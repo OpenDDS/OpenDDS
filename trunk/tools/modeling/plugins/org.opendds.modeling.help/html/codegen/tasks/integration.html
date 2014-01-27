@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" type="text/css" href="../../styles.css">
+	<title>Model Integration</title>
+</head>
+
+<body>
+<h1>Model Integration</h1>
+
+<p>When models reference other models, additional configuration is required using the Build Paths tab.</p>
+
+<div class="note">These build paths are used at build time to locate generated model libray code to compile 
+and link, not to find model files during code generation.</div>
+
+<img src="../images/BuildPaths.png" alt="Build Paths"/>
+
+<h2>Parameters to Build Paths</h2>
+
+<p>Build Paths consist of a series of search paths, used to find other models.</p>
+
+<h3>Search Path Contents</h3>
+
+<p>Each search path consists of two parts:</p>
+
+<ul>
+<li><b>Base Variable</b> - an environment variable used as the basis for the search path.</li>
+<li><b>Path</b> - an additional path, relative to the value of the base variable, to create the path.</li>
+</ul>
+
+<p>Each part of the search path can be omitted.  It can consist of a Base variable only, or a search path only.</p>
+
+<h2>Default Search Paths</h2>
+
+<p>The model file can be selected using the Browse button next to the Model File text field.  Navigate to the desired .opendds model file and hit OK.</p>
+
+<p>Additional search paths can be added through an existing search path's context menu, selecting Add Sibling.</p>
+
+<div class="note">Should the last build path be deleted from a model file, use the Outline view, navigate to searchLocations and select Add Child in its context menu.</div>
+
+
+</body>
+</html>

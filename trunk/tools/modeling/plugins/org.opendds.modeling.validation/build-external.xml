@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="org.opendds.modeling.validation" default="test" basedir=".">
+
+  <property file="build.properties" />
+  <property name="subdir" value=""/>
+
+  <!--
+
+    /******************************************************
+     Setup class path for targets
+    ******************************************************/ -->
+  <path id="project.class.path">
+    <pathelement location="${build.dir}" />
+    <fileset dir="${lib.dir}">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+  <!--
+
+    /******************************************************
+     Initialization
+    ******************************************************/ -->
+  <target name="init">
+    <tstamp />
+  </target>
+
+  <!--
+
+    /******************************************************
+     Prepare for compilation
+    ******************************************************/ -->
+  <target name="prepare" depends="init">
+    <mkdir dir="${build.dir}" />
+    <copy todir="${build.dir}">
+      <fileset dir="${src.dir}">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+  </target>
+
+  <!--
+
+    /******************************************************
+     Transform generated xsd files
+    ******************************************************/ -->
+  <target name="transform-xsd" depends="compile">
+    <delete>
+      <fileset dir="${gen.xsd.dir}" includes="*.xsd"/>
+    </delete>
+  	
+    <java classname="${app.package}.OpenDDSXMISchemaTransformer" fork="yes">
+      <arg value="-src" />
+      <arg value="${opendds.src.xsd.dir}" />
+      <arg value="-dest" />
+      <arg value="${gen.xsd.dir}" />
+      <classpath refid="project.class.path" />
+    </java>
+    <java classname="${app.package}.OpenDDSXMISchemaTransformer" fork="yes">
+      <arg value="-src" />
+      <arg value="${codegen.src.xsd.dir}" />
+      <arg value="-dest" />
+      <arg value="${gen.xsd.dir}" />
+      <classpath refid="project.class.path" />
+    </java>
+  </target>
+
+  <target name="staging" depends="clean" description="setup distribution">
+    <antcall target="compile" />
+    <!--antcall target="transform-xsd" /-->
+    <delete dir="${staging.dir}" />
+    <mkdir dir="${staging.dir}" />
+    <mkdir dir="${staging.dir}/xsd" />
+    <mkdir dir="${staging.dir}/lib" />
+    <copy todir="${staging.dir}/xsd">
+      <fileset dir="${gen.xsd.dir}">
+        <include name="*.xsd" />
+      </fileset>
+    </copy>
+    <copy todir="${staging.dir}">
+      <fileset dir="${rsrc.dir}">
+        <include name="*.sh" />
+        <include name="*.bat" />
+      </fileset>
+    </copy>
+    <replace dir="${staging.dir}" propertyFile="build.properties">
+      <include name="*.sh" />
+      <include name="*.bat" />
+      <replacefilter token="${app.name.token}" property="app.name" />
+    </replace>
+    <replace dir="${build.dir}" propertyFile="build.properties">
+      <include name="log4j.xml" />
+      <replacefilter token="${app.name.token}" property="app.name" />
+    </replace>
+    <jar destfile="${staging.jar}">
+      <fileset dir="${build.dir}" excludes="**/Test.class" />
+      <!--zipfileset src="${lib.dir}/log4j-1.2.16.jar" excludes="META-INF/*" /-->
+      <zipfileset src="${lib.dir}/commons-cli-1.2.jar" excludes="META-INF/*" />
+      <manifest>
+        <attribute name="Main-Class" value="${app.package}.OpenDDSModelValidator" />
+      </manifest>
+    </jar>
+    <copy todir="${staging.dir}/xsd">
+      <fileset dir="${gen.xsd.dir}">
+        <include name="*.xsd" />
+      </fileset>
+    </copy>
+    <copy todir="${staging.dir}">
+      <fileset dir="${rsrc.dir}">
+        <include name="*.sh" />
+        <include name="*.bat" />
+      </fileset>
+    </copy>
+    <replace dir="${staging.dir}" propertyFile="build.properties">
+      <include name="*.sh" />
+      <include name="*.bat" />
+      <replacefilter token="${app.name.token}" property="app.name" />
+    </replace>
+    <fixcrlf srcdir="${staging.dir}" eol="unix" eof="remove" includes="**/*.sh" />
+    <chmod dir="${staging.dir}" includes="**/*.sh" perm="ugo+rx" />
+ </target>
+
+  <target name="dist.win" depends="test, staging" description="build zip distribution for windows">
+    <delete includeemptydirs="true">
+         <fileset dir="${staging.dir}/" includes="**/*.sh"/>
+     </delete>
+    <zip destfile="${dist.dir}/${app.name}.zip">
+      <zipfileset dir="${dist.dir}" includes="${app.name}/**"/>
+    </zip>
+    <delete dir="${staging.dir}" />
+    <echo message="windows zip distribution created at: ${dist.dir}/${app.name}.zip" />
+  </target>
+
+  <target name="dist.nix" depends="test, staging" description="build tar.gz distribution for linux, unix">
+
+    <delete includeemptydirs="true">
+      <fileset dir="${staging.dir}/" includes="**/*.bat"/>
+      </delete>
+    <tar destfile="${dist.dir}/${app.name}.tar.gz" compression="gzip">
+      <tarfileset dir="${dist.dir}" mode="755">
+        <include name="${app.name}/${app.name}.sh" />
+      </tarfileset>
+      <tarfileset dir="${dist.dir}">
+        <include name="${app.name}/**" />
+        <exclude name="${app.name}/${app.name}.sh" />
+      </tarfileset>
+    </tar>
+    <delete dir="${staging.dir}" />
+    <echo message="linux/unix distribution created at: ${dist.dir}/${app.name}.tar.gz" />
+  </target>
+
+  <target name="dist.all" depends="clean" description="build distributions for all windows, linux, unix">
+    <antcall target="dist.win" />
+    <antcall target="dist.nix" />
+  </target>
+
+  <!--
+
+    /******************************************************
+     Compile source
+    ******************************************************/ -->
+  <target name="compile" depends="prepare" description="compile source code">
+    <replace dir="${src.dir}" propertyFile="build.properties">
+      <include name="**/*.java" />
+      <replacefilter token="${app.name.token}" property="app.name" />
+    </replace>
+    <javac debug="true" includeAntRuntime="false" destdir="${build.dir}">
+      <src path="${src.dir}" />
+      <classpath refid="project.class.path" />
+    </javac>
+  </target>
+
+  <target name="compile.test" depends="compile" description="compile test source code">
+    <javac includeAntRuntime="false" destdir="${build.dir}">
+      <src path="${test.dir}/src" />
+      <classpath refid="project.class.path" />
+    </javac>
+  </target>
+
+  <target name="run.tests" depends="staging">
+    <exec osfamily="unix" dir="${staging.dir}" executable="/bin/sh" failonerror="${fail.on.test.fail}">
+      <arg line="${app.name}.sh"/>
+      <arg line="-rqf"/>
+      <arg line="../../../../../modeling/tests/"/>
+    </exec>
+    <exec osfamily="windows" dir="${staging.dir}" executable="cmd.exe" failonerror="${fail.on.test.fail}">
+      <arg line="/c"/>
+      <arg line="${app.name}.bat"/>
+      <arg line="-rqf"/>
+      <arg line="..\..\..\..\..\modeling\tests/"/>
+    </exec>
+  </target>
+
+  <target name="test" depends="clean.test,compile.test" description="runs all JUnit tests">
+    <mkdir dir="${test.report.dir}" />
+    <junit fork="yes" printsummary="yes">
+      <classpath refid="project.class.path" />
+      <batchtest todir="${test.report.dir}">
+        <fileset dir="${test.dir}/src" includes="**/*Test.java" />
+      </batchtest>
+      <formatter type="xml" />
+    </junit>
+    <junitreport toDir="${test.report.dir}">
+      <fileset dir="${test.report.dir}" />
+      <report format="frames" todir="${test.report.dir}" />
+    </junitreport>
+  </target>
+
+  <!--
+
+    /******************************************************
+    Cleanup everything
+    ******************************************************/ -->
+  <target name="clean" depends="clean.build, clean.test" description="clean everything (build, test, dist)" />
+  <!--
+
+    /******************************************************
+    Cleanup previous builds
+    ******************************************************/ -->
+  <target name="clean.build" depends="init">
+    <delete dir="${build.dir}" />
+    <delete dir="${dist.dir}" />
+  </target>
+  <target name="clean.test" depends="init">
+    <delete dir="${test.report.dir}" />
+  </target>
+</project>

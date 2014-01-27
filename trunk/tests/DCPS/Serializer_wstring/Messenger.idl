@@ -1,0 +1,28 @@
+#include "tao/CharSeq.pidl"
+#include "tao/StringSeq.pidl"
+#include "tao/WCharSeq.pidl"
+#include "tao/WStringSeq.pidl"
+
+module Messenger {
+
+  typedef sequence<char, 15> BoundedCharSeq;
+  typedef sequence<wchar, 15> BoundedWCharSeq;
+
+#pragma DCPS_DATA_TYPE "Messenger::Message"
+#pragma DCPS_DATA_KEY "Messenger::Message subject_id"
+
+  struct Message {
+    long subject_id;
+    long   count;
+    char   ch;
+    wchar  wch;
+    string str;
+    wstring wstr;
+    CORBA::CharSeq       char_seq;
+    CORBA::WCharSeq      wchar_seq;
+    CORBA::StringSeq     string_seq;
+    CORBA::WStringSeq    wstring_seq;
+    BoundedCharSeq       bounded_char_seq;
+    BoundedWCharSeq      bounded_wchar_seq;
+  };
+};

@@ -1,0 +1,42 @@
+
+--- tailor this to your installation ---
+all hosts: export BASEDIR=/var/tmp
+
+on build host:
+
+ make -C $DDS_ROOT/performance-tests/Bench
+
+ cd $DDS_ROOT/performance-tests/Bench
+ $DDS_ROOT/performance-tests/Bench/tools/mkpkg spray-tests
+ tar cfj spray-tests.tar.bz2 spray-tests
+
+ cp spray-tests.tar.bz2 $BASEDIR
+ scp spray-tests.tar.bz2 hostn:$BASEDIR
+ ...
+
+--- all hosts: ---
+ cd $BASEDIR
+ tar xfj spray-tests.tar.bz2
+
+--- tailor this to your installation ---
+all hosts: export REPOHOST=172.16.10.102
+all hosts: export REPOPORT=2809
+all hosts: export PROJECTBASE=$BASEDIR/spray-tests
+all hosts: export TESTBASE=$PROJECTBASE/tests/spray
+
+--- repository host: ---
+
+ $PROJECTBASE/bin/run_test -S -h iiop://$REPOHOST:$REPOPORT
+
+--- Test Execution ---
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -P -h $REPOHOST:$REPOPORT -i $TESTBASE/transport.ini"
+
+--- host1: ---
+ $TESTCMD -s $TESTBASE/pub-<n>.ini
+
+--- hostn: ---
+ $TESTCMD -s $TESTBASE/sub.ini
+
+
+* <n> is a value between 1 and 4
+

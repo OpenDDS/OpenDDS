@@ -1,0 +1,153 @@
+
+For bidirectional (modified latency) and publication bound (1 publications) test:
+
+() - indicates the test condition has already been executed.
+
+-- Steepest ascent
+-- test:      1      2      3      4      5
+-- rates:  1000,  2000,  3000,  4000,  5000
+-- sizes: 10000, 20000, 30000, 40000, 50000
+-- Mbps:     80    320    720   1280   2000
+-- Mibps:    76    305    687   1220   1907
+
+-- Fixed rate
+-- test:    (1)      6      7      8      9
+-- rates:  1000   1000   1000   1000   1000
+-- sizes: 10000, 20000, 30000, 40000, 50000
+-- Mbps:     80    160    240    320    400
+-- Mibps:    76    152    229    305    381
+
+-- Fixed size
+-- test:    (1)     10     11     12     13
+-- rates:  1000,  2000,  3000,  4000,  5000
+-- sizes: 10000  10000  10000  10000  10000
+-- Mbps:     80    160    240    320    400
+-- Mibps:    76    152    229    305    381
+
+Additional tests for subscription bound testing (2 simultaneous publications):
+
+() - indicates the test condition has already been executed.
+
+-- Steepest ascent
+-- test:        14        15        16        17        18
+-- rates:  2 * 500, 2 * 1000, 2 * 1500, 2 * 2000, 2 * 2500
+-- sizes:    10000,    20000,    30000,    40000,    50000
+-- Mbps:        80       320       720      1280      2000
+-- Mibps:       76       305       687      1220      1907
+
+-- Fixed rate
+-- test:        19        20        21      (15)        22
+-- rates: 2 * 1000  2 * 1000  2 * 1000  2 * 1000  2 * 1000
+-- sizes:     5000,    10000,    15000,    20000,    25000
+-- Mbps:        80       160       240       320       400
+-- Mibps:       76       152       229       305       381
+
+-- Fixed size
+-- test:      (14)      (20)        23        24        25
+-- rates:  2 * 500, 2 * 1000, 2 * 1500, 2 * 2000, 2 * 2500
+-- sizes:    10000     10000     10000     10000     10000
+-- Mbps:        80       160       240       320       400
+-- Mibps:       76       152       229       305       381
+
+--- Test / Configuration file mappings
+---
+---  Test       bidir(modified latency)         publication bound
+---  ----       -----------------------         -----------------
+---    1:       bidir-*-*-80.ini                pub-2sub-*-80.ini
+---             bidir-remote-*.ini              sub-*.ini
+---    2:       bidir-*-*-320.ini               pub-2sub-*-320.ini
+---             bidir-remote-*.ini              sub-*.ini
+---    3:       bidir-*-*-720.ini               pub-2sub-*-720.ini
+---             bidir-remote-*.ini              sub-*.ini
+---    4:       bidir-*-*-1280.ini              pub-2sub-*-1280.ini
+---             bidir-remote-*.ini              sub-*.ini
+---    5:       bidir-*-*-2000.ini              pub-2sub-*-2000.ini
+---             bidir-remote-*.ini              sub-*.ini
+---    6:       bidir-*-*-160r.ini              pub-2sub-*-160r.ini
+---             bidir-remote-*.ini              sub-*.ini
+---    7:       bidir-*-*-240r.ini              pub-2sub-*-240r.ini
+---             bidir-remote-*.ini              sub-*.ini
+---    8:       bidir-*-*-320r.ini              pub-2sub-*-320r.ini
+---             bidir-remote-*.ini              sub-*.ini
+---    9:       bidir-*-*-400r.ini              pub-2sub-*-400r.ini
+---             bidir-remote-*.ini              sub-*.ini
+---   10:       bidir-*-*-160s.ini              pub-2sub-*-160s.ini
+---             bidir-remote-*.ini              sub-*.ini
+---   11:       bidir-*-*-240s.ini              pub-2sub-*-240s.ini
+---             bidir-remote-*.ini              sub-*.ini
+---   12:       bidir-*-*-320s.ini              pub-2sub-*-320s.ini
+---             bidir-remote-*.ini              sub-*.ini
+---   13:       bidir-*-*-400s.ini              pub-2sub-*-400s.ini
+---             bidir-remote-*.ini              sub-*.ini
+---
+---  Test       subscription bound
+---  ----       ------------------
+---   14:       pub-1sub-*-80.ini
+---             sub-*.ini
+---   15:       pub-1sub-*-320.ini
+---             sub-*.ini
+---   16:       pub-1sub-*-720.ini
+---             sub-*.ini
+---   17:       pub-1sub-*-1280.ini
+---             sub-*.ini
+---   18:       pub-1sub-*-2000.ini
+---             sub-*.ini
+---   19:       pub-1sub-*-80r.ini
+---             sub-*.ini
+---   20:       pub-1sub-*-160.ini
+---             sub-*.ini
+---   21:       pub-1sub-*-240r.ini
+---             sub-*.ini
+---   22:       pub-1sub-*-400r.ini
+---             sub-*.ini
+---   23:       pub-1sub-*-240s.ini
+---             sub-*.ini
+---   24:       pub-1sub-*-320s.ini
+---             sub-*.ini
+---   25:       pub-1sub-*-400s.ini
+---             sub-*.ini
+
+Configuration file                              Test    Rate     Size
+----------------------------------------------- ----   -----     -----
+bidir-1sub-be-80.ini   bidir-1sub-rel-80.ini       1    1000  x  10000
+bidir-1sub-be-160r.ini bidir-1sub-rel-160r.ini     6    1000  x  20000
+bidir-1sub-be-160s.ini bidir-1sub-rel-160s.ini    10    2000  x  10000
+bidir-1sub-be-240r.ini bidir-1sub-rel-240r.ini     7    1000  x  30000
+bidir-1sub-be-240s.ini bidir-1sub-rel-240s.ini    11    3000  x  10000
+bidir-1sub-be-320.ini  bidir-1sub-rel-320.ini      2    2000  x  20000
+bidir-1sub-be-320r.ini bidir-1sub-rel-320r.ini     8    1000  x  40000
+bidir-1sub-be-320s.ini bidir-1sub-rel-320s.ini    12    4000  x  10000
+bidir-1sub-be-400r.ini bidir-1sub-rel-400r.ini     9    1000  x  50000
+bidir-1sub-be-400s.ini bidir-1sub-rel-400s.ini    13    5000  x  10000
+bidir-1sub-be-720.ini  bidir-1sub-rel-720.ini      3    3000  x  30000
+bidir-1sub-be-1280.ini bidir-1sub-rel-1280.ini     4    4000  x  40000
+bidir-1sub-be-2000.ini bidir-1sub-rel-2000.ini     5    5000  x  50000
+
+pub-2sub-be-80.ini   pub-2sub-rel-80.ini           1    1000  x  10000
+pub-2sub-be-160r.ini pub-2sub-rel-160r.ini         6    1000  x  20000
+pub-2sub-be-160.ini  pub-2sub-rel-160.ini         10    2000  x  10000
+pub-2sub-be-240r.ini pub-2sub-rel-240r.ini         7    1000  x  30000
+pub-2sub-be-240s.ini pub-2sub-rel-240s.ini        11    3000  x  10000
+pub-2sub-be-320.ini  pub-2sub-rel-320.ini          2    2000  x  20000
+pub-2sub-be-320r.ini pub-2sub-rel-320r.ini         8    1000  x  40000
+pub-2sub-be-320s.ini pub-2sub-rel-320s.ini        12    4000  x  10000
+pub-2sub-be-400r.ini pub-2sub-rel-400r.ini         9    1000  x  50000
+pub-2sub-be-400s.ini pub-2sub-rel-400s.ini        13    5000  x  10000
+pub-2sub-be-720.ini  pub-2sub-rel-720.ini          3    3000  x  30000
+pub-2sub-be-1280.ini pub-2sub-rel-1280.ini         4    4000  x  40000
+pub-2sub-be-2000.ini pub-2sub-rel-2000.ini         5    5000  x  50000
+
+pub-1sub-be-80.ini   pub-1sub-rel-80.ini          14     500  x  10000
+pub-1sub-be-80r.ini  pub-1sub-rel-80r.ini         19    1000  x   5000
+pub-1sub-be-160.ini  pub-1sub-rel-160.ini         20    1000  x  10000
+pub-1sub-be-240r.ini pub-1sub-rel-240r.ini        21    1000  x  15000
+pub-1sub-be-240s.ini pub-1sub-rel-240s.ini        23    1500  x  10000
+pub-1sub-be-320.ini  pub-1sub-rel-320.ini         15    1000  x  20000
+pub-1sub-be-320s.ini pub-1sub-rel-320s.ini        24    2000  x  10000
+pub-1sub-be-400r.ini pub-1sub-rel-400r.ini        22    1000  x  25000
+pub-1sub-be-400s.ini pub-1sub-rel-400s.ini        25    2500  x  10000
+pub-1sub-be-720.ini  pub-1sub-rel-720.ini         16    1500  x  30000
+pub-1sub-be-1280.ini pub-1sub-rel-1280.ini        17    2000  x  40000
+pub-1sub-be-2000.ini pub-1sub-rel-2000.ini        18    2500  x  50000
+
+

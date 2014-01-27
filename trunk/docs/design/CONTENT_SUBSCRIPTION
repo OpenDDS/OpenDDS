@@ -1,0 +1,129 @@
+Content-Subscription Profile Implementation
+===========================================
+
+The Content-Subscription Profile is one of the optional profiles in the DDS
+specification.  OpenDDS implements all three features in the
+Content-Subscription Profile, which are:
+ - QueryCondition
+ - ContentFilteredTopic
+ - MultiTopic
+
+The OMG DDS specification document describes the interface and expected
+behavior of these features.  The OpenDDS Developer's Guide has more information
+and OpenDDS-specific considerations.  The remainder of this document should be
+considered an extension of that chapter for advanced users and maintainers.
+
+
+Notes for Users
+---------------
+
+OpenDDS implements an optimization for ContentFilteredTopic: the filter
+expression is evaluated in the publishing process so it doesn't even need to
+be sent through the network to the subscribing process.  In most cases, this
+optimization is transparent to users.  There are a few side-effects of it that
+users may notice:
+
+1. ContentFilteredTopic::set_expression_parameters() will block while the new
+   expression parameters are relayed over the network to any associated data
+   writers.  This blocking is a deliberate design decision so that the
+   subscribing application is guaranteed that at the time this operation
+   returns, each data writer is applying the filter with the new parameters.
+
+2. Non-default DEADLINE and LIVELINESS QoS settings may depend on data reaching
+   the subscriber, but those data samples may be filtered-out.  For example,
+   when using LIVELINESS with a kind of AUTOMATIC, a publisher may expect that
+   writing a data sample implicitly asserts LIVELINESS.  With content filtering,
+   that data sample may never reach one or more readers so the LIVELINESS
+   assertion is effectively lost.  A similar effect can be seen with DEADLINE.
+
+Applications can configure OpenDDS publishers to not filter (which effectively
+reverts to the old behavior) by adding "-DCPSPublisherContentFilter 0" to their
+command-line arguments or setting the equivalent value in the [common] section
+of the configuration file.
+
+
+Notes for Maintainers
+---------------------
+
+All of the code (including idl and generated code) for content-subscription is
+guarded by the preprocessor. For ContentFilteredTopic code, macro
+OPENDDS_NO_CONTENT_FILTERED_TOPIC is used. For MultiTopic code, macro
+OPENDDS_NO_MULTI_TOPIC is used. For QueryCondition code, macro
+OPENDDS_NO_QUERY_CONDITION is used. For code that ContentFilteredTopic, MultiTopic,
+QueryCondition all depend on, macro OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+is used.
+This also makes it easy to search for content-subscription code.
+Any additions for content-subscription which may significantly impact the
+footprint (static or dynamic), or execution time through the data-handling paths
+should be guarded similarly.
+
+opendds_idl contains support for content-subscription features in the class
+metaclass_generator ($DDS_ROOT/dds/idl/metaclass_generator.{h,cpp}).
+metaclass_generator implements visitation of IDL enums and structs.  For each
+enum in the IDL, it will generate an array of strings which are the names of
+the enumerators.  This will be used by the FilterEvaluator to compare an enum
+value to the string representation of the enumerator name.  For each struct in
+the IDL, opendds_idl generates a full class template specialization of
+MetaStructImpl for that struct, and an accessor function (getMetaStruct())
+specialization which returns instances of the MetaStructImpl<Foo>.
+See $DDS_ROOT/dds/DCPS/FilterEvaluator.h for the MetaStruct base class.
+The MetaStruct interface allows the FilterEvaluator and other OpenDDS
+implementation classes to dynamically create and destroy instances of the
+struct, as well as manipulating those instances (comparing fields, assigning to
+fields, and reading field values).  The MetaStruct can also create
+QueryCondition comparators which implement the custom sorting for ORDER BY.
+See Comparator_T.h and RakeResults_T.h for more of the QueryCondition behavior.
+
+FilterEvaluator is the internal OpenDDS class which implements the "WHERE
+clause" behavior common to QueryCondition, ContentFilteredTopic, and MultiTopic.
+The FilterEvaluator constructors build a tree of FilterEvaluator::EvalNode
+objects to represent the WHERE clause.  Once constructed, these never change.
+The EvalNodes are built from the AST (Abstract Syntax Tree) of the expression.
+The AST nodes are represented by FilterEvaluator::AstNodeWrapper objects, which
+wrap the AstNode object that come from the yard library that does the actual
+parsing (see $DDS_ROOT/dds/DCPS/yard/README.txt).  OpenDDS's grammars for the
+yard parser are represented in files FilterExpressionGrammar.h and
+TopicExpressionGrammar.h.
+
+Some other key internal methods and classes for content-subscription:
+
+ - DataReaderImpl()::contains_sample_filtered()
+   Determines if a Data Reader contains a sample matching criteria.
+   This implements the key QueryCondition functionality for WHERE clauses.
+   It's pure-virtual in the DataReaderImpl and implemented in the type-specific
+   DataReader derived classes.
+
+ - DataReaderImpl()::*_generic() [such as read_generic()]
+   For MultiTopic, this implements reading data through a void* type-erasure.
+   This is needed since the types of constituent topics are not known until
+   runtime.  The MetaStruct interface allows individual fields to be read,
+   assigned, compared, etc., safely through void*.
+
+ - DataWriterImpl::ReaderInfo
+   For the optimization of Content-Filtered Topics, each writer needs to track
+   some information about each associated CFTopic reader.  Also see
+   DataWriterImpl::add_associations() for creation of the ReaderInfo objects.
+
+ - DomainParticipantImpl::get_filter_eval() / deref_filter_eval()
+   For the optimization of Content-Filtered Topics, since each writer/reader
+   combo needs a FilterEvaluator, these function implement DomainParticipant-
+   level caching of FilterEvaluators (which are held by-rch in the ReaderInfo).
+
+ - DataWriterImpl::send_ack_requests() and send_control_customized()
+   Acks need special handling for the optimized Content-Filtered Topic use-case.
+
+ - MultiTopicDataReaderBase and MultiTopicDataReader_T<Sample, TypedDataReader>
+   These classes implement the Multi-Topic-enabled Data Readers.
+   See SubscriberImpl::create_opendds_datareader() for initialization.
+
+ - FooDataReaderImpl::dds_demarshal()
+   Evaluates the Content-Filtered Topic filter on the subscribing side.
+
+ - FooDataWriterImpl::write_w_timestamp()
+   Evaluates the Content-Filtered Topic filter on the publishing side.
+
+This list is not meant to be exhaustive, but it contains the main entry-points
+for seeing the implementation.  Other key areas that it depends on (especially
+for the optimized Content-Filtered Topic) are the DataSampleHeader, the
+transport framework (specifically DataLinkSet and TransportCustomizedElement),
+and the InfoRepo for exchanging filter string and parameters.

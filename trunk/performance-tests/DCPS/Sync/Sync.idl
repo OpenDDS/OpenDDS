@@ -1,0 +1,26 @@
+module Sync
+{
+  interface Client;
+
+  enum Role {Pub, Sub};
+  typedef long Id;
+  typedef long WayPoint;
+
+  interface Server
+  {
+    // Different entities register with the Data Sink.
+    void register_me (in Role rol, in Client callback
+                      , out Id ide);
+
+    void unregister (in Id ide);
+
+    // The implementations decide on what a WayPoint constitutes.
+    void way_point_reached (in Id ide, in WayPoint way_point);
+  };
+
+  interface Client
+  {
+    void proceed ();
+  };
+
+};

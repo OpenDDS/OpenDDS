@@ -1,0 +1,1634 @@
+Mon Jun 21 15:59:56 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        Merged changes from the trunk, revisions 3352:3368 which correspond to
+        the ChangeLog entries between
+        Fri Jun 18 20:08:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+        and
+        Fri Jun 18 22:42:30 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+Fri Jun 18 20:23:40 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        Merged changes from the trunk, revisions 3278:3352 which correspond to
+        the ChangeLog entries between
+        Mon May 24 21:41:41 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+        and
+        Thu Jun 17 20:09:07 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+        inclusive.  This brings the branch into sync with the trunk as of
+        OpenDDS release 2.1.3 (except for some documentation changes and the
+        actual version number change).
+
+Fri Jun 18 17:50:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/modules/TYPESUPPORTHelper.pm:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/yard/yard_parser.hpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * rules.dds.GNU:
+
+          More fixes for SunCC and misc cleanup.
+
+Fri Jun 18 15:51:21 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/yard/yard_tree.hpp:
+
+          Re-worked some C++ template code that SunCC can't understand.
+          The original code can be re-enabled with the preprocessor macro
+          OPENDDS_USE_NESTED_TEMPLATE_FWDECL.
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Changes for building java bindings with content_subscription=0.
+
+Mon May 24 18:54:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        Merging trunk changes 3253:3278 out to branch.
+
+        Fri May 21 10:38:10 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+                * tests/DCPS/Crossplatform/test_list.txt:
+
+                  Changing Crossplatform nightly build to be on cicada2.
+
+        Wed May 19 16:26:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+                * MPC/config/dcps_ts_defaults.mpb:
+                * MPC/config/java.mpb:
+                * java/dds/dcps_java_optional.mpb:
+
+                  Changed "command" to just the executable (perl) and put the
+                  arguments in "commandflags".  This is for compatibility with the
+                  latest gnuace changes in the DOC group repository.
+
+                * java/INSTALL:
+
+                  Added vc9 projects to documentation.
+
+                * tools/odds_dissector/README:
+
+                  Added notes on the difference between the wireshark install dir
+                  and WIRESHARK_ROOT.
+
+        Wed May 12 21:02:47 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+
+                  Fixed bugs in QueueRemoveVisitor::visit_element_remove and
+                  PacketRemoveVisitor::visit_element_ref that access samples
+                  after it's released.
+
+        Wed May 12 03:50:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                * performance-tests/Bench/bin/lj-plots.gpi:
+                * performance-tests/Bench/bin/plot-density.gpi:
+                * performance-tests/Bench/bin/plot-jitter.gpi:
+                * performance-tests/Bench/bin/plot-quantiles.gpi:
+                * performance-tests/Bench/bin/plot-throughput-testformats.gpi:
+                * performance-tests/Bench/bin/plot-throughput-transports.gpi:
+                * performance-tests/Bench/bin/plot-transports-scaling.gpi:
+                * performance-tests/Bench/bin/plot-transports.gpi:
+                * performance-tests/Bench/tools/plot-latency.gpi:
+                * performance-tests/Bench/tools/plot-scaling.gpi:
+                * performance-tests/Bench/tools/plot-throughput.gpi:
+
+                  Moved files to accepted GNUPlot file extension name.
+
+                * performance-tests/Bench/bin/plot-test-results.sh:
+
+                  Fixed references to the files.
+
+                * performance-tests/Bench/bin/lj-plots.gp:
+                * performance-tests/Bench/bin/plot-density.gp:
+                * performance-tests/Bench/bin/plot-jitter.gp:
+                * performance-tests/Bench/bin/plot-quantiles.gp:
+                * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+                * performance-tests/Bench/bin/plot-throughput-transports.gp:
+                * performance-tests/Bench/bin/plot-transports-scaling.gp:
+                * performance-tests/Bench/bin/plot-transports.gp:
+                * performance-tests/Bench/tools/plot-latency.gp:
+                * performance-tests/Bench/tools/plot-scaling.gp:
+                * performance-tests/Bench/tools/plot-throughput.gp:
+
+                  Removed these files.
+
+        Mon May 10 06:37:48 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+                  Adjusted name of mulitcast plot files to be similar to latency
+                  and to fit the existing html.
+
+        Fri May 07 22:59:20 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+
+                  Corrected throughput graph title and added pub and sub bounded graphs.
+
+        Fri May 07 22:48:44 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/plot-test-results.sh:
+                * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+                  Corrected graph mapping and changed to graph with simple lines by
+                  default and try to graph with smooth on a second pass to ensure
+                  that graphs are drawn even when one set of data is missing.
+
+        Fri May  7 16:03:44 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+
+                  Reverted changes made in last commit and added comments
+                  for dropped_by_transport flag used. These changes in last
+                  commit do not affect the duplicate message issue.
+
+        Fri May  7 01:40:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/transport/framework/TransportQueueElement.inl:
+
+                  Fixed a bug that incorrectly callback
+                  data_dropped(dropped_by_transport=false) when one link
+                  drops sample and other links deliver successfully. It was
+                  corrected to call data_dropped(true). This fixed duplicate
+                  message issue caused by a lost link.
+
+                * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+
+                  Corrected dropped_by_transport flag passed to data_dropped
+                  callback.
+
+        Thu May 06 23:28:13 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/tests/thru/run_test.pl:
+
+                  Added remove of repo ior file before spawning.
+
+        Wed May 05 23:16:41 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/gen-latency-tables.pl:
+                * performance-tests/Bench/bin/gen-throughput-tables.pl:
+
+                  Corrected transport name recognition.
+
+        Wed May 05 20:15:51 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+
+                  Corrected order of commands to generate tables _after_ the data
+                  was processed.  Added in missing test run information.
+
+        Wed May  5 17:14:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/DataWriterImpl.cpp:
+
+                  Moved the publisher->remove_associations call out of DataWriter
+                  locking scope to fix a deadlock issue due to reverse locking with
+                  DataWriter lock and TransportImpl lock when remove/add associations
+                  are handled concurrently.
+
+                * dds/DCPS/transport/framework/DataLink.cpp:
+
+                  Added locking for pub_map_.release_subscriber to make pub_map_
+                  update synchronized. This is a potential cause for a SEGV due
+                  to ReceiveListenerSet destructed during remove_associations.
+
+        Tue May 05 06:31:35 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/tests/thru/run_test.pl:
+
+                  Corrected typo that loaded incorrect configuration for multicast
+                  best effort.
+
+        Tue May 04 23:31:01 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/tests/thru/run_test.pl:
+
+                  Adjusted so the run_test.pl timeout is longer than the run_test
+                  timeout.  This should stop stranding testprocesses waiting on the
+                  multicast transports.
+
+        Tue May 04 20:42:29 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/plot-density.gp:
+                * performance-tests/Bench/bin/plot-quantiles.gp:
+                * performance-tests/Bench/bin/plot-test-results.sh:
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+                * performance-tests/Bench/bin/generate-test-results.sh:
+
+                  Adding scripts to generate html files from results.
+
+                * performance-tests/Bench/tests/latency/run_test.pl:
+
+                  Corrected name of the multicast best effort output directory.
+
+                * performance-tests/Bench/tests/thru/run_test.pl:
+
+                  Removed extra time added for the client side.
+
+                * performance-tests/Bench/tools/plot-latency.gp:
+
+                  Changed order so gnuplot 4.4 plot is called last.
+
+        Sun May 02 06:00:41 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/gen-run-info-table.pl:
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+
+                  Fixed typos and adjusted archive to not fail on missing directory.
+
+        Sat May 01 00:59:12 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * performance-tests/Bench/bin/gen-latency-tables.pl:
+                * performance-tests/Bench/bin/gen-run-info-table.pl:
+                * performance-tests/Bench/bin/gen-throughput-tables.pl:
+                * performance-tests/Bench/bin/generate-perf-html.sh:
+                * performance-tests/Bench/tools/formatting.css:
+
+                  Adding scripts for generating html pages from results.
+
+                * performance-tests/Bench/bin/extract-throughput.pl:
+                * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+                * performance-tests/Bench/bin/plot-throughput-transports.gp:
+
+                  Changed the output of extract-throughput.pl to use commas and added
+                  test type and transport fields.
+
+Sat May 15 04:14:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+
+          Added result verify from subsriber listener.
+
+Fri May 14 17:37:54 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+
+          Fixed a few warnings.
+
+Thu May 13 05:51:44 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/CoherentChangeControl.h:
+        * dds/DCPS/CoherentChangeControl.inl:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GroupRakeData.h:
+        * dds/DCPS/GroupRakeData.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/RakeData.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+
+        Added support for GROUP presentation qos.
+
+        * tests/DCPS/GroupPresentation/DataReaderListener.h:
+        * tests/DCPS/GroupPresentation/DataReaderListener.cpp:
+        * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
+        * tests/DCPS/GroupPresentation/Messenger.idl:
+        * tests/DCPS/GroupPresentation/SubscriberListener.h:
+        * tests/DCPS/GroupPresentation/SubscriberListener.cpp:
+        * tests/DCPS/GroupPresentation/Writer.h:
+        * tests/DCPS/GroupPresentation/Writer.cpp:
+        * tests/DCPS/GroupPresentation/pub.ini:
+        * tests/DCPS/GroupPresentation/publisher.cpp:
+        * tests/DCPS/GroupPresentation/run_test.pl:
+        * tests/DCPS/GroupPresentation/sub.ini:
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/GroupPresentation/tcp.conf:
+
+        Added group presentation test.
+
+        * bin/dcps_tests.lst:
+
+        Added group presentation test.
+
+Mon May  3 03:46:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Fixed a compilation error due to pure virtual function not
+          implemented.
+
+Sat May  1 17:34:52 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Added new method lookup_instance() to get instance pointer
+          without changing any state. This is called to find instance
+          for RequestedDeadlineWatchdog to cancel timer upon unregister
+          or dispose before concrete datawriter handling unregister or
+          dispose which might delete the instance.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Fixed memory overwrite issues in ownership implementation.
+
+Fri Apr 30 20:41:15 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/performance_tests.lst:
+        * performance-tests/Bench/tests/latency/latency.mm:
+        * performance-tests/Bench/tests/latency/run_test.pl:
+        * performance-tests/Bench/tests/latency/test_list.txt:
+
+        * performance-tests/Bench/tests/thru/run_test.pl:
+        * performance-tests/Bench/tests/thru/test_list.txt:
+
+        * performance-tests/Bench/tools/convert-latency:
+        * performance-tests/Bench/tools/plot-latency.gp:
+        * performance-tests/Bench/tools/plot-throughput.gp:
+
+          Added files missed in last commit.
+
+Fri Apr 30 20:16:34 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        Merging trunk changes 3165:3253 out to branch.
+
+            Wed Apr 28 21:15:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/gen-latency-stats.pl:
+
+                      Use zero-based array indices correctly.
+
+                    * performance-tests/Bench/bin/plot-density.gp:
+
+                      Removed incorrect hop adjustment.
+
+                    * performance-tests/Bench/bin/plot-jitter.gp:
+                    * performance-tests/Bench/bin/plot-transports.gp:
+
+                      Migrated to robust statistics.
+
+                    * performance-tests/Bench/bin/plot-quantiles.gp:
+
+                      Removed incorrect hop adjustment.
+
+
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+                      Corrected a minor formatting annoyance.
+
+                    * performance-tests/Bench/tools/plot-latency.gp:
+
+                      Added kernel density and quantile plots to generated results.
+
+            Wed Apr 28 19:50:16 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/extract-latency.pl:
+
+                      Updated documentation to be correct after adding the Median and
+                      Median absolute deviation statistical data.
+
+                    * performance-tests/Bench/bin/gen-latency-stats.pl:
+
+                      Updated generated GNUPlot statistical legend data to contain
+                      the Median and Median absolute deviation instead of the Mean
+                      and Standard Deviation.  This is part of the move towards use
+                      of robust statistics in the data reduction and visualization.
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Updated the 'netstat' command arguments to provide all inet
+                      information instead of just active TCP connections.
+
+            Wed Apr 28 00:21:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Adjusted running time handling.
+
+            Tue Apr 27 22:53:33 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Changed statistics command termination from SIGQUIT (which
+                      produces a core file) to SIGINT (which does not).
+
+                      Updated POD documentation.
+
+                    * performance-tests/Bench/doc/userguide.html:
+
+                      Updated documentation.
+
+            Tue Apr 27 18:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+                      Simplified the MAD determination.  Added a Pearson 2 parameter
+                      estimation of skewness for investigative purposes.
+
+                    * performance-tests/Bench/bin/run_test:
+
+                    * performance-tests/Bench/doc/userguide.html:
+
+                      Incorporated some more of Brian's comments.  Updated run_test
+                      man page with new statistics output filename decorator
+                      specification feature documentation.
+
+                    * performance-tests/Bench/src/Process.cpp:
+
+                      Extended signal handling to be a bit more robust.  Control can
+                      now fall out of the publication wait as well as allowing the
+                      subscription wait to be gracefully terminated as well.
+
+            Mon Apr 26 20:33:01 UTC 2010  Scott Harris  <harris_s@ociweb.com>
+
+                    * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+                    * Pdds/DCPS/transport/multicast/MulticastConfiguration.h:
+                    * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+                    * tests/DCPS/Messenger/pub_multicast.ini:
+                    * docs/html/multicast/multicast.html:
+
+                      Added support to set TTL for multicast transport.
+
+            Sun Apr 26 00:35:23 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Changed to add time to the run time of the client side to compensate
+                      for server side delay in starting repo.
+
+            Sat Apr 24 00:00:38 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+                    * performance-tests/Bench/bin/plot-throughput-transports.gp:
+                    * performance-tests/Bench/bin/plot-throughput.gp:
+
+                      Removed plot-throughput.gp because all because graphs are made through
+                      the more specific plots.
+
+                    * performance-tests/Bench/doc/userguide.html:
+
+                      Updated information about changed files.
+
+                    * performance-tests/Bench/tests/latency/test_list.txt:
+                    * performance-tests/Bench/tests/thru/test_list.txt:
+
+                      Swapped the client and server for castor and pollux.
+
+            Fri Apr 23 20:39:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                    * dds/DCPS/transport/framework/CopyChainVisitor.h:
+                    * dds/DCPS/transport/framework/CopyChainVisitor.inl:
+                    * dds/DCPS/transport/framework/CopyChainVisitor.cpp:
+                    * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                    * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+                    * dds/DCPS/transport/framework/TransportQueueElement.h:
+                    * dds/DCPS/transport/framework/TransportQueueElement.inl:
+                    * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.h:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+                    * dds/DCPS/transport/framework/TransportRetainedElement.h:
+                    * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+                    * dds/DCPS/transport/framework/TransportSendBuffer.h:
+                    * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+                    * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+                      - Made TransportSendBuffer clone the transport element and
+                        packet with its own MessageBlock and DataBlock cached
+                        allocators and heap allocation for the sample data.
+
+                      - Fixed a potential issue in TransportSendBuffer due to buffers_
+                        not mutex protected. The bug may cause invalid iterator(or
+                        corruption) while iterating sequence buffers for resending
+                        from reactor thread and the insert calls to release aged
+                        buffer due to capacity limit from another thread (e.g. write
+                        thread).
+
+                      - Changed TransportQueueElement::data_dropped and
+                        TransportQueueElement::data_delivered to have return value
+                        to indicate if the element is released. This would fix
+                        memory corruption due to access the release flag after
+                        TransportQueueElement is released.
+
+                      - Moved clone() from TransportReplacedElement to
+                        TransportQueueElement so the TransportRetainElement
+                        can use it.
+
+            Fri Apr 23 14:34:11 UTC 2010  Brian Johnson  <johnsonb@ociweb.com>
+
+                    * performance-tests/Bench/doc/userguide.html:
+                      minor edits
+
+            Thu Apr 22 22:55:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/bin/genstats.pl:
+                    * performance-tests/Bench/bin/gen-latency-stats.pl:
+                    * performance-tests/Bench/tools/convert-latency:
+
+                      Renamed latency stat generating script.  Changed stat output file
+                      names to include latency prefix.
+
+            Thu Apr 22 20:46:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * bin/performance_tests.lst:
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Added running of throughput tests and corrected directory names.
+
+            Thu Apr 22 18:16:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/extract-latency.pl:
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+                      Added median and median absolute deviation (MAD) statistics
+                      gathering.
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Factored the filtering closures out and made them selectable by
+                      OS type.
+
+            Wed Apr 21 19:25:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/src/testprocess.cpp:
+
+                      Added static initialization feature for static builds.
+
+            Mon Apr 19 23:50:09 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Adjusted to have the run_test on the server side handle the repo.
+                      Running the repo as a separate run_test was leaving cases of the repo
+                      still running after terminating the run_test.
+
+            Mon Apr 19 19:19:09 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/extract-throughput.pl:
+
+                      Adjusted to produce a single data file with the test and
+                      transport data partitioned into separate indices.
+
+                    * performance-tests/Bench/bin/plot-density.gp:
+                    * performance-tests/Bench/bin/plot-quantiles.gp:
+
+                      Candidate plotting commands for Quantile and Kernel Density
+                      Estimation charts.  These currently assume specific file names
+                      and locations.
+
+                    * performance-tests/Bench/tests/thru/test-commands.txt:
+
+                      Updated to generate output files useful for the current
+                      throughput extraction script.
+
+            Mon Apr 19 05:29:23 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                    * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+                    * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.h:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+                    * dds/DCPS/transport/framework/TransportReplacedElement.cpp:
+                    * dds/DCPS/transport/framework/TransportSendBuffer.h:
+                    * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+                    * dds/DCPS/transport/framework/TransportSendStrategy.h:
+                    * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+                      Fixed bugs that TransportReplacedElement clones samples owned
+                      by DataWriter using the cached allocators from DataWriter.This
+                      causes SEGV when releasing TransportReplacedElement after
+                      DataWrite is deleted.
+
+            Tue Apr 13 00:06:06 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tools/mkpkg:
+
+                      Added files for running scripted tests in packaged environment.
+
+                    * performance-tests/Bench/bin/extract-throughput.pl:
+                    * performance-tests/Bench/bin/plot-throughput-testformats.gp:
+                    * performance-tests/Bench/bin/plot-throughput-transports.gp:
+                    * performance-tests/Bench/tools/plot-throughput.gp:
+
+                      Added more graphing scripts for throughput results.
+
+            Fri Apr 09 21:27:04 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Fixed repo option to Info Repo.
+
+            Fri Apr 09 18:37:50 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Added some basic POD documentation.
+
+            Thu Apr  8 19:17:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+
+                      Added plot data for quantile charts to the output data.
+
+            Tue Apr 06 18:45:55 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * bin/PerlDDS/Cross_Sync_Common.pm:
+
+                      Fix typo and separated output of failing to read file and
+                      failing to find the required instance.
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Improved handling of the Info Repo.
+
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+
+                      Fixed issues with running.
+
+            Thu Apr 01 22:36:25 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * performance-tests/Bench/bin/extract-throughput.pl:
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/thru/run_test.pl:
+                    * performance-tests/Bench/tests/thru/test-commands.txt:
+                    * performance-tests/Bench/tests/thru/test_list.txt:
+
+                      Minor fixes to run tests and data extraction script.
+
+            Thu Apr  1 15:20:09 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Explicitly search the environment PATH variable for the
+                      repository and test commands to execute.
+
+            Wed Mar 31 23:59:23 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * bin/performance_tests.lst:
+                    * performance-tests/Bench/bin/extract-latency.pl:
+                    * performance-tests/Bench/bin/extract-throughput.pl:
+                    * performance-tests/Bench/bin/plot-throughput.gp:
+                    * performance-tests/Bench/bin/reduce-latency-data.pl:
+                    * performance-tests/Bench/tests/latency/run_test.pl:
+                    * performance-tests/Bench/tests/latency/test_list.txt:
+                    * performance-tests/Bench/tests/thru/test-commands.txt:
+                    * performance-tests/Bench/tools/convert-all:
+                    * performance-tests/Bench/tools/convert-latency:
+                    * performance-tests/Bench/tools/plot-latency.gp:
+                    * performance-tests/Bench/tools/plot-throughput.gp:
+                    * performance-tests/Bench/bin/reduce.pl:
+                    * performance-tests/Bench/bin/extract.pl:
+                    * performance-tests/Bench/tools/plot-all.gp:
+
+                      Added initial scripts for plotting throughput data and renamed
+                      the genericly name latency scripts.
+
+            Wed Mar 31 19:51:26 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Prepend the script directory to the command search path and
+                      then use that path to find commands.  This allows installations
+                      other than the 'mkpkg' ones to work as well.
+
+            Wed Mar 31 19:02:50 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Previous debug file specification change is now extended to the
+                      testprocess commands as well.
+
+                    * performance-tests/Bench/doc/userguide.html:
+                    * performance-tests/Bench/tests/latency/latency.mm:
+
+                      Adding and updating documentation.
+
+            Wed Mar 31 13:55:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Allow debug file to be specified in the absence of a debug
+                      level.  This allows the verbose test output to reach a logfile
+                      instead of the standard output.
+
+            Tue Mar 30 22:39:41 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                    * performance-tests/Bench/bin/run_test:
+
+                      Do not remove the repo.ior file unless we are going to start a
+                      repository process.
+                      Updated POD.
+
+                    * performance-tests/Bench/doc/userguide.html:
+
+                      Updated documentation.
+
+                    * performance-tests/Bench/src/Publication.cpp:
+                    * performance-tests/Bench/src/Subscription.cpp:
+
+                      Added more detail to the transport creation/obtain processing
+                      to ensure that the transport type is available in the logfile.
+
+            Tue Mar 23 20:33:39 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                    * NEWS:
+                    * README:
+
+Fri Apr 30 18:13:11 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/dcps_bits.mpb:
+
+          Restored built-in topics support after my earlier change broke it.
+
+Fri Apr 30 17:38:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/metaclass_generator.cpp:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/Ownership/Writer.h:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          Fixed warnings.
+
+Fri Apr 30 17:33:35 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_macros.mpb:
+
+          Forgot to "svn add" this one.
+
+Fri Apr 30 16:25:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * MPC/config/dcps_java.mpb:
+        * MPC/config/dcps_java_optional.mpb:
+        * MPC/config/dcps_optional_features.mpb:
+        * MPC/config/idl2jni.mpb:
+        * dds/DCPS/BitPubListenerImpl.h:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DdsDcps.mpc:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * java/dds/dcps_java_optional.mpb:
+        * java/idl2jni/codegen/idl2jni_codegen.mpc:
+        * java/idl2jni/runtime/idl2jni_runtime.mpc:
+        * rules.dds.GNU:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added support for disabling the Content Subscription Profile at
+          compile-time (MPC feature content_subscription=0).
+
+        * MPC/config/built_in_topic_support.mpb:
+        * MPC/config/dcps_java_bits.mpb:
+
+          Removed these files.
+
+Fri Apr 30 15:41:47 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/design/IDL_COMPILER:
+        * java/README:
+        * tests/DCPS/Compiler/idl_test2_lib/README.txt:
+        * tests/DCPS/FooType3/README.txt:
+        * tests/DCPS/FooType3NoKey/README.txt:
+        * tests/DCPS/FooType3Unbounded/README.txt:
+        * tests/DCPS/FooType4/README.txt:
+        * tests/DCPS/FooType5/README.txt:
+        * tests/DCPS/SimpleFooTest/README:
+
+          Updated documentation for the dcps_ts.pl -> opendds_idl transition.
+
+        * bin/update_dcps.pl:
+
+          Removed this file.
+
+Thu Apr 29 21:37:51 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/built_in_topic_support.mpb:
+        * dds/dcps_bits.mpb:
+
+          Pass -DDDS_HAS_MINIMUM_BIT to opendds_idl when built-in topics are
+          disabled at compile time.
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+        * dds/DCPS/ContentFilteredTopicImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+
+          Implemented Content-Filtered Topics.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/Messenger.idl:
+        * tests/DCPS/ContentFilteredTopic/dcps.ini:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+
+          Added a test for Content-Filtered Topics.
+
+Wed Apr 28 22:21:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/yard/yard_base_grammar.hpp:
+        * dds/DCPS/yard/yard_text_grammar.hpp:
+        * dds/DCPS/yard/yard_tree.hpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/keys_generator.h:
+        * dds/idl/keys_generator.cpp:
+        * dds/idl/marshal_generator.h:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.h:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+
+          Fixed warnings in the core library, the generator and generated code.
+
+Wed Apr 28 20:07:21 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+        * java/dds/dcps_java_optional.mpb:
+
+          Added "libpath" for the Define_Customs of opendds_idl.
+
+        * dds/DCPS/FilterExpressionGrammar.h:
+
+          In query expressions, the "ORDER BY ..." clause is optional.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/ReadConditionImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Implemented Query Condition filtering with the Wait Set (the wait is
+          only satisfied when a sample matches the "where clause").
+
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          Extended this test to test the "where clause" of the Query Condition.
+          This covers both use-cases: with a Wait Set, and with read/take
+          operations on the Data Reader.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Implement the new pure virtual method in DataReaderImpl.
+
+Tue Apr 27 21:59:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Comparator_T.h:
+
+          Consider the global namespace for operator< because that's where the
+          operator< for TAO::String_Manager is defined.
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Removed code that's no longer needed now that the opendds_idl is used.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Removed unnecessary namespace qualification and moved the typedef for
+          DataWriterAckMap down to the .cpp since it's only used there.
+
+        * dds/idl/keys_generator.cpp:
+
+          Applied the same fix from Comparator_T.h (above) to the code that
+          we're generating for KeyLessThan.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Allow defaulted unions (that have no default: branch) to be
+          serialized and deserialized.
+
+Tue Apr 27 16:22:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        This commit switches the OpenDDS marshaling (serialization) code
+        generator from tao_idl -Gdcps to opendds_idl.  This may have
+        implications for user code (which will eventually be documented in the
+        NEWS), but should be mostly transparent.
+
+        * MPC/config/dcps.mpb:
+
+          Removed -Gdcps.  This code is now generated by opendds_idl.
+
+        * MPC/modules/TYPESUPPORTHelper.pm:
+
+          Added support for -o (output dir) and -SI (suppress generation of
+          TypeSupport.idl).
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Integrated the older support for "ORDER BY" in QueryCondition with
+          the new getMetaStruct<>() infrastructure.
+
+        * dds/DCPS/DataCollector_T.h:
+        * dds/DCPS/DataCollector_T.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/GuidUtils.h:
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Moved various operators and the Serializer class into namespace
+          OpenDDS::DCPS.  This includes the QoS helpers.
+          Updated #includes, namespaces, and names for generated code.
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits.mpb:
+
+          Updated for new code generator.
+
+        * dds/DdsDcpsGuid.idl:
+
+          GUID_t is no longer treated as a DCPS_DATA_TYPE.  In the past this
+          was just done in order to get a generated KeyLessThan struct.  Now
+          that KeyLessThan struct is provided in GuidUtils.h.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Updated #includes, namespaces, and names for generated code.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Updated names of generated functions.
+
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/be_init.cpp:
+
+          Added support for -o, -Wb,tao_include_prefix and -SI options.
+          Implemented logic for when to #include other generated headers.
+
+        * dds/idl/dds_generator.h:
+
+          Moved some common code here and refactored other files to use it.
+
+        * dds/idl/ts_generator.cpp:
+
+          Use some of the code in dds_generator.h.
+
+        * dds/idl/dds_visitor.cpp:
+
+          Added the two new generators (keys and marshal) to the list.
+
+        * dds/idl/keys_generator.h:
+        * dds/idl/keys_generator.cpp:
+
+          Implemented a generator for DCPS_DATA_KEY key-comparison structs.
+
+        * dds/idl/marshal_generator.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Implemented a generator for OpenDDS marshaling (which includes the
+          "find size", "max marshaled size", "is bounded size" functions along
+          with the operators << and >> for OpenDDS::DCPS::Serializer.
+          This replaces code that was previously in TAO_IDL_BE.
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Integrated the older support for "ORDER BY" in QueryCondition with
+          the new getMetaStruct<>() infrastructure.
+
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+
+          Added empty TypeSupport_Files sections just to be safe, but
+          they're not really needed at this point.
+
+        * java/idl2jni/codegen/be_global.h:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_produce.cpp:
+
+          Implemented the -Wb,tao_include_prefix option (see opendds_idl).
+
+        * java/tao/tao_java.mpc:
+
+          Use -Wb,tao_include_prefix to generate the correct #includes.
+
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+
+          Fixed an incorrect "after +=".
+
+        * tests/DCPS/Compiler/idl_test1_lib/FooDef.idl:
+        * tests/DCPS/Compiler/idl_test1_lib/idl_test1_lib.mpc:
+        * tests/DCPS/Compiler/idl_test1_main/README.txt:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
+        * tests/DCPS/Compiler/idl_test3_main/README.txt:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Updated tests for the new opendds_idl code generator.
+
+        * tests/DCPS/FooTest3_0/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_1/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest4/Writer.cpp:
+
+          Updated the #includes and the namespace for the Serializer class.
+
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+
+          Added a using-declaration for the DDS::Time_t and QoS class's
+          operators (<, >, ==).
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/DCPS/FooType3/README.txt:
+        * tests/DCPS/FooType4/README.txt:
+
+          Updated namespace for the Serializer class.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Updated name of the generated "find size" / "is bounded size"
+          functions.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+
+          Added a using-declaration for the generated key comparator.
+
+        * bin/DCPS:
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * bin/dcps_ts.pl:
+
+          Removed these files.  This is now covered by opendds_idl.
+
+Fri Apr 23 21:01:57 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Fixed a bug that access data after iterator is erased.
+
+Tue Apr 20 15:07:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+
+          Set output_follows_input to 0.
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Fixed output files for Java Built-in Topics support.
+
+Tue Apr 20 13:55:44 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+
+          Corrected the paths to the *Template.txt files.
+
+Mon Apr 19 22:08:53 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_java.mpb:
+        * MPC/config/dcps_ts_defaults.mpb:
+        * java/dds/dcps_java_optional.mpb:
+
+          Use the new generator, opendds_idl, in place of dcps_ts.pl.
+
+        * MPC/modules/TYPESUPPORTHelper.pm:
+
+          Adjusted for opendds_idl's command-line arguments.
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Added support for 64-bit (signed and unsigned) integral types.
+
+        * dds/DCPS/ZeroCopySeq_T.inl:
+
+          Avoid macro expansion of "max" in std::max().
+
+        * dds/DdsDcps.mpc:
+
+          Removed temporary settings from last commit.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+
+          Moved the 3 perl modules from bin/DCPS here.  Renamed them to .txt
+          and removed the perl-specific parts.  These will be read at runtime
+          by opendds_idl.
+
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_produce.cpp:
+
+          Added support for Java bindings (used to be JavaTypeSupportImpl.pm).
+          Changed output file naming for opendds_idl to what dcps_ts.pl used.
+          Thus the output files are FooTypeSupportImpl.{h,cpp} and
+          FooTypeSupport.idl.
+
+        * dds/idl/be_init.cpp:
+
+          Use $DDS_ROOT as an implicit pre-processor include path (-I).
+
+        * dds/idl/dds_visitor.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+
+          Moved the logic that used to be in dcps_ts.pl here (ts_generator).
+          The majority of the code-generation is done by reading the plain-text
+          template files (see above).
+
+        * java/build_scripts/jni_check.pl:
+
+          Added support for 64-bit DLLs on Windows.
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Changed the #include to the new name of the generated header.
+
+        * dds/dcps_bits.mpb:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/monitor/monitor.mpc:
+        * contrib/wrapper/example/WrapperStockQuoter.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/messenger/messenger_idl/messenger_idl_test.mpc:
+        * java/tests/multirepo/multirepo_test.mpc:
+        * performance-tests/DCPS/TypeNoKeyBounded/TypeNoKeyBounded.mpc:
+        * tests/DCPS/Compiler/idl_test2_lib/idl_test2_lib.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+        * tests/DCPS/FooType3/DcpsFooType3.mpc:
+        * tests/DCPS/FooType3NoKey/DcpsFooType3NoKey.mpc:
+        * tests/DCPS/FooType3Unbounded/DcpsFooType3Unbounded.mpc:
+        * tests/DCPS/FooType4/DcpsFooType4.mpc:
+        * tests/DCPS/FooType5/DcpsFooType5.mpc:
+        * tests/DCPS/MultiTopicTypes/MultiTopicTypes.mpc:
+        * tests/DCPS/TestFramework/TestFramework.mpc:
+
+          Changed dcps_ts_flags settings to use new options for opendds_idl.
+          Mostly this is just a simple s/--export=/-Wb,export_macro=/.
+
+Fri Apr 16 23:13:41 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Ownership/Writer.cpp:
+
+          Replaced function call in ACE_ASSERT with if statement to
+          fix test failure on non-debug build because ACE_ASSERT does
+          nothing.
+
+        * tests/DCPS/Ownership/run_test.pl:
+
+          Made to remove old logs.
+
+Thu Apr 15 22:02:07 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        The Content-Subscription Profile requires some support from the code
+        generator for runtime binding to the user-defined structures.  This
+        commit starts to implement that generated code.  Eventually the new
+        code generator will generate all code for OpenDDs, including the code
+        that's currently generated by tao_idl -Gdcps and by dcps_ts.pl.
+
+        * dds/idl:
+        * dds/idl/be_extern.h:
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_init.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_generator.cpp:
+        * dds/idl/dds_visitor.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/drv_args.cpp:
+        * dds/idl/drv_preproc.cpp:
+        * dds/idl/metaclass_generator.h:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/opendds_idl.cpp:
+        * dds/idl/opendds_idl.mpc:
+
+          New code generator that uses the TAO_IDL front-end.  As of now this
+          only generates support for the filter strings used by QueryCondition
+          and by (the soon to be implemented) ContentFilteredTopic.
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits.mpb:
+
+          Invoke the new code generator on DdsDcpsInfrastructure.idl
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          #if 0'ed some temporary code which is now handled by the new code
+          generator.
+
+        * bin/dcps_ts.pl:
+
+          Added a -z switch which #includes the new generated header in the
+          generated TypeSupportImpl.cpp
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          #include the new generated header and added try/catch.
+
+Tue Apr 13 21:58:14 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataCollector_T.cpp:
+
+          Fixed 64-bit warnings that show up when compiling DataReaderImpl.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed 64-bit warnings and improved error handling in
+          create_querycondition().
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Added support for unsigned int (CORBA::ULong) types in the filter
+          structs.  Also improved the support for conversion between data
+          types.  Improved error handling in the case where the parse fails.
+          Fixed logic for short-circuiting ANDs and ORs.  Refactored
+          implementation of Value to use a Boost.Variant-like visitor instead
+          of switch statements.
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+          Added tests that actually evaluate filter expressions using the
+          struct TopicBuiltinTopicData.
+
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          Removed some extraneous namespace scoping in preparation for
+          enhancing this test once we have the code generation support.
+
+Mon Apr 12 14:24:38 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Implemented filter evaluation (first pass).  It still needs to handle
+          more data types, and it depends on some help from a code generation
+          tool (TAO_IDL or something else), which is not done yet.  For now
+          the support for the TopicBuiltinTopicData struct is implemented here
+          for testing.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+        * tests/DCPS/FilterExpression/FilterExpressionTest.mpc:
+        * tests/DCPS/FilterExpression/run_test.pl:
+
+          Added a test for parsing filter (and query) expressions.  Right now
+          this test only checks the syntax of the expressions.
+
+Fri Apr  9 18:11:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/BitPubListenerImpl.h:
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/OwnershipManager.h:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Added support for the ownership qos.
+
+        * tests/DCPS/Ownership/DataReaderListener.h:
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+        * tests/DCPS/Ownership/Messenger.idl:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Ownership/Writer.h:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/pub.ini:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/run_test.pl:
+        * tests/DCPS/Ownership/sub.ini:
+        * tests/DCPS/Ownership/subscriber.cpp:
+        * tests/DCPS/Ownership/tcp.conf:
+
+          New test.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Accommodated the changes.
+
+        * bin/dcps_tests.lst:
+
+          Added Ownership test cases.
+
+Wed Apr  7 15:32:56 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        The following is for the Content-Subscription Profile implementation
+
+        * dds/DCPS/FilterEvaluator.h:
+        * dds/DCPS/FilterEvaluator.cpp:
+        * dds/DCPS/FilterExpressionGrammar.h:
+
+          Added a new class for evaluating filter (and query) expressions.
+          This is an early version that parses the expression but doesn't do
+          much evaluation, except as needed to support the current OpenDDS
+          feature of "ORDER BY" sorting in QueryCondition.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Made use of the new FilterEvaluator for QueryCondition.
+
+        * dds/DCPS/ZeroCopySeq_T.inl:
+
+          Fixed 64-bit warnings (when size_t is 64 bits).  Also in
+          RakeResults_T.cpp.
+
+        * dds/DdsDcps.mpc:
+        * dds/DCPS/yard/*:
+
+          yard (Yet Another Recursive Descent) is a 3rd-party library for
+          constructing parsers at compile time using template metaprogramming.
+          The license is either Public Domain (if applicable) or MIT, so we
+          are including it here.  It's a header-only library.
+
+Wed Mar 24 15:43:43 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        Merging trunk changes 3113:3165 out to branch.
+
+        Tue Mar 23 19:32:21 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+                * OpenDDS version 2.1.2 released.
+
+        Tue Mar 23 15:57:27 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+                * NEWS:
+
+                  Updated documentation for next release.
+
+        Tue Mar 23 15:45:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+                * NEWS:
+                * README:
+
+                  Updated documentation for next release.
+
+        Mon Mar 22 21:54:24 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * NEWS:
+
+                  Added changes for next release.
+
+        Mon Mar 22 19:53:59 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/DataWriterImpl.h:
+                * dds/DCPS/DataWriterImpl.cpp:
+                * dds/DCPS/transport/framework/DataLink.h:
+                * dds/DCPS/transport/framework/DataLink.inl:
+                * dds/DCPS/transport/framework/DataLinkSet.h:
+                * dds/DCPS/transport/framework/DataLinkSet.inl:
+                * dds/DCPS/transport/framework/TransportInterface.h:
+                * dds/DCPS/transport/framework/TransportInterface.inl:
+                * dds/DCPS/transport/framework/TransportSendStrategy.h:
+                * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+                  Renamed remove_all_control_msgs() to remove_all_msgs() as the function
+                  was changed to removes all messages sent by a datawriter.
+
+                * dds/DCPS/WriteDataContainer.cpp:
+
+                  Removed remove_sample call on samples in sending_data or released_data
+                  lists as it's redundant with remove_all_msgs().
+
+        Fri Mar 19 22:25:14 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                * performance-tests/Bench/bin/expandColors.pl:
+                * performance-tests/Bench/bin/extract.pl:
+                * performance-tests/Bench/bin/genstats.pl:
+                * performance-tests/Bench/bin/mktable.pl:
+                * performance-tests/Bench/bin/reduce.pl:
+                * performance-tests/Bench/bin/run_test:
+                * performance-tests/Bench/doc/userguide.html:
+                * performance-tests/Bench/tests/thru/test-commands.txt:
+
+                  Updating documentation in scripts and user guide.
+
+        Fri Mar 19 21:23:54 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/WriteDataContainer.cpp:
+
+                  - Added lock in data_dropped as it could be called by the
+                    the transport thread that does not hold the lock before
+                    calling it. Otherwise, it may cause SEGV when write()
+                    thraad request transport removing a sample while sample
+                    is released due to tranport delayed notification.
+                  - Added code to remove released_data_ samples in
+                    unregister_all().
+
+                * dds/DCPS/transport/framework/DataLink.h:
+                * dds/DCPS/transport/framework/DataLink.inl:
+                * dds/DCPS/transport/framework/DataLink.cpp:
+                * dds/DCPS/transport/framework/DataLinkSet.inl:
+                * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+                * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+                * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+                * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+                * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+                * dds/DCPS/transport/framework/TransportQueueElement.h:
+                * dds/DCPS/transport/framework/TransportQueueElement.inl:
+                * dds/DCPS/transport/framework/TransportSendElement.h:
+                * dds/DCPS/transport/framework/TransportSendElement.cpp:
+                * dds/DCPS/transport/framework/TransportSendStrategy.h:
+                * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+                * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+                  - Fixed an issue that DataWriter request transport to remove
+                    a sample while the sample is released by transport.
+                    This could happen when there are more number of datalinks
+                    upon sample removing than sending. A datalink is requested
+                    to remove sample is not requested for sending. The sample
+                    may already be released while the link uses the sample to
+                    find in it's storage.
+
+                    Wrappered sample to remove with TransportSendElement so the
+                    DataWriter data_dropped() will be called only when sample is
+                    removed from all links it originally sent to.
+                    The TransportSendElement instance also carry the information
+                    if a data_dropped is called to DataWriter, if it does, then
+                    stop using the sample to remove from the rest links because
+                    the sample may already be released.
+
+                  - Added/update methods to accommodate the changes above.
+                  - Added transport_shutdown to TransportSendStrategy to avoid
+                    delayed notification upon transport release as the transport
+                    release is normally called after DataWriter is destroyed.
+
+                * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+                  Added receive_strategy_ nil value check in handle_close()
+                  to avoid crash if receive_strategy_ is wiped before
+                  handle_close() called.
+
+        Tue Mar 16 21:01:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+                * dds/DCPS/transport/multicast/ReliableSession.h:
+                * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+                  Fixed deadlock caused by shared mutex between starting and
+                  acknowledgement critical sections.
+
+        Tue Mar 16 14:18:51 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+                * performance-tests/Bench/tests/latency/p1-16000.ini:
+
+                  Update to use new datamodel.  Thanks to Don Busch for finding
+                  this.
+
+        Thu Mar 11 23:54:38 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+                * dds/DCPS/WriteDataContainer.cpp:
+
+                  Fixed a bug in obtain_buffer() when max_blocking_time is 0 or very small
+                  period. The condition makes the write() not wait for old sample releasing.
+                  In this case, the TIMEOUT error code should be returned.
+
+                * dds/DCPS/DataWriterImpl.cpp:
+
+                  Turned off the error logging as obtain_buffer() returns TIMEOUT error code.
+
+                * tests/DCPS/FooTest5/InstanceDataMap.cpp:
+                * tests/DCPS/FooTest5/Writer.cpp:
+                * tests/DCPS/FooTest5/run_test.pl:
+
+                  - Adjusted result verify.
+                  - Log timeout error return from write() only if DCPS_debug_level > 0.
+
+        Wed Mar 10 16:25:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+                * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+                * dds/DCPS/transport/framework/ThreadSynchStrategy_rch.h:
+                * dds/DCPS/transport/framework/TransportConfiguration.h:
+                * dds/DCPS/transport/framework/TransportConfiguration.inl:
+                * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+                  Added support for optionally specifying a ThreadSynchStrategy
+                  implementation at construction-time (submitted by Don Busch).
+
+                * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+                * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+                  Updated UDP-based transports to use a NullSynchStrategy by
+                  default; this prevents spurious threads from being spawned
+                  for each created DataLink (submitted by Don Busch).
+
+                * dds/DCPS/transport/udp/UdpTransport.h:
+                * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+                  Updated support for endpoint addressing; DataLinks are created
+                  per unique endpoint rather than RepoId (submitted by Don Busch).
+
+        Tue Mar  9 19:08:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+                * NEWS:
+                * README:
+
+                  Updated documentation for next release.
+
+Wed Mar 10 03:59:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * BranchChangeLog:
+
+          Added branch specific change log.
+          Branch was from trunk@3112
+
+
+# vim: filetype=changelog
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

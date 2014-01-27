@@ -1,0 +1,82 @@
+
+LIFESPAN
+(RxO == N/A ; Mutable == YES)
+[ Topic, DataWriter ]
+
+The default value is lifespan == infinite.
+
+This policy determines the lifetime of all data written to a DataWriter.
+The expiration of the lifetime of data results in its removal from all
+TRANSIENT and PERSISTENT caches as well as any data stored in DataReader
+caches.
+
+This policy is not considered during the establishment of associations
+between DataReaders and DataWriters.  The value of this policy may be
+changed at any time.  Changes to this policy affect only data written
+after the change.
+
+Implementing this policy requires that the lifespan of each sample of
+instance data is transmitted and stored along with it.  This can be done
+for each sample as it is sent or the lifespan of each DataWriter for
+an instance can be stored by the associated DataReaders and the stored
+values used for calculations.  The SOURCE_TIMESTAMP is required and must
+be transmitted for each sample in either case.
+
+All data caches: TRANSIENT or PERSISTENT data caches for the DURABILITY
+policy an the DataReader caches must determine whether a data sample
+should be retained or removed.  This can be done when the data is examined
+rather than continuously polling or scheduling expiration events.  It is
+up to the individual cache implementation to determine when resources
+should be reclaimed.
+
+Expiration is to be computed by using the lifespan value along with the
+SOURCE_TIMESTAMP information for the data sample.  The specification
+allows the DESTINATION_TIMESTAMP to be used in the computation if the
+clocks are not synchronized between the two ends.
+
+The effect of expiration is that the data may no longer be accessed after
+expiration has occured.  It is left to the implementation to reclaim
+any resources associated with the expired sample at its own discretion.
+
+In the case where more than one DataWriter is providing data samples
+to a single subscription (different instances or shared ownership)
+the LIFESPAN value must be consistent between the DataWriters.  This
+constraint is not from the specification but is OpenDDS implementation
+specific.  If we want to allow different LIFESPAN values for data from
+the different DataWriters, then we would need to mark each sample with
+its origin and use only the LIFESPAN policy value from that DataWriter.
+While the receiving transport has this information in the form of the
+publication Id in the sample header, it is not currently propagated up
+to the subscribing DataReader.
+
+Synchronization between clocks on the sending machine and the receiving
+machine is assumed.  It is beyond the scope of DDS to provide a solution
+for unsynchronized participants in a data exchange.
+
+Implementation notes:
+
+  The simplest implementation is to depend on the source timestamp and
+  pass the LIFESPAN policy value during creation of the association so
+  that the destination knows the lifespan and can calculate whether a
+  data sample has expired before allowing access to the data.
+
+  Expired data will not have any StatusCondition set due to expiration.
+  The SAMPLE_REJECTED condition is associated with resource limits
+  only, while the SAMPLE_LOST condition implies that a sample was never
+  received.  None of these reasons applys when a sample is expired.
+
+  DataWriter
+    QoS.LIFESPAN.duration==<any>
+
+    During resource management the lifespan of any given sample is
+    checked for expiration, and if expired the sample is released back
+    to the resource pool.  No access of data after expiration is allowed.
+
+  DataReader
+    QoS.LIFESPAN.duration==<any>
+
+    On access of data samples (read/take), or during resource management,
+    the lifespan of any given sample is checked for expiration, and if
+    expired the sample is released by to the resource pool.  No access
+    of data after expiration is allowed.
+

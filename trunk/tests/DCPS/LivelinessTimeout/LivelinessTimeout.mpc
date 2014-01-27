@@ -1,0 +1,30 @@
+project(*Publisher): dcpsexe_with_tcp {
+  exename   = publisher
+  libpaths += ../FooType4
+  libpaths += ../common
+  libs     +=  common DcpsFooType4
+  after    += DcpsFooType4 common
+
+  Source_Files {
+    common.cpp
+    publisher.cpp
+    Writer.cpp
+    DataWriterListenerImpl.cpp
+  }
+}
+
+
+project(*Subscriber): dcpsexe_with_tcp {
+  exename   = subscriber
+  libpaths += ../FooType4
+  libpaths += ../common
+  libs     +=  common DcpsFooType4
+  after    += DcpsFooType4 common
+
+  Source_Files {
+    common.cpp
+    subscriber.cpp
+    DataReaderListenerImpl.cpp
+  }
+}
+

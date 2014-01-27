@@ -1,0 +1,264 @@
+Wed Feb 27 16:29:08 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * OpenDDS version 3.4.1 released.
+
+Tue Feb 26 19:42:48 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+
+          Check valid_data before reading sample data.
+
+Mon Feb 25 21:59:32 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated docs for upcoming release.
+
+Mon Feb 25 16:08:32 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+
+          Enable this test on static builds.
+
+Mon Feb 25 15:53:26 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManyTopicTest/DataReaderListener.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/ManyTopicTest/common.h:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+
+          Fixed warnings.
+
+Sun Feb 24 20:16:21 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/idl/IDLTemplate.txt:
+          Also when compiling the type support with something other
+          than tao_idl, use the sequence definition
+
+Fri Feb 22 20:16:37 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/ManyTopicTest/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/common.h:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/rtps_disc.ini:
+        * tests/DCPS/ManyTopicTest/run_test.pl:
+        * tests/DCPS/ManyTopicTest/run_test1.pl:
+        * tests/DCPS/ManyTopicTest/run_test2.pl:
+        * tests/DCPS/ManyTopicTest/run_test3.pl:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+
+          Re-enable this test, add a fourth topic, and allow RTPS.
+          This can be used as a regression for the bug fixed yesterday.
+
+Fri Feb 22 00:01:59 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Corrected the logic for determining when GAP submessages
+          can be sent to durable readers.  This required sending
+          more info about durability down to the transport.
+          Thanks to Mike dot Kohler at saabsensis dot com
+          for reporting the bug.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.h:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Updated to match the modified framework APIs.
+
+        * examples/DCPS/ishapes/main.cpp:
+
+          Removed some setup code that isn't needed.
+
+Tue Feb 19 21:55:04 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/ishapes/BouncingShapeDynamics.cpp:
+        * examples/DCPS/ishapes/BouncingShapeDynamics.hpp:
+        * examples/DCPS/ishapes/DDSShapeDynamics.cpp:
+        * examples/DCPS/ishapes/DDSShapeDynamics.hpp:
+        * examples/DCPS/ishapes/ShapeType.idl:
+        * examples/DCPS/ishapes/ShapesDialog.cpp:
+
+          Updated to use the common IDL for the March 2013 OMG demo.
+
+        * PROBLEM-REPORT-FORM:
+
+          Removed ASCII-art "cut here" line that nobody seems to use anyway.
+
+        * README:
+
+          Added Clang 3.2 as a supported compiler.
+
+Thu Feb 14 17:20:05 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_v8.mpb:
+
+          New mpb file, use to enable opendds_idl's V8 JavaScript codegen.
+          See "Mon Jan 21 22:44:03 UTC 2013" for details.
+
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          register_type()'s second parameter is a string.  The null pointer is
+          not a valid IDL string, but it's currently allowed as an extension.
+          The empty string is simply "".
+
+Fri Feb  8 21:52:00 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/Serializer.inl:
+
+          Silence a compiler warning on the Mac.
+
+Fri Feb  8 21:03:40 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Fix math error.
+
+        * tests/DCPS/UnitTests/TimeTSubtraction.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Add test to demonstrate fix is correct.
+
+Tue Feb  5 15:26:27 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.cpp:
+
+          Restored earlier implementation of swapcpy().
+          ACE_CDR swapping helper functions can not be used here because
+          they assume alignment and some combinations of CPU and compiler
+          switches enforce strict alignment (SPARC/SunCC).
+
+Tue Jan 29 14:34:12 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Fixed a warning that was introduced while fixing Coverity warnings.
+
+Mon Jan 28 17:31:01 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/v8_generator.cpp:
+
+          Added range checking for enums.
+
+Tue Jan 22 22:34:30 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidBuilder.cpp:
+        * dds/DCPS/transport/framework/PriorityKey.inl:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Coverity warnings:
+          - pass large structures by const&
+          - initialize all scalar fields
+
+        * dds/DCPS/Service_Participant.h:
+
+          Removed unused members.
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+
+          Pass large structures by const&.
+          Updated logic for copy-from-topic QoS.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Added take_generic() for unit test.
+
+Tue Jan 22 19:56:33 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Added a take_generic() method, which allows samples that
+          may have previously been accessed with read_generic() to
+          be removed from the DataReader.
+
+Mon Jan 21 22:44:03 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/V8TypeConverter.h:
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_util.cpp:
+        * dds/idl/dds_generator.h:
+        * dds/idl/dds_visitor.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/idl/ts_generator.cpp:
+        * dds/idl/v8_generator.h:
+        * dds/idl/v8_generator.cpp:
+
+          Initial version of type support for copying data samples
+          to JavaScript data types for the V8 JavaScript engine.
+          Enable with -Wb,v8.  Generated code links with libv8.
+
+Mon Jan 21 16:19:32 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/WriteDataContainer.h:
+          Doxygen fixes
+
+Mon Jan 21 15:53:58 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/idl/HTemplate.txt:
+          Doxygen and layout changes
+
+Fri Jan 18 19:09:25 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * ChangeLog:
+        * NEWS:
+        * README:
+        * docs/history/ChangeLog-3.4:
+
+          Setup for next version.
+
+Fri Jan 18 16:55:39 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+
+        * OpenDDS version 3.4 released.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

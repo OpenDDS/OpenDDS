@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>PRESENTATION</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H4 CLASS="Head3">
+<A NAME="pgfId-258453"></A>PRESENTATION</H4>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-275405"></A>The PRESENTATION QoS policy controls how changes to instances by publishers are presented to data readers. It affects the relative ordering of these changes and the scope of this ordering. Additionally, this policy introduces the concept of coherent change sets. Here is the IDL for the Presentation QoS:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-276235"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-276293"></A>enum PresentationQosPolicyAccessScopeKind {</P>
+<P CLASS="Code">
+<A NAME="pgfId-276294"></A>  INSTANCE_PRESENTATION_QOS,</P>
+<P CLASS="Code">
+<A NAME="pgfId-276295"></A>  TOPIC_PRESENTATION_QOS,</P>
+<P CLASS="Code">
+<A NAME="pgfId-276296"></A>  GROUP_PRESENTATION_QOS</P>
+<P CLASS="Code">
+<A NAME="pgfId-276297"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-276298"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-276299"></A>struct PresentationQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-276300"></A>  PresentationQosPolicyAccessScopeKind access_scope;</P>
+<P CLASS="Code">
+<A NAME="pgfId-276301"></A>  boolean coherent_access;</P>
+<P CLASS="Code">
+<A NAME="pgfId-276302"></A>  boolean ordered_access;</P>
+<P CLASS="Code">
+<A NAME="pgfId-276303"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-276285"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-276423"></A>The scope of these changes (<EM CLASS="Code">
+access_scope</EM>
+) specifies the level in which an application may be made aware:</LI>
+<LI CLASS="Bullet2">
+<A NAME="pgfId-276424"></A><EM CLASS="Code">
+INSTANCE_PRESENTATION_QOS</EM>
+ (the default) indicates that changes occur to instances independently. Instance access essentially acts as a no-op with respect to <EM CLASS="Code">
+coherent_access</EM>
+ and <EM CLASS="Code">
+ordered_access</EM>
+. Setting either of these values to true has no observable affect within the subscribing application.</LI>
+<LI CLASS="Bullet2">
+<A NAME="pgfId-275418"></A><EM CLASS="Code">
+TOPIC_PRESENTATION_QOS</EM>
+ indicates that accepted changes are limited to all instances within the same data reader or data writer.</LI>
+<LI CLASS="Bullet2">
+<A NAME="pgfId-275421"></A><EM CLASS="Code">
+GROUP_PRESENTATION_QOS</EM>
+ indicates that accepted changes are limited to all instances within the same publisher or subscriber. </LI>
+<LI CLASS="Body">
+<A NAME="pgfId-275424"></A>Coherent changes (<EM CLASS="Code">
+coherent_access</EM>
+) allow one or more changes to an instance be made available to an associated data reader as a single change. If a data reader does not receive the entire set of coherent changes made by a publisher, then none of the changes are made available. The semantics of coherent changes are similar in nature to those found in transactions provided by many relational databases. By default, coherent_access is false.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-276509"></A>Changes may also be made available to associated data readers in the order sent by the publisher (<EM CLASS="Code">
+ordered_access</EM>
+). This is similar in nature to the DESTINATION_ORDER QoS policy, however <EM CLASS="Code">
+ordered_access</EM>
+ permits data to be ordered independently of instance ordering. By default, <EM CLASS="Code">
+ordered_access</EM>
+ is false.</LI>
+</UL>
+<DIV>
+<H6 CLASS="SideNote">
+<A NAME="pgfId-276630"></A>&nbsp;</H6>
+<UL>
+
+</body>
+</html>

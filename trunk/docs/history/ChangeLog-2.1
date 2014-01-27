@@ -1,0 +1,3621 @@
+Fri Feb  5 21:47:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * OpenDDS version 2.1 released.
+
+Fri Feb  5 20:45:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Fixed spurious byte swapping for received transport control
+          samples.
+
+Fri Feb  5 18:44:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * INSTALL:
+        * NEWS:
+
+          Updated documentation for next release.
+
+Fri Feb  5 17:34:12 UTC 2010  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/monitor/README:
+
+          Add missing README with Monitor library documentation.
+
+Fri Feb  5 16:43:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Dropped remaining use of TransportRetained element from
+          remove_sample; this causes spurious ACE_Message_Block allocations
+          which are not subsequently released.
+
+Fri Feb  5 16:34:13 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/odds_monitor/doc/userguide.html:
+
+          Documented the QT_CFG environment variable and added steps
+          for building with VC++.
+
+Fri Feb  5 16:13:51 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/README:
+
+          Replaced explicit environment setup and build instructions with
+          a reference to the user guide.
+
+Fri Feb  5 15:59:27 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * NEWS:
+
+          Added a reference to the OpenDDS-Bench documentation directory.
+
+        * performance-tests/Bench/doc/scenarios.txt:
+        * performance-tests/Bench/doc/tests-latency.txt:
+        * performance-tests/Bench/doc/tests.txt:
+
+          Added '.txt' extension to these text files to accommodate those
+          who need it.
+
+Fri Feb  5 15:39:33 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/doc/odds_monitor.man1:
+
+          Removed this file.
+
+Fri Feb  5 15:24:19 UTC 2010  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * NEWS:
+
+          Add Monitor library entry (README to follow shortly).
+
+Fri Feb  5 14:08:04 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/multicast.html:
+
+          Updated documentation for next release.
+
+Fri Feb  5 13:22:12 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+          Fixed compiler warnings/errors for GCC and VC++.
+
+Fri Feb  5 12:58:18 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+          Fixed compiler warnings/errors for GCC and VC++.
+
+Fri Feb  5 02:18:21 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Fixed bugs that sub_map_ removing elements are not protected
+          in a few places.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Added flag to indicate if a datalink is in pending releasing.
+          When it's in pending release state, the connection reconnect
+          task will not try to reconnect. This should fix the failure
+          of "Failed to connect" during shutdown.
+
+Thu Feb  4 23:26:55 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/multicast.html:
+
+          Minor edits for correctness.
+
+Thu Feb  4 23:25:04 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+        * README:
+        * docs/html/multicast/multicast.html:
+
+          Updated documentation for next release.
+
+Thu Feb  4 22:14:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Corrected refcounts in find_or_create_datalink for subsequent
+          loans of server_link_.
+
+Thu Feb  4 21:27:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Messenger/Writer.cpp:
+
+          Reverted changes accidentally introduced in previous commit.
+
+Thu Feb  4 21:08:09 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+
+          Added a separate mpc project for the code-generation steps,
+          which helps enable parallel builds.
+
+Thu Feb  4 20:41:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/SharedTransport:
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+        * tests/DCPS/SharedTransport/TestCase.h:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/SharedTransport/run_test.pl:
+        * tests/DCPS/SharedTransport/svc.conf:
+        * tests/DCPS/SharedTransport/test.ini:
+
+          Added experimental test for sharing the same TransportImpl
+          between Subscriber and Publisher instances.
+
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+
+          Updates to the TestFramework to support sharing the same
+          TransportImpl between Subscriber and Publisher instances.
+
+Thu Feb  4 19:30:49 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+
+          Need to reference the SERVER constant using the
+          correct Perl package.
+
+Thu Feb  4 17:15:52 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Determine when to end the process based on the subscription
+          becoming un-matched using a WaitSet and StatusCondition.
+          This replaces the old method of counting the number of samples
+          received, which is not appropraite for unreliable transports.
+
+Thu Feb  4 17:02:23 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * NEWS:
+
+          Corrected spelling.
+
+        * performance-tests/Bench/bin/mktable.pl:
+
+          Renamed to allow for additional output formats.  Added HTML
+          output option (unimplemented).
+
+        * performance-tests/Bench/doc/tests-latency:
+
+          Updated documentation.
+
+        * performance-tests/Bench/tests/latency/test-commands:
+
+          Moved from doc to tests/latency subdirectory.  Removed
+          extraneous intermediate directory in data generation commands.
+
+        * performance-tests/Bench/tools/convert-all:
+
+          Removed extraneous intermediate directory.
+
+        * performance-tests/Bench/bin/mktiddler.pl:
+        * performance-tests/Bench/doc/latency-commands:
+
+          Removed these files.  They were moved or renamed
+
+Wed Feb  3 23:52:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Dropped release notes concerning reliable transport teardown.
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Dropped overflow checking for SequenceNumbers; these values are
+          indistinguishable from valid, already seen numbers.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Dropped support for reliable transport teardown in this release.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Disabled reassociation timer by default; this feature is still
+          considered experimental and should not be used.
+
+        * docs/html/README:
+        * docs/html/multicast/multicast.html:
+
+          Updated documentation.
+
+Wed Feb  3 23:03:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * NEWS:
+
+          Updated for upcoming release with odds_monitor and Bench
+          changes.
+
+        * docs/html/README:
+
+          Made the copy instructions explicit to use subversion copy
+          command.
+
+        * tools/odds_monitor/Monitor_main.cpp:
+
+          Simple cleanup - adding GUI loop executions in more places
+          while splash is displayed.
+
+Wed Feb  3 19:26:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/doc/userguide.html:
+
+          This time I actually *saved* the HTML file before commiting the
+          changes.
+
+Wed Feb  3 19:09:24 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor_main.cpp:
+
+          Added an ACE_Service_Config::process_directive() call to load
+          the SimpleTcp library always.  This eliminates the need for a
+          service configuration file for the most common use case.
+
+        * tools/odds_monitor/doc/userguide.html:
+
+          Removed service configuration file from invocation example.
+          Some additional cleanup.
+
+Wed Feb  3 15:05:43 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/dds_comparative/PubWriter.h:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.h:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.h:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.h:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+
+          Updated tests that have their own implementations of the
+          TransportSendListener.
+
+Wed Feb  3 00:18:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * etc/monitor.conf:
+
+          Added this here to simplify odds_monitor operation.
+
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added installation to $DDS_ROOT/bin
+
+        * tools/odds_monitor/doc/images:
+
+          Documentation images.
+
+        * tools/odds_monitor/doc/userguide.html:
+
+          Initial User Guide.
+
+Tue Feb  2 23:39:52 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Added additional filtering based on acked status for both active
+          and passive peers.
+
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * docs/html/multicast/multicast.html:
+
+          Updated default port number documentation.
+
+Tue Feb  2 22:24:56 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added an #include that was necessary for inline=0 builds.
+
+Tue Feb  2 21:59:28 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          In remove_sample(), TransportReatinedElement can't be used when there
+          is no send_buffer_ because it creates a new ACE_Message_Block which
+          is never cleaned up.  Replaced it with the TransportSendElement.
+
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+
+          Construct a TransportSendElement from a pointer to a const
+          DataSampleListElement.
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+
+          data_dropped() and data_delivered() callbacks now take a pointer to
+          a const DataSampleListElement, which required other const-ness
+          changes.  Unfortunately this is incomplete, but it's a start.
+
+Tue Feb  2 18:41:21 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/diagrams/class.dia:
+        * docs/html/multicast/images/class.png:
+        * docs/html/multicast/multicast.html:
+
+          Updated documentation.
+
+Tue Feb  2 16:17:04 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Uncommented guards for DOC x.7.6 release.
+
+Tue Feb  2 16:14:44 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+
+          Uncommented guards for DOC x.7.6 release.
+
+Tue Feb  2 14:13:37 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Minor fix to DDS::DomainId_t ranges.
+
+Tue Feb  2 14:10:43 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Updated with changes to supported DDS::DomainId_t ranges.
+
+Mon Feb  1 23:47:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Updated pre-allocated chunks for header blocks.
+
+Mon Feb  1 23:25:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Updated with new reliable transport teardown details.
+
+Mon Feb  1 22:31:50 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          - Made the header_block_ released before it was created again
+          - Increased header_chunks to be 2.
+          These fixed the memory leaks seen in a stress test that sends
+          large number of messages without delay.
+
+Mon Feb  1 21:18:58 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Initialize WriterInfo::seen_data_ in the 2-arg constructor.
+
+Mon Feb  1 18:55:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Added missing initializer for cancelled_ member.
+
+Mon Feb  1 16:50:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Removed bogus acked_ check for passive peers.
+
+Mon Feb  1 16:13:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/html/README:
+
+          Added instructions to create new documents.  This includes
+          copying the 'images' subdirectory to reflect some changes in
+          the template.html.  Added instructions to publish document as
+          static HTML pages.
+
+        * docs/html/template/template.html:
+
+          - changed the path to the 'opendds.png' logo to be in the local
+            'images' directory to remove a dependency on the '../template'
+            directory.
+          - added the 'PublishMacro' plugin to allow publication of the
+            TiddlyWiki document as separate static HTML pages.
+
+Mon Feb  1 15:34:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Minor nits corrected; documentation updates.
+
+Mon Feb  1 15:12:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Reverted previous commit (r2948); this change affected retained
+          PDU behavior in the TransportSendBuffer used by the multicast
+          transport.
+
+Mon Feb  1 06:34:39 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Made header_block_ created once instead of for every packet.
+          This should fix memory leak due to header_block_ not released
+          and reduce the heap allocation which should improve performance.
+
+Sat Jan 30 23:44:13 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/lj-plots.gp:
+        * performance-tests/Bench/bin/plot-transports.gp:
+
+          Changed Latency and Jitter units to microseconds.
+
+Fri Jan 29 21:57:37 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Corrected refcounts.
+
+Fri Jan 29 20:55:00 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Moved pkt_chain_ release from destructor to stop() before
+          MB allocators is deleted. This should fix a SEGV caused by
+          this incorrect deletion order.
+
+Fri Jan 29 16:51:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.inl:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Updated reliability_lost behavior; added additional check in
+          header_received to avoid spuriously updating nak_sequence_.
+
+Thu Jan 28 20:43:58 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/expandColors.pl:
+
+          New script to post process a published static HTML version of a
+          TiddlyWiki document to translate the ColorPalette.  This
+          replaces development of a plugin to do the processing
+          internally.
+
+        * performance-tests/Bench/bin/plot-jitter.gp:
+        * performance-tests/Bench/bin/plot-transports.gp:
+
+          Change the zoom range to [0:2500]
+
+Thu Jan 28 16:36:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed compiler warnings/errors for GCC and VC++.
+
+Thu Jan 28 16:02:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Fixed missing change to DisjointSequence unit test.
+
+Wed Jan 27 23:37:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSessionFactory.h:
+        * dds/DCPS/transport/multicast/BestEffortSessionFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.inl:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSessionFactory.h:
+        * dds/DCPS/transport/multicast/MulticastSessionFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastSessionFactory_rch.h:
+        * dds/DCPS/transport/multicast/MulticastSession_rch.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTypes.h:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSessionFactory.h:
+        * dds/DCPS/transport/multicast/ReliableSessionFactory.cpp:
+
+          Refactored multicast transport to support sessions over a
+          single DataLink.
+
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.inl:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Removed these files.
+
+Wed Jan 27 23:03:18 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+
+          Update the "count" field in the message struct each time through
+          the loop.
+
+Wed Jan 27 17:00:31 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.inl:
+
+          Fixed bad iterator dereference on second-to-last element
+          accesses.
+
+Wed Jan 27 16:21:36 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+
+          Enable static loading of transports in static builds.
+
+Tue Jan 26 22:34:19 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/InfoRepo/Federator.idl:
+        * dds/monitor/monitor.idl:
+
+          Provide a constant for the maximum user Domain ID.  Move all Domain
+          IDs used by OpenDDS to the range above that constant.
+
+Tue Jan 26 15:22:28 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          inline=0 builds now require an #include of TransportInterface.h
+
+Mon Jan 25 17:29:06 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Added compatibility with latest DOC group TAO_IDL compiler.
+
+Mon Jan 25 17:05:00 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Went back to just a fwd decl (not an include) of TransportImpl.
+          This was required for gcc 3.3.2.
+
+Fri Jan 22 22:13:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/mktiddler.pl:
+
+          New script to generate a TiddlyWiki format table from latency
+          test data created with the bin/extract.pl script.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added DDS_ROOT and ACE_ROOT to the search path so the script
+          can execute from a local directory.
+
+        * performance-tests/Bench/tools/plot-all.gp:
+
+          Cosmetic cleanup for readability.
+
+Fri Jan 22 20:20:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Fixed locally modified conditional used for stress testing.
+
+Fri Jan 22 19:46:57 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed `interface' naming conflicts which affect some platforms.
+
+Fri Jan 22 17:53:20 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/extract.pl:
+        * performance-tests/Bench/bin/genstats.pl:
+        * performance-tests/Bench/bin/lj-plots.gp:
+        * performance-tests/Bench/bin/plot-jitter.gp:
+        * performance-tests/Bench/bin/plot-transports.gp:
+        * performance-tests/Bench/bin/reduce.pl:
+
+          New data reduction and data visualization scripts to process
+          latency testing results.
+
+        * performance-tests/Bench/tools/convert-all:
+        * performance-tests/Bench/tools/plot-all.gp:
+
+          New data reduction and plotting scripts usable in a Linux
+          environment after executing the latency tests as described in
+          the doc/latency-commands file.
+
+Fri Jan 22 16:09:19 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Temporarily disabled nightly BidirMessenger tests until
+          transport issues have been resolved.
+
+        * tests/DCPS/Messenger/Writer.cpp:
+
+          Fixed locally modified constant used for stress testing.
+
+Thu Jan 21 19:06:39 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/BidirMessenger/DataReaderListener.h:
+        * tests/DCPS/BidirMessenger/DataReaderListener.cpp:
+        * tests/DCPS/BidirMessenger/Writer.h:
+        * tests/DCPS/BidirMessenger/Writer.cpp:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Applied changes submitted by Don Busch to BidirMessenger test.
+
+Thu Jan 21 18:42:57 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+
+          Fixed incorrect access modifier on default ctor.
+
+Thu Jan 21 18:41:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Add NULL initializers for pointer types.
+
+Thu Jan 21 18:36:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Documentation updates.
+
+Thu Jan 21 18:33:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Documentation updates; added NULL initializers for pointer
+          types.
+
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.inl:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.h:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Re-worked refcounting behavior.
+
+        * dds/DCPS/transport/udp/UdpConfiguration_rch.h:
+        * dds/DCPS/transport/udp/UdpTransport_rch.h:
+
+          Removed these files.
+
+Thu Jan 21 00:13:13 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Corrected the if condition in repository_lost().
+
+Wed Jan 20 22:07:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added stop operation to allow a DataLink to stop sending and
+          receiving data without tearing down resources.
+          transport_shutdown now exhibits idempotent behavior if a
+          DataLink is already stopped.
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Fixed deadlock problem on upcall in on_timeout.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Minor reformatting.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.inl:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Updated reliability_lost behavior.
+
+Wed Jan 20 16:23:33 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Updated reliability_lost callback behavior.
+
+Wed Jan 20 15:50:04 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Added missing include for TransportInterface.h.
+
+Tue Jan 19 22:55:47 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Minor resource management updates.
+
+Tue Jan 19 22:47:38 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Added finalize operation on TAO_DDS_DCPSInfo_i to cleanup
+          state when the DCPSInfoRepo is shutdown.
+
+Tue Jan 19 22:22:48 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Re-worked refcounting behavior.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration_rch.h:
+        * dds/DCPS/transport/multicast/MulticastTransport_rch.h:
+
+          Removed these files.
+
+Tue Jan 19 17:20:16 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/multicast.html:
+
+          Updated documentation.
+
+Tue Jan 19 17:13:18 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added support for checking overflowed sequences.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed GCC warnings related to unused parameters.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Added support for reliability_lost callback.
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fixed bug in disassociate_participant which caused iterators
+          to not be incremented correctly.
+
+Mon Jan 18 22:11:13 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Added copy-out to avoid holding locks over possible remote
+          calls as a result of reliability_lost.
+
+Mon Jan 18 21:58:22 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/latency-commands:
+        * performance-tests/Bench/doc/tests-latency:
+
+          Updated documentation to explain how to execute the latency
+          testing as it was performed during development.
+
+        * performance-tests/Bench/etc/transport-udp.ini:
+
+          Included a hostname placeholder that needs to be specified for
+          each host on which a test will be executed.
+
+        * performance-tests/Bench/tests/latency/p1-100.ini:
+        * performance-tests/Bench/tests/latency/p1-1000.ini:
+        * performance-tests/Bench/tests/latency/p1-16000.ini:
+        * performance-tests/Bench/tests/latency/p1-250.ini:
+        * performance-tests/Bench/tests/latency/p1-2500.ini:
+        * performance-tests/Bench/tests/latency/p1-32000.ini:
+        * performance-tests/Bench/tests/latency/p1-50.ini:
+        * performance-tests/Bench/tests/latency/p1-500.ini:
+        * performance-tests/Bench/tests/latency/p1-5000.ini:
+        * performance-tests/Bench/tests/latency/p1-8000.ini:
+
+          Updated with a common rate to execute latency tests at.
+
+Mon Jan 18 20:04:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Added client interface to disassociate_* InfoRepo operations.
+          Also added new reliability_lost_i entry point to TransportImpl
+          to allow a transport to report a loss in reliability.
+
+Mon Jan 18 14:59:13 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Fixed compiler warnings/errors for GCC and VC++.
+
+Sat Jan 16 00:14:19 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Completed back-end half to reassociation.
+
+        * java/jms/src/org/opendds/jms/management/argument/InfoRepoArguments.java:
+
+          Added support for new -ReassociateDelay command line option.
+
+Fri Jan 15 21:52:35 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/etc/transport-multi-rel.ini:
+        * performance-tests/Bench/etc/transport-udp.ini:
+
+          Corrected transport type specifications.
+
+Fri Jan 15 21:23:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/latency-commands:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Minor corrections from debug.
+
+Fri Jan 15 20:17:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/latency-commands:
+        * performance-tests/Bench/doc/tests-latency:
+
+          Added documentation describing support for the message size
+          based performance test configurations just added.
+
+        * performance-tests/Bench/etc/transport-multi-be.ini:
+        * performance-tests/Bench/etc/transport-multi-rel.ini:
+        * performance-tests/Bench/etc/transport-tcp.ini:
+        * performance-tests/Bench/etc/transport-udp.ini:
+
+          Added transport specific configurations supporting the message
+          size based performance testing configurations.
+
+        * performance-tests/Bench/tests/latency:
+
+          Added test configurations for message size based latency
+          performance testing.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Changed to include all test specification files in the
+          generated distribution package.
+
+Fri Jan 15 16:54:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          Fixed compiler warnings related to missing return.
+
+Thu Jan 14 23:45:46 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          Completed front-end half to reassociation.
+
+Thu Jan 14 22:42:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          Additional interface changes to allow one participant to
+          disassociate from another.
+
+Thu Jan 14 22:05:03 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Updated release notes with changes to opendds_repo_ctl.
+
+Thu Jan 14 21:39:36 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.inl:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Resolved port conflicts.
+
+Thu Jan 14 17:17:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * docs/html/multicast/multicast.html:
+
+          Updated default port number documentation.
+
+Thu Jan 14 16:50:08 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+
+          Older versions of ACE do not properly support the is_multicast
+          operation; it has been removed in the name of compatibility with
+          broken releases.
+
+Wed Jan 13 22:12:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed idiotic SEGV when passing a NULL pointer to send_buffer.
+
+Wed Jan 13 21:57:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/BidirMessenger:
+        * tests/DCPS/BidirMessenger/BidirMessenger.mpc:
+        * tests/DCPS/BidirMessenger/DataReaderListener.h:
+        * tests/DCPS/BidirMessenger/DataReaderListener.cpp:
+        * tests/DCPS/BidirMessenger/Messenger.idl:
+        * tests/DCPS/BidirMessenger/Writer.h:
+        * tests/DCPS/BidirMessenger/Writer.cpp:
+        * tests/DCPS/BidirMessenger/multicast.conf:
+        * tests/DCPS/BidirMessenger/pub_udp.ini:
+        * tests/DCPS/BidirMessenger/publisher.cpp:
+        * tests/DCPS/BidirMessenger/pubsub.ini:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/BidirMessenger/pubsub_ipv6.ini:
+        * tests/DCPS/BidirMessenger/pubsub_multicast.ini:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/BidirMessenger/sub_udp.ini:
+        * tests/DCPS/BidirMessenger/tcp.conf:
+        * tests/DCPS/BidirMessenger/udp.conf:
+
+          Added BidirMessenger test (submitted by Don Busch) with
+          modifications to test the new udp and multicast transports.
+
+Wed Jan 13 20:34:03 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          Minimal interface changes for new disassociate_subscription
+          and disassociate_publication operations.
+
+Wed Jan 13 18:58:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_monitor/images/splash.psd:
+
+          Added original PSD for splash image.
+
+Wed Jan 13 17:50:58 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_monitor/images/splash.jpg:
+
+          Updated splash image.
+
+Wed Jan 13 16:56:18 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/images/splash.jpg:
+
+          Replaced splash image with a spectrogram of a wave file
+          containing the spoken phrase "OpenDDS".
+
+Tue Jan 12 23:33:01 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/QosFormatter.cpp:
+
+          Refactored child data node handling to simplify.  Initial
+          implementation of periodic report handling complete, but not
+          tested as we are not receiving any of these reports.
+
+          Stopped creating parentless nodes from BultinTopic samples -
+          the reports read these samples when they arrive.
+
+          Some minor cleanup and documentation updates.
+
+Mon Jan 11 23:21:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/README:
+
+          Updated documentation.
+
+        * tools/odds_monitor/monitor.conf:
+
+          Added the monitor service loader.
+
+Mon Jan 11 22:10:25 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Simplified locking and removed initial sample processing as the
+          samples will be processed through normal operation.
+
+Mon Jan 11 20:34:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          BuiltinTopic sample handling refactor complete.  Added
+          Subscription, Topic, and DomainParticipant implementations in
+          same style as the Publication BuiltinTopic sample handling.
+
+Mon Jan 11 17:28:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          builtinTopicUpdate()
+            - new method to handle BuiltinTopic sample updates
+              differently from the instrumentation samples.  This method
+              calls the 'read' rather than 'take' interface.
+          dispatchReader()
+            - dispatch the BuiltinTopic samples to the new method rather
+              than processing them as instrumentation samples.
+          createBuiltinSubscription()
+            - reenabled hanlding BuilinTopic samples
+
+        * tools/odds_monitor/QosFormatter.cpp:
+
+          Added the value to the disply string if an invalid enumeration
+          value is detected.
+
+Mon Jan 11 04:25:47 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Made BIT transport configured with datalink_release_delay=0.
+          The BIT does not need this parameter which is used for performance
+          improvement during reconnecting. It also solved odds_monitor
+          hang during repo switch issue.
+
+Sat Jan  9 22:21:20 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+
+          Updated DDS_Run_Test module to new PerlDDS::Run_Test.
+
+Fri Jan  8 23:46:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/QosFormatter.cpp:
+
+        Starting to refactor Qos policy value processing.  This will
+        avoid the current problem with the BuiltinTopic samples being
+        handled identically to the instrumentation reports.  Specifically
+        we need to 'read' and not 'take' the BuiltinTopic data.
+
+        This is a work in progress and is not complete.  Only the
+        Publication Qos policies / BuiltinTopic samples have been
+        modified.  There is now a complaint from Qt about using pixmaps
+        on a non-GUI thread.  I don't know where this is from, but I may
+        need to hand off processing from the DDS service to the GUI loop
+        to avoid conflicts.
+
+Fri Jan  8 23:23:45 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Reverted the changes made on
+          "Mon Jan  4 22:51:20 UTC 2010  Yan Dai  <dai_y@ociweb.com>"
+          The changes intended to fix a corner test case failure detected
+          in odds_monitor, but it appeared to cause other issues.
+
+Fri Jan  8 20:11:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples:
+
+          Reverted DevGuideExamples changes from r2852.
+
+Fri Jan  8 06:03:48 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          - Made get_discovered_participants returns exclude itself.
+          - Made get_discovered_participants and get_discovered_topics
+            returns exclude the ignored participants and topics.
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Added get_discovered_participants/get_discovered_topics
+          excluding ignored participants/topics test case.
+
+Thu Jan  7 23:54:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Changed comparison GUID_t value extracted from
+          BuiltinTopicKey_t to have the VendorId field set.
+
+Thu Jan  7 17:30:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Removed a minor encapsulation violation.
+
+Thu Jan  7 05:14:11 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Updated release notes with new documentation path.
+
+Thu Jan  7 05:08:11 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Corrected logging for errno values.
+
+Thu Jan  7 04:44:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multirepo.html:
+
+          Updated to new HTML documentation style.
+
+Wed Jan  6 05:23:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+        * bin/PerlDDS/Process_Java.pm:
+
+          Fixed package names.
+
+        * contrib/wrapper/example/WrapperStockQuoter.mpc:
+
+          Fixed includes directive.
+
+Wed Jan  6 04:24:14 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/SCALE:
+
+          Added scalability discussion.
+
+Tue Jan  5 16:01:24 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+
+          Adjusted the includes to fix compilation errors on solaris
+          builds.
+
+Tue Jan  5 00:10:27 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+        * bin/PerlDDS/Process_Java.pm:
+        * bin/PerlDDS/Run_Test.pm:
+
+          Moved CrossSync.pm, CrossSyncDDS.pm, JavaProcess.pm, and
+          DDS_Run_Test.pm into PerlDDS package; renamed as necessary.
+
+        * docs/html/federation/federation.html:
+        * docs/html/multicast/multicast.html:
+        * docs/html/template/template.html:
+
+          Renamed HTML documents.
+
+Mon Jan  4 22:51:20 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Enabled notify_subscription_disconnected and
+          notify_subscription_lost callback for built-in-topic
+          datareader. This is needed for failover repository
+          detection.
+
+        * dds/DCPS/FailoverListener.cpp:
+
+          Added repository recovery call upon
+          on_subscription_disconnected callback.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          Added attach_participant bool parameter to several methods
+          (e.g. remap_domain). If flag is false, it will not invoke
+          attach_participant() on repo. This invocation cause failure
+          for odds_monitor in some test scenarios. Those method defaults
+          to invoke attach_participant on repo.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy_rch.h:
+
+          Changed receive_strategy_ to be SimpleTcpSendStrategy_rch instead of
+          TransportReceiveStrategy_rch so it can call gracefully_disconnected()
+          to verify connection and notify user about disconnection.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Fixed an issue that new datalink and passive accepted connection
+          not associated when new connection is accepted before
+          find_or_create_datalink() creates the new datalink.
+
+        * dds/DdsDcpsSubscriptionExt.idl:
+
+          Updated comments for on_subscription_disconnected
+          that can be called if gracefully disconnected by peer.
+          This is needed to discover the failover repository.
+
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/monitor.idl:
+
+          - Added MONITOR_TRANSPORT_ID for monitor transport to avoid
+            conflict of using DEFAULT_SIMPLE_TCP_ID by both monitor lib
+            and user application.
+          - The MONITOR_TRANSPORT_ID is a temporary define, we'll define
+            the reserved and user used range for transport id, domain id,
+            repository id and etc.
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Fixed issues upon switching repo via GUI.
+          - Made "add" button only add repository to repo list and the binding
+            to repo only happens when selecting the repo.
+          - Fixed crash when same repo location is selected but the repo is
+            restarted. The repo reference needs be resolved again.
+          - Initialized activeKey and associated monitor domain with repo
+            when first time setActiveRepo is called, otherwise monitor domain
+            will not be found when trying to remap domain to different repo.
+          - Released monitor transport if stop instrumentation so it has
+            clean state for new instrumentation.
+
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+        * tests/DCPS/MultiRepoTest/TestConfig.h:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/Monitor/Writer.cpp:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/TestConfig.cpp:
+        * tests/DCPS/Federation/TestConfig.h:
+        * tests/DCPS/Federation/run_test.pl:
+        * tests/DCPS/Federation/Publisher.cpp:
+
+          Added command options to extend the test duration to help test
+          odds_monitor repository switch feature.
+
+Mon Jan  4 21:42:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * examples/DevGuide:
+
+          Moved DevGuideExamples under examples subdirectory.
+
+Mon Jan  4 21:38:34 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/history:
+
+          Moved history under docs subdirectory.
+
+Mon Jan  4 21:28:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs:
+
+          Updated documentation for consistency.
+
+Mon Jan  4 20:59:28 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * performance-tests/Bench/tools/mkpkg:
+        * tools/odds_repoctl:
+
+          Renamed opendds_repo_ctl to odds_repoctl to be in line with
+          new odds_monitor tool.
+
+Mon Jan  4 20:53:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/opendds_repo_ctl:
+
+          Moved opendds_repo_ctl under tools directory.
+
+        * tools/scripts:
+        * tools/scripts/copyright:
+        * tools/scripts/style:
+
+          Moved copyright and style tools under scripts subdirectory.
+
+        * tools/test_burnin.sh:
+
+          Removed these files.
+
+Mon Jan  4 20:42:47 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * INSTALL:
+
+          Moved docs/INSTALL to root to be in line with GNU gnits standards
+          (also followed by ACE+TAO).
+
+        * NEWS:
+
+          Renamed from DDS_release_notes.txt to be in line with GNU gnits
+          standards (also followed by ACE+TAO).
+
+        * contrib:
+
+          A directory has been created to house externally contributed
+          sources (i.e. wrapper).  Sources in this directory are not
+          maintained by the core OpenDDS development team.
+
+        * history/ChangeLog-1.0:
+        * history/ChangeLog-1.0pre:
+        * history/ChangeLog-1.1:
+        * history/ChangeLog-1.2:
+        * history/ChangeLog-1.3:
+        * history/ChangeLog-2.0:
+        * history/ChangeLog-2.0.1:
+
+          Broke apart ChangeLogs by release.  Root ChangeLog now only
+          contains changes since the last release.  Collapsed ChangeLog-01
+          under ChangeLog-1.0pre.
+
+Mon Jan  4 06:33:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * OCI copyrights updated.
+
+Wed Dec 30 21:59:30 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Make changes to track latest DOC group IDL compiler interface
+          changes.
+
+Sun Dec 27 01:58:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Dropped unnecessary copy of transport header; added accessor
+          to TransportReceiveStrategy for receive_transport_header_.
+
+Wed Dec 23 20:49:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed to use GUID values with our vendor Id when generating
+          handle values.
+
+        * tools/odds_monitor/MonitorDataStorage.inl:
+
+          Use GUID values with our vendor Id when generating GUID values
+          from Builtin Topic keys.
+
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Make the readers TRANSIENT_LOCAL durability to ensure they
+          receive historical data when joining.
+
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/monitor.conf:
+
+          Remove monitor service from the monitor application.  This was
+          for initial testing only and has become obsolete.
+
+Wed Dec 23 01:02:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+
+          Dropped DEFAULT_SIMPLE_UDP constant.
+
+Tue Dec 22 21:11:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * wrapper/DDSWrapper_OpenDDS.mpc:
+
+          Added support for new udp transport.
+
+Tue Dec 22 16:55:45 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.cpp:
+
+          Fixed issue with QString conversion to const char* due to
+          toLocal8Bit returned array destroyed.
+
+Mon Dec 21 21:42:37 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Publish DP reports after a create_topic() call.
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * tests/DCPS/Monitor/SPMDataReaderListener.cpp:
+
+          Queue transports so they are published when initialization
+          is completed.
+
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Move the findKey() implementation to the .inl file (to
+          fix some template instantiation issues).
+
+Mon Dec 21 16:14:27 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Factored Qos node management int separate method.
+
+          Initial implementation for Topic, Publication, and Subscription
+          update processing.
+
+        * tools/odds_monitor/QosFormatter.cpp:
+
+          Added specialization for QString parameter to simplify calling
+          code.
+
+Sun Dec 20 22:59:31 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Corrected ref counting behavior; fixed test failures in FooTest5_0.
+
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+
+          Added missing include; fixed compilation failures on Win32 hosts.
+
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+
+          Fixed test failures for FooTest5 and Priority.
+
+Sun Dec 20 01:06:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Disabled experimental performance tests enabled in last commit.
+
+Sat Dec 19 06:27:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Enabled additional performance tests for new udp and multicast
+          transports.
+
+        * docs/html/multicast/index.html:
+
+          Updated documentation.
+
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS/DCPS/transport/UdpConfiguration.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+        * java/jms/README:
+        * java/jms/src/META-INF/services/org.opendds.jms.transport.spi.Transport:
+        * java/jms/src/org/opendds/jms/transport/spi/UdpTransport.java:
+        * java/tests/messenger/publisher/pub_udp.ini:
+        * java/tests/messenger/publisher/publisher_idl_test.mpc:
+        * java/tests/messenger/publisher/sub_udp.ini:
+        * java/tests/messenger/subscriber/pub_udp.ini:
+        * java/tests/messenger/subscriber/sub_udp.ini:
+        * java/tests/messenger/subscriber/subscriber_idl_test.mpc:
+        * java/tests/multirepo/MultiRepoWorker.java:
+        * java/tests/transport_config/TransportConfigTest.java:
+
+          Added support for new udp transport.
+
+        * performance-tests/DCPS/MulticastListenerTest:
+        * performance-tests/DCPS/MulticastListenerTest/MulticastListenerTest.mpc:
+        * performance-tests/DCPS/MulticastListenerTest/common.h:
+        * performance-tests/DCPS/MulticastListenerTest/multicast.conf:
+        * performance-tests/DCPS/MulticastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/subscriber.cpp:
+
+          Added support for new multicast transport.
+
+        * MPC/config/dds_wrapper.mpb:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/pub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub2_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/sub_udp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/udp.conf:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/Bench/etc/svc.conf:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/tools/mkpkg:
+        * performance-tests/DCPS/InfoRepo_population/pub_udp.ini:
+        * performance-tests/DCPS/InfoRepo_population/sub_udp.ini:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/Priority/transport.ini:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TransportLatency/pub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/sub_udp.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/udp.conf:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/udp.conf:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/udp.conf:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5/udp.conf:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooTest5_0/udp.conf:
+        * tests/DCPS/LivelinessTest/LivelinessTest.mpc:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/udp.conf:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/pub_udp.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/sub_udp.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/common.h:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/services.conf:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * wrapper/example/pub_udp_conf.ini:
+        * wrapper/example/sub2_udp_conf.ini:
+        * wrapper/example/sub_udp_conf.ini:
+
+          Added support for new udp and multicast transports.
+
+        * MPC/config/dcps_unreliable_dgram.mpb:
+        * MPC/config/dcpsexe_with_unreliable_dgram.mpb:
+        * dds/DCPS/transport/simpleUnreliableDgram:
+        * docs/Configuration_Settings.html:
+        * java/dds/OpenDDS/DCPS/transport/SimpleUdpConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleUnreliableDgramConfiguration.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleUdpTransport.java:
+        * performance-tests/DCPS/McastListenerTest:
+        * tests/transport/mcast_simple:
+        * tests/transport/mcast_simple_n:
+        * tests/transport/udp_simple:
+        * tests/transport/udp_simple_n:
+
+          Removed these files.
+
+Fri Dec 18 23:18:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes with udp transport information.
+
+Fri Dec 18 22:57:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * configure.ac:
+
+          We don't need no stinkin' autotools.
+
+Fri Dec 18 22:46:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_udp.mpb:
+        * MPC/config/dcpsexe_with_udp.mpb:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/udp:
+        * dds/DCPS/transport/udp/Udp.h:
+        * dds/DCPS/transport/udp/Udp.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * dds/DCPS/transport/udp/UdpConfiguration_rch.h:
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.inl:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink_rch.h:
+        * dds/DCPS/transport/udp/UdpFactory.h:
+        * dds/DCPS/transport/udp/UdpFactory.cpp:
+        * dds/DCPS/transport/udp/UdpGenerator.h:
+        * dds/DCPS/transport/udp/UdpGenerator.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.h:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy_rch.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpSendStrategy_rch.h:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport_rch.h:
+        * dds/DCPS/transport/udp/Udp_Export.h:
+        * dds/DCPS/transport/udp/udp.conf-dist:
+        * dds/DCPS/transport/udp/udp.ini-dist:
+        * dds/DCPS/transport/udp/udp.mpc:
+
+          Added new udp transport to replace SimpleUdp.
+
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/pub_udp.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/sub_udp.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/Messenger/udp.conf:
+
+          Converted Messenger test to use new udp transport.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed bad comparison on pointer addresses.
+
+Fri Dec 18 17:14:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed buffer management problems with the transport header.
+
+Fri Dec 18 15:45:56 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Added verbiage for collapsing repair ranges into a single
+          control sample.
+
+Fri Dec 18 04:08:58 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Starting to implement Builtin Topic updates.
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/QosFormatter.h:
+        * tools/odds_monitor/QosFormatter.cpp:
+
+          Added formatting for each QoS Policy type.
+
+        * tools/odds_monitor/TreeNode.h:
+
+          insertChildren() - debugged implementation.
+
+Thu Dec 17 22:17:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+
+          Added missing write_delay_ms which caused issues with excessive
+          rates during testing.
+
+Thu Dec 17 16:42:09 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Attached 'expand' signal from tree view to
+          'resizeColumnToContents' signal in same view.  Also resize
+          columns when adding/changing data.
+
+Wed Dec 16 23:33:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * README:
+        * bin/dcps_tests.lst:
+
+          Disabled multicast tests on QNX hosts due to IP multicast
+          loopback problems.
+
+Wed Dec 16 17:56:17 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+
+          Moved DEFAULT_MULTICAST_ID to TransportDefs.h.
+
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+
+          Dropped uneccessary includes of MulticastConfiguration.h.
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Dropped uses of RandomGenerator in favor of direct calls to
+          stdlib.
+
+        * dds/DCPS/RandomGenerator.h:
+        * dds/DCPS/RandomGenerator.inl:
+        * dds/DCPS/RandomGenerator.cpp:
+
+          Removed these files.
+
+Wed Dec 16 00:07:21 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/TreeNode.h:
+
+          Refactored to simplify.
+
+          Added Builtin Topic sample dispatching.
+
+          Stubbed Builtin Topic sample processing.
+
+          Expanded diagnostic messages.
+
+          Added link management for Publisher and Subscriber transport
+          links, and DataReader and DataWriter Topic links.  The Topic
+          links will preferentially use the Topic name if it is available
+          and only use the GUID value when no name has been processed
+          yet.
+
+
+Tue Dec 15 23:15:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Fixed spurious log messages on MULTICAST_NAKACK delivery.
+
+Tue Dec 15 22:01:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * README:
+
+          Updated supported transports.
+
+Tue Dec 15 17:34:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Added additional verbiage for ephemeral ports.
+
+Tue Dec 15 00:03:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/tests/transport_config/TransportConfigTest.java:
+
+          Added missing test for syn_backoff.
+
+Mon Dec 14 23:26:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.ui:
+
+          Attempted to relax geometry settings to allow full buttons to
+          be displayed on some platforms where they are being truncated.
+
+        * tools/odds_monitor/MonitorData.h:
+
+          Removed obsolete method declarations.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Refactored and simplified node removals.
+
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/TreeNode.h:
+
+          Added internal value reference capability.  This allows the
+          same data to be displayed at multiple locations in the model
+          without duplicating the data or becoming incoherent.
+
+          Added the ability to update the background color of individual
+          items.  This is intended for use to indicate when elements are
+          deleted from the service, leaving them in the GUI, and when
+          internal reference links become stale.
+
+Mon Dec 14 23:01:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes with multicast transport information.
+
+Mon Dec 14 15:33:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/RandomGenerator.cpp:
+        * dds/DCPS/transport/multicast/Multicast.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * docs/html/multicast/index.html:
+
+          Final corrections and default configuration adjustments.
+
+Mon Dec 14 14:56:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fixed various GCC warnings.
+
+Sun Dec 13 00:00:20 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Fixed receive buffer corruption on duplicate packets.
+
+Sat Dec 12 22:55:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+
+          Added missing include.
+
+Sat Dec 12 00:35:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Fixed type name change introduced in previous commit.
+
+Sat Dec 12 00:14:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/federation/index.html:
+        * docs/html/multicast/index.html:
+        * docs/html/template/index.html:
+
+          Updated html template style.
+
+Fri Dec 11 23:59:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Added additional verbiage for rate limiting issues.
+
+Fri Dec 11 23:30:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Refactored MULTICAST_NAKACK mechanism to be proactive; peers
+          will now shift away unrecoverable samples upon reception.
+
+Fri Dec 11 23:29:19 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataModel.cpp:
+
+          Add missing null pointer check.
+
+Fri Dec 11 20:03:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Updated design notes with latest changes.
+
+Fri Dec 11 19:55:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+
+          Reverted default nak_interval to 2000 (2 seconds).
+
+Fri Dec 11 19:46:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Added support for NAK suppression.
+
+Fri Dec 11 00:15:57 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.cpp:
+
+          remove_repo() - extended QString::toStdString() workaround to
+                          this method.
+
+        * tools/odds_monitor/MonitorDataStorage.inl:
+
+          update<TransportReport>()
+          update<DataWriterReport>()
+          update<DataReaderReport>()
+            - Initial implementations.
+
+          Reformatted transport Id value display to be hexadecimal.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          getTransportNode() - removed redundant argument.
+
+Thu Dec 10 23:16:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Updated handshaking logic to trigger immediately (reduces delay
+          when forming a new reservation between peers).
+
+Thu Dec 10 22:45:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Refactored make_reservation to call new start_i callback
+          when the first reservation is made.
+
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Updated to accomodate changes in DataLink; separating the
+          watchdog scheduling from join was neccessary to prevent
+          lost data during the initial handshake.
+
+Thu Dec 10 21:49:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Type conversion is const, so make it so.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Add diagnostics.
+
+Thu Dec 10 20:19:56 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.cpp:
+
+          Add a workaround to deal with QStrings on windows.
+          Using QString::toStdString() results in an access violation.
+          Replace these calls with QString::toLocal8Bit().constData().
+
+Thu Dec 10 17:35:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_multicast.mpb:
+
+          Fixed incorrect after directive.
+
+Thu Dec 10 16:49:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/RandomGenerator.cpp:
+
+          Dropped obviated include by previous commit.
+
+Thu Dec 10 15:24:49 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RandomGenerator.cpp:
+
+          Change from using std::time to ACE_OS::time.  std::time
+          does not work on WinCE.
+
+Wed Dec  9 22:32:00 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Added vector include to fix compilation errors.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fixed compilation errors on wchar build.
+
+Wed Dec  9 19:03:17 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+
+          Corrected documentation.
+
+Wed Dec  9 18:53:40 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Gaussian.cpp:
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Added new FixedRate publication parameter to allow
+          specification of fixed sending rates.
+
+Wed Dec  9 17:22:09 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Clarified member names.
+
+Wed Dec  9 16:49:06 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Applied minor optimization to send_naks.
+
+Wed Dec  9 16:34:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/RandomGenerator.cpp:
+
+          Fixed VC++ warnings related to time_t signage.
+
+Wed Dec  9 05:14:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/transport/MulticastConfiguration.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Added support for syn_backoff transport configuration option.
+
+Wed Dec  9 01:47:12 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/monitor/monitor.idl:
+
+          Change handle member of the DW and DR report to be
+          pub_handle and sub_handle, respectively.  Add topics
+          sequence to DP report.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/monitor/DPMonitorImpl.h:
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.h:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * tests/DCPS/Monitor/DPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.cpp:
+
+          Add support for new "parent" and topic fields.
+
+Wed Dec  9 00:33:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Updated design notes with latest changes.
+
+Wed Dec  9 00:00:20 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+
+          Dropped uneccessary copy constructor.
+
+        * dds/DCPS/RandomGenerator.h:
+        * dds/DCPS/RandomGenerator.inl:
+        * dds/DCPS/RandomGenerator.cpp:
+
+          Added random number generation container; added static initializer
+          to seed generation based on library load time.
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+
+          Added support for exponential and random backoffs for SYN and NAK
+          interactions between reliable multicast peers.
+
+Tue Dec  8 23:44:45 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/monitor/monitor.idl:
+
+          Added parent links.
+
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Added processing for DomainParticipant, Topic, Publisher, and
+          Subscriber reports.  Added basic handling for Transports but
+          not the report processing.
+
+        * tools/odds_monitor/TreeNode.h:
+
+          Made the parent member completely accessible to allow movement
+          within the tree.
+
+Mon Dec  7 23:08:48 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Factored out name/value data handling and implemented.
+          Included GUI notification at end of sample processing.
+
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Additional diagnostic information.
+
+        * tools/odds_monitor/TreeNode.h:
+
+          indexOf()
+            - new method to determine the row index containing a given
+              value in a given column.
+
+Mon Dec  7 21:22:08 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/odds_monitor/RepoSelect.cpp:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Adjust #includes for better portability to othe Qt versions.
+
+Mon Dec  7 17:16:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/tests/complex_idl/ComplexIDLTest.java:
+
+          Added valid_data check; prevents spurious test output.
+
+Mon Dec  7 15:51:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/OpenDDS_jni_helpers.h:
+
+          Fixed VC++ warnings converting from jlong to long.
+
+Mon Dec  7 05:07:38 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+
+          Fill in some missing fields for a number of monitor reports.
+          These include transport IDs for the pub and sub reports
+          and the remaining details of transport and data reader
+          reports.
+
+        * dds/monitor/monitor.idl:
+
+          Change the instances field of the DataReaderReport to
+          be a sequence of instance handles (and not repo IDs).
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/Monitor_main.cpp:
+
+          Make some mods to allow compilation with VC++.  There
+          remain some #include issues I need to resolve in a later
+          commit.
+
+Mon Dec  7 02:23:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/OpenDDS/DCPS/transport/MulticastConfiguration.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Updated documentation; renamed nak_repair_size to nak_depth.
+
+Sun Dec  6 18:32:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Fixed GCC warnings due to unused parameters.
+
+Sat Dec  5 20:02:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Refactored relationship between TransportSendStrategy and
+          TransportSendBuffer. A good amount of shared state exists
+          between both classes; the send strategy should eventually
+          incorporate features in the send buffer. Until such time,
+          the send buffer will be our BFF.
+
+Sat Dec  5 19:21:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Updated TransportSendStrategy assignment; dropped uneccessary
+          delegation to parent.
+
+Sat Dec  5 19:03:48 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+
+          Added missing locking in TransportSendBuffer::resend; updated
+          formatting in MulticastConfiguration.h.
+
+Sat Dec  5 17:58:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * docs/html/multicast/index.html:
+
+          Updated documentation; renamed nak_repair_size to nak_depth.
+
+Fri Dec  4 22:34:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Updated header allocation behavior to use pools; this fixed an
+          issue which prevented proper repair responses from active peers
+          in the multicast transport.
+
+Fri Dec  4 16:50:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Updated initialization behavior for send buffer; this fixes a
+          potential race condition where data is received prior to the
+          ReliableMulticast::join_i call is completed.
+
+Fri Dec  4 14:13:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Reverted temporary debug logging.
+
+Fri Dec  4 00:49:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Corrected minor nits.
+
+Fri Dec  4 00:36:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Added range_iterator unit tests; fixed issue contributing to
+          multicast NAK request failures due to bogus ranges.
+
+Thu Dec  3 23:57:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcpsexe_with_multicast.mpb:
+
+          Added additional MPC base project.
+
+Thu Dec  3 23:54:56 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/monitor.conf:
+
+          Updated to publish instrumentation topics from the application
+          for testing.  Removed stub data since we are now receiving
+          real instrumentation data (and even displaying some of it).
+
+Thu Dec  3 23:49:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+
+          Updated error logging for expired NAK requests.
+
+Thu Dec  3 22:23:05 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Initial ServiceParticipantReport handling complete except for
+          Name/Value pair data.
+
+Thu Dec  3 17:04:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed circular dependencies; fixed interface leak caused by
+          TransportSendStrategy.
+
+Thu Dec  3 16:37:41 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Reverted previous commit; caused circular dependency.
+
+Thu Dec  3 16:28:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed interface leak caused by TransportSendStrategy.
+
+Thu Dec  3 01:34:57 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Add some missing if's that could cause segfaults in the
+          monitoring code.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Fix a VC++ issue with constructor-style initialization of
+          references.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Added a missing header include that VC++ needed to see.
+
+        * tests/DCPS/FooType3Unbounded/FooDef.idl:
+        * tests/DCPS/FooType5/FooDef.idl:
+
+          Added missing #include "tao/orb.idl" that was required
+          because of VC++ template export issues (see TAO DOC
+          Bugzilla #2703 and the TAO FAQ for details).
+
+Thu Dec  3 00:04:35 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Continued implementation of data update processing.
+
+Wed Dec  2 23:55:38 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Fixed VC9 errors introduced by merge.
+
+Wed Dec  2 23:32:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/diagrams/class.dia:
+        * docs/html/multicast/images/class.png:
+
+          Updated multicast class diagram.
+
+Wed Dec  2 22:41:22 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          operator<<()
+            - forced submessage_id to be interpreted as an integer type
+              when inserting onto a std::ostream.  This corrects a
+              problem where the log messages were truncated at the
+              submessage_id.
+
+Wed Dec  2 22:00:04 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/federation:
+
+          Updated federation HTML documentation to match new template.
+
+Wed Dec  2 21:41:50 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/index.html:
+
+          Finalized multicast transport design documentation.
+
+Wed Dec  2 20:57:43 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+        * tools/odds_monitor/MonitorDataStorage.inl:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Refactored processing and applyed method templates to reduce
+          the total code volume.  Changed to forward updates from the
+          task to the storage object to let it mediate the updates with
+          the GUI.  Stubbed the updates in the MonitorDataStorage.inl
+          file.
+
+Wed Dec  2 19:03:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+
+          update
+            - Added type specific data update methods.
+          setRepoIor
+            - implemented to call service in two stages: setting the IOR
+              and then switching to it.  Clear model data between the two
+              stages.
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          setRepoIor
+            - refactored to move switching repository assignments to
+              the new setActiveRepo method.
+          setActiveRepo
+            - new method to actually switch active repository and
+              initialize the instrumentation subscriptions.
+          InboundData
+            - new private template class to handle reading data and
+              forwarding it to the model.
+          dispatchReader
+            - new method to select the correct data processor and invoke
+              it.
+
+          Added new 'handleTypeMap' container that maps instance handles
+          to instrumentation domain report types.  This is used to select
+          which data processor to invoke when receiving data.
+
+Wed Dec  2 00:47:27 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/diagrams/handshake.dia:
+        * docs/html/multicast/images/handshake.png:
+        * docs/html/multicast/index.html:
+
+          Updated multicast transport design documentation.
+
+Wed Dec  2 00:21:11 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added an additional diagnostic message.
+
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added monitor lib directly for now.  We may want to make
+          monitoring a base configuration.
+
+        * tools/odds_monitor/Monitor.ui:
+
+          Enhanced the GUI.
+
+        * tools/odds_monitor/MonitorData.cpp:
+
+          Pass status information to the GUI about the repository
+          attachment.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Store the currently active repository IOR for general usage.
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          Added more DDS initialization code.  Debugged some
+          synchronization issues.  Predicate IOR success on resolving the
+          given IOR.
+
+        * tools/odds_monitor/Options.cpp:
+
+          Derive the domain Id value for the instrumentation from the
+          monitor.idl definitions.
+
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/TreeNode.h:
+
+          Added support for sorting columns.
+
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Added support for sorting columns.  Set the initial repository
+          to the last added during initialization.
+
+        * tools/odds_monitor/monitor.conf:
+        * tools/odds_monitor/repo.conf:
+
+          Service configuration files for the application and
+          repositories.  Currently only establishes the TCP transport
+          service.
+
+        * tools/odds_monitor/repos.ini:
+
+          Configuration script for establishing an initial set of three
+          repositories for the monitor application to attach.
+
+        * tools/odds_monitor/start_repos.pl:
+
+          Utility script to start multiple repository processes for
+          testing.
+
+Tue Dec  1 20:19:28 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/monitor.idl:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.cpp:
+
+          Fill in additional fields for the Subscriber and Data Writer
+          reports.
+
+Tue Dec  1 19:44:26 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fixed bug which could cause duplicate delivery when used with
+          reliable multicast.
+
+Tue Dec  1 18:57:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/diagrams/class.dia:
+        * docs/html/multicast/diagrams/handshake.dia:
+        * docs/html/multicast/diagrams/repair.dia:
+        * docs/html/multicast/images/class.png:
+        * docs/html/multicast/images/handshake.png:
+        * docs/html/multicast/images/repair.png:
+
+          Updated diagrams for multicast design documentation.
+
+Mon Nov 30 22:09:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast:
+        * docs/html/multicast/images:
+        * docs/html/multicast/index.html:
+
+          Initial commit for multicast design documentation.
+
+Mon Nov 30 21:50:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html:
+        * docs/html/template:
+        * docs/html/template/images:
+        * docs/html/template/images/opendds.png:
+        * docs/html/template/template.html:
+
+          Added template for HTML documentation based on TiddlyWiki.
+
+Mon Nov 30 06:57:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dds_wrapper.mpb:
+        * bin/cross_tests.lst:
+        * java/tests/messenger/publisher/publisher_idl_test.mpc:
+        * java/tests/messenger/subscriber/subscriber_idl_test.mpc:
+        * performance-tests/Bench/bin/run_test:
+        * performance-tests/Bench/etc/svc.conf:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/tools/mkpkg:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/run_test.pl:
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/Priority/transport.ini:
+        * performance-tests/DCPS/TransportLatency/multicast.conf:
+        * performance-tests/DCPS/TransportLatency/pub_multicast.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/TransportLatency/sub_multicast.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/services.conf:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/WaitForAck/run_test.pl:
+        * wrapper/DDSWrapper_OpenDDS.mpc:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.h:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+
+          Removed last remnants of SimpleMcast and ReliableMulticast tests.
+
+        * MPC/config/dcps_reliable_multicast.mpb:
+        * MPC/config/dcpsexe_with_reliable_multicast.mpb:
+        * performance-tests/DCPS/TransportLatency/mcast.conf:
+        * performance-tests/DCPS/TransportLatency/pub_reliable_mcast.ini:
+        * performance-tests/DCPS/TransportLatency/reliable_mcast.conf:
+        * performance-tests/DCPS/TransportLatency/sub_reliable_mcast.ini:
+
+          Removed these files.
+
+Mon Nov 30 04:10:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast:
+        * tests/transport/reliable_multicast:
+
+          Removed these files.
+
+Mon Nov 30 03:49:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * java/dds/OpenDDS/DCPS/transport/MulticastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/OpenDDS_jni_helpers.h:
+        * java/dds/dcps_java.mpc:
+
+          Added support for multicast transport to Java bindings.
+
+        * java/jms/build.xml:
+        * java/jms/src/META-INF/services/org.opendds.jms.transport.spi.Transport:
+        * java/jms/src/org/opendds/jms/transport/spi/MulticastTransport.java:
+
+          Added support for multicast transport to JMS bindings.
+
+        * java/tests/dcps_java_tests.lst:
+        * java/tests/messenger/publisher/pub_multicast.ini:
+        * java/tests/messenger/publisher/sub_multicast.ini:
+        * java/tests/messenger/subscriber/pub_multicast.ini:
+        * java/tests/messenger/subscriber/sub_multicast.ini:
+        * java/tests/transport_config/TransportConfigTest.java:
+
+          Updated tests for multicast transport.
+
+        * java/dds/OpenDDS/DCPS/transport/ReliableMulticastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/SimpleMcastConfiguration.java:
+        * java/jms/src/org/opendds/jms/transport/spi/ReliableMulticastTransport.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleMcastTransport.java:
+        * java/tests/messenger/publisher/pub_mcast.ini:
+        * java/tests/messenger/publisher/pub_reliable_mcast.ini:
+        * java/tests/messenger/publisher/sub_mcast.ini:
+        * java/tests/messenger/publisher/sub_reliable_mcast.ini:
+        * java/tests/messenger/subscriber/pub_mcast.ini:
+        * java/tests/messenger/subscriber/pub_reliable_mcast.ini:
+        * java/tests/messenger/subscriber/sub_mcast.ini:
+        * java/tests/messenger/subscriber/sub_reliable_mcast.ini:
+
+          Removed these files.
+
+Sun Nov 29 17:24:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/FooTest5/common.cpp:
+
+          Fixed GCC warnings introduced by test updates.
+
+Sun Nov 29 17:10:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+
+          Refactored multicast constants; added missing transport_type_
+          initialization.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Fixed bad test spec for default_multicast variant.
+
+Sun Nov 29 08:07:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Crossplatform/Messenger_run_test.pl:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/multicast.conf:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/run_test_multi_trans.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/FooTest5/mcast.conf:
+        * tests/DCPS/FooTest5/reliable_multicast.conf:
+        * tests/DCPS/Messenger/mcast.conf:
+        * tests/DCPS/Messenger/pub_mcast.ini:
+        * tests/DCPS/Messenger/pub_reliable_mcast.ini:
+        * tests/DCPS/Messenger/reliable_mcast.conf:
+        * tests/DCPS/Messenger/sub_mcast.ini:
+        * tests/DCPS/Messenger/sub_reliable_mcast.ini:
+
+          Deprecated mcast and reliable_mcast tests; added new test variants
+          for new multicast transport.
+
+Sun Nov 29 07:32:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/Multicast.h:
+        * dds/DCPS/transport/multicast/Multicast.cpp:
+
+          Added static initialization support for multicast transport.
+
+Sun Nov 29 02:39:16 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Updated initialization order for join.
+
+        * tests/DCPS/FooTest3/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/Writer.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+
+          Fixed errors on Mac OS X 10.6 (Snow Leopard) hosts.
+
+Sat Nov 28 18:29:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Fixed VC9 errors introduced by merge.
+
+Sat Nov 28 18:00:50 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+
+          Fixed GCC warnings introduced by merge.
+
+Sat Nov 28 00:23:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * MPC/config/dcps_multicast.mpb:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/BuildChainVisitor.cpp:
+        * dds/DCPS/transport/framework/CopyChainVisitor.h:
+        * dds/DCPS/transport/framework/CopyChainVisitor.inl:
+        * dds/DCPS/transport/framework/CopyChainVisitor.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer_rch.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.h:
+        * dds/DCPS/transport/multicast/BestEffortMulticast.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/multicast/MulticastConfiguration_rch.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink_rch.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy_rch.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy_rch.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport_rch.h:
+        * dds/DCPS/transport/multicast/Multicast_Export.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.h:
+        * dds/DCPS/transport/multicast/ReliableMulticast.cpp:
+        * dds/DCPS/transport/multicast/multicast.conf-dist:
+        * dds/DCPS/transport/multicast/multicast.ini-dist:
+        * dds/DCPS/transport/multicast/multicast.mpc:
+        * dds/DdsDcps.mpc:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/multicast.conf:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Merged changes from Multicast branch (r2651); for details see:
+          $DDS_ROOT/history/ChangeLog-Multicast
+
+Fri Nov 27 22:43:20 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          keyIorMap
+            - new method to provide access to a new container that
+              maintains mappings from repository keys to IOR strings.
+
+          In the header, moved a 'public' specification down to hide a
+          large amount of internal code that should not be exposed.  This
+          has creeped in during work on the RT11950 branch and is not
+          necessary.  Could not remove entirely as the new monitor API
+          appears to rely on some members being public.
+
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+
+          getIorList
+            - new method to access the MonitorTask and populate a list of
+              IOR values.
+
+          setRepoIor
+            - added call to clear the storage object when changing
+              repositories.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          clear() - stub new method.
+
+          Added GuidToTreeMap container to hold mappings from OpenDDS
+          service values to the GUI TreeNode elements.
+
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+
+          constructor
+            - added query to Service_Participant to obtain list of IOR
+              mappings at startup.
+
+          iorKeyMap
+            - added accessor to new container that maps IOR string values
+              to the Service_Participant internal repository key values.
+
+          setRepoIor
+            - changed this to manage IOR values and keys via the
+              Service_Participant.
+
+        * tools/odds_monitor/Viewer.h:
+
+          Removed obsolete stub.
+
+        * tools/odds_monitor/Viewer.cpp:
+
+          Added query for existing repositories at startup and populate
+          repository selections with them.
+
+Fri Nov 27 05:28:41 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DdsDcpsGuid.idl:
+
+          Added ENTITYKIND_OPENDDS_USER kind value for general purpose
+          usage.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Added KIND_PUBLISHER, KIND_SUBSCRIBER, and KIND_USER to allow
+          generation of Guids for these kinds.
+
+        * dds/DCPS/GuidBuilder.cpp:
+
+          Build the new kinds of Guid.
+
+        * dds/DCPS/GuidConverter.cpp:
+
+          Convert the new kinds of Guid.
+
+        * tools/odds_monitor/MonitorDataStorage.h:
+        * tools/odds_monitor/MonitorDataStorage.cpp:
+
+          Added new storage class to hold instrumentation data for both
+          the OpenDDS service and the GUI.
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/RepoDialog.ui:
+        * tools/odds_monitor/Viewer.cpp:
+
+          More general improvements and updates.  Plumbing for new
+          storage type.  Made GUI operation more robust.
+
+        * dds/DCPS/RepoIdGenerator.h:
+        * dds/DCPS/RepoIdGenerator.cpp:
+
+          Moved these from InfoRepo directory to make them more generally
+          available without needing to link the entire repository
+          libraries.  Adjusted the pch and export details to work after
+          the move.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+
+          Account for new location of RepoIdGenerator.h file.
+
+        * dds/InfoRepo/RepoIdGenerator.h:
+        * dds/InfoRepo/RepoIdGenerator.cpp:
+
+          Removed these files.
+
+Wed Nov 25 23:02:54 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/Monitor.qrc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/Options.cpp:
+        * tools/odds_monitor/RepoDialog.ui:
+        * tools/odds_monitor/RepoSelect.h:
+        * tools/odds_monitor/RepoSelect.cpp:
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          More work on making the GUI usable.  Added a better mechanism
+          to manage multiple repositories, expecting the bind this into
+          the multi-repo capability of the service.  Cleaned up a few
+          nits along the way.
+
+        * tools/odds_monitor/images/splash.jpg:
+
+          Renamed splash image.
+
+        * tools/odds_monitor/images/Winnebago-Moon.jpg:
+
+          Removed this file.
+
+Wed Nov 25 04:01:33 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.qrc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/Monitor_main.cpp:
+
+          Added resource file and a splash to the application.
+
+Wed Nov 25 00:55:49 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+        * tools/odds_monitor/Monitor.ui:
+        * tools/odds_monitor/MonitorData.h:
+        * tools/odds_monitor/MonitorData.cpp:
+        * tools/odds_monitor/MonitorDataModel.h:
+        * tools/odds_monitor/MonitorDataModel.cpp:
+        * tools/odds_monitor/MonitorTask.h:
+        * tools/odds_monitor/MonitorTask.cpp:
+        * tools/odds_monitor/Monitor_main.cpp:
+        * tools/odds_monitor/Options.h:
+        * tools/odds_monitor/Options.cpp:
+        * tools/odds_monitor/Viewer.h:
+        * tools/odds_monitor/Viewer.cpp:
+
+          Continue to develop application.  Updated UI and stubbed to
+          show model clearing and recreation to support changing
+          repository references.  GUI and DDS threads issues addressed
+          for DDS task processing.
+
+Tue Nov 24 21:52:00 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Make the monitor code more tolerant of apps that create transports
+          before domain participants (like some transport tests).
+
+Tue Nov 24 21:22:37 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Add a helper function to get the publication (data writer) ids.
+
+        * dds/monitor/MonitorFactoryImpl.cpp:
+
+          Fix problems with some of the monitor topic registrations.
+
+        * dds/monitor/PublisherMonitorImpl.cpp:
+
+          Finish filling out the PublisherReport data.
+
+        * dds/monitor/monitor.idl:
+
+          Clean up some redundancies in the monitor report model.
+
+        * tests/DCPS/Monitor/DRMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.h:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.h:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.h:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+
+          Add remaining subscriptions to the monitor test client.
+
+Tue Nov 24 17:24:35 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/MonitorFactory.h:
+        * dds/DCPS/MonitorFactory.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/monitor/MonitorFactoryImpl.h:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/monitor.cpp:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/subscriber.cpp:
+
+          A series of changes to make things work properly in static builds.
+
+        * dds/monitor/PublisherMonitorImpl.cpp:
+
+          Publish more details in the Publisher report.  Still a work in
+          progress.
+
+        * dds/monitor/monitor.idl:
+
+          Change the Publisher and Subscriber reports.  These entities do
+          not have GUIDs so a combination of DomainParticipant GUID and
+          instance handle is used as keys.
+
+Mon Nov 23 17:06:25 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DdsDcpsGuid.idl:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/monitor.idl:
+        * tests/DCPS/Monitor/Messenger.mpc:
+
+          Cleanup some issues with the previous commit (mostly Windows
+          issues).
+
+Mon Nov 23 14:28:01 UTC 2009  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GuidUtils.cpp:
+        * dds/DCPS/MonitorFactory.h:
+        * dds/DCPS/MonitorFactory.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/monitor/DPMonitorImpl.h:
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.h:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DRPeriodicMonitorImpl.h:
+        * dds/monitor/DRPeriodicMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.h:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/DWPeriodicMonitorImpl.h:
+        * dds/monitor/DWPeriodicMonitorImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.h:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.h:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.h:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.h:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.h:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.h:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * dds/monitor/monitor.idl:
+        * dds/monitor/monitor.mpc:
+        * dds/monitor/monitor_export.h:
+
+          Add the monitor library and the hooks in the DCPS library to
+          call out to it.  The various monitors are not complete, but
+          the different monitors are all publishing though all fields
+          are not populated.
+
+        * tests/DCPS/Monitor/DPMDataReaderListener.h:
+        * tests/DCPS/Monitor/DPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/DataReaderListener.h:
+        * tests/DCPS/Monitor/DataReaderListener.cpp:
+        * tests/DCPS/Monitor/Messenger.idl:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/Monitor/SPMDataReaderListener.h:
+        * tests/DCPS/Monitor/SPMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.h:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.cpp:
+        * tests/DCPS/Monitor/Writer.h:
+        * tests/DCPS/Monitor/Writer.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+        * tests/DCPS/Monitor/pub.ini:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/Monitor/sub.ini:
+        * tests/DCPS/Monitor/subscriber.cpp:
+        * tests/DCPS/Monitor/tcp.conf:
+
+          Add a test for the monitor library.
+
+Mon Nov 16 19:21:13 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor:
+
+          Moved OpenDDS monitor application to this location.
+
+        * dds/tools/odds_monitor:
+
+          Removed OpenDDS monitor application from this location.
+
+Fri Nov 13 00:45:07 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/tools/odds_monitor/MonitorDataModel.h:
+        * dds/tools/odds_monitor/MonitorDataModel.cpp:
+        * dds/tools/odds_monitor/README:
+        * dds/tools/odds_monitor/TreeNode.h:
+        * dds/tools/odds_monitor/Viewer.h:
+        * dds/tools/odds_monitor/Viewer.cpp:
+
+          Finished basic binding of model to view.
+
+        * dds/tools/odds_monitor/qt4-patch.diff:
+
+          Removed this file.
+
+Tue Nov 10 20:50:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added sequence number to outgoing datagrams.
+
+Mon Nov  9 21:42:25 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Added new sequence and submessage_id fields to the TransportHeader
+          and DataSampleHeader respectively to support ACK/NACK semantics and
+          implementation-specific (transport) control samples.
+
+Mon Nov  9 18:52:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Fixed TRANSPORT_PRIORITY related issues introduced by latest
+          TransportInterface refactorings.
+
+Fri Nov  6 23:09:21 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/tools/odds_monitor:
+
+          Initial checkin of stub code for instrumentation application.
+
+Fri Nov  6 19:09:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+
+          Fixed compiler warnings introduced by last commit.
+
+Fri Nov  6 00:47:50 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterface.inl:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+
+          Refactored TransportInterface to support passing the local RepoId
+          down to TransportImpl::find_or_create_datalink; this is needed to
+          support proper handshaking in the ReliableMulticast transport.
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.cpp:
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/mcast_simple/SimplePublisher.cpp:
+        * tests/transport/mcast_simple/SimpleSubscriber.cpp:
+        * tests/transport/mcast_simple_n/SimplePublisher.cpp:
+        * tests/transport/mcast_simple_n/SimpleSubscriber.cpp:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.cpp:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.cpp:
+        * tests/transport/simple_n/SimplePublisher.cpp:
+        * tests/transport/simple_n/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple/SimplePublisher.cpp:
+        * tests/transport/udp_simple/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple_n/SimplePublisher.cpp:
+        * tests/transport/udp_simple_n/SimpleSubscriber.cpp:
+
+          Refactored tests to support TransportInterface updates.
+
+Tue Nov  3 21:42:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Replaced bad ACE_TMAIN definition.
+
+Tue Nov  3 21:39:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Fixed wait_for_acknowledgements behavior; out of order delivery
+          is now properly supported.
+
+Tue Nov  3 15:19:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Dropped unused arguments in ACE_TMAIN.
+
+Tue Nov  3 00:00:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Added unit test for DisjointSequence implementation.
+
+Mon Nov  2 17:48:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/test_burnin.sh:
+
+          Added test_burnin.sh script to provide burnin semantics for specific
+          test scripts; based on bash script provided by Mike Martinez.
+
+Fri Oct 30 22:09:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added support for out of order delivery for
+          wait_for_acknowledgements.
+
+Fri Oct 30 17:35:57 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.inl:
+
+          Updates to depth.
+
+Fri Oct 30 16:17:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Removed uneccessary assertions obviated by refactoring to an
+          inclusive model.
+
+Fri Oct 30 15:44:05 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+
+          Added depth member function to expose total number of disjoint
+          values within the set.
+
+Thu Oct 29 23:23:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Minor formatting updates.
+
+Thu Oct 29 23:22:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Minor formatting updates.
+
+Thu Oct 29 23:21:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Minor formatting updates.
+
+Thu Oct 29 22:13:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Updated disjoint sequence to be inclusive; added missing
+          inline on global operators.
+
+Wed Oct 28 22:57:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Initial implementation of disjoint sequence tracking for
+          forthcoming updates to wait_for_acknowledgements and
+          coherent_access.
+
+Fri Oct 23 22:40:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Updated documentation for next release.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -1,0 +1,11 @@
+project(DcpsFooTest2): orbsvcsexe, portableserver {
+  exename   = FooTest2
+  libs     +=  TAO_DdsDcps DcpsFooType2
+  libpaths +=  ../FooType2 
+  after    += DdsDcps DcpsFooType2
+  includes += $(TAO_ROOT)/orbsvcs
+
+  Source_Files {
+    main.cpp
+  }
+}

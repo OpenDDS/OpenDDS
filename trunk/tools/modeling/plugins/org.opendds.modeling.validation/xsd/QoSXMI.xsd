@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:enumerations="http://www.opendds.org/modeling/schemas/Enumerations/1.0" xmlns:qos="http://www.opendds.org/modeling/schemas/QoS/1.0" targetNamespace="http://www.opendds.org/modeling/schemas/QoS/1.0">
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Enumerations/1.0" schemaLocation="EnumerationsXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="CoreXMI.xsd"/>
+  <xsd:complexType abstract="true" name="QosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="core:Specification"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="DeadlineQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="period" type="enumerations:Period"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="DestinationOrderQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="kind" type="enumerations:DestinationOrderQosPolicyKind"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="DurabilityQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="kind" type="enumerations:DurabilityQosPolicyKind"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="DurabilityServiceQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="service_cleanup_delay" type="enumerations:Period"/>
+        </xsd:choice>
+        <xsd:attribute name="history_depth" type="xsd:long"/>
+        <xsd:attribute name="history_kind" type="enumerations:HistoryQosPolicyKind"/>
+        <xsd:attribute name="max_instances" type="xsd:long"/>
+        <xsd:attribute name="max_samples" type="xsd:long"/>
+        <xsd:attribute name="max_samples_per_instance" type="xsd:long"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="EntityFactoryQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="autoenable_created_entities" type="xsd:boolean"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="GroupDataQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="datavalue" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="HistoryQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="depth" type="xsd:long"/>
+        <xsd:attribute name="kind" type="enumerations:HistoryQosPolicyKind"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="LatencyBudgetQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="duration" type="enumerations:Period"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="LifespanQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="duration" type="enumerations:Period"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="LivelinessQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="lease_duration" type="enumerations:Period"/>
+        </xsd:choice>
+        <xsd:attribute name="kind" type="enumerations:LivelinessQosPolicyKind"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="OwnershipQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="kind" type="enumerations:OwnershipQosPolicyKind"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="OwnershipStrengthQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="value" type="xsd:long"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="PartitionQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="names" nillable="true" type="xsd:string"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="PresentationQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="access_scope" type="enumerations:PresentationQosPolicyAccessScopeKind"/>
+        <xsd:attribute name="coherent_access" type="xsd:boolean"/>
+        <xsd:attribute name="ordered_access" type="xsd:boolean"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ReaderDataLifecycleQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="autopurge_nowriter_samples_delay" type="enumerations:Period"/>
+          <xsd:element name="autopurge_disposed_samples_delay" type="enumerations:Period"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ReliabilityQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="max_blocking_time" type="enumerations:Period"/>
+        </xsd:choice>
+        <xsd:attribute name="kind" type="enumerations:ReliabilityQosPolicyKind"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ResourceLimitsQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="max_instances" type="xsd:long"/>
+        <xsd:attribute name="max_samples" type="xsd:long"/>
+        <xsd:attribute name="max_samples_per_instance" type="xsd:long"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TimeBasedFilterQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="minimum_separation" type="enumerations:Period"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TopicDataQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="value" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TransportPriorityQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="value" type="xsd:long"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="UserDataQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="value" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="WriterDataLifecycleQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:QosPolicy">
+        <xsd:attribute name="autodispose_unregistered_instances" type="xsd:boolean"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+</xsd:schema>

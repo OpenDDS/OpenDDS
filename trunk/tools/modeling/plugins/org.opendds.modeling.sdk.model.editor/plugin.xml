@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+
+<!--
+ <copyright>
+ </copyright>
+
+ $Id$
+-->
+
+<plugin>
+
+   <extension point="org.eclipse.ui.newWizards">
+      <wizard
+            category="org.opendds.modeling.Wizard.category.ID"
+            class="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorModelWizard"
+            descriptionImage="platform:/plugin/org.opendds.modeling.common/images/codegen-32x32.gif"
+            icon="platform:/plugin/org.opendds.modeling.common/images/codegen-16x16.gif"
+            id="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorModelWizardID"
+            name="%_UI_GeneratorModelWizard_label">
+         <description>%_UI_GeneratorModelWizard_description</description>
+         <selection class="org.eclipse.core.resources.IResource"/>
+      </wizard>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors">
+      <editor
+            id="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorEditorID"
+            name="%_UI_GeneratorEditor_label"
+            icon="platform:/plugin/org.opendds.modeling.common/images/codegen-16x16.gif"
+            extensions="codegen"
+            class="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorEditor"
+            contributorClass="org.opendds.modeling.sdk.model.GeneratorSpecification.Presentation.GeneratorActionBarContributor">
+      </editor>
+   </extension>
+
+</plugin>

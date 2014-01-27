@@ -1,0 +1,3853 @@
+Sat Jan 21 02:32:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Release stored data when the send buffer is destroyed.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          The framework should not assume a data link that has its last
+          association removed will be stopped (immediately or after a delay).
+          Instead now the framework will invoke the release_datalink() virtual
+          method on the derived transport impl which can decide what to do
+          about the data link that the framework is no longer using.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Adapted to data link management changes described above.
+
+Fri Jan 20 23:59:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          At least for now, require "-Config RTPS" to run RTPS tests.
+
+Fri Jan 20 22:53:50 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/dcps.ini:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+
+          Added support for RTPS testing (currently failing).
+
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+
+          Removed these files.
+
+Fri Jan 20 22:10:58 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Update for new ini files.
+
+Fri Jan 20 21:44:45 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/rtps_disc.ini:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+
+          Allow rtps_disc mode.
+
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/rtps_disc.ini:
+        * tests/DCPS/SetQosPartition/rtps_disc_tcp.ini:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+
+          Allow rtps_disc and rtps_disc_tcp mode.
+
+Fri Jan 20 20:04:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Provide a configurable parameter "SedpMulticast" which can disable
+          the use of multicast by the SEDP portion of discovery.
+          Allow the d0 configurable parameter to be defaulted by an enviornment
+          variable "OPENDDS_RTPS_DEFAULT_D0", which will be used for the nightly
+          build machines (to avoid interference).
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          data_received() can now be called with a "destination" reader,
+          identified by subscription id (GUID).
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Use the above feature in the transport framework to allow delivering
+          Data submessages to a specific reader instead of all matched readers.
+
+        * tests/DCPS/RtpsDiscovery/dcps.ini:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+
+          Turn off SedpMulticast for testing.
+
+Fri Jan 20 19:02:44 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+
+          Accicentally commented out.
+
+Fri Jan 20 17:15:19 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/ContentFilteredTopic/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc_tcp.ini:
+        * tests/DCPS/Messenger/rtps_disc.ini:
+        * tests/DCPS/Messenger/rtps_disc_tcp.ini:
+        * tests/DCPS/RtpsDiscovery/dcps.ini:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+
+          Configure RTPS discovery with a shorter resend period (2s).
+
+Fri Jan 20 16:44:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/rtps_disc.ini:
+        * tests/DCPS/DcpsIntegration/rtps_disc_tcp.ini:
+        * tests/DCPS/DcpsIntegration/run_test-topic.pl:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+
+          Allow test to run in rtps_disc or rtps_disc_tcp modes.
+
+Fri Jan 20 15:46:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r5111 through r5254.
+
+Fri Jan 20 15:02:34 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+
+          Make reader and writer reliable.
+          Don't wait for acks when using RTPS discovery.
+
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/rtps_disc.ini
+
+          Run with RTPS discovery using argument rtps_disc
+
+Thu Jan 19 21:11:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Revert change from my prior commit.  This was just for checking
+          the datalink_release_delay_ in cancel_release(), and it doesn't
+          seem to be working.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Manage disabling of the heartbeat timer in the handle_timeout()
+          itself to avoid needing to call into the ACE Reactor while locked.
+
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Enable RELIABILITY QoS in the Data Reader when running
+          with the rtps_udp transport.
+
+Thu Jan 19 20:39:31 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fix shutdown crash accessing pub_bit() or sub_bit()
+            while shutting down.
+
+Thu Jan 19 19:49:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Consistent logging.
+          Log errors unconditionally.
+          Remove unnecessary TODO comments.
+
+Thu Jan 19 18:29:36 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Locking for shared data structures.  Condition variable for
+          the transport to wait for handshake events.
+
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Corrected error logging.
+
+Thu Jan 19 18:24:50 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Removed todo comment, added other, realated one.
+
+Thu Jan 19 18:16:44 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added associated() method to tell caller if we know of any other
+            participants.
+          Don't publish samples when there are no other participants.
+          Log warning when running out of bit keys.
+          Remove Todo comments where there is no additional error handling.
+
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.cpp:
+
+          Fix log msg.
+
+Thu Jan 19 16:45:53 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Refactor determination if need sequence repair bit should be set.
+          Call when creating control message too.
+
+Thu Jan 19 16:11:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          AssociationData now contains a "remote_reliable_" bool,
+          which indicates to each side if the other has enabled reliability.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Run the SEDP association steps on their own thread.  This allows
+          the SPDP reactor thread to be available for the periodic send.
+          Reader-side associations need to start first.
+          Configure SEDP's transport with a "handshake_timeout_" value based
+          on the way the user has configured the Discovery object's resend
+          period, and removed opendds_discovery_guid_ since it's no longer used.
+          match_endpoints() can use a background thread if both sides are local.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Use the new "remote_reliable_" flag in AssociationData so that the
+          individual transport types can have access to this bit of info.
+          Other minor cleanup.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Adapted the non-RTPS transports to the framework changes above.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Implemented handshaking for new RTPS associations.  The writer side
+          will send a heartbeat and wait (for a configurable timeout) until
+          the reader acknowledges.  This applies to reliable readers only.
+          Corrected handling of INFO_DST submessages and the "destination
+          prefix."  Removed hacks previously needed by Discovery.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Cleaned up logging options and added RTPS configs to the nightlies.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Added the initial heartbeat/acknack handshake.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+
+          Adapted transport-level tests for "remote_reliable_".
+
+Thu Jan 19 15:48:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Need to use next_send_sample_ in the DataSampleListElement.
+          Updated generated code for newer use of the reader_info_ map.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Handle the fact that expectsInlinieQos appears on both the
+          participant and subscription discovery data.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Pass RepoId by reference.
+
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+
+          Cleaned up Perl script.
+
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/sample_dissector.cpp:
+
+          Updated to compile against latest Wireshark version.
+
+Wed Jan 18 20:55:52 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Track reader_info_, even when not building in content profile.
+          Increment sequence number when sending historic sample - make
+            all transports behave like the RTPS spec.
+          Update reader_info_ when sending control message or a
+            historic sample.
+
+Tue Jan 17 20:19:12 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          If no Locators provided for endpoint, use default locators provided
+            by SPDP.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Provide access to default locators and expectsInlineQos for a
+            participant.
+
+Tue Jan 17 18:15:52 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Republish local publications and local subscriptions when topic_data
+            changes.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Change topic_data on writer topic.
+
+Tue Jan 17 15:58:35 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Set opendds header historic sample flag when the DataSubmessage
+            contains PID_ORIGINAL_WRITER_INFO.
+
+Mon Jan 16 23:17:19 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          If historic_sample_, populate and add OriginalWriterInfo to
+            DataSubmessage.
+
+Mon Jan 16 19:42:44 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+
+          Add originalSequence_ to DataSampleListElement.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Add original_sequence_ to LocalEndpoint, and set when sending first
+          sample.
+
+Fri Jan 13 18:43:53 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Memory leaks in Sedp messaging.
+
+Thu Jan 12 23:16:01 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidConverter.cpp:
+
+          Added built-in entity kinds for reader and writer.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Continued enabling reliability for the SEDP endpoints.
+
+Thu Jan 12 20:42:55 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Provide a way for discovery to tell the transport about
+          its local GUID so that the DataLink can be created before
+          there are any associations made.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Use the above.
+
+Thu Jan 12 17:28:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Initialize the entityId in the GUID that's used for lookup.
+
+Thu Jan 12 17:24:37 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Make use of != operators for Qos policies in Qos_Helper.h
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Remove temporary log messages.  Proper format of one other.
+
+Thu Jan 12 17:17:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Initialize expectsInlineQos to its default (false).
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Initialize repo_id_ for the use cases like RTPS BITs
+          that will never actually enable the transport.
+
+Thu Jan 12 16:57:33 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added shutdown flag to eliminate transport callbacks while in
+            destructor.
+
+Thu Jan 12 15:41:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Need check for a valid Participant BIT Data Reader since it can
+          be null during the participant's shutdown.
+
+Thu Jan 12 15:03:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added logging, these still need to be made conditional on debug level.
+
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+
+          Updated domain ID to match change to main messenger test.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Added timestamps to logging for rtps_disc_tcp, for use
+          during development.
+
+Wed Jan 11 23:12:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed bugs.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Cleaned up new code for finding the unicast SPDP port.
+
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/rtps_disc.ini:
+        * tests/DCPS/Messenger/rtps_disc_tcp.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Updated test for RTPS.  Added the rtps_disc_tcp test scenario which
+          uses RTPS Discovery with the default OpenDDS TCP transport for user
+          topics.
+          Check total_count in the subscription matched status.
+          Use consistent logging levels for both processes.
+
+Wed Jan 11 21:53:17 UTC 2012  Jeff Schmitz <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Try a series of unicast ports for SpdpTransport.
+
+        * tests/DCPS/Messenger/rtps_disc.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Add ability to run messenger in RTPS discovery mode.
+
+Wed Jan 11 21:53:01 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Both QoS and filter params can change in the same
+          DiscoveredReaderData data sample.
+
+Wed Jan 11 20:55:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fixed bugs in remove_publication() and subscription.
+
+Wed Jan 11 20:06:58 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Rerun match of endpoints for removal when ignoring topic.
+
+Wed Jan 11 20:00:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Move qosChanged() to anonymous-namespace instead of being members of
+          the class.  Added paramsChanged() which is similar but works with the
+          content filtering parameters.
+          In cases where content filtering parameters change, invoke the
+          needed callbacks on DataWriterRemote.
+          Explicity check for dispose/unregister message types instead of
+          assuming that the non-SAMPLE_DATA ones are dispose/unregister.
+
+Wed Jan 11 19:55:07 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Rerun match of endpoints for removal when ignoring discovered pub/sub.
+
+Wed Jan 11 19:25:36 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Rerun match of endpoints for removal when removing local pub/sub.
+
+Wed Jan 11 19:20:07 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Rerun match of endpoints when modifying local pub/sub Qos values.
+
+Wed Jan 11 19:00:23 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Keep track of currently-matched endpoints in local publications and
+          subscriptions.  Provide a method for unmatching when some publication
+          or subscription is going away.  Ability to unmatch when QoS changes.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+
+          Update default passive_connect_duration_.
+
+Wed Jan 11 18:52:58 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Revert last change, release lock prior to actions destructive to
+            SpdpTransport.
+
+Wed Jan 11 18:01:51 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Don't obtain lock while in SpdpTransport destructor.  It is already
+            held, and we are only setting a bool, which should be atomic.
+
+Wed Jan 11 17:10:16 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Lock, find Sedp in map, unlock, then use Sedp as general pattern.
+          Comment verifying acceptable holding of lock during Sedp call
+            where required.
+
+Wed Jan 11 16:10:54 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Call match_endpoints when discovered publication and subscription
+            are has Qos changed, or are disposed/removed.
+
+Tue Jan 10 23:24:03 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Initialize all QoS data members when constructing from BIT data.
+
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+
+          Extend the default passive connect duration to 60 seconds in order
+          to account for the (default) SPDP rebroadcast period of 30 seconds.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Corrected a bug in how fixed-size data types use the allocators
+          with RTPS-compliant marshaling.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+
+          Extended the test to write and read a sample.
+          Cleaned up the test and removed some sleeps.
+          When run with RTPS transport, need two insts -- one per participant.
+
+Tue Jan 10 23:14:23 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Don't access local publication/subscription iter unchecked.
+
+Tue Jan 10 22:50:14 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Make copy of DiscoveredWriterData/DiscoveredReader in data_received(),
+            instead of using input rdata/wdata, which are incomplete.
+
+Tue Jan 10 22:36:26 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Bug - was not setting local instance_handle.
+
+Tue Jan 10 21:27:28 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Deadlock - release lock when calling into part_bit within
+            data_received().
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added lock to data_received() overloads.
+          Same data_received() changes as above, releasing when calling into
+            pub_bit and sub_bit.
+          Copy more items in match() before releasing lock.
+
+Mon Jan  9 23:09:39 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Mutex protection.
+
+Mon Jan  9 22:59:28 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Mutex protection.
+          Add encapsulation header to the control messages.
+
+Mon Jan  9 22:12:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented association_complete() on the active side.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Fix locking for shutdown of Spdp.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Extend test to write and read a TestMsg data sample.
+
+Mon Jan  9 20:35:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented support for first being notified of a topic via one of
+          its (remote) subscriptions.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed bug in ParameterList internal vs. trailing padding.
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Extend error message from test.
+
+Mon Jan  9 19:41:05 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Mutex protection.
+
+Mon Jan  9 18:49:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Fix bug when looking up discovered subscriber - was passing
+          in writer guid, rather than reader guid.
+
+Mon Jan  9 18:20:28 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Extended test to expose problem with internal padding in
+          a Parameter that's part of a ParameterList.
+
+Mon Jan  9 17:46:59 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Don't serialize content filter property when empty filter string.
+          When we *do* serialize, use "DDSSQL" in place of an empty
+            filterClassName.
+
+Mon Jan  9 16:09:41 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Updated tests to use the new rtps_udp transport blob format.
+
+Sun Jan  8 00:24:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          blob_to_locators() now requires a 3rd argument.
+
+Fri Jan  6 23:17:19 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Publish subscription data.
+
+Fri Jan  6 22:57:47 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Keep track of content filtering info for local subscriptions.
+          Account for topics that Sedp first learns about through discovery
+          of publications or subscriptions using said topics.
+          Support requires_inline_qos().
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Implemented requires_inline_qos().
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/dcps_rtps_udp.ini:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Extend the test to run with different transport configs and also
+          to create a data reader and wait for the writer to match it.
+          This does not work yet.
+
+Fri Jan  6 21:46:47 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Cleanup.
+          Set headers consistently in common place.
+          Set headers in dispose msg.
+
+Fri Jan  6 21:36:49 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Account for reliability QOS with an index of 1.
+          Account for reliability QOS having different defaults for
+            reader and writer.
+
+Fri Jan  6 19:48:09 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Literal serialization of PL_CDR_LE value
+
+Fri Jan  6 19:03:48 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Serialize encapsulation header.
+          Set header publication ID, timestamp.
+
+Fri Jan  6 18:11:41 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/Writer.cpp:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/sample_manager.h:
+
+          Replaced uses of RepoIdConverter with GuidConverter.
+          The only remaining uses of RepoIdConverter should be in
+          the DCPSInfoRepo code or tests.  The exception to this rule
+          is in the multicast transport, which should be fixed eventually.
+
+Fri Jan  6 17:42:04 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Refator message publication.
+          Publish durable data on new association.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Share mutex with Sedp.
+
+Fri Jan  6 17:16:45 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Fixed bugs in time value comparison and getting "empty" messages for
+          SPDP dispose/unregister.  Improved logging.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Fixed doxygen and logging statements.
+
+Fri Jan  6 16:35:54 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          beginnings of writing durable data.
+          Return a value from publish_unregister_dispose().
+
+Fri Jan  6 15:37:45 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Make locator changes for reader like writer.
+          Refactor add_ method names for locators
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Handle update publication and remove publication.
+          Publish control message with one param (a guid).
+
+Thu Jan  5 23:36:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          Added a comment on PID_ENDPOINT_GUID not being in the spec.
+          Changed the range of the vendor-specific PIDs for OpenDDS.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Started implementing logic to match associated readers and writers.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Use ACE_INET_Addr::is_multicast() to check the config.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Avoid a crash if the DataLink fails to initialize.
+
+Thu Jan  5 22:13:21 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Make use of new PID_ENDPOINT_GUID.
+          Encode from TransportLocators instead of RTPS locator lists to
+          preserve ordering.
+          Decode to TransportLocators instead of RTPS locator lists.
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Tests for above changes.
+
+Thu Jan  5 20:49:12 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          Added PID_ENDPOINT_GUID.
+
+Thu Jan  5 19:10:10 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Added locators_to_blob(), the inverse of blob_to_locators().
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          Added PID_OPENDDS_LOCATOR custom pid.
+          Added opendds_locator to Parameter.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Remove TODO line, with intentional warning.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Make use of locator_to_address().
+
+Thu Jan  5 17:23:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Improve use of std::map operations.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Moved Writer constructor to the cpp file.
+          Added set of GUIDs (publications/subscriptions) to the Topic info.
+          Improve use of std::map operations.
+
+Thu Jan  5 15:54:04 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Keep track of ignored topic names.  When receiving data samples
+          for remote publications and subscriptions, ignore the sample if
+          the publication/subscription, participant, or topic are in the
+          ignore lists.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Fix logging of ACE_INET_Addr objects.  ACE uses a static
+          local character buffer so two addresses can't be logged at once.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Extended the test to read the publication BIT.  For now this fails.
+          Refactored the test so it's not all happening in main().
+          Fixed scope of _vars and usage issues with WaitSet.
+
+Wed Jan  4 22:27:09 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Revert capture to test.log
+
+Wed Jan  4 22:24:27 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Added locator_to_address().
+          Make blob_to_locators() accept a reference.
+
+Wed Jan  4 20:49:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdBuilder.inl:
+        * dds/DCPS/RepoIdConverter.h:
+        * dds/DCPS/RepoIdConverter.cpp:
+
+          Removed methods that required assumptions about the way that
+          InstanceHandles and BuiltinTopicKeys were assigned.  Those
+          asssumptions are no longer valid with RTPS discovery.
+
+        * dds/DCPS/Discovery.h:
+
+          Provide a new pure-virtual method, bit_key_to_repo_id().
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Use bit_key_to_repo_id() instead of RepoIdBuilder.
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          Removed instance handle "hack", it should no longer be needed.
+          Instead we can directly read_instance() on the BIT Data Reader.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Fixed crazy whitespace.
+
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+
+          Implemented bit_key_to_repo_id() for use with
+          DCPSInfoRepo-assigned GUIDs.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Implemented bit_key_to_repo_id() for use with
+          RTPS Discovery-assigned GUIDs.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented bit_key_to_repo_id() and methods to manage assignment
+          of BIT Keys (12 bytes) from arbitrary GUIDs (16 bytes) which may
+          come from foreign DDS implementations.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Replaced RepoIdConverter with GuidConverter when it's only
+          being used to create strings for logging.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+
+          Removed an unused #include.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Moved logic which used to be in RepoIdConverter for generating
+          BIT Keys into the InfoRepo code.  This is an implementation detail
+          of the DCPSInfoRepo.
+
+        * performance-tests/DCPS/Priority/Writer.cpp:
+
+          Get the Writer's instance handle directly.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Updated for RepoIdConverter changes.
+          This will currently not work with RTPS discovery.
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Updated to use the new way of converting from BIT Keys to GUIDs.
+
+        * tools/monitor/MonitorDataStorage.h:
+        * tools/monitor/MonitorDataStorage.inl:
+        * tools/monitor/MonitorTask.cpp:
+
+          Updated the monitoring tool to use the new way of converting
+          from BIT Keys to GUIDs.
+
+        * docs/design/RTPS:
+
+          Added more notes on how the rtps_udp transport works.
+
+Wed Jan  4 20:09:56 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Really fix the last remnants of a signed/unsigned comparison warning.
+
+Wed Jan  4 20:08:01 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fix log message error.
+
+Wed Jan  4 19:45:46 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          missing return statement.
+
+Wed Jan  4 19:33:38 UTC 2012  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Add allLocators to WriterProxy_t and ReaderProxy_t.
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Adde blob_to_locators() from RtpsUdpTransport.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Publish sample when publisher added.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Log socket in error message.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Log when cleaning up.
+          Write log to test.log.
+
+Tue Jan  3 20:50:00 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Moved Sedp::ignore() to the cpp file and continued adding
+          more of its implementation.
+
+Tue Jan  3 17:29:34 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Use const& to avoid copying Parameters unnecessarily.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented "update" and "remove" cases for discovered
+          publication/subscription data.
+
+Fri Dec 30 21:50:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Starting to implement the two readers for receiving
+          info about remote publications and subscriptions.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Update discovered participant struct if QoS changes.
+          Remove an unused argument of data_received().
+
+Fri Dec 30 20:48:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Removed unused method local_address_port().
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          In destructor, clean up all discovered participants.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Removed duplicated "using" directive.
+
+Fri Dec 30 19:49:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          ACE_OSize sleep() call.
+
+Fri Dec 30 19:47:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Refactor setting of sedp_unicast_.
+          Set sedp_multicast_ also.
+
+Fri Dec 30 19:26:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Move address_to_bytes from RtpsUdpTransport to BaseMessageUtils.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Provide local address and port accessors.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Assign metatraffic locator for unicast.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/TestMsg.idl:
+
+          Extend test to create a datawriter.
+
+Fri Dec 30 19:00:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Provide methods to associate/disassociate SEDP endpoints with
+          corresponding endpoints in remote participants.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Invoke Sedp::associate() and disassociate() when remote participants
+          are discovered / removed.
+          If we're ignoring a previously-discovered participant, remove it.
+
+Fri Dec 30 15:40:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          define init() to configure and enable readers and writers.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Call Sedp::init().
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          add enable_transport(bool, TransportConfig_rch)
+
+Thu Dec 29 23:12:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Moved some methods that were defined in-line in the class
+          to the cpp file.
+          Added data structures for Discovered Publication and Subscription.
+
+Thu Dec 29 22:15:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsTypeSupportExt.idl:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Provide a way for TypeSupport to determine if the underlying
+          data type has DCPS keys or not.  Supply this nugget of info
+          to the DCPSInfo object when creating topics.
+
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Use the topic's keyedness when generating publication/subscription
+          GUIDs for RTPS Discovery.
+          Renamed ParticipantDetails to DiscoveredParticipant to make it clear
+          that this is referring to a "remote" participant.
+          Renamed PublicationDetails and SubscriptionDetails to LocalPublication
+          and LocalSubscription (in Sedp) as these are owned by our participant.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Adapt to the changed IDL interfaces.
+
+Thu Dec 29 21:18:30 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Handle dx tunable parameter.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Spdp::init() partial implementation.
+
+Thu Dec 29 18:49:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Moving SEDP-related (Topic/Publication/Subscription)
+          items from Spdp to Sedp.
+
+Thu Dec 29 17:36:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing discovery.
+
+Thu Dec 29 17:13:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Prefer copyToCxx ro recoverCppObj in jni code.
+
+Thu Dec 29 14:47:32 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/TheServiceParticipant.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+
+          Eliminate dependency on DomainParticipantExt, and implement native
+          get_unique_id.
+
+Wed Dec 28 23:47:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing discovery.
+
+Wed Dec 28 21:42:09 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          implement ignore_domain_participant
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Log handle along with BIT key.
+
+Wed Dec 28 16:02:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_BIT_DataReader.cpp:
+
+          Eliminate wait at start of test - now these messages are dropped.
+
+Wed Dec 28 14:16:15 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Start to add endpoint discovery.
+
+Tue Dec 27 23:08:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added RtpsDiscovery test to the nightly tests.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Allow user-configurable addresses to send SPDP messages to.
+          These are in addition to the default multicast address from the spec.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fixed warning for signed/unsigned mismatch.
+
+        * docs/design/RTPS:
+
+          Updated RTPS design doc.
+
+        * tests/DCPS/ConfigFile/ConfigFile.mpc:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Test all config options for RtpsDiscovery and InfoRepoDiscovery.
+          Use RTPS-compatible domain IDs (less than 232) for RTPS domains.
+
+        * tests/DCPS/UnitTests/run_test.pl:
+
+          Fixed Perl bug (eq vs. ==) and corrected name of test executable.
+
+        * tests/DCPS/UnitTests/ut_BIT_DataReader.cpp:
+
+          main() must return 0 to indicate a successful test.
+
+Tue Dec 27 21:41:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Don't process data_received from our own domain participant.
+
+Thu Dec 22 23:53:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_RepoIdSequence.cpp:
+
+          main() must return 0 to indicate a successful test.
+
+Thu Dec 22 23:41:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Fixed an inconsistent macro name.
+
+        * tests/DCPS/UnitTests/ut_BIT_DataReader.cpp:
+
+          sleep() does not exist.  ACE_OS::sleep() does.
+
+Thu Dec 22 23:24:27 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * java/build_scripts/javah_wrapper.pl:
+        * java/dds/dcps_java.mpc:
+
+          Fixes to support JDK 1.7
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Use ACE_OS::sleep() rather than sleep().
+
+Thu Dec 22 17:26:31 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          add get_unique_id() to return a unique string based on GUID.
+
+Wed Dec 21 20:41:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/GuidConverter.cpp:
+        * tests/DCPS/UnitTests/GuidGenerator.cpp:
+
+          Methods to generate a string ID from first 12 bytes of a GUID.
+
+Wed Dec 21 20:22:18 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Export RepoIdSequence inner class.
+
+Wed Dec 21 17:50:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Check valid_data before accessing.
+
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/rtps.ini:
+        * tests/DCPS/UnitTests/run_test.pl:
+        * tests/DCPS/UnitTests/ut_BIT_DataReader.cpp:
+
+          Unit test for generated BuiltInTopic data readers.
+
+Tue Dec 20 18:22:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Export macro needed on nested class in order to use outside of the
+          OpenDDS_Dcps library.
+
+Mon Dec 19 21:57:03 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Replace sleep with WaitSet.
+
+Wed Dec 14 17:18:47 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * java/dds/dcps_java.mpc:
+
+          Remove reference to DdsDcpsDomainExt.idl
+
+Wed Dec 14 16:13:11 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Inital simple endpoint discovery protocol commit. Not functional,
+          more work to do.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          This test occasionally crashes with a segv. This commit exposes the
+          flaw without crashing. Note that the problem may not occur when run
+          in a debugger. A subsequent crash may occur during cleanup.
+
+Tue Dec 13 22:12:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Remove references to RepoIdConverter.
+          Inherit directly from DDS::DomainParticipant.
+
+        * tests/DCPS/UnitTests:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/ut_RepoIdSequence.cpp:
+
+          New unit test for RepoIdSequence class.
+
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDomainExt.idl:
+
+          Removed DdsDcpsDomainExt.idl
+
+Tue Dec 13 20:43:05 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
+          Change RepoIdConverter references to GuidConverter where appropriate.
+
+Mon Dec 12 21:16:25 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Change RepoIdConverter references to GuidConverter where appropriate.
+
+Mon Dec 12 20:55:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/OwnershipManager.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Change RepoIdConverter references to GuidConverter where appropriate.
+
+Mon Dec 12 19:38:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Remove unnecessary includes of RepoIdConverter.h
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Add needed include of GuidConverter.h
+
+Mon Dec 12 16:18:41 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+
+          Initialize default reader presentation properly.
+
+Wed Dec  7 21:08:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RepoIdBuilder.h:
+
+          Revert accidental checkin change.
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Remove commented-out code.
+
+Wed Dec  7 17:10:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp
+
+          Change RepoIdConverter to GuidConverter where it makes sense.
+
+        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Renamed this file.
+          Added assertion to verify list is empty at start of test.
+
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Account for rename
+Tue Dec  6 16:27:16 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          fix - use strcmp.
+
+Mon Dec  5 18:51:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Compare partition names, rather than memcmp, when comparing to default
+          for to_param_list
+
+Fri Dec  2 22:26:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Track bidirectional InstanceHandle_t <-> RepoId.
+          Remove use of BIT_Helper_1.
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          Remove BIT_Helper_2 and not needed method in BIT_Helper_1
+
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/DistributedContent/main.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+
+          Remove references to BIT_Helper_2.
+
+Fri Dec  2 19:01:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Suppress addition of params with default values in to_param_list.
+
+Wed Nov 30 22:55:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r5022 through r5110.
+
+Wed Nov 30 20:37:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added error logging for SPDP handling methods.
+          Check if remote participants have exceeded their lease duration.
+          Update BIT data if Participant QoS changes (USER_DATA only).
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fixed spelling of an ACE header.
+
+Wed Nov 30 19:05:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Set initial delay for ACE timer to 0.
+          Send dispose/unregister submessage when deleting participant.
+
+        * dds/DCPS/RTPS/md5.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Minor code style cleanup
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Close sockets.  Use ACE::get_ip_interfaces() to get IP address
+          if local_address_ is 0 (any).  This probably needs more work.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Include rtps_udp transport for static builds.
+
+Wed Nov 30 17:07:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Made assign methods inline.
+
+Tue Nov 29 22:18:09 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Copy guid prefix into participant BIT key.
+
+Tue Nov 29 20:58:57 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Move assign() methods from RtpsUdpReceiveStrategy class
+          to RTPS namespace.
+
+Tue Nov 29 18:00:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+
+          Move static assign() methods from private MessageReceiver class
+          to public RtpsUdpReceiveStrategy class.
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Handle partially described locators and test.
+
+Tue Nov 29 17:11:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Need to keep a topic reference count for the case where multiple
+          participants using the same RtpsDiscovery reference the same topic.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing SPDP: add/remove from participant BIT,
+          keep track of discovered remote participants.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Extended test to create 2 participants and read from participant BIT.
+
+Mon Nov 28 20:27:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Completed config file handling for all variables.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Open the (unicast) socket during initial configure() so that
+          host/port info from the OS can be used in connection_info_i().
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Messenger/rtps_uni.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Also run the Messenger test with a unicast-only RTPS transport.
+
+        * tests/transport/rtps/run_test.pl:
+
+          Updated the mulicast send address to match the new default in
+          RtpsUdpInst.cpp from Tue Nov 22 15:29:27 UTC 2011.
+
+Mon Nov 28 17:13:39 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Handle contentFilterProperty.
+
+Wed Nov 23 03:08:38 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/DCPS_Utils.cpp:
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          Fix the namespace for the utils.
+
+Tue Nov 22 22:41:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          RTPSDiscovery's BIT data readers need to be registered with the
+          owning subscriber in order to get cleaned up properly.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Use ACE Event Handler reference counting to avoid a crash when
+          a reactor upcall is in progress during destruction of the Spdp.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Added cleanup and error checking to test.
+
+Tue Nov 22 19:06:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/DCPS_Utils.cpp:
+
+          Cleaned up #includes, fixed PCH include.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing receiving side of SPDP.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Updated comments only.
+
+Tue Nov 22 17:36:45 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/DCPS_Utils.cpp:
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+        * dds/InfoRepo/DCPS_Utils.h:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Moved the DCPS Utils to DCPS so that they can be used by either the
+          InfoRepo or the new RTPS discovery infrastructure. The CompatibleQOS
+          functions were modified slightly to remove a dependency on other
+          InfoRepo classes, thus the changes to the DCPS_IR* classes.
+
+Tue Nov 22 16:35:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Moved new method from inl to cpp in order to get TAO headers.
+
+Tue Nov 22 15:29:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added error handling and configurable parameters.
+          Sending side of SPDP is done.  Receiving side is started, it opens
+          sockets and registers with the reactor.
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added a method for getting the reactor which can be used
+          for discovery.  Currently, this is the ORB's reactor.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Change default multicast addr to not conflict with discovery.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/dcps.ini:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Started a test for discovery.  Not yet enough to run in a nighltly,
+          but the generated SPDP packets can be observed in Wireshark.
+
+Fri Nov 18 23:05:08 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Reader defaults.
+
+Fri Nov 18 22:57:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Started implementing writing of local participant data to
+          the mini-transport.
+
+Fri Nov 18 21:54:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Complete writer defaults and tests for default setting.
+
+Fri Nov 18 18:51:52 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Eliminate class impelementation, use namespace.
+
+Fri Nov 18 18:36:48 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Introduce ParameterListConverter namespace.
+
+Fri Nov 18 18:21:05 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          More writer default testing.
+
+Fri Nov 18 17:36:24 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Start setting/testing writer defaults.
+
+Fri Nov 18 16:41:53 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Remove unused parameters.
+
+Fri Nov 18 16:20:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Reader param list conversion.
+
+Fri Nov 18 13:51:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+
+          Fixed compiler warning for unused local.
+
+Thu Nov 17 21:17:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Use discovery-specific BIT Transport IP/Port if specified, otherwise
+          fallback on global settings in Service_Participant (from [common] or
+          from the command line).
+          Always create one BIT TransportInst per InfoRepoDiscovery object.
+
+Thu Nov 17 21:11:51 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Add in writerProxy encoding.
+          Add all writerProxy decoding.
+          Tests for the above.
+
+Thu Nov 17 17:20:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing RTPS Discovery.
+          Forward calls from RtpsInfo to the corresponding Spdp object.
+
+Thu Nov 17 15:28:46 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Fix size_t to CORBA::ULong 64-bit warnings.
+
+Thu Nov 17 00:02:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+
+          Moved Built-in Topic setup from DomainParticipantImpl to Discovery.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Provide a way to initialize a DataReader without the transport.
+          Used by the RTPS versions of the Built-in Topic DataReaders.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Implemented Built-in Topic setup for RTPS Discovery.  The result is
+          that for each DomainParticipant using RTPS Discovery, its
+          corresponding Spdp object now has a reference to the BIT Subscriber.
+          This will be used to insert samples into one of the four BIT Data
+          Readers.
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          Removed unused constants.
+
+Wed Nov 16 23:04:30 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Complete to_param_list for DiscoveredWriterData and associated
+          unit tests.
+
+Wed Nov 16 21:42:19 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * BranchChangeLog:
+        * ChangeLog:
+
+          Moved entry from Changelog to BranchChangeLog...
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Much of to_param_list for DiscoveredWriterData.
+
+Wed Nov 16 18:03:17 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Change PID_TOPIC_TYPE to PID_TYPE_NAME.
+
+Wed Nov 16 17:44:58 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          Change PID_TOPIC_TYPE to PID_TYPE_NAME.
+
+Wed Nov 16 16:41:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Convert size_t to CORBA::ULong to eliminate 64-bit build warnings.
+          Shell of to_param_list for DiscoveredWriterData.
+
+Wed Nov 16 15:58:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Explicit ignore of PID_SENTINEL and PID_PAD
+          Test this too.
+
+Wed Nov 16 14:50:35 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Set default values in target when none specificed in param list.
+          Ignore vendor-specific params.
+          Ignore optional params.
+          Test the above.
+          Remove commented-out test code.
+
+Tue Nov 15 18:50:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Fill out from_param_list() implementation.
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Test decoding param list in from_param_list().
+
+Mon Nov 14 17:01:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Force guid prefix to have PID_PARTICIPANT_GUID
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Test encoding of expects inline qos, builtin endpoints, locators,
+          and liveliness count.
+
+Fri Nov 11 21:58:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.cpp:
+
+          Removed temporary code that was needed before RtpsDiscovery worked.
+
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Continued implementing RTPS Discovery.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Changed shutdown order so that discovery objects are cleaned up
+          before the POA and ORB are shut down.
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+
+          Removed unused "enable_topic()" operation on DCPSInfo.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+
+          Updated testing of RtpsDiscovery now that it returns an IOR.
+
+        * docs/design/RTPS:
+
+          fixed typo
+
+Fri Nov 11 21:31:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Handle guid prefix in to_param_list for participant data.
+          Start of from_param_list for participant data.
+
+        * tests/DCPS/UnitTests/ParameterListConverter.cpp:
+
+          Some field-level validation of to_param_list for participant data.
+
+Thu Nov 10 23:24:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Added a new class, RtpsInfo, which implementes the DCPSInfo
+          IDL interface.  So far this is mostly just stubbed-out.
+
+Thu Nov 10 22:35:33 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/RTPS/ParameterListConverter.h:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+
+          Converter for ParameterLists.
+          Converting parameter list to SPDPdiscoveredParticipantData.
+
+        * tests/DCPS/UnitTests:
+
+          svn:ignore updates.
+
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Build UnitTests_ParameterListConverter.
+
+Wed Nov  9 23:32:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Transient_Kludge.h:
+
+          Minor code clean-up.  Removed VC6-specific warning disablers.
+
+Wed Nov  9 19:20:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Implemented config file variables for the rtps_udp transport.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.cpp:
+
+          Disabled default transport.  We only want to provide an rtps_udp
+          transport if the user asks for it (in code or in config file).
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Code clean-up: removed unnecessary stuff, added const where possible,
+          added error logging.
+
+        * docs/design/RTPS:
+
+          Added design doc for RTPS, which includes list of items that
+          are not currently implemented.
+
+Tue Nov  8 18:25:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          into_received_data_sample() now returns bool.
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Added a constant for the size of the RTPS Message Header.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          If we receive a DATA Submessage with D = 0 and K = 0, don't
+          deliver up to the datalink since we don't currently handle these.
+
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+
+          Use constant from MessageTypes.h.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Added error/warning logging.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Added error/warning logging.
+          Use a fixed message block, data block, and data buffer for the
+          message header either used directly by control messages or copied
+          into the send buffers for normal messages.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Fixed warning for signed vs. unsigned comparison.
+
+Mon Nov  7 21:29:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added a contains() method to allow clients to check if a number
+          is in the sequence.
+          Made the bitmap "helper" public so it can be used elsewhere.
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Added methods to support RTPS fragment reassembly.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Implemented reliability for receiving fragmented data (receive
+          HEARTBEAT_FRAG, send NACK_FRAG).
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed the size of serialized FragmentNumberSet (it's 4 bytes smaller
+          than SequenceNumberSet because the fragment numbers are 32-bit).
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Test for correct gen_find_size() results for all data types.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Test reliability features for fragmented data.
+
+Wed Nov  2 16:19:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Changes to support use of TransportReassembly with RTPS data.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Handle incoming DATA_FRAG submessages.  Note that we are not
+          currently generating fragments from OpenDDS Data Writers.
+          Reliability for fragments (HEARTBEAT_FRAG, NACK_FRAG) is not yet
+          implemented.
+
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Use a common function in TransportSendStrategy for the
+          ACE_Message_Block to iovec[] conversion.
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Added unit tests for TransportReassembly.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Added tests for DATA_FRAG.
+
+Tue Nov  1 15:04:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4989 through r5021.
+
+Mon Oct 31 20:35:59 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/ConfigUtils.cpp:
+
+          Fixed for building with DOC ACE. The dependency on ace/SString.h
+          was implicit on older versions of ACE.
+
+Mon Oct 31 14:23:29 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Add some additional tests to ConfigFile for a variety of
+          discovery configuration scenarios.  Add some resulting
+          fixes, error checking, and refactoring that the testing
+          directed.
+
+        * docs/design/RTPS_DISCOVERY:
+
+          Update the examples at the end of this file.  This is the
+          best documentation to start with.
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Fix an annoying spelling mistake in TEST_ASSERT.
+
+Fri Oct 28 18:54:25 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * tools/monitor/MonitorTask.h:
+        * tools/monitor/MonitorTask.cpp:
+
+          Changes necessary to get the Monitor tool compiling and running
+          with the new Discovery scheme.  Once again, the monitor tool
+          needs to be revisited in the cotext of RTPS discovery (among
+          other things).
+
+Thu Oct 27 23:54:01 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * java/dds/OpenDDS/DCPS/TheServiceParticipant.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/tests/multirepo/MultiRepoBase.java:
+
+          Fix java problems caused by the Discovery changes below.
+          The biggest impact of these changes is that
+          ServiceParticipant::RepoKey was moved into the Discovery
+          class and went from being an int to a string.
+
+Thu Oct 27 21:06:32 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/ConfigUtils.h:
+        * dds/DCPS/ConfigUtils.cpp:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoUtils.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * docs/design/RTPS_DISCOVERY:
+        * tests/DCPS/ConfigFile/test1.ini:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.h:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.h:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.h:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/unit/run_test.pl:
+        * tests/transport/rtps/run_test.pl:
+
+          Refactoring to allow optional configuration of RTPS
+          as a Discovery mechanism.  See docs/design/RTPS_DISCOVERY
+          for some design details.  This is a work in progress
+          but existing InfoRepo configuration should work as
+          before.  RTPS discovery is not hooked into any actual
+          code and will fail.
+
+Thu Oct 27 18:00:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Set the Multicast flag in INFO_REPLY if we have multicast.
+          Fixed 0-length bitmap in ACKNACK submessages if no nacks.
+
+Thu Oct 27 15:59:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Fixed GCC warning for char array subscripting.
+
+Thu Oct 27 15:54:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Update sequence number tracking for GAP generation to reflect
+          the newer sequence number scheme in the DataWriterImpl.
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Clean up test.  Added testing of writer-side reliability.
+
+Wed Oct 26 22:45:23 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Corrected calls to ACE_Reactor API.
+
+Wed Oct 26 22:35:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fixed bugs found during testing.
+
+        * tests/transport/rtps/publisher.cpp:
+
+          Let the Data Writer send HEARTBEAT messages.
+
+        * bin/dcps_tests.lst:
+        * tests/transport/rtps_reliability/DDS_transport_rtps_reliability.mpc:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/rtps_reliability/run_test.pl:
+
+          Added a new transport-level test for RTPS Reliability features.
+
+Wed Oct 26 18:49:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Added casts to avoid signed/unsigned comparison warnings.
+
+Tue Oct 25 18:30:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added new methods to support generating RTPS ACKNACK submessages.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Support comparison (== and !=) of the EntityId_t portion of GUIDs
+          in addition to the full GUID comparisons.
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Added another common RTPS constant, for size of INFO_DST submessages.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Completed initial implementation of the DataReader side of the
+          RTPS Reliablity protocol (receive HEARTBEAT, DATA, GAP, generate
+          ACKNACK along with its INFO_DST and INFO_REPLY).
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Test new functionality in DisjointSequence.
+
+Mon Oct 24 19:20:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Now that it compiles, make it pass the test.
+
+Mon Oct 24 18:58:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.cpp:
+
+          GCC's STL implementation is more strict, we can't modify in-place.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fix a warning in struct initializer.
+
+Mon Oct 24 18:30:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Added methods for converting to/from the RTPS bitmap representation.
+
+        * dds/DCPS/RTPS/GuidGenerator.h:
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          Updated to compile on VC++.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Allow for external locking so single lock can be held across
+          multiple calls to resend()/resend_i().
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Completed the initial implementation of the DataWriter side of the
+          RTPS Reliablity protocol (generate HEARTBEAT and GAP, ability to
+          resend DATA, receive ACKNACK).
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Unit tests for new DisjointSequence functionality.
+
+Mon Oct 24 18:17:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidBuilder.h:
+        * dds/DCPS/GuidBuilder.inl:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdBuilder.inl:
+
+          Rolled-back changes from prior commit.  (No emacs hints in OpenDDS.)
+
+        * dds/DCPS/RTPS/GuidGenerator.h:
+
+          Moved comment from GuidConverter.h here.
+
+Mon Oct 24 17:07:44 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * MPC/config/dcps_rtpsexe.mpb:
+
+          New base project to support executables that depend on RTPS.
+
+        * dds/DCPS/GuidBuilder.h:
+        * dds/DCPS/GuidBuilder.inl:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdBuilder.inl:
+
+          Added emacs mode hints and documented RTPS based GUID_t octet
+          layout.
+
+        * dds/DCPS/RTPS/GuidGenerator.h:
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          New implementation of the RTPS GUID generator. Makes use of
+          hosts' primary MAC address (or random numbers if no MAC present)
+          plus the 16 bit process ID, plus a counter to generate a unique
+          ID. Probably a time value should be part of it tool, since PID
+          has the potential of being non-unique but there isn't enough
+          room for a timestamp too.
+
+        * tests/DCPS/UnitTests/GuidGenerator.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Added a new unit test to validate the GUID generator.
+
+Thu Oct 20 13:01:31 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * docs/design/RTPS Discovery.jpg:
+        * docs/design/RTPS Discovery.odg:
+        * docs/design/RTPS_DISCOVERY:
+
+          Add some design docs having to do with the overall RTPS
+          discovery design.
+
+Wed Oct 19 19:10:35 UTC 2011  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportStrategy.h:
+
+          Need to specifically include Synch_Traits.h so we can build
+          against ACE 6.0.5+.
+
+Wed Oct 19 17:52:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.inl:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Significant rework of DisjointSequence.  Added doxygen comments.
+          What used to be update() is now insert(), what used to be
+          lowest_valid() is now another form of insert(), and what used to be
+          low() is now either low() or cumulative_ack() depending on the usage.
+          DisjointSequence no longer handles wrapping SequenceNumbers, but the
+          64-bit sequence numbers don't wrap (under real-world conditions).
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Moved another useful constant up to this header.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Cleaned up unused #includes.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Refactored code that makes iovec[]s from ACE_Message_Block chains
+          so that it can be reused by derived classes.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Continued implementing RTPS reliablity, focusing for now on DW side:
+          - mechanism for generating control messages in the transport
+          - timers for sending heartbeats and replying to nacks
+          - processing incoming AckNackSubmessage
+          Also, on DR side: hook for keeping track of received sequence numbers
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.cpp:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Updated usage of DisjointSequence.
+
+Mon Oct 17 21:19:19 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+
+          Start sequence numbers in the data writer with one.
+          Add valid sequence numbers to instance state control
+          messages and properly process them in the reader.
+
+Fri Oct 14 19:36:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Add a constant for the size of SubmessageHeader.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          For reliable writers, track the current sequence number and generate
+          GAP submessages when needed.  On the receive side, added a
+          gap_received() method, but it doesn't do anything yet.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Generate/expect a gap in the sequence numbers used in the test.
+
+Fri Oct 14 14:23:44 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Add support for combined Dispose/Unregister messages.
+          This was added as a new message type in DataSampleHeader.
+          OpenDDS does not currently generate these messages, but
+          may receive them from other RTPS implementations.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Test manual generation and processing of Dispose/Unregister
+          messages via RTPS.
+
+Fri Oct 14 13:18:09 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * tests/transport/rtps/publisher.cpp:
+
+          Fix some unused arg warnings.
+
+Thu Oct 13 21:44:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4965 through r4988.
+
+Thu Oct 13 21:12:39 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Add operator!=() implementations for the qos policy structs.
+          Clean up some of the macro hell.
+
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/transport/rtps/publisher.cpp:
+
+          Clean up some of the inline QoS code.  Add support for
+          inline QoS to the control variants of the Data submessage.
+          Add support for the remaining inline QoS policies.
+
+Thu Oct 13 20:57:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          TransportClient::enable_transport() now gets a bool for "reliable".
+
+        * dds/DCPS/RepoIdGenerator.h:
+
+          Updated comment about VendorId inside the GUID.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added hook for derived classes to get release_reservations().
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Pass "reliable" bool down to the specific transport object.
+
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+
+          TransportQueueElements can now report their sequence numbers.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+
+          Updated SingleSendBuffer for use in RtpsUdpDataLink.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Expose a "nak_depth" configuration parameter.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Started implementing reliability features of RTPS (support
+          for HEARTBEAT, ACKNACK, and GAP submessages).
+
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Updated for changes in TransportImpl.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+
+          TransportClient::enable_transport() now requires an argument.
+
+Wed Oct 12 20:51:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Add supporrt for inline Qos parameters.  This feature
+          adds the requires_inline_qos() function for RtpsUdpDataLink
+          and the retrieve_inline_qos_data() function for
+          TransportSendListeners.  Not all QoS parameters are supported
+          in this commit (currently only topic_name, partition, and
+          presentation).
+
+        * tests/transport/rtps/publisher.cpp:
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fix a marshaling error for Parameters (involves missing
+          padding).
+
+Wed Oct 12 20:20:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendBuffer.h:
+        * dds/DCPS/transport/framework/TransportSendBuffer.inl:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Refactored TransportSendBuffer into two classes, TSB is now the
+          abstract base class representing the interface that
+          TransportSendStrategy needs.  The new class SingleSendBuffer
+          represents the existing use-case for multicast, where a single
+          TSB object is all that's needed per datalink.  TSB is no longer
+          a reference-counted object, it's always owned by the datalink.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Adjusted use of TransportSendBuffer to account for the changes above.
+
+        * dds/DCPS/transport/framework/TransportSendBuffer_rch.h:
+
+          Removed this file.
+
+Wed Oct 12 15:00:13 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Updated test to allow static linking to rtps_udp transport lib.
+
+Wed Oct 12 14:44:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+
+          Updated comment to reflect that there are two populate* functions.
+
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.cpp:
+
+          Moved #include to the proper file.
+
+        * tests/transport/rtps/publisher.cpp:
+
+          Fixed typo in comment.
+
+Tue Oct 11 16:11:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * tests/transport/rtps/publisher.cpp:
+
+          Add a DataSampleHeader to the DataSampleListElement.
+          Remove the sequence number and source timestamp members
+          of the DSLE (they are redundant with those in the header).
+
+Mon Oct 10 16:04:48 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Rework the RTPS control message processing to use
+          a TransportSendControlElement instead of a TransportSendElement.
+          In order for this to work the DataSampleHeader was passed along
+          the send control path and stored in the TSCE.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Modify the test to send RTPS control messages as TSCEs
+          (this more accurately reflects the DCPS behavior).
+
+Fri Oct  7 18:06:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Updated log message to identify the correct method.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Provide a hook for derived classes to know when a remote
+          RepoId is no longer associated to any local user of this link.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+
+          Use the above hook to remove entries from the
+          locators_ map when remote peers disassociate.
+
+        * tests/DCPS/Messenger/rtps.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Updated test to acutally use the rtps_udp transport.
+
+Thu Oct  6 18:26:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Moved operator<< into our namespace.
+          Added a peer_ids() protected method so that the derived DataLink
+          class can get of list of GUIDs that this DataLink is associated with.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+
+          Added a current_packet_first_element() protected method so that the
+          derived SendStrategy can peek at the elems_ queue in order to get
+          contextual information about what's being sent.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Continued implementing transport.  Use RTPS Locators for the blob.
+          Track and use per-association remote network addresses.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          ORB_init() no longer needed since datalink_release_delay_ is off.
+          Modified publisher to use the transport blob instead of "cheating"
+          by setting the remote_address_ in the TransportInst.
+
+Thu Oct  6 15:58:46 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+
+          Fix some linux/gcc compilation issues.
+
+Thu Oct  6 15:07:54 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Oops, left in some extra print statements.
+
+Thu Oct  6 14:13:33 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Add support for instance state messages (instance registration,
+          dispose instance, and unregister instance).
+
+        * tests/transport/rtps/TestMsg.h:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Test new messages and refactor the test some.
+
+Fri Sep 30 20:05:49 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          blob_to_key() is not called from the framework so it doesn't need
+          to be pure virtual here.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+
+          blob_to_key() is no longer virtual.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Continued developing the transport for RTPS.
+          Starting to track the remote "locators" so the send strategy knows
+          where to send messages.  Not done yet.
+
+Thu Sep 29 22:22:00 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          Check for null orig_ pointer in msg_payload().
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Allow derived Receive Strategies to register multiple handles with
+          the reactor.  The active handle is passed to (newly renamed)
+          handle_dds_input() and on to receive_bytes().
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Added multicast socket to RtpsUdpDataLink.
+          Use allocator from DataSampleListElement when creating
+          TransportCustomizedElements in RtpsUdpDataLink.
+          Continued implementing RtpsUdpTransport.
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.h:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Adapt other transports to the framework change above.
+
+        * tests/transport/rtps/run_test.pl:
+
+          Test with multicast in addition to unicast.
+
+Thu Sep 29 19:32:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4942 through r4964.
+
+Thu Sep 29 14:41:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Fix for the prior change to this file from Tuesday.
+          "We are done - no more data" check needs to go after potentially
+          delivering the data sample to the receive listener(s).
+
+Thu Sep 29 14:19:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          In create_control_message(), allow for null ACE_Message_Block of data.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Overload operator!=() to match operator==().
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Updated remove_sample() and remove_all_msgs() method signatures.
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.h:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.h:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.inl:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.h:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportReplacedElement.h:
+        * dds/DCPS/transport/framework/TransportReplacedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.h:
+        * dds/DCPS/transport/framework/TransportRetainedElement.inl:
+        * dds/DCPS/transport/framework/TransportRetainedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Revamped comparison of TransportQueueElements.  This allows
+          remove_sample() to find customized elements in the queues.
+          TransportQueueElements are no longer created just for the sake of
+          comparison.  Track the status of removal in visitor status instead of
+          using the TransportQueueElement::released() bool.
+
+Tue Sep 27 21:53:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          release_element() also needs to delete the TCE when there is
+          no allocator (using an allocator is optional with this class).
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          If the DataSampleHeader (or RTPS SubmessageHeader) indicates that
+          there is no data payload, don't allocate a Message Block for it.
+          Users of ReceivedDataSample need to check for a null sample_ pointer.
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Account for the fact that ReceivedDataSample::sample_ may be null.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Fix a leaked refcount on the reactor task.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+
+          Prevent Service_Participant from spawning a thread for ORB::run.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Improve shutdown and cleanup to get a clean valgrind run.
+
+Tue Sep 27 16:00:45 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+
+          Fixed bug where octetsToNextHeader was calculated incorrectly when
+          the submessage header omits it.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Extend the test, fixed bugs in use of message blocks in serialization.
+
+Fri Sep 23 23:27:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/BaseMessageTypes.h:
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Began implementing specific TransportSendStrategy and framework
+          support for sending messages with alternate (non-OpenDDS) headers.
+
+        * dds/idl/marshal_generator.cpp:
+
+          More support for serialization of special RTPS types (Submessage).
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+        * tests/transport/rtps/DDS_transport_rtps.mpc:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Extended test to use the transport on the publishing side as well.
+          The transport test is not yet working.
+
+Fri Sep 16 22:12:09 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * tools/dissector/packet-opendds.cpp:
+
+          Use a free bit in the 2nd flag byte to indicate "key only" marshaling.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Make use of that flag instead of a always assuming that the "instance
+          control" types of messages are key-only.  This will allow us to
+          interoperate with other RTPS implementations that send the entire
+          data sample payload in instance control messages.
+
+Fri Sep 16 19:37:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          More cleanup for older ACE that has no ostream << ACE_Time_Value.
+
+Fri Sep 16 18:35:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Use an easier constant for the fractional seconds conversion.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Clean up test to work on earlier ACE+TAO versions.
+
+Fri Sep 16 18:21:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Fix compile errors on older GCC versions.
+
+Fri Sep 16 16:29:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+
+          Cleanup from yesterday's commit.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Enhance test -- actually check what we receive.
+
+Thu Sep 15 23:01:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_rtps_udp.mpb:
+
+          New base project for linking the RTPS/UDP transport library.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Fixed a bug found during testing.  Bug only occurs when the
+          destructor runs while there are still datalinks, which shouldn't
+          happen in real use cases.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Continued implementation.
+
+        * bin/dcps_tests.lst:
+        * tests/transport/rtps/DDS_transport_rtps.mpc:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/run_test.pl:
+        * tests/transport/rtps/subscriber.cpp:
+
+          New test of the rtps_udp transport type: for now publisher writes
+          bytes directly to the socket (not using the OpenDDS transport).
+          The subscriber uses the transport.
+
+Wed Sep 14 21:55:18 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Added ability to set SequenceNumber from two 32-bit values (hi/lo).
+
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Moved the SubmessageKind enum into IDL, created a Submessage union.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.inl:
+
+          Provide accessor for current DataSampleHeader.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+
+          New call from Recv Strategy to Data Sample Header to let the header
+          know how many bytes are remaining in the "pdu".
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Continued implementing RTPS-specific receive strategy logic,
+          including adapting the RTPS header data to the DataSampleHeader for
+          use by the DCPS layer.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Restored an add_lib_path() which was mistakenly removed yesterday.
+
+Tue Sep 13 19:54:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          This new method can't be inlined because ReceivedDataSample
+          #includes DataSampleHeader.
+
+Tue Sep 13 19:48:31 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4907 through r4941.
+          Attempting to fix bad svn:mergeinfo at the same time.
+
+Tue Sep 13 17:56:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+
+          Added a few inline methods to make it work with the
+          TransportReceiveStrategy changes (see below).
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/QueueTaskBase_T.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportStrategy.h:
+        * dds/DCPS/transport/framework/TransportStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportStrategy_rch.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.inl:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.h:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSynchResource.h:
+        * dds/DCPS/transport/tcp/TcpSynchResource.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+
+          Refactored transport framework and existing transports to support
+          alternate (RTPS) message headers.  The central change is making the
+          TransportReceiveStrategy a class template so it is not hard-wired to
+          use TransportHeader and DataSampleHeader.  A new class,
+          TransportStrategy was created to handle the parts that can't be in
+          a template because they are used by the DataLink base class.
+          Also changed more transport internal methods to use _rch and
+          automatic reference counting instead of raw pointers and manual
+          manipulation of the reference count.
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.cpp:
+
+          Added new classes to be the RTPS equivalents of the OpenDDS
+          TransportHeader (RTPS Message Header) and DataSampleHeader (RTPS
+          Submessage Header and Submessage Elements).  These are just stubbed-
+          out for now.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Adapted rtps_udp for the framework changes.
+
+        * tests/DCPS/ConfigTransports/Factory.cpp:
+        * tests/DCPS/ConfigTransports/common.cpp:
+
+          Fix some DDS and ACE usage errors (memory / refcount leaks, wrong
+          logging format characters).
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Remove unused add_lib_path().
+
+        * tests/DCPS/FooTest4/Writer.cpp:
+
+          Cleaned up formatting.  ReceivedDataSample no longer has default ctor.
+
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+
+          Can't look at the data sample when !sample_info.valid_data.
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+          Fixed compiler warnings.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Removed these files.  They have been renamed to the *_T.* variants.
+
+Fri Sep  9 21:00:15 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Removed BuiltinEndpointSetSeq, and changed the field
+          ParticipantProxy_t::availableBuiltinEndpoints to have type
+          BuiltinEndpointSet_t.  Having a sequence of these doesn't make
+          sense, but the spec seems to show it both ways.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Implemented the RTPS Message Receiver which maintains state among
+          the various submessages that belong to the same message.
+
+Thu Sep  8 23:02:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+
+          Replaced ACE container with std container, cleaned up function
+          pointer and const char* comparison bugs.
+
+        * tools/dissector/packet-opendds.cpp:
+
+          Corrected handling of the new "flags2" byte in DataSampleHeader.
+          Sanity checks for sample dissection: if the data is using CDR
+          alignment rules, or if it's byte-swapped relative to the wireshark
+          host, we can't dissect it with the current implementation.
+
+        * tools/dissector/sample_dissector.cpp:
+
+          Fixed a bug I introduced earlier on the branch.
+
+Thu Sep  8 19:15:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * tools/dissector/packet-opendds.cpp:
+
+          Added a second flags byte to DataSampleHeader, with the single flag
+          for "cdr encapsulation".
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Enable the "cdr encapsulation" flag in DataSampleHeader, if needed.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Marshal and demarshal data in the CDR-compilant way if (on the writer
+          side) at least one of our transports require it and (on the reader
+          side) the DataSampleHeader indicates CDR encapsualted data.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+
+          Removed unused #includes.
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+
+          Added a virtual method to check if a transport requires
+          CDR-encapsulated payload data.  TransportClient uses it.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Make rtps_udp a "known" transport so it can be loaded automatically
+          when referenced in config files.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Messenger/rtps.ini:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Added an RTPS config file for this test.  Currently, this still sends
+          the data with tcp, but having rtps_udp as an enabled transport causes
+          CDR-encapsulated data marshaling.
+
+Wed Sep  7 22:34:36 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/OpenDDS_Rtps_Udp.mpc:
+        * dds/DCPS/transport/rtps_udp/RtpsUdp.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.inl:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink_rch.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy_rch.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy_rch.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/Rtps_Udp_Export.h:
+        * dds/DCPS/transport/rtps_udp/rtps_udp.rc:
+
+          Added an initial (skeletal) OpenDDS transport type for RTPS over UDP.
+          UDP/IP (capable of IPv4 and IPv6; both unicast and multicast) is the
+          only PSM in the RTPS specification (v2.1) but other PSMs, or
+          implementation-specific transport types, may be used in the future.
+
+Wed Sep  7 18:19:48 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_rtps.mpb:
+
+          Added an mpb for use by projects that depend on the OpenDDS_Rtps lib.
+
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Whitespace fix only.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed some corner cases with Parameter and ParameterList.
+
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          The wchar member must be initialized to avoid seeing values outside
+          the unicode BMP on systems with 4-byte wchar_t.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+        * tests/DCPS/RtpsMessages/RtpsMessages.mpc:
+        * tests/DCPS/RtpsMessages/run_test.pl:
+
+          New test for RTPS Message serialization.
+
+        * dds/DCPS/RTPS/Test.cpp:
+
+          Removed this file.  Its contents were moved to RtpsMessagesTest.cpp.
+
+Thu Sep  1 17:37:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageTypes.h:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/Test.cpp:
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Completed IDL for RTPS Message types.
+
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+
+          Implemented a skip() function used to read ahead and ignore bytes.
+          read_array() and write_array() don't need to swap if size is 1.
+
+        * dds/idl/marshal_generator.cpp:
+
+          Added special handling for RTPS types that don't follow CDR
+          serialization rules: ParameterList, Parameter, SequenceNumberSet,
+          FragmentNumberSet, DataSubmessage, DataFragSubmessage,
+          InfoReplySubmessage, InfoTimestampSubmessage, InfoReplyIp4Submessage.
+
+Tue Aug 30 22:27:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidUtils.h:
+
+          Updated to version 2.1 of RTPS spec.
+          Not much has changed in this area.
+
+        * dds/DCPS/RTPS/BaseMessageTypes.h:
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+
+          Updated RTPS structure and constant definitions.
+
+        * dds/DdsDcpsGuid.idl:
+
+          Added more ENTITYKIND_BUILTIN_* constants from RTPS spec.
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Even with DDS_HAS_MINIMUM_BIT, RTPS needs to see the Built-In Topic
+          struct definitions for use with RTPS discovery.
+
+        * dds/DCPS/Definitions.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Fixed warnings.
+
+        * java/dds/OpenDDS/DCPS:
+
+          Ignored Java files generated from DdsDcpsGuid.idl (svn:ignore only).
+
+Tue Aug 30 14:05:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+        * dds/idl/metaclass_generator.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+
+          gen_find_size() and gen_max_marshaled_size() now account for
+          optional alignment.
+          Use ACE_CDR_BYTE_ORDER instead of TAO_ENCAP_BYTE_ORDER.
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/Test.cpp:
+
+          Use CDR alignment for RTPS key hashing.
+
+        * tools/dissector/packet-opendds.cpp:
+
+          Updated for new gen_find_size() function signature.
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Test gen_find_size() and gen_max_marshaled_size() with and without
+          alignment.
+
+        * tests/DCPS/KeyTest/IsBounded.cpp:
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+
+          Updated for new gen_find_size() function signature and CDR-compliant
+          wchar serialization.
+
+Thu Aug 25 22:11:16 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/dissector/sample_dissector.cpp:
+
+          Updated to account for CDR-compliant wchar and wstring serialization.
+
+Thu Aug 25 21:51:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Serializer/Serializer.mpc:
+        * tests/DCPS/Serializer/AlignmentTest.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Added tests for proper data alignment according to CDR rules.
+
+Thu Aug 25 19:21:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+        * dds/idl/marshal_generator.cpp:
+
+          wchar and wstring serialization are now CDR-compliant.
+          Since RTPS leaves the encoding unspecified, we are using UTF-16BE.
+          Systems with ACE_SIZEOF_WCHAR == 4 could pass characters larger than
+          16-bits.  As of now these are errors (surrogate pairs are not used),
+          but in the future this could be implemented.
+          Made (almost) every un-typed method private.
+          Now using regular C++ bool to represent success/failure return values.
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+
+          Cleaned up test output and removed temp code.
+
+Wed Aug 24 21:59:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+
+          Fixed wstring serialization to always use a byte count and not
+          a character count.  wstring (and wchar) are still not CDR-compliant.
+
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+
+          Fixed ACE logging format characters and output a message for wchar.
+
+Wed Aug 24 18:59:52 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS:
+
+          Copied the trunk version -- it didn't come over in the merge.
+
+Wed Aug 24 18:36:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+
+          - Strings (narrow only) are now CDR-compliant: they include the null
+            terminator byte even though there is no reason to have it.
+          - Alignment (CDR rules) can be enabled with an optional 3rd
+            constructor argument.
+          - Removed unused methods and data members.
+
+        * dds/idl/marshal_generator.cpp:
+
+          gen_max_marshaled_size() and gen_find_size() need to know about the
+          modified string serialization.
+          Note that these are not yet updated for alignment.
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+
+          Updated expected sizes now that strings are CDR-compliant.
+
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+
+          Test that the Serializer with alignment options enabled still
+          generates a byte stream that can be de-serialized correctly.
+          Still need to test that all CDR alignment rules were followed.
+
+        * tools/dissector/sample_dissector.cpp:
+
+          Updated to account for changed string serialization.  Needs testing.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+
+          Fixed an artifact of svn merge (duplicated lines).
+
+        * tests/DCPS/Serializer/.cvsignore:
+
+          Removed this file.
+
+Wed Aug 24 16:20:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/KeyTest:
+
+          Re-added from trunk.  Merging this directory didn't work so it was
+          removed in the last commit.
+
+Wed Aug 24 16:01:03 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4455 through r4906.
+          Previous work on this branch was incorporated in the trunk as of
+          Wed May 18 21:32:29 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+          and therefore the previous BranchChangeLog entries have been cleared.
+          They can now be found in docs/history/ChangeLog-RTPS-1.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

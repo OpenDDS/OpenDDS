@@ -1,0 +1,167 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+// Struct with no keys
+module Messenger1 {
+
+#pragma DCPS_DATA_TYPE "Messenger1::Message"
+
+  struct Message {
+    string from;
+    string subject;
+    long subject_id;
+    string text;
+    long   count;
+  };
+};
+
+// Struct with one key
+module Messenger2 {
+
+#pragma DCPS_DATA_TYPE "Messenger2::Message"
+#pragma DCPS_DATA_KEY "Messenger2::Message subject_id"
+
+  struct Message {
+    string from;
+    string subject;
+    long subject_id;
+    string text;
+    long   count;
+  };
+};
+
+// Struct with two keys
+module Messenger3 {
+
+#pragma DCPS_DATA_TYPE "Messenger3::Message"
+#pragma DCPS_DATA_KEY "Messenger3::Message subject_id"
+#pragma DCPS_DATA_KEY "Messenger3::Message count"
+
+  struct Message {
+    string from;
+    string subject;
+    long subject_id;
+    string text;
+    long   count;
+  };
+};
+
+// Struct with many keys (of all possible types)
+module Messenger4 {
+
+  enum EnumType {
+    FIRST, SECOND, THIRD
+  };
+
+#pragma DCPS_DATA_TYPE "Messenger4::Message"
+#pragma DCPS_DATA_KEY "Messenger4::Message short_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message unsigned_short_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message long_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message unsigned_long_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message long_long_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message unsigned_long_long_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message char_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message wchar_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message float_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message double_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message long_double_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message boolean_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message octet_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message enum_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message string_field"
+#pragma DCPS_DATA_KEY "Messenger4::Message wstring_field"
+
+  struct Message {
+    short short_field;
+    unsigned short unsigned_short_field;
+    long long_field;
+    unsigned long unsigned_long_field;
+    long long long_long_field;
+    unsigned long long unsigned_long_long_field;
+    char char_field;
+    wchar wchar_field;
+    float float_field;
+    double double_field;
+    long double long_double_field;
+    boolean boolean_field;
+    octet octet_field;
+    EnumType enum_field;
+    string string_field;
+    wstring wstring_field;
+  };
+
+#pragma DCPS_DATA_TYPE "Messenger4::NestedMessage"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.short_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.unsigned_short_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.long_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.unsigned_long_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.long_long_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.unsigned_long_long_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.char_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.wchar_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.float_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.double_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.long_double_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.boolean_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.octet_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.enum_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.string_field"
+#pragma DCPS_DATA_KEY "Messenger4::NestedMessage mess.wstring_field"
+
+  struct NestedMessage {
+    Message mess;
+  };
+
+};
+
+// Struct with nested key
+module Messenger5 {
+
+  typedef long ResponseArray[10];
+
+  struct HeaderType {
+    string from;
+    wstring wsubject;
+    long subject_id;
+  };
+#pragma DCPS_DATA_TYPE "Messenger5::Message"
+#pragma DCPS_DATA_KEY "Messenger5::Message header.wsubject"
+
+  struct Message {
+    HeaderType header;
+    string text;
+    long   count;
+    ResponseArray responses;
+  };
+};
+
+// Struct with doubly nested key
+module Messenger6 {
+
+  typedef long ResponseArray[10];
+
+  struct HeaderType {
+    string from;
+    string subject;
+    long subject_id;
+  };
+
+  struct PayloadType {
+    HeaderType header;
+    string text;
+    long   count;
+  };
+
+#pragma DCPS_DATA_TYPE "Messenger6::Message"
+#pragma DCPS_DATA_KEY "Messenger6::Message payload.header.subject_id"
+
+  struct Message {
+    PayloadType payload;
+    ResponseArray responses;
+  };
+};

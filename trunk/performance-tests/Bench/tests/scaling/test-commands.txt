@@ -1,0 +1,50 @@
+
+--- tailor this to your installation ---
+all hosts: export BASEDIR=/var/tmp
+
+on build host:
+
+ make -C $DDS_ROOT/performance-tests/Bench
+
+ cd $DDS_ROOT/performance-tests/Bench
+ $DDS_ROOT/performance-tests/Bench/tools/mkpkg scaling-tests
+ tar cfj scaling-tests.tar.bz2 scaling-tests
+
+ cp scaling-tests.tar.bz2 $BASEDIR
+ scp scaling-tests.tar.bz2 hostn:$BASEDIR
+ ...
+
+--- all hosts: ---
+ cd $BASEDIR
+ tar xfj scaling-tests.tar.bz2
+
+--- tailor this to your installation ---
+all hosts: export REPOHOST=172.16.10.102
+all hosts: export REPOPORT=2809
+all hosts: export PROJECTBASE=$BASEDIR/scaling-tests
+all hosts: export TESTBASE=$PROJECTBASE/tests/scaling
+
+--- repository host: ---
+
+ $PROJECTBASE/bin/run_test -S -h iiop://$REPOHOST:$REPOPORT
+
+--- Test Execution ---
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-<transport>.ini
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -P -t 30 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+
+--- host1: ---
+ mkdir $PROJECTBASE/output
+ cd $PROJECTBASE/output
+
+ mkdir <transport>; cd <transport>
+ $TESTCMD -s $TESTBASE/pub-<n>.ini
+
+--- hostn: ---
+ $TESTCMD -s $TESTBASE/sub.ini
+
+
+* <transport> is one of: tcp, udp, rtps, multi-rel, and multi-be;
+  <n> is a value between 1 and 8
+
+* 32 total tests should be executed (8 collections per transport)
+

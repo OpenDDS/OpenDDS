@@ -1,0 +1,123 @@
+Sun Jun 10 19:53:55 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * Merged from trunk r5670 through r5671.
+
+Fri Jun  8 20:42:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * Merged from trunk r3399 r5647 through r5669.
+
+Fri Jun  8 19:29:36 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Fix decrement operation in dtor so ORB will shut down
+          properly.
+
+Fri Jun  8 14:48:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Don't create an ORB in internal remote object functions.
+          Instead pass IRD's ORB.
+
+Thu Jun  7 20:34:01 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Moved initialization of reactor_ from
+          timer() to ctor.
+
+Wed Jun  6 21:43:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Handle -ORBLogFile and -ORBVerboseLogging internally
+          instead of passing off to ORB_init() so that these
+          options can be used if an ORB isn't being used.
+
+Tue Jun  5 19:19:03 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          Moved function templates remote_reference_to_servant(),
+          servant_to_remote_reference(), deactivate_remote_object()
+          from Service_Participant.h to InfoRepoDiscovery.cpp.
+
+Tue Jun  5 16:04:37 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Avoid use of raw pointer introduced in previous
+          commit.
+
+Tue Jun  5 15:16:40 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+
+          Removed uneeded code that was causing compile error.
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Moved setting of ORB from ServiceParticipant to
+          InfoRepoDiscovery.
+
+        * tests/DCPS/unit/Main.cpp:
+        * tests/DCPS/unit/README:
+        * tests/DCPS/unit/run_test.pl:
+
+          Removed option to have client set the ORB, which
+          wasn't being used.
+
+Mon Jun  4 18:05:20 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * Merged r5637 through r5646 from trunk.
+
+Mon Jun  4 16:33:14 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * Merged r5511 through r5636 from trunk. Note there are still
+          compile errors because Service_Participant no longer has
+          member functions set_ORB() and the_POA().
+
+Fri Apr 13 22:40:31 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/Service_Participant.h:
+
+          Service_Participant no longer manages the ORB and the POA.
+          There is a new API "timer()" to get the ACE_Reactor_Timer_Interface
+          which can be used for scheduling timers but not for Reactor I/O.
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Adapted to the modified Service_Participant API.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+
+          InfoRepoDiscovery is now responsible for the ORB and the POA.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Use a Reactor managed by the RtpsDiscovery object.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          The ORB is now managed by the InfoRepoDiscovery objet.
+
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+
+          Replaced TheServiceParticipant->get_ORB()
+          with the new timer() accessor.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

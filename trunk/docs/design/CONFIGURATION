@@ -1,0 +1,432 @@
+Last updated: 1/20/2006
+
+Design document for DDS configuration of common and transport.
+
+Objectives:
+a) configuration DDS common and transports from a file
+b) dynamically load transports
+c) configuration design should support addition of new transports.
+d) ability to switch transport types by only making configuration file changes.
+e) backward compatibility is not important.
+f) simplify the creation, configuraiton and use of transports
+
+
+
+----- paul's -----
+) backward compatibility is not as important as future ease of use and design/code simplicity
+
+) how the configuration looks in a presentation - Dev Guide or slides - is important
+  The current DDS transport configuration and use is too involved.
+  It would be good if the SimpleTCP transport would default to being loaded.
+
+) Allow transports to be statically linked/loaded.
+
+) Use the service configuration name as the default factory id but also allow specification
+  of multiple transport factories of the same type.
+  This would avoid the need for the [transport_factory_<id>] unless there are multiple
+  factories of the same type.
+
+
+----- Scott ----
+) consider the idea of relating the transport configuration to an factory in the configuration
+  rather than in the user code.
+
+---- design ---
+
+Note: "Ideas:" are ideas that are not developed by the design but could enhance it.
+
+1) regsiter and configure
+
+
+  A new class will be added to framework. This class is used for concrete library registration.
+
+  class TransportGenerator
+  {
+    public:
+
+      TransportGenerator();
+      virtual ~TransportGenerator();
+
+      virtual TransportImplFactory* new_factory() = 0;
+      virtual TransportConfiguration* new_configuration() = 0;
+    protected:
+  };
+
+
+  Each concrete transport library needs provide a class inherited from the TransportGenerator class
+  and implements those virtual functions in the TransportGenerator class.
+
+
+  The SimpleTCP library should be defaults to be loaded automatically without specifing in svc.conf. 
+  
+  Each concrete transport automatically registers with TheTransportFactory via service configurator.
+
+  The SimpleUdpTransport and some other user-implemented transport (e.g. MyTransport)
+  are separated in each individual library. Each library(except SimpleTcpTransport) implements a 
+  *TransportLoader that will register with the Service Configurator during static intialization. 
+  When the Service_Object init() function is called, it will create a concrete TransportGenerator object and 
+  register with the TheTransportFactory. 
+
+  Example of svc.conf:
+
+      dynamic SimpleUDPTransportLoader Service_Object * TAO:_make_DDS_SimpleUDPTransportLoader() "-type SimpleUDP"
+      dynamic MyTransportLoader Service_Object * TAO:_make_DDS_MyTransportLoader() "-type MyTransport"
+
+  When the concrete transport is loaded, the concrete transport library will create a concrete 
+  ConfigurationGenerator object and register with TheTransportFactory.  TheTransportFactory will call the new_factory()
+  on the ConfigurationGenerator object to create a concrete TransportImplFactory object and use the transport_name
+  as the default factory id for registration. 
+  Here are some examples of the TransportImplFactoryMap entry.
+
+       "SimpleTcp"->SimpleTcpTransportImplFactory*
+       "SimpleUdp"->SimpleUdpTransportImplFactory*
+       "MyTransport"->MyTransportImplFactory* 
+
+      
+  After the concrete transport is registered with TheTransportFactory, the configuration data loaded by the
+  Service_Participant is used to configure the new TransportImplFactory instances and the TransportImpl 
+  instances.
+
+  I have tried to make the SimpleTcpTransport in a seperate library. Since the builtin topic requires 
+  SimpleTcpTransport configuration, this would require the SimpleTcpTransport library statically linked
+  and hence the ddsdcps and SimpleTcpTransport library have dependency problem. So I have changed back
+  to make the SimpleTcpTransport still be part of the ddsdcps library.
+
+  The footprint for various approaches:
+
+    1) before dds configuration:  SimpleTcp and SimpleUdp transports are in ddsdcps lib.
+       TAO_DdsDcpsd.dll-> 4208kb
+    2) dds configuration implementation with SimpleTcp and SimpleUdp in seperate libraries.
+       SimpleTcpd.dll ->192k
+       TAO_DdsDcpsd.dll->4152k
+    3) dds configuration implementation with SimpleTcp be part of ddsdcps library.
+       TAO_DdsDcpsd.dll->4264k
+
+  Approach #3 is what I currently implemented.
+
+  Note: we do not use the ACE service configuration facility to configure the transports because we want to
+        be able to specify configuration of multiple transports and the ACE_Configuration file format allows
+        individual sections and is more clear (you can have comments per configuration value).
+
+  NOTE: we may need to make the TCP transport static when Built-in-topic is supported because BIT uses SimpleTCP.
+
+
+2) Service Participant 
+
+
+  The Service_Participant creates the ACE_Configuration object and imports the configuration file. 
+  The name of the configuration file can be passed via command line option, otherwise use the 
+  default name "conf.ini". After the configuration file is loaded, all values are stored in the
+  ACE_Configuration object. 
+
+
+The configuration file format:
+
+
+[common]
+DCPSDebugLevel=
+DcpsInfo=
+DCPSChunks=
+DCPSChunkAssociationMutltiplier=
+DCPSBitTransportPort=
+DCPSLivelinessFactor=
+DCPSBitLookupDurationSec=
+
+
+[transport_impl_<id>]
+# This transport_type should match the "type" argument in the svc.conf or be the
+# SimpleTcp which is part of the DDSdcps lib.
+transport_type=
+# The local endpoint.
+local_address=
+#transport configuration
+swap_bytes=
+# Number of pre-created link (list) objects per pool for the
+# "send queue" of each DataLink.
+queue_links_per_pool=
+# Initial number of pre-allocated pools of link (list) objects
+# for the "send queue" of each DataLink.
+queue_initial_pools=
+#Max size (in bytes) of a packet (packet header + sample(s))
+max_packet_size
+# Max number of samples that should ever be in a single packet.
+max_samples_per_packet
+# Optimum size (in bytes) of a packet (packet header + sample(s)).
+optimum_packet_size=
+# This is just for SimpleTcp transport.
+enable_nagle_algorithm=
+
+Idea: get rid of the [transport_factory_<id>] and that transport factories
+have # ids and just use the name from the service configuration.
+This makes it simpler and there is no reason to have multiple factories so why not avoid
+the complexity.  The only issue is that this would not be backward compatible.
+We could make it backward compatible by having an "id=" value in the [transport_factory_<id>]
+section.
+
+
+The *common* section configures the values currently configured by Service_Participant via 
+command line. These command line options can override the values in configuration file.
+ 
+
+The [transport_impl_<id>] sections provides the informatiopn for configuring a TransportImpl.
+It has the transport_type to tell which factory should be used to create the TransportImpl object
+and it has the configuration specific to the concrete transport.
+
+After the Service_Participant loads the configuration file, the ACE_Configuration is passed to
+the TheTransportFactory to configure the TransportImpl. See 
+void TransportFactory::load_configuration (ACE_Configuration&) for details.
+
+
+3) TransportFactory:
+
+  There are one new map and some new methods added to the TransportFactory to support the automatically registration
+  of a concrete transport configuration.
+
+  - New map:
+
+    ConfigurationGeneratorMap: transport_type->ConfigurationGenerator* 
+
+         The transport_type is the name of the concrete transport such as SimpleTcp, SimpleUdp, MyTransport ...
+    
+         Each concrete transport library needs provide a subclass of ConfigurationGenerator and implements
+         the virtual functions defined in ConfigurationGenerator class.
+         
+         1) TransportImplFactory* new_factory () 
+             
+            This function returns a new concrete TransportImplFactory instance.
+
+            e.g.
+
+             TransportImplFactory* SimpleTcpConfigurationGenerator::new_factory ()
+             {
+               return new SimpleTcpFactory();
+             }
+         
+         2) TransportConfiguration* new_configuration()
+
+            This function returns a new concrete TransportConfiguration instance which uses the 
+            default(hard coded) configurations.
+
+            e.g.
+
+            TransportConfiguration* SimpleTcpConfigurationGenerator::new_configuration()
+             {
+ 		           return new SimpleTcpConfiguration ();
+             }
+
+         
+    ConfigurationMap:  transport_id -> TransportConfiguration*
+
+         
+
+
+  - current existing maps that are referenced in this document.
+
+    TransportImplFactoryMap:  factory_id->TransportImplFactory*  
+      Note the factory_id is changed to be a string instead of an integer.
+      
+    TransportImplMap: transport_id -> TransportImpl*
+      Note the transport_id is still integer type.
+      
+
+  - new methods:
+
+     - void register_transport_generator (ACE_TString transport_type, ConfigurationGenerator*)
+
+       This function is called when the concrete transport libraries are dynamically loaded by 
+       the service configurator. This function adds the transport_type->ConfigurationGenerator* pair
+       to the ConfigurationGeneratorMap in TheTransportFactory. 
+       
+     - void load_configuration (ACE_Configuration&)
+         
+       This function is called by the Service_Participant after the Service_Participant reads 
+       the conf.ini to the ACE_Configuration object. TheTransportFactory uses the configuration 
+       information in the ACE_Configuration object to create a TransportImpl objects.
+       
+       This function iterates the sections in the ACE_Configuration object. If the section is a 
+       transport section then a new concrete configuration object is created and added to the 
+       ConfigurationMap. The TransportImpl object is created upon the user's request which 
+       means when the user call create_transport_impl () funtion.
+       
+        iterates over the sections.
+
+          if it's a transport section, // The transport section has the factory_id and transport configuration info.
+             TransportConfiguration* config = get_or_create_configuration (transport_id, transport_type);
+             add the transport_id-> config to the configuration map
+
+     - TransportImpl* obtain (transport_id)
+        This function is previously implemented which return a ref counted TransportImpl object.
+
+     - TransportImpl* create_transport_impl (transport_id, bool auto_config=true)
+     
+        This function is called when the transport_id is configured in the conf.ini. 
+        If the TransportConfiguration object is not found for the transport_id in the configuration
+        map then an error is reported. If the object exists then we use the transport_type information
+        to create or get the TransportImplFactory object and use the factory instance to create the
+        TransportImpl object.
+         
+        pseudo code:
+
+        TransportConfiguration* config;
+        if (configuration_map_.find (transport_id, config) != 0) // not found
+           error return // the transport_id is not defined in conf.ini
+        
+        transport_type = config->transport_type ();
+        TransportImplFactory* factory = get_or_create_factory (transport_type);
+ 
+        TransportImpl* trans_impl = factory->create_impl ();
+        bind transport_id->transport_impl to impl_map_.
+        if (auto_config)
+           trans_impl->configure (config);
+           return trans_impl;
+ 
+
+     - TransportImpl* create_transport_impl (transport_id, transport_type, bool auto_config=true)
+
+        This function is called when the transport_id is not specified in the conf.ini.
+        A new TransportConfiguration object is created when the auto_config is true. If the user 
+        does not want call configure() automatically then this function will not create a new
+        TransportConfiguration object. The user can call create_configuration() afterwards
+        and then call configure().
+
+        pseudo code:
+
+          TransportImplFactory* factory = get_or_create_factory (transport_type);
+ 
+          TransportImpl* trans_impl = factory->create_impl ();
+          if (auto_config)
+            TransportConfiguration* config = create_configuration (transport_id, transport_type);
+ 
+            trans_impl->configure (config);
+          return trans_impl;
+            
+
+     - TransportConfiguration* get_configuration (transport_id)
+
+       This function is called if the transport_id is configured in the configuration file.
+       The TransportConfiguration object is created during the time of Service_Participant 
+       initialization and added to the configuration map.
+       If the transport_id is not configured then an error is reported.
+
+       pseudo code:
+
+       TransportConfiguration* config;
+       if (configuration_map_.find (transport_id, config) == 0) // found
+         return config;
+       else
+         error.
+       
+     - TransportConfiguration* create_configuration (transport_id, transport_type)
+  
+       This function is to create a new TransportConfiguration object from the transport_type
+       and bind to the configuration_map_. If the transport_id is already in the map then an
+       error is reported.
+ 
+       pseudo code:
+
+       TransportGenerator* generator;
+       if (generator_map_.find (transport_type, generator) ==0)
+           config = generator->new_configuration ();    
+           bind transport_id->config to configuration map.
+       else
+          error. //The transport type is not registered.
+
+
+     - TransportConfiguration* get_or_create_configuration (transport_id, transport_type="")
+ 
+       This function check if the configuration map for transport_id. If it's already created
+       then return it. Otherwise use the provided transport_type to create one.
+
+       pseudo code:
+
+       TransportConfiguration* config;
+       if (configuration_map_.find (transport_id, config) == 0) // found
+         // check if there is conflict between the user provided transport_type and in the 
+         // TransportConfiguration object.
+       else
+         create_configuration (transport_id, transport_type);
+
+
+     - TransportImplFactory* get_or_create_factory (transport_type)
+
+        This function is called to provide the TransportImplFactory object for the given transport_type.
+        Note we have one TranportImplpFactory instance per transport_type. The TransportImplFactory instance 
+        is registered in the TransportImplFactory map using transport_type as it's id.
+
+        This function looks the TransportImplFactory map for the "transport_type" id. If the 
+        TransportImplFactory object is created already then the reference is returned. 
+        Otherwise a new TransportImplFactory object is created using the generator of the transport_type.
+   
+
+        pseudo code:
+
+        if (TransportImplFactoryMap->find (transport_type, factory_impl) == 0)
+           return factory_impl;
+        
+        TransportGenerator* generator;
+        if (generator_map_.find (transport_type, generator) ==0)
+           factory_impl = generator->new_factory ();    
+        else
+           error // transport_type is not registered.
+
+        return factory_impl;
+       
+
+   
+5)  Scenarios for using dds configurations:
+
+
+   - single step to create/configure TransportImpl when transport_id is configured in the conf.ini 
+
+     TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, AUTO_CONFIG);
+
+
+        e.g.        DevGuideExamples\DDS\Messenger
+   
+            - Configure via conf.ini using SimpleTcp, run run_test.pl
+            - Change to use SimpleUdp in conf.ini and run "run_test.pl udp"
+
+   - single step to create/configure TransportImpl when transport_id is NOT configured in the conf.ini
+
+     // using the transport type's default configuration (hardcoded).
+     TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, transport_type, OpenDDS::DCPS::AUTO_CONFIG);
+   
+
+	e.g.     performance-tests\DCPS\SimpleLatency
+
+
+   - the user needs overwrite the configuration in the conf.ini
+
+     TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, DONT_AUTO_CONFIG);
+     TransportConfiguration* config = TheTransportFactory->get_configuration (transport_id)
+     //overwrite the configuration in the conf.ini.
+     config->... = ...
+     trans->configure (config)
+
+
+        e.g.    performance-tests\DCPS\TCPListenerTest
+
+
+   - the user does not use file configuration and the test code overwrites the default hardcoded 
+     configuration. Most tests configure in this way.
+     
+     TransportImpl* trans = TheTransportFactory->create_transport_impl (transport_id, transport_type, DONT_AUTO_CONFIG);
+     TransportConfiguration* config = TheTransportFactory->create_configuration (transport_id)
+     //overwrite the configuration in the conf.ini.
+     config->... = ...
+     trans->configure (config)
+
+ 
+
+6) Allow the transport statically linked.
+
+   To allow the transport statically linked, the user application needs include the header
+   file such as SimpleUdp.h and the specify the project depend on the SimplUdp lib.
+
+   
+   e.g of svc.conf:
+
+      static DCPS_SimpleUdpLoader "-type SimpleUdp"
+
+   See tests\transport\udp_simple as an example.
+

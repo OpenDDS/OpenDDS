@@ -1,0 +1,1045 @@
+Thu Jan  8 22:58:32 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Reduce spew unless requested.
+
+Thu Jan  8 22:41:06 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+          Merging trunk changes 1806:1948 out to branch.
+
+        * ChangeLog:
+        * DDS.mwc:
+        * DDS_release_notes.txt:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * bin/JavaProcess.pm:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/Comparator_T.h:
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DurabilityQueue.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FileSystemStorage.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/QueryConditionImpl.h:
+        * dds/DCPS/QueryConditionImpl.cpp:
+        * dds/DCPS/RakeData.h:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/ReadConditionImpl.h:
+        * dds/DCPS/ReadConditionImpl.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/WaitSet.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/WatchdogTimer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/framework/NullSynchStrategy.h:
+        * dds/DCPS/transport/framework/TransportExceptions.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDomainExt.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsSubscriptionExt.idl:
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+        * dds/Version.h:
+        * dds/tools/opendds_ir_ctl:
+        * dds/tools/opendds_ir_ctl/opendds_ir_ctl.mpc:
+        * dds/tools/opendds_ir_ctl/opendds_ir_ctl.cpp:
+        * docs/design/persistence.txt:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * history/ChangeLog-JMS_PROVIDER:
+        * java:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/README:
+        * tests/DCPS/Deadline/Writer.h:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/FileSystemStorage:
+
+        * tests/DCPS/FileSystemStorage/FileSystemStorage.mpc:
+        * tests/DCPS/FileSystemStorage/FileSystemStorageTest.cpp:
+        * tests/DCPS/FileSystemStorage/run_test.pl:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest4/Reader.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
+        * tests/DCPS/LatencyBudget/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/Partition_Table.h:
+        * tests/DCPS/Partition/README:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/QueryCondition:
+        * tests/DCPS/QueryCondition/Messenger.idl:
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/QueryCondition/dcps.ini:
+        * tests/DCPS/QueryCondition/run_test.pl:
+        * tests/DCPS/ReadCondition:
+        * tests/DCPS/ReadCondition/Messenger.idl:
+        * tests/DCPS/ReadCondition/ReadCondition.mpc:
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+        * tests/DCPS/ReadCondition/dcps.ini:
+        * tests/DCPS/ReadCondition/run_test.pl:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+        * dds/DdsDcpsDataReaderEx.idl:
+
+          Removed this file.
+
+Thu Jan  8 21:35:29 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Priority/DataReaderListener.h:
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/README:
+        * performance-tests/DCPS/Priority/Subscriber.h:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/Test.idl:
+        * performance-tests/DCPS/Priority/Writer.h:
+        * performance-tests/DCPS/Priority/Writer.cpp:
+        * performance-tests/DCPS/Priority/scenario1.ini:
+        * performance-tests/DCPS/Priority/scenario2.ini:
+        * performance-tests/DCPS/Priority/scenario3.ini:
+        * performance-tests/DCPS/Priority/scenario6.ini:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+
+          Debugging and expanding this test.
+
+Tue Jan  6 23:26:34 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Priority/README:
+
+          Updated scenario descriptions to include multiprocess and
+          multihost conditions.  Included estimated network loads.
+
+Mon Jan  5 23:40:31 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+          Capturing todays debugging.
+
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+
+          Added more information to the diagnostic messaging and provided
+          a mechanism to damp the spew.
+
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Options.cpp:
+
+          Added additional diagnostic messages.  Made the argument values
+          correct.  Added extraction of duration value from configuration
+          file.
+
+        * performance-tests/DCPS/Priority/PublicationProfile.cpp:
+
+          Make the small number big before converting to an integer type.
+
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+
+          Added additional diagnostic message.  Changed main thread
+          blocking to use Thread_Manager::wait().
+
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+
+          Change the WaitSet::wait() timeout value to infinity.  This
+          makes the test depend on loosing liveliness for the subscriber
+          to terminate.
+
+        * performance-tests/DCPS/Priority/Writer.cpp:
+
+          Enhanced the diagnostic messages.
+
+        * performance-tests/DCPS/Priority/run_test.pl:
+
+          Updated the command line arguments to be correct and to map to
+          the individual process arguments correctly.  Made the pod
+          documentation correct for arguments.
+
+Wed Dec 24 05:19:45 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/Priority:
+        * performance-tests/DCPS/Priority/DataReaderListener.h:
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Options.inl:
+        * performance-tests/DCPS/Priority/Options.cpp:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/Priority/PublicationProfile.h:
+        * performance-tests/DCPS/Priority/PublicationProfile.cpp:
+        * performance-tests/DCPS/Priority/Publisher.h:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/README:
+        * performance-tests/DCPS/Priority/Subscriber.h:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/Test.h:
+        * performance-tests/DCPS/Priority/Test.idl:
+        * performance-tests/DCPS/Priority/Writer.h:
+        * performance-tests/DCPS/Priority/Writer.cpp:
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/run_test.pl:
+        * performance-tests/DCPS/Priority/scenario1.ini:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/Priority/transport.ini:
+
+          Added new performance test directory for evaluating the
+          TRANSPORT_PRIORITY implementation.
+
+Wed Dec 17 17:11:25 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Reset the thread scheduling policy value used for thread
+          activation if the process scheduling policy was not set.
+
+Tue Dec 16 22:50:36 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added scheduler specification via configuration file.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Removed scheduler specification access.
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          Use Service_Participant scope scheduling policy.
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Removed scheduler specification via configuration file.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Use Service_Participant scope scheduling policy.
+
+        * tests/DCPS/Priority/transport.ini:
+
+          Move scheduling policy specification to [common] section.
+
+Tue Dec  9 04:36:15 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added accessor for configured scheduler policy information.
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.h:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+
+          Added scheduler policy value to interfaces.
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+
+          Activate the thread with sheduling policy and priority.
+
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+
+          Added scheduler policy value to interfaces.
+
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          Activate the thread with sheduling policy and priority.
+
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+
+          Added scheduler policy value to interfaces.
+
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+
+          Added configurable scheduler policy specification.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Expose the configuration information.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Create the synch object with priority and scheduling policy values.
+
+        * tests/DCPS/Priority/transport.ini:
+
+          Added scheduler policy specifications to test configuration.
+
+Mon Dec  8 22:29:48 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added new LATENCY_BUDGET testing to the list.
+
+Mon Dec  8 21:25:09 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed to only gather statistics for application sample data.
+
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+
+          Changed test output slightly.
+
+Mon Dec  8 21:01:04 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Stats_T.h:
+
+          Update max and min values before updating the sample number.
+
+Mon Dec  8 20:29:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DdsDcpsDataReaderEx.idl:
+
+          Changed mean and variance types in the LatencyStatistics
+          structure to be of floating point double types rather than an
+          integer type.
+
+Mon Dec  8 20:13:27 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+
+          Fixed an error on newer versions of gcc.
+
+Mon Dec  8 19:42:06 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * tests/DCPS/LatencyBudget:
+        * tests/DCPS/LatencyBudget/DataReaderListener.h:
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.h:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.cpp:
+        * tests/DCPS/LatencyBudget/LatencyBudget.mpc:
+        * tests/DCPS/LatencyBudget/Messenger.idl:
+        * tests/DCPS/LatencyBudget/README:
+        * tests/DCPS/LatencyBudget/Writer.h:
+        * tests/DCPS/LatencyBudget/Writer.cpp:
+        * tests/DCPS/LatencyBudget/pub.ini:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/run_test.pl:
+        * tests/DCPS/LatencyBudget/sub.ini:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/LatencyBudget/tcp.conf:
+
+          Added a test for LATENCY_BUDGET. The README file contains details
+          about running the test, which accepts either no arguments or the
+          "late" argument to test latency budget processing.
+
+Mon Dec  8 17:20:31 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Modified the test interfaces to match the new actual
+          interfaces.
+
+Fri Dec  5 23:40:25 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynch.h:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSendStrategy.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+
+          Modified interfaces to pass priority information to locations
+          where threads are activated.
+
+Fri Dec  5 20:55:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/FooTest5/run_test_multi_trans.pl:
+
+          This file was not added as I was merging/reverting/merging.
+          This is part of the immediately previous merge.
+
+Fri Dec  5 20:14:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+          Merging trunk changes 1655:1805 out to branch.
+
+        * BranchChangeLog:
+        * DDS_release_notes.txt:
+        * README:
+        * bin/DDS_Run_Test.pm:
+        * bin/PerlDDS:
+        * bin/PerlDDS/Process.pm:
+        * bin/PerlDDS/ProcessFactory.pm:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticast.rc:
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcp.rc:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgram.rc:
+        * dds/InfoRepo/DCPSInfoRepoServ.rc:
+        * dds/InfoRepo/Federator.rc:
+        * dds/InfoRepo/InfoRepoLib.rc:
+        * dds/OpenDDS_DCPS.rc:
+        * java/dds/dcps_java.rc:
+        * java/idl2jni/runtime/idl2jni_runtime.rc:
+        * java/tao/tao_java.rc:
+        * bin/Process.pm:
+        * bin/ProcessFactory.pm:
+
+        * dds/DCPS/transport/framework/TheTransportFactory.inl:
+        * dds/DCPS/transport/framework/TheTransportFactory.cpp:
+
+          Removed these files.
+
+Wed Dec  3 20:44:56 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added a diagnostic to provide latency information per sample
+          received.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added a diagnostic message when a thread is started to
+          specifically handle sending per connection.
+
+Tue Dec  2 22:06:03 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.h:
+
+          Delay setting the DiffServ codepoint for this Transport
+          implementation until the socket has been created.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.cpp:
+
+          Document the 'ended-ness' behavior of the ReliableMulticast
+          transport as it affects the access to the link socket.
+          Implement the return of a 'nil' object when the sending socket
+          has not been initialized (via a call to configure() in a
+          publication role).
+
+Tue Dec  2 18:06:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added the default Priority test to the regression.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Removed the DiffServ codepoint setting behavior from here to
+          allow other transports to use the same behavior implementation.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Factored setting the DiffServ codepoint behavior to a stateless
+          method here as the closest ancestral location.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastDataLink.inl:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportSendStrategy.cpp:
+        * dds/DCPS/transport/ReliableMulticast/detail/EventHandler.h:
+        * dds/DCPS/transport/ReliableMulticast/detail/EventHandler.cpp:
+
+          Exposed the underlying socket to allow options to be set.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Set the socket DiffServ codepoint according to the
+          TRANSPORT_PRIORITY policy value.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpSocket.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramSocket.h:
+
+          Exposed the underlying socket to allow options to be set.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+
+          Set the socket DiffServ codepoint according to the
+          TRANSPORT_PRIORITY policy value.
+
+Mon Dec  1 23:22:00 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Implement setting of the DiffServ codepoint value with a mapped
+          version of the TRANSPORT_PRIORITY QoS policy value.
+
+        * dds/DdsDcpsDataReaderEx.idl:
+        * dds/DdsDcpsSubscription.idl:
+
+          Moved OpenDDS specific interfaces out to there own file.
+          Extended the DataReader interface to include the statistics
+          methods for obtaining results from latency calculations.
+
+        * dds/DdsDcps.mpc:
+
+          Added the new IDL file with the DataReader extensions.
+
+        * bin/DCPS/IDLTemplate.pm:
+
+          Type specific DataReader now inheirits from the OpenDDS extended
+          DataReaderEx.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Hoist the statistics method implementations into the IDL.
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/FailoverListener.h:
+
+          Include the new extended DataReader interface file.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/StackDataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+
+Wed Nov 26 19:22:11 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          WriterInfo::get_stats() -
+            Removed subscription identifier from interface as it is no
+            longer used to fill the LatencyStatistics structures.
+
+          get_latency_stats() -
+            Changed container type from STL container to CORBA sequence
+            container.  This is in preparation of moving the statistics
+            interfaces to the extended OpenDDS::DCPS:DataReader IDL
+            definition.
+
+          process_latency() -
+            Demoted an error message in process_latency() where a
+            publication is not known at the time a sample is received.
+            This is similar to the situation in writer_activity()
+            which also checks and generates an informational message.
+            This condition is possible if samples are received after
+            an association has been torn down.  Currently these samples
+            are received regardless of the association status.  This
+            message is now guarded by the debug level as well.
+
+          writer_activity() -
+            Guard the message mentioned above with the debug level.
+
+        * dds/DdsDcpsSubscription.idl:
+
+          Hoisted LatencyStatistics structure into the IDL.  Included
+          sequence typedef for the type as well.  Modified to include the
+          publication InstanceHandle and remove the subscription identifier.
+
+Tue Nov 25 21:02:44 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/DirectPriorityMapper.h:
+        * dds/DCPS/transport/framework/DirectPriorityMapper.inl:
+        * dds/DCPS/transport/framework/DirectPriorityMapper.cpp:
+        * dds/DCPS/transport/framework/PriorityMapper.h:
+        * dds/DCPS/transport/framework/PriorityMapper.inl:
+        * dds/DCPS/transport/framework/PriorityMapper.cpp:
+
+          Added feature to map TRANSPORT_PRIORITY values to DiffServ
+          codepoint and thread priority values.  This includes an
+          abstract interface and a direct mapping implementation.  The
+          direct mapping simply maps an in-range priority value to the
+          mapped value and maps out of range values to the nearest
+          extremum.
+
+          For thread priorities, ordering is accounted for.  This means
+          that if priorities range from 0 (minimum) to a negative value
+          (maximum), then the TRANSPORT_PRIORITY value will be mapped
+          from [0,range] directly and out of range values will be mapped
+          to the closest extremum.  Increasing TRANSPORT_PRIORITY integer
+          values will always correspond to increasing thread priority
+          values.  See the block header in the DirectPriorityMapper
+          header for additional detail.
+
+Mon Nov 24 16:47:46 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+        statistics_enabled()
+          - added accessors to set and query the (new)
+            statistics gathering state.  The initial state is 'false'
+            which disables statistics gathering.
+        struct LatencyStats
+          - added a subscription and publication RepoId field to the
+            structure to allow correlating the statistics to the
+            association.
+        WriterInfo::get_stats()
+          - Added subscription id to interface, included copying out the
+            publication id of the writer into the structure.
+
+Fri Nov 21 22:57:32 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Stats_T.h:
+
+          Added a statistics gathering class.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added LatencyStats structure to contain statistical data
+          summaries per writer.  Added the following members and methods:
+            WriterInfo::add_stat()
+              - add a latency datum to the statistics for a single writer
+                to a reader.
+            WriterInfo::get_stats()
+              - interface to collect current statistical values for a
+                single writer to a reader.
+            WriterInfo::reset_stats()
+              - interface to clear all statistical data for a single
+                writer to a reader.
+            WriterInfo::stats_
+              - new statistical accumulator member.
+            DataReaderImpl::process_latency()
+              - implemented this behavior to collect statistics and check
+                latency against budget policy value.
+            DataReaderImpl::notify_latency()
+              - implemented this behavior to callback on_budget_exceeded().
+            DataReaderImpl::get_latency_stats()
+              - implemented this to return a vector of LatencyStats
+                structures, one for each publication sending to the
+                reader.
+            DataReaderImpl::reset_latency_stats()
+              - implemented this to clear all statistics gathering state
+                for the reader.
+            DataReaderImpl::budget_exceeded_status_
+              - member to retain count of budget violations and handle of
+                most recent violator.
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Removed an unused argument warning.
+
+        * dds/DdsDcpsSubscription.idl:
+
+          Added BudgetExceededStatus structure definition and added a
+          parameter of this type to the
+          OpenDDS::DCPS::DataReaderListener::on_budget_exceeded()
+          callback.
+
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.cpp:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+
+          Added BudgetExceededStatus parameter to on_budget_exceeded()
+          callback.
+
+Thu Nov 20 20:22:19 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Removed setting the Writer status LIVELINESS_LOST and added
+          status changed indication sets for LIVELINESS_CHANGED where
+          required (not all change locations had set the indicator).
+
+        * dds/DCPS/ConditionImpl.cpp:
+        * dds/DCPS/StatusConditionImpl.cpp:
+
+          Added some debug level 10 diagnostic messages.
+
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.h:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/Test.h:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+
+          Updated the testing to pass data at specified priorities.  This
+          currently has a single writer per publisher process.  There are
+          some startup and shutdown association management race
+          conditions and the multicast transports are not working
+          robustly.
+
+Thu Nov 20 19:40:30 UTC 2008  Jonathan Pollack  <pollack_j@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.cpp:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+
+          Added glue and callback methods for LATENCY_BUDGET QoS processing;
+          the addition of a callback required a lot of test code to be
+          modified.
+
+Wed Nov 19 04:18:22 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.h:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.h:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/Test.h:
+        * tests/DCPS/Priority/run_test.pl:
+
+          Publisher and subscriber are passing data.  There remain some
+          test synchronization issues.
+
+        * tests/DCPS/Priority/DataWriterListener.h:
+        * tests/DCPS/Priority/DataWriterListener.cpp:
+
+          Removed these files.
+
+Tue Nov 18 01:30:29 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataWriterListener.h:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.h:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.h:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/Test.h:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+
+          Capturing the days implementation.  Publisher and subscriber
+          are initializing now.  Improved the argument specification and
+          handling.
+
+Fri Nov 14 23:18:27 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/svc.conf:
+        * tests/DCPS/Priority/transport.ini:
+
+          Beginning some implementation of the testing.
+
+Thu Nov 13 23:18:43 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Priority:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/DataWriterListener.h:
+        * tests/DCPS/Priority/DataWriterListener.cpp:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/README:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/Test.idl:
+        * tests/DCPS/Priority/run_test.pl:
+
+          Adding test skeleton for TRANSPORT_PRIORITY.
+
+Thu Nov 13 20:13:55 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/PriorityKey.h:
+        * dds/DCPS/transport/framework/PriorityKey.inl:
+        * dds/DCPS/transport/framework/PriorityKey.cpp:
+
+          Added complex key type for storing connection objects.
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+
+          Store data links using priority/address complex key.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnectionReplaceTask.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Store data links using priority/address complex key.
+
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramDataLink.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.inl:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+
+          Store data links using priority/address complex key.
+
+Thu Nov 13 01:24:50 UTC 2008  Mike Martinez  <martinez_m@lab.ociweb.com>
+
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Move the TRANSPORT_PRIORITY.value policy value to the place(s)
+          where it will be used.
+
+Wed Nov 12 16:48:49 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Fix some parameter issues.
+
+Tue Nov 11 23:58:51 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Making TRANSPORT_PRIORITY available as a non-default value.
+
+Mon Nov 10 19:54:12 UTC 2008  Mike Martinez  <martinez_m@ociweb.com>
+
+        * BranchChangeLog:
+
+          Added a branch specific ChangeLog.
+
+vim: filetype=changelog
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

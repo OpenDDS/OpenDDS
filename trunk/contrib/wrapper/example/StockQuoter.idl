@@ -1,0 +1,36 @@
+// *******************************************************************
+//
+// (c) Copyright 2006, Object Computing, Inc.
+// All Rights Reserved.
+//
+// *******************************************************************
+
+#include "orbsvcs/TimeBase.idl"
+
+module StockQuoter
+{
+#pragma DCPS_DATA_TYPE "StockQuoter::Quote"
+#pragma DCPS_DATA_KEY "StockQuoter::Quote ticker"
+
+  struct Quote {
+    string ticker;
+    string exchange;
+    string full_name;
+    double value;
+    TimeBase::TimeT timestamp;
+  };
+
+#pragma DCPS_DATA_TYPE "StockQuoter::ExchangeEvent"
+#pragma DCPS_DATA_KEY "StockQuoter::ExchangeEvent exchange"
+
+  enum ExchangeEventType { TRADING_OPENED,
+                           TRADING_CLOSED,
+                           TRADING_SUSPENDED,
+                           TRADING_RESUMED };
+  struct ExchangeEvent {
+    string exchange;
+    ExchangeEventType event;
+    TimeBase::TimeT timestamp;
+  };
+};
+

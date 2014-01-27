@@ -1,0 +1,400 @@
+Starting with release 2.1.1, OpenDDS provides support for Wireshark.
+The OpenDDS DCPS dissector provides a Wireshark 1.2.x/1.3.x compatible
+dissector which supports the TCP/IP, UDP/IP, and IP multicast transports.
+Dissection of transport headers and encapsulated sample headers are fully
+supported.
+
+
+======================================================================
+* See also
+
+  - Wireshark Project Page
+      <http://www.wireshark.org/>
+  - Wireshark Download Page
+      <http://www.wireshark.org/download.html>
+  - Wireshark Developer's Guide
+      <http://www.wireshark.org/docs/wsdg_html_chunked/>
+  - Wireshark User's Guide
+      <http://www.wireshark.org/docs/wsug_html_chunked/>
+
+
+======================================================================
+* Building the OpenDDS DCPS dissector
+
+These instructions assume you have completed the installation steps in
+the $DDS_ROOT/INSTALL document, including having the various environment
+variables defined.
+
+In addition, the Wireshark sources must be available and built locally
+according to the Wireshark Developer's Guide (see above).
+
+1. Define environment variables
+
+   Linux and Solaris:
+     export GLIB_ROOT=<full path to the GLib root directory>
+     export WIRESHARK_SRC=<full path to the Wireshark source directory>
+
+   Windows:
+     set GLIB_ROOT=<full path to the Wireshark win32-libs/gtk2 directory>
+     set WIRESHARK_SRC=<full path to the Wireshark source directory>
+     set WIRETAP_VERSION=<version of the wiretap DLL built by Wireshark>
+
+2. Update platform_macros.GNU (optional)
+
+   For Linux and Solaris, the platform_macros.GNU file must be modified
+   to contain the following:
+     versioned_so=0
+     wireshark=1
+
+3. Generate MPC workspace
+
+   Linux and Solaris:
+     cd $DDS_ROOT/tools/dissector/
+     perl $ACE_ROOT/bin/mwc.pl -type gnuace -features wireshark=1
+
+   Windows:
+     cd %DDS_ROOT%\tools\dissector\
+     perl %ACE_ROOT%\bin\mwc.pl -type [CompilerType] -features wireshark=1
+       "CompilerTypes" tested includes vc71, vc8, vc9, and nmake
+
+4. Build
+
+   Build normally as described in the $DDS_ROOT/INSTALL document.
+
+5. Install plugin
+
+   Linux and Solaris:
+     export WIRESHARK_ROOT=<full path to the Wireshark root directory>
+     cp OpenDDS_Dissector.so $WIRESHARK_ROOT/lib/wireshark/plugins/<version>/
+
+   Windows:
+     The default Wireshark install directory is the wireshark-gtk2
+     subdirectory of the WIRESHARK_ROOT (top of the source tree).
+     copy OpenDDS_Dissector.dll <full path to the Wireshark install>\plugins\<version>\
+     -or-
+     copy OpenDDS_Dissectord.dll <full path to the Wireshark install>\plugins\<version>\
+
+6. Run Wireshark
+
+   You may verify the plugin is installed correctly by clicking on the
+   Help -> Supported Protocols menu item and looking for "OpenDDS" under
+   the Protocols tab.
+
+   NOTE: You may need to define LD_LIBRARY_PATH (for Linux and Solaris)
+         or PATH (for Windows) to resolve dependent libraries when running
+         Wireshark once the plugin is installed.
+
+
+======================================================================
+* Available Display Filters
+
+A number of display filters are supported by the OpenDDS DCPS dissector:
+
+1. Transport header display filters
+
+   opendds.version
+     Revision of the DCPS protocol.
+
+   opendds.byte_order
+     Byte order of transport header contents.
+
+   opendds.length
+     Total length of payload, including sample headers.
+
+   opendds.sequence
+     Sequence number of transmitted PDU.
+
+   opendds.source
+     Source identifier; only used by the multicast transport.
+
+2. Sample header display filters
+
+   opendds.sample.id
+     Message ID of sample (i.e. SAMPLE_DATA).
+
+   opendds.sample.sub_id
+     Sub-Message ID of sample (i.e. MULTICAST_SYN).
+
+   opendds.sample.flags
+     Flags field (see below).
+
+   opendds.sample.flags.byte_order
+     Indicates byte order of sample data.
+
+   opendds.sample.flags.coherent
+     Indicates sample belongs to a coherent change group.
+
+   opendds.sample.flags.historic
+     Indicates sample is historic; resent by DataWriter.
+
+   opendds.sample.flags.lifespan
+     Indicates sample defines a lifespan.
+
+   opendds.sample.flags.group_coherent
+     Indicates sample uses PRESENTATION.coherent_access.
+
+   opendds.sample.flags.content_filter
+     Indicates the publisher has applied filters for Content-Filtered Topics.
+
+   opendds.sample.length
+     Total length of sample data, not including sample header.
+
+   opendds.sample.sequence
+     Sequence number of transmitted SAMPLE_DATA.
+
+   opendds.sample.timestamp
+     Source timestamp of sample.
+
+   opendds.sample.lifespan
+     Lifespan duration of sample (iff lifespan flag is set).
+
+   opendds.sample.publication
+     Publication ID of transmitting DataWriter.
+
+   opendds.sample.publisher
+     ID representing the coherent group (if group_coherent flag is set).
+
+   opendds.sample.content_filter_entries
+     Number of entries in this list for filtering (if content_filter flag is set).
+
+
+======================================================================
+* Available Color Filters
+
+A set of color filters are included in the source distribution which may
+be imported to highlight DCPS protocol packets.
+
+To import these filters, click on the View -> Coloring Rules menu item,
+followed by the the Import button.  Select the colorfilters file in the
+$DDS_ROOT/tools/dissector/ directory and click the Open button.
+
+NOTE: Coloring rules are applied on a first match basis; you may need to
+      move the imported rules above the "tcp" and "udp" rules using the
+      Order buttons on the right-hand side of the dialog.  If ordering is
+      changed, you must ensure the "OpenDDS (Important)" rule appears
+      before the "OpenDDS" rule.
+
+======================================================================
+
+* Configuring Sample Dissectors
+
+These are traditional *.ini files. The environment variable
+"OPENDDS_DISSECTORS" is checked for a path to the directory containing
+the desired *.ini files. The current directory is used if the env var is
+not set. All *.ini files in the directory are processed.
+
+These files can be generated using "opendds_idl -Gws <filname>.idl"
+The generated file will then be named <filename>_ws.ini and will
+contain configuration sections conforming to the specifications
+below. Note that only the structs and related types in the named file
+are parsed. Any included files need to be parsed separately. Predefined
+types and sequences of predefined types are built in to the sample
+dissector framework and thus do not need to be generated.
+
+The new MPC base project "gen_dissector" may be used in MPC to add -Gws to
+the opendds_idl command line.
+
+The general form for configuration is:
+
+[modulepath/entityname]
+name1 = value1
+name2 = value2
+...
+
+The section identifier is the same syntax as the type identifier in a
+repository ID. The "modulepath" compoent must be fully qualified. As the
+*.ini files are parsed, the module names are used to build a namespace
+tree later used to locate dissectors based on repository ID.
+
+The field names identify either elements of the dissectable entity, or
+metadata describing how the entity is to be composed.  The metadata
+fields are named with a dot, such as:
+
+entityname.kind = kind identifier
+entityname.repoid = "IDL:modules/typename:1.0"
+
+Values that are type identifiers may be expressed as their IDL type
+name, such as "long" or "short" or by their C++ mapping name,
+"CORBA::Long" or "CORBA::Short." Files generated by the IDL compiler
+will use the C++ mapping name for type identifiers.
+
+... other kind-specific information
+the name of remaining configuration values are either names of actual
+struct fields, or are meta-data that is used to manage the parsing. The
+meta-data values have the entity name prepended so as to not collide
+with an otherwise valid generated field name.
+
+A kind identifier is required and is one of:
+"struct"
+"sequence"
+"array"
+"enum"
+"union"
+"alias"
+
+Any of the configuration values that take a type name assume that an
+unqualified name is scoped to the same module as the entity being
+configured. Use the syntax "[::][modulelist::]typename" to specify an
+alternative scoping for the type.
+
+-----
+Special values for the remaining types -
+For kind = "struct":
+entityname.order = "field1 field2 ... fieldn"
+field1 = "type"
+field2 = "type"
+...
+fieldn = "type"
+
+The special value entityname.order is necessary to ensure the fields are
+evaluated in the correct order. The individual fields are then listed by
+name giving the type for the field. The type is either a built-in type
+or a type that is defined in this file, or in a previously evaluated file.
+
+Example struct configuration:
+
+struct PlanInfo {
+   unsigned long flight_id1;
+   unsigned long flight_id2;
+   string flight_name;
+   string tailno;
+};
+
+[PlanInfo]
+PlanInfo.kind = "struct"
+PlanInfo.repoid = "IDL:PlanInfo:1.0"
+PlanInfo.order = "flight_id1 flight_id2 flight_name tailno"
+flight_id1 = "unsigned long"
+flight_id2 = "unsigned long"
+flight_name = "string"
+tailno = "string"
+
+The generated configuration would be:
+
+[PlanInfo]
+PlanInfo.kind = "struct"
+PlanInfo.repoid = "IDL:PlanInfo:1.0"
+flight_id1 = "CORBA::ULong"
+flight_id2 = "CORBA::ULong"
+flight_name = "char *"
+tailno = "char *"
+PlanInfo.order = "flight_id1 flight_id2 flight_name tailno"
+
+-----
+For kind = "enum":
+entityname.order = "value1, value2, ... valuen"
+The only special configuration for the enumeration is to list the values
+in their natural order.
+
+Eample enum configuration:
+module MyModule {
+  enum MyEnum {one, two, three};
+}
+
+[MyModule/MyEnum]
+MyEnum.kind = "enum"
+MyEnum.repoid = "IDL:MyModule/MyEnum:1.0"
+MyEnum.order = "one two three"
+
+For kind = "sequence":
+entityname.element = "type id"
+
+The only special field for sequences is to identify the type of sequence
+elements. Bounded sequences are treated the same as unbounded sequences
+by the dissector so no size specification is necessary. It could be
+added if other consumers of the configuration need it.
+
+Example sequence configuration:
+
+typedef sequence<LocationInfo> seqtest;
+
+[seqtest]
+seqtest.kind = "sequence"
+seqtest.repoid = "IDL:seqtest:1.0"
+seqtest.element = "LocationInfo"
+
+------
+For kind = "array":
+entityname.element = "type id"
+entityname.size = number
+
+Arrays are similar to sequences in that they are ordered groups of
+elements using the same type. Unlike sequences, the size of the array
+must be provided in the configuration.
+
+For kind = "alias":
+entityname.base = "type id"
+
+Specifies typedef to provide an alternative typename for a given base type.
+The supplied base can be a built-in type or a previously defined type.
+
+Example array configuration:
+
+module MyModule {
+   module SubModule {
+     typedef ::PlanInfo planarray[10];
+   }
+}
+
+[MyModule/SubModule/planarray]
+playarray.kind = "array"
+planarray.repoid = "IDL:MyModule/SubModule/planarray:1.0"
+planarray.element= "::PlanInfo"
+planarray.size = 10
+
+-----
+For kind = "union"
+entityname.order = "field1 field2 ... fieldn"
+entityname.discriminator = "type"
+default.name = "name"
+default.type = "type"
+field1.name = "name"
+field1.type = "type"
+field2.name = "name"
+field2.type = "type"
+...
+fieldn.name = "name"
+fieldn.type = "type"
+
+The order are stringified versions of each case value for the union. The
+values have to be consistent for the type id defined by
+"entityname.discriminator" but there is no verification of that by the
+dissector.
+For each case statement, there is a name and type id for that case. When
+there are multiple cases for a single target, only the last field in the
+range will have a name and type value.
+
+If there is a default case, that is configured with the default.name and
+default.typeid values.
+
+Example Union configuration:
+
+union unionTest switch (short) {
+   case 1 : short one;
+   case 2 :
+   case 3 :
+   case 5 :
+   case 10: long gt_one;
+   default: string all_else;
+};
+
+[unionTest]
+unionTest.kind = "union"
+unionTest.repoid = "IDL:unionTest:1.0"
+unionTest.order = "1 2 3 5 10"
+unionTest.discriminator = "short"
+default.type = "string"
+default.name = "all_else"
+1.typeid = "short"
+1.name = "one"
+10.type = "long"
+10.name = "gt_one"
+
+
+======================================================================
+* Known Limitations
+
+  - OpenDDS only maintains wire compatibility with the current revision
+    of the DCPS protocol.  This dissector is effective for the compiled
+    protocol version only.
+

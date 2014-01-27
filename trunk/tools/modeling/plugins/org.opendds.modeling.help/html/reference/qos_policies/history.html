@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>HISTORY</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H1 CLASS="Head3">
+<A NAME="pgfId-163623"></A>HISTORY</H1>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-108343"></A>The <A NAME="marker-121664"></A>HISTORY policy determines how <A NAME="marker-120649"></A>samples are held in the <A NAME="marker-119359"></A>data writer and <A NAME="marker-120086"></A>data reader for a particular <A NAME="marker-120884"></A>instance. For data writers these values are held until the <A NAME="marker-119643"></A>publisher retrieves them and successfully sends them to all connected <A NAME="marker-119870"></A>subscribers. For data readers these values are held until “taken” by the application. This policy applies to the <A NAME="marker-119022"></A>topic, data reader, and data writer entities via the <EM CLASS="Code">
+history</EM>
+ member of their respective QoS structures. Below is the IDL related to the history QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-108344"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-108394"></A>enum HistoryQosPolicyKind {</P>
+<P CLASS="Code">
+<A NAME="pgfId-108395"></A>  KEEP_LAST_HISTORY_QOS,</P>
+<P CLASS="Code">
+<A NAME="pgfId-108396"></A>  KEEP_ALL_HISTORY_QOS</P>
+<P CLASS="Code">
+<A NAME="pgfId-108397"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-108398"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-108399"></A>struct HistoryQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-108400"></A>  HistoryQosPolicyKind kind;</P>
+<P CLASS="Code">
+<A NAME="pgfId-108401"></A>  long depth;</P>
+<P CLASS="Code">
+<A NAME="pgfId-108402"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-266613"></A>&nbsp;</P>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-266614"></A>The “keep all” value (<EM CLASS="Code">
+KEEP_ALL_HISTORY_QOS</EM>
+) specifies that all possible <A NAME="marker-266615"></A>samples for that <A NAME="marker-266616"></A>instance should be kept. When “keep all” is specified and the number of unread samples is equal to the “resource limits” field of <EM CLASS="Code">
+max_samples_per_instance</EM>
+ then any incoming samples are rejected.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-114377"></A>The “keep last” value (<EM CLASS="Code">
+KEEP_LAST_HISTORY_QOS</EM>
+) specifies that only the last <EM CLASS="Code">
+depth</EM>
+ values should be kept. When a <A NAME="marker-164165"></A>data writer contains <EM CLASS="Code">
+depth</EM>
+ samples of a given instance, a write of new <A NAME="marker-164167"></A>samples for that instance are queued for delivery and the oldest unsent samples are discarded. When a <A NAME="marker-120095"></A>data reader contains <EM CLASS="Code">
+depth</EM>
+ samples of a given instance, any incoming <A NAME="marker-120666"></A>samples for that instance are kept and the oldest samples are discarded. </LI>
+<LI CLASS="Body">
+<A NAME="pgfId-164180"></A>This policy defaults to a “keep last” with a depth of one.</LI>
+</UL>
+
+</body>
+</html>

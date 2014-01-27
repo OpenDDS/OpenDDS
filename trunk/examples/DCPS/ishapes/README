@@ -1,0 +1,38 @@
+
+ishapes - QT GUI application for testing OpenDDS RTPS interoperability.
+
+This code has been adapted from The Simple DDS API
+(SIMD http://code.google.com/p/simd-cxx), and can be used to demonstrate
+OpenDDS RTPS interoperability with other DDS vendors.
+
+------------------------------------------------------------------------
+DIRECTORIES:
+
+images/
+  -- Contains image resources used by this application.
+
+------------------------------------------------------------------------
+FILES:
+
+*.ui
+  -- Qt4 designer files specifying the UI for the application.
+
+ishape.qrc
+  -- Resource specification file, managed by Qt4 designer.
+
+ishape.mpc
+  -- MPC project file for the application.
+
+*.{hpp,cpp}
+  -- source code for application.
+
+------------------------------------------------------------------------
+Code notes:
+
+The GUI source code files are compiled by the Qt meta-object compiler and
+have certain macros and other non-standard language constructs that are
+parsed by that system.
+
+This means that it is not recommended to run a style utility on the GUI
+files, as the Qt specific elements may no longer be recognizable by the
+Qt tools.

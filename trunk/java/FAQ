@@ -1,0 +1,107 @@
+Starting with release 1.2, OpenDDS provides Java bindings.  Java applications
+can make use of the complete OpenDDS middleware just like C++ applications.
+
+See the README file in the $DDS_ROOT directory (one level above here) for a
+general overview of OpenDDS.  Also see the release notes, DDS_release_notes.txt
+in the $DDS_ROOT directory and the FAQ at <http://www.opendds.org/faq.html>.
+
+
+======================================================================
+* Frequently Asked Questions (FAQ)
+
+  - Why does my program fail with a java.lang.UnsatisfiedLinkError?
+
+    Because the Java bindings make use of JNI, the native OpenDDS
+    libraries and its dependencies must be available for the JVM to
+    load at runtime. Please refer to the JVM documentation on how to
+    configure the JVM library path.
+
+    If the JVM library path is configured correctly, it is still possible
+    to encounter the above Exception if your code references a symbol
+    prior to loading the library. To avoid this issue, your code should
+    always reference TheParticipantFactory before referencing any other
+    Java binding classes.
+
+  - Why does my program fail when attaching both a Publisher and a
+    Subscriber to the same TransportImpl instance?
+
+    This problem is not specific to Java applications.  See the known issues
+    in the section "--- more notes and limitations ---" of the release notes,
+    $DDS_ROOT/DDS_release_notes.txt
+
+  - Why do my DataReaderListener and DataWriterListener implementations
+    fail with the following log message?
+
+      ERROR: TransportReactorTask::svc caught exception.
+
+    If a Throwable is thrown from one of the DataWriterListener or
+    DataReaderListener methods, the above error will be logged and the thread
+    will no longer be available to handle OpenDDS events (the system may
+    lock up because of this). Listener methods should exit normally (not by
+    throwing).
+
+  - How do I detect errors from the OpenDDS middleware?
+
+    DDS (as defined by the spec) does not throw exceptions.  There are some
+    cases where OpenDDS will throw exceptions, mostly for unrecoverable
+    conditions.  See the IDL for the DDS API to determine if an error code is
+    returned from the API call.  In some cases an object reference is returned
+    instead of an error code.  The application must check if this is a nil
+    reference before attempting to dereference it.
+
+  - Can I use static (native) libraries?
+
+    Libraries loaded by the JVM at runtime must be shared (dynamic) libraries
+    by definition.  The only other option would be to compile a new JVM
+    executable already linked to these libraries.  OpenDDS doesn't currently
+    have a provision for this.
+
+  - With Visual Studio 2003 or 2005 (Visual C++ 7.1 or 8), why does compiling
+    Java files fail with messages about missing source or class files?
+
+    A bug in Visual Studio causes directories to be created with all-lowercase
+    names when they should be mixed-case.  This bug is fixed in Visual Studio
+    2008 (Visual C++ 9).  See the comment in $DDS_ROOT/java/dds/dcps_java.mpc
+    for one possible work-around.  Another workaround is to rename the
+    directories after they are created.
+
+  - I'm seeing a null pointer exception or a JVM crash in an OpenDDS native
+    method.  What should I check first?
+
+    OpenDDS assumes that the Java objects representing instances of IDL structs
+    are "complete" when passed down to the middleware.  One common example is
+    SampleInfo (from $DDS_ROOT/dds/ddsDcpsInfrastructure.idl).  SampleInfo has
+    a field "source_timestamp" which itself is a struct, a Time_t.  In Java,
+    the default constructor of SampleInfo initializes "source_timestamp" to a
+    null reference.  Thus the SampleInfo instance is incomplete.  It is up to
+    the application to construct a Time_t instance and assign it to the
+    "source_timestamp" field of the SampleInfo instance.
+
+  - How do I use the *Holder classes?
+
+    OpenDDS follows the OMG-specified IDL-to-Java mapping.  Part of this
+    mapping involves Holder classes.  An IDL operation (method) which uses
+    either the "out" or "inout" parameter passing modes requires the caller to
+    make use of the associated Holder class for those parameters.  For the
+    "inout" mode, the data held by the Holder must be valid before calling the
+    method.  For either mode, the caller must always use the Holder's "value"
+    field to access the data after the call.
+    For more information about IDL and the IDL-to-Java mapping, see the
+    references at the top of the $DDS_ROOT/java/README file and the book
+    "Pure CORBA" by Fintan Bolton (Sams Publishing, 2002).
+
+  - Which IDL constructs are supported?
+
+    OpenDDS data types can consist of structs, sequences, unions, arrays,
+    enums, and basic types.  Constants and typedefs are also used in the IDL.
+    Of these types, multidimensional arrays and long double are not supported.
+    Anonymous sequences and arrays have been deprecated by the OMG specs
+    and are not supported by the OpenDDS Java tools.  For example,
+    struct A {
+      sequence<B> seq;
+    };
+    Must be replaced by:
+    typedef sequence<B> BSeq;
+    struct A {
+      BSeq seq;
+    };

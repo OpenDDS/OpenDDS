@@ -1,0 +1,81 @@
+
+## Run inter-host tests first
+
+performance-tests/Bench/tests/latency/run_test.pl tcp 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl tcp 32000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl udp 32000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-be 32000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 50: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 100: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 250: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 1000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 2500: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 5000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 8000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 16000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl multi-rel 32000: !DCPS_MIN
+performance-tests/Bench/tests/latency/run_test.pl rtps 50: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 100: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 250: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 500: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 1000: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 2500: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 5000: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 8000: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 16000: !DCPS_MIN RTPS
+performance-tests/Bench/tests/latency/run_test.pl rtps 32000: !DCPS_MIN RTPS
+
+performance-tests/Bench/tests/thru/run_test.pl tcp
+performance-tests/Bench/tests/thru/run_test.pl udp
+performance-tests/Bench/tests/thru/run_test.pl multi-be
+performance-tests/Bench/tests/thru/run_test.pl multi-rel
+performance-tests/Bench/tests/thru/run_test.pl rtps : RTPS
+
+
+## Run local tests
+performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA
+
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1 -c: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN
+
+## N.B. There appear to be some bad assumptions in the following tests:
+#performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl: !DCPS_MIN
+#performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl: !DCPS_MIN
+#performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl: !DCPS_MIN
+#performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl: !DCPS_MIN
+
+## N.B. There appear to be some bad assumptions in the following tests:
+#performance-tests/DCPS/MulticastListenerTest/run_test-1p1s.pl: !DCPS_MIN !QNX
+#performance-tests/DCPS/MulticastListenerTest/run_test-4p1s.pl: !DCPS_MIN !QNX
+#performance-tests/DCPS/MulticastListenerTest/run_test-1p4s.pl: !DCPS_MIN !QNX
+#performance-tests/DCPS/MulticastListenerTest/run_test-2p3s.pl: !DCPS_MIN !QNX

@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://www.omg.org/dds"
+           xmlns:dds="http://www.omg.org/dds"
+           targetNamespace="http://www.omg.org/dds"
+           elementFormDefault="qualified">
+
+    <!-- definition of simple types -->
+    <xs:simpleType name="elementName">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9 ])+"></xs:pattern>
+            <!-- <xs:pattern value="^((::)?([a-zA-Z0-9])+(::([a-zA-Z0-9])+)*)$"/> -->
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="topicNameFilter">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="([a-zA-Z0-9])+"></xs:pattern>
+            <!-- <xs:pattern value="^((::)?([a-zA-Z0-9])+(::([a-zA-Z0-9])+)*)$"/> -->
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="destinationOrderKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS"></xs:enumeration>
+            <xs:enumeration value="BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="durabilityKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="VOLATILE_DURABILITY_QOS"></xs:enumeration>
+            <xs:enumeration value="TRANSIENT_LOCAL_DURABILITY_QOS"></xs:enumeration>
+            <xs:enumeration value="TRANSIENT_DURABILITY_QOS"></xs:enumeration>
+            <xs:enumeration value="PERSISTENT_DURABILITY_QOS"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="historyKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="KEEP_LAST_HISTORY_QOS"></xs:enumeration>
+            <xs:enumeration value="KEEP_ALL_HISTORY_QOS"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="livelinessKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="AUTOMATIC_LIVELINESS_QOS"></xs:enumeration>
+            <xs:enumeration value="MANUAL_BY_PARTICIPANT_LIVELINESS_QOS"></xs:enumeration>
+            <xs:enumeration value="MANUAL_BY_TOPIC_LIVELINESS_QOS"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="presentationAccessScopeKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="INSTANCE_PRESENTATION_QOS"></xs:enumeration>
+            <xs:enumeration value="TOPIC_PRESENTATION_QOS"></xs:enumeration>
+            <xs:enumeration value="GROUP_PRESENTATION_QOS"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="reliabilityKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="BEST_EFFORT_RELIABILITY_QOS"></xs:enumeration>
+            <xs:enumeration value="RELIABLE_RELIABILITY_QOS"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="ownershipKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="SHARED_OWNERSHIP_QOS"></xs:enumeration>
+            <xs:enumeration value="EXCLUSIVE_OWNERSHIP_QOS"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="nonNegativeInteger_UNLIMITED">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(LENGTH_UNLIMITED|([0-9])*)?"></xs:pattern>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="nonNegativeInteger_Duration_SEC">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(DURATION_INFINITY|DURATION_INFINITE_SEC|([0-9])*)?"></xs:pattern>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="nonNegativeInteger_Duration_NSEC">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(DURATION_INFINITY|DURATION_INFINITE_NSEC|([0-9])*)?"></xs:pattern>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="positiveInteger_UNLIMITED">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="(LENGTH_UNLIMITED|[1-9]([0-9])*)?"></xs:pattern>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="BinaryData">
+      <xs:restriction base="xs:string">
+        <xs:pattern value="(\s)*(([0-2]?[0-9]?[0-9])|(0[xX][0-9a-fA-F]?[0-9a-fA-F]))(\s)*(,(\s)*(([0-2]?[0-9]?[0-9])|(0[xX][0-9a-fA-F]?[0-9a-fA-F]))(\s)*)*"/>
+      </xs:restriction>
+    </xs:simpleType>
+
+    <!-- definition of named types -->
+    <xs:complexType name="duration">
+        <xs:all>
+            <xs:element name="sec" type="dds:nonNegativeInteger_Duration_SEC" minOccurs="0"></xs:element>
+            <xs:element name="nanosec" type="dds:nonNegativeInteger_Duration_NSEC" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="stringSeq">
+        <xs:sequence>
+            <xs:element name="element" type="xs:string" minOccurs="0" maxOccurs="unbounded"></xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="deadlineQosPolicy">
+        <xs:all>
+            <xs:element name="period" type="dds:duration" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="destinationOrderQosPolicy">
+        <xs:all>
+            <xs:element name="kind" type="dds:destinationOrderKind" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="durabilityQosPolicy">
+        <xs:all>
+            <xs:element name="kind" type="dds:durabilityKind" default="VOLATILE_DURABILITY_QOS" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="durabilityServiceQosPolicy">
+        <xs:all>
+            <xs:element name="service_cleanup_delay" type="dds:duration" minOccurs="0"></xs:element>
+            <xs:element name="history_kind" type="dds:historyKind" default="KEEP_LAST_HISTORY_QOS" minOccurs="0"></xs:element>
+            <xs:element name="history_depth" type="xs:positiveInteger" minOccurs="0"></xs:element>
+            <xs:element name="max_samples" type="dds:positiveInteger_UNLIMITED" minOccurs="0"></xs:element>
+            <xs:element name="max_instances" type="dds:positiveInteger_UNLIMITED" minOccurs="0"></xs:element>
+            <xs:element name="max_samples_per_instance" type="dds:positiveInteger_UNLIMITED" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="entityFactoryQosPolicy">
+        <xs:all>
+            <xs:element name="autoenable_created_entities" type="xs:boolean" default="true" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="groupDataQosPolicy">
+        <xs:all>
+            <xs:element name="value" type="dds:BinaryData" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="historyQosPolicy">
+        <xs:all>
+            <xs:element name="kind" type="dds:historyKind" default="KEEP_LAST_HISTORY_QOS" minOccurs="0"></xs:element>
+            <xs:element name="depth" type="xs:positiveInteger" default="1" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="latencyBudgetQosPolicy">
+        <xs:all>
+            <xs:element name="duration" type="dds:duration" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="lifespanQosPolicy">
+        <xs:all>
+            <xs:element name="duration" type="dds:duration" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="livelinessQosPolicy">
+        <xs:all>
+            <xs:element name="kind" type="dds:livelinessKind" default="AUTOMATIC_LIVELINESS_QOS" minOccurs="0"></xs:element>
+            <xs:element name="lease_duration" type="dds:duration" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="ownershipQosPolicy">
+        <xs:all>
+            <xs:element name="kind" type="dds:ownershipKind" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="ownershipStrengthQosPolicy">
+        <xs:all>
+            <xs:element name="value" type="xs:nonNegativeInteger" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="partitionQosPolicy">
+        <xs:all>
+            <xs:element name="name" type="dds:stringSeq" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="presentationQosPolicy">
+        <xs:all>
+            <xs:element name="access_scope" type="dds:presentationAccessScopeKind" default="INSTANCE_PRESENTATION_QOS" minOccurs="0"></xs:element>
+            <xs:element name="coherent_access" type="xs:boolean" default="false" minOccurs="0"></xs:element>
+            <xs:element name="ordered_access" type="xs:boolean" default="false" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="readerDataLifecycleQosPolicy">
+        <xs:all>
+            <xs:element name="autopurge_nowriter_samples_delay" type="dds:duration" minOccurs="0"></xs:element>
+            <xs:element name="autopurge_disposed_samples_delay" type="dds:duration" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="reliabilityQosPolicy">
+        <xs:all>
+            <xs:element name="kind" type="dds:reliabilityKind" minOccurs="0"></xs:element>
+            <xs:element name="max_blocking_time" type="dds:duration" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="resourceLimitsQosPolicy">
+        <xs:all>
+            <xs:element name="max_samples" type="dds:positiveInteger_UNLIMITED" minOccurs="0"></xs:element>
+            <xs:element name="max_instances" type="dds:positiveInteger_UNLIMITED" minOccurs="0"></xs:element>
+            <xs:element name="max_samples_per_instance" type="dds:positiveInteger_UNLIMITED" minOccurs="0"></xs:element>
+            <xs:element name="initial_samples" type="xs:positiveInteger" minOccurs="0"></xs:element>
+            <xs:element name="initial_instances" type="xs:positiveInteger" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="timeBasedFilterQosPolicy">
+        <xs:all>
+            <xs:element name="minimum_separation" type="dds:duration" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="topicDataQosPolicy">
+        <xs:all>
+            <xs:element name="value" type="dds:BinaryData" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="transportPriorityQosPolicy">
+        <xs:all>
+            <xs:element name="value" type="xs:nonNegativeInteger" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <!-- userDataQosPolicy uses BinaryData encoding:
+        * Allowed characters are all letters: a-z, A-Z,  digits: 0-9, the characters: '+' '/' '=' and ' '
+                  +,/.=,the plus sign (+), the slash (/), the equals sign (=), and XML whitespace characters.
+        * The number of nonwhitespace characters must be divisible by four.
+        * Equals signs, which are used as padding, can only appear at the end of the value,
+          and there can be zero, one, or two of them.
+        * If there are two equals signs, they must be preceded by one of the following characters:
+          A, Q, g, w.
+        * If there is only one equals sign, it must be preceded by one of the following characters: A, E, I, M, Q, U, Y, c, g, k, o, s, w, 0, 4, 8.
+    -->
+    <xs:complexType name="userDataQosPolicy">
+        <xs:all>
+            <xs:element name="value" type="dds:BinaryData" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+    <xs:complexType name="writerDataLifecycleQosPolicy">
+        <xs:all>
+            <xs:element name="autodispose_unregistered_instances" type="xs:boolean" default="true" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="domainparticipantQos">
+        <xs:all>
+            <xs:element name="user_data" type="dds:userDataQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="entity_factory" type="dds:entityFactoryQosPolicy" minOccurs="0"></xs:element>
+        </xs:all>
+        <xs:attribute name="name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
+        <!--xs:attribute name="topic_filter" type="dds:topicNameFilter"></xs:attribute-->
+    </xs:complexType>
+    <xs:complexType name="publisherQos">
+        <xs:all>
+            <xs:element name="presentation" type="dds:presentationQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="partition" type="dds:partitionQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="group_data" type="dds:groupDataQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="entity_factory" type="dds:entityFactoryQosPolicy" minOccurs="0"></xs:element>
+        </xs:all>
+        <xs:attribute name="name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
+        <!--xs:attribute name="topic_filter" type="dds:topicNameFilter"></xs:attribute-->
+    </xs:complexType>
+    <xs:complexType name="subscriberQos">
+        <xs:all>
+            <xs:element name="presentation" type="dds:presentationQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="partition" type="dds:partitionQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="group_data" type="dds:groupDataQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="entity_factory" type="dds:entityFactoryQosPolicy" minOccurs="0"></xs:element>
+        </xs:all>
+        <xs:attribute name="name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
+        <!--xs:attribute name="topic_filter" type="dds:topicNameFilter"></xs:attribute-->
+    </xs:complexType>
+    <xs:complexType name="topicQos">
+        <xs:all>
+            <xs:element name="topic_data" type="dds:topicDataQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="durability" type="dds:durabilityQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="durability_service" type="dds:durabilityServiceQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="deadline" type="dds:deadlineQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="latency_budget" type="dds:latencyBudgetQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="liveliness" type="dds:livelinessQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="reliability" type="dds:reliabilityQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="destination_order" type="dds:destinationOrderQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="history" type="dds:historyQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="resource_limits" type="dds:resourceLimitsQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="transport_priority" type="dds:transportPriorityQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="lifespan" type="dds:lifespanQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="ownership" type="dds:ownershipQosPolicy" minOccurs="0"></xs:element>
+        </xs:all>
+        <xs:attribute name="name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="topic_filter" type="dds:topicNameFilter"></xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="datareaderQos">
+        <xs:all>
+            <xs:element name="durability" type="dds:durabilityQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="deadline" type="dds:deadlineQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="latency_budget" type="dds:latencyBudgetQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="liveliness" type="dds:livelinessQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="reliability" type="dds:reliabilityQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="destination_order" type="dds:destinationOrderQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="history" type="dds:historyQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="resource_limits" type="dds:resourceLimitsQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="user_data" type="dds:userDataQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="ownership" type="dds:ownershipQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="time_based_filter" type="dds:timeBasedFilterQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="reader_data_lifecycle" type="dds:readerDataLifecycleQosPolicy" minOccurs="0"></xs:element>
+        </xs:all>
+        <xs:attribute name="name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="topic_filter" type="dds:topicNameFilter"></xs:attribute>
+    </xs:complexType>
+    <xs:complexType name="datawriterQos">
+        <xs:all>
+            <xs:element name="durability" type="dds:durabilityQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="durability_service" type="dds:durabilityServiceQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="deadline" type="dds:deadlineQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="latency_budget" type="dds:latencyBudgetQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="liveliness" type="dds:livelinessQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="reliability" type="dds:reliabilityQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="destination_order" type="dds:destinationOrderQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="history" type="dds:historyQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="resource_limits" type="dds:resourceLimitsQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="transport_priority" type="dds:transportPriorityQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="lifespan" type="dds:lifespanQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="user_data" type="dds:userDataQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="ownership" type="dds:ownershipQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="ownership_strength" type="dds:ownershipStrengthQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="writer_data_lifecycle" type="dds:writerDataLifecycleQosPolicy" minOccurs="0"></xs:element>
+        </xs:all>
+        <xs:attribute name="name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
+        <xs:attribute name="topic_filter" type="dds:topicNameFilter"></xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="qosProfile">
+      <xs:choice maxOccurs="unbounded">
+        <xs:element name="datareader_qos" type="dds:datareaderQos" minOccurs="0" maxOccurs="unbounded"></xs:element>
+        <xs:element name="datawriter_qos" type="dds:datawriterQos" minOccurs="0" maxOccurs="unbounded"></xs:element>
+        <xs:element name="topic_qos" type="dds:topicQos" minOccurs="0" maxOccurs="unbounded"></xs:element>
+        <xs:element name="domainparticipant_qos" type="dds:domainparticipantQos" minOccurs="0" maxOccurs="unbounded"></xs:element>
+        <xs:element name="publisher_qos" type="dds:publisherQos" minOccurs="0" maxOccurs="unbounded"></xs:element>
+        <xs:element name="subscriber_qos" type="dds:subscriberQos" minOccurs="0" maxOccurs="unbounded"></xs:element>
+      </xs:choice>
+      <xs:attribute name="name" type="dds:elementName" use="required"></xs:attribute>
+      <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="qosProfile_seq">
+      <xs:sequence>
+        <xs:element name="qos_profile" type="dds:qosProfile" minOccurs="0" maxOccurs="unbounded"></xs:element>
+      </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="dds" type="dds:qosProfile_seq" />
+</xs:schema>

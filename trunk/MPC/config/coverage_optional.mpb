@@ -1,0 +1,14 @@
+// this feature is used to turn on coverage insturmentation (for gcov)
+// the flag is in the negative, so that is only needs to be addressed
+// when we do a coverage build and defaults to off otherwise
+
+feature(!dds_non_coverage) {
+
+  verbatim(gnuace,local) {
+
+    CCFLAGS += --coverage
+    LDFLAGS += --coverage
+
+  }
+
+}

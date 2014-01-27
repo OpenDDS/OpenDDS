@@ -1,0 +1,19 @@
+# $Id$
+
+The PERSISTENT kind of the DURABILITY QoS policy configures the
+publisher within a given domain to retain unsent data beyond the
+lifetime of publishing process.
+
+This test verifies properly functioning PERSISTENT DURABILITY support
+in OpenDDS by performing the following actions:
+
+1. Write data for a specific domain/topic/type through a DataWriter
+   that has not been associated with a DataReader.  (No pub/sub match
+   yet).
+2. Allow the publisher process to end gracefully.
+3. Restart the publisher program with a specific command line option
+   to prevent it from writing the data again.
+4. A subscription will then occur, after which the persistent data
+   that was in the durability cache will be sent to the DataReader.
+5. To test "service_cleanup_delay", a new DataWriter for a dummy topic
+   will be created with the appropriate QoS settings.

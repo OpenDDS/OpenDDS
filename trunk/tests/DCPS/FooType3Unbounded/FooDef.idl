@@ -1,0 +1,19 @@
+
+#include "tao/orb.idl"
+
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::Foo"
+#pragma DCPS_DATA_KEY "Xyz::Foo a_long_value"
+
+  typedef sequence<float> UnboundedData;
+
+  // Example user defined "Foo" structure
+  struct Foo {
+    long  a_long_value;
+    long  handle_value;
+    long  sample_sequence;
+    long  writer_id;
+    UnboundedData unbounded_data;
+  };
+};

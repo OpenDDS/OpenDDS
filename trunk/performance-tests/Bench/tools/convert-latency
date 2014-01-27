@@ -1,0 +1,59 @@
+
+reduce-latency-data.pl tcp/latency-50.data > data/latency-tcp-50.gpd
+reduce-latency-data.pl tcp/latency-100.data > data/latency-tcp-100.gpd
+reduce-latency-data.pl tcp/latency-250.data > data/latency-tcp-250.gpd
+reduce-latency-data.pl tcp/latency-500.data > data/latency-tcp-500.gpd
+reduce-latency-data.pl tcp/latency-1000.data > data/latency-tcp-1000.gpd
+reduce-latency-data.pl tcp/latency-2500.data > data/latency-tcp-2500.gpd
+reduce-latency-data.pl tcp/latency-5000.data > data/latency-tcp-5000.gpd
+reduce-latency-data.pl tcp/latency-8000.data > data/latency-tcp-8000.gpd
+reduce-latency-data.pl tcp/latency-16000.data > data/latency-tcp-16000.gpd
+reduce-latency-data.pl tcp/latency-32000.data > data/latency-tcp-32000.gpd
+
+reduce-latency-data.pl udp/latency-50.data > data/latency-udp-50.gpd
+reduce-latency-data.pl udp/latency-100.data > data/latency-udp-100.gpd
+reduce-latency-data.pl udp/latency-250.data > data/latency-udp-250.gpd
+reduce-latency-data.pl udp/latency-500.data > data/latency-udp-500.gpd
+reduce-latency-data.pl udp/latency-1000.data > data/latency-udp-1000.gpd
+reduce-latency-data.pl udp/latency-2500.data > data/latency-udp-2500.gpd
+reduce-latency-data.pl udp/latency-5000.data > data/latency-udp-5000.gpd
+reduce-latency-data.pl udp/latency-8000.data > data/latency-udp-8000.gpd
+reduce-latency-data.pl udp/latency-16000.data > data/latency-udp-16000.gpd
+reduce-latency-data.pl udp/latency-32000.data > data/latency-udp-32000.gpd
+
+reduce-latency-data.pl multi-be/latency-50.data > data/latency-mbe-50.gpd
+reduce-latency-data.pl multi-be/latency-100.data > data/latency-mbe-100.gpd
+reduce-latency-data.pl multi-be/latency-250.data > data/latency-mbe-250.gpd
+reduce-latency-data.pl multi-be/latency-500.data > data/latency-mbe-500.gpd
+reduce-latency-data.pl multi-be/latency-1000.data > data/latency-mbe-1000.gpd
+reduce-latency-data.pl multi-be/latency-2500.data > data/latency-mbe-2500.gpd
+reduce-latency-data.pl multi-be/latency-5000.data > data/latency-mbe-5000.gpd
+reduce-latency-data.pl multi-be/latency-8000.data > data/latency-mbe-8000.gpd
+reduce-latency-data.pl multi-be/latency-16000.data > data/latency-mbe-16000.gpd
+reduce-latency-data.pl multi-be/latency-32000.data > data/latency-mbe-32000.gpd
+
+reduce-latency-data.pl multi-rel/latency-50.data > data/latency-mrel-50.gpd
+reduce-latency-data.pl multi-rel/latency-100.data > data/latency-mrel-100.gpd
+reduce-latency-data.pl multi-rel/latency-250.data > data/latency-mrel-250.gpd
+reduce-latency-data.pl multi-rel/latency-500.data > data/latency-mrel-500.gpd
+reduce-latency-data.pl multi-rel/latency-1000.data > data/latency-mrel-1000.gpd
+reduce-latency-data.pl multi-rel/latency-2500.data > data/latency-mrel-2500.gpd
+reduce-latency-data.pl multi-rel/latency-5000.data > data/latency-mrel-5000.gpd
+reduce-latency-data.pl multi-rel/latency-8000.data > data/latency-mrel-8000.gpd
+reduce-latency-data.pl multi-rel/latency-16000.data > data/latency-mrel-16000.gpd
+reduce-latency-data.pl multi-rel/latency-32000.data > data/latency-mrel-32000.gpd
+
+reduce-latency-data.pl rtps/latency-50.data > data/latency-tcp-50.gpd
+reduce-latency-data.pl rtps/latency-100.data > data/latency-tcp-100.gpd
+reduce-latency-data.pl rtps/latency-250.data > data/latency-tcp-250.gpd
+reduce-latency-data.pl rtps/latency-500.data > data/latency-tcp-500.gpd
+reduce-latency-data.pl rtps/latency-1000.data > data/latency-tcp-1000.gpd
+reduce-latency-data.pl rtps/latency-2500.data > data/latency-tcp-2500.gpd
+reduce-latency-data.pl rtps/latency-5000.data > data/latency-tcp-5000.gpd
+reduce-latency-data.pl rtps/latency-8000.data > data/latency-tcp-8000.gpd
+reduce-latency-data.pl rtps/latency-16000.data > data/latency-tcp-16000.gpd
+reduce-latency-data.pl rtps/latency-32000.data > data/latency-tcp-32000.gpd
+
+extract-latency.pl data/latency-*.gpd > data/latency.csv
+gen-latency-stats.pl data/latency.csv
+

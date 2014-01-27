@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:xmi="http://www.omg.org/XMI" targetNamespace="http://www.opendds.org/modeling/schemas/Core/1.0">
+  <xsd:import namespace="http://www.omg.org/XMI" schemaLocation="XMI.xsd"/>
+  <xsd:simpleType name="CommentFormat">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="PLAIN"/>
+      <xsd:enumeration value="DOXYGEN"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:complexType abstract="true" name="Entity">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="property" type="core:TypedEntity"/>
+        </xsd:choice>
+        <xsd:attribute name="name" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="Specification">
+    <xsd:complexContent>
+      <xsd:extension base="core:Entity"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TypedEntity">
+    <xsd:complexContent>
+      <xsd:extension base="core:Entity">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="type" type="core:Specification"/>
+        </xsd:choice>
+        <xsd:attribute name="type" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType abstract="true" name="Element">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="comment" type="core:Comment"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="Comment">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="body" type="xsd:string"/>
+    <xsd:attribute name="format" type="core:CommentFormat"/>
+  </xsd:complexType>
+  
+</xsd:schema>

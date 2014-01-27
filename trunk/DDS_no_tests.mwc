@@ -1,0 +1,13 @@
+workspace {
+
+  dds
+  java
+  tools
+  DevGuideExamples
+
+  exclude {
+    java/jms
+    tools/modeling/tests
+  }
+
+}

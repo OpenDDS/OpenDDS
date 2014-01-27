@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gmfgraph:Canvas xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:gmfgraph="http://www.eclipse.org/gmf/2006/GraphicalDefinition" name="stereotypedelement">
+  <figures
+      name="Default">
+    <descriptors
+        name="StereotypedElementFigure">
+      <actualFigure
+          xsi:type="gmfgraph:Rectangle"
+          name="StereotypedElementFigure">
+        <layout
+            xsi:type="gmfgraph:FlowLayout"
+            vertical="true"
+            forceSingleLine="true"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="StereotypedElementStereotypeFigure"
+            text="&lt;...>"/>
+        <children
+            xsi:type="gmfgraph:Label"
+            name="StereotypedElementNameFigure"
+            text="&lt;...>"/>
+      </actualFigure>
+      <accessors
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.0"/>
+      <accessors
+          figure="//@figures.0/@descriptors.0/@actualFigure/@children.1"/>
+    </descriptors>
+  </figures>
+  <nodes
+      name="StereotypedElement"
+      figure="StereotypedElementFigure"/>
+  <labels
+      name="StereotypedElementName"
+      figure="StereotypedElementFigure"
+      accessor="//@figures.0/@descriptors.0/@accessors.1"/>
+  <labels
+      name="StereotypedElementStereotype"
+      figure="StereotypedElementFigure"
+      elementIcon="false"
+      accessor="//@figures.0/@descriptors.0/@accessors.0"/>
+</gmfgraph:Canvas>

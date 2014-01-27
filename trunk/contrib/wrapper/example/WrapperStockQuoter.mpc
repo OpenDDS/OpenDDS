@@ -1,0 +1,83 @@
+
+project(*Common) : dcpslib {
+  sharedname     = StockQuoterCommon
+  dynamicflags   = STOCKQUOTERCOMMON_BUILD_DLL
+  libout         = .
+  includes      += $(TAO_ROOT)/orbsvcs
+  idlflags      += -I$(TAO_ROOT)/orbsvcs \
+                   -Wb,export_macro=StockQuoterCommon_Export \
+                   -Wb,export_include=StockQuoterCommon_Export.h
+  dcps_ts_flags += -Wb,export_macro=StockQuoterCommon_Export
+
+  TypeSupport_Files {
+    StockQuoter.idl >> StockQuoterTypeSupport.idl StockQuoterTypeSupportImpl.h StockQuoterTypeSupportImpl.cpp
+  }
+
+  IDL_Files {
+    StockQuoterTypeSupport.idl
+    StockQuoter.idl
+  }
+
+  // We only want the generated files
+  Header_Files {
+  }
+
+  // We only want the generated files
+  Source_Files {
+  }
+}
+
+project(*Publisher) : dcpsexe, svc_utils, dds_wrapper {
+  after    += *Common
+  exename   = publisher
+  includes += $(TAO_ROOT)/orbsvcs $(DDS_ROOT)/contrib/wrapper
+  libs     += StockQuoterCommon
+
+  IDL_Files {
+  }
+
+  Header_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+
+  Documentation_Files {
+    README.txt
+    dds_tcp_conf.ini
+    pub_udp_conf.ini
+    sub2_udp_conf.ini
+    sub_udp_conf.ini
+  }
+}
+
+
+project(*Subscriber) : dcpsexe, dds_wrapper {
+  after    += *Common
+  exename   = subscriber
+  includes += $(TAO_ROOT)/orbsvcs $(DDS_ROOT)/contrib/wrapper
+  libs     += StockQuoterCommon
+
+  IDL_Files {
+  }
+
+  Header_Files {
+    ExchangeEventDataReaderListenerImpl.h
+    QuoteDataReaderListenerImpl.h
+  }
+
+  Source_Files {
+    ExchangeEventDataReaderListenerImpl.cpp
+    QuoteDataReaderListenerImpl.cpp
+    subscriber.cpp
+  }
+
+  Documentation_Files {
+    README.txt
+    dds_tcp_conf.ini
+    pub_udp_conf.ini
+    sub2_udp_conf.ini
+    sub_udp_conf.ini
+  }
+}

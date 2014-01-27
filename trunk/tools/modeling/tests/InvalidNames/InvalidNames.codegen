@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<generator:CodeGen xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <source name="InvalidNames.opendds"/>
+  <target name="model"/>
+  <instances>
+    <instance name="default">
+      <config name="trans1">
+        <transportRef transport="_03beb400-a42e-012e-9618-0017a4e90546"/>
+        <swap_bytes value="false"/>
+        <passive_connect_duration value="0"/>
+      </config>
+      <config name="trans2">
+        <transportRef transport="_03bec400-a42e-012e-9619-0017a4e90546"/>
+        <swap_bytes value="false"/>
+      </config>
+      <config name="trans3">
+        <transportRef transport="_03bed040-a42e-012e-961a-0017a4e90546"/>
+        <swap_bytes value="false"/>
+        <passive_connect_duration value="0"/>
+      </config>
+      <config name="trans4">
+        <transportRef transport="_03bedb50-a42e-012e-961b-0017a4e90546"/>
+        <swap_bytes value="false"/>
+      </config>
+    </instance>
+  </instances>
+  <searchPaths/>
+  <transports>
+    <transport xsi:type="generator:TcpTransport" xmi:id="_03beb400-a42e-012e-9618-0017a4e90546" name="trans1">
+      <queue_messages_per_pool value="10"/>
+      <queue_initial_pools value="10"/>
+      <max_packet_size value="65536"/>
+      <max_samples_per_packet value="20"/>
+      <optimum_packet_size value="1450"/>
+      <thread_per_connection value="false"/>
+      <datalink_release_delay value="10000"/>
+      <datalink_control_chunks value="32"/>
+      <local_address_str value="127.0.0.1"/>
+      <enable_nagle_algorithm value="false"/>
+      <conn_retry_initial_delay value="500"/>
+      <conn_retry_backoff_multiplier value="2.0"/>
+      <conn_retry_attempts value="3"/>
+      <max_output_pause_period value="0"/>
+      <passive_reconnect_duration value="2000"/>
+    </transport>
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_03bec400-a42e-012e-9619-0017a4e90546" name="trans2">
+      <queue_messages_per_pool value="10"/>
+      <queue_initial_pools value="10"/>
+      <max_packet_size value="65536"/>
+      <max_samples_per_packet value="20"/>
+      <optimum_packet_size value="1450"/>
+      <thread_per_connection value="false"/>
+      <datalink_release_delay value="10000"/>
+      <datalink_control_chunks value="32"/>
+      <default_to_ipv6 value="false"/>
+      <port_offset value="49400"/>
+      <group_address value="&quot;224.0.0.128&quot;"/>
+      <reliable value="true"/>
+      <syn_backoff value="2.0"/>
+      <syn_interval value="250"/>
+      <syn_timeout value="30000"/>
+      <nak_depth value="32"/>
+      <nak_interval value="500"/>
+      <nak_timeout value="30000"/>
+      <ttl value="1"/>
+      <rcv_buffer_size value="0"/>
+    </transport>
+    <transport xsi:type="generator:TcpTransport" xmi:id="_03bed040-a42e-012e-961a-0017a4e90546" name="trans3">
+      <queue_messages_per_pool value="10"/>
+      <queue_initial_pools value="10"/>
+      <max_packet_size value="65536"/>
+      <max_samples_per_packet value="20"/>
+      <optimum_packet_size value="1450"/>
+      <thread_per_connection value="false"/>
+      <datalink_release_delay value="10000"/>
+      <datalink_control_chunks value="32"/>
+      <local_address_str value="127.0.0.1"/>
+      <enable_nagle_algorithm value="false"/>
+      <conn_retry_initial_delay value="500"/>
+      <conn_retry_backoff_multiplier value="2.0"/>
+      <conn_retry_attempts value="3"/>
+      <max_output_pause_period value="0"/>
+      <passive_reconnect_duration value="2000"/>
+    </transport>
+    <transport xsi:type="generator:MulticastTransport" xmi:id="_03bedb50-a42e-012e-961b-0017a4e90546" name="trans4">
+      <queue_messages_per_pool value="10"/>
+      <queue_initial_pools value="10"/>
+      <max_packet_size value="65536"/>
+      <max_samples_per_packet value="20"/>
+      <optimum_packet_size value="1450"/>
+      <thread_per_connection value="false"/>
+      <datalink_release_delay value="10000"/>
+      <datalink_control_chunks value="32"/>
+      <default_to_ipv6 value="false"/>
+      <port_offset value="49400"/>
+      <group_address value="&quot;224.0.0.128&quot;"/>
+      <reliable value="true"/>
+      <syn_backoff value="2.0"/>
+      <syn_interval value="250"/>
+      <syn_timeout value="30000"/>
+      <nak_depth value="32"/>
+      <nak_interval value="500"/>
+      <nak_timeout value="30000"/>
+      <ttl value="1"/>
+      <rcv_buffer_size value="0"/>
+    </transport>
+  </transports>
+</generator:CodeGen>

@@ -1,0 +1,102 @@
+
+These descriptions relate to the layers shown in the diagram from
+"RTPS Discovery.odg" and "RTPS Discovery.jpg".  There are three
+layers shown there.
+
+
+DCPS Layer
+----------
+
+This layer is mainly involved in the discovery switching logic.  The
+Service Paricipant and Domain Participant need to have options that
+control which discovery mechanism is used for each domain participant.
+This needs to be integrated into the existing code that determines and
+Info Repo for each DP.  The main interfaces between this layer and the
+one below are the DCPSInfo, DCPSDataReaderRemote, and
+DCPSDataWriterRemote IDL interfaces that the Info Repo uses and a BIT
+reader interface that will be used to inject BIT samples into the local
+data readers.  The BIT reader interfaces need to be pulled out of the
+existing code and exposed to the RTPS Discovery layer, including a
+"fake" data reader that can be fed from in-process data.  The existing
+IDL interfaces may need to be tweaked to support RTPS discovery, but we
+should be able to use them pretty much as is with a collocated CORBA
+object replacing the remote object references of the current discovery.
+We also need global configuration options to control this and other
+aspects of RTPS.
+
+
+RTPS Discovery
+--------------
+
+The hope is that a lot of this code can be adapted from and shared with
+the existing Info Repo implementation.  One main difference is that
+instead of accumulating state from the IDL calls from the different
+participants, the state will be extracted from the RTPS Discovery
+Messaging layer below.  Most IDL calls from the local process will pass
+data through to the RTPS Discovery Messaging for sharing with other
+participants.  Some IDL calls will also cause "matching" to occur based
+on data queried from the Messaging layer.
+
+
+RTPS Discovery Messaging
+------------------------
+
+The main components here are the custom Data Writers and Readers that
+will communicate the builtin topics that discovery is based upon.  They
+need to be custom because they (obviously) can't depend on the discovery
+layer and may need to use lower level interfaces on the transport layer
+to write (and possibly read) their messages.  They will also maintain
+their own state to handle resends, other spec-defined logic, and queries
+from the matching logic.
+
+
+------------------------------------------------------------------------
+
+Other Details
+
+Configuration
+-------------
+
+Existing domain configurations in the .ini file appear as follows,
+with all value required and <domain_id> and <repo_key> restricted
+to integer values.
+
+  [domain/<domain_name>]
+  DomainId=<domain_id>
+  DomainRepoKey=<repo_key>
+
+  [repository/<repo_name>]
+  RepositoryKey=<repo_key>
+  RepositoryIor=<ior>
+
+Leaving the existing functionality as is, we've simplified the
+existing configuration by optionally using the section names
+for the domain id (still must be an integer) and repo key (can
+now be a string):
+
+  [domain/<domain_id>]
+  DomainRepoKey=<repo_name>
+
+  [repository/<repo_name>]
+  RepositoryIor=<ior>
+
+Additionally, we add the ability to configure individual
+domains to use an RTPS configuration for discovery.
+For example, to the default RTPS discovery configuration:
+
+  [domain/<domain_id>]
+  DiscoveryConfig=DEFAULT_RTPS
+
+To use a specific RTPS (or Repository) discovery configuration:
+
+  [domain/<domain_id>]
+  DiscoveryConfig=<config_name>
+
+<config_name> can be any of DEFAULT_RTPS, DEFAULT_REPO,
+any [repository/*] subsections as described above, or an
+[rtps_discovery/*] subsection.  For example:
+
+  [domain/999]
+  DiscoveryConfig=MyConfig
+
+  [rtps_discovery/MyConfig]

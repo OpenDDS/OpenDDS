@@ -1,0 +1,47 @@
+// $Id$
+
+project: taolib_with_idl, portableserver, java, dds_macros {
+
+  includes   += $(DDS_ROOT)/java/idl2jni/runtime $(JAVA_HOME)/include \
+                $(JAVA_HOME)/include/$(JAVA_PLATFORM)
+  libpaths   += $(DDS_ROOT)/lib
+  libs       += idl2jni_runtime
+  after      += idl2jni_runtime idl2jni_codegen
+
+  // We're inheriting libout = $(ACE_ROOT)/lib from taolib_with_idl.mpb,
+  // but there's no reason our libraries should be placed there.
+  libout      = .
+
+  javacflags += -classpath $(DDS_ROOT)/lib/i2jrt.jar
+
+
+  // This Define_Custom makes use of $(DDS_ROOT)/MPC/modules/IDL2JNIHelper.pm
+
+  Define_Custom(Idl2Jni) {
+    automatic_in  = 1
+    automatic_out = 1
+    inputext      = .idl
+    command       = $(DDS_ROOT)/bin/idl2jni
+    commandflags  = -Wb,native_lib_name=<%sharedname%>
+    dependent     = $(DDS_ROOT)/bin/idl2jni
+    libpath       = $(ACE_ROOT)/lib
+
+    // The output from idl2jni does not follow the input file directory.  It
+    // always goes in '.' or a sub-directory thereof.
+    output_follows_input = 0
+
+    keyword idl2jniflags = commandflags
+
+    source_pre_extension = JC
+    header_pre_extension = JC
+    source_outputext     = .cpp
+    header_outputext     = .h
+
+    optional(source_pre_extension) {
+      commandflags(!-SS) += JS
+    }
+    optional(header_pre_extension) {
+      commandflags(!-SS) += JS
+    }
+  }
+}

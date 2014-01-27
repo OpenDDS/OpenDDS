@@ -1,0 +1,66 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_TRANSPORTREACTORTASK_H
+#define OPENDDS_DCPS_TRANSPORTREACTORTASK_H
+
+#include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/RcObject_T.h"
+#include "ace/Condition_T.h"
+#include "ace/Task.h"
+
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+class ACE_Proactor;
+class ACE_Reactor;
+ACE_END_VERSIONED_NAMESPACE_DECL
+
+namespace OpenDDS {
+namespace DCPS {
+
+class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
+      public virtual RcObject<ACE_SYNCH_MUTEX> {
+public:
+
+  TransportReactorTask(bool useAsyncSend);
+  virtual ~TransportReactorTask();
+
+  virtual int open(void*);
+  virtual int svc();
+  virtual int close(u_long flags = 0);
+
+  void stop();
+
+  ACE_Reactor* get_reactor();
+  const ACE_Reactor* get_reactor() const;
+
+  ACE_Proactor* get_proactor();
+  const ACE_Proactor* get_proactor() const;
+
+private:
+
+  typedef ACE_SYNCH_MUTEX         LockType;
+  typedef ACE_Guard<LockType>     GuardType;
+  typedef ACE_Condition<LockType> ConditionType;
+
+  enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
+
+  LockType      lock_;
+  State         state_;
+  ConditionType condition_;
+  ACE_Reactor*  reactor_;
+  ACE_Proactor* proactor_;
+};
+
+} // namespace DCPS
+} // namespace OpenDDS
+
+#if defined (__ACE_INLINE__)
+#include "TransportReactorTask.inl"
+#endif /* __ACE_INLINE__ */
+
+#endif  /* OPENDDS_DCPS_TRANSPORTREACTORTASK_H */

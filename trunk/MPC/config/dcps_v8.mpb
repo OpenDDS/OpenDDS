@@ -1,0 +1,13 @@
+project: dcps_ts_defaults {
+
+  dcps_ts_flags += -Wb,v8
+
+  lit_libs += v8
+
+  specific(prop:microsoft) {
+    includes += $(V8_ROOT)/include
+    Debug::libpaths += $(V8_ROOT)/build/Debug/lib
+    Release::libpaths += $(V8_ROOT)/build/Release/lib
+  }
+
+}

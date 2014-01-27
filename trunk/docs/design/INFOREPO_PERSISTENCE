@@ -1,0 +1,68 @@
+
+Terminology:
+
+Upstream: Business logic layer. Here its the DCPSInfo_i object
+Downstream: Different persistence strategies e.g. file persistence
+ , federation persistence. The downstream API is in Updater.h
+
+Bridge: The layer bridging the upstream and downstream.
+ Here its the UpdateManager.
+
+
+Initialization:
+
+Upon startup both the downstream and the upstream layers have
+to discover the UpdateManager and register with it. Since the UpdateManager is
+a service object the discovery is a one-liner
+
+  um_ = ACE_Dynamic_Service<UpdateManager>::instance ("UpdateManager");
+
+Upstream-UpdateManager is a one-to-one relation while the
+UpdateManager-downstream is a one-to-many relation. So multiple updaters
+(Updater implementers) can be registered simultaneously. The API for
+adding updaters is,
+
+  void UpdateManager::add (Updater* updater);
+
+and removal is:
+
+  void UpdateManager::remove (const Updater* updater);
+
+Persistence mechanism:
+The upstream deals only with the UpdateManager. The UpdateManager has an
+API similar to the Updaters. The UpdateManager class defines the common
+data transmission structures. Broadly there is API for adding updates,
+
+  void UpdateManager::add (const UTopic& topic);
+  void UpdateManager::add (const UParticipant& participant);
+
+  template <typename UA>
+  void UpdateManager::add (const UA& actor);
+
+removing updates:
+
+  void UpdateManager::remove (const IdType& id);
+
+These get mapped to Updater API's:
+
+  virtual void Updater::add(const UpdateManager::DTopic& topic) = 0;
+  virtual void Updater::add(const UpdateManager::DParticipant& participant) = 0;
+  virtual void Updater::add(const UpdateManager::DActor& actor) = 0;
+  virtual void Updater::remove (const IdType& id) = 0;
+
+
+Image Update:
+The upstream requests an image update via:
+
+  void UpdateManager::requestImage (void);
+
+which gets mapped to:
+
+  virtual void Updater::requestImage (void) = 0;
+
+The Updaters get the request in the same thread as the Upstream request. The
+downstream can make the update in the same thread (which will make the call
+synchronous) or in a different thread (asynchronous). The API for pushing
+the image is:
+
+  void UpdateManager::pushImage (const DImage& image);

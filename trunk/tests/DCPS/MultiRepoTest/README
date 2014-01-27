@@ -1,0 +1,3 @@
+This test verifies that multiple DCPSInfoRepo objects can be bound to
+multiple domains within the same process.  See RT11836.
+

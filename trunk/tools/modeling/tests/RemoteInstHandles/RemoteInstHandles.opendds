@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="RemoteInstHandles">
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw" name="RemoteInstHandlesLib">
+    <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
+    <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" entity_factory="_JC6sUEQXEeCkCsT7xFcj3w" transportConfig="trans1">
+        <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </publishers>
+    </participants>
+    <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" entity_factory="_JC6sUEQXEeCkCsT7xFcj3w" transportConfig="trans3">
+        <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </subscribers>
+    </participants>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+  </libs>
+  <libs xsi:type="opendds:PolicyLib" xmi:id="_FdSCYUQXEeCkCsT7xFcj3w" name="Policies">
+    <policies xsi:type="opendds:efQosPolicy" xmi:id="_JC6sUEQXEeCkCsT7xFcj3w" name="manual" autoenable_created_entities="false"/>
+  </libs>
+  <packages xmi:id="_QtHqEUN2EeCHpu743YY7ag" name="data1">
+    <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="datalib1">
+      <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
+        <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_gdLpgEN2EeCHpu743YY7ag" name="subscriber_key" type="_UhQqEEN2EeCHpu743YY7ag"/>
+        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
+      </types>
+      <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Typedef" xmi:id="_UhQqEEN2EeCHpu743YY7ag" type="_WCCgUEN2EeCHpu743YY7ag" name="BitKey"/>
+      <types xsi:type="types:Array" xmi:id="_WCCgUEN2EeCHpu743YY7ag" length="3" subtype="_PXgFEPDvEd-I4rwicuuPOw"/>
+    </libs>
+  </packages>
+</opendds:OpenDDSModel>

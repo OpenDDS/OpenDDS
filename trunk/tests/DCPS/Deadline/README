@@ -1,0 +1,29 @@
+# $Id$
+
+This test verifies that the DEADLINE QoS policy support in OpenDDS is
+functioning properly. The DEADLINE timer is setup for each instance
+in DataWriter and DataReader. Any instance missed count will be
+accumulated by DataWriter and DataReader.
+
+The test performs following actions:
+
+1. Intentionally attempting to set incompatible offered and requested
+   deadline periods.  The offered deadline period must be less than or
+   equal to the requested deadline period.
+
+2. Creating DataReaders and DataWriters with and without listeners,
+   where the requested and offered deadlines are compatibly
+   configured.
+
+3. Reset the deadline qos instead of using default qos. This verifies
+   the fix for the bug that Deadline QOS is not changeable.
+
+4. Attempts to detect that missed deadlines are reported regularly,
+   according to the configured deadline periods.  No data is sent at
+   this point.
+
+5. Send data at a rate that purposely prevents deadlines from being
+   missed.
+
+6. Attempts another set deadlines to verify the missed deadline status
+   updated appropriately.

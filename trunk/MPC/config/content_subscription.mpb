@@ -1,0 +1,4 @@
+// Do not build if content_subscription feature is disabled.
+feature(!content_subscription) {
+  requires += content_subscription
+}

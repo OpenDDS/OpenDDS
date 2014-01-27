@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:topics="http://www.opendds.org/modeling/schemas/Topics/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_J3PV0QOYEeC_KbIBROAyfA" name="DcpsLibTest">
+  <libs xsi:type="opendds:PolicyLib" xmi:id="_VaZ3AAOYEeC_KbIBROAyfA" name="DcpsLibTestPolicyLib">
+    <policies xsi:type="opendds:efQosPolicy" xmi:id="_doUToAOYEeC_KbIBROAyfA" name="LibEntityFactory" autoenable_created_entities="true"/>
+    <policies xsi:type="opendds:udQosPolicy" xmi:id="_msWf8AOYEeC_KbIBROAyfA" name="LibUserData" value="test data"/>
+  </libs>
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_LoyzAAOYEeC_KbIBROAyfA" name="DcpsLibTest">
+    <domains xmi:id="_PsEbMAOYEeC_KbIBROAyfA" name="MessageDomain" domainId="0"/>
+    <participants xmi:id="_ylf4MAOYEeC_KbIBROAyfA" name="TestParticipant" domain="_PsEbMAOYEeC_KbIBROAyfA" entity_factory="_doUToAOYEeC_KbIBROAyfA" user_data="_6TDZwAOYEeC_KbIBROAyfA">
+      <publishers xsi:type="opendds:publisher" xmi:id="_BG7hUAOZEeC_KbIBROAyfA" name="TestParticipant" transportId="-1">
+        <writers xmi:id="_gz0dYCpHEeCSdIszrfle9A" name="TestWriter" copyFromTopicQos="false" topic="_0rzkMBHMEeCilrwN-NFn_g"/>
+      </publishers>
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_SZZusAOZEeC_KbIBROAyfA" name="TestSubscriber" entity_factory="_doUToAOYEeC_KbIBROAyfA" transportId="-1">
+        <readers xmi:id="_j0AQ4CpHEeCSdIszrfle9A" name="TestReader1" copyFromTopicQos="false" topic="__cRGgDLQEeCvDoTjiP9YbQ"/>
+        <readers xmi:id="_Yn7dsDLREeCvDoTjiP9YbQ" name="TestReader2" copyFromTopicQos="false" topic="_PfhHsDLREeCvDoTjiP9YbQ"/>
+      </subscribers>
+    </participants>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_0rzkMBHMEeCilrwN-NFn_g" name="Message" deadline="_2Z42oBHMEeCilrwN-NFn_g" datatype="_z3liYDLQEeCvDoTjiP9YbQ"/>
+    <topicDescriptions xsi:type="topics:ContentFilteredTopic" xmi:id="__cRGgDLQEeCvDoTjiP9YbQ" name="TestContentFilteredTopic" filter_expression="count BETWEEN '2' and '7'" related_topic="_0rzkMBHMEeCilrwN-NFn_g"/>
+    <topicDescriptions xsi:type="topics:MultiTopic" xmi:id="_PfhHsDLREeCvDoTjiP9YbQ" name="TestMultiTopic" subscription_expression="SELECT text FROM Message" datatype="_z3liYDLQEeCvDoTjiP9YbQ"/>
+    <policies xsi:type="opendds:udQosPolicy" xmi:id="_6TDZwAOYEeC_KbIBROAyfA" name="CustomUserData" value="custom data"/>
+    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_2Z42oBHMEeCilrwN-NFn_g" name="messageDeadline">
+      <period xmi:id="_2Z42oRHMEeCilrwN-NFn_g" second="10"/>
+    </policies>
+  </libs>
+  <libs xsi:type="types:DataLib" xmi:id="_vhnnsDLQEeCvDoTjiP9YbQ" name="DcpsLibTestDataLib">
+    <types xsi:type="types:Struct" xmi:id="_z3liYDLQEeCvDoTjiP9YbQ" name="Message" isDcpsDataType="true">
+      <fields xmi:id="_8GbWoDLREeCvDoTjiP9YbQ" name="from" type="_607vATLQEeCvDoTjiP9YbQ"/>
+      <fields xmi:id="_BmnBsDLSEeCvDoTjiP9YbQ" name="subject" type="_607vATLQEeCvDoTjiP9YbQ"/>
+      <fields xmi:id="_DyFawDLSEeCvDoTjiP9YbQ" name="subject_id" type="_607H8zLQEeCvDoTjiP9YbQ"/>
+      <fields xmi:id="_GS5xsDLSEeCvDoTjiP9YbQ" name="text" type="_607vATLQEeCvDoTjiP9YbQ"/>
+      <fields xmi:id="_H4X6sDLSEeCvDoTjiP9YbQ" name="count" type="_607H8zLQEeCvDoTjiP9YbQ"/>
+    </types>
+  </libs>
+  <libs xsi:type="opendds:DcpsLib" xmi:id="__tu9QbRyEeCeurkyoVQgLg" name="DcpsLibTestSharedTopic">
+    <topicDescriptions xsi:type="topics:Topic" xmi:id="_E-2RkLRzEeCeurkyoVQgLg" name="SharedTopic" datatype="_z3liYDLQEeCvDoTjiP9YbQ"/>
+  </libs>
+  <basicTypes xmi:id="_606g4DLQEeCvDoTjiP9YbQ">
+    <types xsi:type="types:Boolean" xmi:id="_606g4TLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:Char" xmi:id="_607H8DLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:Double" xmi:id="_607H8TLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:Float" xmi:id="_607H8jLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:Long" xmi:id="_607H8zLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:LongDouble" xmi:id="_607H9DLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:LongLong" xmi:id="_607H9TLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:Octet" xmi:id="_607H9jLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:Short" xmi:id="_607vADLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:String" xmi:id="_607vATLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:ULong" xmi:id="_607vAjLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:ULongLong" xmi:id="_607vAzLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:UShort" xmi:id="_607vBDLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:WChar" xmi:id="_607vBTLQEeCvDoTjiP9YbQ"/>
+    <types xsi:type="types:WString" xmi:id="_608WEDLQEeCvDoTjiP9YbQ"/>
+  </basicTypes>
+</opendds:OpenDDSModel>

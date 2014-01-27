@@ -1,0 +1,68 @@
+Fri Aug 6 16:25:59 UTC 2010  Don Busch <buschd@ociweb.com>
+
+        * DDS_TAO_all.mwc:
+
+        * dds/DCPS/InfoRepoUtils.h:
+
+        * examples/DCPS/DistributedContent/run_test.pl:
+
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+
+        * tools/monitor/RepoDialog.ui:
+
+        * tools/dissector/packet.cpp:
+
+        Resolved code inspection comments from Adam Mitz:
+        Added DDS_TAO_all.mwc build file instead of modifying DDS_TAO.mwc
+        Added Doxygen comment to InfoRepoUtils.h
+        Changed 127.0.0.1 to localhost in test script
+        Changed "IOR:" to "IOR/Endpoint:" in Monitor GUI
+        Changed "class" to "struct" in packet.cpp
+
+Fri Aug 6 12:05:59 UTC 2010  Don Busch <buschd@ociweb.com>
+
+        * Merged from r3492 through r3556
+
+Sat Jul 24 20:45:59 UTC 2010  Don Busch <buschd@ociweb.com>
+
+        * DDS_TAO.mwc:
+
+        * dds/DCPS/InfoRepoUtils.cpp:
+
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+
+        Fixed DDS_TAO.mwc to build everything in TAO needed for DDS workspace
+        Catching INV_OBJREF in InfoRepoUtils::get_repo instead of CORBA::Exception
+        Fixed run_corbaloc_test.pl script to work properly for udp
+
+Fri Jul 23 21:42:19 UTC 2010  Don Busch <buschd@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+        * dds/DCPS/InfoRepoUtils.h:
+        * dds/DCPS/InfoRepoUtils.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+        * examples/DCPS/DistributedContent/run_test.pl:
+
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+
+        * tools/odds_dissector/README:
+        * tools/odds_dissector/odds_packet.cpp:
+
+        * tools/odds_monitor/RepoDialog.ui:
+
+        Changed Service_Participant::set_repo_ior to allow InfoRepo IORs
+           of the form host:port;  added Messenger test to exercise.
+        Fixed bug in DistributedContent test; InfoRepo port was incorrect
+        Changed default odds_monitor Repo IOR from "corbaloc::iiop:" to "<host>:<port>".
+        Added odds_monitor documentation for dynamic loading of monitor library
+           and initialization of monitor in application code.
+        Added Wireshark 1.3.x compatibility to odds_dissector.
+        Added documentation to odds_dissector to indicate Wireshark 1.3.x compatibility.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

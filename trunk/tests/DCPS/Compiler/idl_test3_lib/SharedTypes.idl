@@ -1,0 +1,29 @@
+
+module Xyz {
+
+  enum AnEnum { redx, greenx, bluex };
+
+  // basic sequences
+  typedef sequence<boolean,6> SeqOfBoolean;
+  typedef sequence<string,6>  SeqOfString;
+  typedef sequence<char,6>    SeqOfChar;
+  typedef sequence<octet,6>   SeqOfOctet;
+  typedef sequence<long,6>    SeqOfLong;
+  typedef sequence<AnEnum,6>  SeqOfAnEnum;
+
+  // basic arrays
+  typedef boolean    ArrayOfBoolean[5];
+  typedef  string<7> ArrayOfString[5];
+  typedef    char    ArrayOfChar[5];
+  typedef   octet    ArrayOfOctet[5];
+  typedef    long    ArrayOfLong[5];
+  typedef  AnEnum    ArrayOfAnEnum[5];
+
+  // arrays of sequences
+  typedef SeqOfBoolean ArrayOfSeqOfBoolean[6];
+  typedef SeqOfString  ArrayOfSeqOfString[6];
+  typedef SeqOfChar    ArrayOfSeqOfChar[6];
+  typedef SeqOfOctet   ArrayOfSeqOfOctet[6];
+  typedef SeqOfLong    ArrayOfSeqOfLong[6];
+  typedef SeqOfAnEnum  ArrayOfSeqOfAnEnum[6];
+};

@@ -1,0 +1,159 @@
+
+body {
+  font-size: 100%;
+  font-weight: normal;
+}
+
+h1.page_title {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 2.5em;
+  font-weight: bold;
+}
+
+.left_logo{
+  float: left;
+}
+
+.right_logo{
+  float: right;
+}
+
+.summary {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  clear: both;
+}
+
+/* Table of Contents */
+/* div, h2, ul, li */
+.ToC {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+ul.ToC {
+  margin-left: auto;
+  margin-right: auto;
+  width: 30%;
+}
+li.ToC {
+  text-align: left;
+}
+
+
+/* Archive of actual data from the run */
+.run_data {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Test summary info */
+/* div, table, tr, td */
+.test_summary {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+div.test_summary {
+  margin-top: 25px;
+  margin-bottom: 25px;
+}
+
+.test_summary_header {
+  font-size: 1.75em;
+  text-decoration: none;
+  color: #000000;
+}
+
+.test_summary_link {
+  font-size: 1.5em;
+}
+
+/* Run information */
+/* div, table, tr, h2 */
+.run_info {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+table.run_info {
+  border-collapse: collapse;
+  border-style: solid;
+  border-width: 1;
+  background-color: #EEEEEE;
+}
+h2.run_info {
+  font-size: 1.5em;
+  text-align: center;
+}
+
+th.run_info {
+  text-align: center;
+}
+
+.run_info_cell {
+  text-align: right;
+  border-style: none;
+  padding: 4px 8px 4px 4px;
+}
+
+.run_info_cellvalue {
+  text-align: left;
+  border-style: none;
+  padding: 4px 4px 4px 4px;
+}
+
+/* full sized graph display */
+/* div, table, tr, td */
+.graph_fullimage {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+table.graph_fullimage {
+  width: 100%
+}
+
+/* thumbnail sized graph display */
+/* div, table, tr, td */
+.graph_thumbnails {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+td.graph_thumbnails {
+  padding: 3px 2px 3px 2px;
+}
+
+/* result data display */
+/* div, h2, h3, table, tr, th, td */
+.data_tables {
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+}
+table.data_tables {
+  border-style: solid;
+  border-width: 1;
+  border-collapse: collapse;
+  border-bottom: 4px;
+}
+th.data_tables {
+  border-style: solid;
+  border-width: 1;
+  padding: 4px 4px 4px 4px;
+}
+td.data_tables {
+  border-style: solid;
+  border-width: 1;
+  padding: 3px 4px 3px 4px;
+}
+hr.data_tables {
+  width: 50%;
+}
+
+

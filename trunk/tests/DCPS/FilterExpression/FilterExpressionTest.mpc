@@ -1,0 +1,6 @@
+project: dcps, content_subscription_core {
+  exename = FilterExpressionTest
+  TypeSupport_Files {
+    FilterStruct.idl
+  }
+}

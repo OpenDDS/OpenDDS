@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="topics"
+    nsURI="http://www.opendds.org/modeling/schemas/Topics/1.0" nsPrefix="topics">
+  <eClassifiers xsi:type="ecore:EClass" name="TopicDescription" abstract="true" eSuperTypes="Core.ecore#//Entity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Topic" eSuperTypes="Domain.ecore#//DomainEntity #//TopicDescription">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="deadline" eType="ecore:EClass QoS.ecore#//DeadlineQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="destination_order" eType="ecore:EClass QoS.ecore#//DestinationOrderQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="durability" eType="ecore:EClass QoS.ecore#//DurabilityQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="durability_service" eType="ecore:EClass QoS.ecore#//DurabilityServiceQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="history" eType="ecore:EClass QoS.ecore#//HistoryQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="latency_budget" eType="ecore:EClass QoS.ecore#//LatencyBudgetQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="liveliness" eType="ecore:EClass QoS.ecore#//LivelinessQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ownership" eType="ecore:EClass QoS.ecore#//OwnershipQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reliability" eType="ecore:EClass QoS.ecore#//ReliabilityQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="resource_limits" eType="ecore:EClass QoS.ecore#//ResourceLimitsQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topic_data" eType="ecore:EClass QoS.ecore#//TopicDataQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="transport_priority" eType="ecore:EClass QoS.ecore#//TransportPriorityQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="lifespan" eType="ecore:EClass QoS.ecore#//LifespanQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="datatype" lowerBound="1"
+        eType="ecore:EClass Types.ecore#//Struct"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ContentFilteredTopic" eSuperTypes="#//TopicDescription">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="filter_expression" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="related_topic" lowerBound="1"
+        eType="#//Topic"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="MultiTopic" eSuperTypes="#//TopicDescription">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="subscription_expression"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="datatype" lowerBound="1"
+        eType="ecore:EClass Types.ecore#//Struct"/>
+  </eClassifiers>
+</ecore:EPackage>

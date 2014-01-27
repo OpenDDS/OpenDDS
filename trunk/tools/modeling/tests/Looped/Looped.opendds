@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="Looped">
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw" name="LoopedLib">
+    <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
+    <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportConfig="trans1">
+        <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </publishers>
+    </participants>
+    <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportConfig="trans3">
+        <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </subscribers>
+    </participants>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="STRUCT_5STIgPDuEd-I4rwicuuPOw"/>
+  </libs>
+  <packages xmi:id="_YivoUGBbEeCJX8aJ5CZShQ" name="data1">
+    <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="datalib1">
+      <types xsi:type="types:Struct" xmi:id="STRUCT_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
+        <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="STRING_E8F2IPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="STRING_E8F2IPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="LONG_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="STRING_E8F2IPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="LONG_PXgFEPDvEd-I4rwicuuPOw"/>
+        <fields xmi:id="_mZNo4GBbEeCJX8aJ5CZShQ" name="history" type="UNION_VpKPQGBfEeCJX8aJ5CZShQ"/>
+        <fields xmi:id="_qARXkGH6EeC_I986asR8iw" name="more" type="_cvEnQGH6EeC_I986asR8iw"/>
+        <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
+      </types>
+      <types xsi:type="types:String" xmi:id="STRING_E8F2IPDvEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Long" xmi:id="LONG_PXgFEPDvEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Sequence" xmi:id="SEQ0_d408MGBbEeCJX8aJ5CZShQ" subtype="STRUCT_5STIgPDuEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Typedef" xmi:id="TD_SEQ_hjFncGBbEeCJX8aJ5CZShQ" type="SEQ0_d408MGBbEeCJX8aJ5CZShQ" name="Messages"/>
+      <types xsi:type="types:Enum" xmi:id="ENUM_ddSIUGBeEeCJX8aJ5CZShQ" name="Jeff">
+        <literals>a1</literals>
+        <literals>b2</literals>
+        <literals>c3</literals>
+        <literals>d</literals>
+      </types>
+      <types xsi:type="types:Array" xmi:id="ARRAY_BLM9UGBfEeCJX8aJ5CZShQ" length="10" subtype="LONG_PXgFEPDvEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Union" xmi:id="UNION_VpKPQGBfEeCJX8aJ5CZShQ" name="JeffUnion" switch="LONG_PXgFEPDvEd-I4rwicuuPOw">
+        <branches xmi:id="_VpMrgGBfEeCJX8aJ5CZShQ">
+          <field xmi:id="_azXDQGBfEeCJX8aJ5CZShQ" name="msg" type="TD_SEQ1_hx5IYGBvEeC8jqX8q9EKww"/>
+          <cases xmi:id="_VpMrgWBfEeCJX8aJ5CZShQ" literal="1"/>
+        </branches>
+        <branches xmi:id="_fc8dgGBfEeCJX8aJ5CZShQ">
+          <field xmi:id="_hcrgoGBfEeCJX8aJ5CZShQ" name="msgs" type="TD_SEQ_hjFncGBbEeCJX8aJ5CZShQ"/>
+          <cases xmi:id="_ktns8GBfEeCJX8aJ5CZShQ" literal="3"/>
+        </branches>
+        <branches xmi:id="_Ms7ZUGH6EeC_I986asR8iw">
+          <field xmi:id="_U05mAGH6EeC_I986asR8iw" name="jeffs" type="_J_imAGH6EeC_I986asR8iw"/>
+          <cases xmi:id="_Qfd20GH6EeC_I986asR8iw" literal="5"/>
+        </branches>
+      </types>
+      <types xsi:type="types:Sequence" xmi:id="SEQ1_c_Gu0GBvEeC8jqX8q9EKww" length="1" subtype="STRUCT_5STIgPDuEd-I4rwicuuPOw"/>
+      <types xsi:type="types:Typedef" xmi:id="TD_SEQ1_hx5IYGBvEeC8jqX8q9EKww" type="SEQ1_c_Gu0GBvEeC8jqX8q9EKww" name="OptionalMessage"/>
+      <types xsi:type="types:Sequence" xmi:id="_DbaKoGH6EeC_I986asR8iw" subtype="UNION_VpKPQGBfEeCJX8aJ5CZShQ"/>
+      <types xsi:type="types:Typedef" xmi:id="_FKzEoGH6EeC_I986asR8iw" type="_DbaKoGH6EeC_I986asR8iw" name="Jeffs"/>
+      <types xsi:type="types:Typedef" xmi:id="_J_imAGH6EeC_I986asR8iw" type="_FKzEoGH6EeC_I986asR8iw" name="AliasJeff"/>
+      <types xsi:type="types:Struct" xmi:id="_ZoM88GH6EeC_I986asR8iw" name="Other" isDcpsDataType="true">
+        <fields xmi:id="_kxXpwGH6EeC_I986asR8iw" name="name" type="_lvEoKmH6EeC_I986asR8iw"/>
+        <fields xmi:id="_ntkVIGH6EeC_I986asR8iw" name="msgs" type="TD_SEQ_hjFncGBbEeCJX8aJ5CZShQ"/>
+      </types>
+      <types xsi:type="types:Sequence" xmi:id="_byNWYGH6EeC_I986asR8iw" subtype="_cvEnQGH6EeC_I986asR8iw"/>
+      <types xsi:type="types:Typedef" xmi:id="_cvEnQGH6EeC_I986asR8iw" type="_ZoM88GH6EeC_I986asR8iw" name="AliasOther"/>
+    </libs>
+  </packages>
+  <basicTypes xmi:id="_lvEoIGH6EeC_I986asR8iw">
+    <types xsi:type="types:Boolean" xmi:id="_lvEoIWH6EeC_I986asR8iw"/>
+    <types xsi:type="types:Char" xmi:id="_lvEoImH6EeC_I986asR8iw"/>
+    <types xsi:type="types:Double" xmi:id="_lvEoI2H6EeC_I986asR8iw"/>
+    <types xsi:type="types:Float" xmi:id="_lvEoJGH6EeC_I986asR8iw"/>
+    <types xsi:type="types:Long" xmi:id="_lvEoJWH6EeC_I986asR8iw"/>
+    <types xsi:type="types:LongDouble" xmi:id="_lvEoJmH6EeC_I986asR8iw"/>
+    <types xsi:type="types:LongLong" xmi:id="_lvEoJ2H6EeC_I986asR8iw"/>
+    <types xsi:type="types:Octet" xmi:id="_lvEoKGH6EeC_I986asR8iw"/>
+    <types xsi:type="types:Short" xmi:id="_lvEoKWH6EeC_I986asR8iw"/>
+    <types xsi:type="types:String" xmi:id="_lvEoKmH6EeC_I986asR8iw"/>
+    <types xsi:type="types:ULong" xmi:id="_lvEoK2H6EeC_I986asR8iw"/>
+    <types xsi:type="types:ULongLong" xmi:id="_lvEoLGH6EeC_I986asR8iw"/>
+    <types xsi:type="types:UShort" xmi:id="_lvEoLWH6EeC_I986asR8iw"/>
+    <types xsi:type="types:WChar" xmi:id="_lvEoLmH6EeC_I986asR8iw"/>
+    <types xsi:type="types:WString" xmi:id="_lvEoL2H6EeC_I986asR8iw"/>
+  </basicTypes>
+</opendds:OpenDDSModel>

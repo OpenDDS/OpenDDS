@@ -1,0 +1,30 @@
+feature (!built_in_topics) : idl2jni {
+  idl2jniflags += -DDDS_HAS_MINIMUM_BIT
+}
+feature (!content_subscription) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_QUERY_CONDITION
+  idl2jniflags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
+  idl2jniflags += -DOPENDDS_NO_MULTI_TOPIC
+}
+feature (!query_condition) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_QUERY_CONDITION
+}
+feature (!content_filtered_topic) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_CONTENT_FILTERED_TOPIC
+}
+feature (!multi_topic) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_MULTI_TOPIC
+}
+feature (!ownership_profile) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP_PROFILE
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+}
+feature (!ownership_kind_exclusive) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+}
+feature (!object_model_profile) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OBJECT_MODEL_PROFILE
+}
+feature (!persistence_profile) : idl2jni {
+  idl2jniflags += -DOPENDDS_NO_PERSISTENCE_PROFILE
+}

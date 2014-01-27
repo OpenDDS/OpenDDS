@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="core"
+    nsURI="http://www.opendds.org/modeling/schemas/Core/1.0" nsPrefix="core">
+  <eClassifiers xsi:type="ecore:EClass" name="Entity" abstract="true" eSuperTypes="#//Element">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="property" upperBound="-1"
+        eType="#//TypedEntity" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Specification" eSuperTypes="#//Entity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TypedEntity" eSuperTypes="#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//Specification"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Element" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="comment" eType="#//Comment"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Comment">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="body" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="format" eType="#//CommentFormat"
+        defaultValueLiteral="DOXYGEN"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="CommentFormat">
+    <eLiterals name="PLAIN"/>
+    <eLiterals name="DOXYGEN" value="1" literal="DOXYGEN"/>
+  </eClassifiers>
+</ecore:EPackage>

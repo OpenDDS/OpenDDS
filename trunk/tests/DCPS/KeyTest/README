@@ -1,0 +1,13 @@
+
+This directory contains unit tests for some of the key-related
+functionality of OpenDDS.  The file KeyTest.idl contains a number
+of DCPS data type definitions and corresponding key definitions
+that Open DDS should allow (and produce valid code for).  The
+files of the form KeyTypeError_*.idl each contain what should
+be flagged as an illegal key definition from OpenDDS' perspective.
+
+KeyMarhalling.cpp uses some of the data types and keys from KeyTest.idl
+to do some run-time testing of the key marshaling functionality.
+
+run_test.pl will run the KeyMarshaling executable and verify the
+errors in the various KeyTypeError_*.idl files.

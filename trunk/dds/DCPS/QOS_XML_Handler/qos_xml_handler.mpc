@@ -1,0 +1,69 @@
+//$Id$
+
+project (OpenDDS_XML_QOS_XSC_Generation) : install, xscdefaults {
+  requires += xsc
+
+  xscflags += --cxx-banner-file $(DDS_ROOT)/ddocs/schema/xsc-banner.cpp
+  xscflags += --cxx-header-banner-file $(DDS_ROOT)/docs/schema/xsc-banner.h
+  xscflags += --cxx-export-symbol XML_QOS_Handler_Export
+  xscflags += --cxx-export-header XML_QOS_Handler_Export.h
+  xscflags += --search-path "$(DDS_ROOT)/docs/schema"
+
+  custom_only = 1
+
+  XSC_Files {
+    gendir = .
+    $(DDS_ROOT)/docs/schema/dds_qos.xsd
+  }
+
+  Source_Files {
+  }
+
+  specific {
+    install_dir = dds/DCPS/QOS_XML_Handler
+  }
+}
+
+
+project (OpenDDS_QOS_XML_XSC_Handler) : install, acelib, xerces, anytypecode, \
+                                optional_ace_xml_utils, gen_ostream, dcpslib {
+  sharedname = OpenDDS_QOS_XML_XSC_Handler
+  after += OpenDDS_XML_QOS_XSC_Generation
+  dynamicflags += XML_QOS_HANDLER_BUILD_DLL
+  macros += XML_USE_PTHREADS
+  requires += dds4ccm_opendds
+
+  Source_Files {
+    dds_qos.cpp
+    XML_File_Intf.cpp
+    QOS_XML_Loader.cpp
+    DataWriterQos_Handler.cpp
+    DataReaderQos_Handler.cpp
+    TopicQos_Handler.cpp
+    PublisherQos_Handler.cpp
+    SubscriberQos_Handler.cpp
+    ParticipantQos_Handler.cpp
+    QOS_Common.cpp
+  }
+
+  Header_Files {
+    XML_QOS_Handler_Export.h
+    dds_qos.hpp
+    QOS_Common.h
+    DataWriterQos_Handler.h
+    DataReaderQos_Handler.h
+    TopicQos_Handler.cpp
+    PublisherQos_Handler.h
+    SubscriberQos_Handler.h
+    ParticipantQos_Handler.h
+  }
+
+  Template_Files {
+    *_T.cpp
+  }
+
+  specific {
+    install_dir = dds/DCPS/QOS_XML_Handler
+  }
+}
+

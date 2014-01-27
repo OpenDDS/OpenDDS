@@ -1,0 +1,33 @@
+
+This directory contains source code for the OpenDDS Monitor library.
+This library, when linked and enabled, causes applications to publish
+instrumentation data that supplement the Built-In-Topics defined by
+the OMG.  The current implementation is intended as a general
+mechanism and future versions of OpenDDS will define and publish
+additional information.
+
+By default, OpenDDS will not publish monitoring data.  To enable
+monitoring, each application process must link with the monitoring
+library (OpenDDS_monitor) and initialize the monitor factory
+immediately after initializing the Domain Participant Factory.
+Here is the code for this:
+    TheServiceParticipant->monitor_factory_->initialize();
+See the code in $DDS_ROOT/tests/DCPS/Monitor for examples of
+publisher and subscriber processes that enable monitoring.
+
+Once monitoring is enabled, OpenDDS applications work as before
+but now publish samples over several monitor topics as certain
+entities are created, modified, or destroyed.  In later
+releases there will also be some periodic samples published
+containing metrics.  The data types and topic names supported
+are defined in $DDS_ROOT/dds/monitor/monitor.idl.  All of these
+topics are located in the OpenDDS::DCPS::MONITOR_DOMAIN_ID domain.
+Applications subscribe to these topics like any other DDS topic.
+The example in $DDS_ROOT/tests/DCPS/Monitor also contains a monitor
+executable that subscribes to each of these topics.  See the code
+there for details on how to subscribe to and process these samples.
+
+There is also a graphical monitor application in
+$DDS_ROOT/tools/monitor.
+
+Note: The periodic monitor topics are not currently supported.

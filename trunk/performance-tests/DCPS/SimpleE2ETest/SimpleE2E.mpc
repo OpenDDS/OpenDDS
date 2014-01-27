@@ -1,0 +1,36 @@
+project(DCPS_Perf*Pub): dcpsexe {
+  exename   = publisher
+  libpaths += ../TypeNoKeyBounded
+  libs     += DCPS_Perf_TypeNoKeyBounded
+  after    += DCPS_Perf_TypeNoKeyBounded
+
+  Header_Files {
+    common.h
+    TestException.h
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+
+project(DCPS_Perf*Sub): dcpsexe {
+  exename   = subscriber
+  libpaths += ../TypeNoKeyBounded
+  libs     += DCPS_Perf_TypeNoKeyBounded
+  after    += DCPS_Perf_TypeNoKeyBounded
+
+  Header_Files {
+    common.h
+    TestStats.h
+    TestException.h
+  }
+
+  Source_Files {
+    subscriber.cpp
+    Reader.cpp
+  }
+}
+

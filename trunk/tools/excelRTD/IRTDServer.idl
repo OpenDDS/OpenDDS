@@ -1,0 +1,70 @@
+/*
+ * $Id$
+ *
+ * From sample code included in Microsoft Knowledge Base Article 327215.
+ */
+import "unknwn.idl";
+import "wtypes.idl";
+import "objidl.idl";
+import "oaidl.idl";
+
+[
+  odl,
+  uuid(A43788C1-D91B-11D3-8F39-00C04F3651B8),
+  helpcontext(0x0007a120),
+  dual,
+  oleautomation
+]
+interface IRTDUpdateEvent : IDispatch {
+    [id(0x0000000a), helpcontext(0x0007a121)]
+    HRESULT UpdateNotify();
+    [id(0x0000000b), propget, helpcontext(0x0007a122)]
+    HRESULT HeartbeatInterval([out, retval] long* plRetVal);
+    [id(0x0000000b), propput, helpcontext(0x0007a122)]
+    HRESULT HeartbeatInterval([in] long plRetVal);
+    [id(0x0000000c), helpcontext(0x0007a123)]
+    HRESULT Disconnect();
+};
+
+[
+  odl,
+  uuid(EC0E6191-DB51-11D3-8F3E-00C04F3651B8),
+  helpcontext(0x0007a124),
+  dual,
+  oleautomation
+]
+interface IRtdServer : IDispatch {
+    [id(0x0000000a), helpcontext(0x0007a125)]
+    HRESULT ServerStart(
+                    [in] IRTDUpdateEvent* CallbackObject,
+                    [out, retval] long* pfRes);
+    [id(0x0000000b), helpcontext(0x0007a126)]
+    HRESULT ConnectData(
+                    [in] long TopicID,
+                    [in] SAFEARRAY(VARIANT)* Strings,
+                    [in, out] VARIANT_BOOL* GetNewValues,
+                    [out, retval] VARIANT* pvarOut);
+    [id(0x0000000c), helpcontext(0x0007a127)]
+    HRESULT RefreshData(
+                    [in, out] long* TopicCount,
+                    [out, retval] SAFEARRAY(VARIANT)* parrayOut);
+    [id(0x0000000d), helpcontext(0x0007a128)]
+    HRESULT DisconnectData([in] long TopicID);
+    [id(0x0000000e), helpcontext(0x0007a129)]
+    HRESULT Heartbeat([out, retval] long* pfRes);
+    [id(0x0000000f), helpcontext(0x0007a12a)]
+    HRESULT ServerTerminate();
+};
+
+[
+   uuid(217C2068-49F7-4207-B14D-B36FB7F9BB17),
+   version(1.0)
+]
+library RTDServerLib
+{
+   importlib("stdole32.tlb");
+
+   //reference the interfaces
+   interface IRtdServer;
+   dispinterface IRTDUpdateEvent;
+};

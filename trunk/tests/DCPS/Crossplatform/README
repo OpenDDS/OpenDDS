@@ -1,0 +1,16 @@
+This directory contains crossplatform test scripts. There
+ are no test executables here, instead the regular
+ executables are used to run the test across the network.
+
+The test framework is implemented in $DDS_ROOT/bin/PerlDDS/Cross_Sync*.pm
+
+The cross platform testing schedule is maintained in test_list.txt.
+ Every test has three configuration components. The test group, the
+ server and client machine names. The test group has no relevance
+ outside the nightly test environment. It identifies a specific
+ instance of the nightly build during which the test should be run.
+ Any two nightly builds defined as part of a single group need to set
+ the environment variable CROSS_GRP to the value defined here.
+
+Messenger_run_test.pl: Based upon the $DDS_ROOT/tests/DCPS
+ /Messenger/run_corbaloc_test.pl test.

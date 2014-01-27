@@ -1,0 +1,3562 @@
+Fri Aug  5 21:00:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          Include name in transport inst
+
+        * tools/modeling/tests/Arrays/Arrays.codegen:
+        * tools/modeling/tests/Arrays/Arrays.opendds:
+
+          Redo migration.
+
+Fri Aug  5 19:01:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          Move swap_bytes, passive_connect_duration to config.
+          Additional documentation
+
+        * tools/modeling/tests/Arrays/Arrays.codegen:
+        * tools/modeling/tests/Arrays/Arrays.opendds:
+
+          Migrated files using migrator.
+
+Fri Aug  5 15:51:34 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Making the wizard create the "Transports" container in the newly
+          created model instance.
+
+Fri Aug  5 15:34:50 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations/v1tov2.rb:
+
+          output xsi:type attribute, instead of type.
+          output closing </transport> tag when running against already-migrated
+          file.
+
+Fri Aug  5 15:00:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/migrations:
+        * tools/modeling/migrations/v1tov2.rb:
+
+          tool for migrating codegen files and opendds models
+
+Thu Aug  4 21:59:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed a deadlock between connections_lock_ and the ACE reactor token
+          for concurrent calls to accept_datalink() and passive_connection().
+
+Thu Aug  4 21:39:08 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/CustomizationTab.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+
+          Modified the customization tab to show both Instances and Transports.
+
+Thu Aug  4 20:37:23 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedGeneratorFile.java:
+
+          detect transportOffset in codegen
+          detect instance/transport in codegen
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/SdkGenerator.java:
+
+          validation checks - no transportOffset, no instance/transport.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorTab.java:
+
+          validate in main thread.
+
+Thu Aug  4 20:04:30 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4768 through r4826.
+
+Thu Aug  4 15:50:58 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
+
+          Adding customizations to a generated file in order to be able to show
+          the name of the referred transport instance.
+
+Thu Aug  4 18:27:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Need to lock the reservation locks for the various transport impls
+          in TransportClient::associate().  It can be called from multiple
+          threads due to nested upcalls from TAO.
+
+Thu Aug  4 14:30:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpLoader.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+
+          Fixed warnings.
+
+Wed Aug  3 21:41:15 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Remove deprecated parts of the model.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+
+          Add multicast and udp settings.
+
+Wed Aug  3 20:48:43 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Model changes for transport properties.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+
+          Codegen changes for transport properties.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+
+          Set transport properties for tcp.
+
+Wed Aug  3 20:20:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          The built-in ACE_Time_Value set-from-milliseconds is not available
+          in older versions of ACE.
+
+Wed Aug  3 20:06:40 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Use the passive_connect_duration_ setting from TransportConfig.
+
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Removed old make_passive_connection() and related code.
+          Improved logging and data structure cleanup for error conditions.
+
+Wed Aug  3 18:49:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/RepoIdSet.h:
+        * dds/DCPS/transport/framework/RepoIdSet.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * tools/dissector/packet-opendds.cpp:
+
+          Removed FULLY_ASSOCIATED messages in the transport layer.
+          The equivalent functionality, applicable to all transpot types, is
+          now implemented as an InfoRepo-mediated call (association_complete).
+
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Removed old comments that are no longer relevant.
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpReceiveStrategy.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+
+          Adapted to new IDL and transport framework APIs.
+
+Wed Aug  3 17:55:10 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          Add some comments to "document" an undocumented option.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Clean up some error messages related to [config/*] processing.
+
+Tue Aug  2 21:38:05 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+
+          A generated file that changed after runing build.pl (likely
+          due to the previous change).
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Generator/ParsedModelFile.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorModelWizard.java:
+
+          Introducing the transport config concepts to the modeling SDK.
+          Implemented initialization of the generator using the names of
+          transport config found in the model.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/.classpath:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/test/org/opendds/modeling/sdk/model/GeneratorSpecification:
+
+          Added a couple of tests
+
+Tue Aug  2 21:19:07 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Add DCPSPersistentDataDir, DCPSTransportDebugLevel, and
+          DCPSPendingTimeout as config file options.  They were
+          previously only command line options which was inconsistent
+          with the other DCPS* options and the existing DevGuide
+          documentation.
+
+Tue Aug  2 19:13:57 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          New transport framework features for separating the two kinds of
+          datalink creation (active and passive) and allowing the passive
+          datalink creation to occur asynchronously.
+          Still needs some data strucutre cleanup and error handling in Tcp.
+          Need to determine if and how to do the "handshaking" in Udp/Multicast.
+          Need to use the passive connect duration setting in TransportClient.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+          Removed invalid package names from the Manifest.
+
+Tue Aug  2 17:28:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+
+          Handle model with no participants, no publishers, no subscribers,
+          no readers and no writers.
+
+Tue Aug  2 16:17:29 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+          Append model instance name to TransportConfig name.
+
+Tue Aug  2 15:06:05 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * java/dds/OpenDDS/DCPS/transport/TransportConfig.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Move the passive_connect_duration option to the
+          TransportConfig.  Generate a deprecation warning
+          when used on an Inst.
+
+        * java/tests/transport_config/TransportConfigTest.java:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/test1.ini:
+        * tests/DCPS/ConfigTransports/transports.ini:
+
+          Convert tests to new option location.  Add some additional
+          unit tests.
+
+        * tests/DCPS/ConfigTransports/Reader.h:
+        * tests/DCPS/ConfigTransports/Writer.h:
+
+          Add missing newlines that were causing warnings.
+
+Tue Aug  2 13:36:22 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/DefaultInstanceTraits.h:
+
+          Remove contents.  TODO: Remove.
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Provide config name to delegate.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+          Exports to allow build.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/h.xsl:
+
+          Save and retrieve transport config names.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_h.xsl:
+
+          Don't check for transport offset.
+          Save TransportInsts and TransportConfigs in transport registry.
+          Associate TransportConfigs with TransportInsts.
+          TODO: Transport settings for TransportInsts.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+
+          Specify a tranasport config in model.
+          Add TCP transport insts in codegen.
+
+Mon Aug  1 21:12:38 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+
+          Remove service configurator file usage in these examples.
+          Add "use strict" and clean up the script.
+
+        * DevGuideExamples/DCPS/Messenger/tcp.conf:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/tcp.conf:
+
+          Removed these files.
+
+Mon Aug  1 17:13:03 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.inl:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * java/dds/OpenDDS/DCPS/transport/TcpInst.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Move the passive_connect_duration option from the TCP
+          transport to the base class.
+
+Fri Jul 29 17:36:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Similar change as before, this time for the mixed_trans tests.
+
+Fri Jul 29 16:34:07 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Use BEST_EFFORT_RELIABILITY_QOS with the udp transport.
+
+Fri Jul 29 15:29:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          Added a missing #include.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Restored custom settings that were removed in last commit.
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+
+          Adapted tests for IDL changes in yesterday's commit.
+
+        * performance-tests/DCPS/SimpleE2ETest:
+        * performance-tests/DCPS/TCPProfilingTest:
+        * performance-tests/DCPS/UDPListenerTest:
+        * performance-tests/DCPS/UDPNoKeyTest:
+        * tests/DCPS/ConfigFile:
+        * tests/DCPS/Monitor:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model/GeneratorSpecification:
+
+          Set svn:ignore property.
+
+Thu Jul 28 22:11:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          If reader and writer have no transport types in common, treat it
+          as an incompatible QoS (fixes FooTest5_0 diff_trans).
+          Pass a boolean parameter to add_association() to indicate which
+          side is active and which is passive.  For now this is hard-coded
+          to be writer=active and reader=passive, but the logic is in the
+          InfoRepo instead of embedded in each participant.
+
+Thu Jul 28 21:33:44 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Manual changes in support of last emf change.
+
+Thu Jul 28 20:12:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          If the DataReader is RELIABLE_RELIABILITY_QOS,
+          don't use unreliable transports.
+          DataWriterImpl's change here is just a comment.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Improve logging, and make it an error if no transports
+          are available and applicable to the TransportClient.
+
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.h:
+
+          Allow each derived class to identify its level of reliability.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Fixed an rch refcount bug introduced in earlier refactoring.
+
+        * tests/DCPS/ConfigTransports/DataReaderListener.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fixed #includes and warnings.
+          Default reliability for this test is BEST_EFFORT.
+
+Thu Jul 28 17:00:46 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+
+          Fixed a bug in the JMS Provider's use of transport API.
+
+Thu Jul 28 16:55:14 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+
+          Additional customizations to generator model.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
+
+          When opening a .codegen file, use the GeneratorResourceFactory.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+
+          Modified based on new codegen format.
+
+Thu Jul 28 16:45:56 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.common/icons/full/ctool16/CreateInstance_configs_TransportConfig.gif:
+
+          Additional needed icon.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model/GeneratorSpecification:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model/GeneratorSpecification/GeneratorResource.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/src/org/opendds/modeling/sdk/model/GeneratorSpecification/GeneratorResourceFactory.java:
+
+          Classes to force UUIDs to be used for elements as xmi:id.
+
+Wed Jul 27 22:18:01 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          pub_id needs to be used before the penditer is erased,
+          since pub_id is a reference to the data in penditer.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.genmodel:
+
+          Re-generated from the ecore, and applied our specific settings.
+
+Wed Jul 27 21:39:26 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Updated to fix the issue of TEST_CHECK not terminating the
+          preocess.
+
+Wed Jul 27 18:28:31 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/Generator.ecore_diagram:
+
+          Transport Additions for the new transports.
+
+        * tools/modeling/plugins/org.opendds.modeling.common/src/org/opendds/modeling/common/Plugin.java:
+
+          Add mappings for new types.
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/GeneratorItemProviderAdapterFactory.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/model/GeneratorXMI.xsd:
+
+          Generated mods for latest model changes.
+
+        * tools/modeling/tests/Messenger/Messenger.codegen:
+        * tools/modeling/tests/Messenger/Messenger.opendds:
+
+          Added transportConfigs and transportInsts.
+          Added transport config properties.
+
+Wed Jul 27 16:15:17 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/.classpath:
+        * java/jms/README:
+        * java/jms/compat/build.xml:
+        * java/jms/src/META-INF/services/org.opendds.jms.common.beans.spi.Type:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/management/ParticipantFactoryService.java:
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+        * java/jms/src/org/opendds/jms/transport/TransportManager.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+
+          Updated JMS Provider code to work with new Transport API.
+
+        * java/jms/src/org/opendds/jms/common/beans/spi/ThreadSynchStrategyType.java:
+
+          Removed this file.
+
+Tue Jul 26 21:42:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Removed references to svc.conf which is no longer.
+
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+
+          transportKey is now a string, updated ACE logging formatters.
+
+Tue Jul 26 20:58:13 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fixing a failing test.
+
+Tue Jul 26 20:12:33 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/doc/userguide.html:
+        * performance-tests/Bench/etc/transport-multi-be.ini:
+        * performance-tests/Bench/etc/transport-multi-rel.ini:
+        * performance-tests/Bench/etc/transport-tcp.ini:
+        * performance-tests/Bench/etc/transport-udp.ini:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/Bench/tests/latency/p1-100.ini:
+        * performance-tests/Bench/tests/latency/p1-1000.ini:
+        * performance-tests/Bench/tests/latency/p1-16000.ini:
+        * performance-tests/Bench/tests/latency/p1-250.ini:
+        * performance-tests/Bench/tests/latency/p1-2500.ini:
+        * performance-tests/Bench/tests/latency/p1-32000.ini:
+        * performance-tests/Bench/tests/latency/p1-50.ini:
+        * performance-tests/Bench/tests/latency/p1-500.ini:
+        * performance-tests/Bench/tests/latency/p1-5000.ini:
+        * performance-tests/Bench/tests/latency/p1-8000.ini:
+        * performance-tests/Bench/tests/latency/p1-template.ini:
+        * performance-tests/Bench/tests/latency/p2.ini:
+        * performance-tests/Bench/tests/scaling/pub-1.ini:
+        * performance-tests/Bench/tests/scaling/pub-2.ini:
+        * performance-tests/Bench/tests/scaling/pub-3.ini:
+        * performance-tests/Bench/tests/scaling/pub-4.ini:
+        * performance-tests/Bench/tests/scaling/pub-5.ini:
+        * performance-tests/Bench/tests/scaling/pub-6.ini:
+        * performance-tests/Bench/tests/scaling/pub-7.ini:
+        * performance-tests/Bench/tests/scaling/pub-8.ini:
+        * performance-tests/Bench/tests/scaling/sub.ini:
+        * performance-tests/Bench/tests/scenarios/s1-p1.ini:
+        * performance-tests/Bench/tests/scenarios/s1-p2.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p1.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p2.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p3.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p4.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p5.ini:
+        * performance-tests/Bench/tests/scenarios/s2-p6.ini:
+        * performance-tests/Bench/tests/scenarios/s3-p1.ini:
+        * performance-tests/Bench/tests/scenarios/s3-p2.ini:
+        * performance-tests/Bench/tests/scenarios/s3-p3.ini:
+        * performance-tests/Bench/tests/spray/pub-1.ini:
+        * performance-tests/Bench/tests/spray/pub-2.ini:
+        * performance-tests/Bench/tests/spray/pub-3.ini:
+        * performance-tests/Bench/tests/spray/pub-4.ini:
+        * performance-tests/Bench/tests/spray/sub.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-1280.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-160r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-160s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-2000.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-240r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-240s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-320.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-320r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-320s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-400r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-400s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-720.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-be-80.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-1280.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-160r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-160s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-2000.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-240r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-240s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-320.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-320r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-320s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-400r.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-400s.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-720.ini:
+        * performance-tests/Bench/tests/thru/bidir-1sub-rel-80.ini:
+        * performance-tests/Bench/tests/thru/bidir-remote-be.ini:
+        * performance-tests/Bench/tests/thru/bidir-remote-rel.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-1280.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-160.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-2000.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-240r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-240s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-320.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-320s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-400r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-400s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-720.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-80.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-be-80r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-1280.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-160.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-2000.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-240r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-240s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-320.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-320s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-400r.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-400s.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-720.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-80.ini:
+        * performance-tests/Bench/tests/thru/pub-1sub-rel-80r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-1280.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-160.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-160r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-2000.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-240r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-240s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-320.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-320r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-320s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-400r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-400s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-720.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-be-80.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-1280.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-160.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-160r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-2000.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-240r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-240s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-320.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-320r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-320s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-400r.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-400s.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-720.ini:
+        * performance-tests/Bench/tests/thru/pub-2sub-rel-80.ini:
+        * performance-tests/Bench/tests/thru/sub-be.ini:
+        * performance-tests/Bench/tests/thru/sub-rel.ini:
+
+          Updated Bench to use TransportConfig instead of TransportIndex in
+          its configuration files.
+
+        * tests/DCPS/Monitor/monitor.conf:
+        * tests/DCPS/Monitor/pub.ini:
+        * tests/DCPS/Monitor/run_odds_mon.pl:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/Monitor/sub.ini:
+
+          Modified test to work with new Transport API and config file format.
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Removed code that explicilty creates and attaches transports.
+          With the new transport API the defaults should work fine.
+
+        * performance-tests/Bench/etc/svc.conf:
+        * tests/DCPS/Monitor/tcp.conf:
+
+          Removed these files.
+
+Tue Jul 26 17:42:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Eliminate warnings due to differently-sized jint and size_t.
+
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Options.inl:
+        * performance-tests/DCPS/Priority/Options.cpp:
+        * performance-tests/DCPS/Priority/Publisher.h:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.h:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/run_test.pl:
+        * performance-tests/DCPS/Priority/transport.ini:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/conf.ini:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/run_test.pl:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/conf.ini:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+
+          Updated to use new config file format and transport API.
+
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/TCPProfilingTest/conf.ini:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/udp.conf:
+        * performance-tests/DCPS/UDPNoKeyTest/udp.conf:
+
+          Removed these files.
+
+Tue Jul 26 16:04:42 UTC 2011  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Use transport names, rather than IDs.
+          Allow for transport name to be specified at the reader, writer,
+            publisher, subscriber, and participant levels.
+          Allow for empty transport names.
+          For readers/writers within autoenabled publishers/subscribers
+            with specified transport names, temporarily override autoenable.
+
+Mon Jul 25 23:23:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4687 through r4767.
+
+Mon Jul 25 23:05:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Changed from sequence_var to just sequence since some GCC
+          versions didn't like the sequence_var subscript.
+
+Mon Jul 25 14:26:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/multirepo/multirepo.ini:
+
+          Forgot to add this file in the change from Fri Jul 22 14:22:24.
+
+Fri Jul 22 23:00:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Access to sub_map_ must be protected by the sub_map_lock_ mutex.
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+
+          Removed wait_for_acknowledgments().  We will need to revisit this
+          with another synchronization approach that's transport-neutral.
+
+Fri Jul 22 22:22:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add newly-developed tests to the list.
+
+Fri Jul 22 20:42:54 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ConfigTransports/Reader.h:
+        * tests/DCPS/ConfigTransports/Reader.cpp:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Improved support for tesing with entities, collocated in-process,
+          in-domain (participant), in-publisher (in-subscriber)
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Making those messages look like any other ACE messages
+
+Fri Jul 22 14:22:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/tests/multirepo/MultiRepoWorker.java:
+        * java/tests/multirepo/run_test.pl:
+
+          This test needs to bind different transports to the various
+          publishers and subscribers.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          sleep is in the ACE_OS namespace.
+
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+
+          Fixed newly introduced bugs in perl script.
+          Added logging to pub and sub .cpp.
+
+        * java/tests/multirepo/domain1_ids:
+        * java/tests/multirepo/domain2_ids:
+
+          Removed these files.
+
+Fri Jul 22 01:41:16 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * performance-tests/DCPS/MulticastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/common.h:
+        * performance-tests/DCPS/MulticastListenerTest/multicast.ini:
+        * performance-tests/DCPS/MulticastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/run_test.pl:
+        * performance-tests/DCPS/MulticastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+          Updates for new transport config scheme.
+          The MulticastListenerTest is still having problems.
+          When run as 'run_test.pl -p 1 -s 1' there is a reference
+          counting problem at exit.  When run as 'run_test.pl'
+          there is a problem during association.  Both problems
+          appear to be multicast-specific as when I switch to tcp
+          they pass.
+
+        * performance-tests/DCPS/MulticastListenerTest/multicast.conf:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-16p4s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test-4p1s.pl:
+
+          Removed these files.
+
+Thu Jul 21 20:33:37 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Clean up some STL map issues.
+
+        * tests/DCPS/FooTest3_0/README:
+        * tests/DCPS/FooTest3_1/DataReaderListener.h:
+        * tests/DCPS/FooTest3_1/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/README:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.h:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/DataReaderListener.h:
+        * tests/DCPS/FooTest3_2/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest3_2/PubDriver.h:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/README:
+        * tests/DCPS/FooTest3_2/SubDriver.h:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/Writer.h:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Adapt to new transport scheme.
+
+        * tests/DCPS/FooTest3_1/SimpleDataReader.h:
+        * tests/DCPS/FooTest3_1/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_1/Test.idl:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.h:
+        * tests/DCPS/FooTest3_2/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_2/Test.idl:
+
+          Removed these files.
+
+Thu Jul 21 16:14:21 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+
+          Add an entry to the transport interface info sequence.
+
+Wed Jul 20 23:00:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Make the data_delivered() callback even when there are no subscribers
+          currently associated.
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/dcps.ini:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/GroupPresentation/pub.ini:
+        * tests/DCPS/GroupPresentation/sub.ini:
+        * tests/DCPS/LatencyBudget/pub.ini:
+        * tests/DCPS/LatencyBudget/sub.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+        * tests/DCPS/MultiTopic/run_test.pl:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Ownership/pub.ini:
+        * tests/DCPS/Ownership/sub.ini:
+        * tests/DCPS/Priority/run_test.pl:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+        * tests/DCPS/QueryCondition/dcps.ini:
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosDeadline/sub.ini:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+        * tests/DCPS/StatusCondition/run_test.pl:
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/sub.ini:
+        * tests/DCPS/WaitForAck/run_test.pl:
+
+          Updated to use new config file format and transport API.
+
+        * tests/DCPS/MultiTopic/dcps.ini:
+        * tests/DCPS/StatusCondition/dcps.ini:
+        * tests/DCPS/WaitForAck/transport.ini:
+
+          Removed these files.
+
+Wed Jul 20 20:16:51 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/DataReaderListener.h:
+        * tests/DCPS/FooTest3_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/README:
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Update for the new transport config scheme.  I have
+          rewritten the subscriber side to use the normal DCPS
+          APIs (as opposed to directly using the transport).  I
+          have also ripped out a lot of endpoint configuration
+          and synchronization code.
+
+        * tests/DCPS/FooTest3_0/SimpleDataReader.h:
+        * tests/DCPS/FooTest3_0/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_0/Test.idl:
+
+          Removed these files.
+
+Wed Jul 20 19:33:39 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed a bug where a config file with a [common] section but no
+          entry for DCPSInfoRepo would set the inforepo IOR to the empty string.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Fixed a few issues with managing the DataLink <=> TransportClient
+          relationship (including the Transport{Send,Receive}Listeners).
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+
+          Corrected logging statements to use RepoIdConverter when needed.
+
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+        * tests/DCPS/Deadline/pub.ini:
+        * tests/DCPS/Deadline/sub.ini:
+        * tests/DCPS/Lifespan/pub.ini:
+        * tests/DCPS/Lifespan/sub.ini:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/Partition/pub.ini:
+        * tests/DCPS/Partition/sub.ini:
+        * tests/DCPS/PersistentDurability/pub.ini:
+        * tests/DCPS/PersistentDurability/sub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/pub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/sub.ini:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientDurability/sub.ini:
+        * tests/DCPS/TransientLocalTest/pub.ini:
+        * tests/DCPS/TransientLocalTest/sub.ini:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/sub.ini:
+
+          Updated scripts and config files to use the new transport API.
+
+Wed Jul 20 16:32:15 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/Reader.h:
+        * tests/DCPS/ConfigTransports/Reader.cpp:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Added support for colocating readers and writers in the same process,
+          in the same domain participant, or in the same publisher/subscriber.
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Added a TEST_ASSERT macro which throws instead of calling abort() and
+          ignoring the exit status.
+
+Wed Jul 20 02:09:49 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/conf.ini:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+
+          Rework for new transport scheme.  Consolidate all
+          capabilities into a single run_test.pl script.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test-4p1s.pl:
+
+          Removed these files.
+
+Tue Jul 19 22:30:42 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/simple/DDS_transport_simple.mpc:
+
+          Update mpc file to remove references to deleted .cpp files.
+
+Tue Jul 19 21:07:36 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * performance-tests/DCPS/InfoRepo_population/pub.ini:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/sub.ini:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/README:
+        * performance-tests/DCPS/TransportLatency/dummy_tcp.conf:
+        * performance-tests/DCPS/TransportLatency/pub.ini:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/run_test.pl:
+        * performance-tests/DCPS/TransportLatency/sub.ini:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Updated for new transport scheme.  TransportLatency is
+          still a work in progress.  Only run_test.pl is modified
+          and not the other two scripts.  run_test.pl is still
+          not running.
+
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/tcp.conf:
+        * performance-tests/DCPS/TransportLatency/multicast.conf:
+        * performance-tests/DCPS/TransportLatency/tcp.conf:
+        * performance-tests/DCPS/TransportLatency/udp.conf:
+
+          Removed these files.
+
+Tue Jul 19 20:59:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple/sub_main.cpp:
+
+          simple_bp was a copy of simple_n with very few changes.  Instead of
+          maintaining two tests, folded-in the simple_bp behavior and allowed
+          it to be enabled by passing a command line argument to run_test.pl.
+
+          simple_bp_rm on the other hand, seems to be written to test the
+          TransportInterface (now TransportClient) method remove_sample(), but
+          that never gets called.  This test case will be dropped (see below).
+
+          dds_comparative looks like an incomplete test with no run_test.pl or
+          README file, and no way to see what it's supposed to be testing.
+          This test case will also be dropped.
+
+        * tests/transport/dds_comparative/Pub.h:
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/PubDriver.h:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/PubWriter.h:
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/dds_comparative/Sub.h:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/dds_comparative/SubDriver.h:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/dds_comparative/SubReader.h:
+        * tests/transport/dds_comparative/SubReader.cpp:
+        * tests/transport/dds_comparative/TestException.h:
+        * tests/transport/dds_comparative/dds_transport_comparative.mpc:
+        * tests/transport/dds_comparative/pub_main.cpp:
+        * tests/transport/dds_comparative/sub_main.cpp:
+        * tests/transport/simple_bp/DDS_transport_simple_bp.mpc:
+        * tests/transport/simple_bp/PubDriver.h:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/README:
+        * tests/transport/simple_bp/SimpleDataReader.h:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.h:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimplePublisher.h:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimpleSubscriber.h:
+        * tests/transport/simple_bp/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp/SubDriver.h:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp/TestException.h:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/run_test.pl:
+        * tests/transport/simple_bp/sub_main.cpp:
+        * tests/transport/simple_bp_rm/DDS_transport_simple_bp_rm.mpc:
+        * tests/transport/simple_bp_rm/PubDriver.h:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/README:
+        * tests/transport/simple_bp_rm/SimpleDataReader.h:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.h:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.h:
+        * tests/transport/simple_bp_rm/SimplePublisher.cpp:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.h:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.h:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/TestException.h:
+        * tests/transport/simple_bp_rm/pub_main.cpp:
+        * tests/transport/simple_bp_rm/run_test.pl:
+        * tests/transport/simple_bp_rm/sub_main.cpp:
+
+          Removed these files.
+
+Tue Jul 19 20:41:39 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Fix issue that was preventing multiple fully_associated()
+          calls to be issued.
+
+Tue Jul 19 20:00:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Use PublicationId/SubscriptionId typedefs instead of just RepoId.
+
+Tue Jul 19 19:43:46 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Improving the test framework to account for 'autoenabling' (or not)
+          readers and writers. Added support for testing ('and') multiple
+          required transports using the '-t' command-line option. Introduced
+          a better categorization of the test cases in the driver script.
+
+Tue Jul 19 19:09:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SubDriver.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/run_test.pl:
+
+          simple_n was a copy of simple with very few changes.  Instead of
+          maintaining two tests, folded-in the simple_n behavior and allowed
+          it to be enabled by passing a command line argument to run_test.pl.
+
+        * tests/transport/simple_n/DDS_transport_simple_n.mpc:
+        * tests/transport/simple_n/PubDriver.h:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/README:
+        * tests/transport/simple_n/SimpleDataReader.h:
+        * tests/transport/simple_n/SimpleDataReader.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.h:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimplePublisher.h:
+        * tests/transport/simple_n/SimplePublisher.cpp:
+        * tests/transport/simple_n/SimpleSubscriber.h:
+        * tests/transport/simple_n/SimpleSubscriber.cpp:
+        * tests/transport/simple_n/SubDriver.h:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/simple_n/TestException.h:
+        * tests/transport/simple_n/pub_main.cpp:
+        * tests/transport/simple_n/run_test.pl:
+        * tests/transport/simple_n/sub_main.cpp:
+
+          Removed these files.
+
+Tue Jul 19 18:04:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Allow for classes which do not derive from EntityImpl (such as
+          those in the tests/transport/simple directory) to derive from
+          TransportClient.
+
+        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
+        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/ManyTopicTest/Writer.cpp:
+        * tests/DCPS/ManyTopicTest/common.h:
+
+          Removed unused variable.
+
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SubDriver.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/run_test.pl:
+        * tests/transport/simple/sub_main.cpp:
+
+          Refactored this test to work with the new TransportClient instead
+          of the old TransportInterface class.
+
+        * tests/transport/simple/SimplePublisher.h:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.h:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+
+          Removed these files.
+
+Tue Jul 19 14:04:07 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Refactored common code to help introducing of new collocation
+          scenarios (same participant, same publisher, etc.)
+
+Mon Jul 18 22:16:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+
+          Fixed compile error.
+
+Mon Jul 18 21:26:18 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DestinationOrder/run_test.pl:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/all.ini:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/LargeSample/pub.ini:
+        * tests/DCPS/LargeSample/pub_multicast.ini:
+        * tests/DCPS/LargeSample/pub_udp.ini:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/sub.ini:
+        * tests/DCPS/LargeSample/sub_multicast.ini:
+        * tests/DCPS/LargeSample/sub_udp.ini:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/common.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/tcp.ini:
+        * tests/DCPS/LivelinessTest/udp.ini:
+        * tests/DCPS/SharedTransport/TestCase.h:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/SharedTransport/multicast.ini:
+        * tests/DCPS/SharedTransport/run_test.pl:
+        * tests/DCPS/SharedTransport/tcp.ini:
+        * tests/DCPS/SharedTransport/udp.ini:
+        * tests/DCPS/TestFramework/TestFramework_T.h:
+
+          Adapted tests to compile with the new transport API.
+
+        * tests/DCPS/DestinationOrder/tcp.conf:
+        * tests/DCPS/LargeSample/multicast.conf:
+        * tests/DCPS/LargeSample/tcp.conf:
+        * tests/DCPS/LargeSample/udp.conf:
+        * tests/DCPS/SharedTransport/svc.conf:
+        * tests/DCPS/SharedTransport/test.ini:
+
+          Removed these files.
+
+Mon Jul 18 21:05:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Fixed a typo in a comment.
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Subscriber.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.h:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/run_test.pl:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpLoader.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.h:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/common.h:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/GroupPresentation/publisher.cpp:
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/common.h:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/ManyTopicTest/common.h:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+        * tests/DCPS/Reconnect/opendds.ini:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+          Adapted tests to compile with the new transport API.
+
+        * performance-tests/Bench/src/Process.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/common.h:
+        * performance-tests/DCPS/MulticastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimplePublisher.h:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SimplePublisher.h:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimpleSubscriber.h:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.h:
+        * tests/transport/simple_bp_rm/SimplePublisher.cpp:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.h:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SimplePublisher.h:
+        * tests/transport/simple_n/SimplePublisher.cpp:
+        * tests/transport/simple_n/SimpleSubscriber.h:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tools/modeling/codegen/model/Application.cpp:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Removed #includes of old headers and some calls to
+          TheTransportFactory->release().  Otherwise they still need work.
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpFactory.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpFactory.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpFactory.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpGenerator.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpGenerator.cpp:
+
+          Removed these files.
+
+Mon Jul 18 20:44:33 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Added another dimension of testing: using built-in topics vs. no
+          built-in topics.
+
+Mon Jul 18 19:51:49 UTC 2011  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/Domain.ecore:
+
+          Added transportConfig attribute to DomainEntity.
+          Note: The changes on the GMF side are not included yet until
+          versioning issues get resolved.
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/plugin.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/DomainXMI.xsd:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/DomainEntity.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/src/org/opendds/modeling/model/domain/impl/DomainEntityImpl.java:
+
+          EMF generated changes to account for addition of transportConfig.
+
+Mon Jul 18 18:58:54 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/TestFramework/TestFramework.h:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+          Remove old transport API code from TestFramework.
+          We may eventually want to add new transport API, unless
+          all tests using this will just use config-file based configuration.
+
+Mon Jul 18 18:50:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Update to use new transport config approach.
+
+Mon Jul 18 18:10:15 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/FooTest5/all.ini:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/run_test_multi_trans.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Update to use new transport config approach.
+
+Mon Jul 18 13:35:36 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Change from a dynamic cast to a static cast to avoid link
+          dependencies on the Tcp library.
+
+        * dds/DCPS/transport/multicast/MulticastInst_rch.h:
+        * dds/DCPS/transport/udp/UdpInst_rch.h:
+
+          Add these _rch types for consistency's sake.
+
+        * java/dds/OpenDDS/DCPS/transport/MulticastInst.java:
+        * java/dds/OpenDDS/DCPS/transport/TcpInst.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportRegistry.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportConfig.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportInst.java:
+        * java/dds/OpenDDS/DCPS/transport/UdpInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+
+          Rework the java interface to support the new transport
+          configuration API.  TheTransportRegistry class replaces
+          TheTransportFactory class and the various Inst classes
+          replace the Configuration classes of the previous design.
+          These classes are now referenced-based and each operation
+          passes through to the corresponding C++ object (the old
+          Configuration classes were value-based).  The Config
+          class is all new and is reference-based as well.
+
+          TODO: The jms code has not been modified.
+
+        * java/tests/builtintopics/BuiltinTopicsTest.java:
+        * java/tests/builtintopics/run_test.pl:
+        * java/tests/complex_idl/ComplexIDLTest.java:
+        * java/tests/complex_idl/run_test.pl:
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/both/run_test.pl:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/publisher/pub_multicast.ini:
+        * java/tests/messenger/publisher/pub_tcp.ini:
+        * java/tests/messenger/publisher/pub_udp.ini:
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/publisher/sub_multicast.ini:
+        * java/tests/messenger/publisher/sub_tcp.ini:
+        * java/tests/messenger/publisher/sub_udp.ini:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * java/tests/messenger/subscriber/pub_multicast.ini:
+        * java/tests/messenger/subscriber/pub_tcp.ini:
+        * java/tests/messenger/subscriber/pub_udp.ini:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * java/tests/messenger/subscriber/sub_multicast.ini:
+        * java/tests/messenger/subscriber/sub_tcp.ini:
+        * java/tests/messenger/subscriber/sub_udp.ini:
+        * java/tests/multirepo/MultiRepoBase.java:
+        * java/tests/multirepo/MultiRepoWorker.java:
+        * java/tests/multirepo/run_test.pl:
+        * java/tests/transport_config/TransportConfigTest.java:
+        * java/tests/transport_config/dcps.ini:
+
+          Update the various java tests to use the new transport
+          config code.  Most of the tests simply use the config
+          file (or even the basic defaults).  The transport_config
+          and multirepo tests each exercise the transport config
+          API.  TODO: The multirepo test fails inconsistently and
+          the udp variant of messenger/publisher/run_test.pl has
+          a termination issue.
+
+        * java/dds/OpenDDS/DCPS/transport/AttachStatus.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportImpl.java:
+        * java/tests/builtintopics/builtintopics.ini:
+        * java/tests/complex_idl/complex_idl.ini:
+        * java/tests/messenger/both/opendds_tcp.ini:
+        * java/tests/multirepo/multirepo.ini:
+
+          Removed these files.
+
+Fri Jul 15 21:43:44 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Messenger/pub.ini:
+        * tests/DCPS/Messenger/pub_ipv6.ini:
+        * tests/DCPS/Messenger/pub_multicast.ini:
+        * tests/DCPS/Messenger/run_corbaloc_test.pl:
+        * tests/DCPS/Messenger/run_ns_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/sub.ini:
+        * tests/DCPS/Messenger/sub_ipv6.ini:
+        * tests/DCPS/Messenger/sub_multicast.ini:
+
+          Updated scripts and config files for the Messenger test.
+          It is now ready to use with the new transport API and file format.
+
+        * tests/DCPS/Messenger/multicast.conf:
+        * tests/DCPS/Messenger/tcp.conf:
+        * tests/DCPS/Messenger/udp.conf:
+        * tests/DCPS/ReadCondition/dcps.ini:
+
+          Removed these files.
+
+Fri Jul 15 20:23:19 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Fixed bug due to parent() method signature changed in EntityImpl
+          but not updated in all derived classes.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed built-in topic local address string and wchar compat.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Added handling of the "fallback" option of loading Tcp if nothing
+          else is present in the global config when the transport layer is
+          about to be used by DCPS.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Updated comments and compatibility check.
+
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/pub.ini:
+        * tests/DCPS/Messenger/pub_udp.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/sub.ini:
+        * tests/DCPS/Messenger/sub_udp.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/ReadCondition/run_test.pl:
+
+          Updated for new transport API.  Messenger test is not done yet.
+
+Fri Jul 15 18:17:53 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Silenced a plethora of mesages due to mismatched
+          auto-negotiation for built-in topics.
+
+Fri Jul 15 16:43:42 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+
+          Remove the Sync Strategy from the TransportInst (and
+          derived classes).  The TransportSendStrategy constructor
+          will now be passed this object from the transport-specific
+          derived classes.  I also added an error message when
+          configuration sections of the old format are encountered
+          ([transport_*]).
+
+Fri Jul 15 16:00:49 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Fixing stray includes and test scenarios
+
+Fri Jul 15 14:25:32 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          AssociationData can now hold > 1 locator.
+          Remove dependency on AssociationData for FULLY_ASSOCIATED, it only
+          needs to track the RepoId of the remote peer.
+          Use bool instead of int to represent success/failure return values.
+
+Thu Jul 14 21:46:59 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Introducing a friend: DDS_TEST to provide tests with access to private members.
+
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ConfigTransports/ConfigTransports.mwc:
+        * tests/DCPS/ConfigTransports/DDSTEST.h:
+        * tests/DCPS/ConfigTransports/DDSTEST.cpp:
+        * tests/DCPS/ConfigTransports/DataReaderListener.h:
+        * tests/DCPS/ConfigTransports/DataReaderListener.cpp:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.h:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ConfigTransports/README:
+        * tests/DCPS/ConfigTransports/Writer.h:
+        * tests/DCPS/ConfigTransports/Writer.cpp:
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+        * tests/DCPS/ConfigTransports/transports.ini:
+
+          A configuration file with various named transport configurations.
+
+        * tests/DCPS/ConfigTransports:
+
+          Adding a test for the various use cases/configuration scenarios.
+
+Thu Jul 14 21:15:59 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          swap_bytes is no longer supported on the per-transport level.
+          It is now supported for each TransportClient, which is in charge
+          of marsahling payload data.  Removing it from the transport impl
+          means that all control messages and transport headers will be
+          marshaled in the sending host's native order.  We do not expect this
+          to have much performance impact on mixed-endian scenarios because the
+          bulk of the data transferred still has the swap_bytes option.
+
+        * tools/dissector/giop_base.h:
+
+          Fixed an #include to work with the re-arranged .idl from last commit.
+
+Thu Jul 14 20:20:05 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsInfoUtils.idl:
+
+          Updated the InfoRepo -> Participant interfaces to change
+          add_associations() to add_association().  Only one association can
+          be added at a time.
+          Use a sequence of TransportLocators in place of what used to be the
+          TransportInterfaceInfo.
+
+        * dds/DCPS/AssociationData.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Use bool instead of int to represent success/failure return values.
+          Adapted to the new add_association() operation and TransportLocator.
+          Remove old reference (mostly in comments) to TransportInterface.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_Utils.cpp:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * dds/InfoRepo/UpdateDataTypes.h:
+        * dds/InfoRepo/UpdateManager.cpp:
+
+          Updated InfoRepo and its federation to use the new data structures,
+          TransportLocatorSeq in place of TransportInterfaceInfo.
+
+        * dds/idl/metaclass_generator.cpp:
+
+          Generate a system header #include with <> instead of "".
+
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+
+          Adapted these tests for use with the new transport API.
+
+Wed Jul 13 22:28:25 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Eliminate the need to track the role_ in TransportClient.
+
+Wed Jul 13 21:38:37 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/monitor/DPMonitorImpl.cpp:
+        * dds/monitor/DRMonitorImpl.cpp:
+        * dds/monitor/DRPeriodicMonitorImpl.cpp:
+        * dds/monitor/DWMonitorImpl.cpp:
+        * dds/monitor/DWPeriodicMonitorImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SPMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TopicMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.cpp:
+        * tools/monitor/MonitorTask.cpp:
+
+          Removing references to TheTransportFactory.h and also to
+          the TransportImplFactory class which no longer exists.
+
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+
+          Removed this file.
+
+Wed Jul 13 20:38:34 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Correct lock order during shutdown (client before impl).
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Real fix for the problem with sharing datalinks -- provide a way
+          for a second thread to wait until the first has completed start().
+
+Wed Jul 13 18:25:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4639 through r4686.
+
+Wed Jul 13 18:06:51 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Improve management of send and recv listeners in the datalink.
+
+        * dds/DCPS/Util.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSetMap.h:
+        * dds/DCPS/transport/framework/RepoIdSetMap.inl:
+
+          Fix const correctness so DataLink::*_listener_for() can be const.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Revert change from Wed Jul 13 15:11:27.  Need a better solution for
+          sharing datalinks that might not yet be completely initialized.
+
+Wed Jul 13 17:39:02 UTC 2011  Iliyan Jeliazkov  <iliyan@ociweb.com>
+
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+
+          Making instances accessible through const pointers.
+
+Wed Jul 13 17:13:33 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/Monitor/monitor.cpp:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/subscriber.cpp:
+
+          Remove old transport code.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+        * dds/monitor/TransportMonitorImpl.cpp:
+
+          Cleanup of old transport code:
+            -  Remove old configuration code.
+            -  Remove attach functions from TransportImpl.
+            -  Remove transport id from TransportImpl.
+            -  Remove some constants and typedefs related to
+               the old transport implementation.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Move auto-loading to the create_inst() member function.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Fix some warnings.
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Comment out debug options (committed accidentally).
+
+Wed Jul 13 15:11:27 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Remove call to TheTransportRegistry->release() since
+          it's no longer needed.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Call TheTransportRegistry->release() from shutdown() so that
+          application code doesn't need to.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          In create_datalink(), don't put the new datalink in the map until
+          it has been initialized.  This will prevent the case of a subsequent
+          call to find_datalink() seeing a datalink that has no TcpConnection.
+
+Wed Jul 13 14:24:55 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Put the TheTransportRegistry->release() back in to avoid one core.
+
+        * tests/DCPS/BuiltInTopic/common.h:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Rip out all the transport code and let the default config handle it.
+
+Wed Jul 13 13:29:35 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Comment out TransportFactory usage.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Switch the BIT code to the new transport code.
+          Remove the -DCPSNewConfig code.  Change to a
+          shared transport for all BIT traffic.
+
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Remove the TransportFactory class.  Add support for
+          auto-loading the transport libraries when the are
+          encountered in a .ini file.  Add swap_bytes as a
+          config-level setting (remove from TransportInst).
+          Remove AUTO_CONFIG and DONT_AUTO_CONFIG constants.
+
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+
+          Remove the code requiring local_address to be set.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Switch to using the new transport code (configs).
+
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * dds/monitor/SPMonitorImpl.cpp:
+
+          Switch to using the new transport and commented out
+          the transport publication code.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Add checks for swap_bytes at the config level, autoloading,
+          and udp/multicast transport insts.
+
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * tests/DCPS/ConfigFile/tcp.conf:
+
+          Removed these files.
+
+Tue Jul 12 22:27:55 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+
+          More cleanup of unused code.
+          Make the *Transport class constructors require a corresponding
+          *Inst object as a parameter (used to be optional).
+
+Tue Jul 12 22:15:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+
+          Added error logging to fix an old //TODO comment.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkinl:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactoryinl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImplinl:
+        * dds/DCPS/transport/framework/TransportReceiveListener.h:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportType.h:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/idl/ts_generator.cpp:
+
+          Removed classes that are no longer used (see below).
+          Added locking and cleanup for TransportClient data structures.
+          Completed TransportClient implementation.
+          DataReader/WriterImpl are no longer registered in the TransportImpl,
+          instead the Transport*Listener classes are used (based on the
+          data structures in the DataLink).
+
+        * dds/DCPS/transport/framework/TransportGenerator.cpp:
+        * dds/DCPS/transport/framework/TransportGenerator.h:
+        * dds/DCPS/transport/framework/TransportGenerator_rch.h:
+        * dds/DCPS/transport/framework/TransportImplFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImplFactory.h:
+        * dds/DCPS/transport/framework/TransportImplFactoryinl:
+        * dds/DCPS/transport/framework/TransportImplFactory_rch.h:
+        * dds/DCPS/transport/framework/TransportInterface.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+        * dds/DCPS/transport/framework/TransportInterfaceinl:
+        * dds/DCPS/transport/multicast/MulticastFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastFactory.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/tcp/TcpFactory.cpp:
+        * dds/DCPS/transport/tcp/TcpFactory.h:
+        * dds/DCPS/transport/tcp/TcpFactoryinl:
+        * dds/DCPS/transport/tcp/TcpGenerator.cpp:
+        * dds/DCPS/transport/tcp/TcpGenerator.h:
+        * dds/DCPS/transport/udp/UdpFactory.cpp:
+        * dds/DCPS/transport/udp/UdpFactory.h:
+        * dds/DCPS/transport/udp/UdpGenerator.cpp:
+        * dds/DCPS/transport/udp/UdpGenerator.h:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+
+          Removed these files.
+
+Mon Jul 11 22:28:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+
+          Connect TransportClient to the DCPS layer in place of the
+          older TransportInterface (which will eventually be removed).
+          At this point the TransportClient is not complete, but tracking
+          associations and sending data (including wait_for_acks) is working.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Built-In Topics are disabled for now.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          find_or_create_datalink() is now two separate methods,
+          one for finding and one for creating.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Change transport attach API so it will compile.
+          BITs and Federation are diasbled for now.
+
+        * dds/idl/CPPTemplate.txt:
+
+          Make sure to get DR reference before releasing the
+          lock for making a listener upcall.
+
+        * dds/monitor/PublisherMonitorImpl.cpp:
+        * dds/monitor/SubscriberMonitorImpl.cpp:
+
+          Disable monitor's use of transportimpl for now.
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          Disable transport attachment from Java for now.
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+
+          Cleaned up style.
+          This is the only test that will run with the above changes.
+
+Wed Jul  6 21:51:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/design/UML/DDS_new_transport.uml:
+        * docs/design/UML/NewTransport.png:
+
+          Adding a class diagram for the new transport classes.
+
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+
+          Fix some small memory leaks in tests.
+
+Wed Jul  6 15:40:25 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+
+          Completed implementation of Udp default local address.
+          Re-enabled it in the test.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed a logging format specifier.
+
+Tue Jul  5 22:44:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Beginning implementation of allowing a default for Udp.
+
+Tue Jul  5 22:01:10 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Allow TransportImpls to be constructed with an Inst_rch parameter
+          so that they are not constructred in a not-configured state.
+          Make sure default Insts are also kept in the registry.
+          Implemented shutdown so that TransportImpls can clean up: this
+          requires TransportClients to be attached to the Impls.
+
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+
+          Cleaned up style, etc.  No functional changes.
+
+Tue Jul  5 16:31:56 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4607 through r4638.
+
+Tue Jul  5 16:23:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+        * dds/DCPS/transport/framework/NetworkAddress.inl:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.inl:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * java/dds/OpenDDS_jni_helpers.h:
+
+          Use std::string instead of ACE_TString in user-visible classes.
+          TransportInst::transport_type_ can't change after initialization.
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/transport/dds_comparative/Pub.h:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/Sub.h:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+
+          Adapt tests for change from ACE_TString to std::string.
+
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigFile/test1.ini:
+
+          Renamed test1.conf to test1.ini to distinguish it from ACE svc conf.
+
+        * tests/DCPS/ConfigFile/test1.conf:
+
+          Removed this file.
+
+Sat Jul  2 04:34:29 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Added DCPSGlobalTransportConfig option (command line
+          and config file).
+          Added -DCPSNewConfig command line option.  Pass a value
+          of 1 to use the new config file format (not used by the
+          underlying code yet).
+
+        * tests/DCPS/ConfigFile:
+        * tests/DCPS/ConfigFile/ConfigFile.mpc:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigFile/tcp.conf:
+        * tests/DCPS/ConfigFile/test1.conf:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Move the ConfigFile test to its own directory and change
+          it to use proper application initialization.
+
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+        * tests/DCPS/UnitTests/tcp.conf:
+        * tests/DCPS/UnitTests/test1.conf:
+
+          Removed these files.
+
+Fri Jul  1 19:47:14 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RcHandle_T.h:
+
+          Added {static,dynamic,const}_rchandle_cast function templates so
+          that RcHandles can be safely downcast while maintining refcount.
+          Other misc cleanup including a locally-defined swap() and defined
+          operator*.
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+
+          Renamed insert() to sorted_insert() to be more explicit about what
+          this method does.
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportType.h:
+
+          Removed TransportType::requires_reactor(), instead each individual
+          transport can optionally call TransportImpl::create_reactor_task().
+
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Adapted to the two framework changes above.
+
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpFactory.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Adapted to the two framework changes above.
+          Use RcHandle instead of manual reference count adjustments.
+
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+
+          Added conditional #include for static builds.
+          Use the new dynamic_rchandle_cast<>().
+
+Fri Jul  1 18:23:00 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+        * tests/DCPS/UnitTests/test1.conf:
+
+          Add support for [config/name] sections in the config file.
+          Add creation of a file default configuration for each config
+          file with [transport/*] sections.
+          Clean up a bunch of dodgy config file error messages and logic.
+
+
+Thu Jun 30 22:29:35 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+
+          Added default config with instances for each specific type.
+          Insts can now create and cache their corresponding impl.
+          Began integrating with DCPS layer (via new TransportClient class).
+
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+
+          Fixed a reference counting bug.
+
+Thu Jun 30 20:50:52 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Add new parsing code to the TransportRegistry.  This
+          is currently not called by the ServiceParticipant.
+          Add a new load function (with a different signature)
+          to TransportInst.  This includes inst parsing but
+          not config parsing.
+
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+
+          Add the new load function to these transport implementations.
+
+        * tests/DCPS/UnitTests/ConfigFile.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/tcp.conf:
+        * tests/DCPS/UnitTests/test1.conf:
+
+          Add a simple unit test to test the TCP config parsing.
+          Much more needs to be added to this.
+
+Thu Jun 30 13:47:26 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+
+          Fixes for inline=1 builds.
+
+        * java/build_scripts/jni_check.pl:
+
+          Account for the 64-bit Windows Release-mode function names.
+
+Thu Jun 30 00:44:08 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportType.h:
+        * dds/DCPS/transport/framework/TransportType.cpp:
+        * dds/DCPS/transport/framework/TransportType_rch.h:
+
+          Implemented new public API for transport configuration (using the
+          TransportRegistry instead of TransportFactory).  These are not yet
+          wired in to the DCPS layer's usage of the transport.
+
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.h:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpGenerator.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.inl:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/udp/UdpGenerator.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.h:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+
+          Adapted existing transport types to the changes above.
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/jms/.classpath:
+        * java/jms/src/org/opendds/jms/common/beans/spi/ThreadSynchStrategyType.java:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.inl:
+
+          Updated to work with the latest renames and API changes.
+
+Wed Jun 29 16:27:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/transport/TransportFactory.java:
+        * java/jms/src/org/opendds/jms/transport/Transports.java:
+
+          Apply yesterday's renaming to the JMS Provider code.
+
+        * java/jms/.classpath:
+        * java/jms/.project:
+        * java/jms/README:
+        * java/jms/compat/.classpath:
+        * java/jms/compat/.project:
+
+          Adding Eclipse projects and fixed typo in README.
+
+Wed Jun 29 14:16:11 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+
+          Added a missing #include.
+
+Tue Jun 28 22:39:24 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.inl:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+        * dds/DCPS/transport/framework/TransportConfig_rch.h:
+        * dds/DCPS/transport/framework/TransportInst.h:
+
+          Added starter files for new TransportConfig class.  A single
+          TransportConfig object represents how a DDS Entity (Data Reader or
+          Data Writer) uses the transport layer.  TransportConfig objects
+          consist of an ordered list of (smart pointers to) TransportInsts.
+
+        * java/tests/transport_config/TransportConfigTest.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+
+          More fixes for TransportConfiguration -> TransportInst rename.
+          Modeling generated code should now work.
+
+Tue Jun 28 20:38:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          One more fix for the case when ant is /usr/bin/ant.
+
+          The changes below are the rename of TransportConfiguration (including
+          TcpConfiguration, UdpConfiguration, MulticastConfiguration) to the
+          corresponding "Inst" class (TransportInst, etc.).  Modeling generated
+          code is not yet accounted for.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportGenerator.h:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.inl:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportInst_rch.h:
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.inl:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastGenerator.h:
+        * dds/DCPS/transport/multicast/MulticastGenerator.cpp:
+        * dds/DCPS/transport/multicast/MulticastInst.h:
+        * dds/DCPS/transport/multicast/MulticastInst.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/tcp/TcpAcceptor.h:
+        * dds/DCPS/transport/tcp/TcpAcceptor.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpGenerator.h:
+        * dds/DCPS/transport/tcp/TcpGenerator.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.inl:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpInst_rch.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.inl:
+        * dds/DCPS/transport/udp/UdpGenerator.h:
+        * dds/DCPS/transport/udp/UdpGenerator.cpp:
+        * dds/DCPS/transport/udp/UdpInst.h:
+        * dds/DCPS/transport/udp/UdpInst.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.h:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * java/dds/OpenDDS/DCPS/transport/MulticastInst.java:
+        * java/dds/OpenDDS/DCPS/transport/TcpInst.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportImpl.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportInst.java:
+        * java/dds/OpenDDS/DCPS/transport/UdpInst.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/MulticastListenerTest/common.h:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpAcceptor.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpAcceptor.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpGenerator.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpGenerator.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpInst_rch.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpSendStrategy.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/common.h:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/ManyTopicTest/common.h:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tools/modeling/codegen/model/Application.h:
+        * tools/modeling/codegen/model/Application.cpp:
+        * tools/modeling/codegen/model/Delegate.h:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.inl:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration_rch.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.h:
+        * dds/DCPS/transport/multicast/MulticastConfiguration.cpp:
+        * dds/DCPS/transport/tcp/TcpConfiguration.h:
+        * dds/DCPS/transport/tcp/TcpConfiguration.inl:
+        * dds/DCPS/transport/tcp/TcpConfiguration.cpp:
+        * dds/DCPS/transport/tcp/TcpConfiguration_rch.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.h:
+        * dds/DCPS/transport/udp/UdpConfiguration.cpp:
+        * java/dds/OpenDDS/DCPS/transport/MulticastConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/TcpConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/TransportConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/UdpConfiguration.java:
+
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration_rch.h:
+
+          Removed these files.
+
+Tue Jun 28 15:37:50 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+
+          Fix for GCC: befriend an ACE_Singleton instantation instead of the
+          template itself.
+
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+
+          Cleaned up warnings and whitespace.
+
+Mon Jun 27 22:25:22 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/modeling/tests/setup.pl:
+
+          Adapt our use of the ANT_HOME environment variable to work with
+          versions of Ant available as Linux packages.  The other place we use
+          Ant (in java/build_scripts/jms_scoreboard.pl) is already taken care
+          of the in the earlier commit.
+
+Mon Jun 27 22:07:47 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r4599 through r4606.
+
+Mon Jun 27 21:51:28 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportRegistry.h:
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Added a TransportRegistry, which is the start of the new API for
+          users to create and configure OpenDDS transports.  Not used yet.
+
+        * MPC/config/dcps_multicast.mpb:
+        * MPC/config/dcps_tcp.mpb:
+        * MPC/config/dcps_udp.mpb:
+
+          Rename SimpleTcp to tcp.  Make MPC project names match library names.
+          Use ACE Service Config service names that start with OpenDDS so we
+          don't clash with anything else.
+          The remainder of this entry is consequences of the SimpleTcp -> tcp
+          change.
+
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/tcp.conf:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/tcp.conf:
+        * contrib/wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        * contrib/wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * contrib/wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+        * contrib/wrapper/example/dds_tcp_conf.ini:
+        * contrib/wrapper/example/tcp.conf:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TheTransportFactory.h:
+        * dds/DCPS/transport/framework/TransportDefs.h:
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.inl:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/multicast/Multicast.cpp:
+        * dds/DCPS/transport/multicast/MulticastLoader.cpp:
+        * dds/DCPS/transport/multicast/OpenDDS_Multicast.mpc:
+        * dds/DCPS/transport/tcp/OpenDDS_Tcp.mpc:
+        * dds/DCPS/transport/tcp/Tcp.h:
+        * dds/DCPS/transport/tcp/Tcp.cpp:
+        * dds/DCPS/transport/tcp/Tcp.rc:
+        * dds/DCPS/transport/tcp/TcpAcceptor.h:
+        * dds/DCPS/transport/tcp/TcpAcceptor.cpp:
+        * dds/DCPS/transport/tcp/TcpConfiguration.h:
+        * dds/DCPS/transport/tcp/TcpConfiguration.inl:
+        * dds/DCPS/transport/tcp/TcpConfiguration.cpp:
+        * dds/DCPS/transport/tcp/TcpConfiguration_rch.h:
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.inl:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpConnectionReplaceTask.h:
+        * dds/DCPS/transport/tcp/TcpConnectionReplaceTask.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection_rch.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.inl:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink_rch.h:
+        * dds/DCPS/transport/tcp/TcpFactory.h:
+        * dds/DCPS/transport/tcp/TcpFactory.inl:
+        * dds/DCPS/transport/tcp/TcpFactory.cpp:
+        * dds/DCPS/transport/tcp/TcpGenerator.h:
+        * dds/DCPS/transport/tcp/TcpGenerator.cpp:
+        * dds/DCPS/transport/tcp/TcpLoader.h:
+        * dds/DCPS/transport/tcp/TcpLoader.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.h:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.inl:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy_rch.h:
+        * dds/DCPS/transport/tcp/TcpReconnectTask.h:
+        * dds/DCPS/transport/tcp/TcpReconnectTask.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy_rch.h:
+        * dds/DCPS/transport/tcp/TcpSynchResource.h:
+        * dds/DCPS/transport/tcp/TcpSynchResource.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport_rch.h:
+        * dds/DCPS/transport/tcp/Tcp_export.h:
+        * dds/DCPS/transport/tcp/Tcp_pch.h:
+        * dds/DCPS/transport/tcp/Tcp_pch.cpp:
+        * dds/DCPS/transport/udp/OpenDDS_Udp.mpc:
+        * dds/DCPS/transport/udp/Udp.cpp:
+        * dds/DCPS/transport/udp/UdpLoader.cpp:
+        * dds/DdsDcpsInfoUtils.idl:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfoRepo_bits.mpb:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/monitor/MonitorFactoryImpl.cpp:
+        * etc/multicast.conf:
+        * etc/tcp.conf:
+        * etc/udp.conf:
+        * examples/DCPS/DistributedContent/AbstractionLayer.h:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/DistributedContent/run_test.pl:
+        * examples/DCPS/DistributedContent/tcp.conf:
+        * examples/DCPS/IntroductionToOpenDDS/dds_tcp_conf.ini:
+        * examples/DCPS/IntroductionToOpenDDS/tcp.conf:
+        * examples/DCPS/Messenger_IOGR_Imr/pub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/sub.ini:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/pub.ini:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/sub.ini:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * java/build_scripts/jms_scoreboard.pl:
+        * java/dds/OpenDDS/DCPS/transport/TcpConfiguration.java:
+        * java/dds/OpenDDS/DCPS/transport/TheTransportFactory.java:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/dcps_java.mpc:
+        * java/jms/build.xml:
+        * java/jms/compat/conf/tcp.conf:
+        * java/jms/compat/src/META-INF/service/opendds-ds.xml:
+        * java/jms/example/jbossas/opendds-ds.xml:
+        * java/jms/example/jbossas/opendds-repo-ds.xml:
+        * java/jms/example/jbossesb/helloworld/src/opendds-ds.xml:
+        * java/jms/example/jbossesb/helloworld2/src/opendds-ds.xml:
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/src/META-INF/services/org.opendds.jms.transport.spi.Transport:
+        * java/jms/src/org/opendds/jms/transport/spi/TcpTransport.java:
+        * java/tests/builtintopics/builtintopics.ini:
+        * java/tests/complex_idl/complex_idl.ini:
+        * java/tests/messenger/both/opendds_tcp.ini:
+        * java/tests/messenger/publisher/pub_tcp.ini:
+        * java/tests/messenger/publisher/sub_tcp.ini:
+        * java/tests/messenger/subscriber/pub_tcp.ini:
+        * java/tests/messenger/subscriber/sub_tcp.ini:
+        * java/tests/multirepo/multirepo.ini:
+        * java/tests/transport_config/TransportConfigTest.java:
+        * java/tests/transport_config/dcps.ini:
+        * performance-tests/Bench/etc/svc.conf:
+        * performance-tests/Bench/etc/transport-tcp.ini:
+        * performance-tests/Bench/etc/transport.ini:
+        * performance-tests/Bench/src/testprocess.cpp:
+        * performance-tests/DCPS/InfoRepo_population/pub2.ini:
+        * performance-tests/DCPS/InfoRepo_population/pub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/sub_mcast.ini:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/InfoRepo_population/tcp.conf:
+        * performance-tests/DCPS/Priority/Options.h:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/svc.conf:
+        * performance-tests/DCPS/Priority/transport.ini:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/conf.ini:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/conf.ini:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/tcp.conf:
+        * tests/DCPS/BidirMessenger/pubsub.ini:
+        * tests/DCPS/BidirMessenger/pubsub.cpp:
+        * tests/DCPS/BidirMessenger/pubsub_ipv6.ini:
+        * tests/DCPS/BidirMessenger/tcp.conf:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopicTest/tcp.conf:
+        * tests/DCPS/CompatibilityTest/common.h:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopicTest.cpp:
+        * tests/DCPS/ContentFilteredTopic/dcps.ini:
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/sub.ini:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/tcp.conf:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/Deadline/pub.ini:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/sub.ini:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Deadline/tcp.conf:
+        * tests/DCPS/DestinationOrder/TestCase.cpp:
+        * tests/DCPS/DestinationOrder/tcp.conf:
+        * tests/DCPS/Dispose/main.cpp:
+        * tests/DCPS/Dispose/tcp.conf:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/publisher_main.cpp:
+        * tests/DCPS/Federation/subscriber_main.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/pub_main.cpp:
+        * tests/DCPS/FooTest3_0/sub_main.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/pub_main.cpp:
+        * tests/DCPS/FooTest3_1/sub_main.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/pub_main.cpp:
+        * tests/DCPS/FooTest3_2/sub_main.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/FooTest4_0.mpc:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/common.h:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/GroupPresentation/pub.ini:
+        * tests/DCPS/GroupPresentation/publisher.cpp:
+        * tests/DCPS/GroupPresentation/sub.ini:
+        * tests/DCPS/GroupPresentation/subscriber.cpp:
+        * tests/DCPS/GroupPresentation/tcp.conf:
+        * tests/DCPS/LargeSample/pub.ini:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/sub.ini:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/LargeSample/tcp.conf:
+        * tests/DCPS/LatencyBudget/pub.ini:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/sub.ini:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/LatencyBudget/tcp.conf:
+        * tests/DCPS/Lifespan/pub.ini:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/sub.ini:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/Lifespan/tcp.conf:
+        * tests/DCPS/LivelinessTest/common.h:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/common.h:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/tcp.conf:
+        * tests/DCPS/ManyTopicTest/common.h:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/Messenger/pub.ini:
+        * tests/DCPS/Messenger/pub_ipv6.ini:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/sub.ini:
+        * tests/DCPS/Messenger/sub_ipv6.ini:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/Messenger/tcp.conf:
+        * tests/DCPS/Monitor/monitor.cpp:
+        * tests/DCPS/Monitor/pub.ini:
+        * tests/DCPS/Monitor/publisher.cpp:
+        * tests/DCPS/Monitor/sub.ini:
+        * tests/DCPS/Monitor/subscriber.cpp:
+        * tests/DCPS/Monitor/tcp.conf:
+        * tests/DCPS/MultiDPTest/common.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiTopic/MultiTopicTest.cpp:
+        * tests/DCPS/MultiTopic/dcps.ini:
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/NotifyTest/tcp.conf:
+        * tests/DCPS/Ownership/pub.ini:
+        * tests/DCPS/Ownership/publisher.cpp:
+        * tests/DCPS/Ownership/sub.ini:
+        * tests/DCPS/Ownership/subscriber.cpp:
+        * tests/DCPS/Ownership/tcp.conf:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/Partition/pub.ini:
+        * tests/DCPS/Partition/sub.ini:
+        * tests/DCPS/Partition/tcp.conf:
+        * tests/DCPS/PersistentDurability/pub.ini:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/sub.ini:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/PersistentDurability/tcp.conf:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/Presentation/tcp.conf:
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Priority/services.conf:
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+        * tests/DCPS/Prst_delayed_subscriber/pub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/sub.ini:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/tcp.conf:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/QueryCondition/dcps.ini:
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+        * tests/DCPS/ReadCondition/dcps.ini:
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+        * tests/DCPS/ReaderDataLifecycle/tcp.conf:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/pub.ini:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/sub.ini:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/tcp.conf:
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/sub.ini:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/tcp.conf:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/DCPS/SharedTransport/svc.conf:
+        * tests/DCPS/SharedTransport/test.ini:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+        * tests/DCPS/StatusCondition/dcps.ini:
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/sub.ini:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/StringKey/tcp.conf:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/Thrasher/tcp.conf:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+        * tests/DCPS/TimeBasedFilter/tcp.conf:
+        * tests/DCPS/TransientDurability/pub.ini:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/sub.ini:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientDurability/tcp.conf:
+        * tests/DCPS/TransientLocalTest/pub.ini:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/sub.ini:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/tcp.conf:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/WaitForAck/tcp.conf:
+        * tests/DCPS/WaitForAck/transport.ini:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/pub.ini:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/sub.ini:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/tcp.conf:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+        * tests/transport/simple/tcp.conf:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/sub_main.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/pub_main.cpp:
+        * tests/transport/simple_bp_rm/sub_main.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/simple_n/pub_main.cpp:
+        * tests/transport/simple_n/sub_main.cpp:
+        * tools/modeling/codegen/model/Application.cpp:
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/TransportDirectives.cpp:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/cpp.xsl:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/xsl/traits_cpp.xsl:
+        * tools/modeling/tests/Arrays/tcp.conf:
+        * tools/modeling/tests/CfTopic/tcp.conf:
+        * tools/modeling/tests/Chained/tcp.conf:
+        * tools/modeling/tests/Chained_Data/tcp.conf:
+        * tools/modeling/tests/Chained_Topic/tcp.conf:
+        * tools/modeling/tests/Codegen/svc.conf:
+        * tools/modeling/tests/Comments/tcp.conf:
+        * tools/modeling/tests/CompositeKey/tcp.conf:
+        * tools/modeling/tests/CopyTopicQos/tcp.conf:
+        * tools/modeling/tests/DataLibRef/tcp.conf:
+        * tools/modeling/tests/Deep/Down/Reference/tcp.conf:
+        * tools/modeling/tests/DomainZero/tcp.conf:
+        * tools/modeling/tests/EmptyLibs/tcp.conf:
+        * tools/modeling/tests/Exchange/tcp.conf:
+        * tools/modeling/tests/ExternalPolicies/tcp.conf:
+        * tools/modeling/tests/InvalidNames/tcp.conf:
+        * tools/modeling/tests/Looped/tcp.conf:
+        * tools/modeling/tests/Messenger/tcp.conf:
+        * tools/modeling/tests/MessengerDpQos/tcp.conf:
+        * tools/modeling/tests/MessengerGlobalNs/tcp.conf:
+        * tools/modeling/tests/MessengerMC/tcp.conf:
+        * tools/modeling/tests/MessengerMixed/tcp.conf:
+        * tools/modeling/tests/MessengerMulti/tcp.conf:
+        * tools/modeling/tests/MessengerNoPub/tcp.conf:
+        * tools/modeling/tests/MessengerNoSub/tcp.conf:
+        * tools/modeling/tests/MessengerPubQos/tcp.conf:
+        * tools/modeling/tests/MessengerSimpleTypes/tcp.conf:
+        * tools/modeling/tests/MessengerSplit/tcp.conf:
+        * tools/modeling/tests/MessengerWriterQos/tcp.conf:
+        * tools/modeling/tests/ModuleNameConflict/tcp.conf:
+        * tools/modeling/tests/MultiDCPS/tcp.conf:
+        * tools/modeling/tests/MultiInstance/tcp.conf:
+        * tools/modeling/tests/MultiTopic/tcp.conf:
+        * tools/modeling/tests/PolicyLib/tcp.conf:
+        * tools/modeling/tests/ReaderQos/tcp.conf:
+        * tools/modeling/tests/ReferExternalProj/tcp.conf:
+        * tools/modeling/tests/RemoteInstHandles/tcp.conf:
+        * tools/modeling/tests/ReusedExtTypes/tcp.conf:
+        * tools/modeling/tests/ReusedTypes/tcp.conf:
+        * tools/modeling/tests/Sequences/tcp.conf:
+        * tools/modeling/tests/StockQuoter/tcp.conf:
+        * tools/modeling/tests/SubscriberQos/tcp.conf:
+        * tools/modeling/tests/TopicQos/tcp.conf:
+        * tools/modeling/tests/UDP/tcp.conf:
+        * tools/monitor/MonitorTask.cpp:
+        * tools/monitor/Monitor_main.cpp:
+        * tools/monitor/monitor.conf:
+        * tools/repoctl/repoctl.mpc:
+
+        * dds/DCPS/transport/multicast/multicast.mpc:
+        * dds/DCPS/transport/udp/udp.mpc:
+        * examples/DCPS/DistributedContent/simple_tcp.conf:
+        * java/build_scripts/ant_wrapper.pl:
+        * java/dds/OpenDDS/DCPS/transport/SimpleTcpConfiguration.java:
+        * java/jms/src/org/opendds/jms/transport/spi/SimpleTcpTransport.java:
+        * tools/monitor/repo.conf:
+
+          Removed these files.
+
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

@@ -1,0 +1,46 @@
+
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,stub_export_include=Ownership_export.h \
+                   -Wb,stub_export_macro=Ownership_Export
+  dcps_ts_flags += -Wb,export_macro=Ownership_Export
+  dynamicflags  += OWNERSHIP_BUILD_DLL
+  requires      += ownership_kind_exclusive
+  requires      += ownership_profile
+
+  TypeSupport_Files {
+    Messenger.idl
+  }
+}
+
+project(DDS*Publisher) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp {
+  exename   = publisher
+  after    += DDS*idl
+  libs     += DDS*idl
+  requires += ownership_kind_exclusive
+  requires += ownership_profile
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    publisher.cpp
+    Writer.cpp
+  }
+}
+
+project(DDS*Subscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp {
+  exename   = subscriber
+  after    += DDS*idl
+  libs     += DDS*idl
+  requires += ownership_kind_exclusive
+  requires += ownership_profile
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    subscriber.cpp
+    DataReaderListener.cpp
+  }
+}
+

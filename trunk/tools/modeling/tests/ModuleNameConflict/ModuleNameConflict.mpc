@@ -1,0 +1,22 @@
+project(*xmlPublisher) : dcpsexe, dds_model, ModuleNameConflict_paths, ModuleNameConflict {
+  exename   = publisher
+  after    += ModuleNameConflict
+  libs     += ModuleNameConflict
+  libpaths += model
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*xmlSubscriber) : dcpsexe, dds_model, ModuleNameConflict_paths, ModuleNameConflict {
+  exename   = subscriber
+  after    += ModuleNameConflict
+  libs     += ModuleNameConflict
+  libpaths += model
+
+  Source_Files {
+    subscriber.cpp
+  }
+}
+

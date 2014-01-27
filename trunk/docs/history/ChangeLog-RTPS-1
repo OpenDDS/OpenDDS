@@ -1,0 +1,499 @@
+Mon May  9 20:06:02 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Fix some type conversion warnings from the 64 bit build
+
+        * dds/idl/marshal_generator.cpp:
+
+          Remove a stray debug print.
+
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+        * tests/DCPS/KeyTest/KeyTest.idl:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/KeyTest/KeyTest2.idl:
+
+          Split KeyTest.idl into two files as the generated code appears
+          to break some sort of size limitation on the VC 64 bit build.
+
+Fri May  6 20:48:04 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/rtps.mpc:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+
+          Yet more changes to get the Windows exports and dependencies
+          right.
+
+Fri May  6 18:22:15 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/md5.h:
+        * dds/DCPS/RTPS/rtps_export.h:
+
+          Fix export macros for the RTPS library
+
+Fri May  6 14:50:23 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Add support for Key hashing required for RTPS.  This is
+          done via a template function marshal_key_hash that will
+          take a message type and put the hash in the corresponding
+          IDL data type.
+
+        * dds/DCPS/RTPS/md5.h:
+        * dds/DCPS/RTPS/md5.cpp:
+
+          Add a public domain MD5 implementation to support key hashing.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+
+          Generate key-only variants of gen_find_size,
+          gen_is_bounded_size, and gen_max_marshaled_size.
+          Clean up some of the existing key marshaling code generation.
+
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+        * tests/DCPS/KeyTest/KeyTest.idl:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/KeyTest/md5_test.cpp:
+        * tests/DCPS/KeyTest/run_test.pl:
+
+          Add unit testing for MD5 and Key Hashing.
+
+Thu May  5 14:43:06 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed a bug that prevented SimpleTcp from being able to send the
+          GRACEFUL_DISCONNECT message during shutdown.
+
+Fri Apr 29 13:54:43 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+          Added optional parameter to lowest_valid() which allows the caller
+          to receive info about which "missing" ranges were removed.
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Completed implementation of fragment reassembly.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Call data_unavailable() where appropriate.
+          Sequence ranges are inclusive at both ends.
+          Fixed logging of sequence numbers (needs %q).
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LargeSample/pub_multicast.ini:
+        * tests/DCPS/LargeSample/sub_multicast.ini:
+
+          Enable this test with multicast.  Default multicast is reliable,
+          changed config files for non-default multicast to be best effort.
+
+Thu Apr 28 19:06:53 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Added logging for the data_unavailable() cases.
+
+Wed Apr 27 21:30:58 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * tools/dissector/packet.cpp:
+
+          Added a "first_fragment" bit to the flags byte.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Use the new "first_fragment" flag.
+
+        * dds/DCPS/transport/framework/ReceivedDataSample.h:
+        * dds/DCPS/transport/framework/ReceivedDataSample.inl:
+
+          Give this class the normal value-semantics with assignment, copy,
+          and swap operations (so we can use it in standard containers).
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.h:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Implement reassembly of fragments.  Basic functionality is done,
+          but data_unavailable() still needs to be implemented.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastReceiveStrategy.cpp:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.h:
+        * dds/DCPS/transport/udp/UdpReceiveStrategy.cpp:
+
+          Enable reassembly with udp and multicast.  Multicast's reliable
+          session still needs to be enhanced to call data_unavailable().
+
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+
+          Removed unused MAX_DEPTH and related #include.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/Messenger.idl:
+        * tests/DCPS/LargeSample/Writer.cpp:
+
+          Use OctetSeq instead of CharSeq and verify that the correct
+          data is received.
+          Run this test with udp transports in order to test the fragmentation
+          and reassembly features of the transport framework.
+
+Wed Apr 27 21:25:31 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Remove obsolete lollipop comment.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/transport/framework/TransportSendBuffer.cpp:
+
+          Fix sequence number debug statements to properly use %q.
+          Some sequence numbers in debug statements change from hex
+          to decimal because of this change.
+
+        * tests/DCPS/KeyTest/README:
+
+          Fix typo.
+
+Wed Apr 27 20:49:47 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+
+          Fix some portability weirdness with the CORBA long double type
+          in TAO.  Note that the long double type works as a key in this
+          unit test but will fail in actual applications on Windows
+          because of a lack of operator<.
+
+Wed Apr 27 18:21:08 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+
+          Add support for marshaling just the keys of a DCPS data type
+          (as opposed to the whole sample).  Use the keys-only marshaling
+          in all of the control messages that don't require the whole
+          sample.  This is required for RTPS as well.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/KeyTest:
+        * tests/DCPS/KeyTest/KeyMarshaling.cpp:
+        * tests/DCPS/KeyTest/KeyTest.idl:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/KeyTest/KeyTest_export.h:
+        * tests/DCPS/KeyTest/KeyTypeError_array_noindex.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_bad_nesting.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_missing_right_bracket.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_multi_dim_array.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_nofield.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_nonarrayindex.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_nonarrayindex2.idl:
+        * tests/DCPS/KeyTest/KeyTypeError_struct_no_nest.idl:
+        * tests/DCPS/KeyTest/README:
+        * tests/DCPS/KeyTest/run_test.pl:
+
+          Add a new unit test for key-related functionality.  This
+          includes tests of all the different type and varieties of
+          keys that we currently support (the spec is vague as to
+          what is allowed).  It also verifies the key-only marshaling
+          functionality and a number of error paths in key specification.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Fix this unit test to adhere to marshaling interface changes.
+
+Mon Apr 25 12:19:34 UTC 2011  Jim Chappell  <chapell_j@ociweb.com>
+
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/Serializer.inl:
+
+          Initial changes for RTPS-style serialization.
+
+Fri Apr 15 21:33:16 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/BasicQueue_T.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Implemented fragmentation in the Send Strategy.
+
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          Changed order of transport init/fini and service cleanup.
+
+        * tools/dissector/packet.cpp:
+
+          Use proto_tree_add_uint64() for 64-bit values.
+
+Fri Apr 15 19:17:31 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/dissector/packet.cpp:
+
+          Changes to get wireshark dissector code compiling with 64 bit sequence numbers.
+
+Fri Apr 15 16:46:30 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Fix some conversion warnings.
+
+Fri Apr 15 15:23:13 UTC 2011  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Modify the SequenceNumber class to be compatible with RTPS.
+          I have also bulked up the abstraction the class provides to
+          simplify the using code.  The main changes are moving from a
+          32 bit count to 64 bit count and from the lollipop scheme to a
+          purely positive range (excepting a spec-defined "unknown" value).
+
+        * dds/DCPS/CoherentChangeControl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DisjointSequence.h:
+        * dds/DCPS/DisjointSequence.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/SubscriptionInstance.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Related changes to the SequenceNumber changes.  In general we
+          move away from directly using integral types and towards using
+          the SequenceNumber abstraction.
+
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.h:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+
+          Fix the details of these tests (as they directly manipulates
+          sequence numbers).  Mostly involves avoiding non-positive
+          numbers.
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+        * tests/DCPS/UnitTests/SequenceNumber.cpp:
+
+          Modify the unit tests as necessary.  Add some new tests to
+          cover new corner cases and functionality.
+
+
+Thu Apr 14 17:37:38 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Added a join() static function to do the inverse of split().
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+
+          max_marshaled_size() should be static.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+
+          Use TranpsortHeader::max_marshaled_size() to determine how much
+          data to log in the hexdump.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Continue with fragment management.
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Test DataSampleHeader::join().
+
+Wed Apr 13 21:32:02 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed a redundant entry.
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Implemented fragmentation logic in DataSampleHeader::split().
+          Removed extra overloads on ACE_Message_Block* when we already have
+          one for ACE_Message_Block&.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Adjusted to use ACE_Message_Block& overload.
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+
+          'port' is a reserved keyword for CCM.
+
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Simplified mpc file and use consistent shared lib name.
+
+        * dds/DCPS/transport/framework/TransportCustomizedElement.h:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.inl:
+        * dds/DCPS/transport/framework/TransportCustomizedElement.cpp:
+
+          Made this class a more generally applicable so we can use it for
+          fragmented send-data as well.
+
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+
+          Added a fragment() method.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Start of integrating fragmentation.  This is nowhere near done.
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+
+          Removed extra overloads (see DataSampleHeader notes, above).
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportControlElement.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpDataLink.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpDataLink.cpp:
+
+          Adjusted to account for the above changes.
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          New unit test for the Fragmentation logic in DataSampleHeader.
+
+        * tests/DCPS/common/TestSupport.h:
+
+          Fixed a wchar bug.
+
+        * tests/transport/dds_comparative/PubWriter.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp/SimpleDataWriter.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataWriter.cpp:
+        * tests/transport/simple_n/SimpleDataWriter.cpp:
+
+          Adjusted to account for the above changes.
+
+Tue Apr 12 18:07:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        Laying the groundwork for generic fragmentation/reassembly in the
+        transport framewowk.
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Use what was the "reserved_4" flag bit for "more fragments".
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/TransportHeader.h:
+        * dds/DCPS/transport/framework/TransportHeader.inl:
+        * dds/DCPS/transport/framework/TransportHeader.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          All: Code cleanup while reviewing to integrate fragmentation.
+          SendStratgey: new max_message_size() method for fragmentation.
+          TransportHeader: changed from an entire byte to hold byte order to
+          a flags byte which has both byte order and a "last fragment" flag.
+
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/udp/UdpSendStrategy.h:
+
+          Override max_message_size() to indicate UDP's size limit.
+
+        * tools/dissector/packet.cpp:
+
+          Wireshark updates for the header changes above.
+
+Tue Apr 12 15:33:01 UTC 2011  cjohn  <john_c@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/BaseMessageTypes.h:
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Update prior Changelog comment to beter explain changes. Replace
+          anonymous types with named types. Replace invalid c++ macro
+          names with valid ones. Remove unnecessary typedefed
+          types. Remove SubmessageHeader body definition as the body for
+          that type of submessage is empty.
+
+Mon Apr 11 21:49:37 UTC 2011  cjohn  <john_c@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/MessageTypes.h:
+
+          Define RTPS wire message IDL structures and reserved constant values.
+
+Mon Apr 11 15:03:30 UTC 2011  cjohn  <john_c@ociweb.com>
+
+        * dds/DCPS/RTPS/:
+        * dds/DCPS/RTPS/RtpsBaseMessageTypes.idl:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/BaseMessageTypes.h:
+        * dds/DCPS/RTPS/MessageTypes.h:
+        * dds/DCPS/RTPS/rtps.mpc:
+        * dds/DCPS/RTPS/Test.cpp:
+
+          Create RTPS directory and Base types.
+
+Tue Apr  5 15:02:41 UTC 2011  Adam Mitz  <mitza@ociweb.com>
+
+        * BranchChangeLog:
+
+          Created branch for DDS-RTPS implementation.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

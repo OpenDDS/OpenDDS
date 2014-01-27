@@ -1,0 +1,99 @@
+
+Some testing scenarios
+
+NOTATION:
+filenames are abbreviations for the following constructs:
+  scenario<i>-process<j>
+with the abbreviated filenames appearing as:
+  s<i>-p<j>.ini
+
+within a file, publications and subscriptions are described.  To fully
+specify these, participants and topics need to be defined as well.  If
+the scenario does not require more than one of these (participants or
+topics) then they may be implied in the brief synopses below.
+
+In general the intent is to execute the different processes on different
+hosts - at least to the extent that the majority of data traffic is
+actually carried by a network and not transferred via the loopback
+interface.
+
+For example to run scenario 2 on 3 hosts you could execute the following
+processes on each host:
+
+  Host1: -s s2-p1.ini,s2-p5.ini
+  Host2: -s s2-p2.ini,s2-p4.ini
+  Host3: -s s2-p3.ini,s2-p6.ini
+
+Or with only 2 hosts:
+
+  Host1: -s s2-p1.ini,s2-p3.ini,s2-p5.ini
+  Host2: -s s2-p2.ini,s2-p4.ini,s2-p6.ini
+
+########################################################################
+# scenario 1
+#   simple loopback;
+#   PATHS:
+#     p1pub1-->p2subl1/p2pub1-->p1subl2
+#       the 1000 messages/sec rate will result in an aggregate 2000
+#       messages/sec traversing the links for 2.2 Mb/s of payload traffic.
+#
+s1-p1.ini: Process1
+s1-p2.ini: Process2
+
+########################################################################
+# scenario 2
+#   6 processes;
+#
+#   send state data in loops through all processes;
+#   PATHS:
+#     p1pub1-->p2sub1/p2pub1-->p1subl2
+#     p1pub1-->p2sub1/p2pub1-->p3sub1/p3pub1-->p1subl3
+#     p1pub1-->p2sub1/p2pub1-->p3sub1/p3pub1-->p4sub1/p4pub1-->p1subl4
+#     p1pub1-->p2sub1/p2pub1-->p3sub1/p3pub1-->p4sub1/p4pub1-->p5sub1/p5pub1-->p1subl5
+#     p1pub1-->p2sub1/p2pub1-->p3sub1/p3pub1-->p4sub1/p4pub1-->p5sub1/p5pub1-->p6sub1/p6pub1-->p1subl6
+#       the 1000 messages/sec rate will result in an aggregate 10000
+#       messages/sec traversing the links for 11 Mb/s of payload traffic.
+#
+#   all processes send control data, all processes receive contol data;
+#   PATHS:
+#     p1pub2-->p1sub2, p1pub2-->p2sub2, p1pub2-->p3sub2, p1pub2-->p4sub2, p1pub2-->p5sub2, p1pub2-->p6sub2,
+#     p2pub2-->p1sub2, p2pub2-->p2sub2, p2pub2-->p3sub2, p2pub2-->p4sub2, p2pub2-->p5sub2, p2pub2-->p6sub2,
+#     p3pub2-->p1sub2, p3pub2-->p2sub2, p3pub2-->p3sub2, p3pub2-->p4sub2, p3pub2-->p5sub2, p3pub2-->p6sub2,
+#     p4pub2-->p1sub2, p4pub2-->p2sub2, p4pub2-->p3sub2, p4pub2-->p4sub2, p4pub2-->p5sub2, p4pub2-->p6sub2,
+#     p5pub2-->p1sub2, p5pub2-->p2sub2, p5pub2-->p3sub2, p5pub2-->p4sub2, p5pub2-->p5sub2, p5pub2-->p6sub2,
+#     p6pub2-->p1sub2, p6pub2-->p2sub2, p6pub2-->p3sub2, p6pub2-->p4sub2, p6pub2-->p5sub2, p6pub2-->p6sub2,
+#       the 20 messages/sec rate will result in an aggregate 600
+#       messages/sec traversing the links for 375 Kb/s of payload traffic,
+#       not including collocated traffic.
+#
+#   all processes send status data, one process receives status data.
+#   PATHS:
+#     p1pub3-->p4sub3, p2pub2-->p4sub3, p3pub3-->p4sub3, p4pub2-->p4sub3, p5pub3-->p4sub3, p6pub2-->p4sub3
+#       the 10 messages/sec rate will result in an aggregate 50
+#       messages/sec traversing the links for 9.8 Kb/s of payload traffic,
+#       not including collocated traffic.
+#
+#   An aggregate (not including collocated traffic) data rate of 11 Mb/s
+#   will traverse the links during this test.
+#
+s2-p1.ini: TestProcess1
+s2-p2.ini: TestProcess2
+s2-p3.ini: TestProcess3
+s2-p4.ini: TestProcess4
+s2-p5.ini: TestProcess5
+s2-p6.ini: TestProcess6
+
+########################################################################
+# scenario 3
+#   3 processes;
+#
+#   send state data in loops through all processes;
+#   PATHS:
+#     p1pub1-->p2subl1/p2pub1-->p1subl2
+#     p1pub1-->p2subl1/p2pub1-->p3subl2/p3pub1-->p1subl3
+#       the 1000 messages/sec rate will result in an agregate 4000
+#       messages/sec traversing the links for 4.4 Mb/s of payload traffic.
+#
+s1-p1.ini: Process1
+s1-p2.ini: Process2
+

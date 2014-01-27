@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="Arrays">
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw" name="Arrays">
+    <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
+    <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportConfig="trans1">
+        <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </publishers>
+    </participants>
+    <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportConfig="trans3">
+        <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </subscribers>
+    </participants>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+  </libs>
+  <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
+    <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
+      <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_Tg-r0Ab8EeCTrrqfM0kA8A" name="letters" type="_otPYwAb9EeCTrrqfM0kA8A"/>
+      <fields xmi:id="_bAOEkAb8EeCTrrqfM0kA8A" name="doubles" type="_sVza4Ab9EeCTrrqfM0kA8A"/>
+      <fields xmi:id="_UyRNMAb_EeCTrrqfM0kA8A" name="bools" type="_SFjvUAb_EeCTrrqfM0kA8A"/>
+      <fields xmi:id="_0ZWIoAb_EeCTrrqfM0kA8A" name="greeks" type="_oy7fIAb_EeCTrrqfM0kA8A"/>
+      <fields xmi:id="_ExYHAAcAEeCTrrqfM0kA8A" name="floats" type="_BleLsAcAEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_WVIRoAcAEeCTrrqfM0kA8A" name="longs" type="_SwlM0AcAEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_hmjikAcAEeCTrrqfM0kA8A" name="longlongs" type="_eBaA0AcAEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_f4EyEAcBEeCTrrqfM0kA8A" name="octets" type="_ZJhPYAcBEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_XVvvMAcCEeCTrrqfM0kA8A" name="shorts" type="_UfWJ0AcCEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_qmSLwAcCEeCTrrqfM0kA8A" name="boundStrings" type="_kYU0sAcCEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_vT-C4AcCEeCTrrqfM0kA8A" name="unboundStrings" type="_jfcr8AcCEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_gCm8MAcDEeCTrrqfM0kA8A" name="ulongs" type="_bMJjkAcDEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_r-wlIAcDEeCTrrqfM0kA8A" name="ulonglongs" type="_mFS3YAcDEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_BkWYEAcFEeCTrrqfM0kA8A" name="ushorts" type="_A-8k8AcFEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_eRvwoAcFEeCTrrqfM0kA8A" name="wchars" type="_dq7BMAcFEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_Oq3s8AcGEeCTrrqfM0kA8A" name="unboundedWstrings" type="_0SrRMAcFEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_PR5QsAcGEeCTrrqfM0kA8A" name="boundedWstrings" type="_1ug9EAcFEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_8--9MAcJEeCTrrqfM0kA8A" name="arrays" type="_8SGpEAcJEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_ns-tQAcLEeCTrrqfM0kA8A" name="octetSeqs" type="_jfUaAAcLEeCTrrqfM0kA8A"/>
+      <fields xmi:id="_PEv_kAeVEeCxruCPh_66Sg" name="structs" type="_YIvvoAeVEeCxruCPh_66Sg"/>
+      <fields xmi:id="_mxhhcAeWEeCxruCPh_66Sg" name="thisthat" type="_MQItcAeWEeCxruCPh_66Sg"/>
+      <fields xmi:id="_nSrtwAeWEeCxruCPh_66Sg" name="unions" type="_mFfh4AeWEeCxruCPh_66Sg"/>
+      <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
+    </types>
+    <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
+    <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
+    <types xsi:type="types:Char" xmi:id="_PLVhQAb8EeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Double" xmi:id="_W1ODwAb8EeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_YTXcwAb8EeCTrrqfM0kA8A" length="2" subtype="_W1ODwAb8EeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_otPYwAb9EeCTrrqfM0kA8A" type="_ppkPIAeiEeCzwZxYLCuzIA" name="CharArr"/>
+    <types xsi:type="types:Typedef" xmi:id="_sVza4Ab9EeCTrrqfM0kA8A" type="_YTXcwAb8EeCTrrqfM0kA8A" name="DoubleArr"/>
+    <types xsi:type="types:Boolean" xmi:id="_OFB5IAb_EeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_Pjk6wAb_EeCTrrqfM0kA8A" length="3" subtype="_OFB5IAb_EeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_SFjvUAb_EeCTrrqfM0kA8A" type="_Pjk6wAb_EeCTrrqfM0kA8A" name="BoolArr"/>
+    <types xsi:type="types:Enum" xmi:id="_gDY8IAb_EeCTrrqfM0kA8A" name="Greeks">
+      <literals>alpha</literals>
+      <literals>beta</literals>
+      <literals>delta</literals>
+      <literals>epsilon</literals>
+    </types>
+    <types xsi:type="types:Array" xmi:id="_lbgQUAb_EeCTrrqfM0kA8A" length="4" subtype="_gDY8IAb_EeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_oy7fIAb_EeCTrrqfM0kA8A" type="_lbgQUAb_EeCTrrqfM0kA8A" name="GreekArr"/>
+    <types xsi:type="types:Float" xmi:id="_8R_f4Ab_EeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_93EnUAb_EeCTrrqfM0kA8A" length="5" subtype="_8R_f4Ab_EeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_BleLsAcAEeCTrrqfM0kA8A" type="_93EnUAb_EeCTrrqfM0kA8A" name="FloatArr"/>
+    <types xsi:type="types:Long" xmi:id="_PW7wcAcAEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_Qp6bQAcAEeCTrrqfM0kA8A" length="6" subtype="_PXgFEPDvEd-I4rwicuuPOw"/>
+    <types xsi:type="types:Typedef" xmi:id="_SwlM0AcAEeCTrrqfM0kA8A" type="_Qp6bQAcAEeCTrrqfM0kA8A" name="LongArr"/>
+    <types xsi:type="types:LongLong" xmi:id="_aX3uUAcAEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_bn3WkAcAEeCTrrqfM0kA8A" length="7" subtype="_aX3uUAcAEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_eBaA0AcAEeCTrrqfM0kA8A" type="_bn3WkAcAEeCTrrqfM0kA8A" name="LongLongArr"/>
+    <types xsi:type="types:Octet" xmi:id="_WZ-f8AcBEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_X2DcYAcBEeCTrrqfM0kA8A" length="8" subtype="_WZ-f8AcBEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_ZJhPYAcBEeCTrrqfM0kA8A" type="_X2DcYAcBEeCTrrqfM0kA8A" name="OctetArr"/>
+    <types xsi:type="types:Short" xmi:id="_ORjx4AcCEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_QcNEgAcCEeCTrrqfM0kA8A" length="9" subtype="_ORjx4AcCEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_UfWJ0AcCEeCTrrqfM0kA8A" type="_QcNEgAcCEeCTrrqfM0kA8A" name="ShortArr"/>
+    <types xsi:type="types:String" xmi:id="_Zl2JkAcCEeCTrrqfM0kA8A" length="10"/>
+    <types xsi:type="types:Array" xmi:id="_bXvlAAcCEeCTrrqfM0kA8A" length="11" subtype="_E8F2IPDvEd-I4rwicuuPOw"/>
+    <types xsi:type="types:Array" xmi:id="_fUixwAcCEeCTrrqfM0kA8A" length="10" subtype="_Zl2JkAcCEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_jfcr8AcCEeCTrrqfM0kA8A" type="_bXvlAAcCEeCTrrqfM0kA8A" name="UnboundStringArr"/>
+    <types xsi:type="types:Typedef" xmi:id="_kYU0sAcCEeCTrrqfM0kA8A" type="_fUixwAcCEeCTrrqfM0kA8A" name="BoundStringArr"/>
+    <types xsi:type="types:ULong" xmi:id="_Vtil0AcDEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_XuctoAcDEeCTrrqfM0kA8A" length="12" subtype="_Vtil0AcDEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_bMJjkAcDEeCTrrqfM0kA8A" type="_XuctoAcDEeCTrrqfM0kA8A" name="UlongArr"/>
+    <types xsi:type="types:ULongLong" xmi:id="_kRRVAAcDEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_lTPvYAcDEeCTrrqfM0kA8A" length="13" subtype="_kRRVAAcDEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_mFS3YAcDEeCTrrqfM0kA8A" type="_lTPvYAcDEeCTrrqfM0kA8A" name="ULongLongArr"/>
+    <types xsi:type="types:UShort" xmi:id="_-8DgIAcEEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_ADGAsAcFEeCTrrqfM0kA8A" length="14" subtype="_-8DgIAcEEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_A-8k8AcFEeCTrrqfM0kA8A" type="_ADGAsAcFEeCTrrqfM0kA8A" name="UShortArr"/>
+    <types xsi:type="types:WChar" xmi:id="_cFulAAcFEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_dC_egAcFEeCTrrqfM0kA8A" length="15" subtype="_cFulAAcFEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_dq7BMAcFEeCTrrqfM0kA8A" type="_dC_egAcFEeCTrrqfM0kA8A" name="WcharArr"/>
+    <types xsi:type="types:WString" xmi:id="_wIER8AcFEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:WString" xmi:id="_xMXAgAcFEeCTrrqfM0kA8A" length="16"/>
+    <types xsi:type="types:Array" xmi:id="_zfwmgAcFEeCTrrqfM0kA8A" length="17" subtype="_wIER8AcFEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_0SrRMAcFEeCTrrqfM0kA8A" type="_zfwmgAcFEeCTrrqfM0kA8A" name="UnboundedWStringArr"/>
+    <types xsi:type="types:Array" xmi:id="_1C7CYAcFEeCTrrqfM0kA8A" length="16" subtype="_xMXAgAcFEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_1ug9EAcFEeCTrrqfM0kA8A" type="_1C7CYAcFEeCTrrqfM0kA8A" name="BoundedWStringArr"/>
+    <types xsi:type="types:Struct" xmi:id="_VaQgoAcHEeCTrrqfM0kA8A" name="LongStruct" isDcpsDataType="true">
+      <fields xmi:id="_YrbWcAcHEeCTrrqfM0kA8A" name="long1" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_aQX7AAcHEeCTrrqfM0kA8A" name="long2" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+    </types>
+    <types xsi:type="types:Array" xmi:id="_3gIu4AcJEeCTrrqfM0kA8A" length="9" subtype="_xMXAgAcFEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Array" xmi:id="_7VUQsAcJEeCTrrqfM0kA8A" length="47" subtype="_zY1s4AcKEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_8SGpEAcJEeCTrrqfM0kA8A" type="_7VUQsAcJEeCTrrqfM0kA8A" name="ArrayArr"/>
+    <types xsi:type="types:Typedef" xmi:id="_zY1s4AcKEeCTrrqfM0kA8A" type="_3gIu4AcJEeCTrrqfM0kA8A" name="StringArray"/>
+    <types xsi:type="types:Array" xmi:id="_fYEQwAcLEeCTrrqfM0kA8A" length="21" subtype="_ZJhPYAcBEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_jfUaAAcLEeCTrrqfM0kA8A" type="_fYEQwAcLEeCTrrqfM0kA8A" name="OctetSeqArr"/>
+    <types xsi:type="types:Array" xmi:id="_WtvKMAeVEeCxruCPh_66Sg" length="22" subtype="_VaQgoAcHEeCTrrqfM0kA8A"/>
+    <types xsi:type="types:Typedef" xmi:id="_YIvvoAeVEeCxruCPh_66Sg" type="_WtvKMAeVEeCxruCPh_66Sg" name="StructArr"/>
+    <types xsi:type="types:Union" xmi:id="_MQItcAeWEeCxruCPh_66Sg" name="ThisOrThat" switch="_ORjx4AcCEeCTrrqfM0kA8A">
+      <branches xmi:id="_P1qpsAeWEeCxruCPh_66Sg">
+        <field xmi:id="_Q6HJQAeWEeCxruCPh_66Sg" name="this_string" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+        <cases xmi:id="_ymsjMAeXEeCxruCPh_66Sg" literal="1"/>
+      </branches>
+      <branches xmi:id="_W4WCQAeWEeCxruCPh_66Sg">
+        <field xmi:id="_XqlXgAeWEeCxruCPh_66Sg" name="that_long" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+        <cases xmi:id="_0lKbAAeXEeCxruCPh_66Sg" literal="0"/>
+      </branches>
+      <default xmi:id="_Z-OOEAeWEeCxruCPh_66Sg" name="common_double" type="_W1ODwAb8EeCTrrqfM0kA8A"/>
+    </types>
+    <types xsi:type="types:Array" xmi:id="_lS6OYAeWEeCxruCPh_66Sg" length="23" subtype="_MQItcAeWEeCxruCPh_66Sg"/>
+    <types xsi:type="types:Typedef" xmi:id="_mFfh4AeWEeCxruCPh_66Sg" type="_lS6OYAeWEeCxruCPh_66Sg" name="UnionArr"/>
+    <types xsi:type="types:Array" xmi:id="_ppkPIAeiEeCzwZxYLCuzIA" length="1" subtype="_PLVhQAb8EeCTrrqfM0kA8A"/>
+  </libs>
+</opendds:OpenDDSModel>

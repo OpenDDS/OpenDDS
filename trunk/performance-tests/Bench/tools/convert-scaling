@@ -1,0 +1,53 @@
+#!/bin/bash
+
+mkdir -p data
+mkdir -p images
+
+reduce.pl tcp/scaling-1.data > data/tcp-1.gpd
+reduce.pl tcp/scaling-2.data > data/tcp-2.gpd
+reduce.pl tcp/scaling-3.data > data/tcp-3.gpd
+reduce.pl tcp/scaling-4.data > data/tcp-4.gpd
+reduce.pl tcp/scaling-5.data > data/tcp-5.gpd
+reduce.pl tcp/scaling-6.data > data/tcp-6.gpd
+reduce.pl tcp/scaling-7.data > data/tcp-7.gpd
+reduce.pl tcp/scaling-8.data > data/tcp-8.gpd
+
+reduce.pl udp/scaling-1.data > data/udp-1.gpd
+reduce.pl udp/scaling-2.data > data/udp-2.gpd
+reduce.pl udp/scaling-3.data > data/udp-3.gpd
+reduce.pl udp/scaling-4.data > data/udp-4.gpd
+reduce.pl udp/scaling-5.data > data/udp-5.gpd
+reduce.pl udp/scaling-6.data > data/udp-6.gpd
+reduce.pl udp/scaling-7.data > data/udp-7.gpd
+reduce.pl udp/scaling-8.data > data/udp-8.gpd
+
+reduce.pl multi-be/scaling-1.data > data/mbe-1.gpd
+reduce.pl multi-be/scaling-2.data > data/mbe-2.gpd
+reduce.pl multi-be/scaling-3.data > data/mbe-3.gpd
+reduce.pl multi-be/scaling-4.data > data/mbe-4.gpd
+reduce.pl multi-be/scaling-5.data > data/mbe-5.gpd
+reduce.pl multi-be/scaling-6.data > data/mbe-6.gpd
+reduce.pl multi-be/scaling-7.data > data/mbe-7.gpd
+reduce.pl multi-be/scaling-8.data > data/mbe-8.gpd
+
+reduce.pl multi-rel/scaling-1.data > data/mrel-1.gpd
+reduce.pl multi-rel/scaling-2.data > data/mrel-2.gpd
+reduce.pl multi-rel/scaling-3.data > data/mrel-3.gpd
+reduce.pl multi-rel/scaling-4.data > data/mrel-4.gpd
+reduce.pl multi-rel/scaling-5.data > data/mrel-5.gpd
+reduce.pl multi-rel/scaling-6.data > data/mrel-6.gpd
+reduce.pl multi-rel/scaling-7.data > data/mrel-7.gpd
+reduce.pl multi-rel/scaling-8.data > data/mrel-8.gpd
+
+reduce.pl rtps/scaling-1.data > data/rtps-1.gpd
+reduce.pl rtps/scaling-2.data > data/rtps-2.gpd
+reduce.pl rtps/scaling-3.data > data/rtps-3.gpd
+reduce.pl rtps/scaling-4.data > data/rtps-4.gpd
+reduce.pl rtps/scaling-5.data > data/rtps-5.gpd
+reduce.pl rtps/scaling-6.data > data/rtps-6.gpd
+reduce.pl rtps/scaling-7.data > data/rtps-7.gpd
+reduce.pl rtps/scaling-8.data > data/rtps-8.gpd
+
+extract.pl data/*.gpd > data/latency.csv
+genstats.pl data/latency.csv
+

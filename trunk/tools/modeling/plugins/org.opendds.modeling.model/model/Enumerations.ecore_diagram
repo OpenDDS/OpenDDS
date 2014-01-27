@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<notation:Diagram xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmi:id="_nugCMHirEd-z-Mm2uzA3lg" type="Ecore" measurementUnit="Pixel">
+  <children xmi:type="notation:Shape" xmi:id="_n1k6kHirEd-z-Mm2uzA3lg" type="2005" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_n1lhoHirEd-z-Mm2uzA3lg" type="5005"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1lhoXirEd-z-Mm2uzA3lg" type="7011">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1lhonirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1lho3irEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1lhpHirEd-z-Mm2uzA3lg" type="7012">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1lhpXirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1lhpnirEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EEnum" href="Enumerations.ecore#//ReliabilityQosPolicyKind"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n1k6kXirEd-z-Mm2uzA3lg" x="48" y="32"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_n1lhp3irEd-z-Mm2uzA3lg" type="2005" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_n1lhqXirEd-z-Mm2uzA3lg" type="5005"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1lhqnirEd-z-Mm2uzA3lg" type="7011">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1lhq3irEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1lhrHirEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1lhrXirEd-z-Mm2uzA3lg" type="7012">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1lhrnirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1lhr3irEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EEnum" href="Enumerations.ecore#//PresentationQosPolicyAccessScopeKind"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n1lhqHirEd-z-Mm2uzA3lg" x="48" y="144"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_n1lhsHirEd-z-Mm2uzA3lg" type="2001" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_n1mIsHirEd-z-Mm2uzA3lg" type="5001"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mIsXirEd-z-Mm2uzA3lg" type="7001">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mIsnirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mIs3irEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mItHirEd-z-Mm2uzA3lg" type="7002">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mItXirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mItnirEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mIt3irEd-z-Mm2uzA3lg" type="7003">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mIuHirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mIuXirEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EClass" href="Enumerations.ecore#//Period"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n1lhsXirEd-z-Mm2uzA3lg" x="384" y="32"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_n1mIunirEd-z-Mm2uzA3lg" type="2005" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_n1mIvHirEd-z-Mm2uzA3lg" type="5005"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mIvXirEd-z-Mm2uzA3lg" type="7011">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mIvnirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mIv3irEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mIwHirEd-z-Mm2uzA3lg" type="7012">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mIwXirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mIwnirEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EEnum" href="Enumerations.ecore#//OwnershipQosPolicyKind"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n1mIu3irEd-z-Mm2uzA3lg" x="384" y="160"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_n1mIw3irEd-z-Mm2uzA3lg" type="2005" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_n1mIxXirEd-z-Mm2uzA3lg" type="5005"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mIxnirEd-z-Mm2uzA3lg" type="7011">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mvwHirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mvwXirEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mvwnirEd-z-Mm2uzA3lg" type="7012">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mvw3irEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mvxHirEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EEnum" href="Enumerations.ecore#//LivelinessQosPolicyKind"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n1mIxHirEd-z-Mm2uzA3lg" x="384" y="288"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_n1mvxXirEd-z-Mm2uzA3lg" type="2005" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_n1mvx3irEd-z-Mm2uzA3lg" type="5005"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mvyHirEd-z-Mm2uzA3lg" type="7011">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mvyXirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mvynirEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mvy3irEd-z-Mm2uzA3lg" type="7012">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mvzHirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mvzXirEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EEnum" href="Enumerations.ecore#//DurabilityQosPolicyKind"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n1mvxnirEd-z-Mm2uzA3lg" x="608" y="32"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_n1mvznirEd-z-Mm2uzA3lg" type="2005" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_n1mv0HirEd-z-Mm2uzA3lg" type="5005"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mv0XirEd-z-Mm2uzA3lg" type="7011">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mv0nirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mv03irEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1mv1HirEd-z-Mm2uzA3lg" type="7012">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1mv1XirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1mv1nirEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EEnum" href="Enumerations.ecore#//DestinationOrderQosPolicyKind"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n1mvz3irEd-z-Mm2uzA3lg" x="48" y="304"/>
+  </children>
+  <children xmi:type="notation:Shape" xmi:id="_n1nW0HirEd-z-Mm2uzA3lg" type="2005" fontName="Sans">
+    <children xmi:type="notation:DecorationNode" xmi:id="_n1nW0nirEd-z-Mm2uzA3lg" type="5005"/>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1nW03irEd-z-Mm2uzA3lg" type="7011">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1nW1HirEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1nW1XirEd-z-Mm2uzA3lg"/>
+    </children>
+    <children xmi:type="notation:BasicCompartment" xmi:id="_n1nW1nirEd-z-Mm2uzA3lg" type="7012">
+      <styles xmi:type="notation:SortingStyle" xmi:id="_n1nW13irEd-z-Mm2uzA3lg"/>
+      <styles xmi:type="notation:FilteringStyle" xmi:id="_n1nW2HirEd-z-Mm2uzA3lg"/>
+    </children>
+    <element xmi:type="ecore:EEnum" href="Enumerations.ecore#//HistoryQosPolicyKind"/>
+    <layoutConstraint xmi:type="notation:Bounds" xmi:id="_n1nW0XirEd-z-Mm2uzA3lg" x="608" y="160"/>
+  </children>
+  <styles xmi:type="notation:DiagramStyle" xmi:id="_nugCMXirEd-z-Mm2uzA3lg"/>
+  <element xmi:type="ecore:EPackage" href="Enumerations.ecore#/"/>
+</notation:Diagram>

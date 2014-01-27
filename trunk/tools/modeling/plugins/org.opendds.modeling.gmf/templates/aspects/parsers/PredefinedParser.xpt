@@ -1,0 +1,254 @@
+«REM»Add support for display and input of infinity for Longs«ENDREM»
+
+«EXTENSION impl::parsers::i18n»
+
+«AROUND parser_getEditStringMethod FOR gmfgen::PredefinedParser-»
+	«EXPAND xpt::Common::generatedMemberComment»
+	public String getEditString(org.eclipse.core.runtime.IAdaptable adapter, int flags) {
+«IF viewMethod = gmfgen::LabelTextAccessMethod::MESSAGE_FORMAT-»
+		org.eclipse.emf.ecore.EObject element =	(org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+«REM»Custom modifications begin«ENDREM-»
+		Object[] values = getEditableValues(element);
+		numbersToSymbols(values);
+		return getEditorProcessor().format(values, new StringBuffer(), new java.text.FieldPosition(0)).toString();
+«REM»Custom modifications end«ENDREM-»
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::PRINTF-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+		String pattern = getEditorPattern() == null ? getDefaultEditablePattern() : getEditorPattern();
+		return String.format(pattern, getEditableValues(element));
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::REGEXP-»
+		return "";«EXPAND xpt::Common::nonNLS»
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::NATIVE-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+		String s = org.eclipse.emf.ecore.util.EcoreUtil.convertToString(editableFeatures[0].getEAttributeType(), element.eGet(editableFeatures[0]));
+		return s != null ? s : "";«EXPAND xpt::Common::nonNLS»
+«ENDIF-»
+	}
+«ENDAROUND»
+
+«AROUND parser_getPrintStringMethod FOR gmfgen::PredefinedParser-»
+	«EXPAND xpt::Common::generatedMemberComment»
+	public String getPrintString(org.eclipse.core.runtime.IAdaptable adapter, int flags) {
+«IF viewMethod = gmfgen::LabelTextAccessMethod::MESSAGE_FORMAT-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+«REM»Custom modifications begin«ENDREM-»
+		Object[] values = getValues(element);
+		numbersToSymbols(values);
+		return getViewProcessor().format(values, new StringBuffer(), new java.text.FieldPosition(0)).toString();
+«REM»Custom modifications end«ENDREM-»
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::PRINTF-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+		return String.format(getViewPattern() == null ? getDefaultPattern() : getViewPattern(), getValues(element));
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::REGEXP-»
+		return "";«EXPAND xpt::Common::nonNLS»
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::NATIVE-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+		String s = org.eclipse.emf.ecore.util.EcoreUtil.convertToString(features[0].getEAttributeType(), element.eGet(features[0]));
+		return s != null ? s : "";«EXPAND xpt::Common::nonNLS»
+«ENDIF-»
+	}
+«ENDAROUND»
+
+«AROUND additions FOR gmfgen::PredefinedParser-»
+	«EXPAND xpt::Common::generatedMemberComment(
+		'Use maximum 32-bit integer to represent infinity to be compatible\n' +
+		'with the value of IDL constants DDS::DURATION_INFINITE_SEC and\n' +
+		'DDS::DURATION_INFINITE_NSEC.\n'
+	)»
+	private static final int INFINITY_32 = Integer.MAX_VALUE;
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	private void numbersToSymbols(Object[] values) {
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] instanceof Integer) {
+				long val = (Integer) values[i];
+				if (val == INFINITY_32) {
+					values[i] = "Infinity";
+				}
+			}
+			else if (values[i] instanceof Long) {
+				long val = (Long) values[i];
+				if (val == INFINITY_32) {
+					values[i] = "Infinity";
+				}
+			}
+		}
+	}
+
+	«REM»
+	Cannot get AROUND AbstractParser.getValidNewValue() because it's embedded in
+	a Main definition and aspects cannot be used in that case (at least with GMF 2.2.2.)
+	Instead, rely on MessageFormatParser inheriting from AbstractParser and override
+	getValidNewValue() in MessageFormatParser allowing for infinity to be entered for
+	attributes of type Long.
+	«ENDREM-»
+	«EXPAND xpt::Common::generatedMemberComment»
+	@Override
+	protected Object getValidNewValue(org.eclipse.emf.ecore.EAttribute feature, Object value) {
+		org.eclipse.emf.ecore.EClassifier type = feature.getEType();
+		if (type instanceof org.eclipse.emf.ecore.EDataType) {
+			Class iClass = type.getInstanceClass();
+			if (Boolean.TYPE.equals(iClass)) {
+				if (value instanceof Boolean) {
+					// ok
+				} else if (value instanceof String) {
+					value = Boolean.valueOf((String) value);
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», iClass.getName()));
+				}
+			} else if (Character.TYPE.equals(iClass)) {
+				if (value instanceof Character) {
+					// ok
+				} else if (value instanceof String) {
+					String s = (String) value;
+					if (s.length() == 0) {
+						value = null;
+					} else {
+						value = new Character(s.charAt(0));
+					}
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», iClass.getName()));
+				}
+			} else if (Byte.TYPE.equals(iClass)) {
+				if (value instanceof Byte) {
+					// ok
+				} else if (value instanceof Number) {
+					value = new Byte(((Number) value).byteValue());
+				} else if (value instanceof String) {
+					String s = (String) value;
+					if (s.length() == 0) {
+						value = null;
+					} else {
+						try {
+							value = Byte.valueOf(s);
+						} catch (NumberFormatException nfe) {
+							value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserWrongStringConversionMessage()) FOR holder.editorGen», iClass.getName()));
+						}
+					}
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», iClass.getName()));
+				}
+			} else if (Short.TYPE.equals(iClass)) {
+				if (value instanceof Short) {
+					// ok
+				} else if (value instanceof Number) {
+					value = new Short(((Number) value).shortValue());
+				} else if (value instanceof String) {
+					String s = (String) value;
+					if (s.length() == 0) {
+						value = null;
+					} else {
+						try {
+							value = Short.valueOf(s);
+						} catch (NumberFormatException nfe) {
+							value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserWrongStringConversionMessage()) FOR holder.editorGen», iClass.getName()));
+						}
+					}
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», iClass.getName()));
+				}
+			} else if (Integer.TYPE.equals(iClass)) {
+				if (value instanceof Integer) {
+					// ok
+				} else if (value instanceof Number) {
+					value = new Integer(((Number) value).intValue());
+				} else if (value instanceof String) {
+					String s = (String) value;
+«REM»Custom modifications begin«ENDREM-»
+					if (s.length() > 2 && s.substring(0, 3).equalsIgnoreCase("inf")) {
+						value = new Integer(INFINITY_32);
+					} else
+«REM»Custom modifications end«ENDREM-»
+					if (s.length() == 0) {
+						value = null;
+					} else {
+						try {
+							value = Integer.valueOf(s);
+						} catch (NumberFormatException nfe) {
+							value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserWrongStringConversionMessage()) FOR holder.editorGen», iClass.getName()));
+						}
+					}
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», iClass.getName()));
+				}
+			} else if (Long.TYPE.equals(iClass)) {
+				if (value instanceof Long) {
+					// ok
+				} else if (value instanceof Number) {
+					value = new Long(((Number) value).longValue());
+				} else if (value instanceof String) {
+					String s = (String) value;
+«REM»Custom modifications begin«ENDREM-»
+					if (s.length() > 2 && s.substring(0, 3).equalsIgnoreCase("inf")) {
+						value = new Long(INFINITY_32);
+					} else
+«REM»Custom modifications end«ENDREM-»
+					if (s.length() == 0) {
+						value = null;
+					} else {
+						try {
+							value = Long.valueOf(s);
+						} catch (NumberFormatException nfe) {
+							value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserWrongStringConversionMessage()) FOR holder.editorGen», iClass.getName()));
+						}
+					}
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», iClass.getName()));
+				}
+			} else if (Float.TYPE.equals(iClass)) {
+				if (value instanceof Float) {
+					// ok
+				} else if (value instanceof Number) {
+					value = new Float(((Number) value).floatValue());
+				} else if (value instanceof String) {
+					String s = (String) value;
+					if (s.length() == 0) {
+						value = null;
+					} else {
+						try {
+							value = Float.valueOf(s);
+						} catch (NumberFormatException nfe) {
+							value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserWrongStringConversionMessage()) FOR holder.editorGen», iClass.getName()));
+						}
+					}
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», iClass.getName()));
+				}
+			} else if (Double.TYPE.equals(iClass)) {
+				if (value instanceof Double) {
+					// ok
+				} else if (value instanceof Number) {
+					value = new Double(((Number) value).doubleValue());
+				} else if (value instanceof String) {
+					String s = (String) value;
+					if (s.length() == 0) {
+						value = null;
+					} else {
+						try {
+							value = Double.valueOf(s);
+						} catch (NumberFormatException nfe) {
+							value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserWrongStringConversionMessage()) FOR holder.editorGen», iClass.getName()));
+						}
+					}
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», iClass.getName()));
+				}
+			} else if (type instanceof org.eclipse.emf.ecore.EEnum) {
+				if (value instanceof String) {
+					org.eclipse.emf.ecore.EEnumLiteral literal =
+							((org.eclipse.emf.ecore.EEnum) type).getEEnumLiteralByLiteral((String) value);
+					if (literal == null) {
+						value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnknownLiteralMessage()) FOR holder.editorGen», value));
+					} else {
+						value = literal.getInstance();
+					}
+				} else {
+					value = new InvalidValue(org.eclipse.osgi.util.NLS.bind(«EXPAND xpt::Externalizer::accessorCall(i18nKeyForAbstractParserUnexpectedValueTypeMessage()) FOR holder.editorGen», String.class.getName()));
+				}
+			}
+		}
+		return value;
+	}
+
+
+«ENDAROUND»

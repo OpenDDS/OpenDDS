@@ -1,0 +1,40 @@
+This directory contains throughput performace tests for
+the Data Distribution Service implementation in TAO.
+
+These tests are meant to be apples-to-apples comparison test with
+the "comparative" performance tests made for AAC that
+compare raw TCP, raw UDP, RTEC and the Notification service in
+different topologies and message sizes.
+
+The topologies are 1-1 1-4, 4-1 and 2-3  (publishers-subscribers).
+The tests support samples of 128, 512, 2048 and 8192 floats.
+
+- TypeNoKeyBounded
+    Sample data types.
+
+- TCPListenerTest
+    Uses the tcp transport.
+    Subscriber reads after N calls to on_data_available.
+
+- UDPListenerTest
+    Uses the udp transport.
+    Must throttle the publisher to avoid having too many dropped packets.
+    Subscriber reads after N calls to on_data_available.
+
+
+- UDPNoKeyTest
+- SimpleE2ETest
+   These tests are equivalent to the TCPListenerTest and UDPListenerTest
+   but the subscriber polls calling read.
+   These tests are less efficient than the Listener variants (because
+   of thread context switching).
+
+- TCPProfilingTest
+    Uses the SimpleTCPTransport.
+    Subscriber reads after N calls to on_data_available.
+    Includes raw TCP version of the test in raw_tcp subdirectory.
+
+- SimpleLatency
+    A simple end-to-end latency test.
+    Uses the SimpleTCPTransport.
+    Includes raw TCP version of the test in raw_tcp subdirectory.
