@@ -54,14 +54,13 @@ namespace
 int
 ACE_TMAIN(int argc, ACE_TCHAR** argv)
 {
-  parse_args(argc, argv);
-
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> SUBSCRIBER STARTED\n")));
-
   try
   {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+    parse_args(argc, argv);
+
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) -> SUBSCRIBER STARTED\n")));
 
     // Create Participant
     DDS::DomainParticipant_var participant =

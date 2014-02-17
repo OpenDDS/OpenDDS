@@ -1,3 +1,240 @@
+Mon Jan 27 19:10:01 UTC 2014  Mike Martinez  <martinezm@ociweb.com>
+
+        * OpenDDS version 3.5 released.
+
+Sun Jan 26 01:17:00 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * AUTHORS:
+        * NEWS:
+        * README:
+
+          Updates to get ready for release.
+
+Tue Jan 14 16:08:32 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReactorSynch.cpp:
+
+          Coverity issue #1154613: explicitly reset the raw pointer copy
+          of the event handler.  We are letting the EventHandler_var
+          actually perform the delete, but be safe(r) here and reset the
+          raw (narrowed) pointer as well.
+
+Thu Jan  9 18:12:54 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Thrasher/ParticipantTask.h:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+
+          Reduce the scope of Entity creation serialization to only the
+          participant.
+
+Thu Jan  9 17:46:36 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Thrasher/ParticipantTask.h:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/Thrasher/run_test.pl:
+
+          Serialize Entity creation for the test threads.
+
+Thu Jan  9 16:30:31 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Enable Builtin Topics.  This stabilizes the test on some
+          platforms.
+
+Thu Jan  9 00:18:43 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+          Specify correct command line argument for zero copy.
+
+Wed Jan  8 23:41:25 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          Include ThreadSynch.h for when inlining is disabled.
+
+Wed Jan  8 19:54:37 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReactorSynch.inl:
+        * dds/DCPS/transport/framework/ReactorSynch.cpp:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+
+          Converted development diagnostics to debug messages.
+
+Wed Jan  8 04:40:24 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+
+          Left out of last checkin.  Declares the new mode() and synch()
+          accessors.
+
+Wed Jan  8 02:59:39 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.h:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+
+          Reverted to previous implementation.
+
+        * dds/DCPS/transport/framework/ReactorSynch.h:
+        * dds/DCPS/transport/framework/ReactorSynch.inl:
+        * dds/DCPS/transport/framework/ReactorSynch.cpp:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.h:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.inl:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.cpp:
+
+          Implementatino of ThreadSynch using an ACE_Reactor.
+
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.h:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.inl:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+
+          Notification scheduler for reactor write mask updates.
+
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+
+          Changed new interface to simplify write mask updates.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added protected mode() and synch() accessors.  Documentation
+          updates.
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          Migrate to new mask update interface.
+
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+
+          Revert diagnostic extensions.
+
+Thu Jan  2 23:29:23 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Hoisted the link id value from the strategy to the base class
+          for use in additional diagnostic messages.
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          Promoted iostream based development messages to ACE_DEBUG
+          messages that I will demote to high debug level logs once
+          development is complete.
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+
+          Added more diagnostics messaging.
+
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+
+          work-in-progress
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+          Updated command line handling to allow additional and finer
+          grained control of the testing and diagnostics.
+
+Thu Jan  2 15:37:16 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Correct Coverity issue 1141707.  The value is initialized
+          before use, but now is always defined.
+
+Fri Dec 20 00:25:35 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/transport/framework/PerConnectionSynch.h:
+        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
+        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
+        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/ThreadSynch.h:
+        * dds/DCPS/transport/framework/ThreadSynch.inl:
+        * dds/DCPS/transport/framework/ThreadSynch.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
+        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.inl:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Replacing the PerConnectionSynch thread with processing of the
+          queued outbound data by the TransportReactorTask thread via its
+          handle_output() callback.
+
+Tue Nov 19 00:13:25 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Replaced redundant use of sample_lock_ with instances_lock_ to
+          allow protecting access of the internal InstanceState::writers_
+          container.
+
+Wed Nov 13 22:07:19 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+        * dds/idl/CPPTemplate.txt:
+
+          Add locking around access to the instances_ container to
+          protect concurrent accesses.
+
+Thu Nov  7 00:58:11 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/run_dds.pl:
+
+          Made this more generally useful:
+          -) added '-g' argument to allow specification of the service
+             configurator configuration file;
+          -) allow fully rooted commands to be executed;
+          -) changed default netstat data gathering from '--inet' to
+             '--tcp' which is more generally available.
+
 Wed Sep 11 23:19:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

@@ -624,15 +624,17 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_tcp_datalink", 6);
 
+  ++last_link_;
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::connect_tcp_datalink() - ")
+               ACE_TEXT("(%P|%t) TcpTransport::connect_tcp_datalink() [%d] - ")
                ACE_TEXT("creating send strategy with priority %d.\n"),
-               link->transport_priority()));
+               last_link_, link->transport_priority()));
   }
+  connection->id() = last_link_;
 
   TransportSendStrategy_rch send_strategy =
-    new TcpSendStrategy(link, this->tcp_config_, connection,
+    new TcpSendStrategy(last_link_, link, this->tcp_config_, connection,
                         new TcpSynchResource(connection,
                           this->tcp_config_->max_output_pause_period_),
                         this->reactor_task_, link->transport_priority());

@@ -20,6 +20,8 @@ ACE_INLINE
 void
 OpenDDS::DCPS::InstanceState::accessed()
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard, this->lock_);
   //
   // Manage the view state due to data access here.
   //
@@ -66,6 +68,8 @@ ACE_INLINE
 void
 OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard, this->lock_);
   cancel_release();
 
   //
@@ -112,6 +116,9 @@ ACE_INLINE
 void
 OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard, this->lock_);
+
   //
   // Manage transisitions in the instance state that do not require a
   // data sample, but merely the notion of liveliness.
@@ -144,6 +151,9 @@ ACE_INLINE
 bool
 OpenDDS::DCPS::InstanceState::is_last (const PublicationId& pub)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard, this->lock_, false);
+
   return (this->writers_.size () == 1) && *(this->writers_.begin ()) == pub;
 }
 
@@ -151,6 +161,9 @@ ACE_INLINE
 bool
 OpenDDS::DCPS::InstanceState::no_writer () const
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard, this->lock_, true);
+
   return this->writers_.size () == 0;
 }
 

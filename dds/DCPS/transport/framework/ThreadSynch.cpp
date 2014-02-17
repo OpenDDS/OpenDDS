@@ -33,3 +33,4 @@ OpenDDS::DCPS::ThreadSynch::unregister_worker_i()
   DBG_ENTRY_LVL("ThreadSynch","unregister_worker_i",6);
   // Default implementation is to do nothing here.  Subclass may override.
 }
+

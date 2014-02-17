@@ -21,6 +21,10 @@ public:
   int svc();
 
 private:
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
+
+  LockType lock_;
   const std::size_t& samples_per_thread_;
 };
 

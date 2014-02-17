@@ -50,6 +50,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
   , shutdown_(false)
   , passive_setup_(false)
   , passive_setup_buffer_(sizeof(ACE_UINT32))
+  , id_(0)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
@@ -244,7 +245,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
   // addr is a string of length len, including null
   ACE_UINT32 nlen = 0;
   if (passive_setup_buffer_.length() >= sizeof(nlen)) {
-    std::memcpy(&nlen, passive_setup_buffer_.rd_ptr(), sizeof(nlen));
+    ACE_OS::memcpy(&nlen, passive_setup_buffer_.rd_ptr(), sizeof(nlen));
     passive_setup_buffer_.rd_ptr(sizeof(nlen));
     ACE_UINT32 hlen = ntohl(nlen);
     passive_setup_buffer_.size(hlen + 2 * sizeof(nlen));
@@ -255,7 +256,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
       const NetworkAddress network_order_address(bufstr);
       network_order_address.to_addr(remote_address_);
 
-      std::memcpy(&nprio, passive_setup_buffer_.rd_ptr() + hlen, sizeof(nprio));
+      ACE_OS::memcpy(&nprio, passive_setup_buffer_.rd_ptr() + hlen, sizeof(nprio));
       transport_priority_ = ntohl(nprio);
 
       passive_setup_buffer_.reset();
@@ -299,6 +300,33 @@ OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE fd)
   }
 
   return receive_strategy_->handle_dds_input(fd);
+}
+
+int
+OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
+{
+  DBG_ENTRY_LVL("TcpConnection","handle_output",6);
+
+  if (!this->send_strategy_.is_nil()) {
+    if (DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TcpConnection::handle_output() [%d] - ")
+                 ACE_TEXT("sending queued data.\n"),
+                 id_));
+    }
+
+    // Process data to be sent from the queue.
+    if (ThreadSynchWorker::WORK_OUTCOME_MORE_TO_DO
+        != send_strategy_->perform_work()) {
+
+      // Stop handling output ready events when there is nothing to output.
+      // N.B. This calls back into the reactor.  Is the reactor lock
+      //      recursive?
+      send_strategy_->schedule_output();
+    }
+  }
+
+  return 0;
 }
 
 int

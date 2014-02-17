@@ -519,7 +519,13 @@ protected:
 
   bool has_readcondition(DDS::ReadCondition_ptr a_condition);
 
-  mutable SubscriptionInstanceMapType           instances_;
+  /// @TODO: document why the instances_ container is mutable.
+  mutable SubscriptionInstanceMapType instances_;
+
+  /// Assume since the container is mutable(?!!?) it may need to use the
+  /// lock while const.
+  /// @TODO: remove the recursive nature of the instances_lock if not needed.
+  mutable ACE_Recursive_Thread_Mutex instances_lock_;
 
   /// Check if the received data sample or instance should
   /// be filtered.

@@ -13,19 +13,25 @@
 #include "TcpInst.h"
 #include "TcpSynchResource.h"
 #include "TcpDataLink.h"
+#include "dds/DCPS/transport/framework/ThreadSynch.h"
+#include "dds/DCPS/transport/framework/ScheduleOutputHandler.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
-#include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
+#include "dds/DCPS/transport/framework/ReactorSynchStrategy.h"
 
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
+  std::size_t id,
   const TcpDataLink_rch& link,
   const TcpInst_rch& config,
   const TcpConnection_rch& connection,
   TcpSynchResource* synch_resource,
   const TransportReactorTask_rch& task,
   Priority priority)
-  : TransportSendStrategy(static_rchandle_cast<TransportInst>(config),
+  : TransportSendStrategy(id, static_rchandle_cast<TransportInst>(config),
                           synch_resource, priority,
-                          new PerConnectionSynchStrategy)
+                          new ReactorSynchStrategy(
+                                this,
+                                task->get_reactor(),
+                                connection->peer().get_handle()))
   , connection_(connection)
   , link_(link)
   , reactor_task_(task)
@@ -38,6 +44,29 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
 OpenDDS::DCPS::TcpSendStrategy::~TcpSendStrategy()
 {
   DBG_ENTRY_LVL("TcpSendStrategy","~TcpSendStrategy",6);
+}
+
+void
+OpenDDS::DCPS::TcpSendStrategy::schedule_output()
+{
+  DBG_ENTRY_LVL("TcpSendStrategy","schedule_output",6);
+
+  // Notify the reactor to adjust its processing policy according to mode_.
+  synch()->work_available();
+
+  if (DCPS_debug_level > 4) {
+    const char* action = "";
+    if( mode() == MODE_DIRECT) {
+      action = "canceling";
+    } else if( (mode() == MODE_QUEUE)
+            || (mode() == MODE_SUSPEND)) {
+      action = "starting";
+    }
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TcpSendStrategy::schedule_output() [%d] - ")
+               ACE_TEXT("%C data queueing for handle %d.\n"),
+               id(),action,get_handle()));
+  }
 }
 
 int

@@ -24,7 +24,8 @@ class TcpSynchResource;
 class TcpSendStrategy : public TransportSendStrategy {
 public:
 
-  TcpSendStrategy(const TcpDataLink_rch& link,
+  TcpSendStrategy(std::size_t id,
+                  const TcpDataLink_rch& link,
                   const TcpInst_rch& config,
                   const TcpConnection_rch& connection,
                   TcpSynchResource* synch_resource,
@@ -37,6 +38,9 @@ public:
   /// object is registered for sending. The implementation of this method is borrowed from
   /// the ReceiveStrategy.
   int reset(TcpConnection* connection);
+
+  /// Enable or disable output processing by the reactor according to mode.
+  virtual void schedule_output();
 
 protected:
 
@@ -51,7 +55,6 @@ protected:
   virtual void stop_i();
 
 private:
-
   TcpConnection_rch connection_;
   TcpDataLink_rch   link_;
   TransportReactorTask_rch reactor_task_;

@@ -32,12 +32,24 @@ ParticipantTask::svc()
   {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    -> PARTICIPANT STARTED\n")));
 
+    DDS::DomainParticipant_var participant;
+    DDS::Publisher_var publisher;
+    DDS::DataWriter_var writer;
+    FooDataWriter_var writer_i;
+    DDS::StatusCondition_var cond;
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+
+    { // Scope for guard to serialize creating Entities.
+      GuardType guard(lock_);
+
     // Create Participant
-    DDS::DomainParticipant_var participant =
+    participant =
       TheParticipantFactory->create_participant(42,
                                                 PARTICIPANT_QOS_DEFAULT,
                                                 DDS::DomainParticipantListener::_nil(),
                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    } // End of lock scope.
 
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -45,7 +57,7 @@ ParticipantTask::svc()
                         ACE_TEXT(" create_participant failed!\n")), 1);
 
     // Create Publisher
-    DDS::Publisher_var publisher =
+    publisher =
       participant->create_publisher(PUBLISHER_QOS_DEFAULT,
                                     DDS::PublisherListener::_nil(),
                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -82,7 +94,7 @@ ParticipantTask::svc()
 
     writer_qos.history.depth = samples_per_thread_;
 
-    DDS::DataWriter_var writer =
+    writer =
       publisher->create_datawriter(topic.in(),
                                    writer_qos,
                                    DDS::DataWriterListener::_nil(),
@@ -93,17 +105,16 @@ ParticipantTask::svc()
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" create_datawriter failed!\n")), 1);
 
-    FooDataWriter_var writer_i = FooDataWriter::_narrow(writer);
+    writer_i = FooDataWriter::_narrow(writer);
     if (CORBA::is_nil(writer_i))
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" _narrow failed!\n")), 1);
 
     // Block until Subscriber is available
-    DDS::StatusCondition_var cond = writer->get_statuscondition();
+    cond = writer->get_statuscondition();
     cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
-    DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(cond);
 
     DDS::Duration_t timeout =

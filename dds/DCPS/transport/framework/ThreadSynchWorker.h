@@ -11,6 +11,8 @@
 
 #include "dds/DCPS/dcps_export.h"
 
+#include "ace/Event_Handler.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -28,9 +30,18 @@ public:
 
   virtual WorkOutcome perform_work() = 0;
 
+  /// Indicate that queued data is available to be sent.
+  virtual void schedule_output();
+
+  /// DataLink reference value for diagnostics.
+  std::size_t id() const;
+
 protected:
 
-  ThreadSynchWorker();
+  ThreadSynchWorker( std::size_t id = 0);
+
+private:
+  std::size_t id_;
 };
 
 } // namespace DCPS

@@ -1631,6 +1631,7 @@ bool
 {
   using namespace OpenDDS::DCPS;
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, false);
 
   for (SubscriptionInstanceMapType::iterator iter = instances_.begin(),
        end = instances_.end(); iter != end; ++iter) {
@@ -1971,8 +1972,12 @@ void
 
   if (it == instance_map_.end())
   {
+    std::size_t instances_size = 0;
+    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      instances_size = instances_.size();
+    }
     if ((this->qos_.resource_limits.max_instances != ::DDS::LENGTH_UNLIMITED) &&
-       ((::CORBA::Long) instances_.size() >= this->qos_.resource_limits.max_instances))
+       ((::CORBA::Long) instances_size >= this->qos_.resource_limits.max_instances))
     {
 
         ::DDS::DataReaderListener_var listener
@@ -2041,20 +2046,23 @@ void
     ACE_NEW (instance,
              OpenDDS::DCPS::SubscriptionInstance(this,
                                                  this->qos_,
-                                                 this->sample_lock_,
+                                                 this->instances_lock_,
                                                  handle));
 
     instance->instance_handle_ = handle;
-    int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
 
-    if (ret != 0)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ")
-                  ACE_TEXT("<%TYPE%>DataReaderImpl::")
-                  ACE_TEXT("store_instance_data, ")
-                  ACE_TEXT("insert handle failed. \n")));
-      return;
+    { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
+
+      if (ret != 0)
+      {
+        ACE_ERROR ((LM_ERROR,
+                    ACE_TEXT("(%P|%t) ")
+                    ACE_TEXT("<%TYPE%>DataReaderImpl::")
+                    ACE_TEXT("store_instance_data, ")
+                    ACE_TEXT("insert handle failed. \n")));
+        return;
+      }
     }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -2187,12 +2195,14 @@ void
     else if (this->qos_.resource_limits.max_samples != ::DDS::LENGTH_UNLIMITED)
     {
       CORBA::Long total_samples = 0;
-      for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
-           iter != instances_.end();
-           ++iter) {
-        OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
+      { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+        for (OpenDDS::DCPS::DataReaderImpl::SubscriptionInstanceMapType::iterator iter = instances_.begin();
+             iter != instances_.end();
+             ++iter) {
+          OpenDDS::DCPS::SubscriptionInstance *ptr = iter->second;
 
-        total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
+          total_samples += (CORBA::Long) ptr->rcvd_samples_.size_;
+        }
       }
 
       if(total_samples >= this->qos_.resource_limits.max_samples)

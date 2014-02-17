@@ -14,6 +14,13 @@
 #include "ace/SOCK_Connector.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
+ACE_INLINE
+std::size_t&
+OpenDDS::DCPS::TcpConnection::id()
+{
+  return id_;
+}
+
 ACE_INLINE void
 OpenDDS::DCPS::TcpConnection::remove_receive_strategy()
 {

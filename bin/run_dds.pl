@@ -77,13 +77,14 @@ my $procspecs;
 my $procfile;
 my $procsubset;
 my $collectStats;
+my $confFile  = $projectRoot . "/etc/svc.conf";
 my $statsOutputDecorator = "-P.log";
 
 ########################################################################
 #
 # Process the command line.
 #
-#   -v -V -? -d -T -R -x -f -C -O -h -i -s -F -p -S -P -t
+#   -v -V -? -d -T -R -x -f -C -O -h -i -s -F -p -S -P -t -g
 #
 GetOptions( "verbose!"            => \$verbose,
             "v"                   => \$verbose,
@@ -105,6 +106,7 @@ GetOptions( "verbose!"            => \$verbose,
             "startrepo|S"         => \$startRepo,
             "starttest|P"         => \$startDds,
             "duration|t=i"        => \$duration,
+            "svcconf|g=s"         => \$confFile,
 
 ) or pod2usage( 0) ;
 pod2usage( 1)             if $help or ($startDds and not ($procspecs or $procfile));
@@ -183,7 +185,6 @@ my $killDelay = 30;
 my $repo_ior  = PerlACE::LocalFile("repo.ior");
 my $debugFile;
    $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
-my $confFile  = $projectRoot . "/etc/svc.conf";
 
 # Clean out leftovers.
 unlink $repo_ior if $startRepo;
@@ -334,8 +335,13 @@ sub findCommand {
   my( $command, $args) = /(\S+)\s+(.*)$/;
   $command = shift if not $command;
   $command =~ s/\s*$//;
-  foreach my $location (@PATH) {
-    return "$location/$command $args" if -x "$location/$command" || -x "$location/${command}.exe";
+  if( $command =~ m!^/!) {
+    return "$command $args" if -x "$command" || -x "${command}.exe";
+
+  } else {
+    foreach my $location (@PATH) {
+      return "$location/$command $args" if -x "$location/$command" || -x "$location/${command}.exe";
+    }
   }
   die "Unable to locate command: $command for execution.";
 }
@@ -410,7 +416,7 @@ sub collectionCommand {
     # Handle generic Unix types here.  Assume they have modern command
     # forms.  If not, add a stanza to handle them specifically above.
     return "vmstat 1"             if $type eq "system";
-    return "netstat -anpc --inet" if $type eq "network";
+    return "netstat -anpc --tcp"  if $type eq "network";
     return "top -bd 1 -p $params" if $type eq "process";
   }
   return undef;
@@ -700,6 +706,15 @@ information for the OpenDDS service.
 The default is to use the file located in the 'etc' directory relative
 from the project root (the parent directory of the directory where the
 command was executed from) with filename 'transport.ini'.
+
+=item B<-g FILE> | B<--svcconf=FILE>
+
+ACE service configuration filename.  This defines the configuration
+information for the ACE service configurator.
+
+The default is to use the file located in the 'etc' directory relative
+from the project root (the parent directory of the directory where the
+command was executed from) with filename 'svc.conf'.
 
 =item B<-s SPECLIST> | B<--commands=SPECLIST>
 

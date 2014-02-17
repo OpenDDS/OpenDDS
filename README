@@ -14,7 +14,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
-This directory structure contains OpenDDS 3.4.2
+This directory structure contains OpenDDS 3.5
 
 
 ======================================================================
@@ -91,10 +91,11 @@ compile OpenDDS:
 
 *** TAO 1.6a patch 14
 *** TAO 2.0a patch 7
-*** TAO 2.1.9 (DOC Group)
+*** TAO 2.2.0a
+*** TAO 2.2.4 (DOC Group)
 
-Note that the 1.6a and 2.0a releases are from OCI and can be obtained from
-http://www.theaceorb.com/.  The DOC Group releases can be obtained from
+Note that the 1.6a, 2.0a, and 2.2a releases are from OCI and can be obtained 
+from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
 http://download.dre.vanderbilt.edu/.
 
 ** GNU Make

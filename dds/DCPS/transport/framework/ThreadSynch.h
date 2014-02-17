@@ -76,6 +76,9 @@ protected:
   /// something when the worker unregisters.
   virtual void unregister_worker_i();
 
+  /// Access the worker implementation directly.
+  ThreadSynchWorker* worker();
+
 private:
 
   ThreadSynchWorker* worker_;
@@ -90,3 +93,4 @@ private:
 #endif /* __ACE_INLINE__ */
 
 #endif  /* OPENDDS_DCPS_THREADSYNCH_H */
+

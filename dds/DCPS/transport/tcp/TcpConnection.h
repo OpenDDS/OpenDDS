@@ -55,6 +55,8 @@ public:
 
   virtual ~TcpConnection();
 
+  std::size_t& id();
+
   /// Protocol setup (handshake) on the active side.
   /// The local address is sent to the remote (passive) side to
   /// identify ourselves to the remote side.
@@ -82,6 +84,9 @@ public:
 
   /// We pass this "event" along to the receive_strategy.
   virtual int handle_input(ACE_HANDLE);
+
+  /// Handle back pressure when sending.
+  virtual int handle_output(ACE_HANDLE);
 
   virtual int close(u_long);
   virtual int handle_close(ACE_HANDLE, ACE_Reactor_Mask);
@@ -203,6 +208,9 @@ private:
   bool passive_setup_;
   ACE_Message_Block passive_setup_buffer_;
   TcpTransport_rch transport_during_setup_;
+
+  /// Small unique identifying value.
+  std::size_t id_;
 };
 
 } // namespace DCPS

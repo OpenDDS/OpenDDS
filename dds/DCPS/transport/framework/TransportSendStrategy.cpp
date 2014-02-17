@@ -57,11 +57,13 @@ namespace {
 // The data block only needs 1 chunk since the duplicate()
 // just increases the ref count.
 TransportSendStrategy::TransportSendStrategy(
+  std::size_t id,
   const TransportInst_rch& transport_inst,
   ThreadSynchResource* synch_resource,
   Priority priority,
   const ThreadSynchStrategy_rch& thread_sync_strategy)
-  : max_samples_(transport_inst->max_samples_per_packet_),
+  : ThreadSynchWorker(id),
+    max_samples_(transport_inst->max_samples_per_packet_),
     optimum_size_(transport_inst->optimum_packet_size_),
     max_size_(transport_inst->max_packet_size_),
     queue_(new QueueType(transport_inst->queue_messages_per_pool_,
@@ -329,7 +331,8 @@ TransportSendStrategy::perform_work()
                 "Reconnect succeeded, Notify synch thread of work "
                 "availablity.\n"), 5);
       // If the datalink is re-established then notify the synch
-      // thread to perform work.
+      // thread to perform work.  We do not hold the object lock at
+      // this point.
       this->synch_->work_available();
     }
   }
@@ -971,6 +974,13 @@ TransportSendStrategy::stop()
 void
 TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
+  if (DCPS_debug_level > 9) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportSendStrategy::send() [%d] - ")
+               ACE_TEXT("sending data at 0x%x.\n"),
+               id(), element));
+  }
+
   DBG_ENTRY_LVL("TransportSendStrategy", "send", 6);
   {
     GuardType guard(this->lock_);
@@ -1121,6 +1131,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
                     "Queue elem and leave.\n"), 5);
           this->queue_->put(element);
           this->synch_->work_available();
+
           return;
         }
       }
@@ -1208,6 +1219,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             if (this->mode_ == MODE_QUEUE) {
               this->queue_->put(next_fragment);
               this->synch_->work_available();
+
             } else {
               next_fragment->data_dropped(true /* dropped by transport */);
             }
@@ -1780,6 +1792,12 @@ TransportSendStrategy::prepare_packet_i()
 ssize_t
 TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 {
+  if (DCPS_debug_level > 9) {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportSendStrategy::do_send_packet() [%d] - ")
+               ACE_TEXT("sending data at 0x%x.\n"),
+               id(), packet));
+  }
   DBG_ENTRY_LVL("TransportSendStrategy", "do_send_packet", 6);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
