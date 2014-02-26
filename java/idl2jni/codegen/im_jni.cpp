@@ -1714,6 +1714,13 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
         jniCast = "static_cast<" + br_type + "> (";
       }
 
+      if (branches[i]->field_type()->node_type() == AST_Decl::NT_typedef) {
+        AST_Typedef *td = AST_Typedef::narrow_from_decl(branches[i]->field_type());
+        if (td->primitive_base_type()->node_type() == AST_Decl::NT_string) {
+          br_tao = "CORBA::String_var";
+        }
+      }
+
       copyToCxx =
         "        " + br_tao + " taoVal;\n"
         "        copyToCxx (jni, taoVal, value);\n"

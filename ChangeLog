@@ -1,3 +1,13 @@
+Wed Feb 26 04:43:44 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Added coverage for typedef-of-string fields in unions.
+
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Regression test for the above.
+
 Mon Jan 27 21:24:53 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * ChangeLog:
