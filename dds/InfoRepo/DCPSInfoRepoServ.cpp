@@ -159,7 +159,12 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
       this->listen_address_str_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
       this->listen_address_given_ = 1;
       arg_shifter.consume_arg();
+    // Must check for -ReassociateDelay before -r
+    } else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-ReassociateDelay"))) != 0) {
+      long msec = ACE_OS::atoi(current_arg);
+      this->reassociate_delay_.msec(msec);
 
+      arg_shifter.consume_arg();
     } else if ((current_arg = arg_shifter.get_the_parameter
                               (ACE_TEXT("-r"))) != 0) {
       int p = ACE_OS::atoi(current_arg);
@@ -183,11 +188,6 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
 
-    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-ReassociateDelay")) == 0) {
-      long msec = ACE_OS::atoi(current_arg);
-      this->reassociate_delay_.msec(msec);
-
-      arg_shifter.consume_arg();
     }
 
     // The '-?' option

@@ -1,3 +1,9 @@
+Wed Mar  5 18:05:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Fixed parsing of -ReassociateDelay argument.
+
 Wed Feb 26 04:43:44 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * java/idl2jni/codegen/im_jni.cpp:
