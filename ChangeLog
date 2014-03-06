@@ -1,3 +1,9 @@
+Thu Mar  6 16:08:53 UTC 2014  Jeff Schmitz  <schmitz@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          Don't inform subsctiption of an assocation to a crashed publication
+
 Wed Mar  5 18:05:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepoServ.cpp:
