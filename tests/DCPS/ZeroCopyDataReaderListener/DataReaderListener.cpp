@@ -77,6 +77,8 @@ throw(CORBA::SystemException)
         }
       }
 
+      // Return samples back
+      message_dr->return_loan(messages_, infos_);
     } else if (status != DDS::RETCODE_NO_DATA) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("%N:%l: on_data_available()")

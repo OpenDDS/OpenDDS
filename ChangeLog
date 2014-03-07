@@ -1,3 +1,8 @@
+Fri Mar  7 21:39:41 UTC 2014  Jeff Schmitz  <schmitz@ociweb.com>
+
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
+
+          Return loan of zero copy samples
 Fri Mar  7 21:03:01 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com lab.ociweb.com>
 
         * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
