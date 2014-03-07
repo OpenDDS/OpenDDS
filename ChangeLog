@@ -1,3 +1,16 @@
+Fri Mar  7 20:44:04 UTC 2014  Jeff Schmitz  <schmitz@ociweb.com>
+
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Correct method name in logs.
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ZeroCopyDataReaderListener:
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.h:
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
+
+          New test to demonstrate crash with long-lived ZeroCopy seq
+
 Thu Mar  6 16:08:53 UTC 2014  Jeff Schmitz  <schmitz@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:

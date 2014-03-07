@@ -374,7 +374,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
     if (sub_undo_result != 0) {
       GuidConverter local(local_subcription_id), remote(remote_publication_id);
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
+                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to remove (undo) local subcription %C to ")
                  ACE_TEXT("remote publication %C reservation from sub_map_.\n"),
                  std::string(local).c_str(), std::string(remote).c_str()));
@@ -383,7 +383,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
     if (pub_undo_result != 0) {
       GuidConverter local(local_subcription_id), remote(remote_publication_id);
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
+                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to remove (undo) remote publication %C to ")
                  ACE_TEXT("local subcription %C reservation from pub_map_.\n"),
                  std::string(remote).c_str(), std::string(local).c_str()));
@@ -392,7 +392,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
   } else {
     GuidConverter local(local_subcription_id), remote(remote_publication_id);
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservations: ")
+               ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                ACE_TEXT("failed to insert local subcription %C to remote ")
                ACE_TEXT("publication %C reservation into sub_map_.\n"),
                std::string(local).c_str(), std::string(remote).c_str()));
