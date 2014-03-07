@@ -54,6 +54,10 @@ protected:
   virtual std::string transport_type() const { return "multicast"; }
 
 private:
+
+  typedef ACE_SYNCH_MUTEX         LockType;
+  typedef ACE_Guard<LockType>     GuardType;
+
   MulticastDataLink* make_datalink(const RepoId& local_id,
                                    Priority priority,
                                    bool active);
@@ -69,12 +73,12 @@ private:
   MulticastDataLink_rch server_link_;
 
   // Used by the passive side to track the virtual "connections" to remote
-  // peers: the pending_connections_ are potentential peers that the framework
+  // peers: the pending_connections_ are potential peers that the framework
   // has already informed us about (in accept_datalink) but have not yet sent
   // a SYN TRANSPORT_CONTROL message; the connections_ are remote peers that
   // have already sent the SYN message -- we can consider these "complete"
   // from the framework's point of view.
-  ACE_SYNCH_MUTEX connections_lock_;
+  LockType connections_lock_;
   typedef std::vector<DataLink::OnStartCallback> Callbacks;
   typedef std::map<MulticastPeer, Callbacks> PendConnMap;
   PendConnMap pending_connections_;
