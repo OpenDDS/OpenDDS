@@ -134,7 +134,7 @@ OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
 }
 
 ACE_INLINE
-void
+bool
 OpenDDS::DCPS::InstanceState::empty(bool value)
 {
   //
@@ -142,7 +142,9 @@ OpenDDS::DCPS::InstanceState::empty(bool value)
   // here.
   //
   if ((this->empty_ = value) && this->release_pending_) {
-    release_if_empty();
+    return release_if_empty();
+  } else {
+    return false;
   }
 }
 

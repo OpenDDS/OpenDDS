@@ -1,16 +1,37 @@
-Fri Mar  7 21:39:41 UTC 2014  Jeff Schmitz  <schmitz@ociweb.com>
+Mon Mar 10 16:23:38 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        
+          Make empty() and release_if_empty() retutn true if the instance was
+          released.
+          
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataElementList.cpp:
+        
+          Change both remove() implementations to return true if the instance
+          was released.
+          
+        * dds/DCPS/RakeResults_T.cpp:
+        
+          Prevent take() crash when writer disassociates by preventing access
+          of instance which has been released within copy_into().
+
+Fri Mar  7 21:39:41 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
 
           Return loan of zero copy samples
-Fri Mar  7 21:03:01 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com lab.ociweb.com>
+
+Fri Mar  7 21:03:01 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
         * tests/DCPS/ZeroCopyDataReaderListener/Messenger.mpc:
 
           Renamed mpc file due to duplicate names
 
-Fri Mar  7 20:44:04 UTC 2014  Jeff Schmitz  <schmitz@ociweb.com>
+Fri Mar  7 20:44:04 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
 
         * dds/DCPS/transport/framework/DataLink.cpp:
@@ -23,7 +44,7 @@ Fri Mar  7 20:44:04 UTC 2014  Jeff Schmitz  <schmitz@ociweb.com>
 
           New test to demonstrate crash with long-lived ZeroCopy seq
 
-Thu Mar  6 16:08:53 UTC 2014  Jeff Schmitz  <schmitz@ociweb.com>
+Thu Mar  6 16:08:53 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
 

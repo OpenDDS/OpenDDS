@@ -118,6 +118,9 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
   typedef std::map<SubscriptionInstance*, InstanceData> InstanceMap;
   InstanceMap inst_map;
 
+  typedef std::set<SubscriptionInstance*> InstanceSet;
+  InstanceSet released_instances;
+
   for (CORBA::ULong idx = 0; iter != end && idx < max_samples_; ++idx, ++iter) {
     // 1. Populate the Received Data sequence
     ReceivedDataElement* rde = iter->rde_;
@@ -171,7 +174,11 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
 
     // 4. Take
     if (oper_ == DDS_OPERATION_TAKE) {
-      inst.rcvd_samples_.remove(rde);
+      // If removing the sample releases it
+      if (inst.rcvd_samples_.remove(rde)) {
+        // Prevent access of the SampleInfo, below
+        released_instances.insert(&inst);
+      }
       this->reader_->dec_ref_data_element(rde);
     }
   }
@@ -179,10 +186,17 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
   // Fill in the *_ranks in the SampleInfo, and set instance state (mrg)
   for (typename InstanceMap::iterator i_iter(inst_map.begin()),
        i_end(inst_map.end()); i_iter != i_end; ++i_iter) {
-    SubscriptionInstance& inst = *i_iter->first;
+    
     InstanceData& id = i_iter->second;
-
-    if (id.most_recent_generation_) inst.instance_state_.accessed();
+    {  // Danger, limit visibility of inst
+      SubscriptionInstance& inst = *i_iter->first;
+      // If this instance has not been released
+      if (released_instances.find(&inst) == released_instances.end()) {
+        if (id.most_recent_generation_) {
+          inst.instance_state_.accessed();
+        }
+      }
+    }
 
     CORBA::Long sample_rank =
       static_cast<CORBA::Long>(id.sampleinfo_positions_.size());

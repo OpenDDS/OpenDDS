@@ -237,15 +237,17 @@ OpenDDS::DCPS::InstanceState::cancel_release()
   }
 }
 
-void
+bool
 OpenDDS::DCPS::InstanceState::release_if_empty()
 {
+  bool released = false;
   if (this->empty_ && this->writers_.empty()) {
     release();
-
+    released = true;
   } else {
     schedule_pending();
   }
+  return released;
 }
 
 void

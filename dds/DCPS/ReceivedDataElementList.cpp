@@ -62,16 +62,15 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
   ReceivedDataFilter& match,
   bool eval_all)
 {
-  bool found(false);
-
   if (!head_) {
     return false;
   }
 
+  bool released = false;
+
   for (ReceivedDataElement* item = head_ ; item != 0 ;
        item = item->next_data_sample_) {
     if (match(item)) {
-      found = true;
       size_-- ;
 
       if (item == head_) {
@@ -102,14 +101,14 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
 
       if (instance_state_ && size_ == 0) {
         // let the instance know it is empty
-        instance_state_->empty(true);
+        released = released || instance_state_->empty(true);
       }
 
       if (!eval_all) break;
     }
   }
 
-  return found;
+  return released;
 }
 
 bool
