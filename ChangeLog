@@ -1,20 +1,26 @@
+Mon Mar 10 16:26:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+        
+          Set loaner to NULL when setting sequence length to zero.
+          
 Mon Mar 10 16:23:38 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/InstanceState.h:
         * dds/DCPS/InstanceState.inl:
         * dds/DCPS/InstanceState.cpp:
-        
+
           Make empty() and release_if_empty() retutn true if the instance was
           released.
-          
+
         * dds/DCPS/ReceivedDataElementList.h:
         * dds/DCPS/ReceivedDataElementList.cpp:
-        
+
           Change both remove() implementations to return true if the instance
           was released.
-          
+
         * dds/DCPS/RakeResults_T.cpp:
-        
+
           Prevent take() crash when writer disassociates by preventing access
           of instance which has been released within copy_into().
 
