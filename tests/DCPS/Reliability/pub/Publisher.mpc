@@ -1,0 +1,19 @@
+// -*- MPC -*-
+// $Id$
+
+
+project(*publisher) : dcpsexe_with_tcp, dds_model {
+  exename   = publisher
+  after    += Reliability
+  
+  includes += ../IDL ..
+  exeout = ..
+  libs += Reliability
+  libpaths += ../IDL
+  
+  Source_Files {
+    Publisher.cpp
+    ../Boilerplate.cpp
+  }
+}
+

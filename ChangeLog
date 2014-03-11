@@ -1,3 +1,32 @@
+Tue Mar 11 20:04:40 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Reliability:
+        * tests/DCPS/Reliability/Boilerplate.h:
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/IDL:
+        * tests/DCPS/Reliability/IDL/Reliability.idl:
+        * tests/DCPS/Reliability/IDL/Reliability.mpc:
+        * tests/DCPS/Reliability/IDL/Reliability_Export.h:
+        * tests/DCPS/Reliability/pub:
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Reliability/shmem.ini:
+        * tests/DCPS/Reliability/sub:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/SeqReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/SeqReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+        * tests/DCPS/Reliability/sub/TakeNextReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/TakeNextReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/ZeroCopyReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/ZeroCopyReaderListenerImpl.cpp:
+
+          Test to verify reliability.
+
 Tue Mar 11 16:31:16 UTC 2014  Jeff Schmitz <schmitzj@ociweb.com>
 
         * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:

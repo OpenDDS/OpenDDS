@@ -1,0 +1,22 @@
+// -*- MPC -*-
+
+
+project(*subscriber) : dcpsexe_with_tcp, dds_model {
+  exename   = subscriber
+  after    += Reliability
+  
+  includes += ../IDL ..
+  exeout = ..
+  libs += Reliability
+  libpaths += ../IDL
+  
+  Source_Files {
+    DataReaderListenerImpl.cpp
+    TakeNextReaderListenerImpl.cpp
+    SeqReaderListenerImpl.cpp
+    ZeroCopyReaderListenerImpl.cpp
+    Subscriber.cpp
+    ../Boilerplate.cpp
+  }
+}
+
