@@ -11,7 +11,7 @@ project(DDS*idl): dcps_test_lib {
   }
 }
 
-project(DDS*Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem {
+project(DDS*Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
 
   exename   = publisher
   after    += DDS*idl
@@ -26,7 +26,7 @@ project(DDS*Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_ud
   }
 }
 
-project(DDS*Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem {
+project(DDS*Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
 
   exename   = subscriber
   after    += DDS*idl
@@ -41,7 +41,7 @@ project(DDS*Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_u
   }
 }
 
-project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp {
+project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dds_model {
 
   exename   = stack_subscriber
   after    += DDS*idl

@@ -1,9 +1,17 @@
+Tue Mar 11 16:31:16 UTC 2014  Jeff Schmitz <schmitzj@ociweb.com>
+
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
+        * tests/DCPS/ZeroCopyDataReaderListener/publisher.cpp:
+
+          Wait for acks in publisher.
+
 Mon Mar 10 16:26:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/ZeroCopySeq_T.cpp:
-        
+
           Set loaner to NULL when setting sequence length to zero.
-          
+
 Mon Mar 10 16:23:38 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/InstanceState.h:

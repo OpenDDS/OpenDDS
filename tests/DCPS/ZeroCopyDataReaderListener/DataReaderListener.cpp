@@ -52,8 +52,6 @@ throw(CORBA::SystemException)
     if (status == DDS::RETCODE_OK) {
       for (unsigned int i = 0; i < messages_.length(); ++i) {
         DDS::SampleInfo& si = infos_[i];
-        std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-        std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
         if (si.valid_data) {
           Messenger::Message& message = messages_[i];

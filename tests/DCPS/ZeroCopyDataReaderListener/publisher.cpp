@@ -26,6 +26,7 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 #include "Args.h"
+#include "model/Sync.h"
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -118,6 +119,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     writer->end();
     delete writer;
+
+    // Wait for acks
+    OpenDDS::Model::WriterSync::wait_ack(dw);
 
     // Clean-up!
     participant->delete_contained_entities();
