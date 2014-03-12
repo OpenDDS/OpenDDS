@@ -42,7 +42,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::string zero_copy = "-zero-copy";
 
     // Create Listener
-    DataReaderListenerImpl* listener_impl;
+    DataReaderListenerImpl* listener_impl = NULL;
     if (argc > 1) {
       if (take_next == argv[1]) {
         listener_impl = new TakeNextReaderListenerImpl;
