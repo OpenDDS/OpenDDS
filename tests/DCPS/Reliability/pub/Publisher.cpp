@@ -48,19 +48,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       Reliability::Message message;
 
       // Override message count
-      unsigned long long msg_count = 5000;
+      long msg_count = 5000;
       if (argc > 1) {
         msg_count = ACE_OS::atoi(argv[1]);
       }
 
       char number[20];
 
-      for (unsigned int i = 0; i<msg_count; ++i) {
+      for (long i = 0; i<msg_count; ++i) {
         // Prepare next sample
         sprintf(number, "foo %d", i);
         message.id = CORBA::string_dup(number);
         message.name = "foo";
-        message.count = (long) i;
+        message.count = i;
         message.expected = msg_count;
 
         // Publish the message

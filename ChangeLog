@@ -1,3 +1,9 @@
+Wed Mar 12 18:01:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+
+          Build warnings.
+
 Wed Mar 12 16:57:47 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Reliability/sub/Subscriber.cpp:
