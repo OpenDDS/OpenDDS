@@ -1,3 +1,14 @@
+Wed Mar 12 23:26:36 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/RakeResults_T.cpp:
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
+
+          Fuzz failures.
+
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
+
+          Project names too long.
+
 Wed Mar 12 18:01:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Reliability/pub/Publisher.cpp:

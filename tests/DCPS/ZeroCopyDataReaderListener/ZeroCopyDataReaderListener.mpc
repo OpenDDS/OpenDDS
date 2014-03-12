@@ -1,6 +1,6 @@
 // $Id$
 
-project(DDS*idl): dcps_test_lib {
+project(ZeroCopyDRL_idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=Messenger_export.h \
                    -Wb,stub_export_macro=Messenger_Export
   dcps_ts_flags += -Wb,export_macro=Messenger_Export
@@ -11,7 +11,7 @@ project(DDS*idl): dcps_test_lib {
   }
 }
 
-project(DDS*Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
+project(ZeroCopyDRL_Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
 
   exename   = publisher
   after    += DDS*idl
@@ -26,7 +26,7 @@ project(DDS*Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_ud
   }
 }
 
-project(DDS*Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
+project(ZeroCopyDRL_Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
 
   exename   = subscriber
   after    += DDS*idl

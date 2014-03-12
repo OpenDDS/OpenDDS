@@ -186,7 +186,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
   // Fill in the *_ranks in the SampleInfo, and set instance state (mrg)
   for (typename InstanceMap::iterator i_iter(inst_map.begin()),
        i_end(inst_map.end()); i_iter != i_end; ++i_iter) {
-    
+
     InstanceData& id = i_iter->second;
     {  // Danger, limit visibility of inst
       SubscriptionInstance& inst = *i_iter->first;

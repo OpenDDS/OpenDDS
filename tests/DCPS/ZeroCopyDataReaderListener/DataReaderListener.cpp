@@ -45,8 +45,8 @@ throw(CORBA::SystemException)
 
     // Take zero copy
     DDS::ReturnCode_t status = message_dr->take(
-      messages_, infos_, DDS::LENGTH_UNLIMITED, 
-      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE 
+      messages_, infos_, DDS::LENGTH_UNLIMITED,
+      DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE
     ) ;
 
     if (status == DDS::RETCODE_OK) {
