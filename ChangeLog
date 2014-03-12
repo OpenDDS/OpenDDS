@@ -1,3 +1,9 @@
+Wed Mar 12 16:57:47 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Build failure when wide chars enabled.
+
 Wed Mar 12 16:33:07 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Reliability/sub/Subscriber.cpp:

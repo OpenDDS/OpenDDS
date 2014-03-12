@@ -37,18 +37,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create subscriber
     DDS::Subscriber_var subscriber = createSubscriber(participant);
 
-    std::string take_next = "-take-next";
-    std::string take_seq  = "-take";
-    std::string zero_copy = "-zero-copy";
-
     // Create Listener
     DataReaderListenerImpl* listener_impl = NULL;
     if (argc > 1) {
-      if (take_next == argv[1]) {
+      if (!ACE_OS::strcmp(ACE_TEXT("-take-next"), argv[1])) {
         listener_impl = new TakeNextReaderListenerImpl;
-      } else if (take_seq == argv[1]) {
+      } else if (!ACE_OS::strcmp(ACE_TEXT("-take"), argv[1])) {
         listener_impl = new SeqReaderListenerImpl;
-      } else if (zero_copy == argv[1]) {
+      } else if (!ACE_OS::strcmp(ACE_TEXT("-zero-copy"), argv[1])) {
         listener_impl = new ZeroCopyReaderListenerImpl;
       }
     }
