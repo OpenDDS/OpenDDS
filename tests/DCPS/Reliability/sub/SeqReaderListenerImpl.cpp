@@ -11,7 +11,7 @@
 
 using namespace examples::boilerplate;
 
-SeqReaderListenerImpl::SeqReaderListenerImpl() : 
+SeqReaderListenerImpl::SeqReaderListenerImpl() :
   messages_(10), infos_(10)
 {
   std::cout << "Using SeqReaderListenerImpl" << std::endl;

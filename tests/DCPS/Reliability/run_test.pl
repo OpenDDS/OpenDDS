@@ -15,7 +15,7 @@ PerlDDS::add_lib_path('./IDL');
 
 $status = 0;
 
-$pub_opts = "";
+$pub_opts = "-DCPSTransportDebugLevel 1";
 $sub_opts = "";
 
 

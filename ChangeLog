@@ -1,3 +1,24 @@
+Wed Mar 12 16:01:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/IDL/Reliability.idl:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Reliability/shmem.ini:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/SeqReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+        * tests/DCPS/Reliability/sub/TakeNextReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/ZeroCopyReaderListenerImpl.cpp:
+
+          Fuzz changes.
+
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+
+          Change name of projects
+
 Tue Mar 11 20:04:40 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:

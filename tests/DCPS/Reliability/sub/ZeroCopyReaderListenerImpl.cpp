@@ -11,7 +11,7 @@
 
 using namespace examples::boilerplate;
 
-ZeroCopyReaderListenerImpl::ZeroCopyReaderListenerImpl() : 
+ZeroCopyReaderListenerImpl::ZeroCopyReaderListenerImpl() :
   messages_(), infos_()
 {
   std::cout << "Using ZeroCopyReaderListenerImpl" << std::endl;

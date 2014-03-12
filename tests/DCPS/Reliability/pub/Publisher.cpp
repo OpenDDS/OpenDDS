@@ -46,7 +46,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Initialize samples
       Reliability::Message message;
-     
+
       // Override message count
       unsigned long long msg_count = 5000;
       if (argc > 1) {
@@ -74,7 +74,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               ACE_ERROR((LM_ERROR,
               ACE_TEXT("ERROR: %N:%l: main() -")
               ACE_TEXT(" write returned %d!\n"), error));
-            } 
+            }
             break;
           }
         }

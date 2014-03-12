@@ -63,19 +63,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                   topic,
                                                   listener);
 
-	  std::cout << "Waiting for connection" << std::endl;
+    std::cout << "Waiting for connection" << std::endl;
     {
-		// Block until reader has associated with a writer
-		// but is no longer associated with any writer
-		OpenDDS::Model::ReaderSync rs(reader);
+    // Block until reader has associated with a writer
+    // but is no longer associated with any writer
+    OpenDDS::Model::ReaderSync rs(reader);
     }
 
     if (listener_impl->sample_count() == listener_impl->expected_count()) {
-      std::cout << "Got all " << listener_impl->sample_count() 
+      std::cout << "Got all " << listener_impl->sample_count()
                 << " samples" << std::endl;
       status = 0;
-    } else { 
-      std::cout << "ERROR: Got " << listener_impl->sample_count() 
+    } else {
+      std::cout << "ERROR: Got " << listener_impl->sample_count()
                 << " samples, expected " << listener_impl->expected_count()
                 << std::endl;
     }

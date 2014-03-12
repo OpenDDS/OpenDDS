@@ -98,13 +98,13 @@ createDataWriter(
 {
   // Set qos
   DDS::DataWriterQos dw_qos;
-	publisher->get_default_datawriter_qos(dw_qos);
+  publisher->get_default_datawriter_qos(dw_qos);
   // RELIABLE/KEEP_ALL/10/10 works
-	dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-	dw_qos.reliability.max_blocking_time.sec = 1;
-	dw_qos.reliability.max_blocking_time.nanosec = 0;
+  dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  dw_qos.reliability.max_blocking_time.sec = 1;
+  dw_qos.reliability.max_blocking_time.nanosec = 0;
 
-	dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+  dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
   dw_qos.resource_limits.max_samples = 10;
   dw_qos.resource_limits.max_samples_per_instance = 10;
   // Create DataWriter
@@ -131,10 +131,10 @@ createDataReader(
   // Set qos
   DDS::DataReaderQos dr_qos;
   // RELIABLE/KEEP_LAST/10 works
-	subscriber->get_default_datareader_qos(dr_qos);
-	dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-	dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
-	dr_qos.history.depth = 10;
+  subscriber->get_default_datareader_qos(dr_qos);
+  dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  dr_qos.history.depth = 10;
   // Create DataReader
   DDS::DataReader_var reader =
     subscriber->create_datareader(topic,
@@ -215,16 +215,16 @@ cleanup(
   DDS::DomainParticipant_var participant,
   DDS::DomainParticipantFactory_var dpf)
 {
-	std::cout << "delete_contained_entities"<< std::endl;
+  std::cout << "delete_contained_entities"<< std::endl;
   // Delete any topics, publishers and subscribers owned by participant
   participant->delete_contained_entities();
-	std::cout << "delete_participant"<< std::endl;
+  std::cout << "delete_participant"<< std::endl;
   // Delete participant itself
   dpf->delete_participant(participant);
-	std::cout << "shutdown"<< std::endl;
+  std::cout << "shutdown"<< std::endl;
   // Shut down info repo connection
   TheServiceParticipant->shutdown();
-	std::cout << "shutdown complete"<< std::endl;
+  std::cout << "shutdown complete"<< std::endl;
 }
 
 } } // End namespaces

@@ -11,7 +11,7 @@
 
 using namespace examples::boilerplate;
 
-DataReaderListenerImpl::DataReaderListenerImpl() : 
+DataReaderListenerImpl::DataReaderListenerImpl() :
   sample_count_(0), expected_count_(0), expected_seq_(0)
 {
 }
@@ -19,21 +19,21 @@ DataReaderListenerImpl::DataReaderListenerImpl() :
 void
 DataReaderListenerImpl::on_sample_lost(DDS::DataReader_ptr , DDS::SampleLostStatus status)
 {
-	std::cout << "Lost sample: " << status.total_count_change << std::endl;
+  std::cout << "Lost sample: " << status.total_count_change << std::endl;
 }
 
 void
 DataReaderListenerImpl::on_sample_rejected(DDS::DataReader_ptr , DDS::SampleRejectedStatus status)
 {
-	std::cout << "Rejected sample: " << status.total_count_change << " Reason: " 
+  std::cout << "Rejected sample: " << status.total_count_change << " Reason: "
             << status.last_reason << std::endl;
 }
 
 void
 DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-	// Safely downcast data reader to type-specific data reader
-	Reliability::MessageDataReader_var reader_i = narrow(reader);
+  // Safely downcast data reader to type-specific data reader
+  Reliability::MessageDataReader_var reader_i = narrow(reader);
 
   take_samples(reader_i);
 }
@@ -55,7 +55,7 @@ void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
   }
 
   if (expected_seq_ != msg.count) {
-    std::cout << "Expected: " << expected_seq_ 
+    std::cout << "Expected: " << expected_seq_
               << " Received: " << msg.count << std::endl;
   }
   ++sample_count_;
