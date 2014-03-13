@@ -1,3 +1,27 @@
+Thu Mar 13 15:01:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * README:
+
+          Fixed Fuzz.
+
+        * dds/DCPS/AssociationData.h:
+
+          Fixed warning - precedence of >> vs comparison.
+
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+
+          Fixed warning - sprintf size.
+
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
+
+          Fixed project name length warning.
+
+        * tests/DCPS/ManyTopicMultiProcess:
+        * tests/DCPS/SubscriberCycle:
+        * tests/DCPS/UnitTests:
+
+          Set svn:ignore.
+
 Wed Mar 12 23:26:36 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/RakeResults_T.cpp:

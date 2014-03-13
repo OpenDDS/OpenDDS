@@ -55,12 +55,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       char number[20];
 
-      for (long i = 0; i<msg_count; ++i) {
+      for (int i = 0; i<msg_count; ++i) {
         // Prepare next sample
         sprintf(number, "foo %d", i);
         message.id = CORBA::string_dup(number);
         message.name = "foo";
-        message.count = i;
+        message.count = (long)i;
         message.expected = msg_count;
 
         // Publish the message

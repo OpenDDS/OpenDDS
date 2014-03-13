@@ -41,7 +41,7 @@ project(ZeroCopyDRL_Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcp
   }
 }
 
-project(DDS*StackSubscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dds_model {
+project(ZeroCopyDRL_StackSubscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dds_model {
 
   exename   = stack_subscriber
   after    += DDS*idl

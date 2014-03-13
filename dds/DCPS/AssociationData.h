@@ -40,7 +40,7 @@ struct AssociationData {
     ACE_InputCDR cdr((const char*)remote.get_buffer(),
                                   remote.length());
 
-    if (cdr >> network_order_address == 0) {
+    if ((cdr >> network_order_address) == 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: AssociationData::get_remote_address")
                  ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
