@@ -14,8 +14,8 @@ project(ZeroCopyDRL_idl): dcps_test_lib {
 project(ZeroCopyDRL_Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
 
   exename   = publisher
-  after    += DDS*idl
-  libs     += DDS*idl
+  after    += ZeroCopyDRL_idl
+  libs     += ZeroCopyDRL_idl
 
   Idl_Files {
   }
@@ -29,8 +29,8 @@ project(ZeroCopyDRL_Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps
 project(ZeroCopyDRL_Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
 
   exename   = subscriber
-  after    += DDS*idl
-  libs     += DDS*idl
+  after    += ZeroCopyDRL_idl
+  libs     += ZeroCopyDRL_idl
 
   Idl_Files {
   }
@@ -44,8 +44,8 @@ project(ZeroCopyDRL_Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcp
 project(ZeroCopyDRL_StackSubscriber) : dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dds_model {
 
   exename   = stack_subscriber
-  after    += DDS*idl
-  libs     += DDS*idl
+  after    += ZeroCopyDRL_idl
+  libs     += ZeroCopyDRL_idl
 
   Idl_Files {
   }
