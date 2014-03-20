@@ -1,3 +1,10 @@
+Thu Mar 20 17:54:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/expfile.pl:
+
+          replace perl with special variable $^X in system call so PATH to
+          perl will not be lost.
+
 Fri Mar 14 15:31:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
