@@ -95,6 +95,7 @@ ReliableSession::control_received(char submessage_id,
                ACE_TEXT("ReliableSession::control_received: ")
                ACE_TEXT("unknown TRANSPORT_CONTROL submessage: 0x%x!\n"),
                submessage_id));
+    break;
   }
   return true;
 }

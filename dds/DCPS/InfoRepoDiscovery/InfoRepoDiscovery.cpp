@@ -217,6 +217,9 @@ InfoRepoDiscovery::get_stringified_dcps_info_ior()
 TransportConfig_rch
 InfoRepoDiscovery::bit_config()
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::bit_config: enter method\n"));
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
   if (bit_config_.is_nil()) {
     const std::string cfg_name = TransportRegistry::DEFAULT_INST_PREFIX +
@@ -249,8 +252,12 @@ InfoRepoDiscovery::bit_config()
     out << bit_transport_ip_ << ':' << bit_transport_port_;
     tcp_inst->local_address_str_ = out.str();
   }
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::bit_config: exit method\n"));
   return bit_config_;
 #else
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::bit_config: exit method\n"));
   return 0;
 #endif
 }
@@ -258,6 +265,9 @@ InfoRepoDiscovery::bit_config()
 DDS::Subscriber_ptr
 InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::init_bit: enter method\n"));
+
 #if defined (DDS_HAS_MINIMUM_BIT)
   ACE_UNUSED_ARG(participant);
   return 0;
@@ -347,6 +357,8 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
                          "exception during DataReader initialization\n"));
     return 0;
   }
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::init_bit: exit method\n"));
   return bit_subscriber._retn();
 #endif
 }
@@ -394,15 +406,22 @@ DCPS::AddDomainStatus
 InfoRepoDiscovery::add_domain_participant(DDS::DomainId_t domainId,
                                           const DDS::DomainParticipantQos& qos)
 {
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::add_domain_participant-> begin\n"));
   try {
     const DCPSInfo_var info = get_dcps_info();
     if (!CORBA::is_nil(info)) {
+       //###Debugging for failure to associate
+       ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::add_domain_participant-> about to info->add_domain_participant THEN RETURN\n"));
+
       return info->add_domain_participant(domainId, qos);
     }
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_domain_participant: ");
   }
   const DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_UNKNOWN, false /*federated*/};
+  //###Debugging for failure to associate
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::add_domain_participant-> end returning GUID_UNKNOWN\n"));
   return ads;
 }
 
@@ -526,6 +545,10 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const DDS::PublisherQos& publisherQos)
 {
   RepoId pubId;
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::add_publication: enter method\n"));
+
   try {
     DCPS::DataWriterRemoteImpl* writer_remote_impl = 0;
     ACE_NEW_RETURN(writer_remote_impl,
@@ -550,6 +573,9 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_publication: ");
     pubId = DCPS::GUID_UNKNOWN;
   }
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::add_publication: exit method\n"));
 
   return pubId;
 }
@@ -618,6 +644,10 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const DDS::StringSeq& params)
 {
   RepoId subId;
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::add_subscription: enter method\n"));
+
   try {
     DCPS::DataReaderRemoteImpl* reader_remote_impl = 0;
     ACE_NEW_RETURN(reader_remote_impl,
@@ -642,6 +672,9 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::add_subscription: ");
     subId = DCPS::GUID_UNKNOWN;
   }
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::add_subscription: exit method\n"));
+
   return subId;
 }
 

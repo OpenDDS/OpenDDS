@@ -107,6 +107,10 @@ SubscriberImpl::create_datareader(
   DDS::DataReaderListener_ptr a_listener,
   DDS::StatusMask             mask)
 {
+
+	//### Debug statements to track where test is failing
+		    	 ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::create_datareader being created\n "));
+
   if (CORBA::is_nil(a_topic_desc)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")

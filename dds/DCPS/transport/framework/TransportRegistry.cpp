@@ -329,14 +329,20 @@ TransportInst_rch
 TransportRegistry::create_inst(const std::string& name,
                                const std::string& transport_type)
 {
+   //### Debug statements to track where connection is failing
+ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> begin\n"));
+ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> LOCKING lock_\n"));
   GuardType guard(this->lock_);
   TransportType_rch type;
 
   if (find(this->type_map_, transport_type, type) != 0) {
 #if !defined(ACE_AS_STATIC_LIBS)
+     ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> RELEASING guard lock_ b/c no ACE_AS_STATIC_LIBS\n"));
     guard.release();
     // Not present, try to load library
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> !defined(ACE_AS_STATIC_LIBS) -> load_transport_lib\n"));
     this->load_transport_lib(transport_type);
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> ACQUIRING guard lock_ after loading transport lib\n"));
     guard.acquire();
 
     // Try to find it again
@@ -346,6 +352,7 @@ TransportRegistry::create_inst(const std::string& name,
                  ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
                  ACE_TEXT("transport_type=%C is not registered.\n"),
                  transport_type.c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> NOT REGISTERED returning\n"));
       return TransportInst_rch();
 #if !defined(ACE_AS_STATIC_LIBS)
     }
@@ -357,11 +364,18 @@ TransportRegistry::create_inst(const std::string& name,
                ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
                ACE_TEXT("name=%C is already in use.\n"),
                name.c_str()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> ALREADY IN USE returning\n"));
     return TransportInst_rch();
   }
-
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> create new_inst()\n"));
   TransportInst_rch inst = type->new_inst(name);
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> DONE creating new_inst()\n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> insert new inst into inst_map_\n"));
   this->inst_map_[name] = inst;
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> DONE inserting new inst into inst_map_\n"));
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> RELEASING lock_\n"));
+ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportRegistry::create_inst --> end SUCCESS\n"));
   return inst;
 }
 

@@ -28,6 +28,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy(
   , reactor_task_(task)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","TcpReceiveStrategy",6);
+
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpReceiveStrategy::TcpReceiveStrategy --> constructor finishing\n"));
 }
 
 OpenDDS::DCPS::TcpReceiveStrategy::~TcpReceiveStrategy()
@@ -77,6 +80,10 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
 int
 OpenDDS::DCPS::TcpReceiveStrategy::start_i()
 {
+
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpReceiveStrategy::start_i --> begin\n"));
+
   DBG_ENTRY_LVL("TcpReceiveStrategy","start_i",6);
 
   // Tell the TcpConnection that we are the object that it should
@@ -110,6 +117,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
                       "reactor %@ %p\n", this->connection_.in(), ACE_TEXT("register_handler")),
                      -1);
   }
+
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpReceiveStrategy::start_i --> end SUCCESS\n"));
 
   return 0;
 }

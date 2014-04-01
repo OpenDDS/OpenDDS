@@ -144,7 +144,7 @@ protected:
   /// stop_accepting_or_connecting() is called from TransportClient
   /// to terminate the accepting process begun by accept_datalink()
   /// or connect_datalink().  This allows the TransportImpl to clean
-  /// up any resources asssociated with this pending connection.
+  /// up any resources associated with this pending connection.
   /// The TransportClient* passed in to accept or connect is not
   /// valid after this method is called.
   virtual void stop_accepting_or_connecting(TransportClient* client,

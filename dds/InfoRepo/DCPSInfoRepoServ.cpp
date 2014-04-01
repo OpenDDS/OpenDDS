@@ -41,388 +41,448 @@
 #include <sstream>
 
 InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
-  : ior_file_(ACE_TEXT("repo.ior"))
-  , listen_address_given_(0)
+: ior_file_(ACE_TEXT("repo.ior"))
+, listen_address_given_(0)
 #ifdef DDS_HAS_MINIMUM_BIT
-  , use_bits_(false)
+, use_bits_(false)
 #else
-  , use_bits_(true)
+, use_bits_(true)
 #endif
-  , resurrect_(true)
-  , finalized_(false)
-  , federator_(this->federatorConfig_)
-  , federatorConfig_(argc, argv)
-  , lock_()
-  , cond_(lock_)
-  , shutdown_complete_(false)
+, resurrect_(true)
+, finalized_(false)
+, federator_(this->federatorConfig_)
+, federatorConfig_(argc, argv)
+, lock_()
+, cond_(lock_)
+, shutdown_complete_(false)
 {
-  try {
-    this->init();
-  } catch (...) {
-    this->finalize();
-    throw;
-  }
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::InfoRepo CONSTRUCTOR --> begin\n"));
+
+   try {
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::InfoRepo CONSTRUCTOR --> begin  init()\n"));
+      this->init();
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::InfoRepo CONSTRUCTOR --> end  init()\n"));
+   } catch (...) {
+      this->finalize();
+      throw;
+   }
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::InfoRepo CONSTRUCTOR --> end\n"));
 }
 
 InfoRepo::~InfoRepo()
 {
-  this->finalize();
+   this->finalize();
 }
 
 void
 InfoRepo::run()
 {
-  this->shutdown_complete_ = false;
-  this->orb_->run();
-  this->finalize();
-  ACE_GUARD(ACE_Thread_Mutex, g, this->lock_);
-  this->shutdown_complete_ = true;
-  this->cond_.signal();
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> begin\n"));
+   this->shutdown_complete_ = false;
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> tell orb_ to run\n"));
+   this->orb_->run();
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> DONE orb_->run()\n"));
+   this->finalize();
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> DONE finalize()\n"));
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> LOCKING lock_\n"));
+   ACE_GUARD(ACE_Thread_Mutex, g, this->lock_);
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> LOCKED lock_\n"));
+   this->shutdown_complete_ = true;
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> SIGNAL cond_\n"));
+   this->cond_.signal();
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> DONE signalling cond_\n"));
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> RELEASING lock_\n"));
+   //###Debugging for failure to associate
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::run --> end\n"));
 }
 
 void
 InfoRepo::finalize()
 {
-  if (this->finalized_) {
-    return;
-  }
+   if (this->finalized_) {
+      return;
+   }
 
-  TheServiceParticipant->shutdown();
+   TheServiceParticipant->shutdown();
 
-  if (!CORBA::is_nil(this->orb_)) {
-    this->orb_->destroy();
-  }
+   if (!CORBA::is_nil(this->orb_)) {
+      this->orb_->destroy();
+   }
 
-  this->finalized_ = true;
+   this->finalized_ = true;
 }
 
 int
 InfoRepo::handle_exception(ACE_HANDLE /* fd */)
 {
-  // these should occur before ORB::shutdown() since they use the ORB/reactor
-  this->info_servant_->finalize();
-  this->federator_.finalize();
+   // these should occur before ORB::shutdown() since they use the ORB/reactor
+   this->info_servant_->finalize();
+   this->federator_.finalize();
 
-  this->orb_->shutdown(true);
-  return 0;
+   this->orb_->shutdown(true);
+   return 0;
 }
 
 void
 InfoRepo::shutdown()
 {
-  this->orb_->orb_core()->reactor()->notify(this);
-  // reactor will invoke our InfoRepo::handle_exception()
+   this->orb_->orb_core()->reactor()->notify(this);
+   // reactor will invoke our InfoRepo::handle_exception()
 }
 
 void
 InfoRepo::sync_shutdown()
 {
-  this->shutdown();
-  ACE_GUARD(ACE_Thread_Mutex, g, this->lock_);
+   this->shutdown();
+   ACE_GUARD(ACE_Thread_Mutex, g, this->lock_);
 
-  while (!this->shutdown_complete_) {
-    this->cond_.wait();
-  }
+   while (!this->shutdown_complete_) {
+      this->cond_.wait();
+   }
 }
 
 void
 InfoRepo::usage(const ACE_TCHAR* cmd)
 {
-  // NOTE: The federation arguments are parsed early by the
-  //       FederationConfig object.
-  ACE_DEBUG((LM_INFO,
-             ACE_TEXT("Usage:\n")
-             ACE_TEXT("  %s\n")
-             ACE_TEXT("    -a <address> listening address for Built-In Topics\n")
-             ACE_TEXT("    -o <file> write ior to file\n")
-             ACE_TEXT("    -NOBITS disable the Built-In Topics\n")
-             ACE_TEXT("    -z turn on verbose Transport logging\n")
-             ACE_TEXT("    -r Resurrect from persistent file\n")
-             ACE_TEXT("    -FederatorConfig <file> configure federation from <file>\n")
-             ACE_TEXT("    -FederationId <number> value for this repository\n")
-             ACE_TEXT("    -FederateWith <ior> federate initially with object at <ior>\n")
-             ACE_TEXT("    -ReassociateDelay <msec> delay between reassociations\n")
-             ACE_TEXT("    -?\n")
-             ACE_TEXT("\n"),
-             cmd));
+   // NOTE: The federation arguments are parsed early by the
+   //       FederationConfig object.
+   ACE_DEBUG((LM_INFO,
+         ACE_TEXT("Usage:\n")
+         ACE_TEXT("  %s\n")
+         ACE_TEXT("    -a <address> listening address for Built-In Topics\n")
+         ACE_TEXT("    -o <file> write ior to file\n")
+         ACE_TEXT("    -NOBITS disable the Built-In Topics\n")
+         ACE_TEXT("    -z turn on verbose Transport logging\n")
+         ACE_TEXT("    -r Resurrect from persistent file\n")
+         ACE_TEXT("    -FederatorConfig <file> configure federation from <file>\n")
+         ACE_TEXT("    -FederationId <number> value for this repository\n")
+         ACE_TEXT("    -FederateWith <ior> federate initially with object at <ior>\n")
+         ACE_TEXT("    -ReassociateDelay <msec> delay between reassociations\n")
+         ACE_TEXT("    -?\n")
+         ACE_TEXT("\n"),
+         cmd));
 }
 
 void
 InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Arg_Shifter arg_shifter(argc, argv);
+   ACE_Arg_Shifter arg_shifter(argc, argv);
 
-  const ACE_TCHAR* current_arg = 0;
+   const ACE_TCHAR* current_arg = 0;
 
-  while (arg_shifter.is_anything_left()) {
-    if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0) {
-      this->listen_address_str_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
-      this->listen_address_given_ = 1;
-      arg_shifter.consume_arg();
+   while (arg_shifter.is_anything_left()) {
+      if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-a"))) != 0) {
+         this->listen_address_str_ = ACE_TEXT_ALWAYS_CHAR(current_arg);
+         this->listen_address_given_ = 1;
+         arg_shifter.consume_arg();
 
-    } else if ((current_arg = arg_shifter.get_the_parameter
-                              (ACE_TEXT("-r"))) != 0) {
-      int p = ACE_OS::atoi(current_arg);
-      this->resurrect_ = true;
+      } else if ((current_arg = arg_shifter.get_the_parameter
+            (ACE_TEXT("-r"))) != 0) {
+         int p = ACE_OS::atoi(current_arg);
+         this->resurrect_ = true;
 
-      if (p == 0) {
-        this->resurrect_ = false;
+         if (p == 0) {
+            this->resurrect_ = false;
+         }
+
+         arg_shifter.consume_arg();
+
+      } else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
+         this->ior_file_ = current_arg;
+         arg_shifter.consume_arg();
+
+      } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-NOBITS")) == 0) {
+         this->use_bits_ = false;
+         arg_shifter.consume_arg();
+
+      } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0) {
+         TURN_ON_VERBOSE_DEBUG;
+         arg_shifter.consume_arg();
+
+      } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-ReassociateDelay")) == 0) {
+         long msec = ACE_OS::atoi(current_arg);
+         this->reassociate_delay_.msec(msec);
+
+         arg_shifter.consume_arg();
       }
 
-      arg_shifter.consume_arg();
+      // The '-?' option
+      else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
+         this->usage(argv[0]);
+         throw InitError("Usage");
+      }
 
-    } else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
-      this->ior_file_ = current_arg;
-      arg_shifter.consume_arg();
+      // Anything else we just skip
 
-    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-NOBITS")) == 0) {
-      this->use_bits_ = false;
-      arg_shifter.consume_arg();
-
-    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0) {
-      TURN_ON_VERBOSE_DEBUG;
-      arg_shifter.consume_arg();
-
-    } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-ReassociateDelay")) == 0) {
-      long msec = ACE_OS::atoi(current_arg);
-      this->reassociate_delay_.msec(msec);
-
-      arg_shifter.consume_arg();
-    }
-
-    // The '-?' option
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-?")) == 0) {
-      this->usage(argv[0]);
-      throw InitError("Usage");
-    }
-
-    // Anything else we just skip
-
-    else {
-      arg_shifter.ignore_arg();
-    }
-  }
+      else {
+         arg_shifter.ignore_arg();
+      }
+   }
 }
 
 void
 InfoRepo::init()
 {
-  ACE_Argv_Type_Converter cvt(this->federatorConfig_.argc(),
-                              this->federatorConfig_.argv());
-  this->orb_ = CORBA::ORB_init(cvt.get_argc(), cvt.get_ASCII_argv(), "");
-  this->info_servant_ =
-    new TAO_DDS_DCPSInfo_i(this->orb_, this->resurrect_, this,
-                           this->federatorConfig_.federationId());
-  PortableServer::ServantBase_var servant(this->info_servant_);
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> begin\n"));
 
-  // Install the DCPSInfo_i into the Federator::Manager.
-  this->federator_.info() = this->info_servant_;
+   ACE_Argv_Type_Converter cvt(this->federatorConfig_.argc(),
+         this->federatorConfig_.argv());
+   this->orb_ = CORBA::ORB_init(cvt.get_argc(), cvt.get_ASCII_argv(), "");
 
-  CORBA::Object_var obj =
-    this->orb_->resolve_initial_references("RootPOA");
-  PortableServer::POA_var root_poa = PortableServer::POA::_narrow(obj);
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> instantiate info_servant_ = TAO_DDS_DCPSInfo_i\n"));
 
-  PortableServer::POAManager_var poa_manager = root_poa->the_POAManager();
+   this->info_servant_ =
+         new TAO_DDS_DCPSInfo_i(this->orb_, this->resurrect_, this,
+               this->federatorConfig_.federationId());
+   PortableServer::ServantBase_var servant(this->info_servant_);
 
-  // Use persistent and user id POA policies so the Info Repo's
-  // object references are consistent.
-  CORBA::PolicyList policies(2);
-  policies.length(2);
-  policies[0] = root_poa->create_id_assignment_policy(PortableServer::USER_ID);
-  policies[1] = root_poa->create_lifespan_policy(PortableServer::PERSISTENT);
-  PortableServer::POA_var info_poa = root_poa->create_POA("InfoRepo",
-                                                          poa_manager,
-                                                          policies);
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> DONE instantiating info_servant_ = TAO_DDS_DCPSInfo_i\n"));
 
-  // Creation of the new POAs over, so destroy the Policy_ptr's.
-  for (CORBA::ULong i = 0; i < policies.length(); ++i) {
-    policies[i]->destroy();
-  }
+   // Install the DCPSInfo_i into the Federator::Manager.
+   this->federator_.info() = this->info_servant_;
 
-  PortableServer::ObjectId_var oid =
-    PortableServer::string_to_ObjectId("InfoRepo");
-  info_poa->activate_object_with_id(oid, this->info_servant_);
-  obj = info_poa->id_to_reference(oid);
-  // the object is created locally, so it is safe to do an
-  // _unchecked_narrow, this was needed to prevent an exception
-  // when dealing with ImR-ified objects
-  OpenDDS::DCPS::DCPSInfo_var info_repo =
-    OpenDDS::DCPS::DCPSInfo::_unchecked_narrow(obj);
+   CORBA::Object_var obj =
+         this->orb_->resolve_initial_references("RootPOA");
+   PortableServer::POA_var root_poa = PortableServer::POA::_narrow(obj);
 
-  CORBA::String_var objref_str =
-    orb_->object_to_string(info_repo);
+   PortableServer::POAManager_var poa_manager = root_poa->the_POAManager();
 
-  // Initialize the DomainParticipantFactory
-  DDS::DomainParticipantFactory_var dpf =
-    TheParticipantFactoryWithArgs(cvt.get_argc(),
-                                  cvt.get_TCHAR_argv());
+   // Use persistent and user id POA policies so the Info Repo's
+   // object references are consistent.
+   CORBA::PolicyList policies(2);
+   policies.length(2);
+   policies[0] = root_poa->create_id_assignment_policy(PortableServer::USER_ID);
+   policies[1] = root_poa->create_lifespan_policy(PortableServer::PERSISTENT);
+   PortableServer::POA_var info_poa = root_poa->create_POA("InfoRepo",
+         poa_manager,
+         policies);
 
-  // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
-  // command line options.
+   // Creation of the new POAs over, so destroy the Policy_ptr's.
+   for (CORBA::ULong i = 0; i < policies.length(); ++i) {
+      policies[i]->destroy();
+   }
 
-  // Check the non-ORB arguments.
-  this->parse_args(cvt.get_argc(), cvt.get_TCHAR_argv());
+   PortableServer::ObjectId_var oid =
+         PortableServer::string_to_ObjectId("InfoRepo");
+   info_poa->activate_object_with_id(oid, this->info_servant_);
+   obj = info_poa->id_to_reference(oid);
+   // the object is created locally, so it is safe to do an
+   // _unchecked_narrow, this was needed to prevent an exception
+   // when dealing with ImR-ified objects
+   OpenDDS::DCPS::DCPSInfo_var info_repo =
+         OpenDDS::DCPS::DCPSInfo::_unchecked_narrow(obj);
 
-  // Activate the POA manager before initialize built-in-topics
-  // so invocations can be processed.
-  poa_manager->activate();
+   CORBA::String_var objref_str =
+         orb_->object_to_string(info_repo);
 
-  if (this->use_bits_) {
-    if (this->info_servant_->init_transport(this->listen_address_given_,
-                                            this->listen_address_str_.c_str())
-        != 0 /* init_transport returns 0 for success */) {
+   //### Debug statements to track where connection is failing
+ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> Initialize the DomainParticipantFactory\n"));
+
+   // Initialize the DomainParticipantFactory
+   DDS::DomainParticipantFactory_var dpf =
+         TheParticipantFactoryWithArgs(cvt.get_argc(),
+               cvt.get_TCHAR_argv());
+
+   //### Debug statements to track where connection is failing
+ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> DONE initializing the DomainParticipantFactory\n"));
+
+   // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
+   // command line options.
+
+   // Check the non-ORB arguments.
+   this->parse_args(cvt.get_argc(), cvt.get_TCHAR_argv());
+
+   // Activate the POA manager before initialize built-in-topics
+   // so invocations can be processed.
+   poa_manager->activate();
+
+   //### Debug statements to track where connection is failing
+ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> about to init BIT's checking if it should 'use_bits_' \n"));
+
+   if (this->use_bits_) {
+      //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> about to 'init_transport'\n"));
+
+      if (this->info_servant_->init_transport(this->listen_address_given_,
+            this->listen_address_str_.c_str())
+            != 0 /* init_transport returns 0 for success */) {
+         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+               ACE_TEXT("Unable to initialize transport.\n")));
+         throw InitError("Unable to initialize transport.");
+      }
+
+   } else {
+      //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> NOT USING BITS\n"));
+
+      TheServiceParticipant->set_BIT(false);
+   }
+   //### Debug statements to track where connection is failing
+ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> DONE init_transport\n"));
+
+
+   // This needs to be done after initialization since we create the reference
+   // to ourselves in the service here.
+   OpenDDS::DCPS::Service_Participant* serv_part = TheServiceParticipant;
+   serv_part->set_repo_ior(objref_str, OpenDDS::DCPS::Discovery::DEFAULT_REPO);
+
+   OpenDDS::DCPS::Discovery_rch disc = serv_part->get_discovery(0 /*domainId*/);
+   OpenDDS::DCPS::InfoRepoDiscovery_rch ird =
+         OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::InfoRepoDiscovery>(disc);
+   if (!ird->set_ORB(orb_)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
-                 ACE_TEXT("Unable to initialize transport.\n")));
-      throw InitError("Unable to initialize transport.");
-    }
+            ACE_TEXT("Unable to set the ORB in InfoRepoDiscovery.\n")));
+      throw InitError("Unable to set the ORB in InfoRepoDiscovery.");
+   }
 
-  } else {
-    TheServiceParticipant->set_BIT(false);
-  }
+   // Initialize persistence _after_ initializing the participant factory
+   // and intializing the transport.
+   if (!this->info_servant_->init_persistence()) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+            ACE_TEXT("Unable to initialize persistence.\n")));
+      throw InitError("Unable to initialize persistence.");
+   }
 
-  // This needs to be done after initialization since we create the reference
-  // to ourselves in the service here.
-  OpenDDS::DCPS::Service_Participant* serv_part = TheServiceParticipant;
-  serv_part->set_repo_ior(objref_str, OpenDDS::DCPS::Discovery::DEFAULT_REPO);
+   // Initialize reassociation.
+   if (this->reassociate_delay_ != ACE_Time_Value::zero &&
+         !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+            ACE_TEXT("Unable to initialize reassociation.\n")));
+      throw InitError("Unable to initialize reassociation.");
+   }
 
-  OpenDDS::DCPS::Discovery_rch disc = serv_part->get_discovery(0 /*domainId*/);
-  OpenDDS::DCPS::InfoRepoDiscovery_rch ird =
-    OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::InfoRepoDiscovery>(disc);
-  if (!ird->set_ORB(orb_)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
-               ACE_TEXT("Unable to set the ORB in InfoRepoDiscovery.\n")));
-    throw InitError("Unable to set the ORB in InfoRepoDiscovery.");
-  }
+   // Fire up the federator.
+   OpenDDS::Federator::Manager_var federator;
+   CORBA::String_var               federator_ior;
 
-  // Initialize persistence _after_ initializing the participant factory
-  // and intializing the transport.
-  if (!this->info_servant_->init_persistence()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
-               ACE_TEXT("Unable to initialize persistence.\n")));
-    throw InitError("Unable to initialize persistence.");
-  }
+   if (federator_.id() != OpenDDS::Federator::NIL_REPOSITORY) {
+      oid = PortableServer::string_to_ObjectId("Federator");
+      info_poa->activate_object_with_id(oid, &federator_);
+      obj = info_poa->id_to_reference(oid);
+      federator = OpenDDS::Federator::Manager::_narrow(obj);
 
-  // Initialize reassociation.
-  if (this->reassociate_delay_ != ACE_Time_Value::zero &&
-     !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
-               ACE_TEXT("Unable to initialize reassociation.\n")));
-    throw InitError("Unable to initialize reassociation.");
-  }
+      federator_ior = orb_->object_to_string(federator);
 
-  // Fire up the federator.
-  OpenDDS::Federator::Manager_var federator;
-  CORBA::String_var               federator_ior;
+      // Add a local repository reference that can be returned via a
+      // remote call to a peer.
+      this->federator_.localRepo(info_repo);
 
-  if (federator_.id() != OpenDDS::Federator::NIL_REPOSITORY) {
-    oid = PortableServer::string_to_ObjectId("Federator");
-    info_poa->activate_object_with_id(oid, &federator_);
-    obj = info_poa->id_to_reference(oid);
-    federator = OpenDDS::Federator::Manager::_narrow(obj);
+      // It should be safe to initialize the federation mechanism at this
+      // point.  What we really needed to wait for is the initialization of
+      // the service components - like the DomainParticipantFactory and the
+      // repository bindings.
+      // N.B. This is done *before* being added to the IOR table to avoid any
+      //      races with an eager client.
+      this->federator_.orb(this->orb_);
 
-    federator_ior = orb_->object_to_string(federator);
+      //
+      // Add the federator to the info_servant update manager as an
+      // additional updater interface to be called.
+      // N.B. This needs to be done *after* the call to load_domains()
+      //      since that is where the update manager is initialized in the
+      //      info startup sequencing.
+      this->info_servant_->add(&this->federator_);
+   }
 
-    // Add a local repository reference that can be returned via a
-    // remote call to a peer.
-    this->federator_.localRepo(info_repo);
+   // Grab the IOR table.
+   CORBA::Object_var table_object =
+         this->orb_->resolve_initial_references("IORTable");
 
-    // It should be safe to initialize the federation mechanism at this
-    // point.  What we really needed to wait for is the initialization of
-    // the service components - like the DomainParticipantFactory and the
-    // repository bindings.
-    // N.B. This is done *before* being added to the IOR table to avoid any
-    //      races with an eager client.
-    this->federator_.orb(this->orb_);
+   IORTable::Table_var adapter = IORTable::Table::_narrow(table_object);
 
-    //
-    // Add the federator to the info_servant update manager as an
-    // additional updater interface to be called.
-    // N.B. This needs to be done *after* the call to load_domains()
-    //      since that is where the update manager is initialized in the
-    //      info startup sequencing.
-    this->info_servant_->add(&this->federator_);
-  }
+   if (CORBA::is_nil(adapter)) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Nil IORTable\n")));
 
-  // Grab the IOR table.
-  CORBA::Object_var table_object =
-    this->orb_->resolve_initial_references("IORTable");
+   } else {
+      adapter->bind(OpenDDS::Federator::REPOSITORY_IORTABLE_KEY, objref_str);
 
-  IORTable::Table_var adapter = IORTable::Table::_narrow(table_object);
+      if (this->federator_.id() != OpenDDS::Federator::NIL_REPOSITORY) {
+         // Bind to '/Federator'
+         adapter->bind(OpenDDS::Federator::FEDERATOR_IORTABLE_KEY, federator_ior);
 
-  if (CORBA::is_nil(adapter)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Nil IORTable\n")));
+         // Bind to '/Federator/1382379631'
+         std::stringstream buffer(OpenDDS::Federator::FEDERATOR_IORTABLE_KEY);
+         buffer << "/" << std::dec << this->federatorConfig_.federationDomain();
+         adapter->bind(buffer.str().c_str(), federator_ior);
+      }
+   }
 
-  } else {
-    adapter->bind(OpenDDS::Federator::REPOSITORY_IORTABLE_KEY, objref_str);
+   FILE* output_file = ACE_OS::fopen(this->ior_file_.c_str(), ACE_TEXT("w"));
 
-    if (this->federator_.id() != OpenDDS::Federator::NIL_REPOSITORY) {
-      // Bind to '/Federator'
-      adapter->bind(OpenDDS::Federator::FEDERATOR_IORTABLE_KEY, federator_ior);
+   if (output_file == 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Unable to open IOR file: %s\n"),
+            ior_file_.c_str()));
+      throw InitError("Unable to open IOR file.");
+   }
 
-      // Bind to '/Federator/1382379631'
-      std::stringstream buffer(OpenDDS::Federator::FEDERATOR_IORTABLE_KEY);
-      buffer << "/" << std::dec << this->federatorConfig_.federationDomain();
-      adapter->bind(buffer.str().c_str(), federator_ior);
-    }
-  }
+   ACE_OS::fprintf(output_file, "%s", objref_str.in());
+   ACE_OS::fclose(output_file);
 
-  FILE* output_file = ACE_OS::fopen(this->ior_file_.c_str(), ACE_TEXT("w"));
+   // Initial federation join if specified on command line.
+   if ((this->federator_.id() > 0)
+         && !this->federatorConfig_.federateIor().empty()) {
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+         ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) INFO: DCPSInfoRepo::init() - ")
+               ACE_TEXT("joining federation with repository %s\n"),
+               this->federatorConfig_.federateIor().c_str()));
+      }
 
-  if (output_file == 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: Unable to open IOR file: %s\n"),
-               ior_file_.c_str()));
-    throw InitError("Unable to open IOR file.");
-  }
+      obj = this->orb_->string_to_object(
+            this->federatorConfig_.federateIor().c_str());
 
-  ACE_OS::fprintf(output_file, "%s", objref_str.in());
-  ACE_OS::fclose(output_file);
+      if (CORBA::is_nil(obj)) {
+         ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: could not resolve %s for initial federation.\n"),
+               this->federatorConfig_.federateIor().c_str()));
+         throw InitError("Unable to resolve IOR for initial federation.");
+      }
 
-  // Initial federation join if specified on command line.
-  if ((this->federator_.id() > 0)
-      && !this->federatorConfig_.federateIor().empty()) {
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) INFO: DCPSInfoRepo::init() - ")
-                 ACE_TEXT("joining federation with repository %s\n"),
-                 this->federatorConfig_.federateIor().c_str()));
-    }
+      OpenDDS::Federator::Manager_var peer =
+            OpenDDS::Federator::Manager::_narrow(obj);
 
-    obj = this->orb_->string_to_object(
-      this->federatorConfig_.federateIor().c_str());
+      if (CORBA::is_nil(peer)) {
+         ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: could not narrow %s.\n"),
+               this->federatorConfig_.federateIor().c_str()));
+         throw InitError("Unable to narrow peer for initial federation.");
+      }
 
-    if (CORBA::is_nil(obj)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: could not resolve %s for initial federation.\n"),
-                 this->federatorConfig_.federateIor().c_str()));
-      throw InitError("Unable to resolve IOR for initial federation.");
-    }
+      // Actually join.
+      peer->join_federation(federator,
+            this->federatorConfig_.federationDomain());
+   }
+   //### Debug statements to track where connection is failing
+ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepo::init --> end\n"));
 
-    OpenDDS::Federator::Manager_var peer =
-      OpenDDS::Federator::Manager::_narrow(obj);
-
-    if (CORBA::is_nil(peer)) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: could not narrow %s.\n"),
-                 this->federatorConfig_.federateIor().c_str()));
-      throw InitError("Unable to narrow peer for initial federation.");
-    }
-
-    // Actually join.
-    peer->join_federation(federator,
-                          this->federatorConfig_.federationDomain());
-  }
 }
 
 InfoRepo_Shutdown::InfoRepo_Shutdown(InfoRepo &ir)
-  : ir_(ir)
+: ir_(ir)
 {
 }
 
 void
 InfoRepo_Shutdown::operator()(int which_signal)
 {
-  ACE_DEBUG((LM_DEBUG,
-             "InfoRepo_Shutdown: shutting down on signal %d\n",
-             which_signal));
-  this->ir_.shutdown();
+   ACE_DEBUG((LM_DEBUG,
+         "InfoRepo_Shutdown: shutting down on signal %d\n",
+         which_signal));
+   this->ir_.shutdown();
 }

@@ -46,6 +46,8 @@ DataReaderRemoteImpl::add_association(const RepoId& yourId,
                                       const WriterAssociation& writer,
                                       bool active)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderRemoteImpl::add_association: enter method\n"));
   DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
@@ -56,11 +58,15 @@ DataReaderRemoteImpl::add_association(const RepoId& yourId,
   if (parent) {
     parent->add_association(yourId, writer, active);
   }
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderRemoteImpl::add_association: exit method\n"));
 }
 
 void
 DataReaderRemoteImpl::association_complete(const RepoId& remote_id)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderRemoteImpl::association_complete: enter method\n"));
   DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
@@ -71,6 +77,8 @@ DataReaderRemoteImpl::association_complete(const RepoId& remote_id)
   if (parent) {
     parent->association_complete(remote_id);
   }
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderRemoteImpl::association_complete: exit method\n"));
 }
 
 void

@@ -881,6 +881,10 @@ TransportSendStrategy::clear(SendMode mode)
 int
 TransportSendStrategy::start()
 {
+
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportSendStrategy::start --> begin\n"));
+
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
   {
@@ -926,6 +930,9 @@ TransportSendStrategy::start()
                       "as a worker with the ThreadSynch object.\n"),
                      -1);
   }
+
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportSendStrategy::start --> end SUCCESS\n"));
 
   return 0;
 }

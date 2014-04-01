@@ -308,6 +308,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
 
   default:
     data_received(sample);
+    break;
   }
 }
 

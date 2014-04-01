@@ -46,21 +46,42 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
                                       const ReaderAssociation& reader,
                                       bool active)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::add_association: enter method\n"));
+
   DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
+     //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::add_association: about to guard mutex_ method\n"));
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::add_association: mutex_ LOCKED to getDataWriter\n"));
     dwv = getDataWriter(this->parent_);
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::add_association: got dataWriter assigning to parent\n"));
     parent = this->parent_;
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::add_association: mutex_ RELEASED\n"));
   }
   if (parent) {
+     //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::add_association: have parent, add_association\n"));
     parent->add_association(yourId, reader, active);
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::add_association: parent done with add_association\n"));
   }
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::add_association: exit method\n"));
 }
 
 void
 DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
 {
+
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::association_complete: enter method\n"));
   DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
@@ -71,6 +92,9 @@ DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
   if (parent) {
     parent->association_complete(remote_id);
   }
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterRemoteImpl::association_complete: exit method\n"));
 }
 
 void

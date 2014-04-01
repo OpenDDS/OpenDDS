@@ -18,6 +18,7 @@
 
 #include "ace/Time_Value.h"
 #include "ace/Event_Handler.h"
+#include "ace/Reverse_Lock_T.h"
 
 #include <vector>
 
@@ -106,6 +107,14 @@ private:
   TransportSendListener* get_send_listener();
   TransportReceiveListener* get_receive_listener();
 
+  //### helper for initiating connection, called by PendingAssoc objects
+  //allows PendingAssoc to temporarily release lock_ to allow TransportImpl to access Reactor if needed
+  bool initiate_connect_i(TransportImpl::AcceptConnectResult& result,
+                          const TransportImpl_rch impl,
+                          const TransportImpl::RemoteTransport& remote,
+                          const TransportImpl::ConnectionAttribs& attribs_,
+                          Guard& guard);
+
   // A class, normally provided by an unit test, who needs access to a client's
   // privates.
   friend class ::DDS_TEST;
@@ -146,7 +155,14 @@ private:
 
 
   TransportLocatorSeq conn_info_;
+
+  //###What exactly is this lock_ protecting?!  Use in associate, use_datalink_i, initiate_connect, use_datalink (disassociate, transport_detached)
+  //### Seems to protect accesses to impls_, pending_, links_, data_link_index_
   ACE_Thread_Mutex lock_;
+
+  typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
+  Reverse_Lock_t reverse_lock_;
+
   RepoId repo_id_;
 };
 

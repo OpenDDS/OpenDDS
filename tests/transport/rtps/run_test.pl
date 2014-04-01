@@ -15,6 +15,8 @@ sub do_test {
   my $subready = 'subready.txt';
   unlink $subready;
 
+  print "***About to create subscriber process\n";
+
   my $SUB = PerlDDS::create_process('subscriber', "-h localhost -p $port");
   my $result = $SUB->Spawn();
   print $SUB->CommandLine() . "\n";
@@ -28,6 +30,8 @@ sub do_test {
     return 1;
   }
 
+  print "***About to create publisher process\n";
+
   my $PUB = PerlDDS::create_process('publisher',
               $mcast ? "-h 239.255.0.2 -p 7401" : "-h localhost -p $port");
   $result = $PUB->SpawnWaitKill(60);
@@ -40,6 +44,8 @@ sub do_test {
   if ($result != 0) {
     print STDERR "ERROR: subscriber returned $result\n";
   }
+
+  print "***About to finish first test\n";
 
   return 0;
 }
