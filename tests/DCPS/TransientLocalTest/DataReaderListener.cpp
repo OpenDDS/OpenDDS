@@ -26,8 +26,6 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   reader->get_qos(qos);
   const bool durable = qos.durability.kind > DDS::VOLATILE_DURABILITY_QOS;
 
-  if (durable) ++num_reads_;
-
   try {
     MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
     if (CORBA::is_nil(message_dr)) {
@@ -39,21 +37,26 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     DDS::SampleInfo si;
     DDS::ReturnCode_t status = message_dr->take_next_sample(message, si);
 
-    if (status == DDS::RETCODE_OK) {
-      cout << (durable ? "Durable " : "Volatile")
-           << " count = " << message.count << endl;
-      if (durable && (message.count != num_reads_)) {
-        cerr << "ERROR: durable reader received out-of-order data" << endl;
-      } else if (!durable) {
-        if (last_non_durable_ && message.count != last_non_durable_ + 1) {
-          cerr << "ERROR: volatile reader received out-of-order data" << endl;
+    if (si.valid_data) {
+      if (status == DDS::RETCODE_OK) {
+
+        if (durable) ++num_reads_;
+
+        cout << (durable ? "Durable " : "Volatile")
+             << " count = " << message.count << endl;
+        if (durable && (message.count != num_reads_)) {
+          cerr << "ERROR: durable reader received out-of-order data" << endl;
+        } else if (!durable) {
+          if (last_non_durable_ && message.count != last_non_durable_ + 1) {
+            cerr << "ERROR: volatile reader received out-of-order data" << endl;
+          }
+          last_non_durable_ = message.count;
         }
-        last_non_durable_ = message.count;
+      } else if (status == DDS::RETCODE_NO_DATA) {
+        cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
+      } else {
+        cerr << "ERROR: read Message: Error: " <<  status << endl;
       }
-    } else if (status == DDS::RETCODE_NO_DATA) {
-      cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
-    } else {
-      cerr << "ERROR: read Message: Error: " <<  status << endl;
     }
   } catch (CORBA::Exception& e) {
     cerr << "Exception caught in read:" << endl << e << endl;
