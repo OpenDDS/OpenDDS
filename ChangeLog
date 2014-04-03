@@ -1,8 +1,14 @@
+Thu Apr  3 19:23:53 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+
+          Clean up and shut down publisher properly.
+
 Thu Apr  3 17:50:59 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
 
-          Check sample_info for valid_data prior to incrementing num_reads 
+          Check sample_info for valid_data prior to incrementing num_reads
           and checking msg.count.
 
 Thu Mar 20 17:54:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
