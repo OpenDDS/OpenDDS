@@ -304,6 +304,7 @@ std::string idl_mapping_java::type(AST_Type *decl)
   case AST_Decl::NT_native:
   case AST_Decl::NT_union:
   case AST_Decl::NT_struct:
+  case AST_Decl::NT_struct_fwd:
     return scoped(decl->name());
   case AST_Decl::NT_typedef: {
     AST_Typedef *td = AST_Typedef::narrow_from_decl(decl);
@@ -320,8 +321,9 @@ std::string idl_mapping_java::type(AST_Type *decl)
   default: ;//fall through
   }
 
-  cerr << "ERROR - unknown Java type for IDL type: " <<
-       decl->local_name()->get_string() << endl;
+  cerr << "ERROR - unknown Java type " << decl->node_type()
+       << " for IDL type: " 
+       << decl->local_name()->get_string() << endl;
   return "**unknown**";
 }
 

@@ -276,6 +276,7 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
     return "Ljava/lang/String;";
   case AST_Decl::NT_enum:
   case AST_Decl::NT_struct:
+  case AST_Decl::NT_struct_fwd:
   case AST_Decl::NT_union:
   case AST_Decl::NT_interface:
   case AST_Decl::NT_interface_fwd:
