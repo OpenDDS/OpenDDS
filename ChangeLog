@@ -1,3 +1,14 @@
+Mon Apr  7 20:43:57 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/Pusher.cpp:
+
+          Don't delete domain partipant in Pusher destructor.
+
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Additional logging.
+
 Thu Apr  3 19:23:53 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ConfigTransports/publisher.cpp:

@@ -110,6 +110,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting subscriber down ...\n")));
       TheServiceParticipant->shutdown();
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber shutdown complete\n")));
 
       if (configopt.collocation_str == "none")
         {

@@ -39,7 +39,6 @@ Pusher::~Pusher()
   // Clean up and shut down DDS objects
   pub->delete_contained_entities();
   dp->delete_contained_entities();
-  dpf->delete_participant(dp.in());
 }
 
 

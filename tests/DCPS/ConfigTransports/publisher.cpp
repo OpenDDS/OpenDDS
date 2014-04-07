@@ -132,8 +132,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 //      //HACK: Use the states instead ...
 //      ACE_OS::sleep(configopt.test_duration);
 
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting publisher down ...\n")));
-      TheServiceParticipant->shutdown();
+      //TheServiceParticipant->shutdown();
 
       if (configopt.collocation_str == "none")
       {
@@ -157,14 +156,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     // Clean up
     if (participant1) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) cleaning up participant 1...\n")));
       participant1->delete_contained_entities();
       dpf->delete_participant(participant1);
     }
     if (participant2) {
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) cleaning up participant 2...\n")));
       participant2->delete_contained_entities();
       dpf->delete_participant(participant2);
     }
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting publisher down ...\n")));
     TheServiceParticipant->shutdown();
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Publisher shutdown complete.\n")));
   }
   catch (char const *ex)
   {
