@@ -322,7 +322,7 @@ std::string idl_mapping_java::type(AST_Type *decl)
   }
 
   cerr << "ERROR - unknown Java type " << decl->node_type()
-       << " for IDL type: " 
+       << " for IDL type: "
        << decl->local_name()->get_string() << endl;
   return "**unknown**";
 }

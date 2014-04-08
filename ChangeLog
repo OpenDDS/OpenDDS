@@ -1,3 +1,9 @@
+Tue Apr  8 01:23:39 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * java/idl2jni/codegen/im_java.cpp:
+
+          Fix fuzz.
+
 Mon Apr  7 22:14:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * java/idl2jni/codegen/im_java.cpp:
