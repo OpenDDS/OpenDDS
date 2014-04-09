@@ -1,3 +1,38 @@
+Wed Apr  9 19:37:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * MPC/config/dcps_test_java.mpb:
+
+          Added mpb file for java test libraries to depend on to
+          cause libout to be set to the current directory.
+
+        * MPC/config/idl2jni.mpb:
+
+          Removed setting libout to current directory and leaving setting
+          libout for decendant projects.
+
+        * java/dds/dcps_java.mpc:
+
+          Removed setting libout and moved dcpslib dependency after idl2jni
+          to ensure that libout is set correctly.
+
+        * java/jms/native/opendds_jms_native.mpc:
+
+          Moved dcpslib dependency after idl2jni to ensure that libout is
+          set correctly.
+
+        * java/tests/builtintopics/builtintopics_test.mpc:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/messenger/both/java_both_test.mpc:
+        * java/tests/messenger/messenger_idl/messenger_idl_test.mpc:
+        * java/tests/messenger/publisher/publisher_idl_test.mpc:
+        * java/tests/messenger/subscriber/subscriber_idl_test.mpc:
+        * java/tests/multirepo/multirepo_test.mpc:
+        * java/tests/transport_config/transport_config.mpc:
+        * java/tests/zerocopy/zerocopy.mpc:
+
+          Changed to depend on dcps_test_java, so the test lib will not
+          go to $DDS_ROOT/lib.
+
 Tue Apr  8 01:23:39 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * java/idl2jni/codegen/im_java.cpp:
