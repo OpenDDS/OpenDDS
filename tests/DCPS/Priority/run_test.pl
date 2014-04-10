@@ -336,7 +336,7 @@ The default value is 10 per publication.
 
 Priority to assign to publications for the test.
 
-The default value is 5.
+The default value is 1.
 
 =back
 

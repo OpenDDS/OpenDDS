@@ -1,3 +1,14 @@
+Thu Apr 10 18:16:25 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/publisher_main.cpp:
+
+          Added test to verify that Service_Participant::scheduler is being
+          set to the value in the transport ini file.
+
+        * tests/DCPS/Priority/run_test.pl:
+
+          Fixed description.
+
 Wed Apr  9 19:37:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * MPC/config/dcps_test_java.mpb:
