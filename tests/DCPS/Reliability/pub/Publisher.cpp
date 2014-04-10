@@ -66,16 +66,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         // Publish the message
         DDS::ReturnCode_t error = DDS::RETCODE_TIMEOUT;
         while (error == DDS::RETCODE_TIMEOUT) {
-          DDS::ReturnCode_t error = msg_writer->write(message, DDS::HANDLE_NIL);
+          error = msg_writer->write(message, DDS::HANDLE_NIL);
           if (error == DDS::RETCODE_TIMEOUT) {
             ACE_ERROR((LM_ERROR, "Timeout, resending %d\n", i));
-          } else {
-            if (error != DDS::RETCODE_OK) {
-              ACE_ERROR((LM_ERROR,
-              ACE_TEXT("ERROR: %N:%l: main() -")
-              ACE_TEXT(" write returned %d!\n"), error));
-            }
-            break;
+          } else if (error != DDS::RETCODE_OK) {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("ERROR: %N:%l: main() -")
+                       ACE_TEXT(" write returned %d!\n"), error));
           }
         }
       }
