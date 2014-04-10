@@ -287,14 +287,24 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
                ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
                std::string(conv).c_str()));
       }
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterImpl::transport_assoc_done: ERROR - exit method\n"));
       return;
    }
 
    if (flags & ASSOC_ACTIVE) {
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::transport_assoc_done --> trying to LOCK lock_\n"));
+
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::transport_assoc_done --> LOCKED lock_\n"));
 
       // Have we already received an association_complete() callback?
       if (assoc_complete_readers_.count(remote_id)) {
+         //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::transport_assoc_done --> found assoc_complete_reader_ about to call association_complete_i\n"));
          assoc_complete_readers_.erase(remote_id);
          association_complete_i(remote_id);
 
@@ -323,6 +333,8 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       disco->association_complete(domain_id_, participant_servant_->get_id(),
             publication_id_, remote_id);
    }
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataWriterImpl::transport_assoc_done: exit method\n"));
 }
 
 
@@ -374,20 +386,39 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
             std::string(writer_converter).c_str(),
             std::string(reader_converter).c_str()));
    }
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete --> trying to LOCK lock_\n"));
 
    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete --> LOCKED lock_\n"));
+
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete --> is remote_id in assoc_complete_readers? %s  is it in pending_readers_? %s\n", assoc_complete_readers_.count(remote_id) ? "YES" : "NO", pending_readers_.count(remote_id) ? "YES" : "NO"));
+
+
    if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete --> failed to remove remote_id from pending_readers_ so insert into assoc_complete_readers_\n"));
+
       // Not found in pending_readers_, defer calling association_complete_i()
       // until add_association() resumes and sees this ID in assoc_complete_readers_.
       assoc_complete_readers_.insert(remote_id);
    } else {
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete --> removed remote_id from pending_readers_ now call association_complete_i\n"));
       association_complete_i(remote_id);
    }
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete --> RELEASING lock_\n"));
 }
 
 void
 DataWriterImpl::association_complete_i(const RepoId& remote_id)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> enter\n"));
+
    DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
    bool reader_durable = false;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -416,15 +447,27 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
    if (this->monitor_) {
       this->monitor_->report();
    }
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> about to check if is_bit_ (if not start sending stuff)\n"));
 
    if (!is_bit_) {
 
       DDS::InstanceHandle_t handle =
             this->participant_servant_->get_handle(remote_id);
 
-      {
+      {         //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> this is not a bit\n"));
+         //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> trying to LOCK lock_\n"));
+
          // protect publication_match_status_ and status changed flags.
          ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+         //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> LOCKED lock_\n"));
+
+         //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> updating publication_match_status_\n"));
 
          // update the publication_match_status_
          ++publication_match_status_.total_count;
@@ -452,13 +495,27 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
          publication_match_status_.last_subscription_handle = handle;
 
+         //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> set status_changed_flag()\n"));
+
          set_status_changed_flag(::DDS::PUBLICATION_MATCHED_STATUS, true);
       }
 
       DDS::DataWriterListener_var listener =
             listener_for(::DDS::PUBLICATION_MATCHED_STATUS);
 
+      if(CORBA::is_nil(listener.in())) {
+         //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> listener IS NIL\n"));
+
+      }
+
+
       if (!CORBA::is_nil(listener.in())) {
+
+         //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> about to call on_publication_matched on listener\n"));
+
          listener->on_publication_matched(dw_local_objref_.in(),
                publication_match_status_);
 
@@ -468,11 +525,20 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
          publication_match_status_.current_count_change = 0;
       }
 
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> notify_status_condition()\n"));
+
       notify_status_condition();
    }
 
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> about to check if reader_durable\n"));
+
    // Support DURABILITY QoS
    if (reader_durable) {
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> reader IS DURABLE\n"));
+
       // Tell the WriteDataContainer to resend all sending/sent
       // samples.
       this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
@@ -513,6 +579,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
          this->send(list);
       }
    }
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> exit\n"));
 }
 
 void

@@ -80,7 +80,8 @@ private:
 
   /// This protects the pending_connections_, pending_server_link_keys_,
   /// and server_link_keys_ data members.
-  LockType connections_lock_;
+  //LockType connections_lock_;
+  ACE_Recursive_Thread_Mutex connections_lock_;
 
   /// Locked by connections_lock_.
   /// These are passive-side PriorityKeys that have been fully associated

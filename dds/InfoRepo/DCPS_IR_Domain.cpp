@@ -1293,6 +1293,9 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   if (useBIT_) {
+     //### Debug statements to track where test is failing
+               ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::publish_publication_bit --> USEBIT\n"));
+
     DCPS_IR_Topic_Description* desc =
       publication->get_topic_description();
 
@@ -1305,6 +1308,8 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
       ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
     if (isNotBIT) {
+       //### Debug statements to track where test is failing
+                 ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::publish_publication_bit --> ISNOTBIT\n"));
       try {
         const DDS::DataWriterQos* writerQos = publication->get_datawriter_qos();
         const DDS::PublisherQos* publisherQos = publication->get_publisher_qos();
@@ -1354,6 +1359,8 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
       }
 
     } else {
+       //### Debug statements to track where test is failing
+                 ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::publish_publication_bit --> else set_bit_status\n"));
       publication->set_bit_status(1);
     }
   }

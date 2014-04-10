@@ -275,8 +275,27 @@ TransportClient::associate(const AssociationData& data, bool active)
                      data.remote_id_, data.remote_data_[j].data,
                      data.publication_transport_priority_,
                      data.remote_reliable_, data.remote_durable_};
-               const TransportImpl::AcceptConnectResult res =
-                     impls_[i]->accept_datalink(remote, pend.attribs_, this);
+
+
+               TransportImpl::AcceptConnectResult res;
+               //### Debug statements to track where associate is failing
+              ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate passive side pre-accept_datalink res Success? : %s \n", res.success_ ? "TRUE": "FALSE"));
+               {
+                  //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
+                  ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+                  //### Debug statements to track where connection is failing
+                  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> RELEASE lock_ using LOCK reverse_lock_\n"));
+               //const TransportImpl::AcceptConnectResult res =
+                  res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
+               }
+               //### Debug statements to track where connection is failing
+               ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> LOCKED lock_ after RELEASE reverse_lock \n"));
+
+               //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
+
+               //### Debug statements to track where associate is failing
+               ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate passive side post-accept_datalink res Success? : %s with res.link: %s\n", res.success_ ? "TRUE": "FALSE", res.link_.is_nil() ? "NIL" :"NOT NIL"));
+
                if (res.success_ && !res.link_.is_nil()) {
                   //### Debug statements to track where associate is failing
                   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate passive side About to use_datalink_i \n"));
@@ -444,12 +463,19 @@ TransportClient::use_datalink(const RepoId& remote_id,
 }
 
 void
-TransportClient::use_datalink_i(const RepoId& remote_id,
+TransportClient::use_datalink_i(const RepoId& remote_id_ref,
       const DataLink_rch& link,
       Guard& guard)
 {
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i search pending assoc's for remote id\n"));
+
+   //### Debugging where associate is failing
+   //### try to make a local copy of remote_id to use in calls because the reference could be invalidated if the caller
+   //### reference location is deleted (i.e. in stop_accepting_or_connecting if user_datalink_i was called from passive_connection)
+   //### Does changing this from a reference to a local affect anything going forward?  Anything need to specifically access that memory, or
+   //### do all further uses simply look up by value and modify references that way?
+   RepoId remote_id(remote_id_ref);
 
    PendingMap::iterator iter = pending_.find(remote_id);
    if (iter == pending_.end()) {
@@ -482,6 +508,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id,
    }
 
    // either link is valid or assoc failed, clean up pending object
+   // for passive side processing
    if (!pend.active_) {
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i clean up pend calling stop_accepting_or_connecting on each impls_\n"));
@@ -496,6 +523,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id,
    //### Get a pointer to singleton to check it exists below
    Service_Participant * this_serv_part = TheServiceParticipant->instance();
 
+   //### this if/else is all debugging, can be deleted
    if (this_serv_part == 0) {
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i Service Participant == 0\n"));
@@ -507,7 +535,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id,
    ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
 
 
-
+   //### this if is debugging only, can be deleted
    if (timer == 0) {
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i timer == 0\n"));

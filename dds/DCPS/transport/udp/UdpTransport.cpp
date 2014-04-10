@@ -104,46 +104,95 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
                               const ConnectionAttribs& attribs,
                               TransportClient* client)
 {
-  GuardType guard(connections_lock_);
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> enter\n"));
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> about to LOCK connections_lock_\n"));
+   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
+   //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> LOCKED connections_lock_\n"));
+  //GuardType guard(connections_lock_);
   const PriorityKey key = blob_to_key(remote.blob_,
                                       attribs.priority_, false /* !active */);
   if (server_link_keys_.count(key)) {
+     //### Debug statements to track where associate is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> found server_link_key so return link\n"));
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink found\n"));
+    //### Debug statements to track where associate is failing
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> about to RELEASE connections_lock_\n"));
     return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
   }
 
-  if (pending_server_link_keys_.count(key)) {
+  else if (pending_server_link_keys_.count(key)) {
+     //### Debug statements to track where associate is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> found pending_server_link_key move to server_link_key and return link\n"));
     pending_server_link_keys_.erase(key);
     server_link_keys_.insert(key);
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink completed\n"));
+    //### Debug statements to track where associate is failing
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> about to RELEASE connections_lock_\n"));
     return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
   } else {
+     //### Debug statements to track where associate is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> adding on start callback\n"));
     const DataLink::OnStartCallback callback(client, remote.repo_id_);
     pending_connections_[key].push_back(callback);
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink pending\n"));
+    //### Debug statements to track where associate is failing
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> about to RELEASE connections_lock_\n"));
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
+  //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::accept_datalink --> about to RELEASE connections_lock_ SHOULD NOT HAPPEN\n"));
+     return AcceptConnectResult();
 }
 
 void
 UdpTransport::stop_accepting_or_connecting(TransportClient* client,
                                            const RepoId& remote_id)
 {
+   //### Debug statements to track where associate is failing
+   GuidConverter remote(remote_id);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> enter for remote_id: %C\n", std::string(remote).c_str()));
+
   VDBG((LM_DEBUG, "(%P|%t) UdpTransport::stop_accepting_or_connecting\n"));
-  GuardType guard(connections_lock_);
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> trying to LOCK connections_lock_\n"));
+
+  //GuardType guard(connections_lock_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> LOCKED connections_lock_\n"));
+
   for (PendConnMap::iterator it = pending_connections_.begin();
        it != pending_connections_.end(); ++it) {
     for (size_t i = 0; i < it->second.size(); ++i) {
       if (it->second[i].first == client && it->second[i].second == remote_id) {
+         //### Debug statements to track where associate is failing
+         GuidConverter remote2(remote_id);
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> about to erase callback for remote_id: %C\n", std::string(remote2).c_str()));
         it->second.erase(it->second.begin() + i);
+        //### Debug statements to track where associate is failing
+        GuidConverter remote3(remote_id);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> after erase callback remote_id is now: %C\n", std::string(remote3).c_str()));
         break;
       }
     }
     if (it->second.empty()) {
       pending_connections_.erase(it);
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> exit after erasing pending_connection\n"));
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> RELEASING connections_lock_\n"));
       return;
     }
   }
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> RELEASING connections_lock_\n"));
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::stop_accepting_or_connecting --> exit\n"));
 }
 
 bool
@@ -260,6 +309,9 @@ void
 UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                  ACE_Message_Block* data)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> enter\n"));
+
   CORBA::ULong octet_size =
     static_cast<CORBA::ULong>(data->length() - sizeof(Priority));
   Priority priority;
@@ -278,23 +330,94 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   server_link_->socket().send(&ack_data, 1, remote_address);
 
   const PriorityKey key = blob_to_key(blob, priority, false /* passive */);
-  GuardType guard(connections_lock_);
+
+  //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> about to LOCK connections_lock_\n"));
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
+
+  //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> LOCKED connections_lock_\n"));
+
+  //GuardType guard(connections_lock_);
   const PendConnMap::iterator pend = pending_connections_.find(key);
 
   if (pend != pending_connections_.end()) {
+
+     //don't hold connections_lock_ while calling use_datalink
+     //guard.release();
+     //### Debug statements to track where associate is failing
+       // ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> RELEASED connections_lock_\n"));
+
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection completing\n"));
+
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> found pending_connection to complete with use_datalink call\n"));
+
     const DataLink_rch link = static_rchandle_cast<DataLink>(server_link_);
-    for (size_t i = 0; i < pend->second.size(); ++i) {
-      pend->second[i].first->use_datalink(pend->second[i].second, link);
-    }
-    pending_connections_.erase(pend);
+
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> got pointer to shared data link\n"));
+
+    //create a copy of the size of callback vector so that if use_datalink_i -> stop_accepting_or_connecting
+    //finds that callbacks vector is empty and deletes pending connection & its callback vector for loop can
+    //still exit the loop without checking the size of invalid memory
+    //size_t num_callbacks = pend->second.size();
+
+    //### Debug statements to track where associate is failing
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> this pending connection has %d callbacks and server_link_ is: %s \n", pend->second.size(), server_link_.is_nil() ? "NIL" : "NOT NIL"));
+    PendConnMap::iterator updated_pend = pend;
+    do {
+       TransportClient* pend_client = updated_pend->second.front().first;
+       RepoId remote_repo = updated_pend->second.front().second;
+    //for (size_t i = 0; i < pend->second.size(); ++i) {
+    //for(size_t i=0; i < num_callbacks; ++i) {
+       //### Debug statements to track where associate is failing
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> about to call use_datalink in loop\n"));
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> RELEASE connections_lock_ to call use_datalink\n"));
+       guard.release();
+       pend_client->use_datalink(remote_repo, link);
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> trying to LOCK connections_lock_ after use_datalink\n"));
+       guard.acquire();
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> LOCKED connections_lock_ after use_datalink\n"));
+      //pend->second[i].first->use_datalink(pend->second[i].second, link);
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> finished use_datalink in loop\n"));
+    } while ((updated_pend = pending_connections_.find(key)) != pending_connections_.end());
+    //### don't need to erase pending_connection here because stop_accepting_or_connecting
+    //### will take care of the clean up when appropriate (called from use_datalink above)
+    //### this allows no duplicate erase of pend, allowing connections_lock_ to be recursive
+
+
+
+    //### Debug statements to track where associate is failing
+       //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> about to LOCK connections_lock_\n"));
+       //need to protect server_link_keys_ access below
+    //ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
+
+    //### Debug statements to track where associate is failing
+      // ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> LOCKED connections_lock_\n"));
+
+       //### Debug statements to track where associate is failing
+       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> inserting key into server_link_keys\n"));
+    //Delegate deletion of pending connection to stop_accepting_or_connecting called from use_datalink_i after link known to be valid
+    //pending_connections_.erase(pend);
     server_link_keys_.insert(key);
 
+
   } else {
+     //still hold guard(connections_lock_) at this point so pending_server_link_keys_ is protected for insert
+     //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> inserting key into pending_server_link_keys\n"));
+
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection pending\n"));
     // accept_datalink() will complete the connection.
     pending_server_link_keys_.insert(key);
   }
+  //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> about to RELEASE connections_lock_\n"));
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###UdpTransport::passive_connection --> exit\n"));
 }
 
 } // namespace DCPS
