@@ -1,3 +1,15 @@
+Fri Apr 11 16:29:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+
+        * tests/DCPS/FooTest2:
+
+        * tests/DCPS/FooTest2/FooTest2.obsolete_mpc:
+        * tests/DCPS/FooTest2/README:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest2/obsolete_test.pl:
+
+          Removed these files.
+
 Fri Apr 11 14:04:45 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
@@ -8,7 +20,7 @@ Thu Apr 10 19:06:20 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Reliability/pub/Publisher.cpp:
 
-                  Cleaned up code.
+          Cleaned up code.
 
 Thu Apr 10 18:16:25 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
