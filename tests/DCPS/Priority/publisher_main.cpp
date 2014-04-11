@@ -48,7 +48,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         scheduler = "<Unkown scheduler val - " + buffer.str() + ">";
       }
       ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) publisher_main() - ")
+        ACE_TEXT("(%P|%t) ERROR: publisher_main() - ")
         ACE_TEXT("scheduler should be THR_SCHDE_RR, but .\n")
         ACE_TEXT("instead it is %C.\n"),
         scheduler.c_str()

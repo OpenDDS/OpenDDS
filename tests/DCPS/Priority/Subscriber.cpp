@@ -142,9 +142,10 @@ Subscriber::Subscriber( const Options& options)
   ::DDS::DataReaderQos readerQos;
   this->subscriber_->get_default_datareader_qos( readerQos);
 
-  readerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+//  readerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   readerQos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
-  readerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
+  readerQos.history.depth                            = 1;
+//  readerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 
   // Reliability varies with the transport implementation.
   switch( this->options_.transportType()) {
@@ -209,6 +210,12 @@ unsigned int
 Subscriber::count() const
 {
   return this->listener_->count();
+}
+
+bool
+Subscriber::passed() const
+{
+  return this->listener_->passed();
 }
 
 void

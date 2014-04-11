@@ -23,7 +23,6 @@ namespace { // anonymous namespace for file scope.
 
   const unsigned long DEFAULT_TEST_DOMAIN    = 521;
   const unsigned long DEFAULT_TEST_PRIORITY  =   0;
-  const unsigned int  DEFAULT_SAMPLE_COUNT   =  10;
   const Test::Options::TransportType
                       DEFAULT_TRANSPORT_TYPE = Test::Options::TCP;
   const unsigned int  DEFAULT_TRANSPORT_KEY  =   1;
@@ -51,7 +50,6 @@ const ACE_TCHAR* Options::TRANSPORT_TYPE_ARGUMENT = ACE_TEXT("-t");
 const ACE_TCHAR* Options::PUBLISHER_ID_ARGUMENT   = ACE_TEXT("-i");
 const ACE_TCHAR* Options::VERBOSE_ARGUMENT        = ACE_TEXT("-v");
 const ACE_TCHAR* Options::PRIORITY_ARGUMENT       = ACE_TEXT("-p");
-const ACE_TCHAR* Options::COUNT_ARGUMENT          = ACE_TEXT("-c");
 
 Options::~Options()
 {
@@ -61,7 +59,6 @@ Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
  : verbose_(       false),
    domain_(        DEFAULT_TEST_DOMAIN),
    priority_(      DEFAULT_TEST_PRIORITY),
-   count_(         DEFAULT_SAMPLE_COUNT),
    transportType_( DEFAULT_TRANSPORT_TYPE),
    transportKey_(  DEFAULT_TRANSPORT_KEY),
    publisherId_(   DEFAULT_PUBLISHER_ID),
@@ -94,10 +91,6 @@ Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
 
     } else if( 0 != (currentArg = parser.get_the_parameter( PRIORITY_ARGUMENT))) {
       this->priority_ = ACE_OS::atoi( currentArg);
-      parser.consume_arg();
-
-    } else if( 0 != (currentArg = parser.get_the_parameter( COUNT_ARGUMENT))) {
-      this->count_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
 
     } else if( 0 != (currentArg = parser.get_the_parameter( PUBLISHER_ID_ARGUMENT))) {

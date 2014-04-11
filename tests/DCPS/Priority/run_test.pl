@@ -34,7 +34,6 @@ my $noaction;
 # Specific options.
 #
 my $transportType = "tcp";
-my $samples       = 10;
 my $priority      = "1";
 
 ########################################################################
@@ -52,7 +51,6 @@ GetOptions( "verbose!"            => \$verbose,
             "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
             "transport|t=s"       => \$transportType,
-            "samples|c=i"         => \$samples,
             "priority|p=s"        => \$priority,
 
 ) or pod2usage( 0) ;
@@ -126,14 +124,12 @@ $REPO = PerlDDS::create_process (
 my $subArgs = "$appOpts ";
 $subArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $subArgs .= "-DCPSGlobalTransportConfig $transportType ";
-$subArgs .= "-c " . (2 * $samples) . " ";
 $subArgs .= "-t $transportType ";
 $SUB = PerlDDS::create_process ( "subscriber", $subArgs);
 
 my $pubArgs = "$appOpts ";
 $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $pubArgs .= "-DCPSGlobalTransportConfig $transportType ";
-$pubArgs .= "-c $samples ";
 $pubArgs .= "-p " . $priority . " ";
 $pubArgs .= "-t $transportType ";
 $PUB = PerlDDS::create_process ( "publisher", $pubArgs);
@@ -248,10 +244,6 @@ Options:
                          use NAME transport for test execution - one of
                          (tcp, udp, multicast), default tcp
 
-  -c NUMBER | --samples=NUMBER
-                         number of samples to publish during the test -
-                         default 10 per publication
-
   -p NUMBER | --priority=NUMBER
                          comma separated list of priority to publish
                          during the test - default is 1
@@ -326,12 +318,6 @@ Accepted values are:
 
 The default value is 'tcp'.
 
-=item B<-c FILE> | B<--samples=NUMBER>
-
-The number of samples to publish during the test.
-
-The default value is 10 per publication.
-
 =item B<-p FILE> | B<--priority=NUMBER>
 
 Priority to assign to publications for the test.
@@ -343,8 +329,13 @@ The default value is 1.
 =head1 DESCRIPTION
 
 This test verifies the TRANSPORT_PRIORITY QoS policy support in OpenDDS.
-It does so by creating 2 publications and a single subscriber and establishing
-associations between them at different priority levels.
+It does so by creating 2 publications at different priority levels and a
+single subscriber.  The low priority publication sends samples with
+increasing sequence numbers, until a timeout occurs on write, then the
+high priority message is sent, indicating the last low priority samples
+sequence number that was sent.  The subscriber then verifies that the
+high priority sample was received before the low priority sample with
+the indicated sequence number is received.
 
 =head1 EXAMPLES
 
@@ -354,9 +345,9 @@ associations between them at different priority levels.
 
 =item B<./run_demo.pl -d 10 -T 4 -f test.log -t udp>
 
-=item B<./run_demo.pl -x -t multicast>
+=item B<./run_demo.pl -x -t mc>
 
-=item B<./run_test.pl -vd10T4Vt multicast -p 8>
+=item B<./run_test.pl -vd10T4Vt mc -p 8>
 
 =back
 

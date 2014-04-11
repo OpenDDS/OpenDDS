@@ -22,7 +22,6 @@ class Options  {
     /// Command line arguments.
     static const ACE_TCHAR* TRANSPORT_TYPE_ARGUMENT;   // Transport type
     static const ACE_TCHAR* PUBLISHER_ID_ARGUMENT;     // Publisher Id
-    static const ACE_TCHAR* COUNT_ARGUMENT;            // Sample count
     static const ACE_TCHAR* PRIORITY_ARGUMENT;         // Priority
     static const ACE_TCHAR* VERBOSE_ARGUMENT;          // Verbosity
 
@@ -53,10 +52,6 @@ class Options  {
     protected: unsigned long& priority();
     public:    unsigned long  priority() const;
 
-    /// Test sample count to publish.
-    protected: unsigned int& count();
-    public:    unsigned int  count() const;
-
     /// Transport Type value.
     protected: TransportType& transportType();
     public:    TransportType  transportType() const;
@@ -82,9 +77,6 @@ class Options  {
 
     /// Writer priority.
     unsigned long priority_;
-
-    /// Sample count.
-    unsigned int count_;
 
     /// Transport Type value.
     TransportType transportType_;
