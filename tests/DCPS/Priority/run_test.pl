@@ -29,6 +29,7 @@ my $dFile;
 my $transportDebug;
 my $repoDebug;
 my $noaction;
+my $multipleInstances;
 
 #
 # Specific options.
@@ -42,6 +43,7 @@ my $priority      = "1";
 #
 GetOptions( "verbose!"            => \$verbose,
             "v"                   => \$verbose,
+            "instances|i"         => \$multipleInstances,
             "ORBVerboseLogging|V" => \$orbVerbose,
             "help|?"              => \$help,
             "man"                 => \$man,
@@ -62,11 +64,12 @@ pod2usage( -verbose => 2) if $man ;
 print "Priority==$priority\n" if $verbose;
 
 # Verbosity.
-print "Debug==$debug\n"                   if $verbose and $debug;
-print "RepoDebug==$repoDebug\n"           if $verbose and $repoDebug;
-print "TransportDebug==$transportDebug\n" if $verbose and $transportDebug;
-print "DebugFile==$dFile\n"               if $verbose and $dFile;
-print "VerboseLogging==$orbVerbose\n"     if $verbose and $orbVerbose;
+print "Debug==$debug\n"                         if $verbose and $debug;
+print "RepoDebug==$repoDebug\n"                 if $verbose and $repoDebug;
+print "TransportDebug==$transportDebug\n"       if $verbose and $transportDebug;
+print "DebugFile==$dFile\n"                     if $verbose and $dFile;
+print "VerboseLogging==$orbVerbose\n"           if $verbose and $orbVerbose;
+print "MultipleInstances==$multipleInstances\n" if $verbose and $multipleInstances;
 
 # Files.
 my $repo_ior  = PerlACE::LocalFile("repo.ior");
@@ -131,6 +134,7 @@ my $pubArgs = "$appOpts ";
 $pubArgs .= "-DCPSInfoRepo file://$repo_ior ";
 $pubArgs .= "-DCPSGlobalTransportConfig $transportType ";
 $pubArgs .= "-p " . $priority . " ";
+$pubArgs .= "-m " if $multipleInstances;
 $pubArgs .= "-t $transportType ";
 $PUB = PerlDDS::create_process ( "publisher", $pubArgs);
 

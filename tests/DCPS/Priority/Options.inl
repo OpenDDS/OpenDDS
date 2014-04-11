@@ -100,3 +100,16 @@ Test::Options::topicName()
   return this->topicName_;
 }
 
+ACE_INLINE
+bool&
+Test::Options::multipleInstances()
+{
+  return this->multipleInstances_;
+}
+
+ACE_INLINE
+bool
+Test::Options::multipleInstances() const
+{
+  return this->multipleInstances_;
+}

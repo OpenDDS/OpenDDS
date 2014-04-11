@@ -295,7 +295,11 @@ Publisher::run()
   sample0.priority = false;
   // add some extra baggage to ensure
   sample0.baggage.length(9999);
-  sample1.key = 1;
+
+  if (options_.multipleInstances())
+    sample1.key = 2;
+  else
+    sample1.key = 1;
   sample1.value = 0;
   // will determine later which value this sample should be seen before
   sample1.before_value = 0;

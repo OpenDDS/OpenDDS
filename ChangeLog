@@ -1,43 +1,63 @@
+Fri Apr 11 18:42:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+		  Added testing priority for multiple key instances
+
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
+
+		  Added parameter for indicating there should be multiple instances.
+
+        * tests/DCPS/Priority/Publisher.cpp:
+
+		  Added being able to set the priority sample to have a different key.
+
+        * tests/DCPS/Priority/run_test.pl:
+
+		  Added option to have the high priority sample sent as a different instance.
+
 Fri Apr 11 17:28:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Priority/Test.idl:
 
-		  Added new fields for tracking samples, which samples are priority,
-		  and extra storage to increase time to send samples.
+                  Added new fields for tracking samples, which samples are priority,
+                  and extra storage to increase time to send samples.
 
         * tests/DCPS/Priority/DataReaderListener.h:
         * tests/DCPS/Priority/DataReaderListener.cpp:
 
-		  Changed to verify that a high priority message arrives before the last
-		  low priority message sent before it.
+                  Changed to verify that a high priority message arrives before the last
+                  low priority message sent before it.
 
         * tests/DCPS/Priority/Publisher.cpp:
 
-		  Changed QOS and changed to send a sequence of low priority messages
-		  until a timeout occurs and then send a high priority message,
-		  indicating the sequence number of the low priority messages that it
-		  should be received before.
+                  Changed QOS and changed to send a sequence of low priority messages
+                  until a timeout occurs and then send a high priority message,
+                  indicating the sequence number of the low priority messages that it
+                  should be received before.
 
         * tests/DCPS/Priority/Subscriber.h:
         * tests/DCPS/Priority/Subscriber.cpp:
 
-		  Changed to report that the test passed and changed QOS settings.
+                  Changed to report that the test passed and changed QOS settings.
 
         * tests/DCPS/Priority/publisher_main.cpp:
 
-		  Cleaned up error statement.
+                  Cleaned up error statement.
 
         * tests/DCPS/Priority/subscriber_main.cpp:
 
-		  Changed how passing is determined.
+                  Changed how passing is determined.
 
         * tests/DCPS/Priority/transport.ini:
 
-		  Fixing multicast config to match what run_test.pl passes.
+                  Fixing multicast config to match what run_test.pl passes.
 
         * tests/DCPS/Priority/run_test.pl:
 
-		  Cleaned up test parameters and description.
+                  Cleaned up test parameters and description.
 
 Fri Apr 11 16:29:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 

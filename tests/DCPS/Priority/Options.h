@@ -24,6 +24,7 @@ class Options  {
     static const ACE_TCHAR* PUBLISHER_ID_ARGUMENT;     // Publisher Id
     static const ACE_TCHAR* PRIORITY_ARGUMENT;         // Priority
     static const ACE_TCHAR* VERBOSE_ARGUMENT;          // Verbosity
+    static const ACE_TCHAR* MULTI_ARGUMENT;            // Multiple Instances
 
     /// Types of transport implementations supported.
     enum TransportType {
@@ -68,6 +69,10 @@ class Options  {
     protected: std::string& topicName();
     public:    std::string topicName() const;
 
+    /// Test multiple instances.
+    protected: bool& multipleInstances();
+    public:    bool  multipleInstances() const;
+
   private:
     /// Test verbosity.
     bool verbose_;
@@ -89,6 +94,9 @@ class Options  {
 
     /// Topic name.
     std::string topicName_;
+
+    /// Test with multiple instances.
+    bool multipleInstances_;
 };
 
 } // End of namespace Test
