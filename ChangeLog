@@ -1,22 +1,29 @@
+Sat Apr 12 11:39:19 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * ChangeLog:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+
+          Fixed fuz errors.
+
 Fri Apr 11 18:42:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-		  Added testing priority for multiple key instances
+          Added testing priority for multiple key instances
 
         * tests/DCPS/Priority/Options.h:
         * tests/DCPS/Priority/Options.inl:
         * tests/DCPS/Priority/Options.cpp:
 
-		  Added parameter for indicating there should be multiple instances.
+          Added parameter for indicating there should be multiple instances.
 
         * tests/DCPS/Priority/Publisher.cpp:
 
-		  Added being able to set the priority sample to have a different key.
+          Added being able to set the priority sample to have a different key.
 
         * tests/DCPS/Priority/run_test.pl:
 
-		  Added option to have the high priority sample sent as a different instance.
+          Added option to have the high priority sample sent as a different instance.
 
 Fri Apr 11 17:28:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 

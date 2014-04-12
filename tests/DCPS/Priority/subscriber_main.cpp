@@ -43,7 +43,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ));
 
     // Test passes if all the low priority samples are recieved in order
-    // and if the high priority sample is received before the low priority 
+    // and if the high priority sample is received before the low priority
     // sample that was sent immediately before it
     if( subscriber.passed()) {
       result = 0;
