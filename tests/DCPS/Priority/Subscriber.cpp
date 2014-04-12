@@ -145,6 +145,7 @@ Subscriber::Subscriber( const Options& options)
 //  readerQos.durability.kind                          = ::DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
   readerQos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
   readerQos.history.depth                            = 1;
+  readerQos.destination_order.kind                   = ::DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
 //  readerQos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 
   // Reliability varies with the transport implementation.
