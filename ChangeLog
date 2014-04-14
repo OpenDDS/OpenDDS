@@ -1,3 +1,11 @@
+Mon Apr 14 19:20:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/publisher_main.cpp:
+
+          Changed check of scheduler to just ensure scheduler was set
+          since publisher would need to be run as super user on linux
+          platforms to select the round robin scheduler.
+
 Mon Apr 14 19:20:05 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/TransientLocalTest/publisher.cpp:
