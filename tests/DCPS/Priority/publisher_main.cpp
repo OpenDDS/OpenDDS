@@ -49,7 +49,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: publisher_main() - ")
-        ACE_TEXT("scheduler should be THR_SCHDE_RR, but .\n")
+        ACE_TEXT("scheduler should be THR_SCHED_RR, but ")
         ACE_TEXT("instead it is %C.\n"),
         scheduler.c_str()
       ));
