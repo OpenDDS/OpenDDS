@@ -48,7 +48,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     DDS::TopicQos topic_qos;
     participant->get_default_topic_qos(topic_qos);
-    DDS::Topic_var topic = participant->create_topic("Movie Discussion List",
+    DDS::Topic_var topic = participant->create_topic("Movie Discussion List TLT",
                                                      type_name,
                                                      topic_qos,
                                                      DDS::TopicListener::_nil(),
@@ -89,6 +89,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (CORBA::is_nil(dr)) {
       cerr << "create_datareader 1 failed." << endl;
       exit(1);
+    } else {
+      cerr << "create_datareader 1 success." << endl;
     }
 
     dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
@@ -99,6 +101,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (CORBA::is_nil(dr2)) {
       cerr << "create_datareader 2 failed." << endl;
       exit(1);
+    } else {
+      cerr << "create_datareader 2 success." << endl;
     }
 
     const int expected = 50;

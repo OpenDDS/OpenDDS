@@ -1,3 +1,10 @@
+Mon Apr 14 19:20:05 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+
+          Create different topic name to diagnose out-of-order issues.
+
 Mon Apr 14 19:17:26 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/RequestedDeadlineWatchdog.cpp:
