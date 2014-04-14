@@ -138,6 +138,7 @@ Publisher::Publisher( const Options& options)
   // message is on its own queue, if tests start failing, then this number should be increased
   // or possibly sample0.baggage length increased
   writerQos.resource_limits.max_samples_per_instance = 50;
+  writerQos.resource_limits.max_samples = 50;
 
   // Reliability varies with the transport implementation.
   writerQos.reliability.max_blocking_time.sec = 1;
