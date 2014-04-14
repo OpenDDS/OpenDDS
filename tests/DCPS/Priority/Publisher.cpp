@@ -186,7 +186,13 @@ Publisher::Publisher( const Options& options)
   // Grab, enable and attach the status condition for test synchronization.
   this->status_[0] = this->writer_[0]->get_statuscondition();
   this->status_[0]->set_enabled_statuses( DDS::PUBLICATION_MATCHED_STATUS);
-  this->waiter_->attach_condition( this->status_[0].in());
+  if (this->waiter_->attach_condition( this->status_[0].in()) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("failed to match publication.\n")
+    ));
+    throw BadAttachException();
+  }
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
@@ -222,7 +228,13 @@ Publisher::Publisher( const Options& options)
   // Grab, enable and attach the status condition for test synchronization.
   this->status_[1] = this->writer_[1]->get_statuscondition();
   this->status_[1]->set_enabled_statuses( DDS::PUBLICATION_MATCHED_STATUS);
-  this->waiter_->attach_condition( this->status_[1].in());
+  if (this->waiter_->attach_condition( this->status_[1].in()) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Publisher::Publisher() - ")
+      ACE_TEXT("failed to match publication.\n")
+    ));
+    throw BadAttachException();
+  }
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,

@@ -1,3 +1,11 @@
+Mon Apr 14 17:42:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+
+          Added logging error for not associating the publication and
+          subscription.
+
 Mon Apr 14 16:35:35 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:

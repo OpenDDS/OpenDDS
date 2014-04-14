@@ -196,7 +196,13 @@ Subscriber::Subscriber( const Options& options)
   // Grab, enable and attach the status condition for test synchronization.
   this->status_ = this->reader_->get_statuscondition();
   this->status_->set_enabled_statuses( DDS::SUBSCRIPTION_MATCHED_STATUS);
-  this->waiter_->attach_condition( this->status_.in());
+  if (this->waiter_->attach_condition( this->status_.in()) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: Subscriber::Subscriber() - ")
+      ACE_TEXT("failed to match subscription.\n")
+    ));
+    throw BadAttachException();
+  }
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
