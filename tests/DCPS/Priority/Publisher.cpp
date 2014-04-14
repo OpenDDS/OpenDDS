@@ -275,6 +275,15 @@ Publisher::run()
 
   } while( cummulative_count < 2);
 
+  /// Kluge to ensure that the remote/subscriber side endpoints have
+  /// been fully associated before starting to send.  This appears to be
+  /// a race between the association creation and use and the BuiltIn
+  /// Topic data becoming available.  There is no existing mechanism (nor
+  /// should there be) to prevent an association from exchanging data
+  /// prior to the remote endpoint information becoming available via the
+  /// BuiltIn Topic publications.
+  ACE_OS::sleep( 2);
+
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Publisher::run() - ")
