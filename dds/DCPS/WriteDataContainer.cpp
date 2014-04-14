@@ -1294,6 +1294,12 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
                                             PublicationInstance* instance)
 {
   if (stale && instance->waiting_list_.head_ != 0) {
+      if (this->lock_.get_nesting_level() < 1) {
+        ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) ERROR: WriteDataContainer::wakeup_blocking_writers, ")
+                              ACE_TEXT ("expecting recursive lock to be locked, but its nesting ")
+                              ACE_TEXT ("level is %d\n"),
+                              this->lock_.get_nesting_level()));
+      }
       // Mark the first waiting sample will be next to add to instance
       // list.
       instance->waiting_list_.head_->space_available_ = true;

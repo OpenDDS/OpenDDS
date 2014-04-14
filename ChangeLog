@@ -1,3 +1,10 @@
+Mon Apr 14 16:35:35 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Added logic to determine if lock is held prior to editing the head
+          of the waiting_list_.
+
 Mon Apr 14 15:15:44 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
