@@ -121,12 +121,12 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadPublisherException();
 
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created publisher.\n")
-    ));
   }
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+    ACE_TEXT("created publisher.\n")
+  ));
 
   // Writer Qos policy values.
   ::DDS::DataWriterQos writerQos;
@@ -176,12 +176,12 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadWriterException();
 
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created writer[0].\n")
-    ));
   }
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+    ACE_TEXT("created writer[0].\n")
+  ));
 
   // Grab, enable and attach the status condition for test synchronization.
   this->status_[0] = this->writer_[0]->get_statuscondition();
@@ -194,12 +194,10 @@ Publisher::Publisher( const Options& options)
     throw BadAttachException();
   }
 
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created StatusCondition[0] for test synchronization.\n")
-    ));
-  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+    ACE_TEXT("created StatusCondition[0] for test synchronization.\n")
+  ));
 
   // Actually set the priority finally.
   writerQos.transport_priority.value = this->options_.priority();
@@ -218,12 +216,12 @@ Publisher::Publisher( const Options& options)
     ));
     throw BadWriterException();
 
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created writer[1].\n")
-    ));
   }
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+    ACE_TEXT("created writer[1].\n")
+  ));
 
   // Grab, enable and attach the status condition for test synchronization.
   this->status_[1] = this->writer_[1]->get_statuscondition();
@@ -236,12 +234,10 @@ Publisher::Publisher( const Options& options)
     throw BadAttachException();
   }
 
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
-      ACE_TEXT("created StatusCondition[1] for test synchronization.\n")
-    ));
-  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Publisher::Publisher() - ")
+    ACE_TEXT("created StatusCondition[1] for test synchronization.\n")
+  ));
 
 }
 
@@ -297,12 +293,10 @@ Publisher::run()
   /// BuiltIn Topic publications.
   ACE_OS::sleep( 2);
 
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::run() - ")
-      ACE_TEXT("starting to publish samples.\n")
-    ));
-  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Publisher::run() - ")
+    ACE_TEXT("starting to publish samples.\n")
+  ));
 
   Test::DataDataWriter_var writer0
     = Test::DataDataWriter::_narrow( this->writer_[0].in());
@@ -342,13 +336,11 @@ Publisher::run()
     }
   }
 
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Publisher::run() - ")
-      ACE_TEXT("finished publishing %d samples.\n"),
-      sample0.value
-    ));
-  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Publisher::run() - ")
+    ACE_TEXT("finished publishing %d samples.\n"),
+    sample0.value
+  ));
 
   // Make sure that the data has arriven.
   ::DDS::Duration_t shutdownDelay = {15, 0}; // Wait up to a total of 15

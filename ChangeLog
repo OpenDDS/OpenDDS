@@ -1,3 +1,11 @@
+Mon Apr 14 18:55:30 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+
+          Removed verbose check on setup (one time) logging messages to better
+          diagnose when in the sequence of events errors are happening.
+
 Mon Apr 14 17:42:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Priority/Publisher.cpp:

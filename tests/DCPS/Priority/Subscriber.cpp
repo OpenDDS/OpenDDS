@@ -68,12 +68,10 @@ Subscriber::Subscriber( const Options& options)
   // Create the listener.
   this->listener_ = new DataReaderListener( this->options_.verbose());
   this->safe_listener_ = this->listener_;
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created reader listener.\n")
-    ));
-  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+    ACE_TEXT("created reader listener.\n")
+  ));
 
   // Create and register the type support.
   DataTypeSupportImpl* testData = new DataTypeSupportImpl();
@@ -86,13 +84,13 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadTypeSupportException ();
 
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created type %C support.\n"),
-      testData->get_type_name()
-    ));
   }
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+    ACE_TEXT("created type %C support.\n"),
+    testData->get_type_name()
+  ));
 
   // Create the topic.
   this->topic_ = this->participant_->create_topic(
@@ -110,13 +108,13 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadTopicException();
 
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created topic %C.\n"),
-      this->options_.topicName().c_str()
-    ));
   }
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+    ACE_TEXT("created topic %C.\n"),
+    this->options_.topicName().c_str()
+  ));
 
   // Create the subscriber.
   this->subscriber_ = this->participant_->create_subscriber(
@@ -131,12 +129,12 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadSubscriberException();
 
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created subscriber.\n")
-    ));
   }
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+    ACE_TEXT("created subscriber.\n")
+  ));
 
   // Reader Qos policy values.
   ::DDS::DataReaderQos readerQos;
@@ -182,12 +180,12 @@ Subscriber::Subscriber( const Options& options)
     ));
     throw BadReaderException();
 
-  } else if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created reader.\n")
-    ));
   }
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+    ACE_TEXT("created reader.\n")
+  ));
 
   // Set the listener mask here so that we don't conflict with the
   // StatusCondition(s) that we want to wait on in the main thread.
@@ -204,12 +202,10 @@ Subscriber::Subscriber( const Options& options)
     throw BadAttachException();
   }
 
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
-      ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
-    ));
-  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Subscriber::Subscriber() - ")
+    ACE_TEXT("created StatusCondition and WaitSet for test synchronization.\n")
+  ));
 
 }
 
@@ -231,12 +227,10 @@ Subscriber::run()
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   DDS::ConditionSeq conditions;
   DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0};
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::run() - ")
-      ACE_TEXT("waiting for publications to attach.\n")
-    ));
-  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Subscriber::run() - ")
+    ACE_TEXT("waiting for publications to attach.\n")
+  ));
   do {
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
       ACE_ERROR((LM_ERROR,
@@ -263,12 +257,10 @@ Subscriber::run()
 
   } while( matches.current_count > 0);
 
-  if( this->options_.verbose()) {
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("(%P|%t) Subscriber::run() - ")
-      ACE_TEXT("shutting down after publication was removed.\n")
-    ));
-  }
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) Subscriber::run() - ")
+    ACE_TEXT("shutting down after publications were removed.\n")
+  ));
 
 }
 
