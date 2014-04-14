@@ -45,6 +45,13 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer(
   if (instance->deadline_timer_id_ == -1) {
     instance->deadline_timer_id_ = Watchdog::schedule_timer((void*)instance, this->interval_);
   }
+  if (instance->deadline_timer_id_ == -1) {
+    ACE_ERROR((LM_ERROR,
+               "ERROR Timer for instance %X should be scheduled, but is %d\n",
+               instance, instance->deadline_timer_id_));
+  } else if (DCPS_debug_level > 5) {
+    ACE_DEBUG((LM_INFO, "Timer for instance %X scheduled \n", instance));
+  }
 }
 
 void
@@ -54,6 +61,9 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
   if (instance->deadline_timer_id_ != -1) {
     Watchdog::cancel_timer(instance->deadline_timer_id_);
     instance->deadline_timer_id_ = -1;
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_INFO, "Timer for instance %X cancelled \n", instance));
+    }
   }
 }
 
@@ -125,7 +135,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
 
   } else {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RequestedDeadlineWatchdog::execute: "
-               "the current timer should not be invalid for instance %X\n",
+               "the current timer should be valid for instance %X\n",
                instance));
   }
 }

@@ -23,8 +23,8 @@ if ($ARGV[0] eq 'rtps_disc') {
   exit(1);
 }
 
-my $pub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");
-my $sub_opts = "-DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "sub.ini");
+my $pub_opts = "-DCPSDebugLevel 6 -DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");
+my $sub_opts = "-DCPSDebugLevel 6 -DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "sub.ini");
 
 my $dcpsrepo_ior = "repo.ior";
 
