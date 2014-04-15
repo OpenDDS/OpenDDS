@@ -913,12 +913,6 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
       resource_limit_waited = true;
       abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
       bool waited = false;
-      if (this->lock_.get_nesting_level() < 1) {
-        ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) ERROR: WriteDataContainer::obtain_buffer, ")
-                              ACE_TEXT ("expecting recursive lock to be locked prior to ")
-                              ACE_TEXT ("conditional wait, but its nesting level is %d\n"),
-                              this->lock_.get_nesting_level()));
-      }
       while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
         waited = true;
         waiting_on_release_ = true; // reduces broadcast to only when waiting
@@ -985,12 +979,6 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
         abs_timeout = duration_to_absolute_time_value (max_blocking_time_);
 
       bool waited = false;
-      if (this->lock_.get_nesting_level() < 1) {
-        ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) ERROR: WriteDataContainer::obtain_buffer, ")
-                              ACE_TEXT ("expecting recursive lock to be locked prior to ")
-                              ACE_TEXT ("conditional wait, but its nesting level is %d\n"),
-                              this->lock_.get_nesting_level()));
-      }
       while (!shutdown_ && ACE_OS::gettimeofday() < abs_timeout) {
         waited = true;
         waiting_on_release_ = true; // reduces broadcast to only when waiting
@@ -1294,12 +1282,6 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
                                             PublicationInstance* instance)
 {
   if (stale && instance->waiting_list_.head_ != 0) {
-      if (this->lock_.get_nesting_level() < 1) {
-        ACE_ERROR ((LM_ERROR, ACE_TEXT ("(%P|%t) ERROR: WriteDataContainer::wakeup_blocking_writers, ")
-                              ACE_TEXT ("expecting recursive lock to be locked, but its nesting ")
-                              ACE_TEXT ("level is %d\n"),
-                              this->lock_.get_nesting_level()));
-      }
       // Mark the first waiting sample will be next to add to instance
       // list.
       instance->waiting_list_.head_->space_available_ = true;

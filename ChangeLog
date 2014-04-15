@@ -1,3 +1,10 @@
+Tue Apr 15 14:24:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removed logging of lock recursion level since it isn't
+          implemented on some platforms.
+
 Mon Apr 14 19:20:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Priority/publisher_main.cpp:
