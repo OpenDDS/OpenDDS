@@ -1,3 +1,14 @@
+Tue Apr 15 21:41:19 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Additional logging prior to calling find_subscription_reference()
+          and find_publication_reference().
+
+        * tests/DCPS/PersistentDurability/run_test.pl:
+
+          Raise log level.
+
 Tue Apr 15 20:57:02 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Priority/DataReaderListener.cpp:

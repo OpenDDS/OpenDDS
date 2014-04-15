@@ -37,7 +37,7 @@ unlink $data_file;
 
 $DCPSREPO =
   PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                           "-o $dcpsrepo_ior ");
+                           "-o $dcpsrepo_ior -DCPSDebugLevel 4");
 $Subscriber = PerlDDS::create_process ("subscriber", "$sub_opts");
 $Publisher1 = PerlDDS::create_process ("publisher",
                                        "$pub_opts -w -ORBLogFile $data_file",
