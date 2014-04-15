@@ -1,3 +1,11 @@
+Tue Apr 15 15:40:10 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed race condition where the element has been marked with
+          space available after the condition has timedout, but before
+          it has re-acquired the lock.
+
 Tue Apr 15 14:24:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
