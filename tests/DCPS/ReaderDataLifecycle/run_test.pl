@@ -23,13 +23,20 @@ $test_opts .= " @ARGV";
 
 my $status = 0;
 
+my $orig_ACE_LOG_TIMESTAMP = $ENV{ACE_LOG_TIMESTAMP};
+$ENV{ACE_LOG_TIMESTAMP} = "TIME";
+sub cleanup
+{
+  $ENV{ACE_LOG_TIMESTAMP} = $orig_ACE_LOG_TIMESTAMP;
+}
+
 my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                        "-o $dcpsrepo_ior");
-
+$test_opts .= " -DCPSDebugLevel 1";
 my $Test = PerlDDS::create_process("test", $test_opts);
 
 print $DCPSREPO->CommandLine() . "\n";
@@ -37,6 +44,7 @@ $DCPSREPO->Spawn();
 if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for Info Repo IOR file\n";
     $DCPSREPO->Kill ();
+    cleanup();
     exit 1;
 }
 
@@ -63,4 +71,5 @@ if ($status == 0) {
   print STDERR "test FAILED.\n";
 }
 
+cleanup();
 exit $status;

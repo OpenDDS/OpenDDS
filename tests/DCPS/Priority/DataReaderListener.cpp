@@ -71,10 +71,14 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
         }
         else if (recieved_samples_.count(data.before_value)) {
           priority_sample_ = RECEIVED_INVALID;
+          // (there is at least one entry so rbegin is valid)
+          const long highest = *recieved_samples_.rbegin();
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
-                     ACE_TEXT("Did not receive high priority sample before expected low ")
-                     ACE_TEXT("priority one.\n")));
+                     ACE_TEXT("Did not receive high priority sample before low priority ")
+                     ACE_TEXT("sample %d (highest received sample=%d.\n"),
+                     data.before_value,
+                     highest));
         }
         else
           priority_sample_ = RECEIVED_VALID;

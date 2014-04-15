@@ -1,3 +1,18 @@
+Tue Apr 15 20:57:02 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+
+          Added more diagnostics.
+
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+
+          Added class to handle cleanup when exiting and added
+          diagnostics messages.
+
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+
+          Added timestamps to track when data is disposed.
+
 Tue Apr 15 15:40:10 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
