@@ -268,20 +268,33 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
 {
   switch (sample.header_.message_id_) {
   case TRANSPORT_CONTROL: {
+     //### Debug statements to track where connection is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> case TRANSPORT_CONTROL\n"));
+
     // Transport control samples are delivered to all sessions
     // regardless of association status:
     {
       char* const ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
 
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> trying to LOCK session_lock_\n"));
+
       ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
                 guard,
                 this->session_lock_);
+
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> LOCKED session_lock_\n"));
 
       const TransportHeader& theader = receive_strategy()->received_header();
       if (!is_active() && sample.header_.submessage_id_ == MULTICAST_SYN &&
           sessions_.find(theader.source_) == sessions_.end()) {
         // We have received a SYN but there is no session (yet) for this source.
         // Depending on the data, we may need to send SYNACK.
+
+         //### Debug statements to track where connection is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> to call syn_received_no_session\n"));
+         guard.release();
         syn_received_no_session(theader.source_, sample.sample_,
                                 theader.swap_bytes());
         if (ptr) {
@@ -290,8 +303,29 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
         return;
       }
 
-      for (MulticastSessionMap::iterator it(this->sessions_.begin());
+      MulticastSessionMap temp_sessions;
+      temp_sessions.insert(this->sessions_.begin(), this->sessions_.end());
+      guard.release();
+
+      for (MulticastSessionMap::iterator it(temp_sessions.begin());
+          it != temp_sessions.end(); ++it) {
+         //### Debug statements to track where connection is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> to call control_received\n"));
+
+         if(this->sessions_.count(it->first)){
+           it->second->control_received(sample.header_.submessage_id_,
+                                        sample.sample_);
+           // reset read pointer
+           if (ptr) {
+             sample.sample_->rd_ptr(ptr);
+           }
+         }
+      }
+/*      for (MulticastSessionMap::iterator it(this->sessions_.begin());
           it != this->sessions_.end(); ++it) {
+         //### Debug statements to track where connection is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> to call control_received\n"));
+
         it->second->control_received(sample.header_.submessage_id_,
                                      sample.sample_);
         // reset read pointer
@@ -299,7 +333,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
           sample.sample_->rd_ptr(ptr);
         }
       }
-    }
+*/    }
   } break;
 
   case SAMPLE_ACK:
