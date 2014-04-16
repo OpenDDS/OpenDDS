@@ -138,7 +138,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
       // that an error has taken place.
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> base DataLink FAILED to start strategy objects so nil out connection\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> base DataLink FAILURE to start strategy objects so nil out connection\n"));
 
       // Drop our reference to the connection object.
       this->connection_ = 0;

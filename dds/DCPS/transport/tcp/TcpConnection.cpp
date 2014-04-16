@@ -199,7 +199,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
      //       transport->connect_tcp_datalink(link_, self) == -1) {
 
          //### Debug statements to track where connection is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> either active_open OR connect_tcp_datalink FAILED\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> either active_open OR connect_tcp_datalink FAILURE\n"));
 
          //### Debug statements to track where connection is failing
          ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> async_connect_failed\n"));
@@ -207,7 +207,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
          transport->async_connect_failed(key);
 
          //### Debug statements to track where connection is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> return FAILED\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> return FAILURE\n"));
 
          return -1;
       }
