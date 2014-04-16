@@ -220,6 +220,9 @@ TransportClient::associate(const AssociationData& data, bool active)
    PendingMap::iterator iter = pending_.find(data.remote_id_);
    if (iter == pending_.end()) {
       iter = pending_.insert(std::make_pair(data.remote_id_, PendingAssoc())).first;
+      //### Debug statements to track where connection is failing
+      GuidConverter remote_new(data.remote_id_);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> NEW PENDING ASSOC remote_id: %C\n", std::string(remote_new).c_str()));
    } else {
       if (iter->second.removed_) {
          iter->second.removed_ = false;
@@ -427,7 +430,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
       blob_index_ = 0;
    }
    //### Debug statements to track where associate is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::PendingAssoc::initiate_connect FAILED\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::PendingAssoc::initiate_connect DID NOT CONNECT\n"));
    return false;
 }
 
@@ -477,8 +480,23 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
    //### do all further uses simply look up by value and modify references that way?
    RepoId remote_id(remote_id_ref);
 
+   PendingMap::iterator iter_print = pending_.begin();
+   //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i PRINT OUT ALL PENDING ASSOC IN PENDINGMAP\n"));
+      int i = 0;
+   while(iter_print != pending_.end()) {
+      //### Debug statements to track where associate is failing
+      GuidConverter remote_print(iter_print->first);
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i PendingAssoc #%d is for RepoId: %C\n", i, std::string(remote_print).c_str()));
+         iter_print++;
+         i++;
+   }
+
+
    PendingMap::iterator iter = pending_.find(remote_id);
    if (iter == pending_.end()) {
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i didn't find a PendingAssoc for remote_id\n"));
       return;
    }
 
