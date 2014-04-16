@@ -558,7 +558,7 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
 
     if (0 != transportResult) {
        //### Debug statements to track where connection is failing
-       ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::init_built_in_topics --> FAILED init_built_in_topics_transport return\n"));
+       ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::init_built_in_topics --> FAILURE init_built_in_topics_transport return\n"));
       return transportResult;
     }
 
@@ -571,7 +571,7 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
 
     if (0 != topicsResult) {
        //### Debug statements to track where connection is failing
-       ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::init_built_in_topics --> FAILED init_built_in_topics_topics return\n"));
+       ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::init_built_in_topics --> FAILURE init_built_in_topics_topics return\n"));
       return topicsResult;
     }
 
@@ -585,7 +585,7 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
 
     if (0 != datawritersResult) {
        //### Debug statements to track where connection is failing
-       ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::init_built_in_topics --> FAILED init_built_in_topics_datawriters\n"));
+       ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DCPS_IR_Domain::init_built_in_topics --> FAILURE init_built_in_topics_datawriters\n"));
       return datawritersResult;
     }
 
