@@ -36,7 +36,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     publisher.run();
 
     // this can only fail if ACE_HAS_PTHREADS is defined
-    if (TheServiceParticipant->scheduler() == -1) {
+/*    if (TheServiceParticipant->scheduler() == -1) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: publisher_main() - ")
         ACE_TEXT("scheduler should be set by transport ini ")
@@ -44,7 +44,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ));
       return 1;
     }
-
+*/
   } catch( CORBA::Exception& /* e */) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("(%P|%t) publisher_main() - ")

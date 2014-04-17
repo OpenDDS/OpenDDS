@@ -49,7 +49,13 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
     if( info.valid_data) {
       ++this->count_;
       if (count_ % 50 == 0)
-        ACE_OS::sleep(1);
+        ACE_OS::sleep(2);
+
+      if (count_ % 1000 == 0)
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
+          ACE_TEXT("received %d samples\n"),
+          count_));
 
       if( this->verbose_) {
         ACE_DEBUG((LM_DEBUG,

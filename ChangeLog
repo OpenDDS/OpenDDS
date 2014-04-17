@@ -1,3 +1,23 @@
+Thu Apr 17 16:53:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added back in Priority tests.
+
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+
+          Increased sleeping to definitely cause back pressure on all builds.
+
+        * tests/DCPS/Priority/publisher_main.cpp:
+
+          Temporarily removed check for scheduler.
+
+        * tests/DCPS/Priority/Publisher.cpp:
+
+          Increased the number of instance samples to prevent low priority samples
+          being removed from the queue before high priority sample can be passed
+          to write.
+
 Thu Apr 17 15:12:57 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
