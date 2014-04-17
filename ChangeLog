@@ -1,3 +1,9 @@
+Thu Apr 17 18:46:52 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/publisher_main.cpp:
+
+          Removed testing scheduler in this test.
+
 Thu Apr 17 16:53:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
