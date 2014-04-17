@@ -1,3 +1,9 @@
+Thu Apr 17 15:12:57 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Temporarily turned off Priority tests.
+
 Thu Apr 17 13:00:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DataSampleList.cpp:
