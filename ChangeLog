@@ -1,3 +1,10 @@
+Thu Apr 17 13:00:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.cpp:
+
+          Fixed error in setting tail_ for removing a next instance sample
+          from the tail of the list.
+
 Tue Apr 15 21:41:19 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
