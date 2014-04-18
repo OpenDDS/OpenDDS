@@ -1,3 +1,21 @@
+Fri Apr 18 21:07:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed transport debug level (it screws up the test matrix).
+
+        * tests/DCPS/Priority/run_test.pl:
+
+          defaulting transport debug to 2.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Adding setting ACE_LOG_TIMESTAMP to improve diagnostics.
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Improving log message.
+
 Fri Apr 18 18:20:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:

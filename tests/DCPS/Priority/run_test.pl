@@ -26,7 +26,7 @@ my $help;
 my $verbose;
 my $orbVerbose;
 my $dFile;
-my $transportDebug;
+my $transportDebug = 2;
 my $repoDebug;
 my $noaction;
 my $multipleInstances;
