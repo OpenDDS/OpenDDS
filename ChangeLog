@@ -1,3 +1,10 @@
+Fri Apr 18 14:45:30 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
+
+          Removed setting scheduler parameters.
+
 Fri Apr 18 12:41:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Messenger/publisher.cpp:
