@@ -58,6 +58,9 @@ private:
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;
 
+  typedef ACE_Thread_Mutex         ThreadLockType;
+  typedef ACE_Guard<ThreadLockType>     GuardThreadType;
+
   MulticastDataLink* make_datalink(const RepoId& local_id,
                                    Priority priority,
                                    bool active);
@@ -67,6 +70,7 @@ private:
 
   RcHandle<MulticastInst> config_i_;
 
+  ThreadLockType links_lock_;
   /// link for pubs.
   MulticastDataLink_rch client_link_;
   /// link for subs.
@@ -78,7 +82,7 @@ private:
   // a SYN TRANSPORT_CONTROL message; the connections_ are remote peers that
   // have already sent the SYN message -- we can consider these "complete"
   // from the framework's point of view.
-  LockType connections_lock_;
+  ThreadLockType connections_lock_;
   typedef std::vector<DataLink::OnStartCallback> Callbacks;
   typedef std::map<MulticastPeer, Callbacks> PendConnMap;
   PendConnMap pending_connections_;

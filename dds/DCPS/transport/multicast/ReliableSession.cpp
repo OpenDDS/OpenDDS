@@ -417,11 +417,27 @@ ReliableSession::send_nakack(SequenceNumber low)
 bool
 ReliableSession::start(bool active, bool acked)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> enter\n"));
+
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> trying to LOCK start_lock_\n"));
+
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->start_lock_, false);
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> LOCKED start_lock_\n"));
 
   if (this->started_) return true;  // already started
 
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> not started, get_reactor()\n"));
+
   ACE_Reactor* reactor = this->link_->get_reactor();
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> got reactor\n"));
+
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -439,6 +455,8 @@ ReliableSession::start(bool active, bool acked)
     if (acked) {
       this->acked_ = true;
     }
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> trying to schedule reactor for nak_watchdog\n"));
     if (!this->nak_watchdog_.schedule(reactor)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
@@ -446,7 +464,12 @@ ReliableSession::start(bool active, bool acked)
                         ACE_TEXT("failed to schedule NAK watchdog!\n")),
                        false);
     }
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> nak_watchdog scheduled reactor\n"));
   }
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> try to start_syn(reactor)\n"));
 
   // Active peers schedule a watchdog timer to initiate a 2-way
   // handshake to verify that passive endpoints can send/receive
@@ -461,7 +484,10 @@ ReliableSession::start(bool active, bool acked)
                       ACE_TEXT("failed to schedule SYN watchdog!\n")),
                      false);
   }
-
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> successfully start_syn(reactor)\n"));
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> exit set started_=true\n"));
   return this->started_ = true;
 }
 

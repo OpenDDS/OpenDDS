@@ -229,8 +229,10 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
 {
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> enter\n"));
+   GuardThreadType guard_links(this->links_lock_);
    MulticastDataLink_rch link = this->client_link_;
    if (link.is_nil()) {
+
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> link is nil, make_datalink for client_link\n"));
       link = this->make_datalink(attribs.local_id_, attribs.priority_, true /*active*/);
@@ -296,8 +298,10 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 {
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> enter\n"));
+   GuardThreadType guard_links(this->links_lock_);
    MulticastDataLink_rch link = this->server_link_;
    if (link.is_nil()) {
+
       link = this->make_datalink(attribs.local_id_, attribs.priority_, false /*passive*/);
       this->server_link_ = link;
    }
@@ -305,7 +309,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
    MulticastPeer remote_peer = RepoIdConverter(remote.repo_id_).participantId();
    //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> trying to LOCK connections_lock_\n"));
-   GuardType guard(this->connections_lock_);
+   GuardThreadType guard(this->connections_lock_);
    //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> LOCKED connections_lock_\n"));
    if (connections_.count(remote_peer)) {
@@ -354,7 +358,7 @@ MulticastTransport::stop_accepting_or_connecting(TransportClient* client,
             ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::stop_accepting_or_connection --> enter\n"));
             //### Debug statements to track where associate is failing
             ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::stop_accepting_or_connecting --> trying to LOCK connections_lock_\n"));
-   GuardType guard(this->connections_lock_);
+   GuardThreadType guard(this->connections_lock_);
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::stop_accepting_or_connecting --> LOCKED connections_lock_\n"));
    for (PendConnMap::iterator it = this->pending_connections_.begin();
@@ -384,17 +388,18 @@ MulticastTransport::passive_connection(MulticastPeer peer)
    //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> about to LOCK connections_lock_\n"));
 
-   GuardType guard(this->connections_lock_);
+   GuardThreadType guard(this->connections_lock_);
 
-
-   if(this->connections_.count(peer)){
-      //need to send ack to active side so it can return from connect_datalink
-     MulticastSession_rch session =
-            this->start_session(this->server_link_, peer, false /*!active*/);
-     if(!session.is_nil()) {
-        session->send_synack();
-     }
-   }
+//### Don't think sending synack is needed due to any call to passive_connection
+//### from datalink or session will have already sent the synack
+//   if(this->connections_.count(peer)){
+//      //need to send ack to active side so it can return from connect_datalink
+//     MulticastSession_rch session =
+//            this->start_session(this->server_link_, peer, false /*!active*/);
+//     if(!session.is_nil()) {
+//        session->send_synack();
+//     }
+//   }
 
    //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> LOCKED connections_lock_\n"));
