@@ -1,3 +1,11 @@
+Fri Apr 18 12:41:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Moved call to TheServiceParticipant->shutdown() to occur before applicable
+          vars go out of scope.
+
 Thu Apr 17 18:46:52 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Priority/publisher_main.cpp:
