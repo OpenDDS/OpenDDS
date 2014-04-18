@@ -1437,6 +1437,10 @@ DataWriterImpl::get_matched_subscription_data(
 DDS::ReturnCode_t
 DataWriterImpl::enable()
 {
+   //### Debug statements to track where connection is failing
+   GuidConverter pub_on_entry(this->publication_id_);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> enter enabling publication: %C\n", std::string(pub_on_entry).c_str()));
+
    //According spec:
    // - Calling enable on an already enabled Entity returns OK and has no
    // effect.
@@ -1444,10 +1448,14 @@ DataWriterImpl::enable()
    // and return PRECONDITION_NOT_MET.
 
    if (this->is_enabled()) {
+      //### Debug statements to track where connection is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> ALREADY ENABLED (exiting)\n"));
       return DDS::RETCODE_OK;
    }
 
    if (this->publisher_servant_->is_enabled() == false) {
+      //### Debug statements to track where connection is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> publisher_servant NOT ENABLED YET (exiting)\n"));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
    }
 
@@ -1552,6 +1560,9 @@ max_total_samples);
       liveliness_check_interval_ *=
             TheServiceParticipant->liveliness_factor()/100.0;
 
+      //### Debug statements to track where connection is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> about to schedule liveliness_timer\n"));
+
       if (reactor_->schedule_timer(this,
             0,
             liveliness_check_interval_,
@@ -1561,6 +1572,8 @@ max_total_samples);
                ACE_TEXT("schedule_timer")));
 
       } else {
+         //### Debug statements to track where connection is failing
+           ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> liveliness_timer SUCCESSFULLY SCHEDULED\n"));
          cancel_timer_ = true;
          this->_add_ref();
       }
@@ -1612,6 +1625,10 @@ max_total_samples);
                trans_conf_info,
                pub_qos);
 
+   //### Debug statements to track where connection is failing
+     GuidConverter pub_after_add(this->publication_id_);
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> after disco->add_publication for publication: %C\n", std::string(pub_after_add).c_str()));
+
    if (this->publication_id_ == GUID_UNKNOWN) {
       ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
@@ -1632,6 +1649,11 @@ max_total_samples);
    // Move cached data from the durability cache to the unsent data
    // queue.
    if (durability_cache != 0) {
+
+      //### Debug statements to track where connection is failing
+        GuidConverter pub_on_get_data(this->publication_id_);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> durability_cache !=0 so try to get_data for publication: %C\n", std::string(pub_on_get_data).c_str()));
+
       if (!durability_cache->get_data(this->domain_id_,
             get_topic_name(),
             get_type_name(),
@@ -1646,6 +1668,10 @@ max_total_samples);
    }
 #endif
 
+   //### Debug statements to track where connection is failing
+   GuidConverter pub_on_exit(this->publication_id_);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> exit returning writer_enabled_result: %s for enabling publication: %C\n", writer_enabled_result == DDS::RETCODE_OK ? "ENABLED" : "NOT ENABLED" ,std::string(pub_on_exit).c_str()));
+
 return writer_enabled_result;
 }
 
@@ -1654,6 +1680,11 @@ DataWriterImpl::register_instance_i(::DDS::InstanceHandle_t& handle,
       DataSample* data,
       const DDS::Time_t & source_timestamp)
 {
+   //### Debug statements to track where connection is failing
+   GuidConverter pub_to_register(this->publication_id_);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::register_instance_i --> enter trying to register publication: %C\n", std::string(pub_to_register).c_str()));
+
+
    DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
 
    if (enabled_ == false) {
@@ -1678,6 +1709,10 @@ DataWriterImpl::register_instance_i(::DDS::InstanceHandle_t& handle,
       this->monitor_->report();
    }
 
+   //### Debug statements to track where connection is failing
+   GuidConverter pub_cntrl(this->publication_id_);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::register_instance_i --> about to create_control_message INSTANCE_REGISTRATION for publication: %C\n", std::string(pub_cntrl).c_str()));
+
    // Add header with the registration sample data.
    DataSampleHeader header;
    ACE_Message_Block* registered_sample =
@@ -1685,6 +1720,10 @@ DataWriterImpl::register_instance_i(::DDS::InstanceHandle_t& handle,
                header,
                data,
                source_timestamp);
+
+   //### Debug statements to track where connection is failing
+   GuidConverter pub_send_cntrl(this->publication_id_);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::register_instance_i --> about to send_control INSTANCE_REGISTRATION for publication: %C\n", std::string(pub_send_cntrl).c_str()));
 
    if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,

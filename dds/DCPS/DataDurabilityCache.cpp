@@ -726,6 +726,10 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
   ACE_Allocator * db_allocator,
   DDS::LifespanQosPolicy const & /* lifespan */)
 {
+
+   //### Debug statements to track where connection is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataDurabilityCache::get_data --> enter\n"));
+
   key_type const key(domain_id,
                      topic_name,
                      type_name,
@@ -864,7 +868,8 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
       }
     }
   }
-
+  //### Debug statements to track where connection is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataDurabilityCache::get_data --> exit TRUE\n"));
   return true;
 }
 

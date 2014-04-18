@@ -177,10 +177,16 @@ MulticastDataLink::find_session(MulticastPeer remote_peer)
 MulticastSession*
 MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::find_or_create_session --> enter\n"));
+
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
                    guard,
                    this->session_lock_,
                    0);
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::find_or_create_session --> current number of sessions: %d\n", this->sessions_.size()));
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
@@ -209,7 +215,8 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
                       remote_peer),
                      0);
   }
-
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::find_or_create_session --> exit\n"));
   return session._retn();
 }
 

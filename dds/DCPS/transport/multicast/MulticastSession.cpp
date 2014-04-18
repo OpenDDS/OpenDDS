@@ -169,6 +169,9 @@ MulticastSession::control_received(char submessage_id,
 void
 MulticastSession::syn_received(ACE_Message_Block* control)
 {
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastSession::syn_received --> enter\n"));
+
   if (this->active_) return; // pub send syn, then doesn't receive them.
 
   const TransportHeader& header =
@@ -201,11 +204,20 @@ MulticastSession::syn_received(ACE_Message_Block* control)
     }
   }
 
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastSession::syn_received --> about to send_synack\n"));
+
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
   send_synack();
 
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastSession::syn_received --> call passive_connection\n"));
+
   this->link_->transport()->passive_connection(this->remote_peer_);
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastSession::syn_received --> exit\n"));
 }
 
 void

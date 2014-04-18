@@ -1314,13 +1314,19 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
 
    RcHandle<WriterInfo> writer;
 
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataReaderImpl::writer_activity --> enter\n"));
+
    // The received_activity() has to be called outside the writers_lock_
    // because it probably acquire writers_lock_ read lock recursively
    // (in handle_timeout). This could cause deadlock when there are writers
    // waiting.
    {
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataReaderImpl::writer_activity --> trying to LOCK writers_lock_\n"));
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataReaderImpl::writer_activity --> LOCKED writers_lock_\n"));
       WriterMapType::iterator iter = writers_.find(header.publication_id_);
 
       if (iter != writers_.end()) {

@@ -76,7 +76,7 @@ UdpTransport::make_datalink(const ACE_INET_Addr& remote_address,
 TransportImpl::AcceptConnectResult
 UdpTransport::connect_datalink(const RemoteTransport& remote,
                                const ConnectionAttribs& attribs,
-                               TransportClient* client)
+                               TransportClient* )
 {
   const ACE_INET_Addr remote_address = get_connection_addr(remote.blob_);
   const bool active = true;

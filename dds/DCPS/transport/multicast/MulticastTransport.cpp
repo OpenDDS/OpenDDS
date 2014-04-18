@@ -186,7 +186,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
       MulticastPeer remote_peer, bool active)
 {
    //### Debug statements to track where associate is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::start_session --> enter\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::start_session --> enter to create session for remote peer: 0x%x\n", remote_peer));
 
    if (link.is_nil()) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -309,6 +309,10 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
    //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> LOCKED connections_lock_\n"));
    if (connections_.count(remote_peer)) {
+
+      //###can't call start session with connections_lock_ due to reactor call in session->start which could deadlock with passive_connection
+      guard.release();
+
       VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink found\n"));
       MulticastSession_rch session =
             this->start_session(this->server_link_, remote_peer, false /*!active*/);
@@ -327,6 +331,8 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
       return AcceptConnectResult(link._retn());
    } else {
       this->pending_connections_[remote_peer].push_back(std::pair<TransportClient*, RepoId>(client, remote.repo_id_));
+      //###can't call start session with connections_lock_ due to reactor call in session->start which could deadlock with passive_connection
+      guard.release();
       MulticastSession_rch session =
             this->start_session(this->server_link_, remote_peer, false /*!active*/);
       //### Debug statements to track where associate is failing
@@ -373,16 +379,22 @@ MulticastTransport::stop_accepting_or_connecting(TransportClient* client,
 void
 MulticastTransport::passive_connection(MulticastPeer peer)
 {
-   //need to send ack to active side so it can return from connect_datalink
-   //MulticastSession_rch session =
-   //      this->start_session(this->server_link_, peer, false /*!active*/);
 
-   //session->send_synack();
 
    //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> about to LOCK connections_lock_\n"));
 
    GuardType guard(this->connections_lock_);
+
+
+   if(this->connections_.count(peer)){
+      //need to send ack to active side so it can return from connect_datalink
+     MulticastSession_rch session =
+            this->start_session(this->server_link_, peer, false /*!active*/);
+     if(!session.is_nil()) {
+        session->send_synack();
+     }
+   }
 
    //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> LOCKED connections_lock_\n"));
@@ -425,11 +437,9 @@ MulticastTransport::passive_connection(MulticastPeer peer)
             ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> RELEASED connections_lock_\n"));
          pend_client->use_datalink(remote_repo, link);
          ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> trying to LOCK connections_lock_ after use_datalink\n"));
-         //### Debug statements to track where associate is failing
-            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> trying to LOCK connections_lock_\n"));
+
          guard.acquire();
-         //### Debug statements to track where associate is failing
-            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> LOCKED connections_lock_\n"));
+
          ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> LOCKED connections_lock_ after use_datalink\n"));
          //pend->second[i].first->use_datalink(pend->second[i].second, link);
          //### Debug statements to track where associate is failing

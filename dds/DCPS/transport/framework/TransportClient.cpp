@@ -222,7 +222,22 @@ TransportClient::associate(const AssociationData& data, bool active)
       iter = pending_.insert(std::make_pair(data.remote_id_, PendingAssoc())).first;
       //### Debug statements to track where connection is failing
       GuidConverter remote_new(data.remote_id_);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> NEW PENDING ASSOC remote_id: %C\n", std::string(remote_new).c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> INSERTED NEW PENDING ASSOC remote_id: %C\n", std::string(remote_new).c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> after insertion there are %d pending assocs\n", pending_.size()));
+
+      PendingMap::iterator iter_print = pending_.begin();
+      //### Debug statements to track where associate is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> PRINT OUT ALL PENDING ASSOC IN PENDINGMAP\n"));
+         int i = 0;
+      while(iter_print != pending_.end()) {
+         //### Debug statements to track where associate is failing
+         GuidConverter remote_print(iter_print->first);
+            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> PendingAssoc #%d is for RepoId: %C\n", i, std::string(remote_print).c_str()));
+            iter_print++;
+            i++;
+      }
+
+
    } else {
       if (iter->second.removed_) {
          iter->second.removed_ = false;
