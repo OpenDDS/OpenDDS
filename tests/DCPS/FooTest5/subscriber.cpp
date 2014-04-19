@@ -513,7 +513,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                   expected -= timeout_writes;
                   ACE_DEBUG((LM_DEBUG,
                              ACE_TEXT ("(%P|%t) timed out writes %d, we expect %d, we have received %d\n"),
-                             timeout_writes, expected, num_reads));
+                             timeout_writes, expected, num_reads.value()));
                 }
 
             }

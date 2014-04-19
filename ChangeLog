@@ -1,3 +1,9 @@
+Sat Apr 19 10:54:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Fixed compile error.
+
 Fri Apr 18 21:07:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
