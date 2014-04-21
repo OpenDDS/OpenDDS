@@ -138,8 +138,8 @@ private:
                   ACE_TEXT("schedule_timer")), false);
       }
     }
-
-    if (this->cancelled_) {
+   //after re-acquiring lock_ need to check cancelled_ and timer_id_ for cancellation/prior completion
+    if (this->cancelled_ || this->timer_id_ != -1) {
       reactor->cancel_timer(timer_id);
       return true;
     }

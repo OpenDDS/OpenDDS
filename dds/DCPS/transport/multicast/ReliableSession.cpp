@@ -423,15 +423,20 @@ ReliableSession::start(bool active, bool acked)
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> trying to LOCK start_lock_\n"));
 
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->start_lock_, false);
+   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->start_lock_, false);
+  //###ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->start_lock_, false);
 
   //### Debug statements to track where associate is failing
   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> LOCKED start_lock_\n"));
 
-  if (this->started_) return true;  // already started
+  if (this->started_) {
+     //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> RELEASING start_lock_\n"));
+     return true;  // already started
+  }
 
   //### Debug statements to track where associate is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> not started, get_reactor()\n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> not started_, get_reactor()\n"));
 
   ACE_Reactor* reactor = this->link_->get_reactor();
 
@@ -447,6 +452,13 @@ ReliableSession::start(bool active, bool acked)
   }
 
   this->active_  = active;
+  {
+  //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
+  ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, this->reverse_start_lock_, false);
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> RELEASED start_lock_ by LOCKING reverse_start_lock_\n"));
+
   // A watchdog timer is scheduled to periodically check for gaps in
   // received data. If a gap is discovered, MULTICAST_NAK control
   // samples will be sent to initiate repairs.
@@ -487,7 +499,14 @@ ReliableSession::start(bool active, bool acked)
   //### Debug statements to track where associate is failing
   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> successfully start_syn(reactor)\n"));
   //### Debug statements to track where associate is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> exit set started_=true\n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> RELEASING reverse_start_lock_\n"));
+  } //Reacquire start_lock_ after releasing unlock_guard with release_start_lock_
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> LOCKED start_lock_ (after reverse_start_lock_ RELEASE)\n"));
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###ReliableSession::start --> exit set started_=true  and RELEASE start_lock_\n"));
   return this->started_ = true;
 }
 

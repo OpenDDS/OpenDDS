@@ -73,6 +73,7 @@ MulticastSession::MulticastSession(MulticastDataLink* link,
                                    MulticastPeer remote_peer)
   : link_(link)
   , remote_peer_(remote_peer)
+  , reverse_start_lock_(start_lock_)
   , started_(false)
   , active_(true)
   , acked_(false)
