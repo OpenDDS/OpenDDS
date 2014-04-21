@@ -1,3 +1,11 @@
+Mon Apr 21 11:50:41 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Removed deleting of publisher and topic after they were already deleted by
+          delete_contained_entities and removed unneeded check that the data writer
+          wasn't there any more.
+
 Sat Apr 19 10:54:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/FooTest5/subscriber.cpp:

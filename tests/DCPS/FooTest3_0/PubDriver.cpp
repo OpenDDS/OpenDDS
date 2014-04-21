@@ -345,16 +345,6 @@ PubDriver::end()
   TEST_CHECK (!CORBA::is_nil (dw.in ()));
 
   publisher_->delete_contained_entities ();
-  // publisher_->delete_datawriter(datawriter_.in ());
-
-  dw = publisher_->lookup_datawriter (topic_name.in ());
-
-  TEST_CHECK (CORBA::is_nil (dw.in ()));
-
-  // clean up the service objects
-  participant_->delete_publisher(publisher_.in ());
-
-  participant_->delete_topic(topic_.in ());
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(participant_.in ());
