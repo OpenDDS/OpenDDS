@@ -1,3 +1,21 @@
+Mon Apr 21 17:55:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/Puller.cpp:
+
+          Removed cleanup of the participants.
+
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+
+          Cleaned up commented out code.
+
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Moved participant1 and participant2 declaration to the outer scope and
+          moved cleanup of participants and shutting down the service participant to
+          occur at the end of processing and put all other code in a sub-scope so
+          they are cleaned up before participants and the service participant are
+          cleaned up.
+
 Mon Apr 21 11:50:41 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:

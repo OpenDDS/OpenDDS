@@ -129,11 +129,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       }
 
-//      //HACK: Use the states instead ...
-//      ACE_OS::sleep(configopt.test_duration);
-
-      //TheServiceParticipant->shutdown();
-
       if (configopt.collocation_str == "none")
       {
         TEST_ASSERT(assert_publication_matched(configopt, dwl1));
