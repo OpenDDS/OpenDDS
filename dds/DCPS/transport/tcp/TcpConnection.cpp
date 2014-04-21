@@ -183,14 +183,14 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
 
       //### Debug statements to track where connection is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> about to call active_open \n"));
-      bool active_open_ = active_open();
+      int active_open_ = active_open();
       //### Debug statements to track where connection is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> active_open_ = %b\n", active_open_));
 
 
       //### Debug statements to track where connection is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> about to call connect_tcp_datalink\n"));
-      bool connect_tcp_datalink_ = transport->connect_tcp_datalink(link_, self);
+      int connect_tcp_datalink_ = transport->connect_tcp_datalink(link_, self);
       //### Debug statements to track where connection is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> is_connector_ --> connect_tcp_datalink- = %b\n", connect_tcp_datalink_));
 
