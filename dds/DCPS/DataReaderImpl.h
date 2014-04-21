@@ -618,6 +618,7 @@ private:
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
 
+  //Used to protect access to id_to_handle_map_
   ACE_Recursive_Thread_Mutex   publication_handle_lock_;
 
   typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;

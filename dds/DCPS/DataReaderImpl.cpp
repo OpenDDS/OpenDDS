@@ -280,12 +280,13 @@ DataReaderImpl::add_association(const RepoId& yourId,
    }
 
    //### Debug statements to track where associate is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: trying to LOCK publication_handle_lock_\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: trying to LOCK publication_handle_lock_\n"));
 
+   //Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
    //### Debug statements to track where associate is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: LOCKED publication_handle_lock_\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: LOCKED publication_handle_lock_\n"));
 
 
    // For each writer in the list of writers to associate with, we
@@ -293,13 +294,13 @@ DataReaderImpl::add_association(const RepoId& yourId,
    // our internal maps.
    //
    {
-            //### Debug statements to track where associate is failing
-                  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: trying to LOCK writers_lock_\n"));
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: trying to LOCK writers_lock_\n"));
 
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
       //### Debug statements to track where associate is failing
-            ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: LOCKED writers_lock_\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: LOCKED writers_lock_\n"));
 
       const PublicationId& writer_id = writer.writerId;
       RcHandle<WriterInfo> info = new WriterInfo(this, writer_id,
@@ -335,6 +336,8 @@ DataReaderImpl::add_association(const RepoId& yourId,
                   std::string(writer_converter).c_str()));
          }
       }
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderImpl::add_association: RELEASE writers_lock_\n"));
    }
 
    // Propagate the add_associations processing down into the Transport
@@ -350,6 +353,12 @@ DataReaderImpl::add_association(const RepoId& yourId,
          (writer.writerQos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS);
    data.remote_durable_ =
          (writer.writerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
+
+   //Do not hold publication_handle_lock_ when calling associate due to possible reactor
+   //deadlock on passive side completion
+   //associate does not access id_to_handle_map_, thus not clear why publication_handle_lock_
+   //is held here anyway
+   guard.release();
 
    if (!associate(data, active)) {
       if (DCPS_debug_level) {
@@ -2190,7 +2199,7 @@ void OpenDDS::DCPS::WriterStats::reset_stats()
 std::ostream& OpenDDS::DCPS::WriterStats::raw_data(std::ostream& str) const
 {
    str << std::dec << this->stats_.size()
-                    << " samples out of " << this->stats_.n() << std::endl;
+                          << " samples out of " << this->stats_.n() << std::endl;
    return str << this->stats_;
 }
 
