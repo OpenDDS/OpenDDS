@@ -254,8 +254,8 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
       }
    }
    //### Debug statements to track where associate is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
-   guard_links.release();
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
+   //guard_links.release();
 
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> server_link_ is nil? %s   client_link_ is nil? %s\n", this->server_link_.is_nil() ? "YES":"NO", this->client_link_.is_nil() ? "YES":"NO"));
@@ -272,6 +272,8 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
    if (session.is_nil()) {
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> exit, FAILURE, session is nil\n"));
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
       return AcceptConnectResult();
    }
 
@@ -283,9 +285,12 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> exit SUCCESS w/link, loopback\n"));
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> link is nil? %s\n", link.is_nil() ? "YES":"NO"));
-
+      //### Debug statements to track where associate is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
       return AcceptConnectResult(link._retn());
    }
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
    return AcceptConnectResult(link._retn());
    /*
    if (session->acked()) {
