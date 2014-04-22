@@ -1,3 +1,17 @@
+Tue Apr 22 15:13:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/RecorderReplayer/Publisher.cpp:
+        * tests/DCPS/RecorderReplayer/Relay.cpp:
+        * tests/DCPS/RecorderReplayer/Subscriber.cpp:
+
+          Changed to create all non-participant vars in a sub-scope to
+          ensure all references are cleaned up before cleaning up the
+          participant and shutting down.
+
+        * tests/DCPS/RecorderReplayer/run_test.pl:
+
+          Fixed error statement.
+
 Mon Apr 21 18:57:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Priority/run_test.pl:

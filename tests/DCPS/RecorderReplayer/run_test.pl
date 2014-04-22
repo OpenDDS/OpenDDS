@@ -178,7 +178,7 @@ if ($SubscriberResult != 0) {
 
 my $RelayResult = $Relay->WaitKill(30);
 if ($RelayResult != 0) {
-    print STDERR "ERROR: subscriber returned $RelayResult \n";
+    print STDERR "ERROR: relay returned $RelayResult \n";
     $status = 1;
 }
 
