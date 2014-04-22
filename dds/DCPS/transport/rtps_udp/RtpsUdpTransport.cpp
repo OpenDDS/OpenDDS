@@ -72,7 +72,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 TransportImpl::AcceptConnectResult
 RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
-                                   TransportClient* client)
+                                   TransportClient* )
 {
   RtpsUdpDataLink_rch link = link_;
   if (link_.is_nil()) {
@@ -106,7 +106,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 TransportImpl::AcceptConnectResult
 RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
-                                  TransportClient* client)
+                                  TransportClient* )
 {
   RtpsUdpDataLink_rch link = link_;
   if (link_.is_nil()) {
@@ -123,8 +123,8 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
 
 
 void
-RtpsUdpTransport::stop_accepting_or_connecting(TransportClient* client,
-                                               const RepoId& remote_id)
+RtpsUdpTransport::stop_accepting_or_connecting(TransportClient* /*client*/,
+                                               const RepoId& /*remote_id*/)
 {
   //TODO: implement
 }
