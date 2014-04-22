@@ -17,6 +17,8 @@ public class TestSubscriber {
 
     public static void main(String[] args) throws Exception {
 
+        System.out.println("Start Subscriber");
+
         DomainParticipantFactory dpf =
             TheParticipantFactory.WithArgs(new StringSeqHolder(args));
         if (dpf == null) {
@@ -95,8 +97,12 @@ public class TestSubscriber {
 
         ws.detach_condition(sc);
 
+        System.out.println("Stop Subscriber");
+
         dp.delete_contained_entities();
         dpf.delete_participant(dp);
         TheServiceParticipant.shutdown();
+
+        System.out.println("Subscriber exiting");
     }
 }

@@ -1,3 +1,11 @@
+Tue Apr 22 15:37:57 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Added logging.
+
 Tue Apr 22 15:27:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
