@@ -1,3 +1,9 @@
+Tue Apr 22 19:20:53 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/rtps.ini:
+
+          Added reliability so subscriber will configure the Qos correctly.
+
 Tue Apr 22 15:37:57 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * java/tests/messenger/both/Both.java:
