@@ -146,8 +146,10 @@ public:
   // adds a data sample to the end of the list
   void add(ReceivedDataElement *data_sample) ;
 
+  // returns true if the instance was released
   bool remove(ReceivedDataElement *data_sample) ;
 
+  // returns true if the instance was released
   bool remove(ReceivedDataFilter& match, bool eval_all);
 
   ReceivedDataElement *remove_head() ;

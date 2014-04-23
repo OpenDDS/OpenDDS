@@ -45,20 +45,6 @@ Test::Options::priority() const
 }
 
 ACE_INLINE
-unsigned int
-Test::Options::count() const
-{
-  return this->count_;
-}
-
-ACE_INLINE
-unsigned int&
-Test::Options::count()
-{
-  return this->count_;
-}
-
-ACE_INLINE
 Test::Options::TransportType
 Test::Options::transportType() const
 {
@@ -114,3 +100,16 @@ Test::Options::topicName()
   return this->topicName_;
 }
 
+ACE_INLINE
+bool&
+Test::Options::multipleInstances()
+{
+  return this->multipleInstances_;
+}
+
+ACE_INLINE
+bool
+Test::Options::multipleInstances() const
+{
+  return this->multipleInstances_;
+}

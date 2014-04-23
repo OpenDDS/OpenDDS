@@ -48,7 +48,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     CORBA::String_var type_name = ts->get_type_name();
 
     DDS::Topic_var topic =
-      participant->create_topic("Movie Discussion List",
+      participant->create_topic("Movie Discussion List TLT",
                                 type_name,
                                 TOPIC_QOS_DEFAULT,
                                 DDS::TopicListener::_nil(),

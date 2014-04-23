@@ -512,8 +512,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                   op_interval_ms = 0;
                   expected -= timeout_writes;
                   ACE_DEBUG((LM_DEBUG,
-                             ACE_TEXT ("(%P|%t) timed out writes %d, we expect %d\n"),
-                             timeout_writes, expected));
+                             ACE_TEXT ("(%P|%t) timed out writes %d, we expect %d, we have received %d\n"),
+                             timeout_writes, expected, num_reads.value()));
                 }
 
             }

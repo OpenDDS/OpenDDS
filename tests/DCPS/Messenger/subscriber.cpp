@@ -155,12 +155,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
+    TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
   }
 
-  TheServiceParticipant->shutdown();
   return 0;
 }

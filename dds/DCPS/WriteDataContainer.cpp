@@ -1003,6 +1003,12 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
             ret = DDS::RETCODE_TIMEOUT;
 
           } else {
+            // handle the race condition where the element is freed after
+            // the timeout has occurred, but before this thread has
+            // re-acquired the lock
+            if (element->space_available_ == true) {
+              break;
+            }
             // Other errors from wait.
             ret = DDS::RETCODE_ERROR;
           }

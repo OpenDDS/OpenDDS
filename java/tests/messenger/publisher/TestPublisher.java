@@ -17,6 +17,8 @@ public class TestPublisher {
 
     public static void main(String[] args) {
 
+        System.out.println("Start Publisher");
+
         DomainParticipantFactory dpf =
             TheParticipantFactory.WithArgs(new StringSeqHolder(args));
         if (dpf == null) {
@@ -110,9 +112,13 @@ public class TestPublisher {
           }
         }
 
+        System.out.println("Stop Publisher");
+
         // Clean up
         dp.delete_contained_entities();
         dpf.delete_participant(dp);
         TheServiceParticipant.shutdown();
+
+        System.out.println("Publisher exiting");
     }
 }

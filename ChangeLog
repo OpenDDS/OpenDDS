@@ -1,995 +1,663 @@
-Mon Jan 27 19:10:01 UTC 2014  Mike Martinez  <martinezm@ociweb.com>
+Tue Apr 22 19:24:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * OpenDDS version 3.5 released.
+        * tests/DCPS/LargeSample/rtps.ini:
 
-Sun Jan 26 01:17:00 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+          Removed reliable, since run_test.pl passes the reliability flag.
 
-        * AUTHORS:
-        * NEWS:
-        * README:
+Tue Apr 22 19:20:53 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Updates to get ready for release.
+        * tests/DCPS/LargeSample/rtps.ini:
 
-Tue Jan 14 16:08:32 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+          Added reliability so subscriber will configure the Qos correctly.
 
-        * dds/DCPS/transport/framework/ReactorSynch.cpp:
+Tue Apr 22 15:37:57 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Coverity issue #1154613: explicitly reset the raw pointer copy
-          of the event handler.  We are letting the EventHandler_var
-          actually perform the delete, but be safe(r) here and reset the
-          raw (narrowed) pointer as well.
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
 
-Thu Jan  9 18:12:54 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+          Added logging.
 
-        * tests/DCPS/Thrasher/ParticipantTask.h:
-        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+Tue Apr 22 15:27:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          Reduce the scope of Entity creation serialization to only the
-          participant.
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
 
-Thu Jan  9 17:46:36 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+          Use ERROR in output so that scoreboard detects it.
 
-        * tests/DCPS/Thrasher/ParticipantTask.h:
-        * tests/DCPS/Thrasher/ParticipantTask.cpp:
-        * tests/DCPS/Thrasher/Publisher.cpp:
-        * tests/DCPS/Thrasher/Subscriber.cpp:
-        * tests/DCPS/Thrasher/run_test.pl:
+Tue Apr 22 15:13:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Serialize Entity creation for the test threads.
+        * tests/DCPS/RecorderReplayer/Publisher.cpp:
+        * tests/DCPS/RecorderReplayer/Relay.cpp:
+        * tests/DCPS/RecorderReplayer/Subscriber.cpp:
 
-Thu Jan  9 16:30:31 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+          Changed to create all non-participant vars in a sub-scope to
+          ensure all references are cleaned up before cleaning up the
+          participant and shutting down.
 
-        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/RecorderReplayer/run_test.pl:
 
-          Enable Builtin Topics.  This stabilizes the test on some
-          platforms.
+          Fixed error statement.
 
-Thu Jan  9 00:18:43 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+Mon Apr 21 18:57:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * tests/DCPS/Priority/run_test.pl:
 
-          Specify correct command line argument for zero copy.
+          Reset the transport debug default value to undef.
 
-Wed Jan  8 23:41:25 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+Mon Apr 21 17:55:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * tests/DCPS/ConfigTransports/Puller.cpp:
 
-          Include ThreadSynch.h for when inlining is disabled.
+          Removed cleanup of the participants.
 
-Wed Jan  8 19:54:37 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+        * tests/DCPS/ConfigTransports/publisher.cpp:
 
-        * dds/DCPS/transport/framework/ReactorSynch.inl:
-        * dds/DCPS/transport/framework/ReactorSynch.cpp:
-        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
-        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
-        * dds/DCPS/transport/tcp/TcpConnection.cpp:
-        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
-        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
-        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+          Cleaned up commented out code.
 
-          Converted development diagnostics to debug messages.
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
 
-Wed Jan  8 04:40:24 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+          Moved participant1 and participant2 declaration to the outer scope and
+          moved cleanup of participants and shutting down the service participant to
+          occur at the end of processing and put all other code in a sub-scope so
+          they are cleaned up before participants and the service participant are
+          cleaned up.
 
-        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+Mon Apr 21 11:50:41 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Left out of last checkin.  Declares the new mode() and synch()
-          accessors.
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
 
-Wed Jan  8 02:59:39 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+          Removed deleting of publisher and topic after they were already deleted by
+          delete_contained_entities and removed unneeded check that the data writer
+          wasn't there any more.
 
-        * dds/DCPS/transport/framework/PerConnectionSynch.h:
-        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
-        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
-        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
-        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
+Sat Apr 19 10:54:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Reverted to previous implementation.
+        * tests/DCPS/FooTest5/subscriber.cpp:
 
-        * dds/DCPS/transport/framework/ReactorSynch.h:
-        * dds/DCPS/transport/framework/ReactorSynch.inl:
-        * dds/DCPS/transport/framework/ReactorSynch.cpp:
-        * dds/DCPS/transport/framework/ReactorSynchStrategy.h:
-        * dds/DCPS/transport/framework/ReactorSynchStrategy.inl:
-        * dds/DCPS/transport/framework/ReactorSynchStrategy.cpp:
+          Fixed compile error.
 
-          Implementatino of ThreadSynch using an ACE_Reactor.
+Fri Apr 18 21:07:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/transport/framework/ScheduleOutputHandler.h:
-        * dds/DCPS/transport/framework/ScheduleOutputHandler.inl:
-        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+        * bin/dcps_tests.lst:
 
-          Notification scheduler for reactor write mask updates.
+          Removed transport debug level (it screws up the test matrix).
 
-        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
-        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
+        * tests/DCPS/Priority/run_test.pl:
 
-          Changed new interface to simplify write mask updates.
+          defaulting transport debug to 2.
 
-        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
-        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
 
-          Added protected mode() and synch() accessors.  Documentation
-          updates.
+          Adding setting ACE_LOG_TIMESTAMP to improve diagnostics.
 
-        * dds/DCPS/transport/tcp/TcpConnection.cpp:
-        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
-        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
 
-          Migrate to new mask update interface.
+          Improving log message.
 
-        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+Fri Apr 18 18:20:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Revert diagnostic extensions.
+        * bin/dcps_tests.lst:
 
-Thu Jan  2 23:29:23 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+          Adding transport debug level for Priority test to identify error
+          where not enough space can be allocated.
 
-        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
-        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
-        * dds/DCPS/transport/framework/TransportSendStrategy.h:
-        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+Fri Apr 18 14:45:30 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Hoisted the link id value from the strategy to the base class
-          for use in additional diagnostic messages.
+        * tests/DCPS/Priority/transport.ini:
+        * tests/DCPS/Priority/transport_solaris.ini:
 
-        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
-        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
-        * dds/DCPS/transport/tcp/TcpConnection.cpp:
-        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+          Removed setting scheduler parameters.
 
-          Promoted iostream based development messages to ACE_DEBUG
-          messages that I will demote to high debug level logs once
-          development is complete.
+Fri Apr 18 12:41:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
 
-          Added more diagnostics messaging.
+          Moved call to TheServiceParticipant->shutdown() to occur before applicable
+          vars go out of scope.
 
-        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+Thu Apr 17 18:46:52 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          work-in-progress
+        * tests/DCPS/Priority/publisher_main.cpp:
 
-        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+          Removed testing scheduler in this test.
 
-          Updated command line handling to allow additional and finer
-          grained control of the testing and diagnostics.
+Thu Apr 17 16:53:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-Thu Jan  2 15:37:16 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
+        * bin/dcps_tests.lst:
 
-        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+          Added back in Priority tests.
 
-          Correct Coverity issue 1141707.  The value is initialized
-          before use, but now is always defined.
+        * tests/DCPS/Priority/DataReaderListener.cpp:
 
-Fri Dec 20 00:25:35 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+          Increased sleeping to definitely cause back pressure on all builds.
 
-        * dds/DCPS/transport/framework/PerConnectionSynch.h:
-        * dds/DCPS/transport/framework/PerConnectionSynch.inl:
-        * dds/DCPS/transport/framework/PerConnectionSynch.cpp:
-        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.h:
-        * dds/DCPS/transport/framework/PerConnectionSynchStrategy.cpp:
-        * dds/DCPS/transport/framework/ThreadSynch.h:
-        * dds/DCPS/transport/framework/ThreadSynch.inl:
-        * dds/DCPS/transport/framework/ThreadSynch.cpp:
-        * dds/DCPS/transport/framework/ThreadSynchWorker.h:
-        * dds/DCPS/transport/framework/ThreadSynchWorker.inl:
-        * dds/DCPS/transport/framework/TransportImpl.h:
-        * dds/DCPS/transport/framework/TransportImpl.cpp:
-        * dds/DCPS/transport/framework/TransportSendStrategy.h:
-        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
 
-        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+          Temporarily removed check for scheduler.
 
-        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
 
-        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+          Increased the number of instance samples to prevent low priority samples
+          being removed from the queue before high priority sample can be passed
+          to write.
 
-        * dds/DCPS/transport/tcp/TcpConnection.h:
-        * dds/DCPS/transport/tcp/TcpConnection.inl:
-        * dds/DCPS/transport/tcp/TcpConnection.cpp:
-        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
-        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
-        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+Thu Apr 17 15:12:57 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/transport/udp/UdpSendStrategy.cpp:
+        * bin/dcps_tests.lst:
 
-        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
-        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
-        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
-        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+          Temporarily turned off Priority tests.
 
-        * tests/DCPS/Reconnect/run_test.pl:
+Thu Apr 17 13:00:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Replacing the PerConnectionSynch thread with processing of the
-          queued outbound data by the TransportReactorTask thread via its
-          handle_output() callback.
+        * dds/DCPS/DataSampleList.cpp:
 
-Tue Nov 19 00:13:25 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+          Fixed error in setting tail_ for removing a next instance sample
+          from the tail of the list.
 
-        * dds/DCPS/InstanceState.inl:
-        * dds/DCPS/InstanceState.cpp:
-        * dds/idl/CPPTemplate.txt:
+Tue Apr 15 21:41:19 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          Replaced redundant use of sample_lock_ with instances_lock_ to
-          allow protecting access of the internal InstanceState::writers_
-          container.
+        * dds/InfoRepo/DCPSInfo_i.cpp:
 
-Wed Nov 13 22:07:19 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+          Additional logging prior to calling find_subscription_reference()
+          and find_publication_reference().
 
-        * dds/DCPS/DataReaderImpl.h:
-        * dds/DCPS/DataReaderImpl.cpp:
+        * tests/DCPS/PersistentDurability/run_test.pl:
 
-        * dds/idl/CPPTemplate.txt:
+          Raise log level.
 
-          Add locking around access to the instances_ container to
-          protect concurrent accesses.
+Tue Apr 15 20:57:02 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-Thu Nov  7 00:58:11 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+        * tests/DCPS/Priority/DataReaderListener.cpp:
 
-        * bin/run_dds.pl:
+          Added more diagnostics.
 
-          Made this more generally useful:
-          -) added '-g' argument to allow specification of the service
-             configurator configuration file;
-          -) allow fully rooted commands to be executed;
-          -) changed default netstat data gathering from '--inet' to
-             '--tcp' which is more generally available.
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
 
-Wed Sep 11 23:19:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+          Added class to handle cleanup when exiting and added
+          diagnostics messages.
 
-        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
 
-          In remove_association(), there may be fewer instance
-          handles than rds_len.
+          Added timestamps to track when data is disposed.
 
-        * dds/DCPS/Service_Participant.cpp:
+Tue Apr 15 15:40:10 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Minor update to the prior commit.
+        * dds/DCPS/WriteDataContainer.cpp:
 
-Wed Sep 11 14:26:27 UTC 2013  Huang-Ming Huang  <huangh@ociweb.com>
+          Fixed race condition where the element has been marked with
+          space available after the condition has timedout, but before
+          it has re-acquired the lock.
 
-        * dds/DCPS/Service_Participant.cpp:
+Tue Apr 15 14:24:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Fixed problem where the quoted value of -ORB command line argument
-          would be expanded before passed into ORB_init().
+        * dds/DCPS/WriteDataContainer.cpp:
 
-Wed Sep 11 00:46:49 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+          Removed logging of lock recursion level since it isn't
+          implemented on some platforms.
 
-        * dds/DCPS/transport/framework/DataLink.h:
-        * dds/DCPS/transport/framework/DataLink.cpp:
-        * dds/DCPS/transport/framework/TransportImpl.h:
-        * dds/DCPS/transport/framework/TransportImpl.inl:
+Mon Apr 14 19:20:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Use the transport's reactor for scheduled_delayed_release().
-          This avoids a deadlock scenario where two threads running
-          handle_timeout from different reactors each try to schedule/cancel
-          timers on the other reactor.
+        * tests/DCPS/Priority/publisher_main.cpp:
 
-Tue Sep 10 18:18:26 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+          Changed check of scheduler to just ensure scheduler was set
+          since publisher would need to be run as super user on linux
+          platforms to select the round robin scheduler.
 
-        * dds/DCPS/transport/framework/TransportSendStrategy.h:
-        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+Mon Apr 14 19:20:05 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          In remove_all_msgs(pub_id), check to see if any queue elements
-          belonging to that publication are on the delayed notification list.
-          If so, remove them from the list and invoke the usual callback when
-          doing the removal.
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
 
-Mon Sep  9 15:39:08 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+          Create different topic name to diagnose out-of-order issues.
 
-        * dds/DCPS/DataReaderImpl.h:
-        * dds/DCPS/ZeroCopySeq_T.h:
-        * dds/idl/CPPTemplate.txt:
+Mon Apr 14 19:17:26 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          Fixed fuzz errors.
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
 
-Thu Sep  5 18:47:10 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+          Additional Watchdog logging at debug level 6 and up
 
-        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/Deadline/run_test.pl:
 
-          Added lock to take() with AbstractSample interface to keep data from
-          double deleting it's member pointers.
+          Run test at debug level 6.
 
-Wed Sep  4 02:20:35 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
+Mon Apr 14 19:01:34 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
 
-          Explicit includes.
+          Fixed error in error statement.
 
-Mon Sep  2 18:01:30 UTC 2013  Phil Mesnier  <mesnier_p@ociweb.com>
+Mon Apr 14 18:55:30 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.h:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
 
-          Explicit includes.
+          Removed verbose check on setup (one time) logging messages to better
+          diagnose when in the sequence of events errors are happening.
 
-Fri Aug 30 18:51:39 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+Mon Apr 14 17:42:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/DataReaderImpl.h:
-        * dds/idl/CPPTemplate.txt:
-        * dds/idl/HTemplate.txt:
-        * tests/DCPS/unit/MyTypeSupportImpl.h:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
 
-          Added AbstractSamples interface and added an overloaded
-          take() method to avoid potential read_generic(),
-          take_generic() interface race conditions.
+          Added logging error for not associating the publication and
+          subscription.
 
-Thu Aug 29 21:41:50 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+Mon Apr 14 16:35:35 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/idl/CPPTemplate.txt:
+        * dds/DCPS/WriteDataContainer.cpp:
 
-          Moved locking to callers of take_i and read_i
-          instead of locking within read_i and take_i.
+          Added logic to determine if lock is held prior to editing the head
+          of the waiting_list_.
 
-Mon Aug 19 10:26:32 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+Mon Apr 14 15:15:44 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/DataReaderImpl.h:
-        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
 
-          RT16148: Removed acquisition of the sample_lock_ from the
-          handle_timeout() method.  There is yet-another-deadlock caused
-          by this acquisition.  The only member protected exclusively by
-          this lock is the liveliness_timer_id_, which has been changed
-          to an Atomic data type.  The writers_ container is protected
-          separately by the writers_lock_.
+          Added logic to determine if lock is held prior to waiting on the
+          condition.
 
-Fri Aug 16 02:25:15 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+        * tests/DCPS/Priority/Publisher.cpp:
 
-        * dds/DCPS/DataReaderImpl.cpp:
+          Changing path of logic that is taken in
+          WriteDataContainer::obtain_buffer to prevent errors (let
+          tests/DCPS/FooTest5 track the obtain_buffer error).
 
-          Ensure raw pointer validity before use.
+Mon Apr 14 12:08:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-Mon Aug 12 22:38:43 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+        * tests/DCPS/Priority/Publisher.cpp:
 
-        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
-        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+          Added back kludge 2 second delay before publisher starts
+          writing.
 
-          RT16206: Changed the value of last_ to correspond to the actual
-          last byte of the pool.  This is how the value is used in the
-          malloc() implementation.  This is the correct usage, and there
-          is a possibly failure if the incorrect value is retained.
+Sat Apr 12 11:53:44 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-Mon Aug 12 19:01:19 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+        * tests/DCPS/Priority/Subscriber.cpp:
 
-        * tests/DCPS/unit/MyTypeSupportImpl.h:
-        * tests/DCPS/unit/MyTypeSupportImpl.cpp:
-          Updated test due to changes to ZeroCopyDataSeq template
-          interface
+          Added source timestamp destination order Qos.
 
-Fri Aug  9 22:04:45 UTC 2013  Phillip LaBanca  <labanca_p@ociweb.com>
+Sat Apr 12 11:39:19 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/DataReaderImpl.h:
-        * dds/DCPS/MultiTopicDataReaderBase.cpp:
-        * dds/DCPS/ZeroCopySeq_T.h:
-        * dds/DCPS/ZeroCopySeq_T.cpp:
+        * ChangeLog:
+        * tests/DCPS/Priority/subscriber_main.cpp:
 
-        * dds/idl/CPPTemplate.txt:
-        * dds/idl/HTemplate.txt:
-          Added methods to ZeroCopyDataSeq template support incrementing and
-          decrementing zero copy references.
+          Fixed fuz errors.
 
-Thu Aug  1 23:08:51 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+Fri Apr 11 18:42:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/DataReaderImpl.cpp:
+        * bin/dcps_tests.lst:
 
-          Correct spelling and scope errors introduced by the last
-          check-in that was done *prior* to compilation.  Ordering is
-          everything...
+          Added testing priority for multiple key instances
 
-Thu Aug  1 22:13:39 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+        * tests/DCPS/Priority/Options.h:
+        * tests/DCPS/Priority/Options.inl:
+        * tests/DCPS/Priority/Options.cpp:
 
-        * dds/DCPS/DataReaderImpl.cpp:
+          Added parameter for indicating there should be multiple instances.
 
-          RT16148 - reduce lock scope to avoid a deadlock by attempting
-          to acquire the reactor and sample locks in different order on
-          different threads.
+        * tests/DCPS/Priority/Publisher.cpp:
 
-Thu Jun 20 17:08:37 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+          Added being able to set the priority sample to have a different key.
 
-        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * tests/DCPS/Priority/run_test.pl:
 
-          Allow configuration string for multicast default transport
-          port to be w_char.
+          Added option to have the high priority sample sent as a different instance.
 
-Tue Jun 18 22:15:41 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+Fri Apr 11 17:28:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/RTPS/RtpsDiscovery.h:
-        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * tests/DCPS/Priority/Test.idl:
 
-          Changed "DefaultMulticastGroup" configuration key to
-          "InteropMulticastOverride" to indicate the semantics better.
-          Added some documentation.
+          Added new fields for tracking samples, which samples are priority,
+          and extra storage to increase time to send samples.
 
-        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
 
-          Include a port number if the user does not supply one with the
-          multicast group specification.  The default port added this way
-          is 7401.
-          Added some documentation.
+          Changed to verify that a high priority message arrives before the last
+          low priority message sent before it.
 
-        * tests/DCPS/RtpsDiscovery/rtps_disc_group.ini:
+        * tests/DCPS/Priority/Publisher.cpp:
 
-          Migrated the multicast groups used to the un-routed local
-          groups (RFC 2365, Section 6.1).
+          Changed QOS and changed to send a sequence of low priority messages
+          until a timeout occurs and then send a high priority message,
+          indicating the sequence number of the low priority messages that it
+          should be received before.
 
-Tue Jun 18 20:23:16 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+        * tests/DCPS/Priority/Subscriber.h:
+        * tests/DCPS/Priority/Subscriber.cpp:
 
-        * dds/DCPS/RTPS/Spdp.cpp:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+          Changed to report that the test passed and changed QOS settings.
 
-          Set TTL on the socket used for sending.
+        * tests/DCPS/Priority/publisher_main.cpp:
 
-        * tests/DCPS/RtpsDiscovery/rtps_disc_group.ini:
+          Cleaned up error statement.
 
-          Change the TTL for each section so it can be identified when
-          validating the tests.
+        * tests/DCPS/Priority/subscriber_main.cpp:
 
-Mon Jun 17 22:13:36 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+          Changed how passing is determined.
 
-        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * tests/DCPS/Priority/transport.ini:
 
-          Actually save and use the configured TTL value.
+          Fixing multicast config to match what run_test.pl passes.
 
-        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * tests/DCPS/Priority/run_test.pl:
 
-          Account for the ACE_INET_Addr assumption that values without a
-          colon are port numbers.
-          Actually save and use the configured TTL value.
+          Cleaned up test parameters and description.
 
-        * tests/DCPS/RtpsDiscovery/rtps_disc_group.ini:
-        * tests/DCPS/RtpsDiscovery/run_test.pl:
+Fri Apr 11 16:29:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          Extend testing to include configurable group and ttl values.
 
-Mon Jun 17 16:28:08 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
+        * tests/DCPS/FooTest2:
 
-        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
-
-          Provide a default for the newly configurable default multicast
-          group.
-
-Mon Jun 17 15:40:44 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
-
-        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
-        * dds/DCPS/RTPS/Sedp.cpp:
-        * dds/DCPS/RTPS/Spdp.cpp:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
-
-          Resolve Coverity defects CID 1034542-1034545 from last checkin.
-
-Fri Jun 14 22:57:38 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
-
-        * dds/DCPS/RTPS/RtpsDiscovery.h:
-        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
-        * dds/DCPS/RTPS/Sedp.cpp:
-        * dds/DCPS/RTPS/Spdp.cpp:
-
-          Added DefaultMulticastGroup and TTL configuration settings.
-          TTL is set on the SPDP socket.
-
-        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
-
-          Set the TTL value for the multicast socket.
-
-Fri Jun 14 17:51:15 UTC 2013  Paul Calabrese  <calabrese_p@ociweb.com>
-
-        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
-        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
-        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
-
-          Modify this example to work with static builds.
-
-Fri Jun  7 18:14:52 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
-
-        * dds/DCPS/transport/tcp/TcpTransport.cpp:
-
-          RT-16106: Moved actions to outside of lock scope to avoid a
-                   deadlock.
-
-Wed Jun  5 20:19:06 UTC 2013  Jeff Schmitz  <schmitz_j@ociweb.com>
-
-        * MPC/config/dcps.mpb:
-        * MPC/config/dcpslib.mpb:
-
-          Bugzilla 4058: Split dcps base in half - one for internal use
-          (dcpslib) and one for external (dcps).  dcpslib adds in libout.
-
-        * contrib/wrapper/DDSWrapper_OpenDDS.mpc:
-        * contrib/wrapper/example/WrapperStockQuoter.mpc:
-        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
-        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
-        * dds/DCPS/RTPS/rtps.mpc:
-        * dds/DCPS/transport/multicast/OpenDDS_Multicast.mpc:
-        * dds/DCPS/transport/rtps_udp/OpenDDS_Rtps_Udp.mpc:
-        * dds/DCPS/transport/shmem/OpenDDS_Shmem.mpc:
-        * dds/DCPS/transport/tcp/OpenDDS_Tcp.mpc:
-        * dds/DCPS/transport/udp/OpenDDS_Udp.mpc:
-        * dds/InfoRepo/DCPSInfoRepo.mpc:
-        * dds/monitor/monitor.mpc:
-        * java/dds/dcps_java.mpc:
-        * java/jms/native/opendds_jms_native.mpc:
-        * java/tests/complex_idl/complex_idl_test.mpc:
-        * java/tests/multirepo/multirepo_test.mpc:
-        * tests/DCPS/Compiler/idl_test1_lib/idl_test1_lib.mpc:
-        * tests/DCPS/Compiler/idl_test2_lib/idl_test2_lib.mpc:
-        * tests/DCPS/Compiler/idl_test3_lib/idl_test3_lib.mpc:
-        * tests/DCPS/TestFramework/TestFramework.mpc:
-        * tools/dissector/dissector.mpc:
-        * tools/excelRTD/ExcelRTD.mpc:
-        * tools/modeling/codegen/model/Model.mpc:
-
-          Bugzilla 4058: Adapt to use dcpslib base where required or set libout
-          manually.
-
-Thu May 30 22:55:43 UTC 2013  Mike Martinez  <martinez_m@ociweb.com>
-
-        * bin/run_dds.pl:
-
-          Updated to only include repo and svc config args when used.
-
-Fri May 24 17:28:41 UTC 2013  Brian Johnson  <johnsonb@ociweb.com>
-
-        * bin/PerlDDS/ProcessFactory.pm:
-
-          Fixed fuzz error.
-
-Thu May 23 21:01:04 UTC 2013  Adam Mitz  <mitza@ociweb.com>
-
-        * tests/DCPS/ManyTopicTest/publisher.cpp:
-        * tests/DCPS/ManyTopicTest/subscriber.cpp:
-
-          Attempting to fix Coverity warnings.
-
-Thu May 23 19:39:50 UTC 2013  Brian Johnson  <johnsonb@ociweb.com>
-
-        * bin/PerlDDS/ProcessFactory.pm:
-        * bin/PerlDDS/Run_Test.pm:
-
-          Added TestTarget handling for VxWorks and cleaned up unused
-          subroutines.
-
-Wed May 22 17:49:05 UTC 2013  Adam Mitz  <mitza@ociweb.com>
-
-        * docs/html/guidelines:
-        * docs/html/guidelines/guidelines.html:
-
-          Started a document describing development guidelines.
-
-Tue May 21 16:39:02 UTC 2013  Adam Mitz  <mitza@ociweb.com>
-
-        * NEWS:
-        * README:
-
-          Updated for next release.  As of now that will be 3.4.2.
-
-Fri May 17 21:10:32 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
-
-        * dds/DCPS/RTPS/Sedp.cpp:
-
-          Added spdp shutdown checks to avoid race condition in task
-          enqueue methods.
-
-Tue May 14 21:18:14 UTC 2013  Paul Calabrese  <calabrese_p@ociweb.com>
-
-        * dds/idl/metaclass_generator.cpp:
-
-          Fix a code generation bug with typedefs of types like
-          octets (char, wchar, boolean also) used in DCPS types.
-
-        * tests/DCPS/Compiler/idl_test3_lib/FooDef.idl:
-
-          Add a typedef-ed octet to this regression test.
-
-        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
-
-          Manually adjust the marshaling and padding sizes for
-          this test.
-
-Mon May 13 14:25:17 UTC 2013  Adam Mitz  <mitza@ociweb.com>
-
-        * tests/DCPS/ManyTopicTest/publisher.cpp:
-        * tests/DCPS/ManyTopicTest/subscriber.cpp:
-
-          Fixed errors that only occurred on some compilers.
-
-Fri May 10 16:18:06 UTC 2013  Adam Mitz  <mitza@ociweb.com>
-
-        * dds/DCPS/RTPS/RtpsDiscovery.h:
-        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
-        * dds/DCPS/RTPS/Sedp.cpp:
-        * dds/DCPS/RTPS/Spdp.cpp:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
-        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
-
-          Added config options to bind RTPS-related multicast sockets
-          to specific network interfaces, similar to the local_address
-          option in the multicast transport.  The new options are...
-          In rtps_udp transport instance: multicast_interface=<string>
-          In rtps_discovery: MulticastInterface=<string>
-
-Fri May 10 15:48:28 UTC 2013  Adam Mitz  <mitza@ociweb.com>
-
-        * dds/idl/HTemplate.txt:
-
-          Added nested typedefs to the generated FooTypeSupportImpl class
-          in order to facilitate template programming using these types.
-
-        * tests/DCPS/ManyTopicTest/DataReaderListener.h:
-        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
-        * tests/DCPS/ManyTopicTest/Writer.h:
-        * tests/DCPS/ManyTopicTest/Writer.cpp:
-        * tests/DCPS/ManyTopicTest/publisher.cpp:
-        * tests/DCPS/ManyTopicTest/subscriber.cpp:
-
-          Demonstrate the use of templates with the typedefs mentioned above.
-          This removes quite a bit of duplicated and almost-duplicated code
-          from the test which uses 4 topics and 3 topic types.
-
-        * tools/modeling/codegen/model/Sync.h:
-        * tools/modeling/codegen/model/Sync.cpp:
-
-          Fixed const-correctness.
-
-        * tests/DCPS/ManyTopicTest/DataReaderListener.cpp:
-        * tests/DCPS/ManyTopicTest/DataReaderListener1.h:
-        * tests/DCPS/ManyTopicTest/DataReaderListener1.cpp:
-        * tests/DCPS/ManyTopicTest/DataReaderListener2.h:
-        * tests/DCPS/ManyTopicTest/DataReaderListener2.cpp:
-        * tests/DCPS/ManyTopicTest/DataReaderListener3.h:
-        * tests/DCPS/ManyTopicTest/DataReaderListener3.cpp:
+        * tests/DCPS/FooTest2/FooTest2.obsolete_mpc:
+        * tests/DCPS/FooTest2/README:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest2/obsolete_test.pl:
 
           Removed these files.
 
-Thu Apr 25 08:29:16 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+Fri Apr 11 14:04:45 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-        * dds/DCPS/DataReaderImpl.cpp:
-          Decouple the DataReader from the ContentFilteredTopic as
-          part of the delete_datareader call instead of doing it
-          in the destructor.
+        * dds/DCPS/Service_Participant.cpp:
 
-Mon Apr 22 18:41:38 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+          Reverted change revision 5550 so scheduler string will be processed.
 
-        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
+Thu Apr 10 19:06:20 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Added base project that was overlooked as part of
-          commit to disable building when CFT is built.
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
 
-Fri Apr 19 19:19:48 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+          Cleaned up code.
 
-        * DDS_TAOv2.mwc:
+Thu Apr 10 18:16:25 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-          Include a directory instead of an mpc file for IORTable.
-          Allows more flexibility for changes in different TAO versions.
+        * tests/DCPS/Priority/publisher_main.cpp:
 
-Fri Apr 19 17:30:19 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+          Added test to verify that Service_Participant::scheduler is being
+          set to the value in the transport ini file.
 
-        * dds/DCPS/DataReaderImpl.cpp:
-          Fixed comment
+        * tests/DCPS/Priority/run_test.pl:
 
-Fri Apr 19 14:53:21 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+          Fixed description.
 
-        * dds/DCPS/DomainParticipantImpl.cpp (delete_contentfilteredtopic):
-          Log the reason why a cft couldn't be deleted
+Wed Apr  9 19:37:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
-Thu Apr 18 17:47:40 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+        * MPC/config/dcps_test_java.mpb:
 
-        * bin/dcps_tests.lst:
+          Added mpb file for java test libraries to depend on to
+          cause libout to be set to the current directory.
 
-          Don't run SubscriberCycle test for DDS build
-          with content filtered topics disabled.
+        * MPC/config/idl2jni.mpb:
 
-        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
+          Removed setting libout to current directory and leaving setting
+          libout for decendant projects.
 
-          Don't build SubscriberCycle test for DDS build
-          with content filtered topics disabled. Complete
-          fix from previous commit so builds using an
-          install of OpenDDS.
+        * java/dds/dcps_java.mpc:
 
-        * tests/DCPS/SubscriberCycle/Subscriber.cpp:
+          Removed setting libout and moved dcpslib dependency after idl2jni
+          to ensure that libout is set correctly.
 
-          Fixed warning about signed/unsigned comparison.
+        * java/jms/native/opendds_jms_native.mpc:
 
-Mon Apr 15 15:47:37 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+          Moved dcpslib dependency after idl2jni to ensure that libout is
+          set correctly.
 
-        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
+        * java/tests/builtintopics/builtintopics_test.mpc:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/messenger/both/java_both_test.mpc:
+        * java/tests/messenger/messenger_idl/messenger_idl_test.mpc:
+        * java/tests/messenger/publisher/publisher_idl_test.mpc:
+        * java/tests/messenger/subscriber/subscriber_idl_test.mpc:
+        * java/tests/multirepo/multirepo_test.mpc:
+        * java/tests/transport_config/transport_config.mpc:
+        * java/tests/zerocopy/zerocopy.mpc:
 
-          Fix so test builds when using an install of OpenDDS.
+          Changed to depend on dcps_test_java, so the test lib will not
+          go to $DDS_ROOT/lib.
 
-Mon Apr 15 12:57:37 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+Tue Apr  8 01:23:39 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-        * tests/DCPS/SubscriberCycle/Subscriber.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
 
-          Added #include to explicity pick up definition of
-          DDS::ContentFilteredTopic_ptr.
+          Fix fuzz.
 
-Fri Apr 12 14:14:23 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+Mon Apr  7 22:14:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-        * DDS_TAOv2.mwc:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
 
-          Added DynamicInterface to the list of TAO libraries used.
-          The DOC Group version now requires it for IORTable.
+          Handle struct fowrard declaration.
 
-Thu Apr 11 14:31:09 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+Mon Apr  7 20:43:57 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-        * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.cpp:
+        * tests/DCPS/ConfigTransports/Pusher.cpp:
 
-          Fixed Visual C++ compile error.
+          Don't delete domain partipant in Pusher destructor.
 
-Wed Apr 10 20:19:29 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
 
-        * dds/DCPS/DataReaderImpl.cpp:
+          Additional logging.
 
-          During cleanup cancel any deadline watchdog timers associated
-          with the reader. This fixes a problem when the reader's subscriber
-          is deleted in one thread while deadline timeout handling in the
-          watchdog thread tries to access the deleted subscriber.
+Thu Apr  3 19:23:53 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-        * bin/dcps_tests.lst:
-        * tests/DCPS/SubscriberCycle:
-        * tests/DCPS/SubscriberCycle/ParticipantTask.h:
-        * tests/DCPS/SubscriberCycle/ParticipantTask.cpp:
-        * tests/DCPS/SubscriberCycle/ProgressIndicator.h:
-        * tests/DCPS/SubscriberCycle/ProgressIndicator.cpp:
-        * tests/DCPS/SubscriberCycle/Publisher.cpp:
-        * tests/DCPS/SubscriberCycle/README:
-        * tests/DCPS/SubscriberCycle/Subscriber.cpp:
-        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
-        * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.h:
-        * tests/DCPS/SubscriberCycle/SubscriberListenerImpl.cpp:
-        * tests/DCPS/SubscriberCycle/run_test.pl:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
 
-          A test that creates/deletes a subscriber multiple times while
-          a publisher is contining to publish samples. This test was
-          used to activate the deadline handling code trying to access
-          a deleted subscriber and verify the fix. The test has a
-          number of command line options described in the README that
-          can be used to help identify if there are other issues with
-          subscriber deletion in the presence of sample processing.
+          Clean up and shut down publisher properly.
 
-Wed Mar 27 20:05:13 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+Thu Apr  3 17:50:59 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-        * dds/DCPS/FileSystemStorage.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
 
-          Reverting previous change after discovering GNU C++
-          incorrectly allowed template based Directory::Iterator
-          to access File's private constructor.
+          Check sample_info for valid_data prior to incrementing num_reads
+          and checking msg.count.
 
-Wed Mar 27 19:44:12 UTC 2013  Byron Harris  <harrisb@ociweb.com>
+Thu Mar 20 17:54:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-        * dds/DCPS/FileSystemStorage.h:
+        * bin/expfile.pl:
 
-          Removed unnecessary class friendship.
+          replace perl with special variable $^X in system call so PATH to
+          perl will not be lost.
 
-Tue Mar 19 20:52:02 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
+Fri Mar 14 15:31:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
 
-          Resolve Coverity issues 990925 and 990926
+          Fix dependencies/libs
 
-        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+Thu Mar 13 15:01:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          Resolve Coverity issues 990927-990931
+        * README:
 
-Fri Mar 15 19:52:41 UTC 2013  Brian Johnson  <johnsonb@ociweb.com>
+          Fixed Fuzz.
 
-        * examples/DCPS/ishapes/BouncingShapeDynamics.cpp:
+        * dds/DCPS/AssociationData.h:
 
-          Changed coordinates to be center of shape.
+          Fixed warning - precedence of >> vs comparison.
 
-        * examples/DCPS/ishapes/ShapesDialog.cpp:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
 
-          Fixed filter coordinates.
+          Fixed warning - sprintf size.
 
-        * examples/DCPS/ishapes/config.hpp:
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
 
-          Cleanup of unused #define.
-
-        * examples/DCPS/ishapes/filterForm.ui:
-
-          Fixed coordinates.
-
-        * examples/DCPS/ishapes/Square.cpp:
-        * examples/DCPS/ishapes/Triangle.cpp:
-        * examples/DCPS/ishapes/Circle.cpp:
-
-          Changed centering of shape.
-
-Wed Mar 13 22:44:14 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
-
-        * tests/DCPS/ManyTopicMultiProcess/Foo4Def.idl:
-
-          Refactored to use a TAO built-in type per the OpenDDS faq.
-
-        * tests/DCPS/ManyTopicTypes/ManyTopicTypes.mpc:
-
-          Removed Foo4Def previously added for the ManyTopicMultiProcess test
-
-        * tests/DCPS/ManyTopicTypes/Foo4Def.idl:
-
-          Removed this file.
-
-Wed Mar 13 20:45:37 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
-
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
-
-          Resolved signed/unsigned comparison warning
-
-Wed Mar 13 20:05:01 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
-
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/Foo1Def.idl:
-        * tests/DCPS/ManyTopicMultiProcess/Foo4Def.idl:
-        * tests/DCPS/ManyTopicMultiProcess/ManyTopicMultiProcess.mpc:
-        * tests/DCPS/ManyTopicMultiProcess/Writer.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/manyfoolib_export.h:
-        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
-
-         Removed dependancy on tests/DCPS/ManyTopicTypes
-
-Tue Mar 12 21:55:35 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
-
-        * bin/dcps_tests.lst:
-
-          Add ManyTopicMultiProcess test
-
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/Writer.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
-
-          Made include path to MultiTopicType relative and fixed
-          missing OS_NS_time include statements.
-
-        * tests/DCPS/ManyTopicMultiProcess/run_test.pl:
-
-          Added a missing unlink statement for the repo ior file.
-
-Tue Mar 12 21:31:08 UTC 2013  Adam Mitz  <mitza@ociweb.com>
-
-        * dds/DCPS/DataReaderImpl.cpp:
-
-          If a single message is both dispose & unregister,
-          the message block needs to be duplicated so that each
-          operation can read the key fields.
-
-        * dds/DCPS/RTPS/Spdp.h:
-        * dds/DCPS/RTPS/Spdp.cpp:
-
-          Use a separate buffer for writing instead of sharing the
-          one used for reading.  The initial implementation never
-          overlapped reads and writes, but now receiving data from
-          a new remote participant causes our announcement to be
-          sent immediately.
-
-Tue Mar 12 19:03:26 UTC 2013  Phillip LaBanca  <labancap@ociweb.com>
+          Fixed project name length warning.
 
         * tests/DCPS/ManyTopicMultiProcess:
+        * tests/DCPS/SubscriberCycle:
+        * tests/DCPS/UnitTests:
 
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener.h:
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.h:
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.h:
-        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/ManyTopicMultiProcess.mpc:
-        * tests/DCPS/ManyTopicMultiProcess/Writer.h:
-        * tests/DCPS/ManyTopicMultiProcess/Writer.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/common.h:
-        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
-        * tests/DCPS/ManyTopicMultiProcess/run_test.pl:
-        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+          Set svn:ignore.
 
-          Added a seven topic three process pub/sub test
+Wed Mar 12 23:26:36 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-        * tests/DCPS/ManyTopicTypes/Foo4Def.idl:
-        * tests/DCPS/ManyTopicTypes/ManyTopicTypes.mpc:
+        * dds/DCPS/RakeResults_T.cpp:
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
 
-          Added the Foo4 type which contains FloatSeq for the
-          ManyTopicMultiProcess test
+          Fuzz failures.
 
-Mon Mar  4 16:48:39 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
 
-        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+          Project names too long.
 
-        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+Wed Mar 12 18:01:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          Fixed compiler warnings.
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
 
-Sun Mar  3 18:37:49 UTC 2013  Johnny Willemsen  <jwillemsen@remedy.nl>
+          Build warnings.
 
-        * dds/DCPS/DataDurabilityCache.h:
-        * dds/DCPS/Discovery.h:
-        * dds/DCPS/FileSystemStorage.h:
-        * dds/DCPS/GuardCondition.h:
-        * dds/DCPS/RawDataSample.h:
-        * dds/DCPS/Serializer.h:
-        * dds/DCPS/WaitSet.h:
-        * dds/DCPS/Watchdog.h:
-        * dds/DCPS/WatchdogTimer.h:
-        * dds/DCPS/ZeroCopyInfoSeq_T.h:
-        * dds/DCPS/ZeroCopyInfoSeq_T.inl:
-        * dds/DCPS/ZeroCopySeq_T.h:
-        * dds/DCPS/ZeroCopySeq_T.inl:
+Wed Mar 12 16:57:47 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Build failure when wide chars enabled.
+
+Wed Mar 12 16:33:07 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Initialize pointer.
+
+Wed Mar 12 16:01:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/IDL/Reliability.idl:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Reliability/shmem.ini:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/SeqReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+        * tests/DCPS/Reliability/sub/TakeNextReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/ZeroCopyReaderListenerImpl.cpp:
+
+          Fuzz changes.
+
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+
+          Change name of projects
+
+Tue Mar 11 20:04:40 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Reliability:
+        * tests/DCPS/Reliability/Boilerplate.h:
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/IDL:
+        * tests/DCPS/Reliability/IDL/Reliability.idl:
+        * tests/DCPS/Reliability/IDL/Reliability.mpc:
+        * tests/DCPS/Reliability/IDL/Reliability_Export.h:
+        * tests/DCPS/Reliability/pub:
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Reliability/shmem.ini:
+        * tests/DCPS/Reliability/sub:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/SeqReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/SeqReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+        * tests/DCPS/Reliability/sub/TakeNextReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/TakeNextReaderListenerImpl.cpp:
+        * tests/DCPS/Reliability/sub/ZeroCopyReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/ZeroCopyReaderListenerImpl.cpp:
+
+          Test to verify reliability.
+
+Tue Mar 11 16:31:16 UTC 2014  Jeff Schmitz <schmitzj@ociweb.com>
+
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
+        * tests/DCPS/ZeroCopyDataReaderListener/publisher.cpp:
+
+          Wait for acks in publisher.
+
+Mon Mar 10 16:26:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
         * dds/DCPS/ZeroCopySeq_T.cpp:
-        * dds/DCPS/transport/framework/BuildChainVisitor.h:
-        * dds/DCPS/transport/framework/CopyChainVisitor.h:
-        * dds/DCPS/transport/framework/DataLink.h:
-        * dds/DCPS/transport/framework/NetworkAddress.h:
-        * dds/DCPS/transport/framework/NetworkAddress.cpp:
-        * dds/DCPS/transport/framework/PacketRemoveVisitor.h:
-        * dds/DCPS/transport/framework/ReceivedDataSample.h:
-        * dds/DCPS/transport/framework/TransportControlElement.h:
-        * dds/DCPS/transport/framework/TransportDefs.h:
-        * dds/DCPS/transport/framework/TransportInst.h:
-        * dds/DCPS/transport/framework/TransportQueueElement.h:
-        * dds/DCPS/transport/framework/TransportReactorTask.h:
-        * dds/DCPS/transport/framework/TransportRegistry.h:
-        * dds/DCPS/transport/framework/TransportSendBuffer.h:
-        * dds/DCPS/transport/framework/TransportSendControlElement.h:
-        * dds/DCPS/transport/framework/TransportSendListener.h:
-        * dds/DCPS/transport/multicast/MulticastSession.h:
-        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
-        * dds/DCPS/transport/rtps_udp/RtpsTransportHeader.h:
-        * performance-tests/Bench/src/Options.h:
-        * tools/modeling/codegen/model/Config.h:
-        * tools/monitor/Options.h:
-          Added missing versioned namespace macros
 
-Fri Mar  1 21:29:21 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+          Set loaner to NULL when setting sequence length to zero.
 
-        * dds/DCPS/RTPS/Sedp.cpp:
+Mon Mar 10 16:23:38 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          Interoperability fix for discovery with Content-Filtered
-          Topics: certain fields must be non-empty strings even
-          though they are not needed.
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
 
-        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+          Make empty() and release_if_empty() retutn true if the instance was
+          released.
 
-          Fixed two corner cases for DURABILITY QoS:
-          - Removed the work-around from Wed Dec 19 16:34:05 UTC 2012,
-            it is not needed due to Thu Jan 10 16:06:08 UTC 2013 and removing
-            the work-around improves interoperability.
-          - If the nacked range is entirely below the durable data range,
-            a Gap submessage is needed so that the reader can proceed to the
-            higher sequence numbers.
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataElementList.cpp:
 
-        * examples/DCPS/ishapes/ShapesDialog.cpp:
-        * examples/DCPS/ishapes/main.cpp:
+          Change both remove() implementations to return true if the instance
+          was released.
 
-          If the PARTITION QoS is non-default, add it to the
-          window's title bar so it is visible in the UI.
+        * dds/DCPS/RakeResults_T.cpp:
 
-Fri Mar  1 15:03:24 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+          Prevent take() crash when writer disassociates by preventing access
+          of instance which has been released within copy_into().
 
-        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
-        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
-        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
-        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
-        * tests/DCPS/Ownership/publisher.cpp:
-        * tests/DCPS/Serializer/SerializerTest.cpp:
-        * tests/DCPS/UnitTests/ut_ParameterListConverter.cpp:
-        * tools/dissector/giop_base.h:
-        * tools/dissector/packet-opendds.h:
+Fri Mar  7 21:39:41 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
-          Fixed compiler warnings.
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
 
-Wed Feb 27 16:41:15 UTC 2013  Adam Mitz  <mitza@ociweb.com>
+          Return loan of zero copy samples
+
+Fri Mar  7 21:03:01 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
+        * tests/DCPS/ZeroCopyDataReaderListener/Messenger.mpc:
+
+          Renamed mpc file due to duplicate names
+
+Fri Mar  7 20:44:04 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Correct method name in logs.
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ZeroCopyDataReaderListener:
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.h:
+        * tests/DCPS/ZeroCopyDataReaderListener/DataReaderListener.cpp:
+
+          New test to demonstrate crash with long-lived ZeroCopy seq
+
+Thu Mar  6 16:08:53 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Topic_Description.cpp:
+
+          Don't inform subsctiption of an assocation to a crashed publication
+
+Wed Mar  5 18:05:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Fixed parsing of -ReassociateDelay argument.
+
+Wed Feb 26 04:43:44 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/im_jni.cpp:
+
+          Added coverage for typedef-of-string fields in unions.
+
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Regression test for the above.
+
+Mon Jan 27 21:24:53 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
 
         * ChangeLog:
         * NEWS:
         * README:
-        * docs/history/ChangeLog-3.4.1:
+        * docs/history/ChangeLog-3.5:
 
-          Setup for next version.
+        Setup for next version.
 
-Wed Feb 27 16:29:08 UTC 2013  Adam Mitz  <mitza@ociweb.com>
-
-        * OpenDDS version 3.4.1 released.
 
 Local Variables:
 mode: change-log

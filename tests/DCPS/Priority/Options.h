@@ -22,9 +22,9 @@ class Options  {
     /// Command line arguments.
     static const ACE_TCHAR* TRANSPORT_TYPE_ARGUMENT;   // Transport type
     static const ACE_TCHAR* PUBLISHER_ID_ARGUMENT;     // Publisher Id
-    static const ACE_TCHAR* COUNT_ARGUMENT;            // Sample count
     static const ACE_TCHAR* PRIORITY_ARGUMENT;         // Priority
     static const ACE_TCHAR* VERBOSE_ARGUMENT;          // Verbosity
+    static const ACE_TCHAR* MULTI_ARGUMENT;            // Multiple Instances
 
     /// Types of transport implementations supported.
     enum TransportType {
@@ -53,10 +53,6 @@ class Options  {
     protected: unsigned long& priority();
     public:    unsigned long  priority() const;
 
-    /// Test sample count to publish.
-    protected: unsigned int& count();
-    public:    unsigned int  count() const;
-
     /// Transport Type value.
     protected: TransportType& transportType();
     public:    TransportType  transportType() const;
@@ -73,6 +69,10 @@ class Options  {
     protected: std::string& topicName();
     public:    std::string topicName() const;
 
+    /// Test multiple instances.
+    protected: bool& multipleInstances();
+    public:    bool  multipleInstances() const;
+
   private:
     /// Test verbosity.
     bool verbose_;
@@ -82,9 +82,6 @@ class Options  {
 
     /// Writer priority.
     unsigned long priority_;
-
-    /// Sample count.
-    unsigned int count_;
 
     /// Transport Type value.
     TransportType transportType_;
@@ -97,6 +94,9 @@ class Options  {
 
     /// Topic name.
     std::string topicName_;
+
+    /// Test with multiple instances.
+    bool multipleInstances_;
 };
 
 } // End of namespace Test

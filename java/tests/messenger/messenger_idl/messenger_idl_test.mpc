@@ -1,4 +1,4 @@
-project: dcps_java {
+project: dcps_test_java {
 
   idlflags     += -Wb,stub_export_include=messenger_idl_test_Export.h \
                   -Wb,stub_export_macro=messenger_idl_test_Export

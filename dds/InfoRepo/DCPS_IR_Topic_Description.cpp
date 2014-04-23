@@ -406,8 +406,16 @@ void DCPS_IR_Topic_Description::associate(DCPS_IR_Publication* publication,
   // Note: the client thread may process the add_associations() oneway
   //       call instead of the ORB thread because it is currently
   //       in a two-way call to the Repo.
-  publication->add_associated_subscription(subscription, true);
-  subscription->add_associated_publication(publication, false);
+  int error = publication->add_associated_subscription(subscription, true);
+
+  // If there was no TAO error contacting the publication (This can happen if
+  // an old publisher has exited non-gracefully)
+  if (error != -1) {
+    // Associate the subscription with the publication
+    subscription->add_associated_publication(publication, false);
+  } else {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("Invalid publication detected, NOT notifying subcription of association\n")));
+  }
 }
 
 void DCPS_IR_Topic_Description::reevaluate_associations(DCPS_IR_Subscription* subscription)

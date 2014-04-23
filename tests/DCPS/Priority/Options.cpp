@@ -23,7 +23,6 @@ namespace { // anonymous namespace for file scope.
 
   const unsigned long DEFAULT_TEST_DOMAIN    = 521;
   const unsigned long DEFAULT_TEST_PRIORITY  =   0;
-  const unsigned int  DEFAULT_SAMPLE_COUNT   =  10;
   const Test::Options::TransportType
                       DEFAULT_TRANSPORT_TYPE = Test::Options::TCP;
   const unsigned int  DEFAULT_TRANSPORT_KEY  =   1;
@@ -51,21 +50,21 @@ const ACE_TCHAR* Options::TRANSPORT_TYPE_ARGUMENT = ACE_TEXT("-t");
 const ACE_TCHAR* Options::PUBLISHER_ID_ARGUMENT   = ACE_TEXT("-i");
 const ACE_TCHAR* Options::VERBOSE_ARGUMENT        = ACE_TEXT("-v");
 const ACE_TCHAR* Options::PRIORITY_ARGUMENT       = ACE_TEXT("-p");
-const ACE_TCHAR* Options::COUNT_ARGUMENT          = ACE_TEXT("-c");
+const ACE_TCHAR* Options::MULTI_ARGUMENT          = ACE_TEXT("-m");
 
 Options::~Options()
 {
 }
 
 Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
- : verbose_(       false),
-   domain_(        DEFAULT_TEST_DOMAIN),
-   priority_(      DEFAULT_TEST_PRIORITY),
-   count_(         DEFAULT_SAMPLE_COUNT),
-   transportType_( DEFAULT_TRANSPORT_TYPE),
-   transportKey_(  DEFAULT_TRANSPORT_KEY),
-   publisherId_(   DEFAULT_PUBLISHER_ID),
-   topicName_(     DEFAULT_TEST_TOPICNAME)
+ : verbose_(          false),
+   domain_(           DEFAULT_TEST_DOMAIN),
+   priority_(         DEFAULT_TEST_PRIORITY),
+   transportType_(    DEFAULT_TRANSPORT_TYPE),
+   transportKey_(     DEFAULT_TRANSPORT_KEY),
+   publisherId_(      DEFAULT_PUBLISHER_ID),
+   topicName_(        DEFAULT_TEST_TOPICNAME),
+   multipleInstances_(false)
 {
   ACE_Arg_Shifter parser( argc, argv);
   while( parser.is_anything_left()) {
@@ -96,12 +95,12 @@ Options::Options( int argc, ACE_TCHAR** argv, char** /* envp */)
       this->priority_ = ACE_OS::atoi( currentArg);
       parser.consume_arg();
 
-    } else if( 0 != (currentArg = parser.get_the_parameter( COUNT_ARGUMENT))) {
-      this->count_ = ACE_OS::atoi( currentArg);
-      parser.consume_arg();
-
     } else if( 0 != (currentArg = parser.get_the_parameter( PUBLISHER_ID_ARGUMENT))) {
       this->publisherId_ = ACE_OS::atoi( currentArg);
+      parser.consume_arg();
+
+    } else if( 0 <= (parser.cur_arg_strncasecmp( MULTI_ARGUMENT))) {
+      this->multipleInstances_ = true;
       parser.consume_arg();
 
     } else if( 0 <= (parser.cur_arg_strncasecmp( VERBOSE_ARGUMENT))) {

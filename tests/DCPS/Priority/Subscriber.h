@@ -24,6 +24,9 @@ class Subscriber {
     /// Number of samples received during the test.
     unsigned int count() const;
 
+    /// if results passed.
+    bool passed() const;
+
   private:
     /// Test options.
     const Options& options_;

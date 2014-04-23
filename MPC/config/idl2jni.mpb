@@ -8,10 +8,6 @@ project: taolib_with_idl, portableserver, java, dds_macros {
   libs       += idl2jni_runtime
   after      += idl2jni_runtime idl2jni_codegen
 
-  // We're inheriting libout = $(ACE_ROOT)/lib from taolib_with_idl.mpb,
-  // but there's no reason our libraries should be placed there.
-  libout      = .
-
   javacflags += -classpath $(DDS_ROOT)/lib/i2jrt.jar
 
 

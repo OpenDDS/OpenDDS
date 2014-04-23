@@ -88,6 +88,8 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::length(CORBA::ULong length)
       }
 
       ptrs_.resize(length, 0);
+      // At this point, there is no longer a loan
+      this->set_loaner(0);
 
     } else {
       //There's no way we can expand the size (logical) of the zero-copy

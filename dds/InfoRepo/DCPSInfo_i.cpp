@@ -1338,6 +1338,10 @@ TAO_DDS_DCPSInfo_i::disassociate_subscription(
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) disassociating subscription\n"));
+  }
+
   DCPS_IR_Subscription* subscription;
   if (participant->find_subscription_reference(local_id, subscription)
       != 0 || subscription == 0) {
@@ -1367,6 +1371,10 @@ TAO_DDS_DCPSInfo_i::disassociate_publication(
   DCPS_IR_Participant* participant = it->second->participant(participantId);
   if (participant == 0) {
     throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) disassociating publication\n"));
   }
 
   DCPS_IR_Publication* publication;
@@ -1459,6 +1467,9 @@ void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
   // since the DataReader is the passive peer)
   DCPS_IR_Subscription* sub = 0;
   DCPS_IR_Publication* pub = 0;
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) completing association\n"));
+  }
   if (0 == partPtr->find_subscription_reference(localId, sub)) {
     sub->association_complete(remoteId);
   } else if (0 == partPtr->find_publication_reference(localId, pub)) {
@@ -1601,6 +1612,10 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos(
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) updating  publication qos 1\n"));
+  }
+
   DCPS_IR_Publication* pub;
 
   if (partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0) {
@@ -1666,6 +1681,10 @@ TAO_DDS_DCPSInfo_i::update_publication_qos(
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) updating  publication qos 2\n"));
+  }
+
   DCPS_IR_Publication* pub;
 
   if (partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0) {
@@ -1697,6 +1716,10 @@ TAO_DDS_DCPSInfo_i::update_publication_qos(
 
   if (0 == partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) updating  publication qos 3\n"));
   }
 
   DCPS_IR_Publication* pub;
@@ -1733,6 +1756,10 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos(
   }
 
   DCPS_IR_Subscription* sub;
+
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) updating QOS for subscription 1\n"));
+  }
 
   if (partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0) {
     throw OpenDDS::DCPS::Invalid_Subscription();
@@ -1799,6 +1826,10 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos(
 
   DCPS_IR_Subscription* sub;
 
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) updating QOS for subscription 2\n"));
+  }
+
   if (partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0) {
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
@@ -1832,6 +1863,10 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos(
 
   DCPS_IR_Subscription* sub;
 
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) updating QOS for subscription 3\n"));
+  }
+
   if (partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0) {
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
@@ -1856,6 +1891,10 @@ TAO_DDS_DCPSInfo_i::update_subscription_params(
   DCPS_IR_Participant* partPtr = domain->second->participant(participantId);
   if (0 == partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
+  }
+
+  if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) updating subscription params\n"));
   }
 
   DCPS_IR_Subscription* sub;

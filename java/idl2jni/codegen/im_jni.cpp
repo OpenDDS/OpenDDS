@@ -276,6 +276,7 @@ string idl_mapping_jni::jvmSignature(AST_Type *decl)
     return "Ljava/lang/String;";
   case AST_Decl::NT_enum:
   case AST_Decl::NT_struct:
+  case AST_Decl::NT_struct_fwd:
   case AST_Decl::NT_union:
   case AST_Decl::NT_interface:
   case AST_Decl::NT_interface_fwd:
@@ -1712,6 +1713,13 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
     } else {
       if (br_sig[0] == '[') {
         jniCast = "static_cast<" + br_type + "> (";
+      }
+
+      if (branches[i]->field_type()->node_type() == AST_Decl::NT_typedef) {
+        AST_Typedef *td = AST_Typedef::narrow_from_decl(branches[i]->field_type());
+        if (td->primitive_base_type()->node_type() == AST_Decl::NT_string) {
+          br_tao = "CORBA::String_var";
+        }
       }
 
       copyToCxx =

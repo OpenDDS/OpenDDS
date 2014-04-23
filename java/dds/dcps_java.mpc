@@ -1,8 +1,8 @@
-project: dcpslib, idl2jni, optional_jni_check, dcps_java_optional {
+// dcpslib needs to come after idl2jni to set libout correctly
+project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional {
 
   sharedname    = OpenDDS_DCPS_Java
   after        += tao_java
-  libout        = $(DDS_ROOT)/lib
   idl2jniflags += -SS -I$(DDS_ROOT) -I$(TAO_ROOT) -I.. \
                   -Wb,stub_export_include=dcps_java_export.h \
                   -Wb,stub_export_macro=dcps_java_Export

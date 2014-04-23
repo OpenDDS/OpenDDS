@@ -96,23 +96,25 @@ DataSampleList::dequeue_next_instance_sample(const DataSampleListElement* stale)
   }
 
   // Search from head_->next_instance_sample_.
-  DataSampleListElement* toRemove = 0;
   DataSampleListElement* previous = head_;
-
-  for (DataSampleListElement* item = head_->next_instance_sample_;
-       item != 0 && toRemove == 0;
+  DataSampleListElement* item;
+  for (item = head_->next_instance_sample_;
+       item != 0;
        item = item->next_instance_sample_) {
     if (item == stale) {
-      toRemove = item;
-      previous->next_instance_sample_ = stale->next_instance_sample_;
+      previous->next_instance_sample_ = item->next_instance_sample_;
+      if (previous->next_instance_sample_ == 0) {
+        tail_ = previous;
+      }
       --size_ ;
       item->next_instance_sample_ = 0;
+      break;
     }
 
     previous = item;
   }
 
-  return toRemove;
+  return item;
 }
 
 DataSampleListElement*

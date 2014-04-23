@@ -97,7 +97,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                                        DDS::TopicListener::_nil(),
                                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ())) {
-        cerr << "Failed to create_topic." << endl;
+        cerr << "ERROR Failed to create_topic." << endl;
         exit(1);
       }
 
@@ -108,7 +108,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                        DDS::SubscriberListener::_nil(),
                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (sub.in ())) {
-        cerr << "Failed to create_subscriber." << endl;
+        cerr << "ERROR Failed to create_subscriber." << endl;
         exit(1);
       }
 
@@ -118,7 +118,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         *dynamic_cast<DataReaderListenerImpl*>(listener.in());
 
       if (CORBA::is_nil (listener.in ())) {
-        cerr << "listener is nil." << endl;
+        cerr << "ERROR listener is nil." << endl;
         exit(1);
       }
 
@@ -134,7 +134,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                                       listener.in (),
                                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dr.in ())) {
-        cerr << "create_datareader failed." << endl;
+        cerr << "ERROR create_datareader failed." << endl;
         exit(1);
       }
 
@@ -155,15 +155,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (listener_servant.num_liveliness_change_callbacks () != num_liveliness_change_callbacks)
       {
-         cerr << "did not receive liveliness change callbacks as expected.(" <<
-           listener_servant.num_liveliness_change_callbacks () << "/"
-           << num_liveliness_change_callbacks << ")" << endl;
+         cerr
+         << "ERROR: did not receive liveliness change callbacks as expected.("
+         << listener_servant.num_liveliness_change_callbacks () << "/"
+         << num_liveliness_change_callbacks << ")" << endl;
          return 1;
       }
     }
   catch (CORBA::Exception& e)
     {
-      cerr << "SUB: Exception caught in main ():" << endl << e << endl;
+      cerr << "ERROR: subscriber Exception caught in main ():" << endl << e << endl;
       return 1;
     }
 

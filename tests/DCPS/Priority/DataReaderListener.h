@@ -11,6 +11,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include <set>
 
 namespace Test {
 
@@ -80,6 +81,9 @@ namespace Test {
     /// Current number of samples that have been received.
     unsigned int count() const;
 
+    /// The data was received and it was valid.
+    bool passed() const;
+
     // Destructor
     virtual ~DataReaderListener (void);
 
@@ -89,7 +93,10 @@ namespace Test {
 
       /// Sample count.
       unsigned int count_;
-
+      std::set<long> recieved_samples_;
+      bool recieved_samples_invalid_;
+      enum PriorityStatus { NOT_RECEIVED, RECEIVED_VALID, RECEIVED_INVALID };
+      PriorityStatus priority_sample_;
   };
 
 } // End of namespace Test

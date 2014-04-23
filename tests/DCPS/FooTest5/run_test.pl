@@ -144,6 +144,13 @@ print $Subscriber->CommandLine(), "\n";
 my $Publisher = PerlDDS::create_process('publisher', $pub_parameters);
 print $Publisher->CommandLine(), "\n";
 
+my $orig_ACE_LOG_TIMESTAMP = $ENV{ACE_LOG_TIMESTAMP};
+$ENV{ACE_LOG_TIMESTAMP} = "TIME";
+sub cleanup
+{
+  $ENV{ACE_LOG_TIMESTAMP} = $orig_ACE_LOG_TIMESTAMP;
+}
+
 $DCPSREPO->Spawn();
 
 if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
@@ -192,4 +199,5 @@ else {
   print STDERR "test FAILED.\n";
 }
 
+cleanup();
 exit $status;

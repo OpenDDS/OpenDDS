@@ -88,8 +88,8 @@ public:
 
   bool most_recent_generation(ReceivedDataElement* item) const;
 
-  /// DataReader has become empty.
-  void empty(bool value);
+  /// DataReader has become empty.  Returns true if the instance was released.
+  bool empty(bool value);
 
   /// Schedule a pending release of resources.
   void schedule_pending();
@@ -102,7 +102,8 @@ public:
 
   /// Remove the instance if it's instance has no samples
   /// and no writers.
-  void release_if_empty();
+  /// Returns true if the instance was released.
+  bool release_if_empty();
 
   /// Remove the instance immediately.
   void release();

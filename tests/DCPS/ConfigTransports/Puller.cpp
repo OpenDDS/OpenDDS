@@ -29,10 +29,8 @@ Puller::Puller(const Factory& f,
 
 Puller::~Puller()
 {
-  // Clean up and shut down DDS objects
-  sub->delete_contained_entities();
-  dp->delete_contained_entities();
-  dpf->delete_participant(dp.in());
+  // don't do any cleanup, leave that to be done when everything else
+  // is out of scope
 }
 
 int

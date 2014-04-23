@@ -9,6 +9,7 @@
 module simple {
 
   typedef long TestTypedef;
+  typedef string StringTypedef;
   typedef sequence<long> TestSeqTypedef;
   typedef sequence<TestTypedef> SeqOfTypedefedLong;
   typedef sequence<string> StringSeq; //because CORBA's isn't good enough???
@@ -28,6 +29,7 @@ module simple {
     unsigned long m2;
     TestSeqTypedef seq1;
     SeqOfTypedefedLong seq2;
+    StringTypedef st;
     //DEPRECATED: sequence<octet> seq2;
   };
 
@@ -70,6 +72,7 @@ module simple {
   case  1: TestStruct     t;
   case  2:
   case  3: TestSeqTypedef q;
+  case  4: StringTypedef  d;
   default: TestEnum       e;
   };
 

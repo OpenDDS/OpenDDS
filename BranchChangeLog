@@ -1,0 +1,17 @@
+Wed Apr 23 19:05:55 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * Merged from trunk  r6049 through r6127.
+	* Created BranchChangeLog
+
+*************************************************************************************
+NOTE BRANCH CHANGELOG CREATED APR 23 ABOVE, CHANGES PRIOR TO APR 23 NOT RECORDED
+Thu Sep 12 23:56:45 UTC 2013  Adam Mitz  <mitza@ociweb.com> 
+
+	* creating branch async_assoc
+*************************************************************************************
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

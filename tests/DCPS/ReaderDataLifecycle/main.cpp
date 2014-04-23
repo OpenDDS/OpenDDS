@@ -29,22 +29,52 @@ namespace {
   const size_t SAMPLES_PER_TEST = 100;
   const DDS::Duration_t autopurge_delay = { 5, 0 };
 
+  struct Cleanup
+  {
+    DDS::DomainParticipantFactory_var dpf;
+    DDS::DomainParticipant_var participant;
+    DDS::WaitSet_var ws;
+    DDS::StatusCondition_var cond;
+    ~Cleanup()
+    {
+      rem_wait_set();
+      // Clean-up!
+      participant->delete_contained_entities();
+      dpf->delete_participant(participant);
+
+      TheServiceParticipant->shutdown();
+    }
+
+    void add_wait_set(DDS::StatusCondition_var condition)
+    {
+      cond = condition;
+      ws = new DDS::WaitSet;
+      ws->attach_condition(cond);
+    }
+
+    void rem_wait_set()
+    {
+      if (!CORBA::is_nil(ws))
+        ws->detach_condition(cond);
+    }
+  };
 } // namespace
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
-    DDS::DomainParticipantFactory_var dpf =
+    Cleanup cu;
+    cu.dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
     // Create Participant
-    DDS::DomainParticipant_var participant =
-      dpf->create_participant(42,
-                              PARTICIPANT_QOS_DEFAULT,
-                              DDS::DomainParticipantListener::_nil(),
-                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    cu.participant =
+      cu.dpf->create_participant(42,
+                                 PARTICIPANT_QOS_DEFAULT,
+                                 DDS::DomainParticipantListener::_nil(),
+                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    if (CORBA::is_nil(participant)) {
+    if (CORBA::is_nil(cu.participant)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_participant failed!\n")), -1);
@@ -52,9 +82,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     // Create Subscriber
     DDS::Subscriber_var subscriber =
-      participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                     DDS::SubscriberListener::_nil(),
-                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      cu.participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+                                        DDS::SubscriberListener::_nil(),
+                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(subscriber)) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -64,9 +94,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     // Create Publisher
     DDS::Publisher_var publisher =
-      participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                    DDS::PublisherListener::_nil(),
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      cu.participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                       DDS::PublisherListener::_nil(),
+                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(publisher)) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -76,7 +106,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     // Register Type (FooType)
     FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(participant, "") != DDS::RETCODE_OK) {
+    if (ts->register_type(cu.participant, "") != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: register_type failed!\n")), -1);
@@ -84,11 +114,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     // Create Topic (FooTopic)
     DDS::Topic_var topic =
-      participant->create_topic("FooTopic",
-                                CORBA::String_var(ts->get_type_name()),
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      cu.participant->create_topic("FooTopic",
+                                   CORBA::String_var(ts->get_type_name()),
+                                   TOPIC_QOS_DEFAULT,
+                                   DDS::TopicListener::_nil(),
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(topic)) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -157,8 +187,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::StatusCondition_var cond = writer->get_statuscondition();
     cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(cond);
+    cu.add_wait_set(cond);
 
     const DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
@@ -175,13 +204,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         break;
       }
 
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+      if (cu.ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: wait failed!\n")), -1);
       }
     }
-    ws->detach_condition(cond);
+    cu.rem_wait_set();
 
     //
     // Test autopurge_nowriter_samples_delay and
@@ -207,9 +236,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_OS::sleep(5); // wait for samples to arrive
 
       writer_i->dispose(foo, handle);
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" disposed\n")));
 
       ACE_OS::sleep(10); // wait for dispose and autopurge
 
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("%N:%l main()")
+                 ACE_TEXT(" take\n")));
       // Verify that no samples are available
       {
         FooSeq foo;
@@ -223,7 +258,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         if (error != DDS::RETCODE_NO_DATA) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l main()")
-                            ACE_TEXT(" ERROR: Unexpected samples taken!\n")), -1);
+                            ACE_TEXT(" ERROR: Unexpected return code for take %d!\n"),
+                            error), -1);
         }
       }
     }
@@ -274,12 +310,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         }
       }
     }
-
-    // Clean-up!
-    participant->delete_contained_entities();
-    dpf->delete_participant(participant);
-
-    TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Caught in main()");

@@ -12,6 +12,7 @@
 tests/DCPS/Prst_delayed_subscriber/run_test.pl: !DCPS_MIN
 tests/DCPS/ZeroCopyRead/run_test.pl: !DCPS_MIN
 tests/DCPS/ZeroCopyRead/run_test.pl by_instance: !DCPS_MIN
+tests/DCPS/ZeroCopyDataReaderListener/run_test.pl: !DCPS_MIN
 tests/DCPS/DCPSInfoRepo/run_test.pl
 tests/DCPS/DCPSInfoRepo/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/unit/run_test.pl:
@@ -112,6 +113,7 @@ tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN
 tests/DCPS/ViewState/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
+tests/DCPS/Reliability/run_test.pl: !DCPS_MIN
 
 tests/transport/simple/run_test.pl bp: !NO_DDS_TRANSPORT !DCPS_MIN
 tests/transport/simple/run_test.pl n: !NO_DDS_TRANSPORT !DCPS_MIN
@@ -217,6 +219,7 @@ tests/DCPS/MetaStruct/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN
 tests/DCPS/Priority/run_test.pl: !DCPS_MIN !QNX
+tests/DCPS/Priority/run_test.pl --instances: !DCPS_MIN !QNX
 tests/DCPS/LatencyBudget/run_test.pl: !DCPS_MIN
 tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN
 tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN

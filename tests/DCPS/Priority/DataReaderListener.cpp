@@ -6,7 +6,9 @@
 
 Test::DataReaderListener::DataReaderListener( const bool verbose)
  : verbose_( verbose),
-   count_( 0)
+   count_( 0),
+   recieved_samples_invalid_( false),
+   priority_sample_( NOT_RECEIVED)
 {
 }
 
@@ -18,6 +20,12 @@ unsigned int
 Test::DataReaderListener::count() const
 {
   return this->count_;
+}
+
+bool
+Test::DataReaderListener::passed() const
+{
+  return !recieved_samples_invalid_ && priority_sample_ == RECEIVED_VALID;
 }
 
 void
@@ -40,14 +48,67 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
   while( DDS::RETCODE_OK == dr->take_next_sample( data, info)) {
     if( info.valid_data) {
       ++this->count_;
+      if (count_ % 50 == 0)
+        ACE_OS::sleep(2);
+
+      if (count_ % 1000 == 0)
+        ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
+          ACE_TEXT("received %d samples\n"),
+          count_));
+
       if( this->verbose_) {
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderListener::on_data_available() - ")
-          ACE_TEXT("received valid sample(%d): %03d: %C\n"),
+          ACE_TEXT("received valid sample(%d): %03d: %d, %C priority\n"),
           count,
           data.key,
-          (const char*)data.value
+          data.value,
+          (data.priority == true ? "high" : "low")
         ));
+      }
+
+      if (data.priority) {
+        if (priority_sample_ != NOT_RECEIVED) {
+          priority_sample_ = RECEIVED_INVALID;
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+                     ACE_TEXT("Received multiple high priority samples.\n")));
+        }
+        else if (recieved_samples_.count(data.before_value)) {
+          priority_sample_ = RECEIVED_INVALID;
+          // (there is at least one entry so rbegin is valid)
+          const long highest = *recieved_samples_.rbegin();
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+                     ACE_TEXT("Did not receive high priority sample before low priority ")
+                     ACE_TEXT("sample %d (highest received sample=%d.\n"),
+                     data.before_value,
+                     highest));
+        }
+        else
+          priority_sample_ = RECEIVED_VALID;
+      }
+      else if (!recieved_samples_.insert(data.value).second) {
+        recieved_samples_invalid_ = true;
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+                   ACE_TEXT("Received duplicate sample %d.\n"),
+                   data.value));
+      }
+      else if (data.value > 1 && !recieved_samples_.count(data.value - 1)) {
+        recieved_samples_invalid_ = true;
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+                   ACE_TEXT("Received the sample %d before the previous sample.\n"),
+                   data.value));
+      }
+      else if (recieved_samples_.count(data.value + 1)) {
+        recieved_samples_invalid_ = true;
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+                   ACE_TEXT("Received the sample %d after the next sample.\n"),
+                   data.value));
       }
     }
     else if (info.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE)
@@ -64,9 +125,8 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
     }
     else
       ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
-      ACE_TEXT("received an INVALID sample.\n")
-      ));
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderListener::on_data_available() - ")
+                 ACE_TEXT("received an INVALID sample.\n")));
   }
 }
 
