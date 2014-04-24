@@ -226,7 +226,8 @@ Publisher::run()
       DDS::StatusCondition_var condition
         = DDS::StatusCondition::_narrow( conditions[ index].in());
 
-      DDS::DataWriter_var writer = DDS::DataWriter::_narrow( condition->get_entity());
+      DDS::Entity_var writer_entity = condition->get_entity();
+      DDS::DataWriter_var writer = DDS::DataWriter::_narrow( writer_entity);
       if( !CORBA::is_nil( writer.in())) {
         DDS::StatusMask changes = writer->get_status_changes();
         if( changes & DDS::PUBLICATION_MATCHED_STATUS) {
