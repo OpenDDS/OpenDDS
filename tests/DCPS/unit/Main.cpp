@@ -416,6 +416,7 @@ void run_next_sample_test (ssize_t size)
     else
     {
       TEST_CHECK (ret == true);
+      delete middle;
     }
   }
 
@@ -517,6 +518,7 @@ void run_next_send_sample_test (ssize_t size)
     else
     {
       TEST_CHECK (ret == true);
+      delete middle;
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
         ACE_TEXT("(ret == true)")
@@ -612,6 +614,7 @@ void run_next_instance_sample_test (ssize_t size)
     else
     {
       TEST_CHECK (ret == true);
+      delete middle;
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
         ACE_TEXT("(ret == true)")
