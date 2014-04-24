@@ -59,9 +59,18 @@ throw(CORBA::SystemException)
           const Messenger::Message& message = messages[i];
           ++num_samples_;
 
+          // output for console to consume
           std::cout << "Message: subject = " << message.subject.in()
                     << " subject_id = " << message.subject_id
                     << " count = " << message.count << '\n';
+          // also track it in the log file
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("%N:%l: Message: subject = %C ")
+                     ACE_TEXT("subject_id = %d ")
+                     ACE_TEXT("count = %d\n"),
+                     message.subject.in(),
+                     message.subject_id,
+                     message.count));
 
           for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
             if ((message.subject_id == 1 &&
@@ -118,10 +127,11 @@ throw(CORBA::SystemException)
 
 void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
-  const DDS::LivelinessChangedStatus &)
+  const DDS::LivelinessChangedStatus& status)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed() alive=%d, not alive=%d\n"),
+             status.alive_count, status.not_alive_count));
 }
 
 void DataReaderListenerImpl::on_subscription_matched(

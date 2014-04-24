@@ -75,6 +75,7 @@ Writer::write()
     // Block until Subscriber is available
     wait_for_match(writer1_);
     wait_for_match(writer2_);
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers matched\n")));
 
     // Write samples
     Messenger::MessageDataWriter_var message_dw1

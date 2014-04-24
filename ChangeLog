@@ -1,3 +1,15 @@
+Thu Apr 24 20:41:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/Writer.cpp:
+
+          Added logging for improved debugging.
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Added Keep all history qos so data can be sent reliably.
+
 Thu Apr 24 18:32:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/TestFramework/TestFramework_T.cpp:

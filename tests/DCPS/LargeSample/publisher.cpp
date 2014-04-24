@@ -91,6 +91,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
     qos.liveliness.lease_duration.sec = 5;
     qos.liveliness.lease_duration.nanosec = 0;
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
     // Create DataWriter
     DDS::DataWriter_var dw =
