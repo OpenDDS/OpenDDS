@@ -38,12 +38,13 @@ ParticipantTask::svc()
 
     ACE_Time_Value delay_between_pubs(0, this->delay_between_pubs_msec_ * 1000);
 
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     // Create Participant
     DDS::DomainParticipant_var participant =
-      TheParticipantFactory->create_participant(42,
-                                                PARTICIPANT_QOS_DEFAULT,
-                                                DDS::DomainParticipantListener::_nil(),
-                                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dpf->create_participant(42,
+                              PARTICIPANT_QOS_DEFAULT,
+                              DDS::DomainParticipantListener::_nil(),
+                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(participant.in()))
       ACE_ERROR_RETURN((LM_ERROR,
@@ -173,7 +174,7 @@ ParticipantTask::svc()
 
     // Clean-up!
     participant->delete_contained_entities();
-    TheParticipantFactory->delete_participant(participant.in());
+    dpf->delete_participant(participant.in());
   }
   catch (const CORBA::Exception& e)
   {

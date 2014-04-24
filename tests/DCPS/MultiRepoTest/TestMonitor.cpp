@@ -500,6 +500,7 @@ TestMonitor::~TestMonitor()
       current->first
     ));
     if( 0 == CORBA::is_nil( current->second.in())) {
+      DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
       if( ::DDS::RETCODE_PRECONDITION_NOT_MET
            == current->second->delete_contained_entities()
         ) {
@@ -509,7 +510,7 @@ TestMonitor::~TestMonitor()
         ));
 
       } else if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-                 == TheParticipantFactory->delete_participant( current->second)
+                 == dpf->delete_participant( current->second)
                ) {
         ACE_ERROR ((LM_ERROR,
           ACE_TEXT("(%P|%t) %T ERROR: Unable to release the participant for domain %d.\n"),

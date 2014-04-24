@@ -90,8 +90,9 @@ ManagerImpl::initialize()
   this->subscriptionListener_.federationId() = this->id();
 
   // Add participant for Federation domain
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   this->federationParticipant_
-  = TheParticipantFactory->create_participant(
+  = dpf->create_participant(
       this->config_.federationDomain(),
       PARTICIPANT_QOS_DEFAULT,
       DDS::DomainParticipantListener::_nil(),
@@ -842,6 +843,7 @@ ManagerImpl::finalize()
 
   // Remove our local participant and contained entities.
   if (0 == CORBA::is_nil(this->federationParticipant_.in())) {
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     if (DDS::RETCODE_PRECONDITION_NOT_MET
         == this->federationParticipant_->delete_contained_entities()) {
       ACE_ERROR((LM_ERROR,
@@ -850,7 +852,7 @@ ManagerImpl::finalize()
                  this->id()));
 
     } else if (DDS::RETCODE_PRECONDITION_NOT_MET
-               == TheParticipantFactory->delete_participant(this->federationParticipant_.in())) {
+               == dpf->delete_participant(this->federationParticipant_.in())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
                  ACE_TEXT("unable to release the participant for repository %d.\n"),

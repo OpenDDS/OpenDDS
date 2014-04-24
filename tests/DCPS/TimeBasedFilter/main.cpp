@@ -71,10 +71,10 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     // Create Participant
     DDS::DomainParticipant_var participant =
-      TheParticipantFactory->create_participant(42,
-                                                PARTICIPANT_QOS_DEFAULT,
-                                                DDS::DomainParticipantListener::_nil(),
-                                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      dpf->create_participant(42,
+                              PARTICIPANT_QOS_DEFAULT,
+                              DDS::DomainParticipantListener::_nil(),
+                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(participant.in()))
     {

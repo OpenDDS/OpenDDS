@@ -333,9 +333,10 @@ TestSystem::~TestSystem()
       ACE_TEXT("(%P|%t) %T ERROR: Unable to release the publication.\n")));
 
   } else {
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     // Release publisher participant.
     if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-        == TheParticipantFactory->delete_participant( this->publisherParticipant_.in())
+        == dpf->delete_participant( this->publisherParticipant_.in())
       ) {
       ACE_ERROR ((LM_ERROR,
         ACE_TEXT("(%P|%t) %T ERROR: Unable to release the publication participant.\n")));
@@ -353,9 +354,10 @@ TestSystem::~TestSystem()
         ACE_TEXT("(%P|%t) %T ERROR: Unable to release the subscription.\n")));
 
     } else {
+      DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
       // Release subscriber participant.
       if( ::DDS::RETCODE_PRECONDITION_NOT_MET
-          == TheParticipantFactory->delete_participant( this->subscriberParticipant_.in())
+          == dpf->delete_participant( this->subscriberParticipant_.in())
         ) {
         ACE_ERROR ((LM_ERROR,
           ACE_TEXT("(%P|%t) %T ERROR: Unable to release the subscription participant.\n")));

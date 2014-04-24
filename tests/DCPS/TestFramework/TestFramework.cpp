@@ -79,7 +79,9 @@ TestBase::fini()
   fini_i();  // delegate to child
 
   this->participant_->delete_contained_entities();
-  TheParticipantFactory->delete_participant(this->participant_);
+
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  dpf->delete_participant(this->participant_);
 }
 
 DDS::DomainParticipant_var
@@ -88,7 +90,8 @@ TestBase::create_participant()
   DDS::DomainId_t domain = DEFAULT_DOMAIN;
 
   DDS::DomainParticipantQos qos;
-  if (TheParticipantFactory->get_default_participant_qos(qos) != DDS::RETCODE_OK) {
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  if (dpf->get_default_participant_qos(qos) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("ERROR: %N:%l: create_participant() -")
                ACE_TEXT(" get_default_participant_qos failed!\n")));
@@ -108,7 +111,7 @@ TestBase::create_participant()
   }
 
   DDS::DomainParticipant_var participant =
-    TheParticipantFactory->create_participant(domain, qos, listener, status);
+    dpf->create_participant(domain, qos, listener, status);
 
   if (CORBA::is_nil(participant.in())) {
     ACE_ERROR((LM_ERROR,
