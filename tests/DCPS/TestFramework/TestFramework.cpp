@@ -59,11 +59,6 @@ TestBase::run(int& argc, ACE_TCHAR* argv[])
     return -1;
   }
 
-  if (!CORBA::is_nil(this->participant_.in())) {
-    this->participant_->delete_contained_entities();
-    dpf->delete_participant(this->participant_.in());
-  }
-
   TheServiceParticipant->shutdown();
 
   return error;
