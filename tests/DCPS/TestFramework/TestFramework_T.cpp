@@ -108,6 +108,9 @@ TestPublisher<Writer>::init_i()
                ACE_TEXT(" _narrow failed!\n")));
     ACE_OS::exit(-1);
   }
+  // narrow added ref, but we already have a var for writer_
+  // so create a temporary var to remove the extra ref
+  DDS::DataWriter_var cleanup_narrow_ref = this->writer_i_;
 }
 
 template<typename Writer>

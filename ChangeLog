@@ -1,3 +1,9 @@
+Thu Apr 24 18:32:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+
+          Cleaned up extra reference to writer.
+
 Thu Apr 24 18:10:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
