@@ -1,7 +1,13 @@
+Fri Apr 25 21:34:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManyToMany/ManyToMany.mpc:
+
+          Fixed IDl project reference
+
 Fri Apr 25 21:09:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/Messenger.idl:
-        
+
           Added parameter to track which participant sample is sent from.
 
         * tests/DCPS/ManyToMany:

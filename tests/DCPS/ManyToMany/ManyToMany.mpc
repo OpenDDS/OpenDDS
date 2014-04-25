@@ -3,8 +3,8 @@ project(DDS*Publisher): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_shmem, 
 
   exename   = publisher
   libpaths += ../LargeSample
-  after    += DDS_LargeSample_idl
-  libs   += DDS_LargeSample_idl
+  after    += DDS_LargeSample_Idl
+  libs   += DDS_LargeSample_Idl
 
   Idl_Files {
   }
@@ -19,8 +19,8 @@ project(DDS*Subscriber): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_shmem,
 
   exename   = subscriber
   libpaths += ../LargeSample
-  after    += DDS_LargeSample_idl
-  libs   += DDS_LargeSample_idl
+  after    += DDS_LargeSample_Idl
+  libs   += DDS_LargeSample_Idl
 
   Idl_Files {
   }
