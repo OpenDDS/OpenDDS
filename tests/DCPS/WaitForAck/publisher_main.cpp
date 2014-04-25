@@ -13,7 +13,8 @@ int ACE_TMAIN( int argc, ACE_TCHAR *argv[])
   int result = 1;
   try {
     // Initialize DDS.
-    TheParticipantFactoryWithArgs( argc, argv);
+    DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs( argc, argv);
 
     // Initialize the test.
     const Test::Options options( argc, argv);

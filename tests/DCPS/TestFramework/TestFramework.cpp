@@ -46,7 +46,7 @@ int
 TestBase::run(int& argc, ACE_TCHAR* argv[])
 {
   DDS::DomainParticipantFactory_var dpf =
-      TheParticipantFactoryWithArgs(argc, argv);
+    TheParticipantFactoryWithArgs(argc, argv);
 
   int error(0);
   try {

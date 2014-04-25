@@ -1,3 +1,20 @@
+Fri Apr 25 13:15:16 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * performance-tests/Bench/src/testprocess.cpp:
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+        * tests/DCPS/SubscriberCycle/Publisher.cpp:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/WaitForAck/publisher_main.cpp:
+        * tests/DCPS/WaitForAck/subscriber_main.cpp:
+
+          Storing the DomainParticipantFactory pointer returned by calling
+          TheParticipantFactoryWithArgs in a var to ensure its ref count is
+          decreased.
+
 Thu Apr 24 20:41:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/DataReaderListener.cpp:
