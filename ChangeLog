@@ -1,3 +1,30 @@
+Fri Apr 25 21:09:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/Messenger.idl:
+        
+          Added parameter to track which participant sample is sent from.
+
+        * tests/DCPS/ManyToMany:
+        * tests/DCPS/ManyToMany/DataReaderListener.h:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/ManyToMany.mpc:
+        * tests/DCPS/ManyToMany/Options.h:
+        * tests/DCPS/ManyToMany/README:
+        * tests/DCPS/ManyToMany/Writer.h:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+        * tests/DCPS/ManyToMany/multicast.ini:
+        * tests/DCPS/ManyToMany/pub_multicast_async.ini:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/rtps.ini:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/shmem.ini:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+        * tests/DCPS/ManyToMany/tcp.ini:
+        * tests/DCPS/ManyToMany/udp.ini:
+
+          Created test to allow testing many publishers to many subscribers.
+          Test is not running yet.
+
 Fri Apr 25 13:15:16 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * performance-tests/Bench/src/testprocess.cpp:
