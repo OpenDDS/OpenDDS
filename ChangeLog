@@ -1,3 +1,9 @@
+Sat Apr 26 10:44:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/DataReaderListener.h:
+
+          Fixed compile error for gcc.
+
 Fri Apr 25 21:34:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ManyToMany/ManyToMany.mpc:

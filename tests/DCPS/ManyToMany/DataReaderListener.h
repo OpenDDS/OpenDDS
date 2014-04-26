@@ -70,9 +70,9 @@ private:
   bool done(bool report) const;
   const Options&       options_;
   DDS::DataReader_var  reader_;
-  typedef std::set<::CORBA::Long> Counts;
-  typedef std::map<::CORBA::Long, Counts> WriterCounts;
-  typedef std::map<::CORBA::Long, WriterCounts> ParticipantWriters;
+  typedef std::set< ::CORBA::Long> Counts;
+  typedef std::map< ::CORBA::Long, Counts> WriterCounts;
+  typedef std::map< ::CORBA::Long, WriterCounts> ParticipantWriters;
   typedef std::map<std::string, ParticipantWriters> ProcessParticipants;
 
   ProcessParticipants processes_;
