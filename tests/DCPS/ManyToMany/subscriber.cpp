@@ -74,9 +74,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ListenerServants listener_servants;
     std::vector<DDS::DataReaderListener_var> listeners;
 
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf\n")));
+
     for (Participants::iterator part = participants.begin();
          part != participants.end();
          ++part) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating participant\n")));
+
       *part =
         dpf->create_participant(411,
                                 PARTICIPANT_QOS_DEFAULT,
@@ -132,6 +136,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       for (unsigned int reader = 0; reader < options.num_readers; ++reader) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating reader\n")));
 
         // Create DataReader
         listener_servants.push_back(new DataReaderListenerImpl(options));
@@ -151,13 +156,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
+    const ACE_Time_Value sleep_delay(options.delay_ms / 1000,
+                                     (options.delay_ms % 1000) * 1000);
     unsigned int delay = 0;
-    const unsigned int MAX_DELAY = 60;
+    // writer uses above delay before sending every sample, so take the number of samples
+    // altogether sent (per process) and then double it to ensure we give a chance for all
+    // the data to be received.
+    const unsigned int MAX_DELAY = options.num_pub_participants * options.num_writers *
+      options.num_samples * options.delay_ms * 2;
     while (delay < MAX_DELAY) {
       bool complete = true;
       for (ListenerServants::const_iterator listener = listener_servants.begin();
            listener != listener_servants.end();
            ++listener) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) listener done=%d\n"), (*listener)->done()));
         if (!(*listener)->done()) {
           complete = false;
         }
@@ -166,8 +178,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (complete)
         break;
 
-      ACE_OS::sleep(1);
+      delay += options.delay_ms;
+      ACE_OS::sleep(sleep_delay);
     }
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Listeners done %d\n"), delay));
 
     if (delay == MAX_DELAY) {
       if (options.reliable) {

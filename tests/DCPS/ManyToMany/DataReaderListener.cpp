@@ -168,17 +168,19 @@ void DataReaderListenerImpl::report_errors() const
 
 bool DataReaderListenerImpl::done(bool report) const
 {
-  if (processes_.size() < options_.num_processes) {
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Processes %d %d\n"), processes_.size(), options_.num_pub_processes));
+  if (processes_.size() < options_.num_pub_processes) {
     if (report)
       std::cout << "ERROR: only received samples from "
                 << processes_.size() << " out of "
-                << options_.num_processes << " processes." << std::endl;
+                << options_.num_pub_processes << " processes." << std::endl;
     return false;
   }
 
   for (ProcessParticipants::const_iterator process = processes_.begin();
        process != processes_.end();
        ++process) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Participants %d %d\n"), process->second.size(), options_.num_pub_participants));
     if (process->second.size() < options_.num_pub_participants) {
       if (report)
         std::cout << "ERROR: did not receive samples from all participants." << std::endl;
@@ -188,6 +190,7 @@ bool DataReaderListenerImpl::done(bool report) const
     for (ParticipantWriters::const_iterator writer = process->second.begin();
          writer != process->second.end();
          ++writer) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers %d %d\n"), writer->second.size(), options_.num_writers));
       if (writer->second.size() < options_.num_writers) {
         if (report)
           std::cout << "ERROR: did not receive samples from all writers." << std::endl;
@@ -197,6 +200,7 @@ bool DataReaderListenerImpl::done(bool report) const
       for (WriterCounts::const_iterator count = writer->second.begin();
            count != writer->second.end();
            ++count) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%s reliable Samples %d %d\n"), (options_.reliable ? "" : " not"), count->second.size(), options_.num_samples));
         if (options_.reliable && count->second.size() < options_.num_samples) {
           if (report)
             std::cout << "ERROR: did not receive samples for all writers." << std::endl;

@@ -18,9 +18,10 @@
 struct Options
 {
   Options(int argc, ACE_TCHAR* argv[])
-  : num_processes(1)
+  : num_pub_processes(1)
   , num_pub_participants(1)
   , num_writers(1)
+  , num_samples(2)
   , num_sub_participants(1)
   , num_readers(1)
   , reliable(false)
@@ -30,49 +31,59 @@ struct Options
     ACE_Arg_Shifter parser( argc, argv);
     while( parser.is_anything_left()) {
       const ACE_TCHAR* currentArg = 0;
-      if( 0 != (currentArg = parser.get_the_parameter("processes"))) {
-        num_processes = ACE_OS::atoi( currentArg);
+      if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-pub_processes")))) {
+        num_pub_processes = ACE_OS::atoi( currentArg);
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) num_pub_processes=%d\n"), num_pub_processes));
 
-      } else if( 0 != (currentArg = parser.get_the_parameter("pub_participants"))) {
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-pub_participants")))) {
         num_pub_participants = ACE_OS::atoi( currentArg);
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) num_pub_participants=%d\n"), num_pub_participants));
 
-      } else if( 0 != (currentArg = parser.get_the_parameter("writers"))) {
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-writers")))) {
         num_writers = ACE_OS::atoi( currentArg);
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) num_writers=%d\n"), num_writers));
 
-      } else if( 0 != (currentArg = parser.get_the_parameter("samples"))) {
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-samples")))) {
         num_samples = ACE_OS::atoi( currentArg);
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) num_samples=%d\n"), num_samples));
 
-      } else if( 0 != (currentArg = parser.get_the_parameter("sub_participants"))) {
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-sub_participants")))) {
         num_sub_participants = ACE_OS::atoi( currentArg);
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) num_sub_participants=%d\n"), num_sub_participants));
 
-      } else if( 0 != (currentArg = parser.get_the_parameter("readers"))) {
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-readers")))) {
         num_readers = ACE_OS::atoi( currentArg);
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) num_readers=%d\n"), num_readers));
 
-      } else if( 0 != (currentArg = parser.get_the_parameter("sample_size"))) {
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-sample_size")))) {
         sample_size = ACE_OS::atoi( currentArg);
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) sample_size=%d\n"), sample_size));
 
-      } else if( 0 != (currentArg = parser.get_the_parameter("delay_ms"))) {
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-delay_ms")))) {
         delay_ms = ACE_OS::atoi( currentArg);
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) delay_ms=%d\n"), delay_ms));
 
-      } else if( 0 <= (parser.cur_arg_strncasecmp("reliable"))) {
+      } else if( 0 <= (parser.cur_arg_strncasecmp(ACE_TEXT("-reliable")))) {
         reliable = true;
         parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) reliable\n")));
 
       } else {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) skipping %s\n"), parser.get_current()));
         parser.ignore_arg();
       }
     }
   }
 
-  unsigned int num_processes;
+  unsigned int num_pub_processes;
   unsigned int num_pub_participants; // per process
   unsigned int num_writers; // per participant
   unsigned int num_samples; // per writer

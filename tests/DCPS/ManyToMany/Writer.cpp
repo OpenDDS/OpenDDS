@@ -105,12 +105,13 @@ Writer::write()
 
         ++writer->message.count;
 
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Write message\n")));
         DDS::ReturnCode_t error = message_dw->write(writer->message, *handle);
 
         if (error != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("%N:%l: svc()")
-                     ACE_TEXT(" ERROR: write dw1 returned %d!\n"), error));
+                     ACE_TEXT(" ERROR: writer returned %d!\n"), error));
 
         }
         ACE_OS::sleep(delay);

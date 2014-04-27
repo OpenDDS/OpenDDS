@@ -57,9 +57,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ws.message.data[j] = j % 256;
     }
 
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf\n")));
+
     for (Participants::iterator part = participants.begin();
          part != participants.end();
          ++part, ++ws.message.participant_id) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating participant\n")));
+
       *part =
         dpf->create_participant(411,
                                 PARTICIPANT_QOS_DEFAULT,
@@ -113,6 +117,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ws.message.subject_id = 0;
       for (unsigned int writer = 0; writer < options.num_writers; ++writer, ++ws.message.subject_id) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating writer\n")));
+
         // Create DataWriter
         ws.writer =
           pub->create_datawriter(topic.in(),
@@ -132,6 +138,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Write\n")));
       Writer writer(options, writers);
       writer.write();
     }
@@ -139,6 +146,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     for (Participants::iterator part = participants.begin();
          part != participants.end();
          ++part, ++ws.message.participant_id) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Cleanup Participant\n")));
       // Clean-up!
       (*part)->delete_contained_entities();
       dpf->delete_participant(part->in());

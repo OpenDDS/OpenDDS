@@ -12,14 +12,16 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../LargeSample');
+
 my $status = 0;
 
 my $logging_p = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
     "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
 my $logging_s = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
     "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $pub_opts = "$logging_p -ORBLogFile pub.log ";
-my $sub_opts = "$logging_s -ORBLogFile sub.log ";
+my $pub_opts = "$logging_p ";#-ORBLogFile pub.log ";
+my $sub_opts = "$logging_s ";#-ORBLogFile sub.log ";
 my $repo_bit_opt = '';
 my $reliable = 1;
 
@@ -65,14 +67,10 @@ unlink <*.log>;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                        "$repo_bit_opt -o $dcpsrepo_ior");
-$sub_opts .= " -r $reliable";
+$sub_opts .= " -reliable $reliable";
 
 my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
 my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
-
-my $pub2_opts = $pub_opts;
-$pub2_opts =~ s/pub\.log/pub2.log/;
-my $Publisher2 = PerlDDS::create_process("publisher", $pub2_opts);
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn();
@@ -85,13 +83,10 @@ if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
 print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn();
 
-print $Publisher2->CommandLine() . "\n";
-$Publisher2->Spawn();
-
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn();
 
-my $SubscriberResult = $Subscriber->WaitKill(65);
+my $SubscriberResult = $Subscriber->WaitKill(600);
 if ($SubscriberResult != 0) {
     print STDERR "ERROR: subscriber returned $SubscriberResult\n";
     $status = 1;
@@ -100,12 +95,6 @@ if ($SubscriberResult != 0) {
 my $PublisherResult = $Publisher->WaitKill(10);
 if ($PublisherResult != 0) {
     print STDERR "ERROR: publisher #1 returned $PublisherResult\n";
-    $status = 1;
-}
-
-my $Publisher2Result = $Publisher2->WaitKill(10);
-if ($Publisher2Result != 0) {
-    print STDERR "ERROR: publisher #2 returned $Publisher2Result\n";
     $status = 1;
 }
 
