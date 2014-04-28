@@ -1,3 +1,9 @@
+Mon Apr 28 15:57:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Dispose/main.cpp:
+
+          Fix Fuzz
+
 Sun Apr 27 19:59:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/ManyToMany/Options.h:
