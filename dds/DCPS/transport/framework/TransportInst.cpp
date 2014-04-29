@@ -98,11 +98,15 @@ OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
 void
 OpenDDS::DCPS::TransportInst::shutdown()
 {
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportInst::shutdown --> enter\n"));
   ACE_GUARD(ACE_SYNCH_MUTEX, g, this->lock_);
   if (!this->impl_.is_nil()) {
     this->impl_->shutdown();
     this->impl_ = 0;
   }
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportInst::shutdown --> exit\n"));
 }
 
 OpenDDS::DCPS::TransportImpl_rch

@@ -49,23 +49,45 @@ TransportClient::~TransportClient()
             std::string(converter).c_str()));
    }
 
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> TRYING TO lock_\n"));
+
+   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> GOT lock_\n"));
+
    for (DataLinkSet::MapType::iterator iter = links_.map().begin();
          iter != links_.map().end(); ++iter) {
+      //### Debug statements to track where connection is failing
+      GuidConverter repo_converted(repo_id_);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> remove_listener for: %C\n", std::string(repo_converted).c_str()));
       iter->second->remove_listener(repo_id_);
    }
 
    ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
    for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
       for (size_t i = 0; i < impls_.size(); ++i) {
+         //### Debug statements to track where connection is failing
+         GuidConverter this_tc_converted(repo_id_);
+         GuidConverter remote_repo_converted(it->second.data_.remote_id_);
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> stop_accepting_or_connecting for tc: %C for remote: %C \n", std::string(this_tc_converted).c_str(), std::string(remote_repo_converted).c_str()));
          impls_[i]->stop_accepting_or_connecting(this, it->second.data_.remote_id_);
       }
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> cancel_timer for PENDING ASSOC \n"));
       timer->cancel_timer(&it->second);
    }
 
    for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
          it != impls_.end(); ++it) {
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> detach_client \n"));
+
       (*it)->detach_client(this);
    }
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> RELEASING lock_\n"));
 }
 
 void
@@ -221,8 +243,9 @@ TransportClient::associate(const AssociationData& data, bool active)
    if (iter == pending_.end()) {
       iter = pending_.insert(std::make_pair(data.remote_id_, PendingAssoc())).first;
       //### Debug statements to track where connection is failing
+      GuidConverter tc_assoc(this->repo_id_);
       GuidConverter remote_new(data.remote_id_);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> INSERTED NEW PENDING ASSOC remote_id: %C\n", std::string(remote_new).c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> INSERTED NEW PENDING ASSOC TransportClient: %C remote_id: %C\n", std::string(tc_assoc).c_str(), std::string(remote_new).c_str()));
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> after insertion there are %d pending assocs\n", pending_.size()));
 
       PendingMap::iterator iter_print = pending_.begin();
@@ -366,7 +389,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
       result = impl->connect_datalink(remote, attribs_, this);
    }
    //Check to make sure the pending assoc still exists in the map and hasn't been slated for removal
-   //figure out how to respond to these possible results that occured while lock was released to connect
+   //figure out how to respond to these possible results that occurred while lock was released to connect
    PendingMap::iterator iter = pending_.find(remote.repo_id_);
    if (iter == pending_.end()) {
       return false;
@@ -456,18 +479,21 @@ TransportClient::use_datalink(const RepoId& remote_id,
 
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink --> begin \n"));
+   GuidConverter tc_repo(this->repo_id_);
    GuidConverter remote(remote_id);
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink with remote_id = %C\n", std::string(remote).c_str()));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink with this TransportClient: %C connecting to remote_id = %C\n", std::string(tc_repo).c_str(), std::string(remote).c_str()));
+
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink --> TRYING TO lock_\n"));
 
-   //ACE_Thread_Mutex lock2_;
-   //ACE_GUARD(ACE_Thread_Mutex, guard, lock2_);
    ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
-
 
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink --> GOT lock_\n"));
+   GuidConverter tc_repo_post_lock(this->repo_id_);
+   GuidConverter remote_post_lock(remote_id);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink AFTER LOCKING with this TransportClient: %C connecting to remote_id = %C\n", std::string(tc_repo_post_lock).c_str(), std::string(remote_post_lock).c_str()));
+
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink --> got the lock_ so can call use_datalink_i\n"));
 

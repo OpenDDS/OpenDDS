@@ -125,8 +125,28 @@ DataLink::invoke_on_start_callbacks(bool success)
 {
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks with success = %b --> begin\n", success));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks with success = %s --> begin\n", success ? "true" : "false"));
 
+
+   const DataLink_rch link(success ? this : 0, false);
+
+   do {
+      GuardType guard(strategy_lock_);
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks before pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
+      if (!on_start_callbacks_.empty()) {
+         OnStartCallback last_callback = on_start_callbacks_.back();
+         on_start_callbacks_.pop_back();
+         //### Debug statements to track where connection is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks after pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
+         guard.release();
+         last_callback.first->use_datalink(last_callback.second, link);
+      }
+   } while (!on_start_callbacks_.empty());
+
+   //### this implementation wasn't working for when TransportClient is destroyed if there is a copy of an on start callback
+   //### out there then the TransportClient* will be invalidated while still being used
+/*
    std::vector<OnStartCallback> local;
    {
       GuardType guard(strategy_lock_);
@@ -147,6 +167,7 @@ DataLink::invoke_on_start_callbacks(bool success)
       //### Debug statements to track where connection is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks use_datalink returned for callback\n"));
    }
+*/
 
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks --> end\n"));

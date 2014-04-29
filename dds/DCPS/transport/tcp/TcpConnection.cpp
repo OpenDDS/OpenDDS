@@ -269,7 +269,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
             -1);
    }
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open  \n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::open --> exiting \n"));
 
    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open passive handle=%d.\n",
          int(get_handle())), 2);

@@ -100,7 +100,7 @@ PublisherImpl::create_datawriter(
 {
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter being created\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter enter\n"));
 
    DDS::DataWriterQos dw_qos;
 
@@ -142,7 +142,7 @@ PublisherImpl::create_datawriter(
          dynamic_cast <DataWriterImpl*>(dw_obj.in());
 
    //### Debug statements to track where test is failing
-             ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE create DataWriterImpl now init()\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE create DataWriterImpl now init()\n"));
 
    dw_servant->init(a_topic,
          topic_servant,
@@ -154,20 +154,20 @@ PublisherImpl::create_datawriter(
          dw_obj.in());
 
    //### Debug statements to track where test is failing
-             ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE DataWriterImpl-> init\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE DataWriterImpl-> init\n"));
 
-             //### Debug statements to track where test is failing
-                        ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> check if Publisher is enabled\n"));
+   //### Debug statements to track where test is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> check if Publisher is enabled\n"));
 
    if (this->enabled_ == true
          && qos_.entity_factory.autoenable_created_entities == 1) {
       //### Debug statements to track where test is failing
-                ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> enable DataWriterImpl (dw_servant)\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> enable DataWriterImpl (dw_servant)\n"));
 
       DDS::ReturnCode_t ret = dw_servant->enable();
 
       //### Debug statements to track where test is failing
-                ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE enabling DataWriterImpl\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE enabling DataWriterImpl\n"));
 
       if (ret != DDS::RETCODE_OK) {
          ACE_ERROR((LM_ERROR,
@@ -175,13 +175,13 @@ PublisherImpl::create_datawriter(
                ACE_TEXT("PublisherImpl::create_datawriter, ")
                ACE_TEXT("enable failed.\n")));
          //### Debug statements to track where test is failing
-                   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> RETURN NIL enable failed\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> RETURN NIL enable failed\n"));
          return DDS::DataWriter::_nil();
       }
    }
 
    //### Debug statements to track where test is failing
-             ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> end SUCCESS\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> end SUCCESS\n"));
 
    return DDS::DataWriter::_duplicate(dw_obj.in());
 }
@@ -189,6 +189,10 @@ PublisherImpl::create_datawriter(
 DDS::ReturnCode_t
 PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 {
+
+   //### Debug statements to track where test is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::delete_datawriter --> enter\n"));
+
    DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
 
    {
@@ -301,6 +305,9 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
    // Decrease ref count after the servant is removed from the maps.
    dw_servant->_remove_ref();
+
+   //### Debug statements to track where test is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::delete_datawriter --> exit\n"));
 
    return DDS::RETCODE_OK;
 }
@@ -664,7 +671,7 @@ PublisherImpl::wait_for_acknowledgments(
       const DDS::Duration_t& max_wait)
 {
    //### Debug statements to track where test is failing
-             ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::wait_for_acknowledgments --> begin\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::wait_for_acknowledgments --> begin\n"));
 
    if (enabled_ == false) {
       ACE_ERROR_RETURN((LM_ERROR,

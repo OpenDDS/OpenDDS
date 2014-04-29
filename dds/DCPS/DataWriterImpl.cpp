@@ -1438,8 +1438,7 @@ DDS::ReturnCode_t
 DataWriterImpl::enable()
 {
    //### Debug statements to track where connection is failing
-   GuidConverter pub_on_entry(this->publication_id_);
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> enter enabling publication: %C\n", std::string(pub_on_entry).c_str()));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::enable --> enter \n"));
 
    //According spec:
    // - Calling enable on an already enabled Entity returns OK and has no

@@ -46,6 +46,8 @@ TransportImpl::~TransportImpl()
 void
 TransportImpl::shutdown()
 {
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportImpl::shutdown --> enter\n"));
   DBG_ENTRY_LVL("TransportImpl", "shutdown", 6);
 
   // Stop datalink clean task.
@@ -90,6 +92,8 @@ TransportImpl::shutdown()
     // Drop our references to the config_.
     this->config_ = 0;
   }
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportImpl::shutdown --> exit\n"));
 }
 
 bool

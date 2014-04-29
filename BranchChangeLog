@@ -1,13 +1,42 @@
+Tue Apr 29 18:53:36 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+	**Where modifications not specifically noted, added debugging logging
+
+        * dds/DCPS/DataWriterImpl.cpp:
+				-removed logging of publication_id_ prior to it being set
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+				-modified how invoke_on_start_callbacks operates.  
+				 Instead of swapping out the vector of callbacks, 
+				 iterate over them.  This allows callbacks to be 
+				 removed while one is being processed.  And thus 
+				 removes possibility of calling use_datalink on a 
+				 previously deleted TransportClient
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+				-added locking to destructor
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+				-modified connect_datalink to properly add_pending_connection 
+				 in situations where a new link was created and on_start_callback 
+				 was added before returning nil link with ACR_SUCCESS
+
 Wed Apr 23 19:05:55 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * Merged from trunk  r6049 through r6127.
-	* Created BranchChangeLog
+        * Created BranchChangeLog
 
 *************************************************************************************
 NOTE BRANCH CHANGELOG CREATED APR 23 ABOVE, CHANGES PRIOR TO APR 23 NOT RECORDED
-Thu Sep 12 23:56:45 UTC 2013  Adam Mitz  <mitza@ociweb.com> 
+Thu Sep 12 23:56:45 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
-	* creating branch async_assoc
+        * creating branch async_assoc
 *************************************************************************************
 
 Local Variables:

@@ -492,6 +492,8 @@ TransportRegistry::register_type(const TransportType_rch& type)
 void
 TransportRegistry::release()
 {
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportRegistry::release --> enter\n"));
   DBG_ENTRY_LVL("TransportRegistry", "release", 6);
   GuardType guard(this->lock_);
 
@@ -506,6 +508,9 @@ TransportRegistry::release()
   config_map_.clear();
   domain_default_config_map_.clear();
   global_config_ = 0;
+
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportRegistry::release --> exit\n"));
 }
 
 
