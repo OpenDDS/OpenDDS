@@ -17,10 +17,18 @@
 #include "tests/DCPS/LargeSample/MessengerTypeSupportImpl.h"
 
 #include <iostream>
+#include <sstream>
 
-DataReaderListenerImpl::DataReaderListenerImpl(const Options& options)
+DataReaderListenerImpl::DataReaderListenerImpl(const Options& options,
+                                               const std::string& process,
+                                               unsigned int participant,
+                                               unsigned int writer)
   : options_(options)
 {
+  std::stringstream ss;
+  ss << process << "->" << participant << "->" << writer;
+  id_ = ss.str();
+  std::cerr << "Starting DataReaderListenerImpl for " << id_ << std::endl;
 }
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -59,23 +67,32 @@ throw(CORBA::SystemException)
           const Messenger::Message& message = messages[i];
 
           // output for console to consume
-          std::cout << "Message: subject = " << message.subject.in()
-                    << " subject_id = " << message.subject_id
-                    << " count = " << message.count << '\n';
+          std::stringstream ss;
+          ss << "Message: from writer " << message.subject.in()
+             << "->" << message.participant_id
+             << "->" << message.subject_id
+             << " count = " << message.count
+             << " for reader=" << id_
+             << std::endl;
+          std::cerr << ss.str();
           // also track it in the log file
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("%N:%l: Message: subject = %C ")
+                     ACE_TEXT("participant_id = %d ")
                      ACE_TEXT("subject_id = %d ")
-                     ACE_TEXT("count = %d\n"),
+                     ACE_TEXT("count = %d ")
+                     ACE_TEXT("for reader = %C\n"),
                      message.subject.in(),
+                     message.participant_id,
                      message.subject_id,
-                     message.count));
+                     message.count,
+                     id_.c_str()));
 
           for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
             if (message.data[i] != i % 256) {
               std::cout << "ERROR: Bad data at index " << i << " subjid "
                         << message.subject_id << " count " << message.count
-                        << "\n";
+                        << std::endl;
               break;
             }
           }
@@ -173,7 +190,8 @@ bool DataReaderListenerImpl::done(bool report) const
     if (report)
       std::cout << "ERROR: only received samples from "
                 << processes_.size() << " out of "
-                << options_.num_pub_processes << " processes." << std::endl;
+                << options_.num_pub_processes << " processes for reader "
+                << id_ << "." << std::endl;
     return false;
   }
 
@@ -183,27 +201,39 @@ bool DataReaderListenerImpl::done(bool report) const
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Participants %d %d\n"), process->second.size(), options_.num_pub_participants));
     if (process->second.size() < options_.num_pub_participants) {
       if (report)
-        std::cout << "ERROR: did not receive samples from all participants." << std::endl;
+        std::cout << "ERROR: only received samples from " << process->second.size()
+                  << " out of " << options_.num_pub_participants
+                  << " participants for " << process->first << " for reader "
+                  << id_ << std::endl;
 
       return false;
     }
-    for (ParticipantWriters::const_iterator writer = process->second.begin();
-         writer != process->second.end();
-         ++writer) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers %d %d\n"), writer->second.size(), options_.num_writers));
-      if (writer->second.size() < options_.num_writers) {
+    for (ParticipantWriters::const_iterator participant = process->second.begin();
+         participant != process->second.end();
+         ++participant) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Participant %d %d\n"), participant->second.size(), options_.num_writers));
+      if (participant->second.size() < options_.num_writers) {
         if (report)
-          std::cout << "ERROR: did not receive samples from all writers." << std::endl;
+          std::cout << "ERROR: only received samples from " << participant->second.size()
+                    << " out of " << options_.num_writers
+                    << " writers for " << process->first
+                    << "->" << participant->first << " for reader "
+                    << id_ << std::endl;
 
         return false;
       }
-      for (WriterCounts::const_iterator count = writer->second.begin();
-           count != writer->second.end();
-           ++count) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%s reliable Samples %d %d\n"), (options_.reliable ? "" : " not"), count->second.size(), options_.num_samples));
-        if (options_.reliable && count->second.size() < options_.num_samples) {
+      for (WriterCounts::const_iterator writer = participant->second.begin();
+           writer != participant->second.end();
+           ++writer) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%s reliable Samples %d %d\n"), (options_.reliable ? "" : " not"), writer->second.size(), options_.num_samples));
+        if (options_.reliable && writer->second.size() < options_.num_samples) {
           if (report)
-            std::cout << "ERROR: did not receive samples for all writers." << std::endl;
+            std::cout << "ERROR: only received " << writer->second.size()
+                      << " out of " << options_.num_samples
+                      << " samples for " << process->first
+                      << "->" << participant->first
+                      << "->" << writer->first << " for reader "
+                      << id_ << std::endl;
 
           return false;
         }

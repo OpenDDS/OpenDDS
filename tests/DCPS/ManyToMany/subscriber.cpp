@@ -32,6 +32,8 @@
 #include "Options.h"
 #include "tests/DCPS/LargeSample/MessengerTypeSupportImpl.h"
 #include <cstdlib>
+#include <sstream>
+#include <iomanip>
 
 namespace {
 
@@ -73,12 +75,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     typedef std::vector<DataReaderListenerImpl*> ListenerServants;
     ListenerServants listener_servants;
     std::vector<DDS::DataReaderListener_var> listeners;
+    std::stringstream ss;
+    ss << std::setw(5) << ACE_OS::getpid();
+
+    const std::string pid = ss.str();
 
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf\n")));
 
+    unsigned int part_index = 0;
     for (Participants::iterator part = participants.begin();
          part != participants.end();
-         ++part) {
+         ++part, ++part_index) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating participant\n")));
 
       *part =
@@ -139,7 +146,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating reader\n")));
 
         // Create DataReader
-        listener_servants.push_back(new DataReaderListenerImpl(options));
+        listener_servants.push_back(new DataReaderListenerImpl(options, pid, part_index, reader));
         listeners.push_back(DDS::DataReaderListener_var(listener_servants.back()));
 
         DDS::DataReader_var data_reader =
@@ -156,15 +163,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    const ACE_Time_Value sleep_delay(options.delay_ms / 1000,
-                                     (options.delay_ms % 1000) * 1000);
+    const ACE_Time_Value sleep_delay(options.delay_msec / 1000,
+                                     (options.delay_msec % 1000) * 1000);
     unsigned int delay = 0;
-    // writer uses above delay before sending every sample, so take the number of samples
-    // altogether sent (per process) and then double it to ensure we give a chance for all
-    // the data to be received.
-    const unsigned int MAX_DELAY = options.num_pub_participants * options.num_writers *
-      options.num_samples * options.delay_ms * 2;
-    while (delay < MAX_DELAY) {
+    while (delay < options.total_duration_msec) {
       bool complete = true;
       for (ListenerServants::const_iterator listener = listener_servants.begin();
            listener != listener_servants.end();
@@ -178,22 +180,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (complete)
         break;
 
-      delay += options.delay_ms;
+      delay += options.delay_msec;
       ACE_OS::sleep(sleep_delay);
     }
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Listeners done %d\n"), delay));
 
-    if (delay == MAX_DELAY) {
-      if (options.reliable) {
-        for (ListenerServants::const_iterator listener = listener_servants.begin();
-             listener != listener_servants.end();
-             ++listener) {
-          (*listener)->report_errors();
-        }
-        ok = false;
+    if (delay >= options.total_duration_msec) {
+      for (ListenerServants::const_iterator listener = listener_servants.begin();
+           listener != listener_servants.end();
+           ++listener) {
+        (*listener)->report_errors();
       }
-      else {
-        std::cout << "WARNING: un-reliable data loss\n";
+
+      if (options.reliable) {
+        ok = false;
       }
     }
 

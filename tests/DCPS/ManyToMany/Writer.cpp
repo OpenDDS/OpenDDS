@@ -25,7 +25,7 @@ Writer::Writer(const Options& options, Writers& writers)
 }
 
 namespace {
-  void wait_for_match(DDS::DataWriter_ptr writer, bool match = true)
+  void wait_for_match(DDS::DataWriter_ptr writer, const unsigned int count)
   {
     DDS::StatusCondition_var condition = writer->get_statuscondition();
     condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
@@ -47,7 +47,7 @@ namespace {
         ACE_OS::exit(-1);
       }
 
-      if (match ? (matches.current_count < 1) : (matches.current_count > 0)) {
+      if (matches.current_count < (int)count) {
         if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("%N:%l: wait_for_match()")
@@ -68,11 +68,13 @@ Writer::write()
   try {
     typedef std::vector<DDS::InstanceHandle_t> Handles;
     Handles handles;
+    const unsigned int subscribers = options_.num_sub_processes *
+      options_.num_sub_participants * options_.num_readers;
     // Block until Subscriber is available
     for (Writers::const_iterator writer = writers_.begin();
          writer != writers_.end();
          ++writer) {
-      wait_for_match(writer->writer);
+      wait_for_match(writer->writer, subscribers);
 
       // we already have a ref count, no need to take another
       Messenger::MessageDataWriter_ptr message_dw =
@@ -90,8 +92,8 @@ Writer::write()
 
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers matched\n")));
 
-    const ACE_Time_Value delay(options_.delay_ms / 1000,
-                               (options_.delay_ms % 1000) * 1000);
+    const ACE_Time_Value delay(options_.delay_msec / 1000,
+                               (options_.delay_msec % 1000) * 1000);
 
     for (unsigned int i = 0; i < options_.num_samples; i++) {
       Handles::iterator handle = handles.begin();
@@ -124,7 +126,7 @@ Writer::write()
     for (Writers::const_iterator writer = writers_.begin();
          writer != writers_.end();
          ++writer) {
-      wait_for_match(writer->writer, false);
+      wait_for_match(writer->writer, 0);
     }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");

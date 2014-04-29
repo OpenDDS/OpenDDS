@@ -22,11 +22,13 @@ struct Options
   , num_pub_participants(1)
   , num_writers(1)
   , num_samples(2)
+  , num_sub_processes(1)
   , num_sub_participants(1)
   , num_readers(1)
   , reliable(false)
   , sample_size(10)
-  , delay_ms(1000)
+  , delay_msec(1000)
+  , total_duration_msec(delay_msec * num_samples * num_writers * num_pub_participants * 2)
   {
     ACE_Arg_Shifter parser( argc, argv);
     while( parser.is_anything_left()) {
@@ -51,6 +53,11 @@ struct Options
         parser.consume_arg();
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) num_samples=%d\n"), num_samples));
 
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-sub_processes")))) {
+        num_sub_processes = ACE_OS::atoi( currentArg);
+        parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) num_sub_processes=%d\n"), num_sub_processes));
+
       } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-sub_participants")))) {
         num_sub_participants = ACE_OS::atoi( currentArg);
         parser.consume_arg();
@@ -66,10 +73,15 @@ struct Options
         parser.consume_arg();
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) sample_size=%d\n"), sample_size));
 
-      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-delay_ms")))) {
-        delay_ms = ACE_OS::atoi( currentArg);
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-delay_msec")))) {
+        delay_msec = ACE_OS::atoi( currentArg);
         parser.consume_arg();
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) delay_ms=%d\n"), delay_ms));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) delay_msec=%d\n"), delay_msec));
+
+      } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-total_duration_msec")))) {
+        total_duration_msec = ACE_OS::atoi( currentArg);
+        parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) total_duration_msec=%d\n"), total_duration_msec));
 
       } else if( 0 <= (parser.cur_arg_strncasecmp(ACE_TEXT("-reliable")))) {
         reliable = true;
@@ -87,11 +99,13 @@ struct Options
   unsigned int num_pub_participants; // per process
   unsigned int num_writers; // per participant
   unsigned int num_samples; // per writer
+  unsigned int num_sub_processes;
   unsigned int num_sub_participants; // in this process
   unsigned int num_readers; // per participant
   bool reliable;
   unsigned int sample_size;
-  unsigned int delay_ms;
+  unsigned int delay_msec;
+  unsigned int total_duration_msec;
 };
 
 #endif /* ManyToMany_Options_h  */

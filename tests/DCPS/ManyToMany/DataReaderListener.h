@@ -24,7 +24,10 @@ class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
   //Constructor
-  DataReaderListenerImpl(const Options& options);
+  DataReaderListenerImpl(const Options& options,
+                         const std::string& process,
+                         unsigned int participant,
+                         unsigned int writer);
 
   //Destructor
   virtual ~DataReaderListenerImpl();
@@ -76,6 +79,7 @@ private:
   typedef std::map<std::string, ParticipantWriters> ProcessParticipants;
 
   ProcessParticipants processes_;
+  std::string id_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

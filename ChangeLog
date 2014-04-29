@@ -1,3 +1,27 @@
+Tue Apr 29 18:44:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/DataReaderListener.h:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+
+          Improved logging.
+
+        * tests/DCPS/ManyToMany/Options.h:
+
+          Added supplying the number of subscriber processes and how long
+          the subscriber should set its timeout for.
+
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Added tracking how many subscribers to wait for.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+        
+          Added interface for configuring the test.
+
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Changed to use passed in timeout.
+
 Mon Apr 28 15:57:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Dispose/main.cpp:
