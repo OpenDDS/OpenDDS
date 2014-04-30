@@ -70,6 +70,7 @@ my $delay_msec;
 my $serialized_samples;
 my $base_delay_msec = 500;
 my $samples = 10;
+my $custom = 0;
 if ($#ARGV < 1) {
     print "no args passed ($#ARGV)\n";
     $pub_processes = 2;
@@ -121,27 +122,77 @@ elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     $delay_msec = int(($total_writers * $samples) / 100 + 1) * $base_delay_msec;
     $serialized_samples = $pub_part * $writers * $samples;
 }
+elsif (($ARGV[1] eq "custom" || $ARGV[1] eq "-custom") && $#ARGV > 1) {
+    $custom = 1;
+    my $added_opts = $ARGV[2];
+    $added_opts =~ s/-reliable//;
+    $config_opts .= $added_opts . ' ';
+    if ($config_opts =~ /-pub_processes (\d+)/) {
+        $pub_processes = $1;
+    }
+    if ($config_opts =~ /-sub_processes (\d+)/) {
+        $sub_processes = $1;
+    }
+    my $pub_part = 1;
+    if ($config_opts =~ /-pub_participants (\d+)/) {
+        $pub_part = $1;
+    }
+    my $sub_part = 1;
+    if ($config_opts =~ /-sub_participants (\d+)/) {
+        $sub_part = $1;
+    }
+    if ($config_opts =~ /-samples (\d+)/) {
+        $samples = $1;
+    }
+    my $writers = 1;
+    if ($config_opts =~ /-writers (\d+)/) {
+        $writers = $1;
+    }
+    my $readers = 1;
+    if ($config_opts =~ /-readers (\d+)/) {
+        $readers = $1;
+    }
+    if ($config_opts =~ /-delay_msec (\d+)/) {
+        $delay_msec = $1;
+    }
+
+    # only used if -total_duration_msec is not in $ARGV[1]
+    $serialized_samples = $pub_part * $writers * $samples;
+}
 else {
     print STDERR "ERROR: invalid argv[1]=$ARGV[1]\n";
 }
 
-$config_opts .= '-delay_msec ' . $delay_msec . ' ';
+if ($config_opts !~ /-delay_msec/) {
+    $config_opts .= '-delay_msec ' . $delay_msec . ' ';
+}
 # double the total time (in seconds) it takes for the publishers
 # to send the data
-my $total_duration_msec = $serialized_samples * $delay_msec * 2;
-$config_opts .= '-total_duration_msec ' . $total_duration_msec . ' ';
+my $total_duration_msec;
+if ($config_opts =~ /-total_duration_msec (\d+)/) {
+    $total_duration_msec = $1;
+}
+else {
+    $total_duration_msec = $serialized_samples * $delay_msec * 2;
+    $config_opts .= '-total_duration_msec ' . $total_duration_msec . ' ';
+}
 
-if ($#ARGV < 2 || $ARGV[2] eq  "small") {
+if (!$custom) {
+    if ($#ARGV < 2 || $ARGV[2] eq  "small") {
+        $config_opts .= '-sample_size 10 ';
+    }
+    elsif ($ARGV[2] eq  "large") {
+        $config_opts .= '-sample_size 66000 ';
+    }
+    elsif ($ARGV[2] eq  "medium") {
+        $config_opts .= '-sample_size 33000 ';
+    }
+    elsif ($ARGV[2] =~ /^\d+$/) {
+        $config_opts .= '-sample_size ' . $ARGV[2] . ' ';
+    }
+}
+elsif ($config_opts !~ /-sample_size/) {
     $config_opts .= '-sample_size 10 ';
-}
-elsif ($ARGV[2] eq  "large") {
-    $config_opts .= '-sample_size 66000 ';
-}
-elsif ($ARGV[2] eq  "medium") {
-    $config_opts .= '-sample_size 33000 ';
-}
-elsif ($ARGV[2] =~ /^\d+$/) {
-    $config_opts .= '-sample_size ' . $ARGV[2] . ' ';
 }
 
 my $dcpsrepo_ior = "repo.ior";
