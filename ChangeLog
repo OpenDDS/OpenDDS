@@ -1,3 +1,9 @@
+Wed Apr 30 16:39:20 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Fixed the svn:executable property.
+
 Wed Apr 30 14:34:37 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
