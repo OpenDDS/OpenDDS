@@ -25,7 +25,7 @@
 #include "ace/Reactor.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
-#include <cstring>
+#include <string.h>
 
 #ifndef __ACE_INLINE__
 # include "RtpsUdpDataLink.inl"
@@ -273,6 +273,15 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 }
 
 bool
+RtpsUdpDataLink::check_handshake_complete(const RepoId& local,
+                                          const RepoId& remote)
+{
+  return this->handshake_done(local, remote);
+}
+
+
+/*
+bool
 RtpsUdpDataLink::wait_for_handshake(const RepoId& local_id,
                                     const RepoId& remote_id)
 {
@@ -290,7 +299,7 @@ RtpsUdpDataLink::wait_for_handshake(const RepoId& local_id,
   }
   return true;
 }
-
+*/
 bool
 RtpsUdpDataLink::handshake_done(const RepoId& local_id, const RepoId& remote_id)
 {

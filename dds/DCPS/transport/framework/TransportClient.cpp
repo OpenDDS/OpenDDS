@@ -76,7 +76,9 @@ TransportClient::~TransportClient()
       }
       //### Debug statements to track where connection is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> cancel_timer for PENDING ASSOC \n"));
-      timer->cancel_timer(&it->second);
+      //### shouldn't really do this, timer should never be 0, right?
+      if (timer != 0)
+        timer->cancel_timer(&it->second);
    }
 
    for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
@@ -602,8 +604,9 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i cancel time for pend\n"));
-
-   timer->cancel_timer(&pend);
+   //### shouldn't really do this, timer should never be 0, right?
+   if (timer != 0)
+     timer->cancel_timer(&pend);
 
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i canceled timer, now delete iter which is pend\n"));

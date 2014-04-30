@@ -100,7 +100,8 @@ public:
                   bool local_reliable, bool remote_reliable,
                   bool local_durable, bool remote_durable);
 
-  bool wait_for_handshake(const RepoId& local_id, const RepoId& remote_id);
+  bool check_handshake_complete(const RepoId& local, const RepoId& remote);
+  //bool wait_for_handshake(const RepoId& local_id, const RepoId& remote_id);
 
 private:
   virtual void stop_i();

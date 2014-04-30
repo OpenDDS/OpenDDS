@@ -74,6 +74,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
                                    TransportClient* )
 {
+  GuardThreadType guard_links(this->links_lock_);
   RtpsUdpDataLink_rch link = link_;
   if (link_.is_nil()) {
     link = make_datalink(attribs.local_id_.guidPrefix);
@@ -86,6 +87,17 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                attribs.local_reliable_, remote.reliable_,
                attribs.local_durable_, remote.durable_);
 
+  if (0 == std::memcmp(attribs.local_id_.guidPrefix, remote.repo_id_.guidPrefix,
+                       sizeof(GuidPrefix_t))) {
+    return AcceptConnectResult(link._retn()); // "loopback" connection return link right away
+  }
+
+  if (link->check_handshake_complete(attribs.local_id_, remote.repo_id_)){
+    return AcceptConnectResult(link._retn());
+  }
+
+  return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
+/*
   const GuidConverter local_conv(attribs.local_id_), remote_conv(remote.repo_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
     "waiting for handshake local %C remote %C\n", std::string(local_conv).c_str(),
@@ -100,7 +112,10 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
   }
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
     "wait for handshake completed\n"), 2);
+
+
   return AcceptConnectResult(link._retn());
+*/
 }
 
 TransportImpl::AcceptConnectResult
@@ -108,6 +123,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
                                   TransportClient* )
 {
+  GuardThreadType guard_links(this->links_lock_);
   RtpsUdpDataLink_rch link = link_;
   if (link_.is_nil()) {
     link = make_datalink(attribs.local_id_.guidPrefix);
@@ -127,6 +143,9 @@ RtpsUdpTransport::stop_accepting_or_connecting(TransportClient* /*client*/,
                                                const RepoId& /*remote_id*/)
 {
   //TODO: implement
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###RtpsUdpTransport::stop_accepting_or_connecting --> enter\n"));
+
 }
 
 void
