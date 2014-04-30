@@ -27,11 +27,12 @@ unlink $dcpsrepo_ior;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                        "$opts -o $dcpsrepo_ior -NOBITS");
-my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
+my $Subscriber1 = PerlDDS::create_process("subscriber", $sub_opts);
+my $Subscriber2 = PerlDDS::create_process("subscriber", $sub_opts);
 my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
 
 print $DCPSREPO->CommandLine() . "\n";
-print $Publisher->CommandLine() . "\n";
+print $Subscriber1->CommandLine() . "\n";
 
 $DCPSREPO->Spawn();
 if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
@@ -40,13 +41,19 @@ if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
     exit 1;
 }
 
+print $Subscriber1->CommandLine() . "\n";
+$Subscriber1->Spawn();
+
+sleep(2);
+
+print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn();
 
 # Sleep for 2 seconds for publisher to write durable data.
 sleep(2);
 
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn();
+print $Subscriber2->CommandLine() . "\n";
+$Subscriber2->Spawn();
 
 my $PublisherResult = $Publisher->WaitKill(300);
 if ($PublisherResult != 0) {
@@ -54,10 +61,15 @@ if ($PublisherResult != 0) {
     $status = 1;
 }
 
-my $SubscriberResult = $Subscriber->WaitKill(15);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
+my $Subscriber1Result = $Subscriber1->WaitKill(15);
+if ($Subscriber1Result != 0) {
+    print STDERR "ERROR: subscriber1 returned $Subscriber1Result \n";
     $status = 1;
+}
+my $Subscriber2Result = $Subscriber2->WaitKill(15);
+if ($Subscriber2Result != 0) {
+    print STDERR "ERROR: subscriber2 returned $Subscriber2Result \n";
+    $status = 2;
 }
 
 my $ir = $DCPSREPO->TerminateWaitKill(5);

@@ -87,10 +87,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                     listener,
                                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(dr)) {
-      cerr << "create_datareader 1 failed." << endl;
+      cerr << "create_datareader volatile failed." << endl;
       exit(1);
     } else {
-      cerr << "create_datareader 1 success." << endl;
+      cerr << "create_datareader volatile success." << endl;
     }
 
     dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
@@ -99,10 +99,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                      listener,
                                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil(dr2)) {
-      cerr << "create_datareader 2 failed." << endl;
+      cerr << "create_datareader durable failed." << endl;
       exit(1);
     } else {
-      cerr << "create_datareader 2 success." << endl;
+      cerr << "create_datareader durable success." << endl;
     }
 
     const int expected = 50;

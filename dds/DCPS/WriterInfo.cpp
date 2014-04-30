@@ -56,6 +56,7 @@ WriterInfoListener::writer_removed(WriterInfo& )
 WriterInfo::WriterInfo()
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
   seen_data_(false),
+  awaiting_historic_samples_(false),
   state_(NOT_SET),
   reader_(0),
   writer_id_(GUID_UNKNOWN),
@@ -71,6 +72,7 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
                        const ::DDS::DataWriterQos& writer_qos)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
   seen_data_(false),
+  awaiting_historic_samples_(writer_qos.durability.kind > DDS::VOLATILE_DURABILITY_QOS),
   state_(NOT_SET),
   reader_(reader),
   writer_id_(writer_id),

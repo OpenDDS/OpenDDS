@@ -1,3 +1,30 @@
+Wed Apr 30 19:35:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+
+          Add control message END_HISTORIC_SAMPLES, add place to track 
+          durable writers who have sent it.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Filter out data samples for durable writers for whom we have not
+          received END_HISTORIC_SAMPLES.
+          Upon receipt of END_HISTORIC_SAMPLES, stop filtering that writer.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Send END_HISTORIC_SAMPLES when done sending durable data.
+
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+
+          Test also with a subscriber prior to the publisher.
+
 Wed Apr 30 17:35:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/transport/simple/SimpleDataWriter.cpp:
