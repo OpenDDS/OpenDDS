@@ -1,3 +1,13 @@
+Wed Apr 30 14:34:37 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Turned on initial tests for all transports.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Got rid of "custom" keyword.
+
 Wed Apr 30 12:58:01 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/ManyToMany/run_test.pl:

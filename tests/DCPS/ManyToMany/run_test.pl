@@ -122,9 +122,12 @@ elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     $delay_msec = int(($total_writers * $samples) / 100 + 1) * $base_delay_msec;
     $serialized_samples = $pub_part * $writers * $samples;
 }
-elsif (($ARGV[1] eq "custom" || $ARGV[1] eq "-custom") && $#ARGV > 1) {
+elsif ($ARGV[1] =~ /-\S_process/ ||
+       $ARGV[1] =~ /-\S_participant/ ||
+       $ARGV[1] =~ /-readers/ ||
+       $ARGV[1] =~ /-writers/) {
     $custom = 1;
-    my $added_opts = $ARGV[2];
+    my $added_opts = $ARGV[1];
     $added_opts =~ s/-reliable//;
     $config_opts .= $added_opts . ' ';
     if ($config_opts =~ /-pub_processes (\d+)/) {
