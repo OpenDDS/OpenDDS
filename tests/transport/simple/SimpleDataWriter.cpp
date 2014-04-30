@@ -47,6 +47,32 @@ SimpleDataWriter::init(const OpenDDS::DCPS::AssociationData& subscription)
   }
 }
 
+namespace
+{
+  class Cleanup
+  {
+  public:
+    Cleanup(OpenDDS::DCPS::DataSampleListElementAllocator& alloc, OpenDDS::DCPS::DataSampleList& list)
+    : alloc_(alloc)
+    , list_(list)
+    {
+    }
+
+    ~Cleanup()
+    {
+      OpenDDS::DCPS::DataSampleListElement* element = list_.head_;
+      while (element != 0) {
+        OpenDDS::DCPS::DataSampleListElement* const to_remove = element;
+        element = element->next_send_sample_;
+        to_remove->~DataSampleListElement();
+        alloc_.free(to_remove);
+      }
+    }
+  private:
+    OpenDDS::DCPS::DataSampleListElementAllocator& alloc_;
+    OpenDDS::DCPS::DataSampleList& list_;
+  };
+}
 
 int
 SimpleDataWriter::run(int num_messages, int msg_size)
@@ -74,6 +100,7 @@ SimpleDataWriter::run(int num_messages, int msg_size)
   OpenDDS::DCPS::DataSampleListElement* prev_element = 0;
 
   OpenDDS::DCPS::DataSampleListElementAllocator allocator(num_messages);
+  Cleanup cleanup(allocator, samples);
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(num_messages, sizeof (OpenDDS::DCPS::TransportSendElement));
 
   std::string data = "Hello World!";

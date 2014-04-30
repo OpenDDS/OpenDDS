@@ -1,3 +1,9 @@
+Wed Apr 30 17:35:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Added class to cleanup DataSampleListElements memory.
+
 Wed Apr 30 16:39:20 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/ManyToMany/run_test.pl:
