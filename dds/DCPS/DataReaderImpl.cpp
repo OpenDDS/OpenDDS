@@ -2714,8 +2714,10 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 
     WriterMapType::iterator where = writers_.find(header.publication_id_);
     if (writers_.end() != where) {
-      // Filter if waiting for historic samples
-      return where->second->awaiting_historic_samples_;
+      // TODO detect RTPS_UDP and Filter if waiting for historic samples
+      // If RTPS_UDP, don't filter
+      //return where->second->awaiting_historic_samples_;
+      return false;
     }
   }
 

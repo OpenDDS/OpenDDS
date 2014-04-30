@@ -1,10 +1,14 @@
+Wed Apr 30 20:41:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
 Wed Apr 30 19:35:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/WriterInfo.h:
         * dds/DCPS/WriterInfo.cpp:
         * dds/DCPS/DataSampleHeader.h:
 
-          Add control message END_HISTORIC_SAMPLES, add place to track 
+          Add control message END_HISTORIC_SAMPLES, add place to track
           durable writers who have sent it.
 
         * dds/DCPS/DataReaderImpl.h:
