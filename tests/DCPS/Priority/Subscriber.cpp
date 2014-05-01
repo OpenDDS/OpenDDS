@@ -32,7 +32,8 @@ Subscriber::~Subscriber()
 
   if( ! CORBA::is_nil( this->participant_.in())) {
     this->participant_->delete_contained_entities(); // Also deletes listener.
-    TheParticipantFactory->delete_participant( this->participant_.in());
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+    dpf->delete_participant( this->participant_.in());
   }
   TheServiceParticipant->shutdown();
 }
@@ -42,9 +43,10 @@ Subscriber::Subscriber( const Options& options)
    listener_( 0),
    waiter_( new DDS::WaitSet)
 {
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   // Create the DomainParticipant
   this->participant_
-    = TheParticipantFactory->create_participant(
+    = dpf->create_participant(
         this->options_.domain(),
         PARTICIPANT_QOS_DEFAULT,
         DDS::DomainParticipantListener::_nil(),

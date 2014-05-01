@@ -32,6 +32,7 @@ ParticipantTask::svc()
   {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    -> PARTICIPANT STARTED\n")));
 
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     DDS::DomainParticipant_var participant;
     DDS::Publisher_var publisher;
     DDS::DataWriter_var writer;
@@ -42,12 +43,12 @@ ParticipantTask::svc()
     { // Scope for guard to serialize creating Entities.
       GuardType guard(lock_);
 
-    // Create Participant
-    participant =
-      TheParticipantFactory->create_participant(42,
-                                                PARTICIPANT_QOS_DEFAULT,
-                                                DDS::DomainParticipantListener::_nil(),
-                                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      // Create Participant
+      participant =
+        dpf->create_participant(42,
+                                PARTICIPANT_QOS_DEFAULT,
+                                DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     } // End of lock scope.
 
@@ -171,7 +172,7 @@ ParticipantTask::svc()
 
     // Clean-up!
     participant->delete_contained_entities();
-    TheParticipantFactory->delete_participant(participant.in());
+    dpf->delete_participant(participant.in());
   }
   catch (const CORBA::Exception& e)
   {

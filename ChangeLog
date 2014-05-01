@@ -1,3 +1,235 @@
+Thu May  1 13:30:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+
+          Removed whitespace.
+
+Wed Apr 30 20:41:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+Wed Apr 30 19:35:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+
+          Add control message END_HISTORIC_SAMPLES, add place to track
+          durable writers who have sent it.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Filter out data samples for durable writers for whom we have not
+          received END_HISTORIC_SAMPLES.
+          Upon receipt of END_HISTORIC_SAMPLES, stop filtering that writer.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Send END_HISTORIC_SAMPLES when done sending durable data.
+
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+
+          Test also with a subscriber prior to the publisher.
+
+Wed Apr 30 17:35:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Added class to cleanup DataSampleListElements memory.
+
+Wed Apr 30 16:39:20 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Fixed the svn:executable property.
+
+Wed Apr 30 14:34:37 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Turned on initial tests for all transports.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Got rid of "custom" keyword.
+
+Wed Apr 30 12:58:01 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Added more controls for test.
+
+Tue Apr 29 18:44:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/DataReaderListener.h:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+
+          Improved logging.
+
+        * tests/DCPS/ManyToMany/Options.h:
+
+          Added supplying the number of subscriber processes and how long
+          the subscriber should set its timeout for.
+
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Added tracking how many subscribers to wait for.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Added interface for configuring the test.
+
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Changed to use passed in timeout.
+
+Mon Apr 28 15:57:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Dispose/main.cpp:
+
+          Fix Fuzz
+
+Sun Apr 27 19:59:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/Options.h:
+
+          Getting test to work and fixed wide character build errors.
+
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Getting test to work.
+
+Sat Apr 26 10:44:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/DataReaderListener.h:
+
+          Fixed compile error for gcc.
+
+Fri Apr 25 21:34:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManyToMany/ManyToMany.mpc:
+
+          Fixed IDl project reference
+
+Fri Apr 25 21:09:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/Messenger.idl:
+
+          Added parameter to track which participant sample is sent from.
+
+        * tests/DCPS/ManyToMany:
+        * tests/DCPS/ManyToMany/DataReaderListener.h:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/ManyToMany.mpc:
+        * tests/DCPS/ManyToMany/Options.h:
+        * tests/DCPS/ManyToMany/README:
+        * tests/DCPS/ManyToMany/Writer.h:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+        * tests/DCPS/ManyToMany/multicast.ini:
+        * tests/DCPS/ManyToMany/pub_multicast_async.ini:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/rtps.ini:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/shmem.ini:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+        * tests/DCPS/ManyToMany/tcp.ini:
+        * tests/DCPS/ManyToMany/udp.ini:
+
+          Created test to allow testing many publishers to many subscribers.
+          Test is not running yet.
+
+Fri Apr 25 13:15:16 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * performance-tests/Bench/src/testprocess.cpp:
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+        * tests/DCPS/SubscriberCycle/Publisher.cpp:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/WaitForAck/publisher_main.cpp:
+        * tests/DCPS/WaitForAck/subscriber_main.cpp:
+
+          Storing the DomainParticipantFactory pointer returned by calling
+          TheParticipantFactoryWithArgs in a var to ensure its ref count is
+          decreased.
+
+Thu Apr 24 20:41:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/Writer.cpp:
+
+          Added logging for improved debugging.
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Added Keep all history qos so data can be sent reliably.
+
+Thu Apr 24 18:32:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/TestFramework/TestFramework_T.cpp:
+
+          Cleaned up extra reference to writer.
+
+Thu Apr 24 18:10:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * performance-tests/Bench/src/Process.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/SubscriberCycle/ParticipantTask.cpp:
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+
+          Storing TheParticipantFactory pointer in var to make sure
+          memory is cleaned up.
+
+Thu Apr 24 17:27:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+          Reverted change since participant is already cleaned up
+          (still need to identify why valgrind indicates it is lost).
+
+Thu Apr 24 17:20:41 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/TestFramework/TestFramework.cpp:
+
+          Cleaned up participant.
+
+        * tests/DCPS/unit/Main.cpp:
+
+          Ensured DataSampleListElements were deleted.
+
+Thu Apr 24 14:30:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+
+          Added storing retrieved entity in a var so the reference added
+          by get_entity is cleaned up.
+
 Tue Apr 22 19:24:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/rtps.ini:

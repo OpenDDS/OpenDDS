@@ -26,13 +26,14 @@ Process::~Process()
   this->subscriptionWaiter_->get_conditions( conditions);
   this->subscriptionWaiter_->detach_conditions( conditions);
 
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   // Clean up the participants and their resources.
   for( ParticipantMap::iterator current = this->participants_.begin();
        current != this->participants_.end();
        ++current
      ) {
     current->second->delete_contained_entities();
-    TheParticipantFactory->delete_participant( current->second.ptr());
+    dpf->delete_participant( current->second.ptr());
   }
 
   // Clean up the rest of the service resources.
@@ -56,6 +57,7 @@ Process::Process( const Options& options)
    condition_( this->lock_),
    terminated_( false)
 {
+  DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   for( Options::ParticipantProfileMap::const_iterator current
          = this->options_.participantProfileMap().begin();
        current != this->options_.participantProfileMap().end();
@@ -63,7 +65,7 @@ Process::Process( const Options& options)
      ) {
     // Create the current participant.
     this->participants_[ current->first]
-      = TheParticipantFactory->create_participant(
+      = dpf->create_participant(
           current->second->domainId,
           current->second->qos,
           DDS::DomainParticipantListener::_nil(),

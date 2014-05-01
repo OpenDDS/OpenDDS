@@ -36,6 +36,7 @@ enum MessageId {
   END_COHERENT_CHANGES,
   TRANSPORT_CONTROL,
   DISPOSE_UNREGISTER_INSTANCE,
+  END_HISTORIC_SAMPLES,
   MESSAGE_ID_MAX // must be the last enumerator
 };
 

@@ -659,6 +659,9 @@ private:
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number
   bool need_sequence_repair() const;
+
+  DDS::ReturnCode_t send_end_historic_samples();
+
 };
 
 } // namespace DCPS

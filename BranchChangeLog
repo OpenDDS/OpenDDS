@@ -1,10 +1,14 @@
+Thu May  1 16:01:28 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * Merged from trunk r6128 through r6150.
+
 Wed Apr 30 22:18:01 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:
-		-added check for nil timer to stop a call to cancel timer on nil pointer
+                -added check for nil timer to stop a call to cancel timer on nil pointer
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
-	
+
     **Began working on RtpsUdpTransport implementation for async_assoc
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:

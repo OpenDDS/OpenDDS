@@ -76,7 +76,8 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
   try
   {
-    TheParticipantFactoryWithArgs(argc, argv);
+    DDS::DomainParticipantFactory_var dpf =
+      TheParticipantFactoryWithArgs(argc, argv);
 
     // Spawn Participant threads
     ParticipantTask task(samples_per_thread, delay_between_pubs_msec, deadline_period);

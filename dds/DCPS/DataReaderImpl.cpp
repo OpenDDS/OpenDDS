@@ -315,6 +315,11 @@ DataReaderImpl::add_association(const RepoId& yourId,
                   writer_id,
                   WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
 
+      // If this is a durable reader
+      if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+        // TODO schedule timer for removing flag from writers
+      }
+
       if (DCPS_debug_level > 4) {
          GuidConverter converter(writer_id);
          ACE_DEBUG((LM_DEBUG,
@@ -1756,13 +1761,29 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
    this->notify_read_conditions();
    break;
 
-   default:
-      ACE_ERROR((LM_ERROR,
-            "(%P|%t) ERROR: DataReaderImpl::data_received"
-            "unexpected message_id = %d\n",
-            sample.header_.message_id_));
-      break;
-   }
+  case END_HISTORIC_SAMPLES: {
+    if (DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_INFO,
+        "(%P|%t) Received END_HISTORIC_SAMPLES control message\n"));
+    }
+    this->resume_sample_processing(sample.header_.publication_id_);
+    if (DCPS_debug_level > 4) {
+      GuidConverter pub_id(sample.header_.publication_id_);
+      ACE_DEBUG((
+        LM_INFO,
+        "(%P|%t) Resumed sample processing for durable writer %C\n",
+        std::string(pub_id).c_str()));
+    }
+    break;
+  }
+
+  default:
+    ACE_ERROR((LM_ERROR,
+               "(%P|%t) ERROR: DataReaderImpl::data_received"
+               "unexpected message_id = %d\n",
+               sample.header_.message_id_));
+    break;
+  }
 }
 
 EntityImpl*
@@ -2793,7 +2814,22 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
    }
 
 
-   return false;
+  // Ignore this sample if it is NOT a historic sample, and we are
+  // waiting for historic sample from this writer
+  if (!header.historic_sample_) {
+    ACE_READ_GUARD_RETURN(
+        ACE_RW_Thread_Mutex, read_guard, this->writers_lock_, false);
+
+    WriterMapType::iterator where = writers_.find(header.publication_id_);
+    if (writers_.end() != where) {
+      // TODO detect RTPS_UDP and Filter if waiting for historic samples
+      // If RTPS_UDP, don't filter
+      //return where->second->awaiting_historic_samples_;
+      return false;
+    }
+  }
+
+  return false;
 }
 
 bool
@@ -3325,6 +3361,17 @@ DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)
          ++iter) {
       iter->second->set_owner_evaluated(instance, false);
    }
+}
+
+void
+DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
+{
+  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+  WriterMapType::iterator where = writers_.find(pub_id);
+  if (writers_.end() != where) {
+    // Stop filtering these
+    where->second->awaiting_historic_samples_ = false;
+  }
 }
 
 } // namespace DCPS
