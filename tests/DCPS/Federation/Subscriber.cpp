@@ -180,6 +180,10 @@ Subscriber::~Subscriber()
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) INFO: finalizing the subscriber.\n")));
   }
 
+  dataReader_ = NULL;
+  subscriber_ = NULL;
+  topic_ = NULL;
+
   // Release the participant
   if( 0 == CORBA::is_nil( this->participant_.in())) {
     DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
