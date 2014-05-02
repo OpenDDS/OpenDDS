@@ -22,7 +22,7 @@ PerlDDS::add_lib_path('../FooType4');
 PerlDDS::add_lib_path('../common');
 
 # An hour should be enough of a timeout for debugging ...
-my $pub_time = $opt_t || ($debug ? 3600 : 5);
+my $pub_time = $opt_t || ($debug ? 3600 : 30);
 my $pub_addr = "localhost:";
 my $port=29804;
 
