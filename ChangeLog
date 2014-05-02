@@ -1,3 +1,9 @@
+Fri May  2 18:13:47 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Added needed include for VS9.
+
 Thu May  1 13:30:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/TransientLocalTest/publisher.cpp:

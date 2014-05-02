@@ -19,6 +19,8 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
+//### just for log messages
+#include "dds/DCPS/GuidConverter.h"
 
 namespace OpenDDS {
 namespace DCPS {
