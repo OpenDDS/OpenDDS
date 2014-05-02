@@ -1,3 +1,10 @@
+Fri May  2 19:13:06 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+
+          Cleanup publisher, subscriber.
+
 Fri May  2 18:13:47 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/udp/UdpTransport.cpp:
