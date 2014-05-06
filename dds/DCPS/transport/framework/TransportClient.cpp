@@ -95,6 +95,8 @@ TransportClient::~TransportClient()
 void
 TransportClient::enable_transport(bool reliable, bool durable)
 {
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::enable_transport --> enter (TransportClient: %@)\n", this));
    // Search for a TransportConfig to use:
    TransportConfig_rch tc;
 
@@ -129,12 +131,17 @@ TransportClient::enable_transport(bool reliable, bool durable)
    }
 
    enable_transport_using_config(reliable, durable, tc);
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::enable_transport --> exit\n"));
 }
 
 void
 TransportClient::enable_transport_using_config(bool reliable, bool durable,
       const TransportConfig_rch& tc)
 {
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::enable_transport_using_config --> enter(TransportClient: %@)\n", this));
+
    swap_bytes_ = tc->swap_bytes_;
    cdr_encapsulation_ = false;
    reliable_ = reliable;
@@ -164,6 +171,8 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
             ACE_TEXT("No TransportImpl could be created.\n")));
       throw Transport::NotConfigured();
    }
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::enable_transport_using_config --> exit\n"));
 }
 
 void

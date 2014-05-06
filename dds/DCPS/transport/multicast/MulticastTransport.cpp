@@ -34,6 +34,8 @@ MulticastTransport::MulticastTransport(const TransportInst_rch& inst)
          throw Transport::UnableToCreate();
       }
    }
+   //### Debug statements to track where associate is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::MulticastTransport --> constructed new: %@\n", this));
 }
 
 MulticastTransport::~MulticastTransport()
@@ -243,22 +245,22 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> link is nil, make_datalink for client_link\n"));
       link = this->make_datalink(attribs.local_id_, attribs.priority_, true /*active*/);
       this->client_link_ = link;
-
-      if (this->server_link_.is_nil()) {
-         //### Debug statements to track where associate is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> server_link_ is nil, make_datalink\n"));
-         // Create the "server" link now, so that it can receive MULTICAST_SYN
-         // from any peers that have add_association() first.
-         this->server_link_ = make_datalink(attribs.local_id_, attribs.priority_,
-               false /*active*/);
-      }
+//### not sure why the DataWriterImpl (active) side was creating a server link
+//      if (this->server_link_.is_nil()) {
+//         //### Debug statements to track where associate is failing
+//         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> server_link_ is nil, make_datalink\n"));
+//         // Create the "server" link now, so that it can receive MULTICAST_SYN
+//         // from any peers that have add_association() first.
+//         this->server_link_ = make_datalink(attribs.local_id_, attribs.priority_,
+//               false /*active*/);
+//      }
    }
    //### Debug statements to track where associate is failing
    //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
    //guard_links.release();
 
    //### Debug statements to track where associate is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> server_link_ is nil? %s   client_link_ is nil? %s\n", this->server_link_.is_nil() ? "YES":"NO", this->client_link_.is_nil() ? "YES":"NO"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> server_link_ %@ is nil? %s   client_link_ %@ is nil? %s\n", this->server_link_.in(), this->server_link_.is_nil() ? "YES":"NO", this->client_link_.in(), this->client_link_.is_nil() ? "YES":"NO"));
 
    MulticastPeer remote_peer = RepoIdConverter(remote.repo_id_).participantId();
 
@@ -521,6 +523,7 @@ MulticastTransport::configure_i(TransportInst* config)
 void
 MulticastTransport::shutdown_i()
 {
+  GuardThreadType guard_links(this->links_lock_);
    if (!this->client_link_.is_nil()) {
       this->client_link_->transport_shutdown();
    }

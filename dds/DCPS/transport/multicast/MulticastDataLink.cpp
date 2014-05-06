@@ -40,6 +40,8 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
   reactor_task_(0),
   send_buffer_(0)
 {
+  //### debugging many to many test failure 2to1
+  ACE_DEBUG((LM_DEBUG, "MulticastDataLink::MulticastDataLink() %@\n", this));
 }
 
 MulticastDataLink::~MulticastDataLink()
@@ -276,7 +278,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
   switch (sample.header_.message_id_) {
   case TRANSPORT_CONTROL: {
     //### Debug statements to track where connection is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> case TRANSPORT_CONTROL\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> case TRANSPORT_CONTROL %@ \n", this));
 
     // Transport control samples are delivered to all sessions
     // regardless of association status:
@@ -294,6 +296,10 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> LOCKED session_lock_\n"));
 
       const TransportHeader& theader = receive_strategy()->received_header();
+
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> %d %d %d \n", is_active(), sample.header_.submessage_id_, (sessions_.find(theader.source_) == sessions_.end())));
+
       if (!is_active() && sample.header_.submessage_id_ == MULTICAST_SYN &&
           sessions_.find(theader.source_) == sessions_.end()) {
         // We have received a SYN but there is no session (yet) for this source.
@@ -310,6 +316,9 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
         return;
       }
 
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> not going to call syn_received_no_session\n"));
+
       MulticastSessionMap temp_sessions;
       temp_sessions.insert(this->sessions_.begin(), this->sessions_.end());
       guard.release();
@@ -317,8 +326,9 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       for (MulticastSessionMap::iterator it(temp_sessions.begin());
           it != temp_sessions.end(); ++it) {
         //### Debug statements to track where connection is failing
-        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> to call control_received\n"));
-
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> to call control_received (Current number of sessions: %d)\n", temp_sessions.size()));
+//TODO
+        //### this is not a safe procedure without session lock
         if(this->sessions_.count(it->first)){
           it->second->control_received(sample.header_.submessage_id_,
               sample.sample_);

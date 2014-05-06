@@ -1,3 +1,24 @@
+Tue May  6 18:00:21 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+    **Updated transport implementation for RtpsUdp for on_start_callbacks on active side
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+    **Added acquiring links_lock_ prior to shutting down transport as well as removing 
+      creation of server_link_ on the active side
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+    **Added debug logging
+        * dds/DCPS/DataReaderImpl.cpp:
+
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+
+
 Thu May  1 16:01:28 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * Merged from trunk r6128 through r6150.

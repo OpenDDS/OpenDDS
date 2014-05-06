@@ -1217,9 +1217,12 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 
   ri->second.acknack_recvd_count_ = acknack.count.value;
 
+  //### broadcast on the condition shouldn't need to happen in async_assoc
+  //TODO:
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    handshake_condition_.broadcast();
+    this->invoke_on_start_callbacks(true);
+    //handshake_condition_.broadcast();
   }
 
   std::map<SequenceNumber, TransportQueueElement*> pendingCallbacks;

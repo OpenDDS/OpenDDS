@@ -1359,6 +1359,10 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
                std::string(writer_converter).c_str()));
       }
    }
+   //### Debug statements to track where connection is failing
+   GuidConverter subID(subscription_id_);
+   GuidConverter pubID(header.publication_id_);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataReaderImpl::writer_activity --> \n\tSubscriptionID: %C\n\tPublicationID: %C\n\theader message id: %d\n",std::string(subID).c_str(), std::string(pubID).c_str(), header.message_id_));
 
    if (!writer.is_nil()) {
       ACE_Time_Value when = ACE_OS::gettimeofday();

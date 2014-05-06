@@ -72,7 +72,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 TransportImpl::AcceptConnectResult
 RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
-                                   TransportClient* )
+                                   TransportClient* client )
 {
   GuardThreadType guard_links(this->links_lock_);
   RtpsUdpDataLink_rch link = link_;
@@ -96,6 +96,23 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link._retn());
   }
 
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###RtpsUdpTransport::connect_datalink ABOUT TO ADD_ON_START_CALLBACK\n"));
+
+  if (!link->add_on_start_callback(client, remote.repo_id_)) {
+     // link was started by the reactor thread before we could add a callback
+     //### Debug statements to track where associate is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###RtpsUdpTransport::connect_datalink COULDN'T ADD_ON_START_CALLBACK B/C REACTOR THREAD STARTED LINK ALREADY\n"));
+
+     VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink got link.\n"), 2);
+     return AcceptConnectResult(link._retn());
+  }
+
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###RtpsUdpTransport::connect_datalink ADD_ON_START_CALLBACK SUCCESSFUL CONNECT_DATALINK PENDING\n"));
+
+  add_pending_connection(client, link.in());
+  VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink pending.\n"), 2);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 /*
   const GuidConverter local_conv(attribs.local_id_), remote_conv(remote.repo_id_);
