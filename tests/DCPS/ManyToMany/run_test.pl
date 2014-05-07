@@ -245,7 +245,7 @@ for ($index = 0; $index < $sub_processes; ++$index) {
 
 # first subscriber process needs to be killed a little after the
 # total expected duration
-my $wait_to_kill = $total_duration_msec * 1.5;
+my $wait_to_kill = $total_duration_msec * 2;
 print "wait_to_kill=$wait_to_kill\n";
 for ($index = 0; $index < $sub_processes; ++$index) {
     my $SubscriberResult = $Subscriber[$index]->WaitKill($wait_to_kill);

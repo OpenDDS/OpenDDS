@@ -1,3 +1,14 @@
+Wed May  7 21:06:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Added timestamps for debugging.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Increased time to wait for kill.
+
 Wed May  7 18:09:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastTransport.h:
