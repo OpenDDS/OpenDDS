@@ -1,10 +1,17 @@
+Wed May  7 13:45:52 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+    **Added implementation for stop_accepting_or_connecting and protected 
+      pending_connections with connections_lock_
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
 Tue May  6 18:00:21 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
     **Updated transport implementation for RtpsUdp for on_start_callbacks on active side
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
         * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
 
-    **Added acquiring links_lock_ prior to shutting down transport as well as removing 
+    **Added acquiring links_lock_ prior to shutting down transport as well as removing
       creation of server_link_ on the active side
         * dds/DCPS/transport/multicast/MulticastTransport.cpp:
 

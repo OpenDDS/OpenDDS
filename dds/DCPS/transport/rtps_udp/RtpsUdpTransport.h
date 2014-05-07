@@ -69,6 +69,10 @@ private:
   typedef ACE_Guard<ThreadLockType>     GuardThreadType;
   ThreadLockType links_lock_;
 
+  /// This protects the connections_ and the pending_connections_
+  /// data members.
+  LockType connections_lock_;
+
   /// RTPS uses only one link per transport.
   /// This link can be safely reused by any clients that belong to the same
   /// domain participant (same GUID prefix).  Use by a second participant
