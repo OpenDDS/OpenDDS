@@ -345,7 +345,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     return;
   }
 
-  transport_->passive_connection(source);
+  transport_->passive_connection(local_peer, source);
 }
 
 void

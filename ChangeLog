@@ -1,3 +1,21 @@
+Wed May  7 18:09:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed multicast to work with multiple participants in one process.
+          Added map keyed on the local peer (domain participant) instead of
+          having one client and server links for all local peers.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+
+          Added passing the local peer to pending_connection.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Turned off Built in Topics.
+
 Fri May  2 20:21:04 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ConfigTransports/run_test.pl:

@@ -205,7 +205,7 @@ MulticastSession::syn_received(ACE_Message_Block* control)
   // acknowledged by a matching remote peer:
   send_synack();
 
-  this->link_->transport()->passive_connection(this->remote_peer_);
+  this->link_->transport()->passive_connection(this->link_->local_peer(), this->remote_peer_);
 }
 
 void

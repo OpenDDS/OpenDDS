@@ -29,7 +29,7 @@ public:
   explicit MulticastTransport(const TransportInst_rch& inst);
   ~MulticastTransport();
 
-  void passive_connection(MulticastPeer peer);
+  void passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer);
 
 protected:
   virtual DataLink* find_datalink_i(const RepoId& local_id,
@@ -61,6 +61,9 @@ protected:
   virtual std::string transport_type() const { return "multicast"; }
 
 private:
+  typedef ACE_Thread_Mutex         ThreadLockType;
+  typedef ACE_Guard<ThreadLockType>     GuardThreadType;
+
   MulticastDataLink* make_datalink(const RepoId& local_id,
                                    CORBA::Long priority,
                                    bool active);
@@ -70,10 +73,12 @@ private:
 
   RcHandle<MulticastInst> config_i_;
 
+  ThreadLockType links_lock_;
   /// link for pubs.
-  MulticastDataLink_rch client_link_;
+  typedef std::map<MulticastPeer, MulticastDataLink_rch> Links;
+  Links client_links_;
   /// link for subs.
-  MulticastDataLink_rch server_link_;
+  Links server_links_;
 
   // Used by the passive side to track the virtual "connections" to remote
   // peers: the pending_connections_ are potentential peers that the framework
@@ -81,9 +86,11 @@ private:
   // a SYN TRANSPORT_CONTROL message; the connections_ are remote peers that
   // have already sent the SYN message -- we can consider these "complete"
   // from the framework's point of view.
-  ACE_SYNCH_MUTEX connections_lock_;
+  ThreadLockType connections_lock_;
   std::multimap<ConnectionEvent*, MulticastPeer> pending_connections_;
-  std::set<MulticastPeer> connections_;
+  // remote peer to local peer
+  typedef std::pair<MulticastPeer, MulticastPeer> Peers;
+  std::set<Peers> connections_;
 };
 
 } // namespace DCPS

@@ -40,7 +40,7 @@ MulticastTransport::~MulticastTransport()
 }
 
 DataLink*
-MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
+MulticastTransport::find_datalink_i(const RepoId& local_id,
                                     const RepoId& remote_id,
                                     const TransportBLOB& /*remote_data*/,
                                     bool /*remote_reliable*/,
@@ -55,13 +55,15 @@ MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
   // Subscribers or Publishers within the same DomainParticipant,
   // it may be assumed that the local_id always references the same
   // participant.
+  const MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
   MulticastDataLink_rch link;
-  if (active && !this->client_link_.is_nil()) {
-    link = this->client_link_;
-  }
-
-  if (!active && !this->server_link_.is_nil()) {
-    link = this->server_link_;
+  {
+    GuardThreadType guard_links(this->links_lock_);
+    Links& links = active ? this->client_links_ : this->server_links_;
+    Links::const_iterator link_iter = links.find(local_peer);
+    if (link_iter != links.end()) {
+      link = link_iter->second;
+    }
   }
 
   if (!link.is_nil()) {
@@ -76,7 +78,8 @@ MulticastTransport::find_datalink_i(const RepoId& /*local_id*/,
       return 0;
     }
 
-    if (!session->start(active, this->connections_.count(remote_peer))) {
+    const bool acked = this->connections_.count(std::make_pair(remote_peer, local_peer));
+    if (!session->start(active, acked)) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("MulticastTransport[%C]::find_datalink_i: ")
@@ -172,7 +175,8 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                      0);
   }
 
-  if (!session->start(active, this->connections_.count(remote_peer))) {
+  const bool acked = this->connections_.count(std::make_pair(remote_peer, link->local_peer()));
+  if (!session->start(active, acked)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport[%C]::start_session: ")
@@ -192,17 +196,25 @@ MulticastTransport::connect_datalink_i(const RepoId& local_id,
                                        bool /*remote_durable*/,
                                        const ConnectionAttribs& attribs)
 {
-  MulticastDataLink_rch link = this->client_link_;
-  if (link.is_nil()) {
+  GuardThreadType guard_links(this->links_lock_);
+  const MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
+  Links::const_iterator link_iter = this->client_links_.find(local_peer);
+  MulticastDataLink_rch link;
+  if (link_iter == this->client_links_.end()) {
     link = this->make_datalink(local_id, attribs.priority_, true /*active*/);
-    this->client_link_ = link;
+    this->client_links_[local_peer] = link;
 
-    if (this->server_link_.is_nil()) {
+    link_iter = this->server_links_.find(local_peer);
+    if (link_iter == this->server_links_.end()) {
       // Create the "server" link now, so that it can receive MULTICAST_SYN
       // from any peers that have add_association() first.
-      this->server_link_ = make_datalink(local_id, attribs.priority_,
-                                         false /*active*/);
+      this->server_links_[local_peer] =
+        make_datalink(local_id, attribs.priority_,
+                      false /*active*/);
     }
+  }
+  else {
+    link = link_iter->second;
   }
 
   MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
@@ -241,30 +253,34 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
   const std::string ttype = "multicast";
   const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
   const RepoId& remote_id = ce.remote_association_.remote_id_;
-  MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
+  const MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
+  const MulticastPeer local_peer = RepoIdConverter(ce.local_id_).participantId();
 
+  GuardThreadType guard_links(this->links_lock_);
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->connections_lock_, 0);
 
   for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
     if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
 
-      MulticastDataLink_rch link = this->server_link_;
-      if (link.is_nil()) {
+      Links::const_iterator link_iter = this->server_links_.find(local_peer);
+      MulticastDataLink_rch link;
+      if (link_iter == this->server_links_.end()) {
         link = this->make_datalink(ce.local_id_, ce.attribs_.priority_,
                                    false /*!active*/);
-        this->server_link_ = link;
+        this->server_links_[local_peer] = link;
+      }
+      else {
+        link = link_iter->second;
       }
 
-      if (this->connections_.count(remote_peer)) {
+      const bool connected = this->connections_.count(std::make_pair(remote_peer, local_peer));
+      if (connected) {
         // remote_peer has already completed the handshake
         VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::accept_datalink "
                   "peer 0x%x already completed handshake\n",
                   this->config_i_->name().c_str(), remote_peer), 2);
         // "link" returned to framework after session starts
       } else {
-        // Can't return link to framework until handshaking is done, which will
-        // result in a call to MulticastTransport::passive_connection().
-        link = 0;
         this->pending_connections_.insert(
           std::pair<ConnectionEvent* const, MulticastPeer>(&ce, remote_peer));
       }
@@ -277,8 +293,10 @@ MulticastTransport::accept_datalink(ConnectionEvent& ce)
                 this->config_i_->name().c_str(), remote_peer), 2);
 
       MulticastSession_rch session =
-        this->start_session(this->server_link_, remote_peer, false /*!active*/);
-      return link._retn();
+        this->start_session(link, remote_peer, false /*!active*/);
+      // Can't return link to framework until handshaking is done, which will
+      // result in a call to MulticastTransport::passive_connection().
+      return (connected ? link._retn() : 0);
     }
   }
   return 0;
@@ -294,29 +312,38 @@ MulticastTransport::stop_accepting(ConnectionEvent& ce)
 }
 
 void
-MulticastTransport::passive_connection(MulticastPeer peer)
+MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer)
 {
   ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->connections_lock_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::passive_connection "
-                      "from peer 0x%x\n",
-                      this->config_i_->name().c_str(), peer), 2);
+                      "from peer 0x%x to local_peer 0x%x\n",
+                      this->config_i_->name().c_str(),
+                      remote_peer,
+                      local_peer), 2);
 
   typedef std::multimap<ConnectionEvent*, MulticastPeer>::iterator iter_t;
   for (iter_t iter = this->pending_connections_.begin();
        iter != this->pending_connections_.end(); ++iter) {
-    if (iter->second == peer) {
-      DataLink_rch link = static_rchandle_cast<DataLink>(this->server_link_);
-      VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection "
-                          "completing accept\n"), 2);
-      iter->first->complete(link);
-      std::pair<iter_t, iter_t> range =
-        this->pending_connections_.equal_range(iter->first);
-      this->pending_connections_.erase(range.first, range.second);
-      break;
+    if (iter->second == remote_peer) {
+      const MulticastPeer pc_local_peer = RepoIdConverter(iter->first->local_id_).participantId();
+      if (pc_local_peer == local_peer) {
+        Links::const_iterator server_link = this->server_links_.find(local_peer);
+        DataLink_rch link;
+        if (server_link != this->server_links_.end()) {
+          link = static_rchandle_cast<DataLink>(server_link->second);
+        }
+        VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection "
+                            "completing accept\n"), 2);
+        iter->first->complete(link);
+        std::pair<iter_t, iter_t> range =
+          this->pending_connections_.equal_range(iter->first);
+        this->pending_connections_.erase(range.first, range.second);
+        break;
+      }
     }
   }
 
-  this->connections_.insert(peer);
+  this->connections_.insert(std::make_pair(remote_peer, local_peer));
 }
 
 bool
@@ -350,11 +377,18 @@ MulticastTransport::configure_i(TransportInst* config)
 void
 MulticastTransport::shutdown_i()
 {
-  if (!this->client_link_.is_nil()) {
-    this->client_link_->transport_shutdown();
+  GuardThreadType guard_links(this->links_lock_);
+  Links::iterator link;
+  for (link = this->client_links_.begin();
+       link != this->client_links_.end();
+       ++link) {
+    link->second->transport_shutdown();
   }
-  if (!this->server_link_.is_nil()) {
-    this->server_link_->transport_shutdown();
+
+  for (link = this->server_links_.begin();
+       link != this->server_links_.end();
+       ++link) {
+    link->second->transport_shutdown();
   }
   this->config_i_ = 0;
 }
@@ -379,7 +413,7 @@ MulticastTransport::connection_info_i(TransportLocator& info) const
 void
 MulticastTransport::release_datalink(DataLink* /*link*/)
 {
-  // No-op for multicast: keep both the client_link_ and server_link_ around
+  // No-op for multicast: keep all the client_links_ and server_links_ around
   // until the transport is shut down.
 }
 
