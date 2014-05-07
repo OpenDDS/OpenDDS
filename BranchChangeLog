@@ -1,6 +1,11 @@
+Wed May  7 14:18:47 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+    **added typedef's for LockType and GuardType
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
+
 Wed May  7 13:45:52 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
-    **Added implementation for stop_accepting_or_connecting and protected 
+    **Added implementation for stop_accepting_or_connecting and protected
       pending_connections with connections_lock_
         * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h:
         * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:

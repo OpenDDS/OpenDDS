@@ -71,6 +71,8 @@ private:
 
   /// This protects the connections_ and the pending_connections_
   /// data members.
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
   LockType connections_lock_;
 
   /// RTPS uses only one link per transport.
