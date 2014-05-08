@@ -1,3 +1,13 @@
+Thu May  8 17:49:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Added printing out log files if error is indicated.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Cleanup of logging.
+
 Thu May  8 17:31:02 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Priority/run_test.pl:

@@ -288,7 +288,8 @@ if ($status == 0) {
           while (my $line = <FILE>) {
               print "$line";
           }
-          print "\n";
+          print "\n\n";
+          close FILE;
       }
   }
 
@@ -298,7 +299,8 @@ if ($status == 0) {
           while (my $line = <FILE>) {
               print "$line";
           }
-          print "\n";
+          print "\n\n";
+          close FILE;
       }
   }
   print "**** End log file output *****\n";
