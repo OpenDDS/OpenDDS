@@ -1,3 +1,9 @@
+Thu May  8 17:31:02 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/run_test.pl:
+
+          Forcing logging for diagnosing intermittent errors on specific builds.
+
 Thu May  8 15:40:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
