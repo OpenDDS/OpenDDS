@@ -180,6 +180,12 @@ else {
     $config_opts .= '-total_duration_msec ' . $total_duration_msec . ' ';
 }
 
+my $min_total_duration_msec = 60000;
+if ($total_duration_msec < $min_total_duration_msec) {
+    $total_duration_msec = $min_total_duration_msec;
+    $config_opts =~ s/(-total_duration_msec) (\d+)/$1 $total_duration_msec/;
+}
+
 if (!$custom) {
     if ($#ARGV < 2 || $ARGV[2] eq  "small") {
         $config_opts .= '-sample_size 10 ';

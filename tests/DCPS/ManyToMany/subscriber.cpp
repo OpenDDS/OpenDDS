@@ -163,8 +163,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    const ACE_Time_Value sleep_delay(options.delay_msec / 1000,
-                                     (options.delay_msec % 1000) * 1000);
+    const unsigned int sleep_delay_msec = 500;
     unsigned int delay = 0;
     while (delay < options.total_duration_msec) {
       bool complete = true;
@@ -179,10 +178,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (complete)
         break;
 
-      delay += options.delay_msec;
-      ACE_OS::sleep(sleep_delay);
+      delay += sleep_delay_msec;
+      ACE_OS::sleep(ACE_Time_Value(0, sleep_delay_msec * 1000));
     }
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Listeners done %d\n"), delay));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Listeners done (ran for %d msec)\n"), delay));
 
     if (delay >= options.total_duration_msec) {
       for (ListenerServants::const_iterator listener = listener_servants.begin();

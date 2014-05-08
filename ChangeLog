@@ -1,3 +1,18 @@
+Thu May  8 14:20:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Setting a minimum total duration.
+
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Cleanup logging.
+
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Polling readers at a set interval.
+
 Thu May  8 13:50:29 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/ManyToMany/run_test.pl:

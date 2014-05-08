@@ -185,7 +185,6 @@ void DataReaderListenerImpl::report_errors() const
 
 bool DataReaderListenerImpl::done(bool report) const
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Processes %d %d\n"), processes_.size(), options_.num_pub_processes));
   if (processes_.size() < options_.num_pub_processes) {
     if (report)
       std::cout << "ERROR: only received samples from "

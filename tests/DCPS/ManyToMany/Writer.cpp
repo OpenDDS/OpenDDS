@@ -111,7 +111,6 @@ Writer::write()
 
         ++writer->message.count;
 
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Write message\n")));
         DDS::ReturnCode_t error = message_dw->write(writer->message, *handle);
 
         if (error != DDS::RETCODE_OK) {
