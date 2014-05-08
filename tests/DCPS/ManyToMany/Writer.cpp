@@ -62,9 +62,10 @@ namespace {
   }
 }
 
-void
+bool
 Writer::write()
 {
+  bool valid = true;
   try {
     typedef std::vector<DDS::InstanceHandle_t> Handles;
     Handles handles;
@@ -127,7 +128,7 @@ Writer::write()
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("%N:%l: svc()")
                      ACE_TEXT(" ERROR: writer returned %d!\n"), error));
-
+          valid = false;
         }
         ACE_OS::sleep(delay);
       }
@@ -143,5 +144,8 @@ Writer::write()
     }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");
+    valid = false;
   }
+
+  return valid;
 }

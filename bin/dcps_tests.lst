@@ -269,8 +269,8 @@ tests/DCPS/ManyTopicTest/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/ManyTopicMultiProcess/run_test.pl: !DCPS_MIN
 
 tests/DCPS/QoS_XML/dump/run_test.pl: DDS4CCM_OPENDDS
-tests/DCPS/ManyToMany/run_test.pl tcp 1to1 small: !DCPS_MIN
-tests/DCPS/ManyToMany/run_test.pl tcp 1to1 large: !DCPS_MIN
+tests/DCPS/ManyToMany/run_test.pl tcp 12to12 small: !DCPS_MIN
+tests/DCPS/ManyToMany/run_test.pl tcp 12to12 large: !DCPS_MIN
 tests/DCPS/ManyToMany/run_test.pl multicast 1to1 small: !DCPS_MIN
 tests/DCPS/ManyToMany/run_test.pl multicast 1to1 large: !DCPS_MIN
 tests/DCPS/ManyToMany/run_test.pl multicast_async 1to1 small: !DCPS_MIN

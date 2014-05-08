@@ -30,6 +30,7 @@
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  bool status = false;
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
@@ -137,9 +138,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
+
     {
       Writer writer(options, writers);
-      writer.write();
+      status = writer.write();
     }
 
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Writers Done\n")));
@@ -159,9 +161,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(-1);
   }
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Publisher exiting\n")));
-  return 0;
+  return (status ? 0 : -1);
 }

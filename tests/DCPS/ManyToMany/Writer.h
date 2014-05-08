@@ -25,7 +25,7 @@ public:
   typedef std::vector<WriterSample> Writers;
   Writer(const Options& options, Writers& writers);
 
-  void write();
+  bool write();
 
 private:
   const Options& options_;
