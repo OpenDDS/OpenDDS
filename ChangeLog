@@ -1,3 +1,15 @@
+Thu May  8 15:10:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/publisher.cpp:
+
+          Logging the process id to verify the correct string that
+          should be in the received sample.
+
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Added logging to track down error with multiple process ids being
+          sent when there is only one publisher process.
+
 Thu May  8 14:20:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/ManyToMany/run_test.pl:

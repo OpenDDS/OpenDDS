@@ -111,6 +111,16 @@ Writer::write()
 
         ++writer->message.count;
 
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("%T (%P|%t) Writing Message: subject = %C ")
+                   ACE_TEXT("participant_id = %d ")
+                   ACE_TEXT("subject_id = %d ")
+                   ACE_TEXT("count = %d \n"),
+                   writer->message.subject.in(),
+                   writer->message.participant_id,
+                   writer->message.subject_id,
+                   writer->message.count));
+
         DDS::ReturnCode_t error = message_dw->write(writer->message, *handle);
 
         if (error != DDS::RETCODE_OK) {

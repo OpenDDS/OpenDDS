@@ -45,7 +45,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     CORBA::String_var type_name = mts->get_type_name();
     std::vector<WriterSample> writers;
     std::ostringstream pid;
-    pid << std::setw(5) << ACE_OS::getpid();
+    pid << ACE_OS::getpid();
     WriterSample ws;
     ws.message.subject    = pid.str().c_str();
     ws.message.from       = "Comic Book Guy";
@@ -57,7 +57,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ws.message.data[j] = j % 256;
     }
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf for process=%C\n"), pid.str().c_str()));
 
     for (Participants::iterator part = participants.begin();
          part != participants.end();
