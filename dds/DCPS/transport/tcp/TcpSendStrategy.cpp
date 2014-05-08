@@ -142,8 +142,11 @@ OpenDDS::DCPS::TcpSendStrategy::relink(bool do_suspend)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","relink",6);
 
-  if (!this->connection_.is_nil())
+  if (!this->connection_.is_nil()) {
+    //### Debug statements to track where connection is failing
+    //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpSendStrategy::relink --> about to relink() \n"));
     this->connection_->relink(do_suspend);
+  }
 }
 
 void

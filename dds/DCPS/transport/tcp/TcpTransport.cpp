@@ -528,6 +528,10 @@ TcpTransport::connection_info_i(TransportLocator& local_info) const
 void
 TcpTransport::release_datalink(DataLink* link)
 {
+
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> begin\n"));
+
    DBG_ENTRY_LVL("TcpTransport", "release_datalink", 6);
 
    TcpDataLink* tcp_link = static_cast<TcpDataLink*>(link);
@@ -630,6 +634,8 @@ TcpTransport::release_datalink(DataLink* link)
             link->transport_priority(),
             buffer.str().c_str()));
    }
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> end\n"));
 }
 
 TcpInst*

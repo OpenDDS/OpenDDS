@@ -243,6 +243,9 @@ SubscriberImpl::create_datareader(
 DDS::ReturnCode_t
 SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> enter\n"));
+
   DBG_ENTRY_LVL("SubscriberImpl", "delete_datareader", 6);
 
   DataReaderImpl* dr_servant = dynamic_cast<DataReaderImpl*>(a_datareader);
@@ -306,8 +309,11 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                         std::string(converter).c_str()),::DDS::RETCODE_ERROR);
     }
 
+    //### Debug statements to track where connection is failing
+    //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> erasing datareader from datareader_map_\n"));
     datareader_map_.erase(it);
-
+    //### Debug statements to track where connection is failing
+    //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> erasing dr_servance from datareader_set_\n"));
     datareader_set_.erase(dr_servant);
   }
 
@@ -316,7 +322,8 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   }
 
   RepoId subscription_id  = dr_servant->get_subscription_id();
-
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> about to remove_subscription from disco\n"));
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   participant_->get_id(),

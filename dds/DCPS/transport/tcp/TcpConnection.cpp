@@ -99,6 +99,9 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
 }
 OpenDDS::DCPS::TcpConnection::~TcpConnection()
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::~TcpConnection --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
 
    // Remove the reference of the old connection object
@@ -119,16 +122,23 @@ OpenDDS::DCPS::TcpConnection::~TcpConnection()
 void
 OpenDDS::DCPS::TcpConnection::disconnect()
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::disconnect --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","disconnect",6);
    this->connected_ = false;
 
    if (!this->receive_strategy_.is_nil()) {
-
+     //### Debug statements to track where connection is failing
+     //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::disconnect --> receive strategy not nil, remove handler\n"));
       this->receive_strategy_->get_reactor()->remove_handler(this,
             ACE_Event_Handler::READ_MASK | ACE_Event_Handler::DONT_CALL);
    }
-
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::disconnect --> close peer\n"));
    this->peer().close();
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::disconnect --> end\n"));
 }
 
 // This can not be inlined due to circular dependencies disallowing
@@ -422,6 +432,9 @@ OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
 int
 OpenDDS::DCPS::TcpConnection::close(u_long)
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::close --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","close",6);
 
    // TBD SOON - Find out exactly when close() is called.
@@ -437,12 +450,14 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
 int
 OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::handle_close --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","handle_close",6);
 
    // TBD SOON - Find out exactly when handle_close() is called.
    //            My guess is that it happens if the reactor is closed
    //            while we are still registered with the reactor.  Right?
-
 
    if (!this->send_strategy_.is_nil())
       this->send_strategy_->terminate_send();
@@ -453,7 +468,8 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
    {
       this->link_->notify (DataLink::DISCONNECTED);
    }
-
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::handle_close --> end\n"));
    return 0;
 }
 
@@ -630,10 +646,16 @@ OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
 int
 OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::reconnect --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","reconnect",6);
 
-   if (on_new_association)
-      return this->active_reconnect_on_new_association();
+   if (on_new_association) {
+     //### Debug statements to track where connection is failing
+     //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::reconnect --> end\n"));
+     return this->active_reconnect_on_new_association();
+   }
 
    // If on_new_association is false, it's called by the reconnect task.
    // We need make sure if the link release is pending. If does, do
@@ -641,13 +663,22 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
    else if (! this->link_->is_release_pending ())
    {
       // Try to reconnect if it's connector previously.
-      if (this->is_connector_ && this->active_reconnect_i() == -1)
+      if (this->is_connector_ && this->active_reconnect_i() == -1) {
+        //### Debug statements to track where connection is failing
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::reconnect --> end\n"));
          return -1;
+      }
 
       // Schedule a timer to see if a incoming connection is accepted when timeout.
-      else if (!this->is_connector_ && this->passive_reconnect_i() == -1)
+      else if (!this->is_connector_ && this->passive_reconnect_i() == -1) {
+        //### Debug statements to track where connection is failing
+        //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::reconnect --> end\n"));
          return -1;
+      }
+
    }
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::reconnect --> end\n"));
    return 0;
 }
 
@@ -711,6 +742,9 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_on_new_association()
 int
 OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::passive_reconnect_i --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","passive_reconnect_i",6);
    GuardType guard(this->reconnect_lock_);
 
@@ -763,6 +797,9 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
 int
 OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::active_reconnect_i --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","active_reconnect_i",6);
 
    GuardType guard(this->reconnect_lock_);
@@ -846,7 +883,8 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
       this->last_reconnect_attempted_ = ACE_OS::gettimeofday();
    }
-
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::active_reconnect_i --> end\n"));
    return this->reconnect_state_ == LOST_STATE ? -1 : 0;
 }
 
@@ -856,6 +894,9 @@ int
 OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
       const void *)
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::handle_timeout --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","handle_timeout",6);
 
    this->reconnect_state_ = PASSIVE_TIMEOUT_CALLED_STATE;
@@ -900,6 +941,9 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
 void
 OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::transfer --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","transfer",6);
 
    GuardType guard(this->reconnect_lock_);
@@ -989,6 +1033,9 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 void
 OpenDDS::DCPS::TcpConnection::notify_lost_on_backpressure_timeout()
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::notify_lost_on_backpressure_timeout --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","notify_lost_on_backpressure_timeout",6);
    bool notify_lost = false;
    {
@@ -1014,18 +1061,28 @@ OpenDDS::DCPS::TcpConnection::notify_lost_on_backpressure_timeout()
 void
 OpenDDS::DCPS::TcpConnection::relink(bool do_suspend)
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::relink --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","relink",6);
 
    if (do_suspend && !this->send_strategy_.is_nil())
       this->send_strategy_->suspend_send();
 
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::relink --> adding DO_RECONNECT to reconnect_task\n"));
    ReconnectOpType op = DO_RECONNECT;
    this->reconnect_task_.add(op);
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::relink --> end\n"));
 }
 
 bool
 OpenDDS::DCPS::TcpConnection::tear_link()
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::tear_link --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","tear_link",6);
 
    return this->link_->release_resources();
@@ -1034,6 +1091,9 @@ OpenDDS::DCPS::TcpConnection::tear_link()
 void
 OpenDDS::DCPS::TcpConnection::shutdown()
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpConnection::shutdown --> begin\n"));
+
    DBG_ENTRY_LVL("TcpConnection","shutdown",6);
    this->shutdown_ = true;
 

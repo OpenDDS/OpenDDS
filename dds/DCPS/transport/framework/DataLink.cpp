@@ -494,6 +494,9 @@ void
 DataLink::release_reservations(RepoId remote_id, RepoId local_id,
       DataLinkSetMap& released_locals)
 {
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> begin\n"));
+
    DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
 
    if (DCPS_debug_level > 9) {
@@ -613,6 +616,8 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
 
       this->impl_->release_datalink(this);
    }
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> end\n"));
 }
 
 void

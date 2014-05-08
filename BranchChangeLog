@@ -1,3 +1,21 @@
+Thu May  8 20:28:39 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+    **debugging statement changes
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
 Wed May  7 14:18:47 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
     **added typedef's for LockType and GuardType

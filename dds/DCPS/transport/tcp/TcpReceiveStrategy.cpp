@@ -63,7 +63,8 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
   (ReceivedDataSample& sample, const ACE_INET_Addr&)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","deliver_sample",6);
-
+  //### Debug statements to track where connection is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpReceiveStrategy::deliver_sample --> message_id: %d \n", sample.header_.message_id_));
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
     this->gracefully_disconnected_ = true;

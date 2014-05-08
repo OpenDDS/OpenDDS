@@ -683,6 +683,8 @@ InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
                                        const RepoId& participantId,
                                        const RepoId& subscriptionId)
 {
+  //### Debug statements to track where associate is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::remove_subscription: enter method\n"));
   bool removed = false;
   try {
     get_dcps_info()->remove_subscription(domainId, participantId, subscriptionId);
@@ -690,10 +692,12 @@ InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::remove_subscription: ");
   }
-
+  //### Debug statements to track where associate is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::remove_subscription: removeDataReaderRemote\n"));
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
   removeDataReaderRemote(subscriptionId);
-
+  //### Debug statements to track where associate is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::remove_subscription: exit method\n"));
   return removed;
 }
 
@@ -761,11 +765,15 @@ InfoRepoDiscovery::association_complete(DDS::DomainId_t domainId,
 void
 InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
 {
+  //### Debug statements to track where associate is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::removeDataReaderRemote: enter\n"));
   DataReaderMap::iterator drr = dataReaderMap_.find(subscriptionId);
   if (drr == dataReaderMap_.end()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: InfoRepoDiscovery::removeDataReaderRemote: ")
                ACE_TEXT(" could not find DataReader for subscriptionId.\n")));
+    //### Debug statements to track where associate is failing
+    //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::removeDataReaderRemote: exit - could not find DataReader for subscriptionId\n"));
     return;
   }
 
@@ -775,6 +783,8 @@ InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
   deactivate_remote_object(drr->second.in(), orb_);
 
   dataReaderMap_.erase(drr);
+  //### Debug statements to track where associate is failing
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::removeDataReaderRemote: exit\n"));
 }
 
 void

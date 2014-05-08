@@ -310,6 +310,9 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
               ACE_TEXT("with data link detected: %p.\n"),
               ACE_TEXT("receive_bytes")));
 
+    //### Debug statements to track where connection is failing
+    //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportReceiveStrategy<TH, DSH>::handle_dds_input --> about to relink() because bytes remaining < 0\n"));
+
     // The relink() will handle the connection to the ReconnectTask to do
     // the reconnect so this reactor thread will not be block.
     this->relink();
@@ -333,6 +336,9 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
     } else {
       VDBG_LVL((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unrecoverable problem ")
                 ACE_TEXT("with data link detected\n")), 1);
+
+      //### Debug statements to track where connection is failing
+      //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportReceiveStrategy<TH, DSH>::handle_dds_input --> about to relink() because bytes remaining == 0 but not gracefully_disconnected_\n"));
 
       // The relink() will handle the connection to the ReconnectTask to do
       // the reconnect so this reactor thread will not be block.

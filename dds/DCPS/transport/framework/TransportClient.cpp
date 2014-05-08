@@ -660,6 +660,10 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
 void
 TransportClient::disassociate(const RepoId& peerId)
 {
+  //### Debug statements to track where connection is failing
+  //GuidConverter peerId_conv(peerId);
+  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> TransportClient(%@) to disassociate %C\n", std::string(peerId_conv).c_str()));
+
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> TRYING TO lock_\n"));
 
@@ -670,6 +674,8 @@ TransportClient::disassociate(const RepoId& peerId)
 
    const PendingMap::iterator iter = pending_.find(peerId);
    if (iter != pending_.end()) {
+     //### Debug statements to track where connection is failing
+     //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> marked pending_ as removed_\n"));
       iter->second.removed_ = true;
       return;
    }
@@ -691,12 +697,21 @@ TransportClient::disassociate(const RepoId& peerId)
 
    const DataLink_rch link = found->second;
    DataLinkSetMap released;
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> releasing reservations\n"));
    link->release_reservations(peerId, repo_id_, released);
+   //### Debug statements to track where connection is failing
+   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> erasing from data_link_index_\n"));
    data_link_index_.erase(found);
 
    if (!released.empty()) {
       // Datalink is no longer used for any remote peer
+     //### Debug statements to track where connection is failing
+     //GuidConverter repo_id_conv(repo_id_);
+     //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> removing listener for %C from link\n", std::string(repo_id_conv).c_str()));
       link->remove_listener(repo_id_);
+      //### Debug statements to track where connection is failing
+      //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> removing link from links_\n"));
       links_.remove_link(link);
    }
 
