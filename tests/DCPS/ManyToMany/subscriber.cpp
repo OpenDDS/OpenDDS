@@ -171,7 +171,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       for (ListenerServants::const_iterator listener = listener_servants.begin();
            listener != listener_servants.end();
            ++listener) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) listener done=%d\n"), (*listener)->done()));
         if (!(*listener)->done()) {
           complete = false;
         }

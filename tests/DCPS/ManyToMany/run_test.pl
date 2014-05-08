@@ -275,6 +275,27 @@ unlink $dcpsrepo_ior;
 if ($status == 0) {
   print "test PASSED.\n";
 } else {
+  print "**** Begin log file output *****\n";
+  for ($index = 0; $index < $pub_processes; ++$index) {
+      if (open FILE, "<", "pub$index.log") {
+          print "Publisher[$index]:\n";
+          while (my $line = <FILE>) {
+              print "$line";
+          }
+          print "\n";
+      }
+  }
+
+  for ($index = 0; $index < $sub_processes; ++$index) {
+      if (open FILE, "<", "sub$index.log") {
+          print "Subscriber[$index]:\n";
+          while (my $line = <FILE>) {
+              print "$line";
+          }
+          print "\n";
+      }
+  }
+  print "**** End log file output *****\n";
   print STDERR "test FAILED.\n";
 }
 

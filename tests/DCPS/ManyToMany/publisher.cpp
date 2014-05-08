@@ -138,7 +138,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Write\n")));
       Writer writer(options, writers);
       writer.write();
     }

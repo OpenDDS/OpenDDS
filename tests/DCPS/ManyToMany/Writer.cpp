@@ -70,6 +70,10 @@ Writer::write()
     Handles handles;
     const unsigned int subscribers = options_.num_sub_processes *
       options_.num_sub_participants * options_.num_readers;
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("%T (%P|%t) Writers wait for %d subscribers\n"),
+               subscribers));
+
     // Block until Subscriber is available
     for (Writers::const_iterator writer = writers_.begin();
          writer != writers_.end();
@@ -90,7 +94,7 @@ Writer::write()
       handles.push_back(message_dw->register_instance(writer->message));
     }
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers matched\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Writers matched\n")));
 
     const ACE_Time_Value delay(options_.delay_msec / 1000,
                                (options_.delay_msec % 1000) * 1000);
@@ -107,7 +111,7 @@ Writer::write()
 
         ++writer->message.count;
 
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Write message\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Write message\n")));
         DDS::ReturnCode_t error = message_dw->write(writer->message, *handle);
 
         if (error != DDS::RETCODE_OK) {
