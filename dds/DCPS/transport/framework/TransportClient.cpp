@@ -320,6 +320,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
       // call accept_datalink for each impl / blob pair of the same type
       for (size_t i = 0; i < impls_.size(); ++i) {
+        pend.impls_.push_back(impls_[i]);
          const std::string type = impls_[i]->transport_type();
          for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
             if (data.remote_data_[j].transport_type.in() == type) {
@@ -360,7 +361,7 @@ TransportClient::associate(const AssociationData& data, bool active)
                }
             }
          }
-         pend.impls_.push_back(impls_[i]);
+         //pend.impls_.push_back(impls_[i]);
       }
 
       ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
@@ -581,7 +582,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
    // for passive side processing
    if (!pend.active_) {
       //### Debug statements to track where associate is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i clean up pend calling stop_accepting_or_connecting on each impls_\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i clean up pend calling stop_accepting_or_connecting on each of pend's %d impls_\n",pend.impls_.size()));
       for (size_t i = 0; i < pend.impls_.size(); ++i) {
          pend.impls_[i]->stop_accepting_or_connecting(this, pend.data_.remote_id_);
       }
