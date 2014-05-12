@@ -1,3 +1,123 @@
+Mon May 12 21:23:45 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/Options.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Increase duration, increase logging on shutdown. 
+          Check if two participants are the same before deleting. 
+
+Mon May 12 17:00:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+
+          Fixed memory leaks identified by valgrind.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Added multi-reader test to expose any problems with using
+          multiple readers and multicast.
+
+Thu May  8 17:49:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Added printing out log files if error is indicated.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Cleanup of logging.
+
+Thu May  8 17:31:02 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Priority/run_test.pl:
+
+          Forcing logging for diagnosing intermittent errors on specific builds.
+
+Thu May  8 15:40:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Changed ManyToMany tcp tests to be 12 writers to 12 readers.
+
+        * tests/DCPS/ManyToMany/Writer.h:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+
+          Changed to report status when a sample timesout.
+
+Thu May  8 15:10:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/publisher.cpp:
+
+          Logging the process id to verify the correct string that
+          should be in the received sample.
+
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Added logging to track down error with multiple process ids being
+          sent when there is only one publisher process.
+
+Thu May  8 14:20:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Setting a minimum total duration.
+
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Cleanup logging.
+
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Polling readers at a set interval.
+
+Thu May  8 13:50:29 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Added printing out log files content when tests fail.
+
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Cleaned up logging.
+
+Wed May  7 21:06:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Added timestamps for debugging.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Increased time to wait for kill.
+
+Wed May  7 18:09:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed multicast to work with multiple participants in one process.
+          Added map keyed on the local peer (domain participant) instead of
+          having one client and server links for all local peers.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+
+          Added passing the local peer to pending_connection.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Turned off Built in Topics.
+
 Fri May  2 20:21:04 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ConfigTransports/run_test.pl:

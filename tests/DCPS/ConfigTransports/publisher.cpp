@@ -149,15 +149,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                     && assert_publication_matched(configopt, dwl2));
       }
     }
+    // only want to clean up participant2 if it isn't just pointing to
+    // participant1
+    if (participant1.in() == participant2.in()) {
+      participant2 = 0;
+    }
     // Clean up
     if (participant1) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) cleaning up participant 1...\n")));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) deleting entities1\n")));
       participant1->delete_contained_entities();
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) deleting participant1\n")));
       dpf->delete_participant(participant1);
     }
     if (participant2) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) cleaning up participant 2...\n")));
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) deleting entities2\n")));
       participant2->delete_contained_entities();
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) deleting participant2\n")));
       dpf->delete_participant(participant2);
     }
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting publisher down ...\n")));

@@ -41,6 +41,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         OpenDDS::DCPS::TypeSupport_var typsup = new Xyz::FooTypeSupportImpl;
 
         Options configopt(argc, argv);
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Running colocation opt %C\n"), 
+          configopt.collocation_str.c_str()
+        ));
         Factory fconfig(configopt, typsup);
 
         Options plainopt;
@@ -140,17 +143,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         participant2 = 0;
 
       if (participant1) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) deleting entities1\n")));
         // Delete any topics, publishers and subscribers owned by participant
         participant1->delete_contained_entities();
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) deleting participant1\n")));
         // Delete participant itself
         dpf->delete_participant(participant1);
       }
       if (participant2) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) deleting entities2\n")));
         // Delete any topics, publishers and subscribers owned by participant
         participant2->delete_contained_entities();
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) deleting participant2\n")));
         // Delete participant itself
         dpf->delete_participant(participant2);
       }
+      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber shutting down svc part\n")));
       // Shut down info repo connection
       TheServiceParticipant->shutdown();
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Subscriber shutdown complete\n")));
