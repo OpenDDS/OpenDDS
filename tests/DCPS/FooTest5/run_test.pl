@@ -73,6 +73,11 @@ elsif ($ARGV[$arg_idx] eq 'mwmr') {
   $num_writers = 2;
   $num_readers = 2;
 }
+elsif ($ARGV[$arg_idx] eq 'mr') {
+  $num_samples_per_instance = 50;
+  $num_writers = 1;
+  $num_readers = 2;
+}
 elsif ($ARGV[$arg_idx] eq 'mwmr_long_seq') {
   $sequence_length = 256;
   $num_samples_per_instance = 50;

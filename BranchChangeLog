@@ -1,7 +1,14 @@
+Mon May 12 17:36:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Merge over just revision 6170 from trunk.
+
 Fri May  9 18:13:43 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:
-          
+
           Shifted where TransportImpls were pushed into the PendingAssoc object
           during associate on the passive side.
 
