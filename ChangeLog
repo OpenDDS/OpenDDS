@@ -1,3 +1,16 @@
+Mon May 12 17:00:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+
+          Fixed memory leaks identified by valgrind.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Added multi-reader test to expose any problems with using
+          multiple readers and multicast.
+
 Thu May  8 17:49:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/run_test.pl:

@@ -55,6 +55,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       }
 
       MessageTypeSupportImpl* mts_servant = new MessageTypeSupportImpl;
+      Messenger::MessageTypeSupport_var mts = mts_servant;
 
       if (DDS::RETCODE_OK != mts_servant->register_type(participant, "")) {
           cerr << "Failed to register the MessageTypeTypeSupport." << endl;
