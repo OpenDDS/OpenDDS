@@ -446,7 +446,7 @@ sub run($$$$) {
 
   print $Subscriber->CommandLine() . "\n";
 
-  my $sublife = ($sub_time + 30);
+  my $sublife = (($sub_time + 30) * 2);
   my $SubscriberResult = $Subscriber->Spawn();
   print "Subscriber PID: " . $Subscriber->{PROCESS} . ". Killing in " . $sublife . " seconds ...\n" if $Subscriber->{PROCESS};
 
@@ -457,7 +457,7 @@ sub run($$$$) {
 
   print $Publisher->CommandLine() . "\n";
 
-  my $publife = ($pub_time + 30);
+  my $publife = (($pub_time + 30) * 2);
   my $PublisherResult = $Publisher->Spawn();
   print "Publisher PID: " . $Publisher->{PROCESS} . ". Killing in " . $publife . " seconds ...\n" if $Publisher->{PROCESS};
 
@@ -534,6 +534,7 @@ for my $hasbuiltins (@builtinscases) {
             $failed++;
             $Data::Dumper::Terse = 1;
             print "Test FAILED " . Dumper(\%$i) . "\n";
+            exit(-1);
         }
 
         if (0 != finalize($DCPSREPO)) {

@@ -3,8 +3,8 @@
 #include <stdexcept>
 
 Options::Options() :
-        test_duration(40),
-        test_duration_str("40"),
+        test_duration(20),
+        test_duration_str("20"),
         LEASE_DURATION_STR("infinite"),
         reliability_kind(::DDS::BEST_EFFORT_RELIABILITY_QOS),
         reliability_kind_str("best_effort"),
@@ -35,11 +35,11 @@ Options::Options() :
 ///  -k liveliness kind          defaults to AUTOMATIC_LIVELINESS_QOS
 ///  -r reliability kind         defaults to BEST_EFFORT_RELIABILITY_QOS
 ///  -l lease duration           no default
-///  -x test duration in sec     defaults to 40
+///  -x test duration in sec     defaults to 20
 
 Options::Options(int argc, ACE_TCHAR *argv[]) :
-        test_duration(40),
-        test_duration_str("40"),
+        test_duration(20),
+        test_duration_str("20"),
         reliability_kind(::DDS::BEST_EFFORT_RELIABILITY_QOS),
         reliability_kind_str("best_effort"),
         durability_kind(::DDS::TRANSIENT_LOCAL_DURABILITY_QOS),

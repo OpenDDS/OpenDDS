@@ -1,3 +1,13 @@
+Mon May 12 21:23:45 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/Options.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Increase duration, increase logging on shutdown. 
+          Check if two participants are the same before deleting. 
+
 Mon May 12 17:00:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
