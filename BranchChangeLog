@@ -1,9 +1,20 @@
+Tue May 13 21:45:09 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          corrected some debug statements incorrectly reporting method calls
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          used a reverse lock in disassociate to prevent possible deadlock
+          in the reactor while holding lock_
+
 Tue May 13 19:52:15 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:
 
           fixed a debug statement in disassociate causing a crash
-        
+
         * dds/DCPS/DataReaderImpl.cpp:
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/DomainParticipantFactoryImpl.cpp:
@@ -19,7 +30,7 @@ Tue May 13 19:52:15 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
         * dds/DCPS/transport/tcp/TcpConnection.cpp:
         * dds/DCPS/transport/tcp/TcpReconnectTask.cpp:
         * dds/DCPS/transport/tcp/TcpTransport.cpp:
-      
+
           Added debugging for disassociation/remove associations/cleanup
 
 Tue May 13 14:57:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>

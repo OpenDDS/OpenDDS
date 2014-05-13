@@ -261,7 +261,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
       PendingMap::iterator iter_print = pending_.begin();
       //### Debug statements to track where associate is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> PRINT OUT ALL PENDING ASSOC IN PENDINGMAP\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> PRINT OUT ALL PENDING ASSOC IN PENDINGMAP (current size: %d)\n", pending_.size()));
          int i = 0;
       while(iter_print != pending_.end()) {
          //### Debug statements to track where associate is failing
@@ -543,7 +543,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 
    PendingMap::iterator iter_print = pending_.begin();
    //### Debug statements to track where associate is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i PRINT OUT ALL PENDING ASSOC IN PENDINGMAP\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::use_datalink_i PRINT OUT ALL PENDING ASSOC IN PENDINGMAP (current size: %d)\n", pending_.size()));
       int i = 0;
    while(iter_print != pending_.end()) {
       //### Debug statements to track where associate is failing
@@ -708,7 +708,15 @@ TransportClient::disassociate(const RepoId& peerId)
    DataLinkSetMap released;
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> releasing reservations\n"));
-   link->release_reservations(peerId, repo_id_, released);
+   {
+     //can't call release_reservations while holding lock due to possible reactor deadlock
+     ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
+     //### Debug statements to track where connection is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> RELEASE lock_ using LOCK reverse_lock_\n"));
+     link->release_reservations(peerId, repo_id_, released);
+   }
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> LOCKED lock_ after RELEASE reverse_lock \n"));
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> erasing from data_link_index_\n"));
    data_link_index_.erase(found);

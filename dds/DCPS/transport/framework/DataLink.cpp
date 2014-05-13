@@ -519,7 +519,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
    }
 
    if (listener_set.is_nil()) {
-     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> listener_set is NIL\n"));
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> listener_set is NIL\n"));
       // The remote_id is not a publisher_id.
       // See if it is a subscriber_id by looking in our sub_map_.
       RepoIdSet_rch id_set;
@@ -546,16 +546,16 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
          VDBG_LVL((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
                ACE_TEXT("the link has no reservations.\n")), 5);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> has local listener (loopback) release_reservations\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> has local listener (loopback) release_reservations\n"));
          this->release_reservations_i(remote_id, local_id);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> has local listener (loopback) release_remote_i\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> has local listener (loopback) release_remote_i\n"));
          this->release_remote_i(remote_id);
          DataLinkSet_rch& rel_set = released_locals[local_id];
          if (!rel_set.in())
             rel_set = new DataLinkSet;
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> has local listener (loopback) insert link into released set\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> has local listener (loopback) insert link into released set\n"));
          rel_set->insert_link(this);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> exit \n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> exit \n"));
          return;
       }
 
@@ -571,9 +571,9 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
          VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::release_reservations: the remote_id is a sub id.\n"), 5);
          //guard.release ();
          // The remote_id is a subscriber_id.
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> release_reservations\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_reservations\n"));
          this->release_reservations_i(remote_id, local_id);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> release_remote_subscriber\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_remote_subscriber\n"));
          this->release_remote_subscriber(remote_id,
                local_id,
                id_set,
@@ -583,9 +583,9 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
             // Remove the remote_id(sub) after the remote/local ids is released
             // and there are no local pubs associated with this sub.
             GuardType guard(this->sub_map_lock_);
-            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> remove remote_id set from sub_map_ \n"));
+            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> remove remote_id set from sub_map_ \n"));
             id_set = this->sub_map_.remove_set(remote_id);
-            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> release_remote_i \n"));
+            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_remote_i \n"));
             this->release_remote_i(remote_id);
          }
 
@@ -593,15 +593,15 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
       }
 
    } else {
-     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> listener_set is NOT NIL\n"));
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> listener_set is NOT NIL\n"));
       VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
             ACE_TEXT("the remote_id is a pub id.\n")), 5);
       //guard.release ();
       // The remote_id is a publisher_id.
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> release_reservations\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_reservations\n"));
       this->release_reservations_i(remote_id, local_id);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> release_remote_publisher\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_remote_publisher\n"));
       this->release_remote_publisher(remote_id,
             local_id,
             listener_set,
@@ -612,7 +612,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
          // Remove the remote_id(pub) after the remote/local ids is released
          // and there are no local subs associated with this pub.
          listener_set = this->pub_map_.remove_set(remote_id);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> release_remote_i\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_remote_i\n"));
          this->release_remote_i(remote_id);
       }
 
