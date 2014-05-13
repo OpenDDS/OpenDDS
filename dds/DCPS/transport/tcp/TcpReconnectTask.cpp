@@ -26,6 +26,8 @@ OpenDDS::DCPS::TcpReconnectTask::~TcpReconnectTask()
 
 void OpenDDS::DCPS::TcpReconnectTask::execute(ReconnectOpType& op)
 {
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###OpenDDS::DCPS::TcpReconnectTask::execute --> enter (for TcpConnection ID: %d)\n", this->connection_->id()));
   DBG_ENTRY_LVL("TcpReconnectTask","execute",6);
 
   // Ignore all signals to avoid
@@ -36,10 +38,16 @@ void OpenDDS::DCPS::TcpReconnectTask::execute(ReconnectOpType& op)
   ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
 
   if (op == DO_RECONNECT) {
+    //### Debug statements to track where connection is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###OpenDDS::DCPS::TcpReconnectTask::execute --> try to reconnect\n"));
     if (this->connection_->reconnect() == -1) {
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###OpenDDS::DCPS::TcpReconnectTask::execute --> reconnect failed, tear_link\n"));
       this->connection_->tear_link();
     }
 
   } else
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpReconnectTask::svc unknown operation %d\n", op));
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###OpenDDS::DCPS::TcpReconnectTask::execute --> exit\n"));
 }

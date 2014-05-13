@@ -1,3 +1,27 @@
+Tue May 13 19:52:15 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          fixed a debug statement in disassociate causing a crash
+        
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpReconnectTask.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+      
+          Added debugging for disassociation/remove associations/cleanup
+
 Tue May 13 14:57:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:

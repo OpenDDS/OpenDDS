@@ -84,12 +84,12 @@ TransportClient::~TransportClient()
    for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
          it != impls_.end(); ++it) {
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> detach_client \n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> detaching client (TransportClient: %@) \n", this));
 
       (*it)->detach_client(this);
    }
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> RELEASING lock_\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::~TransportClient --> exit RELEASING lock_\n"));
 }
 
 void
@@ -232,7 +232,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 {
 
    //### Debug statements to track where associate is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate begun\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate begun (TransportClient: %@)\n", this));
 
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> TRYING TO lock_\n"));
@@ -266,7 +266,8 @@ TransportClient::associate(const AssociationData& data, bool active)
       while(iter_print != pending_.end()) {
          //### Debug statements to track where associate is failing
          GuidConverter remote_print(iter_print->first);
-            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> PendingAssoc #%d is for RepoId: %C\n", i, std::string(remote_print).c_str()));
+         GuidConverter local_conv(this->repo_id_);
+            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::associate --> PendingAssoc #%d (%C) is for remote: %C\n", i, std::string(local_conv).c_str(), std::string(remote_print).c_str()));
             iter_print++;
             i++;
       }
@@ -378,8 +379,15 @@ int
 TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
       const void* arg)
 {
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::PendingAssoc::handle_timeout --> begin \n"));
    TransportClient* tc = static_cast<TransportClient*>(const_cast<void*>(arg));
+   //### Debug statements to track where connection is failing
+   GuidConverter converter(data_.remote_id_);
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::PendingAssoc::handle_timeout --> call use_datalink for (TransportClient: %@) on remote: %C \n", tc, std::string(converter).c_str()));
    tc->use_datalink(data_.remote_id_, 0);
+   //### Debug statements to track where connection is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::PendingAssoc::handle_timeout --> exit \n"));
    return 0;
 }
 
@@ -662,8 +670,8 @@ void
 TransportClient::disassociate(const RepoId& peerId)
 {
   //### Debug statements to track where connection is failing
-  //GuidConverter peerId_conv(peerId);
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> TransportClient(%@) to disassociate %C\n", std::string(peerId_conv).c_str()));
+  GuidConverter peerId_conv(peerId);
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> TransportClient(%@) to disassociate %C\n", this, std::string(peerId_conv).c_str()));
 
    //### Debug statements to track where connection is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> TRYING TO lock_\n"));
@@ -676,7 +684,7 @@ TransportClient::disassociate(const RepoId& peerId)
    const PendingMap::iterator iter = pending_.find(peerId);
    if (iter != pending_.end()) {
      //### Debug statements to track where connection is failing
-     //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> marked pending_ as removed_\n"));
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> marked pending_ as removed_\n"));
       iter->second.removed_ = true;
       return;
    }
@@ -699,20 +707,20 @@ TransportClient::disassociate(const RepoId& peerId)
    const DataLink_rch link = found->second;
    DataLinkSetMap released;
    //### Debug statements to track where connection is failing
-   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> releasing reservations\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> releasing reservations\n"));
    link->release_reservations(peerId, repo_id_, released);
    //### Debug statements to track where connection is failing
-   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> erasing from data_link_index_\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> erasing from data_link_index_\n"));
    data_link_index_.erase(found);
 
    if (!released.empty()) {
       // Datalink is no longer used for any remote peer
      //### Debug statements to track where connection is failing
-     //GuidConverter repo_id_conv(repo_id_);
-     //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> removing listener for %C from link\n", std::string(repo_id_conv).c_str()));
+     GuidConverter repo_id_conv(repo_id_);
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> removing listener for %C from link\n", std::string(repo_id_conv).c_str()));
       link->remove_listener(repo_id_);
       //### Debug statements to track where connection is failing
-      //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> removing link from links_\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportClient::disassociate --> removing link from links_\n"));
       links_.remove_link(link);
    }
 

@@ -244,7 +244,7 @@ DDS::ReturnCode_t
 SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 {
   //### Debug statements to track where connection is failing
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> enter\n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> enter\n"));
 
   DBG_ENTRY_LVL("SubscriberImpl", "delete_datareader", 6);
 
@@ -259,7 +259,8 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
                  ACE_TEXT("data reader %C doesn't belong to this subscriber.\n"),
-                 std::string(converter).c_str()));
+                 std::string(converter).c_str()));  //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> exit return Precondition Not Met\n"));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
@@ -296,6 +297,8 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
         DDS::DataReader_ptr ptr = mt_iter->second;
         dynamic_cast<MultiTopicDataReaderBase*>(ptr)->cleanup();
         multitopic_reader_map_.erase(mt_iter);
+        //### Debug statements to track where connection is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> exit MultiTopicDataReader OK\n"));
         return DDS::RETCODE_OK;
       }
 #endif
@@ -310,10 +313,10 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     }
 
     //### Debug statements to track where connection is failing
-    //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> erasing datareader from datareader_map_\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> erasing datareader from datareader_map_\n"));
     datareader_map_.erase(it);
     //### Debug statements to track where connection is failing
-    //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> erasing dr_servance from datareader_set_\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> erasing dr_servance from datareader_set_\n"));
     datareader_set_.erase(dr_servant);
   }
 
@@ -323,7 +326,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
   RepoId subscription_id  = dr_servant->get_subscription_id();
   //### Debug statements to track where connection is failing
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> about to remove_subscription from disco\n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> about to remove_subscription from disco\n"));
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   participant_->get_id(),
@@ -337,15 +340,19 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
   // Call remove association before unregistering the datareader from the transport,
   // otherwise some callbacks resulted from remove_association may lost.
-
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> remove_all_associations from data_reader\n"));
   dr_servant->remove_all_associations();
-
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> cleanup() datareader\n"));
   dr_servant->cleanup();
-
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> remove ref from datareader\n"));
   // Decrease the ref count after the servant is removed
   // from the datareader map.
   dr_servant->_remove_ref();
-
+  //### Debug statements to track where connection is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###SubscriberImpl::delete_datareader --> exit return OK\n"));
   return DDS::RETCODE_OK;
 }
 

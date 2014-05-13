@@ -866,15 +866,25 @@ DomainParticipantImpl::deref_filter_eval(const char* filter)
 DDS::ReturnCode_t
 DomainParticipantImpl::delete_contained_entities()
 {
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> enter\n"));
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> set_deleted(true)\n"));
   // mark that the entity is being deleted
   set_deleted(true);
 
   // delete publishers
   {
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> LOCKING publishers_protector_\n"));
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      tao_mon,
                      this->publishers_protector_,
                      DDS::RETCODE_ERROR);
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> LOCKED publishers_protector\n"));
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> delete publishers\n"));
 
     PublisherSet::iterator pubIter = publishers_.begin();
     DDS::Publisher_ptr pubPtr;
@@ -888,12 +898,16 @@ DomainParticipantImpl::delete_contained_entities()
       = pubPtr->delete_contained_entities();
 
       if (result != DDS::RETCODE_OK) {
+        //### Debug statements to understand disassociation and deletion
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> exit: pub delete_contained_entities NOT SUCCESSFUL\n"));
         return result;
       }
 
       result = delete_publisher(pubPtr);
 
       if (result != DDS::RETCODE_OK) {
+        //### Debug statements to understand disassociation and deletion
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> exit: delete_publisher NOT SUCCESSFUL\n"));
         return result;
       }
 
@@ -904,10 +918,16 @@ DomainParticipantImpl::delete_contained_entities()
 
   // delete subscribers
   {
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> LOCKING subscribers_protector_\n"));
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      tao_mon,
                      this->subscribers_protector_,
                      DDS::RETCODE_ERROR);
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> LOCKED subscribers_protector_\n"));
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> delete subscribers\n"));
 
     SubscriberSet::iterator subIter = subscribers_.begin();
     DDS::Subscriber_ptr subPtr;
@@ -920,12 +940,16 @@ DomainParticipantImpl::delete_contained_entities()
       DDS::ReturnCode_t result = subPtr->delete_contained_entities();
 
       if (result != DDS::RETCODE_OK) {
+        //### Debug statements to understand disassociation and deletion
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> exit: sub delete_contained_entities NOT SUCCESSFUL\n"));
         return result;
       }
 
       result = delete_subscriber(subPtr);
 
       if (result != DDS::RETCODE_OK) {
+        //### Debug statements to understand disassociation and deletion
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> exit: delete_subscriber NOT SUCCESSFUL\n"));
         return result;
       }
 
@@ -936,10 +960,16 @@ DomainParticipantImpl::delete_contained_entities()
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   // delete topics
   {
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> LOCKING topics_protector_\n"));
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      tao_mon,
                      this->topics_protector_,
                      DDS::RETCODE_ERROR);
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> LOCKED topics_protector_\n"));
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> delete topics\n"));
 
     while (1) {
       if (topics_.begin() == topics_.end()) {
@@ -951,6 +981,8 @@ DomainParticipantImpl::delete_contained_entities()
                                      topics_.begin()->second.pair_.obj_.in(), true);
 
       if (result != DDS::RETCODE_OK) {
+        //### Debug statements to understand disassociation and deletion
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> delete topics NOT SUCCESSFUL\n"));
         ret = result;
       }
     }
@@ -990,15 +1022,28 @@ DomainParticipantImpl::delete_contained_entities()
     replayers_.clear();
   }
 
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> set bit_subscriber_ to NIL\n"));
 
   bit_subscriber_ = DDS::Subscriber::_nil();
 
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> unregister_participant\n"));
+
   OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
+
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> set participant_objref_ to NIL\n"));
+
   participant_objref_ = DDS::DomainParticipant::_nil();
+
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> set_deleted(false)\n"));
 
   // the participant can now start creating new contained entities
   set_deleted(false);
-
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::delete_contained_entities --> exit \n"));
   return ret;
 }
 
@@ -1760,6 +1805,8 @@ DomainParticipantImpl::create_new_topic(
 int
 DomainParticipantImpl::is_clean() const
 {
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::is_clean --> enter\n"));
   int sub_is_clean = subscribers_.empty();
   int topics_is_clean = topics_.size() == 0;
 
@@ -1770,7 +1817,10 @@ DomainParticipantImpl::is_clean() const
     sub_is_clean = sub_is_clean == 0 ? subscribers_.size() == 1 : 1;
     topics_is_clean = topics_is_clean == 0 ? topics_.size() == 4 : 1;
   }
-
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::is_clean --> publishers empty: %s, sub_is_clean? %s, topics_is_clean? %s\n", publishers_.empty() ? "YES": "NO", subscribers_.empty() ? "YES": "NO" ,topics_.size() == 0 ? "YES":"NO"));
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantImpl::is_clean --> exit\n"));
   return (publishers_.empty()
           && sub_is_clean == 1
           && topics_is_clean == 1);

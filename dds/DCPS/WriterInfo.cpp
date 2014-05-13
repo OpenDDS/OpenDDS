@@ -166,7 +166,13 @@ WriterInfo::check_activity(const ACE_Time_Value& now)
 void
 WriterInfo::removed()
 {
+  //### Debug statements to track where test is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriterInfo::removed --> enter\n"));
+  //### Debug statements to track where test is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriterInfo::removed --> call writer_removed\n"));
   reader_->writer_removed(*this);
+  //### Debug statements to track where test is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriterInfo::removed --> exit\n"));
 }
 
 void

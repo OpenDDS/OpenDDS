@@ -100,13 +100,13 @@ PublisherImpl::create_datawriter(
 {
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter enter\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter enter\n"));
 
    DDS::DataWriterQos dw_qos;
 
    if (!validate_datawriter_qos(qos, default_datawriter_qos_, a_topic, dw_qos)) {
       //### Debug statements to track where test is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> RETURN NIL datawriter_qos not validated\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> RETURN NIL datawriter_qos not validated\n"));
       return DDS::DataWriter::_nil();
    }
 
@@ -123,26 +123,26 @@ PublisherImpl::create_datawriter(
             ACE_TEXT("typesupport(topic_name=%C) is nil.\n"),
             name.in()));
       //### Debug statements to track where test is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> RETURN NIL typesupport == 0\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> RETURN NIL typesupport == 0\n"));
       return DDS::DataWriter::_nil();
    }
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> typesupport->create_datawriter()\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> typesupport->create_datawriter()\n"));
 
    DDS::DataWriter_var dw_obj = typesupport->create_datawriter();
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE typesupport->create_datawriter\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> DONE typesupport->create_datawriter\n"));
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> create DataWriterImpl \n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> create DataWriterImpl \n"));
 
    DataWriterImpl* dw_servant =
          dynamic_cast <DataWriterImpl*>(dw_obj.in());
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE create DataWriterImpl now init()\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> DONE create DataWriterImpl now init()\n"));
 
    dw_servant->init(a_topic,
          topic_servant,
@@ -154,20 +154,20 @@ PublisherImpl::create_datawriter(
          dw_obj.in());
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE DataWriterImpl-> init\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> DONE DataWriterImpl-> init\n"));
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> check if Publisher is enabled\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> check if Publisher is enabled\n"));
 
    if (this->enabled_ == true
          && qos_.entity_factory.autoenable_created_entities == 1) {
       //### Debug statements to track where test is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> enable DataWriterImpl (dw_servant)\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> enable DataWriterImpl (dw_servant)\n"));
 
       DDS::ReturnCode_t ret = dw_servant->enable();
 
       //### Debug statements to track where test is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> DONE enabling DataWriterImpl\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> DONE enabling DataWriterImpl\n"));
 
       if (ret != DDS::RETCODE_OK) {
          ACE_ERROR((LM_ERROR,
@@ -175,13 +175,13 @@ PublisherImpl::create_datawriter(
                ACE_TEXT("PublisherImpl::create_datawriter, ")
                ACE_TEXT("enable failed.\n")));
          //### Debug statements to track where test is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> RETURN NIL enable failed\n"));
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> RETURN NIL enable failed\n"));
          return DDS::DataWriter::_nil();
       }
    }
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::create_datawriter --> end SUCCESS\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::create_datawriter --> end SUCCESS\n"));
 
    return DDS::DataWriter::_duplicate(dw_obj.in());
 }
@@ -191,7 +191,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 {
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::delete_datawriter --> enter\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> enter\n"));
 
    DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
 
@@ -224,6 +224,8 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
    // Unregister all registered instances prior to deletion.
    DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
+   //### Debug statements to track where test is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> unregister_instances\n"));
    dw_servant->unregister_instances(source_timestamp);
 
    CORBA::String_var topic_name = dw_servant->get_topic_name();
@@ -235,6 +237,11 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
             DDS::RETCODE_ERROR);
 
       publication_id = dw_servant->get_publication_id();
+
+      //### Debug statements to track where test is failing
+      GuidConverter pubID_conv(publication_id);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> deleting publication: %C\n", std::string(pubID_conv).c_str()));
+
       PublicationMap::iterator it = publication_map_.find(publication_id);
 
       if (it == publication_map_.end()) {
@@ -264,9 +271,13 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
       }
 
       if (the_writ != datawriter_map_.end()) {
+        //### Debug statements to track where test is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> erase datawriter from datawriter_map_\n"));
          datawriter_map_.erase(the_writ);
       }
 
+      //### Debug statements to track where test is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> erase from publication_map_\n"));
       publication_map_.erase(it);
 
       // Release pi_lock_ before making call to transport layer to avoid
@@ -275,22 +286,27 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
       // lock_) in reverse order.
       ACE_GUARD_RETURN(reverse_lock_type, reverse_monitor, this->reverse_pi_lock_,
             DDS::RETCODE_ERROR);
-
+      //### Debug statements to track where test is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> wait for pending samples to drain\n"));
       // Wait for pending samples to drain prior to removing associations
       // and unregistering the publication.
       dw_servant->wait_pending();
-
+      //### Debug statements to track where test is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> remove_all_associations from DataWriterImpl\n"));
       // Call remove association before unregistering the datawriter
       // with the transport, otherwise some callbacks resulted from
       // remove_association may lost.
       dw_servant->remove_all_associations();
-
+      //### Debug statements to track where test is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> cleanup DataWriterImpl\n"));
       dw_servant->cleanup();
    }
-
+   //### Debug statements to track where test is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> unregister_all from DataWriterImpl\n"));
    // not just unregister but remove any pending writes/sends.
    dw_servant->unregister_all();
-
+   //### Debug statements to track where test is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###WriteDataContainer::unregister_all --> try to remove_publication from discovery\n"));
    Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
    if (!disco->remove_publication(
          this->domain_id_,
@@ -302,12 +318,13 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
             ACE_TEXT("publication not removed from discovery.\n")),
             DDS::RETCODE_ERROR);
    }
-
+   //### Debug statements to track where test is failing
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###WriteDataContainer::unregister_all --> remove reference to DataWriterImpl\n"));
    // Decrease ref count after the servant is removed from the maps.
    dw_servant->_remove_ref();
 
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::delete_datawriter --> exit\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> exit OK\n"));
 
    return DDS::RETCODE_OK;
 }
@@ -671,7 +688,7 @@ PublisherImpl::wait_for_acknowledgments(
       const DDS::Duration_t& max_wait)
 {
    //### Debug statements to track where test is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###PublisherImpl::wait_for_acknowledgments --> begin\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::wait_for_acknowledgments --> begin\n"));
 
    if (enabled_ == false) {
       ACE_ERROR_RETURN((LM_ERROR,

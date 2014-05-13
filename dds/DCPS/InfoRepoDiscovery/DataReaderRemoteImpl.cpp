@@ -85,6 +85,8 @@ void
 DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
                                           CORBA::Boolean notify_lost)
 {
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderRemoteImpl::remove_associations: enter method\n"));
   DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
@@ -95,6 +97,8 @@ DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
   if (parent) {
     parent->remove_associations(writers, notify_lost);
   }
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###DataReaderRemoteImpl::remove_associations: exit method\n"));
 }
 
 void

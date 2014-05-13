@@ -152,6 +152,9 @@ DDS::ReturnCode_t
 DomainParticipantFactoryImpl::delete_participant(
   DDS::DomainParticipant_ptr a_participant)
 {
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantFactoryImpl::delete_participant --> enter\n"));
+
 //xxx rc = 4
   if (CORBA::is_nil(a_participant)) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -165,6 +168,8 @@ DomainParticipantFactoryImpl::delete_participant(
   // by the poa and the other referenced by the map.
   DomainParticipantImpl* the_servant
   = dynamic_cast<DomainParticipantImpl*>(a_participant);
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantFactoryImpl::delete_participant --> check if servant is clean\n"));
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
   if (the_servant->is_clean() == 0) {
@@ -175,6 +180,10 @@ DomainParticipantFactoryImpl::delete_participant(
                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
                ACE_TEXT("the participant %C is not empty.\n"),
                std::string(converter).c_str()));
+
+    //### Debug statements to understand disassociation and deletion
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantFactoryImpl::delete_participant --> exit RETCODE_PRECONDITION_NOT_MET\n"));
+
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -204,6 +213,8 @@ DomainParticipantFactoryImpl::delete_participant(
 
 //xxx still rc=4
     if (result != DDS::RETCODE_OK) {
+      //### Debug statements to understand disassociation and deletion
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantFactoryImpl::delete_participant --> exit\n"));
       return result;
     }
 
@@ -239,7 +250,8 @@ DomainParticipantFactoryImpl::delete_participant(
                       ACE_TEXT("could not remove domain participant.\n")),
                      DDS::RETCODE_ERROR);
   }
-
+  //### Debug statements to understand disassociation and deletion
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DomainParticipantFactoryImpl::delete_participant --> exit\n"));
   return DDS::RETCODE_OK;
 }
 

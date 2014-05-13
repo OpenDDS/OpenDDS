@@ -274,7 +274,7 @@ DataLink::add_on_start_callback(TransportClient* client, const RepoId& remote)
   
   if (!send_strategy_.is_nil()) {
     //### Debug statements to track where connection is failing
-  	ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> end (NO ADD, send strat = NIL)\n"));
+  	ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> end (NO ADD, send strat = NOT NIL)\n"));
     return false; // link already started
   }
   on_start_callbacks_.push_back(std::make_pair(client, remote));

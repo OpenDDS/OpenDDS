@@ -243,6 +243,10 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
       const ConnectionAttribs& attribs,
       TransportClient* client)
 {
+  //### Debug statements to track where connection is failing
+  GuidConverter remote_conv(remote.repo_id_);
+  GuidConverter local_conv(attribs.local_id_);
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> enter %C accepting connection from %C\n", std::string(local_conv).c_str(), std::string(remote_conv).c_str()));
    GuardType guard(connections_lock_);
    const PriorityKey key =
          blob_to_key(remote.blob_, attribs.priority_, false /* !active */);
@@ -256,9 +260,13 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
    {
       GuardType guard(links_lock_);
       if (find_datalink_i(key, link, client, remote.repo_id_)) {
+        //### Debug statements to track where connection is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> found datalink, return link\n"));
          return AcceptConnectResult(link._retn());
 
       } else {
+        //### Debug statements to track where connection is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> link not found, create link\n"));
          link = new TcpDataLink(key.address(), this, key.priority(),
                key.is_loopback(), key.is_active());
          if (links_.bind(key, link) != 0 /*OK*/) {
@@ -274,19 +282,31 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
    TcpConnection_rch connection;
    const ConnectionMap::iterator iter = connections_.find(key);
    if (iter != connections_.end()) {
+     //### Debug statements to track where connection is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> existing connection found\n"));
       connection = iter->second;
       connections_.erase(iter);
    }
 
    if (connection.is_nil()) {
+     //### Debug statements to track where connection is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> no existing connection found\n"));
       if (!link->add_on_start_callback(client, remote.repo_id_)) {
+        //### Debug statements to track where connection is failing
+        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> couldn't add_on_start_callback\n"));
          VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
                "got started link %@.\n", link.in()), 2);
          return AcceptConnectResult(link._retn());
       }
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> add_on_start_callback successful\n"));
       VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
             "no existing TcpConnection.\n"), 2);
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> try to add_pending_connection\n"));
       add_pending_connection(client, link.in());
+      //### Debug statements to track where connection is failing
+      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::accept_datalink --> return ACR_SUCCESS and finish connection later\n"));
       // no link ready, passive_connection will complete later
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
    }
@@ -530,7 +550,7 @@ TcpTransport::release_datalink(DataLink* link)
 {
 
   //### Debug statements to track where connection is failing
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> begin\n"));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> begin\n"));
 
    DBG_ENTRY_LVL("TcpTransport", "release_datalink", 6);
 
@@ -584,6 +604,8 @@ TcpTransport::release_datalink(DataLink* link)
                link->datalink_release_delay().usec()), 4);
 
          // Atomic value update, safe to perform here.
+         //### Debug statements to track where connection is failing
+         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> set_release_pending(true)\n"));
          released_link->set_release_pending(true);
 
          switch (this->pending_release_links_.bind(key, released_link)) {
@@ -614,10 +636,14 @@ TcpTransport::release_datalink(DataLink* link)
    // Actions are executed outside of the lock scope.
    switch (linkAction) {
    case StopLink:
+     //### Debug statements to track where connection is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> stop link\n"));
       link->stop();
       break;
 
    case ScheduleLinkRelease:
+     //### Debug statements to track where connection is failing
+     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> schedule_delayed_release\n"));
       link->schedule_delayed_release();
       break;
 
@@ -635,7 +661,7 @@ TcpTransport::release_datalink(DataLink* link)
             buffer.str().c_str()));
    }
    //### Debug statements to track where connection is failing
-   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> end\n"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpTransport::release_datalink --> end\n"));
 }
 
 TcpInst*
