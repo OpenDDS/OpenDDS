@@ -41,7 +41,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         OpenDDS::DCPS::TypeSupport_var typsup = new Xyz::FooTypeSupportImpl;
 
         Options configopt(argc, argv);
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Running colocation opt %C\n"), 
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Running colocation opt %C\n"),
           configopt.collocation_str.c_str()
         ));
         Factory fconfig(configopt, typsup);
