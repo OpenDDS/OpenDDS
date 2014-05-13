@@ -5,10 +5,11 @@
 
 using OpenDDS::DCPS::DCPS_debug_level;
 
-OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var writer) :
+OpenDDS::Model::WriterSync::WriterSync(DDS::DataWriter_var writer,
+                                       unsigned int num_readers) :
 writer_(writer)
 {
-  if (wait_match(writer_)) {
+  if (wait_match(writer_, num_readers)) {
     throw std::runtime_error("wait_match failure");
   }
 }
@@ -21,7 +22,8 @@ OpenDDS::Model::WriterSync::~WriterSync()
 }
 
 int
-OpenDDS::Model::WriterSync::wait_match(const DDS::DataWriter_var& writer)
+OpenDDS::Model::WriterSync::wait_match(const DDS::DataWriter_var& writer,
+                                       unsigned int num_readers)
 {
   DDS::StatusCondition_var condition = writer->get_statuscondition();
   condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
@@ -42,7 +44,7 @@ OpenDDS::Model::WriterSync::wait_match(const DDS::DataWriter_var& writer)
                   ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() -")
                   ACE_TEXT(" get_publication_matched_status failed!\n")),
                  -1);
-    } else if (ms.current_count > 0) {
+    } else if (ms.current_count >= (CORBA::Long)num_readers) {
       break;  // matched
     }
     // wait for a change

@@ -1,3 +1,10 @@
+Tue May 13 14:51:31 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Added setting number of readers a WriterSync needs to expect.
+
 Mon May 12 21:23:45 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ConfigTransports/Options.cpp:
@@ -5,8 +12,8 @@ Mon May 12 21:23:45 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
         * tests/DCPS/ConfigTransports/run_test.pl:
         * tests/DCPS/ConfigTransports/subscriber.cpp:
 
-          Increase duration, increase logging on shutdown. 
-          Check if two participants are the same before deleting. 
+          Increase duration, increase logging on shutdown.
+          Check if two participants are the same before deleting.
 
 Mon May 12 17:00:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 

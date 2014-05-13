@@ -9,9 +9,9 @@ namespace OpenDDS {
   namespace Model {
     class OpenDDS_Model_Export WriterSync {
     public:
-      WriterSync(DDS::DataWriter_var writer);
+      WriterSync(DDS::DataWriter_var writer, unsigned int num_readers = 1);
       ~WriterSync();
-      static int wait_match(const DDS::DataWriter_var& writer);
+      static int wait_match(const DDS::DataWriter_var& writer, unsigned int num_readers = 1);
       static int wait_ack(const DDS::DataWriter_var& writer);
     private:
       DDS::DataWriter_var writer_;
