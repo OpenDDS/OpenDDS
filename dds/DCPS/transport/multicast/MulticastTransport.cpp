@@ -211,7 +211,8 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
    }
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::start_session --> about to have session->start\n"));
-   if (!session->start(active, this->connections_.count(remote_peer))) {
+  const bool acked = this->connections_.count(std::make_pair(remote_peer, link->local_peer()));
+  if (!session->start(active, acked)) {
       ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("MulticastTransport[%C]::start_session: ")
@@ -238,13 +239,15 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
    GuardThreadType guard_links(this->links_lock_);
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> LOCKED links_lock_\n"));
-   MulticastDataLink_rch link = this->client_link_;
-   if (link.is_nil()) {
+  const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
+  Links::const_iterator link_iter = this->client_links_.find(local_peer);
+  MulticastDataLink_rch link;
+  if (link_iter == this->client_links_.end()) {
 
-      //### Debug statements to track where associate is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> link is nil, make_datalink for client_link\n"));
-      link = this->make_datalink(attribs.local_id_, attribs.priority_, true /*active*/);
-      this->client_link_ = link;
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> link is nil, make_datalink for client_link\n"));
+    link = this->make_datalink(attribs.local_id_, attribs.priority_, true /*active*/);
+    this->client_links_[local_peer] = link;
 //### not sure why the DataWriterImpl (active) side was creating a server link
 //      if (this->server_link_.is_nil()) {
 //         //### Debug statements to track where associate is failing
@@ -255,12 +258,16 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
 //               false /*active*/);
 //      }
    }
+  else {
+    link = link_iter->second;
+  }
+
    //### Debug statements to track where associate is failing
    //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
    //guard_links.release();
 
    //### Debug statements to track where associate is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> server_link_ %@ is nil? %s   client_link_ %@ is nil? %s\n", this->server_link_.in(), this->server_link_.is_nil() ? "YES":"NO", this->client_link_.in(), this->client_link_.is_nil() ? "YES":"NO"));
+   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::connect_datalink --> client_link %@ is nil? %s\n", link.in(), link.is_nil() ? "YES":"NO"));
 
    MulticastPeer remote_peer = RepoIdConverter(remote.repo_id_).participantId();
 
@@ -315,6 +322,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 {
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> enter\n"));
+  const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
 
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> trying to LOCK links_lock_\n"));
@@ -322,13 +330,17 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> LOCKED links_lock_\n"));
 
-   MulticastDataLink_rch link = this->server_link_;
+  Links::const_iterator link_iter = this->server_links_.find(local_peer);
+  MulticastDataLink_rch link;
 
-   if (link.is_nil()) {
+  if (link_iter == this->server_links_.end()) {
 
-      link = this->make_datalink(attribs.local_id_, attribs.priority_, false /*passive*/);
-      this->server_link_ = link;
-   }
+    link = this->make_datalink(attribs.local_id_, attribs.priority_, false /*passive*/);
+    this->server_links_[local_peer] = link;
+  }
+  else {
+    link = link_iter->second;
+  }
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> RELEASING links_lock_\n"));
 
@@ -340,15 +352,15 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
    GuardThreadType guard(this->connections_lock_);
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> LOCKED connections_lock_\n"));
-   if (connections_.count(remote_peer)) {
-      //### Debug statements to track where associate is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> connection found, RELEASE connections_lock_, start session\n"));
-      //###can't call start session with connections_lock_ due to reactor call in session->start which could deadlock with passive_connection
-      guard.release();
+  if (connections_.count(std::make_pair(remote_peer, local_peer))) {
+    //### Debug statements to track where associate is failing
+    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> connection found, RELEASE connections_lock_, start session\n"));
+    //###can't call start session with connections_lock_ due to reactor call in session->start which could deadlock with passive_connection
+    guard.release();
 
-      VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink found\n"));
-      MulticastSession_rch session =
-            this->start_session(this->server_link_, remote_peer, false /*!active*/);
+    VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink found\n"));
+    MulticastSession_rch session =
+    this->start_session(link, remote_peer, false /*!active*/);
 
       if (session.is_nil()){
          //### Debug statements to track where associate is failing
@@ -362,22 +374,23 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> link is nil? %s\n", link.is_nil() ? "YES":"NO"));
       return AcceptConnectResult(link._retn());
-   } else {
+  } else {
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> no connection found, add callback, RELEASE connections_lock_ and try to start_session\n"));
 
-      this->pending_connections_[remote_peer].push_back(std::pair<TransportClient*, RepoId>(client, remote.repo_id_));
+    this->pending_connections_[std::make_pair(remote_peer, local_peer)].
+      push_back(std::pair<TransportClient*, RepoId>(client, remote.repo_id_));
       //###can't call start session with connections_lock_ due to reactor call in session->start which could deadlock with passive_connection
       guard.release();
-      MulticastSession_rch session =
-            this->start_session(this->server_link_, remote_peer, false /*!active*/);
+    MulticastSession_rch session =
+      this->start_session(link, remote_peer, false /*!active*/);
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> RELEASE connections_lock_\n"));
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::accept_datalink --> exit SUCCESS with no link, added callback\n"));
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 
-   }
+  }
 }
 
 void
@@ -413,7 +426,7 @@ MulticastTransport::stop_accepting_or_connecting(TransportClient* client,
 }
 
 void
-MulticastTransport::passive_connection(MulticastPeer peer)
+MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer)
 {
 
 
@@ -436,11 +449,12 @@ MulticastTransport::passive_connection(MulticastPeer peer)
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> LOCKED connections_lock_\n"));
 
-   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::passive_connection "
-         "from peer 0x%x\n",
-         this->config_i_->name().c_str(), peer), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::passive_connection "
+            "from remote peer 0x%x to local peer 0x%x\n",
+            this->config_i_->name().c_str(), remote_peer, local_peer), 2);
 
-   const PendConnMap::iterator pend = this->pending_connections_.find(peer);
+  const Peers peers(remote_peer, local_peer);
+  const PendConnMap::iterator pend = this->pending_connections_.find(peers);
 
    /*	  if (pend != pending_connections_.end()) {
 	    VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection completing\n"));
@@ -451,13 +465,16 @@ MulticastTransport::passive_connection(MulticastPeer peer)
 	    this->pending_connections_.erase(pend);
 	  }
     */
-   if (pend != pending_connections_.end()) {
+  if (pend != pending_connections_.end()) {
 
       //How many callbacks are there??
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> num callbacks = %d\n", pend->second.size()));
-
-      const DataLink_rch link = static_rchandle_cast<DataLink>(server_link_);
+    Links::const_iterator server_link = this->server_links_.find(local_peer);
+    DataLink_rch link;
+    if (server_link != this->server_links_.end()) {
+      link = static_rchandle_cast<DataLink>(server_link->second);
+    }
 
       VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection completing\n"));
       PendConnMap::iterator updated_pend = pend;
@@ -481,15 +498,15 @@ MulticastTransport::passive_connection(MulticastPeer peer)
          //pend->second[i].first->use_datalink(pend->second[i].second, link);
          //### Debug statements to track where associate is failing
          ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> finished use_datalink in loop\n"));
-      } while ((updated_pend = pending_connections_.find(peer)) != pending_connections_.end());
-   }
-   //### Debug statements to track where associate is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> inserting peer into connections_\n"));
-   //if connection was pending, calls to use_datalink finalized the connection
-   //if it was not previously pending, accept_datalink() will finalize connection
-   this->connections_.insert(peer);
-   //### Debug statements to track where associate is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> RELEASING connections_lock_\n"));
+    } while ((updated_pend = pending_connections_.find(peers)) != pending_connections_.end());
+  }
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> inserting peer into connections_\n"));
+  //if connection was pending, calls to use_datalink finalized the connection
+  //if it was not previously pending, accept_datalink() will finalize connection
+  this->connections_.insert(peers);
+  //### Debug statements to track where associate is failing
+  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastTransport::passive_connection --> RELEASING connections_lock_\n"));
 }
 
 bool
@@ -524,13 +541,19 @@ void
 MulticastTransport::shutdown_i()
 {
   GuardThreadType guard_links(this->links_lock_);
-   if (!this->client_link_.is_nil()) {
-      this->client_link_->transport_shutdown();
-   }
-   if (!this->server_link_.is_nil()) {
-      this->server_link_->transport_shutdown();
-   }
-   this->config_i_ = 0;
+  Links::iterator link;
+  for (link = this->client_links_.begin();
+       link != this->client_links_.end();
+       ++link) {
+    link->second->transport_shutdown();
+  }
+
+  for (link = this->server_links_.begin();
+       link != this->server_links_.end();
+       ++link) {
+    link->second->transport_shutdown();
+  }
+  this->config_i_ = 0;
 }
 
 bool
@@ -553,8 +576,8 @@ MulticastTransport::connection_info_i(TransportLocator& info) const
 void
 MulticastTransport::release_datalink(DataLink* /*link*/)
 {
-   // No-op for multicast: keep both the client_link_ and server_link_ around
-   // until the transport is shut down.
+  // No-op for multicast: keep both the client_link_ and server_link_ around
+  // until the transport is shut down.
 }
 
 

@@ -62,14 +62,19 @@ namespace {
   }
 }
 
-void
+bool
 Writer::write()
 {
+  bool valid = true;
   try {
     typedef std::vector<DDS::InstanceHandle_t> Handles;
     Handles handles;
     const unsigned int subscribers = options_.num_sub_processes *
       options_.num_sub_participants * options_.num_readers;
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("%T (%P|%t) Writers wait for %d subscribers\n"),
+               subscribers));
+
     // Block until Subscriber is available
     for (Writers::const_iterator writer = writers_.begin();
          writer != writers_.end();
@@ -90,7 +95,7 @@ Writer::write()
       handles.push_back(message_dw->register_instance(writer->message));
     }
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writers matched\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Writers matched\n")));
 
     const ACE_Time_Value delay(options_.delay_msec / 1000,
                                (options_.delay_msec % 1000) * 1000);
@@ -107,14 +112,23 @@ Writer::write()
 
         ++writer->message.count;
 
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Write message\n")));
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("%T (%P|%t) Writing Message: subject = %C ")
+                   ACE_TEXT("participant_id = %d ")
+                   ACE_TEXT("subject_id = %d ")
+                   ACE_TEXT("count = %d \n"),
+                   writer->message.subject.in(),
+                   writer->message.participant_id,
+                   writer->message.subject_id,
+                   writer->message.count));
+
         DDS::ReturnCode_t error = message_dw->write(writer->message, *handle);
 
         if (error != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("%N:%l: svc()")
                      ACE_TEXT(" ERROR: writer returned %d!\n"), error));
-
+          valid = false;
         }
         ACE_OS::sleep(delay);
       }
@@ -130,5 +144,8 @@ Writer::write()
     }
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in svc():");
+    valid = false;
   }
+
+  return valid;
 }

@@ -25,7 +25,7 @@ my $sub_opts = "$logging_s -ORBLogFile subx.log ";
 my $repo_bit_opt = '';
 my $reliable = 1;
 
-my $nobit; # Set to a non-zero value to disable the Builtin Topics.
+my $nobit = 1; # Set to a non-zero value to disable the Builtin Topics.
 my $app_bit_opt = '-DCPSBit 0 ' if $nobit;
 $repo_bit_opt = '-NOBITS' if $nobit;
 
@@ -180,6 +180,12 @@ else {
     $config_opts .= '-total_duration_msec ' . $total_duration_msec . ' ';
 }
 
+my $min_total_duration_msec = 60000;
+if ($total_duration_msec < $min_total_duration_msec) {
+    $total_duration_msec = $min_total_duration_msec;
+    $config_opts =~ s/(-total_duration_msec) (\d+)/$1 $total_duration_msec/;
+}
+
 if (!$custom) {
     if ($#ARGV < 2 || $ARGV[2] eq  "small") {
         $config_opts .= '-sample_size 10 ';
@@ -245,7 +251,7 @@ for ($index = 0; $index < $sub_processes; ++$index) {
 
 # first subscriber process needs to be killed a little after the
 # total expected duration
-my $wait_to_kill = $total_duration_msec * 1.5;
+my $wait_to_kill = $total_duration_msec * 2;
 print "wait_to_kill=$wait_to_kill\n";
 for ($index = 0; $index < $sub_processes; ++$index) {
     my $SubscriberResult = $Subscriber[$index]->WaitKill($wait_to_kill);
@@ -275,6 +281,29 @@ unlink $dcpsrepo_ior;
 if ($status == 0) {
   print "test PASSED.\n";
 } else {
+  print "**** Begin log file output *****\n";
+  for ($index = 0; $index < $pub_processes; ++$index) {
+      if (open FILE, "<", "pub$index.log") {
+          print "Publisher[$index]:\n";
+          while (my $line = <FILE>) {
+              print "$line";
+          }
+          print "\n\n";
+          close FILE;
+      }
+  }
+
+  for ($index = 0; $index < $sub_processes; ++$index) {
+      if (open FILE, "<", "sub$index.log") {
+          print "Subscriber[$index]:\n";
+          while (my $line = <FILE>) {
+              print "$line";
+          }
+          print "\n\n";
+          close FILE;
+      }
+  }
+  print "**** End log file output *****\n";
   print STDERR "test FAILED.\n";
 }
 

@@ -44,7 +44,7 @@ throw(CORBA::SystemException)
 
     if (CORBA::is_nil(message_dr.in())) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: on_data_available()")
+                 ACE_TEXT("%T %N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: _narrow failed!\n")));
       ACE_OS::exit(-1);
     }
@@ -77,7 +77,7 @@ throw(CORBA::SystemException)
           std::cerr << ss.str();
           // also track it in the log file
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("%N:%l: Message: subject = %C ")
+                     ACE_TEXT("%T %N:%l: Message: subject = %C ")
                      ACE_TEXT("participant_id = %d ")
                      ACE_TEXT("subject_id = %d ")
                      ACE_TEXT("count = %d ")
@@ -99,21 +99,21 @@ throw(CORBA::SystemException)
           std::string subject(message.subject.in());
           processes_[subject][message.participant_id][message.subject_id].insert(message.count);
         } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: instance is disposed\n")));
 
         } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: instance is unregistered\n")));
 
         } else {
           ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("%N:%l: on_data_available()")
+                     ACE_TEXT("%T %N:%l: on_data_available()")
                      ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                      si.instance_state));
         }
       }
     } else {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: on_data_available()")
+                 ACE_TEXT("%T %N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: unexpected status: %d\n"),
                  error));
     }
@@ -129,7 +129,7 @@ void DataReaderListenerImpl::on_requested_deadline_missed(
   const DDS::RequestedDeadlineMissedStatus &)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_deadline_missed()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: on_requested_deadline_missed()\n")));
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos(
@@ -137,7 +137,7 @@ void DataReaderListenerImpl::on_requested_incompatible_qos(
   const DDS::RequestedIncompatibleQosStatus &)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_incompatible_qos()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: on_requested_incompatible_qos()\n")));
 }
 
 void DataReaderListenerImpl::on_liveliness_changed(
@@ -145,7 +145,7 @@ void DataReaderListenerImpl::on_liveliness_changed(
   const DDS::LivelinessChangedStatus& status)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_liveliness_changed() alive=%d, not alive=%d\n"),
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: on_liveliness_changed() alive=%d, not alive=%d\n"),
              status.alive_count, status.not_alive_count));
 }
 
@@ -154,7 +154,7 @@ void DataReaderListenerImpl::on_subscription_matched(
   const DDS::SubscriptionMatchedStatus &)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: on_subscription_matched()\n")));
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
@@ -162,7 +162,7 @@ void DataReaderListenerImpl::on_sample_rejected(
   const DDS::SampleRejectedStatus&)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_rejected()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: on_sample_rejected()\n")));
 }
 
 void DataReaderListenerImpl::on_sample_lost(
@@ -170,7 +170,7 @@ void DataReaderListenerImpl::on_sample_lost(
   const DDS::SampleLostStatus&)
 throw(CORBA::SystemException)
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: on_sample_lost()\n")));
 }
 
 bool DataReaderListenerImpl::done() const
@@ -185,7 +185,6 @@ void DataReaderListenerImpl::report_errors() const
 
 bool DataReaderListenerImpl::done(bool report) const
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Processes %d %d\n"), processes_.size(), options_.num_pub_processes));
   if (processes_.size() < options_.num_pub_processes) {
     if (report)
       std::cout << "ERROR: only received samples from "
@@ -198,7 +197,6 @@ bool DataReaderListenerImpl::done(bool report) const
   for (ProcessParticipants::const_iterator process = processes_.begin();
        process != processes_.end();
        ++process) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Participants %d %d\n"), process->second.size(), options_.num_pub_participants));
     if (process->second.size() < options_.num_pub_participants) {
       if (report)
         std::cout << "ERROR: only received samples from " << process->second.size()
@@ -211,7 +209,6 @@ bool DataReaderListenerImpl::done(bool report) const
     for (ParticipantWriters::const_iterator participant = process->second.begin();
          participant != process->second.end();
          ++participant) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Participant %d %d\n"), participant->second.size(), options_.num_writers));
       if (participant->second.size() < options_.num_writers) {
         if (report)
           std::cout << "ERROR: only received samples from " << participant->second.size()
@@ -225,16 +222,18 @@ bool DataReaderListenerImpl::done(bool report) const
       for (WriterCounts::const_iterator writer = participant->second.begin();
            writer != participant->second.end();
            ++writer) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t)%s reliable Samples %d %d\n"), (options_.reliable ? "" : " not"), writer->second.size(), options_.num_samples));
-        if (options_.reliable && writer->second.size() < options_.num_samples) {
-          if (report)
-            std::cout << "ERROR: only received " << writer->second.size()
+        if (writer->second.size() < options_.num_samples) {
+          if (report) {
+            if (options_.reliable)
+              std::cout << "ERROR: ";
+
+            std::cout << "only received " << writer->second.size()
                       << " out of " << options_.num_samples
                       << " samples for " << process->first
                       << "->" << participant->first
                       << "->" << writer->first << " for reader "
                       << id_ << std::endl;
-
+          }
           return false;
         }
       }

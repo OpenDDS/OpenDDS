@@ -120,6 +120,36 @@ unlink $dcpsrepo_ior;
 if ($status == 0) {
   print "test PASSED.\n";
 } else {
+  print "**** Begin log file output *****\n";
+  if (open FILE, "<", "pub.log") {
+      print "Publisher1:\n";
+      while (my $line = <FILE>) {
+          print "$line";
+      }
+      print "\n\n";
+      close FILE;
+  }
+
+  if (open FILE, "<", "pub2.log") {
+      print "Publisher2:\n";
+      while (my $line = <FILE>) {
+          print "$line";
+      }
+      print "\n\n";
+      close FILE;
+  }
+
+  if (open FILE, "<", "sub.log") {
+      print "Subscriber:\n";
+      while (my $line = <FILE>) {
+          print "$line";
+      }
+      print "\n\n";
+      close FILE;
+  }
+
+  print "**** End log file output *****\n";
+
   print STDERR "test FAILED.\n";
 }
 

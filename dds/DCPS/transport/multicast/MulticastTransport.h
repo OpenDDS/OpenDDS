@@ -29,7 +29,7 @@ public:
   explicit MulticastTransport(const TransportInst_rch& inst);
   ~MulticastTransport();
 
-  void passive_connection(MulticastPeer peer);
+  void passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer);
 
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -72,9 +72,10 @@ private:
 
   ThreadLockType links_lock_;
   /// link for pubs.
-  MulticastDataLink_rch client_link_;
+  typedef std::map<MulticastPeer, MulticastDataLink_rch> Links;
+  Links client_links_;
   /// link for subs.
-  MulticastDataLink_rch server_link_;
+  Links server_links_;
 
   // Used by the passive side to track the virtual "connections" to remote
   // peers: the pending_connections_ are potential peers that the framework
@@ -84,9 +85,11 @@ private:
   // from the framework's point of view.
   ThreadLockType connections_lock_;
   typedef std::vector<DataLink::OnStartCallback> Callbacks;
-  typedef std::map<MulticastPeer, Callbacks> PendConnMap;
+  typedef std::pair<MulticastPeer, MulticastPeer> Peers;
+  typedef std::map<Peers, Callbacks> PendConnMap;
   PendConnMap pending_connections_;
-  std::set<MulticastPeer> connections_;
+  // remote peer to local peer
+  std::set<Peers> connections_;
 };
 
 } // namespace DCPS

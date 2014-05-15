@@ -1,3 +1,20 @@
+Thu May 15 20:54:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.h:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/Writer.h:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+
+          Merged in trunk at revision 6160. 
+
 Tue May 13 21:45:09 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

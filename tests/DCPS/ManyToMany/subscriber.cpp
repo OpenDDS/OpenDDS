@@ -80,13 +80,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     const std::string pid = ss.str();
 
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Created dpf\n")));
 
     unsigned int part_index = 0;
     for (Participants::iterator part = participants.begin();
          part != participants.end();
          ++part, ++part_index) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating participant\n")));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Creating participant\n")));
 
       *part =
         dpf->create_participant(411,
@@ -143,7 +143,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       for (unsigned int reader = 0; reader < options.num_readers; ++reader) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating reader\n")));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Creating reader\n")));
 
         // Create DataReader
         listener_servants.push_back(new DataReaderListenerImpl(options, pid, part_index, reader));
@@ -163,15 +163,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    const ACE_Time_Value sleep_delay(options.delay_msec / 1000,
-                                     (options.delay_msec % 1000) * 1000);
+    const unsigned int sleep_delay_msec = 500;
     unsigned int delay = 0;
     while (delay < options.total_duration_msec) {
       bool complete = true;
       for (ListenerServants::const_iterator listener = listener_servants.begin();
            listener != listener_servants.end();
            ++listener) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) listener done=%d\n"), (*listener)->done()));
         if (!(*listener)->done()) {
           complete = false;
         }
@@ -180,10 +178,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (complete)
         break;
 
-      delay += options.delay_msec;
-      ACE_OS::sleep(sleep_delay);
+      delay += sleep_delay_msec;
+      ACE_OS::sleep(ACE_Time_Value(0, sleep_delay_msec * 1000));
     }
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Listeners done %d\n"), delay));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Listeners done (ran for %d msec)\n"), delay));
 
     if (delay >= options.total_duration_msec) {
       for (ListenerServants::const_iterator listener = listener_servants.begin();
@@ -213,5 +211,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return -1;
   }
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Subscriber exiting\n")));
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
 }
