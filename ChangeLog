@@ -1,3 +1,27 @@
+Thu May 15 19:46:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Fixed case where first fragment is received, only one fragment
+          is present (so all contiguous fragments have been received),
+          but the last fragment has not been received.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fixed setting the bits to the bitmap based on the fragment
+          heartbeat.
+
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+
+          Changed test to verify that repeated messages are not received.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Changed test to not use BIT.
+
 Tue May 13 15:51:58 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ConfigTransports/subscriber.cpp:

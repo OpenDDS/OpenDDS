@@ -160,8 +160,11 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
                               CORBA::Long bitmap[], CORBA::ULong length,
                               CORBA::ULong& numBits) const
 {
+  // length is number of (allocated) words in bitmap, max of 8
+  // numBits is number of valid bits in the bitmap, <= length * 32, to account for partial words
   const FragMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
   if (iter == fragments_.end() || length == 0) {
+    // Nothing missing
     return 0;
   }
 
@@ -181,10 +184,13 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
     DisjointSequence::fill_bitmap_range(0, first.getLow() - 2,
                                         bitmap, length, numBits);
   } else if (flist.size() == 1) {
-    // No gaps, but numBits must be positive
-    numBits = 1;
-    bitmap[0] = 0;
-    return 1;
+    // No gaps, but we know there is (at least 1) more_framents
+    DisjointSequence::fill_bitmap_range(0, 0,
+                                        bitmap, length, numBits);
+    // NOTE: this could send a nack for fragments that are in flight
+    // need to defer setting bitmap till heartbeat extending logic
+    // in RtpsUdpDataLink::generate_nack_frags
+    return base;
   }
 
   typedef std::list<FragRange>::const_iterator list_iterator;

@@ -23,7 +23,7 @@ my $sub_opts = "$logging_s -ORBLogFile sub.log ";
 my $repo_bit_opt = '';
 my $reliable = 1;
 
-my $nobit; # Set to a non-zero value to disable the Builtin Topics.
+my $nobit = 1; # Set to a non-zero value to disable the Builtin Topics.
 my $app_bit_opt = '-DCPSBit 0 ' if $nobit;
 $repo_bit_opt = '-NOBITS' if $nobit;
 

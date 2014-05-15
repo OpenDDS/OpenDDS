@@ -57,7 +57,13 @@ throw(CORBA::SystemException)
         const DDS::SampleInfo& si = info[i];
         if (si.valid_data) {
           const Messenger::Message& message = messages[i];
-          ++num_samples_;
+          // only count unique entries
+          if (process_writers_[message.subject.in()][message.subject_id].insert(message.count).second) {
+            ++num_samples_;
+          }
+          else {
+            std::cout << "ERROR: duplicate ";
+          }
 
           // output for console to consume
           std::cout << "Message: subject = " << message.subject.in()
