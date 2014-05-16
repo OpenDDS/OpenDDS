@@ -43,7 +43,10 @@ public:
   /// DataSampleHeader sequence number from the given publication.
   bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const;
 
-  CORBA::ULong get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
+  /// Populates bitmap for missing fragment sequence numbers and set numBits
+  /// for the given message sequence and publisher ID.
+  /// @returns the base fragment sequence number for bit zero in the bitmap
+  CORBA::ULong get_gaps(const SequenceNumber& msg_seq, const RepoId& pub_id,
                         CORBA::Long bitmap[], CORBA::ULong length,
                         CORBA::ULong& numBits) const;
 

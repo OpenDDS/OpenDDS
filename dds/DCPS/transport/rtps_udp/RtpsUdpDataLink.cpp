@@ -1045,9 +1045,9 @@ RtpsUdpDataLink::generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nf,
   }
   for (size_t i = 0; i < frag_info.size(); ++i) {
     // If we've received a HeartbeatFrag, we know the last (available) frag #
-    const iter_t iter = wi.frags_.find(frag_info[i].first);
-    if (iter != wi.frags_.end()) {
-      extend_bitmap_range(frag_info[i].second, iter->second.value);
+    const iter_t heartbeat_frag = wi.frags_.find(frag_info[i].first);
+    if (heartbeat_frag != wi.frags_.end()) {
+      extend_bitmap_range(frag_info[i].second, heartbeat_frag->second.value);
     }
   }
 
@@ -1116,14 +1116,16 @@ RtpsUdpDataLink::extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
   if (extent < fnSet.bitmapBase.value) {
     return; // can't extend to some number under the base
   }
-  const CORBA::ULong index = std::min(CORBA::ULong(255),
-                                      extent - fnSet.bitmapBase.value),
-                     len = (index + 31) / 32;
-  if (index < fnSet.numBits) {
+  // calculate the index to the extent to determine the new_num_bits
+  const CORBA::ULong new_num_bits = std::min(CORBA::ULong(255),
+                                             extent - fnSet.bitmapBase.value + 1),
+                     len = (new_num_bits + 31) / 32;
+  if (new_num_bits < fnSet.numBits) {
     return; // bitmap already extends past "extent"
   }
   fnSet.bitmap.length(len);
-  DisjointSequence::fill_bitmap_range(fnSet.numBits, index,
+  // We are missing from one past old bitmap end to the new end
+  DisjointSequence::fill_bitmap_range(fnSet.numBits + 1, new_num_bits,
                                       fnSet.bitmap.get_buffer(), len,
                                       fnSet.numBits);
 }

@@ -1,3 +1,16 @@
+Fri May 16 10:34:30 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * ChangeLog:
+        * dds/DCPS/transport/framework/TransportReassembly.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Merged in trunk revision 6180.
+
 Thu May 15 20:54:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
@@ -13,7 +26,7 @@ Thu May 15 20:54:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
         * tests/DCPS/ManyToMany/subscriber.cpp:
         * tests/DCPS/Priority/run_test.pl:
 
-          Merged in trunk at revision 6160. 
+          Merged in trunk at revision 6160.
 
 Tue May 13 21:45:09 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 

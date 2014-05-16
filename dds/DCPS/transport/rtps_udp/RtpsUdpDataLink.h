@@ -248,6 +248,12 @@ private:
   size_t generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nack_frags,
                              WriterInfo& wi, const RepoId& pub_id);
 
+  /// Extend the FragmentNumberSet to cover the fragments that are
+  /// missing from our last known fragment to the extent
+  /// @param fnSet FragmentNumberSet for the message sequence number
+  /// in question
+  /// @param extent is the highest fragement sequence number for this
+  /// FragmentNumberSet
   static void extend_bitmap_range(RTPS::FragmentNumberSet& fnSet,
                                   CORBA::ULong extent);
 

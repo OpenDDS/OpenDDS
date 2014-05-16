@@ -15,6 +15,8 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include <map>
+
 //Class DataReaderListenerImpl
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
@@ -66,6 +68,10 @@ public:
 private:
   DDS::DataReader_var  reader_;
   long                 num_samples_;
+  typedef std::set<CORBA::Long> Counts;
+  typedef std::map<CORBA::Long, Counts> WriterCounts;
+  typedef std::map<std::string, WriterCounts> ProcessWriters;
+  ProcessWriters process_writers_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
