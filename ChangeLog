@@ -1,3 +1,18 @@
+Sat May 17 03:39:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed rtps reliability test, since it doesn't work.
+
+        * tests/DCPS/Reliability/multicast.ini:
+        * tests/DCPS/Reliability/rtps.ini:
+
+          Added ini files to support other transports.
+
+        * tests/DCPS/Reliability/run_test.pl:
+
+          Added selecting other transports.
+
 Fri May 16 18:30:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:

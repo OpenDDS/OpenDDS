@@ -20,18 +20,26 @@ $sub_opts = "";
 
 
 if (($ARGV[0] eq 'shmem') ||  ($ARGV[1] eq 'shmem')) {
-  $pub_opts = "$pub_opts -DCPSConfigFile shmem.ini";
-  $sub_opts = "$sub_opts -DCPSConfigFile shmem.ini";
+  $pub_opts = "$pub_opts -DCPSConfigFile shmem.ini ";
+  $sub_opts = "$sub_opts -DCPSConfigFile shmem.ini ";
+}
+elsif (($ARGV[0] eq 'rtps') ||  ($ARGV[1] eq 'rtps')) {
+  $pub_opts = "$pub_opts -DCPSConfigFile rtps.ini ";
+  $sub_opts = "$sub_opts -DCPSConfigFile rtps.ini ";
+}
+elsif (($ARGV[0] eq 'mcast') ||  ($ARGV[1] eq 'mcast')) {
+  $pub_opts = "$pub_opts -DCPSConfigFile multicast.ini ";
+  $sub_opts = "$sub_opts -DCPSConfigFile multicast.ini ";
 }
 
 if (($ARGV[0] eq 'take-next') ||  ($ARGV[1] eq 'take-next')) {
-  $sub_opts = "$sub_opts -take-next";
+  $sub_opts .= "$sub_opts -take-next ";
 }
 elsif (($ARGV[0] eq 'take') ||  ($ARGV[1] eq 'take')) {
-  $sub_opts = "$sub_opts -take";
+  $sub_opts .= "$sub_opts -take ";
 }
 elsif (($ARGV[0] eq 'zero-copy') ||  ($ARGV[1] eq 'zero-copy')) {
-  $sub_opts = "$sub_opts -zero-copy";
+  $sub_opts .= "$sub_opts -zero-copy ";
 }
 
 $dcpsrepo_ior = "repo.ior";
@@ -39,7 +47,7 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 
 $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-o $dcpsrepo_ior ");
+                                     "-o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 
