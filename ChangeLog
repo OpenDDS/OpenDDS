@@ -1,3 +1,16 @@
+Sat May 17 11:59:07 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+
+          Added checking the received data to verify that the data is
+          valid.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Changed to use constants to determine the number of samples
+          to expect.
+
 Sat May 17 03:39:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:

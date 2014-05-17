@@ -163,3 +163,37 @@ throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
+
+bool DataReaderListenerImpl::data_consistent() const
+{
+  if (process_writers_.size() != 2) {
+    std::cout << "ERROR: expect to receive data from " << NUM_PROCESSES
+              << " processes but instead received from "
+              << process_writers_.size() << std::endl;
+    return false;
+  }
+  for (ProcessWriters::const_iterator process = process_writers_.begin();
+       process !=  process_writers_.end();
+       ++process) {
+    if (process->second.size() != NUM_WRITERS_PER_PROCESS) {
+      std::cout << "ERROR: expect to receive from " << NUM_WRITERS_PER_PROCESS
+                << " writers from process " << process->first
+                << " but instead received from "
+                << process->second.size() << std::endl;
+      return false;
+    }
+    for (WriterCounts::const_iterator writer = process->second.begin();
+         writer != process->second.end();
+         ++writer) {
+      if (writer->second.size() > NUM_SAMPLES_PER_WRITER) {
+        std::cout << "ERROR: expect to receive no more than " << NUM_SAMPLES_PER_WRITER
+                  << " samples from process=" << process->first
+                  << " writer=" << writer->first
+                  << " but instead received "
+                  << writer->second.size() << std::endl;
+        return false;
+      }
+    }
+  }
+  return true;
+}
