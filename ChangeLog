@@ -1,3 +1,19 @@
+Sat May 17 19:30:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/Messenger.idl:
+
+          Replaced randomly named parameters with names that are more
+          descriptive (i.e. process_id, writer_id, etc).
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+
+          Changed parameter names and log messages because of
+          Messenger.idl changes.
+
 Sat May 17 11:59:07 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/DataReaderListener.h:

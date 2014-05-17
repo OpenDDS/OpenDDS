@@ -110,17 +110,17 @@ Writer::write()
         Messenger::MessageDataWriter_ptr message_dw =
           dynamic_cast<Messenger::MessageDataWriter*>(writer->writer.in());
 
-        ++writer->message.count;
+        ++writer->message.sample_id;
 
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("%T (%P|%t) Writing Message: subject = %C ")
+                   ACE_TEXT("%T (%P|%t) Writing Message: process_id = %C ")
                    ACE_TEXT("participant_id = %d ")
-                   ACE_TEXT("subject_id = %d ")
-                   ACE_TEXT("count = %d \n"),
-                   writer->message.subject.in(),
+                   ACE_TEXT("writer_id = %d ")
+                   ACE_TEXT("sample_id = %d \n"),
+                   writer->message.process_id.in(),
                    writer->message.participant_id,
-                   writer->message.subject_id,
-                   writer->message.count));
+                   writer->message.writer_id,
+                   writer->message.sample_id));
 
         DDS::ReturnCode_t error = message_dw->write(writer->message, *handle);
 

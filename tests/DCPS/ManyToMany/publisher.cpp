@@ -48,11 +48,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::ostringstream pid;
     pid << ACE_OS::getpid();
     WriterSample ws;
-    ws.message.subject    = pid.str().c_str();
+    ws.message.process_id = pid.str().c_str();
     ws.message.from       = "Comic Book Guy";
     ws.message.text       = "Worst. Movie. Ever.";
     ws.message.participant_id = 0;
-    ws.message.count      = 0;
+    ws.message.sample_id  = 0;
     ws.message.data.length(options.sample_size);
     for (CORBA::ULong j = 0; j < ws.message.data.length(); ++j) {
       ws.message.data[j] = j % 256;
@@ -116,8 +116,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       qos.liveliness.lease_duration.nanosec = 0;
       qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
-      ws.message.subject_id = 0;
-      for (unsigned int writer = 0; writer < options.num_writers; ++writer, ++ws.message.subject_id) {
+      ws.message.writer_id = 0;
+      for (unsigned int writer = 0; writer < options.num_writers; ++writer, ++ws.message.writer_id) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating writer\n")));
 
         // Create DataWriter
