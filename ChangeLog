@@ -1,3 +1,12 @@
+Mon May 19 22:01:40 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          When deleting a data reader or writer, set_deleted(true) so
+	  that DataReaderImpl and DataWriterImpl will see that the
+	  entity is deleted in add_association check.
+
 Sat May 17 19:30:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/Messenger.idl:
