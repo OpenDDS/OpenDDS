@@ -9,15 +9,15 @@
 module Messenger {
 
 #pragma DCPS_DATA_TYPE "Messenger::Message"
-#pragma DCPS_DATA_KEY "Messenger::Message subject_id"
+#pragma DCPS_DATA_KEY "Messenger::Message writer_id"
 
   struct Message {
     string from;
-    string subject;
+    string process_id;
     long participant_id;
-    long subject_id;
+    long writer_id;
     string text;
-    long   count;
+    long   sample_id;
     CORBA::OctetSeq data;
   };
 };

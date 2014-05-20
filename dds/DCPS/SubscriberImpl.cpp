@@ -270,7 +270,10 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
-
+  if (dr_servant) {
+    // mark that the entity is being deleted
+    dr_servant->set_deleted(true);
+  }
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,

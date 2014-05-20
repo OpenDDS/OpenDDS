@@ -101,14 +101,14 @@ Writer::write()
     pid << std::setw(5) << ACE_OS::getpid();
 
     Messenger::Message message1;
-    message1.subject_id = 1;
+    message1.writer_id  = 1;
     message1.from       = "Comic Book Guy 1";
-    message1.subject    = pid.str().c_str();
+    message1.process_id = pid.str().c_str();
     message1.text       = "Worst. Movie. Ever.";
-    message1.count      = 0;
+    message1.sample_id  = 0;
 
     Messenger::Message message2 = message1;
-    message2.subject_id = 2;
+    message2.writer_id  = 2;
     message2.from       = "Comic Book Guy 2";
 
     message1.data.length(66 * 1000); // requires 2 fragments for udp/mcast
@@ -150,8 +150,8 @@ Writer::write()
         }
       }
 
-      ++message1.count;
-      ++message2.count;
+      ++message1.sample_id;
+      ++message2.sample_id;
     }
 
     // Let readers disconnect first, once they either get the data or

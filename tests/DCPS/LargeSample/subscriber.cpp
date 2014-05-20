@@ -36,7 +36,9 @@
 
 namespace {
 
-const long num_messages_expected = 40;
+const long num_messages_expected = DataReaderListenerImpl::NUM_PROCESSES *
+                                   DataReaderListenerImpl::NUM_WRITERS_PER_PROCESS *
+                                   DataReaderListenerImpl::NUM_SAMPLES_PER_WRITER;
 
 void parse_args(int argc, ACE_TCHAR* argv[], bool& reliable)
 {
@@ -160,9 +162,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     const long received = listener_svt->num_samples();
-    if (reliable && received < num_messages_expected) {
+    const bool data_consistent = listener_svt->data_consistent();
+    if (reliable && data_consistent && received < num_messages_expected) {
       std::cout << "ERROR: data loss (" << received << "/"
                 << num_messages_expected << " received)\n";
+      ok = false;
+    }
+    else if (!data_consistent) {
       ok = false;
     }
     else {

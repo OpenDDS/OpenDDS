@@ -57,8 +57,8 @@ throw(CORBA::SystemException)
         const DDS::SampleInfo& si = info[i];
         if (si.valid_data) {
           const Messenger::Message& message = messages[i];
-          // only count unique entries
-          if (process_writers_[message.subject.in()][message.subject_id].insert(message.count).second) {
+          // only sample_id unique entries
+          if (process_writers_[message.process_id.in()][message.writer_id].insert(message.sample_id).second) {
             ++num_samples_;
           }
           else {
@@ -66,25 +66,25 @@ throw(CORBA::SystemException)
           }
 
           // output for console to consume
-          std::cout << "Message: subject = " << message.subject.in()
-                    << " subject_id = " << message.subject_id
-                    << " count = " << message.count << '\n';
+          std::cout << "Message: process_id = " << message.process_id.in()
+                    << " writer_id = " << message.writer_id
+                    << " sample_id = " << message.sample_id << '\n';
           // also track it in the log file
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("%N:%l: Message: subject = %C ")
-                     ACE_TEXT("subject_id = %d ")
-                     ACE_TEXT("count = %d\n"),
-                     message.subject.in(),
-                     message.subject_id,
-                     message.count));
+                     ACE_TEXT("%N:%l: Message: process_id = %C ")
+                     ACE_TEXT("writer_id = %d ")
+                     ACE_TEXT("sample_id = %d\n"),
+                     message.process_id.in(),
+                     message.writer_id,
+                     message.sample_id));
 
           for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
-            if ((message.subject_id == 1 &&
+            if ((message.writer_id == 1 &&
                  (message.data[i] != i % 256)) ||
-                (message.subject_id == 2 &&
+                (message.writer_id == 2 &&
                  (message.data[i] != 255 - (i % 256)))) {
-              std::cout << "ERROR: Bad data at index " << i << " subjid "
-                        << message.subject_id << " count " << message.count
+              std::cout << "ERROR: Bad data at index " << i << " writer_id "
+                        << message.writer_id << " sample_id " << message.sample_id
                         << "\n";
               break;
             }
@@ -162,4 +162,38 @@ void DataReaderListenerImpl::on_sample_lost(
 throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
+}
+
+bool DataReaderListenerImpl::data_consistent() const
+{
+  if (process_writers_.size() != 2) {
+    std::cout << "ERROR: expect to receive data from " << NUM_PROCESSES
+              << " processes but instead received from "
+              << process_writers_.size() << std::endl;
+    return false;
+  }
+  for (ProcessWriters::const_iterator process = process_writers_.begin();
+       process !=  process_writers_.end();
+       ++process) {
+    if (process->second.size() != NUM_WRITERS_PER_PROCESS) {
+      std::cout << "ERROR: expect to receive from " << NUM_WRITERS_PER_PROCESS
+                << " writers from process " << process->first
+                << " but instead received from "
+                << process->second.size() << std::endl;
+      return false;
+    }
+    for (WriterCounts::const_iterator writer = process->second.begin();
+         writer != process->second.end();
+         ++writer) {
+      if (writer->second.size() > NUM_SAMPLES_PER_WRITER) {
+        std::cout << "ERROR: expect to receive no more than " << NUM_SAMPLES_PER_WRITER
+                  << " samples from process=" << process->first
+                  << " writer=" << writer->first
+                  << " but instead received "
+                  << writer->second.size() << std::endl;
+        return false;
+      }
+    }
+  }
+  return true;
 }

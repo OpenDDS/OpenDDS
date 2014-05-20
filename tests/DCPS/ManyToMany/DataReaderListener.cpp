@@ -28,7 +28,8 @@ DataReaderListenerImpl::DataReaderListenerImpl(const Options& options,
   std::stringstream ss;
   ss << process << "->" << participant << "->" << writer;
   id_ = ss.str();
-  std::cerr << "Starting DataReaderListenerImpl for " << id_ << std::endl;
+  std::cout << "Starting DataReaderListenerImpl for " << id_ << std::endl;
+  std::cout << "Readers/Writers identified as (process_id)->(participant_id)->(writer_id)" << std::endl;
 }
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -68,36 +69,36 @@ throw(CORBA::SystemException)
 
           // output for console to consume
           std::stringstream ss;
-          ss << "Message: from writer " << message.subject.in()
+          ss << "Message: from writer " << message.process_id.in()
              << "->" << message.participant_id
-             << "->" << message.subject_id
-             << " count = " << message.count
+             << "->" << message.writer_id
+             << " sample_id = " << message.sample_id
              << " for reader=" << id_
              << std::endl;
           std::cerr << ss.str();
           // also track it in the log file
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("%T %N:%l: Message: subject = %C ")
+                     ACE_TEXT("%T %N:%l: Message: process_id = %C ")
                      ACE_TEXT("participant_id = %d ")
-                     ACE_TEXT("subject_id = %d ")
-                     ACE_TEXT("count = %d ")
+                     ACE_TEXT("writer_id = %d ")
+                     ACE_TEXT("sample_id = %d ")
                      ACE_TEXT("for reader = %C\n"),
-                     message.subject.in(),
+                     message.process_id.in(),
                      message.participant_id,
-                     message.subject_id,
-                     message.count,
+                     message.writer_id,
+                     message.sample_id,
                      id_.c_str()));
 
           for (CORBA::ULong i = 0; i < message.data.length(); ++i) {
             if (message.data[i] != i % 256) {
-              std::cout << "ERROR: Bad data at index " << i << " subjid "
-                        << message.subject_id << " count " << message.count
+              std::cout << "ERROR: Bad data at index " << i << " writer_id "
+                        << message.writer_id << " sample_id " << message.sample_id
                         << std::endl;
               break;
             }
           }
-          std::string subject(message.subject.in());
-          processes_[subject][message.participant_id][message.subject_id].insert(message.count);
+          std::string process_id(message.process_id.in());
+          processes_[process_id][message.participant_id][message.writer_id].insert(message.sample_id);
         } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: instance is disposed\n")));
 

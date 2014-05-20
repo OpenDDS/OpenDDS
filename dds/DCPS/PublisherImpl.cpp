@@ -194,6 +194,10 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> enter\n"));
 
    DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
+  if (dw_servant) {
+    // mark that the entity is being deleted
+    dw_servant->set_deleted(true);
+  }
 
    {
       DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
