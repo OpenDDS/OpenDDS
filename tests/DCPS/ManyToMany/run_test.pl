@@ -64,6 +64,15 @@ sub divides_evenly
   return ($num / $denom) == int($num / $denom);
 }
 
+sub delay_msec_calc
+{
+  my $total_writers = shift;
+  my $samples = shift;
+  my $base_delay_msec = shift;
+
+  return int(($total_writers * $samples) / 100 + 1) * $base_delay_msec;
+}
+
 my $pub_processes = 1;
 my $sub_processes = 1;
 my $delay_msec;
@@ -71,6 +80,7 @@ my $serialized_samples;
 my $base_delay_msec = 500;
 my $samples = 10;
 my $custom = 0;
+my $total_writers;
 if ($#ARGV < 1) {
     print "no args passed ($#ARGV)\n";
     $pub_processes = 2;
@@ -86,7 +96,7 @@ if ($#ARGV < 1) {
     $serialized_samples = 2 * 2 * 10; # pub_part * writers * samples
 }
 elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
-    my $total_writers = $1;
+    $total_writers = $1;
     my $total_readers = $2;
     print "total_writers=$total_writers, total_readers=$total_readers\n";
     my $writers = $total_writers;
@@ -119,7 +129,7 @@ elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     $config_opts .= '-samples ' . $samples . ' ';
     $config_opts .= '-readers ' . $readers . ' ';
     # produce at most 100 samples per 500ms
-    $delay_msec = int(($total_writers * $samples) / 100 + 1) * $base_delay_msec;
+    $delay_msec = delay_msec_calc($total_writers, $samples, $base_delay_msec);
     $serialized_samples = $pub_part * $writers * $samples;
 }
 elsif ($ARGV[1] =~ /-\S_process/ ||
@@ -157,6 +167,8 @@ elsif ($ARGV[1] =~ /-\S_process/ ||
     }
     if ($config_opts =~ /-delay_msec (\d+)/) {
         $delay_msec = $1;
+    } else {
+	$delay_msec = delay_msec_calc($total_writers, $samples, $base_delay_msec);
     }
 
     # only used if -total_duration_msec is not in $ARGV[1]
