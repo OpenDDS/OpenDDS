@@ -168,8 +168,10 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
-  // mark that the entity is being deleted
-  dw_servant->set_deleted(true);
+  if (dw_servant) {
+    // mark that the entity is being deleted
+    dw_servant->set_deleted(true);
+  }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so

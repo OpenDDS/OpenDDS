@@ -1,3 +1,10 @@
+Tue May 20 16:21:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Check if servant is null before calling set_deleted.
+
 Mon May 19 22:01:40 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
