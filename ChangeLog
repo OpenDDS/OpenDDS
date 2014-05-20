@@ -1,3 +1,9 @@
+Tue May 20 18:53:48 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Release sample lock before aquiring writers lock.
+
 Tue May 20 16:21:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
