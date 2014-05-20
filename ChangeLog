@@ -1,3 +1,69 @@
+Tue May 20 18:53:48 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Release sample lock before aquiring writers lock.
+
+Tue May 20 16:21:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Check if servant is null before calling set_deleted.
+
+Mon May 19 22:01:40 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          When deleting a data reader or writer, set_deleted(true) so
+          that DataReaderImpl and DataWriterImpl will see that the
+          entity is deleted in add_association check.
+
+Sat May 17 19:30:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/Messenger.idl:
+
+          Replaced randomly named parameters with names that are more
+          descriptive (i.e. process_id, writer_id, etc).
+
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/Writer.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+
+          Changed parameter names and log messages because of
+          Messenger.idl changes.
+
+Sat May 17 11:59:07 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+
+          Added checking the received data to verify that the data is
+          valid.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Changed to use constants to determine the number of samples
+          to expect.
+
+Sat May 17 03:39:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed rtps reliability test, since it doesn't work.
+
+        * tests/DCPS/Reliability/multicast.ini:
+        * tests/DCPS/Reliability/rtps.ini:
+
+          Added ini files to support other transports.
+
+        * tests/DCPS/Reliability/run_test.pl:
+
+          Added selecting other transports.
+
 Fri May 16 18:30:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:

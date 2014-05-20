@@ -1810,6 +1810,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
    break;
 
   case END_HISTORIC_SAMPLES: {
+    // Going to acquire writers lock, release samples lock
+    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+
     if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_INFO,
         "(%P|%t) Received END_HISTORIC_SAMPLES control message\n"));
