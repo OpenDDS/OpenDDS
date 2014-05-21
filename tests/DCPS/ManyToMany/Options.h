@@ -29,6 +29,7 @@ struct Options
   , sample_size(10)
   , delay_msec(1000)
   , total_duration_msec(delay_msec * num_samples * num_writers * num_pub_participants * 2)
+  , no_validation(false)
   {
     ACE_Arg_Shifter parser( argc, argv);
     while( parser.is_anything_left()) {
@@ -88,6 +89,11 @@ struct Options
         parser.consume_arg();
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) reliable\n")));
 
+      } else if( 0 <= (parser.cur_arg_strncasecmp(ACE_TEXT("-no_validation")))) {
+        no_validation = true;
+        parser.consume_arg();
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) no validation\n")));
+
       } else {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) skipping %s\n"), parser.get_current()));
         parser.ignore_arg();
@@ -106,6 +112,7 @@ struct Options
   unsigned int sample_size;
   unsigned int delay_msec;
   unsigned int total_duration_msec;
+  bool no_validation;
 };
 
 #endif /* ManyToMany_Options_h  */

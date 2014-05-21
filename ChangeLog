@@ -1,3 +1,12 @@
+Tue May 20 21:45:16 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/DataReaderListener.h:
+        * tests/DCPS/ManyToMany/DataReaderListener.cpp:
+        * tests/DCPS/ManyToMany/Options.h:
+
+          Added flag to not validate the received messages to avoid
+          having growing storage.
+
 Tue May 20 18:53:48 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

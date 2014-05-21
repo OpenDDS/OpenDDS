@@ -80,6 +80,8 @@ private:
 
   ProcessParticipants processes_;
   std::string id_;
+  const unsigned long expected_num_samples_;
+  unsigned long num_samples_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
