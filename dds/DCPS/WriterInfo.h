@@ -78,7 +78,8 @@ public:
 
   WriterInfo(WriterInfoListener*         reader,
              const PublicationId&        writer_id,
-             const ::DDS::DataWriterQos& writer_qos);
+             const ::DDS::DataWriterQos& writer_qos,
+             const ::DDS::DataReaderQos& reader_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
   /// @param now next time this DataWriter will become not active (not alive)
