@@ -486,7 +486,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     }
 
     {
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+      ACE_GUARD(ACE_RW_Thread_Mutex, guard, this->writers_lock_);
 
       this->writers_[writer.writerId]->handle_ = handle;
     }
