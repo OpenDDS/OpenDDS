@@ -494,7 +494,9 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       this->send(list);
     }
 
-    send_end_historic_samples();
+    if (qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+      send_end_historic_samples();
+    }
   }
 }
 
