@@ -216,11 +216,11 @@ bool DataReaderListenerImpl::done(bool report) const
     return complete;
   }
 
-  if (processes_.size() < options_.num_pub_processes) {
+  if (processes_.size() != options_.num_pub_processes) {
     if (report)
-      std::cout << "ERROR: only received samples from "
-                << processes_.size() << " out of "
-                << options_.num_pub_processes << " processes for reader "
+      std::cout << "ERROR: received samples from "
+                << processes_.size() << " processes but expected to receive "
+                << options_.num_pub_processes << " for reader "
                 << id_ << "." << std::endl;
     valid_and_done = false;
   }
@@ -228,11 +228,11 @@ bool DataReaderListenerImpl::done(bool report) const
   for (ProcessParticipants::const_iterator process = processes_.begin();
        process != processes_.end();
        ++process) {
-    if (process->second.size() < options_.num_pub_participants) {
+    if (process->second.size() != options_.num_pub_participants) {
       if (report)
-        std::cout << "ERROR: only received samples from " << process->second.size()
-                  << " out of " << options_.num_pub_participants
-                  << " participants for " << process->first << " for reader "
+        std::cout << "ERROR: received samples from " << process->second.size()
+                  << " participants but expected to receive " << options_.num_pub_participants
+                  << " for " << process->first << " for reader "
                   << id_ << std::endl;
 
       valid_and_done = false;
@@ -242,9 +242,9 @@ bool DataReaderListenerImpl::done(bool report) const
          ++participant) {
       if (participant->second.size() < options_.num_writers) {
         if (report)
-          std::cout << "ERROR: only received samples from " << participant->second.size()
-                    << " out of " << options_.num_writers
-                    << " writers for " << process->first
+          std::cout << "ERROR: received samples from " << participant->second.size()
+                    << " writers but expected to receive " << options_.num_writers
+                    << " for " << process->first
                     << "->" << participant->first << " for reader "
                     << id_ << std::endl;
 
@@ -253,14 +253,14 @@ bool DataReaderListenerImpl::done(bool report) const
       for (WriterCounts::const_iterator writer = participant->second.begin();
            writer != participant->second.end();
            ++writer) {
-        if (writer->second.size() < options_.num_samples) {
+        if (writer->second.size() != options_.num_samples) {
           if (report) {
-            if (options_.reliable)
+            if (options_.reliable || writer->second.size() > options_.num_samples)
               std::cout << "ERROR: ";
 
-            std::cout << "only received " << writer->second.size()
-                      << " out of " << options_.num_samples
-                      << " samples for " << process->first
+            std::cout << "received " << writer->second.size()
+                      << " samples but expected to receive " << options_.num_samples
+                      << " for " << process->first
                       << "->" << participant->first
                       << "->" << writer->first << " for reader "
                       << id_ << std::endl;
