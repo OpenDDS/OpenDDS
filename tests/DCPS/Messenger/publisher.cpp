@@ -117,6 +117,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     writer->end();
+
+    // let any missed multicast/rtps messages get re-delivered
+    ACE_Time_Value small_time(0, 250000);
+    ACE_OS::sleep(small_time);
+
     delete writer;
 
     // Clean-up!

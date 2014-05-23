@@ -1,3 +1,12 @@
+Fri May 23 19:05:54 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Fixed test for unreliable transports and increased the number
+          of messages sent.
+
 Fri May 23 18:25:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Messenger/Args.h:

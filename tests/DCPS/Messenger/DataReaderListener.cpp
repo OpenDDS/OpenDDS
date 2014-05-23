@@ -183,7 +183,7 @@ bool DataReaderListenerImpl::is_valid() const
           std::cout << std::endl;
           expected = *count;
           // don't increment count;
-          valid_ = false;
+          valid_count = false;
           continue;
         }
       }
@@ -195,7 +195,7 @@ bool DataReaderListenerImpl::is_valid() const
         }
         std::cout << "ERROR: received message" << (multi ? "s" : "")
                   << " with a negative count" << std::endl;
-        valid_ = false;
+        valid_count = false;
         continue;
       }
     }
@@ -208,7 +208,9 @@ bool DataReaderListenerImpl::is_valid() const
     std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
     valid_count = false;
   }
-  else if (counts_.size() < num_messages) {
+  // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
+  else if (counts_.size() < num_messages &&
+           (reliable_ || counts_.size() * 4 < num_messages)) {
     std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
     valid_count = false;
   }
