@@ -588,7 +588,9 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       this->send(list);
     }
 
-    send_end_historic_samples();
+    if (qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+      send_end_historic_samples();
+    }
   }
    //### Debug statements to track where associate is failing
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataWriterImpl::association_complete_i --> exit\n"));

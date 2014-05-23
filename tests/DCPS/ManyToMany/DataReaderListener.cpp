@@ -19,11 +19,25 @@
 #include <iostream>
 #include <sstream>
 
+namespace
+{
+  unsigned int calc_num_samples(const Options& options)
+  {
+    if (options.no_validation)
+      return options.num_pub_processes * options.num_pub_participants *
+        options.num_writers * options.num_samples;
+    else
+      return 0;
+  }
+}
+
 DataReaderListenerImpl::DataReaderListenerImpl(const Options& options,
                                                const std::string& process,
                                                unsigned int participant,
                                                unsigned int writer)
   : options_(options)
+  , expected_num_samples_(calc_num_samples(options))
+  , num_samples_(0)
 {
   std::stringstream ss;
   ss << process << "->" << participant << "->" << writer;
@@ -97,8 +111,13 @@ throw(CORBA::SystemException)
               break;
             }
           }
-          std::string process_id(message.process_id.in());
-          processes_[process_id][message.participant_id][message.writer_id].insert(message.sample_id);
+          if (!options_.no_validation) {
+            std::string process_id(message.process_id.in());
+            processes_[process_id][message.participant_id][message.writer_id].insert(message.sample_id);
+          }
+
+          ++num_samples_;
+
         } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T %N:%l: INFO: instance is disposed\n")));
 
@@ -186,60 +205,71 @@ void DataReaderListenerImpl::report_errors() const
 
 bool DataReaderListenerImpl::done(bool report) const
 {
-  if (processes_.size() < options_.num_pub_processes) {
-    if (report)
-      std::cout << "ERROR: only received samples from "
-                << processes_.size() << " out of "
-                << options_.num_pub_processes << " processes for reader "
+  bool valid_and_done = true;
+  if (expected_num_samples_ > 0) {
+    const bool complete = num_samples_ >= expected_num_samples_;
+    if (report && (!complete || num_samples_ > expected_num_samples_)) {
+      std::cout << "ERROR: only received " << num_samples_
+                << " out of " << expected_num_samples_ << " samples for reader "
                 << id_ << "." << std::endl;
-    return false;
+    }
+    return complete;
+  }
+
+  if (processes_.size() != options_.num_pub_processes) {
+    if (report)
+      std::cout << "ERROR: received samples from "
+                << processes_.size() << " processes but expected to receive "
+                << options_.num_pub_processes << " for reader "
+                << id_ << "." << std::endl;
+    valid_and_done = false;
   }
 
   for (ProcessParticipants::const_iterator process = processes_.begin();
        process != processes_.end();
        ++process) {
-    if (process->second.size() < options_.num_pub_participants) {
+    if (process->second.size() != options_.num_pub_participants) {
       if (report)
-        std::cout << "ERROR: only received samples from " << process->second.size()
-                  << " out of " << options_.num_pub_participants
-                  << " participants for " << process->first << " for reader "
+        std::cout << "ERROR: received samples from " << process->second.size()
+                  << " participants but expected to receive " << options_.num_pub_participants
+                  << " for " << process->first << " for reader "
                   << id_ << std::endl;
 
-      return false;
+      valid_and_done = false;
     }
     for (ParticipantWriters::const_iterator participant = process->second.begin();
          participant != process->second.end();
          ++participant) {
       if (participant->second.size() < options_.num_writers) {
         if (report)
-          std::cout << "ERROR: only received samples from " << participant->second.size()
-                    << " out of " << options_.num_writers
-                    << " writers for " << process->first
+          std::cout << "ERROR: received samples from " << participant->second.size()
+                    << " writers but expected to receive " << options_.num_writers
+                    << " for " << process->first
                     << "->" << participant->first << " for reader "
                     << id_ << std::endl;
 
-        return false;
+        valid_and_done = false;
       }
       for (WriterCounts::const_iterator writer = participant->second.begin();
            writer != participant->second.end();
            ++writer) {
-        if (writer->second.size() < options_.num_samples) {
+        if (writer->second.size() != options_.num_samples) {
           if (report) {
-            if (options_.reliable)
+            if (options_.reliable || writer->second.size() > options_.num_samples)
               std::cout << "ERROR: ";
 
-            std::cout << "only received " << writer->second.size()
-                      << " out of " << options_.num_samples
-                      << " samples for " << process->first
+            std::cout << "received " << writer->second.size()
+                      << " samples but expected to receive " << options_.num_samples
+                      << " for " << process->first
                       << "->" << participant->first
                       << "->" << writer->first << " for reader "
                       << id_ << std::endl;
           }
-          return false;
+          valid_and_done = false;
         }
       }
     }
   }
 
-  return true;
+  return valid_and_done;
 }

@@ -316,8 +316,10 @@ DataReaderImpl::add_association(const RepoId& yourId,
       //### Debug statements to track where associate is failing
       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataReaderImpl::add_association: About to try to insert? Num writers before: %d\n", writers_.size()));
       const PublicationId& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info = new WriterInfo(this, writer_id,
-            writer.writerQos);
+      RcHandle<WriterInfo> info = new WriterInfo(this,
+                                                 writer_id,
+                                                 writer.writerQos,
+                                                 this->qos_);
       std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
             // This insertion is idempotent.
             WriterMapType::value_type(
@@ -542,7 +544,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       }
 
       {
-         ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+         ACE_GUARD(ACE_RW_Thread_Mutex, guard, this->writers_lock_);
          writers_[remote_id]->handle_ = handle;
       }
    }

@@ -461,7 +461,7 @@ RtpsSampleHeader::populate_data_control_submessages(
   // update control_message_supported() when adding new cases here
   default:
     ACE_DEBUG((LM_INFO,
-               "RtpsSampleHeader::populate_control_submessages(): "
+               "RtpsSampleHeader::populate_data_control_submessages(): "
                "Non-sample messages seen, message_id = %d\n",
                header.message_id_));
     break;

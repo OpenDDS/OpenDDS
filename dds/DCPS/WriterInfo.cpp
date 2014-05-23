@@ -69,10 +69,12 @@ WriterInfo::WriterInfo()
 
 WriterInfo::WriterInfo(WriterInfoListener*         reader,
                        const PublicationId&        writer_id,
-                       const ::DDS::DataWriterQos& writer_qos)
+                       const ::DDS::DataWriterQos& writer_qos,
+                       const ::DDS::DataReaderQos& reader_qos)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
   seen_data_(false),
-  awaiting_historic_samples_(writer_qos.durability.kind > DDS::VOLATILE_DURABILITY_QOS),
+  // Only check reader qos, because durable connection depends on it
+  awaiting_historic_samples_(reader_qos.durability.kind > DDS::VOLATILE_DURABILITY_QOS),
   state_(NOT_SET),
   reader_(reader),
   writer_id_(writer_id),
