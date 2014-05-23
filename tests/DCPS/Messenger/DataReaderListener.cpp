@@ -12,15 +12,27 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/Service_Participant.h>
 
+#include "Args.h"
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
 
 #include <iostream>
 
+namespace
+{
+  bool is_reliable() {
+    OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
+    return !(gc->instances_[0]->transport_type_ == "udp");
+  }
+}
+
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0)
+  , valid_(true)
+  , reliable_(is_reliable())
 {
+  std::cout << "Transport is " << (reliable_ ? "" : "UN-") << "RELIABLE" <<  std::endl;
 }
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -53,12 +65,29 @@ throw(CORBA::SystemException)
       std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
       if (si.valid_data) {
+        if (!counts_.insert(message.count).second) {
+          std::cout << "ERROR: Repeat ";
+          valid_ = false;
+        }
+
         std::cout << "Message: subject    = " << message.subject.in() << std::endl
                   << "         subject_id = " << message.subject_id   << std::endl
                   << "         from       = " << message.from.in()    << std::endl
                   << "         count      = " << message.count        << std::endl
                   << "         text       = " << message.text.in()    << std::endl;
 
+        if (std::string("Comic Book Guy") != message.from.in()) {
+          std::cout << "ERROR: Invalid message.from" << std::endl;
+          valid_ = false;
+        }
+        if (std::string("Review") != message.subject.in()) {
+          std::cout << "ERROR: Invalid message.subject" << std::endl;
+          valid_ = false;
+        }
+        if (std::string("Worst. Movie. Ever.") != message.text.in()) {
+          std::cout << "ERROR: Invalid message.text" << std::endl;
+          valid_ = false;
+        }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 
@@ -70,6 +99,7 @@ throw(CORBA::SystemException)
                    ACE_TEXT("%N:%l: on_data_available()")
                    ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                    si.instance_state));
+        valid_ = false;
       }
 
     } else {
@@ -77,6 +107,7 @@ throw(CORBA::SystemException)
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: unexpected status: %d\n"),
                  status));
+      valid_ = false;
     }
 
   } catch (const CORBA::Exception& e) {
@@ -131,4 +162,56 @@ void DataReaderListenerImpl::on_sample_lost(
 throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
+}
+
+bool DataReaderListenerImpl::is_valid() const
+{
+  CORBA::Long expected = 0;
+  Counts::const_iterator count = counts_.begin();
+  bool valid_count = true;
+  while (count != counts_.end() && expected < num_messages) {
+    if (expected != *count) {
+      if (expected < *count) {
+        if (reliable_) {
+          // if missing multiple
+          const bool multi = (expected + 1 < *count);
+          std::cout << "ERROR: missing message" << (multi ? "s" : "")
+                    << " with count=" << expected;
+          if (multi) {
+            std::cout << " to count=" << (*count - 1);
+          }
+          std::cout << std::endl;
+          expected = *count;
+          // don't increment count;
+          valid_ = false;
+          continue;
+        }
+      }
+      else {
+        const CORBA::Long current_count = *count;
+        bool multi = false;
+        while (++count != counts_.end() && *count < expected) {
+          multi = true;
+        }
+        std::cout << "ERROR: received message" << (multi ? "s" : "")
+                  << " with a negative count" << std::endl;
+        valid_ = false;
+        continue;
+      }
+    }
+
+    ++expected;
+    ++count;
+  }
+
+  if (count != counts_.end()) {
+    std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
+    valid_count = false;
+  }
+  else if (counts_.size() < num_messages) {
+    std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
+    valid_count = false;
+  }
+
+  return valid_ && valid_count;
 }

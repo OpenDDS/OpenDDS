@@ -19,6 +19,8 @@
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 
+const int num_messages = 10;
+
 inline int
 parse_args(int argc, ACE_TCHAR *argv[])
 {

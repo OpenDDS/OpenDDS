@@ -40,6 +40,7 @@ make_dr_reliable()
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  int status = 0;
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
@@ -101,7 +102,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create DataReader
-    DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
+    DataReaderListenerImpl* const listener_servant = new DataReaderListenerImpl;
+    DDS::DataReaderListener_var listener(listener_servant);
 
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
@@ -150,6 +152,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
+    status = listener_servant->is_valid() ? 0 : -1;
+
     ws->detach_condition(condition);
 
     // Clean-up!
@@ -159,8 +163,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    return -1;
+    status = -1;
   }
 
-  return 0;
+  return status;
 }
