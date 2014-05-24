@@ -1,3 +1,9 @@
+Sat May 24 11:14:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+
+          Fixed warnings and fuzz errors.
+
 Fri May 23 19:05:54 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Messenger/Args.h:
