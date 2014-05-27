@@ -1,3 +1,12 @@
+Tue May 27 17:30:45 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Changed to match cpp published and expected data.
+
 Tue May 27 17:20:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/DataReaderListener.h:

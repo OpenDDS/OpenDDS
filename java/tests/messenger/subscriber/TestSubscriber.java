@@ -13,8 +13,6 @@ import Messenger.*;
 
 public class TestSubscriber {
 
-    private static final int N_EXPECTED = 10;
-
     public static void main(String[] args) throws Exception {
 
         System.out.println("Start Subscriber");
@@ -94,6 +92,8 @@ public class TestSubscriber {
                 return;
             }
         }
+        
+        listener.report_validity();
 
         ws.detach_condition(sc);
 

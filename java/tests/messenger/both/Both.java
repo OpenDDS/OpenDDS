@@ -13,7 +13,7 @@ import Messenger.*;
 
 public class Both {
 
-    private static final int N_MSGS = 10;
+    private static final int N_MSGS = 40;
 
     public static void main(String[] args) {
 
