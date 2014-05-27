@@ -31,7 +31,7 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
     }
 
     public synchronized void on_data_available(DDS.DataReader reader) {
-    
+
         initialize_counts();
 
         MessageDataReader mdr = MessageDataReaderHelper.narrow(reader);
