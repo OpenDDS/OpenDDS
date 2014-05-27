@@ -31,6 +31,8 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
     }
 
     public synchronized void on_data_available(DDS.DataReader reader) {
+    
+        initialize_counts();
 
         MessageDataReader mdr = MessageDataReaderHelper.narrow(reader);
         if (mdr == null) {
@@ -85,6 +87,9 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
                 }
                 if (mh.value.text != "Worst. Movie. Ever.") {
                     System.out.println("ERROR: Invalid message.text");
+                }
+                if (mh.value.subject_id != 99) {
+                    System.out.println("ERROR: Invalid message.subject_id");
                 }
             }
             else if (sih.value.instance_state ==

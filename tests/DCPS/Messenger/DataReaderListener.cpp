@@ -89,6 +89,10 @@ throw(CORBA::SystemException)
           std::cout << "ERROR: Invalid message.text" << std::endl;
           valid_ = false;
         }
+        if (message.subject_id != 99) {
+          std::cout << "ERROR: Invalid message.subject_id" << std::endl;
+          valid_ = false;
+        }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 

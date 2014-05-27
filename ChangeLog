@@ -1,3 +1,10 @@
+Tue May 27 19:55:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+
+          Added validation of subject_id.
+
 Tue May 27 19:18:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
