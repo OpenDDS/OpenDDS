@@ -77,7 +77,7 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
                 if (invalid_count == true) {
                     System.out.println("ERROR: Invalid message.count");
                 }
-                if (mh.value.from != "Comic Book Guy") {
+                if (mh.value.from != "Comic Book Guy" && mh.value.from != "OpenDDS-Java") {
                     System.out.println("ERROR: Invalid message.from");
                 }
                 if (mh.value.subject != "Review") {

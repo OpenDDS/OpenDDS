@@ -76,7 +76,8 @@ throw(CORBA::SystemException)
                   << "         count      = " << message.count        << std::endl
                   << "         text       = " << message.text.in()    << std::endl;
 
-        if (std::string("Comic Book Guy") != message.from.in()) {
+        if (std::string("Comic Book Guy") != message.from.in() &&
+            std::string("OpenDDS-Java") != message.from.in()) {
           std::cout << "ERROR: Invalid message.from" << std::endl;
           valid_ = false;
         }
