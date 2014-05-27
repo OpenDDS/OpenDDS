@@ -1,3 +1,12 @@
+Tue May 27 21:17:10 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Added reader_info_lock_ to DataWriterImpl to protect
+          accesses to reader_info_ from different threads.
+
 Tue May 27 20:18:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * java/tests/messenger/subscriber/DataReaderListenerImpl.java:

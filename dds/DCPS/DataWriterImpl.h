@@ -482,6 +482,9 @@ protected:
   /// creates this datawriter.
   DomainParticipantImpl*          participant_servant_;
 
+  //This lock should be used to protect access to reader_info_
+  ACE_Thread_Mutex reader_info_lock_;
+
   struct ReaderInfo {
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     DomainParticipantImpl* participant_;
@@ -656,7 +659,8 @@ private:
 
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number
-  bool need_sequence_repair() const;
+  bool need_sequence_repair();
+  bool need_sequence_repair_i() const;
 
   DDS::ReturnCode_t send_end_historic_samples();
 

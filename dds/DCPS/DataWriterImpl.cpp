@@ -236,7 +236,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
   }
 
   {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+    ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
                  reader.exprParams, participant_servant_,
@@ -384,6 +384,9 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
                  ACE_TEXT("insert %C from pending failed.\n"),
                  std::string(converter).c_str()));
     }
+  }
+  {
+    ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
     RepoIdToReaderInfoMap::const_iterator it = reader_info_.find(remote_id);
     if (it != reader_info_.end()) {
       reader_durable = it->second.durable_;
@@ -475,16 +478,18 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
               this->get_lock());
 
     DataSampleList list = this->get_resend_data();
+    {
+      ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
+      // Update the reader's expected sequence
+      SequenceNumber& seq =
+        reader_info_.find(remote_id)->second.expected_sequence_;
 
-    // Update the reader's expected sequence
-    SequenceNumber& seq =
-      reader_info_.find(remote_id)->second.expected_sequence_;
-
-    for (DataSampleListElement* list_el = list.head_; list_el;
-         list_el = list_el->next_send_sample_) {
-      list_el->header_.historic_sample_ = true;
-      if (list_el->header_.sequence_ > seq) {
-        seq = list_el->header_.sequence_;
+      for (DataSampleListElement* list_el = list.head_; list_el;
+           list_el = list_el->next_send_sample_) {
+        list_el->header_.historic_sample_ = true;
+        if (list_el->header_.sequence_ > seq) {
+          seq = list_el->header_.sequence_;
+        }
       }
     }
 
@@ -526,7 +531,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
     // Ensure the same acquisition order as in wait_for_acknowledgments().
     ACE_GUARD(ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
     //Remove the readers from fully associated reader list.
     //If the supplied reader is not in the cached reader list then it is
     //already removed. We just need remove the readers in the list that have
@@ -573,6 +577,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                   ACE_TEXT("removing reader %C before association_complete() call.\n"),
                   std::string(converter).c_str()));
       }
+      ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
       reader_info_.erase(readers[i]);
       //else reader is already removed which indicates remove_association()
       //is called multiple times.
@@ -591,7 +596,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         id_to_handle_map_.erase(fully_associated_readers[i]);
       }
     }
-
     wfaGuard.release();
 
     // Mirror the PUBLICATION_MATCHED_STATUS processing from
@@ -735,6 +739,7 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
   ACE_UNUSED_ARG(params);
 #else
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
   RepoIdToReaderInfoMap::iterator iter = reader_info_.find(readerId);
   if (iter != reader_info_.end()) {
     iter->second.expression_params_ = params;
@@ -898,11 +903,14 @@ DDS::ReturnCode_t
 DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
 {
   AckCustomization ac(token);
-  for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
-       end = reader_info_.end(); iter != end; ++iter) {
-    if (iter->second.expected_sequence_ != token.sequence_) {
-      push_back(ac.customized_, iter->first);
-      token.custom_[iter->first] = iter->second.expected_sequence_;
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, DDS::RETCODE_ERROR);
+    for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
+         end = reader_info_.end(); iter != end; ++iter) {
+      if (iter->second.expected_sequence_ != token.sequence_) {
+        push_back(ac.customized_, iter->first);
+        token.custom_[iter->first] = iter->second.expected_sequence_;
+      }
     }
   }
 
@@ -1743,10 +1751,13 @@ DataWriterImpl::write(DataSample* data,
 
   this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, DDS::RETCODE_ERROR);
+
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
   std::set<GUID_t, GUID_tKeyLessThan> excluded;
-  if (filter_out && reader_info_.size()) {
+
+  if (filter_out && !reader_info_.empty()) {
     const GUID_t* buf = filter_out->get_buffer();
     excluded.insert(buf, buf + filter_out->length());
   }
@@ -1928,6 +1939,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
   // If we incremented sequence number for this control message
   if (header_data.sequence_ != SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, 0);
     // Update the expected sequence number for all readers
     RepoIdToReaderInfoMap::iterator reader;
     for (reader = reader_info_.begin(); reader != reader_info_.end(); ++reader)
@@ -2516,7 +2528,14 @@ DataWriterImpl::retrieve_inline_qos_data(TransportSendListener::InlineQosData& q
 }
 
 bool
-DataWriterImpl::need_sequence_repair() const
+DataWriterImpl::need_sequence_repair()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, false);
+  return need_sequence_repair_i();
+}
+
+bool
+DataWriterImpl::need_sequence_repair_i() const
 {
   for (RepoIdToReaderInfoMap::const_iterator it = reader_info_.begin(),
        end = reader_info_.end(); it != end; ++it) {
