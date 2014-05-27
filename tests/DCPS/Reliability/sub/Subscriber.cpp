@@ -61,9 +61,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     std::cout << "Waiting for connection" << std::endl;
     {
-    // Block until reader has associated with a writer
-    // but is no longer associated with any writer
-    OpenDDS::Model::ReaderSync rs(reader);
+      // Block until reader has associated with a writer
+      // but is no longer associated with any writer
+      OpenDDS::Model::ReaderSync rs(reader);
     }
 
     if (listener_impl->sample_count() == listener_impl->expected_count()) {

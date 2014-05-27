@@ -1,3 +1,22 @@
+Tue May 27 17:20:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+
+          Returning correct failure status for subscriber.cpp.
+
+        * tests/DCPS/LargeSample/Messenger.idl:
+
+          Changed idl order to make garbled data more evident.
+
+        * tests/DCPS/LargeSample/Writer.cpp:
+
+          Added reporting data that is being sent for debugging.
+
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Cleaned up indentation.
+
 Sat May 24 11:14:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Messenger/DataReaderListener.cpp:
