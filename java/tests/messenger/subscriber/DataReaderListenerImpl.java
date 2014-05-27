@@ -16,10 +16,10 @@ import java.util.ArrayList;
 public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
 
     private int num_msgs = 0;
-	
+
     private static final int N_EXPECTED = 40;
     private ArrayList<Boolean> counts = new ArrayList<Boolean>(N_EXPECTED);
-	
+
     private void initialize_counts() {
         if (counts.size() > 0) {
           return;
@@ -64,7 +64,7 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
                     else {
                         prefix = "ERROR: Repeat ";
                     }
-                }          
+                }
                 System.out.println(prefix + "Message: subject    = " + mh.value.subject);
                 System.out.println("         subject_id = "
                                    + mh.value.subject_id);

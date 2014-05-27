@@ -1,3 +1,10 @@
+Tue May 27 17:43:43 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Cleaned up fuzz errors.
+
 Tue May 27 17:30:45 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * java/tests/messenger/both/Both.java:

@@ -92,7 +92,7 @@ public class TestSubscriber {
                 return;
             }
         }
-        
+
         listener.report_validity();
 
         ws.detach_condition(sc);
