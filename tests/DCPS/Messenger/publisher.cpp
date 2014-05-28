@@ -93,10 +93,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
+    DDS::DataWriterQos qos;
+    pub->get_default_datawriter_qos(qos);
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+
     // Create DataWriter
     DDS::DataWriter_var dw =
       pub->create_datawriter(topic.in(),
-                             DATAWRITER_QOS_DEFAULT,
+                             qos,
                              DDS::DataWriterListener::_nil(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 

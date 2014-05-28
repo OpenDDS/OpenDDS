@@ -1,3 +1,10 @@
+Wed May 28 13:01:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Added history qos of KEEP_ALL to prevent samples being
+          overwritten if sending not keeping up.
+
 Tue May 27 21:17:10 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
