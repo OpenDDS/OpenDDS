@@ -1,3 +1,10 @@
+Wed May 28 18:39:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Initializing memory for QosHolder.
+
 Wed May 28 17:39:38 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
@@ -8,7 +15,7 @@ Wed May 28 17:39:38 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
           Remove friendship of DataWriterImpl to WriteDataContainer.
 
-          Move body of unregister_instances() from DataWriterImpl to 
+          Move body of unregister_instances() from DataWriterImpl to
           WriteDataContainer.  Provide callback for WriteDataContainer to
           invoke unregister_instance_i().
 
