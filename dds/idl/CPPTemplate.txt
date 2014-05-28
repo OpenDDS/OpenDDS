@@ -222,6 +222,7 @@ bool
   OpenDDS::DCPS::GUIDSeq_var filter_out;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (TheServiceParticipant->publisher_content_filter()) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, ::DDS::RETCODE_ERROR);
     for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
          end = reader_info_.end(); iter != end; ++iter) {
       const ReaderInfo& ri = iter->second;

@@ -63,9 +63,16 @@ public:
     return num_reads_;
   }
 
+  bool is_valid() const;
+
 private:
-  DDS::DataReader_var  reader_;
-  long                 num_reads_;
+  typedef std::set<CORBA::Long> Counts;
+
+  DDS::DataReader_var reader_;
+  long                num_reads_;
+  Counts              counts_;
+  bool                valid_;
+  const bool          reliable_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

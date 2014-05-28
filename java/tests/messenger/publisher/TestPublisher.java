@@ -13,7 +13,7 @@ import Messenger.*;
 
 public class TestPublisher {
 
-    private static final int N_MSGS = 10;
+    private static final int N_MSGS = 40;
 
     public static void main(String[] args) {
 
@@ -57,8 +57,11 @@ public class TestPublisher {
 
         // Use the default transport configuration (do nothing)
 
+        DataWriterQosHolder qos = new DataWriterQosHolder();
+        pub.get_default_datawriter_qos(qos);
+        qos.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
         DataWriter dw = pub.create_datawriter(top,
-                                              DATAWRITER_QOS_DEFAULT.get(),
+                                              qos.value,
                                               null,
                                               DEFAULT_STATUS_MASK.value);
         if (dw == null) {
@@ -104,12 +107,14 @@ public class TestPublisher {
         msg.subject = "Review";
         msg.text = "Worst. Movie. Ever.";
         msg.count = 0;
+        int ret = RETCODE_TIMEOUT.value;
         for (; msg.count < N_MSGS; ++msg.count) {
-            int ret = mdw.write(msg, handle);
+            while ((ret = mdw.write(msg, handle)) == RETCODE_TIMEOUT.value) {
+            }
             if (ret != RETCODE_OK.value) {
                 System.err.println("ERROR " + msg.count +
                                    " write() returned " + ret);
-          }
+            }
         }
 
         System.out.println("Stop Publisher");

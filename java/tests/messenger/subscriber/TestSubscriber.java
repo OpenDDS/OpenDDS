@@ -13,8 +13,6 @@ import Messenger.*;
 
 public class TestSubscriber {
 
-    private static final int N_EXPECTED = 10;
-
     public static void main(String[] args) throws Exception {
 
         System.out.println("Start Subscriber");
@@ -56,9 +54,15 @@ public class TestSubscriber {
 
         // Use the default transport (do nothing)
 
+        DataReaderQosHolder qos = new DataReaderQosHolder();
+        sub.get_default_datareader_qos(qos);
+        qos.value.liveliness.kind = LivelinessQosPolicyKind.AUTOMATIC_LIVELINESS_QOS;
+        qos.value.liveliness.lease_duration.sec = 10;
+        qos.value.liveliness.lease_duration.nanosec = 0;
+        qos.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
         DataReaderListenerImpl listener = new DataReaderListenerImpl();
         DataReader dr = sub.create_datareader(top,
-                                              DATAREADER_QOS_DEFAULT.get(),
+                                              qos.value,
                                               listener,
                                               DEFAULT_STATUS_MASK.value);
         if (dr == null) {
@@ -94,6 +98,8 @@ public class TestSubscriber {
                 return;
             }
         }
+
+        listener.report_validity();
 
         ws.detach_condition(sc);
 

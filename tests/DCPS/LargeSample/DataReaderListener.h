@@ -78,6 +78,7 @@ private:
   typedef std::map<CORBA::Long, Counts> WriterCounts;
   typedef std::map<std::string, WriterCounts> ProcessWriters;
   ProcessWriters process_writers_;
+  bool valid_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

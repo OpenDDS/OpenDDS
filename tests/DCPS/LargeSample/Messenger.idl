@@ -12,8 +12,8 @@ module Messenger {
 #pragma DCPS_DATA_KEY "Messenger::Message writer_id"
 
   struct Message {
-    string from;
     string process_id;
+    string from;
     long participant_id;
     long writer_id;
     string text;

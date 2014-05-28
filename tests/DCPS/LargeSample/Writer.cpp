@@ -124,6 +124,13 @@ Writer::write()
     for (int i = 0; i < num_messages; i++) {
       ACE_OS::sleep(1);
 
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
+                 ACE_TEXT("writer_id = %d ")
+                 ACE_TEXT("sample_id = %d\n"),
+                 message1.process_id.in(),
+                 message1.writer_id,
+                 message1.sample_id));
       DDS::ReturnCode_t error = message_dw1->write(message1, handle1);
 
       if (error != DDS::RETCODE_OK) {
@@ -138,6 +145,13 @@ Writer::write()
 
       ACE_OS::sleep(1);
 
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
+                 ACE_TEXT("writer_id = %d ")
+                 ACE_TEXT("sample_id = %d\n"),
+                 message2.process_id.in(),
+                 message2.writer_id,
+                 message2.sample_id));
       error = message_dw2->write(message2, handle2);
 
       if (error != DDS::RETCODE_OK) {

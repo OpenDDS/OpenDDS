@@ -13,16 +13,17 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <dds/DCPS/WaitSet.h>
 
+#include "Args.h"
 #include "MessengerTypeSupportC.h"
 #include "Writer.h"
 
+#include <sstream>
+
 const int num_instances_per_writer = 1;
-const int num_messages = 10;
 
 Writer::Writer(DDS::DataWriter_ptr writer)
   : writer_(DDS::DataWriter::_duplicate(writer)),
-    finished_instances_(0),
-    timeout_writes_(0)
+    finished_instances_(0)
 {
 }
 
@@ -99,22 +100,21 @@ Writer::svc()
 
     DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = "Comic Book Guy";
-    message.subject    = "Review";
-    message.text       = "Worst. Movie. Ever.";
-    message.count      = 0;
+    message.from         = "Comic Book Guy";
+    message.subject      = "Review";
+    message.text         = "Worst. Movie. Ever.";
+    message.count        = 0;
 
     for (int i = 0; i < num_messages; i++) {
-      DDS::ReturnCode_t error = message_dw->write(message, handle);
+      DDS::ReturnCode_t error;
+      do {
+        error = message_dw->write(message, handle);
+      } while (error == DDS::RETCODE_TIMEOUT);
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: write returned %d!\n"), error));
-
-        if (error == DDS::RETCODE_TIMEOUT) {
-          timeout_writes_++;
-        }
       }
 
       message.count++;
@@ -133,10 +133,4 @@ bool
 Writer::is_finished() const
 {
   return finished_instances_ == num_instances_per_writer;
-}
-
-int
-Writer::get_timeout_writes() const
-{
-  return timeout_writes_.value();
 }

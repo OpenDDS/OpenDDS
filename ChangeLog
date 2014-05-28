@@ -1,3 +1,119 @@
+Wed May 28 13:51:42 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Fixed qos settings to prevent dropping messages.
+
+Wed May 28 13:21:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+
+          Fixed not equals check.
+
+Wed May 28 13:01:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Added history qos of KEEP_ALL to prevent samples being
+          overwritten if sending not keeping up.
+
+Tue May 27 21:17:10 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Added reader_info_lock_ to DataWriterImpl to protect
+          accesses to reader_info_ from different threads.
+
+Tue May 27 20:18:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+
+          Fixed fuzz errors.
+
+Tue May 27 20:00:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+
+          Reporting failing value.
+
+Tue May 27 19:55:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+
+          Added validation of subject_id.
+
+Tue May 27 19:18:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+
+          Changed subscriber to expect from to be "Comic Book Guy" or "OpenDDS-Java".
+
+Tue May 27 17:43:43 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Cleaned up fuzz errors.
+
+Tue May 27 17:30:45 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/both/Both.java:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Changed to match cpp published and expected data.
+
+Tue May 27 17:20:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.cpp:
+
+          Returning correct failure status for subscriber.cpp.
+
+        * tests/DCPS/LargeSample/Messenger.idl:
+
+          Changed idl order to make garbled data more evident.
+
+        * tests/DCPS/LargeSample/Writer.cpp:
+
+          Added reporting data that is being sent for debugging.
+
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Cleaned up indentation.
+
+Sat May 24 11:14:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+
+          Fixed warnings and fuzz errors.
+
+Fri May 23 19:05:54 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Fixed test for unreliable transports and increased the number
+          of messages sent.
+
+Fri May 23 18:25:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/Writer.h:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Changed to actually validate the messages that are received.
+
 Thu May 22 21:25:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
