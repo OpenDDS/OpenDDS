@@ -1,3 +1,17 @@
+Wed May 28 17:39:38 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/UnregisterHandler.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Remove friendship of DataWriterImpl to WriteDataContainer.
+
+          Move body of unregister_instances() from DataWriterImpl to 
+          WriteDataContainer.  Provide callback for WriteDataContainer to
+          invoke unregister_instance_i().
+
 Wed May 28 13:51:42 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * java/tests/messenger/publisher/TestPublisher.java:
