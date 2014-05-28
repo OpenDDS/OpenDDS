@@ -1,3 +1,10 @@
+Wed May 28 13:51:42 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Fixed qos settings to prevent dropping messages.
+
 Wed May 28 13:21:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * java/tests/messenger/subscriber/DataReaderListenerImpl.java:

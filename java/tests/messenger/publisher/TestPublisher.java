@@ -57,8 +57,11 @@ public class TestPublisher {
 
         // Use the default transport configuration (do nothing)
 
+        DataWriterQosHolder qos = new DataWriterQosHolder();
+        pub.get_default_datawriter_qos(qos);
+        qos.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
         DataWriter dw = pub.create_datawriter(top,
-                                              DATAWRITER_QOS_DEFAULT.get(),
+                                              qos.value,
                                               null,
                                               DEFAULT_STATUS_MASK.value);
         if (dw == null) {
