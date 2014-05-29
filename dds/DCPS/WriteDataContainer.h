@@ -12,7 +12,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "DataSampleList.h"
 #include "OfferedDeadlineWatchdog.h"
-#include "UnregisterHandler.h"
+
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <map>
@@ -100,6 +100,8 @@ typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanc
  */
 class OpenDDS_Dcps_Export WriteDataContainer {
 public:
+
+  friend class DataWriterImpl;
 
   /**
    * No default constructor, must be initialized.
@@ -289,14 +291,7 @@ public:
   void release_buffer(DataSampleListElement* element);
 
   /**
-   * Unregister all instances of a data writer.
-   */
-  void unregister_instances(
-    UnregisterHandler* data_writer,
-    const DDS::Time_t & source_timestamp);
-
-  /**
-   * Unregister all instances managed by this data container.
+   * Unregister all instances managed by this data containers.
    */
   void unregister_all();
 
@@ -328,11 +323,6 @@ public:
    */
   typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
-
-  /**
-   * Sets publication id of the container (not known at construction time)
-   */
-  void set_publication_id(const PublicationId& pub_id);
 
 private:
 
@@ -371,6 +361,8 @@ private:
 
   void wakeup_blocking_writers (DataSampleListElement* stale,
                                PublicationInstance* instance);
+
+private:
 
   /// List of data that has not been sent yet.
   DataSampleList   unsent_data_;
@@ -448,9 +440,7 @@ private:
   /// same lock will be used by the transport thread to notify
   /// the datawriter the data is delivered. Other internal
   /// operations will not lock.
-public:
   ACE_Recursive_Thread_Mutex                lock_;
-private:
   ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
   ACE_Condition<ACE_Recursive_Thread_Mutex> empty_condition_;
 

@@ -1066,27 +1066,6 @@ WriteDataContainer::release_buffer(DataSampleListElement* element)
 }
 
 void
-WriteDataContainer::unregister_instances(
-  UnregisterHandler* data_writer,
-  const DDS::Time_t & source_timestamp)
-{
-  DBG_ENTRY_LVL("WriteDataContainer","unregister_instances",6);
-
-  // Protect instances_
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            guard,
-            this->lock_);
-
-  PublicationInstanceMapType::const_iterator it;
-  for (it = instances_.begin(); it != instances_.end(); ++it) {
-    DDS::InstanceHandle_t handle = it->first;
-    ++it; // avoid mangling the iterator
-
-    data_writer->unregister_instance_i(handle, source_timestamp);
-  }
-}
-
-void
 WriteDataContainer::unregister_all()
 {
   DBG_ENTRY_LVL("WriteDataContainer","unregister_all",6);
@@ -1338,13 +1317,6 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
         condition_.broadcast();
       }
   }
-}
-
-void
-WriteDataContainer::set_publication_id (const PublicationId& pub_id)
-{
-  // lock?
-  this->publication_id_ = pub_id;
 }
 
 } // namespace OpenDDS

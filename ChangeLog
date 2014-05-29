@@ -1,3 +1,13 @@
+Thu May 29 13:22:55 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/UnregisterHandler.h:
+
+          Undo rev 6216 due to deadlock
+
 Wed May 28 18:39:28 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * java/tests/messenger/publisher/TestPublisher.java:

@@ -1544,7 +1544,7 @@ DataWriterImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
-  this->data_container_->set_publication_id(this->publication_id_);
+  this->data_container_->publication_id_ = this->publication_id_;
 
   const DDS::ReturnCode_t writer_enabled_result =
     publisher_servant_->writer_enabled(topic_name_.in(), this);
@@ -1675,7 +1675,15 @@ DataWriterImpl::unregister_instance_i(::DDS::InstanceHandle_t handle,
 void
 DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 {
-  this->data_container_->unregister_instances(this, source_timestamp);
+  PublicationInstanceMapType::iterator it =
+    this->data_container_->instances_.begin();
+
+  while (it != this->data_container_->instances_.end()) {
+    DDS::InstanceHandle_t handle = it->first;
+    ++it; // avoid mangling the iterator
+
+    this->unregister_instance_i(handle, source_timestamp);
+  }
 }
 
 DDS::ReturnCode_t

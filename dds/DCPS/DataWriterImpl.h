@@ -23,7 +23,6 @@
 #include "Qos_Helper.h"
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
-#include "UnregisterHandler.h"
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 #include "FilterEvaluator.h"
@@ -77,7 +76,6 @@ struct AssociationData;
 class OpenDDS_Dcps_Export DataWriterImpl
   : public virtual DDS::DataWriter,
     public virtual DataWriterCallbacks,
-    public virtual UnregisterHandler,
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportSendListener,
@@ -362,16 +360,16 @@ public:
   void control_dropped(ACE_Message_Block* sample,
                        bool dropped_by_transport);
 
-protected:
   /**
    * Accessor of the WriterDataContainer's lock.
    */
+  // ciju: Seems this is no longer being used.
+  // Was wrong. Still required.
   ACE_INLINE
   ACE_Recursive_Thread_Mutex& get_lock() {
     return data_container_->lock_;
   }
 
-public:
   /**
    * This method is called when an instance is unregistered from
    * the WriteDataContainer.
