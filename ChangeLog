@@ -1,3 +1,10 @@
+Thu May 29 20:37:34 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Changed the test to ensure that all repo ids are assigned
+          in the same order and so they will not be unique.
+
 Thu May 29 13:22:55 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
