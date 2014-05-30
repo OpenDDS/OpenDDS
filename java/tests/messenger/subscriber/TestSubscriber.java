@@ -23,21 +23,18 @@ public class TestSubscriber {
             System.err.println("ERROR: Domain Participant Factory not found");
             return;
         }
-        System.out.println("Subscriber Created DomainParticipantFactory");
         DomainParticipant dp = dpf.create_participant(4,
             PARTICIPANT_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
         if (dp == null) {
             System.err.println("ERROR: Domain Participant creation failed");
             return;
         }
-        System.out.println("Subscriber Created DomainParticipant");
 
         MessageTypeSupportImpl servant = new MessageTypeSupportImpl();
         if (servant.register_type(dp, "") != RETCODE_OK.value) {
             System.err.println("ERROR: register_type failed");
             return;
         }
-        System.out.println("Subscriber Registered MessageTypeSupportImpl");
         Topic top = dp.create_topic("Movie Discussion List",
                                     servant.get_type_name(),
                                     TOPIC_QOS_DEFAULT.get(),
@@ -47,7 +44,6 @@ public class TestSubscriber {
             System.err.println("ERROR: Topic creation failed");
             return;
         }
-        System.out.println("Subscriber Created Topic");
 
         Subscriber sub = dp.create_subscriber(SUBSCRIBER_QOS_DEFAULT.get(),
                                               null, DEFAULT_STATUS_MASK.value);
@@ -55,30 +51,52 @@ public class TestSubscriber {
             System.err.println("ERROR: Subscriber creation failed");
             return;
         }
-        System.out.println("Subscriber Created Subscriber");
 
         // Use the default transport (do nothing)
 
-        //DataReaderQosHolder qos = new DataReaderQosHolder(new DataReaderQos());
-        //System.out.println("Subscriber Get Default DataReader QOS");
-        //sub.get_default_datareader_qos(qos);
-        //System.out.println("Subscriber Set KEEP_ALL_HISTORY_QOS");
-        //qos.value.liveliness.kind = LivelinessQosPolicyKind.AUTOMATIC_LIVELINESS_QOS;
-        //qos.value.liveliness.lease_duration.sec = 10;
-        //qos.value.liveliness.lease_duration.nanosec = 0;
-        //qos.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
+        DataReaderQos dr_qos = new DataReaderQos();
+        dr_qos.durability = new DurabilityQosPolicy();
+        dr_qos.durability.kind = DurabilityQosPolicyKind.from_int(0);
+        dr_qos.deadline = new DeadlineQosPolicy();
+        dr_qos.deadline.period = new Duration_t();
+        dr_qos.latency_budget = new LatencyBudgetQosPolicy();
+        dr_qos.latency_budget.duration = new Duration_t();
+        dr_qos.liveliness = new LivelinessQosPolicy();
+        dr_qos.liveliness.kind = LivelinessQosPolicyKind.from_int(0);
+        dr_qos.liveliness.lease_duration = new Duration_t();
+        dr_qos.reliability = new ReliabilityQosPolicy();
+        dr_qos.reliability.kind = ReliabilityQosPolicyKind.from_int(0);
+        dr_qos.reliability.max_blocking_time = new Duration_t();
+        dr_qos.destination_order = new DestinationOrderQosPolicy();
+        dr_qos.destination_order.kind = DestinationOrderQosPolicyKind.from_int(0);
+        dr_qos.history = new HistoryQosPolicy();
+        dr_qos.history.kind = HistoryQosPolicyKind.from_int(0);
+        dr_qos.resource_limits = new ResourceLimitsQosPolicy();
+        dr_qos.user_data = new UserDataQosPolicy();
+        dr_qos.user_data.value = new byte[0];
+        dr_qos.ownership = new OwnershipQosPolicy();
+        dr_qos.ownership.kind = OwnershipQosPolicyKind.from_int(0);
+        dr_qos.time_based_filter = new TimeBasedFilterQosPolicy();
+        dr_qos.time_based_filter.minimum_separation = new Duration_t();
+        dr_qos.reader_data_lifecycle = new ReaderDataLifecycleQosPolicy();
+        dr_qos.reader_data_lifecycle.autopurge_nowriter_samples_delay = new Duration_t();
+        dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = new Duration_t();
+
+        DataReaderQosHolder qosh = new DataReaderQosHolder(dr_qos);
+        sub.get_default_datareader_qos(qosh);
+        qosh.value.reliability.kind = 
+          ReliabilityQosPolicyKind.RELIABLE_RELIABILITY_QOS;
+        qosh.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
+
         DataReaderListenerImpl listener = new DataReaderListenerImpl();
-        System.out.println("Subscriber Create DataReader");
         DataReader dr = sub.create_datareader(top,
-                                              //qos.value,
-                                              DATAREADER_QOS_DEFAULT.get(),
+                                              qosh.value,
                                               listener,
                                               DEFAULT_STATUS_MASK.value);
         if (dr == null) {
             System.err.println("ERROR: DataReader creation failed");
             return;
         }
-        System.out.println("Subscriber Created DataReader");
 
         StatusCondition sc = dr.get_statuscondition();
         sc.set_enabled_statuses(SUBSCRIPTION_MATCHED_STATUS.value);
