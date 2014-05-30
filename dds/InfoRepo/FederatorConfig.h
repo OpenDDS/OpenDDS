@@ -48,25 +48,31 @@ public:
   ACE_TCHAR**& argv();
   ACE_TCHAR**  argv() const;
 
+  /// Add an argument.
+  void addArg(ACE_TCHAR* arg);
+
   /// Federation Id value.
-  RepoKey& federationId();
+  void federationId(RepoKey id);
   RepoKey  federationId() const;
 
   /// Federation Id value.
-  long& federationDomain();
+  void federationDomain(long domain);
   long  federationDomain() const;
 
   /// Federation Port value.
-  short& federationPort();
+  void federationPort(short port);
   short  federationPort() const;
 
   /// Initial federation IOR value.
-  tstring& federateIor();
+  void federateIor(const tstring& ior);
   tstring  federateIor() const;
 
   /// Configuration filename.
-  tstring& configFile();
+  void configFile(const tstring& file);
   tstring  configFile() const;
+
+  /// Indicate if Federation Id is defaulted
+  bool federationIdDefaulted() const;
 
   /// Random Nil Repository Federation Id value.
   static const RepoKey DEFAULT_FEDERATION_ID;
@@ -89,6 +95,9 @@ private:
 
   /// Configured Federation Id value.
   RepoKey federationId_;
+
+  /// Indicate if Federation Id is defaulted
+  bool federationIdDefaulted_;
 
   /// Configured Federation Domain value.
   long federationDomain_;

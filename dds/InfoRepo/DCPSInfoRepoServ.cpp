@@ -314,7 +314,7 @@ InfoRepo::init()
   OpenDDS::Federator::Manager_var federator;
   CORBA::String_var               federator_ior;
 
-  if (federator_.id() != OpenDDS::Federator::Config::DEFAULT_FEDERATION_ID) {
+  if (!federator_.idDefaulted()) {
     oid = PortableServer::string_to_ObjectId("Federator");
     info_poa->activate_object_with_id(oid, &federator_);
     obj = info_poa->id_to_reference(oid);
@@ -355,7 +355,7 @@ InfoRepo::init()
   } else {
     adapter->bind(OpenDDS::Federator::REPOSITORY_IORTABLE_KEY, objref_str);
 
-    if (this->federator_.id() != OpenDDS::Federator::Config::DEFAULT_FEDERATION_ID) {
+    if (!this->federator_.idDefaulted()) {
       // Bind to '/Federator'
       adapter->bind(OpenDDS::Federator::FEDERATOR_IORTABLE_KEY, federator_ior);
 

@@ -1,3 +1,22 @@
+Fri May 30 17:56:32 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        
+          Changed to use a method to definitely identify it the
+          FederationId was defaulted.
+
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+        
+          Added tracking if the FederationId was defaulted (or set)
+          and cleaned up some of the (essentially) public data members.
+
 Fri May 30 16:02:26 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * java/tests/messenger/publisher/TestPublisher.java:

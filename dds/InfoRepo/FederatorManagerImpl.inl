@@ -7,10 +7,10 @@
  */
 
 ACE_INLINE
-OpenDDS::Federator::RepoKey&
-OpenDDS::Federator::ManagerImpl::id()
+void
+OpenDDS::Federator::ManagerImpl::id(RepoKey val)
 {
-  return this->config_.federationId();
+  this->config_.federationId(val);
 }
 
 ACE_INLINE
@@ -53,4 +53,11 @@ void
 OpenDDS::Federator::ManagerImpl::orb(CORBA::ORB_ptr value)
 {
   this->orb_ = CORBA::ORB::_duplicate(value);
+}
+
+ACE_INLINE
+bool
+OpenDDS::Federator::ManagerImpl::idDefaulted() const
+{
+  return this->config_.federationIdDefaulted();
 }

@@ -35,10 +35,18 @@ OpenDDS::Federator::Config::argv() const
 }
 
 ACE_INLINE
-OpenDDS::Federator::RepoKey&
-OpenDDS::Federator::Config::federationId()
+void
+OpenDDS::Federator::Config::addArg(ACE_TCHAR* arg)
 {
-  return this->federationId_;
+  this->argv_[this->argc_++] = arg;
+}
+
+ACE_INLINE
+void
+OpenDDS::Federator::Config::federationId(RepoKey id)
+{
+  this->federationId_ = id;
+  this->federationIdDefaulted_ = false;
 }
 
 ACE_INLINE
@@ -49,10 +57,10 @@ OpenDDS::Federator::Config::federationId() const
 }
 
 ACE_INLINE
-long&
-OpenDDS::Federator::Config::federationDomain()
+void
+OpenDDS::Federator::Config::federationDomain(long domain)
 {
-  return this->federationDomain_;
+  this->federationDomain_ = domain;
 }
 
 ACE_INLINE
@@ -63,10 +71,10 @@ OpenDDS::Federator::Config::federationDomain() const
 }
 
 ACE_INLINE
-short&
-OpenDDS::Federator::Config::federationPort()
+void
+OpenDDS::Federator::Config::federationPort(short port)
 {
-  return this->federationPort_;
+  this->federationPort_ = port;
 }
 
 ACE_INLINE
@@ -77,10 +85,10 @@ OpenDDS::Federator::Config::federationPort() const
 }
 
 ACE_INLINE
-OpenDDS::Federator::tstring&
-OpenDDS::Federator::Config::configFile()
+void
+OpenDDS::Federator::Config::configFile(const tstring& file)
 {
-  return this->configFile_;
+  this->configFile_ = file;
 }
 
 ACE_INLINE
@@ -91,10 +99,10 @@ OpenDDS::Federator::Config::configFile() const
 }
 
 ACE_INLINE
-OpenDDS::Federator::tstring&
-OpenDDS::Federator::Config::federateIor()
+void
+OpenDDS::Federator::Config::federateIor(const tstring& ior)
 {
-  return this->federateIor_;
+  this->federateIor_ = ior;
 }
 
 ACE_INLINE
@@ -102,4 +110,11 @@ OpenDDS::Federator::tstring
 OpenDDS::Federator::Config::federateIor() const
 {
   return this->federateIor_;
+}
+
+ACE_INLINE
+bool
+OpenDDS::Federator::Config::federationIdDefaulted() const
+{
+  return this->federationIdDefaulted_;
 }

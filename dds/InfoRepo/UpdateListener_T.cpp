@@ -15,7 +15,9 @@ namespace Federator {
 
 template<class DataType, class ReaderType>
 UpdateListener<DataType, ReaderType>::UpdateListener(UpdateProcessor<DataType>& processor)
-  : federationId_(Config::DEFAULT_FEDERATION_ID), receiver_(processor)
+  : federationId_(Config::DEFAULT_FEDERATION_ID),
+    federationIdDefaulted_(true),
+    receiver_(processor)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -33,10 +35,11 @@ UpdateListener<DataType, ReaderType>::~UpdateListener()
 }
 
 template<class DataType, class ReaderType>
-RepoKey&
-UpdateListener<DataType, ReaderType>::federationId()
+void
+UpdateListener<DataType, ReaderType>::federationId(RepoKey id, bool defaulted)
 {
-  return this->federationId_;
+  this->federationId_ = id;
+  this->federationIdDefaulted_ = defaulted;
 }
 
 template<class DataType, class ReaderType>
@@ -74,8 +77,8 @@ UpdateListener<DataType, ReaderType>::on_data_available(
 
       if (status == DDS::RETCODE_OK) {
         // Check if we should process the sample.
-        if ((this->federationId() != Config::DEFAULT_FEDERATION_ID)
-            && (this->federationId() != sample->sender)) {
+        if (!this->federationIdDefaulted_ &&
+            this->federationId() != sample->sender) {
 
           // Delegate processing to the federation manager.
           this->receiver_.add(sample, info);

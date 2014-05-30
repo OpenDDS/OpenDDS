@@ -85,22 +85,22 @@ ArgCopier::operator()(ACE_TCHAR* arg)
   switch (this->action_) {
   case FILENAME:
     // Store the configuration file name.
-    this->config_->configFile() = arg;
+    this->config_->configFile(arg);
     break;
 
   case IDVALUE:
     // Capture the federation Id.
-    this->config_->federationId() = ACE_OS::atoi(arg);
+    this->config_->federationId(ACE_OS::atoi(arg));
     break;
 
   case IORVALUE:
     // Capture the IOR to federate with.
-    this->config_->federateIor() = arg;
+    this->config_->federateIor(arg);
     break;
 
   case COPY:
     // Copy other args verbatim.
-    this->config_->argv()[ this->config_->argc()++] = arg;
+    this->config_->addArg(arg);
     break;
   }
 
@@ -135,6 +135,7 @@ const RepoKey Config::DEFAULT_FEDERATION_ID(random_id());
 Config::Config(int argc, ACE_TCHAR** argv)
   : argc_(0),
     federationId_(DEFAULT_FEDERATION_ID),
+    federationIdDefaulted_(true),
     federationDomain_(DEFAULT_FEDERATIONDOMAIN),
     federationPort_(-1)
 {
@@ -250,6 +251,7 @@ Config::processFile()
 
   } else {
     this->federationId_ = idValue;
+    this->federationIdDefaulted_ = false;
 
     if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
