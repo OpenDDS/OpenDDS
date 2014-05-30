@@ -107,7 +107,7 @@ ArgCopier::operator()(ACE_TCHAR* arg)
   this->action_ = COPY;
 }
 
-int random()
+int random_id()
 {
   ACE_UINT64 msec;
   ACE_OS::gettimeofday().msec(msec);
@@ -130,7 +130,7 @@ Config::FEDERATOR_ID_OPTION(ACE_TEXT("-FederationId"));
 const tstring
 Config::FEDERATE_WITH_OPTION(ACE_TEXT("-FederateWith"));
 
-const RepoKey Config::DEFAULT_FEDERATION_ID(random());
+const RepoKey Config::DEFAULT_FEDERATION_ID(random_id());
 
 Config::Config(int argc, ACE_TCHAR** argv)
   : argc_(0),

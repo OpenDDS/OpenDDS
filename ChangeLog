@@ -1,3 +1,9 @@
+Fri May 30 15:26:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Changed random function name to avoid build errors.
+
 Fri May 30 12:16:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/FederatorConfig.h:
