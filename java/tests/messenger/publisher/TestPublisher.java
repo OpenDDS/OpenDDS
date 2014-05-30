@@ -62,14 +62,40 @@ public class TestPublisher {
 
         // Use the default transport configuration (do nothing)
 
-        DataWriterQosHolder qos = new DataWriterQosHolder(new DataWriterQos());
-        System.out.println("Publisher Get Default DataWriter QOS");
-        pub.get_default_datawriter_qos(qos);
-        System.out.println("Publisher Set KEEP_ALL_HISTORY_QOS");
-        qos.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
+        DataWriterQos dw_qos = new DataWriterQos();
+        dw_qos.durability = new DurabilityQosPolicy();
+        dw_qos.durability_service = new DurabilityServiceQosPolicy();
+        dw_qos.durability_service.service_cleanup_delay = new Duration_t();
+        dw_qos.deadline = new DeadlineQosPolicy();
+        dw_qos.deadline.period = new Duration_t();
+        dw_qos.latency_budget = new LatencyBudgetQosPolicy();
+        dw_qos.latency_budget.duration = new Duration_t();
+        dw_qos.liveliness = new LivelinessQosPolicy();
+        dw_qos.liveliness.lease_duration = new Duration_t();
+        dw_qos.reliability = new ReliabilityQosPolicy();
+        dw_qos.reliability.max_blocking_time = new Duration_t();
+        dw_qos.destination_order = new DestinationOrderQosPolicy();
+        dw_qos.history = new HistoryQosPolicy();
+        dw_qos.resource_limits = new ResourceLimitsQosPolicy();
+        dw_qos.transport_priority = new TransportPriorityQosPolicy();
+        dw_qos.lifespan = new LifespanQosPolicy();
+        dw_qos.lifespan.duration = new Duration_t();
+        dw_qos.user_data = new UserDataQosPolicy();
+        // dw_qos.user_data.value = new byte[];
+        dw_qos.ownership = new OwnershipQosPolicy();
+        dw_qos.ownership_strength = new OwnershipStrengthQosPolicy();
+        dw_qos.writer_data_lifecycle = new WriterDataLifecycleQosPolicy();
+        
+        //DataWriterQosHolder qos = new DataWriterQosHolder(dw_qos);
+        //DataWriterQosHolder qos = new DataWriterQosHolder();
+        //System.out.println("Publisher Get Default DataWriter QOS");
+        //pub.get_default_datawriter_qos(qos);
+        //System.out.println("Publisher Set KEEP_ALL_HISTORY_QOS");
+        //qos.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
         System.out.println("Publisher Create DataWriter");
         DataWriter dw = pub.create_datawriter(top,
-                                              qos.value,
+                                              //qos.value,
+                                              DATAWRITER_QOS_DEFAULT.get(),
                                               null,
                                               DEFAULT_STATUS_MASK.value);
         if (dw == null) {
@@ -124,6 +150,11 @@ public class TestPublisher {
             if (ret != RETCODE_OK.value) {
                 System.err.println("ERROR " + msg.count +
                                    " write() returned " + ret);
+            }
+            try {
+              Thread.sleep(100);
+            } catch(InterruptedException ex) {
+              Thread.currentThread().interrupt();
             }
         }
 

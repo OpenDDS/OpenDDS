@@ -59,18 +59,19 @@ public class TestSubscriber {
 
         // Use the default transport (do nothing)
 
-        DataReaderQosHolder qos = new DataReaderQosHolder(new DataReaderQos());
-        System.out.println("Subscriber Get Default DataReader QOS");
-        sub.get_default_datareader_qos(qos);
-        System.out.println("Subscriber Set KEEP_ALL_HISTORY_QOS");
-        qos.value.liveliness.kind = LivelinessQosPolicyKind.AUTOMATIC_LIVELINESS_QOS;
-        qos.value.liveliness.lease_duration.sec = 10;
-        qos.value.liveliness.lease_duration.nanosec = 0;
-        qos.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
+        //DataReaderQosHolder qos = new DataReaderQosHolder(new DataReaderQos());
+        //System.out.println("Subscriber Get Default DataReader QOS");
+        //sub.get_default_datareader_qos(qos);
+        //System.out.println("Subscriber Set KEEP_ALL_HISTORY_QOS");
+        //qos.value.liveliness.kind = LivelinessQosPolicyKind.AUTOMATIC_LIVELINESS_QOS;
+        //qos.value.liveliness.lease_duration.sec = 10;
+        //qos.value.liveliness.lease_duration.nanosec = 0;
+        //qos.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
         DataReaderListenerImpl listener = new DataReaderListenerImpl();
         System.out.println("Subscriber Create DataReader");
         DataReader dr = sub.create_datareader(top,
-                                              qos.value,
+                                              //qos.value,
+                                              DATAREADER_QOS_DEFAULT.get(),
                                               listener,
                                               DEFAULT_STATUS_MASK.value);
         if (dr == null) {

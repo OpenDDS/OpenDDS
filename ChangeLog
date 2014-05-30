@@ -1,3 +1,10 @@
+Fri May 30 16:02:26 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Roll back QOS setting - causing crash.
+
 Fri May 30 15:26:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/FederatorConfig.cpp:
