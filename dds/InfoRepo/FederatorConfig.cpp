@@ -14,6 +14,8 @@
 #include "ace/Configuration_Import_Export.h"
 #include "ace/Log_Priority.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS_NS_stdlib.h"
+#include "ace/OS_NS_sys_time.h"
 
 #include <algorithm>
 
@@ -105,6 +107,15 @@ ArgCopier::operator()(ACE_TCHAR* arg)
   this->action_ = COPY;
 }
 
+int random()
+{
+  ACE_UINT64 msec;
+  ACE_OS::gettimeofday().msec(msec);
+  ACE_OS::srand((unsigned int)msec);
+  const int r = ACE_OS::rand();
+  ACE_DEBUG((LM_DEBUG, "SETTING FederationID to %d\n", r));
+  return r;
+}
 } // End of anonymous namespace
 
 namespace OpenDDS {
@@ -119,9 +130,11 @@ Config::FEDERATOR_ID_OPTION(ACE_TEXT("-FederationId"));
 const tstring
 Config::FEDERATE_WITH_OPTION(ACE_TEXT("-FederateWith"));
 
+const RepoKey Config::DEFAULT_FEDERATION_ID(random());
+
 Config::Config(int argc, ACE_TCHAR** argv)
   : argc_(0),
-    federationId_(NIL_REPOSITORY),
+    federationId_(DEFAULT_FEDERATION_ID),
     federationDomain_(DEFAULT_FEDERATIONDOMAIN),
     federationPort_(-1)
 {
@@ -228,7 +241,7 @@ Config::processFile()
   RepoKey idValue = ACE_OS::atoi(federationIdString.c_str());
 
   // Allow the command line to override the file value.
-  if (this->federationId_ != NIL_REPOSITORY) {
+  if (this->federationId_ != DEFAULT_FEDERATION_ID) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t)   FederationId == %d from file ")
                ACE_TEXT("overridden by value %d from command line.\n"),

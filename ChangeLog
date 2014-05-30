@@ -1,3 +1,23 @@
+Fri May 30 12:16:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Added a static constant variable to be the default FederatedId
+          to allow GUIDs to be unique among readers/writers on all InfoRepos
+          on a network to allow multicast to work.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Changed to compare to the default FederatedId to determine if the
+          federatedId is defaulted or not.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Removed delay to ensure repo ids were assigned in the same
+          order.
+
 Thu May 29 20:37:34 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/run_test.pl:

@@ -84,11 +84,9 @@ if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
 
 print $Publisher->CommandLine() . "\n";
 $Publisher->Spawn();
-$Publisher->Wait(2);
 
 print $Publisher2->CommandLine() . "\n";
 $Publisher2->Spawn();
-$Publisher2->Wait(2);
 
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn();

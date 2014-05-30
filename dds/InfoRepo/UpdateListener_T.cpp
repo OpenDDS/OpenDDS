@@ -7,6 +7,7 @@
  */
 
 #include "UpdateListener_T.h"
+#include "FederatorConfig.h"
 #include "dds/DCPS/debug.h"
 
 namespace OpenDDS {
@@ -14,7 +15,7 @@ namespace Federator {
 
 template<class DataType, class ReaderType>
 UpdateListener<DataType, ReaderType>::UpdateListener(UpdateProcessor<DataType>& processor)
-  : federationId_(NIL_REPOSITORY), receiver_(processor)
+  : federationId_(Config::DEFAULT_FEDERATION_ID), receiver_(processor)
 {
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -73,7 +74,7 @@ UpdateListener<DataType, ReaderType>::on_data_available(
 
       if (status == DDS::RETCODE_OK) {
         // Check if we should process the sample.
-        if ((this->federationId() != NIL_REPOSITORY)
+        if ((this->federationId() != Config::DEFAULT_FEDERATION_ID)
             && (this->federationId() != sample->sender)) {
 
           // Delegate processing to the federation manager.
