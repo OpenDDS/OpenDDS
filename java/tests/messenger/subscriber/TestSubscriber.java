@@ -84,7 +84,7 @@ public class TestSubscriber {
 
         DataReaderQosHolder qosh = new DataReaderQosHolder(dr_qos);
         sub.get_default_datareader_qos(qosh);
-        qosh.value.reliability.kind = 
+        qosh.value.reliability.kind =
           ReliabilityQosPolicyKind.RELIABLE_RELIABILITY_QOS;
         qosh.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
 

@@ -91,7 +91,7 @@ public class TestPublisher {
         DataWriterQosHolder qosh = new DataWriterQosHolder(dw_qos);
         pub.get_default_datawriter_qos(qosh);
         qosh.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
-        qosh.value.reliability.kind = 
+        qosh.value.reliability.kind =
           ReliabilityQosPolicyKind.RELIABLE_RELIABILITY_QOS;
         DataWriter dw = pub.create_datawriter(top,
                                               qosh.value,
@@ -158,7 +158,7 @@ public class TestPublisher {
         Duration_t forever = new Duration_t(DURATION_INFINITE_SEC.value,
                                             DURATION_INFINITE_NSEC.value);
         dw.wait_for_acknowledgments(forever);
-        
+
         System.out.println("Stop Publisher");
 
         // Clean up

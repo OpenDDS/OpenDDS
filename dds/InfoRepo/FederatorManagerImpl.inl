@@ -61,3 +61,4 @@ OpenDDS::Federator::ManagerImpl::idDefaulted() const
 {
   return this->config_.federationIdDefaulted();
 }
+

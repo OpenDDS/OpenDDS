@@ -118,3 +118,4 @@ OpenDDS::Federator::Config::federationIdDefaulted() const
 {
   return this->federationIdDefaulted_;
 }
+

@@ -1,3 +1,12 @@
+Sun Jun  1 23:56:21 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Fuzz
+
 Fri May 30 20:39:48 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * java/tests/messenger/publisher/TestPublisher.java:
