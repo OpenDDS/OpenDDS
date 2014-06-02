@@ -1,3 +1,10 @@
+Mon Jun  2 14:31:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added locking around pkt_chain_ access in TransportSendStrategy
+          stop() to stop the access violation seen during shutdown.
+
 Sun Jun  1 23:56:21 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/InfoRepo/FederatorConfig.inl:

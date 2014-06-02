@@ -946,15 +946,19 @@ TransportSendStrategy::stop()
   // to take it back now.
   this->_remove_ref();
 
-  if (this->pkt_chain_ != 0) {
-    size_t size = this->pkt_chain_->total_length();
+  {
+    GuardType guard(this->lock_);
 
-    if (size > 0) {
-      this->pkt_chain_->release();
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
-                 ACE_TEXT("terminating with %d unsent bytes.\n"),
-                 size));
+    if (this->pkt_chain_ != 0) {
+      size_t size = this->pkt_chain_->total_length();
+
+      if (size > 0) {
+        this->pkt_chain_->release();
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: TransportSendStrategy::stop() - ")
+                   ACE_TEXT("terminating with %d unsent bytes.\n"),
+                   size));
+      }
     }
   }
 
