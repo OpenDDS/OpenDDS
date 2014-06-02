@@ -15,9 +15,29 @@ public class TestPublisher {
 
     private static final int N_MSGS = 40;
 
+    public static boolean checkReliable(String[] args) {
+      for (int i = 0; i < args.length; ++i) {
+        if (args[i].equals("-r")) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    public static boolean checkWaitForAcks(String[] args) {
+      for (int i = 0; i < args.length; ++i) {
+        if (args[i].equals("-w")) {
+          return true;
+        }
+      }
+      return false;
+    }
+
     public static void main(String[] args) {
 
         System.out.println("Start Publisher");
+        boolean reliable = checkReliable(args);
+        boolean waitForAcks = checkWaitForAcks(args);
 
         DomainParticipantFactory dpf =
             TheParticipantFactory.WithArgs(new StringSeqHolder(args));
@@ -91,8 +111,10 @@ public class TestPublisher {
         DataWriterQosHolder qosh = new DataWriterQosHolder(dw_qos);
         pub.get_default_datawriter_qos(qosh);
         qosh.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
-        qosh.value.reliability.kind =
-          ReliabilityQosPolicyKind.RELIABLE_RELIABILITY_QOS;
+        if (reliable) {
+          qosh.value.reliability.kind =
+            ReliabilityQosPolicyKind.RELIABLE_RELIABILITY_QOS;
+        }
         DataWriter dw = pub.create_datawriter(top,
                                               qosh.value,
                                               null,
@@ -150,15 +172,25 @@ public class TestPublisher {
                 System.err.println("ERROR " + msg.count +
                                    " write() returned " + ret);
             }
+            try {
+              Thread.sleep(100);
+            } catch(InterruptedException ie) {
+            }
         }
 
-        System.out.println("Publisher waiting for acks");
+        if (waitForAcks) {
+          System.out.println("Publisher waiting for acks");
 
-        // Wait for acknowledgements
-        Duration_t forever = new Duration_t(DURATION_INFINITE_SEC.value,
-                                            DURATION_INFINITE_NSEC.value);
-        dw.wait_for_acknowledgments(forever);
-
+          // Wait for acknowledgements
+          Duration_t forever = new Duration_t(DURATION_INFINITE_SEC.value,
+                                              DURATION_INFINITE_NSEC.value);
+          dw.wait_for_acknowledgments(forever);
+        } else {
+          try {
+            Thread.sleep(1000);
+          } catch(InterruptedException ie) {
+          }
+        }
         System.out.println("Stop Publisher");
 
         // Clean up

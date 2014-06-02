@@ -1,3 +1,19 @@
+Mon Jun  2 17:17:20 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Wait for acks if appropriate, use reliable QOS if reliable
+          transport.
+
 Mon Jun  2 14:31:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

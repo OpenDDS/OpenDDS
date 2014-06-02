@@ -26,7 +26,19 @@ if ($config eq '') {
 
 my $use_repo = ($config !~ /^rtps_disc/);
 
-my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini";
+my $reliable = '-r';
+my $wait_for_acks = '-w';
+
+if ($config eq 'udp') {
+  $reliable = '';
+}
+
+if (($config =~ 'rtps') || ($config =~ 'rtps_uni') || 
+    ($config eq 'rtps_disc') || ($config eq 'udp')) {
+  $wait_for_acks = '';
+}
+
+my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini $reliable $wait_for_acks";
 my $pub_opts = $opts;
 my $sub_opts = $opts;
 if ($debug ne '0') {
@@ -56,6 +68,7 @@ my $SUB = new PerlDDS::Process_Java('TestSubscriber', $sub_opts,
              'messenger_idl_test.jar']);
 
 if ($use_repo) {
+    print $DCPSREPO->CommandLine() . "\n";
     $DCPSREPO->Spawn();
     if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
         print STDERR "ERROR: waiting for DCPSInfo IOR file\n";
@@ -64,8 +77,10 @@ if ($use_repo) {
     }
 }
 
+print $PUB->CommandLine() . "\n";
 $PUB->Spawn();
 
+print $SUB->CommandLine() . "\n";
 $SUB->Spawn();
 
 my $PublisherResult = $PUB->WaitKill(300);

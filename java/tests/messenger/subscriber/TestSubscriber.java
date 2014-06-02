@@ -12,10 +12,19 @@ import org.omg.CORBA.StringSeqHolder;
 import Messenger.*;
 
 public class TestSubscriber {
+    public static boolean checkReliable(String[] args) {
+      for (int i = 0; i < args.length; ++i) {
+        if (args[i].equals("-r")) {
+          return true;
+        }
+      }
+      return false;
+    }
 
     public static void main(String[] args) throws Exception {
 
         System.out.println("Start Subscriber");
+        boolean reliable = checkReliable(args);
 
         DomainParticipantFactory dpf =
             TheParticipantFactory.WithArgs(new StringSeqHolder(args));
@@ -84,8 +93,10 @@ public class TestSubscriber {
 
         DataReaderQosHolder qosh = new DataReaderQosHolder(dr_qos);
         sub.get_default_datareader_qos(qosh);
-        qosh.value.reliability.kind =
-          ReliabilityQosPolicyKind.RELIABLE_RELIABILITY_QOS;
+        if (reliable) {
+          qosh.value.reliability.kind =
+            ReliabilityQosPolicyKind.RELIABLE_RELIABILITY_QOS;
+        }
         qosh.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
 
         DataReaderListenerImpl listener = new DataReaderListenerImpl();

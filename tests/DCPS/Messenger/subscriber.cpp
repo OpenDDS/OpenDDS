@@ -34,8 +34,13 @@ bool
 make_dr_reliable()
 {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  return gc->instances_[0]->name() == "the_rtps_transport";
+  std::string cfg_name = gc->instances_[0]->name();
+  return ((cfg_name == "the_rtps_transport") ||
+          (cfg_name == "transport"));
 }
+
+bool reliable = false;
+bool wait_for_acks = false;
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
