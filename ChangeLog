@@ -1,36 +1,3 @@
-Tue Jun  3 19:04:12 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
-
-        * dds/InfoRepo/DCPS_IR_Participant.cpp:
-
-          Defaulting owner_ to our federationId_ (which used to
-          always be NIL_REPOSITORY, which was 0).
-
-        * dds/InfoRepo/DCPSInfoRepo.mpc:
-        * dds/InfoRepo/FederationId.cpp:
-        * dds/InfoRepo/FederationId.h:
-
-          Added FederationId.
-
-        * dds/InfoRepo/DCPSInfo_i.h:
-        * dds/InfoRepo/DCPSInfo_i.cpp:
-
-          Moved federatedId and federatedIdDefaulted to
-          FederationId.
-
-        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
-        * dds/InfoRepo/DCPS_IR_Publication.cpp:
-        * dds/InfoRepo/FederatorConfig.h:
-        * dds/InfoRepo/FederatorConfig.inl:
-        * dds/InfoRepo/FederatorConfig.cpp:
-        * dds/InfoRepo/FederatorManagerImpl.h:
-        * dds/InfoRepo/FederatorManagerImpl.inl:
-        * dds/InfoRepo/FederatorManagerImpl.cpp:
-        * dds/InfoRepo/UpdateDataTypes.h:
-        * dds/InfoRepo/UpdateListener_T.cpp:
-        * dds/InfoRepo/UpdateManager.cpp:
-
-          Passing around FederationId rather than copying long.
-
 Tue Jun  3 15:45:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * java/tests/messenger/publisher/run_test.pl:

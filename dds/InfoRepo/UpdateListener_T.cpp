@@ -15,7 +15,7 @@ namespace Federator {
 
 template<class DataType, class ReaderType>
 UpdateListener<DataType, ReaderType>::UpdateListener(UpdateProcessor<DataType>& processor)
-  : federationId_(NIL_REPOSITORY),
+  : federationId_(Config::DEFAULT_FEDERATION_ID),
     federationIdDefaulted_(true),
     receiver_(processor)
 {

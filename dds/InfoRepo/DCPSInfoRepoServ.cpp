@@ -212,11 +212,11 @@ InfoRepo::init()
   this->orb_ = CORBA::ORB_init(cvt.get_argc(), cvt.get_ASCII_argv(), "");
   this->info_servant_ =
     new TAO_DDS_DCPSInfo_i(this->orb_, this->resurrect_, this,
-                           this->federatorConfig_.federation());
+                           this->federatorConfig_.federationId());
   PortableServer::ServantBase_var servant(this->info_servant_);
 
   // Install the DCPSInfo_i into the Federator::Manager.
-  this->federator_.info(this->info_servant_);
+  this->federator_.info() = this->info_servant_;
 
   CORBA::Object_var obj =
     this->orb_->resolve_initial_references("RootPOA");
@@ -314,7 +314,7 @@ InfoRepo::init()
   OpenDDS::Federator::Manager_var federator;
   CORBA::String_var               federator_ior;
 
-  if (federator_.idOverridden()) {
+  if (!federator_.idDefaulted()) {
     oid = PortableServer::string_to_ObjectId("Federator");
     info_poa->activate_object_with_id(oid, &federator_);
     obj = info_poa->id_to_reference(oid);
@@ -355,7 +355,7 @@ InfoRepo::init()
   } else {
     adapter->bind(OpenDDS::Federator::REPOSITORY_IORTABLE_KEY, objref_str);
 
-    if (this->federator_.idOverridden()) {
+    if (!this->federator_.idDefaulted()) {
       // Bind to '/Federator'
       adapter->bind(OpenDDS::Federator::FEDERATOR_IORTABLE_KEY, federator_ior);
 

@@ -130,9 +130,12 @@ Config::FEDERATOR_ID_OPTION(ACE_TEXT("-FederationId"));
 const tstring
 Config::FEDERATE_WITH_OPTION(ACE_TEXT("-FederateWith"));
 
+const RepoKey Config::DEFAULT_FEDERATION_ID(random_id());
+
 Config::Config(int argc, ACE_TCHAR** argv)
   : argc_(0),
-    federationId_(OpenDDS::Federator::NIL_REPOSITORY),
+    federationId_(DEFAULT_FEDERATION_ID),
+    federationIdDefaulted_(true),
     federationDomain_(DEFAULT_FEDERATIONDOMAIN),
     federationPort_(-1)
 {
@@ -239,21 +242,21 @@ Config::processFile()
   RepoKey idValue = ACE_OS::atoi(federationIdString.c_str());
 
   // Allow the command line to override the file value.
-  if (this->federationId_.overridden()) {
+  if (this->federationId_ != DEFAULT_FEDERATION_ID) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t)   FederationId == %d from file ")
                ACE_TEXT("overridden by value %d from command line.\n"),
                idValue,
-               this->federationId_.id()));
+               this->federationId_));
 
   } else {
-    this->federationId_.id(idValue);
-    this->federationId_.overridden(true);
+    this->federationId_ = idValue;
+    this->federationIdDefaulted_ = false;
 
     if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)   FederationId == %d\n"),
-                 this->federationId_.id()));
+                 this->federationId_));
     }
   }
 

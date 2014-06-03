@@ -17,7 +17,6 @@
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
-#include "FederatorConfig.h"
 #include "UpdateManager.h"
 #include "ShutdownInterface.h"
 
@@ -32,27 +31,14 @@
 #include "ace/Dynamic_Service.h"
 #include "ace/Reactor.h"
 
-namespace {
-int random_id()
-{
-  ACE_UINT64 msec;
-  ACE_OS::gettimeofday().msec(msec);
-  ACE_OS::srand((unsigned int)msec);
-  const int r = ACE_OS::rand();
-  ACE_DEBUG((LM_DEBUG, "SETTING FederationID to %d\n", r));
-  return r;
-}
-} // End of anonymous namespace
-
-
 // constructor
 TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
                                        , bool reincarnate
                                        , ShutdownInterface* shutdown
-                                       , TAO_DDS_DCPSFederationId& fedId)
+                                       , long federation)
   : orb_(CORBA::ORB::_duplicate(orb))
-  , federationId_(fedId)
-  , participantIdGenerator_(0)
+  , federation_(federation)
+  , participantIdGenerator_(federation)
   , um_(0)
   , reincarnate_(reincarnate)
   , shutdown_(shutdown)
@@ -66,7 +52,6 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
 //  destructor
 TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 {
-  delete participantIdGenerator_;
 }
 
 int
@@ -275,7 +260,7 @@ TAO_DDS_DCPSInfo_i::add_topic(const OpenDDS::DCPS::RepoId& topicId,
 
   // See if we are adding a topic that was created within this
   // repository or a different repository.
-  if (converter.federationId() == federationId_.id()) {
+  if (converter.federationId() == federation_) {
     // Ensure the topic RepoId values do not conflict.
     participantPtr->last_topic_key(converter.entityKey());
   }
@@ -606,7 +591,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
 
   // See if we are adding a publication that was created within this
   // repository or a different repository.
-  if (converter.federationId() == federationId_.id()) {
+  if (converter.federationId() == federation_) {
     // Ensure the publication RepoId values do not conflict.
     partPtr->last_publication_key(converter.entityKey());
   }
@@ -916,7 +901,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
 
   // See if we are adding a subscription that was created within this
   // repository or a different repository.
-  if (converter.federationId() == federationId_.id()) {
+  if (converter.federationId() == federation_) {
     // Ensure the subscription RepoId values do not conflict.
     partPtr->last_subscription_key(converter.entityKey());
   }
@@ -977,7 +962,7 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
   // A value to return.
   OpenDDS::DCPS::AddDomainStatus value;
   value.id        = OpenDDS::DCPS::GUID_UNKNOWN;
-  value.federated = this->federationId_.overridden();
+  value.federated = (this->federation_ != 0);
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, value);
 
@@ -994,7 +979,7 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
   DCPS_IR_Participant* participant;
   ACE_NEW_RETURN(participant,
                  DCPS_IR_Participant(
-                   this->federationId_.id(),
+                   this->federation_,
                    participantId,
                    domainPtr,
                    qos, um_),
@@ -1103,7 +1088,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant(DDS::DomainId_t domainId
 
   DCPS_IR_Participant* participant;
   ACE_NEW_RETURN(participant,
-                 DCPS_IR_Participant(this->federationId_.id(),
+                 DCPS_IR_Participant(this->federation_,
                                      participantId,
                                      domainPtr,
                                      qos, um_), 0);
@@ -1139,7 +1124,7 @@ TAO_DDS_DCPSInfo_i::add_domain_participant(DDS::DomainId_t domainId
 
   // See if we are adding a participant that was created within this
   // repository or a different repository.
-  if (converter.federationId() == this->federationId_.id()) {
+  if (converter.federationId() == this->federation_) {
     // Ensure the participant GUID values do not conflict.
     domainPtr->last_participant_key(converter.participantId());
 
@@ -2025,7 +2010,7 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
     // We will attempt to insert a new domain, go ahead and allocate it.
     DCPS_IR_Domain* domainPtr;
     ACE_NEW_RETURN(domainPtr,
-                   DCPS_IR_Domain(domain, *this->participantIdGenerator_),
+                   DCPS_IR_Domain(domain, this->participantIdGenerator_),
                    0);
 
     // We need to insert the domain into the map at this time since it
@@ -2038,7 +2023,7 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
 
     if (TheServiceParticipant->get_BIT()) {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-      bit_status = domainPtr->init_built_in_topics(this->federationId_.id() != 0);
+      bit_status = domainPtr->init_built_in_topics(this->federation_ != 0);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
     }
 
@@ -2130,24 +2115,14 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                ACE_TEXT("processing persistent data.\n")));
   }
 
-  TAO_DDS_DCPSFederationId::RepoKey fedId;
-  if (image.imageFederationIdValid && !this->federationId_.overridden()) {
-    fedId = image.imageFederationId;
-    ACE_DEBUG((LM_DEBUG, "re-SETTING FederationID to %d\n", fedId));
-  }
-  else {
-    fedId = random_id();
-  }
-  init_federation_id(fedId);
-
   // Ensure that new BIT participants do not reuse an id
   for (Update::UImage::ParticipantSeq::const_iterator
        iter = image.participants.begin();
        iter != image.participants.end(); iter++) {
     const Update::UParticipant* part = *iter;
     OpenDDS::DCPS::RepoIdConverter converter(part->participantId);
-    if (converter.federationId() == this->federationId_.id()) {
-      participantIdGenerator_->last(converter.participantId());
+    if (converter.federationId() == this->federation_) {
+      participantIdGenerator_.last(converter.participantId());
     }
   }
 
@@ -2297,10 +2272,6 @@ TAO_DDS_DCPSInfo_i::init_persistence()
     if (reincarnate_) {
       um_->requestImage();
     }
-    else {
-      // not reincarnating, so need to initialize the random id
-      init_federation_id(random_id());
-    }
 
   } else {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("TAO_DDS_DCPSInfo_i> Failed to discover ")
@@ -2355,12 +2326,4 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 #endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
   return CORBA::string_dup(dump.c_str());
 
-}
-
-void
-TAO_DDS_DCPSInfo_i::init_federation_id(TAO_DDS_DCPSFederationId::RepoKey fedId)
-{
-  this->federationId_.id(fedId);
-  delete participantIdGenerator_;
-  participantIdGenerator_ = new RepoIdGenerator(fedId);
 }

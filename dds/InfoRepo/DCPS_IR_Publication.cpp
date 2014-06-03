@@ -92,8 +92,8 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DCPS_IR_Publication::add_associated_subscription: ")
-                 ACE_TEXT("successfully added subscription %x, is_alive=%d, isOwner=%d.\n"),
-                 sub, participant_->is_alive(), this->participant_->isOwner()));
+                 ACE_TEXT("successfully added subscription %x.\n"),
+                 sub));
     }
   }
   break;

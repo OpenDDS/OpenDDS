@@ -16,7 +16,6 @@ project(*Lib): dcpslib, iortable, dcps_inforepodiscovery, DCPSInfoRepo_bits, imr
     DCPS_IR_Topic.cpp
     DCPS_IR_Topic_Description.cpp
     DomainParticipantListener_i.cpp
-    FederationId.cpp
     PersistenceUpdater.cpp
     UpdateManager.cpp
   }
