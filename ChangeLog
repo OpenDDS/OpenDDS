@@ -1,3 +1,12 @@
+Tue Jun  3 15:45:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Fuzz.
+
 Mon Jun  2 17:17:20 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * java/tests/messenger/publisher/TestPublisher.java:

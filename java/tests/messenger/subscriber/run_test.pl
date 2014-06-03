@@ -33,7 +33,7 @@ if ($config eq 'udp') {
   $reliable = '';
 }
 
-if (($config =~ 'rtps') || ($config =~ 'rtps_uni') || 
+if (($config =~ 'rtps') || ($config =~ 'rtps_uni') ||
     ($config eq 'rtps_disc') || ($config eq 'udp')) {
   $wait_for_acks = '';
 }

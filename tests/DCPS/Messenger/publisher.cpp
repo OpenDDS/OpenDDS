@@ -143,7 +143,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (wait_for_acks) {
         std::cout << "Writer wait for ACKS" << std::endl;
 
-        DDS::Duration_t timeout = 
+        DDS::Duration_t timeout =
           { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
         dw->wait_for_acknowledgments(timeout);
       } else {
