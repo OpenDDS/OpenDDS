@@ -26,7 +26,19 @@ if ($config eq '') {
 
 my $use_repo = ($config !~ /^rtps_disc/);
 
-my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini";
+my $reliable = '-r';
+my $wait_for_acks = '-w';
+
+if ($config eq 'udp') {
+  $reliable = '';
+}
+
+if (($config =~ 'rtps') || ($config =~ 'rtps_uni') ||
+    ($config eq 'rtps_disc') || ($config eq 'udp')) {
+  $wait_for_acks = '';
+}
+
+my $opts = "-DCPSBit 0 -DCPSConfigFile ../$config.ini $reliable $wait_for_acks";
 my $pub_opts = $opts;
 my $sub_opts = $opts;
 if ($debug ne '0') {

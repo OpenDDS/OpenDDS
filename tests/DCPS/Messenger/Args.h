@@ -18,13 +18,16 @@
 #include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+#include <iostream>
 
 const int num_messages = 40;
+extern bool reliable;
+extern bool wait_for_acks;
 
 inline int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:p"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:prw"));
 
   std::string transport_type;
   int c;
@@ -41,12 +44,17 @@ parse_args(int argc, ACE_TCHAR *argv[])
 
       } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("tcp")) == 0) {
         transport_type = "tcp";
-
       }
 
       break;
     case 'p':
       thread_per_connection = true;
+      break;
+    case 'r':
+      reliable = true;
+      break;
+    case 'w':
+      wait_for_acks = true;
       break;
     case '?':
     default:

@@ -83,11 +83,11 @@ ManagerImpl::initialize()
 
   // Let the listeners know which repository we are to filter samples at
   // the earliest opportunity.
-  this->ownerListener_.federationId()        = this->id();
-  this->topicListener_.federationId()        = this->id();
-  this->participantListener_.federationId()  = this->id();
-  this->publicationListener_.federationId()  = this->id();
-  this->subscriptionListener_.federationId() = this->id();
+  this->ownerListener_.federationId(this->id(), this->idDefaulted());
+  this->topicListener_.federationId(this->id(), this->idDefaulted());
+  this->participantListener_.federationId(this->id(), this->idDefaulted());
+  this->publicationListener_.federationId(this->id(), this->idDefaulted());
+  this->subscriptionListener_.federationId(this->id(), this->idDefaulted());
 
   // Add participant for Federation domain
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;

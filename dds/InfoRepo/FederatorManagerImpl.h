@@ -98,8 +98,11 @@ public:
   void localRepo(::OpenDDS::DCPS::DCPSInfo_ptr repo);
 
   /// Accessors for the federation Id value.
-  RepoKey& id();
+  void id(RepoKey val);
   RepoKey  id() const;
+
+  /// Indicate if the Id is defaulted
+  bool idDefaulted() const;
 
   /// Accessors for the ORB.
   CORBA::ORB_ptr orb();

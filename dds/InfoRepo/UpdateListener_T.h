@@ -58,7 +58,7 @@ public:
     const DDS::SampleLostStatus& status);
 
   /// Access our Federation Id value.
-  RepoKey& federationId();
+  void federationId(RepoKey id, bool defaulted);
   RepoKey  federationId() const;
 
   void stop();
@@ -67,6 +67,9 @@ public:
 private:
   /// Our Federation Id value.
   RepoKey federationId_;
+
+  /// Indicate if the Federation Id is defaulted
+  bool federationIdDefaulted_;
 
   /// Manager object to delegate sample processing to.
   UpdateReceiver<DataType> receiver_;

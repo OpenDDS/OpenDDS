@@ -24,6 +24,9 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Args.h"
 
+bool reliable = false;
+bool wait_for_acks = false;
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {

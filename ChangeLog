@@ -1,3 +1,129 @@
+Tue Jun  3 20:56:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Changed owner to be the same as the defaulted FederationId.
+
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Added hashing the federationId off of orb endpoints.
+
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Changed back to using NIL_REPOSITORY.
+
+Tue Jun  3 15:45:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Fuzz.
+
+Mon Jun  2 17:17:20 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/publisher/run_test.pl:
+        * java/tests/messenger/run_test.pl:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * java/tests/messenger/subscriber/run_test.pl:
+        * tests/DCPS/Messenger/Args.h:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/stack_subscriber.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Wait for acks if appropriate, use reliable QOS if reliable
+          transport.
+
+Mon Jun  2 14:31:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added locking around pkt_chain_ access in TransportSendStrategy
+          stop() to stop the access violation seen during shutdown.
+
+Sun Jun  1 23:56:21 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Fuzz
+
+Fri May 30 20:39:48 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Set reliability QOS, wait for acks.
+
+        * tests/DCPS/ManyToMany:
+
+          svn:ignore
+
+Fri May 30 17:56:32 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Changed to use a method to definitely identify it the
+          FederationId was defaulted.
+
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Added tracking if the FederationId was defaulted (or set)
+          and cleaned up some of the (essentially) public data members.
+
+Fri May 30 16:02:26 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+
+          Roll back QOS setting - causing crash.
+
+Fri May 30 15:26:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Changed random function name to avoid build errors.
+
+Fri May 30 12:16:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Added a static constant variable to be the default FederatedId
+          to allow GUIDs to be unique among readers/writers on all InfoRepos
+          on a network to allow multicast to work.
+
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Changed to compare to the default FederatedId to determine if the
+          federatedId is defaulted or not.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Removed delay to ensure repo ids were assigned in the same
+          order.
+
+Thu May 29 20:37:34 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Changed the test to ensure that all repo ids are assigned
+          in the same order and so they will not be unique.
+
 Thu May 29 13:22:55 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
