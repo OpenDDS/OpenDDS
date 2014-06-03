@@ -74,9 +74,6 @@ public:
   /// Indicate if Federation Id is defaulted
   bool federationIdDefaulted() const;
 
-  /// Random Nil Repository Federation Id value.
-  static const RepoKey DEFAULT_FEDERATION_ID;
-
 private:
   /// Process a configuration file
   void processFile();
