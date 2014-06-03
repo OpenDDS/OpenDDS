@@ -122,9 +122,9 @@ void hash_endpoint(::CORBA::Long& hash, const char* const endpoint, const size_t
 {
   std::string toprint(endpoint, len);
   ACE_DEBUG((LM_DEBUG, "hash_endpoints parsing endpoint=%C\n", toprint.c_str()));
-  if (len > 0) 
+  if (len > 0)
   {
-    for (size_t i = 0; i < len; i++) 
+    for (size_t i = 0; i < len; i++)
     {
       hash = 31 * hash + endpoint[i];
     }
@@ -142,7 +142,7 @@ void hash_endpoint(::CORBA::Long& hash, const wchar_t* const endpoint, const siz
 void hash_endpoints(::CORBA::Long& hash, const ACE_TCHAR* const endpoints_str)
 {
   ACE_DEBUG((LM_DEBUG, "hash_endpoints parsing\n"));
-  const ACE_TCHAR* delim = ACE_TEXT(";"); 
+  const ACE_TCHAR* delim = ACE_TEXT(";");
   const size_t len = ACE_OS::strlen(endpoints_str);
   ACE_DEBUG((LM_DEBUG, "hash_endpoints parsing len=%d\n", len));
   const ACE_TCHAR* curr = endpoints_str;

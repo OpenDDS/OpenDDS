@@ -1,3 +1,9 @@
+Tue Jun  3 21:43:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Fixed fuzz errors.
+
 Tue Jun  3 20:56:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Participant.cpp:
