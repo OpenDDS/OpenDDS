@@ -23,6 +23,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
   try
   {
     driver.run(argc, argv);
+    std::cout << "subscriber exiting" << std::endl;
     return 0;
   }
   catch (const TestException&)

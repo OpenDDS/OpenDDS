@@ -1434,6 +1434,21 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
   }
 }
 
+void
+DataLink::send_delayed_notifications()
+{
+  TransportSendStrategy_rch strategy;
+  {
+    GuardType guard(this->strategy_lock_);
+
+    strategy = this->send_strategy_;
+  }
+
+  if (!strategy.is_nil()) {
+    strategy->send_delayed_notifications();
+  }
+}
+
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
 {

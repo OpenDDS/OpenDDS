@@ -452,6 +452,11 @@ TransportClient::remove_all_msgs()
   return links_.remove_all_msgs(repo_id_);
 }
 
+void
+TransportClient::send_delayed_notifications()
+{
+  links_.send_delayed_notifications();
+}
 
 // MultiReservLock nested class
 

@@ -470,6 +470,9 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
 {
   DBG_ENTRY_LVL("TcpConnection","reconnect",6);
 
+//ACE_DEBUG((LM_INFO, "(%P|%t) JJS TcpConnection::reconnect() with pending %d\n",
+//  this->link_->is_release_pending()));
+
   if (on_new_association)
     return this->active_reconnect_on_new_association();
 

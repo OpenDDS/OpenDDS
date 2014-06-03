@@ -44,8 +44,6 @@ Writer::Writer(PubDriver*            pubdriver,
 void
 Writer::start ()
 {
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) Writer::start \n")));
   if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1)
   {
     ACE_ERROR ((LM_ERROR,
@@ -69,9 +67,7 @@ Writer::end ()
 int
 Writer::svc ()
 {
-  ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::svc \n")));
-
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer waiting for assoc\n")));
   // Wait for the subscriber to be ready...
   ::DDS::InstanceHandleSeq handles;
   while (1) {
@@ -130,8 +126,13 @@ Writer::svc ()
         ACE_DEBUG ((LM_DEBUG, "(%P|%t) write sample: %d \n", foo.sample_sequence));
       }
 
-      ret = foo_dw->write(foo,
-                          handle);
+      do {
+        ret = foo_dw->write(foo, handle);
+        if (ret != ::DDS::RETCODE_OK) {
+          ACE_DEBUG ((LM_DEBUG, "(%P|%t) write status: %d \n", ret));
+        }
+      } while (ret == ::DDS::RETCODE_TIMEOUT);
+
       TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
       if (write_delay_msec_ > 0)
@@ -148,9 +149,15 @@ Writer::svc ()
 
   if (check_data_dropped_ == 1 && writer_servant_->data_dropped_count_ > 0)
   {
-    while (writer_servant_->data_delivered_count_ + writer_servant_->data_dropped_count_
-    < num_writes_per_thread_ * num_thread_to_write_)
+    while (writer_servant_->data_delivered_count_ + 
+           writer_servant_->data_dropped_count_
+           < num_writes_per_thread_ * num_thread_to_write_)
     {
+          std::cout << "writer sleeping with dropped count of "
+          << writer_servant_->data_dropped_count_
+          << " delivered count " << writer_servant_->data_delivered_count_
+          << std::endl;
+
       ACE_OS::sleep (1);
     }
 
@@ -160,6 +167,9 @@ Writer::svc ()
 
   }
 
+  ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) Writer waiting for disassoc, dropped count=%d\n"),
+      writer_servant_->data_dropped_count_));
   while (true) {
     writer_->get_matched_subscriptions(handles);
     if (handles.length() == 0)
@@ -168,6 +178,7 @@ Writer::svc ()
       ACE_OS::sleep(ACE_Time_Value(0,200000));
   }
 
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc thread finished\n")));
   finished_ = true;
 
   return 0;

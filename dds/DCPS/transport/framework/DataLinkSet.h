@@ -77,6 +77,8 @@ public:
 
   typedef std::map<DataLinkIdType, DataLink_rch> MapType;
 
+  void send_delayed_notifications();
+
   //{@
   /// Accessors for external iteration
   LockType& lock() { return lock_; }

@@ -245,12 +245,6 @@ private:
   int adjust_packet_after_send(ssize_t num_bytes_sent,
                                UseDelayedNotification delay_notification);
 
-  /// If delayed notifications were queued up, issue those callbacks here.
-  /// The default match is "match all", otherwise match can be used to specify
-  /// either a certain individual packet or a publication id.
-  /// Returns true if anything in the delayed notification list matched.
-  bool send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
-
   /// How much space is available in the current packet before we reach one
   /// of the limits: max_message_size() [transport's inherent limitation]
   /// or max_size_ [user's configured limit]
@@ -275,6 +269,12 @@ public:
     // reconnect.
     MODE_TERMINATED
   };
+
+  /// If delayed notifications were queued up, issue those callbacks here.
+  /// The default match is "match all", otherwise match can be used to specify
+  /// either a certain individual packet or a publication id.
+  /// Returns true if anything in the delayed notification list matched.
+  bool send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
 
   /// Clear queued messages and messages in current packet.
   // The API now has a defaulted mode (the default is the same as

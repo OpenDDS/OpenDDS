@@ -75,6 +75,9 @@ protected:
   bool remove_sample(const DataSampleListElement* sample);
   bool remove_all_msgs();
 
+protected:
+  void send_delayed_notifications();
+  
 private:
 
   // Implemented by derived classes (DataReaderImpl/DataWriterImpl)

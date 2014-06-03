@@ -50,6 +50,7 @@ SubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
     if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       num_writes_ = ACE_OS::atoi (current_arg);
+      std::cout << "Expecting " << num_writes_ << " samples" << std::endl;
       arg_shifter.consume_arg ();
     }
     else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-l"))) != 0)
@@ -117,7 +118,8 @@ SubDriver::init(int& argc, ACE_TCHAR* argv[])
                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   TEST_CHECK (! CORBA::is_nil (subscriber_.in ()));
 
-  std::cout << std::hex << "0x" << subscriber_->get_instance_handle() << std::endl;
+  std::cout << std::hex << "0x" << subscriber_->get_instance_handle()
+            << std::dec << std::endl;
 
   // Create datareader to test copy_from_topic_qos.
   listener_ = new DataReaderListenerImpl;
@@ -138,6 +140,8 @@ void
 SubDriver::run()
 {
   while (this->listener_->samples_read() != num_writes_) {
+    std::cout << "Got " << listener_->samples_read() << " of "
+              << num_writes_ << " samples" << std::endl;
     ACE_OS::sleep(1);
   }
 

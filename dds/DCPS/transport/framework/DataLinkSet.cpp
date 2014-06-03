@@ -104,3 +104,24 @@ OpenDDS::DCPS::DataLinkSet::empty()
 
   return map_.empty();
 }
+
+void
+OpenDDS::DCPS::DataLinkSet::send_delayed_notifications()
+{
+  std::vector<DataLink_rch>  data_links;
+  {
+    GuardType guard(this->lock_);
+    for (MapType::iterator itr = map_.begin();
+         itr != map_.end();
+         ++itr) {
+      data_links.push_back(itr->second);
+    }
+  }
+
+  // Guard unlocked
+  for (std::vector<DataLink_rch>::iterator link = data_links.begin();
+       link != data_links.end(); ++link)
+  {
+    (*link)->send_delayed_notifications();
+  }
+}

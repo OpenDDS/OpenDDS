@@ -1089,6 +1089,7 @@ WriteDataContainer::unregister_all()
       condition_.broadcast();
     }
   }
+
   DDS::ReturnCode_t ret;
   DataSample* registered_sample;
   PublicationInstanceMapType::iterator it = instances_.begin();

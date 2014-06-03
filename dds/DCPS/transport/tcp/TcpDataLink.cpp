@@ -79,6 +79,7 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
     if (!this->connection_.is_nil() && !this->graceful_disconnect_sent_
         && !disconnected) {
       this->send_graceful_disconnect_message();
+      this->send_delayed_notifications();
       this->graceful_disconnect_sent_ = true;
     }
   }
@@ -201,6 +202,7 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
 {
   DBG_ENTRY_LVL("TcpDataLink","send_graceful_disconnect_message",6);
 
+//ACE_DEBUG((LM_INFO, "(%P|%t) JJS send_graceful_disconnect_message\n"));
   // Will clear all queued messages but still let the disconnect message
   // sent.
   this->send_strategy_->terminate_send(true);
@@ -286,4 +288,3 @@ bool OpenDDS::DCPS::TcpDataLink::is_release_pending () const
 {
   return this->release_is_pending_.value();
 }
-

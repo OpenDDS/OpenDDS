@@ -36,6 +36,8 @@ void OpenDDS::DCPS::TcpReconnectTask::execute(ReconnectOpType& op)
   ACE_OS::thr_sigsetmask(SIG_SETMASK, &set, NULL);
 
   if (op == DO_RECONNECT) {
+    //ACE_DEBUG((LM_INFO, "(%P|%t) JJS TcpReconnectTask::execute() calling reconnect\n"));
+
     if (this->connection_->reconnect() == -1) {
       this->connection_->tear_link();
     }

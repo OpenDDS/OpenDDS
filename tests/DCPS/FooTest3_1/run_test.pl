@@ -128,7 +128,7 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 $subscriber->Spawn ();
 $publisher->Spawn ();
 
-my $result=$publisher->WaitKill ($publisher_running_sec);
+my $result=$publisher->WaitKill (3000);
 
 if ($result != 0) {
     print STDERR "ERROR: $publisher returned $result \n";

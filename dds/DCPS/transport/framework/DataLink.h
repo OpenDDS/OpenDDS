@@ -113,6 +113,9 @@ public:
                             RepoId          local_id,
                             DataLinkSetMap& released_locals);
 
+  /// Send any delayed notifications waiting in send strategy
+  void send_delayed_notifications();
+
   void schedule_delayed_release();
 
   const ACE_Time_Value& datalink_release_delay() const;

@@ -503,6 +503,9 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       send_end_historic_samples();
     }
   }
+
+  // Out of scope of WriteDataContainer's lock
+  send_delayed_notifications();
 }
 
 void
@@ -1849,6 +1852,9 @@ DataWriterImpl::unregister_all()
   }
 
   data_container_->unregister_all();
+
+  // Out of scope of WriteDataContainer's lock
+  send_delayed_notifications();
 }
 
 RepoId
@@ -2148,47 +2154,52 @@ DataWriterImpl::begin_coherent_changes()
 void
 DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 {
-  // PublisherImpl::pi_lock_ should be held.
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-            guard,
-            get_lock());
+  {
+    // PublisherImpl::pi_lock_ should be held.
+    ACE_GUARD(ACE_Recursive_Thread_Mutex,
+              guard,
+              get_lock());
 
-  CoherentChangeControl end_msg;
-  end_msg.coherent_samples_.num_samples_ = this->coherent_samples_;
-  end_msg.coherent_samples_.last_sample_ = this->sequence_number_;
-  end_msg.group_coherent_
-    = this->publisher_servant_->qos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS;
-  if (end_msg.group_coherent_) {
-    end_msg.publisher_id_ = this->publisher_servant_->publisher_id_;
-    end_msg.group_coherent_samples_ = group_samples;
+    CoherentChangeControl end_msg;
+    end_msg.coherent_samples_.num_samples_ = this->coherent_samples_;
+    end_msg.coherent_samples_.last_sample_ = this->sequence_number_;
+    end_msg.group_coherent_
+      = this->publisher_servant_->qos_.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS;
+    if (end_msg.group_coherent_) {
+      end_msg.publisher_id_ = this->publisher_servant_->publisher_id_;
+      end_msg.group_coherent_samples_ = group_samples;
+    }
+
+    ACE_Message_Block* data = 0;
+    size_t max_marshaled_size = end_msg.max_marshaled_size();
+
+    ACE_NEW(data, ACE_Message_Block(max_marshaled_size));
+
+    Serializer serializer(
+        data,
+        this->swap_bytes());
+
+    serializer << end_msg;
+
+    DDS::Time_t source_timestamp =
+      time_value_to_time(ACE_OS::gettimeofday());
+
+    DataSampleHeader header;
+    ACE_Message_Block* control =
+      create_control_message(END_COHERENT_CHANGES, header, data, source_timestamp);
+
+    if (this->send_control(header, control) == SEND_CONTROL_ERROR) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
+                 ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
+    }
+
+    this->coherent_ = false;
+    this->coherent_samples_ = 0;
   }
 
-  ACE_Message_Block* data = 0;
-  size_t max_marshaled_size = end_msg.max_marshaled_size();
-
-  ACE_NEW(data, ACE_Message_Block(max_marshaled_size));
-
-  Serializer serializer(
-      data,
-      this->swap_bytes());
-
-  serializer << end_msg;
-
-  DDS::Time_t source_timestamp =
-    time_value_to_time(ACE_OS::gettimeofday());
-
-  DataSampleHeader header;
-  ACE_Message_Block* control =
-    create_control_message(END_COHERENT_CHANGES, header, data, source_timestamp);
-
-  if (this->send_control(header, control) == SEND_CONTROL_ERROR) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
-               ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
-  }
-
-  this->coherent_ = false;
-  this->coherent_samples_ = 0;
+  // Out of scope of WriteDataContainer's lock
+  send_delayed_notifications();
 }
 
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE

@@ -87,25 +87,29 @@ bool
     const ::DDS::Time_t & timestamp)
 {
   ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
-
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    registered_handle);
-
-  ::DDS::ReturnCode_t const ret
-    = this->get_or_create_instance_handle(registered_handle,
-                                          instance,
-                                          timestamp);
-  if (ret != ::DDS::RETCODE_OK)
   {
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ")
-                ACE_TEXT("<%TYPE%>DataWriterImpl::")
-                ACE_TEXT("register_instance_w_timestamp, ")
-                ACE_TEXT("register failed error=%d.\n"),
-                ret));
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                      guard,
+                      get_lock (),
+                      registered_handle);
+
+    ::DDS::ReturnCode_t const ret
+      = this->get_or_create_instance_handle(registered_handle,
+                                            instance,
+                                            timestamp);
+    if (ret != ::DDS::RETCODE_OK)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ")
+                  ACE_TEXT("<%TYPE%>DataWriterImpl::")
+                  ACE_TEXT("register_instance_w_timestamp, ")
+                  ACE_TEXT("register failed error=%d.\n"),
+                  ret));
+    }
   }
+
+  // Out of scope of WriteDataContainer's lock
+  send_delayed_notifications();
 
   return registered_handle;
 }
@@ -193,57 +197,65 @@ bool
   //  This operation assumes the provided handle is valid. The handle
   //  provided will not be verified.
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    ::DDS::RETCODE_ERROR);
-
-  if (handle == ::DDS::HANDLE_NIL)
+  ::DDS::ReturnCode_t result = ::DDS::RETCODE_OK;
   {
-    ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
-    ::DDS::ReturnCode_t ret
-      = this->get_or_create_instance_handle(registered_handle,
-                                            instance_data,
-                                            source_timestamp);
-    if (ret != ::DDS::RETCODE_OK)
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                      guard,
+                      get_lock (),
+                      ::DDS::RETCODE_ERROR);
+
+    if (handle == ::DDS::HANDLE_NIL)
     {
-      ACE_ERROR_RETURN ((LM_ERROR,
-                         ACE_TEXT("(%P|%t) ")
-                         ACE_TEXT("<%TYPE%>DataWriterImpl::write, ")
-                         ACE_TEXT("register failed err=%d.\n"),
-                         ret),
-                        ret);
+      ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
+      ::DDS::ReturnCode_t ret
+        = this->get_or_create_instance_handle(registered_handle,
+                                              instance_data,
+                                              source_timestamp);
+      if (ret != ::DDS::RETCODE_OK)
+      {
+        ACE_ERROR_RETURN ((LM_ERROR,
+                           ACE_TEXT("(%P|%t) ")
+                           ACE_TEXT("<%TYPE%>DataWriterImpl::write, ")
+                           ACE_TEXT("register failed err=%d.\n"),
+                           ret),
+                          ret);
+      }
+
+      handle = registered_handle;
     }
 
-    handle = registered_handle;
-  }
-
-  // list of reader RepoIds that should not get data
-  OpenDDS::DCPS::GUIDSeq_var filter_out;
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  if (TheServiceParticipant->publisher_content_filter()) {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, ::DDS::RETCODE_ERROR);
-    for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
-         end = reader_info_.end(); iter != end; ++iter) {
-      const ReaderInfo& ri = iter->second;
-      if (!ri.eval_.is_nil()) {
-        if (!filter_out.ptr()) {
-          filter_out = new OpenDDS::DCPS::GUIDSeq;
-        }
-        if (!ri.eval_->eval(instance_data, ri.expression_params_)) {
-          push_back(filter_out.inout(), iter->first);
+    // list of reader RepoIds that should not get data
+    OpenDDS::DCPS::GUIDSeq_var filter_out;
+  #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+    if (TheServiceParticipant->publisher_content_filter()) {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, ::DDS::RETCODE_ERROR);
+      for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
+           end = reader_info_.end(); iter != end; ++iter) {
+        const ReaderInfo& ri = iter->second;
+        if (!ri.eval_.is_nil()) {
+          if (!filter_out.ptr()) {
+            filter_out = new OpenDDS::DCPS::GUIDSeq;
+          }
+          if (!ri.eval_->eval(instance_data, ri.expression_params_)) {
+            push_back(filter_out.inout(), iter->first);
+          }
         }
       }
     }
+  #endif
+
+    ACE_Message_Block* const marshalled =
+      dds_marshal (instance_data, OpenDDS::DCPS::FULL_MARSHALING);
+
+    result = OpenDDS::DCPS::DataWriterImpl::write(marshalled, handle,
+                                                source_timestamp,
+                                                filter_out._retn());
   }
-#endif
 
-  ACE_Message_Block* const marshalled =
-    dds_marshal (instance_data, OpenDDS::DCPS::FULL_MARSHALING);
+  // Out of scope of WriteDataContainer's lock
+  send_delayed_notifications();
 
-  return OpenDDS::DCPS::DataWriterImpl::write(marshalled, handle,
-                                              source_timestamp,
-                                              filter_out._retn());
+  return result;
 }
 
 ::DDS::ReturnCode_t
@@ -264,6 +276,8 @@ bool
     ::DDS::InstanceHandle_t instance_handle,
     const ::DDS::Time_t & source_timestamp)
 {
+  ::DDS::ReturnCode_t result = ::DDS::RETCODE_OK;
+
   if(instance_handle == ::DDS::HANDLE_NIL)
   {
     instance_handle = this->lookup_instance(instance_data);
@@ -277,13 +291,20 @@ bool
     }
   }
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    ::DDS::RETCODE_ERROR);
+  {
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                      guard,
+                      get_lock (),
+                      ::DDS::RETCODE_ERROR);
 
-  return OpenDDS::DCPS::DataWriterImpl::dispose(instance_handle,
-                                                source_timestamp);
+    result = OpenDDS::DCPS::DataWriterImpl::dispose(instance_handle,
+                                                    source_timestamp);
+  }
+
+  // Out of scope of WriteDataContainer's lock
+  send_delayed_notifications();
+
+  return result;
 }
 
 ::DDS::ReturnCode_t

@@ -180,7 +180,7 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
   ::DDS::TopicQos topic_qos;
   participant_->get_default_topic_qos(topic_qos);
 
-  if (block_on_write_)
+  if (true || block_on_write_)
   {
     topic_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
     topic_qos.resource_limits.max_samples_per_instance = max_samples_per_instance_;
@@ -208,7 +208,7 @@ PubDriver::init(int& argc, ACE_TCHAR *argv[])
   ::DDS::DataWriterQos datawriter_qos;
   publisher_->get_default_datawriter_qos (datawriter_qos);
 
-  if (block_on_write_)
+  if (true || block_on_write_)
   {
     datawriter_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
     datawriter_qos.resource_limits.max_samples_per_instance = max_samples_per_instance_;

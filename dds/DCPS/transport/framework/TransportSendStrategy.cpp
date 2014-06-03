@@ -1266,7 +1266,8 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
     }
   }
 
-  send_delayed_notifications();
+  // Caller of send() must unlock and then call send_delayed_notifications
+  //send_delayed_notifications();
 }
 
 void
@@ -1352,7 +1353,8 @@ TransportSendStrategy::send_stop()
     }
   }
 
-  send_delayed_notifications();
+  // Caller of send_stop() must unlock and then call send_delayed_notifications
+  //send_delayed_notifications();
 }
 
 void
@@ -1361,7 +1363,9 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
 
   const TransportQueueElement::MatchOnPubId match(pub_id);
-  send_delayed_notifications(&match);
+  // Caller of remove_all_msgs is responsible for ensuring WriteDataContainer
+  // is not locked, and calling send_delayed_notifications().
+  //send_delayed_notifications(&match);
 
   GuardType guard(this->lock_);
 
@@ -1393,9 +1397,12 @@ TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
 
   const char* const payload = sample->sample_->cont()->rd_ptr();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
-  if (send_delayed_notifications(&modp)) {
-    return REMOVE_RELEASED;
-  }
+
+  // We can no longer call send_delayed_notifications, as it can cause deadlock
+  // when originating from write_w_timestamp()
+  //if (send_delayed_notifications(&modp)) {
+    //return REMOVE_RELEASED;
+  //}
 
   GuardType guard(this->lock_);
   return do_remove_sample(modp);
