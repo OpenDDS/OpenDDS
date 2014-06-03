@@ -12,6 +12,8 @@
 #include "Updater.h"
 #include "ArrDelAdapter.h"
 #include "DCPSInfo_i.h"
+#include "FederatorC.h"
+#include "dds/DCPS/RepoIdConverter.h"
 
 #include "tao/CDR.h"
 
@@ -117,6 +119,7 @@ Manager::pushImage(const DImage& image)
 
   // image to be propagated.
   UImage u_image;
+  bool idSet = false;
 
   /***************************
   // The downstream image needs to be converted to a
@@ -155,6 +158,17 @@ Manager::pushImage(const DImage& image)
 
     // push newly created UParticipant into UImage Participant bucket
     u_image.participants.push_back(u_part);
+
+    OpenDDS::DCPS::RepoIdConverter converter(u_part->participantId);
+    if (!idSet) {
+      u_image.imageFederationId = converter.federationId();
+      u_image.imageFederationIdValid = true;
+      idSet = true;
+    }
+    else if (u_image.imageFederationIdValid &&
+             u_image.imageFederationId != converter.federationId()) {
+      u_image.imageFederationIdValid = false;
+    }
   }
 
   // Topic buckets

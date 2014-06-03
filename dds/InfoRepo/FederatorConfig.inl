@@ -45,15 +45,8 @@ ACE_INLINE
 void
 OpenDDS::Federator::Config::federationId(RepoKey id)
 {
-  this->federationId_ = id;
-  this->federationIdDefaulted_ = false;
-}
-
-ACE_INLINE
-OpenDDS::Federator::RepoKey
-OpenDDS::Federator::Config::federationId() const
-{
-  return this->federationId_;
+  this->federationId_.id(id);
+  this->federationId_.overridden(true);
 }
 
 ACE_INLINE
@@ -116,6 +109,20 @@ ACE_INLINE
 bool
 OpenDDS::Federator::Config::federationIdDefaulted() const
 {
-  return this->federationIdDefaulted_;
+  return !this->federationId_.overridden();
+}
+
+ACE_INLINE
+TAO_DDS_DCPSFederationId&
+OpenDDS::Federator::Config::federation()
+{
+  return this->federationId_;
+}
+
+ACE_INLINE
+const TAO_DDS_DCPSFederationId&
+OpenDDS::Federator::Config::federation() const
+{
+  return this->federationId_;
 }
 

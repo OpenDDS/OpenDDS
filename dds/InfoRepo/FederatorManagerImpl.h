@@ -91,7 +91,7 @@ public:
   void finalize();
 
   /// Accessors for the DCPSInfo reference.
-  TAO_DDS_DCPSInfo_i*& info();
+  void info(TAO_DDS_DCPSInfo_i* dcpsInfo);
   TAO_DDS_DCPSInfo_i*  info() const;
 
   /// Capture a remote callable reference to the DCPSInfo.
@@ -101,8 +101,8 @@ public:
   void id(RepoKey val);
   RepoKey  id() const;
 
-  /// Indicate if the Id is defaulted
-  bool idDefaulted() const;
+  /// Indicate if the Id was overridden by command line or config file
+  bool idOverridden() const;
 
   /// Accessors for the ORB.
   CORBA::ORB_ptr orb();

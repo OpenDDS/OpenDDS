@@ -33,7 +33,7 @@ DCPS_IR_Participant::DCPS_IR_Participant(long federationId,
     handle_(0),
     isBIT_(0),
     federationId_(federationId),
-    owner_(OWNER_NONE),
+    owner_(federationId),
     topicIdGenerator_(
       federationId,
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),

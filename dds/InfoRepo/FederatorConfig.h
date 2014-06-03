@@ -15,6 +15,7 @@
 
 #include "federator_export.h"
 #include "FederatorC.h"
+#include "FederationId.h"
 
 #include <string>
 
@@ -51,9 +52,12 @@ public:
   /// Add an argument.
   void addArg(ACE_TCHAR* arg);
 
+  // Federation Id value
+  TAO_DDS_DCPSFederationId& federation();
+  const TAO_DDS_DCPSFederationId& federation() const;
+
   /// Federation Id value.
   void federationId(RepoKey id);
-  RepoKey  federationId() const;
 
   /// Federation Id value.
   void federationDomain(long domain);
@@ -74,10 +78,10 @@ public:
   /// Indicate if Federation Id is defaulted
   bool federationIdDefaulted() const;
 
-  /// Random Nil Repository Federation Id value.
-  static const RepoKey DEFAULT_FEDERATION_ID;
-
 private:
+  // friend to give receive_image() access to set DEFAULT_FEDERATION_ID
+//  friend TAO_DDS_DCPSInfo_i;
+
   /// Process a configuration file
   void processFile();
 
@@ -94,10 +98,7 @@ private:
   tstring federateIor_;
 
   /// Configured Federation Id value.
-  RepoKey federationId_;
-
-  /// Indicate if Federation Id is defaulted
-  bool federationIdDefaulted_;
+  TAO_DDS_DCPSFederationId federationId_;
 
   /// Configured Federation Domain value.
   long federationDomain_;

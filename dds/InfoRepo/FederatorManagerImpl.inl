@@ -17,14 +17,14 @@ ACE_INLINE
 OpenDDS::Federator::RepoKey
 OpenDDS::Federator::ManagerImpl::id() const
 {
-  return this->config_.federationId();
+  return this->config_.federation().id();
 }
 
 ACE_INLINE
-TAO_DDS_DCPSInfo_i*&
-OpenDDS::Federator::ManagerImpl::info()
+void
+OpenDDS::Federator::ManagerImpl::info(TAO_DDS_DCPSInfo_i* dcpsInfo)
 {
-  return this->info_;
+  this->info_ = dcpsInfo;
 }
 
 ACE_INLINE
@@ -57,8 +57,8 @@ OpenDDS::Federator::ManagerImpl::orb(CORBA::ORB_ptr value)
 
 ACE_INLINE
 bool
-OpenDDS::Federator::ManagerImpl::idDefaulted() const
+OpenDDS::Federator::ManagerImpl::idOverridden() const
 {
-  return this->config_.federationIdDefaulted();
+  return this->config_.federation().overridden();
 }
 

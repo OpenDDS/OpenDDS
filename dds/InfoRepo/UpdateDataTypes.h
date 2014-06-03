@@ -10,6 +10,7 @@
 #define UPDATE_DATA_TYPES
 
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "FederationId.h"
 
 #include <vector>
 #include <string>
@@ -28,10 +29,11 @@ enum SpecificQos {
   SubscriberQos
 };
 
-typedef long                            DomainIdType;
-typedef OpenDDS::DCPS::RepoId           IdType; // Federation scope identifier type.
-typedef std::pair <size_t, char*>       BinSeq;
-typedef std::pair <SpecificQos, BinSeq> QosSeq;
+typedef long                               DomainIdType;
+typedef OpenDDS::DCPS::RepoId              IdType; // Federation scope identifier type.
+typedef TAO_DDS_DCPSFederationId::RepoKey  RepoKey;
+typedef std::pair <size_t, char*>          BinSeq;
+typedef std::pair <SpecificQos, BinSeq>    QosSeq;
 
 struct IdPath {
   DomainIdType domain;
@@ -174,11 +176,14 @@ struct ImageData {
   typedef std::vector<A> ReaderSeq;
   typedef std::vector<W> WriterSeq;
 
+  ImageData() : imageFederationIdValid(false) {}
   unsigned long  sequenceNumber;
   TopicSeq       topics;
   ParticipantSeq participants;
   ReaderSeq      actors;
   WriterSeq      wActors;
+  bool           imageFederationIdValid;
+  RepoKey        imageFederationId;
 };
 typedef struct ImageData<UTopic*, UParticipant*, URActor*, UWActor*> UImage;
 typedef struct ImageData<DTopic,  DParticipant,  DActor,   DActor>   DImage;
