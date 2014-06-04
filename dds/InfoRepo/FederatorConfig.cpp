@@ -114,7 +114,6 @@ int random_id()
   ACE_OS::gettimeofday().msec(msec);
   ACE_OS::srand((unsigned int)msec);
   const int r = ACE_OS::rand();
-  ACE_DEBUG((LM_DEBUG, "SETTING FederationID to %d\n", r));
   return r;
 }
 
@@ -155,6 +154,7 @@ void hash_endpoints(::CORBA::Long& hash, const ACE_TCHAR* const endpoints_str)
 ::CORBA::Long hash_endpoints(int argc, ACE_TCHAR** argv)
 {
   ::CORBA::Long hash = 0;
+  bool found = false;
   for (int i = 0; i < argc - 1; ++i) {
     if (ACE_OS::strncasecmp(argv[i], ACE_TEXT("-ORB"), ACE_OS::strlen(ACE_TEXT("-ORB"))) == 0 &&
         (ACE_OS::strcasecmp(ACE_TEXT("-ORBEndpoint"), argv[i]) == 0 ||
@@ -163,7 +163,11 @@ void hash_endpoints(::CORBA::Long& hash, const ACE_TCHAR* const endpoints_str)
          ACE_OS::strcasecmp(ACE_TEXT("-ORBLaneListenEndpoints"), argv[i]) == 0)) {
       const ACE_TCHAR* enpoints = argv[++i];
       hash_endpoints(hash, enpoints);
+      found = true;
     }
+  }
+  if (!found) {
+    hash = random_id();
   }
   ACE_DEBUG((LM_DEBUG, "SETTING FederationID to %d\n", hash));
   return hash;
@@ -185,7 +189,7 @@ Config::FEDERATE_WITH_OPTION(ACE_TEXT("-FederateWith"));
 
 Config::Config(int argc, ACE_TCHAR** argv)
   : argc_(0),
-    federationId_(NIL_REPOSITORY),//hash_endpoints(argc, argv)),
+    federationId_(hash_endpoints(argc, argv)),
     federationIdDefaulted_(true),
     federationDomain_(DEFAULT_FEDERATIONDOMAIN),
     federationPort_(-1)
