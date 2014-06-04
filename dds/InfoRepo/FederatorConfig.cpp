@@ -121,7 +121,6 @@ int random_id()
 void hash_endpoint(::CORBA::Long& hash, const char* const endpoint, const size_t len)
 {
   std::string toprint(endpoint, len);
-  ACE_DEBUG((LM_DEBUG, "hash_endpoints parsing endpoint=%C\n", toprint.c_str()));
   if (len > 0)
   {
     for (size_t i = 0; i < len; i++)
@@ -135,24 +134,19 @@ void hash_endpoint(::CORBA::Long& hash, const char* const endpoint, const size_t
 void hash_endpoint(::CORBA::Long& hash, const wchar_t* const endpoint, const size_t len)
 {
   // treat the wchar string as a double length string
-  hash_endpoint(hash, reinterpret_cast<const char*>endpoint, len * 2);
+  hash_endpoint(hash, reinterpret_cast<const char*>(endpoint), len * 2);
 }
 #endif
 
 void hash_endpoints(::CORBA::Long& hash, const ACE_TCHAR* const endpoints_str)
 {
-  ACE_DEBUG((LM_DEBUG, "hash_endpoints parsing\n"));
   const ACE_TCHAR* delim = ACE_TEXT(";");
   const size_t len = ACE_OS::strlen(endpoints_str);
-  ACE_DEBUG((LM_DEBUG, "hash_endpoints parsing len=%d\n", len));
   const ACE_TCHAR* curr = endpoints_str;
   while (curr < endpoints_str + len) {
-    ACE_DEBUG((LM_DEBUG, "hash_endpoints curr=%@\n", curr));
     const ACE_TCHAR* next = ACE_OS::strstr(curr, delim);
-    ACE_DEBUG((LM_DEBUG, "hash_endpoints curr=%@, next=%@\n", curr, next));
     if (next == 0)
       next = endpoints_str + len;
-    ACE_DEBUG((LM_DEBUG, "hash_endpoints curr=%@, next=%@\n", curr, next));
     hash_endpoint(hash, curr, (next - curr));
     curr = next + 1;
   }
@@ -160,21 +154,18 @@ void hash_endpoints(::CORBA::Long& hash, const ACE_TCHAR* const endpoints_str)
 
 ::CORBA::Long hash_endpoints(int argc, ACE_TCHAR** argv)
 {
-  ACE_DEBUG((LM_DEBUG, "hash_endpoints\n"));
   ::CORBA::Long hash = 0;
   for (int i = 0; i < argc - 1; ++i) {
-    ACE_DEBUG((LM_DEBUG, "HASHING arg=%i\n", i));
-    if (ACE_OS::strncasecmp(argv[i], "-ORB", ACE_OS::strlen("-ORB")) == 0 &&
-        (ACE_OS::strcasecmp("-ORBEndpoint", argv[i]) == 0 ||
-         ACE_OS::strcasecmp("-ORBListenEndpoints", argv[i]) == 0 ||
-         ACE_OS::strcasecmp("-ORBLaneEndpoint", argv[i]) == 0 ||
-         ACE_OS::strcasecmp("-ORBLaneListenEndpoints", argv[i]) == 0)) {
-      ACE_DEBUG((LM_DEBUG, "HASHING endpoint arg=%i\n", i));
+    if (ACE_OS::strncasecmp(argv[i], ACE_TEXT("-ORB"), ACE_OS::strlen(ACE_TEXT("-ORB"))) == 0 &&
+        (ACE_OS::strcasecmp(ACE_TEXT("-ORBEndpoint"), argv[i]) == 0 ||
+         ACE_OS::strcasecmp(ACE_TEXT("-ORBListenEndpoints"), argv[i]) == 0 ||
+         ACE_OS::strcasecmp(ACE_TEXT("-ORBLaneEndpoint"), argv[i]) == 0 ||
+         ACE_OS::strcasecmp(ACE_TEXT("-ORBLaneListenEndpoints"), argv[i]) == 0)) {
       const ACE_TCHAR* enpoints = argv[++i];
       hash_endpoints(hash, enpoints);
     }
   }
-  ACE_DEBUG((LM_DEBUG, "HASHING hash=%d\n", hash));
+  ACE_DEBUG((LM_DEBUG, "SETTING FederationID to %d\n", hash));
   return hash;
 }
 
