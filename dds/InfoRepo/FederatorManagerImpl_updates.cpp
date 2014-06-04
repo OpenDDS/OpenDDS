@@ -44,7 +44,7 @@ ManagerImpl::create(const Update::UTopic& topic)
   }
 
   TopicUpdate sample;
-  sample.sender      = this->id();
+  sample.sender      = this->id().id();
   sample.action      = CreateEntity;
 
   sample.id          = topic.topicId;
@@ -78,7 +78,7 @@ ManagerImpl::create(const Update::UParticipant& participant)
   }
 
   ParticipantUpdate sample;
-  sample.sender = this->id();
+  sample.sender = this->id().id();
   sample.action = CreateEntity;
 
   sample.owner  = participant.owner;
@@ -108,7 +108,7 @@ ManagerImpl::create(const Update::URActor& reader)
   }
 
   SubscriptionUpdate sample;
-  sample.sender         = this->id();
+  sample.sender         = this->id().id();
   sample.action         = CreateEntity;
 
   sample.domain         = reader.domainId;
@@ -146,7 +146,7 @@ ManagerImpl::create(const Update::UWActor& writer)
   }
 
   PublicationUpdate sample;
-  sample.sender         = this->id();
+  sample.sender         = this->id().id();
   sample.action         = CreateEntity;
 
   sample.domain         = writer.domainId;
@@ -182,7 +182,7 @@ ManagerImpl::create(const Update::OwnershipData& data)
   }
 
   OwnerUpdate sample;
-  sample.sender      = this->id();
+  sample.sender      = this->id().id();
   sample.action      = CreateEntity;
 
   sample.domain      = data.domain;
@@ -194,7 +194,7 @@ ManagerImpl::create(const Update::OwnershipData& data)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( OwnerUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(converter).c_str(),
                sample.sender,
@@ -226,7 +226,7 @@ ManagerImpl::destroy(
     }
 
     TopicUpdate sample;
-    sample.sender      = this->id();
+    sample.sender      = this->id().id();
     sample.action      = DestroyEntity;
 
     sample.id          = id.id;
@@ -239,7 +239,7 @@ ManagerImpl::destroy(
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( TopicUpdate): ")
                  ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
-                 this->id(),
+                 this->id().id(),
                  sample.domain,
                  std::string(part_converter).c_str(),
                  std::string(topic_converter).c_str()));
@@ -256,7 +256,7 @@ ManagerImpl::destroy(
     }
 
     ParticipantUpdate sample;
-    sample.sender = this->id();
+    sample.sender = this->id().id();
     sample.action = DestroyEntity;
 
     sample.domain = id.domain;
@@ -267,7 +267,7 @@ ManagerImpl::destroy(
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( ParticipantUpdate): ")
                  ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
-                 this->id(),
+                 this->id().id(),
                  sample.domain,
                  std::string(converter).c_str()));
     }
@@ -287,7 +287,7 @@ ManagerImpl::destroy(
       }
 
       PublicationUpdate sample;
-      sample.sender         = this->id();
+      sample.sender         = this->id().id();
       sample.action         = DestroyEntity;
 
       sample.domain         = id.domain;
@@ -300,7 +300,7 @@ ManagerImpl::destroy(
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( PublicationUpdate): ")
                    ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-                   this->id(),
+                   this->id().id(),
                    sample.domain,
                    std::string(part_converter).c_str(),
                    std::string(pub_converter).c_str()));
@@ -317,7 +317,7 @@ ManagerImpl::destroy(
       }
 
       SubscriptionUpdate sample;
-      sample.sender         = this->id();
+      sample.sender         = this->id().id();
       sample.action         = DestroyEntity;
 
       sample.domain         = id.domain;
@@ -330,7 +330,7 @@ ManagerImpl::destroy(
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Federator::ManagerImpl::destroy( SubscriptionUpdate): ")
                    ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-                   this->id(),
+                   this->id().id(),
                    sample.domain,
                    std::string(part_converter).c_str(),
                    std::string(sub_converter).c_str()));
@@ -354,7 +354,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DomainParticipantQos& q
   }
 
   ParticipantUpdate sample;
-  sample.sender = this->id();
+  sample.sender = this->id().id();
   sample.action = UpdateQosValue1;
 
   sample.domain = id.domain;
@@ -366,7 +366,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DomainParticipantQos& q
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( ParticipantUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(converter).c_str()));
   }
@@ -383,7 +383,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::TopicQos& qos)
   }
 
   TopicUpdate sample;
-  sample.sender      = this->id();
+  sample.sender      = this->id().id();
   sample.action      = UpdateQosValue1;
 
   sample.id          = id.id;
@@ -397,7 +397,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::TopicQos& qos)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( TopicUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(topic_converter).c_str()));
@@ -415,7 +415,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DataWriterQos& qos)
   }
 
   PublicationUpdate sample;
-  sample.sender         = this->id();
+  sample.sender         = this->id().id();
   sample.action         = UpdateQosValue1;
 
   sample.domain         = id.domain;
@@ -429,7 +429,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DataWriterQos& qos)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( WriterUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(pub_converter).c_str()));
@@ -447,7 +447,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::PublisherQos& qos)
   }
 
   PublicationUpdate sample;
-  sample.sender         = this->id();
+  sample.sender         = this->id().id();
   sample.action         = UpdateQosValue2;
 
   sample.domain         = id.domain;
@@ -461,7 +461,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::PublisherQos& qos)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( PublisherUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(pub_converter).c_str()));
@@ -479,7 +479,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DataReaderQos& qos)
   }
 
   SubscriptionUpdate sample;
-  sample.sender         = this->id();
+  sample.sender         = this->id().id();
   sample.action         = UpdateQosValue1;
 
   sample.domain         = id.domain;
@@ -493,7 +493,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::DataReaderQos& qos)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( ReaderUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -511,7 +511,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::StringSeq& params)
   }
 
   SubscriptionUpdate sample;
-  sample.sender            = this->id();
+  sample.sender            = this->id().id();
   sample.action            = UpdateFilterExpressionParams;
   sample.domain            = id.domain;
   sample.participant       = id.participant;
@@ -524,7 +524,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::StringSeq& params)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::update(FilterParams): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -542,7 +542,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::SubscriberQos& qos)
   }
 
   SubscriptionUpdate sample;
-  sample.sender         = this->id();
+  sample.sender         = this->id().id();
   sample.action         = UpdateQosValue2;
 
   sample.domain         = id.domain;
@@ -556,7 +556,7 @@ ManagerImpl::update(const Update::IdPath& id, const DDS::SubscriberQos& qos)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::update( SubscriberUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -579,7 +579,7 @@ ManagerImpl::processCreate(const OwnerUpdate* sample, const DDS::SampleInfo* /* 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( OwnerUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(converter).c_str(),
                sample->sender,
@@ -617,7 +617,7 @@ ManagerImpl::processCreate(const PublicationUpdate* sample, const DDS::SampleInf
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( PublicationUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(pub_converter).c_str()));
@@ -658,7 +658,7 @@ ManagerImpl::processCreate(const SubscriptionUpdate* sample, const DDS::SampleIn
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( SubscriptionUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -700,7 +700,7 @@ ManagerImpl::processCreate(const ParticipantUpdate* sample, const DDS::SampleInf
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( ParticipantUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ owner %d ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(converter).c_str(),
                sample->owner));
@@ -727,7 +727,7 @@ ManagerImpl::processCreate(const TopicUpdate* sample, const DDS::SampleInfo* /* 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processCreate( TopicUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(topic_converter).c_str()));
@@ -776,7 +776,7 @@ ManagerImpl::processDeferred()
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( OwnerUpdate): ")
                      ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
-                     this->id(),
+                     this->id().id(),
                      current->domain,
                      std::string(converter).c_str(),
                      current->sender,
@@ -807,7 +807,7 @@ ManagerImpl::processDeferred()
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( TopicUpdate): ")
                      ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
-                     this->id(),
+                     this->id().id(),
                      current->domain,
                      std::string(part_converter).c_str(),
                      std::string(topic_converter).c_str()));
@@ -841,7 +841,7 @@ ManagerImpl::processDeferred()
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( PublicationUpdate): ")
                      ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-                     this->id(),
+                     this->id().id(),
                      current->domain,
                      std::string(part_converter).c_str(),
                      std::string(pub_converter).c_str()));
@@ -877,7 +877,7 @@ ManagerImpl::processDeferred()
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDeferred( SubscriptionUpdate): ")
                      ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-                     this->id(),
+                     this->id().id(),
                      current->domain,
                      std::string(part_converter).c_str(),
                      std::string(sub_converter).c_str()));
@@ -901,7 +901,7 @@ ManagerImpl::processUpdateQos1(const OwnerUpdate* sample, const DDS::SampleInfo*
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( OwnerUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(converter).c_str(),
                sample->sender,
@@ -934,7 +934,7 @@ ManagerImpl::processUpdateQos1(const PublicationUpdate* sample, const DDS::Sampl
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( PublicationUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(pub_converter).c_str()));
@@ -956,7 +956,7 @@ ManagerImpl::processUpdateQos2(const PublicationUpdate* sample, const DDS::Sampl
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos2( PublicationUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(pub_converter).c_str()));
@@ -978,7 +978,7 @@ ManagerImpl::processUpdateQos1(const SubscriptionUpdate* sample, const DDS::Samp
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( SubscriptionUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -1000,7 +1000,7 @@ ManagerImpl::processUpdateQos2(const SubscriptionUpdate* sample, const DDS::Samp
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos2( SubscriptionUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -1023,7 +1023,7 @@ ManagerImpl::processUpdateFilterExpressionParams(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateFilterExpressionParams(SubscriptionUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -1044,7 +1044,7 @@ ManagerImpl::processUpdateQos1(const ParticipantUpdate* sample, const DDS::Sampl
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( ParticipantUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(converter).c_str()));
   }
@@ -1064,7 +1064,7 @@ ManagerImpl::processUpdateQos1(const TopicUpdate* sample, const DDS::SampleInfo*
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processUpdateQos1( TopicUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(topic_converter).c_str()));
@@ -1085,7 +1085,7 @@ ManagerImpl::processDelete(const OwnerUpdate* sample, const DDS::SampleInfo* /* 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( OwnerUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ sender %d/ owner %d ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(converter).c_str(),
                sample->sender,
@@ -1118,7 +1118,7 @@ ManagerImpl::processDelete(const PublicationUpdate* sample, const DDS::SampleInf
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( PublicationUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(pub_converter).c_str()));
@@ -1148,7 +1148,7 @@ ManagerImpl::processDelete(const SubscriptionUpdate* sample, const DDS::SampleIn
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( SubscriptionUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -1177,7 +1177,7 @@ ManagerImpl::processDelete(const ParticipantUpdate* sample, const DDS::SampleInf
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( ParticipantUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(converter).c_str()));
   }
@@ -1196,7 +1196,7 @@ ManagerImpl::processDelete(const TopicUpdate* sample, const DDS::SampleInfo* /* 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( TopicUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample->domain,
                std::string(part_converter).c_str(),
                std::string(topic_converter).c_str()));
@@ -1256,7 +1256,7 @@ ManagerImpl::pushState(Manager_ptr peer)
 
       // Initialize the participant on the peer.
       ParticipantUpdate participantSample;
-      participantSample.sender = this->id();
+      participantSample.sender = this->id().id();
       participantSample.action = CreateEntity;
 
       participantSample.owner  =  currentParticipant->second->owner();
@@ -1268,7 +1268,7 @@ ManagerImpl::pushState(Manager_ptr peer)
 
       // Initialize the ownership of the participant on the peer.
       OwnerUpdate ownerSample;
-      ownerSample.sender      = this->id();
+      ownerSample.sender      = this->id().id();
       ownerSample.action      = CreateEntity;
 
       ownerSample.domain      = currentDomain->second->get_id();
@@ -1295,7 +1295,7 @@ ManagerImpl::pushState(Manager_ptr peer)
            currentTopic != currentParticipant->second->topics().end();
            ++currentTopic) {
         TopicUpdate topicSample;
-        topicSample.sender      = this->id();
+        topicSample.sender      = this->id().id();
         topicSample.action      = CreateEntity;
 
         topicSample.id          = currentTopic->second->get_id();
@@ -1314,7 +1314,7 @@ ManagerImpl::pushState(Manager_ptr peer)
            currentPublication != currentParticipant->second->publications().end();
            ++currentPublication) {
         PublicationUpdate publicationSample;
-        publicationSample.sender         = this->id();
+        publicationSample.sender         = this->id().id();
         publicationSample.action         = CreateEntity;
 
         DCPS_IR_Publication* p = currentPublication->second;
@@ -1339,7 +1339,7 @@ ManagerImpl::pushState(Manager_ptr peer)
            currentSubscription != currentParticipant->second->subscriptions().end();
            ++currentSubscription) {
         SubscriptionUpdate subscriptionSample;
-        subscriptionSample.sender         = this->id();
+        subscriptionSample.sender         = this->id().id();
         subscriptionSample.action         = CreateEntity;
 
         DCPS_IR_Subscription* s = currentSubscription->second;

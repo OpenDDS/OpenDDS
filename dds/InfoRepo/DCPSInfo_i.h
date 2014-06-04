@@ -17,6 +17,7 @@
 #include /**/ "DCPS_IR_Subscription.h"
 #include /**/ "DCPS_IR_Domain.h"
 #include "dds/DCPS/RepoIdGenerator.h"
+#include "FederationId.h"
 #include "UpdateManager.h"
 
 #include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
@@ -57,8 +58,8 @@ public:
   TAO_DDS_DCPSInfo_i(
     CORBA::ORB_ptr orb,
     bool reincarnate,
-    ShutdownInterface* shutdown = 0,
-    long federation = 0);
+    ShutdownInterface* shutdown,
+    const TAO_DDS_DCPSFederationId& federation);
 
   //Destructor
   virtual ~TAO_DDS_DCPSInfo_i();
@@ -409,7 +410,7 @@ private:
   CORBA::ORB_var orb_;
   CORBA::ORB_var dispatchingOrb_;
 
-  long            federation_;
+  const TAO_DDS_DCPSFederationId& federation_;
   RepoIdGenerator participantIdGenerator_;
 
   Update::Manager* um_;

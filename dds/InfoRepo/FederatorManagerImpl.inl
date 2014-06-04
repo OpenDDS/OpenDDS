@@ -6,15 +6,17 @@
  * See: http://www.opendds.org/license.html
  */
 
+/*
 ACE_INLINE
 void
 OpenDDS::Federator::ManagerImpl::id(RepoKey val)
 {
   this->config_.federationId(val);
 }
+*/
 
 ACE_INLINE
-OpenDDS::Federator::RepoKey
+const TAO_DDS_DCPSFederationId&
 OpenDDS::Federator::ManagerImpl::id() const
 {
   return this->config_.federationId();
@@ -54,11 +56,3 @@ OpenDDS::Federator::ManagerImpl::orb(CORBA::ORB_ptr value)
 {
   this->orb_ = CORBA::ORB::_duplicate(value);
 }
-
-ACE_INLINE
-bool
-OpenDDS::Federator::ManagerImpl::idDefaulted() const
-{
-  return this->config_.federationIdDefaulted();
-}
-

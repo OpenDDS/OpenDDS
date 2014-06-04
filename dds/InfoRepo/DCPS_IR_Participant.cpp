@@ -8,6 +8,7 @@
 
 #include "DcpsInfo_pch.h"
 #include /**/ "DCPS_IR_Participant.h"
+#include "FederationId.h"
 #include "UpdateManager.h"
 
 #include /**/ "DCPS_IR_Domain.h"
@@ -21,7 +22,7 @@
 
 #include /**/ "tao/debug.h"
 
-DCPS_IR_Participant::DCPS_IR_Participant(long federationId,
+DCPS_IR_Participant::DCPS_IR_Participant(const TAO_DDS_DCPSFederationId& federationId,
                                          OpenDDS::DCPS::RepoId id,
                                          DCPS_IR_Domain* domain,
                                          DDS::DomainParticipantQos qos,
@@ -33,17 +34,17 @@ DCPS_IR_Participant::DCPS_IR_Participant(long federationId,
     handle_(0),
     isBIT_(0),
     federationId_(federationId),
-    owner_(federationId),
+    owner_(federationId.overridden() ? OWNER_NONE : federationId.id()),
     topicIdGenerator_(
-      federationId,
+      federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
       OpenDDS::DCPS::KIND_TOPIC),
     publicationIdGenerator_(
-      federationId,
+      federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
       OpenDDS::DCPS::KIND_WRITER),
     subscriptionIdGenerator_(
-      federationId,
+      federationId.id(),
       OpenDDS::DCPS::RepoIdConverter(id).participantId(),
       OpenDDS::DCPS::KIND_READER),
     um_(um),
@@ -122,7 +123,7 @@ DCPS_IR_Participant::takeOwnership()
       Update::OwnershipData(
         this->domain_->get_id(),
         this->id_,
-        this->federationId_));
+        this->federationId_.id()));
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
       OpenDDS::DCPS::RepoIdConverter converter(id_);
@@ -135,7 +136,7 @@ DCPS_IR_Participant::takeOwnership()
   }
 
   // And now handle our internal ownership processing.
-  this->changeOwner(this->federationId_, this->federationId_);
+  this->changeOwner(this->federationId_.id(), this->federationId_.id());
 }
 
 void
@@ -170,7 +171,7 @@ DCPS_IR_Participant::owner() const
 bool
 DCPS_IR_Participant::isOwner() const
 {
-  return this->owner_ == this->federationId_;
+  return this->owner_ == this->federationId_.id();
 }
 
 bool&
@@ -939,7 +940,11 @@ DCPS_IR_Participant::dump_to_string(const std::string& prefix, int depth) const
   if (isBIT_)
     str += " (BIT)";
   std::ostringstream os;
-  os << "federation id[" << federationId_ << "]  owner[" << owner_ << "]";
+  os << "federation id[" << federationId_.id();
+  if (federationId_.overridden())
+    os << "(federated)";
+
+  os << "]  owner[" << owner_ << "]";
   str += os.str();
   str += aliveStatus_ ? " (alive)" : " (not alive)";
   str += "\n";

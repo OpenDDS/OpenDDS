@@ -83,11 +83,11 @@ ManagerImpl::initialize()
 
   // Let the listeners know which repository we are to filter samples at
   // the earliest opportunity.
-  this->ownerListener_.federationId(this->id(), this->idDefaulted());
-  this->topicListener_.federationId(this->id(), this->idDefaulted());
-  this->participantListener_.federationId(this->id(), this->idDefaulted());
-  this->publicationListener_.federationId(this->id(), this->idDefaulted());
-  this->subscriptionListener_.federationId(this->id(), this->idDefaulted());
+  this->ownerListener_.federationId(this->id());
+  this->topicListener_.federationId(this->id());
+  this->participantListener_.federationId(this->id());
+  this->publicationListener_.federationId(this->id());
+  this->subscriptionListener_.federationId(this->id());
 
   // Add participant for Federation domain
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
@@ -822,7 +822,7 @@ ManagerImpl::finalize()
                      this->id()));
 
         } else {
-          where->second->leave_federation(this->id());
+          where->second->leave_federation(this->id().id());
           this->federated_ = false;
         }
       }
@@ -871,7 +871,7 @@ ManagerImpl::federation_id()
                ACE_TEXT("(%P|%t) ManagerImpl::federation_id()\n")));
   }
 
-  return this->id();
+  return this->id().id();
 }
 
 OpenDDS::DCPS::DCPSInfo_ptr

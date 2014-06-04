@@ -91,7 +91,7 @@ ArgCopier::operator()(ACE_TCHAR* arg)
 
   case IDVALUE:
     // Capture the federation Id.
-    this->config_->federationId(ACE_OS::atoi(arg));
+    this->config_->federationId().id(ACE_OS::atoi(arg));
     break;
 
   case IORVALUE:
@@ -169,7 +169,6 @@ void hash_endpoints(::CORBA::Long& hash, const ACE_TCHAR* const endpoints_str)
   if (!found) {
     hash = random_id();
   }
-  ACE_DEBUG((LM_DEBUG, "SETTING FederationID to %d\n", hash));
   return hash;
 }
 
@@ -190,7 +189,6 @@ Config::FEDERATE_WITH_OPTION(ACE_TEXT("-FederateWith"));
 Config::Config(int argc, ACE_TCHAR** argv)
   : argc_(0),
     federationId_(hash_endpoints(argc, argv)),
-    federationIdDefaulted_(true),
     federationDomain_(DEFAULT_FEDERATIONDOMAIN),
     federationPort_(-1)
 {
@@ -297,7 +295,7 @@ Config::processFile()
   RepoKey idValue = ACE_OS::atoi(federationIdString.c_str());
 
   // Allow the command line to override the file value.
-  if (!this->federationIdDefaulted_) {
+  if (this->federationId_.overridden()) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t)   FederationId == %d from file ")
                ACE_TEXT("overridden by value %d from command line.\n"),
@@ -305,8 +303,7 @@ Config::processFile()
                this->federationId_));
 
   } else {
-    this->federationId_ = idValue;
-    this->federationIdDefaulted_ = false;
+    this->federationId_.id(idValue);
 
     if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
