@@ -231,33 +231,167 @@
 
    <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
       <?gmfgen generated="true"?>
-      <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.OpenDDSPolicyLibModelingAssistantProvider">
+      <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPolicyLibEditPart">
          <Priority name="Lowest"/>
          <object class="org.opendds.modeling.diagram.policylib.edit.parts.PolicyLibEditPart" id="PolicyLib_1000"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.DeadlineQosPolicyEditPart" id="DeadlineQosPolicy_2021"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.DestinationOrderQosPolicyEditPart" id="DestinationOrderQosPolicy_2022"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.DsQosPolicyEditPart" id="DsQosPolicy_2023"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.DurabilityQosPolicyEditPart" id="DurabilityQosPolicy_2024"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.EfQosPolicyEditPart" id="EfQosPolicy_2025"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.GdQosPolicyEditPart" id="GdQosPolicy_2026"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.HistoryQosPolicyEditPart" id="HistoryQosPolicy_2027"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.LbQosPolicyEditPart" id="LbQosPolicy_2028"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.LifespanQosPolicyEditPart" id="LifespanQosPolicy_2029"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.LivelinessQosPolicyEditPart" id="LivelinessQosPolicy_2030"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.OsQosPolicyEditPart" id="OsQosPolicy_2031"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.OwnershipQosPolicyEditPart" id="OwnershipQosPolicy_2032"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.PartitionQosPolicyEditPart" id="PartitionQosPolicy_2033"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.PresentationQosPolicyEditPart" id="PresentationQosPolicy_2034"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.RdlQosPolicyEditPart" id="RdlQosPolicy_2035"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.ReliabilityQosPolicyEditPart" id="ReliabilityQosPolicy_2036"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.RlQosPolicyEditPart" id="RlQosPolicy_2037"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.TbfQosPolicyEditPart" id="TbfQosPolicy_2038"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.TdQosPolicyEditPart" id="TdQosPolicy_2039"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.TpQosPolicyEditPart" id="TpQosPolicy_2040"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.UdQosPolicyEditPart" id="UdQosPolicy_2041"/>
-         <object class="org.opendds.modeling.diagram.policylib.edit.parts.WdlQosPolicyEditPart" id="WdlQosPolicy_2042"/>
-         <context elements="PolicyLib_1000,DeadlineQosPolicy_2021,DestinationOrderQosPolicy_2022,DsQosPolicy_2023,DurabilityQosPolicy_2024,EfQosPolicy_2025,GdQosPolicy_2026,HistoryQosPolicy_2027,LbQosPolicy_2028,LifespanQosPolicy_2029,LivelinessQosPolicy_2030,OsQosPolicy_2031,OwnershipQosPolicy_2032,PartitionQosPolicy_2033,PresentationQosPolicy_2034,RdlQosPolicy_2035,ReliabilityQosPolicy_2036,RlQosPolicy_2037,TbfQosPolicy_2038,TdQosPolicy_2039,TpQosPolicy_2040,UdQosPolicy_2041,WdlQosPolicy_2042"/>
+         <context elements="PolicyLib_1000"/>
       </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfDeadlineQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.DeadlineQosPolicyEditPart" id="DeadlineQosPolicy_2021"/>
+         <context elements="DeadlineQosPolicy_2021"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfDestinationOrderQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.DestinationOrderQosPolicyEditPart" id="DestinationOrderQosPolicy_2022"/>
+         <context elements="DestinationOrderQosPolicy_2022"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfDsQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.DsQosPolicyEditPart" id="DsQosPolicy_2023"/>
+         <context elements="DsQosPolicy_2023"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfDurabilityQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.DurabilityQosPolicyEditPart" id="DurabilityQosPolicy_2024"/>
+         <context elements="DurabilityQosPolicy_2024"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfEfQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.EfQosPolicyEditPart" id="EfQosPolicy_2025"/>
+         <context elements="EfQosPolicy_2025"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfGdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.GdQosPolicyEditPart" id="GdQosPolicy_2026"/>
+         <context elements="GdQosPolicy_2026"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfHistoryQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.HistoryQosPolicyEditPart" id="HistoryQosPolicy_2027"/>
+         <context elements="HistoryQosPolicy_2027"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfLbQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.LbQosPolicyEditPart" id="LbQosPolicy_2028"/>
+         <context elements="LbQosPolicy_2028"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfLifespanQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.LifespanQosPolicyEditPart" id="LifespanQosPolicy_2029"/>
+         <context elements="LifespanQosPolicy_2029"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfLivelinessQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.LivelinessQosPolicyEditPart" id="LivelinessQosPolicy_2030"/>
+         <context elements="LivelinessQosPolicy_2030"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfOsQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.OsQosPolicyEditPart" id="OsQosPolicy_2031"/>
+         <context elements="OsQosPolicy_2031"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfOwnershipQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.OwnershipQosPolicyEditPart" id="OwnershipQosPolicy_2032"/>
+         <context elements="OwnershipQosPolicy_2032"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPartitionQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.PartitionQosPolicyEditPart" id="PartitionQosPolicy_2033"/>
+         <context elements="PartitionQosPolicy_2033"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPresentationQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.PresentationQosPolicyEditPart" id="PresentationQosPolicy_2034"/>
+         <context elements="PresentationQosPolicy_2034"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfRdlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.RdlQosPolicyEditPart" id="RdlQosPolicy_2035"/>
+         <context elements="RdlQosPolicy_2035"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfReliabilityQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.ReliabilityQosPolicyEditPart" id="ReliabilityQosPolicy_2036"/>
+         <context elements="ReliabilityQosPolicy_2036"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfRlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.RlQosPolicyEditPart" id="RlQosPolicy_2037"/>
+         <context elements="RlQosPolicy_2037"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfTbfQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.TbfQosPolicyEditPart" id="TbfQosPolicy_2038"/>
+         <context elements="TbfQosPolicy_2038"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfTdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.TdQosPolicyEditPart" id="TdQosPolicy_2039"/>
+         <context elements="TdQosPolicy_2039"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfTpQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.TpQosPolicyEditPart" id="TpQosPolicy_2040"/>
+         <context elements="TpQosPolicy_2040"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfUdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.UdQosPolicyEditPart" id="UdQosPolicy_2041"/>
+         <context elements="UdQosPolicy_2041"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfWdlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.WdlQosPolicyEditPart" id="WdlQosPolicy_2042"/>
+         <context elements="WdlQosPolicy_2042"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriodEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.PeriodEditPart" id="Period_3001"/>
+         <context elements="Period_3001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriod2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.Period2EditPart" id="Period_3002"/>
+         <context elements="Period_3002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriod3EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.Period3EditPart" id="Period_3003"/>
+         <context elements="Period_3003"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriod4EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.Period4EditPart" id="Period_3004"/>
+         <context elements="Period_3004"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriod5EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.Period5EditPart" id="Period_3005"/>
+         <context elements="Period_3005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriod6EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.Period6EditPart" id="Period_3007"/>
+         <context elements="Period_3007"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriod7EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.Period7EditPart" id="Period_3008"/>
+         <context elements="Period_3008"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriod8EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.Period8EditPart" id="Period_3006"/>
+         <context elements="Period_3006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.policylib.providers.assistants.OpenDDSPolicyLibModelingAssistantProviderOfPeriod9EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.policylib.edit.parts.Period9EditPart" id="Period_3009"/>
+         <context elements="Period_3009"/>
+      </modelingAssistantProvider>
+      
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">
