@@ -453,9 +453,9 @@ TransportClient::remove_all_msgs()
 }
 
 void
-TransportClient::send_delayed_notifications()
+TransportClient::send_delayed_notifications(const TransportQueueElement::MatchCriteria* match)
 {
-  links_.send_delayed_notifications();
+  links_.send_delayed_notifications(match);
 }
 
 // MultiReservLock nested class

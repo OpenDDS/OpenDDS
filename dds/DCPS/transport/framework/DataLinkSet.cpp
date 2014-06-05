@@ -106,7 +106,7 @@ OpenDDS::DCPS::DataLinkSet::empty()
 }
 
 void
-OpenDDS::DCPS::DataLinkSet::send_delayed_notifications()
+OpenDDS::DCPS::DataLinkSet::send_delayed_notifications(const TransportQueueElement::MatchCriteria* match)
 {
   std::vector<DataLink_rch>  data_links;
   {
@@ -122,6 +122,6 @@ OpenDDS::DCPS::DataLinkSet::send_delayed_notifications()
   for (std::vector<DataLink_rch>::iterator link = data_links.begin();
        link != data_links.end(); ++link)
   {
-    (*link)->send_delayed_notifications();
+    (*link)->send_delayed_notifications(match);
   }
 }

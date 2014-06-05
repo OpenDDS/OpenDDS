@@ -77,7 +77,7 @@ public:
 
   typedef std::map<DataLinkIdType, DataLink_rch> MapType;
 
-  void send_delayed_notifications();
+  void send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
 
   //{@
   /// Accessors for external iteration

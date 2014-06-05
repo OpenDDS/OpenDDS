@@ -1854,7 +1854,8 @@ DataWriterImpl::unregister_all()
   data_container_->unregister_all();
 
   // Out of scope of WriteDataContainer's lock
-  send_delayed_notifications();
+  const TransportQueueElement::MatchOnPubId match(get_publication_id());
+  send_delayed_notifications(&match);
 }
 
 RepoId

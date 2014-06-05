@@ -76,7 +76,7 @@ protected:
   bool remove_all_msgs();
 
 protected:
-  void send_delayed_notifications();
+  void send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
   
 private:
 

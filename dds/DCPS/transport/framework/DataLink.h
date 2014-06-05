@@ -114,7 +114,7 @@ public:
                             DataLinkSetMap& released_locals);
 
   /// Send any delayed notifications waiting in send strategy
-  void send_delayed_notifications();
+  void send_delayed_notifications(const TransportQueueElement::MatchCriteria* match = 0);
 
   void schedule_delayed_release();
 

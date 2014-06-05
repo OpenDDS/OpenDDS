@@ -1435,7 +1435,7 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
 }
 
 void
-DataLink::send_delayed_notifications()
+DataLink::send_delayed_notifications(const TransportQueueElement::MatchCriteria* match)
 {
   TransportSendStrategy_rch strategy;
   {
@@ -1445,7 +1445,7 @@ DataLink::send_delayed_notifications()
   }
 
   if (!strategy.is_nil()) {
-    strategy->send_delayed_notifications();
+    strategy->send_delayed_notifications(match);
   }
 }
 
