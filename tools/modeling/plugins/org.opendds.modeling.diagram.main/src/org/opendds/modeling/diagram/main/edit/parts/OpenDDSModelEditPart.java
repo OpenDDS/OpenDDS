@@ -18,9 +18,11 @@ import org.eclipse.gmf.runtime.diagram.ui.requests.DropObjectsRequest;
 import org.eclipse.gmf.runtime.emf.core.util.EObjectAdapter;
 import org.eclipse.gmf.runtime.notation.Node;
 import org.eclipse.gmf.runtime.notation.View;
+import org.eclipse.gmf.tooling.runtime.edit.policies.reparent.CreationEditPolicyWithCustomReparent;
 import org.opendds.modeling.diagram.main.edit.commands.OpenDDSCreateShortcutDecorationsCommand;
 import org.opendds.modeling.diagram.main.edit.policies.OpenDDSModelCanonicalEditPolicy;
 import org.opendds.modeling.diagram.main.edit.policies.OpenDDSModelItemSemanticEditPolicy;
+import org.opendds.modeling.diagram.main.part.OpenDDSVisualIDRegistry;
 
 /**
  * @generated
@@ -53,13 +55,16 @@ public class OpenDDSModelEditPart extends DiagramEditPart {
 				new OpenDDSModelItemSemanticEditPolicy());
 		installEditPolicy(EditPolicyRoles.CANONICAL_ROLE,
 				new OpenDDSModelCanonicalEditPolicy());
+		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
+				new CreationEditPolicyWithCustomReparent(
+						OpenDDSVisualIDRegistry.TYPED_INSTANCE));
 		installEditPolicy(EditPolicyRoles.DRAG_DROP_ROLE,
 				new DiagramDragDropEditPolicy() {
 					public Command getDropObjectsCommand(
 							DropObjectsRequest dropRequest) {
-						List viewDescriptors = new ArrayList();
-						for (Iterator it = dropRequest.getObjects().iterator(); it
-								.hasNext();) {
+						ArrayList<CreateViewRequest.ViewDescriptor> viewDescriptors = new ArrayList<CreateViewRequest.ViewDescriptor>();
+						for (Iterator<?> it = dropRequest.getObjects()
+								.iterator(); it.hasNext();) {
 							Object nextObject = it.next();
 							if (false == nextObject instanceof EObject) {
 								continue;
@@ -76,7 +81,8 @@ public class OpenDDSModelEditPart extends DiagramEditPart {
 					}
 
 					private Command createShortcutsCommand(
-							DropObjectsRequest dropRequest, List viewDescriptors) {
+							DropObjectsRequest dropRequest,
+							List<CreateViewRequest.ViewDescriptor> viewDescriptors) {
 						Command command = createViewsAndArrangeCommand(
 								dropRequest, viewDescriptors);
 						if (command != null) {

@@ -168,8 +168,8 @@ public class OpenDDSCreationWizard extends Wizard implements INewWizard {
 			protected void execute(IProgressMonitor monitor)
 					throws CoreException, InterruptedException {
 				diagram = OpenDDSDiagramEditorUtil.createDiagram(
-						diagramModelFilePage.getURI(), domainModelFilePage
-								.getURI(), monitor);
+						diagramModelFilePage.getURI(),
+						domainModelFilePage.getURI(), monitor);
 				if (isOpenNewlyCreatedDiagramEditor() && diagram != null) {
 					try {
 						OpenDDSDiagramEditorUtil.openDiagram(diagram);
