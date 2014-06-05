@@ -52,6 +52,30 @@
             class="org.opendds.modeling.model.dcps.DCPSPackage"
             genModel="model/OpenDDS.genmodel"/>
    </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated OpenDDS -->
+      <package
+            uri="http://www.opendds.org/modeling/schemas/Application/1.0"
+            class="org.opendds.modeling.model.application.ApplicationPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated OpenDDS -->
+      <package
+            uri="http://www.opendds.org/modeling/schemas/Enumerations/1.0"
+            class="org.opendds.modeling.model.enumerations.EnumerationsPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated OpenDDS -->
+      <package
+            uri="http://www.opendds.org/modeling/schemas/Types/1.0"
+            class="org.opendds.modeling.model.types.TypesPackage"
+            genModel="model/OpenDDS.genmodel"/>
+   </extension>
    <extension
          id="openddsnature"
          name="OpenDDS Project"
