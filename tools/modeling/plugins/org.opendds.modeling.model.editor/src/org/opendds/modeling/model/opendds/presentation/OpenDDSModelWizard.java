@@ -207,8 +207,8 @@ public class OpenDDSModelWizard extends Wizard implements INewWizard {
 					}
 				}
 			}
-			Collections.sort(initialObjectNames, CommonPlugin.INSTANCE
-					.getComparator());
+			Collections.sort(initialObjectNames,
+					CommonPlugin.INSTANCE.getComparator());
 		}
 		return initialObjectNames;
 	}
@@ -302,9 +302,13 @@ public class OpenDDSModelWizard extends Wizard implements INewWizard {
 			// Open an editor on the new file.
 			//
 			try {
-				page.openEditor(new FileEditorInput(modelFile), workbench
-						.getEditorRegistry().getDefaultEditor(
-								modelFile.getFullPath().toString()).getId());
+				page.openEditor(
+						new FileEditorInput(modelFile),
+						workbench
+								.getEditorRegistry()
+								.getDefaultEditor(
+										modelFile.getFullPath().toString())
+								.getId());
 			} catch (PartInitException exception) {
 				MessageDialog.openError(workbenchWindow.getShell(),
 						OpenDDSEditorPlugin.INSTANCE
@@ -367,8 +371,8 @@ public class OpenDDSModelWizard extends Wizard implements INewWizard {
 		 * @generated
 		 */
 		public IFile getModelFile() {
-			return ResourcesPlugin.getWorkspace().getRoot().getFile(
-					getContainerFullPath().append(getFileName()));
+			return ResourcesPlugin.getWorkspace().getRoot()
+					.getFile(getContainerFullPath().append(getFileName()));
 		}
 	}
 
@@ -603,7 +607,8 @@ public class OpenDDSModelWizard extends Wizard implements INewWizard {
 				.getString("_UI_OpenDDSModelWizard_description"));
 		newFileCreationPage.setFileName(OpenDDSEditorPlugin.INSTANCE
 				.getString("_UI_OpenDDSEditorFilenameDefaultBase")
-				+ "." + FILE_EXTENSIONS.get(0));
+				+ "."
+				+ FILE_EXTENSIONS.get(0));
 		addPage(newFileCreationPage);
 
 		// Try and get the resource selection to determine a current directory for the file dialog.
