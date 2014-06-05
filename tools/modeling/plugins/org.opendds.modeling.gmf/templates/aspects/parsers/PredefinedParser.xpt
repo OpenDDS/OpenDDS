@@ -114,6 +114,11 @@
 				if (val == Integer.MAX_VALUE) {
 					values[i] = "Infinity";
 				}
+			} else if (values[i] instanceof Long) {
+				long val = (Long) values[i];
+				if (val == Integer.MAX_VALUE) {
+					values[i] = "Infinity";
+				}
 			}
 		}
 	}
