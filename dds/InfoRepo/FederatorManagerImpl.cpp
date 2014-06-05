@@ -505,7 +505,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation ParticipantUpdate writer %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -520,7 +520,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create ParticipantUpdate reader for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
 
   } else if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -538,7 +538,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation ParticipantUpdate reader %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -558,7 +558,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create PublicationUpdate writer for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -586,7 +586,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation PublicationUpdate writer %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -601,7 +601,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create PublicationUpdate reader for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
 
   } else if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -619,7 +619,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation PublicationUpdate reader %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -639,7 +639,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create SubscriptionUpdate writer for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -667,7 +667,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation SubscriptionUpdate writer %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -682,7 +682,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create SubscriptionUpdate reader for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
 
   } else if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -700,7 +700,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation SubscriptionUpdate reader %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -741,7 +741,7 @@ ManagerImpl::initialize()
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Unable to initialize ")
                    ACE_TEXT("the multicast responder for repository %d.\n"),
-                   this->id()));
+                   this->id().id()));
         throw Incomplete();
       }
 
@@ -758,7 +758,7 @@ ManagerImpl::initialize()
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Unable to initialize ")
                    ACE_TEXT("the multicast responder for repository %d.\n"),
-                   this->id()));
+                   this->id().id()));
         throw Incomplete();
       }
     }
@@ -769,7 +769,7 @@ ManagerImpl::initialize()
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Unable to register event handler ")
                  ACE_TEXT("for repository %d.\n"),
-                 this->id()));
+                 this->id().id()));
       throw Incomplete();
     }
 
@@ -812,14 +812,14 @@ ManagerImpl::finalize()
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) Federator::Manager::finalize: ")
                    ACE_TEXT("repository %d - all attachment to federation left.\n"),
-                   this->id()));
+                   this->id().id()));
 
       } else {
         if (CORBA::is_nil(where->second.in())) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("(%P|%t) ERROR: Federator::Manager::finalize: ")
                      ACE_TEXT("repository %d not currently attached to a federation.\n"),
-                     this->id()));
+                     this->id().id()));
 
         } else {
           where->second->leave_federation(this->id().id());
@@ -849,14 +849,14 @@ ManagerImpl::finalize()
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
                  ACE_TEXT("unable to release resources for repository %d.\n"),
-                 this->id()));
+                 this->id().id()));
 
     } else if (DDS::RETCODE_PRECONDITION_NOT_MET
                == dpf->delete_participant(this->federationParticipant_.in())) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Federator::Manager ")
                  ACE_TEXT("unable to release the participant for repository %d.\n"),
-                 this->id()));
+                 this->id().id()));
     }
   }
 }
@@ -935,7 +935,7 @@ ManagerImpl::join_federation(
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::join_federation() - ")
                  ACE_TEXT("repo id %d entered from repository with id %d.\n"),
-                 this->id(),
+                 this->id().id(),
                  remote));
     }
 
@@ -952,7 +952,7 @@ ManagerImpl::join_federation(
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::join_federation() - ")
                  ACE_TEXT("repo id %d leaving after reentry from repository with id %d.\n"),
-                 this->id(),
+                 this->id().id(),
                  remote));
     }
 
@@ -1002,7 +1002,7 @@ ManagerImpl::join_federation(
                    ACE_TEXT("(%P|%t) FederatorManagerImpl::join_federation() - ")
                    ACE_TEXT("id %d obtained reference to id %d:\n")
                    ACE_TEXT("\t%C\n"),
-                   this->id(),
+                   this->id().id(),
                    remote,
                    remoteRepoIor.in()));
       }
@@ -1040,7 +1040,7 @@ ManagerImpl::join_federation(
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::join_federation() - ")
                  ACE_TEXT("repo id %d pushing state to repository with id %d.\n"),
-                 this->id(),
+                 this->id().id(),
                  remote));
     }
 
@@ -1065,7 +1065,7 @@ ManagerImpl::join_federation(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::join_federation() - ")
                ACE_TEXT("repo id %d joined to repository with id %d.\n"),
-               this->id(),
+               this->id().id(),
                remote));
   }
 
@@ -1082,7 +1082,7 @@ ManagerImpl::leave_federation(
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ManagerImpl::leave_federation( %d)\n"),
-               this->id()));
+               this->id().id()));
   }
 
   // Remove the leaving repository from our outbound mappings.
@@ -1101,7 +1101,7 @@ ManagerImpl::leave_federation(
   if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ManagerImpl::leave_federation( %d) complete.\n"),
-               this->id()));
+               this->id().id()));
   }
 }
 

@@ -1,10 +1,16 @@
+Thu Jun  5 17:57:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Fixing error passing in POD type for ACE_DEBUG.
+
 Thu Jun  5 15:51:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/FederatorConfig.cpp:
         * dds/InfoRepo/FederatorManagerImpl.cpp:
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
 
-        * dds/idl/HTemplate.txt:
+          Fixing error passing in POD type for ACE_DEBUG.
 
 Wed Jun  4 16:50:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
