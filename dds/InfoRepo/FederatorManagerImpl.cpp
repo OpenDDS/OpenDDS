@@ -102,7 +102,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: create_participant failed for ")
                ACE_TEXT("repository %d in federation domain %d.\n"),
-               this->id(),
+               this->id().id(),
                this->config_.federationDomain()));
     throw Incomplete();
   }
@@ -119,7 +119,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Unable to install ")
                ACE_TEXT("OwnerUpdate type support for repository %d.\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -131,7 +131,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Unable to install ")
                ACE_TEXT("ParticipantUpdate type support for repository %d.\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -143,7 +143,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Unable to install ")
                ACE_TEXT("TopicUpdate type support for repository %d.\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -155,7 +155,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Unable to install ")
                ACE_TEXT("PublicationUpdate type support for repository %d.\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -167,7 +167,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Unable to install ")
                ACE_TEXT("SubscriptionUpdate type support for repository %d.\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -201,14 +201,14 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create subscriber for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
 
   } else if (OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("created federation subscriber for repository %d\n"),
-               this->id()));
+               this->id().id()));
 
   }
 
@@ -238,14 +238,14 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create publisher for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
 
   } else if (OpenDDS::DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("created federation publisher for repository %d\n"),
-               this->id()));
+               this->id().id()));
 
   }
 
@@ -316,7 +316,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create OwnerUpdate writer for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -343,7 +343,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation OwnerUpdate writer %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -358,7 +358,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create OwnerUpdate reader for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
 
   } else if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -376,7 +376,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation OwnerUpdate reader %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -396,7 +396,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create TopicUpdate writer for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 
@@ -424,7 +424,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation TopicUpdate writer %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -439,7 +439,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create TopicUpdate reader for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
 
   } else if (OpenDDS::DCPS::DCPS_debug_level > 4) {
@@ -457,7 +457,7 @@ ManagerImpl::initialize()
                  ACE_TEXT("(%P|%t) Federator::ManagerImpl::initialize() - ")
                  ACE_TEXT("created federation TopicUpdate reader %C for repository %d\n"),
                  std::string(converter).c_str(),
-                 this->id()));
+                 this->id().id()));
     }
   }
 
@@ -477,7 +477,7 @@ ManagerImpl::initialize()
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Federator::ManagerImpl::initialize() - ")
                ACE_TEXT("failed to create ParticipantUpdate writer for repository %d\n"),
-               this->id()));
+               this->id().id()));
     throw Incomplete();
   }
 

@@ -300,7 +300,7 @@ Config::processFile()
                ACE_TEXT("(%P|%t)   FederationId == %d from file ")
                ACE_TEXT("overridden by value %d from command line.\n"),
                idValue,
-               this->federationId_));
+               this->federationId_.id()));
 
   } else {
     this->federationId_.id(idValue);
@@ -308,7 +308,7 @@ Config::processFile()
     if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)   FederationId == %d\n"),
-                 this->federationId_));
+                 this->federationId_.id()));
     }
   }
 
