@@ -1,3 +1,24 @@
+Fri Jun  6 19:55:16 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo:
+        * tests/DCPS/PersistentInfoRepo/Listener.h:
+        * tests/DCPS/PersistentInfoRepo/Listener.cpp:
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/README:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/DCPS/PersistentInfoRepo/multicast.ini:
+        * tests/DCPS/PersistentInfoRepo/pub_multicast_async.ini:
+        * tests/DCPS/PersistentInfoRepo/rtps.ini:
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+        * tests/DCPS/PersistentInfoRepo/shmem.ini:
+        * tests/DCPS/PersistentInfoRepo/tcp.ini:
+        * tests/DCPS/PersistentInfoRepo/udp.ini:
+
+          Added preliminary test that will verify that a persistent
+          InfoRepo can associate data readers and data writers
+          that were created before and after the InfoRepo went down.
+
 Fri Jun  6 19:51:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils:
