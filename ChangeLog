@@ -1,3 +1,15 @@
+Fri Jun  6 20:56:37 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Method change from DDSApp.
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSFacade.h:
+
+          Added documentation.
+
 Fri Jun  6 19:55:16 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo:

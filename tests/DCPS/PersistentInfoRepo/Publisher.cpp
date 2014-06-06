@@ -22,7 +22,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   DDSApp dds(argc, argv);
   try {
     std::cout << "Pub Creating topic\n";
-    DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.topic< ::Xyz::FooDataWriterImpl>("bar");
+    DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.facade< ::Xyz::FooDataWriterImpl>("bar");
     // Create data writer for the topic
     // ?? fix to code gen will allow using ::Xyz::Foo
     std::cout << "Pub Creating writer\n";

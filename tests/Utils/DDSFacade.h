@@ -15,14 +15,31 @@
 
 #include <model/Sync.h>
 
-// Boilerplate code pulled out of mains of publisher and subscriber
-// in order to simplify this example.
 namespace TestUtils {
 
 class DDSApp;
 
-// TODO: change codegen and use Message
+/// Facade to represent a Topic and all the data readers and writers on the
+/// Topic.  The class will create or use default parameters when they are
+/// not provided.  Since a Topic only has one participant, all data readers
+/// and data writers are created on the same participant.
+///
+/// publishers: When a reader is created a publisher can either be
+/// explicitly provided (from a previous call to DDSApp.publisher) or is
+/// the default publisher.  The default publisher is set to the first
+/// created publisher (either set to the first publisher explicitly passed
+/// to writer(...) or to the implicitly created publisher from calling
+/// writer() with no publisher).
+///
+///
+/// subscribers: When a reader is created a subscriber can either be
+/// explicitly provided (from a previous call to DDSApp.subscriber) or is
+/// the default subscriber.  The default subscriber is set to the first
+/// created subscriber (either set to the first subscriber explicitly passed
+/// to reader(...) or to the implicitly created subscriber from calling
+/// reader() with no subscriber).
 template<typename WriterOrReaderImpl>
+// TODO: change codegen and use Message
 class DDSFacade
 {
 public:

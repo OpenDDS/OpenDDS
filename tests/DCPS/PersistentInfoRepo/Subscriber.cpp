@@ -62,7 +62,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   int status = 0;
   try {
     std::cout << "Sub Creating topic\n";
-    DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.topic< ::Xyz::FooDataWriterImpl>("bar");
+    DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.facade< ::Xyz::FooDataWriterImpl>("bar");
     // Create Listener
     ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>* listener_impl =
       new ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>;

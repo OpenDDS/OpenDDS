@@ -18,29 +18,57 @@
 #include <map>
 #include <string>
 
-// Boilerplate code pulled out of mains of publisher and subscriber
-// in order to simplify this example.
 namespace TestUtils {
 
+/// Application to represent all of DDS to the rest of an application that
+/// wants to send and receive DDS messages.  The class will create or use
+/// default parameters when they are not provided.
+///
+/// DDSFacade: This is the essential piece of DDS functionality, it is used
+/// to create data readers and data writers for a particular topic.  A
+/// DDSFacade will be created for a participant and a topic.  If the
+/// participant is not provided, it is set to the default participant (see
+/// below) and the topic is created in DDS when the DDSFacade is created.
+///
+/// domain_id: The domain_id is either provided when explicitly creating a
+/// participant, or the default_domain_id_ is used.  The
+/// default_domain_id_ will be set if it is explicitly set in the
+/// constructor or it will be set the the first domain_id explicitly passed
+/// when creating a participant (or else it will be 0).
+///
+/// participant: A participant can either be provided explicitly when
+/// creating a DDSFacade (by first calling participant(...)) or it will be
+/// set to the default_participant_.  The default_participant_ is set to
+/// the first participant that was created (either by calling
+/// participant(...) explicitly or by calling facade(...) and not providing
+/// a participant).
 class TestUtils_Export DDSApp
 {
 public:
   typedef std::map<DDS::DomainParticipant_ptr, DDS::DomainParticipant_var> Participants;
 
+  /// create a DDSApp with the provided command line (and default domain_id)
   DDSApp(int argc, ACE_TCHAR* argv[]);
   DDSApp(int argc, ACE_TCHAR* argv[], ::DDS::DomainId_t default_domain_id);
   ~DDSApp();
 
+  /// create a new participant
   DDS::DomainParticipant_var participant();
   DDS::DomainParticipant_var participant(::DDS::DomainId_t domain_id);
 
+  /// create a new publisher on the provided participant to be used
+  /// explicitly later for creating data writer(s)
   DDS::Publisher_var  publisher(
     DDS::DomainParticipant_var participant = DDS::DomainParticipant_var());
+
+  /// create a new subscriber on the provided participant to be used
+  /// explicitly later for creating data reader(s)
   DDS::Subscriber_var subscriber(
     DDS::DomainParticipant_var participant = DDS::DomainParticipant_var());
 
+  /// create a new DDSFacade for the given type and topic name
   template<typename WriterOrReaderImpl>
-  DDSFacade<WriterOrReaderImpl> topic(
+  DDSFacade<WriterOrReaderImpl> facade(
     std::string topic_name,
     DDS::DomainParticipant_var participant = DDS::DomainParticipant_var())
   {
@@ -76,16 +104,17 @@ public:
     return DDSFacade<WriterOrReaderImpl>(participant, topic);
   }
 
-  // either cleans up the specified participant, or all participants and the domain participant factory
+  /// cleans up the specified participant, or default participant
   void cleanup(DDS::DomainParticipant_var participant = DDS::DomainParticipant_var());
 
+  /// helper method to downcast a DataWriter
   template<typename Writer_var>
   static DDS::DataWriter_var datawriter(const Writer_var& writer)
   {
     return DDS::DataWriter::_duplicate(writer.in());
   }
 
-  // cleanup all participants and shutdown dds (DDSApp will no longer be usable)
+  /// cleanup all participants and shutdown dds (DDSApp will no longer be usable)
   void shutdown();
 
 private:
@@ -100,10 +129,14 @@ private:
 
   int argc_;
   ACE_TCHAR** argv_;
+
+  // track the default status for domain id
   bool domain_id_defaulted_;
   ::DDS::DomainId_t default_domain_id_;
+
   // don't use this var, use domain_participant_factory() to allow lazy initialization
   DDS::DomainParticipantFactory_var dpf_dont_use_;
+
   DDS::DomainParticipant_var default_participant_;
   Participants participants_;
   bool shutdown_;
