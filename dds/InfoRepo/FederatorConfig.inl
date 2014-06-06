@@ -43,21 +43,6 @@ OpenDDS::Federator::Config::addArg(ACE_TCHAR* arg)
 
 ACE_INLINE
 void
-OpenDDS::Federator::Config::federationId(RepoKey id)
-{
-  this->federationId_ = id;
-  this->federationIdDefaulted_ = false;
-}
-
-ACE_INLINE
-OpenDDS::Federator::RepoKey
-OpenDDS::Federator::Config::federationId() const
-{
-  return this->federationId_;
-}
-
-ACE_INLINE
-void
 OpenDDS::Federator::Config::federationDomain(long domain)
 {
   this->federationDomain_ = domain;
@@ -113,9 +98,15 @@ OpenDDS::Federator::Config::federateIor() const
 }
 
 ACE_INLINE
-bool
-OpenDDS::Federator::Config::federationIdDefaulted() const
+TAO_DDS_DCPSFederationId&
+OpenDDS::Federator::Config::federationId()
 {
-  return this->federationIdDefaulted_;
+  return this->federationId_;
 }
 
+ACE_INLINE
+const TAO_DDS_DCPSFederationId&
+OpenDDS::Federator::Config::federationId() const
+{
+  return this->federationId_;
+}

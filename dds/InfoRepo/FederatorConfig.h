@@ -14,6 +14,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "federator_export.h"
+#include "FederationId.h"
 #include "FederatorC.h"
 
 #include <string>
@@ -52,8 +53,8 @@ public:
   void addArg(ACE_TCHAR* arg);
 
   /// Federation Id value.
-  void federationId(RepoKey id);
-  RepoKey  federationId() const;
+  TAO_DDS_DCPSFederationId& federationId();
+  const TAO_DDS_DCPSFederationId& federationId() const;
 
   /// Federation Id value.
   void federationDomain(long domain);
@@ -70,9 +71,6 @@ public:
   /// Configuration filename.
   void configFile(const tstring& file);
   tstring  configFile() const;
-
-  /// Indicate if Federation Id is defaulted
-  bool federationIdDefaulted() const;
 
 private:
   /// Process a configuration file
@@ -91,10 +89,7 @@ private:
   tstring federateIor_;
 
   /// Configured Federation Id value.
-  RepoKey federationId_;
-
-  /// Indicate if Federation Id is defaulted
-  bool federationIdDefaulted_;
+  TAO_DDS_DCPSFederationId federationId_;
 
   /// Configured Federation Domain value.
   long federationDomain_;

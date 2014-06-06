@@ -10,6 +10,7 @@
 #define UPDATELISTENER_T_H
 
 #include "dds/DCPS/SubscriberImpl.h"
+#include "FederationId.h"
 #include "UpdateReceiver_T.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -58,18 +59,15 @@ public:
     const DDS::SampleLostStatus& status);
 
   /// Access our Federation Id value.
-  void federationId(RepoKey id, bool defaulted);
-  RepoKey  federationId() const;
+  void federationId(const TAO_DDS_DCPSFederationId& id);
+  const TAO_DDS_DCPSFederationId& federationId() const;
 
   void stop();
   void join();
 
 private:
   /// Our Federation Id value.
-  RepoKey federationId_;
-
-  /// Indicate if the Federation Id is defaulted
-  bool federationIdDefaulted_;
+  TAO_DDS_DCPSFederationId federationId_;
 
   /// Manager object to delegate sample processing to.
   UpdateReceiver<DataType> receiver_;

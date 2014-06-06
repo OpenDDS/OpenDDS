@@ -30,6 +30,7 @@
 
 // forward declarations
 class DCPS_IR_Domain;
+class TAO_DDS_DCPSFederationId;
 
 namespace Update {
 
@@ -58,7 +59,7 @@ public:
   /// Special owner to enforce no callbacks.
   enum { OWNER_NONE};
 
-  DCPS_IR_Participant(long federationId,
+  DCPS_IR_Participant(const TAO_DDS_DCPSFederationId& federationId,
                       OpenDDS::DCPS::RepoId id,
                       DCPS_IR_Domain* domain,
                       DDS::DomainParticipantQos qos,
@@ -204,7 +205,7 @@ private:
   DDS::InstanceHandle_t handle_;
   CORBA::Boolean isBIT_;
 
-  long federationId_;
+  const TAO_DDS_DCPSFederationId& federationId_;
   long owner_;
 
   /// Lock portions ownership processing.
