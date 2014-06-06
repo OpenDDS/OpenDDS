@@ -1,3 +1,16 @@
+Fri Jun  6 19:51:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils:
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+        * tests/Utils/DDSFacade.h:
+        * tests/Utils/DataReaderListenerImpl.h:
+        * tests/Utils/ListenerRecorder.h:
+        * tests/Utils/TestUtils.mpc:
+        * tests/Utils/TestUtils_Export.h:
+
+          Added library to make writing tests easier.
+
 Fri Jun  6 14:23:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/idl/HTemplate.txt:
