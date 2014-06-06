@@ -1,3 +1,9 @@
+Fri Jun  6 14:23:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/idl/HTemplate.txt:
+
+          Added typedefs to tie together generated types.
+
 Thu Jun  5 17:57:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl.cpp:
