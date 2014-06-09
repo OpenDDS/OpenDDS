@@ -1,3 +1,12 @@
+Mon Jun  9 16:21:12 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Listener.h:
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DataReaderListenerImpl.h:
+        * tests/Utils/ListenerRecorder.h:
+
+          Fixed errors on linux builds.
+
 Fri Jun  6 20:56:37 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo/Publisher.cpp:

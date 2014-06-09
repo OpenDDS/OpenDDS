@@ -13,7 +13,7 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
 class Listener
-  : public virtual TestUtils::DataReaderListenerImpl<::Xyz::Foo, ::Xyz::FooDataReader>
+  : public virtual TestUtils::DataReaderListenerImpl< ::Xyz::Foo, ::Xyz::FooDataReader>
 {
 public:
   Listener();

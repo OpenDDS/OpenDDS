@@ -35,7 +35,7 @@ protected:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     messages_.push_back(msg);
-    if (verbose())
+    if (this->verbose())
       ACE_DEBUG((LM_DEBUG, "Received message #%d\n", messages_.size()));
   }
 

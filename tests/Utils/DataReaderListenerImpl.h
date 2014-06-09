@@ -45,7 +45,7 @@ public:
   }
 
   virtual void on_sample_lost(
-    DDS::DataReader_ptr reader, DDS::SampleLostStatus status)
+    DDS::DataReader_ptr , DDS::SampleLostStatus status)
   {
     if (verbose_)
       std::cout << "Lost sample: " << status.total_count_change << std::endl;
@@ -53,7 +53,7 @@ public:
 
 
   virtual void on_sample_rejected(
-    DDS::DataReader_ptr reader, DDS::SampleRejectedStatus status)
+    DDS::DataReader_ptr , DDS::SampleRejectedStatus status)
   {
     if (verbose_)
       std::cout << "Rejected sample: " << status.total_count_change << " Reason: "
@@ -70,8 +70,8 @@ public:
   }
 
   virtual void on_requested_incompatible_qos (
-    DDS::DataReader_ptr reader,
-    const DDS::RequestedIncompatibleQosStatus& status)
+    DDS::DataReader_ptr ,
+    const DDS::RequestedIncompatibleQosStatus& )
   {
     if (verbose_)
       std::cout << "Subscriber incompatible QOS" << std::endl;

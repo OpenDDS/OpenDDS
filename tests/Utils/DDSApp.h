@@ -17,6 +17,7 @@
 #include <model/Sync.h>
 #include <map>
 #include <string>
+#include <stdexcept>
 
 namespace TestUtils {
 
@@ -72,9 +73,9 @@ public:
     std::string topic_name,
     DDS::DomainParticipant_var participant = DDS::DomainParticipant_var())
   {
-    typedef WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
-    typedef typesupportimpl_type::typesupport_type typesupport_type;
-    typedef typesupportimpl_type::typesupport_var typesupport_var;
+    typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
+    typedef typename typesupportimpl_type::typesupport_type typesupport_type;
+    typedef typename typesupportimpl_type::typesupport_var typesupport_var;
 
     determine_participant(participant);
 
