@@ -17,6 +17,8 @@
 #include <dds/DCPS/Definitions.h>
 #include <ctime>
 
+#include <iostream>
+
 using OpenDDS::Model::NullReaderListener;
 
 namespace TestUtils {

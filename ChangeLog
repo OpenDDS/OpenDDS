@@ -1,3 +1,13 @@
+Mon Jun  9 19:52:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DataReaderListenerImpl.h:
+
+          Fixed missed include.
+
+        * tests/Utils/DDSApp.cpp:
+
+          Using argv directly.
+
 Mon Jun  9 16:21:12 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo/Listener.h:

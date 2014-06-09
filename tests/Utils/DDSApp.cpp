@@ -10,23 +10,11 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 
-namespace {
-  ACE_TCHAR** copy_argv(int argc, ACE_TCHAR* argv[])
-  {
-    ACE_TCHAR** new_argv = new ACE_TCHAR*[argc];
-    for (int i = 0; i < argc; ++i) {
-      new_argv[i] = argv[i];
-    }
-
-    return new_argv;
-  }
-}
-
 namespace TestUtils {
 
 DDSApp::DDSApp(int argc, ACE_TCHAR* argv[])
 : argc_(argc)
-, argv_(argv)//copy_argv(argc, argv))
+, argv_(argv)
 // default id to 0, but still allow it to be set
 , domain_id_defaulted_(false)
 , default_domain_id_(0)
@@ -38,7 +26,7 @@ DDSApp::DDSApp(int argc,
                ACE_TCHAR* argv[],
                ::DDS::DomainId_t default_domain_id)
 : argc_(argc)
-, argv_(copy_argv(argc, argv))
+, argv_(argv)
 , domain_id_defaulted_(true)
 , default_domain_id_(default_domain_id)
 , shutdown_(false)
