@@ -6,7 +6,7 @@ project(*Publisher) : dcpsexe_with_tcp, dds_model, dcps_shmem,  {
   exename   = publisher
   exeout    = .
 
-  libpaths += $(DDS_ROOT)/tests/Utils
+  libpaths += ../../Utils
   libs     += TestUtils
   after    += TestUtils
   libpaths += ../FooType4

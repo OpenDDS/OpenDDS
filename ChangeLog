@@ -1,3 +1,14 @@
+Tue Jun 10 12:50:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+
+          Changed path to TestUtils to be relative to this directory to
+          fix the install builds.
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Fixed build warning.
+
 Mon Jun  9 19:52:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DataReaderListenerImpl.h:

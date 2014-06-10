@@ -84,7 +84,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = -1;
     }
 
-    if (msgs.size() == expected_count) {
+    if ((int)msgs.size() == expected_count) {
       std::cout << "Got all " << msgs.size()
                 << " samples" << std::endl;
     } else {
