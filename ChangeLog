@@ -1,3 +1,9 @@
+Wed Jun 11 17:28:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+
+          Fixed warning.
+
 Wed Jun 11 16:47:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSApp.cpp:

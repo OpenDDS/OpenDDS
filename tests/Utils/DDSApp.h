@@ -74,7 +74,6 @@ public:
     DDS::DomainParticipant_var participant = DDS::DomainParticipant_var())
   {
     typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
-    typedef typename typesupportimpl_type::typesupport_type typesupport_type;
     typedef typename typesupportimpl_type::typesupport_var typesupport_var;
 
     determine_participant(participant);
