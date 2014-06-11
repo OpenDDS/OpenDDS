@@ -48,7 +48,7 @@ elsif ($ARGV[0] eq 'mw') {
   $multiple_instance=1;
   $num_threads_to_write=5;
   $num_writes_per_thread=2;
-  $num_writers=4;
+  $num_writers=8;
   $num_instances=$num_threads_to_write * $num_writers;
 }
 #tbd: add test for message dropped due to the depth limit.

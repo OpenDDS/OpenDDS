@@ -121,7 +121,6 @@ TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
     if (con->is_connector() && !con->is_connected()) {
       bool on_new_association = true;
 
-//ACE_DEBUG((LM_INFO, "(%P|%t) JJS TcpTransport::find_datalink_i calling reconnect\n"));
       if (con->reconnect(on_new_association) == -1) {
         ACE_ERROR_RETURN((LM_ERROR,
                           "(%P|%t) ERROR: Unable to reconnect to remote %C:%d.\n",
@@ -578,7 +577,6 @@ TcpTransport::release_datalink(DataLink* link)
                 link->datalink_release_delay().sec(),
                 link->datalink_release_delay().usec()), 4);
 
-//ACE_DEBUG((LM_INFO, "(%P|%t) JJS: release_datalink\n"));
 
       // Atomic value update, safe to perform here.
       released_link->set_release_pending(true);
@@ -842,7 +840,6 @@ TcpTransport::fresh_link(TcpConnection_rch connection)
     if (old_con.in() != connection.in())
       // Replace the "old" connection object with the "new" connection object.
     {
-//ACE_DEBUG((LM_INFO, "(%P|%t) JJS TcpTransport::fresh_link() calling reconnect\n"));
       return link->reconnect(connection.in());
     }
   }

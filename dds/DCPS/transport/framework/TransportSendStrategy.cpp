@@ -463,10 +463,6 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
 
         this->pkt_chain_ = this->pkt_chain_->cont();
 
-        if (!pkt_chain_) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) JJS adjust_packet_after_send set pkt_chain_ to NULL\n"));
-        }
-
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Set the fully sent block's cont() to 0.\n"));
 

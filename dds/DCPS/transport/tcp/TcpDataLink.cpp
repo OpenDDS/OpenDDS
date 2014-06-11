@@ -202,7 +202,6 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
 {
   DBG_ENTRY_LVL("TcpDataLink","send_graceful_disconnect_message",6);
 
-//ACE_DEBUG((LM_INFO, "(%P|%t) JJS send_graceful_disconnect_message\n"));
   // Will clear all queued messages but still let the disconnect message
   // sent.
   this->send_strategy_->terminate_send(true);

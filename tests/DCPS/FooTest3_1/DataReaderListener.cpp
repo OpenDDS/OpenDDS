@@ -45,33 +45,36 @@ throw(CORBA::SystemException)
     Xyz::Foo foo;
     DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = foo_dr->take_next_sample(foo, si) ;
+    DDS::ReturnCode_t status;
+    do {
+      status = foo_dr->take_next_sample(foo, si);
 
-    if (status == DDS::RETCODE_OK) {
-      //std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
-      //std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
+      if (status == DDS::RETCODE_OK) {
+        //std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
+        //std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
-      if (si.valid_data) {
-        samples_read_++;  // Only count actual samples
-      } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+        if (si.valid_data) {
+          samples_read_++;  // Only count actual samples
+        } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 
-      } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+        } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
 
-      } else {
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l: on_data_available()")
+                     ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+                     si.instance_state));
+        }
+
+      } else if (status != DDS::RETCODE_NO_DATA) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: on_data_available()")
-                   ACE_TEXT(" ERROR: unknown instance state: %d\n"),
-                   si.instance_state));
+                   ACE_TEXT(" ERROR: unexpected status: %d\n"),
+                   status));
       }
-
-    } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: on_data_available()")
-                 ACE_TEXT(" ERROR: unexpected status: %d\n"),
-                 status));
-    }
+    } while (status == DDS::RETCODE_OK);
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in on_data_available():");
