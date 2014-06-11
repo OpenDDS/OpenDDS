@@ -1,3 +1,9 @@
+Wed Jun 11 11:44:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Don't reverse lock during iterations of adjust_packet_after_send
+
 Mon Jun  9 19:34:17 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

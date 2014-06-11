@@ -388,6 +388,8 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "adjust_packet_after_send", 6);
 
+  std::vector<TransportQueueElement*> elems_to_notify;
+
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Adjusting the current packet because %d bytes of the packet "
         "have been sent.\n", num_bytes_sent));
@@ -407,7 +409,9 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
   // This is the element currently at the front of elems_.
   TransportQueueElement* element = this->elems_->peek();
 
-  if (element) {
+  if (!element) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) WARNING: adjust_packet_after_send skipping due to NULL element\n"));
+  } else {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Use the element's msg() to find the last block in "
           "the msg() chain.\n"));
@@ -458,6 +462,10 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
               "Set pkt_chain_ to pkt_chain_->cont().\n"));
 
         this->pkt_chain_ = this->pkt_chain_->cont();
+
+        if (!pkt_chain_) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) JJS adjust_packet_after_send set pkt_chain_ to NULL\n"));
+        }
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "Set the fully sent block's cont() to 0.\n"));
@@ -548,33 +556,8 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
                   "Tell the element that a decision has been made "
                   "regarding its fate - data_delivered().\n"));
 
-            // Inform the element that the data has been delivered.
-
-            if ((delay_notification == DELAY_NOTIFICATION) &&
-                (this->num_delayed_notifications_ < this->max_samples_)) {
-              // If we can delay notification.
-              this->add_delayed_notification(element);
-
-            } else {
-              // Ciju: If not, do a best effort immediate notification.
-              // I have noticed instances of immediate notification producing
-              // cores ocassionally. I believe the reason is
-              // if (delay_notification == NOTIFY_IMMEADIATELY)
-
-              // ciju: We need to release this->lock_ before
-              // calling data_dropped/data_delivered. Else we have a potential
-              // deadlock in our hands.
-              const SendMode mode = this->mode_;
-              ACE_Reverse_Lock<LockType> reverse(this->lock_);
-              ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
-              if (mode == MODE_TERMINATED) {
-                element->data_dropped(true /*dropped_by_transport*/);
-
-              } else {
-                element->data_delivered();
-
-              }
-            }
+            // later, inform the element that the data has been delivered.
+            elems_to_notify.push_back(element);
 
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "Peek at the next element in the packet "
@@ -692,6 +675,35 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
   // Returns 0 if the entire packet was sent, and returns 1 otherwise.
   int rc = (this->header_.length_ == 0) ? 0 : 1;
 
+  // Now notify the pending elements
+  {
+    std::vector<TransportQueueElement*>::iterator eiter;
+    for (eiter = elems_to_notify.begin();
+         eiter != elems_to_notify.end();
+         ++eiter)
+    {
+      if ((delay_notification == DELAY_NOTIFICATION) &&
+                (this->num_delayed_notifications_ < this->max_samples_)) {
+              // If we can delay notification.
+        this->add_delayed_notification(*eiter);
+
+      } else {
+        const SendMode mode = this->mode_;
+        // remember this->header_.length_
+        ACE_UINT32 old_header_length = this->header_.length_;
+        {
+          ACE_Reverse_Lock<LockType> reverse(this->lock_);
+          ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
+          if (mode == MODE_TERMINATED) {
+            (*eiter)->data_dropped(true); // dropped_by_transport
+
+          } else {
+            (*eiter)->data_delivered();
+          }
+        }
+      }
+    }
+  }
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Adjustments all done.  Returning [%d].  0 means entire packet "
         "has been sent.  1 means otherwise.\n",
