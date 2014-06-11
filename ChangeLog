@@ -1,3 +1,10 @@
+Wed Jun 11 15:43:26 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+	  Avoid potential deadlock with writer_activity() which
+	  assumes sample_lock_ > writers_lock_ order.
+
 Wed Jun 11 11:44:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

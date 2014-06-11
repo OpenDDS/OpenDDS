@@ -377,24 +377,38 @@ DataReaderImpl::add_association(const RepoId& yourId,
     }
 
     // Check if any publications have already sent a REQUEST_ACK message.
+    // writer_activity() assumes lock order sample_lock_ -> writers_lock_
+    // so avoid acquiring locks in reverse order here to avoid deadlock.
+    bool should_ack = false;
+    SequenceNumber sequence;
+    ACE_Time_Value now;
+    bool sample_sent = false;
+    WriterMapType::iterator where;
     {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
-      WriterMapType::iterator where = this->writers_.find(writer.writerId);
+      where = this->writers_.find(writer.writerId);
 
       if (where != this->writers_.end()) {
-        const ACE_Time_Value now = ACE_OS::gettimeofday();
+        now = ACE_OS::gettimeofday();
 
-        ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
-
-        if (where->second->should_ack(now)) {
-          const SequenceNumber sequence = where->second->ack_sequence();
-          const DDS::Time_t timenow = time_value_to_time(now);
-          if (this->send_sample_ack(writer.writerId, sequence, timenow)) {
-            where->second->clear_acks(sequence);
-          }
+        should_ack = where->second->should_ack(now);
+        if (should_ack) {
+        	sequence = where->second->ack_sequence();
         }
       }
+
+      if (should_ack) {
+        const DDS::Time_t timenow = time_value_to_time(now);
+        ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+        sample_sent = this->send_sample_ack(writer.writerId, sequence, timenow);
+      }
+    }
+
+    if (sample_sent) {
+      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+      where = this->writers_.find(writer.writerId);
+      where->second->clear_acks(sequence);
     }
 
     //
