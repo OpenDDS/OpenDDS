@@ -111,7 +111,7 @@ void
 DDSApp::remove(const DDS::DomainParticipant_var& participant)
 {
   participants_.erase(participant.in());
-  if (participant == default_participant_) {
+  if (participant.in() == default_participant_.in()) {
     if (participants_.empty()) {
       default_participant_ = DDS::DomainParticipant_var();
     }
