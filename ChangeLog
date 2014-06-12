@@ -1,3 +1,13 @@
+Thu Jun 12 13:44:03 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DataReaderListenerImpl.h:
+
+          Fixed warnings.
+
+        * tests/Utils/ListenerRecorder.h:
+
+          Debug statement.
+
 Wed Jun 11 17:28:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSApp.h:

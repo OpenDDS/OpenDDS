@@ -47,7 +47,7 @@ public:
   }
 
   virtual void on_sample_lost(
-    DDS::DataReader_ptr , DDS::SampleLostStatus status)
+    DDS::DataReader_ptr , const DDS::SampleLostStatus& status)
   {
     if (verbose_)
       std::cout << "Lost sample: " << status.total_count_change << std::endl;
@@ -55,7 +55,7 @@ public:
 
 
   virtual void on_sample_rejected(
-    DDS::DataReader_ptr , DDS::SampleRejectedStatus status)
+    DDS::DataReader_ptr , const DDS::SampleRejectedStatus& status)
   {
     if (verbose_)
       std::cout << "Rejected sample: " << status.total_count_change << " Reason: "
