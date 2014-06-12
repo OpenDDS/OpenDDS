@@ -1,3 +1,38 @@
+Thu Jun 12 17:21:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Changed persisted publications to try to associate.
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Changed test to create 1 pub and 1 sub, then kill/restart the IR,
+          then start another pub and sub and have each verify that they all
+          associate and disassociate with each other.
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+
+          Passing argc and argv as references to allow DDS and ACE_DEBUG
+          parameters to be removed from argv prior to parsing the parameters.
+
+        * tests/Utils/DDSFacade.h:
+
+          Added ifdef to prevent double inclusion.
+
+        * tests/Utils/DataReaderListenerImpl.h:
+        * tests/Utils/ListenerRecorder.h:
+
+          Added logging.
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Changed ReaderSync to allow waiting for a specific number of publications to
+          happen prior to looking for all publications to be removed.
+
 Thu Jun 12 14:11:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Messenger/DataReaderListener.h:

@@ -2182,6 +2182,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
        iter != image.actors.end(); iter++) {
     const Update::URActor* sub = *iter;
 
+    // no reason to associate, there are no publishers yet to associate with
     if (!this->add_subscription(sub->domainId, sub->participantId
                                 , sub->topicId, sub->actorId
                                 , sub->callback.c_str(), sub->drdwQos
@@ -2213,11 +2214,14 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
        iter != image.wActors.end(); iter++) {
     const Update::UWActor* pub = *iter;
 
+    // try to associate with any persisted subscriptions to track any expected
+    // existing associations
     if (!this->add_publication(pub->domainId, pub->participantId
                                , pub->topicId, pub->actorId
                                , pub->callback.c_str() , pub->drdwQos
                                , pub->transportInterfaceInfo
-                               , pub->pubsubQos)) {
+                               , pub->pubsubQos
+                               , true)) {
       OpenDDS::DCPS::RepoIdConverter pub_converter(pub->actorId);
       OpenDDS::DCPS::RepoIdConverter part_converter(pub->participantId);
       ACE_ERROR((LM_ERROR,

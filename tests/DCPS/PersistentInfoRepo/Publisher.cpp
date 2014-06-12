@@ -7,8 +7,10 @@
  */
 
 #include "tests/Utils/DDSApp.h"
+#include "tests/Utils/Options.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <model/Sync.h>
+#include <sstream>
 #include <stdexcept>
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -18,56 +20,93 @@ using namespace TestUtils;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  std::cout << "Pub Creating App\n";
+  std::stringstream ss;
+  ss << "(" << ACE_OS::getpid() << ")";
+  const std::string pid = ss.str();
+  std::cerr << pid << "Pub Creating App\n";
+  {
   DDSApp dds(argc, argv);
   try {
-    std::cout << "Pub Creating topic\n";
-    DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.facade< ::Xyz::FooDataWriterImpl>("bar");
-    // Create data writer for the topic
+    std::cerr << pid << "Pub Creating topic\n";
     // ?? fix to code gen will allow using ::Xyz::Foo
-    std::cout << "Pub Creating writer\n";
-    ::Xyz::FooDataWriter_var msg_writer = topic.writer();
+    DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.facade< ::Xyz::FooDataWriterImpl>("bar");
+    ::Xyz::FooDataWriter_var msg_writer;
 
-    {
-      std::cout << "Pub waiting for reader\n";
-      // Block until Subscriber is available
-      OpenDDS::Model::WriterSync ws(DDSApp::datawriter(msg_writer), 1);
-      std::cout << "Pub done waiting for reader\n";
+    Arguments args;
+    args.add_long("stage", 0);
+    args.add_long("messages", 60);
+    Options options(argc, argv);
 
-      // Initialize samples
-      ::Xyz::Foo message;
+    long stage = options.get<long>("stage");
+    if (stage != 1 && stage != 2) {
+      std::cerr << "ERROR: " << pid
+                << "Pub command line parameter \"stage\" set to "
+                << stage << " should be set to 1 or 2 ";
+      return -1;
+    }
+    const long msg_count = options.get<long>("messages");
+    if (msg_count <= 0) {
+      std::cerr << "ERROR: " << pid
+                << "Pub command line parameter \"messages\" set to "
+                << msg_count << " should be set greater than 0.\n";
+      return -1;
+    }
 
-      // Override message count
-      long msg_count = 100;
+    // for stage 1 send one set of data with 1.0 and one with 2.0
+    // for stage 2 send one set of data with 3.0
+    float id = (stage == 1 ? 1.0f : 3.0f);
 
-      char number[20];
+    // Create data writer for the topic
+    std::cerr << pid << "Pub Stage " << stage << " Creating writer\n";
+    msg_writer = topic.writer();
 
-      std::cout << "Pub sending\n";
-      for (int i = 0; i<msg_count; ++i) {
-        // Prepare next sample
-        sprintf(number, "foo %d", i);
-        message.key = msg_count;
-        message.c = (char)i;
-        message.x = 1.0;
-        message.y = 1.0;
+    for ( ; stage < 3; ++stage, ++id) {
 
-        // Publish the message
-        DDS::ReturnCode_t error = DDS::RETCODE_TIMEOUT;
-        while (error == DDS::RETCODE_TIMEOUT) {
-          error = msg_writer->write(message, DDS::HANDLE_NIL);
-          if (error == DDS::RETCODE_TIMEOUT) {
-            ACE_ERROR((LM_ERROR, "Timeout, resending %d\n", i));
-          } else if (error != DDS::RETCODE_OK) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("ERROR: %N:%l: main() -")
-                       ACE_TEXT(" write returned %d!\n"), error));
+      {
+        // each stage number will wait for that same number of readers readers
+        std::cerr << pid << "Pub Stage " << stage
+                  << " waiting for " << stage << " readers\n";
+        // Block until Subscriber is available
+        OpenDDS::Model::WriterSync ws(DDSApp::datawriter(msg_writer), 1);
+        std::cerr << pid << "Pub Stage " << stage
+                  << " done waiting for reader\n";
+
+        // Initialize samples
+        ::Xyz::Foo message;
+
+        char number[20];
+
+        std::cerr << pid << "Pub Stage " << stage << " sending\n";
+        for (int i = 0; i<msg_count; ++i) {
+          // Prepare next sample
+          sprintf(number, "foo %d", i);
+          message.key = msg_count;
+          message.c = (char)i;
+          message.x = id;
+          message.y = 1.0;
+
+          // Publish the message
+          DDS::ReturnCode_t error = DDS::RETCODE_TIMEOUT;
+          while (error == DDS::RETCODE_TIMEOUT) {
+            ACE_OS::sleep(1);
+            error = msg_writer->write(message, DDS::HANDLE_NIL);
+            if (error == DDS::RETCODE_TIMEOUT) {
+              ACE_ERROR((LM_ERROR, "(%P|%t) Timeout, resending %d\n", i));
+            } else if (error != DDS::RETCODE_OK) {
+              ACE_ERROR((LM_ERROR,
+                         ACE_TEXT("ERROR: %N:%l: main() -")
+                         ACE_TEXT(" write returned %d!\n"), error));
+            }
           }
         }
-      }
 
-      std::cout << "Pub waiting for acks from sub" << std::endl;
+        std::cerr << pid << "Pub Stage " << stage
+                  << " waiting for acks from sub" << std::endl;
+      }
+      std::cerr << pid << "Pub Stage " << stage
+                << " done waiting for acks from sub" << std::endl;
     }
-    std::cout << "Pub done waiting for acks from sub" << std::endl;
+    std::cerr << pid << "Pub DDSFacade going out of scope" << std::endl;
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
@@ -79,5 +118,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                       msg.c_str()), -1);
   }
 
+  std::cerr << pid << "Pub DDSApp going out of scope" << std::endl;
+  }
+  std::cerr << pid << "Pub returning status=0" << std::endl;
   return 0;
 }

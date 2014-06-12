@@ -12,7 +12,7 @@
 
 namespace TestUtils {
 
-DDSApp::DDSApp(int argc, ACE_TCHAR* argv[])
+DDSApp::DDSApp(int& argc, ACE_TCHAR**& argv)
 : argc_(argc)
 , argv_(argv)
 // default id to 0, but still allow it to be set
@@ -22,8 +22,8 @@ DDSApp::DDSApp(int argc, ACE_TCHAR* argv[])
 {
 }
 
-DDSApp::DDSApp(int argc,
-               ACE_TCHAR* argv[],
+DDSApp::DDSApp(int& argc,
+               ACE_TCHAR**& argv,
                ::DDS::DomainId_t default_domain_id)
 : argc_(argc)
 , argv_(argv)

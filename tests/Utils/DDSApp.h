@@ -6,6 +6,9 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef TestUtils_DDSApp_H
+#define TestUtils_DDSApp_H
+
 #include "TestUtils_Export.h"
 
 #include "tests/Utils/DDSFacade.h"
@@ -49,8 +52,8 @@ public:
   typedef std::map<DDS::DomainParticipant_ptr, DDS::DomainParticipant_var> Participants;
 
   /// create a DDSApp with the provided command line (and default domain_id)
-  DDSApp(int argc, ACE_TCHAR* argv[]);
-  DDSApp(int argc, ACE_TCHAR* argv[], ::DDS::DomainId_t default_domain_id);
+  DDSApp(int& argc, ACE_TCHAR**& argv);
+  DDSApp(int& argc, ACE_TCHAR**& argv, ::DDS::DomainId_t default_domain_id);
   ~DDSApp();
 
   /// create a new participant
@@ -127,8 +130,8 @@ private:
   void determine_participant(DDS::DomainParticipant_var& participant);
   void assign_default_domain_id(::DDS::DomainId_t id);
 
-  int argc_;
-  ACE_TCHAR** argv_;
+  int& argc_;
+  ACE_TCHAR**& argv_;
 
   // track the default status for domain id
   bool domain_id_defaulted_;
@@ -143,3 +146,5 @@ private:
 };
 
 } // End namespaces
+
+#endif /* TestUtils_DDSApp_H */

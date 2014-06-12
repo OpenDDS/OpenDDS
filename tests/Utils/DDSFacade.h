@@ -6,6 +6,9 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef TestUtils_DDSFacade_H
+#define TestUtils_DDSFacade_H
+
 #include "TestUtils_Export.h"
 
 #include "dds/DdsDcpsPublicationC.h"
@@ -14,6 +17,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 
 #include <model/Sync.h>
+#include <map>
 
 namespace TestUtils {
 
@@ -47,6 +51,8 @@ public:
   typedef typename WriterOrReaderImpl::typesupportimpl_type  typesupportimpl_type;
   typedef typename typesupportimpl_type::datawriter_type     datawriter_type;
   typedef typename typesupportimpl_type::datawriter_var      datawriter_var;
+  typedef std::map<DDS::DataWriter_ptr, DDS::Publisher_var>  DataWriters;
+  typedef std::map<DDS::DataReader_ptr, DDS::Subscriber_var> DataReaders;
 
   datawriter_var writer(DDS::Publisher_var publisher = DDS::Publisher_var())
   {
@@ -69,6 +75,24 @@ public:
                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   }
 
+  void remove(datawriter_var& writer)
+  {
+    if (remove(writer.in(), "DataWriter", writers_))
+      writer = 0;
+  }
+
+  void remove(DDS::DataWriter_var& writer)
+  {
+    if (remove(writer.in(), "DataWriter", writers_))
+      writer = 0;
+  }
+
+  void remove(DDS::DataReader_var& reader)
+  {
+    if (remove(reader.in(), "DataReader", readers_))
+      reader = 0;
+  }
+
 private:
   // only called by DDSApp
   DDSFacade(DDS::DomainParticipant_var participant,
@@ -79,6 +103,35 @@ private:
 
   // TODO: REMOVE
   DDSFacade() {}
+
+  bool remove_from_parent(const DDS::Publisher_var& pub, DDS::DataWriter_ptr datawriter)
+  {
+    DDS::ReturnCode_t ret = pub->delete_datawriter (datawriter);
+    return ret == DDS::RETCODE_OK;
+  }
+
+  bool remove_from_parent(const DDS::Subscriber_var& sub, DDS::DataReader_ptr datareader)
+  {
+    DDS::ReturnCode_t ret = sub->delete_datareader (datareader);
+    return ret == DDS::RETCODE_OK;
+  }
+
+  template<typename DDS_Ptr, typename Map>
+  bool remove(const DDS_Ptr dds_ptr, const char* ptr_desc, Map& map)
+  {
+    typename Map::iterator iter = map.find(dds_ptr);
+    if (iter == map.end()) {
+      std::cerr << "ERROR: could not find " << ptr_desc
+        << " to delete" << std::endl;
+      return false;
+    }
+
+    if (!remove_from_parent(iter->second, iter->first))
+      return false;
+
+    map.erase(iter);
+    return true;
+  }
 
   void determine_publisher(DDS::Publisher_var& publisher)
   {
@@ -118,6 +171,11 @@ private:
 
   DDS::Subscriber_var        default_sub_;
   DDS::DataReader_var        default_dr_;
+
+  DataWriters                writers_;
+  DataReaders                readers_;
 };
 
 } // End namespaces
+
+#endif /* TestUtils_DDSFacade_H */

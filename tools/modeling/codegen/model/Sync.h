@@ -19,11 +19,12 @@ namespace OpenDDS {
 
     class OpenDDS_Model_Export ReaderSync {
     public:
-      ReaderSync(DDS::DataReader_var reader);
+      ReaderSync(DDS::DataReader_var reader, unsigned int num_writers = 1);
       ~ReaderSync();
-      static int wait_unmatch(const DDS::DataReader_var& reader);
+      static int wait_unmatch(const DDS::DataReader_var& reader, unsigned int num_writers = 1);
     private:
       DDS::DataReader_var reader_;
+      unsigned int        num_writers_;
     };
 
     class OpenDDS_Model_Export ReaderCondSync {
