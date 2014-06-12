@@ -19,14 +19,6 @@
 
 #include <iostream>
 
-namespace
-{
-  bool is_reliable() {
-    OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-    return !(gc->instances_[0]->transport_type_ == "udp");
-  }
-}
-
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0)
   , valid_(true)
@@ -37,6 +29,13 @@ DataReaderListenerImpl::DataReaderListenerImpl()
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {
+}
+
+bool
+DataReaderListenerImpl::is_reliable()
+{
+  OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
+  return !(gc->instances_[0]->transport_type_ == "udp");
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)

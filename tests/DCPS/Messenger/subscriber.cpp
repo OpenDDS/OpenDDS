@@ -30,15 +30,6 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Args.h"
 
-bool
-make_dr_reliable()
-{
-  OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  std::string cfg_name = gc->instances_[0]->name();
-  return ((cfg_name == "the_rtps_transport") ||
-          (cfg_name == "transport"));
-}
-
 bool reliable = false;
 bool wait_for_acks = false;
 
@@ -112,7 +103,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
-    if (make_dr_reliable()) {
+    if (DataReaderListenerImpl::is_reliable()) {
+      std::cout << "Reliable DataReader" << std::endl;
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
     }
 

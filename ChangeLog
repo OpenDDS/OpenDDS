@@ -1,3 +1,186 @@
+Thu Jun 12 14:11:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Made is_reliable a static method for subscriber to use.
+
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Copied DataReaderListener logic for determining if reliability qos
+          needed to be set.
+
+Thu Jun 12 13:44:03 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DataReaderListenerImpl.h:
+
+          Fixed warnings.
+
+        * tests/Utils/ListenerRecorder.h:
+
+          Debug statement.
+
+Wed Jun 11 17:28:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+
+          Fixed warning.
+
+Wed Jun 11 16:47:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.cpp:
+
+          Fixed compile error for SunOS.
+
+Tue Jun 10 15:15:16 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+
+          Missed fixing subscriber project.
+
+Tue Jun 10 12:50:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+
+          Changed path to TestUtils to be relative to this directory to
+          fix the install builds.
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Fixed build warning.
+
+Mon Jun  9 19:52:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DataReaderListenerImpl.h:
+
+          Fixed missed include.
+
+        * tests/Utils/DDSApp.cpp:
+
+          Using argv directly.
+
+Mon Jun  9 16:21:12 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Listener.h:
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DataReaderListenerImpl.h:
+        * tests/Utils/ListenerRecorder.h:
+
+          Fixed errors on linux builds.
+
+Fri Jun  6 20:56:37 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Method change from DDSApp.
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSFacade.h:
+
+          Added documentation.
+
+Fri Jun  6 19:55:16 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo:
+        * tests/DCPS/PersistentInfoRepo/Listener.h:
+        * tests/DCPS/PersistentInfoRepo/Listener.cpp:
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/README:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/DCPS/PersistentInfoRepo/multicast.ini:
+        * tests/DCPS/PersistentInfoRepo/pub_multicast_async.ini:
+        * tests/DCPS/PersistentInfoRepo/rtps.ini:
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+        * tests/DCPS/PersistentInfoRepo/shmem.ini:
+        * tests/DCPS/PersistentInfoRepo/tcp.ini:
+        * tests/DCPS/PersistentInfoRepo/udp.ini:
+
+          Added preliminary test that will verify that a persistent
+          InfoRepo can associate data readers and data writers
+          that were created before and after the InfoRepo went down.
+
+Fri Jun  6 19:51:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils:
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+        * tests/Utils/DDSFacade.h:
+        * tests/Utils/DataReaderListenerImpl.h:
+        * tests/Utils/ListenerRecorder.h:
+        * tests/Utils/TestUtils.mpc:
+        * tests/Utils/TestUtils_Export.h:
+
+          Added library to make writing tests easier.
+
+Fri Jun  6 14:23:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/idl/HTemplate.txt:
+
+          Added typedefs to tie together generated types.
+
+Thu Jun  5 17:57:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Fixing error passing in POD type for ACE_DEBUG.
+
+Thu Jun  5 15:51:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          Fixing error passing in POD type for ACE_DEBUG.
+
+Wed Jun  4 16:50:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederationId.h:
+        * dds/InfoRepo/FederationId.cpp:
+        * dds/InfoRepo/FederatorConfig.h:
+        * dds/InfoRepo/FederatorConfig.inl:
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Moved id and the fact that it was overridden into its
+          own class, so info can be preserved and passed around
+          rather than being copied.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.h:
+        * dds/InfoRepo/FederatorManagerImpl.inl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Changes from refactoring to FederationId.
+
+Wed Jun  4 15:00:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Added setting random id when no endpoint is provided
+          (persistence requires endpoints).
+
+Wed Jun  4 14:17:31 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Fixing wide character build errors.
+
+Tue Jun  3 21:43:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/FederatorConfig.cpp:
+
+          Fixed fuzz errors.
+
 Tue Jun  3 20:56:08 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Participant.cpp:

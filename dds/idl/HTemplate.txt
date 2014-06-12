@@ -1,3 +1,7 @@
+
+class <%TYPE%>DataWriterImpl;
+class <%TYPE%>DataReaderImpl;
+
 /** Servant for TypeSuport interface of <%TYPE%> data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of
@@ -9,6 +13,17 @@ class <%EXPORT%> <%TYPE%>TypeSupportImpl
   , public virtual OpenDDS::DCPS::TypeSupportImpl
 {
 public:
+  typedef <%TYPE%>                message_type;
+  typedef <%TYPE%>_var            message_var;
+  typedef <%TYPE%>TypeSupport     typesupport_type;
+  typedef <%TYPE%>TypeSupport_var typesupport_var;
+  typedef <%TYPE%>DataWriter      datawriter_type;
+  typedef <%TYPE%>DataReader      datareader_type;
+  typedef <%TYPE%>DataWriter_var  datawriter_var;
+  typedef <%TYPE%>DataReader_var  datareader_var;
+  typedef <%TYPE%>DataWriterImpl  datawriterimpl_type;
+  typedef <%TYPE%>DataReaderImpl  datareaderimpl_type;
+
   <%TYPE%>TypeSupportImpl();
   virtual ~<%TYPE%>TypeSupportImpl();
 
@@ -47,6 +62,9 @@ class <%EXPORT%> <%TYPE%>DataWriterImpl
     public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
+  typedef <%TYPE%>                message_type;
+  typedef <%TYPE%>TypeSupportImpl typesupportimpl_type;
+  typedef <%TYPE%>DataReaderImpl  datareader_type;
 
   typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
@@ -185,6 +203,9 @@ class <%EXPORT%> <%TYPE%>DataReaderImpl
     public virtual OpenDDS::DCPS::DataReaderImpl
 {
 public:
+  typedef <%TYPE%>                message_type;
+  typedef <%TYPE%>TypeSupportImpl typesupportimpl_type;
+  typedef <%TYPE%>DataWriterImpl  datawriter_type;
 
   typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
