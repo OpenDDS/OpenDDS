@@ -18,8 +18,6 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
-using namespace TestUtils;
-
 namespace {
   typedef std::vector< ::Xyz::Foo> Messages;
   bool valid(const Messages& msgs, const long stage, int& expected_count)
@@ -123,19 +121,18 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   const std::string pid = ss.str();
   std::cerr << pid << "Sub Creating App\n";
   int status = 0;
-  {
-  DDSApp dds(argc, argv);
+  ::TestUtils::DDSApp dds(argc, argv);
   try {
     std::cerr << pid << "Sub Creating topic\n";
-    DDSFacade< ::Xyz::FooDataWriterImpl> topic =
+    ::TestUtils::DDSFacade< ::Xyz::FooDataWriterImpl> topic =
       dds.facade< ::Xyz::FooDataWriterImpl>("bar");
 
     // need to process after calling facade to ensure all DDS/TAO/ACE command line
     // parameters are already removed
-    Arguments args;
+    ::TestUtils::Arguments args;
     args.add_long("stage", 0);
     args.add_bool("verbose", false);
-    Options options(argc, argv);
+    ::TestUtils::Options options(argc, argv);
 
     const long stage = options.get<long>("stage");
     if (stage != 1 && stage != 2) {
@@ -145,8 +142,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Create Listener
-    ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>* listener_impl =
-      new ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>;
+    ::TestUtils::ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>* listener_impl =
+      new ::TestUtils::ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>;
     listener_impl->verbose(options.get<bool>("verbose"));
     DDS::DataReaderListener_var listener(listener_impl);
     // Create data reader for the topic
@@ -183,8 +180,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     status = -1;
   }
 
-  std::cerr << pid << "Sub DDSApp going out of scope\n";
-  }
   std::cerr << pid << "Sub returning status=" << status << "\n";
   return status;
 }

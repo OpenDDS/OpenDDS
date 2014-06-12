@@ -16,6 +16,7 @@
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
+#include <iostream>
 #include <model/Sync.h>
 #include <map>
 

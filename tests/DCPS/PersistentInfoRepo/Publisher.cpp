@@ -16,7 +16,6 @@
 #include "dds/DCPS/StaticIncludes.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-using namespace TestUtils;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -24,18 +23,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   ss << "(" << ACE_OS::getpid() << ")";
   const std::string pid = ss.str();
   std::cerr << pid << "Pub Creating App\n";
-  {
-  DDSApp dds(argc, argv);
+  ::TestUtils::DDSApp dds(argc, argv);
   try {
     std::cerr << pid << "Pub Creating topic\n";
     // ?? fix to code gen will allow using ::Xyz::Foo
-    DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.facade< ::Xyz::FooDataWriterImpl>("bar");
+    ::TestUtils::DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.facade< ::Xyz::FooDataWriterImpl>("bar");
     ::Xyz::FooDataWriter_var msg_writer;
 
-    Arguments args;
+    ::TestUtils::Arguments args;
     args.add_long("stage", 0);
     args.add_long("messages", 60);
-    Options options(argc, argv);
+    ::TestUtils::Options options(argc, argv);
 
     long stage = options.get<long>("stage");
     if (stage != 1 && stage != 2) {
@@ -67,7 +65,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         std::cerr << pid << "Pub Stage " << stage
                   << " waiting for " << stage << " readers\n";
         // Block until Subscriber is available
-        OpenDDS::Model::WriterSync ws(DDSApp::datawriter(msg_writer), 1);
+        OpenDDS::Model::WriterSync ws(
+          ::TestUtils::DDSApp::datawriter(msg_writer), 1);
         std::cerr << pid << "Pub Stage " << stage
                   << " done waiting for reader\n";
 
@@ -118,8 +117,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                       msg.c_str()), -1);
   }
 
-  std::cerr << pid << "Pub DDSApp going out of scope" << std::endl;
-  }
   std::cerr << pid << "Pub returning status=0" << std::endl;
   return 0;
 }
