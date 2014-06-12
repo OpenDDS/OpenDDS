@@ -1,3 +1,16 @@
+Thu Jun 12 14:11:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Made is_reliable a static method for subscriber to use.
+
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Copied DataReaderListener logic for determining if reliability qos
+          needed to be set.
+
 Thu Jun 12 13:44:03 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DataReaderListenerImpl.h:

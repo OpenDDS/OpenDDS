@@ -63,6 +63,8 @@ public:
     return num_reads_;
   }
 
+  static bool is_reliable();
+
   bool is_valid() const;
 
 private:
