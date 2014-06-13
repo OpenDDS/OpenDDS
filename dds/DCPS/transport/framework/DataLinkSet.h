@@ -65,7 +65,7 @@ public:
 
   /// This will inform each DataLink in the set about the send_stop()
   /// event.  It will then clear the send_links_ set.
-  void send_stop();
+  void send_stop(RepoId repoId);
 
   DataLinkSet* select_links(const RepoId* remoteIds,
                             const CORBA::ULong num_targets);

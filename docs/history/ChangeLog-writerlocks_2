@@ -1,0 +1,59 @@
+Fri Jun 13 18:35:04 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Remove superfluous log statements
+
+Fri Jun 13 18:22:51 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * .:
+          Merging local changes permissions
+
+Fri Jun 13 18:19:56 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * Merging from trunk r6282 through r6283
+
+Fri Jun 13 15:09:49 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * Merging from trunk r6279 through r6281
+
+Fri Jun 13 14:47:18 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+          To alleviate deadlock when calling send_delayed_notifications, made possible
+          deadlocking calls take a match on the sender's repoId so that only its own
+          associated WriteDataContainer lock is acquired while sending the delayed
+          notifications.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+
+          send_stop() calls now pass the sender's repoId down to the TransportSendStrategy
+          to allow calls to send_delayed_notifications to be based on a match.  Only the
+          ThreadPerConnectionSendTask still calls send_delayed_notification with no match
+          by passing in GUID_UNKNOWN into the send_stop call (this should be okay, since only
+          one thread is accessing the sending data so no deadlocks will happen)
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+         When send() calls send_delayed_notifications it now passes in a match on the elem
+         being sent's publication id.
+
+Fri Jun 13 14:21:06 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * Merge from trunk r6270 through r6278
+
+Wed Jun 11 20:09:25 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * BranchChangeLog:
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

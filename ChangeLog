@@ -1,3 +1,42 @@
+Fri Jun 13 19:02:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+          To alleviate deadlock when calling send_delayed_notifications, made possible
+          deadlocking calls take a match on the sender's repoId so that only its own
+          associated WriteDataContainer lock is acquired while sending the delayed
+          notifications.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Modified send_stop(_i) interface to pass sender's repoId for use
+          in the TransportSendStrategy when calling send_delayed_notifications
+          to pass a match for which delayed notifications to send.
+
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+
+          ThreadPerConnectionSendTask still calls send_delayed_notification
+          with no matchby passing in GUID_UNKNOWN into the send_stop call 
+          this should be okay, since only one thread is accessing the sending
+          data so no deadlocks will happen
+
+          modified execute to pass GUID_UNKNOWN as a paramerter to send_stop_i
+          due to element being null, so no sender repoId is available to pass.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          When send() calls send_delayed_notifications it now passes in a match
+          on the elem being sent's publication id.
+
+        * docs/history/ChangeLog-writerlocks_2:
+
+          Merged the branch "writerlocks_2" For details see the branch-specific 
+          change log at  docs/history/ChangeLog-writerlocks_2
+
 Fri Jun 13 16:31:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
