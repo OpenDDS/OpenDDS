@@ -174,7 +174,7 @@ private:
 };
 
 template<>
-long
+inline long
 Options::get_value<long>(const std::string& str_val)
 {
   const long val = ACE_OS::atol(str_val.c_str());
@@ -182,7 +182,7 @@ Options::get_value<long>(const std::string& str_val)
 }
 
 template<>
-double
+inline double
 Options::get_value<double>(const std::string& str_val)
 {
   const double val = ACE_OS::atof(str_val.c_str());
@@ -190,7 +190,7 @@ Options::get_value<double>(const std::string& str_val)
 }
 
 template<>
-bool
+inline bool
 Options::get_value<bool>(const std::string& str_val)
 {
   std::string lower;

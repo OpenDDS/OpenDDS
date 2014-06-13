@@ -1,3 +1,9 @@
+Fri Jun 13 20:24:34 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/Options.h:
+
+          Made template methods inline.
+
 Fri Jun 13 19:02:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
           To alleviate deadlock when calling send_delayed_notifications, made possible
@@ -18,7 +24,7 @@ Fri Jun 13 19:02:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
         * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
 
           ThreadPerConnectionSendTask still calls send_delayed_notification
-          with no matchby passing in GUID_UNKNOWN into the send_stop call 
+          with no matchby passing in GUID_UNKNOWN into the send_stop call
           this should be okay, since only one thread is accessing the sending
           data so no deadlocks will happen
 
@@ -34,7 +40,7 @@ Fri Jun 13 19:02:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * docs/history/ChangeLog-writerlocks_2:
 
-          Merged the branch "writerlocks_2" For details see the branch-specific 
+          Merged the branch "writerlocks_2" For details see the branch-specific
           change log at  docs/history/ChangeLog-writerlocks_2
 
 Fri Jun 13 16:31:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
