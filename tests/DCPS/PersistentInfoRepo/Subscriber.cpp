@@ -78,7 +78,7 @@ namespace {
     }
 
     if (stage == 2) {
-      if (group1.size() == expected_count) {
+      if ((int)group1.size() == expected_count) {
         std::cerr << "ERROR: Stage 2 received all messages sent in Stage1.\n";
         valid = false;
       }

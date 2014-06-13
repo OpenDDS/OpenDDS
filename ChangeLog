@@ -1,3 +1,9 @@
+Fri Jun 13 14:47:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Fixed warning.
+
 Fri Jun 13 12:56:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/Options.h:
