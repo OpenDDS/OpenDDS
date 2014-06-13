@@ -103,7 +103,8 @@ public:
   public:
     Exception(const std::string& param, const std::string& reason);
     Exception(const std::string& reason);
-    virtual const char* what() const;
+    virtual ~Exception() throw ();
+    virtual const char* what() const throw();
   private:
     std::string what_;
   };

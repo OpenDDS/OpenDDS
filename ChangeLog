@@ -1,3 +1,10 @@
+Fri Jun 13 12:56:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/Options.h:
+        * tests/Utils/Options.cpp:
+
+          Fixing throw spec for linux builds.
+
 Thu Jun 12 20:15:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo/mySvc.conf:

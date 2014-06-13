@@ -227,8 +227,12 @@ Options::Exception::Exception(const std::string& reason)
   what_ += reason;
 }
 
+Options::Exception::~Exception() throw ()
+{
+}
+
 const char*
-Options::Exception::what() const
+Options::Exception::what() const throw()
 {
   return what_.c_str();
 }
