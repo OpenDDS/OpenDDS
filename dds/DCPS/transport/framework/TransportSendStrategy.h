@@ -73,7 +73,7 @@ public:
 
   /// Invoked after one or more send() invocations from a particular
   /// TransportClient.
-  void send_stop();
+  void send_stop(RepoId repoId);
 
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample

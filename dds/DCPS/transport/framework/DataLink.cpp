@@ -738,9 +738,10 @@ DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* messag
                      this->send_control_allocator_),
                      SEND_CONTROL_ERROR);
 
-   send_start();
-   send(elem);
-   send_stop();
+  RepoId senderId(header.publication_id_);
+  send_start();
+  send(elem);
+  send_stop(senderId);
 
    return SEND_CONTROL_OK;
 }

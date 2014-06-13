@@ -866,8 +866,8 @@ TransportClient::send(const DataSampleList& samples)
    // The reason that the send_links_ set is cleared is because we continually
    // reuse the same send_links_ object over and over for each call to this
    // send method.
-
-   send_links_.send_stop();
+  RepoId pub_id(this->repo_id_);
+  send_links_.send_stop(pub_id);
 }
 
 TransportSendListener*

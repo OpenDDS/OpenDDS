@@ -283,3 +283,5 @@ tests/DCPS/ManyToMany/run_test.pl rtps 1to1 small: !DCPS_MIN
 tests/DCPS/ManyToMany/run_test.pl rtps 1to1 large: !DCPS_MIN
 tests/DCPS/ManyToMany/run_test.pl shmem 1to1 small: !DCPS_MIN
 tests/DCPS/ManyToMany/run_test.pl shmem 1to1 large: !DCPS_MIN
+
+tests/DCPS/PersistentInfoRepo/run_test.pl: !DCPS_MIN

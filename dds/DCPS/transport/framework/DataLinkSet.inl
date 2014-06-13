@@ -125,7 +125,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
        ++itr) {
     itr->second->send_start();
     itr->second->send(send_element);
-    itr->second->send_stop();
+    itr->second->send_stop(pub_id);
   }
 
   return SEND_CONTROL_OK;
@@ -165,7 +165,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
        ++itr) {
     itr->second->send_start();
     itr->second->send(send_element);
-    itr->second->send_stop();
+    itr->second->send_stop(pub_id);
   }
 }
 
@@ -250,7 +250,7 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 /// This will inform each DataLink in the set about the send_stop()
 /// event.  It will then clear the send_links_ set.
 ACE_INLINE void
-OpenDDS::DCPS::DataLinkSet::send_stop()
+OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_stop",6);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
@@ -262,7 +262,7 @@ OpenDDS::DCPS::DataLinkSet::send_stop()
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
-    itr->second->send_stop();
+    itr->second->send_stop(repoId);
   }
 
   map_.clear();
