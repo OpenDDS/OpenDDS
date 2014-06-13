@@ -132,7 +132,7 @@ DataLink::send_i(TransportQueueElement* element, bool relink)
 }
 
 ACE_INLINE void
-DataLink::send_stop()
+DataLink::send_stop(RepoId repoId)
 {
   DBG_ENTRY_LVL("DataLink","send_stop",6);
 
@@ -140,11 +140,11 @@ DataLink::send_stop()
     this->thr_per_con_send_task_->add_request(SEND_STOP);
 
   } else
-    this->send_stop_i();
+    this->send_stop_i(repoId);
 }
 
 ACE_INLINE void
-DataLink::send_stop_i()
+DataLink::send_stop_i(RepoId repoId)
 {
   DBG_ENTRY_LVL("DataLink","send_stop_i",6);
   // This one is easy.  Simply delegate to our TransportSendStrategy
@@ -158,7 +158,7 @@ DataLink::send_stop_i()
   }
 
   if (!strategy.is_nil()) {
-    strategy->send_stop();
+    strategy->send_stop(repoId);
   }
 }
 
