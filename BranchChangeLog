@@ -1,3 +1,9 @@
+Fri Jun 13 18:35:04 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Remove superfluous log statements
+
 Fri Jun 13 18:22:51 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * .:

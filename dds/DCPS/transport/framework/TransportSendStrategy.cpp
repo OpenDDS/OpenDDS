@@ -438,7 +438,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "At top of 'num bytes left' loop.  num_bytes_left == [%d].\n",
             num_bytes_left));
-      //TODO: PWO This is a problem line when it tries to read pkt_chain_ if pkt_chain_ is 0
+
       const int block_length = static_cast<int>(this->pkt_chain_->length());
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -724,9 +724,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
         "Adjustments all done.  Returning [%d].  0 means entire packet "
         "has been sent.  1 means otherwise.\n",
         rc));
-  if(rc == 1){
-    ACE_DEBUG((LM_INFO, "(%P|%t) PWO: adjust_packet_after_send returning 1 which will cause a re-establish connection\n"));
-  }
+
   return rc;
 }
 
