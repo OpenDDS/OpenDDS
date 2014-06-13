@@ -1,3 +1,87 @@
+Fri Jun 13 12:56:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/Options.h:
+        * tests/Utils/Options.cpp:
+
+          Fixing throw spec for linux builds.
+
+Thu Jun 12 20:15:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/mySvc.conf:
+        * tests/Utils/Options.h:
+        * tests/Utils/Options.cpp:
+
+          Added missing files to svn.
+
+Thu Jun 12 19:52:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Using complete namespace to avoid name conflict.
+
+        * tests/Utils/DDSFacade.h:
+
+          Fixed missing include.
+
+Thu Jun 12 17:21:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Changed persisted publications to try to associate.
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Changed test to create 1 pub and 1 sub, then kill/restart the IR,
+          then start another pub and sub and have each verify that they all
+          associate and disassociate with each other.
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+
+          Passing argc and argv as references to allow DDS and ACE_DEBUG
+          parameters to be removed from argv prior to parsing the parameters.
+
+        * tests/Utils/DDSFacade.h:
+
+          Added ifdef to prevent double inclusion.
+
+        * tests/Utils/DataReaderListenerImpl.h:
+        * tests/Utils/ListenerRecorder.h:
+
+          Added logging.
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+          Changed ReaderSync to allow waiting for a specific number of publications to
+          happen prior to looking for all publications to be removed.
+
+Thu Jun 12 14:11:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Made is_reliable a static method for subscriber to use.
+
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Copied DataReaderListener logic for determining if reliability qos
+          needed to be set.
+
+Thu Jun 12 13:44:03 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DataReaderListenerImpl.h:
+
+          Fixed warnings.
+
+        * tests/Utils/ListenerRecorder.h:
+
+          Debug statement.
+
 Wed Jun 11 17:28:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSApp.h:
