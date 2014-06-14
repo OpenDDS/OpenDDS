@@ -71,7 +71,7 @@ $repo_bit_opt = '-NOBITS' if $nobit;
 
 my $pub_opts = "$app_bit_opt $pub_ini";
 my $sub_opts = "$app_bit_opt $sub_ini";
-$sub_opts .= " -r $reliable";
+$sub_opts .= " -reliable $reliable";
 my $messages = 60;
 my $pub1_opts = "$logging_p -ORBLogFile pub1.log $pub_opts -stage 1 -messages $messages";
 my $sub1_opts = "$logging_s -ORBLogFile sub1.log $sub_opts -stage 1 -verbose";

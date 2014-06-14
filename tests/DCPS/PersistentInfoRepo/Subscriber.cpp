@@ -121,65 +121,68 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   const std::string pid = ss.str();
   std::cerr << pid << "Sub Creating App\n";
   int status = 0;
-  ::TestUtils::DDSApp dds(argc, argv);
-  try {
-    std::cerr << pid << "Sub Creating topic\n";
-    ::TestUtils::DDSFacade< ::Xyz::FooDataWriterImpl> topic =
-      dds.facade< ::Xyz::FooDataWriterImpl>("bar");
+  {
+    ::TestUtils::DDSApp dds(argc, argv);
+    try {
+      std::cerr << pid << "Sub Creating topic\n";
+      ::TestUtils::DDSFacade< ::Xyz::FooDataWriterImpl> topic =
+        dds.facade< ::Xyz::FooDataWriterImpl>("bar");
 
-    // need to process after calling facade to ensure all DDS/TAO/ACE command line
-    // parameters are already removed
-    ::TestUtils::Arguments args;
-    args.add_long("stage", 0);
-    args.add_bool("verbose", false);
-    ::TestUtils::Options options(argc, argv);
+      // need to process after calling facade to ensure all DDS/TAO/ACE command line
+      // parameters are already removed
+      ::TestUtils::Arguments args;
+      args.add_long("stage", 0);
+      args.add_bool("verbose", false);
+      ::TestUtils::Options options(argc, argv);
 
-    const long stage = options.get<long>("stage");
-    if (stage != 1 && stage != 2) {
-      std::cerr << "ERROR: Sub command line parameter \"stage\" set to "
-                << stage << " should be set to 1 or 2 ";
-      return -1;
-    }
+      const long stage = options.get<long>("stage");
+      if (stage != 1 && stage != 2) {
+        std::cerr << "ERROR: Sub command line parameter \"stage\" set to "
+                  << stage << " should be set to 1 or 2 ";
+        return -1;
+      }
 
-    // Create Listener
-    ::TestUtils::ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>* listener_impl =
-      new ::TestUtils::ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>;
-    listener_impl->verbose(options.get<bool>("verbose"));
-    DDS::DataReaderListener_var listener(listener_impl);
-    // Create data reader for the topic
-    std::cerr << pid << "Sub Creating Stage " << stage << " reader\n";
-    DDS::DataReader_var dr = topic.reader(listener);
+      // Create Listener
+      ::TestUtils::ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>* listener_impl =
+        new ::TestUtils::ListenerRecorder< ::Xyz::Foo, ::Xyz::FooDataReader>;
+      listener_impl->verbose(options.get<bool>("verbose"));
+      DDS::DataReaderListener_var listener(listener_impl);
+      // Create data reader for the topic
+      std::cerr << pid << "Sub Creating Stage " << stage << " reader\n";
+      DDS::DataReader_var dr = topic.reader(listener);
 
 
-    {
-      std::cerr << pid << "Sub Stage " << stage
-                << " waiting for 2 writer to come and go" << std::endl;
-      OpenDDS::Model::ReaderSync rs(dr, 2);
-    }
-    std::cerr << pid << "Sub Stage " << stage << " done waiting\n";
+      {
+        std::cerr << pid << "Sub Stage " << stage
+                  << " waiting for 2 writer to come and go" << std::endl;
+        OpenDDS::Model::ReaderSync rs(dr, 2);
+      }
+      std::cerr << pid << "Sub Stage " << stage << " done waiting\n";
 
-    const Messages msgs = listener_impl->messages();
+      const Messages msgs = listener_impl->messages();
 
-    int expected_count = -1;
-    if (!valid(msgs, stage, expected_count)) {
+      int expected_count = -1;
+      if (!valid(msgs, stage, expected_count)) {
+        status = -1;
+      }
+
+      std::cerr << pid << "Sub DDSFacade going out of scope\n";
+      // Listener will be cleaned up when reader goes out of scope
+    } catch (const CORBA::Exception& e) {
+      e._tao_print_exception("Exception caught in main():");
+      status = -1;
+    } catch (std::runtime_error& err) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+                 err.what()));
+      status = -1;
+    } catch (std::string& msg) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+                 msg.c_str()));
       status = -1;
     }
 
-    std::cerr << pid << "Sub DDSFacade going out of scope\n";
-    // Listener will be cleaned up when reader goes out of scope
-  } catch (const CORBA::Exception& e) {
-    e._tao_print_exception("Exception caught in main():");
-    status = -1;
-  } catch (std::runtime_error& err) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
-               err.what()));
-    status = -1;
-  } catch (std::string& msg) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
-               msg.c_str()));
-    status = -1;
+    std::cerr << pid << "Sub DDSApp going out of scope(shutdown)\n";
   }
-
   std::cerr << pid << "Sub returning status=" << status << "\n";
   return status;
 }
