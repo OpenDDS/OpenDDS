@@ -157,6 +157,9 @@ Options::parse(int argc, ACE_TCHAR* argv[])
            // already processed this arg
            ++arg;
         }
+      } else {
+        // param flag without a value, assume boolean true
+        value = "true";
       }
       Arguments::ValueAndType vt(value, Arguments::UNDEF);
       std::pair<Params::iterator, bool> insert =

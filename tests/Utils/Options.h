@@ -193,8 +193,8 @@ template<>
 inline bool
 Options::get_value<bool>(const std::string& str_val)
 {
-  std::string lower;
-  std::transform(str_val.begin(), str_val.end(), lower.begin(),::tolower);
+  std::string lower = str_val;
+  std::transform(lower.begin(), lower.end(), lower.begin(),::tolower);
   if (lower == "true")
     return true;
   else if (lower == "false")

@@ -111,9 +111,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     } catch (const CORBA::Exception& e) {
       e._tao_print_exception("Exception caught in main():");
       return -1;
-    } catch (std::runtime_error& err) {
+    } catch (std::exception& ex) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
-                        err.what()), -1);
+                        ex.what()), -1);
     } catch (std::string& msg) {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
                         msg.c_str()), -1);

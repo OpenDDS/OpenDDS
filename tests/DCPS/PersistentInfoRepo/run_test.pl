@@ -141,7 +141,7 @@ print $Subscriber2->CommandLine() . "\n";
 $Subscriber2->Spawn();
 
 # 1 second delay between messages + some extra time
-$wait_time = $messages * 2;
+$wait_time = $messages * 2 + 60;
 $Subscriber1->Wait($wait_time);
 print STDERR "shutting down subscriber #1\n";
 my $Subscriber1Result = $Subscriber1->WaitKill(10);
@@ -176,36 +176,28 @@ if ($ir != 0) {
 
 unlink $dcpsrepo_ior;
 
+sub print_file {
+  my $file = shift;
+
+  if (open FILE, "<", $file) {
+      print "$file:\n";
+      while (my $line = <FILE>) {
+          print "$line";
+      }
+      print "\n\n";
+      close FILE;
+  }
+}
+
 if ($status == 0) {
   print "test PASSED.\n";
 } else {
   print "**** Begin log file output *****\n";
-  if (open FILE, "<", "pub1.log") {
-      print "Publisher1:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
 
-  if (open FILE, "<", "pub2.log") {
-      print "Publisher2:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
-
-  if (open FILE, "<", "sub1.log") {
-      print "Subscriber1:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
+  print_file("pub1.log");
+  print_file("pub2.log");
+  print_file("sub1.log");
+  print_file("sub2.log");
 
   print "**** End log file output *****\n";
 

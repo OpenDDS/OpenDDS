@@ -1,3 +1,24 @@
+Mon Jun 16 13:29:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Changed to catch std::exception.
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Added longer delay since subscribers are indicating exiting main
+          but run_test.pl is indicating subscriber timing out.
+
+        * tests/Utils/Options.h:
+
+          Fixed code to convert boolean strings to lower case.
+
+        * tests/Utils/Options.cpp:
+
+          Changed code to assume flags without values are boolean flags with
+          a value of true.
+
 Sat Jun 14 11:49:19 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
