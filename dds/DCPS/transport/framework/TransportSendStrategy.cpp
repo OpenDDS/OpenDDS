@@ -706,8 +706,6 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
          ++eiter)
     {
       const SendMode mode = this->mode_;
-      // remember this->header_.length_
-      ACE_UINT32 old_header_length = this->header_.length_;
       {
         ACE_Reverse_Lock<LockType> reverse(this->lock_);
         ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
