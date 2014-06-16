@@ -1,3 +1,9 @@
+Mon Jun 16 16:28:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Fixed svn::executable property.
+
 Mon Jun 16 14:18:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
