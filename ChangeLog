@@ -1,3 +1,18 @@
+Mon Jun 16 14:18:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Added increasing debug levels prior to returning from main to
+          identify why subscriber looks like it is finishing in time, but
+          run_test.pl indicates that the subscriber times out.
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Increased time waiting for subsciber 1 to finish and added
+          printing timestamps for diagnosing why subsciber indicates
+          it finishes, but run_test.pl incicates that the subscriber
+          timed out.
+
 Mon Jun 16 14:04:15 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.cpp:

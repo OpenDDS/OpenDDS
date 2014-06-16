@@ -184,5 +184,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::cerr << pid << "Sub DDSApp going out of scope(shutdown)\n";
   }
   std::cerr << pid << "Sub returning status=" << status << "\n";
+
+  // adding diagnostics for shutdown problem
+  OpenDDS::DCPS::set_DCPS_debug_level(10);
+  TAO_debug_level = 10;
+  ACE::debug (1);
   return status;
 }

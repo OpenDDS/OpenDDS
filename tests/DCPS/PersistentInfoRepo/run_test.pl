@@ -141,13 +141,17 @@ print $Subscriber2->CommandLine() . "\n";
 $Subscriber2->Spawn();
 
 # 1 second delay between messages + some extra time
-$wait_time = $messages * 2 + 60;
-$Subscriber1->Wait($wait_time);
-print STDERR "shutting down subscriber #1\n";
-my $Subscriber1Result = $Subscriber1->WaitKill(10);
+$wait_time = $messages * 2 + 120;
+my $time_str = localtime;
+print STDERR "shutting down subscriber #1 (waiting $wait_time seconds at $time_str)\n";
+my $Subscriber1Result = $Subscriber1->WaitKill($wait_time);
 if ($Subscriber1Result != 0) {
-    print STDERR "ERROR: subscriber #1 returned $Subscriber1Result\n";
+    $time_str = localtime;
+    print STDERR "ERROR: subscriber #1 returned $Subscriber1Result ($time_str)\n";
     $status = 1;
+} else {
+  $time_str = localtime;
+  print STDERR "shut down subscriber #1 ($time_str)\n";
 }
 
 my $Subscriber2Result = $Subscriber2->WaitKill(10);
