@@ -37,8 +37,7 @@ int offered_incompatible_qos_called_on_dw = 0;
 
 
 PubDriver::PubDriver()
-: publisher_servant_ (0),
-  datawriter_servant_ (0),
+: datawriter_servant_ (0),
   foo_datawriter_servant_ (0),
   sub_handle_ (0),
   history_depth_ (1),
@@ -176,10 +175,6 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   std::cout << std::hex << "0x" << publisher_->get_instance_handle() << std::endl;
 
   TEST_CHECK (participant_->contains_entity(publisher_->get_instance_handle()));
-
-  publisher_servant_
-    = dynamic_cast<OpenDDS::DCPS::PublisherImpl*>
-    (publisher_.in ());
 
   ::DDS::PublisherQos pub_qos_got;
   publisher_->get_qos (pub_qos_got);
@@ -338,13 +333,15 @@ PubDriver::end()
   // Verify the number of instances and the number of samples
   // written to the datawriter.
 
-  CORBA::String_var topic_name = topic_->get_name ();
+  {
+    CORBA::String_var topic_name = topic_->get_name ();
 
-  ::DDS::DataWriter_var dw = publisher_->lookup_datawriter (topic_name.in ());
+    ::DDS::DataWriter_var dw = publisher_->lookup_datawriter (topic_name.in ());
 
-  TEST_CHECK (!CORBA::is_nil (dw.in ()));
+    TEST_CHECK (!CORBA::is_nil (dw.in ()));
+  }
 
-  publisher_->delete_contained_entities ();
+  participant_->delete_contained_entities ();
 
   ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(participant_.in ());

@@ -1,3 +1,13 @@
+Mon Jun 16 17:43:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+
+          Removing unused data member.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Cleaned up shutdown processing.
+
 Mon Jun 16 16:28:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo/run_test.pl:
