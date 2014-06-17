@@ -1,9 +1,17 @@
+Tue Jun 17 20:10:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Added diagnostic messages.
+
 Tue Jun 17 15:57:50 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
 
          Fixed pending_data() so that it also checks size of
-	 released_data_ as indicated in the member function comments.
+         released_data_ as indicated in the member function comments.
 
 Mon Jun 16 17:43:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 

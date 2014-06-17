@@ -168,11 +168,15 @@ ParticipantTask::svc()
         ACE_TEXT("timed out waiting for acks!\n")
       ), 1);
     }
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- DELETE DATAWRITER\n")));
     publisher->delete_datawriter(writer);
 
     // Clean-up!
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER PARTICIPANT DEL CONT ENTITIES\n")));
     participant->delete_contained_entities();
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER DELETE PARTICIPANT\n")));
     dpf->delete_participant(participant.in());
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER PARTICIPANT VARS GOING OUT OF SCOPE\n")));
   }
   catch (const CORBA::Exception& e)
   {
