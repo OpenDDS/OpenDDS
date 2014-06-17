@@ -517,7 +517,8 @@ bool
 WriteDataContainer::pending_data()
 {
   return this->sending_data_.size_ != 0
-         || this->unsent_data_.size_ != 0;
+         || this->unsent_data_.size_ != 0
+         || this->released_data_.size_ != 0;
 }
 
 void
