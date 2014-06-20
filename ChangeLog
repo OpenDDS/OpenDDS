@@ -1,3 +1,9 @@
+Fri Jun 20 17:47:49 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSFacade.h:
+
+          Fixed error in template.
+
 Fri Jun 20 16:54:53 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSApp.h:

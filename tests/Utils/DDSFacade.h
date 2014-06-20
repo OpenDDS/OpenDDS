@@ -84,7 +84,7 @@ public:
     return writer(publisher,
                   qos_func,
                   DDS::DataWriterListener::_nil(),
-                  OpenDDS::DCPS::DEFAULT_STATUS_MASK)
+                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   }
 
   template<typename QosFunc>
