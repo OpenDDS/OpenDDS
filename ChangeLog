@@ -1,3 +1,21 @@
+Fri Jun 20 16:54:53 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+        * tests/Utils/DDSFacade.h:
+
+          Added being able to create DDS entities using non-default qos and
+          providing listeners and non-default masks.
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Removed setting verbosity flags for diagnostics.
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Removed explicitly setting verbose flag and added it as a command
+          line parameter.
+
 Tue Jun 17 20:10:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/Thrasher/ParticipantTask.cpp:

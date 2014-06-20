@@ -25,7 +25,7 @@ my $reliable = 1;
 
 my $nobit = 1; # Set to a non-zero value to disable the Builtin Topics.
 
-my $pub_ini = ' -DCPSConfigFile tcp.ini';
+my $pub_ini = ' -DCPSConfigFile tcp.ini -ORBLogFile';
 my $sub_ini = ' -DCPSConfigFile tcp.ini';
 
 for my $arg (@ARGV) {
@@ -50,12 +50,16 @@ for my $arg (@ARGV) {
         $pub_ini = " -DCPSConfigFile rtps.ini";
         $sub_ini = " -DCPSConfigFile rtps.ini";
     }
-    elsif ($arg eq 'rtps') {
-        $pub_ini = " -DCPSConfigFile rtps.ini";
-        $sub_ini = " -DCPSConfigFile rtps.ini";
+    elsif ($arg eq 'verbose') {
+        $logging_p .= " -verbose";
+        $logging_s .= " -verbose";
     }
     elsif ($arg eq 'BIT' || $arg eq 'bit') {
         $nobit = 0;
+    }
+    elsif ($arg eq 'verbose') {
+        $pub_ini = " -DCPSConfigFile rtps.ini";
+        $sub_ini = " -DCPSConfigFile rtps.ini";
     }
     elsif ($arg ne '') {
         print STDERR "ERROR: invalid test case\n";
@@ -74,10 +78,10 @@ my $sub_opts = "$app_bit_opt $sub_ini";
 $sub_opts .= " -reliable $reliable";
 my $messages = 60;
 my $pub1_opts = "$logging_p -ORBLogFile pub1.log $pub_opts -stage 1 -messages $messages";
-my $sub1_opts = "$logging_s -ORBLogFile sub1.log $sub_opts -stage 1 -verbose";
+my $sub1_opts = "$logging_s -ORBLogFile sub1.log $sub_opts -stage 1";
 
 my $pub2_opts = "$logging_p -ORBLogFile pub2.log $pub_opts -stage 2 -messages $messages";
-my $sub2_opts = "$logging_s -ORBLogFile sub2.log $sub_opts -stage 2 -verbose";
+my $sub2_opts = "$logging_s -ORBLogFile sub2.log $sub_opts -stage 2";
 
 my $dcpsrepo_ior = "repo.ior";
 my $info_prst_file = "info.pr";

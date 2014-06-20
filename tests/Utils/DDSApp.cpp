@@ -24,7 +24,7 @@ DDSApp::DDSApp(int& argc, ACE_TCHAR**& argv)
 
 DDSApp::DDSApp(int& argc,
                ACE_TCHAR**& argv,
-               ::DDS::DomainId_t default_domain_id)
+               DDS::DomainId_t default_domain_id)
 : argc_(argc)
 , argv_(argv)
 , domain_id_defaulted_(true)
@@ -41,40 +41,95 @@ DDSApp::~DDSApp()
 DDS::DomainParticipant_var
 DDSApp::participant()
 {
-  return participant(default_domain_id_);
+  std::cerr << "participant with default_domain_id_=" << default_domain_id_ << "\n";
+  return create_part(default_domain_id_,
+                     PARTICIPANT_QOS_DEFAULT,
+                     DDS::DomainParticipantListener::_nil(),
+                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 }
 
 DDS::DomainParticipant_var
-DDSApp::participant(::DDS::DomainId_t domain_id)
+DDSApp::participant(DDS::DomainId_t domain_id)
 {
+  return create_part(domain_id,
+                     PARTICIPANT_QOS_DEFAULT,
+                     DDS::DomainParticipantListener::_nil(),
+                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+}
+
+DDS::DomainParticipant_var
+DDSApp::participant(DDS::DomainId_t                    domain_id,
+                    DDS::DomainParticipantListener_var listener,
+                    DDS::StatusMask                    mask)
+{
+  return create_part(domain_id,
+                     PARTICIPANT_QOS_DEFAULT,
+                     listener,
+                     mask);
+}
+
+DDS::DomainParticipant_var
+DDSApp::create_part(DDS::DomainId_t                    domain_id,
+                    const DDS::DomainParticipantQos&   qos,
+                    DDS::DomainParticipantListener_var listener,
+                    DDS::StatusMask                    mask)
+{
+  std::cerr << "create_part\n";
   DDS::DomainParticipantFactory_var dpf = domain_participant_factory();
+  std::cerr << "call dpf->create_participant(...)\n";
   DDS::DomainParticipant_var participant =
     dpf->create_participant(domain_id,
-                            PARTICIPANT_QOS_DEFAULT,
-                            DDS::DomainParticipantListener::_nil(),
-                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                            qos,
+                            listener.in(),
+                            mask);
   add(participant);
   return participant;
 }
 
 DDS::Publisher_var
-DDSApp::publisher(
-  DDS::DomainParticipant_var participant)
+DDSApp::publisher(DDS::DomainParticipant_var participant,
+                  DDS::PublisherListener_var a_listener,
+                  DDS::StatusMask            mask)
+{
+  return create_pub(participant,
+                    PUBLISHER_QOS_DEFAULT,
+                    a_listener,
+                    mask);
+}
+
+DDS::Publisher_var
+DDSApp::create_pub(DDS::DomainParticipant_var participant,
+                   const DDS::PublisherQos&   qos,
+                   DDS::PublisherListener_var a_listener,
+                   DDS::StatusMask            mask)
 {
   determine_participant(participant);
-  return participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                       DDS::PublisherListener::_nil(),
-                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  return participant->create_publisher(qos,
+                                       a_listener.in(),
+                                       mask);
 }
 
 DDS::Subscriber_var
-DDSApp::subscriber(
-  DDS::DomainParticipant_var participant)
+DDSApp::subscriber(DDS::DomainParticipant_var  participant,
+                   DDS::SubscriberListener_var a_listener,
+                   DDS::StatusMask             mask)
+{
+  return create_sub(participant,
+                    SUBSCRIBER_QOS_DEFAULT,
+                    a_listener,
+                    mask);
+}
+
+DDS::Subscriber_var
+DDSApp::create_sub(DDS::DomainParticipant_var  participant,
+                   const DDS::SubscriberQos&   qos,
+                   DDS::SubscriberListener_var a_listener,
+                   DDS::StatusMask             mask)
 {
   determine_participant(participant);
-  return participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                        DDS::SubscriberListener::_nil(),
-                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  return participant->create_subscriber(qos,
+                                        a_listener.in(),
+                                        mask);
 }
 
 // either cleans up the specified participant, or all participants and the domain participant factory
@@ -91,17 +146,20 @@ DDSApp::cleanup(DDS::DomainParticipant_var participant)
 DDS::DomainParticipantFactory_var
 DDSApp::domain_participant_factory()
 {
+  std::cerr << "domain_participant_factory dpf=" << dpf_dont_use_.in() << "\n";
   // only use dpf_dont_use_ in this method
   if (!dpf_dont_use_.in())
     // Initialize DomainParticipantFactory
     dpf_dont_use_ = TheParticipantFactoryWithArgs(argc_, argv_);
 
+  std::cerr << "domain_participant_factory dpf=" << dpf_dont_use_.in() << "\n";
   return dpf_dont_use_;
 }
 
 void
 DDSApp::add(const DDS::DomainParticipant_var& participant)
 {
+  std::cerr << "add participant=" << participant.in() << "\n";
   participants_.insert(std::make_pair(participant.in(), participant));
   if (!default_participant_.in())
     default_participant_ = participant;
@@ -127,9 +185,11 @@ DDSApp::remove(const DDS::DomainParticipant_var& participant)
 void
 DDSApp::determine_participant(DDS::DomainParticipant_var& part)
 {
+  std::cerr << "determine_participant\n";
   if (part.in())
     return;
 
+  std::cerr << "determine_participant default=" << default_participant_.in() << "\n";
   if (!default_participant_.in()) {
     // this will create a participant and assign the default participant
     participant();
@@ -139,7 +199,7 @@ DDSApp::determine_participant(DDS::DomainParticipant_var& part)
 }
 
 void
-DDSApp::assign_default_domain_id(::DDS::DomainId_t id)
+DDSApp::assign_default_domain_id(DDS::DomainId_t id)
 {
   if (!domain_id_defaulted_) {
     domain_id_defaulted_ = true;
