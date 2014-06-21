@@ -24,10 +24,6 @@ namespace TestUtils {
 
 class DDSApp;
 
-void datawriter_qos_no_op(DDS::DataWriterQos& )
-{
-}
-
 template<typename Qos>
 struct QosNoOp
 {

@@ -1,3 +1,9 @@
+Sat Jun 21 10:56:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSFacade.h:
+
+          Removed unneeded method.
+
 Fri Jun 20 17:47:49 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSFacade.h:
