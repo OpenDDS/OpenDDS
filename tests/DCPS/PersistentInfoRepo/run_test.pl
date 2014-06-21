@@ -25,7 +25,7 @@ my $reliable = 1;
 
 my $nobit = 1; # Set to a non-zero value to disable the Builtin Topics.
 
-my $pub_ini = ' -DCPSConfigFile tcp.ini -ORBLogFile';
+my $pub_ini = ' -DCPSConfigFile tcp.ini';
 my $sub_ini = ' -DCPSConfigFile tcp.ini';
 
 for my $arg (@ARGV) {

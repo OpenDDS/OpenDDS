@@ -1,3 +1,9 @@
+Sat Jun 21 11:08:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Reverted inadvertent change.
+
 Sat Jun 21 11:01:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSFacade.h:
