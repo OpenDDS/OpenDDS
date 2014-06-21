@@ -1,3 +1,9 @@
+Sat Jun 21 11:01:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSFacade.h:
+
+          Missed calling qos_func to allow setting of Qos for DataReaders.
+
 Sat Jun 21 10:56:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSFacade.h:

@@ -126,6 +126,7 @@ public:
     determine_subscriber(subscriber);
     DDS::DataReaderQos qos;
     subscriber->get_default_datareader_qos(qos);
+    qos_func(qos);
     return subscriber->create_datareader(topic_.in(),
                                          qos,
                                          listener.in(),
