@@ -9,7 +9,6 @@
 #include "EntryExit.h"
 #include "DataLink.h"
 #include "TransportSendElement.h"
-#include "SendResponseListener.h"
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Definitions.h"
@@ -131,15 +130,13 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   DBG_ENTRY_LVL("DataLinkSet","send_response",6);
   TransportSendControlElement* send_element = 0;
 
-  SendResponseListener listener;
-
   GuardType guard(this->lock_);
   ACE_NEW_MALLOC(send_element,
     static_cast<TransportSendControlElement*>(
       send_control_element_allocator_.malloc()),
     TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
-                                &listener,
+                                &send_response_listener_,
                                 header,
                                 response,
                                 &send_control_element_allocator_));

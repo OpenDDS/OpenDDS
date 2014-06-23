@@ -1,3 +1,13 @@
+Mon Jun 23 16:49:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Fixed passing in listener from stack to method that may end up
+          being processed on the transport thread.
+
 Mon Jun 23 16:42:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSApp.h:
