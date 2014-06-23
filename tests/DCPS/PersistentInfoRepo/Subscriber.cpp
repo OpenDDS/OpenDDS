@@ -125,10 +125,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ::TestUtils::DDSApp dds(argc, argv);
     try {
       std::cerr << pid << "Sub Creating topic\n";
-      ::TestUtils::DDSFacade< ::Xyz::FooDataWriterImpl> topic =
-        dds.facade< ::Xyz::FooDataWriterImpl>("bar");
+      ::TestUtils::DDSTopic< ::Xyz::FooDataWriterImpl> topic =
+        dds.topic< ::Xyz::FooDataWriterImpl>("bar");
 
-      // need to process after calling facade to ensure all DDS/TAO/ACE command line
+      // need to process after calling topic to ensure all DDS/TAO/ACE command line
       // parameters are already removed
       ::TestUtils::Arguments args;
       args.add_long("stage", 0);
@@ -166,7 +166,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         status = -1;
       }
 
-      std::cerr << pid << "Sub DDSFacade going out of scope\n";
+      std::cerr << pid << "Sub DDSTopic going out of scope\n";
       // Listener will be cleaned up when reader goes out of scope
     } catch (const CORBA::Exception& e) {
       e._tao_print_exception("Exception caught in main():");

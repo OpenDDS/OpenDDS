@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TestUtils_DDSFacade_H
-#define TestUtils_DDSFacade_H
+#ifndef TestUtils_DDSTopic_H
+#define TestUtils_DDSTopic_H
 
 #include "TestUtils_Export.h"
 
@@ -53,7 +53,7 @@ struct QosNoOp
 /// reader() with no subscriber).
 template<typename WriterOrReaderImpl>
 // TODO: change codegen and use Message
-class DDSFacade
+class DDSTopic
 {
 public:
   friend class DDSApp;
@@ -153,14 +153,14 @@ public:
 
 private:
   // only called by DDSApp
-  DDSFacade(DDS::DomainParticipant_var participant,
+  DDSTopic(DDS::DomainParticipant_var participant,
             DDS::Topic_var topic)
   : participant_(participant)
   , topic_(topic)
   { }
 
   // TODO: REMOVE
-  DDSFacade() {}
+  DDSTopic() {}
 
   bool remove_from_parent(const DDS::Publisher_var& pub, DDS::DataWriter_ptr datawriter)
   {
@@ -236,4 +236,4 @@ private:
 
 } // End namespaces
 
-#endif /* TestUtils_DDSFacade_H */
+#endif /* TestUtils_DDSTopic_H */

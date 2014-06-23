@@ -29,7 +29,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     try {
       std::cerr << pid << "Pub Creating topic\n";
       // ?? fix to code gen will allow using ::Xyz::Foo
-      ::TestUtils::DDSFacade< ::Xyz::FooDataWriterImpl> topic = dds.facade< ::Xyz::FooDataWriterImpl>("bar");
+      ::TestUtils::DDSTopic< ::Xyz::FooDataWriterImpl> topic = dds.topic< ::Xyz::FooDataWriterImpl>("bar");
       ::Xyz::FooDataWriter_var msg_writer;
 
       ::TestUtils::Arguments args;
@@ -107,7 +107,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         std::cerr << pid << "Pub Stage " << stage
                   << " done waiting for acks from sub" << std::endl;
       }
-      std::cerr << pid << "Pub DDSFacade going out of scope" << std::endl;
+      std::cerr << pid << "Pub DDSTopic going out of scope" << std::endl;
     } catch (const CORBA::Exception& e) {
       e._tao_print_exception("Exception caught in main():");
       return -1;

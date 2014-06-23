@@ -11,7 +11,7 @@
 
 #include "TestUtils_Export.h"
 
-#include "tests/Utils/DDSFacade.h"
+#include "tests/Utils/DDSTopic.h"
 
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
@@ -28,11 +28,11 @@ namespace TestUtils {
 /// wants to send and receive DDS messages.  The class will create or use
 /// default parameters when they are not provided.
 ///
-/// DDSFacade: This is the essential piece of DDS functionality, it is used
+/// DDSTopic: This is the essential piece of DDS functionality, it is used
 /// to create data readers and data writers for a particular topic.  A
-/// DDSFacade will be created for a participant and a topic.  If the
+/// DDSTopic will be created for a participant and a topic.  If the
 /// participant is not provided, it is set to the default participant (see
-/// below) and the topic is created in DDS when the DDSFacade is created.
+/// below) and the topic is created in DDS when the DDSTopic is created.
 ///
 /// domain_id: The domain_id is either provided when explicitly creating a
 /// participant, or the default_domain_id_ is used.  The
@@ -41,10 +41,10 @@ namespace TestUtils {
 /// when creating a participant (or else it will be 0).
 ///
 /// participant: A participant can either be provided explicitly when
-/// creating a DDSFacade (by first calling participant(...)) or it will be
+/// creating a DDSTopic (by first calling participant(...)) or it will be
 /// set to the default_participant_.  The default_participant_ is set to
 /// the first participant that was created (either by calling
-/// participant(...) explicitly or by calling facade(...) and not providing
+/// participant(...) explicitly or by calling topic(...) and not providing
 /// a participant).
 class TestUtils_Export DDSApp
 {
@@ -105,9 +105,9 @@ public:
                                   DDS::StatusMask             mask =
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  /// create a new DDSFacade for the given type and topic name
+  /// create a new DDSTopic for the given type and topic name
   template<typename WriterOrReaderImpl>
-  DDSFacade<WriterOrReaderImpl> facade(
+  DDSTopic<WriterOrReaderImpl> topic(
     std::string topic_name,
     DDS::DomainParticipant_var participant = DDS::DomainParticipant_var())
   {
@@ -142,7 +142,7 @@ public:
       throw std::runtime_error(message);
     }
 
-    return DDSFacade<WriterOrReaderImpl>(participant, topic);
+    return DDSTopic<WriterOrReaderImpl>(participant, topic);
   }
 
   /// cleans up the specified participant, or default participant
@@ -216,7 +216,7 @@ DDSApp::participant(DDS::DomainId_t                    domain_id,
   DDS::DomainParticipantQos part_qos;
   dpf->get_default_participant_qos(part_qos);
   qos_func(part_qos);
-  return create_part(default_domain_id_,
+  return create_part(domain_id,
                      part_qos,
                      listener,
                      mask);

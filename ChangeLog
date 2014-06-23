@@ -1,3 +1,23 @@
+Mon Jun 23 23:03:33 UTC 2014  Phillip LaBanca  <labanca_p@ociweb.com>
+
+        * configure:
+
+          Added support for OS X 10.8 Mountain Lion
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Made relevent changes due to the renaming of DDSFacade to DDSTopic
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSTopic.h:
+
+          Renamed DDSFacade to DDSTopic
+
+        * tests/Utils/DDSFacade.h:
+
+          Removed this file.
+
 Mon Jun 23 21:40:22 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
