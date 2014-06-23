@@ -54,8 +54,6 @@ namespace DCPS {
 DataWriterImpl::DataWriterImpl()
   : data_dropped_count_(0),
     data_delivered_count_(0),
-    control_dropped_count_(0),
-    control_delivered_count_(0),
     n_chunks_(TheServiceParticipant->n_chunks()),
     association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier()),
     qos_(TheServiceParticipant->initial_DataWriterQos()),
@@ -2049,8 +2047,8 @@ void
 DataWriterImpl::control_delivered(ACE_Message_Block* sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","control_delivered",6);
-  ++control_delivered_count_;
   sample->release();
+  controlTracker.message_delivered();
 }
 
 void
@@ -2208,8 +2206,8 @@ DataWriterImpl::control_dropped(ACE_Message_Block* sample,
                                 bool /* dropped_by_transport */)
 {
   DBG_ENTRY_LVL("DataWriterImpl","control_dropped",6);
-  ++control_dropped_count_;
   sample->release();
+  controlTracker.message_dropped();
 }
 
 DDS::DataWriterListener_ptr
@@ -2500,6 +2498,17 @@ DataWriterImpl::reschedule_deadline()
   }
 }
 
+bool
+DataWriterImpl::pending_control() {
+  return controlTracker.pending_messages();
+}
+
+void
+DataWriterImpl::wait_control_pending()
+{
+  controlTracker.wait_messages_pending();
+}
+
 void
 DataWriterImpl::wait_pending()
 {
@@ -2571,6 +2580,18 @@ DataWriterImpl::send_end_historic_samples()
   }
 
   return DDS::RETCODE_OK;
+}
+
+SendControlStatus
+DataWriterImpl::send_control(const DataSampleHeader& header,
+                              ACE_Message_Block* msg,
+                              void* extra /* = 0*/)
+{
+  SendControlStatus status = TransportClient::send_control(header, msg, extra);
+  if (status == SEND_CONTROL_OK) {
+       controlTracker.message_sent();
+  }
+  return status;
 }
 
 } // namespace DCPS

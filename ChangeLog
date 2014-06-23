@@ -1,10 +1,22 @@
+Mon Jun 23 21:40:22 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          When deleting a data writer, wait until all control messages
+          sent during unregistering of instances have been accounted before
+          proceeding after unregistering instances.  This avoid a later pure
+          virtual function call occurring trying to access a message block
+          that has been deleted.
+
 Mon Jun 23 19:09:32 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/MessageTracker.h:
         * dds/DCPS/MessageTracker.cpp:
 
-	  Added a simple class to track message count and wait
-	  until all messages have been accounted for.
+          Added a simple class to track message count and wait
+          until all messages have been accounted for.
 
 Mon Jun 23 16:49:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
