@@ -1,3 +1,14 @@
+Mon Jun 23 16:42:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+
+          Added call to domain_participant_factory() to ensure it is created
+          when we are doing lazy initialization.
+
+        * tests/Utils/DDSApp.cpp:
+
+          Removed debug statements.
+
 Sat Jun 21 11:08:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo/run_test.pl:

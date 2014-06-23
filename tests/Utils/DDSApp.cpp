@@ -41,7 +41,6 @@ DDSApp::~DDSApp()
 DDS::DomainParticipant_var
 DDSApp::participant()
 {
-  std::cerr << "participant with default_domain_id_=" << default_domain_id_ << "\n";
   return create_part(default_domain_id_,
                      PARTICIPANT_QOS_DEFAULT,
                      DDS::DomainParticipantListener::_nil(),
@@ -74,9 +73,7 @@ DDSApp::create_part(DDS::DomainId_t                    domain_id,
                     DDS::DomainParticipantListener_var listener,
                     DDS::StatusMask                    mask)
 {
-  std::cerr << "create_part\n";
   DDS::DomainParticipantFactory_var dpf = domain_participant_factory();
-  std::cerr << "call dpf->create_participant(...)\n";
   DDS::DomainParticipant_var participant =
     dpf->create_participant(domain_id,
                             qos,
@@ -146,20 +143,17 @@ DDSApp::cleanup(DDS::DomainParticipant_var participant)
 DDS::DomainParticipantFactory_var
 DDSApp::domain_participant_factory()
 {
-  std::cerr << "domain_participant_factory dpf=" << dpf_dont_use_.in() << "\n";
   // only use dpf_dont_use_ in this method
   if (!dpf_dont_use_.in())
     // Initialize DomainParticipantFactory
     dpf_dont_use_ = TheParticipantFactoryWithArgs(argc_, argv_);
 
-  std::cerr << "domain_participant_factory dpf=" << dpf_dont_use_.in() << "\n";
   return dpf_dont_use_;
 }
 
 void
 DDSApp::add(const DDS::DomainParticipant_var& participant)
 {
-  std::cerr << "add participant=" << participant.in() << "\n";
   participants_.insert(std::make_pair(participant.in(), participant));
   if (!default_participant_.in())
     default_participant_ = participant;
@@ -185,11 +179,9 @@ DDSApp::remove(const DDS::DomainParticipant_var& participant)
 void
 DDSApp::determine_participant(DDS::DomainParticipant_var& part)
 {
-  std::cerr << "determine_participant\n";
   if (part.in())
     return;
 
-  std::cerr << "determine_participant default=" << default_participant_.in() << "\n";
   if (!default_participant_.in()) {
     // this will create a participant and assign the default participant
     participant();

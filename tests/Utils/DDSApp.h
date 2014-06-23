@@ -114,6 +114,9 @@ public:
     typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
     typedef typename typesupportimpl_type::typesupport_var typesupport_var;
 
+    // call this first to ensure the dpf is created first if we are doing lazy
+    // initialization
+    domain_participant_factory();
     determine_participant(participant);
 
     typesupport_var ts(new typesupportimpl_type);
