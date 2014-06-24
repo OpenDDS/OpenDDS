@@ -140,6 +140,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
                                 header,
                                 response,
                                 &send_control_element_allocator_));
+  send_response_listener_.track_message();
 
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();

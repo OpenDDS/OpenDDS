@@ -668,6 +668,7 @@ DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* messag
                                                     message,
                                                     this->send_control_allocator_),
                         SEND_CONTROL_ERROR);
+  send_response_listener_.track_message();
 
   RepoId senderId(header.publication_id_);
   send_start();

@@ -11,6 +11,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportSendListener.h"
+#include "dds/DCPS/MessageTracker.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -42,6 +43,10 @@ public:
   void notify_publication_lost(const ReaderIdSeq&) {}
   void notify_connection_deleted() {}
   void remove_associations(const ReaderIdSeq&, bool) {}
+
+  void track_message();
+private:
+  MessageTracker tracker_;
 };
 
 } // namespace DCPS

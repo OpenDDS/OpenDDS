@@ -1,10 +1,29 @@
+Tue Jun 24 16:33:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Added tracking when a message is sent.
+
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+        
+          Added using MessageTracker to track how many messages still need
+          to wait to be delivered or dropped before the listener can be
+          deleted.
+
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.cpp:
+
+          Fixed warnings.
+
 Tue Jun 24 13:08:20 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/MessageTracker.h:
         * dds/DCPS/MessageTracker.cpp:
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
 
-	  Fix so test code can get to dropped count of data writer messages.
+          Fix so test code can get to dropped count of data writer messages.
 
 Mon Jun 23 23:03:33 UTC 2014  Phillip LaBanca  <labanca_p@ociweb.com>
 
