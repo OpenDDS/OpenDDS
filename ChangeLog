@@ -1,3 +1,10 @@
+Tue Jun 24 17:48:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+
+          Fixed so TransportSendControlElement will delete itself before it
+          reports to the listener that the message has been delivered/dropped.
+
 Tue Jun 24 16:33:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
@@ -7,7 +14,7 @@ Tue Jun 24 16:33:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/framework/SendResponseListener.h:
         * dds/DCPS/transport/framework/SendResponseListener.cpp:
-        
+
           Added using MessageTracker to track how many messages still need
           to wait to be delivered or dropped before the listener can be
           deleted.
