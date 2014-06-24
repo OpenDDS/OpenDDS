@@ -63,7 +63,8 @@ public class ReliabilityQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
-		ElementInitializers.getInstance().init_ReliabilityQosPolicy_3031(newElement);
+		ElementInitializers.getInstance().init_ReliabilityQosPolicy_3031(
+				newElement);
 
 		doConfigure(newElement, monitor, info);
 

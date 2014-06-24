@@ -79,9 +79,10 @@ public class LocationPathItemProvider extends ItemProviderAdapter implements
 	protected void addValuePropertyDescriptor(Object object) {
 		itemPropertyDescriptors.add(createItemPropertyDescriptor(
 				((ComposeableAdapterFactory) adapterFactory)
-						.getRootAdapterFactory(), getResourceLocator(),
-				getString("_UI_LocationPath_value_feature"), getString(
-						"_UI_PropertyDescriptor_description",
+						.getRootAdapterFactory(),
+				getResourceLocator(),
+				getString("_UI_LocationPath_value_feature"),
+				getString("_UI_PropertyDescriptor_description",
 						"_UI_LocationPath_value_feature",
 						"_UI_LocationPath_type"),
 				GeneratorPackage.Literals.LOCATION_PATH__VALUE, true, false,
@@ -96,14 +97,20 @@ public class LocationPathItemProvider extends ItemProviderAdapter implements
 	 */
 	@Override
 	public Object getImage(Object object) {
-		return overlayImage(object, getResourceLocator().getImage(
-				"full/obj16/" + Plugin.INSTANCE.imageMapping("LocationPath")));
+		return overlayImage(
+				object,
+				getResourceLocator().getImage(
+						"full/obj16/"
+								+ Plugin.INSTANCE.imageMapping("LocationPath")));
 	}
 
 	@Override
 	public Object getColumnImage(Object object, int columnIndex) {
-		return overlayImage(object, getResourceLocator().getImage(
-				"full/obj16/" + Plugin.INSTANCE.imageMapping("LocationPath")));
+		return overlayImage(
+				object,
+				getResourceLocator().getImage(
+						"full/obj16/"
+								+ Plugin.INSTANCE.imageMapping("LocationPath")));
 	}
 
 	/**
@@ -147,8 +154,8 @@ public class LocationPathItemProvider extends ItemProviderAdapter implements
 
 		switch (notification.getFeatureID(LocationPath.class)) {
 		case GeneratorPackage.LOCATION_PATH__VALUE:
-			fireNotifyChanged(new ViewerNotification(notification, notification
-					.getNotifier(), false, true));
+			fireNotifyChanged(new ViewerNotification(notification,
+					notification.getNotifier(), false, true));
 			return;
 		}
 		super.notifyChanged(notification);

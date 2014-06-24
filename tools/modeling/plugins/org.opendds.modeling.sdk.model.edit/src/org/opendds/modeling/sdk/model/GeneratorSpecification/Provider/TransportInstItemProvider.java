@@ -78,9 +78,10 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements
 	protected void addNamePropertyDescriptor(Object object) {
 		itemPropertyDescriptors.add(createItemPropertyDescriptor(
 				((ComposeableAdapterFactory) adapterFactory)
-						.getRootAdapterFactory(), getResourceLocator(),
-				getString("_UI_TransportInst_name_feature"), getString(
-						"_UI_PropertyDescriptor_description",
+						.getRootAdapterFactory(),
+				getResourceLocator(),
+				getString("_UI_TransportInst_name_feature"),
+				getString("_UI_PropertyDescriptor_description",
 						"_UI_TransportInst_name_feature",
 						"_UI_TransportInst_type"),
 				GeneratorPackage.Literals.TRANSPORT_INST__NAME, true, false,
@@ -175,8 +176,8 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements
 
 		switch (notification.getFeatureID(TransportInst.class)) {
 		case GeneratorPackage.TRANSPORT_INST__NAME:
-			fireNotifyChanged(new ViewerNotification(notification, notification
-					.getNotifier(), false, true));
+			fireNotifyChanged(new ViewerNotification(notification,
+					notification.getNotifier(), false, true));
 			return;
 		case GeneratorPackage.TRANSPORT_INST__QUEUE_MESSAGES_PER_POOL:
 		case GeneratorPackage.TRANSPORT_INST__QUEUE_INITIAL_POOLS:
@@ -186,8 +187,8 @@ public class TransportInstItemProvider extends ItemProviderAdapter implements
 		case GeneratorPackage.TRANSPORT_INST__THREAD_PER_CONNECTION:
 		case GeneratorPackage.TRANSPORT_INST__DATALINK_RELEASE_DELAY:
 		case GeneratorPackage.TRANSPORT_INST__DATALINK_CONTROL_CHUNKS:
-			fireNotifyChanged(new ViewerNotification(notification, notification
-					.getNotifier(), true, false));
+			fireNotifyChanged(new ViewerNotification(notification,
+					notification.getNotifier(), true, false));
 			return;
 		}
 		super.notifyChanged(notification);

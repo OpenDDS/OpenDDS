@@ -63,7 +63,8 @@ public class LivelinessQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
-		ElementInitializers.getInstance().init_LivelinessQosPolicy_3028(newElement);
+		ElementInitializers.getInstance().init_LivelinessQosPolicy_3028(
+				newElement);
 
 		doConfigure(newElement, monitor, info);
 
