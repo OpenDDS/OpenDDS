@@ -1,0 +1,72 @@
+Mon Jun 23 15:41:11 UTC 2014  Weiqi Gao  <gao_w@ociweb.com>
+
+       * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+
+         Marked the "modelassist-providers" extension from generated="false"
+         to generated="true" to accommodate changes in generated code in GMF
+         3.1.0.  The custom modifications are not needed in the new version.
+
+Thu Jun  5 20:12:20 UTC 2014  Byron Harris <harrisb@ociweb.com>
+
+	* tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/parsers/PredefinedParser.xpt
+
+	  Fix so that Infinity symbol can apply to ELong type in addition to EInt type.
+
+Thu Jun  5 16:53:17 UTC 2014  Byron Harris <harrisb@ociweb.com>
+
+	* tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.xml
+	* tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java
+	* tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSModelWizard.java
+	* tools/modeling/plugins/org.opendds.modeling.model/plugin.xml
+
+       	  Account for changes between EMF 2.5.0 and EMF 2.9.2 in code generation
+
+Thu Jun  5 16:36:57 UTC 2014  Byron Harris <harrisb@ociweb.com>
+
+	* tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF
+	* tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml
+	* tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/StructFieldsEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/StructKeysEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/part/OpenDDSDataLibDiagramEditor.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/preferences/DiagramPreferenceInitializer.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DestinationOrderQosPolicyKindEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DsQosPolicyHistory_kindEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DurabilityQosPolicyKindEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/HistoryQosPolicyKindEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/LivelinessQosPolicyKindEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/OwnershipQosPolicyKindEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/PresentationQosPolicyAccess_scopeEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/ReliabilityQosPolicyKindEditPart.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/part/OpenDDSPolicyLibDiagramEditor.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/preferences/DiagramPreferenceInitializer.java
+
+	  Account for changes between GMF 2.2.2 and GMF 3.1.0 in code generation
+
+Thu Jun  5 16:27:32 UTC 2014  Byron Harris <harrisb@ociweb.com>
+
+	* tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LivelinessQosPolicyCreateCommand.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/RdlQosPolicyCreateCommand.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/ReliabilityQosPolicyCreateCommand.java
+	* tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/TbfQosPolicyCreateCommand.java
+
+	  Updates to get around compile failures using GMF > 2.2.2 (see RT 15037)
+
+Thu Jun  5 13:46:28 UTC 2014  Byron Harris <harrisb@ociweb.com>
+
+	* tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/parsers/PredefinedParser.xpt
+
+          Account for changes between GMF 2.2.2 and GMF 3.1.0. In particular, MessageFormatParser.getValidNewValue()
+	  went away so it cannot be used as targeted generated code using Xpand template. The code for this was modified
+	  to support entering string "Infinity" for values that can be infinite.
+
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
+
+	LocalWords:  UTC Weiqi Gao
+
