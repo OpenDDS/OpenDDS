@@ -1,3 +1,10 @@
+Tue Jun 24 18:18:30 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
+
+	  Account for changes in generated project files between EMF 2.5.0 and EMF 2.9.2.
+
 Tue Jun 24 18:14:30 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LivelinessQosPolicyCreateCommand.java:
@@ -9,7 +16,7 @@ Tue Jun 24 18:14:30 UTC 2014  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportInstItemProvider.java:
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
 
-	  Account for default Eclipse Java code formatting changes between Galileo and Kepler.
+          Account for default Eclipse Java code formatting changes between Galileo and Kepler.
 
 Mon Jun 23 15:41:11 UTC 2014  Weiqi Gao  <gao_w@ociweb.com>
 

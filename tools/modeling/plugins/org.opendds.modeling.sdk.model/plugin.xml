@@ -16,4 +16,12 @@
             class="org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorResourceFactory"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated Generator -->
+      <package
+            uri="http://www.opendds.org/modeling/schemas/Generator/1.0"
+            class="org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage"
+            genModel="model/Generator.genmodel"/>
+   </extension>
+
 </plugin>
