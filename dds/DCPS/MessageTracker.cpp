@@ -75,3 +75,8 @@ MessageTracker::wait_messages_pending()
   }
 }
 
+int
+MessageTracker::dropped_count()
+{
+  return dropped_count_;
+}

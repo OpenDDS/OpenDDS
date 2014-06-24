@@ -571,7 +571,11 @@ PubDriver::unregister_test ()
   // The subscriber will wait a while after telling the
   // publisher shutdown, so the unreigster message can still
   // be sent out.
-  TEST_CHECK (foo_datawriter_servant_->control_dropped_count_ == 0);
+  MessageTracker & tracker = foo_datawriter_servant_->controlTracker;
+  tracker.dropped_count();
+  tracker.pending_messages();
+
+  TEST_CHECK (foo_datawriter_servant_->controlTracker.dropped_count() == 0);
 }
 
 

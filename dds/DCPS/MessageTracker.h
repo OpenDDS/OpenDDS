@@ -9,6 +9,7 @@
 #ifndef OPENDDS_DCPS_MESSAGETRACKER_H
 #define OPENDDS_DCPS_MESSAGETRACKER_H
 
+#include <dds/DCPS/dcps_export.h>
 #include <ace/Thread_Mutex.h>
 #include <ace/Condition_Thread_Mutex.h>
 
@@ -19,7 +20,7 @@ namespace DCPS {
    * A simple message tracker to use to wait until all messages have been
    * accounted for being continuing processing.
    */
-  class  MessageTracker {
+  class OpenDDS_Dcps_Export MessageTracker {
   public:
     MessageTracker();
 
@@ -47,6 +48,11 @@ namespace DCPS {
      * Block until all messages have been account for.
      */
     void wait_messages_pending();
+
+    /**
+     * For testing.
+     */
+    int dropped_count();
 
   private:
 
