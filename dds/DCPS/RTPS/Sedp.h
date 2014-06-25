@@ -67,6 +67,8 @@ public:
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
 
+  void shutdown();
+
   // @brief return the ip address we have bound to.
   // Valid after init() call
   const ACE_INET_Addr& local_address() const;
@@ -245,7 +247,9 @@ private:
 
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)
-      : spdp_(&sedp->spdp_), sedp_(sedp)
+      : spdp_(&sedp->spdp_)
+      , sedp_(sedp)
+      , shutting_down_(false)
     {
       activate();
     }
@@ -255,6 +259,8 @@ private:
     void enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata);
     void enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
+
+    void shutdown();
 
   private:
     int svc();
@@ -266,6 +272,7 @@ private:
 
     Spdp* spdp_;
     Sedp* sedp_;
+    bool shutting_down_;
   } task_;
 
   // Transport

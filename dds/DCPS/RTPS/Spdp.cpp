@@ -114,6 +114,10 @@ Spdp::~Spdp()
       shutdown_cond_.wait();
     }
   }
+
+  // ensure sedp's task queue is drained before data members are being
+  // deleted
+  sedp_.shutdown();
 }
 
 void

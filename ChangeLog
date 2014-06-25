@@ -1,3 +1,16 @@
+Wed Jun 25 16:06:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added explicit call to shutdown the task.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added explicitly shutting down sedp to ensure its task can stop
+          processing messages before spdp's data members start getting
+          deleted.
+
 Tue Jun 24 17:48:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendControlElement.cpp:

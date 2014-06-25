@@ -1103,6 +1103,22 @@ Sedp::make_topic_guid()
 }
 
 void
+Sedp::shutdown()
+{
+  task_.shutdown();
+}
+
+void
+Sedp::Task::shutdown()
+{
+  if (!shutting_down_) {
+    shutting_down_ = true;
+    putq(new Msg(Msg::MSG_STOP, DCPS::GRACEFUL_DISCONNECT, 0));
+    wait();
+  }
+}
+
+void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
                   const DiscoveredWriterData* pwdata)
 {
@@ -2453,8 +2469,7 @@ Sedp::Task::svc()
 
 Sedp::Task::~Task()
 {
-  putq(new Msg(Msg::MSG_STOP, DCPS::GRACEFUL_DISCONNECT, 0));
-  wait();
+  shutdown();
 }
 
 }
