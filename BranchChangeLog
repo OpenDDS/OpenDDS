@@ -1,3 +1,10 @@
+Wed Jun 25 22:11:35 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+
+	  Added initial declaration of iterator to use for the three new list types
+	  and initial declaration of DataSampleWriterList to use as a sample list
+	  used by data writers.
 
 Local Variables:
 mode: change-log

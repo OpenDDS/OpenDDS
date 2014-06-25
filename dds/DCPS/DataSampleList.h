@@ -212,6 +212,78 @@ private:
 };
 
 /**
+ * An STL-like ierator over the sample lists that uses template specialization
+ * on the data sample list type to create multiple iterator classes
+ * without having to rely on inheritance which would degrade performance.
+ **/
+template <class ListType>
+class OpenDDS_Dcps_Export DataSampleListIter
+  : public std::iterator<std::bidirectional_iterator_tag, DataSampleListElement> {
+public:
+
+  /// Default constructor.
+  /**
+   * This constructor is used when constructing an "end" iterator.
+   */
+
+  DataSampleListIter(DataSampleListElement* head,
+                         DataSampleListElement* tail,
+                         DataSampleListElement* current);
+
+  DataSampleListIter& operator++();
+  DataSampleListIter  operator++(int);
+  DataSampleListIter& operator--();
+  DataSampleListIter  operator--(int);
+  reference operator*();
+  pointer operator->();
+
+  bool
+  operator==(const DataSampleListIter& rhs) const {
+    return this->head_ == rhs.head_
+           && this->tail_ == rhs.tail_
+           && this->current_ == rhs.current_;
+  }
+
+  bool
+  operator!=(const DataSampleListIter& rhs) const {
+    return !(*this == rhs);
+  }
+
+private:
+  DataSampleListIter();
+
+  DataSampleListElement* head_;
+  DataSampleListElement* tail_;
+  DataSampleListElement* current_;
+
+};
+
+class OpenDDS_Dcps_Export DataSampleWriterList {
+
+ public:
+
+  typedef DataSampleListIter<DataSampleWriterList> iterator;
+
+  DataSampleWriterList();
+
+  void reset();
+
+  void enqueue_tail(DataSampleListElement* element);
+
+  bool dequeue_head(DataSampleListElement*& stale);
+
+  bool dequeue(const DataSampleListElement* stale);
+
+  iterator begin();
+  iterator end();
+
+  DataSampleListElement* head_;
+  DataSampleListElement* tail_;
+  ssize_t                size_;
+
+};
+
+/**
 * Lists include a pointer to both the head and tail elements of the
 * list.  Cache the number of elements in the list so that we don't have
 * to traverse the list to ind this information.  For most lists that
