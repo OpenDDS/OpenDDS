@@ -1,3 +1,18 @@
+Wed Jun 25 18:57:43 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added logging to identify when indefinitely waiting for
+          pending messages.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Using wait_kill subroutines in Run_Test.pm.
+
 Wed Jun 25 17:10:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

@@ -91,29 +91,11 @@ $Publisher2->Spawn();
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn();
 
-my $SubscriberResult = $Subscriber->WaitKill(65);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
-    $status = 1;
-}
+$status |= PerlDDS::wait_kill($Subscriber, 65, "subscriber");
 
-my $PublisherResult = $Publisher->WaitKill(10);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher #1 returned $PublisherResult\n";
-    $status = 1;
-}
-
-my $Publisher2Result = $Publisher2->WaitKill(10);
-if ($Publisher2Result != 0) {
-    print STDERR "ERROR: publisher #2 returned $Publisher2Result\n";
-    $status = 1;
-}
-
-my $ir = $DCPSREPO->TerminateWaitKill(10);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
+$status |= PerlDDS::wait_kill($Publisher, 10, "publisher #1");
+$status |= PerlDDS::wait_kill($Publisher2, 10, "publisher #2");
+$status |= PerlDDS::terminate_wait_kill($DCPSREPO);
 
 unlink $dcpsrepo_ior;
 

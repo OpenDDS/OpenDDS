@@ -64,6 +64,12 @@ MessageTracker::wait_messages_pending()
   }
 
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
+  if (DCPS_debug_level > 0 && pending_messages()) {
+    ACE_DEBUG((LM_DEBUG,
+               "%T MessageTracker::wait_messages_pending %C\n",
+               (pending_timeout == ACE_Time_Value::zero ?
+                  " (no timeout)" : "")));
+  }
   while (true) {
     if (!pending_messages())
       break;
