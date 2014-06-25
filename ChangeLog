@@ -1,3 +1,234 @@
+Tue Jun 24 17:48:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+
+          Fixed so TransportSendControlElement will delete itself before it
+          reports to the listener that the message has been delivered/dropped.
+
+Tue Jun 24 16:33:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Added tracking when a message is sent.
+
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+
+          Added using MessageTracker to track how many messages still need
+          to wait to be delivered or dropped before the listener can be
+          deleted.
+
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.cpp:
+
+          Fixed warnings.
+
+Tue Jun 24 13:08:20 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Fix so test code can get to dropped count of data writer messages.
+
+Mon Jun 23 23:03:33 UTC 2014  Phillip LaBanca  <labanca_p@ociweb.com>
+
+        * configure:
+
+          Added support for OS X 10.8 Mountain Lion
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Made relevent changes due to the renaming of DDSFacade to DDSTopic
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSTopic.h:
+
+          Renamed DDSFacade to DDSTopic
+
+        * tests/Utils/DDSFacade.h:
+
+          Removed this file.
+
+Mon Jun 23 21:40:22 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          When deleting a data writer, wait until all control messages
+          sent during unregistering of instances have been accounted before
+          proceeding after unregistering instances.  This avoid a later pure
+          virtual function call occurring trying to access a message block
+          that has been deleted.
+
+Mon Jun 23 19:09:32 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added a simple class to track message count and wait
+          until all messages have been accounted for.
+
+Mon Jun 23 16:49:17 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Fixed passing in listener from stack to method that may end up
+          being processed on the transport thread.
+
+Mon Jun 23 16:42:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+
+          Added call to domain_participant_factory() to ensure it is created
+          when we are doing lazy initialization.
+
+        * tests/Utils/DDSApp.cpp:
+
+          Removed debug statements.
+
+Sat Jun 21 11:08:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Reverted inadvertent change.
+
+Sat Jun 21 11:01:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSFacade.h:
+
+          Missed calling qos_func to allow setting of Qos for DataReaders.
+
+Sat Jun 21 10:56:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSFacade.h:
+
+          Removed unneeded method.
+
+Fri Jun 20 17:47:49 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSFacade.h:
+
+          Fixed error in template.
+
+Fri Jun 20 16:54:53 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+        * tests/Utils/DDSFacade.h:
+
+          Added being able to create DDS entities using non-default qos and
+          providing listeners and non-default masks.
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Removed setting verbosity flags for diagnostics.
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Removed explicitly setting verbose flag and added it as a command
+          line parameter.
+
+Tue Jun 17 20:10:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Added diagnostic messages.
+
+Tue Jun 17 15:57:50 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+         Fixed pending_data() so that it also checks size of
+         released_data_ as indicated in the member function comments.
+
+Mon Jun 16 17:43:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+
+          Removing unused data member.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Cleaned up shutdown processing.
+
+Mon Jun 16 16:28:46 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Fixed svn::executable property.
+
+Mon Jun 16 14:18:21 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Added increasing debug levels prior to returning from main to
+          identify why subscriber looks like it is finishing in time, but
+          run_test.pl indicates that the subscriber times out.
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Increased time waiting for subsciber 1 to finish and added
+          printing timestamps for diagnosing why subsciber indicates
+          it finishes, but run_test.pl incicates that the subscriber
+          timed out.
+
+Mon Jun 16 14:04:15 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Removed unused variable 'old_header_length'
+
+Mon Jun 16 13:29:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Changed to catch std::exception.
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Added longer delay since subscribers are indicating exiting main
+          but run_test.pl is indicating subscriber timing out.
+
+        * tests/Utils/Options.h:
+
+          Fixed code to convert boolean strings to lower case.
+
+        * tests/Utils/Options.cpp:
+
+          Changed code to assume flags without values are boolean flags with
+          a value of true.
+
+Sat Jun 14 11:49:19 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Added debug statements to indicate when DDS is being cleaned up.
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Made flag more descriptive.
+
+        * tests/Utils/Options.cpp:
+
+          Fixed handling of flags with no following value.
+
+Fri Jun 13 20:24:34 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/Options.h:
+
+          Made template methods inline.
+
 Fri Jun 13 19:02:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
           To alleviate deadlock when calling send_delayed_notifications, made possible
@@ -18,7 +249,7 @@ Fri Jun 13 19:02:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
         * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
 
           ThreadPerConnectionSendTask still calls send_delayed_notification
-          with no matchby passing in GUID_UNKNOWN into the send_stop call 
+          with no matchby passing in GUID_UNKNOWN into the send_stop call
           this should be okay, since only one thread is accessing the sending
           data so no deadlocks will happen
 
@@ -34,7 +265,7 @@ Fri Jun 13 19:02:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * docs/history/ChangeLog-writerlocks_2:
 
-          Merged the branch "writerlocks_2" For details see the branch-specific 
+          Merged the branch "writerlocks_2" For details see the branch-specific
           change log at  docs/history/ChangeLog-writerlocks_2
 
 Fri Jun 13 16:31:22 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>

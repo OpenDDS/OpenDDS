@@ -50,12 +50,16 @@ for my $arg (@ARGV) {
         $pub_ini = " -DCPSConfigFile rtps.ini";
         $sub_ini = " -DCPSConfigFile rtps.ini";
     }
-    elsif ($arg eq 'rtps') {
-        $pub_ini = " -DCPSConfigFile rtps.ini";
-        $sub_ini = " -DCPSConfigFile rtps.ini";
+    elsif ($arg eq 'verbose') {
+        $logging_p .= " -verbose";
+        $logging_s .= " -verbose";
     }
     elsif ($arg eq 'BIT' || $arg eq 'bit') {
         $nobit = 0;
+    }
+    elsif ($arg eq 'verbose') {
+        $pub_ini = " -DCPSConfigFile rtps.ini";
+        $sub_ini = " -DCPSConfigFile rtps.ini";
     }
     elsif ($arg ne '') {
         print STDERR "ERROR: invalid test case\n";
@@ -71,13 +75,13 @@ $repo_bit_opt = '-NOBITS' if $nobit;
 
 my $pub_opts = "$app_bit_opt $pub_ini";
 my $sub_opts = "$app_bit_opt $sub_ini";
-$sub_opts .= " -r $reliable";
+$sub_opts .= " -reliable $reliable";
 my $messages = 60;
 my $pub1_opts = "$logging_p -ORBLogFile pub1.log $pub_opts -stage 1 -messages $messages";
-my $sub1_opts = "$logging_s -ORBLogFile sub1.log $sub_opts -stage 1 -verbose";
+my $sub1_opts = "$logging_s -ORBLogFile sub1.log $sub_opts -stage 1";
 
 my $pub2_opts = "$logging_p -ORBLogFile pub2.log $pub_opts -stage 2 -messages $messages";
-my $sub2_opts = "$logging_s -ORBLogFile sub2.log $sub_opts -stage 2 -verbose";
+my $sub2_opts = "$logging_s -ORBLogFile sub2.log $sub_opts -stage 2";
 
 my $dcpsrepo_ior = "repo.ior";
 my $info_prst_file = "info.pr";
@@ -141,13 +145,17 @@ print $Subscriber2->CommandLine() . "\n";
 $Subscriber2->Spawn();
 
 # 1 second delay between messages + some extra time
-$wait_time = $messages * 2;
-$Subscriber1->Wait($wait_time);
-print STDERR "shutting down subscriber #1\n";
-my $Subscriber1Result = $Subscriber1->WaitKill(10);
+$wait_time = $messages * 2 + 120;
+my $time_str = localtime;
+print STDERR "shutting down subscriber #1 (waiting $wait_time seconds at $time_str)\n";
+my $Subscriber1Result = $Subscriber1->WaitKill($wait_time);
 if ($Subscriber1Result != 0) {
-    print STDERR "ERROR: subscriber #1 returned $Subscriber1Result\n";
+    $time_str = localtime;
+    print STDERR "ERROR: subscriber #1 returned $Subscriber1Result ($time_str)\n";
     $status = 1;
+} else {
+  $time_str = localtime;
+  print STDERR "shut down subscriber #1 ($time_str)\n";
 }
 
 my $Subscriber2Result = $Subscriber2->WaitKill(10);
@@ -176,36 +184,28 @@ if ($ir != 0) {
 
 unlink $dcpsrepo_ior;
 
+sub print_file {
+  my $file = shift;
+
+  if (open FILE, "<", $file) {
+      print "$file:\n";
+      while (my $line = <FILE>) {
+          print "$line";
+      }
+      print "\n\n";
+      close FILE;
+  }
+}
+
 if ($status == 0) {
   print "test PASSED.\n";
 } else {
   print "**** Begin log file output *****\n";
-  if (open FILE, "<", "pub1.log") {
-      print "Publisher1:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
 
-  if (open FILE, "<", "pub2.log") {
-      print "Publisher2:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
-
-  if (open FILE, "<", "sub1.log") {
-      print "Subscriber1:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
+  print_file("pub1.log");
+  print_file("pub2.log");
+  print_file("sub1.log");
+  print_file("sub2.log");
 
   print "**** End log file output *****\n";
 

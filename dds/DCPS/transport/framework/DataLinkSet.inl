@@ -9,7 +9,6 @@
 #include "EntryExit.h"
 #include "DataLink.h"
 #include "TransportSendElement.h"
-#include "SendResponseListener.h"
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Definitions.h"
@@ -140,8 +139,6 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   DBG_ENTRY_LVL("DataLinkSet","send_response",6);
   TransportSendControlElement* send_element = 0;
 
-  SendResponseListener listener;
-
   //### debugging many to many test failure 2to1
   //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLinkSet::send_response --> trying to LOCK lock_\n"));
 
@@ -155,10 +152,11 @@ OpenDDS::DCPS::DataLinkSet::send_response(
       send_control_element_allocator_.malloc()),
     TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
-                                &listener,
+                                &send_response_listener_,
                                 header,
                                 response,
                                 &send_control_element_allocator_));
+  send_response_listener_.track_message();
 
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();

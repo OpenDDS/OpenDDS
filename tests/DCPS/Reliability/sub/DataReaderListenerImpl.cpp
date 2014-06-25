@@ -17,13 +17,13 @@ DataReaderListenerImpl::DataReaderListenerImpl() :
 }
 
 void
-DataReaderListenerImpl::on_sample_lost(DDS::DataReader_ptr , DDS::SampleLostStatus status)
+DataReaderListenerImpl::on_sample_lost(DDS::DataReader_ptr , const DDS::SampleLostStatus& status)
 {
   std::cout << "Lost sample: " << status.total_count_change << std::endl;
 }
 
 void
-DataReaderListenerImpl::on_sample_rejected(DDS::DataReader_ptr , DDS::SampleRejectedStatus status)
+DataReaderListenerImpl::on_sample_rejected(DDS::DataReader_ptr , const DDS::SampleRejectedStatus& status)
 {
   std::cout << "Rejected sample: " << status.total_count_change << " Reason: "
             << status.last_reason << std::endl;

@@ -14,7 +14,6 @@
 
 #include "TransportImpl.h"
 #include "TransportInst.h"
-#include "SendResponseListener.h"
 #include "TransportClient.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
@@ -722,21 +721,21 @@ DataLink::create_control(char submessage_id,
 SendControlStatus
 DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* message)
 {
-   DBG_ENTRY_LVL("DataLink", "send_control", 6);
-   SendResponseListener listener;
+  DBG_ENTRY_LVL("DataLink", "send_control", 6);
 
-   TransportSendControlElement* elem;
+  TransportSendControlElement* elem;
 
-   ACE_NEW_MALLOC_RETURN(elem,
-         static_cast<TransportSendControlElement*>(
-               this->send_control_allocator_->malloc()),
-               TransportSendControlElement(1,  // initial_count
-                     GUID_UNKNOWN,
-                     &listener,
-                     header,
-                     message,
-                     this->send_control_allocator_),
-                     SEND_CONTROL_ERROR);
+  ACE_NEW_MALLOC_RETURN(elem,
+                        static_cast<TransportSendControlElement*>(
+                          this->send_control_allocator_->malloc()),
+                        TransportSendControlElement(1,  // initial_count
+                                                    GUID_UNKNOWN,
+                                                    &send_response_listener_,
+                                                    header,
+                                                    message,
+                                                    this->send_control_allocator_),
+                        SEND_CONTROL_ERROR);
+  send_response_listener_.track_message();
 
   RepoId senderId(header.publication_id_);
   send_start();

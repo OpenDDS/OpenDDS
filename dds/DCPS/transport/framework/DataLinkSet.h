@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "DataLink_rch.h"
+#include "SendResponseListener.h"
 #include "TransportDefs.h"
 #include "TransportSendControlElement.h"
 
@@ -94,6 +95,9 @@ private:
   /// This lock will protect critical sections of code that play a
   /// role in the sending of data.
   LockType lock_;
+
+  /// Listener for TransportSendControlElements created in send_response
+  SendResponseListener send_response_listener_;
 };
 
 } // namespace DCPS

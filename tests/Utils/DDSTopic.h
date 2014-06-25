@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TestUtils_DDSFacade_H
-#define TestUtils_DDSFacade_H
+#ifndef TestUtils_DDSTopic_H
+#define TestUtils_DDSTopic_H
 
 #include "TestUtils_Export.h"
 
@@ -23,6 +23,14 @@
 namespace TestUtils {
 
 class DDSApp;
+
+template<typename Qos>
+struct QosNoOp
+{
+  void operator()(Qos& )
+  {
+  }
+};
 
 /// Facade to represent a Topic and all the data readers and writers on the
 /// Topic.  The class will create or use default parameters when they are
@@ -45,7 +53,7 @@ class DDSApp;
 /// reader() with no subscriber).
 template<typename WriterOrReaderImpl>
 // TODO: change codegen and use Message
-class DDSFacade
+class DDSTopic
 {
 public:
   friend class DDSApp;
@@ -55,25 +63,74 @@ public:
   typedef std::map<DDS::DataWriter_ptr, DDS::Publisher_var>  DataWriters;
   typedef std::map<DDS::DataReader_ptr, DDS::Subscriber_var> DataReaders;
 
-  datawriter_var writer(DDS::Publisher_var publisher = DDS::Publisher_var())
+  datawriter_var writer(DDS::Publisher_var          publisher = DDS::Publisher_var(),
+                        DDS::DataWriterListener_var a_listener =
+                          DDS::DataWriterListener::_nil(),
+                        DDS::StatusMask             mask =
+                          OpenDDS::DCPS::DEFAULT_STATUS_MASK)
+  {
+    return writer(publisher, QosNoOp<DDS::DataWriterQos>(), a_listener, mask);
+  }
+
+  template<typename QosFunc>
+  datawriter_var writer(QosFunc                     qos_func)
+  {
+    DDS::Publisher_var publisher;
+    determine_publisher(publisher);
+    return writer(publisher,
+                  qos_func,
+                  DDS::DataWriterListener::_nil(),
+                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  }
+
+  template<typename QosFunc>
+  datawriter_var writer(DDS::Publisher_var          publisher,
+                        QosFunc                     qos_func,
+                        DDS::DataWriterListener_var a_listener =
+                          DDS::DataWriterListener::_nil(),
+                        DDS::StatusMask             mask =
+                          OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {
     determine_publisher(publisher);
+    DDS::DataWriterQos qos;
+    publisher->get_default_datawriter_qos(qos);
+    qos_func(qos);
     DDS::DataWriter_var writer =
       publisher->create_datawriter(topic_.in(),
-                                   DATAWRITER_QOS_DEFAULT,
-                                   DDS::DataWriterListener::_nil(),
-                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                   qos,
+                                   a_listener.in(),
+                                   mask);
     return datawriter_var(datawriter_type::_narrow(writer.in()));
   }
 
   DDS::DataReader_var reader(DDS::DataReaderListener_var listener,
-                             DDS::Subscriber_var subscriber = DDS::Subscriber_var())
+                             DDS::Subscriber_var         subscriber =
+                               DDS::Subscriber_var(),
+                             DDS::StatusMask             mask =
+                               OpenDDS::DCPS::DEFAULT_STATUS_MASK)
+  {
+    return reader(listener,
+                  QosNoOp<DDS::DataReaderQos>(),
+                  subscriber,
+                  mask);
+  }
+
+  template<typename QosFunc>
+  DDS::DataReader_var reader(DDS::DataReaderListener_var listener,
+                             QosFunc                     qos_func,
+                             DDS::Subscriber_var         subscriber =
+                               DDS::Subscriber_var(),
+                             DDS::StatusMask             mask =
+                               OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {
     determine_subscriber(subscriber);
+    DDS::DataReaderQos qos;
+    subscriber->get_default_datareader_qos(qos);
+    qos_func(qos);
     return subscriber->create_datareader(topic_.in(),
-                                         DATAREADER_QOS_DEFAULT,
+                                         qos,
                                          listener.in(),
-                                         OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                         mask);
   }
 
   void remove(datawriter_var& writer)
@@ -96,14 +153,14 @@ public:
 
 private:
   // only called by DDSApp
-  DDSFacade(DDS::DomainParticipant_var participant,
+  DDSTopic(DDS::DomainParticipant_var participant,
             DDS::Topic_var topic)
   : participant_(participant)
   , topic_(topic)
   { }
 
   // TODO: REMOVE
-  DDSFacade() {}
+  DDSTopic() {}
 
   bool remove_from_parent(const DDS::Publisher_var& pub, DDS::DataWriter_ptr datawriter)
   {
@@ -179,4 +236,4 @@ private:
 
 } // End namespaces
 
-#endif /* TestUtils_DDSFacade_H */
+#endif /* TestUtils_DDSTopic_H */

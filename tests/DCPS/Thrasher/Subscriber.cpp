@@ -159,10 +159,14 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ws->detach_condition(cond);
 
     // Clean-up!
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER PARTICIPANT DEL CONT ENTITIES\n")));
     participant->delete_contained_entities();
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER DELETE PARTICIPANT\n")));
     dpf->delete_participant(participant.in());
 
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER SHUTDOWN\n")));
     TheServiceParticipant->shutdown();
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER VARS GOING OUT OF SCOPE\n")));
   }
   catch (const CORBA::Exception& e)
   {

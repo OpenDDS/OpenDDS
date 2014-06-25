@@ -14,6 +14,7 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "ReceiveListenerSetMap.h"
 #include "RepoIdSetMap.h"
+#include "SendResponseListener.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
@@ -444,6 +445,9 @@ protected:
   bool is_loopback_;
   /// Is pub or sub ?
   bool is_active_;
+
+  /// Listener for TransportSendControlElements created in send_control
+  SendResponseListener send_response_listener_;
 };
 
 } // namespace DCPS

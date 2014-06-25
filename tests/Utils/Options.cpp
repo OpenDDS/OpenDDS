@@ -142,23 +142,24 @@ Options::parse(int argc, ACE_TCHAR* argv[])
     throw Exception("Args cannot parse more than one set of arguments");
   }
 
-  std::cout << "Options::parse\n";
-
-  ACE_Arg_Shifter parser( argc, argv);
-  while( parser.is_anything_left()) {
-    std::string param = ACE_TEXT_ALWAYS_CHAR(parser.get_current());
+  std::cerr << "Options::parse\n";
+  for (int arg = 0; arg < argc; ++arg) {
+    std::string param = ACE_TEXT_ALWAYS_CHAR(argv[arg]);
     if(!param.empty() && param[0] == '-') {
       param = param.substr(1); // strip off "-"
-      parser.consume_arg();
       std::string value;
-      if (parser.is_anything_left()) {
-        value = ACE_TEXT_ALWAYS_CHAR(parser.get_current());
-      }
-      if (!value.empty() && value[0] == '-') {
+      if (arg + 1 < argc) {
+        // look ahead to see if flag or value
+        value = ACE_TEXT_ALWAYS_CHAR(argv[arg + 1]);
+        if(!value.empty() && value[0] == '-') {
+          value = "true";
+        } else {
+           // already processed this arg
+           ++arg;
+        }
+      } else {
+        // param flag without a value, assume boolean true
         value = "true";
-      }
-      else {
-        parser.consume_arg();
       }
       Arguments::ValueAndType vt(value, Arguments::UNDEF);
       std::pair<Params::iterator, bool> insert =
@@ -172,8 +173,7 @@ Options::parse(int argc, ACE_TCHAR* argv[])
         insert.first->second.first = value;
       }
     } else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Options::parse skipping %s\n"), param.c_str()));
-      parser.ignore_arg();
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Options::parse skipping value=%s not paired with flag\n"), param.c_str()));
     }
   }
 

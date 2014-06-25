@@ -232,13 +232,17 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###PublisherImpl::delete_datawriter --> unregister_instances\n"));
    dw_servant->unregister_instances(source_timestamp);
 
-   CORBA::String_var topic_name = dw_servant->get_topic_name();
-   RepoId publication_id  = GUID_UNKNOWN;
-   {
-      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-            guard,
-            this->pi_lock_,
-            DDS::RETCODE_ERROR);
+  // Wait for any control messages to be transported during
+  // unregistering of instances.
+  dw_servant->wait_control_pending();
+
+  CORBA::String_var topic_name = dw_servant->get_topic_name();
+  RepoId publication_id  = GUID_UNKNOWN;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     this->pi_lock_,
+                     DDS::RETCODE_ERROR);
 
       publication_id = dw_servant->get_publication_id();
 
