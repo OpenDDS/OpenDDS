@@ -146,66 +146,24 @@ $Subscriber2->Spawn();
 
 # 1 second delay between messages + some extra time
 $wait_time = $messages * 2 + 120;
-my $time_str = localtime;
-print STDERR "shutting down subscriber #1 (waiting $wait_time seconds at $time_str)\n";
-my $Subscriber1Result = $Subscriber1->WaitKill($wait_time);
-if ($Subscriber1Result != 0) {
-    $time_str = localtime;
-    print STDERR "ERROR: subscriber #1 returned $Subscriber1Result ($time_str)\n";
-    $status = 1;
-} else {
-  $time_str = localtime;
-  print STDERR "shut down subscriber #1 ($time_str)\n";
-}
+$status |= PerlDDS::wait_kill($Subscriber1, $wait_time, "subscriber #1");
 
-my $Subscriber2Result = $Subscriber2->WaitKill(10);
-if ($Subscriber2Result != 0) {
-    print STDERR "ERROR: subscriber #2 returned $Subscriber2Result\n";
-    $status = 1;
-}
-
-my $Publisher1Result = $Publisher1->WaitKill(10);
-if ($Publisher1Result != 0) {
-    print STDERR "ERROR: publisher #1 returned $Publisher1Result\n";
-    $status = 1;
-}
-
-my $Publisher2Result = $Publisher2->WaitKill(10);
-if ($Publisher2Result != 0) {
-    print STDERR "ERROR: publisher #2 returned $Publisher2Result\n";
-    $status = 1;
-}
-
-my $ir = $DCPSREPO->TerminateWaitKill(10);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
+$status |= PerlDDS::wait_kill($Subscriber2, 10, "subscriber #2");
+$status |= PerlDDS::wait_kill($Publisher1, 10, "publisher #1");
+$status |= PerlDDS::wait_kill($Publisher2, 10, "publisher #2");
+$status |= PerlDDS::terminate_wait_kill($DCPSREPO);
 
 unlink $dcpsrepo_ior;
-
-sub print_file {
-  my $file = shift;
-
-  if (open FILE, "<", $file) {
-      print "$file:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
-}
 
 if ($status == 0) {
   print "test PASSED.\n";
 } else {
   print "**** Begin log file output *****\n";
 
-  print_file("pub1.log");
-  print_file("pub2.log");
-  print_file("sub1.log");
-  print_file("sub2.log");
+  PerlDDS::print_file("pub1.log");
+  PerlDDS::print_file("pub2.log");
+  PerlDDS::print_file("sub1.log");
+  PerlDDS::print_file("sub2.log");
 
   print "**** End log file output *****\n";
 

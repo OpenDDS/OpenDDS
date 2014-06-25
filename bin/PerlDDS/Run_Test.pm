@@ -25,6 +25,76 @@ sub orbsvcs {
     );
 }
 
+sub formatted_time {
+  my $seconds = shift;
+
+  my $sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst;
+  if (defined($seconds)) {
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+      localtime($seconds);
+  } else {
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+      localtime;
+  }
+  $year += 1900;
+  my $time_str = "$year-$mon-$mday $hour:$min:$sec";
+  return $time_str;
+}
+
+sub wait_kill {
+  my $process = shift;
+  my $wait_time = shift;
+  my $desc = shift;
+  my $verbose = shift;
+  $verbose = 0 if !defined($verbose);
+
+  my $ret_status = 0;
+  my $start_time = formatted_time;
+  if ($verbose) {
+    print STDERR "$start_time: waiting $wait_time for $desc before calling kill\n";
+  }
+  my $result = $process->WaitKill($wait_time);
+  my $time_str = formatted_time;
+  if ($result != 0) {
+      my $ext = ($verbose ? "" : "(started at $start_time)");
+      print STDERR "$time_str: ERROR: $desc returned $result $ext\n";
+      $ret_status = 1;
+  } elsif ($verbose) {
+    print STDERR "$time_str: shut down subscriber #1\n";
+  }
+  return $ret_status;
+}
+
+sub terminate_wait_kill {
+  my $process = shift;
+  my $wait_time = shift;
+  my $desc = shift;
+  $wait_time = 10 if !defined($wait_time);
+  $desc = "DCPSInfoRepo" if !defined($desc);
+
+  my $result = $process->TerminateWaitKill($wait_time);
+  my $ret_status = 0;
+  my $time_str = formatted_time;
+  if ($result != 0) {
+      print STDERR "$time_str: ERROR: $desc returned $result\n";
+      $ret_status = 1;
+  }
+  return $ret_status;
+}
+
+sub print_file {
+  my $file = shift;
+
+  if (open FILE, "<", $file) {
+      print "$file:\n";
+      while (my $line = <FILE>) {
+          print "$line";
+      }
+      print "\n\n";
+      close FILE;
+  }
+}
+
 # load gcov helpers in case this is a coverage build
 my $config = new PerlACE::ConfigList;
 $PerlDDS::Coverage_Test = $config->check_config("Coverage");
