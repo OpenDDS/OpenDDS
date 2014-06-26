@@ -265,9 +265,8 @@ DDSApp::participant(DDS::DomainId_t                    domain_id,
                     DDS::DomainParticipantListener_var listener,
                     DDS::StatusMask                    mask)
 {
-  DDS::DomainParticipantFactory_var dpf = domain_participant_factory();
   DDS::DomainParticipantQos part_qos;
-  dpf->get_default_participant_qos(part_qos);
+  dpf_->get_default_participant_qos(part_qos);
   qos_func(part_qos);
   return create_part(domain_id,
                      part_qos,
