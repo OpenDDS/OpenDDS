@@ -106,6 +106,14 @@ public:
                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   /// create a new DDSTopic for the given type and topic name
+  /// overloaded methods allow optionally providing an already
+  /// created participant, setting the qos using a function pointer
+  /// or a functor, providing a Topic listener, and/or setting
+  /// a non-default status mask.
+  /// To provide qos_func it should either be set to the address of a
+  /// function or else it should be an object that provides the
+  /// implementation:
+  /// void operator()(DDS::TopicQos& qos)
   template<typename WriterOrReaderImpl>
   DDSTopic<WriterOrReaderImpl> topic(
     std::string topic_name,
@@ -167,43 +175,6 @@ public:
                                             mask);
   }
 
-  template<typename WriterOrReaderImpl>
-  DDSTopic<WriterOrReaderImpl> create_topic(
-    std::string topic_name,
-    DDS::DomainParticipant_var participant,
-    const DDS::TopicQos& qos,
-    DDS::TopicListener_var listener,
-    DDS::StatusMask mask)
-  {
-    typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
-    typedef typename typesupportimpl_type::typesupport_var typesupport_var;
-
-    typesupport_var ts(new typesupportimpl_type);
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-      throw std::runtime_error(" ERROR: register_type failed!");
-    }
-
-    // Create Topic
-    CORBA::String_var type_name = ts->get_type_name();
-    DDS::Topic_var topic =
-      participant->create_topic(topic_name.c_str(),
-                                type_name.in(),
-                                qos,
-                                DDS::TopicListener::_nil(),
-                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(topic.in())) {
-      std::string message = "ERROR: could not create topic \"";
-      message += topic_name;
-      message += "\" of type \"";
-      message += type_name;
-      message += "\"!";
-      throw std::runtime_error(message);
-    }
-
-    return DDSTopic<WriterOrReaderImpl>(participant, topic);
-  }
-
   /// cleans up the specified participant, or default participant
   void cleanup(DDS::DomainParticipant_var participant = DDS::DomainParticipant_var());
 
@@ -238,6 +209,43 @@ private:
                                  const DDS::SubscriberQos&   qos,
                                  DDS::SubscriberListener_var a_listener,
                                  DDS::StatusMask             mask);
+
+  template<typename WriterOrReaderImpl>
+  DDSTopic<WriterOrReaderImpl> create_topic(
+    std::string topic_name,
+    DDS::DomainParticipant_var participant,
+    const DDS::TopicQos& qos,
+    DDS::TopicListener_var listener,
+    DDS::StatusMask mask)
+  {
+    typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
+    typedef typename typesupportimpl_type::typesupport_var typesupport_var;
+
+    typesupport_var ts(new typesupportimpl_type);
+    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
+      throw std::runtime_error(" ERROR: register_type failed!");
+    }
+
+    // Create Topic
+    CORBA::String_var type_name = ts->get_type_name();
+    DDS::Topic_var topic =
+      participant->create_topic(topic_name.c_str(),
+                                type_name.in(),
+                                qos,
+                                listener,
+                                mask);
+
+    if (CORBA::is_nil(topic.in())) {
+      std::string message = "ERROR: could not create topic \"";
+      message += topic_name;
+      message += "\" of type \"";
+      message += type_name;
+      message += "\"!";
+      throw std::runtime_error(message);
+    }
+
+    return DDSTopic<WriterOrReaderImpl>(participant, topic);
+  }
 
   int& argc_;
   ACE_TCHAR**& argv_;
