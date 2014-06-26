@@ -1,3 +1,9 @@
+Thu Jun 26 20:44:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed printing log files when test fails.
+
 Thu Jun 26 20:31:43 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

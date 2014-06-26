@@ -86,11 +86,11 @@ sub print_file {
   my $file = shift;
 
   if (open FILE, "<", $file) {
-      print "$file:\n";
+      print "<<<<<  $file  >>>>>\n";
       while (my $line = <FILE>) {
           print "$line";
       }
-      print "\n\n";
+      print "\n<<<<<  end $file  >>>>>\n\n";
       close FILE;
   }
 }
@@ -330,7 +330,7 @@ sub finish {
     print STDERR _prefix() . "test PASSED.\n";
   } else {
     foreach my $file (@{$self->{log_files}}) {
-      print_file($file);
+      PerlDDS::print_file($file);
     }
     print STDERR _prefix() . "test FAILED.\n";
   }
@@ -480,7 +480,8 @@ sub stop_process {
   $self->{status} |=
     PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
                        $timed_wait,
-                       $name);
+                       $name,
+                       $self->{test_verbose});
   delete($self->{processes}->{process}->{$name});
 }
 
@@ -565,12 +566,15 @@ sub _track_log_files {
   my $self = shift;
   my $data = shift;
 
+  if ($self->{test_verbose}) {
+    print STDERR "TestFramework::_track_log_files looking in \"$data\"\n";
+  }
   if ($data =~ /-ORBLogFile ([^ ]+)/) {
     my $file = $1;
     if ($self->{test_verbose}) {
       print STDERR "TestFramework::_track_log_files found file=\"$file\"\n";
     }
-    push(@{$self->log_files}, $file);
+    push(@{$self->{log_files}}, $file);
   }
 }
 
@@ -583,7 +587,7 @@ sub _create_process {
     print STDERR "TestFramework::_create_process creating executable="
       . "$executable w/ params=$params\n";
   }
-  _track_log_files($params);
+  $self->_track_log_files($params);
   return
     PerlDDS::create_process($executable, $params);
 }
