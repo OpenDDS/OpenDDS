@@ -1,3 +1,10 @@
+Thu Jun 26 15:43:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+
+          Missed adding support for creating topic with qos, topic listener,
+          and/or status mask.
+
 Thu Jun 26 15:13:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/MessageTracker.cpp:

@@ -109,15 +109,74 @@ public:
   template<typename WriterOrReaderImpl>
   DDSTopic<WriterOrReaderImpl> topic(
     std::string topic_name,
-    DDS::DomainParticipant_var participant = DDS::DomainParticipant_var())
+    DDS::DomainParticipant_var participant = DDS::DomainParticipant_var(),
+    DDS::TopicListener_var listener = DDS::TopicListener::_nil(),
+    DDS::StatusMask mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {
-    typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
-    typedef typename typesupportimpl_type::typesupport_var typesupport_var;
-
     // call this first to ensure the dpf is created first if we are doing lazy
     // initialization
     domain_participant_factory();
     determine_participant(participant);
+    return create_topic<WriterOrReaderImpl>(topic_name,
+                                            participant,
+                                            TOPIC_QOS_DEFAULT,
+                                            listener,
+                                            mask);
+  }
+
+  template<typename WriterOrReaderImpl, typename QosFunc>
+  DDSTopic<WriterOrReaderImpl> topic(
+    std::string topic_name,
+    DDS::DomainParticipant_var participant,
+    QosFunc qos_func,
+    DDS::TopicListener_var listener = DDS::TopicListener::_nil(),
+    DDS::StatusMask mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
+  {
+    // call this first to ensure the dpf is created first if we are doing lazy
+    // initialization
+    domain_participant_factory();
+    DDS::TopicQos qos;
+    participant->get_default_topic_qos(qos);
+    qos_func(qos);
+    return create_topic<WriterOrReaderImpl>(topic_name,
+                                            participant,
+                                            qos,
+                                            listener,
+                                            mask);
+  }
+
+  template<typename WriterOrReaderImpl, typename QosFunc>
+  DDSTopic<WriterOrReaderImpl> topic(
+    std::string topic_name,
+    QosFunc qos_func,
+    DDS::TopicListener_var listener = DDS::TopicListener::_nil(),
+    DDS::StatusMask mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
+  {
+    DDS::DomainParticipant_var participant;
+    // call this first to ensure the dpf is created first if we are doing lazy
+    // initialization
+    domain_participant_factory();
+    determine_participant(participant);
+    DDS::TopicQos qos;
+    participant->get_default_topic_qos(qos);
+    qos_func(qos);
+    return create_topic<WriterOrReaderImpl>(topic_name,
+                                            participant,
+                                            qos,
+                                            listener,
+                                            mask);
+  }
+
+  template<typename WriterOrReaderImpl>
+  DDSTopic<WriterOrReaderImpl> create_topic(
+    std::string topic_name,
+    DDS::DomainParticipant_var participant,
+    const DDS::TopicQos& qos,
+    DDS::TopicListener_var listener,
+    DDS::StatusMask mask)
+  {
+    typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
+    typedef typename typesupportimpl_type::typesupport_var typesupport_var;
 
     typesupport_var ts(new typesupportimpl_type);
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
@@ -129,7 +188,7 @@ public:
     DDS::Topic_var topic =
       participant->create_topic(topic_name.c_str(),
                                 type_name.in(),
-                                TOPIC_QOS_DEFAULT,
+                                qos,
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
