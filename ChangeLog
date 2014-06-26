@@ -1,3 +1,9 @@
+Thu Jun 26 15:13:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added logging when done waiting for pending messages.
+
 Thu Jun 26 14:16:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/LargeSample/publisher.cpp:

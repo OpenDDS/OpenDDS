@@ -64,7 +64,8 @@ MessageTracker::wait_messages_pending()
   }
 
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
-  if (DCPS_debug_level > 0 && pending_messages()) {
+  const bool report = DCPS_debug_level > 0 && pending_messages();
+  if (report) {
     ACE_DEBUG((LM_DEBUG,
                "%T MessageTracker::wait_messages_pending %C\n",
                (pending_timeout == ACE_Time_Value::zero ?
@@ -78,6 +79,10 @@ MessageTracker::wait_messages_pending()
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %p\n")
         ACE_TEXT("Timed out waiting for messages to be transported")));
     }
+  }
+  if (report) {
+    ACE_DEBUG((LM_DEBUG,
+               "%T MessageTracker::wait_messages_pending done\n"));
   }
 }
 
