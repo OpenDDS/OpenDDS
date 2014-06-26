@@ -302,7 +302,7 @@ sub new {
     ++$index;
   }
 
-  return $self;  
+  return $self;
 }
 
 sub DESTROY
@@ -317,12 +317,12 @@ sub finish {
     print STDERR "TestFramework::finish finished=$self->{finished}, "
       . "status=$self->{status}\n";
   }
-  
+
   if ($self->{finished}) {
     return;
   }
   $self->{finished} = 1;
-  
+
   if (defined($wait_to_kill)) {
     $self->stop_processes($wait_to_kill, $first_process_to_stop);
   }
@@ -381,7 +381,7 @@ sub report_unused_flags {
 
 sub unused_flags {
   my $self = shift;
-  
+
   return keys(%{$self->{flags}->{unused}});
 }
 
@@ -490,7 +490,7 @@ sub stop_processes {
   my $timed_wait = shift;
   # if passed, this will be the first processed WaitKilled
   my $name = shift;
-  
+
   if (!defined($timed_wait)) {
     print STDERR "ERROR: TestFramework::stop_processes need to provide time "
       . "to wait as first parameter passed.\n";
@@ -535,7 +535,7 @@ sub stop_discovery {
     }
     return;
   }
-  
+
   if (!defined($self->{info_repo}->{state}) ||
        $self->{info_repo}->{state} eq "shutdown") {
     my $state = (!defined($self->{info_repo}->{state}) ? "" : $self->{info_repo}->{state});
