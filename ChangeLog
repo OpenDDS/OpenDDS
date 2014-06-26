@@ -1,3 +1,9 @@
+Thu Jun 26 20:49:54 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed typo.
+
 Thu Jun 26 20:44:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

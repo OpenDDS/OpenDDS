@@ -60,7 +60,7 @@ sub wait_kill {
       print STDERR "$time_str: ERROR: $desc returned $result $ext\n";
       $ret_status = 1;
   } elsif ($verbose) {
-    print STDERR "$time_str: shut down subscriber #1\n";
+    print STDERR "$time_str: shut down $desc\n";
   }
   return $ret_status;
 }
