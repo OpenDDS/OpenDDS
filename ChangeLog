@@ -1,3 +1,13 @@
+Thu Jun 26 16:02:01 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Added logging for tracking when waiting for pending messages.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Setting the pending message wait time to 1 second.
+
 Thu Jun 26 15:43:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSApp.h:

@@ -1260,13 +1260,27 @@ WriteDataContainer::wait_pending()
     pending_timeout += ACE_OS::gettimeofday();
   }
 
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+  const bool report = DCPS_debug_level > 0 && pending_data();
+  if (report) {
+    ACE_DEBUG((LM_DEBUG,
+               "%T WriteDataContainer::wait_pending %C\n",
+               (pending_timeout == ACE_Time_Value::zero ?
+                  " (no timeout)" : "")));
+  }
   while (true) {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
     if (!pending_data())
       break;
 
-    empty_condition_.wait(pTimeout);
+    if (empty_condition_.wait(pTimeout) == -1) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n")
+        ACE_TEXT("Timed out waiting for messages to be transported")));
+    }
+  }
+  if (report) {
+    ACE_DEBUG((LM_DEBUG,
+               "%T WriteDataContainer::wait_pending done\n"));
   }
 }
 
