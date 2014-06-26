@@ -1,3 +1,11 @@
+Thu Jun 26 14:16:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Added log messages to identify what is going on when publisher
+          or subscriber times out.
+
 Wed Jun 25 18:57:43 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/MessageTracker.cpp:

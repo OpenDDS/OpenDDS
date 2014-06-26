@@ -27,6 +27,7 @@
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  int status = 0;
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
@@ -125,16 +126,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       writer.write();
     }
 
+    ACE_DEBUG((LM_DEBUG, "Publisher delete contained entities\n"));
     // Clean-up!
     participant->delete_contained_entities();
+    ACE_DEBUG((LM_DEBUG, "Publisher delete participant\n"));
     dpf->delete_participant(participant.in());
 
+    ACE_DEBUG((LM_DEBUG, "Publisher shutdown\n"));
     TheServiceParticipant->shutdown();
 
+    ACE_DEBUG((LM_DEBUG, "Publisher vars going out of scope\n"));
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    ACE_OS::exit(-1);
+    status = -1;
   }
 
-  return 0;
+  ACE_DEBUG((LM_DEBUG, "Publisher exiting with status=%d\n", status));
+  return status;
 }
