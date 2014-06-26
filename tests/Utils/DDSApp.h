@@ -247,15 +247,11 @@ private:
     return DDSTopic<WriterOrReaderImpl>(participant, topic);
   }
 
-  int& argc_;
-  ACE_TCHAR**& argv_;
-
   // track the default status for domain id
   bool domain_id_defaulted_;
   DDS::DomainId_t default_domain_id_;
 
-  // don't use this var, use domain_participant_factory() to allow lazy initialization
-  DDS::DomainParticipantFactory_var dpf_dont_use_;
+  const DDS::DomainParticipantFactory_var dpf_;
 
   DDS::DomainParticipant_var default_participant_;
   Participants participants_;

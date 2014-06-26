@@ -24,13 +24,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   const std::string pid = ss.str();
 
   {
-    std::cerr << pid << "Pub Creating App\n";
-    ::TestUtils::DDSApp dds(argc, argv);
     try {
+
+      std::cerr << pid << "Pub Creating App\n";
+      ::TestUtils::DDSApp dds(argc, argv);
+
       std::cerr << pid << "Pub Creating topic\n";
-      // ?? fix to code gen will allow using ::Xyz::Foo
-      ::TestUtils::DDSTopic< ::Xyz::FooDataWriterImpl> topic = dds.topic< ::Xyz::FooDataWriterImpl>("bar");
-      ::Xyz::FooDataWriter_var msg_writer;
 
       ::TestUtils::Arguments args;
       args.add_long("stage", 0);
@@ -58,6 +57,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Create data writer for the topic
       std::cerr << pid << "Pub Stage " << stage << " Creating writer\n";
+
+      // ?? fix to code gen will allow using ::Xyz::Foo
+      ::TestUtils::DDSTopic< ::Xyz::FooDataWriterImpl> topic = dds.topic< ::Xyz::FooDataWriterImpl>("bar");
+
+      ::Xyz::FooDataWriter_var msg_writer;
       msg_writer = topic.writer();
 
       for ( ; stage < 3; ++stage, ++id) {

@@ -13,11 +13,10 @@
 namespace TestUtils {
 
 DDSApp::DDSApp(int& argc, ACE_TCHAR**& argv)
-: argc_(argc)
-, argv_(argv)
 // default id to 0, but still allow it to be set
-, domain_id_defaulted_(false)
+: domain_id_defaulted_(false)
 , default_domain_id_(0)
+, dpf_(TheParticipantFactoryWithArgs(argc, argv))
 , shutdown_(false)
 {
 }
@@ -25,10 +24,9 @@ DDSApp::DDSApp(int& argc, ACE_TCHAR**& argv)
 DDSApp::DDSApp(int& argc,
                ACE_TCHAR**& argv,
                DDS::DomainId_t default_domain_id)
-: argc_(argc)
-, argv_(argv)
-, domain_id_defaulted_(true)
+: domain_id_defaulted_(true)
 , default_domain_id_(default_domain_id)
+, dpf_(TheParticipantFactoryWithArgs(argc, argv))
 , shutdown_(false)
 {
 }
@@ -143,12 +141,7 @@ DDSApp::cleanup(DDS::DomainParticipant_var participant)
 DDS::DomainParticipantFactory_var
 DDSApp::domain_participant_factory()
 {
-  // only use dpf_dont_use_ in this method
-  if (!dpf_dont_use_.in())
-    // Initialize DomainParticipantFactory
-    dpf_dont_use_ = TheParticipantFactoryWithArgs(argc_, argv_);
-
-  return dpf_dont_use_;
+  return dpf_;
 }
 
 void
