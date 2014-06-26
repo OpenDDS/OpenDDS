@@ -26,71 +26,72 @@ my $DCPSREPO;
 
 unlink qw/DCPSInfoRepo.log pub.log sub.log/;
 
-my $arg = 0;
+my $test = new PerlDDS::TestFramework();
+
 my $thread_per_connection = "";
-if ($ARGV[0] eq 'thread_per' || $#ARGV > 0 && $ARGV[1] eq 'thread_per') {
+if ($test->flag('thread_per')) {
     $thread_per_connection = " -p ";
-    $arg = 1 if ($ARGV[0] eq 'thread_per');
 }
 
-if ($ARGV[$arg] eq 'udp') {
+my $flag_found = 1;
+if ($test->flag('udp')) {
     $pub_opts .= " -DCPSConfigFile pub_udp.ini";
     $sub_opts .= " -DCPSConfigFile sub_udp.ini";
 }
-elsif ($ARGV[$arg] eq 'multicast') {
+elsif ($test->flag('multicast')) {
     $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
     $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
 }
-elsif ($ARGV[$arg] eq 'default_tcp') {
+elsif ($test->flag('default_tcp')) {
     $pub_opts .= " -t tcp";
     $sub_opts .= " -t tcp";
 }
-elsif ($ARGV[$arg] eq 'default_udp') {
+elsif ($test->flag('default_udp')) {
     $pub_opts .= " -t udp";
     $sub_opts .= " -t udp";
 }
-elsif ($ARGV[$arg] eq 'default_multicast') {
+elsif ($test->flag('default_multicast')) {
     $pub_opts .= " -t multicast";
     $sub_opts .= " -t multicast";
 }
-elsif ($ARGV[$arg] eq 'nobits') {
+elsif ($test->flag('nobits')) {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= ' -DCPSConfigFile pub.ini -DCPSBit 0';
     $sub_opts .= ' -DCPSConfigFile sub.ini -DCPSBit 0';
 }
-elsif ($ARGV[$arg] eq 'ipv6') {
+elsif ($test->flag('ipv6')) {
     $pub_opts .= " -DCPSConfigFile pub_ipv6.ini";
     $sub_opts .= " -DCPSConfigFile sub_ipv6.ini";
 }
-elsif ($ARGV[$arg] eq 'stack') {
+elsif ($test->flag('stack')) {
     $pub_opts .= " -t tcp";
     $sub_opts .= " -t tcp";
     $stack_based = 1;
 }
-elsif ($ARGV[$arg] eq 'rtps') {
+elsif ($test->flag('rtps')) {
     $pub_opts .= " -DCPSConfigFile rtps.ini";
     $sub_opts .= " -DCPSConfigFile rtps.ini";
 }
-elsif ($ARGV[$arg] eq 'rtps_disc') {
+elsif ($test->flag('rtps_disc')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
 }
-elsif ($ARGV[$arg] eq 'rtps_disc_tcp') {
+elsif ($test->flag('rtps_disc_tcp')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $is_rtps_disc = 1;
 }
-elsif ($ARGV[$arg] eq 'rtps_unicast') {
+elsif ($test->flag('rtps_unicast')) {
     $repo_bit_opt = '-NOBITS';
     $pub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
     $sub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
 }
-elsif ($ARGV[$arg] eq 'shmem') {
+elsif ($test->flag('shmem')) {
     $pub_opts .= " -DCPSConfigFile shmem.ini";
     $sub_opts .= " -DCPSConfigFile shmem.ini";
 }
-elsif ($ARGV[$arg] eq 'all') {
+elsif ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
     my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
                         nobits stack shmem
@@ -101,14 +102,13 @@ elsif ($ARGV[$arg] eq 'all') {
     }
     exit $status;
 }
-elsif ($ARGV[$arg] ne '') {
-    print STDERR "ERROR: invalid test case\n";
-    exit 1;
-}
 else {
+    $flag_found = 0;
     $pub_opts .= ' -DCPSConfigFile pub.ini';
     $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
+
+$test->report_unused_flags(!$flag_found);
 
 $pub_opts .= $thread_per_connection;
 
@@ -116,49 +116,15 @@ my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
-unless ($is_rtps_disc) {
-  $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                     "-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                     "$repo_bit_opt -o $dcpsrepo_ior");
-}
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
+                       "$repo_bit_opt -o $dcpsrepo_ior");
 
-my $Subscriber = PerlDDS::create_process(($stack_based ? 'stack_' : '') .
-                                         "subscriber", $sub_opts);
+my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
+$test->process("subscriber", $sub_exe, $sub_opts);
+$test->process("publisher", "publisher", $pub_opts);
 
-my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
+$test->start_process("subscriber");
+$test->start_process("publisher");
 
-unless ($is_rtps_disc) {
-  print $DCPSREPO->CommandLine() . "\n";
-  $DCPSREPO->Spawn();
-
-  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-      print STDERR "ERROR: waiting for Info Repo IOR file\n";
-      $DCPSREPO->Kill();
-      exit 1;
-  }
-}
-
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn();
-
-
-$status |= PerlDDS::wait_kill($Publisher, 300, "publisher");
-
-$status |= PerlDDS::wait_kill($Subscriber, 30, "subscriber");
-
-unless ($is_rtps_disc) {
-  $status |= PerlDDS::terminate_wait_kill($DCPSREPO);
-
-  unlink $dcpsrepo_ior;
-}
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+# start killing processes in 300 seconds
+exit $test->finish(300);

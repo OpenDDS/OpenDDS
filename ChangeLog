@@ -1,3 +1,13 @@
+Thu Jun 26 20:31:43 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added TestFramework for doing common run_test.pl activities.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Changed to use TestFramework.
+
 Thu Jun 26 20:30:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/Utils/DDSApp.h:
