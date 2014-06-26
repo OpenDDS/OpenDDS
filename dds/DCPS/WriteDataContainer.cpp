@@ -1276,6 +1276,7 @@ WriteDataContainer::wait_pending()
     if (empty_condition_.wait(pTimeout) == -1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n")
         ACE_TEXT("Timed out waiting for messages to be transported")));
+      break;
     }
   }
   if (report) {

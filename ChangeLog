@@ -1,13 +1,20 @@
+Thu Jun 26 19:55:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed exiting loop when timeout occurs.
+
 Thu Jun 26 19:34:36 UTC 2014  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
-           
+
           Moved topic creation to after argument processing
 
         * tests/Utils/DDSApp.h:
         * tests/Utils/DDSApp.cpp:
-          
-          Changed DDSApp constructor to explictly initalize 
+
+          Changed DDSApp constructor to explictly initalize
           DomainParticipantFactory
 
 Thu Jun 26 17:19:03 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>

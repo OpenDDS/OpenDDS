@@ -78,6 +78,7 @@ MessageTracker::wait_messages_pending()
     if (done_condition_.wait(pTimeout) == -1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %p\n")
         ACE_TEXT("Timed out waiting for messages to be transported")));
+      break;
     }
   }
   if (report) {
