@@ -1,3 +1,14 @@
+Thu Jun 26 20:14:56 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Moved construction of DDSApp inside try-catch-block.
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+
+          Cleaned up unneeded calls and methods.
+
 Thu Jun 26 19:55:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/MessageTracker.cpp:

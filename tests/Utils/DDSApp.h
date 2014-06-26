@@ -121,9 +121,6 @@ public:
     DDS::TopicListener_var listener = DDS::TopicListener::_nil(),
     DDS::StatusMask mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {
-    // call this first to ensure the dpf is created first if we are doing lazy
-    // initialization
-    domain_participant_factory();
     determine_participant(participant);
     return create_topic<WriterOrReaderImpl>(topic_name,
                                             participant,
@@ -140,9 +137,6 @@ public:
     DDS::TopicListener_var listener = DDS::TopicListener::_nil(),
     DDS::StatusMask mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {
-    // call this first to ensure the dpf is created first if we are doing lazy
-    // initialization
-    domain_participant_factory();
     DDS::TopicQos qos;
     participant->get_default_topic_qos(qos);
     qos_func(qos);
@@ -161,9 +155,6 @@ public:
     DDS::StatusMask mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {
     DDS::DomainParticipant_var participant;
-    // call this first to ensure the dpf is created first if we are doing lazy
-    // initialization
-    domain_participant_factory();
     determine_participant(participant);
     DDS::TopicQos qos;
     participant->get_default_topic_qos(qos);
@@ -192,7 +183,6 @@ private:
   DDSApp(const DDSApp& rhs);
   DDSApp& operator=(DDSApp& rhs);
 
-  DDS::DomainParticipantFactory_var domain_participant_factory();
   void add(const DDS::DomainParticipant_var& participant);
   void remove(const DDS::DomainParticipant_var& participant);
   void determine_participant(DDS::DomainParticipant_var& participant);

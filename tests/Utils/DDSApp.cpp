@@ -71,12 +71,11 @@ DDSApp::create_part(DDS::DomainId_t                    domain_id,
                     DDS::DomainParticipantListener_var listener,
                     DDS::StatusMask                    mask)
 {
-  DDS::DomainParticipantFactory_var dpf = domain_participant_factory();
   DDS::DomainParticipant_var participant =
-    dpf->create_participant(domain_id,
-                            qos,
-                            listener.in(),
-                            mask);
+    dpf_->create_participant(domain_id,
+                             qos,
+                             listener.in(),
+                             mask);
   add(participant);
   return participant;
 }
@@ -133,15 +132,9 @@ DDSApp::cleanup(DDS::DomainParticipant_var participant)
 {
   determine_participant(participant);
   participant->delete_contained_entities();
-  domain_participant_factory()->delete_participant(participant.in());
+  dpf_->delete_participant(participant.in());
 
   remove(participant);
-}
-
-DDS::DomainParticipantFactory_var
-DDSApp::domain_participant_factory()
-{
-  return dpf_;
 }
 
 void
@@ -200,12 +193,11 @@ DDSApp::shutdown()
 
   shutdown_ = true;
 
-  const DDS::DomainParticipantFactory_var dpf = domain_participant_factory();
   for (Participants::const_iterator part = participants_.begin();
        part != participants_.end();
        ++part) {
     part->second->delete_contained_entities();
-    dpf->delete_participant(part->first);
+    dpf_->delete_participant(part->first);
   }
 
   participants_.clear();
