@@ -20,8 +20,8 @@ my $logging_p = "";#"-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
 #    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
 my $logging_s = "";#"-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
 #    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $pub_opts = "$logging_p -ORBLogFile pubx.log ";
-my $sub_opts = "$logging_s -ORBLogFile subx.log ";
+my $pub_opts = "$logging_p -ORBLogFile pubx.log -DCPSPendingTimeout 1 ";
+my $sub_opts = "$logging_s -ORBLogFile subx.log -DCPSPendingTimeout 1 ";
 my $repo_bit_opt = '';
 my $reliable = 1;
 
@@ -222,7 +222,8 @@ unlink $dcpsrepo_ior;
 unlink <*.log>;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$repo_bit_opt -o $dcpsrepo_ior");
+                                       "$repo_bit_opt -o $dcpsrepo_ior"
+                                       . " -DCPSPendingTimeout 1 ");
 
 my $index;
 print "config_opts=$config_opts\n";

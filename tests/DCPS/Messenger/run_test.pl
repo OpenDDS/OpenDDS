@@ -111,13 +111,15 @@ else {
 $test->report_unused_flags(!$flag_found);
 
 $pub_opts .= $thread_per_connection;
+$pub_opts .= " -DCPSPendingTimeout 1 ";
+$sub_opts .= " -DCPSPendingTimeout 1 ";
 
 my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                       "$repo_bit_opt -o $dcpsrepo_ior");
+                       "$repo_bit_opt -o $dcpsrepo_ior -DCPSPendingTimeout 1 ");
 
 my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
 $test->process("subscriber", $sub_exe, $sub_opts);

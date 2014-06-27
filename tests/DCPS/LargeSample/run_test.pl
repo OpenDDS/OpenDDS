@@ -64,7 +64,8 @@ unlink $dcpsrepo_ior;
 unlink <*.log>;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$repo_bit_opt -o $dcpsrepo_ior");
+                                       "$repo_bit_opt -o $dcpsrepo_ior"
+                                       . " -DCPSPendingTimeout 1 ");
 $sub_opts .= " -r $reliable";
 
 my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
