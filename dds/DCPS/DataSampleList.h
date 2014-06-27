@@ -13,21 +13,22 @@
 #include "Definitions.h"
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
-#include "DataSampleHeader.h"
+//#include "DataSampleHeader.h"
+#include "DataSampleListElement.h"
 
-#include <map>
+//#include <map>
 #include <iterator>
 
 namespace OpenDDS {
 namespace DCPS {
 
-const CORBA::ULong MAX_READERS_PER_ELEM = 5;
-typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
-  TransportSendElementAllocator;
+//const CORBA::ULong MAX_READERS_PER_ELEM = 5;
+//typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
+//  TransportSendElementAllocator;
 
-class TransportCustomizedElement;
-typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
-  TransportCustomizedElementAllocator;
+//class TransportCustomizedElement;
+//typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
+//  TransportCustomizedElementAllocator;
 
 struct DataSampleListElement;
 typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>
@@ -35,130 +36,14 @@ typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>
 
 const int MAX_READERS_TO_RESEND = 5;
 
-class TransportSendListener;
-struct PublicationInstance;
+//class TransportSendListener;
+//struct PublicationInstance;
 
 /**
 * Currently we contain entire messages in a single ACE_Message_Block
 * chain.
 */
 typedef ACE_Message_Block DataSample;
-
-/**
-* List elements include the marshaled message, the publication Id and
-* Instance handle for downstream processing, and three separate threads
-* allowing the elements to reside simultaneously on four different
-* lists of data:
-*
-*   next_sample_ / previous_sample
-*     - the next sample of data in the DataWriter.  This thread is used
-*       to traverse elements in the order in which they were written to
-*       the DataWriter (within PRESENTATION.access_scope==TOPIC).
-*       This thread will be used to hold the element in one of four
-*       different lists in the WriteDataContainer: the unsent_data_
-*       list, the sending_data_ list, the sent_data_ list, or the
-*       released_data_ list at different times during its lifetime.
-*       This has a double link to allow removal of elements from internal
-*       locations in the list.
-*
-*   next_instance_sample_
-*     - the next sample of data in the instance within the DataWriter.
-*       This thread is used to traverse elements in the
-*       order in which they were written to the instance (within
-*       PRESENTAION.access_scope==INSTANCE).  It is mainly used on the
-*       send side to count the depth of instance data and to allow the
-*       removal of elements by instance.
-*
-*   next_send_sample_/previous_send_sample_
-*     - the next sample of data to be sent.  This thread is used
-*       external to the container to maintain a list of data samples
-*       that are to be transmitted over the transport layer. The
-*       Publisher may use this thread to maintain a list of samples to
-*       be sent with PRESENTATION.access_scope==GROUP by obtaining
-*       data from each DataWriter as it becomes available and
-*       concatentating the data in the order in which it was written.
-*
-* We thread this single element rather than having multiple smaller
-* lists in order to allow us to allocate once and have the element
-* contained in all of the lists in which it will be held during its
-* lifetime.  These three threads will at times hold the element in
-* three separate lists simultaneously.  The next_sample_ thread will be
-* used in the container to hold the element in one of three different
-* lists at different times, so a single thread is all that is required
-* for all of those lists.
-*
-* NOTE: this is what we want to pass into the enqueue method of the
-*       container, since we want to centralize the
-*       allocation/deallocation so that we can minimize locking.  By
-*       grabbing a single lock, allocating the
-*       buffer/Data_Block/Message_Block/DataSampleListElement at the
-*       same time, we only pay once for all of the allocations.  They
-*       are all presumably from a cache (for the most part) anyway, so
-*       it should be fairly quick.
-*/
-struct OpenDDS_Dcps_Export DataSampleListElement {
-  DataSampleListElement(PublicationId                   publication_id,
-                        TransportSendListener*          send_listner,
-                        PublicationInstance*            handle,
-                        TransportSendElementAllocator*  tse_allocator,
-                        TransportCustomizedElementAllocator* tce_allocator);
-
-  DataSampleListElement(const DataSampleListElement& elem);
-  DataSampleListElement& operator=(const DataSampleListElement& elem);
-
-  ~DataSampleListElement();
-
-  /// The OpenDDS DCPS header for this sample
-  DataSampleHeader       header_;
-
-  /// Message being sent which includes the DataSampleHeader message block
-  /// and DataSample message block.
-  DataSample*            sample_;
-
-  /// Publication Id used downstream.
-  PublicationId          publication_id_;
-  CORBA::ULong           num_subs_;
-  OpenDDS::DCPS::RepoId  subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
-
-  /// Used to make removal from the
-  /// container _much_ more efficient.
-
-  /// Thread of all data within a DataWriter.
-  DataSampleListElement* previous_sample_;
-  DataSampleListElement* next_sample_;
-
-  /// Thread of data within the instance.
-  DataSampleListElement* next_instance_sample_;
-
-  /// Thread of data being unsent/sending/sent/released.
-  DataSampleListElement* next_send_sample_;
-  DataSampleListElement* previous_send_sample_;
-
-  /// Pointer to object that will be informed when the data has
-  /// been delivered.  This needs to be set prior to using the
-  /// TransportClient to send().
-  TransportSendListener* send_listener_;
-
-  /// The flag indicates space availability for this waiting DataSample.
-  bool space_available_;
-
-  /// The pointer to the object that contains the instance information
-  /// and data sample list.
-  /// The client holds this as an InstanceHandle_t.
-  PublicationInstance*   handle_;
-
-  /// Allocator for the TransportSendElement.
-  TransportSendElementAllocator* transport_send_element_allocator_;
-
-  /// Allocator for TransportCustomizedElement
-  TransportCustomizedElementAllocator* transport_customized_element_allocator_;
-
-  //{@
-  /// tracking for Content-Filtering data
-  GUIDSeq_var filter_out_;
-  std::map<DataLinkIdType, GUIDSeq_var> filter_per_link_;
-  //@}
-};
 
 /**
  * @struct DataSampleListIterator
@@ -258,30 +143,6 @@ private:
 
 };
 
-class OpenDDS_Dcps_Export DataSampleWriterList {
-
- public:
-
-  typedef DataSampleListIter<DataSampleWriterList> iterator;
-
-  DataSampleWriterList();
-
-  void reset();
-
-  void enqueue_tail(DataSampleListElement* element);
-
-  bool dequeue_head(DataSampleListElement*& stale);
-
-  bool dequeue(const DataSampleListElement* stale);
-
-  iterator begin();
-  iterator end();
-
-  DataSampleListElement* head_;
-  DataSampleListElement* tail_;
-  ssize_t                size_;
-
-};
 
 /**
 * Lists include a pointer to both the head and tail elements of the
@@ -300,64 +161,91 @@ public:
 
   /// Default constructor clears the list.
   DataSampleList();
+  virtual ~DataSampleList(){};
 
   /// Reset to initial state.
   void reset();
 
-  /// This function assumes the list is the sending_data, sent_data,
-  /// unsent_data or released_data which is linked by the
-  /// next_sample/previous_sample.
-  void enqueue_tail_next_sample(DataSampleListElement* sample);
+  //PWO: HELPER METHODS FOR SETTING DATA MEMBERS
+  // These methods should go away
+
+  void set_head(DataSampleListElement* newHead) { this->head_ = newHead;};
+  void set_tail(DataSampleListElement* newTail) { this->tail_ = newTail;};
+  void set_size(size_t size) { this->size_ = size;};
+
+  //PWO: END HELPER METHODS
+
+  ssize_t size() const {return size_;};
+
+  DataSampleListElement* head() const {return head_;};
+
+  DataSampleListElement* tail() const {return tail_;};
+
+  virtual void enqueue_tail(const DataSampleListElement* element) = 0;
+
+  virtual bool dequeue_head(DataSampleListElement*& stale) = 0;
+
+  //PWO: took away the 'const' for the paramter 'stale'
+  //virtual bool dequeue(/*const*/ DataSampleListElement* stale) = 0;
+
+  //virtual DataSampleListElement* dequeue_sample(const DataSampleListElement* stale) = 0;
 
   /// This function assumes the list is the sending_data, sent_data,
   /// unsent_data or released_data which is linked by the
   /// next_sample/previous_sample.
-  bool dequeue_head_next_sample(DataSampleListElement*& stale);
+  //void enqueue_tail_next_sample(DataSampleListElement* sample);
+
+  /// This function assumes the list is the sending_data, sent_data,
+  /// unsent_data or released_data which is linked by the
+  /// next_sample/previous_sample.
+  //bool dequeue_head_next_sample(DataSampleListElement*& stale);
 
   /// This function assumes the list is the sending_data or sent_data
   /// which is linked by the next_send_sample.
-  void enqueue_tail_next_send_sample(const DataSampleListElement* sample);
+  //void enqueue_tail_next_send_sample(const DataSampleListElement* sample);
 
   /// This function assumes the list is the sending_data or sent_data
   /// which is linked by the next_send_sample.
-  bool dequeue_head_next_send_sample(DataSampleListElement*& stale);
+  //bool dequeue_head_next_send_sample(DataSampleListElement*& stale);
 
   /// This function assumes the list is the instance samples that is
   /// linked by the next_instance_sample_.
-  void enqueue_tail_next_instance_sample(DataSampleListElement* sample);
+//  void enqueue_tail_next_instance_sample(DataSampleListElement* sample);
 
   /// This function assumes the list is the instance samples that is
   /// linked by the next_instance_sample_.
-  bool dequeue_head_next_instance_sample(DataSampleListElement*& stale);
+//  bool dequeue_head_next_instance_sample(DataSampleListElement*& stale);
 
   /// This function assumes that the list is a list that linked using
   /// next_sample/previous_sample but the stale element's position is
   /// unknown.
-  bool dequeue_next_sample(DataSampleListElement* stale);
+  //bool dequeue_next_sample(DataSampleListElement* stale);
 
   /// This function assumes that the list is a list that linked using
   /// next_instance_sample but the stale element's position is
   /// unknown.
-  DataSampleListElement*
-  dequeue_next_instance_sample(const DataSampleListElement* stale);
+//  DataSampleListElement*
+//  dequeue_next_instance_sample(const DataSampleListElement* stale);
 
   /// This function assumes that the list is a list that linked using
   /// next_send_sample but the stale element's position is
   /// unknown.
-  DataSampleListElement*
-  dequeue_next_send_sample(const DataSampleListElement* stale);
+ // DataSampleListElement*
+ // dequeue_next_send_sample(const DataSampleListElement* stale);
 
   /// This function assumes the appended list is a list linked with
   /// previous/next_sample_ and might be linked with next_send_sample_.
   /// If it's not linked with the next_send_sample_ then this function
   /// will make it linked before appending.
-  void enqueue_tail_next_send_sample(DataSampleList list);
+ // void enqueue_tail_next_send_sample(DataSampleList list);
 
   /// Return iterator to beginning of list.
   iterator begin();
 
   /// Return iterator to end of list.
   iterator end();
+
+protected:
 
   /// The first element of the list.
   DataSampleListElement* head_;
@@ -369,6 +257,92 @@ public:
   ssize_t                size_;
   //TBD size is never negative so should be size_t but this ripples through
   // the transport code so leave it for now. SHH
+};
+
+class OpenDDS_Dcps_Export DataSampleWriterList : public DataSampleList {
+
+ public:
+
+  typedef DataSampleListIter<DataSampleWriterList> iterator;
+
+  DataSampleWriterList() : DataSampleList(){};
+  ~DataSampleWriterList(){};
+
+  //void reset();
+
+  void enqueue_tail(const DataSampleListElement* element);
+
+  bool dequeue_head(DataSampleListElement*& stale);
+
+  //PWO: took away the 'const' for the parameter 'stale'
+  bool dequeue(/*const*/ DataSampleListElement* stale);
+
+//  iterator begin();
+//  iterator end();
+
+  //DataSampleListElement* head_;
+  //DataSampleListElement* tail_;
+  //ssize_t                size_;
+
+};
+
+class OpenDDS_Dcps_Export DataSampleInstanceList : public DataSampleList {
+
+ public:
+
+  typedef DataSampleListIter<DataSampleInstanceList> iterator;
+
+  DataSampleInstanceList() : DataSampleList(){};
+  ~DataSampleInstanceList(){};
+
+  //void reset();
+
+  void enqueue_tail(const DataSampleListElement* element);
+
+  bool dequeue_head(DataSampleListElement*& stale);
+
+  //PWO: took away the 'const' for the parameter 'stale'
+  //bool dequeue(/*const*/ DataSampleListElement* stale);
+
+  DataSampleListElement*
+  dequeue(const DataSampleListElement* stale);
+//  iterator begin();
+//  iterator end();
+
+  //DataSampleListElement* head_;
+  //DataSampleListElement* tail_;
+  //ssize_t                size_;
+
+};
+
+class OpenDDS_Dcps_Export DataSampleSendList : public DataSampleList {
+
+ public:
+
+  typedef DataSampleListIter<DataSampleSendList> iterator;
+
+  DataSampleSendList() : DataSampleList(){};
+  ~DataSampleSendList(){};
+
+  //void reset();
+
+  void enqueue_tail(const DataSampleListElement* element);
+  void enqueue_tail(DataSampleSendList list);
+
+  bool dequeue_head(DataSampleListElement*& stale);
+
+  //PWO: took away the 'const' for the parameter 'stale'
+  //bool dequeue(/*const*/ DataSampleListElement* stale);
+
+  DataSampleListElement*
+  dequeue(const DataSampleListElement* stale);
+//  iterator begin();
+//  iterator end();
+
+  //DataSampleListElement* head_;
+  //DataSampleListElement* tail_;
+  //ssize_t                size_;
+
 };
 
 } // namespace DCPS

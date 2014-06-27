@@ -52,7 +52,7 @@ namespace
   class Cleanup
   {
   public:
-    Cleanup(OpenDDS::DCPS::DataSampleListElementAllocator& alloc, OpenDDS::DCPS::DataSampleList& list)
+    Cleanup(OpenDDS::DCPS::DataSampleListElementAllocator& alloc, OpenDDS::DCPS::DataSampleSendList& list)
     : alloc_(alloc)
     , list_(list)
     {
@@ -60,17 +60,17 @@ namespace
 
     ~Cleanup()
     {
-      OpenDDS::DCPS::DataSampleListElement* element = list_.head_;
+      OpenDDS::DCPS::DataSampleListElement* element = list_.head();
       while (element != 0) {
         OpenDDS::DCPS::DataSampleListElement* const to_remove = element;
-        element = element->next_send_sample_;
+        element = element->get_next_send_sample();
         to_remove->~DataSampleListElement();
         alloc_.free(to_remove);
       }
     }
   private:
     OpenDDS::DCPS::DataSampleListElementAllocator& alloc_;
-    OpenDDS::DCPS::DataSampleList& list_;
+    OpenDDS::DCPS::DataSampleSendList& list_;
   };
 }
 
@@ -84,11 +84,11 @@ SimpleDataWriter::run(int num_messages, int msg_size)
   this->num_messages_sent_      = num_messages;
 
   // Set up the DataSampleList
-  OpenDDS::DCPS::DataSampleList samples;
+  OpenDDS::DCPS::DataSampleSendList samples;
 
-  samples.head_ = 0;
-  samples.tail_ = 0;
-  samples.size_ = num_messages;
+  samples.set_head(0);
+  samples.set_tail(0);
+  samples.set_size(num_messages);
 
   // Now we can create the DataSampleHeader struct and set its fields.
   OpenDDS::DCPS::DataSampleHeader header;
@@ -145,17 +145,17 @@ SimpleDataWriter::run(int num_messages, int msg_size)
     // The Sample Element will hold on to the chain of blocks (header + data).
     element->sample_ = header_block;
     if (prev_element == 0) {
-      samples.head_ = element;
+      samples.set_head(element);
     } else {
-      prev_element->next_send_sample_ = element;
+      prev_element->set_next_send_sample(element);
     }
 
     prev_element = element;
-    samples.tail_ = element;
+    samples.set_tail(element);
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Send the DataSampleList (samples).\n"));
+             "Send the DataSampleSendList (samples).\n"));
 
   ACE_Time_Value start = ACE_OS::gettimeofday();
   this->send(samples);

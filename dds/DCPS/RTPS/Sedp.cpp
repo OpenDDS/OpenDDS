@@ -2052,9 +2052,8 @@ Sedp::Writer::write_sample(const ParameterList& plist,
       list_el->num_subs_ = 1;
     }
 
-    DCPS::DataSampleList list;
-    list.head_ = list.tail_ = list_el;
-    list.size_ = 1;
+    DCPS::DataSampleSendList list;
+    list.enqueue_tail(list_el);
 
     send(list);
   }

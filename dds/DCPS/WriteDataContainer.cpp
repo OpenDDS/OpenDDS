@@ -123,26 +123,26 @@ WriteDataContainer::WriteDataContainer(
 
 WriteDataContainer::~WriteDataContainer()
 {
-  if (this->unsent_data_.size_ > 0) {
+  if (this->unsent_data_.size() > 0) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
                ACE_TEXT("destroyed with %d samples unsent.\n"),
-               this->unsent_data_.size_));
+               this->unsent_data_.size()));
   }
 
-  if (this->sending_data_.size_ > 0) {
+  if (this->sending_data_.size() > 0) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: WriteDataContainer::~WriteDataContainer() - ")
                ACE_TEXT("destroyed with %d samples sending.\n"),
-               this->sending_data_.size_));
+               this->sending_data_.size()));
   }
 
-  if (this->sent_data_.size_ > 0) {
+  if (this->sent_data_.size() > 0) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::~WriteDataContainer() - ")
                  ACE_TEXT("destroyed with %d samples sent.\n"),
-                 this->sent_data_.size_));
+                 this->sent_data_.size()));
     }
   }
 
@@ -164,7 +164,7 @@ WriteDataContainer::enqueue(
   PublicationInstance* const instance =
     get_handle_instance(instance_handle);
   // Extract the instance queue.
-  DataSampleList& instance_list = instance->samples_;
+  DataSampleInstanceList& instance_list = instance->samples_;
 
   if (this->watchdog_.get()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
@@ -178,11 +178,11 @@ WriteDataContainer::enqueue(
   // also next_send_sample_.
   // This would save time when we actually send the data.
 
-  unsent_data_.enqueue_tail_next_send_sample(sample);
+  unsent_data_.enqueue_tail(sample);
 
   //
   // Add this sample to the INSTANCE scope list.
-  instance_list.enqueue_tail_next_instance_sample(sample);
+  instance_list.enqueue_tail(sample);
 
   return DDS::RETCODE_OK;
 }
@@ -204,7 +204,7 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 
   // Make a copy of sending_data_ and sent_data_;
 
-  if (sending_data_.size_ > 0) {
+  if (sending_data_.size() > 0) {
     this->copy_and_append(this->resend_data_,
                           sending_data_,
                           reader_id,
@@ -215,7 +215,7 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                           );
   }
 
-  if (sent_data_.size_ > 0) {
+  if (sent_data_.size() > 0) {
     this->copy_and_append(this->resend_data_,
                           sent_data_,
                           reader_id,
@@ -382,9 +382,9 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
   // Alive state.
   // We have choosen to NOT remove the sending samples.
 
-  DataSampleList& instance_list = instance->samples_;
+  DataSampleInstanceList& instance_list = instance->samples_;
 
-  while (instance_list.size_ > 0) {
+  while (instance_list.size() > 0) {
     bool released = false;
     DDS::ReturnCode_t ret
     = remove_oldest_sample(instance_list, released);
@@ -416,7 +416,7 @@ WriteDataContainer::num_samples(DDS::InstanceHandle_t handle,
     return DDS::RETCODE_ERROR;
 
   } else {
-    size = instance->samples_.size_;
+    size = instance->samples_.size();
     return DDS::RETCODE_OK;
   }
 }
@@ -435,13 +435,13 @@ WriteDataContainer::num_all_samples()
        iter != instances_.end();
        ++iter)
   {
-    size += iter->second->samples_.size_;
+    size += iter->second->samples_.size();
   }
 
   return size;
 }
 
-DataSampleList
+DataSampleSendList
 WriteDataContainer::get_unsent_data()
 {
   DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",6);
@@ -450,14 +450,14 @@ WriteDataContainer::get_unsent_data()
   // The samples in unsent_data are added to the sending_data
   // during enqueue.
   //
-  DataSampleList list = this->unsent_data_;
+  DataSampleSendList list = this->unsent_data_;
 
   //
   // The unsent_data_ already linked with the
   // next_send_sample during enqueue.
   // Append the unsent_data_ to current sending_data_
   // list.
-  sending_data_.enqueue_tail_next_send_sample(list);
+  sending_data_.enqueue_tail(list);
 
   //
   // Clear the unsent data list.
@@ -483,7 +483,7 @@ WriteDataContainer::get_unsent_data()
   return list;
 }
 
-DataSampleList
+DataSampleSendList
 WriteDataContainer::get_resend_data()
 {
   DBG_ENTRY_LVL("WriteDataContainer","get_resend_data",6);
@@ -492,15 +492,15 @@ WriteDataContainer::get_resend_data()
   // The samples in unsent_data are added to the sending_data
   // during enqueue.
   //
-  DataSampleList list = this->resend_data_;
+  DataSampleSendList list = this->resend_data_;
 
-  if (list.size_) {
+  if (list.size()) {
     //
     // The unsent_data_ already linked with the
     // next_send_sample during enqueue.
     // Append the unsent_data_ to current sending_data_
     // list.
-    released_data_.enqueue_tail_next_send_sample(list);
+    released_data_.enqueue_tail(list);
   }
 
   //
@@ -516,9 +516,9 @@ WriteDataContainer::get_resend_data()
 bool
 WriteDataContainer::pending_data()
 {
-  return this->sending_data_.size_ != 0
-         || this->unsent_data_.size_ != 0
-         || this->released_data_.size_ != 0;
+  return this->sending_data_.size() != 0
+         || this->unsent_data_.size() != 0
+         || this->released_data_.size() != 0;
 }
 
 void
@@ -549,14 +549,14 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
   //
   PublicationInstance* instance = sample->handle_;
   DataSampleListElement* stale =
-    released_data_.dequeue_next_send_sample(sample);
+    released_data_.dequeue(sample);
   if (stale) {
     release_buffer(stale);
   } else {
     //
     // Search the sending_data_ list first.
     //
-    if (sending_data_.dequeue_next_send_sample(sample)) {
+    if (sending_data_.dequeue(sample)) {
       // in sending_data_ list
     } else {
       // The sample is neither in the sending_data_ nor the
@@ -569,10 +569,10 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
       return;
     }
 
-    if (instance->waiting_list_.head_ != 0) {
+    if (instance->waiting_list_.head() != 0) {
       // Remove the delivered sample from the instance sample list
       // and release.
-      stale = instance->samples_.dequeue_next_instance_sample(sample);
+      stale = instance->samples_.dequeue(sample);
       if (stale == 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")
@@ -595,7 +595,7 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
       }
 
       DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->sample_);
-      sent_data_.enqueue_tail_next_send_sample(sample);
+      sent_data_.enqueue_tail(sample);
     }
   }
 
@@ -646,15 +646,15 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
   // sample list since we will send it.
   DataSampleListElement* stale = 0;
 
-  if (sending_data_.dequeue_next_send_sample(sample)) {
+  if (sending_data_.dequeue(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
     // called from reenqueue_all() which supports the TRANSIENT_LOCAL
     // qos. The samples that are sending by transport are dropped from
     // transport and will be moved to the unsent list for resend.
-    unsent_data_.enqueue_tail_next_send_sample(sample);
+    unsent_data_.enqueue_tail(sample);
 
   } else {
-    stale = released_data_.dequeue_next_send_sample(sample);
+    stale = released_data_.dequeue(sample);
     if (stale) {
       // The remove_sample is requested when sample list size
       // reaches limit. In this case, the oldest sample is
@@ -680,7 +680,7 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
 
 DDS::ReturnCode_t
 WriteDataContainer::remove_oldest_sample(
-  DataSampleList& instance_list,
+  DataSampleInstanceList& instance_list,
   bool& released)
 {
   DataSampleListElement* stale = 0;
@@ -688,7 +688,7 @@ WriteDataContainer::remove_oldest_sample(
   //
   // Remove the oldest sample from the instance list.
   //
-  if (instance_list.dequeue_head_next_instance_sample(stale) == false) {
+  if (instance_list.dequeue_head(stale) == false) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("WriteDataContainer::remove_oldest_sample, ")
@@ -713,8 +713,8 @@ WriteDataContainer::remove_oldest_sample(
   //
   DataSampleListElement* head = stale;
 
-  while (head->previous_send_sample_ != 0) {
-    head = head->previous_send_sample_;
+  while (head->get_previous_send_sample() != 0) {
+    head = head->get_previous_send_sample();
   }
 
   //
@@ -727,19 +727,19 @@ WriteDataContainer::remove_oldest_sample(
   // Remove the element from the internal list.
   bool result = false;
 
-  if (head == this->sending_data_.head_) {
+  if (head == this->sending_data_.head()) {
     // Move the element to the released_data_ list since it is still
     // in use, and we need to wait until it is told by the transport.
     //
-    result = this->sending_data_.dequeue_next_send_sample(stale) != 0;
-    released_data_.enqueue_tail_next_send_sample(stale);
+    result = this->sending_data_.dequeue(stale) != 0;
+    released_data_.enqueue_tail(stale);
     released = false;
 
-  } else if (head == this->sent_data_.head_) {
+  } else if (head == this->sent_data_.head()) {
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
-    result = this->sent_data_.dequeue_next_send_sample(stale) != 0;
+    result = this->sent_data_.dequeue(stale) != 0;
     release_buffer(stale);
     released = true;
 
@@ -753,12 +753,12 @@ WriteDataContainer::remove_oldest_sample(
                  std::string(converter).c_str()));
     }
 
-  } else if (head == this->unsent_data_.head_) {
+  } else if (head == this->unsent_data_.head()) {
     //
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
-    result = this->unsent_data_.dequeue_next_send_sample(stale) != 0;
+    result = this->unsent_data_.dequeue(stale) != 0;
     release_buffer(stale);
     released = true;
 
@@ -821,24 +821,24 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
     DDS::RETCODE_ERROR);
 
   // Extract the current instance queue.
-  DataSampleList& instance_list = instance->samples_;
+  DataSampleInstanceList& instance_list = instance->samples_;
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   bool oldest_released = true;
-  DataSampleListElement* stale = instance_list.head_;
+  DataSampleListElement* stale = instance_list.head();
 
   // Release the oldest sample if the size reaches the max size of
   // the sample list.
-  if (instance_list.size_ > depth_) {
+  if (instance_list.size() > depth_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("WriteDataContainer::obtain_buffer, ")
                ACE_TEXT("The instance list size %d exceeds depth %d\n"),
-               instance_list.size_,
+               instance_list.size(),
                depth_));
     ret = DDS::RETCODE_ERROR;
 
-  } else if (instance_list.size_ == depth_) {
+  } else if (instance_list.size() == depth_) {
     // The remove_oldest_sample() method removes the oldest sample
     // from instance list and removes it from the internal lists.
     ret = this->remove_oldest_sample(instance_list, oldest_released);
@@ -876,7 +876,7 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
 
       // try removing any full instances first
       while (!other_oldest_released && it != instances_.end()) {
-        if (it->second->samples_.size_ == depth_) {
+        if (it->second->samples_.size() == depth_) {
           ret = this->remove_oldest_sample(it->second->samples_, other_oldest_released);
         }
         ++it;
@@ -897,7 +897,7 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
 
         // try removing any full instances first
         while (!other_oldest_released && it != instances_.end()) {
-          if (it->second->samples_.size_ > 1) {
+          if (it->second->samples_.size() > 1) {
             ret = this->remove_oldest_sample(it->second->samples_, other_oldest_released);
           }
           ++it;
@@ -967,12 +967,12 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
     // Need wait when waiting list is not empty or the oldest sample
     // is still being used.
     bool const need_wait =
-      instance->waiting_list_.head_ != 0
+      instance->waiting_list_.head() != 0
       || !oldest_released ? true : false;
 
     if (need_wait) {
       // Add the newly allocated sample to waiting list.
-      instance->waiting_list_.enqueue_tail_next_instance_sample(element);
+      instance->waiting_list_.enqueue_tail(element);
 
       // wait for all "released" samples to be delivered
       // Timeout value from Qos.RELIABILITY.max_blocking_time
@@ -987,14 +987,14 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) WriteDataContainer::obtain_buffer, ")
                                 ACE_TEXT ("wait for condition, oldest_released %d waiting %X\n"),
-                                oldest_released, instance->waiting_list_.head_));
+                                oldest_released, instance->waiting_list_.head()));
         }
 
-        // lock is released while waiting and aquired before returning
+        // lock is released while waiting and acquired before returning
         // from wait.
         int const wait_result = condition_.wait(&abs_timeout);
 
-        if (wait_result == 0) { // signalled
+        if (wait_result == 0) { // signaled
           if (element->space_available_ == true) {
             break;
           } // else continue wait
@@ -1024,7 +1024,7 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
       if (ret != DDS::RETCODE_OK) {
         // Remove from the waiting list if wait() timed out or return
         // other errors.
-        if (instance->waiting_list_.dequeue_next_instance_sample(element) == false) {
+        if (instance->waiting_list_.dequeue(element) == false) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: ")
                             ACE_TEXT("WriteDataContainer::obtain_buffer, ")
@@ -1050,7 +1050,7 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
     release_buffer(element);
 
   } else {
-    data_holder_.enqueue_tail_next_sample(element);
+    data_holder_.enqueue_tail(element);
   }
 
   return ret;
@@ -1059,8 +1059,8 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
 void
 WriteDataContainer::release_buffer(DataSampleListElement* element)
 {
-  data_holder_.dequeue_next_sample(element);
-  // Release the memeory to the allocator.
+  data_holder_.dequeue(element);
+  // Release the memory to the allocator.
   ACE_DES_FREE(element,
                sample_list_element_allocator_.free,
                DataSampleListElement);
@@ -1149,8 +1149,8 @@ WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
 }
 
 void
-WriteDataContainer::copy_and_append(DataSampleList& list,
-                                    const DataSampleList& appended,
+WriteDataContainer::copy_and_append(DataSampleSendList& list,
+                                    const DataSampleSendList& appended,
                                     const RepoId& reader_id,
                                     const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1160,9 +1160,9 @@ WriteDataContainer::copy_and_append(DataSampleList& list,
 #endif
                                     )
 {
-  for (DataSampleListElement* cur = appended.head_;
+  for (DataSampleListElement* cur = appended.head();
        cur != 0;
-       cur = cur->next_send_sample_) {
+       cur = cur->get_next_send_sample()) {
     // Do not copy and append data that has exceeded the configured
     // lifespan.
     if (resend_data_expired(*cur, lifespan))
@@ -1180,13 +1180,13 @@ WriteDataContainer::copy_and_append(DataSampleList& list,
                         sizeof(DataSampleListElement))),
                     DataSampleListElement(*cur));
 
-    // @todo Does ACE_NEW_MALLOC throw?  Where's the check for
+    // TODO: Does ACE_NEW_MALLOC throw?  Where's the check for
     //       allocation failure, i.e. element == 0?
 
     element->num_subs_ = 1;
     element->subscription_ids_[0] = reader_id;
 
-    list.enqueue_tail_next_send_sample(element);
+    list.enqueue_tail(element);
   }
 }
 
@@ -1204,7 +1204,7 @@ WriteDataContainer::persist_data()
     // PERSISTENT data durability.  Cache the data samples.
 
     /**
-     * @todo We should only cache data that is not in the
+     * TODO: We should only cache data that is not in the
      *       "released_data_" list, i.e. not still in use outside of
      *       this instance of WriteDataContainer.
      */
@@ -1288,17 +1288,17 @@ void
 WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
                                             PublicationInstance* instance)
 {
-  if (stale && instance->waiting_list_.head_ != 0) {
+  if (stale && instance->waiting_list_.head() != 0) {
       // Mark the first waiting sample will be next to add to instance
       // list.
-      instance->waiting_list_.head_->space_available_ = true;
+      instance->waiting_list_.head()->space_available_ = true;
       // Remove this waiting sample from waiting list.
       DataSampleListElement* waiting = 0;
 
-      if (instance->waiting_list_.dequeue_head_next_instance_sample(waiting) == false) {
+      if (instance->waiting_list_.dequeue_head(waiting) == false) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("WriteDataContainer::data_delivered, ")
+                   ACE_TEXT("WriteDataContainer::wakeup_blocking_writers, ")
                    ACE_TEXT("dequeue_head_next_instance_sample from waiting ")
                    ACE_TEXT("list failed\n")));
         return;

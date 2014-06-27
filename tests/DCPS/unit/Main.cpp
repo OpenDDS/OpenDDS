@@ -295,7 +295,7 @@ int run_domain_test ()
 
 void run_sample_list_test ()
 {
-  DataSampleList list;
+  DataSampleSendList list;
   TEST_CHECK( list.begin() == list.end() );
 
   OpenDDS::DCPS::RepoId repoId;
@@ -306,7 +306,7 @@ void run_sample_list_test ()
     repoId.entityId.entityKey[2] = i;
     sample[i]
       = new DataSampleListElement(repoId, 0, 0, 0, 0);
-    list.enqueue_tail_next_send_sample (sample[i]);
+    list.enqueue_tail(sample[i]);
   }
   TEST_CHECK( list.begin() != list.end() );
   DataSampleListIterator iter = list.begin();
@@ -329,11 +329,11 @@ void run_sample_list_test ()
 
   // document that DataSampleList::iterator == not based on list itself
   iter = list.begin();
-  DataSampleList sameHeadTailList;
+  DataSampleWriterList sameHeadTailList;
   // calling enqueue_tail_next_sample will setup head and tail, but not mess with
   // send_sample params
-  sameHeadTailList.enqueue_tail_next_sample (sample[0]);
-  sameHeadTailList.enqueue_tail_next_sample (sample[2]);
+  sameHeadTailList.enqueue_tail (sample[0]);
+  sameHeadTailList.enqueue_tail (sample[2]);
   // will iterate the same, since sample 0-2 send_sample params were not changed
   DataSampleListIterator iter1 = sameHeadTailList.begin();
   TEST_CHECK( iter == iter1 );
@@ -342,15 +342,15 @@ void run_sample_list_test ()
   TEST_CHECK( ++iter == ++iter1 );
 
   // check same head, same current but different tail fails
-  DataSampleList tailDiffList;
-  tailDiffList.enqueue_tail_next_sample (sample[0]);
-  tailDiffList.enqueue_tail_next_sample (sample[1]);
+  DataSampleWriterList tailDiffList;
+  tailDiffList.enqueue_tail (sample[0]);
+  tailDiffList.enqueue_tail (sample[1]);
   TEST_CHECK( list.begin() != tailDiffList.begin() );
 
   // check same tail, same current but different head fails
-  DataSampleList headDiffList;
-  headDiffList.enqueue_tail_next_sample (sample[1]);
-  headDiffList.enqueue_tail_next_sample (sample[2]);
+  DataSampleWriterList headDiffList;
+  headDiffList.enqueue_tail (sample[1]);
+  headDiffList.enqueue_tail (sample[2]);
   iter = list.begin();
   iter1 = headDiffList.begin();
   // verify both iters have same current
@@ -369,7 +369,7 @@ void run_sample_list_test ()
 
 void run_next_sample_test (ssize_t size)
 {
-  DataSampleList list;
+  DataSampleWriterList list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
@@ -396,14 +396,14 @@ void run_next_sample_test (ssize_t size)
     {
       middle = sample;
     }
-    list.enqueue_tail_next_sample (sample);
+    list.enqueue_tail (sample);
   }
-  ssize_t current_size = list.size_;
+  ssize_t current_size = list.size();
   bool ret = true;
 
   if (middle != 0)
   {
-    ret = list.dequeue_next_sample (middle);
+    ret = list.dequeue (middle);
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
@@ -430,7 +430,7 @@ void run_next_sample_test (ssize_t size)
       continue;
     }
     DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_sample (sample)
+    TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_sample_test: ")
@@ -448,20 +448,20 @@ void run_next_sample_test (ssize_t size)
   }
   }
 
-  TEST_CHECK (list.head_ == 0
-              && list.tail_ == 0
-              && list.size_ == 0);
+  TEST_CHECK (list.head() == 0
+              && list.tail() == 0
+              && list.size() == 0);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) run_next_sample_test: ")
-    ACE_TEXT("(list.head_ == 0 && list.tail_ == 0 && list.size_ == 0)")
+    ACE_TEXT("(list.head() == 0 && list.tail() == 0 && list.size() == 0)")
     ACE_TEXT("\n")
   ));
 }
 
 void run_next_send_sample_test (ssize_t size)
 {
-  DataSampleList list;
-  DataSampleList appended_list;
+  DataSampleSendList list;
+  DataSampleSendList appended_list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
@@ -484,7 +484,7 @@ void run_next_send_sample_test (ssize_t size)
     repoId.entityId.entityKey[2] = i;
     DataSampleListElement* sample
       = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
-    list.enqueue_tail_next_send_sample (sample);
+    list.enqueue_tail (sample);
   }
 
   for (ssize_t i = pub_id_middle; i < size; i ++)
@@ -496,16 +496,16 @@ void run_next_send_sample_test (ssize_t size)
     {
       middle = sample;
     }
-    appended_list.enqueue_tail_next_send_sample (sample);
+    appended_list.enqueue_tail (sample);
   }
-  list.enqueue_tail_next_send_sample (appended_list);
+  list.enqueue_tail (appended_list);
 
-  ssize_t current_size = list.size_;
+  ssize_t current_size = list.size();
   bool ret = true;
 
   if (middle != 0)
   {
-    ret = list.dequeue_next_send_sample (middle);
+    ret = list.dequeue (middle);
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
@@ -537,7 +537,7 @@ void run_next_send_sample_test (ssize_t size)
       continue;
     }
     DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_send_sample (sample)
+    TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
@@ -554,19 +554,19 @@ void run_next_send_sample_test (ssize_t size)
     delete sample;
   }
   }
-  TEST_CHECK (list.head_ == 0
-              && list.tail_ == 0
-              && list.size_ == 0);
+  TEST_CHECK (list.head() == 0
+              && list.tail() == 0
+              && list.size() == 0);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
-    ACE_TEXT("(list.head_ == 0 && list.tail_ == 0 && list.size_ == 0)")
+    ACE_TEXT("(list.head() == 0 && list.tail() == 0 && list.size() == 0)")
     ACE_TEXT("\n")
   ));
 }
 
 void run_next_instance_sample_test (ssize_t size)
 {
-  DataSampleList list;
+  DataSampleInstanceList list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
@@ -593,15 +593,15 @@ void run_next_instance_sample_test (ssize_t size)
     {
       middle = sample;
     }
-    list.enqueue_tail_next_instance_sample (sample);
+    list.enqueue_tail (sample);
   }
 
-  ssize_t current_size = list.size_;
+  ssize_t current_size = list.size();
   bool ret = true;
 
   if (middle != 0)
   {
-    ret = list.dequeue_next_instance_sample (middle);
+    ret = list.dequeue (middle);
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
@@ -633,7 +633,7 @@ void run_next_instance_sample_test (ssize_t size)
       continue;
     }
     DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_instance_sample (sample)
+    TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
@@ -650,9 +650,9 @@ void run_next_instance_sample_test (ssize_t size)
     delete sample;
   }
   }
-  TEST_CHECK (list.head_ == 0
-              && list.tail_ == 0
-              && list.size_ == 0);
+  TEST_CHECK (list.head() == 0
+              && list.tail() == 0
+              && list.size() == 0);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
     ACE_TEXT("")

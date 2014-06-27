@@ -21,14 +21,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 bool
-DataSampleList::dequeue_next_sample(DataSampleListElement* stale)
+DataSampleWriterList::dequeue(/*const*/ DataSampleListElement* stale)
 {
   if (head_ == 0) {
     return false;
   }
 
   if (stale == head_) {
-    return dequeue_head_next_sample(stale);
+    return dequeue_head(stale);
   }
 
   // Search from head_->next_sample_.
@@ -83,7 +83,7 @@ DataSampleList::dequeue_next_sample(DataSampleListElement* stale)
 }
 
 DataSampleListElement*
-DataSampleList::dequeue_next_instance_sample(const DataSampleListElement* stale)
+DataSampleInstanceList::dequeue(const DataSampleListElement* stale)
 {
   if (head_ == 0) {
     return 0;
@@ -92,7 +92,7 @@ DataSampleList::dequeue_next_instance_sample(const DataSampleListElement* stale)
   // Same as dequeue from head.
   if (stale == head_) {
     DataSampleListElement* tmp = head_;
-    return dequeue_head_next_instance_sample(tmp) ? tmp : 0;
+    return dequeue_head(tmp) ? tmp : 0;
   }
 
   // Search from head_->next_instance_sample_.
@@ -118,7 +118,7 @@ DataSampleList::dequeue_next_instance_sample(const DataSampleListElement* stale)
 }
 
 DataSampleListElement*
-DataSampleList::dequeue_next_send_sample(const DataSampleListElement* stale)
+DataSampleSendList::dequeue(const DataSampleListElement* stale)
 {
   if (head_ == 0) {
     return 0;
@@ -127,7 +127,7 @@ DataSampleList::dequeue_next_send_sample(const DataSampleListElement* stale)
   // Same as dequeue from head.
   if (stale == head_) {
     DataSampleListElement* tmp = head_;
-    return dequeue_head_next_send_sample(tmp) ? tmp : 0;
+    return dequeue_head(tmp) ? tmp : 0;
   }
 
   // Search from head_->next_send_sample_.
@@ -164,7 +164,7 @@ DataSampleList::dequeue_next_send_sample(const DataSampleListElement* stale)
 }
 
 void
-DataSampleList::enqueue_tail_next_send_sample(DataSampleList list)
+DataSampleSendList::enqueue_tail(DataSampleSendList list)
 {
   //// Make the appended list linked with next_send_sample_ first.
   //DataSampleListElement* cur = list.head_;

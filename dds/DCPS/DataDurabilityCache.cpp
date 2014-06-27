@@ -474,10 +474,10 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
   DDS::DomainId_t domain_id,
   char const * topic_name,
   char const * type_name,
-  DataSampleList & the_data,
+  DataSampleSendList & the_data,
   DDS::DurabilityServiceQosPolicy const & qos)
 {
-  if (the_data.size_ == 0)
+  if (the_data.size() == 0)
     return true;  // Nothing to cache.
 
   // Apply DURABILITY_SERVICE QoS HISTORY and RESOURCE_LIMITS related
@@ -497,7 +497,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
   else if (depth == 0)
     return true;  // Nothing else to do.  Discard all data.
 
-  else if (the_data.size_ > depth) {
+  else if (the_data.size() > depth) {
     // N.B. Dropping data samples does not take into account
     // those samples which are not actually persisted (i.e.
     // samples with the coherent_sample_ flag set). The spec
@@ -509,7 +509,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
     // Drop "old" samples.  Only keep the "depth" most recent
     // samples, i.e. those found at the tail end of the
     // DataSampleList.
-    ssize_t const advance_amount = the_data.size_ - depth;
+    ssize_t const advance_amount = the_data.size() - depth;
     std::advance(element, advance_amount);
   }
 
@@ -623,7 +623,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
       //
       // It should be noted that persisting coherent changes
       // is a non-trivial task, and should be handled when
-      // finializing persistence profile conformance.
+      // finalizing persistence profile conformance.
       if (DataSampleHeader::test_flag(COHERENT_CHANGE_FLAG, elem.sample_)) {
         continue; // skip coherent sample
       }

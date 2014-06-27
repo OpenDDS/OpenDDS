@@ -223,7 +223,7 @@ public:
    * The entire list is linked via the
    * DataSampleListElement.next_send_sample_ link as well.
    */
-  DataSampleList get_unsent_data() ;
+  DataSampleSendList get_unsent_data() ;
 
   /**
    * Obtain a list of data for resending. This is only used when
@@ -231,7 +231,7 @@ public:
    * returned is moved from the resend list to the released list
    * as part of this call.
    */
-  DataSampleList get_resend_data() ;
+  DataSampleSendList get_resend_data() ;
 
   /**
    * Returns if pending data exists.  This includes released,
@@ -333,8 +333,8 @@ private:
   WriteDataContainer & operator= (WriteDataContainer const &);
   // --------------------------
 
-  void copy_and_append(DataSampleList& list,
-                       const DataSampleList& appended,
+  void copy_and_append(DataSampleSendList& list,
+                       const DataSampleSendList& appended,
                        const RepoId& reader_id,
                        const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -356,7 +356,7 @@ private:
    * released.
    */
   DDS::ReturnCode_t remove_oldest_sample(
-    DataSampleList& instance_list,
+    DataSampleInstanceList& instance_list,
     bool& released);
 
   void wakeup_blocking_writers (DataSampleListElement* stale,
@@ -365,28 +365,28 @@ private:
 private:
 
   /// List of data that has not been sent yet.
-  DataSampleList   unsent_data_;
+  DataSampleSendList   unsent_data_;
 
   /// List of data that is currently being sent.
-  DataSampleList   sending_data_;
+  DataSampleSendList   sending_data_;
 
   /// List of data that has already been sent.
-  DataSampleList   sent_data_;
+  DataSampleSendList   sent_data_;
 
   /// List of data that has been released, but it
   /// still in use externally (by the transport).
-  DataSampleList   released_data_;
+  DataSampleSendList   released_data_;
 
   /// The list of all samples written to this datawriter in
   /// writing order.
-  DataSampleList   data_holder_;
+  DataSampleWriterList   data_holder_;
 
   /// List of the data reenqueued to support the
   /// TRANSIENT_LOCAL_DURABILITY_QOS policy. It duplicates the
   /// samples in sent and sending list. These
   /// DataSampleListElement will be appended to released_data_
   /// list after passing to the transport.
-  DataSampleList   resend_data_;
+  DataSampleSendList   resend_data_;
 
   /// The individual instance queue threads in the data.
   PublicationInstanceMapType instances_;

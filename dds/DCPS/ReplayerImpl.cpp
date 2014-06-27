@@ -966,7 +966,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
     }
   }
 
-  DataSampleList list;
+  DataSampleSendList list;
 
   for (int i = 0; i < num_samples; ++i) {
     DataSampleListElement* element = 0;
@@ -985,7 +985,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
 
     element->header_.byte_order_ = samples[i].sample_byte_order_;
     element->header_.publication_id_ = this->publication_id_;
-    list.enqueue_tail_next_sample(element);
+    list.enqueue_tail(element);
 
     DDS::ReturnCode_t ret = create_sample_data_message(samples[i].sample_->duplicate(),
                                                        element->header_,
@@ -999,7 +999,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
 
     if (ret != DDS::RETCODE_OK) {
       // we need to free the list
-      while (list.dequeue_head_next_sample(element)) {
+      while (list.dequeue(element)) {
         ACE_DES_FREE(element, sample_list_element_allocator_->free, DataSampleListElement);
       }
 

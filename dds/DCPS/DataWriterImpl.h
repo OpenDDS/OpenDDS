@@ -263,11 +263,11 @@ public:
   /**
    * Retrieve the unsent data from the WriteDataContainer.
    */
-  DataSampleList get_unsent_data() {
+  DataSampleSendList get_unsent_data() {
     return data_container_->get_unsent_data();
   }
 
-  DataSampleList get_resend_data() {
+  DataSampleSendList get_resend_data() {
     return data_container_->get_resend_data();
   }
 
@@ -665,7 +665,7 @@ private:
   IdSet                      pending_readers_, assoc_complete_readers_;
 
   /// The cached available data while suspending.
-  DataSampleList             available_data_list_;
+  DataSampleSendList             available_data_list_;
 
   /// Monitor object for this entity
   Monitor* monitor_;

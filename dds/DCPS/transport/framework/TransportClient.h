@@ -68,7 +68,7 @@ protected:
   bool send_response(const RepoId& peer,
                      const DataSampleHeader& header,
                      ACE_Message_Block* payload); // [DR]
-  void send(const DataSampleList& samples);
+  void send(const DataSampleSendList& samples);
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,
                                  void* extra = 0);

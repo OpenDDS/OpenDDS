@@ -105,8 +105,10 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     , alloc_(2, sizeof(TransportSendElementAllocator))
     , dsle_(pub_id, this, 0, &alloc_, 0)
   {
-    list_.head_ = list_.tail_ = &dsle_;
-    list_.size_ = 1;
+    //list_.head_ = list_.tail_ = &dsle_;
+    list_.set_head(&dsle_);
+    list_.set_tail(&dsle_);
+    list_.set_size(1);
     dsle_.header_.message_id_ = SAMPLE_DATA;
     dsle_.header_.message_length_ = 8;
     dsle_.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
@@ -141,7 +143,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void remove_associations(const ReaderIdSeq&, bool) {}
 
   TransportSendElementAllocator alloc_;
-  DataSampleList list_;
+  DataSampleSendList list_;
   DataSampleListElement dsle_;
   ACE_Message_Block payload_;
 };

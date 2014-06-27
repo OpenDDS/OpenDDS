@@ -304,9 +304,9 @@ TransportClient::send_response(const RepoId& peer,
 }
 
 void
-TransportClient::send(const DataSampleList& samples)
+TransportClient::send(const DataSampleSendList& samples)
 {
-  DataSampleListElement* cur = samples.head_;
+  DataSampleListElement* cur = samples.head();
 
   while (cur) {
     // VERY IMPORTANT NOTE:
@@ -318,7 +318,7 @@ TransportClient::send(const DataSampleList& samples)
     // DataSampleListElement!  Thus, we need to get the next
     // DataSampleListElement (pointer) from the current element now,
     // while it is safe.
-    DataSampleListElement* next_elem = cur->next_send_sample_;
+    DataSampleListElement* next_elem = cur->get_next_send_sample();
     DataLinkSet_rch pub_links =
       (cur->num_subs_ > 0)
       ? links_.select_links(cur->subscription_ids_, cur->num_subs_)
@@ -335,7 +335,7 @@ TransportClient::send(const DataSampleList& samples)
                    ACE_TEXT("no links for publication %C, ")
                    ACE_TEXT("not sending %d samples.\n"),
                    std::string(converter).c_str(),
-                   samples.size_));
+                   samples.size()));
       }
 
       // We tell the send_listener_ that all of the remote subscriber ids

@@ -418,12 +418,12 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
     DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
   };
-  DataSampleList list;
-  list.head_ = elements;
-  list.size_ = sizeof(elements) / sizeof(elements[0]);
-  list.tail_ = &elements[list.size_ - 1];
-  for (int i = 0; i < list.size_ - 1; ++i) {
-    elements[i].next_send_sample_ = &elements[i + 1];
+  DataSampleSendList list;
+  list.set_head(elements);
+  list.set_size(sizeof(elements) / sizeof(elements[0]));
+  list.set_tail(&elements[list.size() - 1]);
+  for (int i = 0; i < list.size() - 1; ++i) {
+    elements[i].set_next_send_sample( &elements[i + 1]);
   }
 
   // Send a regular data sample
@@ -495,7 +495,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  sdw.callbacks_expected_ = list.size_;
+  sdw.callbacks_expected_ = list.size();
   ::DDS_TEST::force_inline_qos(true);  // Inline QoS
   sdw.send(list);
 

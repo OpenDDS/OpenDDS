@@ -1,10 +1,69 @@
+Fri Jun 27 20:36:46 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleListElement.h:
+        * dds/DCPS/DataSampleListElement.inl:
+
+          Split out the DataSampleListElement into its own class instead of
+          an imbedded struct in DataSampleList.  Made its pointers to list
+          positions private and added the DataSample*List classes friends so
+          that they can manage the element's internal pointers.
+
+          Added setters and getters for pointers to next and previous send samples
+          to support current code usage.  These should hopefully be done away with
+          in the future and not allow direct manipulation or access to these internals.
+
+          Left other data members as public for the moment, but hope to shift most to
+          private.
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+
+          Made the DataSampleList an abstract base class for concrete derived list types:
+            -DataSampleSendList
+            -DataSampleInstanceList
+            -DataSampleWriterList
+
+          Added initial declaration and definitions of derived lists member functions within
+          existing DataSampleList.(h,cpp,inl).  Made previous DataSampleList's member functions
+          for managing element pointers into generalized enqueue_tail, dequeue_head, dequeue
+          functionality specific to the concrete derived list type.  These methods are pure virtual
+          in abstract base class and each derived list type concretely defines them per old
+          implementations.
+
+          Provided accessors and mutators for the head_, tail_, and size_ datamembers to control
+          access to the DataSampleList's internals which were being directly accessed from outside
+          the class.  The mutators at least should hopefully go away with a more controlled design
+          in future iterations.
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Updated DataSampleList's to be the appropriate derived type as well as correctly calling
+          member functions for operations on the lists.  Used helper functions to control access
+          to head_, tail_, and size_ data members which are now private.  Did provide a setter for
+          these members for this initial implemenation so that the operation wouldn't be changed yet.
+
 Wed Jun 25 22:11:35 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:
 
-	  Added initial declaration of iterator to use for the three new list types
-	  and initial declaration of DataSampleWriterList to use as a sample list
-	  used by data writers.
+          Added initial declaration of iterator to use for the three new list types
+          and initial declaration of DataSampleWriterList to use as a sample list
+          used by data writers.
 
 Local Variables:
 mode: change-log

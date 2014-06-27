@@ -52,7 +52,7 @@ namespace DCPS {
 
 class WriteDataContainer;
 class DataWriterImpl;
-class DataSampleList;
+class DataSampleSendList;
 
 /**
  * @class DataDurabilityCache
@@ -198,7 +198,7 @@ public:
   bool insert(DDS::DomainId_t domain_id,
               char const * topic_name,
               char const * type_name,
-              DataSampleList & the_data,
+              DataSampleSendList & the_data,
               DDS::DurabilityServiceQosPolicy const & qos);
 
   /// Write cached data corresponding to given domain, topic and

@@ -475,15 +475,15 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
               guard,
               this->get_lock());
 
-    DataSampleList list = this->get_resend_data();
+    DataSampleSendList list = this->get_resend_data();
     {
       ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
       // Update the reader's expected sequence
       SequenceNumber& seq =
         reader_info_.find(remote_id)->second.expected_sequence_;
 
-      for (DataSampleListElement* list_el = list.head_; list_el;
-           list_el = list_el->next_send_sample_) {
+      for (DataSampleListElement* list_el = list.head(); list_el;
+           list_el = list_el->get_next_send_sample()) {
         list_el->header_.historic_sample_ = true;
         if (list_el->header_.sequence_ > seq) {
           seq = list_el->header_.sequence_;
@@ -492,7 +492,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     }
 
     if (this->publisher_servant_->is_suspended()) {
-      this->available_data_list_.enqueue_tail_next_send_sample(list);
+      this->available_data_list_.enqueue_tail(list);
     } else {
       this->send(list);
     }
@@ -1739,10 +1739,10 @@ DataWriterImpl::write(DataSample* data,
                      ret);
   }
 
-  DataSampleList list = this->get_unsent_data();
+  DataSampleSendList list = this->get_unsent_data();
 
   if (this->publisher_servant_->is_suspended()) {
-    this->available_data_list_.enqueue_tail_next_send_sample(list);
+    this->available_data_list_.enqueue_tail(list);
   } else {
     this->send(list);
   }
