@@ -1,3 +1,10 @@
+Fri Jun 27 15:07:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Changed to only report an error on timeout if messages are still pending.
+
 Thu Jun 26 21:09:27 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
