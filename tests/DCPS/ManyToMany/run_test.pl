@@ -31,7 +31,7 @@ $repo_bit_opt = '-NOBITS' if $nobit;
 
 my $config_opts = "";
 if ($#ARGV < 0 || $ARGV[0] eq 'tcp') {
-    $config_opts .= ' -DCPSConfigFile tcp.ini ';
+    $config_opts .= "$app_bit_opt -DCPSConfigFile tcp.ini ";
 }
 elsif ($ARGV[0] eq 'udp') {
     $config_opts .= "$app_bit_opt -DCPSConfigFile udp.ini ";

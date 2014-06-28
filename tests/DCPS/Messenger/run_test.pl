@@ -55,9 +55,9 @@ elsif ($test->flag('default_multicast')) {
     $sub_opts .= " -t multicast";
 }
 elsif ($test->flag('nobits')) {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= ' -DCPSConfigFile pub.ini -DCPSBit 0';
-    $sub_opts .= ' -DCPSConfigFile sub.ini -DCPSBit 0';
+    # nobits handled by TestFramework
+    $pub_opts .= ' -DCPSConfigFile pub.ini';
+    $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
 elsif ($test->flag('ipv6')) {
     $pub_opts .= " -DCPSConfigFile pub_ipv6.ini";
@@ -114,12 +114,8 @@ $pub_opts .= $thread_per_connection;
 $pub_opts .= " -DCPSPendingTimeout 1 ";
 $sub_opts .= " -DCPSPendingTimeout 1 ";
 
-my $dcpsrepo_ior = "repo.ior";
-
-unlink $dcpsrepo_ior;
-
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                       "$repo_bit_opt -o $dcpsrepo_ior -DCPSPendingTimeout 1 ");
+                       "$repo_bit_opt");
 
 my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
 $test->process("subscriber", $sub_exe, $sub_opts);

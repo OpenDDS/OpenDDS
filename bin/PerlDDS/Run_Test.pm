@@ -51,7 +51,8 @@ sub wait_kill {
   my $ret_status = 0;
   my $start_time = formatted_time;
   if ($verbose) {
-    print STDERR "$start_time: waiting $wait_time for $desc before calling kill\n";
+    print STDERR "$start_time: waiting $wait_time seconds for $desc before "
+      . "calling kill\n";
   }
   my $result = $process->WaitKill($wait_time);
   my $time_str = formatted_time;
@@ -86,13 +87,29 @@ sub print_file {
   my $file = shift;
 
   if (open FILE, "<", $file) {
-      print "<<<<<  $file  >>>>>\n";
+      print STDERR "<<<<<  $file  >>>>>\n";
       while (my $line = <FILE>) {
-          print "$line";
+          print STDERR "$line";
       }
-      print "\n<<<<<  end $file  >>>>>\n\n";
+      print STDERR "\n<<<<<  end $file  >>>>>\n\n";
       close FILE;
   }
+}
+
+sub report_errors_in_file {
+  my $file = shift;
+  my $error = 0;
+  if (open FILE, "<", $file) {
+      while (my $line = <FILE>) {
+          if ($line =~ /ERROR/) {
+              print STDERR "$line";
+              $error = 1;
+          }
+      }
+      close FILE;
+  }
+  
+  return $error;
 }
 
 # load gcov helpers in case this is a coverage build
@@ -269,7 +286,6 @@ use strict;
 
 sub new {
   my $class = shift;
-  print STDERR "TestFramework created\n";
   my $self = bless {}, $class;
 
   $self->{processes} = {};
@@ -284,17 +300,33 @@ sub new {
   $self->{processes}->{order} = [];
   $self->{discovery} = "info_repo";
   $self->{test_verbose} = 0;
+  $self->{add_transport_config} = 1;
+  $self->{nobits} = 0;
+  $self->{add_pending_timeout} = 1;
+  $self->{transport} = "";
+  $self->{report_errors_in_log_file} = 1;
   $self->{finished} = 0;
 
   my $index = 0;
   foreach my $arg (@ARGV) {
     $self->{flags}->{$arg} = $index;
+    my $transport = _is_transport($arg);
+    if ($transport && $self->{transport} eq "") {
+      $self->{transport} = $arg;
+    } elsif ($transport) {
+      print STDERR "ERROR: TestFramework got transport flag=\"$arg\", but "
+        . "already got another transport flag=\"$self->{transport}\".\n";
+      $transport = 0;
+    }
+
     if ($arg =~ /^rtps_disc(?:_tcp)?$/) {
       $self->{discovery} = "rtps";
     } elsif ($arg eq "--test_verbose") {
       $self->{test_verbose} = 1;
-      print STDERR _prefix() . "Test starting\n";
-    } else {
+      $self->_time_info("Test starting\n");
+    } elsif (lc($arg) eq "nobits") {
+      $self->{nobits} = 1;
+    } elsif (!$transport) {
       # also keep a copy to delete so we can see which parameters
       # are unused (above args are already "used")
       $self->{flags}->{unused}->{$arg} = $index;
@@ -305,6 +337,19 @@ sub new {
   return $self;
 }
 
+sub default_transport {
+  my $self = shift;
+  my $transport = shift;
+  if ($self->{transport} eq "") {
+    $self->_info("TestFramework::default_transport setting transport to "
+      . "\"$transport\"\n");
+    $self->{transport} = $transport;
+  } else {
+    $self->_info("TestFramework::default_transport not setting transport to "
+      . "\"$transport\", since it is already set to \"$self->{transport}\"\n");
+  }
+}
+
 sub DESTROY
 {
 }
@@ -313,10 +358,8 @@ sub finish {
   my $self = shift;
   my $wait_to_kill = shift;
   my $first_process_to_stop = shift;
-  if ($self->{test_verbose}) {
-    print STDERR "TestFramework::finish finished=$self->{finished}, "
-      . "status=$self->{status}\n";
-  }
+  $self->_info("TestFramework::finish finished=$self->{finished}, "
+    . "status=$self->{status}\n");
 
   if ($self->{finished}) {
     return;
@@ -325,6 +368,16 @@ sub finish {
 
   if (defined($wait_to_kill)) {
     $self->stop_processes($wait_to_kill, $first_process_to_stop);
+    if ($self->{report_errors_in_log_file}) {
+      $self->_info("TestFramework::finish looking for ERRORs in log files."
+        . "to prevent this set <TestFramework>->{report_errors_in_log_file}"
+        . "=0\n");
+      foreach my $file (@{$self->{log_files}}) {
+        if (PerlDDS::report_errors_in_file($file)) {
+          $self->{status} = -1;
+        }
+      }
+    }
   }
   if ($self->{status} == 0) {
     print STDERR _prefix() . "test PASSED.\n";
@@ -356,9 +409,7 @@ sub report_unused_flags {
   my $exit_if_unidentified = shift;
   $exit_if_unidentified = 0 if !defined($exit_if_unidentified);
 
-  if ($self->{test_verbose}) {
-    print STDERR "TestFramework::report_unused_flags\n";
-  }
+  $self->_info("TestFramework::report_unused_flags\n");
   my @unused = keys(%{$self->{flags}->{unused}});
   if (scalar(@unused) == 0) {
     return;
@@ -395,6 +446,21 @@ sub process {
     $self->{status} = -1;
     return;
   }
+  if ($self->{add_transport_config} &&
+      $self->{transport} ne "" &&
+      $params !~ /-DCPSConfigFile /) {
+    $self->_info("TestFramework::process appending "
+      . "\"-DCPSConfigFile <transport>.ini\" to process's parameters. Set "
+      . "<TestFramework>->{add_transport_config} = 0 to prevent this.\n");
+    my $ini_file = $self->_ini_file();
+    $params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
+  }
+  if ($self->{nobits}) {
+    my $no_bits = "-DCPSBit 0 ";
+    $self->_info("TestFramework::process appending \"$no_bits \" to process's "
+      . "parameters. Set <TestFramework>->{nobits} = 0 to prevent this.\n");
+    $params .= $no_bits;
+  }
   $self->{processes}->{process}->{$name}->{process} =
     $self->_create_process($executable, $params);
 }
@@ -405,10 +471,8 @@ sub setup_discovery {
   my $executable = shift;
   $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo" if !defined($executable);
   if ($self->{discovery} ne "info_repo") {
-    if ($self->{test_verbose}) {
-      print STDERR "TestFramework::setup_discovery not creating DCPSInfoRepo " .
-        "since discovery=" . $self->{discovery} . "\n";
-    }
+    $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
+      . "since discovery=" . $self->{discovery} . "\n");
     return;
   }
 
@@ -423,10 +487,23 @@ sub setup_discovery {
 
   if ($params =~ /^(?:.* )?-o ([^ ]+)/) {
     $self->{info_repo}->{file} = $1;
+    $self->_info("TestFramework::setup_discovery identified ior "
+      . "file=\"$1\"\n");
   } else {
-    $params .= " -o $self->{info_repo}->{file}";
+    my $ior_str = " -o $self->{info_repo}->{file}";
+    $self->_info("TestFramework::setup_discovery did not identify ior "
+      . "file, adding \"$ior_str\" to InfoRepo's parameters.\n");
+    $params .= $ior_str;
   }
   unlink $self->{info_repo}->{file};
+
+  if ($self->{nobits}) {
+    my $no_bits = " -NOBITS";
+    $self->_info("TestFramework::process appending \"$no_bits\" to "
+      . "InfoRepo's parameters. Set <TestFramework>->{nobits} = 0 to prevent"
+      . " this.\n");
+    $params .= $no_bits;
+  }
 
   $self->{info_repo}->{process} =
     $self->_create_process($executable, $params);
@@ -498,18 +575,15 @@ sub stop_processes {
     return;
   }
 
-  if ($self->{test_verbose}) {
-    print STDERR "TestFramework::stop_processes\n";
-  }
+  $self->_info("TestFramework::stop_processes\n");
 
   while (scalar(@{$self->{processes}->{order}}) > 0) {
     if (!defined($name)) {
       my @rorder = reverse(@{$self->{processes}->{order}});
       $name = $rorder[0];
     }
-    if ($self->{test_verbose}) {
-      print STDERR "TestFramework::stop_processes stopping $name in $timed_wait seconds\n";
-    }
+    $self->_info("TestFramework::stop_processes stopping $name in $timed_wait "
+      . "seconds\n");
     $self->stop_process($timed_wait, $name);
     # make next loop
     $name = undef;
@@ -524,15 +598,11 @@ sub stop_discovery {
   my $timed_wait = shift;
   my $name = "DCPSInfoRepo";
 
-  if ($self->{test_verbose}) {
-    print STDERR "TestFramework::stop_discovery in $timed_wait seconds\n";
-  }
+  $self->_info("TestFramework::stop_discovery in $timed_wait seconds\n");
 
   if ($self->{discovery} ne "info_repo") {
-    if ($self->{test_verbose}) {
-      print STDERR "TestFramework::stop_discovery no discovery to stop " .
-        "since discovery=" . $self->{discovery} . "\n";
-    }
+    $self->_info("TestFramework::stop_discovery no discovery to stop " .
+        "since discovery=" . $self->{discovery} . "\n");
     return;
   }
 
@@ -566,15 +636,12 @@ sub _track_log_files {
   my $self = shift;
   my $data = shift;
 
-  if ($self->{test_verbose}) {
-    print STDERR "TestFramework::_track_log_files looking in \"$data\"\n";
-  }
+  $self->_info("TestFramework::_track_log_files looking in \"$data\"\n");
   if ($data =~ /-ORBLogFile ([^ ]+)/) {
     my $file = $1;
-    if ($self->{test_verbose}) {
-      print STDERR "TestFramework::_track_log_files found file=\"$file\"\n";
-    }
+    $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
     push(@{$self->{log_files}}, $file);
+    unlink $file;
   }
 }
 
@@ -583,13 +650,88 @@ sub _create_process {
   my $executable = shift;
   my $params = shift;
 
-  if ($self->{test_verbose}) {
-    print STDERR "TestFramework::_create_process creating executable="
-      . "$executable w/ params=$params\n";
+  $self->_info("TestFramework::_create_process creating executable="
+    . "$executable w/ params=$params\n");
+  if ($params !~ /-DCPSPendingTimeout /) {
+    my $flag = " -DCPSPendingTimeout 1 ";
+    my $possible_would_be = ($self->{add_pending_timeout} ? "" : "would be ");
+    my $prevent_or_allow = ($self->{add_pending_timeout} ? "prevent" : "allow");
+    $self->_info("TestFramework::_create_process " . $possible_would_be
+      . "adding \"$flag\" to $executable's parameters. To " . $prevent_or_allow
+      . " this set " . "<TestFramework>->{add_pending_timeout} = "
+      . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
+    $params .= $flag if $self->{add_pending_timeout};
   }
   $self->_track_log_files($params);
   return
     PerlDDS::create_process($executable, $params);
+}
+
+sub _ini_file {
+  my $self = shift;
+  if ($self->{transport} eq "") {
+    print STDERR "ERROR: TestFramework::_ini_file should not be called if no "
+      . "transport has been identified.\n";
+    $self->{status} = 1;
+    return "";
+  }
+  my $transport = $self->{transport};
+  unless (-e "$transport.ini") {
+    my $alternate = _alternate_transport($transport);
+    if ($alternate ne "" && -e "$alternate.ini") {
+      $transport = $alternate;
+    } else {
+      my $transports = "$transport.ini";
+      if ($alternate ne "") {
+        $transports .= " or $alternate.ini";
+      }
+      print STDERR "ERROR: TestFramework::_init_file called but $transports "
+        . "do not exist.  Either provide files, or set "
+        . "<TestFramework>->{add_transport_config} = 0.\n";
+      return "";
+    }
+  }
+  return "$transport.ini";
+}
+
+sub _is_transport {
+  my $param = shift;
+  if ($param eq "tcp" ||
+      $param eq "ipv6" ||
+      $param eq "udp" ||
+      $param eq "mcast" ||
+      $param eq "multicast" ||
+      $param eq "multicast_async" ||
+      $param eq "rtps" ||
+      $param eq "rtps_disc" ||
+      $param eq "rtps_disc_tcp" ||
+      $param eq "rtps_unicast" ||
+      $param eq "shmem") {
+    return 1;
+  }
+  return 0;  
+}
+
+sub _time_info {
+  my $self = shift;
+  my $msg = shift;
+  $self->_info($msg, 1);
+}
+
+sub _info {
+  my $self = shift;
+  my $msg = shift;
+  my $prefix = shift;
+  if (defined($prefix) && $prefix) {
+    $msg = _prefix() . $msg;
+  }
+  
+  if ($self->{test_verbose}) {
+    print STDERR "$msg";
+  }
+}
+
+sub _write_tcp_ini {
 }
 
 1;
