@@ -23,6 +23,7 @@
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
+#include "ace/ace.h"
 #include "tao/debug.h"
 
 #include <sstream>
@@ -1263,10 +1264,15 @@ WriteDataContainer::wait_pending()
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
+    ACE_TCHAR date_time[50];
+    ACE_TCHAR* const time =
+      ACE::timestamp(pending_timeout,
+                     date_time,
+                     50);
     ACE_DEBUG((LM_DEBUG,
-               "%T WriteDataContainer::wait_pending %C\n",
+               "%T WriteDataContainer::wait_pending timeout at %C\n",
                (pending_timeout == ACE_Time_Value::zero ?
-                  " (no timeout)" : "")));
+                  "(no timeout)" : time)));
   }
   while (true) {
 

@@ -5,6 +5,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
+#include "ace/ace.h"
 #include "ace/Guard_T.h"
 
 using namespace OpenDDS::DCPS;
@@ -66,10 +67,15 @@ MessageTracker::wait_messages_pending()
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_messages();
   if (report) {
+    ACE_TCHAR date_time[50];
+    ACE_TCHAR* const time =
+      ACE::timestamp(pending_timeout,
+                     date_time,
+                     50);
     ACE_DEBUG((LM_DEBUG,
-               "%T MessageTracker::wait_messages_pending %C\n",
+               "%T MessageTracker::wait_messages_pending timeout at %C\n",
                (pending_timeout == ACE_Time_Value::zero ?
-                  " (no timeout)" : "")));
+                  "(no timeout)" : time)));
   }
   while (true) {
     if (!pending_messages())
