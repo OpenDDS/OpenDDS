@@ -1,3 +1,10 @@
+Mon Jun 30 17:08:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed include file case.
+
 Mon Jun 30 16:39:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/MessageTracker.cpp:

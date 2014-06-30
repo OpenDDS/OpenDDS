@@ -5,7 +5,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
-#include "ace/ace.h"
+#include "ace/ACE.h"
 #include "ace/Guard_T.h"
 
 using namespace OpenDDS::DCPS;

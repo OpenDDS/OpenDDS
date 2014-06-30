@@ -23,7 +23,7 @@
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
-#include "ace/ace.h"
+#include "ace/ACE.h"
 #include "tao/debug.h"
 
 #include <sstream>
