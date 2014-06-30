@@ -153,8 +153,8 @@ private:
   friend class DataSampleSendList;
   friend class DataSampleWriterList;
   friend class DataSampleInstanceList;
-  // DataSampleListIterator needs access to prev/next pointers for iteration
-  friend class DataSampleListIterator;
+  // DataSampleSendListIterator needs access to prev/next pointers for iteration
+  friend class DataSampleSendListIterator;
 
   /// Used to make removal from the
   /// container _much_ more efficient.

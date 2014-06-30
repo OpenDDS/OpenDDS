@@ -1,3 +1,13 @@
+Mon Jun 30 18:59:03 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleListElement.h:
+        * tests/DCPS/unit/Main.cpp:
+
+	  Removed DataSampleListIterator and added DataSampleSendListIterator
+	  (iteration is only done for DataSampleSendList).
+
 Fri Jun 27 20:36:46 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleListElement.h:

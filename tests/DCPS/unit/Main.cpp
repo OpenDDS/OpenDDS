@@ -309,7 +309,7 @@ void run_sample_list_test ()
     list.enqueue_tail(sample[i]);
   }
   TEST_CHECK( list.begin() != list.end() );
-  DataSampleListIterator iter = list.begin();
+  DataSampleSendListIterator iter = list.begin();
   TEST_CHECK( (*iter).publication_id_.entityId.entityKey[2] == 0 );
   TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 0 );
   TEST_CHECK( ++iter != list.end() );
@@ -335,7 +335,7 @@ void run_sample_list_test ()
   sameHeadTailList.enqueue_tail (sample[0]);
   sameHeadTailList.enqueue_tail (sample[2]);
   // will iterate the same, since sample 0-2 send_sample params were not changed
-  DataSampleListIterator iter1 = sameHeadTailList.begin();
+  DataSampleSendListIterator iter1 = sameHeadTailList.begin();
   TEST_CHECK( iter == iter1 );
   TEST_CHECK( ++iter == ++iter1 );
   TEST_CHECK( ++iter == ++iter1 );

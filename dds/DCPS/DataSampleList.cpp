@@ -196,7 +196,7 @@ DataSampleSendList::enqueue_tail(DataSampleSendList list)
 
 // -----------------------------------------------
 
-DataSampleListIterator::DataSampleListIterator(
+DataSampleSendListIterator::DataSampleSendListIterator(
   DataSampleListElement* head,
   DataSampleListElement* tail,
   DataSampleListElement* current)
@@ -206,8 +206,8 @@ DataSampleListIterator::DataSampleListIterator(
 {
 }
 
-DataSampleListIterator&
-DataSampleListIterator::operator++()
+DataSampleSendListIterator&
+DataSampleSendListIterator::operator++()
 {
   if (this->current_)
     this->current_ = this->current_->next_send_sample_;
@@ -215,16 +215,16 @@ DataSampleListIterator::operator++()
   return *this;
 }
 
-DataSampleListIterator
-DataSampleListIterator::operator++(int)
+DataSampleSendListIterator
+DataSampleSendListIterator::operator++(int)
 {
-  DataSampleListIterator tmp(*this);
+  DataSampleSendListIterator tmp(*this);
   ++(*this);
   return tmp;
 }
 
-DataSampleListIterator&
-DataSampleListIterator::operator--()
+DataSampleSendListIterator&
+DataSampleSendListIterator::operator--()
 {
   if (this->current_)
     this->current_ = this->current_->previous_send_sample_;
@@ -235,16 +235,16 @@ DataSampleListIterator::operator--()
   return *this;
 }
 
-DataSampleListIterator
-DataSampleListIterator::operator--(int)
+DataSampleSendListIterator
+DataSampleSendListIterator::operator--(int)
 {
-  DataSampleListIterator tmp(*this);
+  DataSampleSendListIterator tmp(*this);
   --(*this);
   return tmp;
 }
 
-DataSampleListIterator::reference
-DataSampleListIterator::operator*()
+DataSampleSendListIterator::reference
+DataSampleSendListIterator::operator*()
 {
   // Hopefully folks will be smart enough to not dereference a
   // null iterator.  Such a case should only exist for an "end"
@@ -254,8 +254,8 @@ DataSampleListIterator::operator*()
   return *(this->current_);
 }
 
-DataSampleListIterator::pointer
-DataSampleListIterator::operator->()
+DataSampleSendListIterator::pointer
+DataSampleSendListIterator::operator->()
 {
   return this->current_;
 }

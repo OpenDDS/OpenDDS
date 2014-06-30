@@ -46,7 +46,7 @@ const int MAX_READERS_TO_RESEND = 5;
 typedef ACE_Message_Block DataSample;
 
 /**
- * @struct DataSampleListIterator
+ * @struct DataSampleSendListIterator
  *
  * @brief @c DataSampleList STL-style iterator implementation.
  *
@@ -55,7 +55,7 @@ typedef ACE_Message_Block DataSample;
  * @c with the STL generic algorithms.  It is meant for iteration
  * @c over the "send samples" in a @c DataSampleList.
  */
-class OpenDDS_Dcps_Export DataSampleListIterator
+class OpenDDS_Dcps_Export DataSampleSendListIterator
   : public std::iterator<std::bidirectional_iterator_tag, DataSampleListElement> {
 public:
 
@@ -64,85 +64,37 @@ public:
    * This constructor is used when constructing an "end" iterator.
    */
 
-  DataSampleListIterator(DataSampleListElement* head,
+  DataSampleSendListIterator(DataSampleListElement* head,
                          DataSampleListElement* tail,
                          DataSampleListElement* current);
 
-  DataSampleListIterator& operator++();
-  DataSampleListIterator  operator++(int);
-  DataSampleListIterator& operator--();
-  DataSampleListIterator  operator--(int);
+  DataSampleSendListIterator& operator++();
+  DataSampleSendListIterator  operator++(int);
+  DataSampleSendListIterator& operator--();
+  DataSampleSendListIterator  operator--(int);
   reference operator*();
   pointer operator->();
 
   bool
-  operator==(const DataSampleListIterator& rhs) const {
+  operator==(const DataSampleSendListIterator& rhs) const {
     return this->head_ == rhs.head_
            && this->tail_ == rhs.tail_
            && this->current_ == rhs.current_;
   }
 
   bool
-  operator!=(const DataSampleListIterator& rhs) const {
+  operator!=(const DataSampleSendListIterator& rhs) const {
     return !(*this == rhs);
   }
 
 private:
-  DataSampleListIterator();
+  DataSampleSendListIterator();
 
   DataSampleListElement* head_;
   DataSampleListElement* tail_;
   DataSampleListElement* current_;
 
 };
-
-/**
- * An STL-like ierator over the sample lists that uses template specialization
- * on the data sample list type to create multiple iterator classes
- * without having to rely on inheritance which would degrade performance.
- **/
-template <class ListType>
-class OpenDDS_Dcps_Export DataSampleListIter
-  : public std::iterator<std::bidirectional_iterator_tag, DataSampleListElement> {
-public:
-
-  /// Default constructor.
-  /**
-   * This constructor is used when constructing an "end" iterator.
-   */
-
-  DataSampleListIter(DataSampleListElement* head,
-                         DataSampleListElement* tail,
-                         DataSampleListElement* current);
-
-  DataSampleListIter& operator++();
-  DataSampleListIter  operator++(int);
-  DataSampleListIter& operator--();
-  DataSampleListIter  operator--(int);
-  reference operator*();
-  pointer operator->();
-
-  bool
-  operator==(const DataSampleListIter& rhs) const {
-    return this->head_ == rhs.head_
-           && this->tail_ == rhs.tail_
-           && this->current_ == rhs.current_;
-  }
-
-  bool
-  operator!=(const DataSampleListIter& rhs) const {
-    return !(*this == rhs);
-  }
-
-private:
-  DataSampleListIter();
-
-  DataSampleListElement* head_;
-  DataSampleListElement* tail_;
-  DataSampleListElement* current_;
-
-};
-
 
 /**
 * Lists include a pointer to both the head and tail elements of the
@@ -157,7 +109,7 @@ class OpenDDS_Dcps_Export DataSampleList {
 public:
 
   /// STL-style bidirectional iterator type.
-  typedef DataSampleListIterator iterator;
+  typedef DataSampleSendListIterator iterator;
 
   /// Default constructor clears the list.
   DataSampleList();
@@ -169,9 +121,9 @@ public:
   //PWO: HELPER METHODS FOR SETTING DATA MEMBERS
   // These methods should go away
 
-  void set_head(DataSampleListElement* newHead) { this->head_ = newHead;};
-  void set_tail(DataSampleListElement* newTail) { this->tail_ = newTail;};
-  void set_size(size_t size) { this->size_ = size;};
+  // void set_head(DataSampleListElement* newHead) { this->head_ = newHead;};
+  // void set_tail(DataSampleListElement* newTail) { this->tail_ = newTail;};
+  // void set_size(size_t size) { this->size_ = size;};
 
   //PWO: END HELPER METHODS
 
@@ -263,8 +215,6 @@ class OpenDDS_Dcps_Export DataSampleWriterList : public DataSampleList {
 
  public:
 
-  typedef DataSampleListIter<DataSampleWriterList> iterator;
-
   DataSampleWriterList() : DataSampleList(){};
   ~DataSampleWriterList(){};
 
@@ -277,20 +227,11 @@ class OpenDDS_Dcps_Export DataSampleWriterList : public DataSampleList {
   //PWO: took away the 'const' for the parameter 'stale'
   bool dequeue(/*const*/ DataSampleListElement* stale);
 
-//  iterator begin();
-//  iterator end();
-
-  //DataSampleListElement* head_;
-  //DataSampleListElement* tail_;
-  //ssize_t                size_;
-
 };
 
 class OpenDDS_Dcps_Export DataSampleInstanceList : public DataSampleList {
 
  public:
-
-  typedef DataSampleListIter<DataSampleInstanceList> iterator;
 
   DataSampleInstanceList() : DataSampleList(){};
   ~DataSampleInstanceList(){};
@@ -306,12 +247,6 @@ class OpenDDS_Dcps_Export DataSampleInstanceList : public DataSampleList {
 
   DataSampleListElement*
   dequeue(const DataSampleListElement* stale);
-//  iterator begin();
-//  iterator end();
-
-  //DataSampleListElement* head_;
-  //DataSampleListElement* tail_;
-  //ssize_t                size_;
 
 };
 
@@ -319,7 +254,7 @@ class OpenDDS_Dcps_Export DataSampleSendList : public DataSampleList {
 
  public:
 
-  typedef DataSampleListIter<DataSampleSendList> iterator;
+  typedef DataSampleSendListIterator iterator;
 
   DataSampleSendList() : DataSampleList(){};
   ~DataSampleSendList(){};
