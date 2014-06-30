@@ -20,8 +20,8 @@ my $logging_p = "";#"-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
 #    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
 my $logging_s = "";#"-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
 #    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $pub_opts = "$logging_p -ORBLogFile pubx.log ";
-my $sub_opts = "$logging_s -ORBLogFile subx.log ";
+my $pub_opts = "$logging_p -ORBLogFile pubx.log -DCPSPendingTimeout 1 ";
+my $sub_opts = "$logging_s -ORBLogFile subx.log -DCPSPendingTimeout 1 ";
 my $repo_bit_opt = '';
 my $reliable = 1;
 
@@ -31,7 +31,7 @@ $repo_bit_opt = '-NOBITS' if $nobit;
 
 my $config_opts = "";
 if ($#ARGV < 0 || $ARGV[0] eq 'tcp') {
-    $config_opts .= ' -DCPSConfigFile tcp.ini ';
+    $config_opts .= "$app_bit_opt -DCPSConfigFile tcp.ini ";
 }
 elsif ($ARGV[0] eq 'udp') {
     $config_opts .= "$app_bit_opt -DCPSConfigFile udp.ini ";
@@ -222,7 +222,8 @@ unlink $dcpsrepo_ior;
 unlink <*.log>;
 
 my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$repo_bit_opt -o $dcpsrepo_ior");
+                                       "$repo_bit_opt -o $dcpsrepo_ior"
+                                       . " -DCPSPendingTimeout 1 ");
 
 my $index;
 print "config_opts=$config_opts\n";

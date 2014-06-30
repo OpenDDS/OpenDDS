@@ -170,26 +170,10 @@ $Publisher->Spawn();
 $Subscriber->Spawn();
 
 my $status = 0;
-my $PublisherResult = $Publisher->WaitKill(300);
+$status |= PerlDDS::wait_kill($Publisher, 300, "publisher");
 
-if ($PublisherResult != 0) {
-  print STDERR "ERROR: publisher returned $PublisherResult\n";
-  $status = 1;
-}
-
-my $SubscriberResult = $Subscriber->WaitKill(15);
-
-if ($SubscriberResult != 0) {
-  print STDERR "ERROR: subscriber returned $SubscriberResult\n";
-  $status = 1;
-}
-
-my $ir = $DCPSREPO->TerminateWaitKill(5);
-
-if ($ir != 0) {
-  print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-  $status = 1;
-}
+$status |= PerlDDS::wait_kill($Subscriber, 15, "subscriber");
+$status |= PerlDDS::terminate_wait_kill($DCPSREPO);
 
 unlink $dcpsrepo_ior;
 unlink $subscriber_completed;

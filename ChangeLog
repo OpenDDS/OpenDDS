@@ -1,3 +1,190 @@
+Mon Jun 30 14:35:49 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed formatting dates and times with leading 0s.
+
+Mon Jun 30 12:51:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed fuzz errors.
+
+Fri Jun 27 21:42:27 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added more common functionality for tests.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Converted to use TestFramework.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Fixed flags.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          More cleanup and using TestFramework default values.
+
+Fri Jun 27 15:44:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Setting the pending message wait time to 1 second.
+
+Fri Jun 27 15:07:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Changed to only report an error on timeout if messages are still pending.
+
+Thu Jun 26 21:09:27 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed fuzz errors.
+
+Thu Jun 26 20:49:54 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed typo.
+
+Thu Jun 26 20:44:58 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed printing log files when test fails.
+
+Thu Jun 26 20:31:43 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added TestFramework for doing common run_test.pl activities.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Changed to use TestFramework.
+
+Thu Jun 26 20:30:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+
+          Fixed missed use of domain_participant_factory.
+
+Thu Jun 26 20:14:56 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Moved construction of DDSApp inside try-catch-block.
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+
+          Cleaned up unneeded calls and methods.
+
+Thu Jun 26 19:55:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed exiting loop when timeout occurs.
+
+Thu Jun 26 19:34:36 UTC 2014  Phillip LaBanca  <labanca_p@ociweb.com>
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+
+          Moved topic creation to after argument processing
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+
+          Changed DDSApp constructor to explictly initalize
+          DomainParticipantFactory
+
+Thu Jun 26 17:19:03 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+
+          Added comments for usage of topic overloaded methods.
+
+Thu Jun 26 16:02:01 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Added logging for tracking when waiting for pending messages.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Setting the pending message wait time to 1 second.
+
+Thu Jun 26 15:43:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+
+          Missed adding support for creating topic with qos, topic listener,
+          and/or status mask.
+
+Thu Jun 26 15:13:40 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added logging when done waiting for pending messages.
+
+Thu Jun 26 14:16:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Added log messages to identify what is going on when publisher
+          or subscriber times out.
+
+Wed Jun 25 18:57:43 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added logging to identify when indefinitely waiting for
+          pending messages.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Using wait_kill subroutines in Run_Test.pm.
+
+Wed Jun 25 17:10:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added subroutines to do the common task of waiting to kill the
+          process and reporting status, including reporting timestamp to
+          identify if delay is too short for completing processing.  Also
+          added other helper subroutines.
+
+        * tests/DCPS/PersistentInfoRepo/run_test.pl:
+
+          Changed to use subroutines in Run_Test.pl.
+
+Wed Jun 25 16:06:59 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added explicit call to shutdown the task.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added explicitly shutting down sedp to ensure its task can stop
+          processing messages before spdp's data members start getting
+          deleted.
+
 Tue Jun 24 17:48:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendControlElement.cpp:

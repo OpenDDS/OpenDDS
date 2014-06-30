@@ -13,11 +13,10 @@
 namespace TestUtils {
 
 DDSApp::DDSApp(int& argc, ACE_TCHAR**& argv)
-: argc_(argc)
-, argv_(argv)
 // default id to 0, but still allow it to be set
-, domain_id_defaulted_(false)
+: domain_id_defaulted_(false)
 , default_domain_id_(0)
+, dpf_(TheParticipantFactoryWithArgs(argc, argv))
 , shutdown_(false)
 {
 }
@@ -25,10 +24,9 @@ DDSApp::DDSApp(int& argc, ACE_TCHAR**& argv)
 DDSApp::DDSApp(int& argc,
                ACE_TCHAR**& argv,
                DDS::DomainId_t default_domain_id)
-: argc_(argc)
-, argv_(argv)
-, domain_id_defaulted_(true)
+: domain_id_defaulted_(true)
 , default_domain_id_(default_domain_id)
+, dpf_(TheParticipantFactoryWithArgs(argc, argv))
 , shutdown_(false)
 {
 }
@@ -73,12 +71,11 @@ DDSApp::create_part(DDS::DomainId_t                    domain_id,
                     DDS::DomainParticipantListener_var listener,
                     DDS::StatusMask                    mask)
 {
-  DDS::DomainParticipantFactory_var dpf = domain_participant_factory();
   DDS::DomainParticipant_var participant =
-    dpf->create_participant(domain_id,
-                            qos,
-                            listener.in(),
-                            mask);
+    dpf_->create_participant(domain_id,
+                             qos,
+                             listener.in(),
+                             mask);
   add(participant);
   return participant;
 }
@@ -135,20 +132,9 @@ DDSApp::cleanup(DDS::DomainParticipant_var participant)
 {
   determine_participant(participant);
   participant->delete_contained_entities();
-  domain_participant_factory()->delete_participant(participant.in());
+  dpf_->delete_participant(participant.in());
 
   remove(participant);
-}
-
-DDS::DomainParticipantFactory_var
-DDSApp::domain_participant_factory()
-{
-  // only use dpf_dont_use_ in this method
-  if (!dpf_dont_use_.in())
-    // Initialize DomainParticipantFactory
-    dpf_dont_use_ = TheParticipantFactoryWithArgs(argc_, argv_);
-
-  return dpf_dont_use_;
 }
 
 void
@@ -207,12 +193,11 @@ DDSApp::shutdown()
 
   shutdown_ = true;
 
-  const DDS::DomainParticipantFactory_var dpf = domain_participant_factory();
   for (Participants::const_iterator part = participants_.begin();
        part != participants_.end();
        ++part) {
     part->second->delete_contained_entities();
-    dpf->delete_participant(part->first);
+    dpf_->delete_participant(part->first);
   }
 
   participants_.clear();

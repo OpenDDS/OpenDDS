@@ -20,137 +20,37 @@ my $logging_s = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
     "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
 my $pub_opts = "$logging_p -ORBLogFile pub.log ";
 my $sub_opts = "$logging_s -ORBLogFile sub.log ";
-my $repo_bit_opt = '';
 my $reliable = 1;
 
-my $nobit = 1; # Set to a non-zero value to disable the Builtin Topics.
-my $app_bit_opt = '-DCPSBit 0 ' if $nobit;
-$repo_bit_opt = '-NOBITS' if $nobit;
+my $test = new PerlDDS::TestFramework();
 
-
-if ($ARGV[0] eq 'udp') {
-    $pub_opts .= "$app_bit_opt -DCPSConfigFile udp.ini";
-    $sub_opts .= "$app_bit_opt -DCPSConfigFile udp.ini";
+# let TestFramework handle ini file, but also need to identify that
+# we are using a non-reliable transport
+if ($test->flag('udp')) {
     $reliable = 0;
 }
-elsif ($ARGV[0] eq 'multicast') {
-    $pub_opts .= "$app_bit_opt -DCPSConfigFile multicast.ini";
-    $sub_opts .= "$app_bit_opt -DCPSConfigFile multicast.ini";
-}
-elsif ($ARGV[0] eq 'multicast_async') {
-    $pub_opts .= "$app_bit_opt -DCPSConfigFile pub_multicast_async.ini";
-    $sub_opts .= "$app_bit_opt -DCPSConfigFile multicast.ini";
-}
-elsif ($ARGV[0] eq 'shmem') {
-    $pub_opts .= "$app_bit_opt -DCPSConfigFile shmem.ini";
-    $sub_opts .= "$app_bit_opt -DCPSConfigFile shmem.ini";
-}
-elsif ($ARGV[0] eq 'rtps') {
-    $pub_opts .= '$app_bit_opt -DCPSConfigFile rtps.ini';
-    $sub_opts .= '$app_bit_opt -DCPSConfigFile rtps.ini';
-}
-elsif ($ARGV[0] ne '') {
-    print STDERR "ERROR: invalid test case\n";
-    exit 1;
-}
-else {
-    $pub_opts .= "$app_bit_opt -DCPSConfigFile  tcp.ini";
-    $sub_opts .= "$app_bit_opt -DCPSConfigFile  tcp.ini";
+# cannot use default ini for multicast_async
+elsif ($test->flag('multicast_async')) {
+    $pub_opts .= "-DCPSConfigFile pub_multicast_async.ini ";
+    $sub_opts .= "-DCPSConfigFile multicast.ini ";
 }
 
-my $dcpsrepo_ior = "repo.ior";
-
-unlink $dcpsrepo_ior;
-unlink <*.log>;
-
-my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$repo_bit_opt -o $dcpsrepo_ior");
 $sub_opts .= " -r $reliable";
 
-my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
-my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
+$test->report_unused_flags();
+# use tcp if no transport is set on command line
+$test->default_transport("tcp");
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log");
+
+$test->process("subscriber", "subscriber", $sub_opts);
+$test->process("publisher #1", "publisher", $pub_opts);
 
 my $pub2_opts = $pub_opts;
 $pub2_opts =~ s/pub\.log/pub2.log/;
-my $Publisher2 = PerlDDS::create_process("publisher", $pub2_opts);
+$test->process("publisher #2", "publisher", $pub_opts);
 
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn();
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill();
-    exit 1;
-}
+$test->start_process("publisher #1");
+$test->start_process("publisher #2");
+$test->start_process("subscriber");
 
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn();
-
-print $Publisher2->CommandLine() . "\n";
-$Publisher2->Spawn();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn();
-
-my $SubscriberResult = $Subscriber->WaitKill(65);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
-    $status = 1;
-}
-
-my $PublisherResult = $Publisher->WaitKill(10);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher #1 returned $PublisherResult\n";
-    $status = 1;
-}
-
-my $Publisher2Result = $Publisher2->WaitKill(10);
-if ($Publisher2Result != 0) {
-    print STDERR "ERROR: publisher #2 returned $Publisher2Result\n";
-    $status = 1;
-}
-
-my $ir = $DCPSREPO->TerminateWaitKill(10);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print "**** Begin log file output *****\n";
-  if (open FILE, "<", "pub.log") {
-      print "Publisher1:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
-
-  if (open FILE, "<", "pub2.log") {
-      print "Publisher2:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
-
-  if (open FILE, "<", "sub.log") {
-      print "Subscriber:\n";
-      while (my $line = <FILE>) {
-          print "$line";
-      }
-      print "\n\n";
-      close FILE;
-  }
-
-  print "**** End log file output *****\n";
-
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish(65);
