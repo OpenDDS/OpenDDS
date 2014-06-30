@@ -117,6 +117,28 @@ DataSampleInstanceList::dequeue(const DataSampleListElement* stale)
   return item;
 }
 
+const DataSampleSendList*
+DataSampleSendList::send_list_containing_element(const DataSampleListElement* element,
+                                                 std::vector<DataSampleSendList*> send_lists)
+{
+  DataSampleListElement* head = const_cast<DataSampleListElement*>(element);
+
+  while (head->previous_send_sample_ != 0) {
+    head = head->previous_send_sample_;
+  }
+
+  DataSampleSendList* list_containing_element = 0;
+
+  for(std::vector<DataSampleSendList*>::iterator it = send_lists.begin(); it != send_lists.end(); ++it) {
+    if ((*it)->head_ == head) {
+    	list_containing_element = *it;
+    	break;
+    }
+  }
+  return list_containing_element;
+}
+
+
 DataSampleListElement*
 DataSampleSendList::dequeue(const DataSampleListElement* stale)
 {

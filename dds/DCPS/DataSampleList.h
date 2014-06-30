@@ -260,6 +260,8 @@ class OpenDDS_Dcps_Export DataSampleSendList : public DataSampleList {
   ~DataSampleSendList(){};
 
   //void reset();
+  static const DataSampleSendList* send_list_containing_element(const DataSampleListElement* element,
+                                                                std::vector<DataSampleSendList*> send_lists);
 
   void enqueue_tail(const DataSampleListElement* element);
   void enqueue_tail(DataSampleSendList list);

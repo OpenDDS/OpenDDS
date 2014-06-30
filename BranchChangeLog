@@ -1,3 +1,26 @@
+Mon Jun 30 21:11:06 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleListElement.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Added static method send_list_containing_element to DataSampleSendList which takes
+          a vector of pointers to DataSampleSendList(s) and an element, and returns a const
+          pointer to the list it is contained in.  This is used for locating an element in one
+          of a WriteDataContainer's send lists.
+
+          Modified WriteDataContainer to use send_list_containing_element to locate list containing
+          element during remove_oldest_sample operation.
+
+          This allowed removing accessor to previous_send_sample from DataSampleList element to
+          enforce encapsulation.
+
+
+          Note:  Currently DataSampleList's accessors and mutators for head, tail, and size are
+            commented out leaving several tests unable to build.  This change was done in previous
+            commit and should be temporary.
+
 Mon Jun 30 18:59:03 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:
@@ -5,8 +28,8 @@ Mon Jun 30 18:59:03 UTC 2014  Byron Harris  <harrisb@ociweb.com>
         * dds/DCPS/DataSampleListElement.h:
         * tests/DCPS/unit/Main.cpp:
 
-	  Removed DataSampleListIterator and added DataSampleSendListIterator
-	  (iteration is only done for DataSampleSendList).
+          Removed DataSampleListIterator and added DataSampleSendListIterator
+          (iteration is only done for DataSampleSendList).
 
 Fri Jun 27 20:36:46 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 

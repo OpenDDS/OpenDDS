@@ -711,11 +711,13 @@ WriteDataContainer::remove_oldest_sample(
   //
   // Locate the head of the list that the stale data is in.
   //
-  DataSampleListElement* head = stale;
+  std::vector<DataSampleSendList*> send_lists;
+  send_lists.push_back(&sending_data_);
+  send_lists.push_back(&sent_data_);
+  send_lists.push_back(&unsent_data_);
 
-  while (head->get_previous_send_sample() != 0) {
-    head = head->get_previous_send_sample();
-  }
+  const DataSampleSendList* containing_list = DataSampleSendList::send_list_containing_element(stale, send_lists);
+
 
   //
   // Identify the list that the stale data is in.
@@ -727,7 +729,7 @@ WriteDataContainer::remove_oldest_sample(
   // Remove the element from the internal list.
   bool result = false;
 
-  if (head == this->sending_data_.head()) {
+  if (containing_list == &this->sending_data_) {
     // Move the element to the released_data_ list since it is still
     // in use, and we need to wait until it is told by the transport.
     //
@@ -735,7 +737,7 @@ WriteDataContainer::remove_oldest_sample(
     released_data_.enqueue_tail(stale);
     released = false;
 
-  } else if (head == this->sent_data_.head()) {
+  } else if (containing_list == &this->sent_data_) {
     // No one is using the data sample, so we can release it back to
     // its allocator.
     //
@@ -753,7 +755,7 @@ WriteDataContainer::remove_oldest_sample(
                  std::string(converter).c_str()));
     }
 
-  } else if (head == this->unsent_data_.head()) {
+  } else if (containing_list == &this->unsent_data_) {
     //
     // No one is using the data sample, so we can release it back to
     // its allocator.

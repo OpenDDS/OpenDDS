@@ -141,7 +141,6 @@ public:
   std::map<DataLinkIdType, GUIDSeq_var> filter_per_link_;
   //@}
 
-  DataSampleListElement* get_previous_send_sample() const {return previous_send_sample_;};
   DataSampleListElement* get_next_send_sample() const {return next_send_sample_;};
 
   void set_next_send_sample(DataSampleListElement* next_send_sample) { this->next_send_sample_ = next_send_sample;};
