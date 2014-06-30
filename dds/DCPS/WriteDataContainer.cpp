@@ -12,6 +12,7 @@
 #include "DataSampleHeader.h"
 #include "DataSampleList.h"
 #include "DataWriterImpl.h"
+#include "MessageTracker.h"
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 #include "DataDurabilityCache.h"
 #endif
@@ -23,7 +24,6 @@
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
-#include "ace/ACE.h"
 #include "tao/debug.h"
 
 #include <sstream>
@@ -1266,9 +1266,9 @@ WriteDataContainer::wait_pending()
   if (report) {
     ACE_TCHAR date_time[50];
     ACE_TCHAR* const time =
-      ACE::timestamp(pending_timeout,
-                     date_time,
-                     50);
+      MessageTracker::timestamp(pending_timeout,
+                                date_time,
+                                50);
     ACE_DEBUG((LM_DEBUG,
                "%T WriteDataContainer::wait_pending timeout at %C\n",
                (pending_timeout == ACE_Time_Value::zero ?

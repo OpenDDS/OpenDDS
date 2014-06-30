@@ -7,6 +7,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include "ace/ACE.h"
 #include "ace/Guard_T.h"
+#include "ace/OS_NS_time.h"
 
 using namespace OpenDDS::DCPS;
 
@@ -69,9 +70,9 @@ MessageTracker::wait_messages_pending()
   if (report) {
     ACE_TCHAR date_time[50];
     ACE_TCHAR* const time =
-      ACE::timestamp(pending_timeout,
-                     date_time,
-                     50);
+      timestamp(pending_timeout,
+                date_time,
+                50);
     ACE_DEBUG((LM_DEBUG,
                "%T MessageTracker::wait_messages_pending timeout at %C\n",
                (pending_timeout == ACE_Time_Value::zero ?
@@ -92,6 +93,42 @@ MessageTracker::wait_messages_pending()
                "%T MessageTracker::wait_messages_pending done\n"));
   }
 }
+
+ACE_TCHAR *
+MessageTracker::timestamp (const ACE_Time_Value& time_value,
+                           ACE_TCHAR date_and_time[],
+                           size_t date_and_timelen)
+{
+  //ACE_TRACE ("ACE::timestamp");
+
+  // This magic number is from the formatting statement
+  // farther down this routine.
+  if (date_and_timelen < 27)
+    {
+      errno = EINVAL;
+      return 0;
+    }
+
+  ACE_Time_Value cur_time =
+    (time_value == ACE_Time_Value::zero) ?
+        ACE_Time_Value (ACE_OS::gettimeofday ()) : time_value;
+  time_t secs = cur_time.sec ();
+  struct tm tms;
+  ACE_OS::localtime_r (&secs, &tms);
+  ACE_OS::snprintf (date_and_time,
+                    date_and_timelen,
+                    ACE_TEXT ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%06ld"),
+                    tms.tm_year + 1900,
+                    tms.tm_mon + 1,
+                    tms.tm_mday,
+                    tms.tm_hour,
+                    tms.tm_min,
+                    tms.tm_sec,
+                    static_cast<long> (cur_time.usec()));
+  date_and_time[date_and_timelen - 1] = '\0';
+  return &date_and_time[11];
+}
+
 
 int
 MessageTracker::dropped_count()

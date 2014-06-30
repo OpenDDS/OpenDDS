@@ -1,3 +1,16 @@
+Mon Jun 30 18:34:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+        
+          Added static method to return a timestamp, since
+          ACE::timestamp for any time is not supported in
+          TAO 1.6a.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Changed to used MessageTracker::timestamp.
+
 Mon Jun 30 17:08:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/MessageTracker.cpp:
