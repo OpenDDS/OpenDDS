@@ -1,3 +1,9 @@
+Mon Jun 30 12:51:23 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed fuzz errors.
+
 Fri Jun 27 21:42:27 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

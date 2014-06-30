@@ -108,7 +108,7 @@ sub report_errors_in_file {
       }
       close FILE;
   }
-  
+
   return $error;
 }
 
@@ -709,7 +709,7 @@ sub _is_transport {
       $param eq "shmem") {
     return 1;
   }
-  return 0;  
+  return 0;
 }
 
 sub _time_info {
@@ -725,7 +725,7 @@ sub _info {
   if (defined($prefix) && $prefix) {
     $msg = _prefix() . $msg;
   }
-  
+
   if ($self->{test_verbose}) {
     print STDERR "$msg";
   }
