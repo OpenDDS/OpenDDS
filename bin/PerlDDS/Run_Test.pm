@@ -37,7 +37,12 @@ sub formatted_time {
       localtime;
   }
   $year += 1900;
-  my $time_str = "$year-$mon-$mday $hour:$min:$sec";
+  my $mon2 = sprintf("%02d", $mon);
+  my $mday2 = sprintf("%02d", $mday);
+  my $hour2 = sprintf("%02d", $hour);
+  my $min2 = sprintf("%02d", $min);
+  my $sec2 = sprintf("%02d", $sec);
+  my $time_str = "$year-$mon2-$mday2 $hour2:$min2:$sec2";
   return $time_str;
 }
 
