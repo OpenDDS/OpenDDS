@@ -16,17 +16,19 @@ use strict;
 
 my $status = 0;
 
-my $dbg_lvl = '-ORBDebugLevel 1 -DCPSDebugLevel 4 -DCPSTransportDebugLevel 2';
-my $pub_opts = "$dbg_lvl -ORBLogFile pub.log";
-my $sub_opts = "$dbg_lvl -ORBLogFile sub.log";
+my $test = new PerlDDS::TestFramework();
+
+$test->{dcps_debug_level} = 4;
+$test->{dcps_transport_debug_level} = 2;
+# will manually set -DCPSConfigFile
+$test->{add_transport_config} = 0;
+my $dbg_lvl = '-ORBDebugLevel 1';
+my $pub_opts = "$dbg_lvl";
+my $sub_opts = "$dbg_lvl";
 my $repo_bit_opt = "";
 my $stack_based = 0;
 my $is_rtps_disc = 0;
 my $DCPSREPO;
-
-unlink qw/DCPSInfoRepo.log pub.log sub.log/;
-
-my $test = new PerlDDS::TestFramework();
 
 my $thread_per_connection = "";
 if ($test->flag('thread_per')) {
@@ -83,9 +85,9 @@ elsif ($test->flag('rtps_disc_tcp')) {
     $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_unicast')) {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
-    $sub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
+    $test->{nobits} = 1;
+    $pub_opts .= " -DCPSConfigFile rtps_uni.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_uni.ini";
 }
 elsif ($test->flag('shmem')) {
     $pub_opts .= " -DCPSConfigFile shmem.ini";
@@ -111,18 +113,16 @@ else {
 $test->report_unused_flags(!$flag_found);
 
 $pub_opts .= $thread_per_connection;
-$pub_opts .= " -DCPSPendingTimeout 1 ";
-$sub_opts .= " -DCPSPendingTimeout 1 ";
 
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
                        "$repo_bit_opt");
 
+$test->process("publisher", "publisher", $pub_opts);
 my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
 $test->process("subscriber", $sub_exe, $sub_opts);
-$test->process("publisher", "publisher", $pub_opts);
 
-$test->start_process("subscriber");
 $test->start_process("publisher");
+$test->start_process("subscriber");
 
 # start killing processes in 300 seconds
 exit $test->finish(300);

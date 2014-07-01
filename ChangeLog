@@ -1,3 +1,20 @@
+Tue Jul  1 15:45:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Increased time to wait for 2nd and all following processes to
+          shutdown before killing and added missing _alternate_transport.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Increased time to wait before killing the subscriber.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Changed order of creation to cause subscriber to be killed first,
+          increased time to wait for subscriber to be kill, and changed to use
+          default TestFramework functionality.
+
 Tue Jul  1 15:09:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/MessageTracker.h:

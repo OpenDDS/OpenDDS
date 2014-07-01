@@ -46,4 +46,4 @@ $test->start_process("publisher #1");
 $test->start_process("publisher #2");
 $test->start_process("subscriber");
 
-exit $test->finish(65);
+exit $test->finish(100);

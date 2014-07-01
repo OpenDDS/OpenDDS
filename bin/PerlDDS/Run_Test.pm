@@ -624,7 +624,7 @@ sub stop_processes {
     $self->stop_process($timed_wait, $name);
     # make next loop
     $name = undef;
-    $timed_wait = 15;
+    $timed_wait = 25;
   }
 
   $self->stop_discovery($timed_wait);
@@ -704,6 +704,15 @@ sub _create_process {
     PerlDDS::create_process($executable, $params);
 }
 
+sub _alternate_transport {
+  my $transport = shift;
+  if ($transport =~ s/multicast/mcast/ ||
+      $transport =~ s/unicast/uni/) {
+    return $transport;
+  }
+  return "";
+}
+
 sub _ini_file {
   my $self = shift;
   if ($self->{transport} eq "") {
@@ -725,7 +734,7 @@ sub _ini_file {
       print STDERR "ERROR: TestFramework::_init_file called but $transports "
         . "do not exist.  Either provide files, or set "
         . "<TestFramework>->{add_transport_config} = 0.\n";
-      return "";
+      return $self->finish();
     }
   }
   return "$transport.ini";
@@ -743,6 +752,7 @@ sub _is_transport {
       $param eq "rtps_disc" ||
       $param eq "rtps_disc_tcp" ||
       $param eq "rtps_unicast" ||
+      $param eq "rtps_uni" ||
       $param eq "shmem") {
     return 1;
   }
