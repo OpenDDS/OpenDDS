@@ -548,9 +548,10 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
   // now release the element.
   //
   PublicationInstance* instance = sample->handle_;
-  DataSampleListElement* stale =
+  bool dequeued =
     released_data_.dequeue(sample);
-  if (stale) {
+  DataSampleListElement* stale = const_cast<DataSampleListElement*>(sample);
+  if (dequeued) {
     release_buffer(stale);
   } else {
     //
@@ -572,8 +573,7 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
     if (instance->waiting_list_.head() != 0) {
       // Remove the delivered sample from the instance sample list
       // and release.
-      stale = instance->samples_.dequeue(sample);
-      if (stale == 0) {
+      if (!instance->samples_.dequeue(sample)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("WriteDataContainer::data_delivered, ")
@@ -654,11 +654,11 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
     unsent_data_.enqueue_tail(sample);
 
   } else {
-    stale = released_data_.dequeue(sample);
-    if (stale) {
+    if (released_data_.dequeue(sample)) {
       // The remove_sample is requested when sample list size
       // reaches limit. In this case, the oldest sample is
       // moved to released_data_ already.
+      stale = const_cast<DataSampleListElement*>(sample);
       release_buffer(stale);
 
     } else {

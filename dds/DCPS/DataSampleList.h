@@ -121,9 +121,9 @@ public:
   //PWO: HELPER METHODS FOR SETTING DATA MEMBERS
   // These methods should go away
 
-  // void set_head(DataSampleListElement* newHead) { this->head_ = newHead;};
-  // void set_tail(DataSampleListElement* newTail) { this->tail_ = newTail;};
-  // void set_size(size_t size) { this->size_ = size;};
+  void set_head(DataSampleListElement* newHead) { this->head_ = newHead;};
+  void set_tail(DataSampleListElement* newTail) { this->tail_ = newTail;};
+  void set_size(size_t size) { this->size_ = size;};
 
   //PWO: END HELPER METHODS
 
@@ -224,8 +224,7 @@ class OpenDDS_Dcps_Export DataSampleWriterList : public DataSampleList {
 
   bool dequeue_head(DataSampleListElement*& stale);
 
-  //PWO: took away the 'const' for the parameter 'stale'
-  bool dequeue(/*const*/ DataSampleListElement* stale);
+  bool dequeue(const DataSampleListElement* stale);
 
 };
 
@@ -242,11 +241,7 @@ class OpenDDS_Dcps_Export DataSampleInstanceList : public DataSampleList {
 
   bool dequeue_head(DataSampleListElement*& stale);
 
-  //PWO: took away the 'const' for the parameter 'stale'
-  //bool dequeue(/*const*/ DataSampleListElement* stale);
-
-  DataSampleListElement*
-  dequeue(const DataSampleListElement* stale);
+  bool dequeue(const DataSampleListElement* stale);
 
 };
 
@@ -268,17 +263,7 @@ class OpenDDS_Dcps_Export DataSampleSendList : public DataSampleList {
 
   bool dequeue_head(DataSampleListElement*& stale);
 
-  //PWO: took away the 'const' for the parameter 'stale'
-  //bool dequeue(/*const*/ DataSampleListElement* stale);
-
-  DataSampleListElement*
-  dequeue(const DataSampleListElement* stale);
-//  iterator begin();
-//  iterator end();
-
-  //DataSampleListElement* head_;
-  //DataSampleListElement* tail_;
-  //ssize_t                size_;
+  bool dequeue(const DataSampleListElement* stale);
 
 };
 

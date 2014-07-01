@@ -21,14 +21,15 @@ namespace OpenDDS {
 namespace DCPS {
 
 bool
-DataSampleWriterList::dequeue(/*const*/ DataSampleListElement* stale)
+DataSampleWriterList::dequeue(const DataSampleListElement* stale)
 {
   if (head_ == 0) {
     return false;
   }
 
   if (stale == head_) {
-    return dequeue_head(stale);
+    DataSampleListElement* head = head_;
+    return dequeue_head(head);
   }
 
   // Search from head_->next_sample_.
@@ -82,17 +83,17 @@ DataSampleWriterList::dequeue(/*const*/ DataSampleListElement* stale)
   return found;
 }
 
-DataSampleListElement*
+bool
 DataSampleInstanceList::dequeue(const DataSampleListElement* stale)
 {
   if (head_ == 0) {
-    return 0;
+    return false;
   }
 
   // Same as dequeue from head.
   if (stale == head_) {
     DataSampleListElement* tmp = head_;
-    return dequeue_head(tmp) ? tmp : 0;
+    return dequeue_head(tmp);
   }
 
   // Search from head_->next_instance_sample_.
@@ -139,17 +140,17 @@ DataSampleSendList::send_list_containing_element(const DataSampleListElement* el
 }
 
 
-DataSampleListElement*
+bool
 DataSampleSendList::dequeue(const DataSampleListElement* stale)
 {
   if (head_ == 0) {
-    return 0;
+    return false;
   }
 
   // Same as dequeue from head.
   if (stale == head_) {
     DataSampleListElement* tmp = head_;
-    return dequeue_head(tmp) ? tmp : 0;
+    return dequeue_head(tmp);
   }
 
   // Search from head_->next_send_sample_.

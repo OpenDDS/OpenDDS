@@ -1,3 +1,14 @@
+Tue Jul  1 15:49:14 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleListElement.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+	  Modify so list dequeue method takes a const element since the logical value of the element
+	  isn't changed although the prev/next list pointers needed only by the list do.
+	  Have dequeue method return a bool instead of an element pointer.
+
 Mon Jun 30 21:11:06 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:

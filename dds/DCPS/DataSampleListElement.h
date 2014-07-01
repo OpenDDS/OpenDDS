@@ -159,15 +159,15 @@ private:
   /// container _much_ more efficient.
 
   /// Thread of all data within a DataWriter.
-  DataSampleListElement* previous_sample_;
-  DataSampleListElement* next_sample_;
+  mutable DataSampleListElement* previous_sample_;
+  mutable DataSampleListElement* next_sample_;
 
   /// Thread of data within the instance.
-  DataSampleListElement* next_instance_sample_;
+  mutable DataSampleListElement* next_instance_sample_;
 
   /// Thread of data being unsent/sending/sent/released.
-  DataSampleListElement* next_send_sample_;
-  DataSampleListElement* previous_send_sample_;
+  mutable DataSampleListElement* next_send_sample_;
+  mutable DataSampleListElement* previous_send_sample_;
 };
 
 
