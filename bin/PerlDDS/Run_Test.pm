@@ -481,7 +481,8 @@ sub process {
     $params .= $debug;
   }
 
-  if ($params !~ /-DCPSTransportDebugLevel /) {
+  if ($params !~ /-DCPSTransportDebugLevel / &&
+      $self->{dcps_transport_debug_level}) {
     my $debug = " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
     $self->_info_appending($executable, $debug, "dcps_transport_debug_level");
     $params .= $debug;
@@ -523,6 +524,7 @@ sub setup_discovery {
   my $self = shift;
   my $params = shift;
   my $executable = shift;
+  $params = "" if !defined($params);
   $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo" if !defined($executable);
   if ($self->{discovery} ne "info_repo") {
     $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
