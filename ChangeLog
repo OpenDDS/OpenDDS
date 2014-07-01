@@ -1,3 +1,9 @@
+Tue Jul  1 20:20:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Adding tracking of wait*_pending in TestFramework.
+
 Tue Jul  1 20:04:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/MessageTracker.h:

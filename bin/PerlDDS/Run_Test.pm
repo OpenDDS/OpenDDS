@@ -122,9 +122,11 @@ sub report_errors_in_file {
               }
 
               if ($report) {
-                  print STDERR "$line";
+                  print STDERR "$file: $line";
                   $error = 1;
               }
+          } elsif ($line =~ /wait_(?:messages_)?pending /) {  # REMOVE LATER
+              print STDERR "$file: $line";
           }
       }
       close FILE;
