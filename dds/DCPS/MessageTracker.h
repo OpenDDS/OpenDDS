@@ -13,6 +13,8 @@
 #include <ace/Thread_Mutex.h>
 #include <ace/Condition_Thread_Mutex.h>
 
+#include <string>
+
 namespace OpenDDS {
 namespace DCPS {
 
