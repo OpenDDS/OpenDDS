@@ -2,15 +2,16 @@ Tue Jul  1 13:04:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
 
+          Added more default flags provided.
+
         * dds/DCPS/MessageTracker.cpp:
         * dds/DCPS/WriteDataContainer.cpp:
 
-        * tests/DCPS/DeleteWritersReaders:
-
-        * tests/DCPS/DeleteWritersReaders/README:
-        * tests/DCPS/DeleteWritersReaders/run_test.pl:
+          Fixed wide character error.
 
         * tests/DCPS/LargeSample/run_test.pl:
+
+          Using defaulted flags.
 
 Mon Jun 30 18:34:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
