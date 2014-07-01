@@ -22,7 +22,7 @@ namespace DCPS {
    */
   class OpenDDS_Dcps_Export MessageTracker {
   public:
-    MessageTracker();
+    MessageTracker(const std::string& msg_src);
 
     /**
      * Indicate that a message has been to the transport layer.
@@ -66,9 +66,10 @@ namespace DCPS {
 
   private:
 
-    int         dropped_count_;
-    int         delivered_count_; // Messages transmitted by transport layer
-    int         sent_count_;      // Messages sent to transport layer
+    const std::string msg_src_;         // Source of tracked messages
+    int               dropped_count_;
+    int               delivered_count_; // Messages transmitted by transport layer
+    int               sent_count_;      // Messages sent to transport layer
 
     ACE_Thread_Mutex lock_;
 

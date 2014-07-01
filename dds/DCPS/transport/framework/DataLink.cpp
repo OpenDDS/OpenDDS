@@ -53,7 +53,8 @@ DataLink::DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback,
     db_allocator_(0),
     is_loopback_(is_loopback),
     is_active_(is_active),
-    start_failed_(false)
+    start_failed_(false),
+    send_response_listener_("DataLink")
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 

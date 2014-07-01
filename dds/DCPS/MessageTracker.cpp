@@ -11,8 +11,9 @@
 
 using namespace OpenDDS::DCPS;
 
-MessageTracker::MessageTracker()
-: dropped_count_(0)
+MessageTracker::MessageTracker(const std::string& msg_src)
+: msg_src_(msg_src)
+, dropped_count_(0)
 , delivered_count_(0)
 , sent_count_(0)
 , done_condition_(lock_)
@@ -74,7 +75,9 @@ MessageTracker::wait_messages_pending()
                                 date_time,
                                 50);
     ACE_DEBUG((LM_DEBUG,
-               "%T MessageTracker::wait_messages_pending timeout at %s\n",
+               ACE_TEXT("%T MessageTracker::wait_messages_pending from ")
+               ACE_TEXT("source=%C timeout at %s.\n"),
+               msg_src_.c_str(),
                (pending_timeout == ACE_Time_Value::zero ?
                   ACE_TEXT("(no timeout)") : time)));
   }

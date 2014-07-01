@@ -1,3 +1,30 @@
+Tue Jul  1 15:09:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added description in log messages of the source of the messages and
+          fixed for wide character builds.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed for wide character builds.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Added passing in message source to the MessageTracker.
+
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+
+          Added passing through the message source.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Cleanup of unneeded variables.
+
 Tue Jul  1 13:04:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

@@ -40,9 +40,6 @@ $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log");
 
 $test->process("subscriber", "subscriber", $sub_opts);
 $test->process("publisher #1", "publisher", $pub_opts);
-
-my $pub2_opts = $pub_opts;
-$pub2_opts =~ s/pub\.log/pub2.log/;
 $test->process("publisher #2", "publisher", $pub_opts);
 
 $test->start_process("publisher #1");
