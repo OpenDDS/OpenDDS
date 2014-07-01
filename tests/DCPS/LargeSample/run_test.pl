@@ -14,12 +14,8 @@ use strict;
 
 my $status = 0;
 
-my $logging_p = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
-    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $logging_s = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
-    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $pub_opts = "$logging_p -ORBLogFile pub.log ";
-my $sub_opts = "$logging_s -ORBLogFile sub.log ";
+my $pub_opts = "";
+my $sub_opts = "";
 my $reliable = 1;
 
 my $test = new PerlDDS::TestFramework();

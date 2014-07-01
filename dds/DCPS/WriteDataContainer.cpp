@@ -1270,9 +1270,9 @@ WriteDataContainer::wait_pending()
                                 date_time,
                                 50);
     ACE_DEBUG((LM_DEBUG,
-               "%T WriteDataContainer::wait_pending timeout at %C\n",
+               "%T WriteDataContainer::wait_pending timeout at %s\n",
                (pending_timeout == ACE_Time_Value::zero ?
-                  "(no timeout)" : time)));
+                  ACE_TEXT("(no timeout)") : time)));
   }
   while (true) {
 

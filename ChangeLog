@@ -1,8 +1,22 @@
+Tue Jul  1 13:04:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+        * tests/DCPS/DeleteWritersReaders:
+
+        * tests/DCPS/DeleteWritersReaders/README:
+        * tests/DCPS/DeleteWritersReaders/run_test.pl:
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
 Mon Jun 30 18:34:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/MessageTracker.h:
         * dds/DCPS/MessageTracker.cpp:
-        
+
           Added static method to return a timestamp, since
           ACE::timestamp for any time is not supported in
           TAO 1.6a.

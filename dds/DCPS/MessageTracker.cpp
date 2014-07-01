@@ -70,13 +70,13 @@ MessageTracker::wait_messages_pending()
   if (report) {
     ACE_TCHAR date_time[50];
     ACE_TCHAR* const time =
-      timestamp(pending_timeout,
-                date_time,
-                50);
+      MessageTracker::timestamp(pending_timeout,
+                                date_time,
+                                50);
     ACE_DEBUG((LM_DEBUG,
-               "%T MessageTracker::wait_messages_pending timeout at %C\n",
+               "%T MessageTracker::wait_messages_pending timeout at %s\n",
                (pending_timeout == ACE_Time_Value::zero ?
-                  "(no timeout)" : time)));
+                  ACE_TEXT("(no timeout)") : time)));
   }
   while (true) {
     if (!pending_messages())

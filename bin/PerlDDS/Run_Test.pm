@@ -310,6 +310,9 @@ sub new {
   $self->{add_pending_timeout} = 1;
   $self->{transport} = "";
   $self->{report_errors_in_log_file} = 1;
+  $self->{dcps_debug_level} = 1;
+  $self->{dcps_transport_debug_level} = 1;
+  $self->{add_orb_log_file} = 1;
   $self->{finished} = 0;
 
   my $index = 0;
@@ -451,6 +454,34 @@ sub process {
     $self->{status} = -1;
     return;
   }
+
+  if ($params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
+    my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
+    if ($params !~ /-ORBVerboseLogging /) {
+      $debug .= " -ORBVerboseLogging 1";
+    }
+    $self->_info_appending($executable, $debug, "dcps_debug_level");
+    $params .= $debug;
+  }
+
+  if ($params !~ /-DCPSTransportDebugLevel /) {
+    my $debug = " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
+    $self->_info_appending($executable, $debug, "dcps_transport_debug_level");
+    $params .= $debug;
+  }
+
+  if ($params !~ /-ORBLogFile ([^ ]+)/) {
+    my $file_name = "$name";
+
+    # account for "blah #2"
+    $file_name =~ s/ /_/g;
+    $file_name =~ s/#//g;
+
+    my $debug = " -ORBLogFile $file_name.log";
+    $self->_info_appending($executable, $debug, "add_orb_log_file");
+    $params .= $debug;
+  }
+
   if ($self->{add_transport_config} &&
       $self->{transport} ne "" &&
       $params !~ /-DCPSConfigFile /) {
@@ -460,12 +491,13 @@ sub process {
     my $ini_file = $self->_ini_file();
     $params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
   }
+
   if ($self->{nobits}) {
     my $no_bits = "-DCPSBit 0 ";
-    $self->_info("TestFramework::process appending \"$no_bits \" to process's "
-      . "parameters. Set <TestFramework>->{nobits} = 0 to prevent this.\n");
+    $self->_info_appending($executable, $no_bits, "nobits");
     $params .= $no_bits;
   }
+
   $self->{processes}->{process}->{$name}->{process} =
     $self->_create_process($executable, $params);
 }
@@ -734,6 +766,16 @@ sub _info {
   if ($self->{test_verbose}) {
     print STDERR "$msg";
   }
+}
+
+sub _info_appending {
+  my $self = shift;
+  my $executable = shift;
+  my $str = shift;
+  my $param = shift;
+  $self->_info("TestFramework::process appending \"$str\" to "
+    . "$executable's parameters. Set <TestFramework>->{$param} = 0 to prevent"
+    . " this.\n");
 }
 
 sub _write_tcp_ini {
