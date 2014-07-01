@@ -1,3 +1,19 @@
+Tue Jul  1 17:16:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Copy map_ and release lock in send_control prior to calling send_i
+          due to deadlock.
+
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+
+          Identify sending writer in sample.
+
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+
+          Keep last 4 messages, due to multiple writers.
+
 Tue Jul  1 15:45:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

@@ -98,6 +98,9 @@ private:
 
   /// Listener for TransportSendControlElements created in send_response
   SendResponseListener send_response_listener_;
+
+  /// lock and copy map for lock-free access
+  void copy_map_to(MapType& target);
 };
 
 } // namespace DCPS
