@@ -18,7 +18,6 @@ my $test = new PerlDDS::TestFramework();
 
 my $status = 0;
 
-$test->{dcps_debug_level} = 0;
 $test->{dcps_transport_debug_level} = 0;
 $test->{nobits} = 1;
 my $pub_opts = "";

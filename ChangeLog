@@ -1,3 +1,9 @@
+Tue Jul  1 18:40:48 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Letting TestFramework add DCPS_debug_level flag.
+
 Tue Jul  1 18:34:14 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
