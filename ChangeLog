@@ -1,3 +1,28 @@
+Tue Jul  1 17:50:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added logic to indicate errors in log files that TestFramework
+          should ignore.
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added log messages indicating when dtor is called.
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added traceability to redmine issue and fixed log statement.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed log statement.
+
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Added ignoring already identified redmine issue.
+
 Tue Jul  1 17:16:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.h:

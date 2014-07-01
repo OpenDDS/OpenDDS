@@ -75,8 +75,8 @@ MessageTracker::wait_messages_pending()
                                 date_time,
                                 50);
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("%T MessageTracker::wait_messages_pending from ")
-               ACE_TEXT("source=%C timeout at %s.\n"),
+               ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
+               ACE_TEXT("from source=%C timeout at %s.\n"),
                msg_src_.c_str(),
                (pending_timeout == ACE_Time_Value::zero ?
                   ACE_TEXT("(no timeout)") : time)));
@@ -86,14 +86,16 @@ MessageTracker::wait_messages_pending()
       break;
 
     if (done_condition_.wait(pTimeout) == -1 && !pending_messages()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %p\n")
-        ACE_TEXT("Timed out waiting for messages to be transported")));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: MessageTracker::")
+                 ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p\n"),
+                 ACE_TEXT("Timed out waiting for messages to be transported")));
       break;
     }
   }
   if (report) {
     ACE_DEBUG((LM_DEBUG,
-               "%T MessageTracker::wait_messages_pending done\n"));
+               "%T (%P|%t) MessageTracker::wait_messages_pending done\n"));
   }
 }
 

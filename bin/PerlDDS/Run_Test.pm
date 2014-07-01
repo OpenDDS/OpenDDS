@@ -103,12 +103,28 @@ sub print_file {
 
 sub report_errors_in_file {
   my $file = shift;
+  my $errors_to_ignore = shift;
+  my $verbose = shift;
+  $errors_to_ignore = [] if !defined($errors_to_ignore);
+  $verbose = 0 if !defined($verbose);
+
   my $error = 0;
   if (open FILE, "<", $file) {
       while (my $line = <FILE>) {
           if ($line =~ /ERROR/) {
-              print STDERR "$line";
-              $error = 1;
+              my $report = 1;
+              # determine if this is an error we want to ignore
+              foreach my $to_ignore (@{$errors_to_ignore}) {
+                  if ($line =~ /$to_ignore/) {
+                      $report = 0;
+                      last;
+                  }
+              }
+
+              if ($report) {
+                  print STDERR "$line";
+                  $error = 1;
+              }
           }
       }
       close FILE;
@@ -297,6 +313,7 @@ sub new {
   $self->{flags} = {};
   $self->{status} = 0;
   $self->{log_files} = [];
+  $self->{errors_to_ignore} = [];
   $self->{info_repo} = {};
   $self->{info_repo}->{executable} = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
   $self->{info_repo}->{state} = "none";
@@ -378,10 +395,10 @@ sub finish {
     $self->stop_processes($wait_to_kill, $first_process_to_stop);
     if ($self->{report_errors_in_log_file}) {
       $self->_info("TestFramework::finish looking for ERRORs in log files."
-        . "to prevent this set <TestFramework>->{report_errors_in_log_file}"
+        . " To prevent this set <TestFramework>->{report_errors_in_log_file}"
         . "=0\n");
       foreach my $file (@{$self->{log_files}}) {
-        if (PerlDDS::report_errors_in_file($file)) {
+        if (PerlDDS::report_errors_in_file($file, $self->{errors_to_ignore})) {
           $self->{status} = -1;
         }
       }
@@ -657,6 +674,14 @@ sub stop_discovery {
                                  $timed_wait,
                                  $name,
                                  $self->{test_verbose});
+}
+
+sub ignore_error {
+  my $self = shift;
+  my $error_msg = shift;
+  $self->_info("TestFramework::ignore_error will ignore error messages "
+    . "containing \"$error_msg\"\n");
+  push(@{$self->{errors_to_ignore}}, $error_msg);
 }
 
 sub _prefix {
