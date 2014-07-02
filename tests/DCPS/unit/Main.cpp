@@ -1,6 +1,6 @@
 #include "dds/DCPS/Service_Participant.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleSendList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleInstanceList.h"
 #include "dds/DCPS/DataSampleWriterList.h"
 #include "dds/DCPS/DataSampleElement.h"
@@ -299,7 +299,7 @@ int run_domain_test ()
 
 void run_sample_list_test ()
 {
-  DataSampleSendList list;
+  SendStateDataSampleList list;
   TEST_CHECK( list.begin() == list.end() );
 
   OpenDDS::DCPS::RepoId repoId;
@@ -313,7 +313,7 @@ void run_sample_list_test ()
     list.enqueue_tail(sample[i]);
   }
   TEST_CHECK( list.begin() != list.end() );
-  DataSampleSendListIterator iter = list.begin();
+  SendStateDataSampleListIterator iter = list.begin();
   TEST_CHECK( (*iter).publication_id_.entityId.entityKey[2] == 0 );
   TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 0 );
   TEST_CHECK( ++iter != list.end() );
@@ -339,7 +339,7 @@ void run_sample_list_test ()
   sameHeadTailList.enqueue_tail (sample[0]);
   sameHeadTailList.enqueue_tail (sample[2]);
   // will iterate the same, since sample 0-2 send_sample params were not changed
-  DataSampleSendListIterator iter1 = sameHeadTailList.begin();
+  SendStateDataSampleListIterator iter1 = sameHeadTailList.begin();
   TEST_CHECK( iter == iter1 );
   TEST_CHECK( ++iter == ++iter1 );
   TEST_CHECK( ++iter == ++iter1 );
@@ -464,8 +464,8 @@ void run_next_sample_test (ssize_t size)
 
 void run_next_send_sample_test (ssize_t size)
 {
-  DataSampleSendList list;
-  DataSampleSendList appended_list;
+  SendStateDataSampleList list;
+  SendStateDataSampleList appended_list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;

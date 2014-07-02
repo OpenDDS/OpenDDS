@@ -85,7 +85,7 @@ DataSampleWriterList::dequeue_head(DataSampleElement*& stale)
 
 ACE_INLINE
 void
-DataSampleSendList::enqueue_tail(const DataSampleElement* sample)
+SendStateDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {
   ++size_;
 
@@ -110,7 +110,7 @@ DataSampleSendList::enqueue_tail(const DataSampleElement* sample)
 
 ACE_INLINE
 bool
-DataSampleSendList::dequeue_head(DataSampleElement*& stale)
+SendStateDataSampleList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the instance list.

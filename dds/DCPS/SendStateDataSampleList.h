@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATASAMPLESENDLIST_H
-#define OPENDDS_DCPS_DATASAMPLESENDLIST_H
+#ifndef OPENDDS_DCPS_SENDSTATEDATASAMPLELIST_H
+#define OPENDDS_DCPS_SENDSTATEDATASAMPLELIST_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "Definitions.h"
@@ -38,16 +38,16 @@ const int MAX_READERS_TO_RESEND = 5;
 typedef ACE_Message_Block DataSample;
 
 /**
- * @struct DataSampleSendListIterator
+ * @struct SendStateDataSampleListIterator
  *
- * @brief @c DataSampleSendList STL-style iterator implementation.
+ * @brief @c SendStateDataSampleList STL-style iterator implementation.
  *
  * This class implements a STL-style iterator for the OpenDDS
- * @c DataSampleSendList class.  The resulting iterator may be used
+ * @c SendStateDataSampleList class.  The resulting iterator may be used
  * @c with the STL generic algorithms.  It is meant for iteration
- * @c over the "send samples" in a @c DataSampleSendList.
+ * @c over the "send samples" in a @c SendStateDataSampleList.
  */
-class OpenDDS_Dcps_Export DataSampleSendListIterator
+class OpenDDS_Dcps_Export SendStateDataSampleListIterator
   : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement> {
 public:
 
@@ -56,31 +56,31 @@ public:
    * This constructor is used when constructing an "end" iterator.
    */
 
-  DataSampleSendListIterator(DataSampleElement* head,
+  SendStateDataSampleListIterator(DataSampleElement* head,
                          DataSampleElement* tail,
                          DataSampleElement* current);
 
-  DataSampleSendListIterator& operator++();
-  DataSampleSendListIterator  operator++(int);
-  DataSampleSendListIterator& operator--();
-  DataSampleSendListIterator  operator--(int);
+  SendStateDataSampleListIterator& operator++();
+  SendStateDataSampleListIterator  operator++(int);
+  SendStateDataSampleListIterator& operator--();
+  SendStateDataSampleListIterator  operator--(int);
   reference operator*();
   pointer operator->();
 
   bool
-  operator==(const DataSampleSendListIterator& rhs) const {
+  operator==(const SendStateDataSampleListIterator& rhs) const {
     return this->head_ == rhs.head_
            && this->tail_ == rhs.tail_
            && this->current_ == rhs.current_;
   }
 
   bool
-  operator!=(const DataSampleSendListIterator& rhs) const {
+  operator!=(const SendStateDataSampleListIterator& rhs) const {
     return !(*this == rhs);
   }
 
 private:
-  DataSampleSendListIterator();
+  SendStateDataSampleListIterator();
 
   DataSampleElement* head_;
   DataSampleElement* tail_;
@@ -94,19 +94,19 @@ private:
 * to traverse the list to find this information.  For most lists that
 * we manage, we append to the tail and remove from the head.
 */
-class OpenDDS_Dcps_Export DataSampleSendList {
+class OpenDDS_Dcps_Export SendStateDataSampleList {
 
   friend class ::DDS_TEST;
 
  public:
 
-  typedef DataSampleSendListIterator iterator;
+  typedef SendStateDataSampleListIterator iterator;
 
-  DataSampleSendList();
-  ~DataSampleSendList(){};
+  SendStateDataSampleList();
+  ~SendStateDataSampleList(){};
 
-  static const DataSampleSendList* send_list_containing_element(const DataSampleElement* element,
-                                                                std::vector<DataSampleSendList*> send_lists);
+  static const SendStateDataSampleList* send_list_containing_element(const DataSampleElement* element,
+                                                                std::vector<SendStateDataSampleList*> send_lists);
 
   /// Reset to initial state.
   void reset();
@@ -116,7 +116,7 @@ class OpenDDS_Dcps_Export DataSampleSendList {
   DataSampleElement* tail() const {return tail_;};
 
   void enqueue_tail(const DataSampleElement* element);
-  void enqueue_tail(DataSampleSendList list);
+  void enqueue_tail(SendStateDataSampleList list);
 
   bool dequeue_head(DataSampleElement*& stale);
 
@@ -147,7 +147,7 @@ class OpenDDS_Dcps_Export DataSampleSendList {
 } // namespace OpenDDS
 
 #if defined(__ACE_INLINE__)
-#include "DataSampleSendList.inl"
+#include "SendStateDataSampleList.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* OPENDDS_DCPS_DATASAMPLESENDLIST_H */
+#endif  /* OPENDDS_DCPS_SENDSTATEDATASAMPLELIST_H */

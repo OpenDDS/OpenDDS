@@ -5,7 +5,7 @@
 #include "SimpleDataWriter.h"
 #include "dds/DCPS/DataSampleHeader.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleSendList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/GuidBuilder.h"
@@ -54,7 +54,7 @@ namespace
   class Cleanup
   {
   public:
-    Cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc, OpenDDS::DCPS::DataSampleSendList& list)
+    Cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc, OpenDDS::DCPS::SendStateDataSampleList& list)
     : alloc_(alloc)
     , list_(list)
     {
@@ -72,7 +72,7 @@ namespace
     }
   private:
     OpenDDS::DCPS::DataSampleElementAllocator& alloc_;
-    OpenDDS::DCPS::DataSampleSendList& list_;
+    OpenDDS::DCPS::SendStateDataSampleList& list_;
   };
 }
 
@@ -155,7 +155,7 @@ DDS_TEST::run(int num_messages, int msg_size)
   this->num_messages_sent_      = num_messages;
 
   // Set up the DataSampleList
-  OpenDDS::DCPS::DataSampleSendList samples;
+  OpenDDS::DCPS::SendStateDataSampleList samples;
 
   samples.size_ = num_messages;
 
@@ -224,7 +224,7 @@ DDS_TEST::run(int num_messages, int msg_size)
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-             "Send the DataSampleSendList (samples).\n"));
+             "Send the SendStateDataSampleList (samples).\n"));
 
   ACE_Time_Value start = ACE_OS::gettimeofday();
   this->send(samples);

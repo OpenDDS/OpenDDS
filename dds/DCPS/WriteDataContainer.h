@@ -11,7 +11,7 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 //#include "DataSampleList.h"
-#include "DataSampleSendList.h"
+#include "SendStateDataSampleList.h"
 //#include "DataSampleInstanceList.h"
 #include "DataSampleWriterList.h"
 #include "OfferedDeadlineWatchdog.h"
@@ -233,7 +233,7 @@ public:
    * The entire list is linked via the
    * DataSampleElement.next_send_sample_ link as well.
    */
-  DataSampleSendList get_unsent_data() ;
+  SendStateDataSampleList get_unsent_data() ;
 
   /**
    * Obtain a list of data for resending. This is only used when
@@ -241,7 +241,7 @@ public:
    * returned is moved from the resend list to the released list
    * as part of this call.
    */
-  DataSampleSendList get_resend_data() ;
+  SendStateDataSampleList get_resend_data() ;
 
   /**
    * Returns if pending data exists.  This includes released,
@@ -343,8 +343,8 @@ private:
   WriteDataContainer & operator= (WriteDataContainer const &);
   // --------------------------
 
-  void copy_and_append(DataSampleSendList& list,
-                       const DataSampleSendList& appended,
+  void copy_and_append(SendStateDataSampleList& list,
+                       const SendStateDataSampleList& appended,
                        const RepoId& reader_id,
                        const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -375,17 +375,17 @@ private:
 private:
 
   /// List of data that has not been sent yet.
-  DataSampleSendList   unsent_data_;
+  SendStateDataSampleList   unsent_data_;
 
   /// List of data that is currently being sent.
-  DataSampleSendList   sending_data_;
+  SendStateDataSampleList   sending_data_;
 
   /// List of data that has already been sent.
-  DataSampleSendList   sent_data_;
+  SendStateDataSampleList   sent_data_;
 
   /// List of data that has been released, but it
   /// still in use externally (by the transport).
-  DataSampleSendList   released_data_;
+  SendStateDataSampleList   released_data_;
 
   /// The list of all samples written to this datawriter in
   /// writing order.
@@ -396,7 +396,7 @@ private:
   /// samples in sent and sending list. These
   /// DataSampleElement will be appended to released_data_
   /// list after passing to the transport.
-  DataSampleSendList   resend_data_;
+  SendStateDataSampleList   resend_data_;
 
   /// The individual instance queue threads in the data.
   PublicationInstanceMapType instances_;

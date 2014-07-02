@@ -21,7 +21,7 @@
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
 #include "TypeSupportImpl.h"
-#include "DataSampleSendList.h"
+#include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -477,7 +477,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
               guard,
               this->get_lock());
 
-    DataSampleSendList list = this->get_resend_data();
+    SendStateDataSampleList list = this->get_resend_data();
     {
       ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
       // Update the reader's expected sequence
@@ -1741,7 +1741,7 @@ DataWriterImpl::write(DataSample* data,
                      ret);
   }
 
-  DataSampleSendList list = this->get_unsent_data();
+  SendStateDataSampleList list = this->get_unsent_data();
 
   if (this->publisher_servant_->is_suspended()) {
     this->available_data_list_.enqueue_tail(list);

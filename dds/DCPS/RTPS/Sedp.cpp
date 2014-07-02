@@ -28,7 +28,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/DataSampleSendList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -2053,7 +2053,7 @@ Sedp::Writer::write_sample(const ParameterList& plist,
       list_el->num_subs_ = 1;
     }
 
-    DCPS::DataSampleSendList list;
+    DCPS::SendStateDataSampleList list;
     list.enqueue_tail(list_el);
 
     send(list);

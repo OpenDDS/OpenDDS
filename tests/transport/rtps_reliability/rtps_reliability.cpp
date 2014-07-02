@@ -22,7 +22,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/DisjointSequence.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleSendList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 
 #include <tao/Exception.h>
@@ -104,7 +104,7 @@ class DDS_TEST
 {
 public:
 
-  static void list_set(DataSampleElement &element, DataSampleSendList &list)
+  static void list_set(DataSampleElement &element, SendStateDataSampleList &list)
   {
     list.head_ = &element;
     list.tail_ = &element;
@@ -154,7 +154,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void remove_associations(const ReaderIdSeq&, bool) {}
 
   TransportSendElementAllocator alloc_;
-  DataSampleSendList list_;
+  SendStateDataSampleList list_;
   DataSampleElement dsle_;
   ACE_Message_Block payload_;
 };

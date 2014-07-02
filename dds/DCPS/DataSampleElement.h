@@ -149,11 +149,11 @@ private:
 
   // DataSampleList is in charge of managing list placement therefore needs access to pointers
   friend class DataSampleList;
-  friend class DataSampleSendList;
+  friend class SendStateDataSampleList;
   friend class DataSampleWriterList;
   friend class DataSampleInstanceList;
-  // DataSampleSendListIterator needs access to prev/next pointers for iteration
-  friend class DataSampleSendListIterator;
+  // SendStateDataSampleListIterator needs access to prev/next pointers for iteration
+  friend class SendStateDataSampleListIterator;
 
   /// Used to make removal from the
   /// container _much_ more efficient.

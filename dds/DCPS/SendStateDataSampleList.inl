@@ -14,7 +14,7 @@ namespace DCPS {
 
 
 ACE_INLINE
-DataSampleSendList::DataSampleSendList()
+SendStateDataSampleList::SendStateDataSampleList()
   : head_(0),
     tail_(0),
     size_(0)
@@ -22,7 +22,7 @@ DataSampleSendList::DataSampleSendList()
 }
 
 ACE_INLINE
-void DataSampleSendList::reset()
+void SendStateDataSampleList::reset()
 {
   head_ = tail_ = 0;
   size_ = 0;
@@ -30,7 +30,7 @@ void DataSampleSendList::reset()
 
 ACE_INLINE
 void
-DataSampleSendList::enqueue_tail(const DataSampleElement* sample)
+SendStateDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {
   ++size_;
 
@@ -55,7 +55,7 @@ DataSampleSendList::enqueue_tail(const DataSampleElement* sample)
 
 ACE_INLINE
 bool
-DataSampleSendList::dequeue_head(DataSampleElement*& stale)
+SendStateDataSampleList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the instance list.
@@ -90,15 +90,15 @@ DataSampleSendList::dequeue_head(DataSampleElement*& stale)
 }
 
 ACE_INLINE
-DataSampleSendList::iterator
-DataSampleSendList::begin()
+SendStateDataSampleList::iterator
+SendStateDataSampleList::begin()
 {
   return iterator(this->head_, this->tail_, this->head_);
 }
 
 ACE_INLINE
-DataSampleSendList::iterator
-DataSampleSendList::end()
+SendStateDataSampleList::iterator
+SendStateDataSampleList::end()
 {
   return iterator(this->head_, this->tail_, 0);
 }

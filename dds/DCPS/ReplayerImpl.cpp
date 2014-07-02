@@ -15,7 +15,7 @@
 #include "GuidConverter.h"
 #include "TopicImpl.h"
 #include "PublicationInstance.h"
-#include "DataSampleSendList.h"
+#include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "Serializer.h"
 #include "Transient_Kludge.h"
@@ -968,7 +968,7 @@ ReplayerImpl::write (const RawDataSample*   samples,
     }
   }
 
-  DataSampleSendList list;
+  SendStateDataSampleList list;
 
   for (int i = 0; i < num_samples; ++i) {
     DataSampleElement* element = 0;

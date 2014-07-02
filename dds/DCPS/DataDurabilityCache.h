@@ -18,7 +18,7 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 //#include "dds/DCPS/DataSampleList.h"
-//#include "dds/DCPS/DataSampleSendList.h"
+//#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DurabilityArray.h"
 #include "dds/DCPS/DurabilityQueue.h"
 #include "dds/DCPS/FileSystemStorage.h"
@@ -54,7 +54,7 @@ namespace DCPS {
 
 class DataWriterImpl;
 class DataSampleElement;
-class DataSampleSendList;
+class SendStateDataSampleList;
 class WriteDataContainer;
 
 /**
@@ -201,7 +201,7 @@ public:
   bool insert(DDS::DomainId_t domain_id,
               char const * topic_name,
               char const * type_name,
-              DataSampleSendList & the_data,
+              SendStateDataSampleList & the_data,
               DDS::DurabilityServiceQosPolicy const & qos);
 
   /// Write cached data corresponding to given domain, topic and

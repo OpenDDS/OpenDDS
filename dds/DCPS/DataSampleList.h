@@ -46,7 +46,7 @@
 //typedef ACE_Message_Block DataSample;
 //
 ///**
-// * @struct DataSampleSendListIterator
+// * @struct SendStateDataSampleListIterator
 // *
 // * @brief @c DataSampleList STL-style iterator implementation.
 // *
@@ -55,7 +55,7 @@
 // * @c with the STL generic algorithms.  It is meant for iteration
 // * @c over the "send samples" in a @c DataSampleList.
 // */
-//class OpenDDS_Dcps_Export DataSampleSendListIterator
+//class OpenDDS_Dcps_Export SendStateDataSampleListIterator
 //  : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement> {
 //public:
 //
@@ -64,31 +64,31 @@
 //   * This constructor is used when constructing an "end" iterator.
 //   */
 //
-//  DataSampleSendListIterator(DataSampleElement* head,
+//  SendStateDataSampleListIterator(DataSampleElement* head,
 //                         DataSampleElement* tail,
 //                         DataSampleElement* current);
 //
-//  DataSampleSendListIterator& operator++();
-//  DataSampleSendListIterator  operator++(int);
-//  DataSampleSendListIterator& operator--();
-//  DataSampleSendListIterator  operator--(int);
+//  SendStateDataSampleListIterator& operator++();
+//  SendStateDataSampleListIterator  operator++(int);
+//  SendStateDataSampleListIterator& operator--();
+//  SendStateDataSampleListIterator  operator--(int);
 //  reference operator*();
 //  pointer operator->();
 //
 //  bool
-//  operator==(const DataSampleSendListIterator& rhs) const {
+//  operator==(const SendStateDataSampleListIterator& rhs) const {
 //    return this->head_ == rhs.head_
 //           && this->tail_ == rhs.tail_
 //           && this->current_ == rhs.current_;
 //  }
 //
 //  bool
-//  operator!=(const DataSampleSendListIterator& rhs) const {
+//  operator!=(const SendStateDataSampleListIterator& rhs) const {
 //    return !(*this == rhs);
 //  }
 //
 //private:
-//  DataSampleSendListIterator();
+//  SendStateDataSampleListIterator();
 //
 //  DataSampleElement* head_;
 //  DataSampleElement* tail_;
@@ -109,7 +109,7 @@
 //public:
 //
 //  /// STL-style bidirectional iterator type.
-//  typedef DataSampleSendListIterator iterator;
+//  typedef SendStateDataSampleListIterator iterator;
 //
 //  /// Default constructor clears the list.
 //  DataSampleList();
@@ -245,21 +245,21 @@
 //
 //};
 //
-//class OpenDDS_Dcps_Export DataSampleSendList : public DataSampleList {
+//class OpenDDS_Dcps_Export SendStateDataSampleList : public DataSampleList {
 //
 // public:
 //
-//  typedef DataSampleSendListIterator iterator;
+//  typedef SendStateDataSampleListIterator iterator;
 //
-//  DataSampleSendList() : DataSampleList(){};
-//  ~DataSampleSendList(){};
+//  SendStateDataSampleList() : DataSampleList(){};
+//  ~SendStateDataSampleList(){};
 //
 //  //void reset();
-//  static const DataSampleSendList* send_list_containing_element(const DataSampleElement* element,
-//                                                                std::vector<DataSampleSendList*> send_lists);
+//  static const SendStateDataSampleList* send_list_containing_element(const DataSampleElement* element,
+//                                                                std::vector<SendStateDataSampleList*> send_lists);
 //
 //  void enqueue_tail(const DataSampleElement* element);
-//  void enqueue_tail(DataSampleSendList list);
+//  void enqueue_tail(SendStateDataSampleList list);
 //
 //  bool dequeue_head(DataSampleElement*& stale);
 //

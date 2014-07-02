@@ -19,7 +19,7 @@
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 //#include "DataSampleList.h"
-//#include "DataSampleSendList.h"
+//#include "SendStateDataSampleList.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
 #include "Qos_Helper.h"
@@ -53,7 +53,7 @@ class DomainParticipantImpl;
 class OfferedDeadlineWatchdog;
 class Monitor;
 class DataSampleElement;
-class DataSampleSendList;
+class SendStateDataSampleList;
 struct AssociationData;
 
 /**
@@ -266,11 +266,11 @@ public:
   /**
    * Retrieve the unsent data from the WriteDataContainer.
    */
-  DataSampleSendList get_unsent_data() {
+  SendStateDataSampleList get_unsent_data() {
     return data_container_->get_unsent_data();
   }
 
-  DataSampleSendList get_resend_data() {
+  SendStateDataSampleList get_resend_data() {
     return data_container_->get_resend_data();
   }
 
@@ -668,7 +668,7 @@ private:
   IdSet                      pending_readers_, assoc_complete_readers_;
 
   /// The cached available data while suspending.
-  DataSampleSendList             available_data_list_;
+  SendStateDataSampleList             available_data_list_;
 
   /// Monitor object for this entity
   Monitor* monitor_;

@@ -11,8 +11,8 @@
 #include "Service_Participant.h"
 #include "DataSampleHeader.h"
 //#include "DataSampleList.h"
-//#include "DataSampleSendList.h"
-//#include "DataSampleSendList.h"
+//#include "SendStateDataSampleList.h"
+//#include "SendStateDataSampleList.h"
 #include "DataSampleInstanceList.h"
 //#include "DataSampleWriterList.h"
 #include "DataSampleElement.h"
@@ -446,7 +446,7 @@ WriteDataContainer::num_all_samples()
   return size;
 }
 
-DataSampleSendList
+SendStateDataSampleList
 WriteDataContainer::get_unsent_data()
 {
   DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",6);
@@ -455,7 +455,7 @@ WriteDataContainer::get_unsent_data()
   // The samples in unsent_data are added to the sending_data
   // during enqueue.
   //
-  DataSampleSendList list = this->unsent_data_;
+  SendStateDataSampleList list = this->unsent_data_;
 
   //
   // The unsent_data_ already linked with the
@@ -488,7 +488,7 @@ WriteDataContainer::get_unsent_data()
   return list;
 }
 
-DataSampleSendList
+SendStateDataSampleList
 WriteDataContainer::get_resend_data()
 {
   DBG_ENTRY_LVL("WriteDataContainer","get_resend_data",6);
@@ -497,7 +497,7 @@ WriteDataContainer::get_resend_data()
   // The samples in unsent_data are added to the sending_data
   // during enqueue.
   //
-  DataSampleSendList list = this->resend_data_;
+  SendStateDataSampleList list = this->resend_data_;
 
   if (list.size()) {
     //
@@ -716,12 +716,12 @@ WriteDataContainer::remove_oldest_sample(
   //
   // Locate the head of the list that the stale data is in.
   //
-  std::vector<DataSampleSendList*> send_lists;
+  std::vector<SendStateDataSampleList*> send_lists;
   send_lists.push_back(&sending_data_);
   send_lists.push_back(&sent_data_);
   send_lists.push_back(&unsent_data_);
 
-  const DataSampleSendList* containing_list = DataSampleSendList::send_list_containing_element(stale, send_lists);
+  const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
 
   //
@@ -1156,8 +1156,8 @@ WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
 }
 
 void
-WriteDataContainer::copy_and_append(DataSampleSendList& list,
-                                    const DataSampleSendList& appended,
+WriteDataContainer::copy_and_append(SendStateDataSampleList& list,
+                                    const SendStateDataSampleList& appended,
                                     const RepoId& reader_id,
                                     const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC

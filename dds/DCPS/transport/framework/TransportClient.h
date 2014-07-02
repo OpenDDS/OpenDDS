@@ -29,7 +29,7 @@ class TransportInst;
 class AssocationInfo;
 class ReaderIdSeq;
 class WriterIdSeq;
-class DataSampleSendList;
+class SendStateDataSampleList;
 
 /**
  * @brief Mix-in class for DDS entities which directly use the transport layer.
@@ -68,7 +68,7 @@ protected:
   bool send_response(const RepoId& peer,
                      const DataSampleHeader& header,
                      ACE_Message_Block* payload); // [DR]
-  void send(const DataSampleSendList& samples);
+  void send(const SendStateDataSampleList& samples);
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,
                                  void* extra = 0);

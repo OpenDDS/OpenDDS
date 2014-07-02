@@ -13,7 +13,7 @@
 #include "DataDurabilityCache.h"
 #include "Service_Participant.h"
 //#include "DataSampleList.h"
-#include "DataSampleSendList.h"
+#include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "WriteDataContainer.h"
 #include "DataWriterImpl.h"
@@ -476,7 +476,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
   DDS::DomainId_t domain_id,
   char const * topic_name,
   char const * type_name,
-  DataSampleSendList & the_data,
+  SendStateDataSampleList & the_data,
   DDS::DurabilityServiceQosPolicy const & qos)
 {
   if (the_data.size() == 0)
@@ -491,7 +491,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
       qos.max_samples_per_instance);
 
   // Iterator to first DataSampleElement to be copied.
-  DataSampleSendList::iterator element(the_data.begin());
+  SendStateDataSampleList::iterator element(the_data.begin());
 
   if (depth < 0)
     return false; // Should never occur.
@@ -523,7 +523,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
                      topic_name,
                      type_name,
                      this->allocator_.get());
-  DataSampleSendList::iterator the_end(the_data.end());
+  SendStateDataSampleList::iterator the_end(the_data.end());
   sample_list_type * sample_list = 0;
 
   typedef DurabilityQueue<sample_data_type> data_queue_type;
@@ -615,7 +615,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
       samples->fs_path_ = path;
     }
 
-    for (DataSampleSendList::iterator i(element); i != the_end; ++i) {
+    for (SendStateDataSampleList::iterator i(element); i != the_end; ++i) {
       DataSampleElement& elem = *i;
 
       // N.B. Do not persist samples with coherent changes.

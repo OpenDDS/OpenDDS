@@ -1,9 +1,49 @@
+Wed Jul  2 21:22:59 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleSendList.h:
+        * dds/DCPS/DataSampleSendList.inl:
+        * dds/DCPS/DataSampleSendList.cpp:
+
+          Removed these files.
+
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+
+          Replaced removed files with renamed SendStateDataSampleList files.
+          Reflected renaming of DataSampleSendList to the new naming strategy
+          SendStateDataSampleList which more accurately reflects the list's
+          use by the DCPS layer to track the TransportLayer's usage of a DataSample.
+ 
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Changed references to DataSampleSendList to reflect naming change
+          to the new SendStateDataSampleList.
+
 Wed Jul  2 20:55:49 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleListElement.h:
         * dds/DCPS/DataSampleListElement.inl:
 
-          Removed these files.  Part of the renaming process.  
+          Removed these files.  Part of the renaming process.
           Replaced by DataSampleElement[.h, .inl]
 
         * dds/DCPS/DataSampleElement.h:
@@ -61,7 +101,6 @@ Wed Jul  2 20:55:49 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
         * tests/transport/rtps_reliability/rtps_reliability.cpp:
         * tests/transport/simple/SimpleDataWriter.h:
         * tests/transport/simple/SimpleDataWriter.cpp:
-
 
 Wed Jul  2 19:29:41 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 

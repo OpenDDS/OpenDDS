@@ -17,7 +17,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleSendList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -405,7 +405,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     DataSampleElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
     DataSampleElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
   };
-  DataSampleSendList list;
+  SendStateDataSampleList list;
   list.head_ = elements;
   list.size_ = sizeof(elements) / sizeof(elements[0]);
   list.tail_ = &elements[list.size() - 1];

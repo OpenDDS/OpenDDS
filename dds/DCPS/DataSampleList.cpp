@@ -118,9 +118,9 @@
 //  return item;
 //}
 //
-//const DataSampleSendList*
-//DataSampleSendList::send_list_containing_element(const DataSampleElement* element,
-//                                                 std::vector<DataSampleSendList*> send_lists)
+//const SendStateDataSampleList*
+//SendStateDataSampleList::send_list_containing_element(const DataSampleElement* element,
+//                                                 std::vector<SendStateDataSampleList*> send_lists)
 //{
 //  DataSampleElement* head = const_cast<DataSampleElement*>(element);
 //
@@ -128,9 +128,9 @@
 //    head = head->previous_send_sample_;
 //  }
 //
-//  DataSampleSendList* list_containing_element = 0;
+//  SendStateDataSampleList* list_containing_element = 0;
 //
-//  for(std::vector<DataSampleSendList*>::iterator it = send_lists.begin(); it != send_lists.end(); ++it) {
+//  for(std::vector<SendStateDataSampleList*>::iterator it = send_lists.begin(); it != send_lists.end(); ++it) {
 //    if ((*it)->head_ == head) {
 //    	list_containing_element = *it;
 //    	break;
@@ -141,7 +141,7 @@
 //
 //
 //bool
-//DataSampleSendList::dequeue(const DataSampleElement* stale)
+//SendStateDataSampleList::dequeue(const DataSampleElement* stale)
 //{
 //  if (head_ == 0) {
 //    return false;
@@ -187,7 +187,7 @@
 //}
 //
 //void
-//DataSampleSendList::enqueue_tail(DataSampleSendList list)
+//SendStateDataSampleList::enqueue_tail(SendStateDataSampleList list)
 //{
 //  //// Make the appended list linked with next_send_sample_ first.
 //  //DataSampleElement* cur = list.head_;
@@ -219,7 +219,7 @@
 //
 //// -----------------------------------------------
 //
-//DataSampleSendListIterator::DataSampleSendListIterator(
+//SendStateDataSampleListIterator::SendStateDataSampleListIterator(
 //  DataSampleElement* head,
 //  DataSampleElement* tail,
 //  DataSampleElement* current)
@@ -229,8 +229,8 @@
 //{
 //}
 //
-//DataSampleSendListIterator&
-//DataSampleSendListIterator::operator++()
+//SendStateDataSampleListIterator&
+//SendStateDataSampleListIterator::operator++()
 //{
 //  if (this->current_)
 //    this->current_ = this->current_->next_send_sample_;
@@ -238,16 +238,16 @@
 //  return *this;
 //}
 //
-//DataSampleSendListIterator
-//DataSampleSendListIterator::operator++(int)
+//SendStateDataSampleListIterator
+//SendStateDataSampleListIterator::operator++(int)
 //{
-//  DataSampleSendListIterator tmp(*this);
+//  SendStateDataSampleListIterator tmp(*this);
 //  ++(*this);
 //  return tmp;
 //}
 //
-//DataSampleSendListIterator&
-//DataSampleSendListIterator::operator--()
+//SendStateDataSampleListIterator&
+//SendStateDataSampleListIterator::operator--()
 //{
 //  if (this->current_)
 //    this->current_ = this->current_->previous_send_sample_;
@@ -258,16 +258,16 @@
 //  return *this;
 //}
 //
-//DataSampleSendListIterator
-//DataSampleSendListIterator::operator--(int)
+//SendStateDataSampleListIterator
+//SendStateDataSampleListIterator::operator--(int)
 //{
-//  DataSampleSendListIterator tmp(*this);
+//  SendStateDataSampleListIterator tmp(*this);
 //  --(*this);
 //  return tmp;
 //}
 //
-//DataSampleSendListIterator::reference
-//DataSampleSendListIterator::operator*()
+//SendStateDataSampleListIterator::reference
+//SendStateDataSampleListIterator::operator*()
 //{
 //  // Hopefully folks will be smart enough to not dereference a
 //  // null iterator.  Such a case should only exist for an "end"
@@ -277,8 +277,8 @@
 //  return *(this->current_);
 //}
 //
-//DataSampleSendListIterator::pointer
-//DataSampleSendListIterator::operator->()
+//SendStateDataSampleListIterator::pointer
+//SendStateDataSampleListIterator::operator->()
 //{
 //  return this->current_;
 //}
