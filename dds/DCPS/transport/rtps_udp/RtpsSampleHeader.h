@@ -24,7 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class ReceivedDataSample;
-struct DataSampleListElement;
+class DataSampleListElement;
 class DisjointSequence;
 
 /// Adapt the TransportReceiveStrategy for RTPS's "sample" (submessage) Header

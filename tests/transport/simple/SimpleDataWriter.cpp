@@ -4,7 +4,9 @@
 
 #include "SimpleDataWriter.h"
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/DataSampleList.h"
+//#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleSendList.h"
+#include "dds/DCPS/DataSampleListElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/GuidBuilder.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"

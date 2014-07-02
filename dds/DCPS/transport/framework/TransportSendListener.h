@@ -20,7 +20,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct DataSampleListElement;
+class DataSampleListElement;
 struct DataSampleHeader;
 typedef ACE_Message_Block DataSample;
 

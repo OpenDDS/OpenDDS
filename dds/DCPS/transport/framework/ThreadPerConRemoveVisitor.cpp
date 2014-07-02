@@ -10,7 +10,7 @@
 #include "ThreadPerConRemoveVisitor.h"
 #include "TransportQueueElement.h"
 #include "TransportRetainedElement.h"
-#include "dds/DCPS/DataSampleList.h"
+//#include "dds/DCPS/DataSampleList.h"
 
 #if !defined (__ACE_INLINE__)
 #include "ThreadPerConRemoveVisitor.inl"

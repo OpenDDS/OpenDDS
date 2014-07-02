@@ -29,7 +29,7 @@ class TransportInst;
 class AssocationInfo;
 class ReaderIdSeq;
 class WriterIdSeq;
-class DataSampleList;
+class DataSampleSendList;
 
 /**
  * @brief Mix-in class for DDS entities which directly use the transport layer.

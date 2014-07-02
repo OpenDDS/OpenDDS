@@ -17,7 +17,8 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
-#include "DataSampleList.h"
+//#include "DataSampleList.h"
+//#include "DataSampleSendList.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
 #include "Qos_Helper.h"
@@ -47,6 +48,8 @@ class DDS_TEST;
 namespace OpenDDS {
 namespace DCPS {
 
+class DataSampleSendList;
+class DataSampleListElement;
 
 /**
  * @class ReplayerImpl

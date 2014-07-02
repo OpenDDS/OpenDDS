@@ -31,7 +31,7 @@ class ThreadSynchResource;
 class TransportQueueElement;
 class TransportSendElement;
 class TransportSendBuffer;
-struct DataSampleListElement;
+class DataSampleListElement;
 class QueueRemoveVisitor;
 class PacketRemoveVisitor;
 

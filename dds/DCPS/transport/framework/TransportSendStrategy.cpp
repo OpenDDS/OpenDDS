@@ -21,7 +21,8 @@
 #include "TransportDefs.h"
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/DataSampleList.h"
+//#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleListElement.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 

@@ -9,6 +9,7 @@
 #include "dds/DCPS/Definitions.h"
 
 class SimplePublisher;
+class DataSampleListElement;
 
 class SimpleDataWriter
   : public OpenDDS::DCPS::TransportSendListener

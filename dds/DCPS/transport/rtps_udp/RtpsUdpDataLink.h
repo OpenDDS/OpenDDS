@@ -26,7 +26,8 @@
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
 
-#include "dds/DCPS/DataSampleList.h"
+//#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleListElement.h"
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/GuidConverter.h"
 

@@ -18,7 +18,8 @@
 #include "dds/DCPS/MessageTracker.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
-#include "DataSampleList.h"
+//#include "DataSampleList.h"
+//#include "DataSampleSendList.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
 #include "Qos_Helper.h"
@@ -51,6 +52,8 @@ class PublisherImpl;
 class DomainParticipantImpl;
 class OfferedDeadlineWatchdog;
 class Monitor;
+class DataSampleListElement;
+class DataSampleSendList;
 struct AssociationData;
 
 /**

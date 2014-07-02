@@ -24,7 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TransportSendListener;
-struct DataSampleListElement;
+class DataSampleListElement;
 
 class OpenDDS_Dcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX> {
 public:

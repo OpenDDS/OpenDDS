@@ -10,7 +10,10 @@
 #define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
-#include "DataSampleList.h"
+//#include "DataSampleList.h"
+#include "DataSampleSendList.h"
+//#include "DataSampleInstanceList.h"
+#include "DataSampleWriterList.h"
 #include "OfferedDeadlineWatchdog.h"
 
 #include "ace/Condition_Recursive_Thread_Mutex.h"
@@ -26,11 +29,18 @@
 namespace OpenDDS {
 namespace DCPS {
 
+class DataSampleListElement;
+class DataSampleInstanceList;
+
+
+
 class DataWriterImpl;
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
 class FilterEvaluator;
+
+
 
 typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
 

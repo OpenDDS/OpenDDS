@@ -27,7 +27,7 @@ namespace DCPS {
 
 class DataLink;
 class TransportQueueElement;
-struct DataSampleListElement;
+class DataSampleListElement;
 class TransportSendElement;
 
 

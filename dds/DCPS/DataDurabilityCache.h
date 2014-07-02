@@ -17,7 +17,8 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/DataSampleList.h"
+//#include "dds/DCPS/DataSampleList.h"
+//#include "dds/DCPS/DataSampleSendList.h"
 #include "dds/DCPS/DurabilityArray.h"
 #include "dds/DCPS/DurabilityQueue.h"
 #include "dds/DCPS/FileSystemStorage.h"
@@ -50,9 +51,11 @@ struct LifespanQosPolicy;
 namespace OpenDDS {
 namespace DCPS {
 
-class WriteDataContainer;
+
 class DataWriterImpl;
+class DataSampleListElement;
 class DataSampleSendList;
+class WriteDataContainer;
 
 /**
  * @class DataDurabilityCache

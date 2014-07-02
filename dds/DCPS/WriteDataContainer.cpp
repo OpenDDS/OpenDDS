@@ -10,7 +10,12 @@
 #include "WriteDataContainer.h"
 #include "Service_Participant.h"
 #include "DataSampleHeader.h"
-#include "DataSampleList.h"
+//#include "DataSampleList.h"
+//#include "DataSampleSendList.h"
+//#include "DataSampleSendList.h"
+#include "DataSampleInstanceList.h"
+//#include "DataSampleWriterList.h"
+#include "DataSampleListElement.h"
 #include "DataWriterImpl.h"
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 #include "DataDurabilityCache.h"
@@ -930,7 +935,7 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
         // from wait.
         int const wait_result = condition_.wait(&abs_timeout);
 
-        if (wait_result == 0) { // signalled
+        if (wait_result == 0) { // signaled
           if ((CORBA::Long) this->num_all_samples () < max_num_samples_) {
             break;
           } // else continue wait
@@ -963,7 +968,7 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
 
   // Each write/enqueue just writes one element and hence the number
   // of samples will reach the size of sample list at some point.
-  // We need remove enough to accomodate the new element.
+  // We need remove enough to accommodate the new element.
 
   if (should_block_) {
     // Need wait when waiting list is not empty or the oldest sample

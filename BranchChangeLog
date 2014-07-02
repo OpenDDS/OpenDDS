@@ -1,9 +1,72 @@
+Wed Jul  2 19:02:22 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleInstanceList.h:
+        * dds/DCPS/DataSampleInstanceList.inl:
+        * dds/DCPS/DataSampleInstanceList.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleSendList.h:
+        * dds/DCPS/DataSampleSendList.inl:
+        * dds/DCPS/DataSampleSendList.cpp:
+        * dds/DCPS/DataSampleWriterList.h:
+        * dds/DCPS/DataSampleWriterList.inl:
+        * dds/DCPS/DataSampleWriterList.cpp:
+
+          Split out DataSampleSendList, DataSampleInstanceList, and DataSampleWriterList
+          from DataSampleList and removed inheritance structure so that the three list types
+          are stand alone containers.  Left DataSampleList files for now, but have commented
+          out all code within rendering them ready to delete after work on lists is complete.
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Made necessary modifications to include statements and forward declarations in
+          files/classes making use of the DataSample[Send, Instance, Writer]List(s) as well
+          as for DataSampleListElement includes throughout.
+
 Wed Jul  2 13:57:47 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:
 
-	  Don't make list's tail, head, and size data fields settable by code that uses
-	  DataSampleSendList.
+          Don't make list's tail, head, and size data fields settable by code that uses
+          DataSampleSendList.
 
         * tests/transport/rtps/publisher.cpp:
         * tests/transport/rtps_reliability/rtps_reliability.cpp:
@@ -11,7 +74,7 @@ Wed Jul  2 13:57:47 UTC 2014  Byron Harris  <harrisb@ociweb.com>
         * tests/transport/simple/SimpleDataWriter.h:
         * tests/transport/simple/SimpleDataWriter.cpp:
 
-	  Update to account for DataSampleSendList's internals not be settable.
+          Update to account for DataSampleSendList's internals not be settable.
 
 Tue Jul  1 15:49:14 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 

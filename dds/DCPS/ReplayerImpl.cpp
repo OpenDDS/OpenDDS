@@ -15,6 +15,8 @@
 #include "GuidConverter.h"
 #include "TopicImpl.h"
 #include "PublicationInstance.h"
+#include "DataSampleSendList.h"
+#include "DataSampleListElement.h"
 #include "Serializer.h"
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"

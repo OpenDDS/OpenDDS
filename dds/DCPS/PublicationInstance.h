@@ -10,7 +10,8 @@
 #define OPENDDS_DCPS_PUBLICATION_INSTANCE_H
 
 #include "dcps_export.h"
-#include "DataSampleList.h"
+//#include "DataSampleList.h"
+#include "DataSampleInstanceList.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -18,6 +19,7 @@
 
 namespace OpenDDS {
 namespace DCPS {
+
 
 /**
   * @class PublicationInstance

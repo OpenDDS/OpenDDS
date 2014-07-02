@@ -17,7 +17,8 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
-#include "dds/DCPS/DataSampleList.h"
+//#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleSendList.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Definitions.h"

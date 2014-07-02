@@ -1,5 +1,9 @@
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/DataSampleList.h"
+//#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleSendList.h"
+#include "dds/DCPS/DataSampleInstanceList.h"
+#include "dds/DCPS/DataSampleWriterList.h"
+#include "dds/DCPS/DataSampleListElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RepoIdBuilder.h"
@@ -623,7 +627,7 @@ void run_next_instance_sample_test (ssize_t size)
     }
   }
 
-  { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
+  { // make VC6 build - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = pub_id_head;
        i <= pub_id_tail;
        i ++)

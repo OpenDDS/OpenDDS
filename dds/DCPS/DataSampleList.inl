@@ -6,6 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
+/*
 #include <algorithm>
 
 namespace OpenDDS {
@@ -211,3 +212,4 @@ DataSampleList::end()
 
 } // namespace DCPS
 } // namespace OpenDDS
+*/

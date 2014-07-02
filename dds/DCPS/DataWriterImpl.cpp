@@ -21,6 +21,8 @@
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
 #include "TypeSupportImpl.h"
+#include "DataSampleSendList.h"
+#include "DataSampleListElement.h"
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"

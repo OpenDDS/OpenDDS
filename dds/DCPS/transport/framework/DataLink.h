@@ -45,7 +45,7 @@ class  TransportReceiveListener;
 class  TransportSendListener;
 class  TransportQueueElement;
 class  ReceivedDataSample;
-struct DataSampleListElement;
+class  DataSampleListElement;
 class  ThreadPerConnectionSendTask;
 
 typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan> DataLinkSetMap;
