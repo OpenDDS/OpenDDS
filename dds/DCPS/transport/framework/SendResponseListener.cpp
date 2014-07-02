@@ -14,6 +14,11 @@
 namespace OpenDDS {
 namespace DCPS {
 
+SendResponseListener::SendResponseListener(const std::string& msg_src)
+: tracker_(msg_src)
+{
+}
+
 SendResponseListener::~SendResponseListener()
 {
   tracker_.wait_messages_pending();

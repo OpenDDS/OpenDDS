@@ -54,6 +54,7 @@ namespace DCPS {
 DataWriterImpl::DataWriterImpl()
   : data_dropped_count_(0),
     data_delivered_count_(0),
+    controlTracker("DataWriterImpl"),
     n_chunks_(TheServiceParticipant->n_chunks()),
     association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier()),
     qos_(TheServiceParticipant->initial_DataWriterQos()),

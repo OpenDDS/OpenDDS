@@ -43,16 +43,17 @@ namespace DCPS {
 /// Only called by our TransportImpl object.
 DataLink::DataLink(TransportImpl* impl, Priority priority, bool is_loopback,
       bool is_active)
-: stopped_(false)
-, default_listener_(0)
-, thr_per_con_send_task_(0)
-, transport_priority_(priority)
-, scheduled_(false)
-, send_control_allocator_(0)
-, mb_allocator_(0)
-, db_allocator_(0)
-, is_loopback_(is_loopback)
-, is_active_(is_active)
+: stopped_(false),
+  default_listener_(0),
+  thr_per_con_send_task_(0),
+  transport_priority_(priority),
+  scheduled_(false),
+  send_control_allocator_(0),
+  mb_allocator_(0),
+  db_allocator_(0),
+  is_loopback_(is_loopback),
+  is_active_(is_active),
+  send_response_listener_("DataLink")
 {
    DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 

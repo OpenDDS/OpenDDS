@@ -5,12 +5,15 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include <dds/DCPS/MessageTracker.h>
 #include <dds/DCPS/Service_Participant.h>
+#include "ace/ACE.h"
 #include "ace/Guard_T.h"
+#include "ace/OS_NS_time.h"
 
 using namespace OpenDDS::DCPS;
 
-MessageTracker::MessageTracker()
-: dropped_count_(0)
+MessageTracker::MessageTracker(const std::string& msg_src)
+: msg_src_(msg_src)
+, dropped_count_(0)
 , delivered_count_(0)
 , sent_count_(0)
 , done_condition_(lock_)
@@ -66,26 +69,71 @@ MessageTracker::wait_messages_pending()
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_messages();
   if (report) {
+    ACE_TCHAR date_time[50];
+    ACE_TCHAR* const time =
+      MessageTracker::timestamp(pending_timeout,
+                                date_time,
+                                50);
     ACE_DEBUG((LM_DEBUG,
-               "%T MessageTracker::wait_messages_pending %C\n",
+               ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
+               ACE_TEXT("from source=%C timeout at %s.\n"),
+               msg_src_.c_str(),
                (pending_timeout == ACE_Time_Value::zero ?
-                  " (no timeout)" : "")));
+                  ACE_TEXT("(no timeout)") : time)));
   }
   while (true) {
     if (!pending_messages())
       break;
 
     if (done_condition_.wait(pTimeout) == -1 && !pending_messages()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %p\n")
-        ACE_TEXT("Timed out waiting for messages to be transported")));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: MessageTracker::")
+                 ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p\n"),
+                 ACE_TEXT("Timed out waiting for messages to be transported")));
       break;
     }
   }
   if (report) {
     ACE_DEBUG((LM_DEBUG,
-               "%T MessageTracker::wait_messages_pending done\n"));
+               "%T (%P|%t) MessageTracker::wait_messages_pending done\n"));
   }
 }
+
+ACE_TCHAR *
+MessageTracker::timestamp (const ACE_Time_Value& time_value,
+                           ACE_TCHAR date_and_time[],
+                           size_t date_and_timelen)
+{
+  //ACE_TRACE ("ACE::timestamp");
+
+  // This magic number is from the formatting statement
+  // farther down this routine.
+  if (date_and_timelen < 27)
+    {
+      errno = EINVAL;
+      return 0;
+    }
+
+  ACE_Time_Value cur_time =
+    (time_value == ACE_Time_Value::zero) ?
+        ACE_Time_Value (ACE_OS::gettimeofday ()) : time_value;
+  time_t secs = cur_time.sec ();
+  struct tm tms;
+  ACE_OS::localtime_r (&secs, &tms);
+  ACE_OS::snprintf (date_and_time,
+                    date_and_timelen,
+                    ACE_TEXT ("%4.4d-%2.2d-%2.2d %2.2d:%2.2d:%2.2d.%06ld"),
+                    tms.tm_year + 1900,
+                    tms.tm_mon + 1,
+                    tms.tm_mday,
+                    tms.tm_hour,
+                    tms.tm_min,
+                    tms.tm_sec,
+                    static_cast<long> (cur_time.usec()));
+  date_and_time[date_and_timelen - 1] = '\0';
+  return &date_and_time[11];
+}
+
 
 int
 MessageTracker::dropped_count()

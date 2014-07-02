@@ -184,6 +184,10 @@ Service_Participant::~Service_Participant()
 
   delete monitor_;
   delete reactor_;
+  if (DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) Service_Participant::~Service_Participant()\n"));
+  }
 }
 
 Service_Participant*

@@ -1,3 +1,163 @@
+Tue Jul  1 20:20:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Adding tracking of wait*_pending in TestFramework.
+
+Tue Jul  1 20:04:13 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.h:
+
+          Added include file.
+
+Tue Jul  1 18:40:48 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Letting TestFramework add DCPS_debug_level flag.
+
+Tue Jul  1 18:34:14 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Cleaned up preventing adding flags.
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Changed to use TestFramework.
+
+Tue Jul  1 17:50:00 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added logic to indicate errors in log files that TestFramework
+          should ignore.
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added log messages indicating when dtor is called.
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added traceability to redmine issue and fixed log statement.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed log statement.
+
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Added ignoring already identified redmine issue.
+
+Tue Jul  1 17:16:24 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Copy map_ and release lock in send_control prior to calling send_i
+          due to deadlock.
+
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+
+          Identify sending writer in sample.
+
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+
+          Keep last 4 messages, due to multiple writers.
+
+Tue Jul  1 15:45:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Increased time to wait for 2nd and all following processes to
+          shutdown before killing and added missing _alternate_transport.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Increased time to wait before killing the subscriber.
+
+        * tests/DCPS/Messenger/run_test.pl:
+
+          Changed order of creation to cause subscriber to be killed first,
+          increased time to wait for subscriber to be kill, and changed to use
+          default TestFramework functionality.
+
+Tue Jul  1 15:09:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added description in log messages of the source of the messages and
+          fixed for wide character builds.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed for wide character builds.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+
+          Added passing in message source to the MessageTracker.
+
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+
+          Added passing through the message source.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Cleanup of unneeded variables.
+
+Tue Jul  1 13:04:06 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added more default flags provided.
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed wide character error.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Using defaulted flags.
+
+Mon Jun 30 18:34:55 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+
+          Added static method to return a timestamp, since
+          ACE::timestamp for any time is not supported in
+          TAO 1.6a.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Changed to used MessageTracker::timestamp.
+
+Mon Jun 30 17:08:33 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed include file case.
+
+Mon Jun 30 16:39:11 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Added logging when the pending timeout wait time is over.
+
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Fixed const-ness.
+
 Mon Jun 30 14:35:49 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

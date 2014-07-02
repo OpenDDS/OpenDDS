@@ -12,6 +12,7 @@
 #include "DataSampleHeader.h"
 #include "DataSampleList.h"
 #include "DataWriterImpl.h"
+#include "MessageTracker.h"
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 #include "DataDurabilityCache.h"
 #endif
@@ -1277,10 +1278,16 @@ WriteDataContainer::wait_pending()
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   const bool report = DCPS_debug_level > 0 && pending_data();
   if (report) {
+    ACE_TCHAR date_time[50];
+    ACE_TCHAR* const time =
+      MessageTracker::timestamp(pending_timeout,
+                                date_time,
+                                50);
     ACE_DEBUG((LM_DEBUG,
-               "%T WriteDataContainer::wait_pending %C\n",
+               ACE_TEXT("%T (%P|%t) WriteDataContainer::wait_pending timeout ")
+               ACE_TEXT("at %s\n"),
                (pending_timeout == ACE_Time_Value::zero ?
-                  " (no timeout)" : "")));
+                  ACE_TEXT("(no timeout)") : time)));
   }
   while (true) {
 
@@ -1288,8 +1295,9 @@ WriteDataContainer::wait_pending()
       break;
 
     if (empty_condition_.wait(pTimeout) == -1 && !pending_data()) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n")
-        ACE_TEXT("Timed out waiting for messages to be transported")));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
+                 ACE_TEXT("Timed out waiting for messages to be transported")));
       break;
     }
   }

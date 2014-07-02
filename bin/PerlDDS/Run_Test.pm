@@ -103,12 +103,30 @@ sub print_file {
 
 sub report_errors_in_file {
   my $file = shift;
+  my $errors_to_ignore = shift;
+  my $verbose = shift;
+  $errors_to_ignore = [] if !defined($errors_to_ignore);
+  $verbose = 0 if !defined($verbose);
+
   my $error = 0;
   if (open FILE, "<", $file) {
       while (my $line = <FILE>) {
           if ($line =~ /ERROR/) {
-              print STDERR "$line";
-              $error = 1;
+              my $report = 1;
+              # determine if this is an error we want to ignore
+              foreach my $to_ignore (@{$errors_to_ignore}) {
+                  if ($line =~ /$to_ignore/) {
+                      $report = 0;
+                      last;
+                  }
+              }
+
+              if ($report) {
+                  print STDERR "$file: $line";
+                  $error = 1;
+              }
+          } elsif ($line =~ /wait_(?:messages_)?pending /) {  # REMOVE LATER
+              print STDERR "$file: $line";
           }
       }
       close FILE;
@@ -297,6 +315,7 @@ sub new {
   $self->{flags} = {};
   $self->{status} = 0;
   $self->{log_files} = [];
+  $self->{errors_to_ignore} = [];
   $self->{info_repo} = {};
   $self->{info_repo}->{executable} = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
   $self->{info_repo}->{state} = "none";
@@ -310,6 +329,9 @@ sub new {
   $self->{add_pending_timeout} = 1;
   $self->{transport} = "";
   $self->{report_errors_in_log_file} = 1;
+  $self->{dcps_debug_level} = 1;
+  $self->{dcps_transport_debug_level} = 1;
+  $self->{add_orb_log_file} = 1;
   $self->{finished} = 0;
 
   my $index = 0;
@@ -375,10 +397,10 @@ sub finish {
     $self->stop_processes($wait_to_kill, $first_process_to_stop);
     if ($self->{report_errors_in_log_file}) {
       $self->_info("TestFramework::finish looking for ERRORs in log files."
-        . "to prevent this set <TestFramework>->{report_errors_in_log_file}"
+        . " To prevent this set <TestFramework>->{report_errors_in_log_file}"
         . "=0\n");
       foreach my $file (@{$self->{log_files}}) {
-        if (PerlDDS::report_errors_in_file($file)) {
+        if (PerlDDS::report_errors_in_file($file, $self->{errors_to_ignore})) {
           $self->{status} = -1;
         }
       }
@@ -451,6 +473,35 @@ sub process {
     $self->{status} = -1;
     return;
   }
+
+  if ($params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
+    my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
+    if ($params !~ /-ORBVerboseLogging /) {
+      $debug .= " -ORBVerboseLogging 1";
+    }
+    $self->_info_appending($executable, $debug, "dcps_debug_level");
+    $params .= $debug;
+  }
+
+  if ($params !~ /-DCPSTransportDebugLevel / &&
+      $self->{dcps_transport_debug_level}) {
+    my $debug = " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
+    $self->_info_appending($executable, $debug, "dcps_transport_debug_level");
+    $params .= $debug;
+  }
+
+  if ($params !~ /-ORBLogFile ([^ ]+)/) {
+    my $file_name = "$name";
+
+    # account for "blah #2"
+    $file_name =~ s/ /_/g;
+    $file_name =~ s/#//g;
+
+    my $debug = " -ORBLogFile $file_name.log";
+    $self->_info_appending($executable, $debug, "add_orb_log_file");
+    $params .= $debug;
+  }
+
   if ($self->{add_transport_config} &&
       $self->{transport} ne "" &&
       $params !~ /-DCPSConfigFile /) {
@@ -460,12 +511,13 @@ sub process {
     my $ini_file = $self->_ini_file();
     $params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
   }
+
   if ($self->{nobits}) {
     my $no_bits = "-DCPSBit 0 ";
-    $self->_info("TestFramework::process appending \"$no_bits \" to process's "
-      . "parameters. Set <TestFramework>->{nobits} = 0 to prevent this.\n");
+    $self->_info_appending($executable, $no_bits, "nobits");
     $params .= $no_bits;
   }
+
   $self->{processes}->{process}->{$name}->{process} =
     $self->_create_process($executable, $params);
 }
@@ -474,6 +526,7 @@ sub setup_discovery {
   my $self = shift;
   my $params = shift;
   my $executable = shift;
+  $params = "" if !defined($params);
   $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo" if !defined($executable);
   if ($self->{discovery} ne "info_repo") {
     $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
@@ -592,7 +645,7 @@ sub stop_processes {
     $self->stop_process($timed_wait, $name);
     # make next loop
     $name = undef;
-    $timed_wait = 15;
+    $timed_wait = 25;
   }
 
   $self->stop_discovery($timed_wait);
@@ -625,6 +678,14 @@ sub stop_discovery {
                                  $timed_wait,
                                  $name,
                                  $self->{test_verbose});
+}
+
+sub ignore_error {
+  my $self = shift;
+  my $error_msg = shift;
+  $self->_info("TestFramework::ignore_error will ignore error messages "
+    . "containing \"$error_msg\"\n");
+  push(@{$self->{errors_to_ignore}}, $error_msg);
 }
 
 sub _prefix {
@@ -672,6 +733,15 @@ sub _create_process {
     PerlDDS::create_process($executable, $params);
 }
 
+sub _alternate_transport {
+  my $transport = shift;
+  if ($transport =~ s/multicast/mcast/ ||
+      $transport =~ s/unicast/uni/) {
+    return $transport;
+  }
+  return "";
+}
+
 sub _ini_file {
   my $self = shift;
   if ($self->{transport} eq "") {
@@ -693,7 +763,7 @@ sub _ini_file {
       print STDERR "ERROR: TestFramework::_init_file called but $transports "
         . "do not exist.  Either provide files, or set "
         . "<TestFramework>->{add_transport_config} = 0.\n";
-      return "";
+      return $self->finish();
     }
   }
   return "$transport.ini";
@@ -711,6 +781,7 @@ sub _is_transport {
       $param eq "rtps_disc" ||
       $param eq "rtps_disc_tcp" ||
       $param eq "rtps_unicast" ||
+      $param eq "rtps_uni" ||
       $param eq "shmem") {
     return 1;
   }
@@ -734,6 +805,16 @@ sub _info {
   if ($self->{test_verbose}) {
     print STDERR "$msg";
   }
+}
+
+sub _info_appending {
+  my $self = shift;
+  my $executable = shift;
+  my $str = shift;
+  my $param = shift;
+  $self->_info("TestFramework::process appending \"$str\" to "
+    . "$executable's parameters. Set <TestFramework>->{$param} = 0 to prevent"
+    . " this.\n");
 }
 
 sub _write_tcp_ini {

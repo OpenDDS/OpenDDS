@@ -14,12 +14,8 @@ use strict;
 
 my $status = 0;
 
-my $logging_p = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
-    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $logging_s = "-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
-    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $pub_opts = "$logging_p -ORBLogFile pub.log ";
-my $sub_opts = "$logging_s -ORBLogFile sub.log ";
+my $pub_opts = "";
+my $sub_opts = "";
 my $reliable = 1;
 
 my $test = new PerlDDS::TestFramework();
@@ -44,13 +40,12 @@ $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log");
 
 $test->process("subscriber", "subscriber", $sub_opts);
 $test->process("publisher #1", "publisher", $pub_opts);
-
-my $pub2_opts = $pub_opts;
-$pub2_opts =~ s/pub\.log/pub2.log/;
 $test->process("publisher #2", "publisher", $pub_opts);
 
 $test->start_process("publisher #1");
 $test->start_process("publisher #2");
 $test->start_process("subscriber");
 
-exit $test->finish(65);
+# ignore this issue that is already being tracked in redmine
+$test->ignore_error("(Redmine Issue# 1446)");
+exit $test->finish(100);

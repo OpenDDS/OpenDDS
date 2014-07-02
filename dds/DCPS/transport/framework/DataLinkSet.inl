@@ -87,14 +87,10 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
   //Optimized - use cached allocator.
   TransportSendControlElement* send_element = 0;
 
-  //### debugging many to many test failure 2to1
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLinkSet::send_control --> trying to LOCK lock_\n"));
-  
-  GuardType guard(this->lock_);
-  //### debugging many to many test failure 2to1
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLinkSet::send_control --> LOCKED lock_\n"));
+  MapType dup_map;
+  copy_map_to(dup_map);
 
-  if (map_.empty()) {
+  if (dup_map.empty()) {
     // similar to the "no links" case in TransportClient::send()
     if (DCPS_debug_level > 4) {
       const GuidConverter converter(pub_id);
@@ -111,7 +107,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
   ACE_NEW_MALLOC_RETURN(send_element,
     static_cast<TransportSendControlElement*>(
       send_control_element_allocator_.malloc()),
-    TransportSendControlElement(static_cast<int>(map_.size()),
+    TransportSendControlElement(static_cast<int>(dup_map.size()),
                                 pub_id,
                                 listener,
                                 header,
@@ -119,8 +115,8 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
                                 &send_control_element_allocator_),
     SEND_CONTROL_ERROR);
 
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
+  for (MapType::iterator itr = dup_map.begin();
+       itr != dup_map.end();
        ++itr) {
     itr->second->send_start();
     itr->second->send(send_element);
@@ -264,4 +260,20 @@ OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
   }
 
   map_.clear();
+}
+
+ACE_INLINE void
+OpenDDS::DCPS::DataLinkSet::copy_map_to(MapType& target)
+{
+  target.clear();
+
+  // Lock the existing map
+  GuardType guard(this->lock_);
+
+  // Copy to target
+  for (MapType::iterator itr = map_.begin();
+       itr != map_.end();
+       ++itr) {
+    target.insert(*itr);
+  }
 }

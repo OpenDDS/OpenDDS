@@ -14,44 +14,22 @@ use strict;
 
 PerlDDS::add_lib_path('../LargeSample');
 
+my $test = new PerlDDS::TestFramework();
+
 my $status = 0;
 
-my $logging_p = "";#"-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
-#    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $logging_s = "";#"-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
-#    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $pub_opts = "$logging_p -ORBLogFile pubx.log -DCPSPendingTimeout 1 ";
-my $sub_opts = "$logging_s -ORBLogFile subx.log -DCPSPendingTimeout 1 ";
-my $repo_bit_opt = '';
+$test->{dcps_transport_debug_level} = 0;
+$test->{nobits} = 1;
+my $pub_opts = "";
+my $sub_opts = "";
 my $reliable = 1;
 
-my $nobit = 1; # Set to a non-zero value to disable the Builtin Topics.
-my $app_bit_opt = '-DCPSBit 0 ' if $nobit;
-$repo_bit_opt = '-NOBITS' if $nobit;
-
 my $config_opts = "";
-if ($#ARGV < 0 || $ARGV[0] eq 'tcp') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile tcp.ini ";
-}
-elsif ($ARGV[0] eq 'udp') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile udp.ini ";
+if ($test->flag('udp')) {
     $reliable = 0;
 }
-elsif ($ARGV[0] eq 'multicast') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile multicast.ini ";
-}
-elsif ($ARGV[0] eq 'multicast_async') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile pub_multicast_async.ini ";
-}
-elsif ($ARGV[0] eq 'shmem') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile shmem.ini ";
-}
-elsif ($ARGV[0] eq 'rtps') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile rtps.ini ";
-}
-elsif ($ARGV[0] ne '') {
-    print STDERR "ERROR: invalid test case\n";
-    exit 1;
+elsif ($test->flag('multicast_async')) {
+    $config_opts .= "-DCPSConfigFile pub_multicast_async.ini ";
 }
 
 $config_opts .= '-reliable ' if $reliable;
@@ -216,14 +194,7 @@ elsif ($config_opts !~ /-sample_size/) {
     $config_opts .= '-sample_size 10 ';
 }
 
-my $dcpsrepo_ior = "repo.ior";
-
-unlink $dcpsrepo_ior;
-unlink <*.log>;
-
-my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$repo_bit_opt -o $dcpsrepo_ior"
-                                       . " -DCPSPendingTimeout 1 ");
+$test->default_transport("tcp");
 
 my $index;
 print "config_opts=$config_opts\n";
@@ -231,93 +202,28 @@ $pub_opts .= $config_opts;
 print "pub_opts=$pub_opts\n";
 $sub_opts .= $config_opts;
 print "sub_opts=$sub_opts\n";
-my @Subscriber;
-my @Publisher;
+
+$test->setup_discovery();
+
 for ($index = 0; $index < $sub_processes; ++$index) {
-    my $temp_opts = $sub_opts;
-    $temp_opts =~ s/sub(x)\.log/sub$index\.log/;
-    push(@Subscriber, PerlDDS::create_process("subscriber", $temp_opts));
+    $test->process("subscriber #$index", "subscriber", $sub_opts);
 }
 for ($index = 0; $index < $pub_processes; ++$index) {
-    my $temp_opts = $pub_opts;
-    $temp_opts =~ s/pub(x)\.log/pub$index\.log/;
-    push(@Publisher, PerlDDS::create_process("publisher", $temp_opts));
-}
-
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn();
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill();
-    exit 1;
+    $test->process("publisher #$index", "publisher", $pub_opts);
 }
 
 for ($index = 0; $index < $pub_processes; ++$index) {
-    print $Publisher[$index]->CommandLine() . "\n";
-    $Publisher[$index]->Spawn();
+    $test->start_process("publisher #$index");
 }
 
 for ($index = 0; $index < $sub_processes; ++$index) {
-    print $Subscriber[$index]->CommandLine() . "\n";
-    $Subscriber[$index]->Spawn();
+    $test->start_process("subscriber #$index");
 }
 
 # first subscriber process needs to be killed a little after the
 # total expected duration
 my $wait_to_kill = $total_duration_msec * 2;
 print "wait_to_kill=$wait_to_kill\n";
-for ($index = 0; $index < $sub_processes; ++$index) {
-    my $SubscriberResult = $Subscriber[$index]->WaitKill($wait_to_kill);
-    if ($SubscriberResult != 0) {
-        print STDERR "ERROR: subscriber[$index] returned $SubscriberResult\n";
-        $status = 1;
-    }
-    $wait_to_kill = 10;
-}
-
-for ($index = 0; $index < $pub_processes; ++$index) {
-  my $PublisherResult = $Publisher[$index]->WaitKill(10);
-  if ($PublisherResult != 0) {
-      print STDERR "ERROR: publisher[$index] returned $PublisherResult\n";
-      $status = 1;
-  }
-}
-
-my $ir = $DCPSREPO->TerminateWaitKill(10);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print "**** Begin log file output *****\n";
-  for ($index = 0; $index < $pub_processes; ++$index) {
-      if (open FILE, "<", "pub$index.log") {
-          print "Publisher[$index]:\n";
-          while (my $line = <FILE>) {
-              print "$line";
-          }
-          print "\n\n";
-          close FILE;
-      }
-  }
-
-  for ($index = 0; $index < $sub_processes; ++$index) {
-      if (open FILE, "<", "sub$index.log") {
-          print "Subscriber[$index]:\n";
-          while (my $line = <FILE>) {
-              print "$line";
-          }
-          print "\n\n";
-          close FILE;
-      }
-  }
-  print "**** End log file output *****\n";
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+# ignore this issue that is already being tracked in redmine
+$test->ignore_error("(Redmine Issue# 1446)");
+exit $test->finish($wait_to_kill);
