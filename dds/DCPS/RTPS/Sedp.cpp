@@ -2461,6 +2461,10 @@ Sedp::Task::svc()
             static_cast<const DDS::InstanceHandle_t*>(msg->payload_));
       break;
     case Msg::MSG_STOP:
+      if (DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::Task::svc - ")
+                            ACE_TEXT("received MSG_STOP. Task exiting\n")));
+      }
       return 0;
     }
   }

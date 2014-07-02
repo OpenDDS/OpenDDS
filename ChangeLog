@@ -1,3 +1,15 @@
+Wed Jul  2 18:22:15 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed to only report that their are errors in log files if the status is
+          still good.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added log statements to identify where ACCESS VIOLATION is occurring.
+
 Tue Jul  1 20:20:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
