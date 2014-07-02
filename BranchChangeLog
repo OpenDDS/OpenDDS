@@ -1,3 +1,9 @@
+Wed Jul  2 19:29:41 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+
+          Removed artifact from an earlier merge.
+
 Wed Jul  2 19:02:22 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleInstanceList.h:
