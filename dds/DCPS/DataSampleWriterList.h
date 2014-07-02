@@ -14,18 +14,18 @@
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 //#include "DataSampleHeader.h"
-//#include "DataSampleListElement.h"
+//#include "DataSampleElement.h"
 
 #include <iterator>
 
 namespace OpenDDS {
 namespace DCPS {
 
-class DataSampleListElement;
+class DataSampleElement;
 
-//struct DataSampleListElement;
-typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>
-  DataSampleListElementAllocator;
+//struct DataSampleElement;
+typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
+  DataSampleElementAllocator;
 
 //const int MAX_READERS_TO_RESEND = 5;
 
@@ -55,23 +55,23 @@ class OpenDDS_Dcps_Export DataSampleWriterList {
 
   ssize_t size() const {return size_;};
 
-  DataSampleListElement* head() const {return head_;};
+  DataSampleElement* head() const {return head_;};
 
-  DataSampleListElement* tail() const {return tail_;};
+  DataSampleElement* tail() const {return tail_;};
 
-  void enqueue_tail(const DataSampleListElement* element);
+  void enqueue_tail(const DataSampleElement* element);
 
-  bool dequeue_head(DataSampleListElement*& stale);
+  bool dequeue_head(DataSampleElement*& stale);
 
-  bool dequeue(const DataSampleListElement* stale);
+  bool dequeue(const DataSampleElement* stale);
 
  protected:
 
    /// The first element of the list.
-   DataSampleListElement* head_;
+   DataSampleElement* head_;
 
    /// The last element of the list.
-   DataSampleListElement* tail_;
+   DataSampleElement* tail_;
 
    /// Number of elements in the list.
    ssize_t                size_;

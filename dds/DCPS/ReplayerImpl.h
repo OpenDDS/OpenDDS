@@ -49,7 +49,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DataSampleSendList;
-class DataSampleListElement;
+class DataSampleElement;
 
 /**
  * @class ReplayerImpl
@@ -112,8 +112,8 @@ public:
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
 
   // Implement TransportSendListener
-  virtual void data_delivered(const DataSampleListElement* sample);
-  virtual void data_dropped(const DataSampleListElement* sample,
+  virtual void data_delivered(const DataSampleElement* sample);
+  virtual void data_dropped(const DataSampleElement* sample,
                             bool                         dropped_by_transport);
 
   virtual void control_delivered(ACE_Message_Block* sample);
@@ -275,9 +275,9 @@ private:
   // The header data allocator.
   std::auto_ptr<DataSampleHeaderAllocator> header_allocator_;
 
-  /// The cached allocator to allocate DataSampleListElement
+  /// The cached allocator to allocate DataSampleElement
   /// objects.
-  std::auto_ptr<DataSampleListElementAllocator> sample_list_element_allocator_;
+  std::auto_ptr<DataSampleElementAllocator> sample_list_element_allocator_;
 
   /// The allocator for TransportSendElement.
   /// The TransportSendElement allocator is put here because it

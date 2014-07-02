@@ -9,7 +9,7 @@
 #include "dds/DCPS/Definitions.h"
 
 class SimplePublisher;
-class DataSampleListElement;
+class DataSampleElement;
 
 class SimpleDataWriter
   : public OpenDDS::DCPS::TransportSendListener
@@ -37,8 +37,8 @@ class SimpleDataWriter
     void transport_lost();
 
     // Implementing TransportSendListener
-    void data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample);
-    void data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
+    void data_delivered(const OpenDDS::DCPS::DataSampleElement* sample);
+    void data_dropped(const OpenDDS::DCPS::DataSampleElement* sample,
                       bool dropped_by_transport = false);
     void notify_publication_disconnected(const OpenDDS::DCPS::ReaderIdSeq&) {}
     void notify_publication_reconnected(const OpenDDS::DCPS::ReaderIdSeq&) {}

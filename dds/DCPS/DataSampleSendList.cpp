@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 //#include "DataSampleList.h"
 #include "DataSampleSendList.h"
-#include "DataSampleListElement.h"
+#include "DataSampleElement.h"
 #include "Definitions.h"
 #include "PublicationInstance.h"
 
@@ -24,10 +24,10 @@ namespace DCPS {
 
 
 const DataSampleSendList*
-DataSampleSendList::send_list_containing_element(const DataSampleListElement* element,
+DataSampleSendList::send_list_containing_element(const DataSampleElement* element,
                                                  std::vector<DataSampleSendList*> send_lists)
 {
-  DataSampleListElement* head = const_cast<DataSampleListElement*>(element);
+  DataSampleElement* head = const_cast<DataSampleElement*>(element);
 
   while (head->previous_send_sample_ != 0) {
     head = head->previous_send_sample_;
@@ -46,7 +46,7 @@ DataSampleSendList::send_list_containing_element(const DataSampleListElement* el
 
 
 bool
-DataSampleSendList::dequeue(const DataSampleListElement* stale)
+DataSampleSendList::dequeue(const DataSampleElement* stale)
 {
   if (head_ == 0) {
     return false;
@@ -54,13 +54,13 @@ DataSampleSendList::dequeue(const DataSampleListElement* stale)
 
   // Same as dequeue from head.
   if (stale == head_) {
-    DataSampleListElement* tmp = head_;
+    DataSampleElement* tmp = head_;
     return dequeue_head(tmp);
   }
 
   // Search from head_->next_send_sample_.
-  DataSampleListElement* toRemove = 0;
-  for (DataSampleListElement* item = head_->next_send_sample_;
+  DataSampleElement* toRemove = 0;
+  for (DataSampleElement* item = head_->next_send_sample_;
        item != 0 && toRemove == 0;
        item = item->next_send_sample_) {
     if (item == stale) {
@@ -95,7 +95,7 @@ void
 DataSampleSendList::enqueue_tail(DataSampleSendList list)
 {
   //// Make the appended list linked with next_send_sample_ first.
-  //DataSampleListElement* cur = list.head_;
+  //DataSampleElement* cur = list.head_;
 
   //if (list.size_ > 1 && cur->next_send_sample_ == 0)
   // {
@@ -125,9 +125,9 @@ DataSampleSendList::enqueue_tail(DataSampleSendList list)
 // -----------------------------------------------
 
 DataSampleSendListIterator::DataSampleSendListIterator(
-  DataSampleListElement* head,
-  DataSampleListElement* tail,
-  DataSampleListElement* current)
+  DataSampleElement* head,
+  DataSampleElement* tail,
+  DataSampleElement* current)
   : head_(head)
   , tail_(tail)
   , current_(current)

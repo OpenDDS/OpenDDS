@@ -30,12 +30,12 @@ void DataSampleList::reset()
 
 ACE_INLINE
 void
-DataSampleWriterList::enqueue_tail(const DataSampleListElement* sample)
+DataSampleWriterList::enqueue_tail(const DataSampleElement* sample)
 {
   // const_cast here so that higher layers don't need to pass around so many
-  // non-const pointers to DataSampleListElement.  Ideally the design would be
+  // non-const pointers to DataSampleElement.  Ideally the design would be
   // changed to accommodate const-correctness throughout.
-  DataSampleListElement* mSample = const_cast<DataSampleListElement*>(sample);
+  DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
   
   //sample->previous_sample_ = 0;
   //sample->next_sample_ = 0;
@@ -56,7 +56,7 @@ DataSampleWriterList::enqueue_tail(const DataSampleListElement* sample)
 
 ACE_INLINE
 bool
-DataSampleWriterList::dequeue_head(DataSampleListElement*& stale)
+DataSampleWriterList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the list.
@@ -85,14 +85,14 @@ DataSampleWriterList::dequeue_head(DataSampleListElement*& stale)
 
 ACE_INLINE
 void
-DataSampleSendList::enqueue_tail(const DataSampleListElement* sample)
+DataSampleSendList::enqueue_tail(const DataSampleElement* sample)
 {
   ++size_;
 
   // const_cast here so that higher layers don't need to pass around so many
-  // non-const pointers to DataSampleListElement.  Ideally the design would be
+  // non-const pointers to DataSampleElement.  Ideally the design would be
   // changed to accommodate const-correctness throughout.
-  DataSampleListElement* mSample = const_cast<DataSampleListElement*>(sample);
+  DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
 
   if (head_ == 0) {
     // First sample in list.
@@ -110,7 +110,7 @@ DataSampleSendList::enqueue_tail(const DataSampleListElement* sample)
 
 ACE_INLINE
 bool
-DataSampleSendList::dequeue_head(DataSampleListElement*& stale)
+DataSampleSendList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the instance list.
@@ -146,12 +146,12 @@ DataSampleSendList::dequeue_head(DataSampleListElement*& stale)
 
 ACE_INLINE
 void
-DataSampleInstanceList::enqueue_tail(const DataSampleListElement* sample)
+DataSampleInstanceList::enqueue_tail(const DataSampleElement* sample)
 {
   // const_cast here so that higher layers don't need to pass around so many
-  // non-const pointers to DataSampleListElement.  Ideally the design would be
+  // non-const pointers to DataSampleElement.  Ideally the design would be
   // changed to accommodate const-correctness throughout.
-  DataSampleListElement* mSample = const_cast<DataSampleListElement*>(sample);
+  DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
   
   mSample->next_instance_sample_ = 0;
 
@@ -172,7 +172,7 @@ DataSampleInstanceList::enqueue_tail(const DataSampleListElement* sample)
 
 ACE_INLINE
 bool
-DataSampleInstanceList::dequeue_head(DataSampleListElement*& stale)
+DataSampleInstanceList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the instance list.

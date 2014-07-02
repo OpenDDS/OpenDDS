@@ -15,7 +15,7 @@
 //#include "DataSampleSendList.h"
 #include "DataSampleInstanceList.h"
 //#include "DataSampleWriterList.h"
-#include "DataSampleListElement.h"
+#include "DataSampleElement.h"
 #include "DataWriterImpl.h"
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 #include "DataDurabilityCache.h"
@@ -40,7 +40,7 @@ namespace DCPS {
  *       a common function.
  */
 bool
-resend_data_expired(DataSampleListElement const & element,
+resend_data_expired(DataSampleElement const & element,
                     DDS::LifespanQosPolicy const & lifespan)
 {
   if (lifespan.duration.sec != DDS::DURATION_INFINITE_SEC
@@ -162,7 +162,7 @@ WriteDataContainer::~WriteDataContainer()
 // This method preassumes that instance list has space for this sample.
 DDS::ReturnCode_t
 WriteDataContainer::enqueue(
-  DataSampleListElement* sample,
+  DataSampleElement* sample,
   DDS::InstanceHandle_t instance_handle)
 {
   // Get the PublicationInstance pointer from InstanceHandle_t.
@@ -527,7 +527,7 @@ WriteDataContainer::pending_data()
 }
 
 void
-WriteDataContainer::data_delivered(const DataSampleListElement* sample)
+WriteDataContainer::data_delivered(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("WriteDataContainer","data_delivered",6);
 
@@ -555,7 +555,7 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
   PublicationInstance* instance = sample->handle_;
   bool dequeued =
     released_data_.dequeue(sample);
-  DataSampleListElement* stale = const_cast<DataSampleListElement*>(sample);
+  DataSampleElement* stale = const_cast<DataSampleElement*>(sample);
   if (dequeued) {
     release_buffer(stale);
   } else {
@@ -612,7 +612,7 @@ WriteDataContainer::data_delivered(const DataSampleListElement* sample)
 }
 
 void
-WriteDataContainer::data_dropped(const DataSampleListElement* sample,
+WriteDataContainer::data_dropped(const DataSampleElement* sample,
                                  bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("WriteDataContainer","data_dropped",6);
@@ -649,7 +649,7 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
   // now release the sample from released_data_ list and
   // keep the sample from the sending_data_ list still in
   // sample list since we will send it.
-  DataSampleListElement* stale = 0;
+  DataSampleElement* stale = 0;
 
   if (sending_data_.dequeue(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
@@ -663,7 +663,7 @@ WriteDataContainer::data_dropped(const DataSampleListElement* sample,
       // The remove_sample is requested when sample list size
       // reaches limit. In this case, the oldest sample is
       // moved to released_data_ already.
-      stale = const_cast<DataSampleListElement*>(sample);
+      stale = const_cast<DataSampleElement*>(sample);
       release_buffer(stale);
 
     } else {
@@ -688,7 +688,7 @@ WriteDataContainer::remove_oldest_sample(
   DataSampleInstanceList& instance_list,
   bool& released)
 {
-  DataSampleListElement* stale = 0;
+  DataSampleElement* stale = 0;
 
   //
   // Remove the oldest sample from the instance list.
@@ -810,17 +810,17 @@ WriteDataContainer::remove_oldest_sample(
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
+WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                                   DDS::InstanceHandle_t handle)
 {
   PublicationInstance* instance = get_handle_instance(handle);
 
   ACE_NEW_MALLOC_RETURN(
     element,
-    static_cast<DataSampleListElement*>(
+    static_cast<DataSampleElement*>(
       sample_list_element_allocator_.malloc(
-        sizeof(DataSampleListElement))),
-    DataSampleListElement(publication_id_,
+        sizeof(DataSampleElement))),
+    DataSampleElement(publication_id_,
                           this->writer_,
                           instance,
                           &transport_send_element_allocator_,
@@ -832,7 +832,7 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   bool oldest_released = true;
-  DataSampleListElement* stale = instance_list.head();
+  DataSampleElement* stale = instance_list.head();
 
   // Release the oldest sample if the size reaches the max size of
   // the sample list.
@@ -1064,13 +1064,13 @@ WriteDataContainer::obtain_buffer(DataSampleListElement*& element,
 }
 
 void
-WriteDataContainer::release_buffer(DataSampleListElement* element)
+WriteDataContainer::release_buffer(DataSampleElement* element)
 {
   data_holder_.dequeue(element);
   // Release the memory to the allocator.
   ACE_DES_FREE(element,
                sample_list_element_allocator_.free,
-               DataSampleListElement);
+               DataSampleElement);
 }
 
 void
@@ -1167,7 +1167,7 @@ WriteDataContainer::copy_and_append(DataSampleSendList& list,
 #endif
                                     )
 {
-  for (DataSampleListElement* cur = appended.head();
+  for (DataSampleElement* cur = appended.head();
        cur != 0;
        cur = cur->get_next_send_sample()) {
     // Do not copy and append data that has exceeded the configured
@@ -1180,12 +1180,12 @@ WriteDataContainer::copy_and_append(DataSampleSendList& list,
       continue;
 #endif
 
-    DataSampleListElement* element = 0;
+    DataSampleElement* element = 0;
     ACE_NEW_MALLOC(element,
-                    static_cast<DataSampleListElement*>(
+                    static_cast<DataSampleElement*>(
                       sample_list_element_allocator_.malloc(
-                        sizeof(DataSampleListElement))),
-                    DataSampleListElement(*cur));
+                        sizeof(DataSampleElement))),
+                    DataSampleElement(*cur));
 
     // TODO: Does ACE_NEW_MALLOC throw?  Where's the check for
     //       allocation failure, i.e. element == 0?
@@ -1292,7 +1292,7 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 }
 
 void
-WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
+WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale,
                                             PublicationInstance* instance)
 {
   if (stale && instance->waiting_list_.head() != 0) {
@@ -1300,7 +1300,7 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleListElement* stale,
       // list.
       instance->waiting_list_.head()->space_available_ = true;
       // Remove this waiting sample from waiting list.
-      DataSampleListElement* waiting = 0;
+      DataSampleElement* waiting = 0;
 
       if (instance->waiting_list_.dequeue_head(waiting) == false) {
         ACE_ERROR((LM_ERROR,

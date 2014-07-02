@@ -18,7 +18,7 @@
 #include "dds/DCPS/Service_Participant.h"
 //#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DataSampleSendList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
@@ -89,13 +89,13 @@ public:
   }
 
   // Implementing TransportSendListener
-  void data_delivered(const DataSampleListElement*)
+  void data_delivered(const DataSampleElement*)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::data_delivered()\n"));
     --callbacks_expected_;
   }
 
-  void data_dropped(const DataSampleListElement*, bool by_transport)
+  void data_dropped(const DataSampleElement*, bool by_transport)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::data_dropped(element, %d)\n",
       int(by_transport)));
@@ -401,9 +401,9 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   // 2b. send sample data through the OpenDDS transport
 
   TransportSendElementAllocator alloc(2, sizeof(TransportSendElementAllocator));
-  DataSampleListElement elements[] = {
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
+  DataSampleElement elements[] = {
+    DataSampleElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
+    DataSampleElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
   };
   DataSampleSendList list;
   list.head_ = elements;

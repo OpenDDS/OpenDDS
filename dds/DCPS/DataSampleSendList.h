@@ -14,7 +14,7 @@
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 //#include "DataSampleHeader.h"
-//#include "DataSampleListElement.h"
+//#include "DataSampleElement.h"
 
 #include <iterator>
 
@@ -23,11 +23,11 @@ class DDS_TEST;
 namespace OpenDDS {
 namespace DCPS {
 
-class DataSampleListElement;
+class DataSampleElement;
 
-//struct DataSampleListElement;
-typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>
-  DataSampleListElementAllocator;
+//struct DataSampleElement;
+typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
+  DataSampleElementAllocator;
 
 const int MAX_READERS_TO_RESEND = 5;
 
@@ -48,7 +48,7 @@ typedef ACE_Message_Block DataSample;
  * @c over the "send samples" in a @c DataSampleSendList.
  */
 class OpenDDS_Dcps_Export DataSampleSendListIterator
-  : public std::iterator<std::bidirectional_iterator_tag, DataSampleListElement> {
+  : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement> {
 public:
 
   /// Default constructor.
@@ -56,9 +56,9 @@ public:
    * This constructor is used when constructing an "end" iterator.
    */
 
-  DataSampleSendListIterator(DataSampleListElement* head,
-                         DataSampleListElement* tail,
-                         DataSampleListElement* current);
+  DataSampleSendListIterator(DataSampleElement* head,
+                         DataSampleElement* tail,
+                         DataSampleElement* current);
 
   DataSampleSendListIterator& operator++();
   DataSampleSendListIterator  operator++(int);
@@ -82,9 +82,9 @@ public:
 private:
   DataSampleSendListIterator();
 
-  DataSampleListElement* head_;
-  DataSampleListElement* tail_;
-  DataSampleListElement* current_;
+  DataSampleElement* head_;
+  DataSampleElement* tail_;
+  DataSampleElement* current_;
 
 };
 
@@ -105,22 +105,22 @@ class OpenDDS_Dcps_Export DataSampleSendList {
   DataSampleSendList();
   ~DataSampleSendList(){};
 
-  static const DataSampleSendList* send_list_containing_element(const DataSampleListElement* element,
+  static const DataSampleSendList* send_list_containing_element(const DataSampleElement* element,
                                                                 std::vector<DataSampleSendList*> send_lists);
 
   /// Reset to initial state.
   void reset();
 
   ssize_t size() const {return size_;};
-  DataSampleListElement* head() const {return head_;};
-  DataSampleListElement* tail() const {return tail_;};
+  DataSampleElement* head() const {return head_;};
+  DataSampleElement* tail() const {return tail_;};
 
-  void enqueue_tail(const DataSampleListElement* element);
+  void enqueue_tail(const DataSampleElement* element);
   void enqueue_tail(DataSampleSendList list);
 
-  bool dequeue_head(DataSampleListElement*& stale);
+  bool dequeue_head(DataSampleElement*& stale);
 
-  bool dequeue(const DataSampleListElement* stale);
+  bool dequeue(const DataSampleElement* stale);
 
   /// Return iterator to beginning of list.
   iterator begin();
@@ -131,10 +131,10 @@ class OpenDDS_Dcps_Export DataSampleSendList {
  protected:
 
    /// The first element of the list.
-   DataSampleListElement* head_;
+   DataSampleElement* head_;
 
    /// The last element of the list.
-   DataSampleListElement* tail_;
+   DataSampleElement* tail_;
 
    /// Number of elements in the list.
    ssize_t                size_;

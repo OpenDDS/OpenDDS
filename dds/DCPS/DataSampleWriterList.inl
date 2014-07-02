@@ -6,7 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DataSampleListElement.h"
+#include "DataSampleElement.h"
 #include <algorithm>
 
 namespace OpenDDS {
@@ -30,12 +30,12 @@ void DataSampleWriterList::reset()
 
 ACE_INLINE
 void
-DataSampleWriterList::enqueue_tail(const DataSampleListElement* sample)
+DataSampleWriterList::enqueue_tail(const DataSampleElement* sample)
 {
   // const_cast here so that higher layers don't need to pass around so many
-  // non-const pointers to DataSampleListElement.  Ideally the design would be
+  // non-const pointers to DataSampleElement.  Ideally the design would be
   // changed to accommodate const-correctness throughout.
-  DataSampleListElement* mSample = const_cast<DataSampleListElement*>(sample);
+  DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
   
   //sample->previous_sample_ = 0;
   //sample->next_sample_ = 0;
@@ -56,7 +56,7 @@ DataSampleWriterList::enqueue_tail(const DataSampleListElement* sample)
 
 ACE_INLINE
 bool
-DataSampleWriterList::dequeue_head(DataSampleListElement*& stale)
+DataSampleWriterList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the list.

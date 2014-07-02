@@ -11,7 +11,7 @@
 
 #include "dds/DCPS/Serializer.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -319,7 +319,7 @@ namespace {
 void
 RtpsSampleHeader::populate_data_sample_submessages(
   RTPS::SubmessageSeq& subm,
-  const DataSampleListElement& dsle,
+  const DataSampleElement& dsle,
   bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;

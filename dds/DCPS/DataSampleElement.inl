@@ -12,7 +12,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-DataSampleListElement::DataSampleListElement(
+DataSampleElement::DataSampleElement(
   PublicationId           publication_id,
   TransportSendListener*  send_listner,
   PublicationInstance*    handle,
@@ -36,7 +36,7 @@ DataSampleListElement::DataSampleListElement(
 }
 
 ACE_INLINE
-DataSampleListElement::DataSampleListElement(const DataSampleListElement& elem)
+DataSampleElement::DataSampleElement(const DataSampleElement& elem)
   : header_(elem.header_)
   , sample_(elem.sample_->duplicate())
   , publication_id_(elem.publication_id_)
@@ -64,7 +64,7 @@ DataSampleListElement::DataSampleListElement(const DataSampleListElement& elem)
 }
 
 ACE_INLINE
-DataSampleListElement::~DataSampleListElement()
+DataSampleElement::~DataSampleElement()
 {
   if (sample_) {
     sample_->release();
@@ -72,8 +72,8 @@ DataSampleListElement::~DataSampleListElement()
 }
 
 ACE_INLINE
-DataSampleListElement&
-DataSampleListElement::operator=(const DataSampleListElement& rhs)
+DataSampleElement&
+DataSampleElement::operator=(const DataSampleElement& rhs)
 {
   header_ = rhs.header_;
   sample_ = rhs.sample_->duplicate();

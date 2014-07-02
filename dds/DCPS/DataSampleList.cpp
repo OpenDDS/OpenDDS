@@ -21,21 +21,21 @@
 //namespace DCPS {
 //
 //bool
-//DataSampleWriterList::dequeue(const DataSampleListElement* stale)
+//DataSampleWriterList::dequeue(const DataSampleElement* stale)
 //{
 //  if (head_ == 0) {
 //    return false;
 //  }
 //
 //  if (stale == head_) {
-//    DataSampleListElement* head = head_;
+//    DataSampleElement* head = head_;
 //    return dequeue_head(head);
 //  }
 //
 //  // Search from head_->next_sample_.
 //  bool found = false;
 //
-//  for (DataSampleListElement* item = head_->next_sample_ ;
+//  for (DataSampleElement* item = head_->next_sample_ ;
 //       item != 0 ;
 //       item = item->next_sample_) {
 //    if (item == stale) {
@@ -84,7 +84,7 @@
 //}
 //
 //bool
-//DataSampleInstanceList::dequeue(const DataSampleListElement* stale)
+//DataSampleInstanceList::dequeue(const DataSampleElement* stale)
 //{
 //  if (head_ == 0) {
 //    return false;
@@ -92,13 +92,13 @@
 //
 //  // Same as dequeue from head.
 //  if (stale == head_) {
-//    DataSampleListElement* tmp = head_;
+//    DataSampleElement* tmp = head_;
 //    return dequeue_head(tmp);
 //  }
 //
 //  // Search from head_->next_instance_sample_.
-//  DataSampleListElement* previous = head_;
-//  DataSampleListElement* item;
+//  DataSampleElement* previous = head_;
+//  DataSampleElement* item;
 //  for (item = head_->next_instance_sample_;
 //       item != 0;
 //       item = item->next_instance_sample_) {
@@ -119,10 +119,10 @@
 //}
 //
 //const DataSampleSendList*
-//DataSampleSendList::send_list_containing_element(const DataSampleListElement* element,
+//DataSampleSendList::send_list_containing_element(const DataSampleElement* element,
 //                                                 std::vector<DataSampleSendList*> send_lists)
 //{
-//  DataSampleListElement* head = const_cast<DataSampleListElement*>(element);
+//  DataSampleElement* head = const_cast<DataSampleElement*>(element);
 //
 //  while (head->previous_send_sample_ != 0) {
 //    head = head->previous_send_sample_;
@@ -141,7 +141,7 @@
 //
 //
 //bool
-//DataSampleSendList::dequeue(const DataSampleListElement* stale)
+//DataSampleSendList::dequeue(const DataSampleElement* stale)
 //{
 //  if (head_ == 0) {
 //    return false;
@@ -149,13 +149,13 @@
 //
 //  // Same as dequeue from head.
 //  if (stale == head_) {
-//    DataSampleListElement* tmp = head_;
+//    DataSampleElement* tmp = head_;
 //    return dequeue_head(tmp);
 //  }
 //
 //  // Search from head_->next_send_sample_.
-//  DataSampleListElement* toRemove = 0;
-//  for (DataSampleListElement* item = head_->next_send_sample_;
+//  DataSampleElement* toRemove = 0;
+//  for (DataSampleElement* item = head_->next_send_sample_;
 //       item != 0 && toRemove == 0;
 //       item = item->next_send_sample_) {
 //    if (item == stale) {
@@ -190,7 +190,7 @@
 //DataSampleSendList::enqueue_tail(DataSampleSendList list)
 //{
 //  //// Make the appended list linked with next_send_sample_ first.
-//  //DataSampleListElement* cur = list.head_;
+//  //DataSampleElement* cur = list.head_;
 //
 //  //if (list.size_ > 1 && cur->next_send_sample_ == 0)
 //  // {
@@ -220,9 +220,9 @@
 //// -----------------------------------------------
 //
 //DataSampleSendListIterator::DataSampleSendListIterator(
-//  DataSampleListElement* head,
-//  DataSampleListElement* tail,
-//  DataSampleListElement* current)
+//  DataSampleElement* head,
+//  DataSampleElement* tail,
+//  DataSampleElement* current)
 //  : head_(head)
 //  , tail_(tail)
 //  , current_(current)

@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 //#include "DataSampleList.h"
 #include "DataSampleInstanceList.h"
-#include "DataSampleListElement.h"
+#include "DataSampleElement.h"
 #include "Definitions.h"
 #include "PublicationInstance.h"
 
@@ -24,7 +24,7 @@ namespace DCPS {
 
 
 bool
-DataSampleInstanceList::dequeue(const DataSampleListElement* stale)
+DataSampleInstanceList::dequeue(const DataSampleElement* stale)
 {
   if (head_ == 0) {
     return false;
@@ -32,13 +32,13 @@ DataSampleInstanceList::dequeue(const DataSampleListElement* stale)
 
   // Same as dequeue from head.
   if (stale == head_) {
-    DataSampleListElement* tmp = head_;
+    DataSampleElement* tmp = head_;
     return dequeue_head(tmp);
   }
 
   // Search from head_->next_instance_sample_.
-  DataSampleListElement* previous = head_;
-  DataSampleListElement* item;
+  DataSampleElement* previous = head_;
+  DataSampleElement* item;
   for (item = head_->next_instance_sample_;
        item != 0;
        item = item->next_instance_sample_) {

@@ -14,7 +14,7 @@
 //#include "transport/framework/TransportDefs.h"
 //#include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 ////#include "DataSampleHeader.h"
-//#include "DataSampleListElement.h"
+//#include "DataSampleElement.h"
 //
 ////#include <map>
 //#include <iterator>
@@ -30,9 +30,9 @@
 ////typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
 ////  TransportCustomizedElementAllocator;
 //
-//class DataSampleListElement;
-//typedef Cached_Allocator_With_Overflow<DataSampleListElement, ACE_Null_Mutex>
-//  DataSampleListElementAllocator;
+//class DataSampleElement;
+//typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
+//  DataSampleElementAllocator;
 //
 //const int MAX_READERS_TO_RESEND = 5;
 //
@@ -56,7 +56,7 @@
 // * @c over the "send samples" in a @c DataSampleList.
 // */
 //class OpenDDS_Dcps_Export DataSampleSendListIterator
-//  : public std::iterator<std::bidirectional_iterator_tag, DataSampleListElement> {
+//  : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement> {
 //public:
 //
 //  /// Default constructor.
@@ -64,9 +64,9 @@
 //   * This constructor is used when constructing an "end" iterator.
 //   */
 //
-//  DataSampleSendListIterator(DataSampleListElement* head,
-//                         DataSampleListElement* tail,
-//                         DataSampleListElement* current);
+//  DataSampleSendListIterator(DataSampleElement* head,
+//                         DataSampleElement* tail,
+//                         DataSampleElement* current);
 //
 //  DataSampleSendListIterator& operator++();
 //  DataSampleSendListIterator  operator++(int);
@@ -90,9 +90,9 @@
 //private:
 //  DataSampleSendListIterator();
 //
-//  DataSampleListElement* head_;
-//  DataSampleListElement* tail_;
-//  DataSampleListElement* current_;
+//  DataSampleElement* head_;
+//  DataSampleElement* tail_;
+//  DataSampleElement* current_;
 //
 //};
 //
@@ -121,69 +121,69 @@
 //  //PWO: HELPER METHODS FOR SETTING DATA MEMBERS
 //  // These methods should go away
 //
-//  void set_head(DataSampleListElement* newHead) { this->head_ = newHead;};
-//  void set_tail(DataSampleListElement* newTail) { this->tail_ = newTail;};
+//  void set_head(DataSampleElement* newHead) { this->head_ = newHead;};
+//  void set_tail(DataSampleElement* newTail) { this->tail_ = newTail;};
 //  void set_size(size_t size) { this->size_ = size;};
 //
 //  //PWO: END HELPER METHODS
 //
 //  ssize_t size() const {return size_;};
 //
-//  DataSampleListElement* head() const {return head_;};
+//  DataSampleElement* head() const {return head_;};
 //
-//  DataSampleListElement* tail() const {return tail_;};
+//  DataSampleElement* tail() const {return tail_;};
 //
-//  virtual void enqueue_tail(const DataSampleListElement* element) = 0;
+//  virtual void enqueue_tail(const DataSampleElement* element) = 0;
 //
-//  virtual bool dequeue_head(DataSampleListElement*& stale) = 0;
+//  virtual bool dequeue_head(DataSampleElement*& stale) = 0;
 //
 //  //PWO: took away the 'const' for the paramter 'stale'
-//  //virtual bool dequeue(/*const*/ DataSampleListElement* stale) = 0;
+//  //virtual bool dequeue(/*const*/ DataSampleElement* stale) = 0;
 //
-//  //virtual DataSampleListElement* dequeue_sample(const DataSampleListElement* stale) = 0;
-//
-//  /// This function assumes the list is the sending_data, sent_data,
-//  /// unsent_data or released_data which is linked by the
-//  /// next_sample/previous_sample.
-//  //void enqueue_tail_next_sample(DataSampleListElement* sample);
+//  //virtual DataSampleElement* dequeue_sample(const DataSampleElement* stale) = 0;
 //
 //  /// This function assumes the list is the sending_data, sent_data,
 //  /// unsent_data or released_data which is linked by the
 //  /// next_sample/previous_sample.
-//  //bool dequeue_head_next_sample(DataSampleListElement*& stale);
+//  //void enqueue_tail_next_sample(DataSampleElement* sample);
+//
+//  /// This function assumes the list is the sending_data, sent_data,
+//  /// unsent_data or released_data which is linked by the
+//  /// next_sample/previous_sample.
+//  //bool dequeue_head_next_sample(DataSampleElement*& stale);
 //
 //  /// This function assumes the list is the sending_data or sent_data
 //  /// which is linked by the next_send_sample.
-//  //void enqueue_tail_next_send_sample(const DataSampleListElement* sample);
+//  //void enqueue_tail_next_send_sample(const DataSampleElement* sample);
 //
 //  /// This function assumes the list is the sending_data or sent_data
 //  /// which is linked by the next_send_sample.
-//  //bool dequeue_head_next_send_sample(DataSampleListElement*& stale);
+//  //bool dequeue_head_next_send_sample(DataSampleElement*& stale);
 //
 //  /// This function assumes the list is the instance samples that is
 //  /// linked by the next_instance_sample_.
-////  void enqueue_tail_next_instance_sample(DataSampleListElement* sample);
+////  void enqueue_tail_next_instance_sample(DataSampleElement* sample);
 //
 //  /// This function assumes the list is the instance samples that is
 //  /// linked by the next_instance_sample_.
-////  bool dequeue_head_next_instance_sample(DataSampleListElement*& stale);
+////  bool dequeue_head_next_instance_sample(DataSampleElement*& stale);
 //
 //  /// This function assumes that the list is a list that linked using
 //  /// next_sample/previous_sample but the stale element's position is
 //  /// unknown.
-//  //bool dequeue_next_sample(DataSampleListElement* stale);
+//  //bool dequeue_next_sample(DataSampleElement* stale);
 //
 //  /// This function assumes that the list is a list that linked using
 //  /// next_instance_sample but the stale element's position is
 //  /// unknown.
-////  DataSampleListElement*
-////  dequeue_next_instance_sample(const DataSampleListElement* stale);
+////  DataSampleElement*
+////  dequeue_next_instance_sample(const DataSampleElement* stale);
 //
 //  /// This function assumes that the list is a list that linked using
 //  /// next_send_sample but the stale element's position is
 //  /// unknown.
-// // DataSampleListElement*
-// // dequeue_next_send_sample(const DataSampleListElement* stale);
+// // DataSampleElement*
+// // dequeue_next_send_sample(const DataSampleElement* stale);
 //
 //  /// This function assumes the appended list is a list linked with
 //  /// previous/next_sample_ and might be linked with next_send_sample_.
@@ -200,10 +200,10 @@
 //protected:
 //
 //  /// The first element of the list.
-//  DataSampleListElement* head_;
+//  DataSampleElement* head_;
 //
 //  /// The last element of the list.
-//  DataSampleListElement* tail_;
+//  DataSampleElement* tail_;
 //
 //  /// Number of elements in the list.
 //  ssize_t                size_;
@@ -220,11 +220,11 @@
 //
 //  //void reset();
 //
-//  void enqueue_tail(const DataSampleListElement* element);
+//  void enqueue_tail(const DataSampleElement* element);
 //
-//  bool dequeue_head(DataSampleListElement*& stale);
+//  bool dequeue_head(DataSampleElement*& stale);
 //
-//  bool dequeue(const DataSampleListElement* stale);
+//  bool dequeue(const DataSampleElement* stale);
 //
 //};
 //
@@ -237,11 +237,11 @@
 //
 //  //void reset();
 //
-//  void enqueue_tail(const DataSampleListElement* element);
+//  void enqueue_tail(const DataSampleElement* element);
 //
-//  bool dequeue_head(DataSampleListElement*& stale);
+//  bool dequeue_head(DataSampleElement*& stale);
 //
-//  bool dequeue(const DataSampleListElement* stale);
+//  bool dequeue(const DataSampleElement* stale);
 //
 //};
 //
@@ -255,15 +255,15 @@
 //  ~DataSampleSendList(){};
 //
 //  //void reset();
-//  static const DataSampleSendList* send_list_containing_element(const DataSampleListElement* element,
+//  static const DataSampleSendList* send_list_containing_element(const DataSampleElement* element,
 //                                                                std::vector<DataSampleSendList*> send_lists);
 //
-//  void enqueue_tail(const DataSampleListElement* element);
+//  void enqueue_tail(const DataSampleElement* element);
 //  void enqueue_tail(DataSampleSendList list);
 //
-//  bool dequeue_head(DataSampleListElement*& stale);
+//  bool dequeue_head(DataSampleElement*& stale);
 //
-//  bool dequeue(const DataSampleListElement* stale);
+//  bool dequeue(const DataSampleElement* stale);
 //
 //};
 //

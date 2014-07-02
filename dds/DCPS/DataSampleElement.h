@@ -6,8 +6,8 @@
 // * See: http://www.opendds.org/license.html
 // */
 //
-#ifndef OPENDDS_DCPS_DATASAMPLELISTELEMENT_H
-#define OPENDDS_DCPS_DATASAMPLELISTELEMENT_H
+#ifndef OPENDDS_DCPS_DATASAMPLEELEMENT_H
+#define OPENDDS_DCPS_DATASAMPLEELEMENT_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "Definitions.h"
@@ -84,25 +84,25 @@ typedef ACE_Message_Block DataSample;
 *       container, since we want to centralize the
 *       allocation/deallocation so that we can minimize locking.  By
 *       grabbing a single lock, allocating the
-*       buffer/Data_Block/Message_Block/DataSampleListElement at the
+*       buffer/Data_Block/Message_Block/DataSampleElement at the
 *       same time, we only pay once for all of the allocations.  They
 *       are all presumably from a cache (for the most part) anyway, so
 *       it should be fairly quick.
 */
-class OpenDDS_Dcps_Export DataSampleListElement {
+class OpenDDS_Dcps_Export DataSampleElement {
 
 
 public:
-  DataSampleListElement(PublicationId                   publication_id,
+  DataSampleElement(PublicationId                   publication_id,
                         TransportSendListener*          send_listner,
                         PublicationInstance*            handle,
                         TransportSendElementAllocator*  tse_allocator,
                         TransportCustomizedElementAllocator* tce_allocator);
 
-  DataSampleListElement(const DataSampleListElement& elem);
-  DataSampleListElement& operator=(const DataSampleListElement& elem);
+  DataSampleElement(const DataSampleElement& elem);
+  DataSampleElement& operator=(const DataSampleElement& elem);
 
-  ~DataSampleListElement();
+  ~DataSampleElement();
 
   /// The OpenDDS DCPS header for this sample
   DataSampleHeader       header_;
@@ -141,9 +141,9 @@ public:
   std::map<DataLinkIdType, GUIDSeq_var> filter_per_link_;
   //@}
 
-  DataSampleListElement* get_next_send_sample() const {return next_send_sample_;};
+  DataSampleElement* get_next_send_sample() const {return next_send_sample_;};
 
-  void set_next_send_sample(DataSampleListElement* next_send_sample) { this->next_send_sample_ = next_send_sample;};
+  void set_next_send_sample(DataSampleElement* next_send_sample) { this->next_send_sample_ = next_send_sample;};
 
 private:
 
@@ -159,15 +159,15 @@ private:
   /// container _much_ more efficient.
 
   /// Thread of all data within a DataWriter.
-  mutable DataSampleListElement* previous_sample_;
-  mutable DataSampleListElement* next_sample_;
+  mutable DataSampleElement* previous_sample_;
+  mutable DataSampleElement* next_sample_;
 
   /// Thread of data within the instance.
-  mutable DataSampleListElement* next_instance_sample_;
+  mutable DataSampleElement* next_instance_sample_;
 
   /// Thread of data being unsent/sending/sent/released.
-  mutable DataSampleListElement* next_send_sample_;
-  mutable DataSampleListElement* previous_send_sample_;
+  mutable DataSampleElement* next_send_sample_;
+  mutable DataSampleElement* previous_send_sample_;
 };
 
 
@@ -175,7 +175,7 @@ private:
 } // namespace OpenDDS
 
 #if defined(__ACE_INLINE__)
-#include "DataSampleListElement.inl"
+#include "DataSampleElement.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* OPENDDS_DCPS_DATASAMPLELISTELEMENT_H */
+#endif  /* OPENDDS_DCPS_DATASAMPLEELEMENT_H */

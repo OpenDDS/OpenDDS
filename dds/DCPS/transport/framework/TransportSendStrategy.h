@@ -31,7 +31,7 @@ class ThreadSynchResource;
 class TransportQueueElement;
 class TransportSendElement;
 class TransportSendBuffer;
-class DataSampleListElement;
+class DataSampleElement;
 class QueueRemoveVisitor;
 class PacketRemoveVisitor;
 
@@ -78,7 +78,7 @@ public:
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
-  RemoveResult remove_sample(const DataSampleListElement* sample);
+  RemoveResult remove_sample(const DataSampleElement* sample);
 
   void remove_all_msgs(RepoId pub_id);
 

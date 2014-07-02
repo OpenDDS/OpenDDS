@@ -15,7 +15,7 @@
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Auto_Ptr.h"
@@ -201,7 +201,7 @@ int ThreadPerConnectionSendTask::close(u_long flag)
 }
 
 RemoveResult
-ThreadPerConnectionSendTask::remove_sample(const DataSampleListElement* element)
+ThreadPerConnectionSendTask::remove_sample(const DataSampleElement* element)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask", "remove_sample");
 

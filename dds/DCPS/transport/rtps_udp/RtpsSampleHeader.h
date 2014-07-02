@@ -24,7 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class ReceivedDataSample;
-class DataSampleListElement;
+class DataSampleElement;
 class DisjointSequence;
 
 /// Adapt the TransportReceiveStrategy for RTPS's "sample" (submessage) Header
@@ -77,7 +77,7 @@ public:
   // into_received_data_sample() so they are used on the sending side:
   // translating from an OpenDDS data structure to the RTPS format.
   static void populate_data_sample_submessages(RTPS::SubmessageSeq& subm,
-                                               const DataSampleListElement& dsle,
+                                               const DataSampleElement& dsle,
                                                bool requires_inline_qos);
   static void populate_data_control_submessages(RTPS::SubmessageSeq& subm,
                                                 const TransportSendControlElement& tsce,

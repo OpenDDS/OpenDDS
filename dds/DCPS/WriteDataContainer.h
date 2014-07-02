@@ -29,7 +29,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class DataSampleListElement;
+class DataSampleElement;
 class DataSampleInstanceList;
 
 
@@ -55,8 +55,8 @@ typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanc
  *
  * This container contains threaded lists of all data written to a
  * given DataWriter. The real data sample is represented by the
- * DataSampleListElement.  The data_holder_ holds all
- * DataSampleListElement in the writing order via the
+ * DataSampleElement.  The data_holder_ holds all
+ * DataSampleElement in the writing order via the
  * next_sample_/previous_sample_ thread. The instance list in
  * PublicationInstance links samples via the next_instance_sample_
  * thread.
@@ -64,13 +64,13 @@ typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanc
  * There are four state transition lists - unsent, sending, sent
  * and released during the data writing. These lists are linked
  * via the next_send_sample_/previous_send_sample_ thread. Any
- * DataSampleListElement should be in one of these four lists and
+ * DataSampleElement should be in one of these four lists and
  * SHOULD NOT be shared between these four lists. A normal
- * transition of a DataSampleListElement would be
- * unsent->sending->sent, but a DataSampleListElement could be
+ * transition of a DataSampleElement would be
+ * unsent->sending->sent, but a DataSampleElement could be
  * moved from sending to released list when the instance reaches
  * maximum samples allowed and the transport is still using the
- * sample. A DataSampleListElement is removed from released or
+ * sample. A DataSampleElement is removed from released or
  * sent list after it's delivered or dropped and is freed when
  * it's removed from release list or when the instance queue needs
  * more space.  The real data sample will be freed when the
@@ -125,7 +125,7 @@ public:
     bool             should_block ,
     /// The timeout for write.
     ::DDS::Duration_t max_blocking_time,
-    /// The number of chunks that the DataSampleListElementAllocator
+    /// The number of chunks that the DataSampleElementAllocator
     /// needs allocate.
     size_t           n_chunks,
     /// Domain ID.
@@ -158,7 +158,7 @@ public:
   */
   DDS::ReturnCode_t
   enqueue(
-    DataSampleListElement* sample,
+    DataSampleElement* sample,
     DDS::InstanceHandle_t instance);
 
   /**
@@ -231,7 +231,7 @@ public:
    * on the list returned is moved from the internal unsent_data_
    * list to the internal sending_data_ list as part of this call.
    * The entire list is linked via the
-   * DataSampleListElement.next_send_sample_ link as well.
+   * DataSampleElement.next_send_sample_ link as well.
    */
   DataSampleSendList get_unsent_data() ;
 
@@ -256,7 +256,7 @@ public:
    * list.  If there is any threads waiting for available space
    *  then it needs wake up these threads.
    */
-  void data_delivered(const DataSampleListElement* sample);
+  void data_delivered(const DataSampleElement* sample);
 
   /**
    * This method is called by the transport to notify the sample
@@ -273,11 +273,11 @@ public:
    * remove_sample and data_dropped() is a result of
    * remove_sample().
    */
-  void data_dropped(const DataSampleListElement* element,
+  void data_dropped(const DataSampleElement* element,
                     bool dropped_by_transport);
 
   /**
-   * Allocate a DataSampleListElement object and check the space
+   * Allocate a DataSampleElement object and check the space
    * availability in the instance list for newly allocated element.
    * For the blocking write case, if the instance list size reaches
    * depth_, then the new element will be added to the waiting list
@@ -289,7 +289,7 @@ public:
    * the oldest sample.
    */
   DDS::ReturnCode_t obtain_buffer(
-    DataSampleListElement*& element,
+    DataSampleElement*& element,
     DDS::InstanceHandle_t handle);
 
   /**
@@ -298,7 +298,7 @@ public:
    * the memory is allocated by some allocator then the memory
    * needs to be released to the allocator.
    */
-  void release_buffer(DataSampleListElement* element);
+  void release_buffer(DataSampleElement* element);
 
   /**
    * Unregister all instances managed by this data containers.
@@ -369,7 +369,7 @@ private:
     DataSampleInstanceList& instance_list,
     bool& released);
 
-  void wakeup_blocking_writers (DataSampleListElement* stale,
+  void wakeup_blocking_writers (DataSampleElement* stale,
                                PublicationInstance* instance);
 
 private:
@@ -394,7 +394,7 @@ private:
   /// List of the data reenqueued to support the
   /// TRANSIENT_LOCAL_DURABILITY_QOS policy. It duplicates the
   /// samples in sent and sending list. These
-  /// DataSampleListElement will be appended to released_data_
+  /// DataSampleElement will be appended to released_data_
   /// list after passing to the transport.
   DataSampleSendList   resend_data_;
 
@@ -458,9 +458,9 @@ private:
   /// needs initialize.
   size_t                                    n_chunks_;
 
-  /// The cached allocator to allocate DataSampleListElement
+  /// The cached allocator to allocate DataSampleElement
   /// objects.
-  DataSampleListElementAllocator sample_list_element_allocator_;
+  DataSampleElementAllocator sample_list_element_allocator_;
 
   /// The allocator for TransportSendElement.
   /// The TransportSendElement allocator is put here because it

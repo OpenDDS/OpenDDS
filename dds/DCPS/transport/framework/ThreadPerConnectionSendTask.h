@@ -27,7 +27,7 @@ namespace DCPS {
 
 class DataLink;
 class TransportQueueElement;
-class DataSampleListElement;
+class DataSampleElement;
 class TransportSendElement;
 
 
@@ -76,7 +76,7 @@ public:
   virtual int close(u_long flag = 0);
 
   /// Remove sample from the thread per connection queue.
-  RemoveResult remove_sample(const DataSampleListElement* element);
+  RemoveResult remove_sample(const DataSampleElement* element);
 
 private:
 

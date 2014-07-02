@@ -9,7 +9,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 //#include "DataSampleList.h"
 #include "DataSampleWriterList.h"
-#include "DataSampleListElement.h"
+#include "DataSampleElement.h"
 #include "Definitions.h"
 #include "PublicationInstance.h"
 
@@ -23,21 +23,21 @@ namespace OpenDDS {
 namespace DCPS {
 
 bool
-DataSampleWriterList::dequeue(const DataSampleListElement* stale)
+DataSampleWriterList::dequeue(const DataSampleElement* stale)
 {
   if (head_ == 0) {
     return false;
   }
 
   if (stale == head_) {
-    DataSampleListElement* head = head_;
+    DataSampleElement* head = head_;
     return dequeue_head(head);
   }
 
   // Search from head_->next_sample_.
   bool found = false;
 
-  for (DataSampleListElement* item = head_->next_sample_ ;
+  for (DataSampleElement* item = head_->next_sample_ ;
        item != 0 ;
        item = item->next_sample_) {
     if (item == stale) {

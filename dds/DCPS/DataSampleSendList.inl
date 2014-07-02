@@ -6,7 +6,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "DataSampleListElement.h"
+#include "DataSampleElement.h"
 #include <algorithm>
 
 namespace OpenDDS {
@@ -30,14 +30,14 @@ void DataSampleSendList::reset()
 
 ACE_INLINE
 void
-DataSampleSendList::enqueue_tail(const DataSampleListElement* sample)
+DataSampleSendList::enqueue_tail(const DataSampleElement* sample)
 {
   ++size_;
 
   // const_cast here so that higher layers don't need to pass around so many
-  // non-const pointers to DataSampleListElement.  Ideally the design would be
+  // non-const pointers to DataSampleElement.  Ideally the design would be
   // changed to accommodate const-correctness throughout.
-  DataSampleListElement* mSample = const_cast<DataSampleListElement*>(sample);
+  DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
 
   if (head_ == 0) {
     // First sample in list.
@@ -55,7 +55,7 @@ DataSampleSendList::enqueue_tail(const DataSampleListElement* sample)
 
 ACE_INLINE
 bool
-DataSampleSendList::dequeue_head(DataSampleListElement*& stale)
+DataSampleSendList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the instance list.

@@ -1986,13 +1986,13 @@ Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
 }
 
 void
-Sedp::Writer::data_delivered(const DCPS::DataSampleListElement* dsle)
+Sedp::Writer::data_delivered(const DCPS::DataSampleElement* dsle)
 {
   delete dsle;
 }
 
 void
-Sedp::Writer::data_dropped(const DCPS::DataSampleListElement* dsle, bool)
+Sedp::Writer::data_dropped(const DCPS::DataSampleElement* dsle, bool)
 {
   delete dsle;
 }
@@ -2040,8 +2040,8 @@ Sedp::Writer::write_sample(const ParameterList& plist,
 
   if (result == DDS::RETCODE_OK) {
     // Send sample
-    DCPS::DataSampleListElement* list_el =
-      new DCPS::DataSampleListElement(repo_id_, this, 0, &alloc_, 0);
+    DCPS::DataSampleElement* list_el =
+      new DCPS::DataSampleElement(repo_id_, this, 0, &alloc_, 0);
     set_header_fields(list_el->header_, size, reader, sequence);
 
     list_el->sample_ = new ACE_Message_Block(size);

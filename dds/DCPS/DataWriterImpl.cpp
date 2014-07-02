@@ -22,7 +22,7 @@
 #include "MonitorFactory.h"
 #include "TypeSupportImpl.h"
 #include "DataSampleSendList.h"
-#include "DataSampleListElement.h"
+#include "DataSampleElement.h"
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
@@ -484,7 +484,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       SequenceNumber& seq =
         reader_info_.find(remote_id)->second.expected_sequence_;
 
-      for (DataSampleListElement* list_el = list.head(); list_el;
+      for (DataSampleElement* list_el = list.head(); list_el;
            list_el = list_el->get_next_send_sample()) {
         list_el->header_.historic_sample_ = true;
         if (list_el->header_.sequence_ > seq) {
@@ -1704,7 +1704,7 @@ DataWriterImpl::write(DataSample* data,
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  DataSampleListElement* element = 0;
+  DataSampleElement* element = 0;
   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
 
   if (ret == DDS::RETCODE_TIMEOUT) {
@@ -2024,7 +2024,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
 }
 
 void
-DataWriterImpl::data_delivered(const DataSampleListElement* sample)
+DataWriterImpl::data_delivered(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
 
@@ -2100,7 +2100,7 @@ DataWriterImpl::parent() const
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 bool
-DataWriterImpl::filter_out(const DataSampleListElement& elt,
+DataWriterImpl::filter_out(const DataSampleElement& elt,
                            const FilterEvaluator& evaluator,
                            const DDS::StringSeq& expression_params) const
 {
@@ -2194,7 +2194,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 void
-DataWriterImpl::data_dropped(const DataSampleListElement* element,
+DataWriterImpl::data_dropped(const DataSampleElement* element,
                              bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_dropped",6);

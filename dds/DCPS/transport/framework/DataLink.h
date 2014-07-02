@@ -45,7 +45,7 @@ class  TransportReceiveListener;
 class  TransportSendListener;
 class  TransportQueueElement;
 class  ReceivedDataSample;
-class  DataSampleListElement;
+class  DataSampleElement;
 class  ThreadPerConnectionSendTask;
 
 typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan> DataLinkSetMap;
@@ -137,7 +137,7 @@ public:
   /// This method is essentially an "undo_send()" method.  It's goal
   /// is to remove all traces of the sample from this DataLink (if
   /// the sample is even known to the DataLink).
-  RemoveResult remove_sample(const DataSampleListElement* sample);
+  RemoveResult remove_sample(const DataSampleElement* sample);
 
   // ciju: Called by LinkSet with locks held
   void remove_all_msgs(RepoId pub_id);

@@ -53,7 +53,7 @@ namespace DCPS {
 
 
 class DataWriterImpl;
-class DataSampleListElement;
+class DataSampleElement;
 class DataSampleSendList;
 class WriteDataContainer;
 
@@ -147,7 +147,7 @@ public:
   public:
 
     sample_data_type();
-    sample_data_type(DataSampleListElement & element,
+    sample_data_type(DataSampleElement & element,
                      ACE_Allocator * allocator);
     sample_data_type(DDS::Time_t timestamp,
                      const ACE_Message_Block & mb,

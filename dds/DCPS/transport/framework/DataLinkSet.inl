@@ -20,7 +20,7 @@
 #endif
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
+OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "send", 6);
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
@@ -152,7 +152,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
 }
 
 ACE_INLINE bool
-OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample)
+OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_sample", 6);
 

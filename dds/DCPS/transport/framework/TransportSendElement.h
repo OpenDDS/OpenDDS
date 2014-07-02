@@ -12,7 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "TransportQueueElement.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -21,10 +21,10 @@ class OpenDDS_Dcps_Export TransportSendElement : public TransportQueueElement {
 public:
 
   static TransportSendElement* alloc(int initial_count,
-                                     const DataSampleListElement* sample);
+                                     const DataSampleElement* sample);
 
   TransportSendElement(int initial_count,
-                       const DataSampleListElement* sample,
+                       const DataSampleElement* sample,
                        TransportSendElementAllocator* allocator = 0);
 
   virtual ~TransportSendElement();
@@ -42,7 +42,7 @@ public:
   virtual SequenceNumber sequence() const;
 
   /// Original sample from send listener.
-  const DataSampleListElement* sample() const;
+  const DataSampleElement* sample() const;
 
   virtual bool owned_by_transport();
 
@@ -54,7 +54,7 @@ private:
 
   /// This is the actual element that the transport framework was
   /// asked to send.
-  const DataSampleListElement* element_;
+  const DataSampleElement* element_;
 
   /// Reference to TransportSendElement allocator.
   TransportSendElementAllocator* allocator_;

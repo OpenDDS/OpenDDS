@@ -3,7 +3,7 @@
 #include "dds/DCPS/DataSampleSendList.h"
 #include "dds/DCPS/DataSampleInstanceList.h"
 #include "dds/DCPS/DataSampleWriterList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RepoIdBuilder.h"
@@ -303,13 +303,13 @@ void run_sample_list_test ()
   TEST_CHECK( list.begin() == list.end() );
 
   OpenDDS::DCPS::RepoId repoId;
-  DataSampleListElement* sample[3];
+  DataSampleElement* sample[3];
   ssize_t i;
   for (i = 0; i < 3; i ++)
   {
     repoId.entityId.entityKey[2] = i;
     sample[i]
-      = new DataSampleListElement(repoId, 0, 0, 0, 0);
+      = new DataSampleElement(repoId, 0, 0, 0, 0);
     list.enqueue_tail(sample[i]);
   }
   TEST_CHECK( list.begin() != list.end() );
@@ -377,7 +377,7 @@ void run_next_sample_test (ssize_t size)
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
-  DataSampleListElement* middle = 0;
+  DataSampleElement* middle = 0;
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
@@ -394,8 +394,8 @@ void run_next_sample_test (ssize_t size)
   for (ssize_t i = 0; i < size; i ++)
   {
     repoId.entityId.entityKey[2] = i;
-    DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
+    DataSampleElement* sample
+      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -433,7 +433,7 @@ void run_next_sample_test (ssize_t size)
     {
       continue;
     }
-    DataSampleListElement* sample;
+    DataSampleElement* sample;
     TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,
@@ -469,7 +469,7 @@ void run_next_send_sample_test (ssize_t size)
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
-  DataSampleListElement* middle = 0;
+  DataSampleElement* middle = 0;
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
@@ -486,16 +486,16 @@ void run_next_send_sample_test (ssize_t size)
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
     repoId.entityId.entityKey[2] = i;
-    DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
+    DataSampleElement* sample
+      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     list.enqueue_tail (sample);
   }
 
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
     repoId.entityId.entityKey[2] = i;
-    DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
+    DataSampleElement* sample
+      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -540,7 +540,7 @@ void run_next_send_sample_test (ssize_t size)
     {
       continue;
     }
-    DataSampleListElement* sample;
+    DataSampleElement* sample;
     TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,
@@ -574,7 +574,7 @@ void run_next_instance_sample_test (ssize_t size)
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
-  DataSampleListElement* middle = 0;
+  DataSampleElement* middle = 0;
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
@@ -591,8 +591,8 @@ void run_next_instance_sample_test (ssize_t size)
   for (ssize_t i = 0; i < size; i ++)
   {
     repoId.entityId.entityKey[2] = i;
-    DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
+    DataSampleElement* sample
+      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
@@ -636,7 +636,7 @@ void run_next_instance_sample_test (ssize_t size)
     {
       continue;
     }
-    DataSampleListElement* sample;
+    DataSampleElement* sample;
     TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,

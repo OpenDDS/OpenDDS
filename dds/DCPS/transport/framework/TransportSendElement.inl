@@ -10,7 +10,7 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TransportSendElement::TransportSendElement(int initial_count,
-  const DataSampleListElement* sample,
+  const DataSampleElement* sample,
   TransportSendElementAllocator* allocator)
   : TransportQueueElement(initial_count),
     element_(sample),
@@ -22,7 +22,7 @@ OpenDDS::DCPS::TransportSendElement::TransportSendElement(int initial_count,
 ACE_INLINE /*static*/
 OpenDDS::DCPS::TransportSendElement*
 OpenDDS::DCPS::TransportSendElement::alloc(int initial_count,
-                                           const DataSampleListElement* sample)
+                                           const DataSampleElement* sample)
 {
   TransportSendElement* ret;
   TransportSendElementAllocator* al = sample->transport_send_element_allocator_;
@@ -48,7 +48,7 @@ OpenDDS::DCPS::TransportSendElement::sequence() const
 }
 
 ACE_INLINE
-const OpenDDS::DCPS::DataSampleListElement*
+const OpenDDS::DCPS::DataSampleElement*
 OpenDDS::DCPS::TransportSendElement::sample() const
 {
   return this->element_;

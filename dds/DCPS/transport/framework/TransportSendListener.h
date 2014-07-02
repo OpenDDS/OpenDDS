@@ -20,7 +20,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class DataSampleListElement;
+class DataSampleElement;
 struct DataSampleHeader;
 typedef ACE_Message_Block DataSample;
 
@@ -34,8 +34,8 @@ public:
 
   virtual ~TransportSendListener();
 
-  virtual void data_delivered(const DataSampleListElement* sample);
-  virtual void data_dropped(const DataSampleListElement* sample,
+  virtual void data_delivered(const DataSampleElement* sample);
+  virtual void data_dropped(const DataSampleElement* sample,
                             bool dropped_by_transport);
 
   virtual void control_delivered(ACE_Message_Block* sample);

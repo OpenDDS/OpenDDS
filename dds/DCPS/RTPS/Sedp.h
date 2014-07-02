@@ -23,7 +23,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/DataSampleHeader.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -187,9 +187,9 @@ private:
     bool assoc(const DCPS::AssociationData& subscription);
 
     // Implementing TransportSendListener
-    void data_delivered(const DCPS::DataSampleListElement*);
+    void data_delivered(const DCPS::DataSampleElement*);
 
-    void data_dropped(const DCPS::DataSampleListElement*, bool by_transport);
+    void data_dropped(const DCPS::DataSampleElement*, bool by_transport);
 
     void control_delivered(ACE_Message_Block* sample);
 

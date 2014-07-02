@@ -72,7 +72,7 @@ protected:
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,
                                  void* extra = 0);
-  bool remove_sample(const DataSampleListElement* sample);
+  bool remove_sample(const DataSampleElement* sample);
   bool remove_all_msgs();
 
 private:

@@ -22,7 +22,7 @@
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/DataSampleHeader.h"
 //#include "dds/DCPS/DataSampleList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
@@ -1416,7 +1416,7 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
 }
 
 RemoveResult
-TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
+TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "remove_sample", 6);
 

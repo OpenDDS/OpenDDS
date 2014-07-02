@@ -6,7 +6,7 @@
 #include "dds/DCPS/DataSampleHeader.h"
 //#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DataSampleSendList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/GuidBuilder.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
@@ -54,7 +54,7 @@ namespace
   class Cleanup
   {
   public:
-    Cleanup(OpenDDS::DCPS::DataSampleListElementAllocator& alloc, OpenDDS::DCPS::DataSampleSendList& list)
+    Cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc, OpenDDS::DCPS::DataSampleSendList& list)
     : alloc_(alloc)
     , list_(list)
     {
@@ -62,16 +62,16 @@ namespace
 
     ~Cleanup()
     {
-      OpenDDS::DCPS::DataSampleListElement* element = list_.head();
+      OpenDDS::DCPS::DataSampleElement* element = list_.head();
       while (element != 0) {
-        OpenDDS::DCPS::DataSampleListElement* const to_remove = element;
+        OpenDDS::DCPS::DataSampleElement* const to_remove = element;
         element = element->get_next_send_sample();
-        to_remove->~DataSampleListElement();
+        to_remove->~DataSampleElement();
         alloc_.free(to_remove);
       }
     }
   private:
-    OpenDDS::DCPS::DataSampleListElementAllocator& alloc_;
+    OpenDDS::DCPS::DataSampleElementAllocator& alloc_;
     OpenDDS::DCPS::DataSampleSendList& list_;
   };
 }
@@ -88,7 +88,7 @@ SimpleDataWriter::transport_lost()
 
 
 void
-SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample)
+SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleElement* sample)
 {
   DBG_ENTRY("SimpleDataWriter","data_delivered");
 
@@ -110,7 +110,7 @@ SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleListElement* sam
 
 
 void
-SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
+SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleElement* sample,
                                bool dropped_by_transport)
 {
   DBG_ENTRY("SimpleDataWriter","data_dropped");
@@ -166,9 +166,9 @@ DDS_TEST::run(int num_messages, int msg_size)
   header.message_id_ = 1;
   header.publication_id_ = this->pub_id_;
 
-  OpenDDS::DCPS::DataSampleListElement* prev_element = 0;
+  OpenDDS::DCPS::DataSampleElement* prev_element = 0;
 
-  OpenDDS::DCPS::DataSampleListElementAllocator allocator(num_messages);
+  OpenDDS::DCPS::DataSampleElementAllocator allocator(num_messages);
   Cleanup cleanup(allocator, samples);
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(num_messages, sizeof (OpenDDS::DCPS::TransportSendElement));
 
@@ -204,12 +204,12 @@ DDS_TEST::run(int num_messages, int msg_size)
     // Chain the "Data Block" to the "Header Block"
     header_block->cont(data_block);
 
-    // Create the DataSampleListElement now.
-    OpenDDS::DCPS::DataSampleListElement* element;
+    // Create the DataSampleElement now.
+    OpenDDS::DCPS::DataSampleElement* element;
 
     ACE_NEW_MALLOC_RETURN(element,
-      static_cast<OpenDDS::DCPS::DataSampleListElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleListElement))),
-      OpenDDS::DCPS::DataSampleListElement(this->pub_id_, this, 0, &trans_allocator, 0), 1);
+      static_cast<OpenDDS::DCPS::DataSampleElement*>(allocator.malloc(sizeof (OpenDDS::DCPS::DataSampleElement))),
+      OpenDDS::DCPS::DataSampleElement(this->pub_id_, this, 0, &trans_allocator, 0), 1);
 
     // The Sample Element will hold on to the chain of blocks (header + data).
     element->sample_ = header_block;

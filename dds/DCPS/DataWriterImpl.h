@@ -52,7 +52,7 @@ class PublisherImpl;
 class DomainParticipantImpl;
 class OfferedDeadlineWatchdog;
 class Monitor;
-class DataSampleListElement;
+class DataSampleElement;
 class DataSampleSendList;
 struct AssociationData;
 
@@ -71,7 +71,7 @@ struct AssociationData;
 * @note: This class is responsible for allocating memory for the
 *        header message block
 *        (MessageBlock + DataBlock + DataSampleHeader) and the
-*        DataSampleListElement.
+*        DataSampleElement.
 *        The data-type datawriter is responsible for allocating
 *        memory for the sample data message block.
 *        (e.g. MessageBlock + DataBlock + Foo data). But it gives
@@ -294,7 +294,7 @@ public:
    * delivered and it is delegated to WriteDataContainer
    * to adjust the internal data sample threads.
    */
-  void data_delivered(const DataSampleListElement* sample);
+  void data_delivered(const DataSampleElement* sample);
 
   /**
    * This is called by transport to notify that the control
@@ -354,7 +354,7 @@ public:
    * sample is dropped and it delegates to WriteDataContainer
    * to update the internal list.
    */
-  void data_dropped(const DataSampleListElement* element,
+  void data_dropped(const DataSampleElement* element,
                     bool dropped_by_transport);
 
   /**
@@ -454,7 +454,7 @@ public:
   virtual EntityImpl* parent() const;
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-  bool filter_out(const DataSampleListElement& elt,
+  bool filter_out(const DataSampleElement& elt,
                   const FilterEvaluator& evaluator,
                   const DDS::StringSeq& expression_params) const;
 #endif

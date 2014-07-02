@@ -307,19 +307,19 @@ TransportClient::send_response(const RepoId& peer,
 void
 TransportClient::send(const DataSampleSendList& samples)
 {
-  DataSampleListElement* cur = samples.head();
+  DataSampleElement* cur = samples.head();
 
   while (cur) {
     // VERY IMPORTANT NOTE:
     //
     // We have to be very careful in how we deal with the current
-    // DataSampleListElement.  The issue is that once we have invoked
+    // DataSampleElement.  The issue is that once we have invoked
     // data_delivered() on the send_listener_ object, or we have invoked
     // send() on the pub_links, we can no longer access the current
-    // DataSampleListElement!  Thus, we need to get the next
-    // DataSampleListElement (pointer) from the current element now,
+    // DataSampleElement!  Thus, we need to get the next
+    // DataSampleElement (pointer) from the current element now,
     // while it is safe.
-    DataSampleListElement* next_elem = cur->get_next_send_sample();
+    DataSampleElement* next_elem = cur->get_next_send_sample();
     DataLinkSet_rch pub_links =
       (cur->num_subs_ > 0)
       ? links_.select_links(cur->subscription_ids_, cur->num_subs_)
@@ -353,7 +353,7 @@ TransportClient::send(const DataSampleSendList& samples)
       // - If the sample should be filtered out of all subscriptions on a given
       //   DataLink, then exclude that link from the subset that we'll send to.
       // - If the sample should be filtered out of some (or none) of the subs,
-      //   then record that information in the DataSampleListElement so that the
+      //   then record that information in the DataSampleElement so that the
       //   header's content_filter_entries_ can be marshaled before it's sent.
       if (cur->filter_out_.ptr()) {
         DataLinkSet_rch subset;
@@ -399,7 +399,7 @@ TransportClient::send(const DataSampleSendList& samples)
       pub_links->send(cur);
     }
 
-    // Move on to the next DataSampleListElement to send.
+    // Move on to the next DataSampleElement to send.
     cur = next_elem;
   }
 
@@ -442,7 +442,7 @@ TransportClient::send_control(const DataSampleHeader& header,
 }
 
 bool
-TransportClient::remove_sample(const DataSampleListElement* sample)
+TransportClient::remove_sample(const DataSampleElement* sample)
 {
   return links_.remove_sample(sample);
 }

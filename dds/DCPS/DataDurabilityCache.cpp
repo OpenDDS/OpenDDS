@@ -14,7 +14,7 @@
 #include "Service_Participant.h"
 //#include "DataSampleList.h"
 #include "DataSampleSendList.h"
-#include "DataSampleListElement.h"
+#include "DataSampleElement.h"
 #include "WriteDataContainer.h"
 #include "DataWriterImpl.h"
 #include "Qos_Helper.h"
@@ -177,7 +177,7 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::sample_data_type()
 }
 
 OpenDDS::DCPS::DataDurabilityCache::sample_data_type::sample_data_type(
-  DataSampleListElement & element,
+  DataSampleElement & element,
   ACE_Allocator * a)
   : length_(0)
   , sample_(0)
@@ -490,7 +490,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
       qos.history_depth,
       qos.max_samples_per_instance);
 
-  // Iterator to first DataSampleListElement to be copied.
+  // Iterator to first DataSampleElement to be copied.
   DataSampleSendList::iterator element(the_data.begin());
 
   if (depth < 0)
@@ -616,7 +616,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
     }
 
     for (DataSampleSendList::iterator i(element); i != the_end; ++i) {
-      DataSampleListElement& elem = *i;
+      DataSampleElement& elem = *i;
 
       // N.B. Do not persist samples with coherent changes.
       // To verify, we check the DataSampleHeader for the

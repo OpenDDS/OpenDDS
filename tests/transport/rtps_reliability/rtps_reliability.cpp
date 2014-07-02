@@ -23,7 +23,7 @@
 #include "dds/DCPS/DisjointSequence.h"
 //#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DataSampleSendList.h"
-#include "dds/DCPS/DataSampleListElement.h"
+#include "dds/DCPS/DataSampleElement.h"
 
 #include <tao/Exception.h>
 
@@ -104,7 +104,7 @@ class DDS_TEST
 {
 public:
 
-  static void list_set(DataSampleListElement &element, DataSampleSendList &list)
+  static void list_set(DataSampleElement &element, DataSampleSendList &list)
   {
     list.head_ = &element;
     list.tail_ = &element;
@@ -142,7 +142,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     send(list_);
   }
 
-  void data_delivered(const DataSampleListElement*)
+  void data_delivered(const DataSampleElement*)
   {
     ACE_DEBUG((LM_INFO, "SimpleDataWriter::data_delivered()\n"));
   }
@@ -155,7 +155,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
 
   TransportSendElementAllocator alloc_;
   DataSampleSendList list_;
-  DataSampleListElement dsle_;
+  DataSampleElement dsle_;
   ACE_Message_Block payload_;
 };
 
