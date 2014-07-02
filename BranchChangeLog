@@ -1,3 +1,18 @@
+Wed Jul  2 13:57:47 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+
+	  Don't make list's tail, head, and size data fields settable by code that uses
+	  DataSampleSendList.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+	  Update to account for DataSampleSendList's internals not be settable.
+
 Tue Jul  1 15:49:14 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleList.h:
@@ -5,9 +20,9 @@ Tue Jul  1 15:49:14 UTC 2014  Byron Harris  <harrisb@ociweb.com>
         * dds/DCPS/DataSampleListElement.h:
         * dds/DCPS/WriteDataContainer.cpp:
 
-	  Modify so list dequeue method takes a const element since the logical value of the element
-	  isn't changed although the prev/next list pointers needed only by the list do.
-	  Have dequeue method return a bool instead of an element pointer.
+          Modify so list dequeue method takes a const element since the logical value of the element
+          isn't changed although the prev/next list pointers needed only by the list do.
+          Have dequeue method return a bool instead of an element pointer.
 
 Mon Jun 30 21:11:06 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 

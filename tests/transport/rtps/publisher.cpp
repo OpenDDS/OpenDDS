@@ -39,15 +39,15 @@
 
 #include "TestMsg.h"
 
-class DDS_TEST {  // friended by RtpsUdpDataLink
+class DDS_TEST {  // friended by RtpsUdpDataLink and DataSampleList
 public:
   static void force_inline_qos(bool val) {
     OpenDDS::DCPS::RtpsUdpDataLink::force_inline_qos_ = val;
   }
+
+  static int test(ACE_TString host, u_short port);
 };
 
-using namespace OpenDDS::DCPS;
-using namespace OpenDDS::RTPS;
 
 void log_time(const ACE_Time_Value& t)
 {
@@ -175,26 +175,11 @@ public:
   InlineQosMode inline_qos_mode_;
 };
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+using namespace OpenDDS::DCPS;
+using namespace OpenDDS::RTPS;
+
+int DDS_TEST::test(ACE_TString host, u_short port)
 {
-  ACE_TString host;
-  u_short port = 0;
-
-  ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
-  int option = 0;
-
-  while ((option = opts()) != EOF) {
-    switch (option) {
-    case 'h':
-      host = opts.opt_arg();
-      break;
-    case 'p':
-      port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
-      break;
-    }
-  }
-
   if (host.empty() || port == 0) {
     std::cerr << "ERROR: -h <host> and -p <port> options are required\n";
     return 1;
@@ -419,9 +404,9 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
   };
   DataSampleSendList list;
-  list.set_head(elements);
-  list.set_size(sizeof(elements) / sizeof(elements[0]));
-  list.set_tail(&elements[list.size() - 1]);
+  list.head_ = elements;
+  list.size_ = sizeof(elements) / sizeof(elements[0]);
+  list.tail_ = &elements[list.size() - 1];
   for (int i = 0; i < list.size() - 1; ++i) {
     elements[i].set_next_send_sample( &elements[i + 1]);
   }
@@ -515,4 +500,28 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_Thread_Manager::instance()->wait();
 
   return 0;
+}
+
+
+int
+ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
+  ACE_TString host;
+  u_short port = 0;
+
+  ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
+  int option = 0;
+
+  while ((option = opts()) != EOF) {
+    switch (option) {
+    case 'h':
+      host = opts.opt_arg();
+      break;
+    case 'p':
+      port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
+      break;
+    }
+  }
+
+  DDS_TEST::test(host, port);
 }

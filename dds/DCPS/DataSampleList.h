@@ -19,6 +19,8 @@
 //#include <map>
 #include <iterator>
 
+class DDS_TEST;
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -118,15 +120,6 @@ public:
   /// Reset to initial state.
   void reset();
 
-  //PWO: HELPER METHODS FOR SETTING DATA MEMBERS
-  // These methods should go away
-
-  void set_head(DataSampleListElement* newHead) { this->head_ = newHead;};
-  void set_tail(DataSampleListElement* newTail) { this->tail_ = newTail;};
-  void set_size(size_t size) { this->size_ = size;};
-
-  //PWO: END HELPER METHODS
-
   ssize_t size() const {return size_;};
 
   DataSampleListElement* head() const {return head_;};
@@ -209,6 +202,7 @@ protected:
   ssize_t                size_;
   //TBD size is never negative so should be size_t but this ripples through
   // the transport code so leave it for now. SHH
+
 };
 
 class OpenDDS_Dcps_Export DataSampleWriterList : public DataSampleList {
@@ -264,6 +258,8 @@ class OpenDDS_Dcps_Export DataSampleSendList : public DataSampleList {
   bool dequeue_head(DataSampleListElement*& stale);
 
   bool dequeue(const DataSampleListElement* stale);
+
+  friend class ::DDS_TEST;
 
 };
 

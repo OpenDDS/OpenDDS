@@ -10,7 +10,6 @@
 
 class SimplePublisher;
 
-
 class SimpleDataWriter
   : public OpenDDS::DCPS::TransportSendListener
   , public OpenDDS::DCPS::TransportClient
@@ -21,7 +20,10 @@ class SimpleDataWriter
     virtual ~SimpleDataWriter();
 
     void init(const OpenDDS::DCPS::AssociationData& subscription);
-    int run(int num_msgs, int msg_size);
+
+    // Implement in derived DDS_TEST class since internals of DataSampleList
+    // need to be accessed and DDS_TEST is a friend of DataSampleList.
+    virtual int run(int num_msgs, int msg_size) = 0;
 
     // This means that the TransportImpl has been shutdown, making the
     // transport_interface sent to the run() method no longer valid.
@@ -58,11 +60,18 @@ class SimpleDataWriter
     using OpenDDS::DCPS::TransportClient::enable_transport;
     using OpenDDS::DCPS::TransportClient::disassociate;
 
-  private:
+  protected:
 
     const OpenDDS::DCPS::RepoId& pub_id_;
     int num_messages_sent_;
     int num_messages_delivered_;
+};
+
+class DDS_TEST : public SimpleDataWriter
+{
+public:
+    explicit DDS_TEST(const OpenDDS::DCPS::RepoId& pub_id);
+    virtual int run(int num_msgs, int msg_size);
 };
 
 #endif  /* SIMPLEDATAWRITER_H */

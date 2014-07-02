@@ -98,6 +98,18 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   bool have_frag_;
 };
 
+class DDS_TEST
+{
+public:
+
+  static void list_set(DataSampleListElement &element, DataSampleSendList &list)
+  {
+    list.head_ = &element;
+    list.tail_ = &element;
+    list.size_ = 1;
+  }
+};
+
 
 struct SimpleDataWriter: SimpleTC, TransportSendListener {
   explicit SimpleDataWriter(const RepoId& pub_id)
@@ -105,10 +117,7 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     , alloc_(2, sizeof(TransportSendElementAllocator))
     , dsle_(pub_id, this, 0, &alloc_, 0)
   {
-    //list_.head_ = list_.tail_ = &dsle_;
-    list_.set_head(&dsle_);
-    list_.set_tail(&dsle_);
-    list_.set_size(1);
+    DDS_TEST::list_set(dsle_, list_);
     dsle_.header_.message_id_ = SAMPLE_DATA;
     dsle_.header_.message_length_ = 8;
     dsle_.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
