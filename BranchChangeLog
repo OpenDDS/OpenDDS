@@ -1,3 +1,14 @@
+Thu Jul  3 17:00:21 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.h:
+
+          Shifted typedefs for DataSample and DataSampleElementAllocator from
+          the list files into the DataSampleElement header file to reduce
+          unnecessary replication.
+
 Thu Jul  3 14:21:14 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleInstanceList.h:

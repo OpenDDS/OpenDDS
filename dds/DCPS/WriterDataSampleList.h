@@ -24,8 +24,8 @@ namespace DCPS {
 class DataSampleElement;
 
 //struct DataSampleElement;
-typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
-  DataSampleElementAllocator;
+//typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
+//  DataSampleElementAllocator;
 
 //const int MAX_READERS_TO_RESEND = 5;
 
@@ -34,7 +34,8 @@ typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
 * Currently we contain entire messages in a single ACE_Message_Block
 * chain.
 */
-typedef ACE_Message_Block DataSample;
+//typedef ACE_Message_Block DataSample;
+
 
 
 /**
