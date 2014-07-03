@@ -2468,6 +2468,10 @@ Sedp::Task::svc()
       return 0;
     }
   }
+  if (DCPS::DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::Task::svc - ")
+                        ACE_TEXT("Task exiting.\n")));
+  }
   return 0;
 }
 

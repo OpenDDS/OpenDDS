@@ -110,6 +110,11 @@ Spdp::~Spdp()
       }
     }
   }
+
+  // ensure sedp's task queue is drained before data members are being
+  // deleted
+  sedp_.shutdown();
+
   // release lock for reset of event handler, which may delete transport
   tport_->close();
   eh_.reset();
@@ -119,10 +124,6 @@ Spdp::~Spdp()
       shutdown_cond_.wait();
     }
   }
-
-  // ensure sedp's task queue is drained before data members are being
-  // deleted
-  sedp_.shutdown();
 }
 
 void
@@ -422,7 +423,7 @@ Spdp::SpdpTransport::open()
 Spdp::SpdpTransport::~SpdpTransport()
 {
   if (DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::~SpdpTransport")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::~SpdpTransport\n")));
   }
   dispose_unregister();
   {
@@ -480,7 +481,7 @@ void
 Spdp::SpdpTransport::close()
 {
   if (DCPS::DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close")));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
   }
   ACE_Reactor* reactor = outer_->reactor();
   reactor->cancel_timer(this);
