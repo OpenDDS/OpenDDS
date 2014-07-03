@@ -14,7 +14,7 @@ namespace DCPS {
 
 
 ACE_INLINE
-DataSampleWriterList::DataSampleWriterList()
+WriterDataSampleList::WriterDataSampleList()
   : head_(0),
     tail_(0),
     size_(0)
@@ -22,7 +22,7 @@ DataSampleWriterList::DataSampleWriterList()
 }
 
 ACE_INLINE
-void DataSampleWriterList::reset()
+void WriterDataSampleList::reset()
 {
   head_ = tail_ = 0;
   size_ = 0;
@@ -30,7 +30,7 @@ void DataSampleWriterList::reset()
 
 ACE_INLINE
 void
-DataSampleWriterList::enqueue_tail(const DataSampleElement* sample)
+WriterDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {
   // const_cast here so that higher layers don't need to pass around so many
   // non-const pointers to DataSampleElement.  Ideally the design would be
@@ -56,7 +56,7 @@ DataSampleWriterList::enqueue_tail(const DataSampleElement* sample)
 
 ACE_INLINE
 bool
-DataSampleWriterList::dequeue_head(DataSampleElement*& stale)
+WriterDataSampleList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the list.

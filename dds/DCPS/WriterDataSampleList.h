@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATASAMPLEWRITERLIST_H
-#define OPENDDS_DCPS_DATASAMPLEWRITERLIST_H
+#ifndef OPENDDS_DCPS_WRITERDATASAMPLELIST_H
+#define OPENDDS_DCPS_WRITERDATASAMPLELIST_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "Definitions.h"
@@ -43,12 +43,12 @@ typedef ACE_Message_Block DataSample;
 * to traverse the list to ind this information.  For most lists that
 * we manage, we append to the tail and remove from the head.
 */
-class OpenDDS_Dcps_Export DataSampleWriterList {
+class OpenDDS_Dcps_Export WriterDataSampleList {
 
  public:
 
-  DataSampleWriterList();
-  ~DataSampleWriterList(){};
+  WriterDataSampleList();
+  ~WriterDataSampleList(){};
 
   /// Reset to initial state.
   void reset();
@@ -84,7 +84,7 @@ class OpenDDS_Dcps_Export DataSampleWriterList {
 } // namespace OpenDDS
 
 #if defined(__ACE_INLINE__)
-#include "DataSampleWriterList.inl"
+#include "WriterDataSampleList.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* OPENDDS_DCPS_DATASAMPLEWRITERLIST_H */
+#endif  /* OPENDDS_DCPS_WRITERDATASAMPLELIST_H */

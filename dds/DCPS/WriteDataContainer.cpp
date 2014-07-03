@@ -14,7 +14,7 @@
 //#include "SendStateDataSampleList.h"
 //#include "SendStateDataSampleList.h"
 #include "DataSampleInstanceList.h"
-//#include "DataSampleWriterList.h"
+//#include "WriterDataSampleList.h"
 #include "DataSampleElement.h"
 #include "DataWriterImpl.h"
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE

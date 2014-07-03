@@ -211,12 +211,12 @@
 //  // the transport code so leave it for now. SHH
 //};
 //
-//class OpenDDS_Dcps_Export DataSampleWriterList : public DataSampleList {
+//class OpenDDS_Dcps_Export WriterDataSampleList : public DataSampleList {
 //
 // public:
 //
-//  DataSampleWriterList() : DataSampleList(){};
-//  ~DataSampleWriterList(){};
+//  WriterDataSampleList() : DataSampleList(){};
+//  ~WriterDataSampleList(){};
 //
 //  //void reset();
 //

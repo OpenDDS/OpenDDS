@@ -1,3 +1,30 @@
+Thu Jul  3 13:53:47 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleWriterList.h:
+        * dds/DCPS/DataSampleWriterList.inl:
+        * dds/DCPS/DataSampleWriterList.cpp:
+
+          Removed these files.
+
+        * dds/DCPS/WriterDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.inl:
+        * dds/DCPS/WriterDataSampleList.cpp:
+
+          Replaced removed files with renamed WriterDataSampleList files.
+          Reflected renaming of DataSampleWriterList to the new naming strategy
+          WriterDataSampleList 
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+          Changed references to DataSampleWriterList to reflect naming change
+          to the new WriterDataSampleList.
+
 Wed Jul  2 21:22:59 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleSendList.h:
@@ -14,7 +41,7 @@ Wed Jul  2 21:22:59 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
           Reflected renaming of DataSampleSendList to the new naming strategy
           SendStateDataSampleList which more accurately reflects the list's
           use by the DCPS layer to track the TransportLayer's usage of a DataSample.
- 
+
         * dds/DCPS/DataDurabilityCache.h:
         * dds/DCPS/DataDurabilityCache.cpp:
         * dds/DCPS/DataSampleElement.h:

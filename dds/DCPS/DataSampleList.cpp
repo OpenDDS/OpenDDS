@@ -21,7 +21,7 @@
 //namespace DCPS {
 //
 //bool
-//DataSampleWriterList::dequeue(const DataSampleElement* stale)
+//WriterDataSampleList::dequeue(const DataSampleElement* stale)
 //{
 //  if (head_ == 0) {
 //    return false;

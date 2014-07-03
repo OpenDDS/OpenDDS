@@ -150,7 +150,7 @@ private:
   // DataSampleList is in charge of managing list placement therefore needs access to pointers
   friend class DataSampleList;
   friend class SendStateDataSampleList;
-  friend class DataSampleWriterList;
+  friend class WriterDataSampleList;
   friend class DataSampleInstanceList;
   // SendStateDataSampleListIterator needs access to prev/next pointers for iteration
   friend class SendStateDataSampleListIterator;

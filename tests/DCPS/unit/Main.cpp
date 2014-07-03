@@ -2,7 +2,7 @@
 //#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleInstanceList.h"
-#include "dds/DCPS/DataSampleWriterList.h"
+#include "dds/DCPS/WriterDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -333,7 +333,7 @@ void run_sample_list_test ()
 
   // document that DataSampleList::iterator == not based on list itself
   iter = list.begin();
-  DataSampleWriterList sameHeadTailList;
+  WriterDataSampleList sameHeadTailList;
   // calling enqueue_tail_next_sample will setup head and tail, but not mess with
   // send_sample params
   sameHeadTailList.enqueue_tail (sample[0]);
@@ -346,13 +346,13 @@ void run_sample_list_test ()
   TEST_CHECK( ++iter == ++iter1 );
 
   // check same head, same current but different tail fails
-  DataSampleWriterList tailDiffList;
+  WriterDataSampleList tailDiffList;
   tailDiffList.enqueue_tail (sample[0]);
   tailDiffList.enqueue_tail (sample[1]);
   TEST_CHECK( list.begin() != tailDiffList.begin() );
 
   // check same tail, same current but different head fails
-  DataSampleWriterList headDiffList;
+  WriterDataSampleList headDiffList;
   headDiffList.enqueue_tail (sample[1]);
   headDiffList.enqueue_tail (sample[2]);
   iter = list.begin();
@@ -373,7 +373,7 @@ void run_sample_list_test ()
 
 void run_next_sample_test (ssize_t size)
 {
-  DataSampleWriterList list;
+  WriterDataSampleList list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;

@@ -13,7 +13,7 @@
 //#include "DataSampleList.h"
 #include "SendStateDataSampleList.h"
 //#include "DataSampleInstanceList.h"
-#include "DataSampleWriterList.h"
+#include "WriterDataSampleList.h"
 #include "OfferedDeadlineWatchdog.h"
 
 #include "ace/Condition_Recursive_Thread_Mutex.h"
@@ -389,7 +389,7 @@ private:
 
   /// The list of all samples written to this datawriter in
   /// writing order.
-  DataSampleWriterList   data_holder_;
+  WriterDataSampleList   data_holder_;
 
   /// List of the data reenqueued to support the
   /// TRANSIENT_LOCAL_DURABILITY_QOS policy. It duplicates the
