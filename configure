@@ -17,6 +17,9 @@ use FileHandle;
 use Cwd;
 use strict;
 
+## faster, and hopefully more reliable extraction:
+$Archive::Extract::PREFER_BIN = 1;
+
 ## arg processing and usage
 
 my @specs = # Array of array-refs, each inner array is an option group which
@@ -329,11 +332,11 @@ elsif (!$ENV{'TAO_ROOT'} && $ENV{'ACE_ROOT'}
   setenv('TAO_ROOT', $ENV{'ACE_ROOT'} . $slash . 'TAO');
 }
 
-## Download ACE+TAO 1.6a
+## Download ACE+TAO 2.2a
 
 if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
-  my $urlbase = 'http://download.ociweb.com/TAO-1.6a/';
-  my $file = 'ACE+TAO-1.6a_with_latest_patches.'
+  my $urlbase = 'http://download.ociweb.com/TAO-2.2a/';
+  my $file = 'ACE+TAO-2.2a_with_latest_patches.'
     . ($slash eq '/' ? 'tar.gz' : 'zip');
   if (-r $file) {
     print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
@@ -342,7 +345,7 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
     eval {require LWP::UserAgent;};
     if ($@) {
       if (which('wget')) {
-        print "Downloading ACE+TAO 1.6a with latest patches (using wget)\n";
+        print "Downloading ACE+TAO 2.2a with latest patches (using wget)\n";
         if ($opts{'dry-run'}) {
           print "Dry-run: would run wget $urlbase$file\nExiting\n";
           exit 1;
@@ -352,7 +355,7 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
         }
       }
       elsif (which('curl')) {
-        print "Downloading ACE+TAO 1.6a with latest patches (using curl)\n";
+        print "Downloading ACE+TAO 2.2a with latest patches (using curl)\n";
         if ($opts{'dry-run'}) {
           print "Dry-run: would run curl $urlbase$file -o $file\nExiting\n";
           exit 1;
@@ -369,7 +372,7 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
     else {
       my $ua = LWP::UserAgent->new;
       $ua->env_proxy;
-      print "Downloading ACE+TAO 1.6a with latest patches\n";
+      print "Downloading ACE+TAO 2.2a with latest patches\n";
       if ($opts{'dry-run'}) {
         print "Dry-run: would LWP::UserAgent get $urlbase$file\nExiting\n";
         exit 1;

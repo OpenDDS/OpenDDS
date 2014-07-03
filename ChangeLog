@@ -1,3 +1,31 @@
+Thu Jul  3 19:45:42 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * configure:
+
+          Download TAO 2.2a instead of 1.6a
+
+Thu Jul  3 03:34:14 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Improved logging.
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Moved shutting down sedp before shutting down transport.
+
+Wed Jul  2 18:22:15 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Fixed to only report that their are errors in log files if the status is
+          still good.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added log statements to identify where ACCESS VIOLATION is occurring.
+
 Tue Jul  1 20:20:50 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
