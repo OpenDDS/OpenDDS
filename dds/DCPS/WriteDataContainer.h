@@ -12,7 +12,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 //#include "DataSampleList.h"
 #include "SendStateDataSampleList.h"
-//#include "DataSampleInstanceList.h"
+//#include "InstanceDataSampleList.h"
 #include "WriterDataSampleList.h"
 #include "OfferedDeadlineWatchdog.h"
 
@@ -30,7 +30,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DataSampleElement;
-class DataSampleInstanceList;
+class InstanceDataSampleList;
 
 
 
@@ -366,7 +366,7 @@ private:
    * released.
    */
   DDS::ReturnCode_t remove_oldest_sample(
-    DataSampleInstanceList& instance_list,
+    InstanceDataSampleList& instance_list,
     bool& released);
 
   void wakeup_blocking_writers (DataSampleElement* stale,

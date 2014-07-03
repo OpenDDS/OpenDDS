@@ -228,12 +228,12 @@
 //
 //};
 //
-//class OpenDDS_Dcps_Export DataSampleInstanceList : public DataSampleList {
+//class OpenDDS_Dcps_Export InstanceDataSampleList : public DataSampleList {
 //
 // public:
 //
-//  DataSampleInstanceList() : DataSampleList(){};
-//  ~DataSampleInstanceList(){};
+//  InstanceDataSampleList() : DataSampleList(){};
+//  ~InstanceDataSampleList(){};
 //
 //  //void reset();
 //

@@ -146,7 +146,7 @@ SendStateDataSampleList::dequeue_head(DataSampleElement*& stale)
 
 ACE_INLINE
 void
-DataSampleInstanceList::enqueue_tail(const DataSampleElement* sample)
+InstanceDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {
   // const_cast here so that higher layers don't need to pass around so many
   // non-const pointers to DataSampleElement.  Ideally the design would be
@@ -172,7 +172,7 @@ DataSampleInstanceList::enqueue_tail(const DataSampleElement* sample)
 
 ACE_INLINE
 bool
-DataSampleInstanceList::dequeue_head(DataSampleElement*& stale)
+InstanceDataSampleList::dequeue_head(DataSampleElement*& stale)
 {
   //
   // Remove the oldest sample from the instance list.

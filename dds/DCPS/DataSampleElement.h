@@ -151,7 +151,7 @@ private:
   friend class DataSampleList;
   friend class SendStateDataSampleList;
   friend class WriterDataSampleList;
-  friend class DataSampleInstanceList;
+  friend class InstanceDataSampleList;
   // SendStateDataSampleListIterator needs access to prev/next pointers for iteration
   friend class SendStateDataSampleListIterator;
 

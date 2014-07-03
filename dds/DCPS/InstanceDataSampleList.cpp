@@ -8,7 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 //#include "DataSampleList.h"
-#include "DataSampleInstanceList.h"
+#include "InstanceDataSampleList.h"
 #include "DataSampleElement.h"
 #include "Definitions.h"
 #include "PublicationInstance.h"
@@ -16,7 +16,7 @@
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 
 #if !defined (__ACE_INLINE__)
-#include "DataSampleInstanceList.inl"
+#include "InstanceDataSampleList.inl"
 #endif /* __ACE_INLINE__ */
 
 namespace OpenDDS {
@@ -24,7 +24,7 @@ namespace DCPS {
 
 
 bool
-DataSampleInstanceList::dequeue(const DataSampleElement* stale)
+InstanceDataSampleList::dequeue(const DataSampleElement* stale)
 {
   if (head_ == 0) {
     return false;

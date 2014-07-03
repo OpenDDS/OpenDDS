@@ -84,7 +84,7 @@
 //}
 //
 //bool
-//DataSampleInstanceList::dequeue(const DataSampleElement* stale)
+//InstanceDataSampleList::dequeue(const DataSampleElement* stale)
 //{
 //  if (head_ == 0) {
 //    return false;

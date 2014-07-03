@@ -1,7 +1,7 @@
 #include "dds/DCPS/Service_Participant.h"
 //#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
-#include "dds/DCPS/DataSampleInstanceList.h"
+#include "dds/DCPS/InstanceDataSampleList.h"
 #include "dds/DCPS/WriterDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -570,7 +570,7 @@ void run_next_send_sample_test (ssize_t size)
 
 void run_next_instance_sample_test (ssize_t size)
 {
-  DataSampleInstanceList list;
+  InstanceDataSampleList list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;

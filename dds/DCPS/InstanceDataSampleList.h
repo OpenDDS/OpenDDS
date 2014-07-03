@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_DATASAMPLEINSTANCELIST_H
-#define OPENDDS_DCPS_DATASAMPLEINSTANCELIST_H
+#ifndef OPENDDS_DCPS_INSTANCEDATASAMPLELIST_H
+#define OPENDDS_DCPS_INSTANCEDATASAMPLELIST_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "Definitions.h"
@@ -42,12 +42,12 @@ typedef ACE_Message_Block DataSample;
 * to traverse the list to ind this information.  For most lists that
 * we manage, we append to the tail and remove from the head.
 */
-class OpenDDS_Dcps_Export DataSampleInstanceList {
+class OpenDDS_Dcps_Export InstanceDataSampleList {
 
  public:
 
-  DataSampleInstanceList();
-  ~DataSampleInstanceList(){};
+  InstanceDataSampleList();
+  ~InstanceDataSampleList(){};
 
   void reset();
 
@@ -81,7 +81,7 @@ class OpenDDS_Dcps_Export DataSampleInstanceList {
 } // namespace OpenDDS
 
 #if defined(__ACE_INLINE__)
-#include "DataSampleInstanceList.inl"
+#include "InstanceDataSampleList.inl"
 #endif /* __ACE_INLINE__ */
 
-#endif  /* OPENDDS_DCPS_DATASAMPLEINSTANCELIST_H */
+#endif  /* OPENDDS_DCPS_INSTANCEDATASAMPLELIST_H */

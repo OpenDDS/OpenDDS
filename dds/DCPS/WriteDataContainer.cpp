@@ -13,7 +13,7 @@
 //#include "DataSampleList.h"
 //#include "SendStateDataSampleList.h"
 //#include "SendStateDataSampleList.h"
-#include "DataSampleInstanceList.h"
+#include "InstanceDataSampleList.h"
 //#include "WriterDataSampleList.h"
 #include "DataSampleElement.h"
 #include "DataWriterImpl.h"
@@ -169,7 +169,7 @@ WriteDataContainer::enqueue(
   PublicationInstance* const instance =
     get_handle_instance(instance_handle);
   // Extract the instance queue.
-  DataSampleInstanceList& instance_list = instance->samples_;
+  InstanceDataSampleList& instance_list = instance->samples_;
 
   if (this->watchdog_.get()) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
@@ -387,7 +387,7 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
   // Alive state.
   // We have choosen to NOT remove the sending samples.
 
-  DataSampleInstanceList& instance_list = instance->samples_;
+  InstanceDataSampleList& instance_list = instance->samples_;
 
   while (instance_list.size() > 0) {
     bool released = false;
@@ -685,7 +685,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
 
 DDS::ReturnCode_t
 WriteDataContainer::remove_oldest_sample(
-  DataSampleInstanceList& instance_list,
+  InstanceDataSampleList& instance_list,
   bool& released)
 {
   DataSampleElement* stale = 0;
@@ -828,7 +828,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
     DDS::RETCODE_ERROR);
 
   // Extract the current instance queue.
-  DataSampleInstanceList& instance_list = instance->samples_;
+  InstanceDataSampleList& instance_list = instance->samples_;
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   bool oldest_released = true;

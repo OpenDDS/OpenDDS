@@ -11,7 +11,7 @@
 
 #include "dcps_export.h"
 //#include "DataSampleList.h"
-#include "DataSampleInstanceList.h"
+#include "InstanceDataSampleList.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -58,10 +58,10 @@ struct OpenDDS_Dcps_Export PublicationInstance {
   DataSample*      registered_sample_;
 
   /// History of the instance samples.
-  DataSampleInstanceList   samples_;
+  InstanceDataSampleList   samples_;
 
   /// The list of samples that wait for available space.
-  DataSampleInstanceList   waiting_list_;
+  InstanceDataSampleList   waiting_list_;
 
   /// The flag to indicate whether the instance is unregistered.
   bool             unregistered_;

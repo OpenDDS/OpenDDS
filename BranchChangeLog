@@ -1,3 +1,31 @@
+Thu Jul  3 14:21:14 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleInstanceList.h:
+        * dds/DCPS/DataSampleInstanceList.inl:
+        * dds/DCPS/DataSampleInstanceList.cpp:
+
+          Removed these files.
+
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/InstanceDataSampleList.inl:
+        * dds/DCPS/InstanceDataSampleList.cpp:
+
+          Replaced removed files with renamed InstanceDataSampleList files.
+          Reflected renaming of DataSampleInstanceList to the new naming strategy
+          InstanceDataSampleList
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+          Changed references to DataSampleInstanceList to reflect naming change
+          to the new InstanceDataSampleList.
+
 Thu Jul  3 13:53:47 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleWriterList.h:
@@ -12,7 +40,7 @@ Thu Jul  3 13:53:47 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
           Replaced removed files with renamed WriterDataSampleList files.
           Reflected renaming of DataSampleWriterList to the new naming strategy
-          WriterDataSampleList 
+          WriterDataSampleList
 
         * dds/DCPS/DataSampleElement.h:
         * dds/DCPS/DataSampleList.h:
