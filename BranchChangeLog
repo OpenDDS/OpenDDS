@@ -1,3 +1,21 @@
+Thu Jul  3 20:30:08 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+
+          Removed friending of class DataSampleList as it no longer exists.
+          Corrected spelling errors in comments.
+
+        * tests/DCPS/unit/Main.cpp:
+
+          Since iterators are only being provided for SendStateDataSampleList(s)
+          test code had to be modified where it was relying on an iterator for
+          what has become a WriterDataSampleList.  Replaced calls to iterator creation
+          on WriterDataSampleList to directly constructing a SendStateDataSampleListIterator
+          with DataSampleElements head and tail pointers into the WriterDataSampleList.  
+          Since the test is simply checking that the iteration through the two lists 
+          will be the same because their DataSampleElements are the same, this will 
+          test the same functionality.
+
 Thu Jul  3 17:00:21 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:

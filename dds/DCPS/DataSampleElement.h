@@ -73,7 +73,7 @@ typedef ACE_Message_Block DataSample;
 *       Publisher may use this thread to maintain a list of samples to
 *       be sent with PRESENTATION.access_scope==GROUP by obtaining
 *       data from each DataWriter as it becomes available and
-*       concatentating the data in the order in which it was written.
+*       concatenating the data in the order in which it was written.
 *
 * We thread this single element rather than having multiple smaller
 * lists in order to allow us to allocate once and have the element
@@ -152,7 +152,7 @@ public:
 private:
 
   // DataSampleList is in charge of managing list placement therefore needs access to pointers
-  friend class DataSampleList;
+  //friend class DataSampleList;
   friend class SendStateDataSampleList;
   friend class WriterDataSampleList;
   friend class InstanceDataSampleList;
