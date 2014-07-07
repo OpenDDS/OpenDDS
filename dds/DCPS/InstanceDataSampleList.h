@@ -37,10 +37,11 @@ class DataSampleElement;
 
 
 /**
-* Lists include a pointer to both the head and tail elements of the
-* list.  Cache the number of elements in the list so that we don't have
-* to traverse the list to ind this information.  For most lists that
-* we manage, we append to the tail and remove from the head.
+* A list of DataSampleElement pointers to be queued by the order the
+* samples are written to the instance (within
+* PRESENTAION.access_scope==INSTANCE).  It is mainly used on the
+* send side to count the depth of instance data and to allow the
+* removal of elements by instance.
 */
 class OpenDDS_Dcps_Export InstanceDataSampleList {
 

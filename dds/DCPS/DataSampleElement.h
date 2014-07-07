@@ -44,66 +44,26 @@ class DDS_TEST;
 typedef ACE_Message_Block DataSample;
 
 /**
-* List elements include the marshaled message, the publication Id and
-* Instance handle for downstream processing, and three separate threads
-* allowing the elements to reside simultaneously on four different
-* lists of data:
+* Wraps the marshaled message sample to be published, along with
+* the publication Id and Instance handle for downstream processing.
 *
-*   next_writer_sample_ / previous_sample
-*     - the next sample of data in the DataWriter.  This thread is used
-*       to traverse elements in the order in which they were written to
-*       the DataWriter (within PRESENTATION.access_scope==TOPIC).
-*       This thread will be used to hold the element in one of four
-*       different lists in the WriteDataContainer: the unsent_data_
-*       list, the sending_data_ list, the sent_data_ list, or the
-*       released_data_ list at different times during its lifetime.
-*       This has a double link to allow removal of elements from internal
-*       locations in the list.
-*
-*   next_instance_sample_
-*     - the next sample of data in the instance within the DataWriter.
-*       This thread is used to traverse elements in the
-*       order in which they were written to the instance (within
-*       PRESENTAION.access_scope==INSTANCE).  It is mainly used on the
-*       send side to count the depth of instance data and to allow the
-*       removal of elements by instance.
-*
-*   next_send_sample_/previous_send_sample_
-*     - the next sample of data to be sent.  This thread is used
-*       external to the container to maintain a list of data samples
-*       that are to be transmitted over the transport layer. The
-*       Publisher may use this thread to maintain a list of samples to
-*       be sent with PRESENTATION.access_scope==GROUP by obtaining
-*       data from each DataWriter as it becomes available and
-*       concatenating the data in the order in which it was written.
-*
-* We thread this single element rather than having multiple smaller
-* lists in order to allow us to allocate once and have the element
-* contained in all of the lists in which it will be held during its
-* lifetime.  These three threads will at times hold the element in
-* three separate lists simultaneously.  The next_writer_sample_ thread will be
-* used in the container to hold the element in one of three different
-* lists at different times, so a single thread is all that is required
-* for all of those lists.
-*
-* NOTE: this is what we want to pass into the enqueue method of the
-*       container, since we want to centralize the
-*       allocation/deallocation so that we can minimize locking.  By
-*       grabbing a single lock, allocating the
-*       buffer/Data_Block/Message_Block/DataSampleElement at the
-*       same time, we only pay once for all of the allocations.  They
-*       are all presumably from a cache (for the most part) anyway, so
-*       it should be fairly quick.
+* Internally there are next/previous pointers that used for lists
+* InstanceDataSampleList, SendStateDataSampleList, and WriterDataSampleList.
+* These pointers are kept in this single element rather than having multiple smaller
+* lists in order to allow us to allocate once which will minimize locking.
+* Note that because the list pointers are stored within the element,
+* the element can simultenously be in at most one InstanceDataSampleList list, one
+* SendStateDataSampleList list, and one WriterDataSampleList list.
 */
 class OpenDDS_Dcps_Export DataSampleElement {
 
 
 public:
   DataSampleElement(PublicationId                   publication_id,
-                        TransportSendListener*          send_listener,
-                        PublicationInstance*            handle,
-                        TransportSendElementAllocator*  tse_allocator,
-                        TransportCustomizedElementAllocator* tce_allocator);
+                    TransportSendListener*          send_listener,
+                    PublicationInstance*            handle,
+                    TransportSendElementAllocator*  tse_allocator,
+                    TransportCustomizedElementAllocator* tce_allocator);
 
   DataSampleElement(const DataSampleElement& elem);
   DataSampleElement& operator=(const DataSampleElement& elem);

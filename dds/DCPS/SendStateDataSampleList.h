@@ -131,10 +131,12 @@ private:
 };
 
 /**
-* Lists include a pointer to both the head and tail elements of the
-* list.  Cache the number of elements in the list so that we don't have
-* to traverse the list to find this information.  For most lists that
-* we manage, we append to the tail and remove from the head.
+* A list of DataSampleElement pointers to be queued by the order the
+* samples are to be transmitted over the transport layer.
+* The Publisher may use this to maintain a list of samples to
+* be sent with PRESENTATION.access_scope==GROUP by obtaining
+* data from each DataWriter as it becomes available and
+* concatenating the data in the order in which it was written.
 */
 class OpenDDS_Dcps_Export SendStateDataSampleList {
 

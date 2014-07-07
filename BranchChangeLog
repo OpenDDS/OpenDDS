@@ -1,3 +1,14 @@
+Mon Jul  7 21:08:41 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.h:
+
+	  Update class-level comments to reflect split up of DataSampleList into
+	  different lists. Removed duplicate comments and moved comments that were not
+	  specific to the class.
+
 Mon Jul  7 20:32:41 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:
