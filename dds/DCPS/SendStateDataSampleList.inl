@@ -45,8 +45,8 @@ SendStateDataSampleList::enqueue_tail(const DataSampleElement* sample)
 
   } else {
     // Add to existing list.
-    //sample->previous_sample_ = tail_;
-    //tail_->next_sample_ = sample;
+    //sample->previous_writer_sample_ = tail_;
+    //tail_->next_writer_sample_ = sample;
     mSample->previous_send_sample_ = tail_;
     tail_->next_send_sample_ = mSample;
     tail_ = mSample;
@@ -79,7 +79,7 @@ SendStateDataSampleList::dequeue_head(DataSampleElement*& stale)
 
     //else
     //  {
-    //    head_->previous_sample_ = 0;
+    //    head_->previous_writer_sample_ = 0;
     //  }
 
     stale->next_send_sample_ = 0 ;

@@ -186,7 +186,7 @@
 // // dequeue_next_send_sample(const DataSampleElement* stale);
 //
 //  /// This function assumes the appended list is a list linked with
-//  /// previous/next_sample_ and might be linked with next_send_sample_.
+//  /// previous/next_writer_sample_ and might be linked with next_send_sample_.
 //  /// If it's not linked with the next_send_sample_ then this function
 //  /// will make it linked before appending.
 // // void enqueue_tail_next_send_sample(DataSampleList list);

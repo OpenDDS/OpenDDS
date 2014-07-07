@@ -57,7 +57,7 @@ typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanc
  * given DataWriter. The real data sample is represented by the
  * DataSampleElement.  The data_holder_ holds all
  * DataSampleElement in the writing order via the
- * next_sample_/previous_sample_ thread. The instance list in
+ * next_writer_sample_/previous_writer_sample_ thread. The instance list in
  * PublicationInstance links samples via the next_instance_sample_
  * thread.
  *

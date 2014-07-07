@@ -702,12 +702,12 @@ WriteDataContainer::remove_oldest_sample(
   }
 
   //
-  // Remove the stale data from the next_sample_ list.  The
+  // Remove the stale data from the next_writer_sample_ list.  The
   // sending_data_/next_send_sample_ list is not managed within the
   // container, it is only used external to the container and does
   // not need to be managed internally.
   //
-  // The next_sample_ link is being used in one of the sent_data_,
+  // The next_writer_sample_ link is being used in one of the sent_data_,
   // sending_data_, or unsent_data lists.  Removal from the doubly
   // linked list needs to repair the list only when the stale sample
   // is either the head or tail of the list.

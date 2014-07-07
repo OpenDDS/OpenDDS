@@ -37,8 +37,8 @@ WriterDataSampleList::enqueue_tail(const DataSampleElement* sample)
   // changed to accommodate const-correctness throughout.
   DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
   
-  //sample->previous_sample_ = 0;
-  //sample->next_sample_ = 0;
+  //sample->previous_writer_sample_ = 0;
+  //sample->next_writer_sample_ = 0;
 
   ++size_ ;
 
@@ -48,8 +48,8 @@ WriterDataSampleList::enqueue_tail(const DataSampleElement* sample)
 
   } else {
     // Add to existing list.
-    tail_->next_sample_ = mSample ;
-    mSample->previous_sample_ = tail_;
+    tail_->next_writer_sample_ = mSample ;
+    mSample->previous_writer_sample_ = tail_;
     tail_ = mSample;
   }
 }
@@ -68,17 +68,17 @@ WriterDataSampleList::dequeue_head(DataSampleElement*& stale)
 
   } else {
     --size_ ;
-    head_ = head_->next_sample_;
+    head_ = head_->next_writer_sample_;
 
     if (head_ == 0) {
       tail_ = 0;
 
     } else {
-      head_->previous_sample_ = 0;
+      head_->previous_writer_sample_ = 0;
     }
 
-    stale->next_sample_ = 0;
-    stale->previous_sample_ = 0;
+    stale->next_writer_sample_ = 0;
+    stale->previous_writer_sample_ = 0;
     return true;
   }
 }
@@ -100,8 +100,8 @@ SendStateDataSampleList::enqueue_tail(const DataSampleElement* sample)
 
   } else {
     // Add to existing list.
-    //sample->previous_sample_ = tail_;
-    //tail_->next_sample_ = sample;
+    //sample->previous_writer_sample_ = tail_;
+    //tail_->next_writer_sample_ = sample;
     mSample->previous_send_sample_ = tail_;
     tail_->next_send_sample_ = mSample;
     tail_ = mSample;
@@ -134,7 +134,7 @@ SendStateDataSampleList::dequeue_head(DataSampleElement*& stale)
 
     //else
     //  {
-    //    head_->previous_sample_ = 0;
+    //    head_->previous_writer_sample_ = 0;
     //  }
 
     stale->next_send_sample_ = 0 ;

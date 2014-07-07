@@ -32,12 +32,12 @@
 //    return dequeue_head(head);
 //  }
 //
-//  // Search from head_->next_sample_.
+//  // Search from head_->next_writer_sample_.
 //  bool found = false;
 //
-//  for (DataSampleElement* item = head_->next_sample_ ;
+//  for (DataSampleElement* item = head_->next_writer_sample_ ;
 //       item != 0 ;
-//       item = item->next_sample_) {
+//       item = item->next_writer_sample_) {
 //    if (item == stale) {
 //      found = true;
 //      break;
@@ -51,33 +51,33 @@
 //    //
 //    // Remove from the previous element.
 //    //
-//    if (stale->previous_sample_ != 0) {
+//    if (stale->previous_writer_sample_ != 0) {
 //      // Remove from inside of the list.
-//      stale->previous_sample_->next_sample_ = stale->next_sample_ ;
+//      stale->previous_writer_sample_->next_writer_sample_ = stale->next_writer_sample_ ;
 //
 //    } else {
 //      // Remove from the head of the list.
-//      head_ = stale->next_sample_ ;
+//      head_ = stale->next_writer_sample_ ;
 //
 //      if (head_ != 0) {
-//        head_->previous_sample_ = 0;
+//        head_->previous_writer_sample_ = 0;
 //      }
 //    }
 //
 //    //
 //    // Remove from the next element.
 //    //
-//    if (stale->next_sample_ != 0) {
+//    if (stale->next_writer_sample_ != 0) {
 //      // Remove the inside of the list.
-//      stale->next_sample_->previous_sample_ = stale->previous_sample_ ;
+//      stale->next_writer_sample_->previous_writer_sample_ = stale->previous_writer_sample_ ;
 //
 //    } else {
 //      // Remove from the tail of the list.
-//      tail_ = stale->previous_sample_ ;
+//      tail_ = stale->previous_writer_sample_ ;
 //    }
 //
-//    stale->next_sample_ = 0;
-//    stale->previous_sample_ = 0;
+//    stale->next_writer_sample_ = 0;
+//    stale->previous_writer_sample_ = 0;
 //  }
 //
 //  return found;
@@ -196,8 +196,8 @@
 //  // {
 //  //   for (ssize_t i = 0; i < list.size_; i ++)
 //  //     {
-//  //       cur->next_send_sample_ = cur->next_sample_;
-//  //       cur = cur->next_sample_;
+//  //       cur->next_send_sample_ = cur->next_writer_sample_;
+//  //       cur = cur->next_writer_sample_;
 //  //     }
 //  // }
 //
@@ -208,10 +208,10 @@
 //
 //  } else {
 //    tail_->next_send_sample_
-//    //= tail_->next_sample_
+//    //= tail_->next_writer_sample_
 //    = list.head_;
 //    list.head_->previous_send_sample_ = tail_;
-//    //list.head_->previous_sample_ = tail_;
+//    //list.head_->previous_writer_sample_ = tail_;
 //    tail_ = list.tail_;
 //    size_ = size_ + list.size_;
 //  }

@@ -49,7 +49,7 @@ typedef ACE_Message_Block DataSample;
 * allowing the elements to reside simultaneously on four different
 * lists of data:
 *
-*   next_sample_ / previous_sample
+*   next_writer_sample_ / previous_sample
 *     - the next sample of data in the DataWriter.  This thread is used
 *       to traverse elements in the order in which they were written to
 *       the DataWriter (within PRESENTATION.access_scope==TOPIC).
@@ -81,7 +81,7 @@ typedef ACE_Message_Block DataSample;
 * lists in order to allow us to allocate once and have the element
 * contained in all of the lists in which it will be held during its
 * lifetime.  These three threads will at times hold the element in
-* three separate lists simultaneously.  The next_sample_ thread will be
+* three separate lists simultaneously.  The next_writer_sample_ thread will be
 * used in the container to hold the element in one of three different
 * lists at different times, so a single thread is all that is required
 * for all of those lists.
@@ -100,7 +100,7 @@ class OpenDDS_Dcps_Export DataSampleElement {
 
 public:
   DataSampleElement(PublicationId                   publication_id,
-                        TransportSendListener*          send_listner,
+                        TransportSendListener*          send_listener,
                         PublicationInstance*            handle,
                         TransportSendElementAllocator*  tse_allocator,
                         TransportCustomizedElementAllocator* tce_allocator);
@@ -169,8 +169,8 @@ private:
   /// container _much_ more efficient.
 
   /// Thread of all data within a DataWriter.
-  mutable DataSampleElement* previous_sample_;
-  mutable DataSampleElement* next_sample_;
+  mutable DataSampleElement* previous_writer_sample_;
+  mutable DataSampleElement* next_writer_sample_;
 
   /// Thread of data within the instance.
   mutable DataSampleElement* next_instance_sample_;

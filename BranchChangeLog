@@ -1,23 +1,44 @@
+Mon Jul  7 20:32:41 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Renamed {previous_,next_}sample_ to more accurately follow naming convention
+          of other list pointers by adding list descriptor.  Now named previous_writer_sample_
+          and next_writer_sample_.  Also corrected spelling of listener in constructor.
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterDataSampleList.inl:
+        * dds/DCPS/WriterDataSampleList.cpp:
+
+          Carried naming change out to references in other files.
+
 Mon Jul  7 18:11:18 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:
 
-	  Made {get,set}_next_send_sample() members private since normally they should
-	  not be exposed to the outside world.
+          Made {get,set}_next_send_sample() members private since normally they should
+          not be exposed to the outside world.
 
         * dds/DCPS/SendStateDataSampleList.h:
         * dds/DCPS/SendStateDataSampleList.inl:
         * dds/DCPS/SendStateDataSampleList.cpp:
 
-	  Add const_iterator for SendStateDataSampleList to reduce need to
-	  access next send sample.
+          Add const_iterator for SendStateDataSampleList to reduce need to
+          access next send sample.
 
         * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/WriteDataContainer.cpp:
         * tests/transport/simple/SimpleDataWriter.h:
         * tests/transport/simple/SimpleDataWriter.cpp:
 
-	  Updated to account for DataSampleElement::{get,set}_next_send_sample() being private.
+          Updated to account for DataSampleElement::{get,set}_next_send_sample() being private.
 
 Thu Jul  3 20:30:08 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 

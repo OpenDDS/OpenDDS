@@ -101,8 +101,8 @@ SendStateDataSampleList::enqueue_tail(SendStateDataSampleList list)
   // {
   //   for (ssize_t i = 0; i < list.size_; i ++)
   //     {
-  //       cur->next_send_sample_ = cur->next_sample_;
-  //       cur = cur->next_sample_;
+  //       cur->next_send_sample_ = cur->next_writer_sample_;
+  //       cur = cur->next_writer_sample_;
   //     }
   // }
 
@@ -113,10 +113,10 @@ SendStateDataSampleList::enqueue_tail(SendStateDataSampleList list)
 
   } else {
     tail_->next_send_sample_
-    //= tail_->next_sample_
+    //= tail_->next_writer_sample_
     = list.head_;
     list.head_->previous_send_sample_ = tail_;
-    //list.head_->previous_sample_ = tail_;
+    //list.head_->previous_writer_sample_ = tail_;
     tail_ = list.tail_;
     size_ = size_ + list.size_;
   }

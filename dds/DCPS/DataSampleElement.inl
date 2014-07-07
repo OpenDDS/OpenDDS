@@ -14,20 +14,20 @@ namespace DCPS {
 ACE_INLINE
 DataSampleElement::DataSampleElement(
   PublicationId           publication_id,
-  TransportSendListener*  send_listner,
+  TransportSendListener*  send_listener,
   PublicationInstance*    handle,
   TransportSendElementAllocator* tse_allocator,
   TransportCustomizedElementAllocator* tce_allocator)
   : sample_(0),
     publication_id_(publication_id),
     num_subs_(0),
-    send_listener_(send_listner),
+    send_listener_(send_listener),
     space_available_(false),
     handle_(handle),
     transport_send_element_allocator_(tse_allocator),
     transport_customized_element_allocator_(tce_allocator),
-    previous_sample_(0),
-    next_sample_(0),
+    previous_writer_sample_(0),
+    next_writer_sample_(0),
     next_instance_sample_(0),
     next_send_sample_(0),
     previous_send_sample_(0)
@@ -50,8 +50,8 @@ DataSampleElement::DataSampleElement(const DataSampleElement& elem)
       elem.transport_customized_element_allocator_)
   , filter_out_(elem.filter_out_)
   , filter_per_link_(elem.filter_per_link_)
-  , previous_sample_(elem.previous_sample_)
-  , next_sample_(elem.next_sample_)
+  , previous_writer_sample_(elem.previous_writer_sample_)
+  , next_writer_sample_(elem.next_writer_sample_)
   , next_instance_sample_(elem.next_instance_sample_)
   , next_send_sample_(elem.next_send_sample_)
   , previous_send_sample_(elem.previous_send_sample_)
@@ -82,8 +82,8 @@ DataSampleElement::operator=(const DataSampleElement& rhs)
   std::copy(rhs.subscription_ids_,
             rhs.subscription_ids_ + num_subs_,
             subscription_ids_);
-  previous_sample_ = rhs.previous_sample_;
-  next_sample_ = rhs.next_sample_;
+  previous_writer_sample_ = rhs.previous_writer_sample_;
+  next_writer_sample_ = rhs.next_writer_sample_;
   next_instance_sample_ = rhs.next_instance_sample_;
   next_send_sample_ = rhs.next_send_sample_;
   previous_send_sample_ = rhs.previous_send_sample_;
