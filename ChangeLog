@@ -1,3 +1,9 @@
+Mon Jul  7 21:15:36 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+
+          Force verbose.
 Mon Jul  7 21:02:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:

@@ -14,6 +14,8 @@ sub new {
         , $pub_ini, $sub_ini, $schedule_file) = @_;
 
     $verbose ||= 0;
+    $verbose = 1;
+
     $pub_ini ||= "pub.ini";
     $sub_ini ||= "sub.ini";
 
