@@ -103,5 +103,19 @@ SendStateDataSampleList::end()
   return iterator(this->head_, this->tail_, 0);
 }
 
+ACE_INLINE
+SendStateDataSampleList::const_iterator
+SendStateDataSampleList::begin() const
+{
+  return const_iterator(this->head_, this->tail_, this->head_);
+}
+
+ACE_INLINE
+SendStateDataSampleList::const_iterator
+SendStateDataSampleList::end() const
+{
+  return const_iterator(this->head_, this->tail_, 0);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

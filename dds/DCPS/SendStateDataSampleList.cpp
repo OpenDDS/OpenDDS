@@ -188,5 +188,77 @@ SendStateDataSampleListIterator::operator->()
   return this->current_;
 }
 
+SendStateDataSampleListConstIterator::SendStateDataSampleListConstIterator(
+  const DataSampleElement* head,
+  const DataSampleElement* tail,
+  const DataSampleElement* current)
+  : head_(head)
+  , tail_(tail)
+  , current_(current)
+{
+}
+
+SendStateDataSampleListConstIterator::SendStateDataSampleListConstIterator(
+  const SendStateDataSampleListIterator& iterator)
+  : head_(iterator.head_)
+  , tail_(iterator.tail_)
+  , current_(iterator.current_)
+{
+}
+
+SendStateDataSampleListConstIterator&
+SendStateDataSampleListConstIterator::operator++()
+{
+  if (this->current_)
+    this->current_ = this->current_->next_send_sample_;
+
+  return *this;
+}
+
+SendStateDataSampleListConstIterator
+SendStateDataSampleListConstIterator::operator++(int)
+{
+  SendStateDataSampleListConstIterator tmp(*this);
+  ++(*this);
+  return tmp;
+}
+
+SendStateDataSampleListConstIterator&
+SendStateDataSampleListConstIterator::operator--()
+{
+  if (this->current_)
+    this->current_ = this->current_->previous_send_sample_;
+
+  else
+    this->current_ = this->tail_;
+
+  return *this;
+}
+
+SendStateDataSampleListConstIterator
+SendStateDataSampleListConstIterator::operator--(int)
+{
+  SendStateDataSampleListConstIterator tmp(*this);
+  --(*this);
+  return tmp;
+}
+
+SendStateDataSampleListConstIterator::reference
+SendStateDataSampleListConstIterator::operator*() const
+{
+  // Hopefully folks will be smart enough to not dereference a
+  // null iterator.  Such a case should only exist for an "end"
+  // iterator.  Otherwise we may want to throw an exception here.
+  // assert (this->current_ != 0);
+
+  return *(this->current_);
+}
+
+SendStateDataSampleListConstIterator::pointer
+SendStateDataSampleListConstIterator::operator->() const
+{
+  return this->current_;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

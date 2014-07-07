@@ -1167,9 +1167,9 @@ WriteDataContainer::copy_and_append(SendStateDataSampleList& list,
 #endif
                                     )
 {
-  for (DataSampleElement* cur = appended.head();
-       cur != 0;
-       cur = cur->get_next_send_sample()) {
+  for (SendStateDataSampleList::const_iterator cur = appended.begin();
+       cur != appended.end(); ++cur) {
+
     // Do not copy and append data that has exceeded the configured
     // lifespan.
     if (resend_data_expired(*cur, lifespan))

@@ -86,6 +86,48 @@ private:
   DataSampleElement* tail_;
   DataSampleElement* current_;
 
+  friend class SendStateDataSampleListConstIterator;
+};
+
+class OpenDDS_Dcps_Export SendStateDataSampleListConstIterator
+{
+public:
+  typedef const DataSampleElement* pointer;
+  typedef const DataSampleElement& reference;
+
+
+  SendStateDataSampleListConstIterator(const DataSampleElement* head,
+                                  const DataSampleElement* tail,
+                                  const DataSampleElement* current);
+
+  SendStateDataSampleListConstIterator(const SendStateDataSampleListIterator& iterator);
+
+  SendStateDataSampleListConstIterator& operator++();
+  SendStateDataSampleListConstIterator  operator++(int);
+  SendStateDataSampleListConstIterator& operator--();
+  SendStateDataSampleListConstIterator  operator--(int);
+  reference operator*() const;
+  pointer operator->() const;
+
+  bool
+  operator==(const SendStateDataSampleListConstIterator& rhs) const {
+    return this->head_ == rhs.head_
+           && this->tail_ == rhs.tail_
+           && this->current_ == rhs.current_;
+  }
+
+  bool
+  operator!=(const SendStateDataSampleListConstIterator& rhs) const {
+    return !(*this == rhs);
+  }
+
+private:
+  SendStateDataSampleListConstIterator();
+
+  const DataSampleElement* head_;
+  const DataSampleElement* tail_;
+  const DataSampleElement* current_;
+
 };
 
 /**
@@ -101,6 +143,7 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
  public:
 
   typedef SendStateDataSampleListIterator iterator;
+  typedef SendStateDataSampleListConstIterator const_iterator;
 
   SendStateDataSampleList();
   ~SendStateDataSampleList(){};
@@ -124,9 +167,11 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
 
   /// Return iterator to beginning of list.
   iterator begin();
+  const_iterator begin() const;
 
   /// Return iterator to end of list.
   iterator end();
+  const_iterator end() const;
 
  protected:
 

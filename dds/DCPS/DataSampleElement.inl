@@ -31,7 +31,7 @@ DataSampleElement::DataSampleElement(
     next_instance_sample_(0),
     next_send_sample_(0),
     previous_send_sample_(0)
-    
+
 {
 }
 
@@ -55,7 +55,7 @@ DataSampleElement::DataSampleElement(const DataSampleElement& elem)
   , next_instance_sample_(elem.next_instance_sample_)
   , next_send_sample_(elem.next_send_sample_)
   , previous_send_sample_(elem.previous_send_sample_)
-  
+
 {
   std::copy(elem.subscription_ids_,
             elem.subscription_ids_ + num_subs_,
@@ -99,6 +99,19 @@ DataSampleElement::operator=(const DataSampleElement& rhs)
   return *this;
 }
 
+ACE_INLINE
+DataSampleElement*
+DataSampleElement::get_next_send_sample() const
+{
+  return next_send_sample_;
+};
+
+ACE_INLINE
+void
+DataSampleElement::set_next_send_sample(DataSampleElement* next_send_sample)
+{
+  this->next_send_sample_ = next_send_sample;
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

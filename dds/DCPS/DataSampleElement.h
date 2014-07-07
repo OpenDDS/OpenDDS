@@ -35,6 +35,8 @@ typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
 class TransportSendListener;
 struct PublicationInstance;
 
+class DDS_TEST;
+
 /**
 * Currently we contain entire messages in a single ACE_Message_Block
 * chain.
@@ -145,19 +147,23 @@ public:
   std::map<DataLinkIdType, GUIDSeq_var> filter_per_link_;
   //@}
 
-  DataSampleElement* get_next_send_sample() const {return next_send_sample_;};
-
-  void set_next_send_sample(DataSampleElement* next_send_sample) { this->next_send_sample_ = next_send_sample;};
-
 private:
+
+  DataSampleElement* get_next_send_sample() const;
+
+  void set_next_send_sample(DataSampleElement* next_send_sample);
 
   // DataSampleList is in charge of managing list placement therefore needs access to pointers
   //friend class DataSampleList;
   friend class SendStateDataSampleList;
   friend class WriterDataSampleList;
   friend class InstanceDataSampleList;
-  // SendStateDataSampleListIterator needs access to prev/next pointers for iteration
+  friend class TransportClient;
+  friend class DDS_TEST;
+  // Iterators needs access to prev/next pointers for iteration
   friend class SendStateDataSampleListIterator;
+  friend class SendStateDataSampleListConstIterator;
+
 
   /// Used to make removal from the
   /// container _much_ more efficient.

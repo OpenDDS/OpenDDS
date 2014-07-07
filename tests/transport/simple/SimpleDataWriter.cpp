@@ -51,10 +51,12 @@ SimpleDataWriter::init(const OpenDDS::DCPS::AssociationData& subscription)
 
 namespace
 {
+
   class Cleanup
   {
   public:
-    Cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc, OpenDDS::DCPS::SendStateDataSampleList& list)
+    Cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc,
+            OpenDDS::DCPS::SendStateDataSampleList& list)
     : alloc_(alloc)
     , list_(list)
     {
@@ -62,14 +64,9 @@ namespace
 
     ~Cleanup()
     {
-      OpenDDS::DCPS::DataSampleElement* element = list_.head();
-      while (element != 0) {
-        OpenDDS::DCPS::DataSampleElement* const to_remove = element;
-        element = element->get_next_send_sample();
-        to_remove->~DataSampleElement();
-        alloc_.free(to_remove);
-      }
+      DDS_TEST::cleanup(alloc_, list_);
     }
+
   private:
     OpenDDS::DCPS::DataSampleElementAllocator& alloc_;
     OpenDDS::DCPS::SendStateDataSampleList& list_;
@@ -143,6 +140,18 @@ SimpleDataWriter::delivered_test_message()
 DDS_TEST::DDS_TEST(const OpenDDS::DCPS::RepoId& pub_id)
   : SimpleDataWriter(pub_id)
 {
+}
+
+void DDS_TEST::cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc,
+                       OpenDDS::DCPS::SendStateDataSampleList& list)
+{
+  OpenDDS::DCPS::DataSampleElement* element = list.head();
+  while (element != 0) {
+    OpenDDS::DCPS::DataSampleElement* const to_remove = element;
+    element = element->get_next_send_sample();
+    to_remove->~DataSampleElement();
+    alloc.free(to_remove);
+  }
 }
 
 int

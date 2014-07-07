@@ -73,6 +73,10 @@ class DDS_TEST : public SimpleDataWriter
 public:
     explicit DDS_TEST(const OpenDDS::DCPS::RepoId& pub_id);
     virtual int run(int num_msgs, int msg_size);
+
+    static void cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc,
+                        OpenDDS::DCPS::SendStateDataSampleList& list);
+
 };
 
 #endif  /* SIMPLEDATAWRITER_H */

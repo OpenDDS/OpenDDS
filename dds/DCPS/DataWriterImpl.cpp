@@ -484,8 +484,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       SequenceNumber& seq =
         reader_info_.find(remote_id)->second.expected_sequence_;
 
-      for (DataSampleElement* list_el = list.head(); list_el;
-           list_el = list_el->get_next_send_sample()) {
+      for (SendStateDataSampleList::iterator list_el = list.begin();
+           list_el != list.end(); ++list_el) {
         list_el->header_.historic_sample_ = true;
         if (list_el->header_.sequence_ > seq) {
           seq = list_el->header_.sequence_;
