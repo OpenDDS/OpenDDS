@@ -1788,6 +1788,9 @@ bool
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                    ::DDS::HANDLE_NIL);
 
+  if (get_deleted())
+    return ::DDS::HANDLE_NIL;
+
 #ifndef OPENDDS_NO_MULTI_TOPIC
   ::DDS::TopicDescription_var descr = get_topicdescription();
   if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
@@ -1835,6 +1838,9 @@ void
 {
   using namespace OpenDDS::DCPS;
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  
+  if (get_deleted())
+    return;
 
   SubscriptionInstance* si = get_handle_instance(instance);
   if (si && state != ::DDS::ALIVE_INSTANCE_STATE) {

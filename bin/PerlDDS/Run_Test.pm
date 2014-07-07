@@ -111,8 +111,8 @@ sub report_errors_in_file {
   my $error = 0;
   if (open FILE, "<", $file) {
       while (my $line = <FILE>) {
-          if ($line =~ /ERROR/) {
-              my $report = 1;
+          my $report = ($line =~ /ERROR/);
+          if ($report) {
               # determine if this is an error we want to ignore
               foreach my $to_ignore (@{$errors_to_ignore}) {
                   if ($line =~ /$to_ignore/) {
@@ -124,7 +124,12 @@ sub report_errors_in_file {
               if ($report) {
                   $error = 1;
               }
-          } elsif ($line =~ /wait_(?:messages_)?pending /) {  # REMOVE LATER
+          }
+
+          if (!$report && $line =~ /wait_(?:messages_)?pending /) {  # REMOVE LATER
+              if ($line =~ s/ERROR/ERR0R/g) {
+                  $line .= "(TestFramework ignored this as a problem)";
+              }
               print STDERR "$file: $line";
           }
       }

@@ -699,7 +699,7 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
   ACE_Auto_Basic_Ptr<const DDS::InstanceHandle_t> delete_the_ih(bit_ih);
   switch (which_bit) {
   case Msg::MSG_REMOVE_FROM_PUB_BIT: {
-    DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
+    Publication_BIT_DR bit = sedp_->pub_bit();
     // bit may be null if the DomainParticipant is shutting down
     if (bit && *bit_ih != DDS::HANDLE_NIL) {
       bit->set_instance_state(*bit_ih,
@@ -708,7 +708,7 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
     break;
   }
   case Msg::MSG_REMOVE_FROM_SUB_BIT: {
-    DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp_->sub_bit();
+    Subscription_BIT_DR bit = sedp_->sub_bit();
     // bit may be null if the DomainParticipant is shutting down
     if (bit && *bit_ih != DDS::HANDLE_NIL) {
       bit->set_instance_state(*bit_ih,
@@ -721,31 +721,22 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
   }
 }
 
-DDS::TopicBuiltinTopicDataDataReaderImpl*
-Sedp::topic_bit()
-{
-  DDS::Subscriber_var sub = spdp_.bit_subscriber();
-  DDS::DataReader_var d =
-    sub->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
-  return dynamic_cast<DDS::TopicBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DDS::PublicationBuiltinTopicDataDataReaderImpl*
+Sedp::Publication_BIT_DR
 Sedp::pub_bit()
 {
   DDS::Subscriber_var sub = spdp_.bit_subscriber();
   DDS::DataReader_var d =
     sub->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
-  return dynamic_cast<DDS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
+  return Publication_BIT_DR(d);
 }
 
-DDS::SubscriptionBuiltinTopicDataDataReaderImpl*
+Sedp::Subscription_BIT_DR
 Sedp::sub_bit()
 {
   DDS::Subscriber_var sub = spdp_.bit_subscriber();
   DDS::DataReader_var d =
     sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-  return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
+  return Subscription_BIT_DR(d);
 }
 
 DCPS::TopicStatus
@@ -1201,7 +1192,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       {
         // Release lock for call into pub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-        DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+        Publication_BIT_DR bit = pub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           instance_handle =
             bit->store_synthetic_data(wdata_copy.ddsPublicationData,
@@ -1227,7 +1218,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
-      DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+      Publication_BIT_DR bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
                                   DDS::NOT_NEW_VIEW_STATE);
@@ -1353,7 +1344,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       {
         // Release lock for call into sub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
-        DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+        Subscription_BIT_DR bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           instance_handle =
             bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
@@ -1380,7 +1371,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     } else { // update existing
       if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                      rdata.ddsSubscriptionData)) {
-        DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+        Subscription_BIT_DR bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           bit->store_synthetic_data(
                 iter->second.reader_data_.ddsSubscriptionData,

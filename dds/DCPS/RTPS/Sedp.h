@@ -57,6 +57,28 @@ class Spdp;
 
 typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> RepoIdSet;
 
+// This is needed since RT #12230 was never implemented
+template<typename T>
+class Psuedovar {
+public:
+  Psuedovar(DDS::DataReader_var dr)
+  : dr_(dynamic_cast<T*>(dr.in()))
+  , dr_var_(dr)
+  {
+  }
+  T* operator->() const
+  {
+    return dr_;
+  }
+  operator bool() const
+  {
+    return dr_;
+  }
+private:
+  T* const dr_;
+  const DDS::DataReader_var dr_var_;
+};
+
 class Sedp {
 public:
   Sedp(const DCPS::RepoId& participant_id,
@@ -278,9 +300,10 @@ private:
   // Transport
   DCPS::TransportInst_rch transport_inst_;
 
-  DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
-  DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+  typedef Psuedovar<DDS::PublicationBuiltinTopicDataDataReaderImpl> Publication_BIT_DR;
+  typedef Psuedovar<DDS::SubscriptionBuiltinTopicDataDataReaderImpl> Subscription_BIT_DR;
+  Publication_BIT_DR pub_bit();
+  Subscription_BIT_DR sub_bit();
 
   struct LocalEndpoint {
     LocalEndpoint() : topic_id_(DCPS::GUID_UNKNOWN), sequence_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {}

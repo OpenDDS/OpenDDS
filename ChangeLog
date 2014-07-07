@@ -1,3 +1,27 @@
+Mon Jul  7 21:02:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Added check for get_deleted in store_synthetic_data and
+          set_instance_state to prevent spdp/sedp from writing
+          while the data reader is being deleted.
+
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Added Psuedovar to keep var to data readers while providing
+          derived pointer and change *_bit() methods to return
+          Psuedovars.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Changed *_bit() methods to return Psuedovars.
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Cleanup of temporary diagnostics.
+
 Thu Jul  3 19:45:42 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * configure:
