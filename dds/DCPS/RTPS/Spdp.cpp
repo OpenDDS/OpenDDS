@@ -315,15 +315,31 @@ Spdp::bit_key_to_repo_id(const char* bit_topic_name,
 }
 
 void
-Spdp::bit_subscriber(const DDS::Subscriber_var& bit_subscriber)
+Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
 {
   bit_subscriber_ = bit_subscriber;
   tport_->open();
 }
 
+void
+Spdp::fini_bit()
+{
+  bit_subscriber_ = 0;
+  wait_for_acks_.reset();
+  // request for SpdpTransport(actually Reactor) thread and Sedp::Task
+  // to acknowledge
+  tport_->acknowledge();
+  sedp_.acknowledge();
+  // wait for the 2 acknowledgements
+  wait_for_acks_.wait_for_acks(2);
+}
+
 DDS::ParticipantBuiltinTopicDataDataReaderImpl*
 Spdp::part_bit()
 {
+  if (!bit_subscriber_.in())
+    return 0;
+
   DDS::DataReader_var d =
     bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
   return dynamic_cast<DDS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
@@ -333,6 +349,12 @@ ACE_Reactor*
 Spdp::reactor() const
 {
   return disco_->reactor();
+}
+
+WaitForAcks&
+Spdp::wait_for_acks()
+{
+  return wait_for_acks_;
 }
 
 Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
@@ -709,6 +731,20 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   }
 
   return 0;
+}
+
+int
+Spdp::SpdpTransport::handle_exception(ACE_HANDLE )
+{
+  outer_->wait_for_acks().ack();
+  return 0;
+}
+
+void
+Spdp::SpdpTransport::acknowledge()
+{
+  ACE_Reactor* reactor = outer_->reactor();
+  reactor->notify(this);
 }
 
 DCPS::TopicStatus
