@@ -207,7 +207,7 @@ ThreadPerConnectionSendTask::remove_sample(const DataSampleElement* element)
 
   GuardType guard(this->lock_);
 
-  ACE_Message_Block* payload = element->sample_->cont();
+  ACE_Message_Block* payload = element->get_sample()->cont();
   ThreadPerConRemoveVisitor visitor(payload);
 
   this->queue_.accept_visitor(visitor);

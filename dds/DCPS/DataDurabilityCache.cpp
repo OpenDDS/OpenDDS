@@ -183,8 +183,8 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::sample_data_type(
   , sample_(0)
   , allocator_(a)
 {
-  this->source_timestamp_.sec     = element.header_.source_timestamp_sec_;
-  this->source_timestamp_.nanosec = element.header_.source_timestamp_nanosec_;
+  this->source_timestamp_.sec     = element.get_header().source_timestamp_sec_;
+  this->source_timestamp_.nanosec = element.get_header().source_timestamp_nanosec_;
 
   // Only copy the data provided by the user.  The DataSampleHeader
   // will be reconstructed when the durable data is retrieved by a
@@ -192,7 +192,7 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::sample_data_type(
   //
   // The user's data is stored in the first message block
   // continuation.
-  ACE_Message_Block const * const data = element.sample_->cont();
+  ACE_Message_Block const * const data = element.get_sample()->cont();
   init(data);
 }
 
@@ -626,7 +626,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
       // It should be noted that persisting coherent changes
       // is a non-trivial task, and should be handled when
       // finalizing persistence profile conformance.
-      if (DataSampleHeader::test_flag(COHERENT_CHANGE_FLAG, elem.sample_)) {
+      if (DataSampleHeader::test_flag(COHERENT_CHANGE_FLAG, elem.get_sample())) {
         continue; // skip coherent sample
       }
 

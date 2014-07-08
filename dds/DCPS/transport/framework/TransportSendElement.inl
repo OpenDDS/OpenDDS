@@ -44,7 +44,7 @@ ACE_INLINE
 OpenDDS::DCPS::SequenceNumber
 OpenDDS::DCPS::TransportSendElement::sequence() const
 {
-  return this->element_->header_.sequence_;
+  return this->element_->get_header().sequence_;
 }
 
 ACE_INLINE

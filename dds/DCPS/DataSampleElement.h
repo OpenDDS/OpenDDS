@@ -70,6 +70,44 @@ public:
 
   ~DataSampleElement();
 
+  const DataSampleHeader& get_header() const;
+  DataSampleHeader& get_header();
+
+  DataSample* get_sample() const;
+  DataSample* get_sample();
+
+  void set_sample(DataSample* sample);
+
+  PublicationId get_pub_id() const;
+
+  CORBA::ULong get_num_subs() const;
+
+  void set_num_subs(int num_subs);
+
+  const OpenDDS::DCPS::RepoId* get_sub_ids() const;
+  OpenDDS::DCPS::RepoId  get_sub_id(int index) const;
+
+  void set_sub_id(int index, OpenDDS::DCPS::RepoId id);
+
+  TransportSendListener* get_send_listener() const;
+  TransportSendListener* get_send_listener();
+
+  bool space_available() const;
+  void set_space_available(bool is_space_available);
+
+  PublicationInstance* get_handle() const;
+
+  TransportSendElementAllocator* get_transport_send_element_allocator() const;
+
+  TransportCustomizedElementAllocator* get_transport_customized_element_allocator() const;
+
+  typedef std::map<DataLinkIdType, GUIDSeq_var> DataLinkIdTypeGUIDMap;
+  DataLinkIdTypeGUIDMap& get_filter_per_link();
+
+  void set_filter_out(GUIDSeq *filter_out);
+
+private:
+
   /// The OpenDDS DCPS header for this sample
   DataSampleHeader       header_;
 
@@ -79,7 +117,9 @@ public:
 
   /// Publication Id used downstream.
   PublicationId          publication_id_;
+
   CORBA::ULong           num_subs_;
+
   OpenDDS::DCPS::RepoId  subscription_ids_[OpenDDS::DCPS::MAX_READERS_PER_ELEM];
 
   /// Pointer to object that will be informed when the data has
@@ -95,17 +135,6 @@ public:
   /// The client holds this as an InstanceHandle_t.
   PublicationInstance*   handle_;
 
-  TransportSendElementAllocator* get_transport_send_element_allocator() const;
-
-  TransportCustomizedElementAllocator* get_transport_customized_element_allocator() const;
-
-  typedef std::map<DataLinkIdType, GUIDSeq_var> DataLinkIdTypeGUIDMap;
-  DataLinkIdTypeGUIDMap& get_filter_per_link();
-
-  void set_filter_out(GUIDSeq *filter_out);
-
-private:
-
   /// Allocator for the TransportSendElement.
   TransportSendElementAllocator* transport_send_element_allocator_;
 
@@ -117,8 +146,6 @@ private:
   GUIDSeq_var filter_out_;
   DataLinkIdTypeGUIDMap filter_per_link_;
   //@}
-
-private:
 
   DataSampleElement* get_next_send_sample() const;
 

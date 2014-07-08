@@ -49,8 +49,8 @@ resend_data_expired(DataSampleElement const & element,
     // Finite lifespan.  Check if data has expired.
 
     DDS::Time_t const tmp = {
-      element.header_.source_timestamp_sec_ + lifespan.duration.sec,
-      element.header_.source_timestamp_nanosec_ + lifespan.duration.nanosec
+      element.get_header().source_timestamp_sec_ + lifespan.duration.sec,
+      element.get_header().source_timestamp_nanosec_ + lifespan.duration.nanosec
     };
 
     ACE_Time_Value const now(ACE_OS::gettimeofday());
@@ -553,7 +553,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   // by transport.  We are now been notified by transport, so we can
   // now release the element.
   //
-  PublicationInstance* instance = sample->handle_;
+  PublicationInstance* instance = sample->get_handle();
   bool dequeued =
     released_data_.dequeue(sample);
   DataSampleElement* stale = const_cast<DataSampleElement*>(sample);
@@ -600,7 +600,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                    std::string(converter).c_str()));
       }
 
-      DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->sample_);
+      DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
       sent_data_.enqueue_tail(sample);
     }
   }
@@ -678,7 +678,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     }
   }
 
-  this->wakeup_blocking_writers (stale, sample->handle_);
+  this->wakeup_blocking_writers (stale, sample->get_handle());
 
   if (!pending_data())
     empty_condition_.broadcast();
@@ -1003,7 +1003,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         int const wait_result = condition_.wait(&abs_timeout);
 
         if (wait_result == 0) { // signaled
-          if (element->space_available_ == true) {
+          if (element->space_available() == true) {
             break;
           } // else continue wait
 
@@ -1015,7 +1015,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
             // handle the race condition where the element is freed after
             // the timeout has occurred, but before this thread has
             // re-acquired the lock
-            if (element->space_available_ == true) {
+            if (element->space_available() == true) {
               break;
             }
             // Other errors from wait.
@@ -1191,8 +1191,8 @@ WriteDataContainer::copy_and_append(SendStateDataSampleList& list,
     // TODO: Does ACE_NEW_MALLOC throw?  Where's the check for
     //       allocation failure, i.e. element == 0?
 
-    element->num_subs_ = 1;
-    element->subscription_ids_[0] = reader_id;
+    element->set_num_subs(1);
+    element->set_sub_id(0, reader_id);
 
     list.enqueue_tail(element);
   }
@@ -1321,7 +1321,7 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale,
   if (stale && instance->waiting_list_.head() != 0) {
       // Mark the first waiting sample will be next to add to instance
       // list.
-      instance->waiting_list_.head()->space_available_ = true;
+      instance->waiting_list_.head()->set_space_available(true);
       // Remove this waiting sample from waiting list.
       DataSampleElement* waiting = 0;
 

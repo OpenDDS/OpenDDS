@@ -487,9 +487,9 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       for (SendStateDataSampleList::iterator list_el = list.begin();
            list_el != list.end(); ++list_el) {
-        list_el->header_.historic_sample_ = true;
-        if (list_el->header_.sequence_ > seq) {
-          seq = list_el->header_.sequence_;
+        list_el->get_header().historic_sample_ = true;
+        if (list_el->get_header().sequence_ > seq) {
+          seq = list_el->get_header().sequence_;
         }
       }
     }
@@ -1719,13 +1719,14 @@ DataWriterImpl::write(DataSample* data,
                       ret),
                      ret);
   }
-
+  DataSample* temp;
   ret = create_sample_data_message(data,
                                    handle,
-                                   element->header_,
-                                   element->sample_,
+                                   element->get_header(),
+                                   temp,
                                    source_timestamp,
                                    (filter_out != 0));
+  element->set_sample(temp);
   if (ret != DDS::RETCODE_OK) {
     return ret;
   }
@@ -2029,8 +2030,8 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
 
-  if (!(sample->publication_id_ == this->publication_id_)) {
-    GuidConverter sample_converter(sample->publication_id_);
+  if (!(sample->get_pub_id() == this->publication_id_)) {
+    GuidConverter sample_converter(sample->get_pub_id());
     GuidConverter writer_converter(publication_id_);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
@@ -2108,9 +2109,9 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
   TypeSupportImpl* const typesupport =
     dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
 
-  return !evaluator.eval(elt.sample_->cont(),
-    elt.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-    elt.header_.cdr_encapsulation_, typesupport->getMetaStructForType(),
+  return !evaluator.eval(elt.get_sample()->cont(),
+    elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
+    elt.get_header().cdr_encapsulation_, typesupport->getMetaStructForType(),
     expression_params);
 }
 #endif

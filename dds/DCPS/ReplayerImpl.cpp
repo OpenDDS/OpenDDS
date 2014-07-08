@@ -858,8 +858,8 @@ void
 ReplayerImpl::data_delivered(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("ReplayerImpl","data_delivered",6);
-  if (!(sample->publication_id_ == this->publication_id_)) {
-    GuidConverter sample_converter(sample->publication_id_);
+  if (!(sample->get_pub_id() == this->publication_id_)) {
+    GuidConverter sample_converter(sample->get_pub_id());
     GuidConverter writer_converter(publication_id_);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::data_delivered: ")
@@ -985,18 +985,19 @@ ReplayerImpl::write (const RawDataSample*   samples,
                             transport_customized_element_allocator_.get()),
       DDS::RETCODE_ERROR);
 
-    element->header_.byte_order_ = samples[i].sample_byte_order_;
-    element->header_.publication_id_ = this->publication_id_;
+    element->get_header().byte_order_ = samples[i].sample_byte_order_;
+    element->get_header().publication_id_ = this->publication_id_;
     list.enqueue_tail(element);
-
+    DataSample* temp;
     DDS::ReturnCode_t ret = create_sample_data_message(samples[i].sample_->duplicate(),
-                                                       element->header_,
-                                                       element->sample_,
+                                                       element->get_header(),
+                                                       temp,
                                                        samples[i].source_timestamp_,
                                                        false);
+    element->set_sample(temp);
     if (reader_ih_ptr) {
-      element->num_subs_ = 1;
-      element->subscription_ids_[0] = repo_id;
+      element->set_num_subs(1);
+      element->set_sub_id(0, repo_id);
     }
 
     if (ret != DDS::RETCODE_OK) {

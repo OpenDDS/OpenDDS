@@ -2042,15 +2042,15 @@ Sedp::Writer::write_sample(const ParameterList& plist,
     // Send sample
     DCPS::DataSampleElement* list_el =
       new DCPS::DataSampleElement(repo_id_, this, 0, &alloc_, 0);
-    set_header_fields(list_el->header_, size, reader, sequence);
+    set_header_fields(list_el->get_header(), size, reader, sequence);
 
-    list_el->sample_ = new ACE_Message_Block(size);
-    *list_el->sample_ << list_el->header_;
-    list_el->sample_->cont(payload.duplicate());
+    list_el->set_sample(new ACE_Message_Block(size));
+    *list_el->get_sample() << list_el->get_header();
+    list_el->get_sample()->cont(payload.duplicate());
 
     if (reader != GUID_UNKNOWN) {
-      list_el->subscription_ids_[0] = reader;
-      list_el->num_subs_ = 1;
+      list_el->set_sub_id(0, reader);
+      list_el->set_num_subs(1);
     }
 
     DCPS::SendStateDataSampleList list;

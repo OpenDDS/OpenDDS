@@ -1,16 +1,43 @@
+Tue Jul  8 21:27:30 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Made header_, publication_id_, num_subs_, subscription_ids_[], space_available_
+          members as well as pointer members sample_, send_listener_, and handle_ private.
+          Provided accessors and mutators, where necessary, for the members.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Updated to account for providing accessors/mutators mentioned above.
+
 Tue Jul  8 19:29:21 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:
         * dds/DCPS/DataSampleElement.inl:
 
           Made allocator pointer members, filter_out_, and filter_per_link_ members
-	  private. Provided accessors the members.
+          private. Provided accessors the members.
 
-	* dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
         * dds/DCPS/transport/framework/DataLinkSet.inl:
         * dds/DCPS/transport/framework/TransportSendElement.inl:
 
-	  Updated to account for providing accessors mentioned above.
+          Updated to account for providing accessors mentioned above.
 
 Tue Jul  8 16:13:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 

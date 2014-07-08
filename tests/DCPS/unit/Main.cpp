@@ -314,22 +314,22 @@ void run_sample_list_test ()
   }
   TEST_CHECK( list.begin() != list.end() );
   SendStateDataSampleListIterator iter = list.begin();
-  TEST_CHECK( (*iter).publication_id_.entityId.entityKey[2] == 0 );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 0 );
+  TEST_CHECK( (*iter).get_pub_id().entityId.entityKey[2] == 0 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 0 );
   TEST_CHECK( ++iter != list.end() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 1 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 1 );
   TEST_CHECK( ++iter != list.end() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 2 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 2 );
   TEST_CHECK( ++iter == list.end() );
   TEST_CHECK( iter-- == list.end() );
   TEST_CHECK( iter != list.end() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 2 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 2 );
   TEST_CHECK( --iter != list.end() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 1 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 1 );
   TEST_CHECK( --iter != list.end() );
   TEST_CHECK( iter == list.begin() );
   TEST_CHECK( iter++ == list.begin() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 1 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 1 );
 
   // document that DataSampleList::iterator == not based on list itself
   iter = list.begin();
@@ -362,8 +362,8 @@ void run_sample_list_test ()
   //iter1 = headDiffList.begin();
   iter1 = SendStateDataSampleListIterator(headDiffList.head(), headDiffList.tail(), headDiffList.head());
   // verify both iters have same current
-  TEST_CHECK( ++iter->publication_id_.entityId.entityKey[2] == 1 );
-  TEST_CHECK( iter1->publication_id_.entityId.entityKey[2] == 1 );
+  TEST_CHECK( ++iter->get_pub_id().entityId.entityKey[2] == 1 );
+  TEST_CHECK( iter1->get_pub_id().entityId.entityKey[2] == 1 );
   TEST_CHECK( iter != iter1 );
 
 
@@ -446,7 +446,7 @@ void run_next_sample_test (ssize_t size)
       ACE_TEXT("\n")
     ));
     repoId.entityId.entityKey[2] = i;
-    TEST_CHECK (sample->publication_id_ == repoId);
+    TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")
@@ -553,7 +553,7 @@ void run_next_send_sample_test (ssize_t size)
       ACE_TEXT("\n")
     ));
     repoId.entityId.entityKey[2] = i;
-    TEST_CHECK (sample->publication_id_ == repoId);
+    TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")
@@ -649,7 +649,7 @@ void run_next_instance_sample_test (ssize_t size)
       ACE_TEXT("\n")
     ));
     repoId.entityId.entityKey[2] = i;
-    TEST_CHECK (sample->publication_id_ == repoId);
+    TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")

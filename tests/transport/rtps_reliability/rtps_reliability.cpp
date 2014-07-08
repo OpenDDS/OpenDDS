@@ -120,10 +120,10 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     , dsle_(pub_id, this, 0, &alloc_, 0)
   {
     DDS_TEST::list_set(dsle_, list_);
-    dsle_.header_.message_id_ = SAMPLE_DATA;
-    dsle_.header_.message_length_ = 8;
-    dsle_.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
-    payload_.init(dsle_.header_.message_length_);
+    dsle_.get_header().message_id_ = SAMPLE_DATA;
+    dsle_.get_header().message_length_ = 8;
+    dsle_.get_header().byte_order_ = ACE_CDR_BYTE_ORDER;
+    payload_.init(dsle_.get_header().message_length_);
     const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in LE format
       data = 0xDCBADCBA;
     Serializer ser(&payload_, host_is_bigendian, Serializer::ALIGN_CDR);
@@ -133,11 +133,10 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
 
   void send_data(const SequenceNumber& seq)
   {
-    dsle_.header_.sequence_ = seq;
-    dsle_.sample_ =
-      new ACE_Message_Block(DataSampleHeader::max_marshaled_size());
-    *dsle_.sample_ << dsle_.header_;
-    dsle_.sample_->cont(payload_.duplicate());
+    dsle_.get_header().sequence_ = seq;
+    dsle_.set_sample(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
+    *dsle_.get_sample() << dsle_.get_header();
+    dsle_.get_sample()->cont(payload_.duplicate());
     ACE_DEBUG((LM_INFO, "sending with seq#: %q\n", seq.getValue()));
     send(list_);
   }

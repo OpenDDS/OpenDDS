@@ -32,7 +32,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const bool customHeader =
-    DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->sample_);
+    DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->get_sample());
 #endif
 
   for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
@@ -50,7 +50,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
         "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
         itr->second.in(), guids ? guids->length() : 0), 5);
 
-      ACE_Message_Block* mb = sample->sample_->duplicate();
+      ACE_Message_Block* mb = sample->get_sample()->duplicate();
 
       DataSampleHeader::add_cfentries(guids, mb);
 

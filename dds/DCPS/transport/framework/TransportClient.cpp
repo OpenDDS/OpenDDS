@@ -321,8 +321,8 @@ TransportClient::send(const SendStateDataSampleList& samples)
     // while it is safe.
     DataSampleElement* next_elem = cur->get_next_send_sample();
     DataLinkSet_rch pub_links =
-      (cur->num_subs_ > 0)
-      ? links_.select_links(cur->subscription_ids_, cur->num_subs_)
+      (cur->get_num_subs() > 0)
+      ? links_.select_links(cur->get_sub_ids(), cur->get_num_subs())
       : DataLinkSet_rch(&links_, false);
 
     if (pub_links.is_nil() || pub_links->empty()) {
@@ -330,7 +330,7 @@ TransportClient::send(const SendStateDataSampleList& samples)
       //       associated with any remote subscriber ids" case.
 
       if (DCPS_debug_level > 4) {
-        GuidConverter converter(cur->publication_id_);
+        GuidConverter converter(cur->get_pub_id());
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) TransportClient::send: ")
                    ACE_TEXT("no links for publication %C, ")
@@ -342,7 +342,7 @@ TransportClient::send(const SendStateDataSampleList& samples)
       // We tell the send_listener_ that all of the remote subscriber ids
       // that wanted the data (all zero of them) have indeed received
       // the data.
-      cur->send_listener_->data_delivered(cur);
+      cur->get_send_listener()->data_delivered(cur);
 
     } else {
       VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
@@ -363,7 +363,7 @@ TransportClient::send(const SendStateDataSampleList& samples)
         for (MapType::iterator itr = map.begin(); itr != map.end(); ++itr) {
           size_t n_subs;
           GUIDSeq_var ti =
-            itr->second->target_intersection(cur->publication_id_,
+            itr->second->target_intersection(cur->get_pub_id(),
                                              cur->filter_out_, n_subs);
           if (ti.ptr() == 0 || ti->length() != n_subs) {
             if (!subset.in()) {
@@ -380,7 +380,7 @@ TransportClient::send(const SendStateDataSampleList& samples)
         if (!subset.in()) {
           VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
           // similar to the "if (pub_links.is_nil())" case above, no links
-          cur->send_listener_->data_delivered(cur);
+          cur->get_send_listener()->data_delivered(cur);
           cur = next_elem;
           continue;
         }
