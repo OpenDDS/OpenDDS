@@ -1,3 +1,10 @@
+Tue Jul  8 14:15:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Increased the log level for messages on shutdown.
+
 Tue Jul  8 02:49:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:

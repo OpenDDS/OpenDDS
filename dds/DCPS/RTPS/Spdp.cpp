@@ -91,7 +91,7 @@ Spdp::~Spdp()
   shutdown_flag_ = 1;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    if (DCPS::DCPS_debug_level > 0) {
+    if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("(%P|%t) Spdp::~Spdp ")
                  ACE_TEXT("remove discovered participants\n")));
@@ -423,7 +423,7 @@ Spdp::SpdpTransport::open()
 
 Spdp::SpdpTransport::~SpdpTransport()
 {
-  if (DCPS::DCPS_debug_level > 0) {
+  if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::~SpdpTransport\n")));
   }
   dispose_unregister();
@@ -481,7 +481,7 @@ Spdp::SpdpTransport::dispose_unregister()
 void
 Spdp::SpdpTransport::close()
 {
-  if (DCPS::DCPS_debug_level > 0) {
+  if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
   }
   ACE_Reactor* reactor = outer_->reactor();
