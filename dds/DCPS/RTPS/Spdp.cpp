@@ -111,13 +111,12 @@ Spdp::~Spdp()
     }
   }
 
-  tport_->close();
-
   // ensure sedp's task queue is drained before data members are being
   // deleted
   sedp_.shutdown();
 
   // release lock for reset of event handler, which may delete transport
+  tport_->close();
   eh_.reset();
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -203,7 +202,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     // add a new participant
     participants_[guid] = DiscoveredParticipant(pdata, time);
     DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
-    Participant_BIT_DR bit = part_bit();
+    DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
     if (bit) {
       ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
       bit_instance_handle =
@@ -232,7 +231,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 #endif
       iter->second.pdata_.ddsParticipantData.user_data =
         pdata.ddsParticipantData.user_data;
-      Participant_BIT_DR bit = part_bit();
+      DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
       if (bit) {
         ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->store_synthetic_data(pdata.ddsParticipantData,
@@ -254,7 +253,7 @@ Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
 {
   bool removed = sedp_.disassociate(iter->second.pdata_);
   if (removed) {
-    Participant_BIT_DR bit = part_bit();
+    DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
     // bit may be null if the DomainParticipant is shutting down
     if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
       bit->set_instance_state(iter->second.bit_ih_,
@@ -322,12 +321,12 @@ Spdp::bit_subscriber(const DDS::Subscriber_var& bit_subscriber)
   tport_->open();
 }
 
-Spdp::Participant_BIT_DR
+DDS::ParticipantBuiltinTopicDataDataReaderImpl*
 Spdp::part_bit()
 {
   DDS::DataReader_var d =
     bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
-  return Participant_BIT_DR(d);
+  return dynamic_cast<DDS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 
 ACE_Reactor*

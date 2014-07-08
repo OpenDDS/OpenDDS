@@ -126,8 +126,7 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
-  typedef Psuedovar<DDS::ParticipantBuiltinTopicDataDataReaderImpl> Participant_BIT_DR;
-  Participant_BIT_DR part_bit();
+  DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 
   struct SpdpTransport : ACE_Event_Handler {
     explicit SpdpTransport(Spdp* outer);
