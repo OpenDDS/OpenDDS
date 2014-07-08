@@ -103,24 +103,10 @@ if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
 $subscriber->Spawn ();
 $publisher->Spawn ();
 
+$status |= PerlDDS::wait_kill($subscriber, 60, "subscriber");
 
-my $result = $subscriber->WaitKill(60);
-if ($result != 0) {
-    print STDERR "ERROR: $subscriber returned $result  \n";
-    $status = 1;
-}
-
-$result = $publisher->WaitKill (60);
-if ($result != 0) {
-    print STDERR "ERROR: $publisher returned $result \n";
-    $status = 1;
-}
-
-my $ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
+$status |= PerlDDS::wait_kill($publisher, 60, "publisher");
+$status |= PerlDDS::terminate_wait_kill($DCPSREPO);
 
 if ($status == 0) {
   print "test PASSED.\n";

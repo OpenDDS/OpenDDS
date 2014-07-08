@@ -28,6 +28,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export SendResponseListener
   : public TransportSendListener {
 public:
+  SendResponseListener(const std::string& msg_src);
   virtual ~SendResponseListener();
 
   virtual void data_delivered(const DataSampleElement* sample);

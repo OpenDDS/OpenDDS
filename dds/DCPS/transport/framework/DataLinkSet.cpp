@@ -31,6 +31,7 @@
 
 OpenDDS::DCPS::DataLinkSet::DataLinkSet()
   : send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
+  , send_response_listener_("DataLinkSet")
 {
   DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",6);
 

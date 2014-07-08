@@ -1,12 +1,51 @@
+Tue Jul  8 16:13:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * .:
+        * ChangeLog:
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+        * bin/PerlDDS/Run_Test.pm:
+        * configure:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+
+	  Merged r6317 through r6379 from trunk.
+
 Tue Jul  8 14:40:50 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:
 
-	  Place forward decl of DDS_TEST in global namespace.
+          Place forward decl of DDS_TEST in global namespace.
 
         * tests/transport/rtps/publisher.cpp:
 
-	  Fix so test can set next sample on a DataSampleElement.
+          Fix so test can set next sample on a DataSampleElement.
 
 Mon Jul  7 21:08:41 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 

@@ -71,7 +71,7 @@ Manual_By_Participant_Writer_1::svc ()
     message.subject_id = 99;
     ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup("Comic Book Guy");
+    message.from       = CORBA::string_dup("Manual_By_Participant_Writer_1");
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
@@ -221,7 +221,7 @@ Manual_By_Topic_Writer_1::svc ()
     message.subject_id = 99;
     ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup("Comic Book Guy");
+    message.from       = CORBA::string_dup("Manual_By_Topic_Writer_1");
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;

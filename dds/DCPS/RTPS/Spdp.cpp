@@ -91,6 +91,11 @@ Spdp::~Spdp()
   shutdown_flag_ = 1;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) Spdp::~Spdp ")
+                 ACE_TEXT("remove discovered participants\n")));
+    }
     // Iterate through a copy of the repo Ids, rather than the map
     //   as it gets unlocked in remove_discovered_participant()
     RepoIdSet participant_ids;
@@ -105,6 +110,11 @@ Spdp::~Spdp()
       }
     }
   }
+
+  // ensure sedp's task queue is drained before data members are being
+  // deleted
+  sedp_.shutdown();
+
   // release lock for reset of event handler, which may delete transport
   tport_->close();
   eh_.reset();
@@ -114,10 +124,6 @@ Spdp::~Spdp()
       shutdown_cond_.wait();
     }
   }
-
-  // ensure sedp's task queue is drained before data members are being
-  // deleted
-  sedp_.shutdown();
 }
 
 void
@@ -416,6 +422,9 @@ Spdp::SpdpTransport::open()
 
 Spdp::SpdpTransport::~SpdpTransport()
 {
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::~SpdpTransport\n")));
+  }
   dispose_unregister();
   {
     // Acquire lock for modification of condition variable
@@ -471,6 +480,9 @@ Spdp::SpdpTransport::dispose_unregister()
 void
 Spdp::SpdpTransport::close()
 {
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) SpdpTransport::close\n")));
+  }
   ACE_Reactor* reactor = outer_->reactor();
   reactor->cancel_timer(this);
   const ACE_Reactor_Mask mask =

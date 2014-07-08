@@ -426,16 +426,11 @@ sub initialize($) {
 
 sub finalize($) {
   my $DCPSREPO = shift;
-  my $ir = $DCPSREPO->TerminateWaitKill(5);
+  my $ir = PerlDDS::terminate_wait_kill($DCPSREPO);
 
   unlink $dcpsrepo_ior;
 
-  if ($ir != 0) {
-      print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-      return 1;
-  }
-
-  return 0;
+  return $ir;
 }
 
 sub run($$$$) {
@@ -461,17 +456,9 @@ sub run($$$$) {
   my $PublisherResult = $Publisher->Spawn();
   print "Publisher PID: " . $Publisher->{PROCESS} . ". Killing in " . $publife . " seconds ...\n" if $Publisher->{PROCESS};
 
-  $PublisherResult = $Publisher->WaitKill ($publife);
-  if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-  }
+  $status |= PerlDDS::wait_kill($Publisher, $publife, "publisher");
 
-  $SubscriberResult = $Subscriber->WaitKill($sublife);
-  if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-  }
+  $status |= PerlDDS::wait_kill($Subscriber, $sublife, "subscriber");
 
   return $status;
 }
