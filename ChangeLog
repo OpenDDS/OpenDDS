@@ -1,3 +1,9 @@
+Tue Jul  8 02:49:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Fixed fuzz error.
+
 Mon Jul  7 21:15:36 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/PerlDDS/Cross_Sync.pm:

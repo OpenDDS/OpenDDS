@@ -1838,7 +1838,7 @@ void
 {
   using namespace OpenDDS::DCPS;
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-  
+
   if (get_deleted())
     return;
 
