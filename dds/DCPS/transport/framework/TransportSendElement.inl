@@ -25,7 +25,7 @@ OpenDDS::DCPS::TransportSendElement::alloc(int initial_count,
                                            const DataSampleElement* sample)
 {
   TransportSendElement* ret;
-  TransportSendElementAllocator* al = sample->transport_send_element_allocator_;
+  TransportSendElementAllocator* al = sample->get_transport_send_element_allocator();
   ACE_NEW_MALLOC_RETURN(ret,
     static_cast<TransportSendElement*>(al->malloc()),
     TransportSendElement(initial_count, sample, al),

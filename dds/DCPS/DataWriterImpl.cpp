@@ -1730,7 +1730,7 @@ DataWriterImpl::write(DataSample* data,
     return ret;
   }
 
-  element->filter_out_ = filter_out_var._retn(); // ownership passed to element
+  element->set_filter_out(filter_out_var._retn()); // ownership passed to element
 
   ret = this->data_container_->enqueue(element, handle);
 

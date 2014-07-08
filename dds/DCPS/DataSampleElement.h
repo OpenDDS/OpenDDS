@@ -95,6 +95,17 @@ public:
   /// The client holds this as an InstanceHandle_t.
   PublicationInstance*   handle_;
 
+  TransportSendElementAllocator* get_transport_send_element_allocator() const;
+
+  TransportCustomizedElementAllocator* get_transport_customized_element_allocator() const;
+
+  typedef std::map<DataLinkIdType, GUIDSeq_var> DataLinkIdTypeGUIDMap;
+  DataLinkIdTypeGUIDMap& get_filter_per_link();
+
+  void set_filter_out(GUIDSeq *filter_out);
+
+private:
+
   /// Allocator for the TransportSendElement.
   TransportSendElementAllocator* transport_send_element_allocator_;
 
@@ -104,7 +115,7 @@ public:
   //{@
   /// tracking for Content-Filtering data
   GUIDSeq_var filter_out_;
-  std::map<DataLinkIdType, GUIDSeq_var> filter_per_link_;
+  DataLinkIdTypeGUIDMap filter_per_link_;
   //@}
 
 private:

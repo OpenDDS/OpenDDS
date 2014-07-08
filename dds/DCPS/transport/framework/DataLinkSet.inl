@@ -40,9 +40,9 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     if (customHeader) {
       typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
-      FilterIter fi = sample->filter_per_link_.find(itr->first);
+      FilterIter fi = sample->get_filter_per_link().find(itr->first);
       GUIDSeq* guids = 0;
-      if (fi != sample->filter_per_link_.end()) {
+      if (fi != sample->get_filter_per_link().end()) {
         guids = fi->second.ptr();
       }
 
@@ -56,7 +56,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
 
       TransportCustomizedElement* tce =
         TransportCustomizedElement::alloc(send_element, false,
-          sample->transport_customized_element_allocator_);
+          sample->get_transport_customized_element_allocator());
       tce->set_msg(mb); // tce now owns ACE_Message_Block chain
 
       itr->second->send(tce);

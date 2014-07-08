@@ -1,3 +1,17 @@
+Tue Jul  8 19:29:21 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Made allocator pointer members, filter_out_, and filter_per_link_ members
+	  private. Provided accessors the members.
+
+	* dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+
+	  Updated to account for providing accessors mentioned above.
+
 Tue Jul  8 16:13:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * .:
@@ -35,7 +49,7 @@ Tue Jul  8 16:13:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
         * tests/Utils/DDSApp.h:
         * tests/Utils/DDSApp.cpp:
 
-	  Merged r6317 through r6379 from trunk.
+          Merged r6317 through r6379 from trunk.
 
 Tue Jul  8 14:40:50 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 

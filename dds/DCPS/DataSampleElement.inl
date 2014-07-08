@@ -113,5 +113,33 @@ DataSampleElement::set_next_send_sample(DataSampleElement* next_send_sample)
   this->next_send_sample_ = next_send_sample;
 };
 
+ACE_INLINE
+TransportSendElementAllocator*
+DataSampleElement::get_transport_send_element_allocator() const
+{
+  return transport_send_element_allocator_;
+}
+
+ACE_INLINE
+TransportCustomizedElementAllocator*
+DataSampleElement::get_transport_customized_element_allocator() const
+{
+  return transport_customized_element_allocator_;
+}
+
+ACE_INLINE
+DataSampleElement::DataLinkIdTypeGUIDMap&
+DataSampleElement::get_filter_per_link()
+{
+  return filter_per_link_;
+}
+
+ACE_INLINE
+void
+DataSampleElement::set_filter_out(GUIDSeq *filter_out)
+{
+  filter_out_ = filter_out;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
