@@ -41,10 +41,14 @@
 
 #include "TestMsg.h"
 
-class DDS_TEST {  // friended by RtpsUdpDataLink and DataSampleList
+class DDS_TEST {  // friended by RtpsUdpDataLink and DataSampleElement
 public:
   static void force_inline_qos(bool val) {
     OpenDDS::DCPS::RtpsUdpDataLink::force_inline_qos_ = val;
+  }
+
+  static void set_next_send_sample(DataSampleElement& element, DataSampleElement *next_send_sample) {
+    element.set_next_send_sample(next_send_sample);
   }
 
   static int test(ACE_TString host, u_short port);
@@ -410,7 +414,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   list.size_ = sizeof(elements) / sizeof(elements[0]);
   list.tail_ = &elements[list.size() - 1];
   for (int i = 0; i < list.size() - 1; ++i) {
-    elements[i].set_next_send_sample( &elements[i + 1]);
+    DDS_TEST::set_next_send_sample(elements[i], &elements[i + 1]);
   }
 
   // Send a regular data sample

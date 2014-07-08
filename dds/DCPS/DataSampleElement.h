@@ -17,6 +17,8 @@
 
 #include <map>
 
+class DDS_TEST;
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -34,8 +36,6 @@ typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>
 
 class TransportSendListener;
 struct PublicationInstance;
-
-class DDS_TEST;
 
 /**
 * Currently we contain entire messages in a single ACE_Message_Block
@@ -119,7 +119,7 @@ private:
   friend class WriterDataSampleList;
   friend class InstanceDataSampleList;
   friend class TransportClient;
-  friend class DDS_TEST;
+  friend class ::DDS_TEST;
   // Iterators needs access to prev/next pointers for iteration
   friend class SendStateDataSampleListIterator;
   friend class SendStateDataSampleListConstIterator;
