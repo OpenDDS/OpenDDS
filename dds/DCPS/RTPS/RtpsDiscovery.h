@@ -47,6 +47,8 @@ public:
 
   virtual DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* dpi);
 
+  virtual void fini_bit(DCPS::DomainParticipantImpl* participant);
+
   virtual DCPS::RepoId bit_key_to_repo_id(DCPS::DomainParticipantImpl* part,
                                           const char* bit_topic_name,
                                           const DDS::BuiltinTopicKey_t& key) const;

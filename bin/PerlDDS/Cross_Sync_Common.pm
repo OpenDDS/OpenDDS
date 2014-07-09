@@ -18,6 +18,7 @@ use constant SERVER  => 1;
 ### Constructor and Destructor
 
 sub allocate {
+
     my $proto = shift;
     my $class = ref ($proto) || $proto;
 
@@ -28,6 +29,8 @@ sub allocate {
     $server_port ||= 12345;
     $client_port ||= 12346;
     $schedule_file ||= "test_list.txt";
+
+    $verbose = 1;
 
     my $self = {
         VERBOSE => $verbose,
@@ -302,6 +305,7 @@ sub _initialize {
 }
 
 sub _parse_schedule {
+
     my $self = shift;
     my $verbose = $self->{VERBOSE};
 

@@ -873,6 +873,12 @@ DomainParticipantImpl::delete_contained_entities()
   // mark that the entity is being deleted
   set_deleted(true);
 
+  // BIT subsciber and data readers will be deleted with the
+  // rest of the entities, so need to report to discovery that
+  // BIT is no longer available
+  Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
+  disc->fini_bit(this);
+
   // delete publishers
   {
     //### Debug statements to understand disassociation and deletion

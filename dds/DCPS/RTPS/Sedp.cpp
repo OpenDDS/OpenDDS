@@ -725,6 +725,9 @@ DDS::TopicBuiltinTopicDataDataReaderImpl*
 Sedp::topic_bit()
 {
   DDS::Subscriber_var sub = spdp_.bit_subscriber();
+  if (!sub.in())
+    return 0;
+
   DDS::DataReader_var d =
     sub->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
   return dynamic_cast<DDS::TopicBuiltinTopicDataDataReaderImpl*>(d.in());
@@ -734,6 +737,9 @@ DDS::PublicationBuiltinTopicDataDataReaderImpl*
 Sedp::pub_bit()
 {
   DDS::Subscriber_var sub = spdp_.bit_subscriber();
+  if (!sub.in())
+    return 0;
+
   DDS::DataReader_var d =
     sub->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
   return dynamic_cast<DDS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
@@ -743,6 +749,9 @@ DDS::SubscriptionBuiltinTopicDataDataReaderImpl*
 Sedp::sub_bit()
 {
   DDS::Subscriber_var sub = spdp_.bit_subscriber();
+  if (!sub.in())
+    return 0;
+
   DDS::DataReader_var d =
     sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
@@ -1106,6 +1115,13 @@ void
 Sedp::shutdown()
 {
   task_.shutdown();
+}
+
+void
+Sedp::Task::acknowledge()
+{
+  // id is really a don't care, but just set to REQUEST_ACK
+  putq(new Msg(Msg::MSG_FINI_BIT, DCPS::REQUEST_ACK, 0));
 }
 
 void
@@ -2413,6 +2429,12 @@ Sedp::is_opendds(const GUID_t& endpoint)
 }
 
 void
+Sedp::acknowledge()
+{
+  task_.acknowledge();
+}
+
+void
 Sedp::Task::enqueue(const SPDPdiscoveredParticipantData* pdata)
 {
   if (spdp_->shutting_down()) { return; }
@@ -2460,15 +2482,21 @@ Sedp::Task::svc()
       svc_i(msg->type_,
             static_cast<const DDS::InstanceHandle_t*>(msg->payload_));
       break;
+    case Msg::MSG_FINI_BIT:
+      // acknowledge that fini_bit has been called (this just ensures that
+      // this task is not in the act of using one of BIT Subscriber's Data
+      // Readers while it is being deleted
+      spdp_->wait_for_acks().ack();
+      break;
     case Msg::MSG_STOP:
-      if (DCPS::DCPS_debug_level > 0) {
+      if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::Task::svc - ")
                             ACE_TEXT("received MSG_STOP. Task exiting\n")));
       }
       return 0;
     }
   }
-  if (DCPS::DCPS_debug_level > 0) {
+  if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::Task::svc - ")
                         ACE_TEXT("Task exiting.\n")));
   }
@@ -2478,6 +2506,40 @@ Sedp::Task::svc()
 Sedp::Task::~Task()
 {
   shutdown();
+}
+
+WaitForAcks::WaitForAcks()
+: cond_(lock_)
+, acks_(0)
+{
+}
+
+void
+WaitForAcks::ack()
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ++acks_;
+  }
+  cond_.signal();
+}
+
+void
+WaitForAcks::wait_for_acks(unsigned int num_acks)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  while (num_acks > acks_) {
+    cond_.wait();
+  }
+}
+
+void
+WaitForAcks::reset()
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  acks_ = 0;
+  // no need to signal, going back to zero won't ever
+  // cause wait_for_acks() to exit it's loop
 }
 
 }
