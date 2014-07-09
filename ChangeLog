@@ -1,3 +1,10 @@
+Wed Jul  9 17:25:49 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+
+          Logging changes.
+
 Wed Jul  9 15:12:35 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:
