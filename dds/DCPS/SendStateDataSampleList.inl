@@ -29,6 +29,27 @@ void SendStateDataSampleList::reset()
 }
 
 ACE_INLINE
+ssize_t
+SendStateDataSampleList::size() const
+{
+  return size_;
+}
+
+ACE_INLINE
+DataSampleElement*
+SendStateDataSampleList::head() const
+{
+  return head_;
+}
+
+ACE_INLINE
+DataSampleElement*
+SendStateDataSampleList::tail() const
+{
+  return tail_;
+}
+
+ACE_INLINE
 void
 SendStateDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {

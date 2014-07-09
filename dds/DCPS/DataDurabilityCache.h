@@ -17,8 +17,6 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-//#include "dds/DCPS/DataSampleList.h"
-//#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DurabilityArray.h"
 #include "dds/DCPS/DurabilityQueue.h"
 #include "dds/DCPS/FileSystemStorage.h"

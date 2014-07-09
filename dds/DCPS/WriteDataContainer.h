@@ -10,9 +10,7 @@
 #define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
-//#include "DataSampleList.h"
 #include "SendStateDataSampleList.h"
-//#include "InstanceDataSampleList.h"
 #include "WriterDataSampleList.h"
 #include "OfferedDeadlineWatchdog.h"
 

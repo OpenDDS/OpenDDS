@@ -24,6 +24,7 @@ namespace DCPS {
 
 const CORBA::ULong MAX_READERS_PER_ELEM = 5;
 
+class DataSampleElement;
 typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
   DataSampleElementAllocator;
 
@@ -52,7 +53,7 @@ typedef ACE_Message_Block DataSample;
 * These pointers are kept in this single element rather than having multiple smaller
 * lists in order to allow us to allocate once which will minimize locking.
 * Note that because the list pointers are stored within the element,
-* the element can simultenously be in at most one InstanceDataSampleList list, one
+* the element can simultaneously be in at most one InstanceDataSampleList list, one
 * SendStateDataSampleList list, and one WriterDataSampleList list.
 */
 class OpenDDS_Dcps_Export DataSampleElement {
@@ -151,14 +152,14 @@ private:
 
   void set_next_send_sample(DataSampleElement* next_send_sample);
 
-  // DataSampleList is in charge of managing list placement therefore needs access to pointers
-  //friend class DataSampleList;
+  /// *DataSampleList(s) is in charge of managing list placement therefore
+  /// needs access to pointers
   friend class SendStateDataSampleList;
   friend class WriterDataSampleList;
   friend class InstanceDataSampleList;
   friend class TransportClient;
   friend class ::DDS_TEST;
-  // Iterators needs access to prev/next pointers for iteration
+  /// Iterators needs access to prev/next pointers for iteration
   friend class SendStateDataSampleListIterator;
   friend class SendStateDataSampleListConstIterator;
 

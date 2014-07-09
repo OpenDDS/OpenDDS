@@ -13,8 +13,6 @@
 #include "Definitions.h"
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
-//#include "DataSampleHeader.h"
-//#include "DataSampleElement.h"
 
 #include <iterator>
 
@@ -25,17 +23,7 @@ namespace DCPS {
 
 class DataSampleElement;
 
-//struct DataSampleElement;
-//typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
-//  DataSampleElementAllocator;
-
 const int MAX_READERS_TO_RESEND = 5;
-
-/**
-* Currently we contain entire messages in a single ACE_Message_Block
-* chain.
-*/
-//typedef ACE_Message_Block DataSample;
 
 /**
  * @struct SendStateDataSampleListIterator
@@ -89,6 +77,16 @@ private:
   friend class SendStateDataSampleListConstIterator;
 };
 
+/**
+ * @struct SendStateDataSampleListConstIterator
+ *
+ * @brief @c SendStateDataSampleList STL-style const iterator implementation.
+ *
+ * This class implements a STL-style const iterator for the OpenDDS
+ * @c SendStateDataSampleList class.  The resulting iterator may be used
+ * @c with the STL generic algorithms.  It is meant for iteration
+ * @c over the "send samples" in a @c SendStateDataSampleList.
+ */
 class OpenDDS_Dcps_Export SendStateDataSampleListConstIterator
 {
 public:
@@ -133,10 +131,13 @@ private:
 /**
 * A list of DataSampleElement pointers to be queued by the order the
 * samples are to be transmitted over the transport layer.
+* Cache the number of elements in the list so that list traversal is
+* not required to find this information.
 * The Publisher may use this to maintain a list of samples to
 * be sent with PRESENTATION.access_scope==GROUP by obtaining
 * data from each DataWriter as it becomes available and
 * concatenating the data in the order in which it was written.
+* Manages DataSampleElement's previous_send_sample/next_send_sample pointers
 */
 class OpenDDS_Dcps_Export SendStateDataSampleList {
 
@@ -144,21 +145,27 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
 
  public:
 
+  /// STL-style bidirectional iterator and const-iterator types.
   typedef SendStateDataSampleListIterator iterator;
   typedef SendStateDataSampleListConstIterator const_iterator;
 
+  /// Default constructor clears the list.
   SendStateDataSampleList();
   ~SendStateDataSampleList(){};
 
+  /// Returns a pointer to the SendStateDataSampleList containing a
+  /// given DataSampleElement for use in the typical situation where
+  /// the send state of a DataSampleElement is tracked by shifting
+  /// it between distinct SendStateDataSampleLists, one for each state
   static const SendStateDataSampleList* send_list_containing_element(const DataSampleElement* element,
                                                                 std::vector<SendStateDataSampleList*> send_lists);
 
   /// Reset to initial state.
   void reset();
 
-  ssize_t size() const {return size_;};
-  DataSampleElement* head() const {return head_;};
-  DataSampleElement* tail() const {return tail_;};
+  ssize_t size() const;
+  DataSampleElement* head() const;
+  DataSampleElement* tail() const;
 
   void enqueue_tail(const DataSampleElement* element);
   void enqueue_tail(SendStateDataSampleList list);

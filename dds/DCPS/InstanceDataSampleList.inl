@@ -28,6 +28,27 @@ void InstanceDataSampleList::reset()
 }
 
 ACE_INLINE
+ssize_t
+InstanceDataSampleList::size() const
+{
+  return size_;
+}
+
+ACE_INLINE
+DataSampleElement*
+InstanceDataSampleList::head() const
+{
+  return head_;
+}
+
+ACE_INLINE
+DataSampleElement*
+InstanceDataSampleList::tail() const
+{
+  return tail_;
+}
+
+ACE_INLINE
 void
 InstanceDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {

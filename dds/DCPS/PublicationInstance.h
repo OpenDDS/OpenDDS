@@ -10,7 +10,6 @@
 #define OPENDDS_DCPS_PUBLICATION_INSTANCE_H
 
 #include "dcps_export.h"
-//#include "DataSampleList.h"
 #include "InstanceDataSampleList.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

@@ -1,3 +1,67 @@
+Wed Jul  9 18:10:28 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.cpp:
+
+          Added to allow for inclusion of .inl file if ACE INLINE
+          not defined.
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/InstanceDataSampleList.inl:
+        * dds/DCPS/InstanceDataSampleList.cpp:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+        * dds/DCPS/WriterDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.inl:
+        * dds/DCPS/WriterDataSampleList.cpp:
+
+          Shifted method definitions into the .inl file and removed commented
+          out included of DataSampleList.  Also added some documentation to
+          clarify list mechanics and relationship to DataSampleElement(s).
+
+        * dds/DCPS/PublisherImpl.h:
+
+          Removed references to DataSampleList including unused typedef of
+          DataSampleListMap.
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Removed include statements for removed DataSampleList file.
+          Added some clarifying documentation where pertinent.
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+
+          Removed these files as they are no longer needed after being replaced
+          by {Writer, Instance, SendState}DataSampleList(s).
+
 Tue Jul  8 21:27:30 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:

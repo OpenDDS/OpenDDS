@@ -7,7 +7,6 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-//#include "DataSampleList.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "Definitions.h"

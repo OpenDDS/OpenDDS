@@ -22,8 +22,9 @@ class SimpleDataWriter
 
     void init(const OpenDDS::DCPS::AssociationData& subscription);
 
-    // Implement in derived DDS_TEST class since internals of DataSampleList
-    // need to be accessed and DDS_TEST is a friend of DataSampleList.
+    // Implement in derived DDS_TEST class since internals of SendStateDataSampleList
+    // and DataSampleElement need to be accessed and DDS_TEST is a friend of
+    // SendStateDataSampleList and DataSampleElement.
     virtual int run(int num_msgs, int msg_size) = 0;
 
     // This means that the TransportImpl has been shutdown, making the

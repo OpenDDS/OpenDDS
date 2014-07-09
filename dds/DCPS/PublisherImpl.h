@@ -13,7 +13,6 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "DataWriterImpl.h"
-//#include "DataSampleList.h"
 #include "ace/Synch.h"
 #include "ace/Reverse_Lock_T.h"
 
@@ -46,8 +45,6 @@ class OpenDDS_Dcps_Export PublisherImpl
 public:
 
   friend class DataWriterImpl;
-
-  //typedef std::map<PublicationId, DataSampleList> DataSampleListMap;
 
   PublisherImpl(DDS::InstanceHandle_t handle,
                 RepoId id,

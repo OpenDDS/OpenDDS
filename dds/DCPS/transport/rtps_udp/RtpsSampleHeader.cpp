@@ -10,7 +10,6 @@
 #include "RtpsUdpSendStrategy.h"
 
 #include "dds/DCPS/Serializer.h"
-//#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"

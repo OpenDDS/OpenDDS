@@ -21,7 +21,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/DisjointSequence.h"
-//#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 

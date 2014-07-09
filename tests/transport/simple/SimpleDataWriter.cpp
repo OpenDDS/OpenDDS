@@ -4,7 +4,6 @@
 
 #include "SimpleDataWriter.h"
 #include "dds/DCPS/DataSampleHeader.h"
-//#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
@@ -163,7 +162,7 @@ DDS_TEST::run(int num_messages, int msg_size)
   this->num_messages_delivered_ = 0;
   this->num_messages_sent_      = num_messages;
 
-  // Set up the DataSampleList
+  // Set up the SendStateDataSampleList
   OpenDDS::DCPS::SendStateDataSampleList samples;
 
   samples.size_ = num_messages;

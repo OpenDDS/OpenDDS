@@ -11,7 +11,6 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportQueueElement.h"
-//#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 
 namespace OpenDDS {

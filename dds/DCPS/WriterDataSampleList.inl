@@ -29,6 +29,27 @@ void WriterDataSampleList::reset()
 }
 
 ACE_INLINE
+ssize_t
+WriterDataSampleList::size() const
+{
+  return size_;
+}
+
+ACE_INLINE
+DataSampleElement*
+WriterDataSampleList::head() const
+{
+  return head_;
+}
+
+ACE_INLINE
+DataSampleElement*
+WriterDataSampleList::tail() const
+{
+  return tail_;
+}
+
+ACE_INLINE
 void
 WriterDataSampleList::enqueue_tail(const DataSampleElement* sample)
 {

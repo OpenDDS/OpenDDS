@@ -13,8 +13,6 @@
 #include "Definitions.h"
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
-//#include "DataSampleHeader.h"
-//#include "DataSampleElement.h"
 
 #include <iterator>
 
@@ -23,40 +21,28 @@ namespace DCPS {
 
 class DataSampleElement;
 
-//struct DataSampleElement;
-//typedef Cached_Allocator_With_Overflow<DataSampleElement, ACE_Null_Mutex>
-//  DataSampleElementAllocator;
-
-//const int MAX_READERS_TO_RESEND = 5;
-
-
-/**
-* Currently we contain entire messages in a single ACE_Message_Block
-* chain.
-*/
-//typedef ACE_Message_Block DataSample;
-
-
 
 /**
 * A list of DataSampleElement pointers to be queued by the order the
 * samples are written to the DataWriter (within PRESENTATION.access_scope==TOPIC).
+* Cache the number of elements in the list so that list traversal is
+* not required to find this information.
+* Manages DataSampleElement's previous_writer_sample/next_writer_sample pointers
 */
 class OpenDDS_Dcps_Export WriterDataSampleList {
 
  public:
 
+  /// Default constructor clears the list.
   WriterDataSampleList();
   ~WriterDataSampleList(){};
 
   /// Reset to initial state.
   void reset();
 
-  ssize_t size() const {return size_;};
-
-  DataSampleElement* head() const {return head_;};
-
-  DataSampleElement* tail() const {return tail_;};
+  ssize_t size() const;
+  DataSampleElement* head() const;
+  DataSampleElement* tail() const;
 
   void enqueue_tail(const DataSampleElement* element);
 

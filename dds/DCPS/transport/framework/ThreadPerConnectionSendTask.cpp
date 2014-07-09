@@ -14,7 +14,6 @@
 #include "ThreadPerConRemoveVisitor.h"
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
-//#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
 

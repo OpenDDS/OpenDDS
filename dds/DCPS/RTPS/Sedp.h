@@ -22,7 +22,6 @@
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
-//#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/DataSampleHeader.h"
 

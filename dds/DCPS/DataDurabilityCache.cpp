@@ -12,7 +12,6 @@
 
 #include "DataDurabilityCache.h"
 #include "Service_Participant.h"
-//#include "DataSampleList.h"
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 #include "WriteDataContainer.h"
@@ -510,7 +509,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
 
     // Drop "old" samples.  Only keep the "depth" most recent
     // samples, i.e. those found at the tail end of the
-    // DataSampleList.
+    // SendStateDataSampleList.
     ssize_t const advance_amount = the_data.size() - depth;
     std::advance(element, advance_amount);
   }

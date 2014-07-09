@@ -16,7 +16,6 @@
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
-//#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Qos_Helper.h"

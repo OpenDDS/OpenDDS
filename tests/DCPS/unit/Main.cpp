@@ -1,5 +1,4 @@
 #include "dds/DCPS/Service_Participant.h"
-//#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/InstanceDataSampleList.h"
 #include "dds/DCPS/WriterDataSampleList.h"
@@ -331,7 +330,8 @@ void run_sample_list_test ()
   TEST_CHECK( iter++ == list.begin() );
   TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 1 );
 
-  // document that DataSampleList::iterator == not based on list itself
+  // document that SendStateDataSampleList::iterator == not based on list itself
+  // but rather on the *send_sample_ pointers in the DataSampleElements themselves
   iter = list.begin();
   WriterDataSampleList sameHeadTailList;
   // calling enqueue_tail_next_sample will setup head and tail, but not mess with
@@ -339,7 +339,6 @@ void run_sample_list_test ()
   sameHeadTailList.enqueue_tail (sample[0]);
   sameHeadTailList.enqueue_tail (sample[2]);
   // will iterate the same, since sample 0-2 send_sample params were not changed
-  //SendStateDataSampleListIterator iter1 = sameHeadTailList.begin();
   SendStateDataSampleListIterator iter1 = SendStateDataSampleListIterator(sameHeadTailList.head(), sameHeadTailList.tail(), sameHeadTailList.head());
   TEST_CHECK( iter == iter1 );
   TEST_CHECK( ++iter == ++iter1 );
@@ -351,7 +350,6 @@ void run_sample_list_test ()
   tailDiffList.enqueue_tail (sample[0]);
   tailDiffList.enqueue_tail (sample[1]);
   SendStateDataSampleListIterator iter_tailDiffList = SendStateDataSampleListIterator(tailDiffList.head(), tailDiffList.tail(), tailDiffList.head());
-  //TEST_CHECK( list.begin() != tailDiffList.begin() );
   TEST_CHECK( list.begin() != iter_tailDiffList );
 
   // check same tail, same current but different head fails
@@ -359,7 +357,6 @@ void run_sample_list_test ()
   headDiffList.enqueue_tail (sample[1]);
   headDiffList.enqueue_tail (sample[2]);
   iter = list.begin();
-  //iter1 = headDiffList.begin();
   iter1 = SendStateDataSampleListIterator(headDiffList.head(), headDiffList.tail(), headDiffList.head());
   // verify both iters have same current
   TEST_CHECK( ++iter->get_pub_id().entityId.entityKey[2] == 1 );

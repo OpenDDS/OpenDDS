@@ -17,8 +17,6 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
-//#include "DataSampleList.h"
-//#include "SendStateDataSampleList.h"
 #include "DataSampleHeader.h"
 #include "TopicImpl.h"
 #include "Qos_Helper.h"
