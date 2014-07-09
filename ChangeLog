@@ -1,3 +1,9 @@
+Wed Jul  9 15:12:35 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add back Thrasher test cases.
+
 Tue Jul  8 19:42:52 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
