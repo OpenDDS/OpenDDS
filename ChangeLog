@@ -1,3 +1,13 @@
+Wed Jul  9 17:59:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Fixed logic for reporting and exiting after wait timed out.
+
+        * tests/DCPS/QueryCondition/run_test.pl:
+
+          Added printing out command line for executables that are started.
+
 Wed Jul  9 17:25:49 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:

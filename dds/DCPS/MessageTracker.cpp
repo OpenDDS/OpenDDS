@@ -78,14 +78,13 @@ MessageTracker::wait_messages_pending()
                ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
                ACE_TEXT("from source=%C timeout at %s.\n"),
                msg_src_.c_str(),
-               (pending_timeout == ACE_Time_Value::zero ?
-                  ACE_TEXT("(no timeout)") : time)));
+               (pTimeout == 0 ? ACE_TEXT("(no timeout)") : time)));
   }
   while (true) {
     if (!pending_messages())
       break;
 
-    if (done_condition_.wait(pTimeout) == -1 && !pending_messages()) {
+    if (done_condition_.wait(pTimeout) == -1 && pending_messages()) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: MessageTracker::")
                  ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p\n"),
