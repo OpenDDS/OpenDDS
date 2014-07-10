@@ -34,7 +34,7 @@ class PubDriver
     ACE_INET_Addr     sub_addr_;
     ACE_TString       sub_addr_str_;
 
-    SimpleDataWriter writer_;
+    DDS_TEST writer_;
 
     int num_msgs_;
     int msg_size_;

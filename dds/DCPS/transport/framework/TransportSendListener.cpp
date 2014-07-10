@@ -26,7 +26,7 @@ OpenDDS::DCPS::TransportSendListener::~TransportSendListener()
 }
 
 void
-OpenDDS::DCPS::TransportSendListener::data_delivered(const DataSampleListElement* sample)
+OpenDDS::DCPS::TransportSendListener::data_delivered(const DataSampleElement* sample)
 {
   ACE_UNUSED_ARG(sample);
   ACE_ERROR((LM_ERROR,
@@ -34,7 +34,7 @@ OpenDDS::DCPS::TransportSendListener::data_delivered(const DataSampleListElement
 }
 
 void
-OpenDDS::DCPS::TransportSendListener::data_dropped(const DataSampleListElement* sample,
+OpenDDS::DCPS::TransportSendListener::data_dropped(const DataSampleElement* sample,
                                                    bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);

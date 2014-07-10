@@ -25,14 +25,14 @@ SendResponseListener::~SendResponseListener()
 }
 
 void
-SendResponseListener::data_delivered(const DataSampleListElement* /* sample */)
+SendResponseListener::data_delivered(const DataSampleElement* /* sample */)
 {
   tracker_.message_delivered();
 }
 
 void
 SendResponseListener::data_dropped(
-  const DataSampleListElement* /* sample */,
+  const DataSampleElement* /* sample */,
   bool /* dropped_by_transport */)
 {
   tracker_.message_dropped();

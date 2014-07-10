@@ -20,7 +20,7 @@
 #endif
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
+OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "send", 6);
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
@@ -32,7 +32,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const bool customHeader =
-    DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->sample_);
+    DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->get_sample());
 #endif
 
   for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
@@ -40,9 +40,9 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     if (customHeader) {
       typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
-      FilterIter fi = sample->filter_per_link_.find(itr->first);
+      FilterIter fi = sample->get_filter_per_link().find(itr->first);
       GUIDSeq* guids = 0;
-      if (fi != sample->filter_per_link_.end()) {
+      if (fi != sample->get_filter_per_link().end()) {
         guids = fi->second.ptr();
       }
 
@@ -50,13 +50,13 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
         "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
         itr->second.in(), guids ? guids->length() : 0), 5);
 
-      ACE_Message_Block* mb = sample->sample_->duplicate();
+      ACE_Message_Block* mb = sample->get_sample()->duplicate();
 
       DataSampleHeader::add_cfentries(guids, mb);
 
       TransportCustomizedElement* tce =
         TransportCustomizedElement::alloc(send_element, false,
-          sample->transport_customized_element_allocator_);
+          sample->get_transport_customized_element_allocator());
       tce->set_msg(mb); // tce now owns ACE_Message_Block chain
 
       itr->second->send(tce);
@@ -153,7 +153,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
 }
 
 ACE_INLINE bool
-OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample)
+OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_sample", 6);
 

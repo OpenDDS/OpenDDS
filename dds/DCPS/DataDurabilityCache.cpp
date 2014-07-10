@@ -12,7 +12,8 @@
 
 #include "DataDurabilityCache.h"
 #include "Service_Participant.h"
-#include "DataSampleList.h"
+#include "SendStateDataSampleList.h"
+#include "DataSampleElement.h"
 #include "WriteDataContainer.h"
 #include "DataWriterImpl.h"
 #include "Qos_Helper.h"
@@ -175,14 +176,14 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::sample_data_type()
 }
 
 OpenDDS::DCPS::DataDurabilityCache::sample_data_type::sample_data_type(
-  DataSampleListElement & element,
+  DataSampleElement & element,
   ACE_Allocator * a)
   : length_(0)
   , sample_(0)
   , allocator_(a)
 {
-  this->source_timestamp_.sec     = element.header_.source_timestamp_sec_;
-  this->source_timestamp_.nanosec = element.header_.source_timestamp_nanosec_;
+  this->source_timestamp_.sec     = element.get_header().source_timestamp_sec_;
+  this->source_timestamp_.nanosec = element.get_header().source_timestamp_nanosec_;
 
   // Only copy the data provided by the user.  The DataSampleHeader
   // will be reconstructed when the durable data is retrieved by a
@@ -190,7 +191,7 @@ OpenDDS::DCPS::DataDurabilityCache::sample_data_type::sample_data_type(
   //
   // The user's data is stored in the first message block
   // continuation.
-  ACE_Message_Block const * const data = element.sample_->cont();
+  ACE_Message_Block const * const data = element.get_sample()->cont();
   init(data);
 }
 
@@ -474,10 +475,10 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
   DDS::DomainId_t domain_id,
   char const * topic_name,
   char const * type_name,
-  DataSampleList & the_data,
+  SendStateDataSampleList & the_data,
   DDS::DurabilityServiceQosPolicy const & qos)
 {
-  if (the_data.size_ == 0)
+  if (the_data.size() == 0)
     return true;  // Nothing to cache.
 
   // Apply DURABILITY_SERVICE QoS HISTORY and RESOURCE_LIMITS related
@@ -488,8 +489,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
       qos.history_depth,
       qos.max_samples_per_instance);
 
-  // Iterator to first DataSampleListElement to be copied.
-  DataSampleList::iterator element(the_data.begin());
+  // Iterator to first DataSampleElement to be copied.
+  SendStateDataSampleList::iterator element(the_data.begin());
 
   if (depth < 0)
     return false; // Should never occur.
@@ -497,7 +498,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
   else if (depth == 0)
     return true;  // Nothing else to do.  Discard all data.
 
-  else if (the_data.size_ > depth) {
+  else if (the_data.size() > depth) {
     // N.B. Dropping data samples does not take into account
     // those samples which are not actually persisted (i.e.
     // samples with the coherent_sample_ flag set). The spec
@@ -508,8 +509,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
 
     // Drop "old" samples.  Only keep the "depth" most recent
     // samples, i.e. those found at the tail end of the
-    // DataSampleList.
-    ssize_t const advance_amount = the_data.size_ - depth;
+    // SendStateDataSampleList.
+    ssize_t const advance_amount = the_data.size() - depth;
     std::advance(element, advance_amount);
   }
 
@@ -521,7 +522,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
                      topic_name,
                      type_name,
                      this->allocator_.get());
-  DataSampleList::iterator the_end(the_data.end());
+  SendStateDataSampleList::iterator the_end(the_data.end());
   sample_list_type * sample_list = 0;
 
   typedef DurabilityQueue<sample_data_type> data_queue_type;
@@ -613,8 +614,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
       samples->fs_path_ = path;
     }
 
-    for (DataSampleList::iterator i(element); i != the_end; ++i) {
-      DataSampleListElement& elem = *i;
+    for (SendStateDataSampleList::iterator i(element); i != the_end; ++i) {
+      DataSampleElement& elem = *i;
 
       // N.B. Do not persist samples with coherent changes.
       // To verify, we check the DataSampleHeader for the
@@ -623,8 +624,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
       //
       // It should be noted that persisting coherent changes
       // is a non-trivial task, and should be handled when
-      // finializing persistence profile conformance.
-      if (DataSampleHeader::test_flag(COHERENT_CHANGE_FLAG, elem.sample_)) {
+      // finalizing persistence profile conformance.
+      if (DataSampleHeader::test_flag(COHERENT_CHANGE_FLAG, elem.get_sample())) {
         continue; // skip coherent sample
       }
 

@@ -10,7 +10,7 @@
 #include "RtpsUdpSendStrategy.h"
 
 #include "dds/DCPS/Serializer.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Service_Participant.h"
@@ -318,23 +318,23 @@ namespace {
 void
 RtpsSampleHeader::populate_data_sample_submessages(
   RTPS::SubmessageSeq& subm,
-  const DataSampleListElement& dsle,
+  const DataSampleElement& dsle,
   bool requires_inline_qos)
 {
   using namespace OpenDDS::RTPS;
 
-  const ACE_CDR::Octet flags = dsle.header_.byte_order_;
-  add_timestamp(subm, flags, dsle.header_);
+  const ACE_CDR::Octet flags = dsle.get_header().byte_order_;
+  add_timestamp(subm, flags, dsle.get_header());
   CORBA::ULong i = subm.length();
 
   EntityId_t readerId = ENTITYID_UNKNOWN;
-  if (dsle.num_subs_ == 1) {
-    readerId = dsle.subscription_ids_[0].entityId;
+  if (dsle.get_num_subs() == 1) {
+    readerId = dsle.get_sub_id(0).entityId;
     InfoDestinationSubmessage idest;
     idest.smHeader.submessageId = INFO_DST;
     idest.smHeader.flags = flags;
     idest.smHeader.submessageLength = INFO_DST_SZ;
-    std::memcpy(idest.guidPrefix, dsle.subscription_ids_[0].guidPrefix,
+    std::memcpy(idest.guidPrefix, dsle.get_sub_id(0).guidPrefix,
                 sizeof(GuidPrefix_t));
     subm.length(i + 1);
     subm[i++].info_dst_sm(idest);
@@ -345,11 +345,11 @@ RtpsSampleHeader::populate_data_sample_submessages(
     0,
     DATA_OCTETS_TO_IQOS,
     readerId,
-    dsle.publication_id_.entityId,
-    {dsle.header_.sequence_.getHigh(), dsle.header_.sequence_.getLow()},
+    dsle.get_pub_id().entityId,
+    {dsle.get_header().sequence_.getHigh(), dsle.get_header().sequence_.getLow()},
     ParameterList()
   };
-  const char message_id = dsle.header_.message_id_;
+  const char message_id = dsle.get_header().message_id_;
   switch (message_id) {
   case SAMPLE_DATA:
     // Must be a data message
@@ -363,7 +363,7 @@ RtpsSampleHeader::populate_data_sample_submessages(
 
   if (requires_inline_qos) {
     TransportSendListener::InlineQosData qos_data;
-    dsle.send_listener_->retrieve_inline_qos_data(qos_data);
+    dsle.get_send_listener()->retrieve_inline_qos_data(qos_data);
 
     populate_inline_qos(qos_data, data.inlineQos);
   }

@@ -21,7 +21,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 
 #include <tao/Exception.h>
 
@@ -98,6 +99,18 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   bool have_frag_;
 };
 
+class DDS_TEST
+{
+public:
+
+  static void list_set(DataSampleElement &element, SendStateDataSampleList &list)
+  {
+    list.head_ = &element;
+    list.tail_ = &element;
+    list.size_ = 1;
+  }
+};
+
 
 struct SimpleDataWriter: SimpleTC, TransportSendListener {
   explicit SimpleDataWriter(const RepoId& pub_id)
@@ -105,12 +118,11 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     , alloc_(2, sizeof(TransportSendElementAllocator))
     , dsle_(pub_id, this, 0, &alloc_, 0)
   {
-    list_.head_ = list_.tail_ = &dsle_;
-    list_.size_ = 1;
-    dsle_.header_.message_id_ = SAMPLE_DATA;
-    dsle_.header_.message_length_ = 8;
-    dsle_.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
-    payload_.init(dsle_.header_.message_length_);
+    DDS_TEST::list_set(dsle_, list_);
+    dsle_.get_header().message_id_ = SAMPLE_DATA;
+    dsle_.get_header().message_length_ = 8;
+    dsle_.get_header().byte_order_ = ACE_CDR_BYTE_ORDER;
+    payload_.init(dsle_.get_header().message_length_);
     const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in LE format
       data = 0xDCBADCBA;
     Serializer ser(&payload_, host_is_bigendian, Serializer::ALIGN_CDR);
@@ -120,16 +132,15 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
 
   void send_data(const SequenceNumber& seq)
   {
-    dsle_.header_.sequence_ = seq;
-    dsle_.sample_ =
-      new ACE_Message_Block(DataSampleHeader::max_marshaled_size());
-    *dsle_.sample_ << dsle_.header_;
-    dsle_.sample_->cont(payload_.duplicate());
+    dsle_.get_header().sequence_ = seq;
+    dsle_.set_sample(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
+    *dsle_.get_sample() << dsle_.get_header();
+    dsle_.get_sample()->cont(payload_.duplicate());
     ACE_DEBUG((LM_INFO, "sending with seq#: %q\n", seq.getValue()));
     send(list_);
   }
 
-  void data_delivered(const DataSampleListElement*)
+  void data_delivered(const DataSampleElement*)
   {
     ACE_DEBUG((LM_INFO, "SimpleDataWriter::data_delivered()\n"));
   }
@@ -141,8 +152,8 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void remove_associations(const ReaderIdSeq&, bool) {}
 
   TransportSendElementAllocator alloc_;
-  DataSampleList list_;
-  DataSampleListElement dsle_;
+  SendStateDataSampleList list_;
+  DataSampleElement dsle_;
   ACE_Message_Block payload_;
 };
 

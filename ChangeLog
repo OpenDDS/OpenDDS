@@ -1,3 +1,24 @@
+Thu Jul 10 15:01:11 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * Merged the branch "DataSampleList_split" which:
+
+          Split the DataSampleList interface into three distinct list
+          interfaces denoting and clarifying their functionality and
+          responsibilities.  This eliminates the requirement that an 
+          DataSampleList instance is to only be used in a certain "mode" 
+          --a list for a data writer, a list for a instance, or a list 
+          for send state--.
+
+          DataSampleList is replaced by: 
+            WriterDataSampleList 
+            InstanceDataSampleList
+            SendStateDataSampleList
+
+          struct DataSampleListElement has been replaced by a first
+          class object DataSampleElement.  This was done to control
+          access to the list pointer elements, which now are only
+          modified through the list interfaces.
+
 Wed Jul  9 20:19:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * tests/DCPS/ManyToMany/README:

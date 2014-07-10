@@ -15,6 +15,8 @@
 #include "GuidConverter.h"
 #include "TopicImpl.h"
 #include "PublicationInstance.h"
+#include "SendStateDataSampleList.h"
+#include "DataSampleElement.h"
 #include "Serializer.h"
 #include "Transient_Kludge.h"
 #include "DataDurabilityCache.h"
@@ -332,7 +334,7 @@ ReplayerImpl::enable()
                      new DataSampleHeaderAllocator(n_chunks_+1));
 
   ACE_auto_ptr_reset(sample_list_element_allocator_,
-                     new DataSampleListElementAllocator(2 * n_chunks_));
+                     new DataSampleElementAllocator(2 * n_chunks_));
 
   ACE_auto_ptr_reset(transport_send_element_allocator_,
                      new TransportSendElementAllocator(2 * n_chunks_,
@@ -853,11 +855,11 @@ ReplayerImpl::get_priority_value(const AssociationData&) const
 }
 
 void
-ReplayerImpl::data_delivered(const DataSampleListElement* sample)
+ReplayerImpl::data_delivered(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("ReplayerImpl","data_delivered",6);
-  if (!(sample->publication_id_ == this->publication_id_)) {
-    GuidConverter sample_converter(sample->publication_id_);
+  if (!(sample->get_pub_id() == this->publication_id_)) {
+    GuidConverter sample_converter(sample->get_pub_id());
     GuidConverter writer_converter(publication_id_);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::data_delivered: ")
@@ -867,9 +869,9 @@ ReplayerImpl::data_delivered(const DataSampleListElement* sample)
                std::string(writer_converter).c_str()));
     return;
   }
-  DataSampleListElement* elem = const_cast<DataSampleListElement*>(sample);
+  DataSampleElement* elem = const_cast<DataSampleElement*>(sample);
   // this->data_container_->data_delivered(sample);
-  ACE_DES_FREE(elem, sample_list_element_allocator_->free, DataSampleListElement);
+  ACE_DES_FREE(elem, sample_list_element_allocator_->free, DataSampleElement);
   ++data_delivered_count_;
 
   {
@@ -887,14 +889,14 @@ ReplayerImpl::control_delivered(ACE_Message_Block* sample)
 }
 
 void
-ReplayerImpl::data_dropped(const DataSampleListElement* sample,
+ReplayerImpl::data_dropped(const DataSampleElement* sample,
                            bool                         dropped_by_transport)
 {
   DBG_ENTRY_LVL("ReplayerImpl","data_dropped",6);
   // this->data_container_->data_dropped(element, dropped_by_transport);
   ACE_UNUSED_ARG(dropped_by_transport);
-  DataSampleListElement* elem = const_cast<DataSampleListElement*>(sample);
-  ACE_DES_FREE(elem, sample_list_element_allocator_->free, DataSampleListElement);
+  DataSampleElement* elem = const_cast<DataSampleElement*>(sample);
+  ACE_DES_FREE(elem, sample_list_element_allocator_->free, DataSampleElement);
   ++data_dropped_count_;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -966,41 +968,42 @@ ReplayerImpl::write (const RawDataSample*   samples,
     }
   }
 
-  DataSampleList list;
+  SendStateDataSampleList list;
 
   for (int i = 0; i < num_samples; ++i) {
-    DataSampleListElement* element = 0;
+    DataSampleElement* element = 0;
 
     ACE_NEW_MALLOC_RETURN(
       element,
-      static_cast<DataSampleListElement*>(
+      static_cast<DataSampleElement*>(
         sample_list_element_allocator_->malloc(
-          sizeof(DataSampleListElement))),
-      DataSampleListElement(publication_id_,
+          sizeof(DataSampleElement))),
+      DataSampleElement(publication_id_,
                             this,
                             0,
                             transport_send_element_allocator_.get(),
                             transport_customized_element_allocator_.get()),
       DDS::RETCODE_ERROR);
 
-    element->header_.byte_order_ = samples[i].sample_byte_order_;
-    element->header_.publication_id_ = this->publication_id_;
-    list.enqueue_tail_next_sample(element);
-
+    element->get_header().byte_order_ = samples[i].sample_byte_order_;
+    element->get_header().publication_id_ = this->publication_id_;
+    list.enqueue_tail(element);
+    DataSample* temp;
     DDS::ReturnCode_t ret = create_sample_data_message(samples[i].sample_->duplicate(),
-                                                       element->header_,
-                                                       element->sample_,
+                                                       element->get_header(),
+                                                       temp,
                                                        samples[i].source_timestamp_,
                                                        false);
+    element->set_sample(temp);
     if (reader_ih_ptr) {
-      element->num_subs_ = 1;
-      element->subscription_ids_[0] = repo_id;
+      element->set_num_subs(1);
+      element->set_sub_id(0, repo_id);
     }
 
     if (ret != DDS::RETCODE_OK) {
       // we need to free the list
-      while (list.dequeue_head_next_sample(element)) {
-        ACE_DES_FREE(element, sample_list_element_allocator_->free, DataSampleListElement);
+      while (list.dequeue(element)) {
+        ACE_DES_FREE(element, sample_list_element_allocator_->free, DataSampleElement);
       }
 
       return ret;
