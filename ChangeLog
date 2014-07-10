@@ -1,16 +1,25 @@
+Thu Jul 10 16:17:35 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ManyToMany/README:
+        * tests/DCPS/ManyToMany/rtps_disc.ini:
+        * tests/DCPS/ManyToMany/rtps_disc_tcp.ini:
+
+          Added RTPS discovery options to the ManyToMany test.
+
 Thu Jul 10 15:01:11 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * Merged the branch "DataSampleList_split" which:
 
           Split the DataSampleList interface into three distinct list
           interfaces denoting and clarifying their functionality and
-          responsibilities.  This eliminates the requirement that an 
-          DataSampleList instance is to only be used in a certain "mode" 
-          --a list for a data writer, a list for a instance, or a list 
+          responsibilities.  This eliminates the requirement that an
+          DataSampleList instance is to only be used in a certain "mode"
+          --a list for a data writer, a list for a instance, or a list
           for send state--.
 
-          DataSampleList is replaced by: 
-            WriterDataSampleList 
+          DataSampleList is replaced by:
+            WriterDataSampleList
             InstanceDataSampleList
             SendStateDataSampleList
 
