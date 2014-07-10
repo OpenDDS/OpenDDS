@@ -351,6 +351,12 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 #endif
 }
 
+void
+InfoRepoDiscovery::fini_bit(DCPS::DomainParticipantImpl* /* participant */)
+{
+  // nothing to do for DCPSInfoRepo
+}
+
 RepoId
 InfoRepoDiscovery::bit_key_to_repo_id(DomainParticipantImpl* /*participant*/,
                                       const char* /*bit_topic_name*/,

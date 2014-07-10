@@ -1,3 +1,62 @@
+Wed Jul  9 20:19:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/README:
+
+          Added information about how to pass parameters to run_test.pl.
+
+Wed Jul  9 17:59:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Fixed logic for reporting and exiting after wait timed out.
+
+        * tests/DCPS/QueryCondition/run_test.pl:
+
+          Added printing out command line for executables that are started.
+
+Wed Jul  9 17:25:49 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+
+          Logging changes.
+
+Wed Jul  9 15:12:35 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add back Thrasher test cases.
+
+Tue Jul  8 19:42:52 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Calling fini_bit on discovery before deleting
+          BIT entities.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Added fini_bit to indicate that BIT entities are being
+          deleted (and should no longer be used).
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added class to wait for acknowledgements from other thread and
+          added method to request for Sedp::Task to acknowledge to spdp.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added a WaitForAcks object to use in fini_bit to wait for
+          SpdpTransport (actually reactor) thread and Sedp::Task have sent
+          an acknowledgement, so that we know that all threads will see
+          that subscriber_bit_ is nil.
+
 Tue Jul  8 14:40:32 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

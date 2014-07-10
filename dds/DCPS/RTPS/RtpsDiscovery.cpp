@@ -141,11 +141,17 @@ RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
 }
 
 void
+RtpsDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant)
+{
+  get_part(participant->get_domain_id(), participant->get_id())->fini_bit();
+}
+
+void
 RtpsDiscovery::set_part_bit_subscriber(const DDS::DomainId_t domain_id,
                                        const DCPS::RepoId& part_id,
                                        const DDS::Subscriber_var& bit_subscriber)
 {
-  get_part(domain_id, part_id)->bit_subscriber(bit_subscriber);
+  get_part(domain_id, part_id)->init_bit(bit_subscriber);
 }
 
 namespace {
