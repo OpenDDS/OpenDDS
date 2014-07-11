@@ -6,6 +6,7 @@
 
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Definitions.h"
 
 class SimplePublisher;

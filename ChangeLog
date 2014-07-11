@@ -1,3 +1,13 @@
+Fri Jul 11 22:12:18 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+
+          Must return a value.
+
+        * tests/transport/simple/SimpleDataWriter.h:
+
+          Missing include.
+
 Fri Jul 11 20:43:52 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/ManyToMany/README:

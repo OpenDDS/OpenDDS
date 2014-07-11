@@ -528,5 +528,5 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
-  DDS_TEST::test(host, port);
+  return DDS_TEST::test(host, port);
 }
