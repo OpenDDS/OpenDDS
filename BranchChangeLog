@@ -1,3 +1,16 @@
+Fri Jul 11 22:24:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * .:
+        * ChangeLog:
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ManyToMany/README:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/svc_csdtp.conf:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+
+          Merge r6396 through r6399
+
 Fri Jul 11 21:15:02 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/async_debug.h:

@@ -6,12 +6,14 @@ subscribers.  For un-reliable transports it verifies that at least a minimum
 percentage of samples from each publisher are received by all subscribers.
 
 Usage:
-run_test.pl [tcp|udp|multicast|multicast_async|shmem|rtps|rtps_disc|rtps_disc_tcp] XToY [large|small]
+run_test.pl [tcp|udp|multicast|multicast_async|shmem|rtps|rtps_disc|rtps_disc_tcp] XToY [large|small] [orb_csdtp]
   - X writers sending to Y readers.  If X(/Y) is divisible by 2, then 2
     publisher(/subscriber) processes will be created. If X(/Y) is divisible by
     4, then 2 participants will be created on each of the 2 publisher
     (/subscriber) processes.  Then the remaining writers(/readers) will be created on
     each participant, so that there are X(/Y) writers(/readers) altogether.
+  - If orb_csdtp is passed after large small then TAO will be configured using the svc_csdtp.conf file.
+    (See the comments in this file for why you might want to use this configuration.)
 
 run_test.pl [tcp|udp|multicast|multicast_async|shmem|rtps|rtps_disc|rtps_disc_tcp] "<command line parameters passed>"
   - This allows passing in parameters that are passed onto the publishers and
