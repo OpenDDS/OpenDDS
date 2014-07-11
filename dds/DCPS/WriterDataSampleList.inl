@@ -57,7 +57,7 @@ WriterDataSampleList::enqueue_tail(const DataSampleElement* sample)
   // non-const pointers to DataSampleElement.  Ideally the design would be
   // changed to accommodate const-correctness throughout.
   DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
-  
+
   //sample->previous_writer_sample_ = 0;
   //sample->next_writer_sample_ = 0;
 

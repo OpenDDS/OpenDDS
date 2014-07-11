@@ -11,7 +11,6 @@
 #include "Service_Participant.h"
 #include "DataSampleHeader.h"
 #include "InstanceDataSampleList.h"
-#include "DataSampleElement.h"
 #include "DataWriterImpl.h"
 #include "MessageTracker.h"
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE

@@ -1,3 +1,18 @@
+Fri Jul 11 15:12:19 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/InstanceDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+        * dds/DCPS/WriterDataSampleList.inl:
+
+          Fixed fuzz errors
+
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Replaced foward declaration of DataSampleElement to a full
+          include in WriteDataContainer.h to capture the typedef for
+          the allocator.
+
 Thu Jul 10 16:17:35 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:

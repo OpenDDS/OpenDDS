@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_WRITE_DATA_CONTAINER_H
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "DataSampleElement.h"
 #include "SendStateDataSampleList.h"
 #include "WriterDataSampleList.h"
 #include "OfferedDeadlineWatchdog.h"
@@ -27,7 +28,6 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class DataSampleElement;
 class InstanceDataSampleList;
 
 

@@ -56,13 +56,11 @@ InstanceDataSampleList::enqueue_tail(const DataSampleElement* sample)
   // non-const pointers to DataSampleElement.  Ideally the design would be
   // changed to accommodate const-correctness throughout.
   DataSampleElement* mSample = const_cast<DataSampleElement*>(sample);
-  
+
   mSample->next_instance_sample_ = 0;
 
   ++ size_ ;
-  
 
-  
   if (head_ == 0) {
     // First sample on queue.
     head_ = tail_ = mSample ;

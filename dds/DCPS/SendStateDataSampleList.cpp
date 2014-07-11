@@ -36,8 +36,8 @@ SendStateDataSampleList::send_list_containing_element(const DataSampleElement* e
 
   for(std::vector<SendStateDataSampleList*>::iterator it = send_lists.begin(); it != send_lists.end(); ++it) {
     if ((*it)->head_ == head) {
-    	list_containing_element = *it;
-    	break;
+        list_containing_element = *it;
+        break;
     }
   }
   return list_containing_element;
