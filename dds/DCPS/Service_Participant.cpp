@@ -15,6 +15,8 @@
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
 
+#include "async_debug.h"
+
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/ORB_Core.h"
@@ -218,10 +220,10 @@ void
 Service_Participant::shutdown()
 {
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###Service_Participant::shutdown --> enter\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::shutdown --> enter\n"));
   try {
      //### Debug statements to track where connection is failing
-     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###Service_Participant::shutdown --> about to call TransportRegistry::instance()->release()\n"));
+     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::shutdown --> about to call TransportRegistry::instance()->release()\n"));
     TransportRegistry::instance()->release();
 
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
@@ -247,7 +249,7 @@ Service_Participant::shutdown()
     }
     discovery_types_.clear();
     //### Debug statements to track where connection is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###Service_Participant::shutdown --> exit (end of try block)\n"));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::shutdown --> exit (end of try block)\n"));
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
   }

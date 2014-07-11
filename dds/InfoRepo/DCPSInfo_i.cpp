@@ -25,6 +25,7 @@
 #include "dds/DCPS/RepoIdConverter.h"
 
 #include /**/ "tao/debug.h"
+#include "dds/DCPS/async_debug.h"
 
 #include /**/ "ace/Read_Buffer.h"
 #include /**/ "ace/OS_NS_stdio.h"
@@ -165,13 +166,13 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
   bool /*hasDcpsKey -- only used for RTPS Discovery*/)
 {
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::assert_topic --> begin\n"));
+   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> begin\n"));
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::assert_topic --> LOCKING lock_\n"));
+   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> LOCKING lock_\n"));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::assert_topic --> LOCKED lock_\n"));
+  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> LOCKED lock_\n"));
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find(domainId);
 
@@ -211,9 +212,9 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
     }
   }
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::assert_topic --> RELEASE lock_\n"));
+  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> RELEASE lock_\n"));
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::assert_topic --> end\n"));
+  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> end\n"));
 
   return topicStatus;
 }
@@ -970,7 +971,7 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
   const DDS::DomainParticipantQos & qos)
 {
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::add_domain_participant --> begin\n"));
+   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::add_domain_participant --> begin\n"));
 
   // A value to return.
   OpenDDS::DCPS::AddDomainStatus value;
@@ -1057,7 +1058,7 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
                participant));
   }
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::add_domain_participant --> end\n"));
+  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::add_domain_participant --> end\n"));
   return value;
 }
 
@@ -2011,7 +2012,7 @@ DCPS_IR_Domain*
 TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
 {
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::domain --> begin\n"));
+   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::domain --> begin\n"));
 
   if (domain == OpenDDS::DCPS::Service_Participant::ANY_DOMAIN) {
     ACE_ERROR((LM_ERROR,
@@ -2063,12 +2064,12 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
                  domainPtr));
     }
     //### Debug statements to track where connection is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::domain --> end (domainPtr)\n"));
+    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::domain --> end (domainPtr)\n"));
     return domainPtr;
 
   } else {
      //### Debug statements to track where connection is failing
-     ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::domain --> end (where->second i.e. domain already exists)\n"));
+     if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::domain --> end (where->second i.e. domain already exists)\n"));
     return where->second;
   }
 }
@@ -2091,7 +2092,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 #endif
 
     //### Debug statements to track where connection is failing
- ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::init_transport --> instantiate OpenDDS::DCPS::TransportRegistry::instance()->create_config\n"));
+ if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::init_transport --> instantiate OpenDDS::DCPS::TransportRegistry::instance()->create_config\n"));
 
     std::string config_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
@@ -2100,9 +2101,9 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
       OpenDDS::DCPS::TransportRegistry::instance()->create_config(config_name);
 
     //### Debug statements to track where connection is failing
- ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::init_transport --> DONE instantiating OpenDDS::DCPS::TransportRegistry::instance()\n"));
+ if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::init_transport --> DONE instantiating OpenDDS::DCPS::TransportRegistry::instance()\n"));
  //### Debug statements to track where connection is failing
-ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::init_transport --> instantiate OpenDDS::DCPS::TransportRegistry::instance()->create_inst for TCP\n"));
+if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::init_transport --> instantiate OpenDDS::DCPS::TransportRegistry::instance()->create_inst for TCP\n"));
     std::string inst_name =
       OpenDDS::DCPS::TransportRegistry::DEFAULT_INST_PREFIX
       + std::string("InfoRepoBITTCPTransportInst");
@@ -2114,7 +2115,7 @@ ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::init_transport --> instanti
     OpenDDS::DCPS::TcpInst_rch tcp_inst =
       OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
     //### Debug statements to track where connection is failing
- ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::init_transport --> DONE instantiating OpenDDS::DCPS::TransportRegistry::instance()->create_inst\n"));
+ if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::init_transport --> DONE instantiating OpenDDS::DCPS::TransportRegistry::instance()->create_inst\n"));
     inst->datalink_release_delay_ = 0;
 
     tcp_inst->conn_retry_attempts_ = 0;
@@ -2131,7 +2132,7 @@ ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::init_transport --> instanti
     status = 1;
   }
   //### Debug statements to track where connection is failing
-ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::init_transport --> end\n"));
+if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::init_transport --> end\n"));
   return status;
 }
 
@@ -2161,7 +2162,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
     const Update::UParticipant* part = *iter;
 
     //###Debugging for failure to associate
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TAO_DDS_DCPSInfo_i::receive_image -> about to add_domain_participant\n"));
+    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::receive_image -> about to add_domain_participant\n"));
 
     if (!this->add_domain_participant(part->domainId, part->participantId
                                       , part->participantQos)) {

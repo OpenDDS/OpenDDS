@@ -17,6 +17,7 @@
 #include "dds/DCPS/transport/framework/ScheduleOutputHandler.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/ReactorSynchStrategy.h"
+#include "dds/DCPS/async_debug.h"
 
 OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   std::size_t id,
@@ -144,7 +145,7 @@ OpenDDS::DCPS::TcpSendStrategy::relink(bool do_suspend)
 
   if (!this->connection_.is_nil()) {
     //### Debug statements to track where connection is failing
-    //ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TcpSendStrategy::relink --> about to relink() \n"));
+    //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpSendStrategy::relink --> about to relink() \n"));
     this->connection_->relink(do_suspend);
   }
 }

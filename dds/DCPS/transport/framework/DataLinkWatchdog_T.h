@@ -17,6 +17,7 @@
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_time.h"
 #include "ace/Reverse_Lock_T.h"
+#include "dds/DCPS/async_debug.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -140,7 +141,7 @@ private:
     }
 
     //### Debug statements to track where associate is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLinkWatchdog_T.h::schedule_i --> after schedule timer this->timer_id_: %d and timer_id: %d \n", this->timer_id_, timer_id));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> after schedule timer this->timer_id_: %d and timer_id: %d \n", this->timer_id_, timer_id));
 
    //after re-acquiring lock_ need to check cancelled_
     //### Thought maybe would have to check timer_id_ for cancellation/prior completion
@@ -149,7 +150,7 @@ private:
     //### multiple timers to be scheduled, since  they are not interval timers it won't keep firing after each expires the first time
     if (this->cancelled_) {
        //### Debug statements to track where associate is failing
-       ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLinkWatchdog_T.h::schedule_i --> about to cancel timer\n"));
+       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> about to cancel timer\n"));
       reactor->cancel_timer(timer_id);
       return true;
     }

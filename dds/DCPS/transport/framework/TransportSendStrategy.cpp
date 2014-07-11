@@ -912,7 +912,7 @@ TransportSendStrategy::start()
 {
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportSendStrategy::start --> begin\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportSendStrategy::start --> begin\n"));
 
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
@@ -961,7 +961,7 @@ TransportSendStrategy::start()
   }
 
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TransportSendStrategy::start --> end SUCCESS\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportSendStrategy::start --> end SUCCESS\n"));
 
   return 0;
 }

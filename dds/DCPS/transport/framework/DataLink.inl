@@ -10,6 +10,7 @@
 #include "TransportStrategy.h"
 #include "ThreadPerConnectionSendTask.h"
 #include "EntryExit.h"
+#include "dds/DCPS/async_debug.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -261,28 +262,28 @@ bool
 DataLink::add_on_start_callback(TransportClient* client, const RepoId& remote)
 {
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> enter\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> enter\n"));
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> trying to LOCK strategy_lock_\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> trying to LOCK strategy_lock_\n"));
 
   GuardType guard(strategy_lock_);
   
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> LOCKED strategy_lock_\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> LOCKED strategy_lock_\n"));
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> NUM CALLBACKS BEFORE ADD: %d\n", on_start_callbacks_.size()));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> NUM CALLBACKS BEFORE ADD: %d\n", on_start_callbacks_.size()));
   
   if (!send_strategy_.is_nil()) {
     //### Debug statements to track where connection is failing
-  	ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> end (NO ADD, send strat = NOT NIL)\n"));
+  	if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> end (NO ADD, send strat = NOT NIL)\n"));
     return false; // link already started
   }
   on_start_callbacks_.push_back(std::make_pair(client, remote));
   
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> NUM CALLBACKS AFTER ADD: %d\n", on_start_callbacks_.size()));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> NUM CALLBACKS AFTER ADD: %d\n", on_start_callbacks_.size()));
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::add_on_start_callback --> end\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> end\n"));
    
   return true;
 }
@@ -292,23 +293,23 @@ void
 DataLink::remove_on_start_callback(TransportClient* client, const RepoId& remote)
 {
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::remove_on_start_callback --> enter\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> enter\n"));
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::remove_on_start_callback --> trying to LOCK strategy_lock_\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> trying to LOCK strategy_lock_\n"));
   GuardType guard(strategy_lock_);
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::remove_on_start_callback --> LOCKED strategy_lock_\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> LOCKED strategy_lock_\n"));
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::remove_on_start_callback --> NUM CALLBACKS BEFORE REMOVE: %d\n", on_start_callbacks_.size()));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> NUM CALLBACKS BEFORE REMOVE: %d\n", on_start_callbacks_.size()));
 
   on_start_callbacks_.erase(std::remove(on_start_callbacks_.begin(),
                                         on_start_callbacks_.end(),
                                         std::make_pair(client, remote)),
                             on_start_callbacks_.end());
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::remove_on_start_callback --> NUM CALLBACKS AFTER REMOVE: %d\n", on_start_callbacks_.size()));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> NUM CALLBACKS AFTER REMOVE: %d\n", on_start_callbacks_.size()));
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::remove_on_start_callback --> end\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> end\n"));
 }
 
 ACE_INLINE

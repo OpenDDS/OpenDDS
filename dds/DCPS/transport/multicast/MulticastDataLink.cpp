@@ -20,6 +20,7 @@
 #include "tao/ORB_Core.h"
 
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/async_debug.h"
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
@@ -180,7 +181,7 @@ MulticastSession*
 MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 {
   //### Debug statements to track where associate is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::find_or_create_session --> enter\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::find_or_create_session --> enter\n"));
 
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
       guard,
@@ -188,7 +189,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
       0);
 
   //### Debug statements to track where associate is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::find_or_create_session --> current number of sessions: %d\n", this->sessions_.size()));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::find_or_create_session --> current number of sessions: %d\n", this->sessions_.size()));
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
@@ -218,7 +219,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
         0);
   }
   //### Debug statements to track where associate is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::find_or_create_session --> exit\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::find_or_create_session --> exit\n"));
   return session._retn();
 }
 
@@ -278,7 +279,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
   switch (sample.header_.message_id_) {
   case TRANSPORT_CONTROL: {
     //### Debug statements to track where connection is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> case TRANSPORT_CONTROL %@ \n", this));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> case TRANSPORT_CONTROL %@ \n", this));
 
     // Transport control samples are delivered to all sessions
     // regardless of association status:
@@ -286,19 +287,19 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       char* const ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> trying to LOCK session_lock_\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> trying to LOCK session_lock_\n"));
 
       ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
           guard,
           this->session_lock_);
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> LOCKED session_lock_\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> LOCKED session_lock_\n"));
 
       const TransportHeader& theader = receive_strategy()->received_header();
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> %d %d %d \n", is_active(), sample.header_.submessage_id_, (sessions_.find(theader.source_) == sessions_.end())));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> %d %d %d \n", is_active(), sample.header_.submessage_id_, (sessions_.find(theader.source_) == sessions_.end())));
 
       if (!is_active() && sample.header_.submessage_id_ == MULTICAST_SYN &&
           sessions_.find(theader.source_) == sessions_.end()) {
@@ -306,7 +307,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
         // Depending on the data, we may need to send SYNACK.
 
         //### Debug statements to track where connection is failing
-        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> to call syn_received_no_session\n"));
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> to call syn_received_no_session\n"));
         guard.release();
         syn_received_no_session(theader.source_, sample.sample_,
             theader.swap_bytes());
@@ -317,7 +318,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       }
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> not going to call syn_received_no_session\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> not going to call syn_received_no_session\n"));
 
       MulticastSessionMap temp_sessions;
       temp_sessions.insert(this->sessions_.begin(), this->sessions_.end());
@@ -326,7 +327,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       for (MulticastSessionMap::iterator it(temp_sessions.begin());
           it != temp_sessions.end(); ++it) {
         //### Debug statements to track where connection is failing
-        ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> to call control_received (Current number of sessions: %d)\n", temp_sessions.size()));
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> to call control_received (Current number of sessions: %d)\n", temp_sessions.size()));
 //TODO
         //### this is not a safe procedure without session lock
         if(this->sessions_.count(it->first)){
@@ -341,7 +342,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       /*      for (MulticastSessionMap::iterator it(this->sessions_.begin());
           it != this->sessions_.end(); ++it) {
          //### Debug statements to track where connection is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###MulticastDataLink::sample_received -> to call control_received\n"));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> to call control_received\n"));
 
         it->second->control_received(sample.header_.submessage_id_,
                                      sample.sample_);

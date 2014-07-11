@@ -20,6 +20,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "tao/debug.h"
 #include <sstream>
+#include "dds/DCPS/async_debug.h"
+#include "dds/DCPS/async_debug.h"
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
@@ -47,7 +49,7 @@ void
 TransportImpl::shutdown()
 {
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportImpl::shutdown --> enter\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportImpl::shutdown --> enter\n"));
   DBG_ENTRY_LVL("TransportImpl", "shutdown", 6);
 
   // Stop datalink clean task.
@@ -93,7 +95,7 @@ TransportImpl::shutdown()
     this->config_ = 0;
   }
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###TransportImpl::shutdown --> exit\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportImpl::shutdown --> exit\n"));
 }
 
 bool

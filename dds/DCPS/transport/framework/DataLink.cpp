@@ -30,6 +30,8 @@
 #include "ace/Reactor.h"
 #include "ace/SOCK.h"
 
+#include "dds/DCPS/async_debug.h"
+
 #include <iostream>
 #include <sstream>
 
@@ -125,7 +127,7 @@ DataLink::invoke_on_start_callbacks(bool success)
 {
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks with success = %s --> begin\n", success ? "true" : "false"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks with success = %s --> begin\n", success ? "true" : "false"));
 
 
    const DataLink_rch link(success ? this : 0, false);
@@ -133,12 +135,12 @@ DataLink::invoke_on_start_callbacks(bool success)
    do {
       GuardType guard(strategy_lock_);
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks before pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks before pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
       if (!on_start_callbacks_.empty()) {
          OnStartCallback last_callback = on_start_callbacks_.back();
          on_start_callbacks_.pop_back();
          //### Debug statements to track where connection is failing
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks after pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks after pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
          guard.release();
          last_callback.first->use_datalink(last_callback.second, link);
       }
@@ -152,7 +154,7 @@ DataLink::invoke_on_start_callbacks(bool success)
       GuardType guard(strategy_lock_);
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks swapping vector\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks swapping vector\n"));
 
       local.swap(on_start_callbacks_);
    }
@@ -160,17 +162,17 @@ DataLink::invoke_on_start_callbacks(bool success)
    for (size_t i = 0; i < local.size(); ++i) {
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks use_datalink on each callback\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks use_datalink on each callback\n"));
 
       local[i].first->use_datalink(local[i].second, link);
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks use_datalink returned for callback\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks use_datalink returned for callback\n"));
    }
 */
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::invoke_on_start_callbacks --> end\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks --> end\n"));
 }
 
 void
@@ -495,7 +497,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
       DataLinkSetMap& released_locals)
 {
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> begin\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> begin\n"));
 
    DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
 
@@ -519,7 +521,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
    }
 
    if (listener_set.is_nil()) {
-     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> listener_set is NIL\n"));
+     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> listener_set is NIL\n"));
       // The remote_id is not a publisher_id.
       // See if it is a subscriber_id by looking in our sub_map_.
       RepoIdSet_rch id_set;
@@ -546,16 +548,16 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
          VDBG_LVL((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
                ACE_TEXT("the link has no reservations.\n")), 5);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> has local listener (loopback) release_reservations\n"));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> has local listener (loopback) release_reservations\n"));
          this->release_reservations_i(remote_id, local_id);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> has local listener (loopback) release_remote_i\n"));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> has local listener (loopback) release_remote_i\n"));
          this->release_remote_i(remote_id);
          DataLinkSet_rch& rel_set = released_locals[local_id];
          if (!rel_set.in())
             rel_set = new DataLinkSet;
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> has local listener (loopback) insert link into released set\n"));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> has local listener (loopback) insert link into released set\n"));
          rel_set->insert_link(this);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> exit \n"));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> exit \n"));
          return;
       }
 
@@ -571,9 +573,9 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
          VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::release_reservations: the remote_id is a sub id.\n"), 5);
          //guard.release ();
          // The remote_id is a subscriber_id.
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_reservations\n"));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> release_reservations\n"));
          this->release_reservations_i(remote_id, local_id);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_remote_subscriber\n"));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> release_remote_subscriber\n"));
          this->release_remote_subscriber(remote_id,
                local_id,
                id_set,
@@ -583,9 +585,9 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
             // Remove the remote_id(sub) after the remote/local ids is released
             // and there are no local pubs associated with this sub.
             GuardType guard(this->sub_map_lock_);
-            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> remove remote_id set from sub_map_ \n"));
+            if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> remove remote_id set from sub_map_ \n"));
             id_set = this->sub_map_.remove_set(remote_id);
-            ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_remote_i \n"));
+            if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> release_remote_i \n"));
             this->release_remote_i(remote_id);
          }
 
@@ -593,15 +595,15 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
       }
 
    } else {
-     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> listener_set is NOT NIL\n"));
+     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> listener_set is NOT NIL\n"));
       VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
             ACE_TEXT("the remote_id is a pub id.\n")), 5);
       //guard.release ();
       // The remote_id is a publisher_id.
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_reservations\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> release_reservations\n"));
       this->release_reservations_i(remote_id, local_id);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_remote_publisher\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> release_remote_publisher\n"));
       this->release_remote_publisher(remote_id,
             local_id,
             listener_set,
@@ -612,7 +614,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
          // Remove the remote_id(pub) after the remote/local ids is released
          // and there are no local subs associated with this pub.
          listener_set = this->pub_map_.remove_set(remote_id);
-         ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_remote_i\n"));
+         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> release_remote_i\n"));
          this->release_remote_i(remote_id);
       }
 
@@ -626,18 +628,18 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
          5);
 
    if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
-     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> release_datalink\n"));
+     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> release_datalink\n"));
       this->impl_->release_datalink(this);
    }
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::release_reservations --> end\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::release_reservations --> end\n"));
 }
 
 void
 DataLink::schedule_delayed_release()
 {
   //### Debug statements to track where associate is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> enter\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::schedule_delayed_release --> enter\n"));
    // Add reference before schedule timer with reactor and remove reference after
    // handle_timeout is called. This would avoid DataLink deletion while handling
    // timeout.
@@ -648,17 +650,17 @@ DataLink::schedule_delayed_release()
    // can not be delivered when new association is added and still use
    // this connection/datalink.
    if (!this->send_strategy_.is_nil()) {
-     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> clearing send_strategy\n"));
+     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::schedule_delayed_release --> clearing send_strategy\n"));
       this->send_strategy_->clear();
    }
 
    ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
 
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> schedule timer for DataLink release delay\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::schedule_delayed_release --> schedule timer for DataLink release delay\n"));
 
    reactor->schedule_timer(this, 0, this->datalink_release_delay_);
    this->scheduled_ = true;
-   ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataLink::schedule_delayed_release --> exit\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::schedule_delayed_release --> exit\n"));
 }
 
 bool

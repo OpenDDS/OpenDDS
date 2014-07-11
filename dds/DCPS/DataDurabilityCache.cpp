@@ -33,6 +33,8 @@
 #include <fstream>
 #include <algorithm>
 
+#include "async_debug.h"
+
 namespace {
 
 void cleanup_directory(const std::vector<std::string> & path,
@@ -729,7 +731,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
 {
 
    //### Debug statements to track where connection is failing
-     ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataDurabilityCache::get_data --> enter\n"));
+     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataDurabilityCache::get_data --> enter\n"));
 
   key_type const key(domain_id,
                      topic_name,
@@ -870,7 +872,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
     }
   }
   //### Debug statements to track where connection is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ###DataDurabilityCache::get_data --> exit TRUE\n"));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataDurabilityCache::get_data --> exit TRUE\n"));
   return true;
 }
 

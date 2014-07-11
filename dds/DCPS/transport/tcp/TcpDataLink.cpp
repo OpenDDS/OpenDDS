@@ -99,7 +99,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
 {
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> begin\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpDataLink::connect --> begin\n"));
 
    DBG_ENTRY_LVL("TcpDataLink","connect",6);
 
@@ -113,7 +113,7 @@ OpenDDS::DCPS::TcpDataLink::connect(
    this->connection_ = connection;
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> enable peer\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpDataLink::connect --> enable peer\n"));
 
    if (this->connection_->peer().enable(ACE_NONBLOCK) == -1) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -122,13 +122,13 @@ OpenDDS::DCPS::TcpDataLink::connect(
    }
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> set_datalink\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpDataLink::connect --> set_datalink\n"));
 
    // Let connection know the datalink for callbacks upon reconnect failure.
    this->connection_->set_datalink(this);
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> try to start DataLink with send/recv strategies\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpDataLink::connect --> try to start DataLink with send/recv strategies\n"));
 
    // And lastly, inform our base class (DataLink) that we are now "connected",
    // and it should start the strategy objects.
@@ -138,19 +138,19 @@ OpenDDS::DCPS::TcpDataLink::connect(
       // that an error has taken place.
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> base DataLink FAILURE to start strategy objects so nil out connection\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpDataLink::connect --> base DataLink FAILURE to start strategy objects so nil out connection\n"));
 
       // Drop our reference to the connection object.
       this->connection_ = 0;
 
       //### Debug statements to track where connection is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> return FAILURE\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpDataLink::connect --> return FAILURE\n"));
 
       return -1;
    }
 
    //### Debug statements to track where connection is failing
-   ACE_DEBUG((LM_DEBUG, "(%P|%t) ###TcpDataLink::connect --> return SUCCESS\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpDataLink::connect --> return SUCCESS\n"));
 
    return 0;
 }

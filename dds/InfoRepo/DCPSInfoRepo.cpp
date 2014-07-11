@@ -12,6 +12,8 @@
 #include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 #endif
 
+#include "dds/DCPS/async_debug.h"
+
 #include "tao/ORB_Core.h"
 
 #include <iostream>
@@ -22,23 +24,23 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   try {
 
      //### Debug statements to track where connection is failing
-     ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::ACE_TMAIN --> begin\n"));
-     ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::ACE_TMAIN --> START to instantiate infoRepo\n"));
+     if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::ACE_TMAIN --> begin\n"));
+     if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::ACE_TMAIN --> START to instantiate infoRepo\n"));
     InfoRepo infoRepo(argc, argv);
 
     //### Debug statements to track where connection is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::ACE_TMAIN --> DONE instantiating infoRepo\n"));
+    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::ACE_TMAIN --> DONE instantiating infoRepo\n"));
 
     InfoRepo_Shutdown ir_shutdown(infoRepo);
     Service_Shutdown service_shutdown(ir_shutdown);
 
     //### Debug statements to track where connection is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::ACE_TMAIN --> about to 'run' infoRepo\n"));
+    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::ACE_TMAIN --> about to 'run' infoRepo\n"));
 
     infoRepo.run();
 
     //### Debug statements to track where connection is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::ACE_TMAIN --> post-'run' infoRepo\n"));
+    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::ACE_TMAIN --> post-'run' infoRepo\n"));
 
   } catch (InfoRepo::InitError& ex) {
     std::cerr << "Unexpected initialization Error: "
@@ -50,7 +52,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return -1;
   }
   //### Debug statements to track where connection is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###InfoRepoDiscovery::ACE_TMAIN --> end\n"));
+  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::ACE_TMAIN --> end\n"));
 
   return 0;
 }

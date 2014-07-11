@@ -1073,24 +1073,24 @@ void
 WriteDataContainer::unregister_all()
 {
   //### Debug statements to track where test is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> enter\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> enter\n"));
   DBG_ENTRY_LVL("WriteDataContainer","unregister_all",6);
   //### Debug statements to track where test is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> set shutdown_ = true\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> set shutdown_ = true\n"));
   shutdown_ = true;
 
   {
     //The internal list needs protection since this call may result from the
     //the delete_datawriter call which does not acquire the lock in advance.
     //### Debug statements to track where test is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> LOCKING lock_\n"));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> LOCKING lock_\n"));
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
               this->lock_);
     //### Debug statements to track where test is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> LOCKED lock_\n"));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> LOCKED lock_\n"));
     //### Debug statements to track where test is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> remove_all_messages\n"));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> remove_all_messages\n"));
     // Tell transport remove all control messages currently
     // transport is processing.
     (void) this->writer_->remove_all_msgs();
@@ -1098,7 +1098,7 @@ WriteDataContainer::unregister_all()
     // Broadcast to wake up all waiting threads.
     if (waiting_on_release_) {
       //### Debug statements to track where test is failing
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> broadcast\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> broadcast\n"));
       condition_.broadcast();
     }
   }
@@ -1108,7 +1108,7 @@ WriteDataContainer::unregister_all()
 
   while (it != instances_.end()) {
     //### Debug statements to track where test is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> dispose of the instance data\n"));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> dispose of the instance data\n"));
     // Release the instance data.
     ret = dispose(it->first, registered_sample, false);
 
@@ -1120,7 +1120,7 @@ WriteDataContainer::unregister_all()
                  it->first));
     }
     //### Debug statements to track where test is failing
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> mark instance unregistered\n"));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> mark instance unregistered\n"));
     // Mark the instance unregistered.
     ret = unregister(it->first, registered_sample, false);
 
@@ -1146,7 +1146,7 @@ WriteDataContainer::unregister_all()
 
   ACE_UNUSED_ARG(registered_sample);
   //### Debug statements to track where test is failing
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) ###WriteDataContainer::unregister_all --> exit\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> exit\n"));
 }
 
 PublicationInstance*
