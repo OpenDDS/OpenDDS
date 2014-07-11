@@ -110,10 +110,11 @@ elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     $delay_msec = delay_msec_calc($total_writers, $samples, $base_delay_msec);
     $serialized_samples = $pub_part * $writers * $samples;
 }
-elsif ($ARGV[1] =~ /-\S_process/ ||
-       $ARGV[1] =~ /-\S_participant/ ||
+elsif ($ARGV[1] =~ /-\S+_process/ ||
+       $ARGV[1] =~ /-\S+_participant/ ||
        $ARGV[1] =~ /-readers/ ||
-       $ARGV[1] =~ /-writers/) {
+       $ARGV[1] =~ /-writers/ ||
+       $ARGV[1] =~ /-ORBSvcConf/) {
     $custom = 1;
     my $added_opts = $ARGV[1];
     $added_opts =~ s/-reliable//;
@@ -151,6 +152,7 @@ elsif ($ARGV[1] =~ /-\S_process/ ||
 
     # only used if -total_duration_msec is not in $ARGV[1]
     $serialized_samples = $pub_part * $writers * $samples;
+
 }
 else {
     print STDERR "ERROR: invalid argv[1]=$ARGV[1]\n";
@@ -188,6 +190,10 @@ if (!$custom) {
     }
     elsif ($ARGV[2] =~ /^\d+$/) {
         $config_opts .= '-sample_size ' . $ARGV[2] . ' ';
+    }
+
+    if ($#ARGV == 3 && $ARGV[3] eq "orb_csdtp") {
+	$config_opts .= '-ORBSvcConf svc_csdtp.conf ';
     }
 }
 elsif ($config_opts !~ /-sample_size/) {
