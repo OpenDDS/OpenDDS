@@ -11,6 +11,7 @@
 
 #include "dcps_export.h"
 #include "InstanceDataSampleList.h"
+#include "DataSampleElement.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
