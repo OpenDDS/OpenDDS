@@ -21,6 +21,8 @@
 #include "OfferedDeadlineWatchdog.h"
 #include "MonitorFactory.h"
 #include "TypeSupportImpl.h"
+#include "SendStateDataSampleList.h"
+#include "DataSampleElement.h"
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
@@ -570,24 +572,24 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
             guard,
             this->get_lock());
 
-      DataSampleList list = this->get_resend_data();
+    SendStateDataSampleList list = this->get_resend_data();
     {
       ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
       // Update the reader's expected sequence
       SequenceNumber& seq =
         reader_info_.find(remote_id)->second.expected_sequence_;
 
-      for (DataSampleListElement* list_el = list.head_; list_el;
-           list_el = list_el->next_send_sample_) {
-        list_el->header_.historic_sample_ = true;
-        if (list_el->header_.sequence_ > seq) {
-          seq = list_el->header_.sequence_;
+      for (SendStateDataSampleList::iterator list_el = list.begin();
+           list_el != list.end(); ++list_el) {
+        list_el->get_header().historic_sample_ = true;
+        if (list_el->get_header().sequence_ > seq) {
+          seq = list_el->get_header().sequence_;
         }
       }
     }
 
     if (this->publisher_servant_->is_suspended()) {
-      this->available_data_list_.enqueue_tail_next_send_sample(list);
+      this->available_data_list_.enqueue_tail(list);
     } else {
       this->send(list);
     }
@@ -1882,8 +1884,8 @@ DataWriterImpl::write(DataSample* data,
             DDS::RETCODE_NOT_ENABLED);
    }
 
-   DataSampleListElement* element = 0;
-   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
+  DataSampleElement* element = 0;
+  DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
 
    if (ret == DDS::RETCODE_TIMEOUT) {
       return ret; // silent for timeout
@@ -1896,18 +1898,19 @@ DataWriterImpl::write(DataSample* data,
             ret),
             ret);
    }
+  DataSample* temp;
+  ret = create_sample_data_message(data,
+                                   handle,
+                                   element->get_header(),
+                                   temp,
+                                   source_timestamp,
+                                   (filter_out != 0));
+  element->set_sample(temp);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
 
-   ret = create_sample_data_message(data,
-         handle,
-         element->header_,
-         element->sample_,
-         source_timestamp,
-         (filter_out != 0));
-   if (ret != DDS::RETCODE_OK) {
-      return ret;
-   }
-
-   element->filter_out_ = filter_out_var._retn(); // ownership passed to element
+  element->set_filter_out(filter_out_var._retn()); // ownership passed to element
 
    ret = this->data_container_->enqueue(element, handle);
 
@@ -1919,13 +1922,13 @@ DataWriterImpl::write(DataSample* data,
             ret);
    }
 
-   DataSampleList list = this->get_unsent_data();
+  SendStateDataSampleList list = this->get_unsent_data();
 
-   if (this->publisher_servant_->is_suspended()) {
-      this->available_data_list_.enqueue_tail_next_send_sample(list);
-   } else {
-      this->send(list);
-   }
+  if (this->publisher_servant_->is_suspended()) {
+    this->available_data_list_.enqueue_tail(list);
+  } else {
+    this->send(list);
+  }
 
    this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
 
@@ -2209,21 +2212,21 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
 }
 
 void
-DataWriterImpl::data_delivered(const DataSampleListElement* sample)
+DataWriterImpl::data_delivered(const DataSampleElement* sample)
 {
    DBG_ENTRY_LVL("DataWriterImpl","data_delivered",6);
 
-   if (!(sample->publication_id_ == this->publication_id_)) {
-      GuidConverter sample_converter(sample->publication_id_);
-      GuidConverter writer_converter(publication_id_);
-      ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
-            ACE_TEXT(" The publication id %C from delivered element ")
-            ACE_TEXT("does not match the datawriter's id %C\n"),
-            std::string(sample_converter).c_str(),
-            std::string(writer_converter).c_str()));
-      return;
-   }
+  if (!(sample->get_pub_id() == this->publication_id_)) {
+    GuidConverter sample_converter(sample->get_pub_id());
+    GuidConverter writer_converter(publication_id_);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
+               ACE_TEXT(" The publication id %C from delivered element ")
+               ACE_TEXT("does not match the datawriter's id %C\n"),
+               std::string(sample_converter).c_str(),
+               std::string(writer_converter).c_str()));
+    return;
+  }
 
    this->data_container_->data_delivered(sample);
 
@@ -2285,17 +2288,17 @@ DataWriterImpl::parent() const
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 bool
-DataWriterImpl::filter_out(const DataSampleListElement& elt,
+DataWriterImpl::filter_out(const DataSampleElement& elt,
       const FilterEvaluator& evaluator,
       const DDS::StringSeq& expression_params) const
 {
    TypeSupportImpl* const typesupport =
          dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
 
-   return !evaluator.eval(elt.sample_->cont(),
-         elt.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-         elt.header_.cdr_encapsulation_, typesupport->getMetaStructForType(),
-         expression_params);
+  return !evaluator.eval(elt.get_sample()->cont(),
+    elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
+    elt.get_header().cdr_encapsulation_, typesupport->getMetaStructForType(),
+    expression_params);
 }
 #endif
 
@@ -2379,7 +2382,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
 void
-DataWriterImpl::data_dropped(const DataSampleListElement* element,
+DataWriterImpl::data_dropped(const DataSampleElement* element,
       bool dropped_by_transport)
 {
    DBG_ENTRY_LVL("DataWriterImpl","data_dropped",6);

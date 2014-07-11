@@ -163,7 +163,7 @@ DataLink::send_stop_i(RepoId repoId)
 }
 
 ACE_INLINE RemoveResult
-DataLink::remove_sample(const DataSampleListElement* sample)
+DataLink::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLink", "remove_sample", 6);
 

@@ -1,3 +1,160 @@
+Fri Jul 11 15:12:19 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/InstanceDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+        * dds/DCPS/WriterDataSampleList.inl:
+
+          Fixed fuzz errors
+
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Replaced foward declaration of DataSampleElement to a full
+          include in WriteDataContainer.h to capture the typedef for
+          the allocator.
+
+Thu Jul 10 16:17:35 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ManyToMany/README:
+        * tests/DCPS/ManyToMany/rtps_disc.ini:
+        * tests/DCPS/ManyToMany/rtps_disc_tcp.ini:
+
+          Added RTPS discovery options to the ManyToMany test.
+
+Thu Jul 10 15:01:11 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * Merged the branch "DataSampleList_split" which:
+
+          Split the DataSampleList interface into three distinct list
+          interfaces denoting and clarifying their functionality and
+          responsibilities.  This eliminates the requirement that an
+          DataSampleList instance is to only be used in a certain "mode"
+          --a list for a data writer, a list for a instance, or a list
+          for send state--.
+
+          DataSampleList is replaced by:
+            WriterDataSampleList
+            InstanceDataSampleList
+            SendStateDataSampleList
+
+          struct DataSampleListElement has been replaced by a first
+          class object DataSampleElement.  This was done to control
+          access to the list pointer elements, which now are only
+          modified through the list interfaces.
+
+Wed Jul  9 20:19:51 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/ManyToMany/README:
+
+          Added information about how to pass parameters to run_test.pl.
+
+Wed Jul  9 17:59:26 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/MessageTracker.cpp:
+
+          Fixed logic for reporting and exiting after wait timed out.
+
+        * tests/DCPS/QueryCondition/run_test.pl:
+
+          Added printing out command line for executables that are started.
+
+Wed Jul  9 17:25:49 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+
+          Logging changes.
+
+Wed Jul  9 15:12:35 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add back Thrasher test cases.
+
+Tue Jul  8 19:42:52 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Calling fini_bit on discovery before deleting
+          BIT entities.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Added fini_bit to indicate that BIT entities are being
+          deleted (and should no longer be used).
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added class to wait for acknowledgements from other thread and
+          added method to request for Sedp::Task to acknowledge to spdp.
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added a WaitForAcks object to use in fini_bit to wait for
+          SpdpTransport (actually reactor) thread and Sedp::Task have sent
+          an acknowledgement, so that we know that all threads will see
+          that subscriber_bit_ is nil.
+
+Tue Jul  8 14:40:32 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Reverted revisions 6373 and 6376.
+
+Tue Jul  8 14:15:38 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Increased the log level for messages on shutdown.
+
+Tue Jul  8 02:49:18 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Fixed fuzz error.
+
+Mon Jul  7 21:15:36 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+
+          Force verbose.
+Mon Jul  7 21:02:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Added check for get_deleted in store_synthetic_data and
+          set_instance_state to prevent spdp/sedp from writing
+          while the data reader is being deleted.
+
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Added Psuedovar to keep var to data readers while providing
+          derived pointer and change *_bit() methods to return
+          Psuedovars.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Changed *_bit() methods to return Psuedovars.
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Cleanup of temporary diagnostics.
+
 Thu Jul  3 19:45:42 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * configure:

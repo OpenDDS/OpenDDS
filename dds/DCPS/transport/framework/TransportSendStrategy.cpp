@@ -21,7 +21,7 @@
 #include "TransportDefs.h"
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
@@ -1422,11 +1422,11 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
 }
 
 RemoveResult
-TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
+TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "remove_sample", 6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@\n", sample->sample_), 5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@\n", sample->get_sample()), 5);
 
   // The sample to remove is either in temporary delayed notification list or
   // internal list (elems_ or queue_). If it's going to be removed from temporary delayed
@@ -1438,7 +1438,7 @@ TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
   // in which case the element carry the info if the sample is released so the datalinkset
   // can stop calling rest datalinks to remove this sample if it's already released..
 
-  const char* const payload = sample->sample_->cont()->rd_ptr();
+  const char* const payload = sample->get_sample()->cont()->rd_ptr();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
   if (send_delayed_notifications(&modp)) {
     return REMOVE_RELEASED;

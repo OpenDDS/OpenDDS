@@ -24,7 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TransportSendListener;
-struct DataSampleListElement;
+class DataSampleElement;
 
 class OpenDDS_Dcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX> {
 public:
@@ -39,7 +39,7 @@ public:
   void remove_link(const DataLink_rch& link);
 
   /// Send to each DataLink in the set.
-  void send(DataSampleListElement* sample);
+  void send(DataSampleElement* sample);
 
   /// Send control message to each DataLink in the set.
   SendControlStatus send_control(RepoId                  pub_id,
@@ -51,7 +51,7 @@ public:
                      const DataSampleHeader& header,
                      ACE_Message_Block* response);
 
-  bool remove_sample(const DataSampleListElement* sample);
+  bool remove_sample(const DataSampleElement* sample);
 
   bool remove_all_msgs(RepoId pub_id);
 

@@ -23,7 +23,7 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct DataSampleListElement;
+class DataSampleElement;
 
 class TransportQueueElement;
 typedef std::pair<TransportQueueElement*, TransportQueueElement*> ElementPair;

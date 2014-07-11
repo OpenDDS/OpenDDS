@@ -541,20 +541,20 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   } else if (tse) {  // Basic data message
     // {DataSampleHeader} -> {Data Payload}
     data = msg->cont()->duplicate();
-    const DataSampleListElement* dsle = tse->sample();
+    const DataSampleElement* dsle = tse->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
               subm, *dsle, this->requires_inline_qos(pub_id));
-    durable = dsle->header_.historic_sample_;
+    durable = dsle->get_header().historic_sample_;
 
   } else if (tce) {  // Customized data message
     // {DataSampleHeader} -> {Content Filtering GUIDs} -> {Data Payload}
     data = msg->cont()->cont()->duplicate();
-    const DataSampleListElement* dsle = tce->original_send_element()->sample();
+    const DataSampleElement* dsle = tce->original_send_element()->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
               subm, *dsle, this->requires_inline_qos(pub_id));
-    durable = dsle->header_.historic_sample_;
+    durable = dsle->get_header().historic_sample_;
 
   } else {
     return element;

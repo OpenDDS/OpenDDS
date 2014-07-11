@@ -1,0 +1,599 @@
+Thu Jul 10 14:39:12 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * Merged from trunk r6380 through r6389
+
+Wed Jul  9 18:10:28 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.cpp:
+
+          Added to allow for inclusion of .inl file if ACE INLINE
+          not defined.
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/InstanceDataSampleList.inl:
+        * dds/DCPS/InstanceDataSampleList.cpp:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+        * dds/DCPS/WriterDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.inl:
+        * dds/DCPS/WriterDataSampleList.cpp:
+
+          Shifted method definitions into the .inl file and removed commented
+          out included of DataSampleList.  Also added some documentation to
+          clarify list mechanics and relationship to DataSampleElement(s).
+
+        * dds/DCPS/PublisherImpl.h:
+
+          Removed references to DataSampleList including unused typedef of
+          DataSampleListMap.
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Removed include statements for removed DataSampleList file.
+          Added some clarifying documentation where pertinent.
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+
+          Removed these files as they are no longer needed after being replaced
+          by {Writer, Instance, SendState}DataSampleList(s).
+
+Tue Jul  8 21:27:30 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Made header_, publication_id_, num_subs_, subscription_ids_[], space_available_
+          members as well as pointer members sample_, send_listener_, and handle_ private.
+          Provided accessors and mutators, where necessary, for the members.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Updated to account for providing accessors/mutators mentioned above.
+
+Tue Jul  8 19:29:21 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Made allocator pointer members, filter_out_, and filter_per_link_ members
+          private. Provided accessors the members.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+
+          Updated to account for providing accessors mentioned above.
+
+Tue Jul  8 16:13:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * .:
+        * ChangeLog:
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+        * bin/PerlDDS/Run_Test.pm:
+        * configure:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSApp.cpp:
+
+          Merged r6317 through r6379 from trunk.
+
+Tue Jul  8 14:40:50 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+
+          Place forward decl of DDS_TEST in global namespace.
+
+        * tests/transport/rtps/publisher.cpp:
+
+          Fix so test can set next sample on a DataSampleElement.
+
+Mon Jul  7 21:08:41 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.h:
+
+          Update class-level comments to reflect split up of DataSampleList into
+          different lists. Removed duplicate comments and moved comments that were not
+          specific to the class.
+
+Mon Jul  7 20:32:41 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Renamed {previous_,next_}sample_ to more accurately follow naming convention
+          of other list pointers by adding list descriptor.  Now named previous_writer_sample_
+          and next_writer_sample_.  Also corrected spelling of listener in constructor.
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterDataSampleList.inl:
+        * dds/DCPS/WriterDataSampleList.cpp:
+
+          Carried naming change out to references in other files.
+
+Mon Jul  7 18:11:18 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+
+          Made {get,set}_next_send_sample() members private since normally they should
+          not be exposed to the outside world.
+
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+
+          Add const_iterator for SendStateDataSampleList to reduce need to
+          access next send sample.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Updated to account for DataSampleElement::{get,set}_next_send_sample() being private.
+
+Thu Jul  3 20:30:08 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+
+          Removed friending of class DataSampleList as it no longer exists.
+          Corrected spelling errors in comments.
+
+        * tests/DCPS/unit/Main.cpp:
+
+          Since iterators are only being provided for SendStateDataSampleList(s)
+          test code had to be modified where it was relying on an iterator for
+          what has become a WriterDataSampleList.  Replaced calls to iterator creation
+          on WriterDataSampleList to directly constructing a SendStateDataSampleListIterator
+          with DataSampleElements head and tail pointers into the WriterDataSampleList.
+          Since the test is simply checking that the iteration through the two lists
+          will be the same because their DataSampleElements are the same, this will
+          test the same functionality.
+
+Thu Jul  3 17:00:21 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.h:
+
+          Shifted typedefs for DataSample and DataSampleElementAllocator from
+          the list files into the DataSampleElement header file to reduce
+          unnecessary replication.
+
+Thu Jul  3 14:21:14 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleInstanceList.h:
+        * dds/DCPS/DataSampleInstanceList.inl:
+        * dds/DCPS/DataSampleInstanceList.cpp:
+
+          Removed these files.
+
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/InstanceDataSampleList.inl:
+        * dds/DCPS/InstanceDataSampleList.cpp:
+
+          Replaced removed files with renamed InstanceDataSampleList files.
+          Reflected renaming of DataSampleInstanceList to the new naming strategy
+          InstanceDataSampleList
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+          Changed references to DataSampleInstanceList to reflect naming change
+          to the new InstanceDataSampleList.
+
+Thu Jul  3 13:53:47 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleWriterList.h:
+        * dds/DCPS/DataSampleWriterList.inl:
+        * dds/DCPS/DataSampleWriterList.cpp:
+
+          Removed these files.
+
+        * dds/DCPS/WriterDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.inl:
+        * dds/DCPS/WriterDataSampleList.cpp:
+
+          Replaced removed files with renamed WriterDataSampleList files.
+          Reflected renaming of DataSampleWriterList to the new naming strategy
+          WriterDataSampleList
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+          Changed references to DataSampleWriterList to reflect naming change
+          to the new WriterDataSampleList.
+
+Wed Jul  2 21:22:59 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleSendList.h:
+        * dds/DCPS/DataSampleSendList.inl:
+        * dds/DCPS/DataSampleSendList.cpp:
+
+          Removed these files.
+
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+
+          Replaced removed files with renamed SendStateDataSampleList files.
+          Reflected renaming of DataSampleSendList to the new naming strategy
+          SendStateDataSampleList which more accurately reflects the list's
+          use by the DCPS layer to track the TransportLayer's usage of a DataSample.
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Changed references to DataSampleSendList to reflect naming change
+          to the new SendStateDataSampleList.
+
+Wed Jul  2 20:55:49 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleListElement.h:
+        * dds/DCPS/DataSampleListElement.inl:
+
+          Removed these files.  Part of the renaming process.
+          Replaced by DataSampleElement[.h, .inl]
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Renamed DataSampleListElement to DataSampleElement, reflected in .h and .inl
+          files as well as in all referencing files below.
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleInstanceList.h:
+        * dds/DCPS/DataSampleInstanceList.inl:
+        * dds/DCPS/DataSampleInstanceList.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleSendList.h:
+        * dds/DCPS/DataSampleSendList.inl:
+        * dds/DCPS/DataSampleSendList.cpp:
+        * dds/DCPS/DataSampleWriterList.h:
+        * dds/DCPS/DataSampleWriterList.inl:
+        * dds/DCPS/DataSampleWriterList.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+Wed Jul  2 19:29:41 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+
+          Removed artifact from an earlier merge.
+
+Wed Jul  2 19:02:22 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleInstanceList.h:
+        * dds/DCPS/DataSampleInstanceList.inl:
+        * dds/DCPS/DataSampleInstanceList.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleSendList.h:
+        * dds/DCPS/DataSampleSendList.inl:
+        * dds/DCPS/DataSampleSendList.cpp:
+        * dds/DCPS/DataSampleWriterList.h:
+        * dds/DCPS/DataSampleWriterList.inl:
+        * dds/DCPS/DataSampleWriterList.cpp:
+
+          Split out DataSampleSendList, DataSampleInstanceList, and DataSampleWriterList
+          from DataSampleList and removed inheritance structure so that the three list types
+          are stand alone containers.  Left DataSampleList files for now, but have commented
+          out all code within rendering them ready to delete after work on lists is complete.
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Made necessary modifications to include statements and forward declarations in
+          files/classes making use of the DataSample[Send, Instance, Writer]List(s) as well
+          as for DataSampleListElement includes throughout.
+
+Wed Jul  2 13:57:47 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+
+          Don't make list's tail, head, and size data fields settable by code that uses
+          DataSampleSendList.
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Update to account for DataSampleSendList's internals not be settable.
+
+Tue Jul  1 15:49:14 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleListElement.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Modify so list dequeue method takes a const element since the logical value of the element
+          isn't changed although the prev/next list pointers needed only by the list do.
+          Have dequeue method return a bool instead of an element pointer.
+
+Mon Jun 30 21:11:06 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleListElement.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Added static method send_list_containing_element to DataSampleSendList which takes
+          a vector of pointers to DataSampleSendList(s) and an element, and returns a const
+          pointer to the list it is contained in.  This is used for locating an element in one
+          of a WriteDataContainer's send lists.
+
+          Modified WriteDataContainer to use send_list_containing_element to locate list containing
+          element during remove_oldest_sample operation.
+
+          This allowed removing accessor to previous_send_sample from DataSampleList element to
+          enforce encapsulation.
+
+
+          Note:  Currently DataSampleList's accessors and mutators for head, tail, and size are
+            commented out leaving several tests unable to build.  This change was done in previous
+            commit and should be temporary.
+
+Mon Jun 30 18:59:03 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+        * dds/DCPS/DataSampleListElement.h:
+        * tests/DCPS/unit/Main.cpp:
+
+          Removed DataSampleListIterator and added DataSampleSendListIterator
+          (iteration is only done for DataSampleSendList).
+
+Fri Jun 27 20:36:46 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleListElement.h:
+        * dds/DCPS/DataSampleListElement.inl:
+
+          Split out the DataSampleListElement into its own class instead of
+          an imbedded struct in DataSampleList.  Made its pointers to list
+          positions private and added the DataSample*List classes friends so
+          that they can manage the element's internal pointers.
+
+          Added setters and getters for pointers to next and previous send samples
+          to support current code usage.  These should hopefully be done away with
+          in the future and not allow direct manipulation or access to these internals.
+
+          Left other data members as public for the moment, but hope to shift most to
+          private.
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+
+          Made the DataSampleList an abstract base class for concrete derived list types:
+            -DataSampleSendList
+            -DataSampleInstanceList
+            -DataSampleWriterList
+
+          Added initial declaration and definitions of derived lists member functions within
+          existing DataSampleList.(h,cpp,inl).  Made previous DataSampleList's member functions
+          for managing element pointers into generalized enqueue_tail, dequeue_head, dequeue
+          functionality specific to the concrete derived list type.  These methods are pure virtual
+          in abstract base class and each derived list type concretely defines them per old
+          implementations.
+
+          Provided accessors and mutators for the head_, tail_, and size_ datamembers to control
+          access to the DataSampleList's internals which were being directly accessed from outside
+          the class.  The mutators at least should hopefully go away with a more controlled design
+          in future iterations.
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Updated DataSampleList's to be the appropriate derived type as well as correctly calling
+          member functions for operations on the lists.  Used helper functions to control access
+          to head_, tail_, and size_ data members which are now private.  Did provide a setter for
+          these members for this initial implemenation so that the operation wouldn't be changed yet.
+
+Wed Jun 25 22:11:35 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+
+          Added initial declaration of iterator to use for the three new list types
+          and initial declaration of DataSampleWriterList to use as a sample list
+          used by data writers.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

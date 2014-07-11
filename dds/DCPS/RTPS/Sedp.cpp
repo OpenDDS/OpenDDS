@@ -28,6 +28,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/DataSampleHeader.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
@@ -2001,13 +2002,13 @@ Sedp::Writer::assoc(const DCPS::AssociationData& subscription)
 }
 
 void
-Sedp::Writer::data_delivered(const DCPS::DataSampleListElement* dsle)
+Sedp::Writer::data_delivered(const DCPS::DataSampleElement* dsle)
 {
   delete dsle;
 }
 
 void
-Sedp::Writer::data_dropped(const DCPS::DataSampleListElement* dsle, bool)
+Sedp::Writer::data_dropped(const DCPS::DataSampleElement* dsle, bool)
 {
   delete dsle;
 }
@@ -2055,22 +2056,21 @@ Sedp::Writer::write_sample(const ParameterList& plist,
 
   if (result == DDS::RETCODE_OK) {
     // Send sample
-    DCPS::DataSampleListElement* list_el =
-      new DCPS::DataSampleListElement(repo_id_, this, 0, &alloc_, 0);
-    set_header_fields(list_el->header_, size, reader, sequence);
+    DCPS::DataSampleElement* list_el =
+      new DCPS::DataSampleElement(repo_id_, this, 0, &alloc_, 0);
+    set_header_fields(list_el->get_header(), size, reader, sequence);
 
-    list_el->sample_ = new ACE_Message_Block(size);
-    *list_el->sample_ << list_el->header_;
-    list_el->sample_->cont(payload.duplicate());
+    list_el->set_sample(new ACE_Message_Block(size));
+    *list_el->get_sample() << list_el->get_header();
+    list_el->get_sample()->cont(payload.duplicate());
 
     if (reader != GUID_UNKNOWN) {
-      list_el->subscription_ids_[0] = reader;
-      list_el->num_subs_ = 1;
+      list_el->set_sub_id(0, reader);
+      list_el->set_num_subs(1);
     }
 
-    DCPS::DataSampleList list;
-    list.head_ = list.tail_ = list_el;
-    list.size_ = 1;
+    DCPS::SendStateDataSampleList list;
+    list.enqueue_tail(list_el);
 
     send(list);
   }

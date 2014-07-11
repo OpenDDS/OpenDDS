@@ -16,7 +16,8 @@
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
@@ -39,15 +40,19 @@
 
 #include "TestMsg.h"
 
-class DDS_TEST {  // friended by RtpsUdpDataLink
+class DDS_TEST {  // friended by RtpsUdpDataLink and DataSampleElement
 public:
   static void force_inline_qos(bool val) {
     OpenDDS::DCPS::RtpsUdpDataLink::force_inline_qos_ = val;
   }
+
+  static void set_next_send_sample(DataSampleElement& element, DataSampleElement *next_send_sample) {
+    element.set_next_send_sample(next_send_sample);
+  }
+
+  static int test(ACE_TString host, u_short port);
 };
 
-using namespace OpenDDS::DCPS;
-using namespace OpenDDS::RTPS;
 
 void log_time(const ACE_Time_Value& t)
 {
@@ -87,13 +92,13 @@ public:
   }
 
   // Implementing TransportSendListener
-  void data_delivered(const DataSampleListElement*)
+  void data_delivered(const DataSampleElement*)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::data_delivered()\n"));
     --callbacks_expected_;
   }
 
-  void data_dropped(const DataSampleListElement*, bool by_transport)
+  void data_dropped(const DataSampleElement*, bool by_transport)
   {
     ACE_DEBUG((LM_INFO, "(%P|%t) SimpleDataWriter::data_dropped(element, %d)\n",
       int(by_transport)));
@@ -175,26 +180,11 @@ public:
   InlineQosMode inline_qos_mode_;
 };
 
-int
-ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+using namespace OpenDDS::DCPS;
+using namespace OpenDDS::RTPS;
+
+int DDS_TEST::test(ACE_TString host, u_short port)
 {
-  ACE_TString host;
-  u_short port = 0;
-
-  ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
-  int option = 0;
-
-  while ((option = opts()) != EOF) {
-    switch (option) {
-    case 'h':
-      host = opts.opt_arg();
-      break;
-    case 'p':
-      port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
-      break;
-    }
-  }
-
   if (host.empty() || port == 0) {
     std::cerr << "ERROR: -h <host> and -p <port> options are required\n";
     return 1;
@@ -414,16 +404,16 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   // 2b. send sample data through the OpenDDS transport
 
   TransportSendElementAllocator alloc(2, sizeof(TransportSendElementAllocator));
-  DataSampleListElement elements[] = {
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
-    DataSampleListElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
+  DataSampleElement elements[] = {
+    DataSampleElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample
+    DataSampleElement(local_guid, &sdw, 0, &alloc, 0),  // Data Sample (key=99 means end)
   };
-  DataSampleList list;
+  SendStateDataSampleList list;
   list.head_ = elements;
   list.size_ = sizeof(elements) / sizeof(elements[0]);
-  list.tail_ = &elements[list.size_ - 1];
-  for (int i = 0; i < list.size_ - 1; ++i) {
-    elements[i].next_send_sample_ = &elements[i + 1];
+  list.tail_ = &elements[list.size() - 1];
+  for (int i = 0; i < list.size() - 1; ++i) {
+    DDS_TEST::set_next_send_sample(elements[i], &elements[i + 1]);
   }
 
   // Send a regular data sample
@@ -495,7 +485,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  sdw.callbacks_expected_ = list.size_;
+  sdw.callbacks_expected_ = list.size();
   ::DDS_TEST::force_inline_qos(true);  // Inline QoS
   sdw.send(list);
 
@@ -515,4 +505,28 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   ACE_Thread_Manager::instance()->wait();
 
   return 0;
+}
+
+
+int
+ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
+  ACE_TString host;
+  u_short port = 0;
+
+  ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
+  int option = 0;
+
+  while ((option = opts()) != EOF) {
+    switch (option) {
+    case 'h':
+      host = opts.opt_arg();
+      break;
+    case 'p':
+      port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
+      break;
+    }
+  }
+
+  DDS_TEST::test(host, port);
 }

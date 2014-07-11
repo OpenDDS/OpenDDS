@@ -10,7 +10,6 @@
 #include "DataLinkSet.h"
 #include "DataLinkSet_rch.h"
 
-#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 #include "TransportImpl.h"
