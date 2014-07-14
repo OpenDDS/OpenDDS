@@ -1,3 +1,23 @@
+Mon Jul 14 15:17:47 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+
+        * tests/DCPS/Instances:
+        * tests/DCPS/Instances/InstanceDataMap.h:
+        * tests/DCPS/Instances/InstanceFoo1.idl:
+        * tests/DCPS/Instances/InstanceFoo2.idl:
+        * tests/DCPS/Instances/Instances.mpc:
+        * tests/DCPS/Instances/PubDriver.h:
+        * tests/DCPS/Instances/Publisher.cpp:
+        * tests/DCPS/Instances/README:
+        * tests/DCPS/Instances/SubDriver.h:
+        * tests/DCPS/Instances/Subscriber.cpp:
+        * tests/DCPS/Instances/TestException.h:
+        * tests/DCPS/Instances/instanceslib_export.h:
+        * tests/DCPS/Instances/run_test.pl:
+        
+          Added Instances test (adapted from FooTest3_1) to utilize 
+          TestUtils test framework.
+
 Fri Jul 11 22:12:18 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/transport/rtps/publisher.cpp:
