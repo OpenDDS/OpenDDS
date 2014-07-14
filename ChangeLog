@@ -1,3 +1,11 @@
+Mon Jul 14 17:29:32 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Fix change I made on Fri Jul 11 20:43:52 UTC 2014 so RTPS discovery
+          usage in ManyToMany test is in right place and another ManyTopicTest
+          test.
+
 Mon Jul 14 15:17:47 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
 
@@ -14,8 +22,8 @@ Mon Jul 14 15:17:47 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
         * tests/DCPS/Instances/TestException.h:
         * tests/DCPS/Instances/instanceslib_export.h:
         * tests/DCPS/Instances/run_test.pl:
-        
-          Added Instances test (adapted from FooTest3_1) to utilize 
+
+          Added Instances test (adapted from FooTest3_1) to utilize
           TestUtils test framework.
 
 Fri Jul 11 22:12:18 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
