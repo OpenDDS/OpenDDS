@@ -1,10 +1,9 @@
+#include <tao/orb.idl>
 
 module Xyz {
 
 #pragma DCPS_DATA_TYPE "Xyz::Foo1"
 #pragma DCPS_DATA_KEY "Xyz::Foo1 a_long_value"
-
-  typedef sequence<float> UnboundedFloatSeq;
 
   // Example user defined "Foo1" structure with a key field and with an
   // unbounded sequence member
@@ -13,7 +12,7 @@ module Xyz {
     long  handle_value;
     long  sample_sequence;
     long  writer_id;
-    UnboundedFloatSeq unbounded_sequence;
+    CORBA::FloatSeq unbounded_sequence;
   };
 
 };
