@@ -1,3 +1,26 @@
+Tue Jul 15 17:03:39 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/Utils/DDSTopicFacade.h:
+
+          Renamed class DDSTopic to DDSTopicFacade.
+
+        * tests/DCPS/Instances/PubDriver.h:
+        * tests/DCPS/Instances/Publisher.cpp:
+        * tests/DCPS/Instances/SubDriver.h:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/Utils/DDSApp.h:
+
+          Updated to account for renaming DDSTopic to DDSTopicFacade.
+          Changed name of DDSApp instances from dds to ddsApp.
+
+        * tests/DCPS/Instances/InstanceFoo1.idl:
+          Fixed type.
+
+        * tests/Utils/DDSTopic.h:
+
+          Removed this file.
+
 Mon Jul 14 17:29:32 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:

@@ -32,10 +32,10 @@ class SubDriver
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) SubDriver::~SubDriver \n")));
     }
 
-    void run(::TestUtils::DDSApp& dds, ::TestUtils::Options& options)
+    void run(::TestUtils::DDSApp& ddsApp, ::TestUtils::Options& options)
     {
         parse_args(options);
-        run(dds);
+        run(ddsApp);
     }
 
   private:
@@ -48,10 +48,10 @@ class SubDriver
         verbose_            = options.get<bool>("verbose");
     }
 
-    void run(::TestUtils::DDSApp& dds)
+    void run(::TestUtils::DDSApp& ddsApp)
     {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) SubDriver::run \n")));
-        ::TestUtils::DDSTopic< datareaderimpl_type> topic = dds.topic< datareaderimpl_type> ("bar");
+        ::TestUtils::DDSTopicFacade< datareaderimpl_type> topic_facade = ddsApp.topic_facade< datareaderimpl_type> ("bar");
 
         // Create Listener
         typedef typename ::TestUtils::ListenerRecorder< message_type, datareader_type> ListenerRecorder;
@@ -62,7 +62,7 @@ class SubDriver
 
         // Create data reader for the topic
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sub Creating Reader\n")));
-        DDS::DataReader_var reader = topic.reader(listener);
+        DDS::DataReader_var reader = topic_facade.reader(listener);
 
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sub waiting for writer to come and go\n")));
         {

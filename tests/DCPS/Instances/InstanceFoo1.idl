@@ -6,7 +6,7 @@ module Xyz {
 
   typedef sequence<float> UnboundedFloatSeq;
 
-  // Example user defined "Foo1" structure with a key field and a with an
+  // Example user defined "Foo1" structure with a key field and with an
   // unbounded sequence member
   struct Foo1 {
     long  a_long_value;  // the instance key

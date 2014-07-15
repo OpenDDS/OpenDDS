@@ -122,10 +122,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   std::cerr << pid << "Sub Creating App\n";
   int status = 0;
   try {
-    ::TestUtils::DDSApp dds(argc, argv);
+    ::TestUtils::DDSApp ddsApp(argc, argv);
     std::cerr << pid << "Sub Creating topic\n";
-    ::TestUtils::DDSTopic< ::Xyz::FooDataWriterImpl> topic =
-      dds.topic< ::Xyz::FooDataWriterImpl>("bar");
+    ::TestUtils::DDSTopicFacade< ::Xyz::FooDataWriterImpl> topic =
+      ddsApp.topic_facade< ::Xyz::FooDataWriterImpl>("bar");
 
     // need to process after calling topic to ensure all DDS/TAO/ACE command line
     // parameters are already removed

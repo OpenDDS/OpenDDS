@@ -283,24 +283,24 @@ class PubDriver
     check_data_dropped_       = options.get<long>("data_dropped");
   }
 
-  void run(::TestUtils::DDSApp& dds, ::TestUtils::Options& options)
+  void run(::TestUtils::DDSApp& ddsApp, ::TestUtils::Options& options)
   {
       parse_args(options);
-      run(dds);
+      run(ddsApp);
       end();
   }
 
   private:
 
-  void run(::TestUtils::DDSApp& dds)
+  void run(::TestUtils::DDSApp& ddsApp)
   {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) PubDriver::run \n")));
 
     SetHistoryDepthQOS history_depth_qos(history_depth_);
 
-    ::TestUtils::DDSTopic< datawriterimpl_type> topic =
-      dds.topic< datawriterimpl_type, SetHistoryDepthQOS>
+    ::TestUtils::DDSTopicFacade< datawriterimpl_type> topic_facade =
+      ddsApp.topic_facade< datawriterimpl_type, SetHistoryDepthQOS>
         ("bar", history_depth_qos);
 
     writers_ = new Writer< TypeSupportImpl>* [num_datawriters_];
@@ -313,7 +313,7 @@ class PubDriver
     // identifies instances is the thread id.
     for (int i = 0; i < num_datawriters_; i++)
     {
-      datawriters_.push_back( topic.writer(history_depth_qos) );
+      datawriters_.push_back( topic_facade.writer(history_depth_qos) );
       writers_[i] = new Writer< TypeSupportImpl>(datawriters_[i].in (),
                                num_threads_to_write_,
                                num_writes_per_thread_,

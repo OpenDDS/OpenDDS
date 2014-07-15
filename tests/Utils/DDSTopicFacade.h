@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef TestUtils_DDSTopic_H
-#define TestUtils_DDSTopic_H
+#ifndef TestUtils_DDSTopicFacade_H
+#define TestUtils_DDSTopicFacade_H
 
 #include "TestUtils_Export.h"
 
@@ -37,7 +37,7 @@ struct QosNoOp
 /// not provided.  Since a Topic only has one participant, all data readers
 /// and data writers are created on the same participant.
 ///
-/// publishers: When a reader is created a publisher can either be
+/// publishers: When a writer is created a publisher can either be
 /// explicitly provided (from a previous call to DDSApp.publisher) or is
 /// the default publisher.  The default publisher is set to the first
 /// created publisher (either set to the first publisher explicitly passed
@@ -53,7 +53,7 @@ struct QosNoOp
 /// reader() with no subscriber).
 template<typename WriterOrReaderImpl>
 // TODO: change codegen and use Message
-class DDSTopic
+class DDSTopicFacade
 {
 public:
   friend class DDSApp;
@@ -153,14 +153,14 @@ public:
 
 private:
   // only called by DDSApp
-  DDSTopic(DDS::DomainParticipant_var participant,
+  DDSTopicFacade(DDS::DomainParticipant_var participant,
             DDS::Topic_var topic)
   : participant_(participant)
   , topic_(topic)
   { }
 
   // TODO: REMOVE
-  DDSTopic() {}
+  DDSTopicFacade() {}
 
   bool remove_from_parent(const DDS::Publisher_var& pub, DDS::DataWriter_ptr datawriter)
   {
@@ -236,4 +236,4 @@ private:
 
 } // End namespaces
 
-#endif /* TestUtils_DDSTopic_H */
+#endif /* TestUtils_DDSTopicFacade_H */

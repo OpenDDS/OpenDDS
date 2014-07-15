@@ -22,7 +22,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   try
   {
-    ::TestUtils::DDSApp dds(argc, argv);
+    ::TestUtils::DDSApp ddsApp(argc, argv);
 
     // Parse App options
     ::TestUtils::Arguments args(true);
@@ -49,7 +49,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       case FOO2_TYPE:
         {
           PubDriver< ::Xyz::Foo2TypeSupportImpl> driver;
-          driver.run(dds, options);
+          driver.run(ddsApp, options);
         }
       break;
 
@@ -57,7 +57,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       default:
         {
           PubDriver< ::Xyz::Foo1TypeSupportImpl> driver;
-          driver.run(dds, options);
+          driver.run(ddsApp, options);
         }
       break;
 
