@@ -166,7 +166,7 @@ public:
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Writer::svc data_delivered_count=%d "
-                                   "data_dropped_count=%d\n"),
+                 ACE_TEXT("data_dropped_count=%d\n")),
                  writer_servant_->data_delivered_count_,
                  writer_servant_->data_dropped_count_));
     }

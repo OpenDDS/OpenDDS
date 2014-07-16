@@ -1,8 +1,14 @@
+Wed Jul 16 17:10:23 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Instances/PubDriver.h:
+
+          Fix mismatched text error for wide build.
+
 Tue Jul 15 18:39:31 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances/InstanceFoo1.idl:
-          
-          Changed typedef of basic type Float sequence to CORBA::FloatSeq to 
+
+          Changed typedef of basic type Float sequence to CORBA::FloatSeq to
           avoid Windows DLL link error when building the Instances test.
 
 Tue Jul 15 17:03:39 UTC 2014  Byron Harris  <harrisb@ociweb.com>
