@@ -21,6 +21,7 @@ my $num_instances=1;
 my $num_writers=1;
 
 # const process control parameters
+my $keyed_data=1;
 my $multiple_instance=0;
 my $num_threads_to_write=5;
 my $num_writes_per_thread=2;
@@ -49,9 +50,9 @@ if ($#ARGV >= 0) {
       $i++;
       $num_writers = $ARGV[$i];
     }
-    elsif ($ARGV[$i] eq '-nokey') {
+    elsif ($ARGV[$i] eq '-keyed_data') {
       $i++;
-      $nokey = $ARGV[$i];
+      $keyed_data = $ARGV[$i];
     }
     else {
       print STDERR "ERROR: invalid parameter $ARGV[$i] \n";
@@ -73,6 +74,7 @@ print $DCPSREPO->CommandLine(), "\n";
 my $publisher=PerlDDS::create_process ("publisher",
                                        "$app_bit_conf $cfgfile"
                                        . " -DCPSInfoRepo file://$dcpsrepo_ior"
+                                       . " -keyed_data $keyed_data"
                                        . " -num_writers $num_writers"
                                        . " -history_depth $history_depth"
                                        . " -num_threads_to_write $num_threads_to_write"
@@ -89,6 +91,7 @@ print $publisher->CommandLine(), "\n";
 my $subscriber=PerlDDS::create_process ("subscriber",
                                         "$app_bit_conf $cfgfile"
                                         . " -DCPSInfoRepo file://$dcpsrepo_ior"
+                                       . " -keyed_data $keyed_data"
                                         . " -num_writes $num_writes"
                                         . " -receive_delay_msec $receive_delay_msec");
 

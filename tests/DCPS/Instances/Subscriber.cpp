@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "tests/DCPS/Instances/InstanceFoo1TypeSupportImpl.h"
-#include "tests/DCPS/Instances/InstanceFoo2TypeSupportImpl.h"
+#include "tests/DCPS/Instances/KeyedDataTypeSupportImpl.h"
+#include "tests/DCPS/Instances/NoKeyDataTypeSupportImpl.h"
 #include "TestException.h"
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
@@ -22,37 +22,23 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   try
   {
     // Initalize ParticapantFactory and parse ORB options
-    ::TestUtils::DDSApp dds(argc, argv);
+    ::TestUtils::DDSApp ddsApp(argc, argv);
 
     // Parse App options
     ::TestUtils::Arguments args(true);
-    args.add_long("foo_type",1);
+    args.add_bool("keyed_data",true);
     args.add_long("num_writes",1);
     args.add_long("receive_delay_msec",0);
     args.add_bool("verbose",true);
 
     ::TestUtils::Options options(argc, argv, args);
 
-    const long FOO1_TYPE = 1;
-    const long FOO2_TYPE = 2;
-
-    switch (options.get<long>("foo_type"))
-    {
-
-      case FOO2_TYPE:
-        {
-          SubDriver< ::Xyz::Foo2TypeSupportImpl> driver;
-          driver.run(dds, options);
-        }
-      break;
-
-      case FOO1_TYPE:
-      default:
-        {
-          SubDriver< ::Xyz::Foo1TypeSupportImpl> driver;
-          driver.run(dds, options);
-        }
-      break;
+    if ( options.get<bool>("keyed_data")) {
+      SubDriver< ::Xyz::KeyedDataTypeSupportImpl> driver;
+      driver.run(ddsApp, options);
+    } else {
+      SubDriver< ::Xyz::NoKeyDataTypeSupportImpl> driver;
+      driver.run(ddsApp, options);
     }
 
   }

@@ -30,20 +30,20 @@ public:
   typedef typename TypeSupportImpl::datawriter_type datawriter_type;
 
   Writer(datawriter_var writer,
+    bool keyed_data = true,
     long num_thread_to_write = 1,
     long num_writes_per_thread = 1,
     bool multiple_instances = false,
     long writer_id = -1,
-    bool have_key = true,
     long write_delay_msec = 0,
     long check_data_dropped = 0)
   : writer_ (datawriter_type::_duplicate(writer)),
     writer_servant_ (0),
+    keyed_data_ (keyed_data),
     num_thread_to_write_ (num_thread_to_write),
     num_writes_per_thread_ (num_writes_per_thread),
     multiple_instances_ (multiple_instances),
     writer_id_ (writer_id),
-    has_key_ (have_key),
     write_delay_msec_ (write_delay_msec),
     check_data_dropped_ (check_data_dropped),
     finished_(false)
@@ -91,54 +91,54 @@ public:
 
     try
     {
-      message_type foo;
-      foo.sample_sequence = -1;
-      foo.handle_value    = -1;
-      foo.writer_id       = writer_id_;
+      message_type msg;
+      msg.sample_sequence = -1;
+      msg.handle_value    = -1;
+      msg.writer_id       = writer_id_;
 
       if (true == multiple_instances_)
       {
         // Use the thread id as the instance key.
-        foo.a_long_value = ++key;
+        msg.a_long_value = ++key;
       }
       else
       {
-        foo.a_long_value = default_key;
+        msg.a_long_value = default_key;
       }
 
-      datawriter_var foo_dw = datawriter_type::_narrow( writer_.in () );
+      datawriter_var msg_dw = datawriter_type::_narrow( writer_.in () );
 
-      TEST_CHECK (! CORBA::is_nil (foo_dw.in ()));
+      TEST_CHECK (! CORBA::is_nil (msg_dw.in ()));
 
       for (int i = 0; i< num_writes_per_thread_; i ++)
       {
-        ::DDS::InstanceHandle_t handle = foo_dw->register_instance(foo);
-        foo.handle_value = handle;
-        foo.sample_sequence = i;
+        ::DDS::InstanceHandle_t handle = msg_dw->register_instance(msg);
+        msg.handle_value = handle;
+        msg.sample_sequence = i;
 
         // The sequence number will be increased after the insert.
-        TEST_CHECK (data_map_.insert (handle, foo) == 0);
+        TEST_CHECK (data_map_.insert (handle, msg) == 0);
 
         ::DDS::ReturnCode_t ret = ::DDS::RETCODE_OK;
 
-        if (true == has_key_)
+        if (true == keyed_data_)
         {
           message_type key_holder;
-          ret = foo_dw->get_key_value(key_holder, handle);
+          ret = msg_dw->get_key_value(key_holder, handle);
 
           TEST_CHECK(ret == ::DDS::RETCODE_OK);
 
           // check for equality
-          TEST_CHECK (foo.a_long_value == key_holder.a_long_value);
+          TEST_CHECK (msg.a_long_value == key_holder.a_long_value);
         }
 
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG ((LM_DEBUG,
                       ACE_TEXT("(%P|%t) write sample: %d \n"),
-                      foo.sample_sequence));
+                      msg.sample_sequence));
         }
 
-        ret = foo_dw->write(foo, handle);
+        ret = msg_dw->write(msg, handle);
         TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
         if (write_delay_msec_ > 0)
@@ -165,8 +165,8 @@ public:
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Writer::svc data_delivered_count=%d "
-                 ACE_TEXT("data_dropped_count=%d\n")),
+                 ACE_TEXT("(%P|%t) Writer::svc data_delivered_count=%d ")
+                 ACE_TEXT("data_dropped_count=%d\n"),
                  writer_servant_->data_delivered_count_,
                  writer_servant_->data_dropped_count_));
     }
@@ -201,11 +201,11 @@ private:
   InstanceDataMap<TypeSupportImpl> data_map_;
   datawriter_var writer_;
   ::OpenDDS::DCPS::DataWriterImpl* writer_servant_;
+  bool keyed_data_;
   long num_thread_to_write_;
   long num_writes_per_thread_;
   bool multiple_instances_;
   long writer_id_;
-  bool has_key_;
   long write_delay_msec_;
   long check_data_dropped_;
   bool finished_;
@@ -239,16 +239,14 @@ class PubDriver
   typedef typename TypeSupportImpl::datawriter_type datawriter_type;
   typedef typename TypeSupportImpl::datawriterimpl_type datawriterimpl_type;
 
-
   PubDriver()
-  : writers_ (0),
+  : keyed_data_ (true),
     num_threads_to_write_ (0),
     multiple_instances_ (false),
     num_writes_per_thread_ (1),
     num_datawriters_ (1),
     max_samples_per_instance_(::DDS::LENGTH_UNLIMITED),
     history_depth_ (1),
-    has_key_ (1),
     write_delay_msec_ (0),
     check_data_dropped_ (0)
   {
@@ -265,20 +263,19 @@ class PubDriver
       {
           delete writers_[i];
       }
-      delete [] writers_;
   }
 
   void parse_args(::TestUtils::Options& options)
   {
 
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) PubDriver::parse_args \n")));
+    keyed_data_               = options.get<bool>("keyed_data");
     num_threads_to_write_     = options.get<long>("num_threads_to_write");
     multiple_instances_       = options.get<bool>("multiple_instances");
     num_writes_per_thread_    = options.get<long>("num_writes_per_thread");
     num_datawriters_          = options.get<long>("num_writers");
     max_samples_per_instance_ = options.get<long>("max_samples_per_instance");
     history_depth_            = options.get<long>("history_depth");
-    has_key_                  = options.get<long>("has_key_flag");
     write_delay_msec_         = options.get<long>("write_delay_msec");
     check_data_dropped_       = options.get<long>("data_dropped");
   }
@@ -303,8 +300,6 @@ class PubDriver
       ddsApp.topic_facade< datawriterimpl_type, SetHistoryDepthQOS>
         ("bar", history_depth_qos);
 
-    writers_ = new Writer< TypeSupportImpl>* [num_datawriters_];
-
     // Create one datawriter or multiple datawriters belong to the same
     // publisher.
     // Each Writer/DataWriter launch threads to write samples
@@ -313,15 +308,22 @@ class PubDriver
     // identifies instances is the thread id.
     for (int i = 0; i < num_datawriters_; i++)
     {
-      datawriters_.push_back( topic_facade.writer(history_depth_qos) );
-      writers_[i] = new Writer< TypeSupportImpl>(datawriters_[i].in (),
-                               num_threads_to_write_,
-                               num_writes_per_thread_,
-                               multiple_instances_,
-                               i,
-                               has_key_,
-                               write_delay_msec_,
-                               check_data_dropped_);
+      datawriters_.push_back(
+        topic_facade.writer(history_depth_qos)
+      );
+
+      writers_.push_back(
+        new Writer< TypeSupportImpl>( datawriters_[i].in (),
+                                      keyed_data_,
+                                      num_threads_to_write_,
+                                      num_writes_per_thread_,
+                                      multiple_instances_,
+                                      i,
+                                      write_delay_msec_,
+                                      check_data_dropped_
+                                    )
+      );
+
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) PubDriver::Starting Writer %d \n"), i));
       writers_[i]->start ();
@@ -350,7 +352,7 @@ class PubDriver
     {
       writers_[i]->end ();
       InstanceDataMap<TypeSupportImpl>& map = writers_[i]->data_map ();
-      if (multiple_instances_ == false || has_key_ == 0)
+      if (multiple_instances_ == false || keyed_data_ == false)
       {
         // One instance when data type has a key value and all instances
         // have the same key or has no key value.
@@ -360,20 +362,22 @@ class PubDriver
         TEST_CHECK (map.num_instances() == num_threads_to_write_);
       }
       TEST_CHECK (map.num_samples() == num_threads_to_write_ * num_writes_per_thread_);
-      //publisher_->delete_datawriter(datawriters_[i].in ());
     }
   }
 
-  std::vector<datawriter_var> datawriters_;
-  Writer< TypeSupportImpl> ** writers_;
+  typedef std::vector< datawriter_var > DataWriterVector;
+  typedef std::vector< Writer<TypeSupportImpl>* > WriterVector;
 
+  DataWriterVector datawriters_;
+  WriterVector writers_;
+
+  bool  keyed_data_;
   long  num_threads_to_write_;
   bool  multiple_instances_;
   long  num_writes_per_thread_;
   long  num_datawriters_;
   long  max_samples_per_instance_;
   long  history_depth_;
-  long  has_key_;
   long  write_delay_msec_;
   long  check_data_dropped_;
 };

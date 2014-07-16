@@ -6,8 +6,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "tests/DCPS/Instances/InstanceFoo1TypeSupportImpl.h"
-#include "tests/DCPS/Instances/InstanceFoo2TypeSupportImpl.h"
+#include "tests/DCPS/Instances/KeyedDataTypeSupportImpl.h"
+#include "tests/DCPS/Instances/NoKeyDataTypeSupportImpl.h"
 #include "TestException.h"
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
@@ -26,41 +26,24 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Parse App options
     ::TestUtils::Arguments args(true);
-    args.add_long("foo_type",1);
+    args.add_bool("keyed_data",true);
     args.add_long("num_threads_to_write",1);
     args.add_bool("multiple_instances",false);
     args.add_long("num_writes_per_thread",1);
     args.add_long("max_samples_per_instance",::DDS::LENGTH_UNLIMITED);
     args.add_long("history_depth",1);
-    args.add_long("has_key_flag",1);
     args.add_long("write_delay_msec",0);
     args.add_long("data_dropped",0);
     args.add_long("num_writers",1);
 
     ::TestUtils::Options options(argc, argv, args);
 
-    const long FOO1_TYPE = 1;
-    const long FOO2_TYPE = 2;
-
-
-    switch (options.get<long>("foo_type"))
-    {
-
-      case FOO2_TYPE:
-        {
-          PubDriver< ::Xyz::Foo2TypeSupportImpl> driver;
-          driver.run(ddsApp, options);
-        }
-      break;
-
-      case FOO1_TYPE:
-      default:
-        {
-          PubDriver< ::Xyz::Foo1TypeSupportImpl> driver;
-          driver.run(ddsApp, options);
-        }
-      break;
-
+    if ( options.get<bool>("keyed_data") == true ) {
+      PubDriver< ::Xyz::KeyedDataTypeSupportImpl> driver;
+      driver.run(ddsApp, options);
+    } else {
+      PubDriver< ::Xyz::NoKeyDataTypeSupportImpl> driver;
+      driver.run(ddsApp, options);
     }
 
   }

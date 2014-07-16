@@ -2,12 +2,12 @@
 
 module Xyz {
 
-#pragma DCPS_DATA_TYPE "Xyz::Foo1"
-#pragma DCPS_DATA_KEY "Xyz::Foo1 a_long_value"
+#pragma DCPS_DATA_TYPE "Xyz::KeyedData"
+#pragma DCPS_DATA_KEY "Xyz::KeyedData a_long_value"
 
-  // Example user defined "Foo1" structure with a key field and with an
+  // Example user defined "KeyedData" structure with a key field and with an
   // unbounded sequence member
-  struct Foo1 {
+  struct KeyedData {
     long  a_long_value;  // the instance key
     long  handle_value;
     long  sample_sequence;

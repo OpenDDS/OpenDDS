@@ -10,8 +10,8 @@ project(DDS*idl): dcps_test_lib {
   dynamicflags  += INSTANCESLIB_BUILD_DLL
 
   TypeSupport_Files {
-    InstanceFoo1.idl
-    InstanceFoo2.idl
+    KeyedData.idl
+    NoKeyData.idl
   }
 }
 
