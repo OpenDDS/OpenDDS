@@ -1,3 +1,9 @@
+Thu Jul 17 13:21:31 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Fixed wait_pending() so timeout condition is properly detected.
+
 Wed Jul 16 17:43:31 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances/Instances.mpc:
@@ -7,8 +13,8 @@ Wed Jul 16 17:43:31 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
         * tests/DCPS/Instances/Publisher.cpp:
         * tests/DCPS/Instances/Subscriber.cpp:
         * tests/DCPS/Instances/run_test.pl:
-          
-          Changed Foo types to Keyed and NoKey Data types and refactored to 
+
+          Changed Foo types to Keyed and NoKey Data types and refactored to
           use keyed_data option flag
 
         * tests/DCPS/Instances/InstanceFoo1.idl:
@@ -46,7 +52,7 @@ Tue Jul 15 17:03:39 UTC 2014  Byron Harris  <harrisb@ociweb.com>
           Changed name of DDSApp instances from dds to ddsApp.
 
         * tests/DCPS/Instances/InstanceFoo1.idl:
-          Fixed type.
+          Fixed typo.
 
         * tests/Utils/DDSTopic.h:
 
