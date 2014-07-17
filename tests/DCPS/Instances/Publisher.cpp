@@ -41,15 +41,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if ( options.get<bool>("keyed_data") == true ) {
       PubDriver< ::Xyz::KeyedDataTypeSupportImpl> driver;
       driver.run(ddsApp, options);
+      ddsApp.cleanup();
     } else {
       PubDriver< ::Xyz::NoKeyDataTypeSupportImpl> driver;
       driver.run(ddsApp, options);
+      ddsApp.cleanup();
     }
 
   }
   catch (const TestException&)
   {
-    ACE_ERROR((LM_ERROR, "(%P|%t) PubDriver TestException.\n"));
+
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) PubDriver TestException.\n")));
 
   } catch (const CORBA::Exception& e) {
 
@@ -58,16 +62,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (std::exception& ex) {
 
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"), ex.what()), -1);
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("ERROR: main() - %s\n"), ex.what()),
+                      -1);
 
   } catch (std::string& msg) {
 
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"), msg.c_str()), -1);
-
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("ERROR: main() - %s\n"), msg.c_str()),
+                      -1);
   }
 
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) Pub DDSApp going out of scope (shutdown)\n"));
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) Pub returning status=0\n"));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Pub DDSApp going out of scope (shutdown)\n")));
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Pub returning status=0\n")));
 
   return 0;
 }

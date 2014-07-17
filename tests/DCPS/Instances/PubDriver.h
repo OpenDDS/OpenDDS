@@ -48,13 +48,18 @@ public:
     check_data_dropped_ (check_data_dropped),
     finished_(false)
   {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::Writer \n")));
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) Writer::Writer \n")));
     writer_servant_ = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer_.in());
   }
 
   void start ()
   {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::start \n")));
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) Writer::start \n")));
+    }
+
     if (activate (THR_NEW_LWP | THR_JOINABLE, num_thread_to_write_) == -1)
     {
       ACE_ERROR ((LM_ERROR,
@@ -67,19 +72,25 @@ public:
   void end ()
   {
     wait ();
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::end \n")));
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) Writer::end \n")));
+    }
   }
 
 
   /** Lanch a thread to write. **/
   virtual int svc ()
   {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc \n")));
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) Writer::svc \n")));
+    }
 
     // Wait for the subscriber to be ready...
     ::DDS::InstanceHandleSeq handles;
 
-    while (1) {
+    while (true) {
 
       writer_->get_matched_subscriptions(handles);
 
@@ -171,14 +182,6 @@ public:
                  writer_servant_->data_dropped_count_));
     }
 
-    while (true) {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() == 0)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-    }
-
     finished_ = true;
 
     return 0;
@@ -250,25 +253,28 @@ class PubDriver
     write_delay_msec_ (0),
     check_data_dropped_ (0)
   {
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) PubDriver::PubDriver \n")));
+    }
   }
 
   virtual ~PubDriver()
   {
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) PubDriver::~PubDriver \n")));
+    }
 
-      for (int i = 0; i < num_datawriters_; i ++)
-      {
-          delete writers_[i];
-      }
+    for (int i = 0; i < num_datawriters_; i ++)
+    {
+      delete writers_[i];
+    }
+
   }
 
   void parse_args(::TestUtils::Options& options)
   {
-
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) PubDriver::parse_args \n")));
     keyed_data_               = options.get<bool>("keyed_data");
     num_threads_to_write_     = options.get<long>("num_threads_to_write");
     multiple_instances_       = options.get<bool>("multiple_instances");
@@ -282,23 +288,26 @@ class PubDriver
 
   void run(::TestUtils::DDSApp& ddsApp, ::TestUtils::Options& options)
   {
-      parse_args(options);
-      run(ddsApp);
-      end();
+    parse_args(options);
+    run(ddsApp);
+    end();
   }
 
   private:
 
   void run(::TestUtils::DDSApp& ddsApp)
   {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) PubDriver::run \n")));
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) PubDriver::run \n")));
+    }
 
     SetHistoryDepthQOS history_depth_qos(history_depth_);
+    std::string topic_name("topic_name");
 
     ::TestUtils::DDSTopicFacade< datawriterimpl_type> topic_facade =
       ddsApp.topic_facade< datawriterimpl_type, SetHistoryDepthQOS>
-        ("bar", history_depth_qos);
+        (topic_name, history_depth_qos);
 
     // Create one datawriter or multiple datawriters belong to the same
     // publisher.
@@ -324,34 +333,49 @@ class PubDriver
                                     )
       );
 
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) PubDriver::Starting Writer %d \n"), i));
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) PubDriver::Starting Writer %d \n"), i));
+      }
+
       writers_[i]->start ();
     }
 
     bool finished = false;
     while (!finished) {
-    finished = true;
-    for (int i = 0; i < num_datawriters_; i ++) {
-      if (!writers_[i]->finished()) {
-        finished = false;
-        break;
+      finished = true;
+      for (int i = 0; i < num_datawriters_; i ++) {
+        if (!writers_[i]->finished()) {
+          finished = false;
+          break;
+        }
       }
+      ACE_OS::sleep(ACE_Time_Value(0,200000));
     }
-    ACE_OS::sleep(ACE_Time_Value(0,200000));
+
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) PubDriver::Finished\n")));
     }
+
   }
 
   void end()
   {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) PubDriver::end \n"));
+
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) PubDriver::end \n")));
+    }
     // Record samples been written in the Writer's data map.
     // Verify the number of instances and the number of samples
     // written to the datawriter.
     for (int i = 0; i < num_datawriters_; i ++)
     {
       writers_[i]->end ();
+
       InstanceDataMap<TypeSupportImpl>& map = writers_[i]->data_map ();
+
       if (multiple_instances_ == false || keyed_data_ == false)
       {
         // One instance when data type has a key value and all instances
@@ -361,6 +385,7 @@ class PubDriver
         // multiple instances test - an instance per thread
         TEST_CHECK (map.num_instances() == num_threads_to_write_);
       }
+
       TEST_CHECK (map.num_samples() == num_threads_to_write_ * num_writes_per_thread_);
     }
   }
