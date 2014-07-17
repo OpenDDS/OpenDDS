@@ -1,0 +1,54 @@
+// -*- MPC -*-
+//
+// $Id$
+
+
+project(DDS*idl): dcps_test_lib {
+  idlflags      += -Wb,export_macro=InstancesLib_Export -Wb,export_include=instanceslib_export.h
+  dcps_ts_flags += -Wb,export_macro=InstancesLib_Export
+  libout         = .
+  dynamicflags  += INSTANCESLIB_BUILD_DLL
+
+  TypeSupport_Files {
+    KeyedData.idl
+    NoKeyData.idl
+  }
+}
+
+project(*Publisher): dcpsexe_with_tcp, dds_model {
+  exename = publisher
+  exeout = .
+
+  after    += DDS*idl
+  libs     += DDS*idl
+
+  after    += TestUtils
+  libs     += TestUtils
+  libpaths += ../../Utils
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    Publisher.cpp
+  }
+}
+
+project(*Subscriber): dcpsexe_with_tcp, dds_model {
+  exename = subscriber
+  exeout = .
+
+  after    += DDS*idl
+  libs     += DDS*idl
+
+  after    += TestUtils
+  libs     += TestUtils
+  libpaths += ../../Utils
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    Subscriber.cpp
+  }
+}

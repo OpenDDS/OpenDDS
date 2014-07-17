@@ -1,3 +1,17 @@
+Thu Jul 17 02:10:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * .:
+        * ChangeLog:
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Instances:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSTopicFacade.h:
+        * tests/Utils/DDSTopic.h:
+
+          Merged from trunk r6400 through r6406
+
 Fri Jul 11 22:24:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * .:
