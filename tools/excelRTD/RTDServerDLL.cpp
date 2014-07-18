@@ -10,11 +10,11 @@
 
 namespace {
 #ifdef RTD_DLL_NAME
-  const char* DLL_NAME = RTD_DLL_NAME;
+  ACE_TCHAR* DLL_NAME = RTD_DLL_NAME;
 #elif _DEBUG
-  const char* DLL_NAME = "OpenDDS_ExcelRTDd.dll";
+  ACE_TCHAR* DLL_NAME = ACE_TEXT("OpenDDS_ExcelRTDd.dll");
 #else
-  const char* DLL_NAME = "OpenDDS_ExcelRTD.dll";
+  ACE_TCHAR* DLL_NAME = ACE_TEXT("OpenDDS_ExcelRTD.dll");
 #endif
 
   const char* PROG_ID = "OpenDDS.ExcelRTD";
