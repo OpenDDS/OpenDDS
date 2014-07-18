@@ -1,16 +1,26 @@
+Fri Jul 18 00:14:49 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances:
+         
+          Updated svn:ignore list
+
+        * tests/DCPS/Instances/SubDriver.h:
+       
+          removed SetDataReaderQOS setting
+
 Thu Jul 17 23:45:35 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances:
-          
+
           Added svn:ignore property
 
         * tests/DCPS/Instances/PubDriver.h:
         * tests/DCPS/Instances/Publisher.cpp:
         * tests/DCPS/Instances/SubDriver.h:
         * tests/DCPS/Instances/Subscriber.cpp:
-         
-          Resolved wait logic errors and made most log output conditional 
-          on DCPSLogLevel setting 
+
+          Resolved wait logic errors and made most log output conditional
+          on DCPSLogLevel setting
 
 Thu Jul 17 13:21:31 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 

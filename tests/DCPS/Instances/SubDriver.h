@@ -81,6 +81,7 @@ class SubDriver
                    ACE_TEXT("(%P|%t) Sub Creating Reader\n")));
       }
 
+      /*
       class SetDataReaderQOS {
       public:
           void operator()(DDS::DataReaderQos& qos)
@@ -92,6 +93,9 @@ class SubDriver
       SetDataReaderQOS data_reader_qos;
 
       DDS::DataReader_var reader = topic_facade.reader(listener,data_reader_qos);
+      */
+
+      DDS::DataReader_var reader = topic_facade.reader(listener);
 
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
