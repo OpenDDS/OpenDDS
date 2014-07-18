@@ -1,22 +1,29 @@
+Fri Jul 18 23:04:50 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances/README:
+        * tests/DCPS/Instances/run_test.pl:
+    
+          Updated README and modified run_test.pl's argument processing 
+
 Fri Jul 18 17:35:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/excelRTD/RTDServerDLL.cpp:
 
-		Fixed build error for wide-char builds.
+                Fixed build error for wide-char builds.
 
 Fri Jul 18 16:24:37 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances/PubDriver.h:
 
-          Made std::string topic_name const 
+          Made std::string topic_name const
 
         * tests/DCPS/Instances/SubDriver.h:
 
-          Provided template call parameter to topic_facade.reader() 
-          method to set DATAREADER_QOS_USE_TOPIC_QOS QOS property when 
-          creating a datareader. 
+          Provided template call parameter to topic_facade.reader()
+          method to set DATAREADER_QOS_USE_TOPIC_QOS QOS property when
+          creating a datareader.
 
-          Made std::string topic_name const 
+          Made std::string topic_name const
 
 Fri Jul 18 00:14:49 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
