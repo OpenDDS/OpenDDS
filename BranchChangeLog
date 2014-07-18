@@ -1,3 +1,9 @@
+Fri Jul 18 15:54:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed spacing/formatting.
+
 Fri Jul 18 15:41:05 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
