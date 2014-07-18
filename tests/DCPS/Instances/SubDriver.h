@@ -7,7 +7,14 @@
 #include <model/Sync.h>
 #include <vector>
 
-
+// Set data reader QOS to use topic QOS
+class SetDataReaderQosUseTopicQos {
+  public:
+    void operator()(DDS::DataReaderQos& qos)
+    {
+      qos = DATAREADER_QOS_USE_TOPIC_QOS;
+    }
+};
 
 template<typename TypeSupportImpl>
 class SubDriver
@@ -63,13 +70,15 @@ class SubDriver
                ACE_TEXT("(%P|%t) SubDriver::run \n")));
       }
 
-      std::string topic_name("topic_name");
+      const std::string topic_name("topic_name");
 
       ::TestUtils::DDSTopicFacade< datareaderimpl_type> topic_facade =
           ddsApp.topic_facade< datareaderimpl_type> (topic_name);
 
       // Create Listener
-      typedef typename ::TestUtils::ListenerRecorder< message_type, datareader_type> ListenerRecorder;
+      typedef typename ::TestUtils::ListenerRecorder< message_type,
+        datareader_type> ListenerRecorder;
+
       ListenerRecorder* listener_impl = new ListenerRecorder;
 
       listener_impl->verbose(verbose_);
@@ -81,21 +90,9 @@ class SubDriver
                    ACE_TEXT("(%P|%t) Sub Creating Reader\n")));
       }
 
-      /*
-      class SetDataReaderQOS {
-      public:
-          void operator()(DDS::DataReaderQos& qos)
-          {
-            qos = DATAREADER_QOS_USE_TOPIC_QOS;
-          }
-      };
-
-      SetDataReaderQOS data_reader_qos;
+      SetDataReaderQosUseTopicQos data_reader_qos;
 
       DDS::DataReader_var reader = topic_facade.reader(listener,data_reader_qos);
-      */
-
-      DDS::DataReader_var reader = topic_facade.reader(listener);
 
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,

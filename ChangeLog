@@ -1,11 +1,25 @@
+Fri Jul 18 16:24:37 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances/PubDriver.h:
+
+          Made std::string topic_name const 
+
+        * tests/DCPS/Instances/SubDriver.h:
+
+          Provided template call parameter to topic_facade.reader() 
+          method to set DATAREADER_QOS_USE_TOPIC_QOS QOS property when 
+          creating a datareader. 
+
+          Made std::string topic_name const 
+
 Fri Jul 18 00:14:49 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances:
-         
+
           Updated svn:ignore list
 
         * tests/DCPS/Instances/SubDriver.h:
-       
+
           removed SetDataReaderQOS setting
 
 Thu Jul 17 23:45:35 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>

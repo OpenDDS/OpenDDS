@@ -303,7 +303,7 @@ class PubDriver
     }
 
     SetHistoryDepthQOS history_depth_qos(history_depth_);
-    std::string topic_name("topic_name");
+    const std::string topic_name("topic_name");
 
     ::TestUtils::DDSTopicFacade< datawriterimpl_type> topic_facade =
       ddsApp.topic_facade< datawriterimpl_type, SetHistoryDepthQOS>
