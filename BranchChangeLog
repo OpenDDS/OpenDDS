@@ -1,3 +1,11 @@
+Fri Jul 18 20:35:34 UTC 2014  Weiqi Gao  <gao_w@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditorPlugin.java:
+
+          Made the GeneratorEditorPlugin constructor "@generated NOT" to prevent it from being 
+          overwritten when EMF code generation is performed from org.opendds.modeling.sdk.model
+          directory.
+
 Tue Jun 24 18:18:30 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
