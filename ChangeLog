@@ -1,3 +1,9 @@
+Mon Jul 21 15:30:57 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tools/excelRTD/RTDServerDLL.cpp:
+
+          Reverted previous change.
+
 Fri Jul 18 23:04:50 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances/README:
@@ -25,6 +31,7 @@ Fri Jul 18 16:24:37 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
           Made std::string topic_name const
 
+>>>>>>> .r6417
 Fri Jul 18 00:14:49 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances:
