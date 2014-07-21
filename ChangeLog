@@ -1,3 +1,9 @@
+Mon Jul 21 17:30:47 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Fix misleading header comments.
+
 Mon Jul 21 15:30:57 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/excelRTD/RTDServerDLL.cpp:
@@ -8,8 +14,8 @@ Fri Jul 18 23:04:50 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances/README:
         * tests/DCPS/Instances/run_test.pl:
-    
-          Updated README and modified run_test.pl's argument processing 
+
+          Updated README and modified run_test.pl's argument processing
 
 Fri Jul 18 17:35:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
