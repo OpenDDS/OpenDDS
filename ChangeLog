@@ -1,3 +1,16 @@
+Mon Jul 21 19:25:59 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Clean up comments related to TransportClient::send_links_.
+
+        * dds/DdsDcpsSubscriptionExt.idl:
+
+          Avoid Doxygen treating comment as a general comment about
+          OpenDDS namespace.
+
 Mon Jul 21 17:30:47 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * bin/dcps_tests.lst:

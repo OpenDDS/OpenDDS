@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DCPS_SUBSCRIPTION_EXT_IDL
 #define OPENDDS_DCPS_SUBSCRIPTION_EXT_IDL
 
-/// OpenDDS extensions to the DDS Subscription Module
+// OpenDDS extensions to the DDS Subscription Module
 
 #include "dds/DdsDcpsSubscription.idl"
 #include "dds/DdsDcpsGuid.idl"

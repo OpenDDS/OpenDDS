@@ -185,13 +185,6 @@ OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
   return true;
 }
 
-/// This will do several things, including adding to the membership
-/// of the send_links_ set.  Any DataLinks added to the send_links_
-/// set will be also told about the send_start() event.  Those
-/// DataLinks (in the pub_links set) that are already in the
-/// send_links_ set will not be told about the send_start() event
-/// since they heard about it when they were inserted into the
-/// send_links_ set.
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 {
@@ -223,8 +216,6 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
   }
 }
 
-/// This will inform each DataLink in the set about the send_stop()
-/// event.  It will then clear the send_links_ set.
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
 {

@@ -102,7 +102,12 @@ private:
   // Associated Impls and DataLinks:
 
   std::vector<TransportImpl_rch> impls_;
-  DataLinkSet links_, send_links_;
+  DataLinkSet links_;
+
+  /// These are the links being used during the call to send(). This is made a member of the
+  /// class to minimize allocation/deallocations of the data link set.
+  DataLinkSet send_links_;
+
   DataLinkIndex data_link_index_;
 
 
