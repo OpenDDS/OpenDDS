@@ -78,7 +78,6 @@ public:
     }
   }
 
-
   /** Lanch a thread to write. **/
   virtual int svc ()
   {
@@ -154,7 +153,8 @@ public:
 
         if (write_delay_msec_ > 0)
         {
-          ACE_Time_Value delay (write_delay_msec_/1000, write_delay_msec_%1000 * 1000);
+          ACE_Time_Value delay (write_delay_msec_/1000,
+                                write_delay_msec_%1000 * 1000);
           ACE_OS::sleep (delay);
         }
       }
@@ -317,12 +317,8 @@ class PubDriver
     // identifies instances is the thread id.
     for (int i = 0; i < num_datawriters_; i++)
     {
-      datawriters_.push_back(
-        topic_facade.writer(history_depth_qos)
-      );
-
       writers_.push_back(
-        new Writer< TypeSupportImpl>( datawriters_[i].in (),
+        new Writer< TypeSupportImpl>( topic_facade.writer(history_depth_qos),
                                       keyed_data_,
                                       num_threads_to_write_,
                                       num_writes_per_thread_,
@@ -390,10 +386,7 @@ class PubDriver
     }
   }
 
-  typedef std::vector< datawriter_var > DataWriterVector;
   typedef std::vector< Writer<TypeSupportImpl>* > WriterVector;
-
-  DataWriterVector datawriters_;
   WriterVector writers_;
 
   bool  keyed_data_;

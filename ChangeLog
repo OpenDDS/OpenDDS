@@ -1,3 +1,9 @@
+Mon Jul 21 23:21:04 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances/PubDriver.h:
+          
+          Removed unneccessary datawriter vector
+
 Mon Jul 21 19:25:59 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.h:
