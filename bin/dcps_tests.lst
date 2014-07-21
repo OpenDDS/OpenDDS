@@ -287,3 +287,12 @@ tests/DCPS/ManyToMany/run_test.pl shmem 1to1 large: !DCPS_MIN
 tests/DCPS/ManyToMany/run_test.pl tcp 20to20 small orb_csdtp: !DCPS_MIN
 
 tests/DCPS/PersistentInfoRepo/run_test.pl: !DCPS_MIN
+
+tests/DCPS/Instances/run_test.pl single_instance single_datawriter keyed: !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Instances/run_test.pl single_instance single_datawriter nokey: !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Instances/run_test.pl multiple_instance single_datawriter keyed: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Instances/run_test.pl multiple_instance single_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter keyed: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter keyed: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE

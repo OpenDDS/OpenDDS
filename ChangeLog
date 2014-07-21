@@ -1,7 +1,13 @@
+Mon Jul 21 23:27:31 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+        Added Instances tests
+
 Mon Jul 21 23:21:04 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances/PubDriver.h:
-          
+
           Removed unneccessary datawriter vector
 
 Mon Jul 21 19:25:59 UTC 2014  Byron Harris  <harrisb@ociweb.com>
