@@ -62,7 +62,6 @@ Fri Jul 18 16:24:37 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
           Made std::string topic_name const
 
->>>>>>> .r6417
 Fri Jul 18 00:14:49 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances:
