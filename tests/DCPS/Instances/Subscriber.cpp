@@ -11,9 +11,11 @@
 #include "TestException.h"
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
+#include <dds/DCPS/Service_Participant.h>
 #include "SubDriver.h"
 #include <sstream>
 #include <stdexcept>
+#include "dds/DCPS/StaticIncludes.h"
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
