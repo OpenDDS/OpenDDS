@@ -1,8 +1,15 @@
+Tue Jul 22 19:01:59 UTC 2014  Weiqi Gao  <gao_w@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+
+          Turned off the generation of "OpenDDS Model" wizard in the
+          "Example EMF Model Creation Wizards" category.
+
 Fri Jul 18 20:35:34 UTC 2014  Weiqi Gao  <gao_w@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditorPlugin.java:
 
-          Made the GeneratorEditorPlugin constructor "@generated NOT" to prevent it from being 
+          Made the GeneratorEditorPlugin constructor "@generated NOT" to prevent it from being
           overwritten when EMF code generation is performed from org.opendds.modeling.sdk.model
           directory.
 
@@ -97,4 +104,3 @@ indent-tabs-mode: nil
 End:
 
         LocalWords:  UTC Weiqi Gao
-
