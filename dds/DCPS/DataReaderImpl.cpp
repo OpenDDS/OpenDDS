@@ -68,6 +68,7 @@ DataReaderImpl::DataReaderImpl()
   domain_id_(0),
   subscriber_servant_(0),
   n_chunks_(TheServiceParticipant->n_chunks()),
+  reverse_pub_handle_lock_(publication_handle_lock_),
   reactor_(0),
   liveliness_timer_id_(-1),
   last_deadline_missed_total_count_(0),
@@ -193,7 +194,7 @@ DataReaderImpl::cleanup()
     content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
   }
 #endif
-//### Debug statements to track where associate is failing
+  //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::cleanup() --> exit \n"));
 }
 
@@ -546,7 +547,15 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     }
 
     {
-      ACE_GUARD(ACE_RW_Thread_Mutex, guard, this->writers_lock_);
+      ACE_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+      //### Debug statements to track where associate is failing
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::transport_assoc_done check if writer still exists\n"));
+      if(!writers_.count(remote_id)){
+        //### Debug statements to track where associate is failing
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::transport_assoc_done writer was removed, return\n"));
+        return;
+      }
       writers_[remote_id]->handle_ = handle;
     }
   }
@@ -602,6 +611,11 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         std::string(writer_converter).c_str(),
         writers.length()));
   }
+  //### stop pending associations
+  //### Debug statements to track where associate is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::remove_associations --> call stop_associating\n"));
+  this->stop_associating();
+
 
   DDS::InstanceHandleSeq handles;
 
@@ -693,7 +707,11 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::remove_associations --> for call to disassociate DW: %@\n", this));
     GuidConverter peer_converted(updated_writers[i]);
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::remove_associations --> for call to disassociate remote: %C\n", std::string(peer_converted).c_str()));
-    this->disassociate(updated_writers[i]);
+    {
+      //###can't hold publication_handle_lock_ here due to possible reactor deadlock when scheduling time in schedule_delayed_release
+      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_pub_handle_lock_);
+      this->disassociate(updated_writers[i]);
+    }
   }
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.

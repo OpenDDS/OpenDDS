@@ -622,6 +622,11 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
             readers.length()));
    }
 
+   //### stop pending associations
+   //### Debug statements to track where associate is failing
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> call stop_associating\n"));
+   this->stop_associating();
+
    ReaderIdSeq fully_associated_readers;
    CORBA::ULong fully_associated_len = 0;
    ReaderIdSeq rds;
@@ -774,6 +779,11 @@ void DataWriterImpl::remove_all_associations()
 {
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_all_associations --> enter\n"));
+  //### stop pending associations
+  //### Debug statements to track where associate is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> call stop_associating\n"));
+  this->stop_associating();
+
    OpenDDS::DCPS::ReaderIdSeq readers;
    CORBA::ULong size;
    CORBA::ULong num_pending_readers;

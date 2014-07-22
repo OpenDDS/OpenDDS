@@ -55,6 +55,7 @@ DataLink::DataLink(TransportImpl* impl, Priority priority, bool is_loopback,
   db_allocator_(0),
   is_loopback_(is_loopback),
   is_active_(is_active),
+  started(false),
   send_response_listener_("DataLink")
 {
    DBG_ENTRY_LVL("DataLink", "DataLink", 6);
@@ -656,7 +657,7 @@ DataLink::schedule_delayed_release()
 
    ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
 
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::schedule_delayed_release --> schedule timer for DataLink release delay\n"));
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::schedule_delayed_release --> schedule timer for DataLink release delay accessing reactor timer interface (is nil? %s)\n", reactor == 0? "YES":"NO"));
 
    reactor->schedule_timer(this, 0, this->datalink_release_delay_);
    this->scheduled_ = true;
@@ -916,9 +917,18 @@ DataLink::release_remote_subscriber(RepoId subscriber_id, RepoId publisher_id,
          }
       }
    }
-
+   bool last;
+   bool exists = pubid_set->exist(publisher_id, last);
+   if (!exists) {
+      GuidConverter converter(publisher_id);
+      ACE_ERROR((LM_INFO,
+            ACE_TEXT("(%P|%t) DataLink::release_remote_subscriber: ")
+            ACE_TEXT(" pub %C not in PubSet when trying to remove.\n"),
+            std::string(converter).c_str()));
+   }
    // remove the publisher_id from the pubset that associate with the remote sub.
-   if (pubid_set->remove_id(publisher_id) == -1) {
+   // only call remove_id if publisher_id indeed exists in pubid_set
+   if (exists && pubid_set->remove_id(publisher_id) == -1) {
       GuidConverter converter(publisher_id);
       ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_subscriber: ")

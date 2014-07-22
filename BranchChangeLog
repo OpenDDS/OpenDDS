@@ -1,3 +1,85 @@
+Tue Jul 22 16:47:33 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+
+          Added reverse_pub_handle_lock_ to alleviate deadlock in remove_associations
+          when calling disassociate
+ 
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Updated for use of reverse_pub_handle_lock_ for call to disassociate in
+          remove_associations
+
+          Added acquiring sample_lock_ when accessing writers_ in transport_assoc_done
+          so that if the writer was removed we can return instead of trying to access
+          the handle_ of a writer that no longer exists.
+
+          Added call to stop_associating() in remove_associations to let pending assoc
+          that may be in different states of associating, that they should stop because
+          they are being removed.
+          
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added call to stop_associating() in remove_associations and remove_all_associations
+          to let pending assoc that may be in different states of associating, that they 
+          should stop because they are being removed.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          In delete_datawriter, set_deleted to true on the dw_servant to stop future association
+          Added some async logging
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Acquire factory_lock_ before deleting from discovery_types_ in destructor.
+
+          Added some async logging
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Added logging and comments for why set_deleted is called in delete_datareader.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+
+          Added bool started to track state of datalink
+
+        * dds/DCPS/transport/framework/DataLink.inl:
+
+          During start(), added toggling of started to true after call to invoke_on_start_callbacks
+          before second call to invoke_on_start_callbacks to catch associations possibly occuring
+          after initial call to invoked_on_start_callbacks and setting started to true.
+
+          Added check for if DataLink has 'started' and has a send_strategy_ before returning false
+          from add_on_start_callback
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added initializing started to false in constructor.
+
+          In release_remote_subscriber, checked that the publisher_id is still present in
+          pubid_set prior to trying to remove_id to avoid access violation.
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Added declaration for stop_associating() to be used for stopping pending associations
+          from continuing forward if they have been set to be removed
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Added check for pending association still being present in pending_ during associate
+          on the passive side after call to accept_datalink because an active side connection may
+          have completed the association while lock was released.  If pend has already completed
+          (i.e. no longer exists in pending_) return true.
+
+          Added definition for stop_associating() to toggle all pending associations removed_ flags
+
+          In disassociate, shifted call to data_link_index_.erase(found) up to keep it within the
+          scope of the lock.
+
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+
+          Added async debugging.
+
 Fri Jul 18 15:54:31 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

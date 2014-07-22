@@ -254,6 +254,12 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
     this->receive_strategy_ = receive_strategy;
   }
   invoke_on_start_callbacks(true);
+  {
+  //### catch any associations coming on during the initial callbacks
+    GuardType guard(this->strategy_lock_);
+	  this->started = true;
+  }
+  invoke_on_start_callbacks(true);
   return 0;
 }
 
@@ -273,9 +279,9 @@ DataLink::add_on_start_callback(TransportClient* client, const RepoId& remote)
   //### Debug statements to track where connection is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> NUM CALLBACKS BEFORE ADD: %d\n", on_start_callbacks_.size()));
   
-  if (!send_strategy_.is_nil()) {
+  if (started && !send_strategy_.is_nil()) {
     //### Debug statements to track where connection is failing
-  	if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> end (NO ADD, send strat = NOT NIL)\n"));
+  	if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> end (NO ADD, already started and send strat = NOT NIL)\n"));
     return false; // link already started
   }
   on_start_callbacks_.push_back(std::make_pair(client, remote));

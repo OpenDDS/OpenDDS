@@ -445,6 +445,7 @@ protected:
   bool is_loopback_;
   /// Is pub or sub ?
   bool is_active_;
+  bool started;
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;

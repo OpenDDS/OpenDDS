@@ -182,7 +182,9 @@ PublisherImpl::create_datawriter(
   }
 
   //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::create_datawriter --> end SUCCESS\n"));
+  GuidConverter pubID_conv(dw_servant->get_publication_id());
+   //### Debug statements to track where test is failing
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::create_datawriter --> end SUCCESS (datawriter: %C)\n", std::string(pubID_conv).c_str())); 
 
   return DDS::DataWriter::_duplicate(dw_obj.in());
 }
@@ -214,6 +216,13 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
+ //### Debug statements to track where test is failing
+  GuidConverter pubID_conv2(dw_servant->get_publication_id());
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::delete_datawriter --> to delete datawriter: %C\n", std::string(pubID_conv2).c_str()));
+
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::delete_datawriter --> setting deleted_ to true\n"));
+  //### toggle deleted_ to stop any future associating
+  dw_servant->set_deleted(true);
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so

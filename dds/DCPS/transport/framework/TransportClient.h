@@ -71,7 +71,7 @@ protected:
 
   bool associate(const AssociationData& peer, bool active);
   void disassociate(const RepoId& peerId);
-
+  void stop_associating();
 
   // Data transfer:
 
