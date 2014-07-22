@@ -238,7 +238,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::fclose(file);
 
   std::cerr << "***Ready written to subready.txt\n";
-  
+
   AssociationData publication;
   publication.remote_id_ = remote;
   publication.remote_reliable_ = true;
@@ -258,7 +258,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   std::cerr << "***Simple Data Reader init:: publication completed\n";
-  
+
   while (!sdr.done_) {
     ACE_OS::sleep(1);
   }

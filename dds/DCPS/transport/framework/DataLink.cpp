@@ -442,7 +442,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
             ACE_TEXT("publication %C reservation into sub_map_.\n"),
             std::string(local).c_str(), std::string(remote).c_str()));
    }
-  
+
    return -1;
 }
 

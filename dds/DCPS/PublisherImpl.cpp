@@ -184,7 +184,7 @@ PublisherImpl::create_datawriter(
   //### Debug statements to track where test is failing
   GuidConverter pubID_conv(dw_servant->get_publication_id());
    //### Debug statements to track where test is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::create_datawriter --> end SUCCESS (datawriter: %C)\n", std::string(pubID_conv).c_str())); 
+   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::create_datawriter --> end SUCCESS (datawriter: %C)\n", std::string(pubID_conv).c_str()));
 
   return DDS::DataWriter::_duplicate(dw_obj.in());
 }

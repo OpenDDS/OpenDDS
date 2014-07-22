@@ -91,9 +91,9 @@ MulticastTransport::~MulticastTransport()
 //  if (!link.is_nil()) {
 //
 //    //***MulticastPeer remote_peer = RepoIdConverter(remote_id).participantId();
-//	MulticastPeer remote_peer = RepoIdConverter(remote.repo_id_).participantId();
+//    MulticastPeer remote_peer = RepoIdConverter(remote.repo_id_).participantId();
 //
-//	MulticastSession_rch session = link->find_or_create_session(remote_peer);
+//    MulticastSession_rch session = link->find_or_create_session(remote_peer);
 ///***    MulticastSession_rch session = link->find_session(remote_peer);
 //
 //    if (session.is_nil()) {
@@ -458,14 +458,14 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
   const Peers peers(remote_peer, local_peer);
   const PendConnMap::iterator pend = this->pending_connections_.find(peers);
 
-   /*	  if (pend != pending_connections_.end()) {
-	    VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection completing\n"));
-	    const DataLink_rch link = static_rchandle_cast<DataLink>(server_link_);
-	    for (size_t i = 0; i < pend->second.size(); ++i) {
-	      pend->second[i].first->use_datalink(pend->second[i].second, link);
-	    }
-	    this->pending_connections_.erase(pend);
-	  }
+   /*    if (pend != pending_connections_.end()) {
+            VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection completing\n"));
+            const DataLink_rch link = static_rchandle_cast<DataLink>(server_link_);
+            for (size_t i = 0; i < pend->second.size(); ++i) {
+            pend->second[i].first->use_datalink(pend->second[i].second, link);
+            }
+            this->pending_connections_.erase(pend);
+          }
     */
   if (pend != pending_connections_.end()) {
 

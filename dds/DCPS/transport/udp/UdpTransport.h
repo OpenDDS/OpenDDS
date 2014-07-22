@@ -57,7 +57,7 @@ protected:
 private:
   UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address,
                              Priority priority, bool active);
-  
+
   PriorityKey blob_to_key(const TransportBLOB& remote,
                           Priority priority, bool active);
 

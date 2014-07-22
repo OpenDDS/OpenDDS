@@ -107,8 +107,8 @@ SubscriberImpl::create_datareader(
   DDS::StatusMask             mask)
 {
 
-	//### Debug statements to track where test is failing
-		    	 if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:SubscriberImpl::create_datareader being created\n "));
+  //### Debug statements to track where test is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:SubscriberImpl::create_datareader being created\n "));
 
   if (CORBA::is_nil(a_topic_desc)) {
     ACE_ERROR((LM_ERROR,

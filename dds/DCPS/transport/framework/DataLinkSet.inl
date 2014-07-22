@@ -140,10 +140,10 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send_response --> trying to LOCK lock_\n"));
 
   GuardType guard(this->lock_);
-  
+
     //### debugging many to many test failure 2to1
   //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send_response --> LOCKED lock_\n"));
-  
+
   ACE_NEW_MALLOC(send_element,
     static_cast<TransportSendControlElement*>(
       send_control_element_allocator_.malloc()),
