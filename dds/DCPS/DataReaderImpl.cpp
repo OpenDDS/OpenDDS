@@ -548,7 +548,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     {
       ACE_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+//      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
       //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::transport_assoc_done check if writer still exists\n"));
       if(!writers_.count(remote_id)){
