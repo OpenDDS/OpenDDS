@@ -1,10 +1,59 @@
+Wed Jul 23 14:08:01 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * docs/design/UML/OpenDDS_UML_sketches.asta:
+        * docs/design/UML/README:
+
+          Added a file containing class and sequence diagrams of
+          some of the current OpenDDS DCPS implementation code.
+
+        * docs/design/UML/history/Analysis.unt:
+        * docs/design/UML/history/Create_DataReader_Detail.jpg:
+        * docs/design/UML/history/Create_DataReader_Simple.jpg:
+        * docs/design/UML/history/Create_DataWriter_Detail.jpg:
+        * docs/design/UML/history/Create_DataWriter_Simple.jpg:
+        * docs/design/UML/history/DDS.uml:
+        * docs/design/UML/history/DDS.xmi:
+        * docs/design/UML/history/InDepthOverview.unt:
+        * docs/design/UML/history/Overview.unt:
+        * docs/design/UML/history/README:
+        * docs/design/UML/history/Register_Sample_Detail.jpg:
+        * docs/design/UML/history/Register_Sample_Simple.jpg:
+        * docs/design/UML/history/Repo_Pub_Sub_Detail.jpg:
+        * docs/design/UML/history/Repo_Pub_Sub_Simple.jpg:
+        * docs/design/UML/history/Send_Remote_Detail.jpg:
+        * docs/design/UML/history/Send_Remote_Simple.jpg:
+        * docs/design/UML/history/Write_Data_Detail.jpg:
+        * docs/design/UML/history/Write_Data_Simple.jpg:
+
+          Moved outstated modeling files into history directory.
+
+        * docs/design/UML/Analysis.unt:
+        * docs/design/UML/Create_DataReader_Detail.jpg:
+        * docs/design/UML/Create_DataReader_Simple.jpg:
+        * docs/design/UML/Create_DataWriter_Detail.jpg:
+        * docs/design/UML/Create_DataWriter_Simple.jpg:
+        * docs/design/UML/DDS.uml:
+        * docs/design/UML/DDS.xmi:
+        * docs/design/UML/InDepthOverview.unt:
+        * docs/design/UML/Overview.unt:
+        * docs/design/UML/Register_Sample_Detail.jpg:
+        * docs/design/UML/Register_Sample_Simple.jpg:
+        * docs/design/UML/Repo_Pub_Sub_Detail.jpg:
+        * docs/design/UML/Repo_Pub_Sub_Simple.jpg:
+        * docs/design/UML/Send_Remote_Detail.jpg:
+        * docs/design/UML/Send_Remote_Simple.jpg:
+        * docs/design/UML/Write_Data_Detail.jpg:
+        * docs/design/UML/Write_Data_Simple.jpg:
+
+          Removed these files.
+
 Tue Jul 22 20:28:21 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Instances/Publisher.cpp:
         * tests/DCPS/Instances/Subscriber.cpp:
 
-        Added static build required headers StaticIncludes.h and 
-        Service_Participant.h 
+        Added static build required headers StaticIncludes.h and
+        Service_Participant.h
 
 Mon Jul 21 23:27:31 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
