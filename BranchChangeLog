@@ -1,3 +1,10 @@
+Wed Jul 23 18:39:57 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          removed sample_lock_ during transport_assoc_done call because not
+          necessary and causing deadlock with data_received.
+
 Tue Jul 22 18:34:32 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/PublisherImpl.cpp:
