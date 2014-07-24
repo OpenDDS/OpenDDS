@@ -1,8 +1,14 @@
+Thu Jul 24 21:50:08 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+
+        Fix fuzz error.
+
 Wed Jul 23 18:44:58 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * dds/DCPS/transport/framework/EntryExit.h:
 
-        Added ACE_UNUSED_ARG call for unused member variable to 
+        Added ACE_UNUSED_ARG call for unused member variable to
         resolve clang compiler warning
 
 Wed Jul 23 14:08:01 UTC 2014  Byron Harris  <harrisb@ociweb.com>
