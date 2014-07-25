@@ -11,7 +11,7 @@
 
 namespace {
 #ifdef RTD_DLL_NAME
-  const wchar_t* DLL_NAME = ACE_TEXT_CHAR_TO_TCHAR(RTD_DLL_NAME);
+  const ACE_TCHAR* DLL_NAME = ACE_TEXT_CHAR_TO_TCHAR(RTD_DLL_NAME);
 #elif _DEBUG
   const ACE_TCHAR* DLL_NAME = ACE_TEXT("OpenDDS_ExcelRTDd.dll");
 #else
