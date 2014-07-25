@@ -5,16 +5,17 @@
  * Additional material distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
+#include <ace/config-lite.h>
 #include "RTDServerDLL.h"
 #include "RTDServer.h"
 
 namespace {
 #ifdef RTD_DLL_NAME
-  const char* DLL_NAME = RTD_DLL_NAME;
+  const wchar_t* DLL_NAME = ACE_TEXT_CHAR_TO_TCHAR(RTD_DLL_NAME);
 #elif _DEBUG
-  const char* DLL_NAME = "OpenDDS_ExcelRTDd.dll";
+  const ACE_TCHAR* DLL_NAME = ACE_TEXT("OpenDDS_ExcelRTDd.dll");
 #else
-  const char* DLL_NAME = "OpenDDS_ExcelRTD.dll";
+  const ACE_TCHAR* DLL_NAME = ACE_TEXT("OpenDDS_ExcelRTD.dll");
 #endif
 
   const char* PROG_ID = "OpenDDS.ExcelRTD";
@@ -175,7 +176,7 @@ STDAPI DllRegisterServer(void)
    HRESULT hr = S_OK;
 
    //look up server's file name
-   char szFileName[255];
+   ACE_TCHAR szFileName[255];
    HMODULE dllModule = GetModuleHandle(DLL_NAME);
    GetModuleFileName(dllModule, szFileName, 255);
 
@@ -189,7 +190,7 @@ STDAPI DllRegisterServer(void)
 
       //Map rogue values to module file name
       if (pszValue == (const char*)-1)
-         pszValue = szFileName;
+         pszValue = ACE_TEXT_ALWAYS_CHAR(szFileName);
 
       //Create the key
       HKEY hkey;
