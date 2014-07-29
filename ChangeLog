@@ -1,3 +1,12 @@
+Tue Jul 29 18:53:26 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * DDS.mwc:
+        * DDS_TAO.mwc:
+        * DDS_TAOv2.mwc:
+
+          Add comment about generating the MPC file to generate
+          the makefiles to generate test executables.
+
 Fri Jul 25 21:00:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/excelRTD/RTDServerDLL.cpp:
