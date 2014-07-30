@@ -1,11 +1,19 @@
+Wed Jul 30 13:25:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * configure:
+
+          Specify version of TAO used in variable so only one place
+          needs to be updated when TAO version to download changes.
+          Put common message content about TAO version into variable.
+
 Tue Jul 29 18:53:26 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * DDS.mwc:
         * DDS_TAO.mwc:
         * DDS_TAOv2.mwc:
 
-          Add comment about generating the MPC file to generate
-          the makefiles to generate test executables.
+          Add a comment about generating the MPC file to generate
+          the modeling library test makefiles.
 
 Fri Jul 25 21:00:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
