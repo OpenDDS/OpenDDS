@@ -31,8 +31,8 @@ Fri Aug  1 15:24:01 UTC 2014  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-        Removed DCPS FooTest3_1 tests entries that were replaced by
-        DCPS Instances test
+          Removed DCPS FooTest3_1 tests entries that were replaced by
+          DCPS Instances test
 
 Wed Jul 30 13:25:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
@@ -55,32 +55,32 @@ Fri Jul 25 21:00:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/excelRTD/RTDServerDLL.cpp:
 
-        Change wchar_t to ACE_TCHAR
+          Change wchar_t to ACE_TCHAR
 
 Fri Jul 25 17:57:12 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/excelRTD/RTDServerDLL.cpp:
 
-        Fix windows wide char build with QT.
+          Fix windows wide char build with QT.
 
 Fri Jul 25 17:56:19 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.cpp:
 
-        Fix warnings
+          Fix warnings
 
 Thu Jul 24 21:50:08 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/framework/EntryExit.h:
 
-        Fix fuzz error.
+          Fix fuzz error.
 
 Wed Jul 23 18:44:58 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * dds/DCPS/transport/framework/EntryExit.h:
 
-        Added ACE_UNUSED_ARG call for unused member variable to
-        resolve clang compiler warning
+          Added ACE_UNUSED_ARG call for unused member variable to
+          resolve clang compiler warning
 
 Wed Jul 23 14:08:01 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
@@ -136,14 +136,14 @@ Tue Jul 22 20:28:21 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
         * tests/DCPS/Instances/Publisher.cpp:
         * tests/DCPS/Instances/Subscriber.cpp:
 
-        Added static build required headers StaticIncludes.h and
-        Service_Participant.h
+          Added static build required headers StaticIncludes.h and
+          Service_Participant.h
 
 Mon Jul 21 23:27:31 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-        Added Instances tests
+          Added Instances tests
 
 Mon Jul 21 23:21:04 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
@@ -187,7 +187,7 @@ Fri Jul 18 17:35:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/excelRTD/RTDServerDLL.cpp:
 
-                Fixed build error for wide-char builds.
+          Fixed build error for wide-char builds.
 
 Fri Jul 18 16:24:37 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
@@ -480,6 +480,7 @@ Mon Jul  7 21:15:36 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
         * bin/PerlDDS/Cross_Sync_Common.pm:
 
           Force verbose.
+
 Mon Jul  7 21:02:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
@@ -2852,7 +2853,7 @@ Mon Jan 27 21:24:53 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
         * README:
         * docs/history/ChangeLog-3.5:
 
-        Setup for next version.
+          Setup for next version.
 
 
 Local Variables:
