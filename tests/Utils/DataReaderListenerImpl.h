@@ -9,7 +9,6 @@
 #ifndef TESTUTILS_DATAREADER_LISTENER_IMPL_H
 #define TESTUTILS_DATAREADER_LISTENER_IMPL_H
 
-#include <tools/modeling/codegen/model/NullReaderListener.h>
 #include <ace/Global_Macros.h>
 
 #include <dds/DdsDcpsSubscriptionS.h>
@@ -19,13 +18,11 @@
 
 #include <iostream>
 
-using OpenDDS::Model::NullReaderListener;
-
 namespace TestUtils {
 
 template<typename Message, typename MessageDataReader>
 class DataReaderListenerImpl
-  : public virtual OpenDDS::DCPS::LocalObject<NullReaderListener> {
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
   typedef Message                             message_type;
   typedef MessageDataReader                   datareader_type;
@@ -104,6 +101,18 @@ public:
 
 
   virtual void on_sample(const message_type& msg) = 0;
+
+  virtual void on_requested_deadline_missed(DDS::DataReader_ptr, const DDS::RequestedDeadlineMissedStatus&)
+  {
+  }
+
+  virtual void on_liveliness_changed(DDS::DataReader_ptr, const DDS::LivelinessChangedStatus&)
+  {
+  }
+
+  virtual void on_subscription_matched(DDS::DataReader_ptr, const DDS::SubscriptionMatchedStatus&)
+  {
+  }
 
 private:
   bool verbose_;

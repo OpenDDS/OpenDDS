@@ -1,4 +1,4 @@
-project : dcps, dds_model {
+project : dcps {
   libout         = .
   dynamicflags   = TESTUTILS_BUILD_DLL
   dcps_ts_flags += -Wb,export_macro=TestUtils_Export

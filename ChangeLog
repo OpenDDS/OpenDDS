@@ -1,8 +1,18 @@
+Fri Aug  1 17:39:37 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSTopicFacade.h:
+        * tests/Utils/DataReaderListenerImpl.h:
+        * tests/Utils/Options.h:
+        * tests/Utils/TestUtils.mpc:
+
+          Remove dependency on modeling library.
+
 Fri Aug  1 15:24:01 UTC 2014  Phillip LaBanca  <labanca_p@ociweb.com>
 
         * bin/dcps_tests.lst:
 
-        Removed DCPS FooTest3_1 tests entries that were replaced by 
+        Removed DCPS FooTest3_1 tests entries that were replaced by
         DCPS Instances test
 
 Wed Jul 30 13:25:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
