@@ -29,14 +29,9 @@ tests/DCPS/FooTest3_0/run_test.pl resume: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl listener: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl allocator: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl liveliness: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
-tests/DCPS/FooTest3_1/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest3_1/run_test.pl mi: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest3_1/run_test.pl mw: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_1/run_test.pl bp_remove: !DCPS_MIN
 tests/DCPS/FooTest3_1/run_test.pl b: !DCPS_MIN
 tests/DCPS/FooTest3_1/run_test.pl rtps_b: !DCPS_MIN RTPS !STATIC
-tests/DCPS/FooTest3_1/run_test_nokey.pl: !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest3_1/run_test_nokey.pl mw: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_2/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_2/run_test.pl mi: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_2/run_test.pl mw: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
