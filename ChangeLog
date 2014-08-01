@@ -1,3 +1,9 @@
+Fri Aug  1 21:16:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Remove ManyToMany rtps_disc test - not supported
+
 Fri Aug  1 19:49:06 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * tests/Utils/Sync.h:
