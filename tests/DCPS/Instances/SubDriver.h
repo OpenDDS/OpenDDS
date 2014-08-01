@@ -4,7 +4,7 @@
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
 #include "tests/Utils/ListenerRecorder.h"
-#include <model/Sync.h>
+#include "tests/Utils/Sync.h"
 #include <vector>
 
 // Set data reader QOS to use topic QOS
@@ -99,7 +99,7 @@ class SubDriver
                    ACE_TEXT("(%P|%t) Sub waiting for writer to come and go\n")));
       }
       {
-          OpenDDS::Model::ReaderSync rs(reader);
+          TestUtils::ReaderSync rs(reader);
       }
 
       const typename ListenerRecorder::Messages msgs = listener_impl->messages();

@@ -2,7 +2,7 @@
 // $Id$
 
 
-project(*Publisher) : dcpsexe_with_tcp, dds_model, dcps_shmem,  {
+project(*Publisher) : dcpsexe_with_tcp, dcps_shmem,  {
   exename   = publisher
   exeout    = .
 
@@ -12,13 +12,13 @@ project(*Publisher) : dcpsexe_with_tcp, dds_model, dcps_shmem,  {
   libpaths += ../FooType4
   libs     += DcpsFooType4
   after    += DcpsFooType4
-  
+
   Source_Files {
     Publisher.cpp
   }
 }
 
-project(*Subscriber) : dcpsexe_with_tcp, dds_model, dcps_shmem,  {
+project(*Subscriber) : dcpsexe_with_tcp, dcps_shmem,  {
   exename   = subscriber
   exeout    = .
 
@@ -28,7 +28,7 @@ project(*Subscriber) : dcpsexe_with_tcp, dds_model, dcps_shmem,  {
   libpaths += ../FooType4
   libs     += DcpsFooType4
   after    += DcpsFooType4
-  
+
   Source_Files {
     Subscriber.cpp
     Listener.cpp

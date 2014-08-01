@@ -8,8 +8,9 @@
 
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
+#include "tests/Utils/Sync.h"
+
 #include <dds/DCPS/Service_Participant.h>
-#include <model/Sync.h>
 #include <sstream>
 #include <stdexcept>
 
@@ -71,7 +72,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           std::cerr << pid << "Pub Stage " << stage
                     << " waiting for " << stage << " readers\n";
           // Block until Subscriber is available
-          OpenDDS::Model::WriterSync ws(
+          TestUtils::WriterSync ws(
             ::TestUtils::DDSApp::datawriter(msg_writer), 1);
           std::cerr << pid << "Pub Stage " << stage
                     << " done waiting for reader\n";

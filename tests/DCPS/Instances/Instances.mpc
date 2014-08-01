@@ -15,7 +15,7 @@ project(DDS*idl): dcps_test_lib {
   }
 }
 
-project(*Publisher): dcpsexe_with_tcp, dds_model {
+project(*Publisher): dcpsexe_with_tcp {
   exename = publisher
   exeout = .
 
@@ -34,7 +34,7 @@ project(*Publisher): dcpsexe_with_tcp, dds_model {
   }
 }
 
-project(*Subscriber): dcpsexe_with_tcp, dds_model {
+project(*Subscriber): dcpsexe_with_tcp {
   exename = subscriber
   exeout = .
 
