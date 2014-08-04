@@ -1,3 +1,11 @@
+Mon Aug  4 20:51:13 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/Instances/Instances.mpc:
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+
+          Added dependency on the model library which is needed for
+          static builds.
+
 Fri Aug  1 21:16:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:
