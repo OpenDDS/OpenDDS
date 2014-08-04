@@ -1,3 +1,9 @@
+Mon Aug  4 15:26:45 UTC 2014  Weiqi Gao  <gao_w@ociweb.com>
+
+        * tools/modeling/README.dev:
+
+          Updated README.dev for the Eclipse 4 (Kepler and Luna) environment.
+
 Fri Aug  1 18:57:02 UTC 2014  Weiqi Gao  <gao_w@ociweb.com>
 
         * tools/modeling/plugins/org.opendds.modeling.model.edit/build.properties:
@@ -24,7 +30,7 @@ Tue Jun 24 18:18:30 UTC 2014  Byron Harris  <harrisb@ociweb.com>
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
         * tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
 
-	  Account for changes in generated project files between EMF 2.5.0 and EMF 2.9.2.
+          Account for changes in generated project files between EMF 2.5.0 and EMF 2.9.2.
 
 Tue Jun 24 18:14:30 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
