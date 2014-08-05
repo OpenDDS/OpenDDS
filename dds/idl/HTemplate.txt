@@ -2,7 +2,7 @@
 class <%TYPE%>DataWriterImpl;
 class <%TYPE%>DataReaderImpl;
 
-/** Servant for TypeSuport interface of <%TYPE%> data type.
+/** Servant for TypeSupport interface of <%TYPE%> data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
@@ -485,6 +485,11 @@ public:
          OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
          bool & just_registered,
          bool & filtered);
+
+    /// Release sample_lock_ during status notifications in store_instance_data()
+    /// as the lock is not needed and could cause deadlock condition.
+    /// See comments in member function implementation for details.
+    void notify_status_condition_no_sample_lock();
 
     /// Common input read* & take* input processing and precondition checks
     ::DDS::ReturnCode_t check_inputs (

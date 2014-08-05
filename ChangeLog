@@ -1,3 +1,13 @@
+Tue Aug  5 20:01:00 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Fixed a possible deadlock condition that can occur while
+          waiting inside WaitSet::wait() in one thread and
+          DataReaderImpl::data_received() is called from another.
+
 Tue Aug  5 19:09:06 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * bin/dcps_tests.lst:

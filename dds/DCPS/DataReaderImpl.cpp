@@ -2229,9 +2229,10 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed) {
-    // RT7273: possible solution is to release the sample lock for the
-    //         duration of this call
-    // ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+    // Avoid possible deadlock by releasing sample_lock_.
+    // See comments in <Topic>DataDataReaderImpl::notify_status_condition_no_sample_lock()
+    // for information about the locks involved.
+    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
     this->notify_liveliness_change();
   }
 
