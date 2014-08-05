@@ -517,7 +517,7 @@ sub process {
   }
 
   if ($self->{nobits}) {
-    my $no_bits = "-DCPSBit 0 ";
+    my $no_bits = " -DCPSBit 0 ";
     $self->_info_appending($executable, $no_bits, "nobits");
     $params .= $no_bits;
   }

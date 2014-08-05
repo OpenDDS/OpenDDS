@@ -1,3 +1,10 @@
+Tue Aug  5 18:38:36 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added space before the added DCPSBit parameter to that it
+          doesn't get concatenated with the log file name.
+
 Tue Aug  5 17:49:33 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/ManyToMany/publisher.cpp:
