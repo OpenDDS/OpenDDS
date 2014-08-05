@@ -26,13 +26,57 @@ my $reliable = 1;
 
 my $config_opts = "";
 if ($test->flag('udp')) {
-    $reliable = 0;
+  $reliable = 0;
 }
 elsif ($test->flag('multicast_async')) {
-    $config_opts .= "-DCPSConfigFile pub_multicast_async.ini ";
+  $config_opts .= "-DCPSConfigFile pub_multicast_async.ini ";
 }
 
 $config_opts .= '-reliable ' if $reliable;
+
+sub generate_rtps_config {
+  my ($num_participants) = @_;
+  my $config_file;
+  my $gen_conf_file;
+  if ($test->flag('rtps_disc')) {
+    $config_file = "rtps_disc.ini";
+  }
+  elsif ($test->flag('rtps')) {
+    $config_file = "rtps.ini";
+  }
+  else {
+    #not rtps test
+    return;
+  }
+  $gen_conf_file = $config_file;
+  $gen_conf_file =~ s/\.ini/_generated\.ini/g;
+  print "Config File: $config_file   Gen Config File: $gen_conf_file\n";
+  use File::Copy;
+  copy($config_file , $gen_conf_file) or die "Copy failed: $!";
+  open MYFILE, '+<', $gen_conf_file or die "Open failed: $!";
+  my $transport_type_line;
+  my $use_multicast_line;
+  while(<MYFILE>)  {   
+    chomp;
+    if ($_ =~ /use_multicast=/) {
+      $use_multicast_line = $_;
+    }
+    if ($_ =~ /transport_type=/) {
+      $transport_type_line = $_;
+    }
+  }
+  seek MYFILE, 0, 2;
+  say MYFILE "\n#START GENERATED TRANSPORT CONFIG";
+  my $part_num;
+  for($part_num = 0; $part_num < $num_participants; ++$part_num ) {
+    say MYFILE "\n[config\/domain_part_$part_num]";
+    say MYFILE "transports=rtps_transport_$part_num";
+    say MYFILE "\n[transport\/rtps_transport_$part_num]";
+    say MYFILE "$transport_type_line\n$use_multicast_line";
+  }
+  close MYFILE;
+  $config_opts .= "-DCPSConfigFile $gen_conf_file ";
+}
 
 sub divides_evenly
 {
@@ -59,16 +103,18 @@ my $base_delay_msec = 500;
 my $samples = 10;
 my $custom = 0;
 my $total_writers;
+my $pub_part = 2;
+my $sub_part = 2;
 if ($#ARGV < 1) {
     print "no args passed ($#ARGV)\n";
     $pub_processes = 2;
     $sub_processes = 2;
     $config_opts .= '-pub_processes ' . $pub_processes . ' ';
     $config_opts .= '-sub_processes ' . $sub_processes . ' ';
-    $config_opts .= '-pub_participants 2 ';
+    $config_opts .= '-pub_participants ' . $pub_part . ' ';
     $config_opts .= '-writers 2 ';
     $config_opts .= '-samples ' . $samples . ' ';
-    $config_opts .= '-sub_participants 2 ';
+    $config_opts .= '-sub_participants ' . $sub_part . ' ';
     $config_opts .= '-readers 2 ';
     $delay_msec = $base_delay_msec;
     $serialized_samples = 2 * 2 * 10; # pub_part * writers * samples
@@ -79,8 +125,8 @@ elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     print "total_writers=$total_writers, total_readers=$total_readers\n";
     my $writers = $total_writers;
     my $readers = $total_readers;
-    my $pub_part = 1;
-    my $sub_part = 1;
+    $pub_part = 1;
+    $sub_part = 1;
     if (divides_evenly($writers, 2)) {
         $pub_part = 2;
         $writers /= 2;
@@ -125,11 +171,11 @@ elsif ($ARGV[1] =~ /-\S+_process/ ||
     if ($config_opts =~ /-sub_processes (\d+)/) {
         $sub_processes = $1;
     }
-    my $pub_part = 1;
+    $pub_part = 1;
     if ($config_opts =~ /-pub_participants (\d+)/) {
         $pub_part = $1;
     }
-    my $sub_part = 1;
+    $sub_part = 1;
     if ($config_opts =~ /-sub_participants (\d+)/) {
         $sub_part = $1;
     }
@@ -200,6 +246,14 @@ elsif ($config_opts !~ /-sample_size/) {
     $config_opts .= '-sample_size 10 ';
 }
 
+if (($test->flag('rtps_disc') || $test->flag('rtps')) &&
+    ($sub_part > 1 || $pub_part > 1))
+{
+  #need to generate proper .ini files for multiple participants in a process
+  #each participant requires its own rtps transport
+  my $max_parts = $sub_part >= $pub_part ? $sub_part : $pub_part;
+  generate_rtps_config($max_parts);
+}  
 $test->default_transport("tcp");
 
 my $index;

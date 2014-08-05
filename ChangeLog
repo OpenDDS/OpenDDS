@@ -1,3 +1,15 @@
+Tue Aug  5 17:49:33 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Fixed problem with ManyToMany test using transport type
+          rtps_udp to use a separate transport instance for each
+          participant created.  In these cases, a new .ini file is
+          generated to provide configurations for each participant
+          and the subscriber or publisher binds the proper config to each.
+
 Mon Aug  4 20:51:13 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/Instances/Instances.mpc:

@@ -43,7 +43,15 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   bool ok = true;
+  bool generated_config = false;
   try {
+    //Look to see if the config file (.ini) was generated
+    //for rtps participant processing
+    for(int i = 0; i < argc; ++i) {
+      if(strstr(argv[i], "generated")) {
+        generated_config = true;
+      }
+    }
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -97,6 +105,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
+      }
+
+      if (generated_config) {
+        std::stringstream domain_config_stream;
+        std::string config_name = "domain_part_";
+        domain_config_stream << config_name << part_index;
+        std::string config;
+        config = domain_config_stream.str();
+        TheTransportRegistry->bind_config(config, *part);
       }
 
       if (ts->register_type(part->in(), "") != DDS::RETCODE_OK) {
