@@ -56,7 +56,7 @@ sub generate_rtps_config {
   open MYFILE, '+<', $gen_conf_file or die "Open failed: $!";
   my $transport_type_line;
   my $use_multicast_line;
-  while(<MYFILE>)  {   
+  while(<MYFILE>)  {
     chomp;
     if ($_ =~ /use_multicast=/) {
       $use_multicast_line = $_;
@@ -253,7 +253,7 @@ if (($test->flag('rtps_disc') || $test->flag('rtps')) &&
   #each participant requires its own rtps transport
   my $max_parts = $sub_part >= $pub_part ? $sub_part : $pub_part;
   generate_rtps_config($max_parts);
-}  
+}
 $test->default_transport("tcp");
 
 my $index;

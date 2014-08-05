@@ -2000,7 +2000,7 @@ void
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
-        notify_status_condition();
+        notify_status_condition_no_sample_lock();
 
         ACE_DES_FREE (instance_data,
                       data_allocator_->free,
@@ -2176,7 +2176,7 @@ void
           listener->on_sample_rejected(dr.in (),
                                        sample_rejected_status_);
         }  // do we want to do something if listener is nil???
-        notify_status_condition();
+        notify_status_condition_no_sample_lock();
 
         ACE_DES_FREE (instance_data,
                       data_allocator_->free,
@@ -2239,7 +2239,7 @@ void
              listener->on_sample_rejected(dr.in (),
                                           sample_rejected_status_);
            }  // do we want to do something if listener is nil???
-           notify_status_condition();
+           notify_status_condition_no_sample_lock();
 
            ACE_DES_FREE (instance_data,
                          data_allocator_->free,
@@ -2328,7 +2328,7 @@ void
           listener->on_sample_lost(dr.in (), sample_lost_status_);
         }
 
-        notify_status_condition();
+        notify_status_condition_no_sample_lock();
       }
 
       dec_ref_data_element(head_ptr);
@@ -2369,7 +2369,7 @@ void
         }
         else
         {
-          notify_status_condition();
+          notify_status_condition_no_sample_lock();
         }
       }
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -2384,6 +2384,26 @@ void
                   data_allocator_->free,
                   <%TYPE%> );
   }
+}
+
+void
+<%TYPE%>DataReaderImpl::notify_status_condition_no_sample_lock()
+{
+  // This member function avoids a deadlock condition which otherwise
+  // could occur as follows:
+  // Thread 1: Call to WaitSet::wait() causes WaitSet::lock_ to lock and
+  // eventually DataReaderImpl::sample_lock_ to lock in call to
+  // DataReaderImpl::contains_samples().
+  // Thread2: Call to DataReaderImpl::data_received()
+  // causes DataReaderImpl::sample_lock_ to lock and eventually
+  // during notify of status condition a call to WaitSet::signal()
+  // causes WaitSet::lock_ to lock.
+  // Because the DataReaderImpl::sample_lock_ is not needed during
+  // status notification this member function is used in
+  // store_instance_data() to release sample_lock_ before making
+  // the notification.
+  ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+  notify_status_condition();
 }
 
 void
