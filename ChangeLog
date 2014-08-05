@@ -1,3 +1,271 @@
+Tue Aug  5 19:09:06 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Re-enabled ManyToMany test for rtps_disc 12To12
+
+Tue Aug  5 18:38:36 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added space before the added DCPSBit parameter to that it
+          doesn't get concatenated with the log file name.
+
+Tue Aug  5 17:49:33 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Fixed problem with ManyToMany test using transport type
+          rtps_udp to use a separate transport instance for each
+          participant created.  In these cases, a new .ini file is
+          generated to provide configurations for each participant
+          and the subscriber or publisher binds the proper config to each.
+
+Mon Aug  4 20:51:13 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/Instances/Instances.mpc:
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+
+          Added dependency on the model library which is needed for
+          static builds.
+
+Fri Aug  1 21:16:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Remove ManyToMany rtps_disc test - not supported
+
+Fri Aug  1 19:49:06 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/Utils/Sync.h:
+        * tests/Utils/Sync.cpp:
+        * tests/Utils/TestUtils.mpc:
+
+          Add read and writer sync helper classes that are currently
+          wrappers around those in OpenDDS::Model. This avoid the need
+          for test code to include the model library and allow for
+          expansion of the classes based on test needs.
+
+        * tests/DCPS/Instances/Instances.mpc:
+        * tests/DCPS/Instances/SubDriver.h:
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+
+          Update to no longer explicitly depend on the modeling library.
+
+Fri Aug  1 17:39:37 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/Utils/DDSApp.h:
+        * tests/Utils/DDSTopicFacade.h:
+        * tests/Utils/DataReaderListenerImpl.h:
+        * tests/Utils/Options.h:
+        * tests/Utils/TestUtils.mpc:
+
+          Remove dependency on modeling library.
+
+Fri Aug  1 15:24:01 UTC 2014  Phillip LaBanca  <labanca_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed DCPS FooTest3_1 tests entries that were replaced by
+          DCPS Instances test
+
+Wed Jul 30 13:25:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * configure:
+
+          Specify version of TAO used in variable so only one place
+          needs to be updated when TAO version to download changes.
+          Put common message content about TAO version into variable.
+
+Tue Jul 29 18:53:26 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * DDS.mwc:
+        * DDS_TAO.mwc:
+        * DDS_TAOv2.mwc:
+
+          Add a comment about generating the MPC file to generate
+          the modeling library test makefiles.
+
+Fri Jul 25 21:00:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tools/excelRTD/RTDServerDLL.cpp:
+
+          Change wchar_t to ACE_TCHAR
+
+Fri Jul 25 17:57:12 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tools/excelRTD/RTDServerDLL.cpp:
+
+          Fix windows wide char build with QT.
+
+Fri Jul 25 17:56:19 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Fix warnings
+
+Thu Jul 24 21:50:08 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+
+          Fix fuzz error.
+
+Wed Jul 23 18:44:58 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * dds/DCPS/transport/framework/EntryExit.h:
+
+          Added ACE_UNUSED_ARG call for unused member variable to
+          resolve clang compiler warning
+
+Wed Jul 23 14:08:01 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * docs/design/UML/OpenDDS_UML_sketches.asta:
+        * docs/design/UML/README:
+
+          Added a file containing class and sequence diagrams of
+          some of the current OpenDDS DCPS implementation code.
+
+        * docs/design/UML/history/Analysis.unt:
+        * docs/design/UML/history/Create_DataReader_Detail.jpg:
+        * docs/design/UML/history/Create_DataReader_Simple.jpg:
+        * docs/design/UML/history/Create_DataWriter_Detail.jpg:
+        * docs/design/UML/history/Create_DataWriter_Simple.jpg:
+        * docs/design/UML/history/DDS.uml:
+        * docs/design/UML/history/DDS.xmi:
+        * docs/design/UML/history/InDepthOverview.unt:
+        * docs/design/UML/history/Overview.unt:
+        * docs/design/UML/history/README:
+        * docs/design/UML/history/Register_Sample_Detail.jpg:
+        * docs/design/UML/history/Register_Sample_Simple.jpg:
+        * docs/design/UML/history/Repo_Pub_Sub_Detail.jpg:
+        * docs/design/UML/history/Repo_Pub_Sub_Simple.jpg:
+        * docs/design/UML/history/Send_Remote_Detail.jpg:
+        * docs/design/UML/history/Send_Remote_Simple.jpg:
+        * docs/design/UML/history/Write_Data_Detail.jpg:
+        * docs/design/UML/history/Write_Data_Simple.jpg:
+
+          Moved outstated modeling files into history directory.
+
+        * docs/design/UML/Analysis.unt:
+        * docs/design/UML/Create_DataReader_Detail.jpg:
+        * docs/design/UML/Create_DataReader_Simple.jpg:
+        * docs/design/UML/Create_DataWriter_Detail.jpg:
+        * docs/design/UML/Create_DataWriter_Simple.jpg:
+        * docs/design/UML/DDS.uml:
+        * docs/design/UML/DDS.xmi:
+        * docs/design/UML/InDepthOverview.unt:
+        * docs/design/UML/Overview.unt:
+        * docs/design/UML/Register_Sample_Detail.jpg:
+        * docs/design/UML/Register_Sample_Simple.jpg:
+        * docs/design/UML/Repo_Pub_Sub_Detail.jpg:
+        * docs/design/UML/Repo_Pub_Sub_Simple.jpg:
+        * docs/design/UML/Send_Remote_Detail.jpg:
+        * docs/design/UML/Send_Remote_Simple.jpg:
+        * docs/design/UML/Write_Data_Detail.jpg:
+        * docs/design/UML/Write_Data_Simple.jpg:
+
+          Removed these files.
+
+Tue Jul 22 20:28:21 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances/Publisher.cpp:
+        * tests/DCPS/Instances/Subscriber.cpp:
+
+          Added static build required headers StaticIncludes.h and
+          Service_Participant.h
+
+Mon Jul 21 23:27:31 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Added Instances tests
+
+Mon Jul 21 23:21:04 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances/PubDriver.h:
+
+          Removed unneccessary datawriter vector
+
+Mon Jul 21 19:25:59 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Clean up comments related to TransportClient::send_links_.
+
+        * dds/DdsDcpsSubscriptionExt.idl:
+
+          Avoid Doxygen treating comment as a general comment about
+          OpenDDS namespace.
+
+Mon Jul 21 17:30:47 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Fix misleading header comments.
+
+Mon Jul 21 15:30:57 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tools/excelRTD/RTDServerDLL.cpp:
+
+          Reverted previous change.
+
+Fri Jul 18 23:04:50 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances/README:
+        * tests/DCPS/Instances/run_test.pl:
+
+          Updated README and modified run_test.pl's argument processing
+
+Fri Jul 18 17:35:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tools/excelRTD/RTDServerDLL.cpp:
+
+          Fixed build error for wide-char builds.
+
+Fri Jul 18 16:24:37 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances/PubDriver.h:
+
+          Made std::string topic_name const
+
+        * tests/DCPS/Instances/SubDriver.h:
+
+          Provided template call parameter to topic_facade.reader()
+          method to set DATAREADER_QOS_USE_TOPIC_QOS QOS property when
+          creating a datareader.
+
+          Made std::string topic_name const
+
+Fri Jul 18 00:14:49 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances:
+
+          Updated svn:ignore list
+
+        * tests/DCPS/Instances/SubDriver.h:
+
+          removed SetDataReaderQOS setting
+
+Thu Jul 17 23:45:35 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Instances:
+
+          Added svn:ignore property
+
+        * tests/DCPS/Instances/PubDriver.h:
+        * tests/DCPS/Instances/Publisher.cpp:
+        * tests/DCPS/Instances/SubDriver.h:
+        * tests/DCPS/Instances/Subscriber.cpp:
+
+          Resolved wait logic errors and made most log output conditional
+          on DCPSLogLevel setting
+
 Thu Jul 17 13:21:31 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:
@@ -251,6 +519,7 @@ Mon Jul  7 21:15:36 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
         * bin/PerlDDS/Cross_Sync_Common.pm:
 
           Force verbose.
+
 Mon Jul  7 21:02:05 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:
@@ -2623,7 +2892,7 @@ Mon Jan 27 21:24:53 UTC 2014  Mike Martinez  <martinez_m@ociweb.com>
         * README:
         * docs/history/ChangeLog-3.5:
 
-        Setup for next version.
+          Setup for next version.
 
 
 Local Variables:

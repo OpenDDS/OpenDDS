@@ -11,9 +11,11 @@
 #include "TestException.h"
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
+#include <dds/DCPS/Service_Participant.h>
 #include "SubDriver.h"
 #include <sstream>
 #include <stdexcept>
+#include "dds/DCPS/StaticIncludes.h"
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -33,18 +35,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     ::TestUtils::Options options(argc, argv, args);
 
-    if ( options.get<bool>("keyed_data")) {
+    if (options.get<bool>("keyed_data") == true ) {
       SubDriver< ::Xyz::KeyedDataTypeSupportImpl> driver;
       driver.run(ddsApp, options);
+      ddsApp.cleanup();
     } else {
       SubDriver< ::Xyz::NoKeyDataTypeSupportImpl> driver;
       driver.run(ddsApp, options);
+      ddsApp.cleanup();
     }
 
   }
   catch (const TestException&)
   {
-    ACE_ERROR((LM_ERROR, "(%P|%t) SubDriver TestException.\n"));
+
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) SubDriver TestException.\n")));
 
   } catch (const CORBA::Exception& e) {
 
@@ -53,15 +59,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (std::exception& ex) {
 
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"), ex.what()), -1);
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("ERROR: main() - %s\n"), ex.what()),
+                       -1);
 
   } catch (std::string& msg) {
 
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"), msg.c_str()), -1);
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("ERROR: main() - %s\n"), msg.c_str()),
+                       -1);
 
   }
 
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) Sub DDSApp going out of scope (shutdown)\n"));
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) Sub returning status=0\n"));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Sub DDSApp going out of scope (shutdown)\n")));
+
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Sub returning status=0\n")));
   return 0;
 }

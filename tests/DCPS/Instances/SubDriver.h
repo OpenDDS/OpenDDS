@@ -4,8 +4,17 @@
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
 #include "tests/Utils/ListenerRecorder.h"
-#include <model/Sync.h>
+#include "tests/Utils/Sync.h"
 #include <vector>
+
+// Set data reader QOS to use topic QOS
+class SetDataReaderQosUseTopicQos {
+  public:
+    void operator()(DDS::DataReaderQos& qos)
+    {
+      qos = DATAREADER_QOS_USE_TOPIC_QOS;
+    }
+};
 
 template<typename TypeSupportImpl>
 class SubDriver
@@ -24,12 +33,19 @@ class SubDriver
     receive_delay_msec_ (0),
     verbose_ (false)
     {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) SubDriver::SubDriver \n")));
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) SubDriver::SubDriver \n")));
+      }
+
     }
 
     virtual ~SubDriver()
     {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) SubDriver::~SubDriver \n")));
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) SubDriver::~SubDriver \n")));
+      }
     }
 
     void run(::TestUtils::DDSApp& ddsApp, ::TestUtils::Options& options)
@@ -42,44 +58,67 @@ class SubDriver
 
     void parse_args(::TestUtils::Options& options)
     {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) SubDriver::parse_args \n")));
-        num_writes_         = options.get<long>("num_writes");
-        receive_delay_msec_ = options.get<long>("receive_delay_msec");
-        verbose_            = options.get<bool>("verbose");
+      num_writes_         = options.get<long>("num_writes");
+      receive_delay_msec_ = options.get<long>("receive_delay_msec");
+      verbose_            = options.get<bool>("verbose");
     }
 
     void run(::TestUtils::DDSApp& ddsApp)
     {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) SubDriver::run \n")));
-        ::TestUtils::DDSTopicFacade< datareaderimpl_type> topic_facade = ddsApp.topic_facade< datareaderimpl_type> ("bar");
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) SubDriver::run \n")));
+      }
 
-        // Create Listener
-        typedef typename ::TestUtils::ListenerRecorder< message_type, datareader_type> ListenerRecorder;
-        ListenerRecorder* listener_impl = new ListenerRecorder;
+      const std::string topic_name("topic_name");
 
-        listener_impl->verbose(verbose_);
-        DDS::DataReaderListener_var listener(listener_impl);
+      ::TestUtils::DDSTopicFacade< datareaderimpl_type> topic_facade =
+          ddsApp.topic_facade< datareaderimpl_type> (topic_name);
 
-        // Create data reader for the topic
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sub Creating Reader\n")));
-        DDS::DataReader_var reader = topic_facade.reader(listener);
+      // Create Listener
+      typedef typename ::TestUtils::ListenerRecorder< message_type,
+        datareader_type> ListenerRecorder;
 
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sub waiting for writer to come and go\n")));
-        {
-            OpenDDS::Model::ReaderSync rs(reader);
-        }
+      ListenerRecorder* listener_impl = new ListenerRecorder;
 
-        const typename ListenerRecorder::Messages msgs = listener_impl->messages();
-        if (msgs.empty()) {
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: no messages received\n")));
-        }
+      listener_impl->verbose(verbose_);
+      DDS::DataReaderListener_var listener(listener_impl);
+
+      // Create data reader for the topic
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) Sub Creating Reader\n")));
+      }
+
+      SetDataReaderQosUseTopicQos data_reader_qos;
+
+      DDS::DataReader_var reader = topic_facade.reader(listener,data_reader_qos);
+
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) Sub waiting for writer to come and go\n")));
+      }
+      {
+          TestUtils::ReaderSync rs(reader);
+      }
+
+      const typename ListenerRecorder::Messages msgs = listener_impl->messages();
+      if (msgs.empty()) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) ERROR: no messages received\n")));
+      }
+
+      while ( msgs.empty() || msgs.size() != num_writes_) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) STATUS: not enough messages seen\n")));
+          ACE_OS::sleep(1);
+      }
 
     }
 
-    long               num_writes_;
+    size_t             num_writes_;
     long               receive_delay_msec_;
     bool               verbose_;
-
 };
 
 #endif

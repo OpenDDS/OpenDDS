@@ -17,7 +17,6 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
 
-#include <model/Sync.h>
 #include <map>
 #include <string>
 #include <stdexcept>

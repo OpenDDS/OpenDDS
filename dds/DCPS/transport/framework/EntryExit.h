@@ -80,6 +80,9 @@ public:
   : recurse_level_(recurse_level)
   , addr_(addr)
   , addr_set_(true) {
+
+    ACE_UNUSED_ARG(addr_set_);
+
     // No processing unless debugging turned on.
     if (OpenDDS::DCPS::Transport_debug_level > 0) {
       class_[25] = method_[25] = 0;

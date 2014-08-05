@@ -1,3 +1,7 @@
+Tue Aug  5 19:45:47 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * Merged from trunk r6409 through r6449
+
 Wed Jul 23 21:00:57 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

@@ -14,10 +14,11 @@
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
+#include "dds/DdsDcpsDomainC.h"
+
 #include "dds/DCPS/Marked_Default_Qos.h"
 
 #include <iostream>
-#include <model/Sync.h>
 #include <map>
 
 namespace TestUtils {
