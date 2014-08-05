@@ -1,3 +1,9 @@
+Tue Aug  5 19:09:06 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Re-enabled ManyToMany test for rtps_disc 12To12
+
 Tue Aug  5 18:38:36 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
