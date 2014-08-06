@@ -11,7 +11,7 @@
 
 #include <ace/Global_Macros.h>
 
-#include <dds/DdsDcpsSubscriptionS.h>
+#include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/Definitions.h>
 #include <ctime>

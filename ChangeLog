@@ -1,3 +1,9 @@
+Wed Aug  6 14:46:33 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/Utils/DataReaderListenerImpl.h:
+
+          Fix compile error (hopefully)
+
 Wed Aug  6 14:21:41 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/ManyToMany/run_test.pl:
