@@ -66,13 +66,13 @@ sub generate_rtps_config {
     }
   }
   seek MYFILE, 0, 2;
-  say MYFILE "\n#START GENERATED TRANSPORT CONFIG";
+  print MYFILE "\n#START GENERATED TRANSPORT CONFIG";
   my $part_num;
   for($part_num = 0; $part_num < $num_participants; ++$part_num ) {
-    say MYFILE "\n[config\/domain_part_$part_num]";
-    say MYFILE "transports=rtps_transport_$part_num";
-    say MYFILE "\n[transport\/rtps_transport_$part_num]";
-    say MYFILE "$transport_type_line\n$use_multicast_line";
+    print MYFILE "\n\n[config\/domain_part_$part_num]\n";
+    print MYFILE "transports=rtps_transport_$part_num\n";
+    print MYFILE "\n[transport\/rtps_transport_$part_num]\n";
+    print MYFILE "$transport_type_line\n$use_multicast_line";
   }
   close MYFILE;
   $config_opts .= "-DCPSConfigFile $gen_conf_file ";

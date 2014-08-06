@@ -1,3 +1,10 @@
+Wed Aug  6 14:21:41 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/ManyToMany/run_test.pl:
+
+          Replaced uses of perl feature 'say' with simple print to
+          file statements for older version support.
+
 Tue Aug  5 20:01:00 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
