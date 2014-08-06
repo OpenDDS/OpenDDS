@@ -1,3 +1,10 @@
+Wed Aug  6 18:41:21 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Fixed for wchar builds.
+
 Wed Aug  6 14:46:33 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/Utils/DataReaderListenerImpl.h:

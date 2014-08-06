@@ -8,6 +8,7 @@
 
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_string.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -37,7 +38,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     //Look to see if the config file (.ini) was generated
     //for rtps participant processing
     for(int i = 0; i < argc; ++i) {
-      if(strstr(argv[i], "generated")) {
+      if(ACE_OS::strstr(argv[i], ACE_TEXT("generated"))) {
         generated_config = true;
       }
     }
