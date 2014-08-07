@@ -1,3 +1,10 @@
+Thu Aug  7 17:09:50 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Include RtpsDiscover.h in static builds.
+
 Wed Aug  6 18:41:21 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/ManyToMany/publisher.cpp:
