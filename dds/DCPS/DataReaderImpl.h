@@ -576,7 +576,7 @@ protected:
 
 protected:
     virtual void add_link(const DataLink_rch& link, const RepoId& peer);
-    
+
 private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
   bool send_sample_ack(
