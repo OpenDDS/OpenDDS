@@ -197,14 +197,33 @@ private:
   void detach_client(TransportClient* client);
   virtual void pre_detach(TransportClient*) {}
 
+  DataLink* find_connect_i(const RepoId& local_id,
+                           const AssociationData& remote_association,
+                           const ConnectionAttribs& attribs,
+                           bool active, bool connect);
+
+public:
+  /// Called by our friends, the TransportClient, and the DataLink.
+  /// Since this TransportImpl can be attached to many TransportClient
+  /// objects, and each TransportClient object could be "running" in
+  /// a separate thread, we need to protect all of the "reservation"
+  /// methods with a lock.  The protocol is that a client of ours
+  /// must "acquire" our reservation_lock_ before it can proceed to
+  /// call any methods that affect the DataLink reservations.  It
+  /// should release the reservation_lock_ as soon as it is done.
+  int acquire();
+  int tryacquire();
+  int release();
+  int remove();
+
+  virtual std::string transport_type() const = 0;
+
   /// Called by our friend, the TransportClient.
   /// Accessor for the TransportInterfaceInfo.  Accepts a reference
   /// to a TransportInterfaceInfo object that will be "populated"
   /// with this TransportImpl's connection information (ie, how
   /// another process would connect to this TransportImpl).
   bool connection_info(TransportLocator& local_info) const;
-
-  virtual std::string transport_type() const = 0;
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;

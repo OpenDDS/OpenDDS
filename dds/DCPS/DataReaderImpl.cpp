@@ -2916,10 +2916,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 
     WriterMapType::iterator where = writers_.find(header.publication_id_);
     if (writers_.end() != where) {
-      // TODO detect RTPS_UDP and Filter if waiting for historic samples
-      // If RTPS_UDP, don't filter
-      //return where->second->awaiting_historic_samples_;
-      return false;
+      return where->second->awaiting_historic_samples_;
     }
   }
 
@@ -3470,6 +3467,21 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
   if (writers_.end() != where) {
     // Stop filtering these
     where->second->awaiting_historic_samples_ = false;
+  }
+}
+
+void
+DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
+{
+  TransportClient::add_link(link, peer);
+  // Chek impl?
+  TransportImpl_rch impl = link->impl();
+  std::string type = impl->transport_type();
+  ACE_DEBUG((LM_INFO, "add_link transport type %s\n", type.c_str()));
+
+  // If this is an RTPS link
+  if (type == "rtps_udp") {
+    resume_sample_processing(peer);
   }
 }
 

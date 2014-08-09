@@ -13,6 +13,7 @@ using namespace Messenger;
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0), last_non_durable_(0)
 {
+  ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl\n"));
 }
 
 // Implementation skeleton destructor
@@ -42,13 +43,13 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
         if (durable) ++num_reads_;
 
-        cout << (durable ? "Durable " : "Volatile")
-             << " count = " << message.count << endl;
+        ACE_DEBUG((LM_INFO, "(%P|%t) %s count = %d\n",
+              durable ? "Durable " : "Volatile", message.count));
         if (durable && (message.count != num_reads_)) {
-          cerr << "ERROR: durable reader received out-of-order data" << endl;
+          ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: durable reader received out-of-order data\n"));
         } else if (!durable) {
           if (last_non_durable_ && message.count != last_non_durable_ + 1) {
-            cerr << "ERROR: volatile reader received out-of-order data" << endl;
+          ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: volatile reader received out-of-order data\n"));
           }
           last_non_durable_ = message.count;
         }
@@ -89,7 +90,7 @@ void DataReaderListenerImpl::on_subscription_matched (
     DDS::DataReader_ptr,
     const DDS::SubscriptionMatchedStatus &)
 {
-  cerr << "DataReaderListenerImpl::on_subscription_matched" << endl;
+  ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl::on_subscription_matched\n"));
 }
 
 void DataReaderListenerImpl::on_sample_rejected(

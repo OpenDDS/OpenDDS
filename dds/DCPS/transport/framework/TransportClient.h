@@ -66,7 +66,6 @@ protected:
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
 
-
   // Managing associations to remote peers:
 
   bool associate(const AssociationData& peer, bool active);
@@ -84,6 +83,8 @@ protected:
                                  void* extra = 0);
   bool remove_sample(const DataSampleElement* sample);
   bool remove_all_msgs();
+
+  virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
 
@@ -103,7 +104,6 @@ private:
   void use_datalink_i(const RepoId& remote_id,
                       const DataLink_rch& link,
                       Guard& guard);
-  void add_link(const DataLink_rch& link, const RepoId& peer);
   TransportSendListener* get_send_listener();
   TransportReceiveListener* get_receive_listener();
 
