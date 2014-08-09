@@ -32,7 +32,6 @@ my $Subscriber2 = PerlDDS::create_process("subscriber", $sub_opts);
 my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
 
 print $DCPSREPO->CommandLine() . "\n";
-print $Subscriber1->CommandLine() . "\n";
 
 $DCPSREPO->Spawn();
 if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
