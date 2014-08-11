@@ -1,6 +1,59 @@
 
 Version 3.5.1 of OpenDDS.
 
+- Support later (>= 4.7) versions of GCC compilers, and later (>= 2.0a)
+  builds of TAO. Configure script now downloads 2.2a by default.
+
+- Added IDL compiler support for typedef of string fields within unions. 
+  Added Java IDL compiler support for struct forward declarations.
+
+- Added Reliability test.
+
+- Added ManyToMany test to test associations with additional participants, 
+  publishers, subcribers, data readers and data writers.
+
+- Restored thrasher medium and high test cases.
+
+- Many updates to make test results more deterministic.
+
+- Rewrite Priority test to make it verify proper QOS functionality.
+
+- Rewrite LargeSample test to make it verify message contents are as expected.
+
+- DCPSInfoRepo no longer informs a subscriber about a crashed or killed
+  publisher.  This made associations of current publishers and subscribers
+  delayed until timeout was reached.
+
+- Fixed deadlock condition resulting from multiple datawriters. 
+
+- Fixed multicast with multiple participants in a single process.
+
+- Fixed condition where durable historic data could be handled twice by data
+  reader.
+
+- Fixed parsing of -ReassociateDelay argument by DCPSInfoRepo.
+
+- Fixed crash of long-lived zero-copy sequence when it is destroyed.  Fix
+  crash of zero-copy sequence accessing released instances.
+
+- BJ      Fixed race condition where the element has been marked with 
+          space available after the condition has timedout, but before
+          it has re-acquired the lock.
+
+- BJ      Fixed error in setting tail_ for removing a next instance sample
+          from the tail of the list.
+
+- BJ      Fixed case where first fragment is received, only one fragment
+          is present (so all contiguous fragments have been received),
+          but the last fragment has not been received.
+
+- BJ      Fixed setting the bits to the bitmap based on the fragment
+          heartbeat.
+
+- PO      When deleting a data reader or writer, set_deleted(true) so
+          that DataReaderImpl and DataWriterImpl will see that the
+          entity is deleted in add_association check.
+
 ========================================================================
 
 Version 3.5 of OpenDDS.

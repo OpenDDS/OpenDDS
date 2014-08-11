@@ -143,8 +143,9 @@ public:
 
   bool seen_data_;
 
-  // Is this a durable writer for which we are awaiting durable samples?
-  bool awaiting_historic_samples_;
+  // Non-zero if this a durable writer for which we are awaiting an 
+  // end historic samples control message
+  long historic_samples_timer_;
 
   /// State of the writer.
   WriterState state_;

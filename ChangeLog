@@ -1,3 +1,13 @@
+Mon Aug 11 21:20:50 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Recover from missing end_historic_samples message and resume
+          sample processing.
+
 Sat Aug  9 18:20:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
