@@ -182,6 +182,19 @@ DataReaderImpl::cleanup()
     content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
   }
 #endif
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+                   read_guard,
+                   this->writers_lock_);
+    // Cancel any uncancelled sweeper timers
+    WriterMapType::iterator writer;
+    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
+      if (writer->second->historic_samples_timer_ > 0) {
+        reactor_->cancel_timer(writer->second->historic_samples_timer_);
+      }
+      writer->second->historic_samples_timer_ = 0;
+    }
+  }
 }
 
 void DataReaderImpl::init(
@@ -319,12 +332,13 @@ DataReaderImpl::add_association(const RepoId& yourId,
           writer_id,
           info));
       // Scheule timer if necessary
-      if (info->historic_samples_timer_) {
+      if (info->historic_samples_timer_ == -1) {
         ACE_Time_Value ten_seconds(10);
         const void* arg = reinterpret_cast<const void*>(&writer.writerId);
-        reactor_->schedule_timer(&end_historic_sweeper_,
-                                 arg,
-                                 ten_seconds);
+        info->historic_samples_timer_ = 
+            reactor_->schedule_timer(&end_historic_sweeper_,
+                                     arg,
+                                     ten_seconds);
       }
 
       this->statistics_.insert(
