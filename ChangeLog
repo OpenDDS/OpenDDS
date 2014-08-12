@@ -1,3 +1,11 @@
+Tue Aug 12 20:53:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * configure:
+
+          Use the _no_makefiles version of the archive.  Previously, it
+          contained more than the 65k+ file limit.  We don't need them
+          anyway.
+
 Tue Aug 12 19:19:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * NEWS:
