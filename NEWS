@@ -1,40 +1,47 @@
 
 Version 3.5.1 of OpenDDS.
 
+Additions:
 - Support later (>= 4.7) versions of GCC compilers, and later (>= 2.0a)
   builds of TAO. Configure script now downloads 2.2a by default.
 
 - Added IDL compiler support for typedef of string fields within unions. 
   Added Java IDL compiler support for struct forward declarations.
 
-- Added Reliability test.
+- Updated UML design diagrams.
 
-- Added ManyToMany test to test associations with additional participants, 
-  publishers, subcribers, data readers and data writers.
-
-- Restored thrasher medium and high test cases.
-
-- Many updates to make test results more deterministic.
-
-- Rewrite Priority test to make it verify proper QOS functionality.
-
-- Rewrite LargeSample test to make it verify message contents are as expected.
+Fixes:
 
 - DCPSInfoRepo no longer informs a subscriber about a crashed or killed
   publisher.  This made associations of current publishers and subscribers
   delayed until timeout was reached.
 
-- Fixed deadlock condition resulting from multiple datawriters. 
+- Fixed deadlock condition in send_delayed_notifications() resulting from 
+  multiple datawriters. 
 
-- Fixed multicast with multiple participants in a single process.
+- Fixed deadlock in DataLinkSet::send_control().
+
+- Fixed deadlock in WaitSet::wait() and DataReaderImpl::data_received().
+
+- Fixed multicast transport with multiple participants in a single process.
 
 - Fixed condition where durable historic data could be handled twice by data
   reader.
 
 - Fixed parsing of -ReassociateDelay argument by DCPSInfoRepo.
 
-- Fixed crash of long-lived zero-copy sequence when it is destroyed.  Fix
+- Fixed crash of long-lived zero-copy sequence when it is destroyed and
   crash of zero-copy sequence accessing released instances.
+
+- Fixed unprotected access to DataWriterImpl::reader_info_,  and
+  TransportSendStrategy::pkt_chain_.
+
+- Fixed condition where RepoIds were not unique.  This caused... BJ
+
+- Fixed crash during shutdown of SPDP.
+
+- Fixed crash of SPDP and SEDP callbacks while the data reader is being
+  deleted.
 
 - BJ      Fixed race condition where the element has been marked with 
           space available after the condition has timedout, but before
@@ -53,6 +60,71 @@ Version 3.5.1 of OpenDDS.
 - PO      When deleting a data reader or writer, set_deleted(true) so
           that DataReaderImpl and DataWriterImpl will see that the
           entity is deleted in add_association check.
+
+- BJ      Added setting random id when no endpoint is provided
+          (persistence requires endpoints).
+          Changed owner to be the same as the defaulted FederationId.
+          Added hashing the federationId off of orb endpoints.
+          Changed back to using NIL_REPOSITORY.
+
+- BJ      Changed persisted publications to try to associate.
+
+- BH      Fixed pending_data() so that it also checks size of
+          released_data_ as indicated in the member function comments.
+
+- BH      When deleting a data writer, wait until all control messages
+          sent during unregistering of instances have been accounted before
+          proceeding after unregistering instances.  This avoid a later pure
+          virtual function call occurring trying to access a message block
+          that has been deleted.
+
+- BJ      Added using MessageTracker to track how many messages still need
+          to wait to be delivered or dropped before the listener can be
+          deleted.
+          Added tracking when a message is sent.
+          Fixed so TransportSendControlElement will delete itself before it
+          reports to the listener that the message has been delivered/dropped.
+
+Tests:
+
+- Many updates to make test results more deterministic.
+
+- Added Reliability test.
+
+- Added ManyToMany test to test associations with additional participants, 
+  publishers, subcribers, data readers and data writers.
+
+- Added PersistentInfoRepo test.
+
+- Restored thrasher medium and high test cases.
+
+- Rewrite Priority test to make it verify proper QOS functionality.
+
+- Rewrite LargeSample test to make it verify message contents are as expected.
+
+UNKNOWN:
+
+While fixing priority test...
+- BJ      Added logic to determine if lock is held prior to editing the head 
+          of the waiting_list_.
+
+- BJ      Added logic to determine if lock is held prior to waiting on the
+          condition.
+
+- BJ      Added Psuedovar to keep var to data readers while providing
+          derived pointer and change *_bit() methods to return
+          Psuedovars.
+
+- BJ      Calling fini_bit on discovery before deleting
+          BIT entities.
+          Added fini_bit to indicate that BIT entities are being
+          deleted (and should no longer be used).
+          Added class to wait for acknowledgements from other thread and
+          added method to request for Sedp::Task to acknowledge to spdp.
+          Added a WaitForAcks object to use in fini_bit to wait for
+          SpdpTransport (actually reactor) thread and Sedp::Task have sent
+          an acknowledgement, so that we know that all threads will see
+          that subscriber_bit_ is nil.
 
 ========================================================================
 

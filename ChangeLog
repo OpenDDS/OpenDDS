@@ -1,8 +1,18 @@
+Tue Aug 12 19:19:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * NEWS:
+
+          Updates for 3.5.1 release.
+
+        * dds/DCPS/WriterInfo.h:
+
+          Fix fuzz.
+
 Tue Aug 12 15:01:54 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
-          Properly retain timer for end_historic_samples cleanup, and 
+          Properly retain timer for end_historic_samples cleanup, and
           handle when not cancelled.
 
 Mon Aug 11 21:20:50 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
