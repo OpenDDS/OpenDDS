@@ -36,38 +36,25 @@ Fixes:
 - Fixed unprotected access to DataWriterImpl::reader_info_,  and
   TransportSendStrategy::pkt_chain_.
 
-- Fixed condition where RepoIds were not unique.  This caused... BJ
-
 - Fixed crash during shutdown of SPDP.
 
 - Fixed crash of SPDP and SEDP callbacks while the data reader is being
   deleted.
 
-- BJ      Fixed race condition where the element has been marked with 
-          space available after the condition has timedout, but before
-          it has re-acquired the lock.
+- Fixed problem for non-unique repo ids for multicast when multiple
+  (non-federated) DCPSInfoRepos are used on the same network.
 
-- BJ      Fixed error in setting tail_ for removing a next instance sample
-          from the tail of the list.
+- Fixed crash caused by back-pressure in transport causing the most recent
+  sample for an instance to be dropped.
 
-- BJ      Fixed case where first fragment is received, only one fragment
-          is present (so all contiguous fragments have been received),
-          but the last fragment has not been received.
-
-- BJ      Fixed setting the bits to the bitmap based on the fragment
-          heartbeat.
+- Fixed error in reconstruction logic for fragmentation of UDP packets.
 
 - PO      When deleting a data reader or writer, set_deleted(true) so
           that DataReaderImpl and DataWriterImpl will see that the
           entity is deleted in add_association check.
 
-- BJ      Added setting random id when no endpoint is provided
-          (persistence requires endpoints).
-          Changed owner to be the same as the defaulted FederationId.
-          Added hashing the federationId off of orb endpoints.
-          Changed back to using NIL_REPOSITORY.
-
-- BJ      Changed persisted publications to try to associate.
+- Fixed problem for persisted DCPSInfoRepo where persisted participants
+  were never dissociating.
 
 - BH      Fixed pending_data() so that it also checks size of
           released_data_ as indicated in the member function comments.
@@ -85,6 +72,8 @@ Fixes:
           Fixed so TransportSendControlElement will delete itself before it
           reports to the listener that the message has been delivered/dropped.
 
+- Fixed RTPS crash when participant is being deleted.
+
 Tests:
 
 - Many updates to make test results more deterministic.
@@ -101,30 +90,6 @@ Tests:
 - Rewrite Priority test to make it verify proper QOS functionality.
 
 - Rewrite LargeSample test to make it verify message contents are as expected.
-
-UNKNOWN:
-
-While fixing priority test...
-- BJ      Added logic to determine if lock is held prior to editing the head 
-          of the waiting_list_.
-
-- BJ      Added logic to determine if lock is held prior to waiting on the
-          condition.
-
-- BJ      Added Psuedovar to keep var to data readers while providing
-          derived pointer and change *_bit() methods to return
-          Psuedovars.
-
-- BJ      Calling fini_bit on discovery before deleting
-          BIT entities.
-          Added fini_bit to indicate that BIT entities are being
-          deleted (and should no longer be used).
-          Added class to wait for acknowledgements from other thread and
-          added method to request for Sedp::Task to acknowledge to spdp.
-          Added a WaitForAcks object to use in fini_bit to wait for
-          SpdpTransport (actually reactor) thread and Sedp::Task have sent
-          an acknowledgement, so that we know that all threads will see
-          that subscriber_bit_ is nil.
 
 ========================================================================
 
