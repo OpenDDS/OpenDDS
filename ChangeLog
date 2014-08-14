@@ -1,3 +1,9 @@
+Thu Aug 14 16:29:55 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * NEWS:
+
+          Edited content that I added to this release.
+
 Thu Aug 14 16:11:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

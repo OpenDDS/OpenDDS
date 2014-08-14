@@ -5,10 +5,10 @@ Additions:
 - Support later (>= 4.7) versions of GCC compilers, and later (>= 2.0a)
   builds of TAO. Configure script now downloads 2.2a by default.
 
-- Added IDL compiler support for typedef of string fields within unions. 
+- Added IDL compiler support for typedef of string fields within unions.
   Added Java IDL compiler support for struct forward declarations.
 
-- Updated UML design diagrams.
+- Updated UML design diagrams to reflect current code base.
 
 Fixes:
 
@@ -16,8 +16,8 @@ Fixes:
   publisher.  This made associations of current publishers and subscribers
   delayed until timeout was reached.
 
-- Fixed deadlock condition in send_delayed_notifications() resulting from 
-  multiple datawriters. 
+- Fixed deadlock condition in send_delayed_notifications() resulting from
+  multiple datawriters.
 
 - Fixed deadlock in DataLinkSet::send_control().
 
@@ -56,21 +56,14 @@ Fixes:
 - Fixed problem for persisted DCPSInfoRepo where persisted participants
   were never dissociating.
 
-- BH      Fixed pending_data() so that it also checks size of
-          released_data_ as indicated in the member function comments.
+- Fixed possible deadlock condition between a wait set and data reader.
 
-- BH      When deleting a data writer, wait until all control messages
-          sent during unregistering of instances have been accounted before
-          proceeding after unregistering instances.  This avoid a later pure
-          virtual function call occurring trying to access a message block
-          that has been deleted.
-
-- BJ      Added using MessageTracker to track how many messages still need
-          to wait to be delivered or dropped before the listener can be
-          deleted.
-          Added tracking when a message is sent.
-          Fixed so TransportSendControlElement will delete itself before it
-          reports to the listener that the message has been delivered/dropped.
+- Fixed activity improperly occuring when a partipant is being deleted
+  that caused pure virtual function calls. In one case, waiting now takes
+  place during deletion of a data writer until all control messages sent during
+  unregistration of instances are account for. In another case fixed so
+  TransportSendControlElement will delete itself before it reports to the listener
+  that the message has been delivered/dropped.
 
 - Fixed RTPS crash when participant is being deleted.
 
@@ -80,7 +73,7 @@ Tests:
 
 - Added Reliability test.
 
-- Added ManyToMany test to test associations with additional participants, 
+- Added ManyToMany test to test associations with additional participants,
   publishers, subcribers, data readers and data writers.
 
 - Added PersistentInfoRepo test.
