@@ -1,3 +1,14 @@
+Thu Aug 14 16:11:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Revert end_historic_samples cleanup changes from Tue Aug 12 15:01:54 UTC 2014
+          and Mon Aug 11 21:20:50 UTC 2014 as it was observed sometimes subscribers
+          were not getting the control message and so were running indefinitely.
+
 Wed Aug 13 14:28:12 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
 
         * NEWS:
