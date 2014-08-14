@@ -49,9 +49,10 @@ Fixes:
 
 - Fixed error in reconstruction logic for fragmentation of UDP packets.
 
-- PO      When deleting a data reader or writer, set_deleted(true) so
-          that DataReaderImpl and DataWriterImpl will see that the
-          entity is deleted in add_association check.
+- Fixed PublisherImpl and SubscriberImpl to properly set a DataWriterImpl
+  or DataReaderImpl entity's deleted flag during deletion to allow
+  association checks to properly identify entities that are being deleted and 
+  not proceed in association.
 
 - Fixed problem for persisted DCPSInfoRepo where persisted participants
   were never dissociating.
