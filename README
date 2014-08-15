@@ -121,27 +121,21 @@ This release of OpenDDS has been tested under the following platforms:
 Linux family:
 ** Red Hat EL 5, x86_64
 ** Red Hat EL 6.2, x86_64
+** Red Hat EL 6.3, x86_64
 ** Fedora Core 6, x86
-** Fedoras 12, 15, and 17, x86_64
+** Fedoras 12 x86_64
 ** Ubuntu 12.04 LTS, x86_64
 ** openSUSE 11.4, x86_64
-** openSUSE 12.2, x86_64
 
 Windows family:
-** Windows XP
 ** Windows Server 2003
 ** Windows 7 (64-bit)
 ** Windows Server 2008 R2 (64-bit)
-** Windows Mobile 6 (ARM)
 
 Others:
 ** Android NDK
+** SunOS 5.9 (Solaris 9) (x86)
 ** SunOS 5.10 (Solaris 10) (SPARC)
-** SunOS 5.11 (OpenSolaris 2009.06) (x86)
-** QNX Neutrino 6.3.2 (x86)
-** Macintosh OS X 10.6 "Snow Leopard" (x86)
-** VxWorks 6.9 RTP (x86) -- compiled but not yet tested
-
 
 ======================================================================
 * Compilers
@@ -152,16 +146,11 @@ This release of OpenDDS has been tested using the following compilers:
 ** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 ** Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
-** Microsoft Visual C++ 11 (Visual Studio 2012 / nmake projects)
-** gcc 4.1.x
-** gcc 4.2.1 (Apple Inc. build 5646 dot 1)
-** gcc 4.4.x
-** gcc 4.5.x
-** gcc 4.6.x
-** gcc 4.7.x
-** gcc 4.8.x
-** Clang 3.2
-** QNX gcc 3.3.5
+** gcc 4.1.1
+** gcc 4.4.3
+** gcc 4.6.1
+** gcc 4.8.2
+** Clang 3.4
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 ** Sun C++ 5.10 SunOS_i386 2009/06/03
 
