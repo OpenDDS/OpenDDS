@@ -3277,7 +3277,6 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   // Chek impl?
   TransportImpl_rch impl = link->impl();
   std::string type = impl->transport_type();
-  ACE_DEBUG((LM_INFO, "add_link transport type %s\n", type.c_str()));
 
   // If this is an RTPS link
   if (type == "rtps_udp") {

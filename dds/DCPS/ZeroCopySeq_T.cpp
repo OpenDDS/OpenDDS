@@ -177,6 +177,7 @@ ZeroCopyDataSeq<Sample_T, DEF_MAX>::decrement_references(void){
       if (ptrs_[ii]->ref_count() > 0) {
         ptrs_[ii]->dec_ref();
       }
+      // What if dec_ref returns 0, how is element deleted?
     }
   }
 }

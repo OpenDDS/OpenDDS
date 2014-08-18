@@ -154,6 +154,13 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 {
   DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
 
+  if (!dw_servant) {
+    ACE_ERROR((LM_ERROR, 
+              "(%P|%t) PublisherImpl::delete_datawriter - dynamic cast to DataWriterImpl failed\n"
+    ));
+    return DDS::RETCODE_ERROR;
+  }
+
   {
     DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
 
@@ -168,10 +175,8 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
-  if (dw_servant) {
-    // mark that the entity is being deleted
-    dw_servant->set_deleted(true);
-  }
+  // mark that the entity is being deleted
+  dw_servant->set_deleted(true);
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so

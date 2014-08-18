@@ -36,10 +36,9 @@ Fixes:
 - Fixed unprotected access to DataWriterImpl::reader_info_,  and
   TransportSendStrategy::pkt_chain_.
 
-- Fixed crash during shutdown of SPDP.
+- Fixed multiple RTPS crashes when participant is being deleted.
 
-- Fixed crash of SPDP and SEDP callbacks while the data reader is being
-  deleted.
+- Fixed RTPS crash when a data reader is being deleted.
 
 - Fixed problem for non-unique repo ids for multicast when multiple
   (non-federated) DCPSInfoRepos are used on the same network.
@@ -47,17 +46,16 @@ Fixes:
 - Fixed crash caused by back-pressure in transport causing the most recent
   sample for an instance to be dropped.
 
-- Fixed error in reconstruction logic for fragmentation of UDP packets.
+- Fixed error in reconstruction logic for fragmentation of udp and multicast
+  transport packets.
 
 - Fixed PublisherImpl and SubscriberImpl to properly set a DataWriterImpl
   or DataReaderImpl entity's deleted flag during deletion to allow
-  association checks to properly identify entities that are being deleted and 
+  association checks to properly identify entities that are being deleted and
   not proceed in association.
 
 - Fixed problem for persisted DCPSInfoRepo where persisted participants
   were never dissociating.
-
-- Fixed possible deadlock condition between a wait set and data reader.
 
 - Fixed activity improperly occuring when a partipant is being deleted
   that caused pure virtual function calls. In one case, waiting now takes
@@ -65,8 +63,6 @@ Fixes:
   unregistration of instances are account for. In another case fixed so
   TransportSendControlElement will delete itself before it reports to the listener
   that the message has been delivered/dropped.
-
-- Fixed RTPS crash when participant is being deleted.
 
 Tests:
 

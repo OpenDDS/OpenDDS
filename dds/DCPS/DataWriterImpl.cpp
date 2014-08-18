@@ -2109,6 +2109,11 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
   TypeSupportImpl* const typesupport =
     dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
 
+  if (!typesupport) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR DataWriterImpl::filter_out - Could not cast type support, not filtering\n"));
+    return false;
+  }
+
   return !evaluator.eval(elt.get_sample()->cont(),
     elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
     elt.get_header().cdr_encapsulation_, typesupport->getMetaStructForType(),
