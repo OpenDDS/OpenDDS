@@ -155,7 +155,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
 
   if (!dw_servant) {
-    ACE_ERROR((LM_ERROR, 
+    ACE_ERROR((LM_ERROR,
               "(%P|%t) PublisherImpl::delete_datawriter - dynamic cast to DataWriterImpl failed\n"
     ));
     return DDS::RETCODE_ERROR;

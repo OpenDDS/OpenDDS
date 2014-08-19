@@ -1,3 +1,9 @@
+Tue Aug 19 14:36:56 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Fix fuzz.
+
 Mon Aug 18 21:45:13 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * NEWS:
