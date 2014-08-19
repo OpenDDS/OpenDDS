@@ -554,6 +554,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   DataSampleElement* stale = const_cast<DataSampleElement*>(sample);
   if (dequeued) {
     release_buffer(stale);
+    stale = 0;
   } else {
     //
     // Search the sending_data_ list first.
@@ -584,6 +585,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       }
 
       release_buffer(stale);
+      stale = 0;
     } else {
       if (DCPS_debug_level > 9) {
         GuidConverter converter(publication_id_);
@@ -646,6 +648,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
   // keep the sample from the sending_data_ list still in
   // sample list since we will send it.
   DataSampleElement* stale = 0;
+  PublicationInstance* instance = 0;
 
   if (sending_data_.dequeue(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
@@ -654,13 +657,22 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     // transport and will be moved to the unsent list for resend.
     unsent_data_.enqueue_tail(sample);
 
+    // Get the handle
+    instance = sample->get_handle();
+
   } else {
     if (released_data_.dequeue(sample)) {
       // The remove_sample is requested when sample list size
       // reaches limit. In this case, the oldest sample is
       // moved to released_data_ already.
       stale = const_cast<DataSampleElement*>(sample);
+
+      // Get the handle
+      instance = sample->get_handle();
+
       release_buffer(stale);
+      // Reset the pointer
+      stale = 0;
 
     } else {
       // The sample is neither in not in the
@@ -673,7 +685,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     }
   }
 
-  this->wakeup_blocking_writers (stale, sample->get_handle());
+  this->wakeup_blocking_writers (stale, instance);
 
   if (!pending_data())
     empty_condition_.broadcast();

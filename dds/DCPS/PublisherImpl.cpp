@@ -202,6 +202,13 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     dw_servant->set_deleted(true);
   }
 
+  if (!dw_servant) {
+    ACE_ERROR((LM_ERROR, 
+              "(%P|%t) PublisherImpl::delete_datawriter - dynamic cast to DataWriterImpl failed\n"
+    ));
+    return DDS::RETCODE_ERROR;
+  }
+
   {
     DDS::Publisher_var dw_publisher(dw_servant->get_publisher());
 
@@ -221,7 +228,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::delete_datawriter --> to delete datawriter: %C\n", std::string(pubID_conv2).c_str()));
 
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::delete_datawriter --> setting deleted_ to true\n"));
-  //### toggle deleted_ to stop any future associating
+  // mark that the entity is being deleted
   dw_servant->set_deleted(true);
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE

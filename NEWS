@@ -1,6 +1,86 @@
 
 Version 3.5.1 of OpenDDS.
 
+Additions:
+- Support later (>= 4.7) versions of GCC compilers, and later (>= 2.0a)
+  builds of TAO. Configure script now downloads 2.2a by default.
+
+- Added IDL compiler support for typedef of string fields within unions.
+  Added Java IDL compiler support for struct forward declarations.
+
+- Updated UML design diagrams to reflect current code base.
+
+Fixes:
+
+- DCPSInfoRepo no longer informs a subscriber about a crashed or killed
+  publisher.  This made associations of current publishers and subscribers
+  delayed until timeout was reached.
+
+- Fixed deadlock condition in send_delayed_notifications() resulting from
+  multiple datawriters.
+
+- Fixed deadlock in DataLinkSet::send_control().
+
+- Fixed deadlock in WaitSet::wait() and DataReaderImpl::data_received().
+
+- Fixed multicast transport with multiple participants in a single process.
+
+- Fixed condition where durable historic data could be handled twice by data
+  reader.
+
+- Fixed parsing of -ReassociateDelay argument by DCPSInfoRepo.
+
+- Fixed crash of long-lived zero-copy sequence when it is destroyed and
+  crash of zero-copy sequence accessing released instances.
+
+- Fixed unprotected access to DataWriterImpl::reader_info_,  and
+  TransportSendStrategy::pkt_chain_.
+
+- Fixed multiple RTPS crashes when participant is being deleted.
+
+- Fixed RTPS crash when a data reader is being deleted.
+
+- Fixed problem for non-unique repo ids for multicast when multiple
+  (non-federated) DCPSInfoRepos are used on the same network.
+
+- Fixed crash caused by back-pressure in transport causing the most recent
+  sample for an instance to be dropped.
+
+- Fixed error in reconstruction logic for fragmentation of udp and multicast
+  transport packets.
+
+- Fixed PublisherImpl and SubscriberImpl to properly set a DataWriterImpl
+  or DataReaderImpl entity's deleted flag during deletion to allow
+  association checks to properly identify entities that are being deleted and
+  not proceed in association.
+
+- Fixed problem for persisted DCPSInfoRepo where persisted participants
+  were never dissociating.
+
+- Fixed activity improperly occuring when a partipant is being deleted
+  that caused pure virtual function calls. In one case, waiting now takes
+  place during deletion of a data writer until all control messages sent during
+  unregistration of instances are account for. In another case fixed so
+  TransportSendControlElement will delete itself before it reports to the listener
+  that the message has been delivered/dropped.
+
+Tests:
+
+- Many updates to make test results more deterministic.
+
+- Added Reliability test.
+
+- Added ManyToMany test to test associations with additional participants,
+  publishers, subcribers, data readers and data writers.
+
+- Added PersistentInfoRepo test.
+
+- Restored thrasher medium and high test cases.
+
+- Rewrite Priority test to make it verify proper QOS functionality.
+
+- Rewrite LargeSample test to make it verify message contents are as expected.
+
 ========================================================================
 
 Version 3.5 of OpenDDS.

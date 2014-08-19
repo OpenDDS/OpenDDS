@@ -153,7 +153,7 @@ PubDriver::parse_args(int& argc, ACE_TCHAR* argv[])
 
       this->msg_size_ = value;
 
-      got_n = true;
+      got_c = true;
     }
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-m")) == 0) {
       this->shmem_ = true;

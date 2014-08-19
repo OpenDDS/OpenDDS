@@ -339,7 +339,7 @@ elsif (!$ENV{'TAO_ROOT'} && $ENV{'ACE_ROOT'}
 
 if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
   my $urlbase = 'http://download.ociweb.com/TAO-' . $tao_version . '/';
-  my $file = 'ACE+TAO-' . $tao_version . '_with_latest_patches.'
+  my $file = 'ACE+TAO-' . $tao_version . '_with_latest_patches_NO_makefiles.'
     . ($slash eq '/' ? 'tar.gz' : 'zip');
   my $download_message = "Downloading ACE+TAO " . $tao_version . " with latest patches";
   if (-r $file) {

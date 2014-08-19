@@ -1,3 +1,121 @@
+Mon Aug 18 21:45:13 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * NEWS:
+
+          Minor updates for 3.5.1 release.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Removed unwanted log message.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Validate non-null result of dynamic cast.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Get and store instance handle prior to deleting sample.
+          When deleting sample, set pointer to null to avoid later use.
+
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Added comment.
+
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+          Initialize all data members.
+
+        * tests/DCPS/Messenger/publisher.cpp:
+
+          Correct spelling error.
+
+        * tests/DCPS/PersistentInfoRepo:
+
+          Set svn:ignore.
+
+        * tests/transport/simple/PubDriver.cpp:
+
+          Correct parsing of command line options.
+
+Fri Aug 15 20:53:30 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * README:
+
+          Updated list of operating systems and compilers OpenDDS
+          was tested on to reflect the test configurations used
+          for daily testing by OCI.
+
+Fri Aug 15 14:16:22 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * AUTHORS:
+
+          Added Peter Oschwald to list of authors.
+
+Thu Aug 14 16:37:40 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * NEWS:
+
+          Edited content that I added to this release.
+
+Thu Aug 14 16:29:55 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * NEWS:
+
+          Edited content that I added to this release.
+
+Thu Aug 14 16:11:10 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Revert end_historic_samples cleanup changes from Tue Aug 12 15:01:54 UTC 2014
+          and Mon Aug 11 21:20:50 UTC 2014 as it was observed sometimes subscribers
+          were not getting the control message and so were running indefinitely.
+
+Wed Aug 13 14:28:12 UTC 2014  Brian Johnson  <johnsonb@ociweb.com>
+
+        * NEWS:
+
+          Edited content that I added to this release.
+
+Tue Aug 12 20:53:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * configure:
+
+          Use the _no_makefiles version of the archive.  Previously, it
+          contained more than the 65k+ file limit.  We don't need them
+          anyway.
+
+Tue Aug 12 19:19:29 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * NEWS:
+
+          Updates for 3.5.1 release.
+
+        * dds/DCPS/WriterInfo.h:
+
+          Fix fuzz.
+
+Tue Aug 12 15:01:54 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Properly retain timer for end_historic_samples cleanup, and
+          handle when not cancelled.
+
+Mon Aug 11 21:20:50 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Recover from missing end_historic_samples message and resume
+          sample processing.
+
 Sat Aug  9 18:20:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

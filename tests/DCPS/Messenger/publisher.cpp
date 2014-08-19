@@ -136,7 +136,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep(small_time);
       }
 
-      std::cout << "Writer finihed " << std::endl;
+      std::cout << "Writer finished " << std::endl;
       writer->end();
 
       if (wait_for_acks) {

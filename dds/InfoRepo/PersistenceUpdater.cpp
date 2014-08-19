@@ -208,6 +208,11 @@ PersistenceUpdater::PersistenceUpdater()
   : persistence_file_(ACE_TEXT("InforepoPersist"))
   , reset_(false)
   , um_(0)
+  , allocator_(0)
+  , topic_index_(0)
+  , participant_index_(0)
+  , actor_index_(0)
+
 {}
 
 PersistenceUpdater::~PersistenceUpdater()
