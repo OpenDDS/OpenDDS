@@ -2910,6 +2910,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 
   // Ignore this sample if it is NOT a historic sample, and we are
   // waiting for historic sample from this writer
+/* Commenting out for 3.5.1 release - not backward compatible with 3.5.0
   if (!header.historic_sample_) {
     ACE_READ_GUARD_RETURN(
         ACE_RW_Thread_Mutex, read_guard, this->writers_lock_, false);
@@ -2918,7 +2919,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
     if (writers_.end() != where) {
       return where->second->awaiting_historic_samples_;
     }
-  }
+  } */
 
   return false;
 }

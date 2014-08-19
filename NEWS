@@ -1,6 +1,15 @@
 
 Version 3.5.1 of OpenDDS.
 
+Notes: Due to addition control messages in the 3.5.1 release, mixing 3.5.0
+  and 3.5.1 releases should work properly, but the 3.5.0 data readers can emit
+  the following error message when associating with a durable 3.5.1 data
+  writer:
+
+  ERROR: DataReaderImpl::data_received unexpected message_id = 11
+
+  Upgrade all endpoints to 3.5.1 to remove this error message.
+
 Additions:
 - Support later (>= 4.7) versions of GCC compilers, and later (>= 2.0a)
   builds of TAO. Configure script now downloads 2.2a by default.
@@ -24,9 +33,6 @@ Fixes:
 - Fixed deadlock in WaitSet::wait() and DataReaderImpl::data_received().
 
 - Fixed multicast transport with multiple participants in a single process.
-
-- Fixed condition where durable historic data could be handled twice by data
-  reader.
 
 - Fixed parsing of -ReassociateDelay argument by DCPSInfoRepo.
 
