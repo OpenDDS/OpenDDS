@@ -1,3 +1,7 @@
+Tue Aug 19 16:49:02 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * OpenDDS version 3.5.1 released.
+
 Tue Aug 19 16:39:54 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
