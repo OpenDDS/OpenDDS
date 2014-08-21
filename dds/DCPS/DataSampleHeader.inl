@@ -65,6 +65,7 @@ OpenDDS::DCPS::DataSampleHeader::DataSampleHeader(ACE_Message_Block& buffer)
   , lifespan_duration_sec_(0)
   , lifespan_duration_nanosec_(0)
   , publication_id_(GUID_UNKNOWN)
+  , publisher_id_(GUID_UNKNOWN)
 {
   this->init(&buffer);
 }

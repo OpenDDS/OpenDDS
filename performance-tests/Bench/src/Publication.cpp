@@ -36,6 +36,7 @@ Publication::Publication(
     enabled_( false),
     messages_( 0),
     timeouts_( 0),
+    duration_(0.0),
     publisher_(::DDS::Publisher::_nil())
 {
 }

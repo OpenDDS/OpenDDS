@@ -3,6 +3,7 @@
 #include "Foo_Singleton_Transport.h"
 
 Singleton_Transport::Singleton_Transport(void)
+  : current_foo_()
 {
 }
 

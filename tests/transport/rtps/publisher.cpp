@@ -80,8 +80,12 @@ class SimpleDataWriter : public TransportSendListener, public TransportClient
 public:
 
   explicit SimpleDataWriter(const RepoId& pub_id)
-    : pub_id_(pub_id), inline_qos_mode_(DEFAULT_QOS)
-  {}
+    : pub_id_(pub_id)
+    , sub_id_(GUID_UNKNOWN)
+    , callbacks_expected_(0)
+    , inline_qos_mode_(DEFAULT_QOS)
+  {
+  }
 
   virtual ~SimpleDataWriter() {}
 

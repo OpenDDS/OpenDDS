@@ -26,7 +26,8 @@ Subscription::Subscription(
 ) : name_( name),
     profile_( profile),
     verbose_( verbose),
-    enabled_( false)
+    enabled_( false),
+    listener_(0)
 {
 }
 

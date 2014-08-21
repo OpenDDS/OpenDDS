@@ -33,6 +33,9 @@ DataSampleElement::DataSampleElement(
     previous_send_sample_(0)
 
 {
+	std::fill(subscription_ids_,
+			  subscription_ids_ + OpenDDS::DCPS::MAX_READERS_PER_ELEM,
+			  GUID_UNKNOWN);
 }
 
 ACE_INLINE

@@ -165,7 +165,7 @@ struct TestParticipant: ACE_Event_Handler {
                   const OpenDDS::DCPS::GuidPrefix_t& prefix,
                   const OpenDDS::DCPS::EntityId_t& reader_ent)
     : sock_(sock), heartbeat_count_(0), acknack_count_(0), hbfrag_count_(0)
-    , recv_mb_(64 * 1024), do_nack_(true), reader_ent_(reader_ent)
+    , recv_hdr_(), recv_mb_(64 * 1024), do_nack_(true), reader_ent_(reader_ent)
   {
     const Header hdr = {
       {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,

@@ -15,7 +15,9 @@
 
 DataReaderListenerImpl::DataReaderListenerImpl(const Options& opt) :
         subscription_matched_(false),
-        configopt_(opt) { }
+        configopt_(opt),
+        last_si_()
+        { }
 
 // Implementation skeleton destructor
 

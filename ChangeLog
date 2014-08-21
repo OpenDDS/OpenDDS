@@ -1,3 +1,23 @@
+Thu Aug 21 20:01:08 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/StatisticalValue.h:
+        * performance-tests/Bench/src/StatisticalValue.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/DCPS/Priority/PublicationProfile.cpp:
+        * tests/DCPS/ConfigTransports/DataReaderListener.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/FooType/Foo_Singleton_Transport.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/transport/error_handling/SimpleTransportClient.h:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Address missing initialization of class members reported by Coverity.
 
 Local Variables:
 mode: change-log
