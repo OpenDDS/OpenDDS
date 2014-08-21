@@ -1,3 +1,10 @@
+Thu Aug 21 22:52:12 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/transport/error_handling/SimpleTransportClient.h:
+
+          Fix references to GUID_UNKNOWN.
+
 Thu Aug 21 20:01:08 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataSampleElement.inl:

@@ -12,7 +12,7 @@ TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
   disco_(0),
 #endif
   domainId_(0),
-  participantId_(GUID_UNKNOWN)
+  participantId_(OpenDDS::DCPS::GUID_UNKNOWN)
   {
   }
 
