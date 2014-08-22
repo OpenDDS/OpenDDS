@@ -1,3 +1,17 @@
+Fri Aug 22 20:08:21 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/Writer.cpp:
+
+          Don't sleep between sends.
+
+        * tests/DCPS/LargeSample/multicast.ini:
+
+          Double nak_depth.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Reworking logging.
+
 Fri Aug 22 16:11:35 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/MultiRepoTest/TestConfig.h:
