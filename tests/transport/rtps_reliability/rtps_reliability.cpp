@@ -664,6 +664,10 @@ void transport_setup()
   TransportInst_rch inst =
     TheTransportRegistry->create_inst("my_rtps", "rtps_udp");
   RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
+  if (!rtps_inst) {
+    std::cerr << "ERROR: Could not cast to RtpsUdpInst\n";
+    return;
+  }
   rtps_inst->use_multicast_ = false;
   rtps_inst->datalink_release_delay_ = 0;
   rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 500*1000 /*microseconds*/);

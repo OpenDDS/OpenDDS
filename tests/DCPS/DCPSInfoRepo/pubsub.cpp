@@ -37,6 +37,10 @@ public:
     OpenDDS::DCPS::RepoId partId, const DDS::Subscriber_var& bit_subscriber)
   {
     OpenDDS::RTPS::RtpsDiscovery* rtpsDisc = dynamic_cast<OpenDDS::RTPS::RtpsDiscovery*>(disc.in());
+    if (!rtpsDisc) {
+      std::cerr << "ERROR: Could not cast to RtpsDiscovery\n";
+      return;
+    }
     rtpsDisc->set_part_bit_subscriber(domain, partId, bit_subscriber);
   }
 };

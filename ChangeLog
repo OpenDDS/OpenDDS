@@ -1,3 +1,14 @@
+Mon Aug 25 20:24:17 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * tests/DCPS/ConfigTransports/Options.cpp:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Address null pointer dereferencing issues reported by
+          Coverity.
+
 Mon Aug 25 14:49:26 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
