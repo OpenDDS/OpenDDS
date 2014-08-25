@@ -428,10 +428,6 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states, bool adjust_ref_count ) = 0;
 
-  virtual DDS::ReturnCode_t take_generic(
-    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states, bool adjust_ref_count) = 0;
-
   virtual DDS::ReturnCode_t take(
     AbstractSamples& samples,
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,

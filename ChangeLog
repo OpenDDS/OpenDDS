@@ -1,3 +1,22 @@
+Mon Aug 25 14:49:26 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Remove pure virtual function DataReaderImpl::take_generic()
+          which wasn't being used anywhere.
+
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+          Remove ZeroCopySeq::decrement_reference() which was only
+          being called by code that implemented DataReaderImpl::take_generic().
+          This function had questionable semantics anyway since it
+          wasn't clear what the expected behavior was if the reference
+          count went to zero.
+
 Mon Aug 25 12:38:56 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
