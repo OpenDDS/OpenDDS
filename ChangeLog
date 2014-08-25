@@ -1,3 +1,11 @@
+Mon Aug 25 20:50:55 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+
+          Fuzz fixing.
+
 Mon Aug 25 20:24:17 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportReassembly.cpp:

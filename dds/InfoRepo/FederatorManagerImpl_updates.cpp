@@ -716,8 +716,8 @@ ManagerImpl::processCreate(const ParticipantUpdate* sample, const DDS::SampleInf
     sample->sender,
     sample->owner);
   if (!ownershipChanged) {
-	ACE_ERROR((LM_ERROR,
-			   ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("OpenDDS::Federator::ManagerImpl::processCreate(), ")
                ACE_TEXT("Could not change ownership\n")));
   }

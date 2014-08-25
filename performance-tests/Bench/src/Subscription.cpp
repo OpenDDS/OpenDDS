@@ -266,10 +266,10 @@ Subscription::associations() const
 {
   DDS::SubscriptionMatchedStatus subscriptionMatches = { 0, 0, 0, 0, 0};
   if (this->reader_->get_subscription_matched_status(subscriptionMatches) != DDS::RETCODE_OK) {
-	  ACE_ERROR((LM_ERROR,
-	             ACE_TEXT("(%P|%t) ERROR: ")
-	             ACE_TEXT("Test::Publication::associations, ")
-	             ACE_TEXT("Could not get publication matched status.\n")));
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("Test::Publication::associations, ")
+               ACE_TEXT("Could not get publication matched status.\n")));
   }
   return subscriptionMatches.current_count;
 }
