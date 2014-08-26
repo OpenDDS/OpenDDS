@@ -34,6 +34,7 @@
 #include <cstdlib>
 #include <typeinfo>
 #include <exception>
+#include <iostream>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
