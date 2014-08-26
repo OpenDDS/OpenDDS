@@ -754,7 +754,9 @@ bool run_test()
   // Participant 1 contains writer1 and reader1 and will use sockets directly
   // Participant 2 contains writer2 and reader2 and will use the OpenDDS tport
   // Associations: writer1 <-> reader2 and writer2 <-> reader1
-  OpenDDS::DCPS::GUID_t writer1, reader1, writer2, reader2;
+  OpenDDS::DCPS::GUID_t
+    writer1(GUID_UNKNOWN), reader1(GUID_UNKNOWN),
+    writer2(GUID_UNKNOWN), reader2(GUID_UNKNOWN);
   make_guids(writer1, reader1, writer2, reader2);
 
   ACE_SOCK_Dgram part1_sock;

@@ -12,6 +12,8 @@ using namespace Messenger;
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0),
+  num_received_dispose_(0),
+  num_received_unregister_(0),
   last_hdl_(::DDS::HANDLE_NIL),
   same_instance_(true)
 {
