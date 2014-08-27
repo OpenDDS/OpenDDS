@@ -10,7 +10,7 @@
 
 SyncServer_i::SyncServer_i (size_t pub_count, size_t sub_count
                             , CORBA::ORB_ptr orb, bool write_ior)
-  throw (SyncServer_i::InitError)
+  throw (SyncServer_i::InitError, CORBA::ORB::InvalidName)
   : count_ (0), pub_count_(pub_count), sub_count_(sub_count)
   , shutdown_ (false), ior_file_("sync.ior")
 {

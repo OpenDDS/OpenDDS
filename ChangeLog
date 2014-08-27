@@ -1,3 +1,24 @@
+Tue Aug 26 21:46:09 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+          Convert dynamic_casts to static_casts for performance
+          gain as suggested by Coverity.
+
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+
+          Added exception to throw list that Coverity reported was
+          missing.
+
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+
+          Added null pointer check that Coverity reported was missing.
+
+        * tests/DCPS/FooTest5/publisher.cpp:
+
+          Avoid null dereference check after Coverity reported such a
+          dereference was possible.
+
 Tue Aug 26 18:04:38 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/DataCollector_T.cpp:

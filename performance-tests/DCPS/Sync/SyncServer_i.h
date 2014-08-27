@@ -16,7 +16,7 @@ class Sync_Export SyncServer_i : public virtual POA_Sync::Server, public ACE_Tas
   typedef std::string InitError;
 
   SyncServer_i (size_t pub_count, size_t sub_count
-                , CORBA::ORB_ptr orb, bool write_ior=true) throw (InitError);
+                , CORBA::ORB_ptr orb, bool write_ior=true) throw (InitError, CORBA::ORB::InvalidName);
   virtual ~SyncServer_i (void);
 
   // synchrously wait for session completion.
