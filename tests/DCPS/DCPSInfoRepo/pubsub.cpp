@@ -451,6 +451,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ex._tao_print_exception ("Exception caught in publisher.cpp:");
       return 1;
     }
+  catch (const std::exception& ex)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) std::exception caught in main.cpp: %C\n"),
+                  ex.what()));
+      return 1;
+    }
 
   return failed;
 }

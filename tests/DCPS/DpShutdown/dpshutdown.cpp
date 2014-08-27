@@ -17,7 +17,7 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig_rch.h>
-
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
@@ -133,7 +133,23 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
                     participant2->get_instance_handle ()));
       }
 
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config2, participant2.in());
+      try {
+        OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config2, participant2.in());
+      }
+      catch (const OpenDDS::DCPS::Transport::MiscProblem &ex) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: TransportRegistry::bind_config() throws")
+                          ACE_TEXT(" Transport::MiscProblem exception\n")),
+                          -1);
+      }
+      catch (const OpenDDS::DCPS::Transport::NotFound &ex) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: TransportRegistry::bind_config() throws")
+                          ACE_TEXT(" Transport::NotFound exception\n")),
+                          -1);
+      }
 
       // Register TypeSupport (Messenger::Message)
       Messenger::MessageTypeSupport_var mts =

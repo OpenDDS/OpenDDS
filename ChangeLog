@@ -1,3 +1,12 @@
+Wed Aug 27 19:39:07 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+
+          Catch exceptions being missed as reported by
+          Coverity.
+
 Wed Aug 27 17:30:41 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/MultiRepoTest/TestConfig.h:
