@@ -1,3 +1,17 @@
+Wed Aug 27 14:18:17 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/MultiRepoTest/TestConfig.h:
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+
+          Make member function input argument types consistent
+          internal types.
+
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+
+          Intialize all members in contructor initializers.
+
 Tue Aug 26 21:46:09 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpDataLink.cpp:

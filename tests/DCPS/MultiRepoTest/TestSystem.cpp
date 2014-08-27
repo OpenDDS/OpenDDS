@@ -16,6 +16,16 @@
  */
 TestSystem::TestSystem( int argc, ACE_TCHAR** argv, char** envp)
  : config_( argc, argv, envp)
+ , subscriberParticipant_(0)
+ , publisherParticipant_(0)
+ , subscriber_(0)
+ , publisher_(0)
+ , readerTopic_(0)
+ , writerTopic_(0)
+ , dataReader_(0)
+ , dataWriter_(0)
+ , listener_(0)
+ , transport_(0)
 {
   // Grab a local reference to the factory to ensure that we perform the
   // operations - they should not get optimized away!  Note that this

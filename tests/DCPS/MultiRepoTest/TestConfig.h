@@ -90,33 +90,33 @@ class TestConfig {
     typedef std::map< long, long> DomainRepoMap;
 
     /// InfoRepo IOR.
-    std::string& infoRepoIor( int index = 0);
-    std::string  infoRepoIor( int index = 0) const;
+    std::string& infoRepoIor( StringVector::size_type index = 0);
+    std::string  infoRepoIor( StringVector::size_type index = 0) const;
     StringVector::size_type infoRepoIorSize() const;
 
     /// Topic subscribed to.
-    std::string& readerTopicName( int index = 0);
-    std::string  readerTopicName( int index = 0) const;
+    std::string& readerTopicName( StringVector::size_type index = 0);
+    std::string  readerTopicName( StringVector::size_type index = 0) const;
     StringVector::size_type readerTopicNameSize() const;
 
     /// Topic published.
-    std::string& writerTopicName( int index = 0);
-    std::string  writerTopicName( int index = 0) const;
+    std::string& writerTopicName( StringVector::size_type index = 0);
+    std::string  writerTopicName( StringVector::size_type index = 0) const;
     StringVector::size_type writerTopicNameSize() const;
 
     /// Domain subscribed in.
-    long& subscriberDomain( int index = 0);
-    long  subscriberDomain( int index = 0) const;
+    long& subscriberDomain( DomainVector::size_type index = 0);
+    long  subscriberDomain( DomainVector::size_type index = 0) const;
     DomainVector::size_type subscriberDomainSize() const;
 
     /// Domain published in.
-    long& publisherDomain( int index = 0);
-    long  publisherDomain( int index = 0) const;
+    long& publisherDomain( DomainVector::size_type index = 0);
+    long  publisherDomain( DomainVector::size_type index = 0) const;
     DomainVector::size_type publisherDomainSize() const;
 
     /// Mapping of domains to repositories.
-    long& domainToRepo( int domain = 0);
-    long  domainToRepo( int domain = 0) const;
+    long& domainToRepo( DomainVector::size_type domain = 0);
+    long  domainToRepo( DomainVector::size_type domain = 0) const;
     DomainRepoMap::size_type domainToRepoSize() const;
 
   private:

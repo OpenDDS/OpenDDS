@@ -36,7 +36,9 @@ Subscriber::~Subscriber()
 
 Subscriber::Subscriber( const Options& options)
  : options_( options),
-   waiter_( new DDS::WaitSet)
+   participant_(0),
+   waiter_( new DDS::WaitSet),
+   status_(0)
 {
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   // Create the DomainParticipant
