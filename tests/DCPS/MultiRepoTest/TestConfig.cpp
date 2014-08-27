@@ -149,7 +149,7 @@ TestConfig::typeName() const
 }
 
 std::string&
-TestConfig::infoRepoIor( StringVector::size_type index)
+TestConfig::infoRepoIor( int index)
 {
   if( (index < 0) || (unsigned(index) >= this->infoRepoIor_.size())) {
     throw OutOfRangeException();
@@ -160,7 +160,7 @@ TestConfig::infoRepoIor( StringVector::size_type index)
 }
 
 std::string
-TestConfig::infoRepoIor( StringVector::size_type index) const
+TestConfig::infoRepoIor( int index) const
 {
   if( (index < 0) || (unsigned(index) >= this->infoRepoIor_.size())) {
     throw OutOfRangeException();
@@ -183,7 +183,7 @@ TestConfig::transportAddressName() const
 }
 
 std::string&
-TestConfig::readerTopicName( StringVector::size_type index)
+TestConfig::readerTopicName( int index)
 {
   if( (index < 0) || (unsigned(index) >= this->readerTopicName_.size())) {
     throw OutOfRangeException();
@@ -194,7 +194,7 @@ TestConfig::readerTopicName( StringVector::size_type index)
 }
 
 std::string
-TestConfig::readerTopicName( StringVector::size_type index) const
+TestConfig::readerTopicName( int index) const
 {
   if( (index < 0) || (unsigned(index) >= this->readerTopicName_.size())) {
     throw OutOfRangeException();
@@ -205,7 +205,7 @@ TestConfig::readerTopicName( StringVector::size_type index) const
 }
 
 std::string&
-TestConfig::writerTopicName( StringVector::size_type index)
+TestConfig::writerTopicName( int index)
 {
   if( (index < 0) || (unsigned(index) >= this->writerTopicName_.size())) {
     throw OutOfRangeException();
@@ -216,7 +216,7 @@ TestConfig::writerTopicName( StringVector::size_type index)
 }
 
 std::string
-TestConfig::writerTopicName( StringVector::size_type index) const
+TestConfig::writerTopicName( int index) const
 {
   if( (index < 0) || (unsigned(index) >= this->writerTopicName_.size())) {
     throw OutOfRangeException();
@@ -227,7 +227,7 @@ TestConfig::writerTopicName( StringVector::size_type index) const
 }
 
 long&
-TestConfig::subscriberDomain( DomainVector::size_type index)
+TestConfig::subscriberDomain( int index)
 {
   if( (index < 0) || (unsigned(index) >= this->subscriberDomain_.size())) {
     throw OutOfRangeException();
@@ -238,7 +238,7 @@ TestConfig::subscriberDomain( DomainVector::size_type index)
 }
 
 long
-TestConfig::subscriberDomain( DomainVector::size_type index) const
+TestConfig::subscriberDomain( int index) const
 {
   if( (index < 0) || (unsigned(index) >= this->subscriberDomain_.size())) {
     throw OutOfRangeException();
@@ -249,7 +249,7 @@ TestConfig::subscriberDomain( DomainVector::size_type index) const
 }
 
 long&
-TestConfig::publisherDomain( DomainVector::size_type index)
+TestConfig::publisherDomain( int index)
 {
   if( (index < 0) || (unsigned(index) >= this->publisherDomain_.size())) {
     throw OutOfRangeException();
@@ -260,7 +260,7 @@ TestConfig::publisherDomain( DomainVector::size_type index)
 }
 
 long
-TestConfig::publisherDomain( DomainVector::size_type index) const
+TestConfig::publisherDomain( int index) const
 {
   if( (index < 0) || (unsigned(index) >= this->publisherDomain_.size())) {
     throw OutOfRangeException();
@@ -271,7 +271,7 @@ TestConfig::publisherDomain( DomainVector::size_type index) const
 }
 
 long&
-TestConfig::domainToRepo( DomainVector::size_type domain)
+TestConfig::domainToRepo( int domain)
 {
   DomainRepoMap::iterator where = this->domainRepoMap_.find( domain);
   if( where == this->domainRepoMap_.end()) {
@@ -283,7 +283,7 @@ TestConfig::domainToRepo( DomainVector::size_type domain)
 }
 
 long
-TestConfig::domainToRepo( DomainVector::size_type domain) const
+TestConfig::domainToRepo( int domain) const
 {
   DomainRepoMap::const_iterator where = this->domainRepoMap_.find( domain);
   if( where == this->domainRepoMap_.end()) {
