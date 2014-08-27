@@ -1,3 +1,13 @@
+Wed Aug 27 16:57:49 UTC 2014  Byron Harris  <harrisb@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/Ownership/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Address not checking function return status as reported
+          by Coverity.
+
 Wed Aug 27 14:18:17 UTC 2014  Byron Harris  <harrisb@ociweb.com>
 
         * tests/DCPS/MultiRepoTest/TestConfig.h:

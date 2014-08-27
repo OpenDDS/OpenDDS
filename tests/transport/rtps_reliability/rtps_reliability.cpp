@@ -761,7 +761,10 @@ bool run_test()
 
   ACE_SOCK_Dgram part1_sock;
   ACE_INET_Addr part1_addr;
-  part1_sock.open(part1_addr);
+  if (part1_sock.open(part1_addr) != 0) {
+    std::cerr << "ERROR: run_test() unable to open part1_sock" << std::endl;
+    exit(1);
+  }
   part1_sock.get_local_addr(part1_addr);
   part1_addr.set(part1_addr.get_port_number(), "localhost");
 

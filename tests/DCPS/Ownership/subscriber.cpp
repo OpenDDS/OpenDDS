@@ -28,6 +28,8 @@
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
 
+#include <iostream>
+
 int testcase = strength;
 
 DDS::Duration_t deadline = {DDS::DURATION_INFINITE_SEC,
@@ -200,7 +202,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           (matches2.current_count == 0 && matches2.total_count > 0)) {
         break;
       }
-      ws->wait(conditions, timeout);
+      DDS::ReturnCode_t wait_status = ws->wait(conditions, timeout);
+      if (wait_status != DDS::RETCODE_OK) {
+        std::cerr << "ERROR: Subscriber failed during waiting on wait set with return code "
+                  << wait_status << std::endl;
+      }
     }
 
     ws->detach_condition(condition1);
