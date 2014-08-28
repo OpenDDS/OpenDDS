@@ -1,3 +1,9 @@
+Thu Aug 28 20:02:32 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+          Fixed check of return value to fscanf
+
 Thu Aug 28 16:33:47 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tools/excelRTD/RTDMonitor.cpp:
