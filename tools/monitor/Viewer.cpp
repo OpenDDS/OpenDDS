@@ -212,7 +212,7 @@ namespace Monitor {
   {
     std::stringstream msg;
 
-    if (graphView == 0) {
+    if (!graphView) {
       msg << "No image to scale";
 
     }
@@ -520,7 +520,7 @@ namespace Monitor {
   void
   Viewer::saveImage(const QPixmap *p)
   {
-    if (p == 0) {
+    if (!p) {
       return;
     }
 

@@ -1,3 +1,15 @@
+Thu Aug 28 16:33:47 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tools/excelRTD/RTDMonitor.cpp:
+
+          Replaced pointer comparison to NULL with !pointer syntax
+          to removed compile warnings
+
+        * tools/monitor/Viewer.cpp:
+
+          Replaced pointer comparison to 0 with !pointer syntax
+          to removed compile warnings
+
 Thu Aug 28 15:54:55 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/DpShutdown/dpshutdown.cpp:
