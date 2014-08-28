@@ -7,12 +7,13 @@
  */
 
 #include "DataCollector_T.h"
+#include <iostream>
+#include <ios>
 
 #if !defined (__ACE_INLINE__)
 #include "DataCollector_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#include <iostream>
 
 namespace OpenDDS {
 namespace DCPS {
