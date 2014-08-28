@@ -136,14 +136,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       try {
         OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config2, participant2.in());
       }
-      catch (const OpenDDS::DCPS::Transport::MiscProblem &ex) {
+      catch (const OpenDDS::DCPS::Transport::MiscProblem &) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: TransportRegistry::bind_config() throws")
                           ACE_TEXT(" Transport::MiscProblem exception\n")),
                           -1);
       }
-      catch (const OpenDDS::DCPS::Transport::NotFound &ex) {
+      catch (const OpenDDS::DCPS::Transport::NotFound &) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
                           ACE_TEXT(" ERROR: TransportRegistry::bind_config() throws")

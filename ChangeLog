@@ -1,3 +1,9 @@
+Thu Aug 28 15:54:55 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+
+          Removed unused exception references
+
 Thu Aug 28 14:24:48 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataCollector_T.cpp:
