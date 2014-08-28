@@ -80,37 +80,6 @@ class TestConfig {
     ACE_TString& transportAddressName();
     ACE_TString  transportAddressName() const;
 
-    /// InfoRepo IOR.
-    std::string& infoRepoIor( int index = 0);
-    std::string  infoRepoIor( int index = 0) const;
-    int          infoRepoIorSize() const;
-
-    /// Topic subscribed to.
-    std::string& readerTopicName( int index = 0);
-    std::string  readerTopicName( int index = 0) const;
-    int          readerTopicNameSize() const;
-
-    /// Topic published.
-    std::string& writerTopicName( int index = 0);
-    std::string  writerTopicName( int index = 0) const;
-    int          writerTopicNameSize() const;
-
-    /// Domain subscribed in.
-    long& subscriberDomain( int index = 0);
-    long  subscriberDomain( int index = 0) const;
-    int   subscriberDomainSize() const;
-
-    /// Domain published in.
-    long& publisherDomain( int index = 0);
-    long  publisherDomain( int index = 0) const;
-    int   publisherDomainSize() const;
-
-    /// Mapping of domains to repositories.
-    long& domainToRepo( int domain = 0);
-    long  domainToRepo( int domain = 0) const;
-    int   domainToRepoSize() const;
-
-  private:
     /// Storage type for configured names.
     typedef std::vector<std::string> StringVector;
 
@@ -119,6 +88,38 @@ class TestConfig {
 
     /// Storage type for configured domains.
     typedef std::map< long, long> DomainRepoMap;
+
+    /// InfoRepo IOR.
+    std::string& infoRepoIor( int index = 0);
+    std::string  infoRepoIor( int index = 0) const;
+    StringVector::size_type infoRepoIorSize() const;
+
+    /// Topic subscribed to.
+    std::string& readerTopicName( int index = 0);
+    std::string  readerTopicName( int index = 0) const;
+    StringVector::size_type readerTopicNameSize() const;
+
+    /// Topic published.
+    std::string& writerTopicName( int index = 0);
+    std::string  writerTopicName( int index = 0) const;
+    StringVector::size_type writerTopicNameSize() const;
+
+    /// Domain subscribed in.
+    long& subscriberDomain( int index = 0);
+    long  subscriberDomain( int index = 0) const;
+    DomainVector::size_type subscriberDomainSize() const;
+
+    /// Domain published in.
+    long& publisherDomain( int index = 0);
+    long  publisherDomain( int index = 0) const;
+    DomainVector::size_type publisherDomainSize() const;
+
+    /// Mapping of domains to repositories.
+    long& domainToRepo( int domain = 0);
+    long  domainToRepo( int domain = 0) const;
+    DomainRepoMap::size_type domainToRepoSize() const;
+
+  private:
 
     /// Be chatty while executing.
     bool verbose_;
@@ -155,42 +156,42 @@ class TestConfig {
 };
 
 inline
-int
+TestConfig::StringVector::size_type
 TestConfig::infoRepoIorSize() const
 {
   return this->infoRepoIor_.size();
 }
 
 inline
-int
+TestConfig::StringVector::size_type
 TestConfig::readerTopicNameSize() const
 {
   return this->readerTopicName_.size();
 }
 
 inline
-int
+TestConfig::StringVector::size_type
 TestConfig::writerTopicNameSize() const
 {
   return this->writerTopicName_.size();
 }
 
 inline
-int
+TestConfig::DomainVector::size_type
 TestConfig::subscriberDomainSize() const
 {
   return this->subscriberDomain_.size();
 }
 
 inline
-int
+TestConfig::DomainVector::size_type
 TestConfig::publisherDomainSize() const
 {
   return this->publisherDomain_.size();
 }
 
 inline
-int
+TestConfig::DomainRepoMap::size_type
 TestConfig::domainToRepoSize() const
 {
   return this->domainRepoMap_.size();

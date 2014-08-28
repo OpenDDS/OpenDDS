@@ -40,6 +40,7 @@ PublicationProfile::PublicationProfile(
     rate_( static_cast<double>( rate)),
     mean_( static_cast<double>( size)),
     deviation_( static_cast<double>( deviation)),
+    nextSize_(0),
     sizeAvailable_( false),
     max_( max),
     min_( min)

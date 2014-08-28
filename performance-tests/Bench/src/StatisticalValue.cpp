@@ -23,6 +23,11 @@ namespace { // Anonymous namespace for file scope.
 
 } // End of anonymous namespace.
 
+Test::StatisticalImpl::StatisticalImpl()
+  : nextValue_(0.0)
+{
+}
+
 double
 Test::StatisticalImpl::uniform(
   double lower,

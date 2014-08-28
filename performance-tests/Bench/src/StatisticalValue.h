@@ -98,6 +98,8 @@ class StatisticalValue {
  */
 class StatisticalImpl {
   public:
+    StatisticalImpl();
+
     /// Extract a deviate value from a uniform distribution.
     double uniform(
              double lower,

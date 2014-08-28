@@ -301,7 +301,7 @@ void run_sample_list_test ()
   SendStateDataSampleList list;
   TEST_CHECK( list.begin() == list.end() );
 
-  OpenDDS::DCPS::RepoId repoId;
+  OpenDDS::DCPS::RepoId repoId(GUID_UNKNOWN);
   DataSampleElement* sample[3];
   ssize_t i;
   for (i = 0; i < 3; i ++)

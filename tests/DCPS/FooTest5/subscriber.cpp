@@ -506,7 +506,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               if (writers_completed != 0)
                 {
                   //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
-                  fscanf (writers_completed, "%d\n", &timeout_writes);
+                  if (fscanf (writers_completed, "%d\n", &timeout_writes) != 0) {
+                    ACE_ERROR ((LM_ERROR,
+                                ACE_TEXT("(%P|%t) ERROR: subscriber could not read timeout_writes\n")));
+                  }
                   // After we got the number of timed out writes, we should speed the
                   // receiving.
                   op_interval_ms = 0;

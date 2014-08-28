@@ -36,6 +36,7 @@ Publication::Publication(
     enabled_( false),
     messages_( 0),
     timeouts_( 0),
+    duration_(0.0),
     publisher_(::DDS::Publisher::_nil())
 {
 }
@@ -109,7 +110,12 @@ int
 Publication::associations() const
 {
   DDS::PublicationMatchedStatus publicationMatches = { 0, 0, 0, 0, 0};
-  this->writer_->get_publication_matched_status(publicationMatches);
+  if (this->writer_->get_publication_matched_status(publicationMatches) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("Test::Publication::associations, ")
+               ACE_TEXT("Could not get publication matched status.\n")));
+  }
   return publicationMatches.current_count;
 }
 

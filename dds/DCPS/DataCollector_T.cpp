@@ -7,12 +7,13 @@
  */
 
 #include "DataCollector_T.h"
+#include <iostream>
+#include <ios>
 
 #if !defined (__ACE_INLINE__)
 #include "DataCollector_T.inl"
 #endif /* __ACE_INLINE__ */
 
-#include <iostream>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -62,6 +63,9 @@ template<typename DatumType>
 std::ostream&
 DataCollector<DatumType>::insert(std::ostream& str) const
 {
+  std::ios initStrState(0);
+  initStrState.copyfmt(str);
+
   str.precision(5);
   str << std::scientific;
 
@@ -85,6 +89,7 @@ DataCollector<DatumType>::insert(std::ostream& str) const
     str << this->buffer_[ index] << std::endl;
   }
 
+  str.copyfmt(initStrState);
   return str;
 }
 

@@ -21,6 +21,7 @@
 #include "ace/Get_Opt.h"
 #include "ace/Sched_Params.h"
 
+#include <iostream>
 #include <cstdio>
 
 using namespace std;
@@ -142,8 +143,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
        /* Create topic for datawriter */
        PubMessageTypeSupportImpl* pubmessage_dt = new PubMessageTypeSupportImpl;
-       pubmessage_dt->register_type (dp.in (),
-                                    "DDSPerfTest::PubMessage");
+       DDS::ReturnCode_t register_status = pubmessage_dt->register_type (dp.in (),
+                                                                         "DDSPerfTest::PubMessage");
+       if (register_status != DDS::RETCODE_OK) {
+         std::cerr << "ERROR: sample_pub failed to register PubMessage with return code "
+                   << register_status << std::endl;
+         exit(1);
+       }
+
        DDS::Topic_var pubmessage_topic = dp->create_topic ("pubmessage_topic", // topic name
                                                            "DDSPerfTest::PubMessage", // topic type
                                                            TOPIC_QOS_DEFAULT,
@@ -170,8 +177,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
        /* Create topic for datareader */
        AckMessageTypeSupportImpl* ackmessage_dt = new AckMessageTypeSupportImpl;
-       ackmessage_dt->register_type (dp.in (),
-                                    "DDSPerfTest::AckMessage");
+       register_status = ackmessage_dt->register_type (dp.in (),
+                                                       "DDSPerfTest::AckMessage");
+       if (register_status != DDS::RETCODE_OK) {
+         std::cerr << "ERROR: sample_pub failed to register AckMessage with return code "
+                   << register_status << std::endl;
+         exit(1);
+       }
+
        DDS::Topic_var ackmessage_topic = dp->create_topic ("ackmessage_topic", // topic name
                                                            "DDSPerfTest::AckMessage", // topic type
                                                            TOPIC_QOS_DEFAULT,

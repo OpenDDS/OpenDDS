@@ -165,7 +165,7 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> shutdown_flag_; // Spdp shutting down
 
   struct DiscoveredParticipant {
-    DiscoveredParticipant() {}
+    DiscoveredParticipant() : bit_ih_(0) {}
     DiscoveredParticipant(const SPDPdiscoveredParticipantData& p,
                           const ACE_Time_Value& t)
       : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL) {}

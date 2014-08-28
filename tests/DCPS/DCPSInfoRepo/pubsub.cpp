@@ -37,6 +37,10 @@ public:
     OpenDDS::DCPS::RepoId partId, const DDS::Subscriber_var& bit_subscriber)
   {
     OpenDDS::RTPS::RtpsDiscovery* rtpsDisc = dynamic_cast<OpenDDS::RTPS::RtpsDiscovery*>(disc.in());
+    if (!rtpsDisc) {
+      std::cerr << "ERROR: Could not cast to RtpsDiscovery\n";
+      return;
+    }
     rtpsDisc->set_part_bit_subscriber(domain, partId, bit_subscriber);
   }
 };
@@ -445,6 +449,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   catch (const CORBA::Exception& ex)
     {
       ex._tao_print_exception ("Exception caught in publisher.cpp:");
+      return 1;
+    }
+  catch (const std::exception& ex)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) std::exception caught in main.cpp: %C\n"),
+                  ex.what()));
       return 1;
     }
 

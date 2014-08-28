@@ -163,17 +163,24 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     const long received = listener_svt->num_samples();
     const bool data_consistent = listener_svt->data_consistent();
+    std::string error = "";
+    bool show_data_loss = true;
+
     if (reliable && data_consistent && received < num_messages_expected) {
-      std::cout << "ERROR: data loss (" << received << "/"
-                << num_messages_expected << " received)\n";
+      error = "ERROR: ";
       status = EXIT_FAILURE;
     }
     else if (!data_consistent) {
       status = EXIT_FAILURE;
+      show_data_loss = false;
     }
-    else {
-      const unsigned int percent = ((num_messages_expected - received) * 100) / num_messages_expected;
-      std::cout << "data loss == " << percent << "% (" << received << "/"
+
+    if (show_data_loss && num_messages_expected) {
+      const unsigned int missed_msgs = (num_messages_expected - received);
+      const unsigned int percent = (missed_msgs * 100) / num_messages_expected;
+
+      std::cout << error
+                << "data loss == " << percent << "% (" << received << "/"
                 << num_messages_expected << " received)\n";
     }
 

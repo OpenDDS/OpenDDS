@@ -26,7 +26,8 @@ Subscription::Subscription(
 ) : name_( name),
     profile_( profile),
     verbose_( verbose),
-    enabled_( false)
+    enabled_( false),
+    listener_(0)
 {
 }
 
@@ -264,7 +265,12 @@ int
 Subscription::associations() const
 {
   DDS::SubscriptionMatchedStatus subscriptionMatches = { 0, 0, 0, 0, 0};
-  this->reader_->get_subscription_matched_status(subscriptionMatches);
+  if (this->reader_->get_subscription_matched_status(subscriptionMatches) != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("Test::Publication::associations, ")
+               ACE_TEXT("Could not get publication matched status.\n")));
+  }
   return subscriptionMatches.current_count;
 }
 

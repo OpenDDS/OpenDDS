@@ -80,8 +80,12 @@ class SimpleDataWriter : public TransportSendListener, public TransportClient
 public:
 
   explicit SimpleDataWriter(const RepoId& pub_id)
-    : pub_id_(pub_id), inline_qos_mode_(DEFAULT_QOS)
-  {}
+    : pub_id_(pub_id)
+    , sub_id_(GUID_UNKNOWN)
+    , callbacks_expected_(0)
+    , inline_qos_mode_(DEFAULT_QOS)
+  {
+  }
 
   virtual ~SimpleDataWriter() {}
 
@@ -198,6 +202,10 @@ int DDS_TEST::test(ACE_TString host, u_short port)
                                                              "rtps_udp");
 
   RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
+  if (!rtps_inst) {
+    std::cerr << "ERROR: Failed to cast to RtpsUdpInst\n";
+    return 1;
+  }
   rtps_inst->datalink_release_delay_ = 0;
   rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 100*1000 /*microseconds*/);
 

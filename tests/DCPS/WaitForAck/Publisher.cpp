@@ -47,6 +47,8 @@ Publisher::~Publisher()
 Publisher::Publisher( const Options& options)
  : status_( 0),
    options_( options),
+   participant_(0),
+   publisher_(0),
    waiter_( new DDS::WaitSet)
 {
   DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;

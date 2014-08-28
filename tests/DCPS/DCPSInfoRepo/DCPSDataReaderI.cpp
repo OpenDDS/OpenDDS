@@ -7,9 +7,12 @@
 
 // Implementation skeleton constructor
 TAO_DDS_DCPSDataReader_i::TAO_DDS_DCPSDataReader_i (void)
+  :
 #ifndef DDS_HAS_MINIMUM_BIT
-: disco_(0)
+  disco_(0),
 #endif
+  domainId_(0),
+  participantId_(OpenDDS::DCPS::GUID_UNKNOWN)
   {
   }
 

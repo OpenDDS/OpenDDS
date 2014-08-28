@@ -342,11 +342,6 @@ public:
     ::DDS::InstanceStateMask instance_states,
     bool adjust_ref_count=false);
 
-  ::DDS::ReturnCode_t take_generic(
-    ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states,
-    bool adjust_ref_count=false);
-
   ::DDS::InstanceHandle_t lookup_instance_generic(const void* data);
 
   virtual ::DDS::ReturnCode_t take(
