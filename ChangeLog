@@ -1,3 +1,13 @@
+Sun Aug 31 17:54:04 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataCollector_T.cpp:
+
+          Fix build error.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Increase log level for common messages
+
 Thu Aug 28 20:02:32 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/FooTest5/subscriber.cpp:

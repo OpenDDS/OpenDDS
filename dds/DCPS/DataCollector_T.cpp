@@ -8,7 +8,7 @@
 
 #include "DataCollector_T.h"
 #include <iostream>
-#include <ios>
+#include <fstream>
 
 #if !defined (__ACE_INLINE__)
 #include "DataCollector_T.inl"
@@ -63,7 +63,7 @@ template<typename DatumType>
 std::ostream&
 DataCollector<DatumType>::insert(std::ostream& str) const
 {
-  std::ios initStrState(0);
+  std::ofstream initStrState;
   initStrState.copyfmt(str);
 
   str.precision(5);

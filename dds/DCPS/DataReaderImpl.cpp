@@ -1349,7 +1349,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
     }
 
-    if (DCPS_debug_level >= 5) {
+    // Per sample logging
+    if (DCPS_debug_level >= 8) {
       GuidConverter reader_converter(subscription_id_);
       GuidConverter writer_converter(header.publication_id_);
 
