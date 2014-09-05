@@ -510,6 +510,10 @@ void
 DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                                     CORBA::Boolean notify_lost)
 {
+  if (readers.length() == 0) {
+    return;
+  }
+
   if (DCPS_debug_level >= 1) {
     GuidConverter writer_converter(publication_id_);
     GuidConverter reader_converter(readers[0]);

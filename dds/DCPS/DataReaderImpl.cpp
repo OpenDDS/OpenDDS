@@ -518,6 +518,10 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 {
   DBG_ENTRY_LVL("DataReaderImpl", "remove_associations", 6);
 
+  if (writers.length() == 0) {
+    return;
+  }
+
   if (DCPS_debug_level >= 1) {
     GuidConverter reader_converter(subscription_id_);
     GuidConverter writer_converter(writers[0]);

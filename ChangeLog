@@ -1,3 +1,11 @@
+Fri Sep  5 21:20:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Check lengths of readers and writers before accessing in
+          remove_associations().
+
 Fri Sep  5 16:25:41 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
