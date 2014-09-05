@@ -24,7 +24,6 @@ DomainParticipantFactoryImpl::DomainParticipantFactoryImpl()
   : qos_(TheServiceParticipant->initial_DomainParticipantFactoryQos()),
     default_participant_qos_(TheServiceParticipant->initial_DomainParticipantQos())
 {
-  ACE_DEBUG((LM_INFO, "MEMCHK: DomainParticipantFactoryImpl\n"));
 }
 
 // Implementation skeleton destructor
@@ -35,7 +34,6 @@ DomainParticipantFactoryImpl::~DomainParticipantFactoryImpl()
                "%T (%P|%t) DomainParticipantFactoryImpl::"
                "~DomainParticipantFactoryImpl()\n"));
   }
-  ACE_DEBUG((LM_INFO, "MEMCHK: ~DomainParticipantFactoryImpl\n"));
 }
 
 DDS::DomainParticipant_ptr

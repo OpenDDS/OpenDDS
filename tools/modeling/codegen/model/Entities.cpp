@@ -17,16 +17,10 @@ OpenDDS::Model::Entities::Entities(int& argc, ACE_TCHAR** argv)
   : delegate_()
   , config_(argc, argv)
 {
-  ACE_DEBUG((LM_INFO, "MEMCHK: Model::Entities\n"));
 }
 
 OpenDDS::Model::Entities::~Entities()
 {
-/*  StringToParticipantMap::iterator part;
-  for (part = participantByString_.begin(); part != participantByString_.end(); ++part) {
-    delete part->second;
-  } */
-  ACE_DEBUG((LM_INFO, "MEMCHK: Model::~Entities with %d DP\n", participantByString_.size()));
 }
 
 void

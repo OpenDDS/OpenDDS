@@ -29,7 +29,7 @@ OpenDDS::Model::Delegate::createParticipant(
 )
 {
   DDS::DomainParticipantFactory_var pfact = TheParticipantFactory;
-  DDS::DomainParticipant_var participant
+  DDS::DomainParticipant* participant
     = pfact->create_participant(
         domain,
         participantQos,

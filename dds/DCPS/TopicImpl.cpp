@@ -42,12 +42,10 @@ TopicImpl::TopicImpl(const RepoId                   topic_id,
   inconsistent_topic_status_.total_count_change = 0;
   monitor_ =
     TheServiceParticipant->monitor_factory_->create_topic_monitor(this);
-  ACE_DEBUG((LM_INFO, "MEMCHK: Topicmpl\n"));
 }
 
 TopicImpl::~TopicImpl()
 {
-  ACE_DEBUG((LM_INFO, "MEMCHK: ~Topicmpl\n"));
 }
 
 DDS::ReturnCode_t

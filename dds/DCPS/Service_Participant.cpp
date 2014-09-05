@@ -173,7 +173,6 @@ Service_Participant::Service_Participant()
     pending_timeout_(ACE_Time_Value::zero)
 {
   initialize();
-  ACE_DEBUG((LM_INFO, "MEMCHK: Service_Participant\n"));
 }
 
 Service_Participant::~Service_Participant()
@@ -189,7 +188,6 @@ Service_Participant::~Service_Participant()
     ACE_DEBUG((LM_DEBUG,
                "%T (%P|%t) Service_Participant::~Service_Participant()\n"));
   }
-  ACE_DEBUG((LM_INFO, "MEMCHK: ~Service_Participant\n"));
 }
 
 Service_Participant*

@@ -52,7 +52,6 @@ PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
   publisher_id_(id)
 {
   monitor_ = TheServiceParticipant->monitor_factory_->create_publisher_monitor(this);
-  ACE_DEBUG((LM_INFO, "MEMCHK: PublisherImpl\n"));
 }
 
 // Implementation skeleton destructor
@@ -66,7 +65,6 @@ PublisherImpl::~PublisherImpl()
                ACE_TEXT("PublisherImpl::~PublisherImpl, ")
                ACE_TEXT("some datawriters still exist.\n")));
   }
-  ACE_DEBUG((LM_INFO, "MEMCHK: ~PublisherImpl\n"));
 }
 
 DDS::InstanceHandle_t

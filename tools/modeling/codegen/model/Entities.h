@@ -132,7 +132,7 @@ class OpenDDS_Model_Export Entities  {
 
     // Maps for access via string key names.
 
-    typedef std::map< std::string, DDS::DomainParticipant_var>
+    typedef std::map< std::string, DDS::DomainParticipant_ptr>
             StringToParticipantMap;
 
     typedef std::map< std::string, std::string>

@@ -60,7 +60,6 @@ SubscriberImpl::SubscriberImpl(DDS::InstanceHandle_t       handle,
   listener_ = DDS::SubscriberListener::_duplicate(a_listener);
 
   monitor_ = TheServiceParticipant->monitor_factory_->create_subscriber_monitor(this);
-  ACE_DEBUG((LM_INFO, "MEMCHK: SubscriberImpl\n"));
 }
 
 // Implementation skeleton destructor
@@ -75,7 +74,6 @@ SubscriberImpl::~SubscriberImpl()
                ACE_TEXT("SubscriberImpl::~SubscriberImpl, ")
                ACE_TEXT("some datareaders still exist.\n")));
   }
-  ACE_DEBUG((LM_INFO, "MEMCHK: ~SubscriberImpl\n"));
 }
 
 DDS::InstanceHandle_t

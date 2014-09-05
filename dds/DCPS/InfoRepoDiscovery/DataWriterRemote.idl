@@ -22,7 +22,7 @@ module OpenDDS {
     interface DataWriterRemote {
 
       // will tell transport and call on_publication_matched()
-      void add_association(
+      oneway void add_association(
         in RepoId yourId,
         in ReaderAssociation reader,
         in boolean active
