@@ -29,6 +29,8 @@ TopicDescriptionImpl::TopicDescriptionImpl(const char*            topic_name,
   // were still using it.
   if (type_support_)
     type_support_->_add_ref();
+
+  ACE_DEBUG((LM_INFO, "MEMCHK: TopicDescriptionImpl\n"));
 }
 
 // Implementation skeleton destructor
@@ -37,6 +39,8 @@ TopicDescriptionImpl::~TopicDescriptionImpl()
   // were finished with the type_support
   if (type_support_)
     type_support_->_remove_ref();
+
+  ACE_DEBUG((LM_INFO, "MEMCHK: ~TopicDescriptionImpl\n"));
 }
 
 char *

@@ -33,9 +33,12 @@ inline
 OpenDDS::Model::Service< ModelName, InstanceTraits>::~Service()
 {
   DDS::DomainParticipantFactory_var pfact = TheParticipantFactory;
+ACE_DEBUG((LM_INFO, "Service dtor - with array of %d participants\n", participants_.size()));
   for( int index = 0; index < Participants::LAST_INDEX; ++index) {
     if( this->participants_[ index]) {
+ACE_DEBUG((LM_INFO, "Service dtor - participant %d exists\n", index));
       this->participants_[ index]->delete_contained_entities();
+ACE_DEBUG((LM_INFO, "Service dtor - deleting participant %d\n", index));
       pfact->delete_participant( this->participants_[ index]);
     }
   }

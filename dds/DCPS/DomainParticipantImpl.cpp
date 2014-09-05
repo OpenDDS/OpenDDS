@@ -87,11 +87,13 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
 {
   (void) this->set_listener(a_listener, mask);
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
+  ACE_DEBUG((LM_INFO, "MEMCHK: DomainParticipantImpl\n"));
 }
 
 // Implementation skeleton destructor
 DomainParticipantImpl::~DomainParticipantImpl()
 {
+  ACE_DEBUG((LM_INFO, "MEMCHK: ~DomainParticipantImpl\n"));
 }
 
 DDS::Publisher_ptr
