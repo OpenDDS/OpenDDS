@@ -31,6 +31,7 @@ elsif ($test->flag('multicast_async')) {
     $sub_opts .= "-DCPSConfigFile multicast.ini ";
 }
 
+$pub_opts .= " -r $reliable";
 $sub_opts .= " -r $reliable";
 
 $test->report_unused_flags();

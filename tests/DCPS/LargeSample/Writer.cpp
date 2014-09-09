@@ -67,7 +67,7 @@ namespace {
 }
 
 void
-Writer::write()
+Writer::write(bool reliable)
 {
   DDS::InstanceHandleSeq handles;
 
@@ -122,6 +122,10 @@ Writer::write()
     DDS::InstanceHandle_t handle2 = message_dw2->register_instance(message2);
 
     for (int i = 0; i < num_messages; i++) {
+
+      if (!reliable) {
+        ACE_OS::sleep(1);
+      }
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
