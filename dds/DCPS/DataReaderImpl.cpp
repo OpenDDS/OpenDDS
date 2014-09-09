@@ -65,6 +65,7 @@ DataReaderImpl::DataReaderImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     subscriber_servant_(0),
+    end_historic_sweeper_(this),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reactor_(0),
     liveliness_timer_id_(-1),
@@ -181,6 +182,20 @@ DataReaderImpl::cleanup()
     content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
   }
 #endif
+
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+                   read_guard,
+                   this->writers_lock_);
+    // Cancel any uncancelled sweeper timers
+    WriterMapType::iterator writer;
+    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
+      if (writer->second->historic_samples_timer_ > 0) {
+        reactor_->cancel_timer(writer->second->historic_samples_timer_);
+      }
+      writer->second->historic_samples_timer_ = 0;
+    }
+  }
 }
 
 void DataReaderImpl::init(
@@ -317,6 +332,17 @@ DataReaderImpl::add_association(const RepoId& yourId,
         WriterMapType::value_type(
           writer_id,
           info));
+
+      // Scheule timer if necessary
+      if (info->historic_samples_timer_ == -1) {
+        ACE_Time_Value ten_seconds(10);
+        const void* arg = reinterpret_cast<const void*>(&writer.writerId);
+        info->historic_samples_timer_ =
+            reactor_->schedule_timer(&end_historic_sweeper_,
+                                     arg,
+                                     ten_seconds);
+      }
+
       this->statistics_.insert(
         StatsMapType::value_type(
           writer_id,
@@ -2715,16 +2741,15 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 
   // Ignore this sample if it is NOT a historic sample, and we are
   // waiting for historic sample from this writer
-/* Commenting out for 3.5.1 release - not backward compatible with 3.5.0
   if (!header.historic_sample_) {
     ACE_READ_GUARD_RETURN(
         ACE_RW_Thread_Mutex, read_guard, this->writers_lock_, false);
 
     WriterMapType::iterator where = writers_.find(header.publication_id_);
     if (writers_.end() != where) {
-      return where->second->awaiting_historic_samples_;
+      return where->second->historic_samples_timer_ != 0;
     }
-  } */
+  }
 
   return false;
 }
@@ -3267,7 +3292,12 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
   WriterMapType::iterator where = writers_.find(pub_id);
   if (writers_.end() != where) {
     // Stop filtering these
-    where->second->awaiting_historic_samples_ = false;
+    if (where->second->historic_samples_timer_ != 0) {
+      if (where->second->historic_samples_timer_ > 0) {
+        reactor_->cancel_timer(where->second->historic_samples_timer_);
+      }
+      where->second->historic_samples_timer_ = 0;
+    }
   }
 }
 
@@ -3283,6 +3313,30 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   if (type == "rtps_udp") {
     resume_sample_processing(peer);
   }
+}
+
+EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(
+  DataReaderImpl* reader) : reader_(reader)
+{
+}
+
+EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
+{
+  ACE_DEBUG((LM_INFO, "EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper\n"));
+}
+
+int EndHistoricSamplesMissedSweeper::handle_timeout(
+    const ACE_Time_Value& ,
+    const void* arg)
+{
+  PublicationId pub_id = *reinterpret_cast<const PublicationId*>(arg);
+
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout\n"));
+  }
+
+  reader_->resume_sample_processing(pub_id);
+  return 0;
 }
 
 } // namespace DCPS

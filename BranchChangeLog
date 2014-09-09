@@ -1,8 +1,21 @@
+Mon Sep  8 22:05:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Track the historic samples timer.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Handle end historic samples message.  Set the historic samples timer
+          to cleanup after missed end historic samples message.  Cleanup timer.
+
 Thu Sep  4 19:14:39 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * BranchChangeLog:
 
-        Added for branch updates.
+          Added for branch updates.
 
 Local Variables:
 mode: change-log
