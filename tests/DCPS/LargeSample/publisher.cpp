@@ -43,9 +43,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
   
-  bool reliable = true;
-  parse_args(argc, argv, reliable);
-
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
@@ -140,6 +137,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     {
+      bool reliable = true;
+      parse_args(argc, argv, reliable);
       Writer writer(dw, dw2);
       writer.write(reliable);
     }

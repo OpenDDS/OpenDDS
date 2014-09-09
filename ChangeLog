@@ -1,3 +1,9 @@
+Tue Sep  9 21:11:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+
+          Fix parsing of -r to be non-destructive.
+
 Tue Sep  9 20:58:14 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/LargeSample/Writer.h:
