@@ -42,7 +42,7 @@ void parse_args(int argc, ACE_TCHAR* argv[], bool& reliable)
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
-  
+
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =

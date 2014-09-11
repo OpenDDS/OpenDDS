@@ -1,3 +1,9 @@
+Thu Sep 11 19:00:07 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+
+          Fix fuzz
+
 Thu Sep 11 16:22:40 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/LargeSample/pub_multicast_async.ini:
