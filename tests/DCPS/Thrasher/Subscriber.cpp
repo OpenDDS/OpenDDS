@@ -73,90 +73,92 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("%N:%l: main()")
                         ACE_TEXT(" create_participant failed!\n")), 1);
+    { // Scope for contained entities
+      // Create Subscriber
+      DDS::Subscriber_var subscriber =
+        participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+                                       DDS::SubscriberListener::_nil(),
+                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-    // Create Subscriber
-    DDS::Subscriber_var subscriber =
-      participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                     DDS::SubscriberListener::_nil(),
-                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(subscriber.in()))
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" create_subscriber failed!\n")), 2);
-
-    // Register Type (FooType)
-    FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" register_type failed!\n")), 5);
-
-    // Create Topic (FooTopic)
-    DDS::Topic_var topic =
-      participant->create_topic("FooTopic",
-                                ts->get_type_name(),
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(topic.in()))
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" create_topic failed!\n")), 6);
-
-    // Create DataReader
-    ProgressIndicator progress =
-      ProgressIndicator("(%P|%t)    SUBSCRIBER %d%% (%d samples received)\n",
-                        expected_samples);
-
-    DDS::DataReaderListener_var listener =
-      new DataReaderListenerImpl(received_samples, progress);
-
-    DDS::DataReaderQos reader_qos;
-    subscriber->get_default_datareader_qos(reader_qos);
-
-    reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-
-    DDS::DataReader_var reader =
-      subscriber->create_datareader(topic.in(),
-                                    reader_qos,
-                                    listener.in(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(reader.in()))
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: main()")
-                        ACE_TEXT(" create_datareader failed!\n")), 7);
-
-    // Block until Publisher completes
-    DDS::StatusCondition_var cond = reader->get_statuscondition();
-    cond->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(cond);
-
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};
-    do
-    {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
+      if (CORBA::is_nil(subscriber.in()))
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" wait failed!\n")), 8);
+                          ACE_TEXT(" create_subscriber failed!\n")), 2);
 
-      if (reader->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK)
+      // Register Type (FooType)
+      FooTypeSupport_var ts = new FooTypeSupportImpl;
+      if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" register_type failed!\n")), 5);
+
+      // Create Topic (FooTopic)
+      DDS::Topic_var topic =
+        participant->create_topic("FooTopic",
+                                  ts->get_type_name(),
+                                  TOPIC_QOS_DEFAULT,
+                                  DDS::TopicListener::_nil(),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (CORBA::is_nil(topic.in()))
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" create_topic failed!\n")), 6);
+
+      // Create DataReader
+      ProgressIndicator progress =
+        ProgressIndicator("(%P|%t)    SUBSCRIBER %d%% (%d samples received)\n",
+                          expected_samples);
+
+      DDS::DataReaderListener_var listener =
+        new DataReaderListenerImpl(received_samples, progress);
+
+      DDS::DataReaderQos reader_qos;
+      subscriber->get_default_datareader_qos(reader_qos);
+
+      reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+
+      DDS::DataReader_var reader =
+        subscriber->create_datareader(topic.in(),
+                                      reader_qos,
+                                      listener.in(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (CORBA::is_nil(reader.in()))
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" create_datareader failed!\n")), 7);
+
+      // Block until Publisher completes
+      DDS::StatusCondition_var cond = reader->get_statuscondition();
+      cond->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
+
+      DDS::WaitSet_var ws = new DDS::WaitSet;
+      ws->attach_condition(cond);
+
+      DDS::Duration_t timeout =
+        { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+      DDS::ConditionSeq conditions;
+      DDS::SubscriptionMatchedStatus matches = {0, 0, 0, 0, 0};
+      do
       {
-        ACE_ERROR ((LM_ERROR,
-          "ERROR: failed to get subscription matched status\n"));
-        return 1;
+        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l: main()")
+                            ACE_TEXT(" wait failed!\n")), 8);
+
+        if (reader->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK)
+        {
+          ACE_ERROR ((LM_ERROR,
+            "ERROR: failed to get subscription matched status\n"));
+          return 1;
+        }
       }
-    }
-    while (matches.current_count > 0 || matches.total_count < n_publishers);
-    ws->detach_condition(cond);
+      while (matches.current_count > 0 || matches.total_count < n_publishers);
+      ws->detach_condition(cond);
+
+    } // End scope for contained entities
 
     // Clean-up!
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- SUBSCRIBER PARTICIPANT DEL CONT ENTITIES\n")));

@@ -1,3 +1,15 @@
+Thu Sep 11 15:58:21 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Only log when debug level is set.
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Make entities go out of scope prior to calling 
+          partiipant->delete_containe_entities().
+
 Tue Sep  9 21:11:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/LargeSample/publisher.cpp:
