@@ -13,6 +13,7 @@ class SimpleTransportClient : public OpenDDS::DCPS::TransportClient
 
   SimpleTransportClient()
     : exceptionThrown(false)
+    , repoId_(OpenDDS::DCPS::GUID_UNKNOWN)
     {
     }
 

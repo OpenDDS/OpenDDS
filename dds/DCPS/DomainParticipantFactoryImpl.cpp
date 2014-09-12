@@ -29,6 +29,11 @@ DomainParticipantFactoryImpl::DomainParticipantFactoryImpl()
 // Implementation skeleton destructor
 DomainParticipantFactoryImpl::~DomainParticipantFactoryImpl()
 {
+  if (DCPS_debug_level > 0) {
+    ACE_DEBUG((LM_DEBUG,
+               "%T (%P|%t) DomainParticipantFactoryImpl::"
+               "~DomainParticipantFactoryImpl()\n"));
+  }
 }
 
 DDS::DomainParticipant_ptr

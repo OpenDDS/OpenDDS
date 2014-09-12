@@ -14,47 +14,69 @@ use strict;
 
 PerlDDS::add_lib_path('../LargeSample');
 
+my $test = new PerlDDS::TestFramework();
+
 my $status = 0;
 
-my $logging_p = "";#"-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
-#    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $logging_s = "";#"-DCPSDebugLevel 1 -ORBVerboseLogging 1 " .
-#    "-DCPSTransportDebugLevel 1";#6 -DCPSDebugLevel 10";
-my $pub_opts = "$logging_p -ORBLogFile pubx.log ";
-my $sub_opts = "$logging_s -ORBLogFile subx.log ";
-my $repo_bit_opt = '';
+$test->{dcps_transport_debug_level} = 0;
+$test->{nobits} = 1;
+my $pub_opts = "";
+my $sub_opts = "";
 my $reliable = 1;
 
-my $nobit = 1; # Set to a non-zero value to disable the Builtin Topics.
-my $app_bit_opt = '-DCPSBit 0 ' if $nobit;
-$repo_bit_opt = '-NOBITS' if $nobit;
-
 my $config_opts = "";
-if ($#ARGV < 0 || $ARGV[0] eq 'tcp') {
-    $config_opts .= ' -DCPSConfigFile tcp.ini ';
+if ($test->flag('udp')) {
+  $reliable = 0;
 }
-elsif ($ARGV[0] eq 'udp') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile udp.ini ";
-    $reliable = 0;
-}
-elsif ($ARGV[0] eq 'multicast') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile multicast.ini ";
-}
-elsif ($ARGV[0] eq 'multicast_async') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile pub_multicast_async.ini ";
-}
-elsif ($ARGV[0] eq 'shmem') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile shmem.ini ";
-}
-elsif ($ARGV[0] eq 'rtps') {
-    $config_opts .= "$app_bit_opt -DCPSConfigFile rtps.ini ";
-}
-elsif ($ARGV[0] ne '') {
-    print STDERR "ERROR: invalid test case\n";
-    exit 1;
+elsif ($test->flag('multicast_async')) {
+  $config_opts .= "-DCPSConfigFile pub_multicast_async.ini ";
 }
 
 $config_opts .= '-reliable ' if $reliable;
+
+sub generate_rtps_config {
+  my ($num_participants) = @_;
+  my $config_file;
+  my $gen_conf_file;
+  if ($test->flag('rtps_disc')) {
+    $config_file = "rtps_disc.ini";
+  }
+  elsif ($test->flag('rtps')) {
+    $config_file = "rtps.ini";
+  }
+  else {
+    #not rtps test
+    return;
+  }
+  $gen_conf_file = $config_file;
+  $gen_conf_file =~ s/\.ini/_generated\.ini/g;
+  print "Config File: $config_file   Gen Config File: $gen_conf_file\n";
+  use File::Copy;
+  copy($config_file , $gen_conf_file) or die "Copy failed: $!";
+  open MYFILE, '+<', $gen_conf_file or die "Open failed: $!";
+  my $transport_type_line;
+  my $use_multicast_line;
+  while(<MYFILE>)  {
+    chomp;
+    if ($_ =~ /use_multicast=/) {
+      $use_multicast_line = $_;
+    }
+    if ($_ =~ /transport_type=/) {
+      $transport_type_line = $_;
+    }
+  }
+  seek MYFILE, 0, 2;
+  print MYFILE "\n#START GENERATED TRANSPORT CONFIG";
+  my $part_num;
+  for($part_num = 0; $part_num < $num_participants; ++$part_num ) {
+    print MYFILE "\n\n[config\/domain_part_$part_num]\n";
+    print MYFILE "transports=rtps_transport_$part_num\n";
+    print MYFILE "\n[transport\/rtps_transport_$part_num]\n";
+    print MYFILE "$transport_type_line\n$use_multicast_line";
+  }
+  close MYFILE;
+  $config_opts .= "-DCPSConfigFile $gen_conf_file ";
+}
 
 sub divides_evenly
 {
@@ -81,16 +103,18 @@ my $base_delay_msec = 500;
 my $samples = 10;
 my $custom = 0;
 my $total_writers;
+my $pub_part = 2;
+my $sub_part = 2;
 if ($#ARGV < 1) {
     print "no args passed ($#ARGV)\n";
     $pub_processes = 2;
     $sub_processes = 2;
     $config_opts .= '-pub_processes ' . $pub_processes . ' ';
     $config_opts .= '-sub_processes ' . $sub_processes . ' ';
-    $config_opts .= '-pub_participants 2 ';
+    $config_opts .= '-pub_participants ' . $pub_part . ' ';
     $config_opts .= '-writers 2 ';
     $config_opts .= '-samples ' . $samples . ' ';
-    $config_opts .= '-sub_participants 2 ';
+    $config_opts .= '-sub_participants ' . $sub_part . ' ';
     $config_opts .= '-readers 2 ';
     $delay_msec = $base_delay_msec;
     $serialized_samples = 2 * 2 * 10; # pub_part * writers * samples
@@ -101,8 +125,8 @@ elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     print "total_writers=$total_writers, total_readers=$total_readers\n";
     my $writers = $total_writers;
     my $readers = $total_readers;
-    my $pub_part = 1;
-    my $sub_part = 1;
+    $pub_part = 1;
+    $sub_part = 1;
     if (divides_evenly($writers, 2)) {
         $pub_part = 2;
         $writers /= 2;
@@ -132,10 +156,11 @@ elsif ($ARGV[1] =~ /(\d+)[t|T][o|O](\d+)/) {
     $delay_msec = delay_msec_calc($total_writers, $samples, $base_delay_msec);
     $serialized_samples = $pub_part * $writers * $samples;
 }
-elsif ($ARGV[1] =~ /-\S_process/ ||
-       $ARGV[1] =~ /-\S_participant/ ||
+elsif ($ARGV[1] =~ /-\S+_process/ ||
+       $ARGV[1] =~ /-\S+_participant/ ||
        $ARGV[1] =~ /-readers/ ||
-       $ARGV[1] =~ /-writers/) {
+       $ARGV[1] =~ /-writers/ ||
+       $ARGV[1] =~ /-ORBSvcConf/) {
     $custom = 1;
     my $added_opts = $ARGV[1];
     $added_opts =~ s/-reliable//;
@@ -146,11 +171,11 @@ elsif ($ARGV[1] =~ /-\S_process/ ||
     if ($config_opts =~ /-sub_processes (\d+)/) {
         $sub_processes = $1;
     }
-    my $pub_part = 1;
+    $pub_part = 1;
     if ($config_opts =~ /-pub_participants (\d+)/) {
         $pub_part = $1;
     }
-    my $sub_part = 1;
+    $sub_part = 1;
     if ($config_opts =~ /-sub_participants (\d+)/) {
         $sub_part = $1;
     }
@@ -173,6 +198,7 @@ elsif ($ARGV[1] =~ /-\S_process/ ||
 
     # only used if -total_duration_msec is not in $ARGV[1]
     $serialized_samples = $pub_part * $writers * $samples;
+
 }
 else {
     print STDERR "ERROR: invalid argv[1]=$ARGV[1]\n";
@@ -211,18 +237,24 @@ if (!$custom) {
     elsif ($ARGV[2] =~ /^\d+$/) {
         $config_opts .= '-sample_size ' . $ARGV[2] . ' ';
     }
+
+    if ($#ARGV == 3 && $ARGV[3] eq "orb_csdtp") {
+	$config_opts .= '-ORBSvcConf svc_csdtp.conf ';
+    }
 }
 elsif ($config_opts !~ /-sample_size/) {
     $config_opts .= '-sample_size 10 ';
 }
 
-my $dcpsrepo_ior = "repo.ior";
-
-unlink $dcpsrepo_ior;
-unlink <*.log>;
-
-my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$repo_bit_opt -o $dcpsrepo_ior");
+if (($test->flag('rtps_disc') || $test->flag('rtps')) &&
+    ($sub_part > 1 || $pub_part > 1))
+{
+  #need to generate proper .ini files for multiple participants in a process
+  #each participant requires its own rtps transport
+  my $max_parts = $sub_part >= $pub_part ? $sub_part : $pub_part;
+  generate_rtps_config($max_parts);
+}
+$test->default_transport("tcp");
 
 my $index;
 print "config_opts=$config_opts\n";
@@ -230,93 +262,28 @@ $pub_opts .= $config_opts;
 print "pub_opts=$pub_opts\n";
 $sub_opts .= $config_opts;
 print "sub_opts=$sub_opts\n";
-my @Subscriber;
-my @Publisher;
+
+$test->setup_discovery();
+
 for ($index = 0; $index < $sub_processes; ++$index) {
-    my $temp_opts = $sub_opts;
-    $temp_opts =~ s/sub(x)\.log/sub$index\.log/;
-    push(@Subscriber, PerlDDS::create_process("subscriber", $temp_opts));
+    $test->process("subscriber #$index", "subscriber", $sub_opts);
 }
 for ($index = 0; $index < $pub_processes; ++$index) {
-    my $temp_opts = $pub_opts;
-    $temp_opts =~ s/pub(x)\.log/pub$index\.log/;
-    push(@Publisher, PerlDDS::create_process("publisher", $temp_opts));
-}
-
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn();
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill();
-    exit 1;
+    $test->process("publisher #$index", "publisher", $pub_opts);
 }
 
 for ($index = 0; $index < $pub_processes; ++$index) {
-    print $Publisher[$index]->CommandLine() . "\n";
-    $Publisher[$index]->Spawn();
+    $test->start_process("publisher #$index");
 }
 
 for ($index = 0; $index < $sub_processes; ++$index) {
-    print $Subscriber[$index]->CommandLine() . "\n";
-    $Subscriber[$index]->Spawn();
+    $test->start_process("subscriber #$index");
 }
 
 # first subscriber process needs to be killed a little after the
 # total expected duration
 my $wait_to_kill = $total_duration_msec * 2;
 print "wait_to_kill=$wait_to_kill\n";
-for ($index = 0; $index < $sub_processes; ++$index) {
-    my $SubscriberResult = $Subscriber[$index]->WaitKill($wait_to_kill);
-    if ($SubscriberResult != 0) {
-        print STDERR "ERROR: subscriber[$index] returned $SubscriberResult\n";
-        $status = 1;
-    }
-    $wait_to_kill = 10;
-}
-
-for ($index = 0; $index < $pub_processes; ++$index) {
-  my $PublisherResult = $Publisher[$index]->WaitKill(10);
-  if ($PublisherResult != 0) {
-      print STDERR "ERROR: publisher[$index] returned $PublisherResult\n";
-      $status = 1;
-  }
-}
-
-my $ir = $DCPSREPO->TerminateWaitKill(10);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print "**** Begin log file output *****\n";
-  for ($index = 0; $index < $pub_processes; ++$index) {
-      if (open FILE, "<", "pub$index.log") {
-          print "Publisher[$index]:\n";
-          while (my $line = <FILE>) {
-              print "$line";
-          }
-          print "\n\n";
-          close FILE;
-      }
-  }
-
-  for ($index = 0; $index < $sub_processes; ++$index) {
-      if (open FILE, "<", "sub$index.log") {
-          print "Subscriber[$index]:\n";
-          while (my $line = <FILE>) {
-              print "$line";
-          }
-          print "\n\n";
-          close FILE;
-      }
-  }
-  print "**** End log file output *****\n";
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+# ignore this issue that is already being tracked in redmine
+$test->ignore_error("(Redmine Issue# 1446)");
+exit $test->finish($wait_to_kill);

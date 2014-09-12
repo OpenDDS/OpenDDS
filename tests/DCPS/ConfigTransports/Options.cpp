@@ -101,10 +101,9 @@ Options::Options(int argc, ACE_TCHAR *argv[]) :
           this->compatible = (ACE_TString(currentArg) == ACE_TEXT("true"));
           arg_shifter.consume_arg();
         }
-      else if (0 == arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-d")))
+      else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-d"))) != 0)
         {
-
-          this->durability_kind_str = ACE_TEXT_ALWAYS_CHAR(arg_shifter.get_the_parameter(ACE_TEXT("-d")));
+          this->durability_kind_str = ACE_TEXT_ALWAYS_CHAR(currentArg);
           this->durability_kind = this->get_durability_kind(this->durability_kind_str);
           arg_shifter.consume_arg();
         }

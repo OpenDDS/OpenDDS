@@ -29,7 +29,7 @@ class TransportInst;
 class AssocationInfo;
 class ReaderIdSeq;
 class WriterIdSeq;
-class DataSampleList;
+class SendStateDataSampleList;
 
 /**
  * @brief Mix-in class for DDS entities which directly use the transport layer.
@@ -56,24 +56,24 @@ protected:
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
 
-
   // Managing associations to remote peers:
 
   bool associate(const AssociationData& peer, bool active);
   void disassociate(const RepoId& peerId);
-
 
   // Data transfer:
 
   bool send_response(const RepoId& peer,
                      const DataSampleHeader& header,
                      ACE_Message_Block* payload); // [DR]
-  void send(const DataSampleList& samples);
+  void send(const SendStateDataSampleList& samples);
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,
                                  void* extra = 0);
-  bool remove_sample(const DataSampleListElement* sample);
+  bool remove_sample(const DataSampleElement* sample);
   bool remove_all_msgs();
+
+  virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
 
@@ -88,7 +88,6 @@ private:
   void transport_detached(TransportImpl* which);
 
   // helpers
-  void add_link(const DataLink_rch& link, const RepoId& peer);
   TransportSendListener* get_send_listener();
   TransportReceiveListener* get_receive_listener();
 
@@ -102,7 +101,12 @@ private:
   // Associated Impls and DataLinks:
 
   std::vector<TransportImpl_rch> impls_;
-  DataLinkSet links_, send_links_;
+  DataLinkSet links_;
+
+  /// These are the links being used during the call to send(). This is made a member of the
+  /// class to minimize allocation/deallocations of the data link set.
+  DataLinkSet send_links_;
+
   DataLinkIndex data_link_index_;
 
 

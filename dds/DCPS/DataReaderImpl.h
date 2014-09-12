@@ -109,6 +109,20 @@ public:
 
 #endif
 
+// Class to cleanup in case EndHistoricSamples is missed
+class EndHistoricSamplesMissedSweeper : public ACE_Event_Handler {
+public:
+  EndHistoricSamplesMissedSweeper(DataReaderImpl* reader);
+  ~EndHistoricSamplesMissedSweeper();
+
+protected:
+  // Arg will be PublicationId
+  int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
+
+private:
+  DataReaderImpl* reader_;
+};
+
 /**
 * @class DataReaderImpl
 *
@@ -428,10 +442,6 @@ public:
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
     DDS::InstanceStateMask instance_states, bool adjust_ref_count ) = 0;
 
-  virtual DDS::ReturnCode_t take_generic(
-    DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-    DDS::InstanceStateMask instance_states, bool adjust_ref_count) = 0;
-
   virtual DDS::ReturnCode_t take(
     AbstractSamples& samples,
     DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
@@ -574,6 +584,9 @@ protected:
 
   DDS::SubscriberQos subqos_;
 
+protected:
+    virtual void add_link(const DataLink_rch& link, const RepoId& peer);
+
 private:
   /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
   bool send_sample_ack(
@@ -606,7 +619,7 @@ private:
   void resume_sample_processing(const PublicationId& pub_id);
 
   friend class InstanceState;
-
+  friend class EndHistoricSamplesMissedSweeper;
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var    topic_desc_;
@@ -615,6 +628,7 @@ private:
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;
+  EndHistoricSamplesMissedSweeper end_historic_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;

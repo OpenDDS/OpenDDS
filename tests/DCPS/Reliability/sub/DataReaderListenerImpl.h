@@ -26,10 +26,10 @@ public:
   DataReaderListenerImpl();
 
   virtual void on_sample_lost(
-    DDS::DataReader_ptr reader, DDS::SampleLostStatus status);
+    DDS::DataReader_ptr reader, const DDS::SampleLostStatus& status);
 
   virtual void on_sample_rejected(
-    DDS::DataReader_ptr reader, DDS::SampleRejectedStatus status);
+    DDS::DataReader_ptr reader, const DDS::SampleRejectedStatus& status);
 
   virtual void on_data_available(
     DDS::DataReader_ptr reader);

@@ -21,7 +21,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/DisjointSequence.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 
 #include <tao/Exception.h>
 
@@ -33,6 +34,7 @@
 #include <cstdlib>
 #include <typeinfo>
 #include <exception>
+#include <iostream>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -98,6 +100,18 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   bool have_frag_;
 };
 
+class DDS_TEST
+{
+public:
+
+  static void list_set(DataSampleElement &element, SendStateDataSampleList &list)
+  {
+    list.head_ = &element;
+    list.tail_ = &element;
+    list.size_ = 1;
+  }
+};
+
 
 struct SimpleDataWriter: SimpleTC, TransportSendListener {
   explicit SimpleDataWriter(const RepoId& pub_id)
@@ -105,12 +119,11 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     , alloc_(2, sizeof(TransportSendElementAllocator))
     , dsle_(pub_id, this, 0, &alloc_, 0)
   {
-    list_.head_ = list_.tail_ = &dsle_;
-    list_.size_ = 1;
-    dsle_.header_.message_id_ = SAMPLE_DATA;
-    dsle_.header_.message_length_ = 8;
-    dsle_.header_.byte_order_ = ACE_CDR_BYTE_ORDER;
-    payload_.init(dsle_.header_.message_length_);
+    DDS_TEST::list_set(dsle_, list_);
+    dsle_.get_header().message_id_ = SAMPLE_DATA;
+    dsle_.get_header().message_length_ = 8;
+    dsle_.get_header().byte_order_ = ACE_CDR_BYTE_ORDER;
+    payload_.init(dsle_.get_header().message_length_);
     const ACE_CDR::ULong encap = 0x00000100, // {CDR_LE, options} in LE format
       data = 0xDCBADCBA;
     Serializer ser(&payload_, host_is_bigendian, Serializer::ALIGN_CDR);
@@ -120,16 +133,15 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
 
   void send_data(const SequenceNumber& seq)
   {
-    dsle_.header_.sequence_ = seq;
-    dsle_.sample_ =
-      new ACE_Message_Block(DataSampleHeader::max_marshaled_size());
-    *dsle_.sample_ << dsle_.header_;
-    dsle_.sample_->cont(payload_.duplicate());
+    dsle_.get_header().sequence_ = seq;
+    dsle_.set_sample(new ACE_Message_Block(DataSampleHeader::max_marshaled_size()));
+    *dsle_.get_sample() << dsle_.get_header();
+    dsle_.get_sample()->cont(payload_.duplicate());
     ACE_DEBUG((LM_INFO, "sending with seq#: %q\n", seq.getValue()));
     send(list_);
   }
 
-  void data_delivered(const DataSampleListElement*)
+  void data_delivered(const DataSampleElement*)
   {
     ACE_DEBUG((LM_INFO, "SimpleDataWriter::data_delivered()\n"));
   }
@@ -141,8 +153,8 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
   void remove_associations(const ReaderIdSeq&, bool) {}
 
   TransportSendElementAllocator alloc_;
-  DataSampleList list_;
-  DataSampleListElement dsle_;
+  SendStateDataSampleList list_;
+  DataSampleElement dsle_;
   ACE_Message_Block payload_;
 };
 
@@ -154,7 +166,7 @@ struct TestParticipant: ACE_Event_Handler {
                   const OpenDDS::DCPS::GuidPrefix_t& prefix,
                   const OpenDDS::DCPS::EntityId_t& reader_ent)
     : sock_(sock), heartbeat_count_(0), acknack_count_(0), hbfrag_count_(0)
-    , recv_mb_(64 * 1024), do_nack_(true), reader_ent_(reader_ent)
+    , recv_hdr_(), recv_mb_(64 * 1024), do_nack_(true), reader_ent_(reader_ent)
   {
     const Header hdr = {
       {'R', 'T', 'P', 'S'}, PROTOCOLVERSION, VENDORID_OPENDDS,
@@ -653,6 +665,10 @@ void transport_setup()
   TransportInst_rch inst =
     TheTransportRegistry->create_inst("my_rtps", "rtps_udp");
   RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
+  if (!rtps_inst) {
+    std::cerr << "ERROR: Could not cast to RtpsUdpInst\n";
+    return;
+  }
   rtps_inst->use_multicast_ = false;
   rtps_inst->datalink_release_delay_ = 0;
   rtps_inst->heartbeat_period_ = ACE_Time_Value(0, 500*1000 /*microseconds*/);
@@ -738,12 +754,17 @@ bool run_test()
   // Participant 1 contains writer1 and reader1 and will use sockets directly
   // Participant 2 contains writer2 and reader2 and will use the OpenDDS tport
   // Associations: writer1 <-> reader2 and writer2 <-> reader1
-  OpenDDS::DCPS::GUID_t writer1, reader1, writer2, reader2;
+  OpenDDS::DCPS::GUID_t
+    writer1(GUID_UNKNOWN), reader1(GUID_UNKNOWN),
+    writer2(GUID_UNKNOWN), reader2(GUID_UNKNOWN);
   make_guids(writer1, reader1, writer2, reader2);
 
   ACE_SOCK_Dgram part1_sock;
   ACE_INET_Addr part1_addr;
-  part1_sock.open(part1_addr);
+  if (part1_sock.open(part1_addr) != 0) {
+    std::cerr << "ERROR: run_test() unable to open part1_sock" << std::endl;
+    exit(1);
+  }
   part1_sock.get_local_addr(part1_addr);
   part1_addr.set(part1_addr.get_port_number(), "localhost");
 

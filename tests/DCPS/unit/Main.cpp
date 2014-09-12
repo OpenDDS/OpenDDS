@@ -1,5 +1,8 @@
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/SendStateDataSampleList.h"
+#include "dds/DCPS/InstanceDataSampleList.h"
+#include "dds/DCPS/WriterDataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/RepoIdBuilder.h"
@@ -295,67 +298,69 @@ int run_domain_test ()
 
 void run_sample_list_test ()
 {
-  DataSampleList list;
+  SendStateDataSampleList list;
   TEST_CHECK( list.begin() == list.end() );
 
-  OpenDDS::DCPS::RepoId repoId;
-  DataSampleListElement* sample[3];
+  OpenDDS::DCPS::RepoId repoId(GUID_UNKNOWN);
+  DataSampleElement* sample[3];
   ssize_t i;
   for (i = 0; i < 3; i ++)
   {
     repoId.entityId.entityKey[2] = i;
     sample[i]
-      = new DataSampleListElement(repoId, 0, 0, 0, 0);
-    list.enqueue_tail_next_send_sample (sample[i]);
+      = new DataSampleElement(repoId, 0, 0, 0, 0);
+    list.enqueue_tail(sample[i]);
   }
   TEST_CHECK( list.begin() != list.end() );
-  DataSampleListIterator iter = list.begin();
-  TEST_CHECK( (*iter).publication_id_.entityId.entityKey[2] == 0 );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 0 );
+  SendStateDataSampleListIterator iter = list.begin();
+  TEST_CHECK( (*iter).get_pub_id().entityId.entityKey[2] == 0 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 0 );
   TEST_CHECK( ++iter != list.end() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 1 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 1 );
   TEST_CHECK( ++iter != list.end() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 2 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 2 );
   TEST_CHECK( ++iter == list.end() );
   TEST_CHECK( iter-- == list.end() );
   TEST_CHECK( iter != list.end() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 2 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 2 );
   TEST_CHECK( --iter != list.end() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 1 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 1 );
   TEST_CHECK( --iter != list.end() );
   TEST_CHECK( iter == list.begin() );
   TEST_CHECK( iter++ == list.begin() );
-  TEST_CHECK( iter->publication_id_.entityId.entityKey[2] == 1 );
+  TEST_CHECK( iter->get_pub_id().entityId.entityKey[2] == 1 );
 
-  // document that DataSampleList::iterator == not based on list itself
+  // document that SendStateDataSampleList::iterator == not based on list itself
+  // but rather on the *send_sample_ pointers in the DataSampleElements themselves
   iter = list.begin();
-  DataSampleList sameHeadTailList;
+  WriterDataSampleList sameHeadTailList;
   // calling enqueue_tail_next_sample will setup head and tail, but not mess with
   // send_sample params
-  sameHeadTailList.enqueue_tail_next_sample (sample[0]);
-  sameHeadTailList.enqueue_tail_next_sample (sample[2]);
+  sameHeadTailList.enqueue_tail (sample[0]);
+  sameHeadTailList.enqueue_tail (sample[2]);
   // will iterate the same, since sample 0-2 send_sample params were not changed
-  DataSampleListIterator iter1 = sameHeadTailList.begin();
+  SendStateDataSampleListIterator iter1 = SendStateDataSampleListIterator(sameHeadTailList.head(), sameHeadTailList.tail(), sameHeadTailList.head());
   TEST_CHECK( iter == iter1 );
   TEST_CHECK( ++iter == ++iter1 );
   TEST_CHECK( ++iter == ++iter1 );
   TEST_CHECK( ++iter == ++iter1 );
 
   // check same head, same current but different tail fails
-  DataSampleList tailDiffList;
-  tailDiffList.enqueue_tail_next_sample (sample[0]);
-  tailDiffList.enqueue_tail_next_sample (sample[1]);
-  TEST_CHECK( list.begin() != tailDiffList.begin() );
+  WriterDataSampleList tailDiffList;
+  tailDiffList.enqueue_tail (sample[0]);
+  tailDiffList.enqueue_tail (sample[1]);
+  SendStateDataSampleListIterator iter_tailDiffList = SendStateDataSampleListIterator(tailDiffList.head(), tailDiffList.tail(), tailDiffList.head());
+  TEST_CHECK( list.begin() != iter_tailDiffList );
 
   // check same tail, same current but different head fails
-  DataSampleList headDiffList;
-  headDiffList.enqueue_tail_next_sample (sample[1]);
-  headDiffList.enqueue_tail_next_sample (sample[2]);
+  WriterDataSampleList headDiffList;
+  headDiffList.enqueue_tail (sample[1]);
+  headDiffList.enqueue_tail (sample[2]);
   iter = list.begin();
-  iter1 = headDiffList.begin();
+  iter1 = SendStateDataSampleListIterator(headDiffList.head(), headDiffList.tail(), headDiffList.head());
   // verify both iters have same current
-  TEST_CHECK( ++iter->publication_id_.entityId.entityKey[2] == 1 );
-  TEST_CHECK( iter1->publication_id_.entityId.entityKey[2] == 1 );
+  TEST_CHECK( ++iter->get_pub_id().entityId.entityKey[2] == 1 );
+  TEST_CHECK( iter1->get_pub_id().entityId.entityKey[2] == 1 );
   TEST_CHECK( iter != iter1 );
 
 
@@ -369,11 +374,11 @@ void run_sample_list_test ()
 
 void run_next_sample_test (ssize_t size)
 {
-  DataSampleList list;
+  WriterDataSampleList list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
-  DataSampleListElement* middle = 0;
+  DataSampleElement* middle = 0;
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
@@ -390,20 +395,20 @@ void run_next_sample_test (ssize_t size)
   for (ssize_t i = 0; i < size; i ++)
   {
     repoId.entityId.entityKey[2] = i;
-    DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
+    DataSampleElement* sample
+      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
     }
-    list.enqueue_tail_next_sample (sample);
+    list.enqueue_tail (sample);
   }
-  ssize_t current_size = list.size_;
+  ssize_t current_size = list.size();
   bool ret = true;
 
   if (middle != 0)
   {
-    ret = list.dequeue_next_sample (middle);
+    ret = list.dequeue (middle);
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
@@ -429,8 +434,8 @@ void run_next_sample_test (ssize_t size)
     {
       continue;
     }
-    DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_sample (sample)
+    DataSampleElement* sample;
+    TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_sample_test: ")
@@ -438,7 +443,7 @@ void run_next_sample_test (ssize_t size)
       ACE_TEXT("\n")
     ));
     repoId.entityId.entityKey[2] = i;
-    TEST_CHECK (sample->publication_id_ == repoId);
+    TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")
@@ -448,24 +453,24 @@ void run_next_sample_test (ssize_t size)
   }
   }
 
-  TEST_CHECK (list.head_ == 0
-              && list.tail_ == 0
-              && list.size_ == 0);
+  TEST_CHECK (list.head() == 0
+              && list.tail() == 0
+              && list.size() == 0);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) run_next_sample_test: ")
-    ACE_TEXT("(list.head_ == 0 && list.tail_ == 0 && list.size_ == 0)")
+    ACE_TEXT("(list.head() == 0 && list.tail() == 0 && list.size() == 0)")
     ACE_TEXT("\n")
   ));
 }
 
 void run_next_send_sample_test (ssize_t size)
 {
-  DataSampleList list;
-  DataSampleList appended_list;
+  SendStateDataSampleList list;
+  SendStateDataSampleList appended_list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
-  DataSampleListElement* middle = 0;
+  DataSampleElement* middle = 0;
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
@@ -482,30 +487,30 @@ void run_next_send_sample_test (ssize_t size)
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
     repoId.entityId.entityKey[2] = i;
-    DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
-    list.enqueue_tail_next_send_sample (sample);
+    DataSampleElement* sample
+      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
+    list.enqueue_tail (sample);
   }
 
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
     repoId.entityId.entityKey[2] = i;
-    DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
+    DataSampleElement* sample
+      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
     }
-    appended_list.enqueue_tail_next_send_sample (sample);
+    appended_list.enqueue_tail (sample);
   }
-  list.enqueue_tail_next_send_sample (appended_list);
+  list.enqueue_tail (appended_list);
 
-  ssize_t current_size = list.size_;
+  ssize_t current_size = list.size();
   bool ret = true;
 
   if (middle != 0)
   {
-    ret = list.dequeue_next_send_sample (middle);
+    ret = list.dequeue (middle);
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
@@ -536,8 +541,8 @@ void run_next_send_sample_test (ssize_t size)
     {
       continue;
     }
-    DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_send_sample (sample)
+    DataSampleElement* sample;
+    TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
@@ -545,7 +550,7 @@ void run_next_send_sample_test (ssize_t size)
       ACE_TEXT("\n")
     ));
     repoId.entityId.entityKey[2] = i;
-    TEST_CHECK (sample->publication_id_ == repoId);
+    TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")
@@ -554,23 +559,23 @@ void run_next_send_sample_test (ssize_t size)
     delete sample;
   }
   }
-  TEST_CHECK (list.head_ == 0
-              && list.tail_ == 0
-              && list.size_ == 0);
+  TEST_CHECK (list.head() == 0
+              && list.tail() == 0
+              && list.size() == 0);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
-    ACE_TEXT("(list.head_ == 0 && list.tail_ == 0 && list.size_ == 0)")
+    ACE_TEXT("(list.head() == 0 && list.tail() == 0 && list.size() == 0)")
     ACE_TEXT("\n")
   ));
 }
 
 void run_next_instance_sample_test (ssize_t size)
 {
-  DataSampleList list;
+  InstanceDataSampleList list;
   ssize_t pub_id_head = 0;
   ssize_t pub_id_tail = size - 1;
   ssize_t pub_id_middle = size/2;
-  DataSampleListElement* middle = 0;
+  DataSampleElement* middle = 0;
 
   OpenDDS::DCPS::TransportSendElementAllocator trans_allocator(size, sizeof (OpenDDS::DCPS::TransportSendElement));
 
@@ -587,21 +592,21 @@ void run_next_instance_sample_test (ssize_t size)
   for (ssize_t i = 0; i < size; i ++)
   {
     repoId.entityId.entityKey[2] = i;
-    DataSampleListElement* sample
-      = new DataSampleListElement(repoId, 0, 0, &trans_allocator, 0);
+    DataSampleElement* sample
+      = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
     {
       middle = sample;
     }
-    list.enqueue_tail_next_instance_sample (sample);
+    list.enqueue_tail (sample);
   }
 
-  ssize_t current_size = list.size_;
+  ssize_t current_size = list.size();
   bool ret = true;
 
   if (middle != 0)
   {
-    ret = list.dequeue_next_instance_sample (middle);
+    ret = list.dequeue (middle);
     if (current_size == 0)
     {
       TEST_CHECK (ret == false);
@@ -623,7 +628,7 @@ void run_next_instance_sample_test (ssize_t size)
     }
   }
 
-  { // make VC6 buid - avoid error C2374: 'i' : redefinition; multiple initialization
+  { // make VC6 build - avoid error C2374: 'i' : redefinition; multiple initialization
   for (ssize_t i = pub_id_head;
        i <= pub_id_tail;
        i ++)
@@ -632,8 +637,8 @@ void run_next_instance_sample_test (ssize_t size)
     {
       continue;
     }
-    DataSampleListElement* sample;
-    TEST_CHECK (list.dequeue_head_next_instance_sample (sample)
+    DataSampleElement* sample;
+    TEST_CHECK (list.dequeue_head (sample)
                 == true);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
@@ -641,7 +646,7 @@ void run_next_instance_sample_test (ssize_t size)
       ACE_TEXT("\n")
     ));
     repoId.entityId.entityKey[2] = i;
-    TEST_CHECK (sample->publication_id_ == repoId);
+    TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
       ACE_TEXT("(sample->publication_id_ == converter)")
@@ -650,9 +655,9 @@ void run_next_instance_sample_test (ssize_t size)
     delete sample;
   }
   }
-  TEST_CHECK (list.head_ == 0
-              && list.tail_ == 0
-              && list.size_ == 0);
+  TEST_CHECK (list.head() == 0
+              && list.tail() == 0
+              && list.size() == 0);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")
     ACE_TEXT("")

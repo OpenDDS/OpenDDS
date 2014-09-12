@@ -14,7 +14,6 @@
 
 #include "TransportImpl.h"
 #include "TransportInst.h"
-#include "SendResponseListener.h"
 
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
@@ -54,7 +53,8 @@ DataLink::DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback,
     db_allocator_(0),
     is_loopback_(is_loopback),
     is_active_(is_active),
-    start_failed_(false)
+    start_failed_(false),
+    send_response_listener_("DataLink")
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
@@ -656,7 +656,6 @@ SendControlStatus
 DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* message)
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
-  SendResponseListener listener;
 
   TransportSendControlElement* elem;
 
@@ -665,15 +664,17 @@ DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* messag
                           this->send_control_allocator_->malloc()),
                         TransportSendControlElement(1,  // initial_count
                                                     GUID_UNKNOWN,
-                                                    &listener,
+                                                    &send_response_listener_,
                                                     header,
                                                     message,
                                                     this->send_control_allocator_),
                         SEND_CONTROL_ERROR);
+  send_response_listener_.track_message();
 
+  RepoId senderId(header.publication_id_);
   send_start();
   send(elem);
-  send_stop();
+  send_stop(senderId);
 
   return SEND_CONTROL_OK;
 }
@@ -1167,14 +1168,16 @@ DataLink::target_intersection(const RepoId& pub_id, const GUIDSeq& in,
   GUIDSeq_var res;
   GuardType guard(this->pub_map_lock_);
   ReceiveListenerSet_rch rlset = this->pub_map_.find(pub_id);
-  n_subs = rlset->map().size();
-  const CORBA::ULong len = in.length();
-  for (CORBA::ULong i(0); i < len; ++i) {
-    if (rlset->exist(in[i])) {
-      if (res.ptr() == 0) {
-        res = new GUIDSeq;
+  if (!rlset.is_nil()) {
+    n_subs = rlset->map().size();
+    const CORBA::ULong len = in.length();
+    for (CORBA::ULong i(0); i < len; ++i) {
+      if (rlset->exist(in[i])) {
+        if (res.ptr() == 0) {
+          res = new GUIDSeq;
+        }
+        push_back(res.inout(), in[i]);
       }
-      push_back(res.inout(), in[i]);
     }
   }
   return res._retn();

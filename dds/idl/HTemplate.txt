@@ -1,4 +1,8 @@
-/** Servant for TypeSuport interface of <%TYPE%> data type.
+
+class <%TYPE%>DataWriterImpl;
+class <%TYPE%>DataReaderImpl;
+
+/** Servant for TypeSupport interface of <%TYPE%> data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
@@ -9,6 +13,17 @@ class <%EXPORT%> <%TYPE%>TypeSupportImpl
   , public virtual OpenDDS::DCPS::TypeSupportImpl
 {
 public:
+  typedef <%TYPE%>                message_type;
+  typedef <%TYPE%>_var            message_var;
+  typedef <%TYPE%>TypeSupport     typesupport_type;
+  typedef <%TYPE%>TypeSupport_var typesupport_var;
+  typedef <%TYPE%>DataWriter      datawriter_type;
+  typedef <%TYPE%>DataReader      datareader_type;
+  typedef <%TYPE%>DataWriter_var  datawriter_var;
+  typedef <%TYPE%>DataReader_var  datareader_var;
+  typedef <%TYPE%>DataWriterImpl  datawriterimpl_type;
+  typedef <%TYPE%>DataReaderImpl  datareaderimpl_type;
+
   <%TYPE%>TypeSupportImpl();
   virtual ~<%TYPE%>TypeSupportImpl();
 
@@ -47,6 +62,9 @@ class <%EXPORT%> <%TYPE%>DataWriterImpl
     public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
+  typedef <%TYPE%>                message_type;
+  typedef <%TYPE%>TypeSupportImpl typesupportimpl_type;
+  typedef <%TYPE%>DataReaderImpl  datareader_type;
 
   typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
@@ -185,6 +203,9 @@ class <%EXPORT%> <%TYPE%>DataReaderImpl
     public virtual OpenDDS::DCPS::DataReaderImpl
 {
 public:
+  typedef <%TYPE%>                message_type;
+  typedef <%TYPE%>TypeSupportImpl typesupportimpl_type;
+  typedef <%TYPE%>DataWriterImpl  datawriter_type;
 
   typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
@@ -317,11 +338,6 @@ public:
 
   ::DDS::ReturnCode_t read_generic(
     OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
-    ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
-    ::DDS::InstanceStateMask instance_states,
-    bool adjust_ref_count=false);
-
-  ::DDS::ReturnCode_t take_generic(
     ::DDS::SampleStateMask sample_states, ::DDS::ViewStateMask view_states,
     ::DDS::InstanceStateMask instance_states,
     bool adjust_ref_count=false);
@@ -464,6 +480,11 @@ public:
          OpenDDS::DCPS::SubscriptionInstance*& instance_ptr,
          bool & just_registered,
          bool & filtered);
+
+    /// Release sample_lock_ during status notifications in store_instance_data()
+    /// as the lock is not needed and could cause deadlock condition.
+    /// See comments in member function implementation for details.
+    void notify_status_condition_no_sample_lock();
 
     /// Common input read* & take* input processing and precondition checks
     ::DDS::ReturnCode_t check_inputs (

@@ -14,26 +14,35 @@
 namespace OpenDDS {
 namespace DCPS {
 
-SendResponseListener::~SendResponseListener()
+SendResponseListener::SendResponseListener(const std::string& msg_src)
+: tracker_(msg_src)
 {
 }
 
-void
-SendResponseListener::data_delivered(const DataSampleListElement* /* sample */)
+SendResponseListener::~SendResponseListener()
 {
+  tracker_.wait_messages_pending();
+}
+
+void
+SendResponseListener::data_delivered(const DataSampleElement* /* sample */)
+{
+  tracker_.message_delivered();
 }
 
 void
 SendResponseListener::data_dropped(
-  const DataSampleListElement* /* sample */,
+  const DataSampleElement* /* sample */,
   bool /* dropped_by_transport */)
 {
+  tracker_.message_dropped();
 }
 
 void
 SendResponseListener::control_delivered(ACE_Message_Block* sample)
 {
   if (sample != 0) sample->release();
+  tracker_.message_delivered();
 }
 
 void
@@ -42,6 +51,13 @@ SendResponseListener::control_dropped(
   bool /* dropped_by_transport */)
 {
   if (sample != 0) sample->release();
+  tracker_.message_dropped();
+}
+
+void
+SendResponseListener::track_message()
+{
+  tracker_.message_sent();
 }
 
 } // namespace DCPS

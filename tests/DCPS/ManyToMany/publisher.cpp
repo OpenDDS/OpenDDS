@@ -8,15 +8,18 @@
 
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_string.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/udp/Udp.h>
 #include <dds/DCPS/transport/multicast/Multicast.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
@@ -31,7 +34,15 @@
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   bool status = false;
+  bool generated_config = false;
   try {
+    //Look to see if the config file (.ini) was generated
+    //for rtps participant processing
+    for(int i = 0; i < argc; ++i) {
+      if(ACE_OS::strstr(argv[i], ACE_TEXT("generated"))) {
+        generated_config = true;
+      }
+    }
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
@@ -59,10 +70,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Created dpf for process=%C\n"), pid.str().c_str()));
-
+    int part_num = 0;
     for (Participants::iterator part = participants.begin();
          part != participants.end();
-         ++part, ++ws.message.participant_id) {
+         ++part, ++ws.message.participant_id, ++part_num) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Creating participant\n")));
 
       *part =
@@ -74,6 +85,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l main()")
                           ACE_TEXT(" ERROR: create_participant() failed!\n")), -1);
+      }
+
+      if (generated_config) {
+        std::stringstream domain_config_stream;
+        std::string config_name = "domain_part_";
+        domain_config_stream << config_name << part_num;
+        std::string config;
+        config = domain_config_stream.str();
+        TheTransportRegistry->bind_config(config, *part);
       }
 
       if (mts->register_type(part->in(), "") != DDS::RETCODE_OK) {

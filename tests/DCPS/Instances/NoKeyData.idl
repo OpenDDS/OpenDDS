@@ -1,0 +1,14 @@
+
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::NoKeyData"
+
+  // Example user defined "NoKeyData" structure without a key field
+  struct NoKeyData {
+    long  a_long_value;
+    long  handle_value;
+    long  sample_sequence;
+    long  writer_id;
+  };
+
+};

@@ -23,7 +23,7 @@ class OpenDDS_Dcps_Export ThreadPerConRemoveVisitor
 public:
 
   /// In order to construct a QueueRemoveVisitor, it must be
-  /// provided with the DataSampleListElement* (used as an
+  /// provided with the DataSampleElement* (used as an
   /// identifier) that should be removed from the BasicQueue<T>
   /// (the one this visitor will visit when it is passed-in
   /// to a BasicQueue<T>::accept_remove_visitor() invocation).

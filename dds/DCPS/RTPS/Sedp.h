@@ -22,7 +22,7 @@
 #include "dds/DCPS/DataReaderCallbacks.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/DataSampleHeader.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -31,7 +31,8 @@
 #include "dds/DCPS/transport/framework/TransportInst_rch.h"
 
 #include "ace/Task_Ex_T.h"
-
+#include "ace/Condition_Thread_Mutex.h"
+#include "ace/Thread_Mutex.h"
 #include <map>
 #include <set>
 #include <string>
@@ -57,6 +58,8 @@ class Spdp;
 
 typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> RepoIdSet;
 
+class WaitForAcks;
+
 class Sedp {
 public:
   Sedp(const DCPS::RepoId& participant_id,
@@ -66,6 +69,11 @@ public:
   DDS::ReturnCode_t init(const DCPS::RepoId& guid,
                          const RtpsDiscovery& disco,
                          DDS::DomainId_t domainId);
+
+  /// request for acknowledgement from all Sedp threads (Task)
+  void acknowledge();
+
+  void shutdown();
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
@@ -142,7 +150,7 @@ private:
   struct Msg {
     enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER,
                    MSG_REMOVE_FROM_PUB_BIT, MSG_REMOVE_FROM_SUB_BIT,
-                   MSG_STOP } type_;
+                   MSG_FINI_BIT, MSG_STOP } type_;
     DCPS::MessageId id_;
     const void* payload_;
     Msg(MsgType mt, DCPS::MessageId id, const void* p)
@@ -184,9 +192,9 @@ private:
     bool assoc(const DCPS::AssociationData& subscription);
 
     // Implementing TransportSendListener
-    void data_delivered(const DCPS::DataSampleListElement*);
+    void data_delivered(const DCPS::DataSampleElement*);
 
-    void data_dropped(const DCPS::DataSampleListElement*, bool by_transport);
+    void data_dropped(const DCPS::DataSampleElement*, bool by_transport);
 
     void control_delivered(ACE_Message_Block* sample);
 
@@ -245,7 +253,9 @@ private:
 
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)
-      : spdp_(&sedp->spdp_), sedp_(sedp)
+      : spdp_(&sedp->spdp_)
+      , sedp_(sedp)
+      , shutting_down_(false)
     {
       activate();
     }
@@ -255,6 +265,10 @@ private:
     void enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata);
     void enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
+
+    void acknowledge();
+    void shutdown();
+
 
   private:
     int svc();
@@ -266,6 +280,7 @@ private:
 
     Spdp* spdp_;
     Sedp* sedp_;
+    bool shutting_down_;
   } task_;
 
   // Transport
@@ -410,6 +425,19 @@ private:
   DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
                                             LocalSubscription& pub,
                                             const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+};
+
+/// A class to wait on acknowledgements from other threads
+class WaitForAcks {
+public:
+  WaitForAcks();
+  void ack();
+  void wait_for_acks(unsigned int num_acks);
+  void reset();
+private:
+  ACE_Thread_Mutex lock_;
+  ACE_Condition_Thread_Mutex cond_;
+  unsigned int acks_;
 };
 
 }

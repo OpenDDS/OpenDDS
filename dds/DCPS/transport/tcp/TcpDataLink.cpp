@@ -177,9 +177,9 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
 
   this->connection_ = conn_rch._retn();
 
-  TcpReceiveStrategy* rs = dynamic_cast<TcpReceiveStrategy*>(brs.in());
+  TcpReceiveStrategy* rs = static_cast<TcpReceiveStrategy*>(brs.in());
 
-  TcpSendStrategy* ss = dynamic_cast<TcpSendStrategy*>(bss.in());
+  TcpSendStrategy* ss = static_cast<TcpSendStrategy*>(bss.in());
 
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.

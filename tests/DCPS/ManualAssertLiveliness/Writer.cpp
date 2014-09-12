@@ -71,13 +71,11 @@ Manual_By_Participant_Writer_1::svc ()
     message.subject_id = 99;
     ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup("Comic Book Guy");
+    message.from       = CORBA::string_dup("Manual_By_Participant_Writer_1");
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
 
-    ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_1::svc starting to write.\n")));
     for (int i = 0; i< num_messages; i ++)
     {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
@@ -86,6 +84,8 @@ Manual_By_Participant_Writer_1::svc ()
         continue;
       }
 
+      ACE_DEBUG((LM_DEBUG,
+                ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_1::svc writing msg.\n")));
       ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
 
       if (ret != ::DDS::RETCODE_OK) {
@@ -145,8 +145,6 @@ Manual_By_Participant_Writer_2::svc ()
         ACE_OS::sleep(ACE_Time_Value(0,200000));
     }
 
-    ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_2::svc starting to send liveliness.\n")));
     for (int i = 0; i< num_messages; i ++)
     {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
@@ -155,6 +153,8 @@ Manual_By_Participant_Writer_2::svc ()
         continue;
       }
 
+      ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_2::svc sending liveliness.\n")));
       ::DDS::ReturnCode_t ret = this->participant_->assert_liveliness ();
       if (ret != ::DDS::RETCODE_OK)
       {
@@ -221,13 +221,11 @@ Manual_By_Topic_Writer_1::svc ()
     message.subject_id = 99;
     ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
 
-    message.from       = CORBA::string_dup("Comic Book Guy");
+    message.from       = CORBA::string_dup("Manual_By_Topic_Writer_1");
     message.subject    = CORBA::string_dup("Review");
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
     message.count      = 0;
 
-    ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_1::svc starting to write.\n")));
     for (int i = 0; i< num_messages; i ++)
     {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
@@ -236,6 +234,8 @@ Manual_By_Topic_Writer_1::svc ()
         continue;
       }
 
+      ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_1::svc writing msg.\n")));
       ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
 
       if (ret != ::DDS::RETCODE_OK) {
@@ -293,8 +293,6 @@ Manual_By_Topic_Writer_2::svc ()
         ACE_OS::sleep(ACE_Time_Value(0,200000));
     }
 
-    ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_2::svc starting send liveliness.\n")));
     for (int i = 0; i< num_messages; i ++) {
       if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
       {
@@ -302,6 +300,8 @@ Manual_By_Topic_Writer_2::svc ()
         continue;
       }
 
+      ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_2::svc sending liveliness.\n")));
       ::DDS::ReturnCode_t ret = writer_->assert_liveliness ();
 
       if (ret != ::DDS::RETCODE_OK) {

@@ -17,7 +17,7 @@ public:
 
   Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2);
 
-  void write();
+  void write(bool reliable);
 
   int get_timeout_writes() const;
 

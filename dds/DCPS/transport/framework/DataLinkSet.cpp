@@ -10,7 +10,6 @@
 #include "DataLinkSet.h"
 #include "DataLinkSet_rch.h"
 
-#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 #include "TransportImpl.h"
@@ -31,6 +30,7 @@
 
 OpenDDS::DCPS::DataLinkSet::DataLinkSet()
   : send_control_element_allocator_(NUM_SEND_CONTROL_ELEMENT_CHUNKS)
+  , send_response_listener_("DataLinkSet")
 {
   DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",6);
 

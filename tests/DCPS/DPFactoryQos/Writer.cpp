@@ -52,6 +52,10 @@ Writer::svc ()
 
       if (ret == ::DDS::RETCODE_NOT_ENABLED)
       {
+        if (!writer_) {
+          cerr << "ERROR: Trying to call enable on null writer_" << endl;
+          exit(1);
+        }
         writer_->enable ();
         continue;
       }

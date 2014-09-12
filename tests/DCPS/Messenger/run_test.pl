@@ -16,81 +16,84 @@ use strict;
 
 my $status = 0;
 
-my $dbg_lvl = '-ORBDebugLevel 1 -DCPSDebugLevel 4 -DCPSTransportDebugLevel 2';
-my $pub_opts = "$dbg_lvl -ORBLogFile pub.log";
-my $sub_opts = "$dbg_lvl -ORBLogFile sub.log";
+my $test = new PerlDDS::TestFramework();
+
+$test->{dcps_debug_level} = 4;
+$test->{dcps_transport_debug_level} = 2;
+# will manually set -DCPSConfigFile
+$test->{add_transport_config} = 0;
+my $dbg_lvl = '-ORBDebugLevel 1';
+my $pub_opts = "$dbg_lvl";
+my $sub_opts = "$dbg_lvl";
 my $repo_bit_opt = "";
 my $stack_based = 0;
 my $is_rtps_disc = 0;
 my $DCPSREPO;
 
-unlink qw/DCPSInfoRepo.log pub.log sub.log/;
-
-my $arg = 0;
 my $thread_per_connection = "";
-if ($ARGV[0] eq 'thread_per' || $#ARGV > 0 && $ARGV[1] eq 'thread_per') {
+if ($test->flag('thread_per')) {
     $thread_per_connection = " -p ";
-    $arg = 1 if ($ARGV[0] eq 'thread_per');
 }
 
-if ($ARGV[$arg] eq 'udp') {
+my $flag_found = 1;
+if ($test->flag('udp')) {
     $pub_opts .= " -DCPSConfigFile pub_udp.ini";
     $sub_opts .= " -DCPSConfigFile sub_udp.ini";
 }
-elsif ($ARGV[$arg] eq 'multicast') {
+elsif ($test->flag('multicast')) {
     $pub_opts .= " -DCPSConfigFile pub_multicast.ini";
     $sub_opts .= " -DCPSConfigFile sub_multicast.ini";
 }
-elsif ($ARGV[$arg] eq 'default_tcp') {
+elsif ($test->flag('default_tcp')) {
     $pub_opts .= " -t tcp";
     $sub_opts .= " -t tcp";
 }
-elsif ($ARGV[$arg] eq 'default_udp') {
+elsif ($test->flag('default_udp')) {
     $pub_opts .= " -t udp";
     $sub_opts .= " -t udp";
 }
-elsif ($ARGV[$arg] eq 'default_multicast') {
+elsif ($test->flag('default_multicast')) {
     $pub_opts .= " -t multicast";
     $sub_opts .= " -t multicast";
 }
-elsif ($ARGV[$arg] eq 'nobits') {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= ' -DCPSConfigFile pub.ini -DCPSBit 0';
-    $sub_opts .= ' -DCPSConfigFile sub.ini -DCPSBit 0';
+elsif ($test->flag('nobits')) {
+    # nobits handled by TestFramework
+    $pub_opts .= ' -DCPSConfigFile pub.ini';
+    $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
-elsif ($ARGV[$arg] eq 'ipv6') {
+elsif ($test->flag('ipv6')) {
     $pub_opts .= " -DCPSConfigFile pub_ipv6.ini";
     $sub_opts .= " -DCPSConfigFile sub_ipv6.ini";
 }
-elsif ($ARGV[$arg] eq 'stack') {
+elsif ($test->flag('stack')) {
     $pub_opts .= " -t tcp";
     $sub_opts .= " -t tcp";
     $stack_based = 1;
 }
-elsif ($ARGV[$arg] eq 'rtps') {
+elsif ($test->flag('rtps')) {
     $pub_opts .= " -DCPSConfigFile rtps.ini";
     $sub_opts .= " -DCPSConfigFile rtps.ini";
 }
-elsif ($ARGV[$arg] eq 'rtps_disc') {
+elsif ($test->flag('rtps_disc')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
     $is_rtps_disc = 1;
 }
-elsif ($ARGV[$arg] eq 'rtps_disc_tcp') {
+elsif ($test->flag('rtps_disc_tcp')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $is_rtps_disc = 1;
 }
-elsif ($ARGV[$arg] eq 'rtps_unicast') {
-    $repo_bit_opt = '-NOBITS';
-    $pub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
-    $sub_opts .= " -DCPSConfigFile rtps_uni.ini -DCPSBit 0";
+elsif ($test->flag('rtps_unicast')) {
+    $test->{nobits} = 1;
+    $pub_opts .= " -DCPSConfigFile rtps_uni.ini";
+    $sub_opts .= " -DCPSConfigFile rtps_uni.ini";
 }
-elsif ($ARGV[$arg] eq 'shmem') {
+elsif ($test->flag('shmem')) {
     $pub_opts .= " -DCPSConfigFile shmem.ini";
     $sub_opts .= " -DCPSConfigFile shmem.ini";
 }
-elsif ($ARGV[$arg] eq 'all') {
+elsif ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
     my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
                         nobits stack shmem
@@ -101,75 +104,27 @@ elsif ($ARGV[$arg] eq 'all') {
     }
     exit $status;
 }
-elsif ($ARGV[$arg] ne '') {
-    print STDERR "ERROR: invalid test case\n";
-    exit 1;
-}
 else {
+    $flag_found = 0;
     $pub_opts .= ' -DCPSConfigFile pub.ini';
     $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
 
+$test->report_unused_flags(!$flag_found);
+
 $pub_opts .= $thread_per_connection;
 
-my $dcpsrepo_ior = "repo.ior";
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
+                       "$repo_bit_opt");
 
-unlink $dcpsrepo_ior;
+$test->process("publisher", "publisher", $pub_opts);
+my $sub_exe = ($stack_based ? 'stack_' : '') . "subscriber";
+$test->process("subscriber", $sub_exe, $sub_opts);
 
-unless ($is_rtps_disc) {
-  $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                     "-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                     "$repo_bit_opt -o $dcpsrepo_ior");
-}
+$test->start_process("publisher");
+$test->start_process("subscriber");
 
-my $Subscriber = PerlDDS::create_process(($stack_based ? 'stack_' : '') .
-                                         "subscriber", $sub_opts);
-
-my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
-
-unless ($is_rtps_disc) {
-  print $DCPSREPO->CommandLine() . "\n";
-  $DCPSREPO->Spawn();
-
-  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-      print STDERR "ERROR: waiting for Info Repo IOR file\n";
-      $DCPSREPO->Kill();
-      exit 1;
-  }
-}
-
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn();
-
-
-my $PublisherResult = $Publisher->WaitKill(300);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
-my $SubscriberResult = $Subscriber->WaitKill(30);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-}
-
-unless ($is_rtps_disc) {
-  my $ir = $DCPSREPO->TerminateWaitKill(5);
-  if ($ir != 0) {
-      print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-      $status = 1;
-  }
-  unlink $dcpsrepo_ior;
-}
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+# ignore this issue that is already being tracked in redmine
+$test->ignore_error("(Redmine Issue# 1446)");
+# start killing processes in 300 seconds
+exit $test->finish(300);

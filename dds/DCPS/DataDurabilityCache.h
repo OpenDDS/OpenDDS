@@ -17,7 +17,6 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DCPS/DataSampleList.h"
 #include "dds/DCPS/DurabilityArray.h"
 #include "dds/DCPS/DurabilityQueue.h"
 #include "dds/DCPS/FileSystemStorage.h"
@@ -50,9 +49,11 @@ struct LifespanQosPolicy;
 namespace OpenDDS {
 namespace DCPS {
 
-class WriteDataContainer;
+
 class DataWriterImpl;
-class DataSampleList;
+class DataSampleElement;
+class SendStateDataSampleList;
+class WriteDataContainer;
 
 /**
  * @class DataDurabilityCache
@@ -144,7 +145,7 @@ public:
   public:
 
     sample_data_type();
-    sample_data_type(DataSampleListElement & element,
+    sample_data_type(DataSampleElement & element,
                      ACE_Allocator * allocator);
     sample_data_type(DDS::Time_t timestamp,
                      const ACE_Message_Block & mb,
@@ -198,7 +199,7 @@ public:
   bool insert(DDS::DomainId_t domain_id,
               char const * topic_name,
               char const * type_name,
-              DataSampleList & the_data,
+              SendStateDataSampleList & the_data,
               DDS::DurabilityServiceQosPolicy const & qos);
 
   /// Write cached data corresponding to given domain, topic and

@@ -9,7 +9,6 @@
 #include "EntryExit.h"
 #include "DataLink.h"
 #include "TransportSendElement.h"
-#include "SendResponseListener.h"
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Definitions.h"
@@ -21,7 +20,7 @@
 #endif
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
+OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "send", 6);
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
@@ -33,7 +32,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const bool customHeader =
-    DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->sample_);
+    DataSampleHeader::test_flag(CONTENT_FILTER_FLAG, sample->get_sample());
 #endif
 
   for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
@@ -41,9 +40,9 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
     if (customHeader) {
       typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
-      FilterIter fi = sample->filter_per_link_.find(itr->first);
+      FilterIter fi = sample->get_filter_per_link().find(itr->first);
       GUIDSeq* guids = 0;
-      if (fi != sample->filter_per_link_.end()) {
+      if (fi != sample->get_filter_per_link().end()) {
         guids = fi->second.ptr();
       }
 
@@ -51,13 +50,13 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleListElement* sample)
         "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
         itr->second.in(), guids ? guids->length() : 0), 5);
 
-      ACE_Message_Block* mb = sample->sample_->duplicate();
+      ACE_Message_Block* mb = sample->get_sample()->duplicate();
 
       DataSampleHeader::add_cfentries(guids, mb);
 
       TransportCustomizedElement* tce =
         TransportCustomizedElement::alloc(send_element, false,
-          sample->transport_customized_element_allocator_);
+          sample->get_transport_customized_element_allocator());
       tce->set_msg(mb); // tce now owns ACE_Message_Block chain
 
       itr->second->send(tce);
@@ -84,9 +83,10 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
   //Optimized - use cached allocator.
   TransportSendControlElement* send_element = 0;
 
-  GuardType guard(this->lock_);
+  MapType dup_map;
+  copy_map_to(dup_map);
 
-  if (map_.empty()) {
+  if (dup_map.empty()) {
     // similar to the "no links" case in TransportClient::send()
     if (DCPS_debug_level > 4) {
       const GuidConverter converter(pub_id);
@@ -103,7 +103,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
   ACE_NEW_MALLOC_RETURN(send_element,
     static_cast<TransportSendControlElement*>(
       send_control_element_allocator_.malloc()),
-    TransportSendControlElement(static_cast<int>(map_.size()),
+    TransportSendControlElement(static_cast<int>(dup_map.size()),
                                 pub_id,
                                 listener,
                                 header,
@@ -111,12 +111,12 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
                                 &send_control_element_allocator_),
     SEND_CONTROL_ERROR);
 
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
+  for (MapType::iterator itr = dup_map.begin();
+       itr != dup_map.end();
        ++itr) {
     itr->second->send_start();
     itr->second->send(send_element);
-    itr->second->send_stop();
+    itr->second->send_stop(pub_id);
   }
 
   return SEND_CONTROL_OK;
@@ -131,30 +131,29 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   DBG_ENTRY_LVL("DataLinkSet","send_response",6);
   TransportSendControlElement* send_element = 0;
 
-  SendResponseListener listener;
-
   GuardType guard(this->lock_);
   ACE_NEW_MALLOC(send_element,
     static_cast<TransportSendControlElement*>(
       send_control_element_allocator_.malloc()),
     TransportSendControlElement(static_cast<int>(map_.size()),
                                 pub_id,
-                                &listener,
+                                &send_response_listener_,
                                 header,
                                 response,
                                 &send_control_element_allocator_));
+  send_response_listener_.track_message();
 
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
     itr->second->send_start();
     itr->second->send(send_element);
-    itr->second->send_stop();
+    itr->second->send_stop(pub_id);
   }
 }
 
 ACE_INLINE bool
-OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleListElement* sample)
+OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_sample", 6);
 
@@ -186,13 +185,6 @@ OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
   return true;
 }
 
-/// This will do several things, including adding to the membership
-/// of the send_links_ set.  Any DataLinks added to the send_links_
-/// set will be also told about the send_start() event.  Those
-/// DataLinks (in the pub_links set) that are already in the
-/// send_links_ set will not be told about the send_start() event
-/// since they heard about it when they were inserted into the
-/// send_links_ set.
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 {
@@ -224,10 +216,8 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
   }
 }
 
-/// This will inform each DataLink in the set about the send_stop()
-/// event.  It will then clear the send_links_ set.
 ACE_INLINE void
-OpenDDS::DCPS::DataLinkSet::send_stop()
+OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_stop",6);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
@@ -237,8 +227,24 @@ OpenDDS::DCPS::DataLinkSet::send_stop()
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
-    itr->second->send_stop();
+    itr->second->send_stop(repoId);
   }
 
   map_.clear();
+}
+
+ACE_INLINE void
+OpenDDS::DCPS::DataLinkSet::copy_map_to(MapType& target)
+{
+  target.clear();
+
+  // Lock the existing map
+  GuardType guard(this->lock_);
+
+  // Copy to target
+  for (MapType::iterator itr = map_.begin();
+       itr != map_.end();
+       ++itr) {
+    target.insert(*itr);
+  }
 }

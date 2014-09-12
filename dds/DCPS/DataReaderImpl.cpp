@@ -65,6 +65,7 @@ DataReaderImpl::DataReaderImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     subscriber_servant_(0),
+    end_historic_sweeper_(this),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reactor_(0),
     liveliness_timer_id_(-1),
@@ -181,6 +182,20 @@ DataReaderImpl::cleanup()
     content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
   }
 #endif
+
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+                   read_guard,
+                   this->writers_lock_);
+    // Cancel any uncancelled sweeper timers
+    WriterMapType::iterator writer;
+    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
+      if (writer->second->historic_samples_timer_ > 0) {
+        reactor_->cancel_timer(writer->second->historic_samples_timer_);
+      }
+      writer->second->historic_samples_timer_ = 0;
+    }
+  }
 }
 
 void DataReaderImpl::init(
@@ -311,11 +326,23 @@ DataReaderImpl::add_association(const RepoId& yourId,
                                                  writer_id,
                                                  writer.writerQos,
                                                  this->qos_);
+
       std::pair<WriterMapType::iterator, bool> bpair = this->writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
           writer_id,
           info));
+
+      // Scheule timer if necessary
+      if (info->historic_samples_timer_ == -1) {
+        ACE_Time_Value ten_seconds(10);
+        const void* arg = reinterpret_cast<const void*>(&writer.writerId);
+        info->historic_samples_timer_ =
+            reactor_->schedule_timer(&end_historic_sweeper_,
+                                     arg,
+                                     ten_seconds);
+      }
+
       this->statistics_.insert(
         StatsMapType::value_type(
           writer_id,
@@ -516,6 +543,10 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
                                     bool notify_lost)
 {
   DBG_ENTRY_LVL("DataReaderImpl", "remove_associations", 6);
+
+  if (writers.length() == 0) {
+    return;
+  }
 
   if (DCPS_debug_level >= 1) {
     GuidConverter reader_converter(subscription_id_);
@@ -1348,7 +1379,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
     }
 
-    if (DCPS_debug_level >= 5) {
+    // Per sample logging
+    if (DCPS_debug_level >= 8) {
       GuidConverter reader_converter(subscription_id_);
       GuidConverter writer_converter(header.publication_id_);
 
@@ -2229,9 +2261,10 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 
   // Call listener only when there are liveliness status changes.
   if (liveliness_changed) {
-    // RT7273: possible solution is to release the sample lock for the
-    //         duration of this call
-    // ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+    // Avoid possible deadlock by releasing sample_lock_.
+    // See comments in <Topic>DataDataReaderImpl::notify_status_condition_no_sample_lock()
+    // for information about the locks involved.
+    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
     this->notify_liveliness_change();
   }
 
@@ -2719,10 +2752,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 
     WriterMapType::iterator where = writers_.find(header.publication_id_);
     if (writers_.end() != where) {
-      // TODO detect RTPS_UDP and Filter if waiting for historic samples
-      // If RTPS_UDP, don't filter
-      //return where->second->awaiting_historic_samples_;
-      return false;
+      return where->second->historic_samples_timer_ != 0;
     }
   }
 
@@ -3267,8 +3297,53 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
   WriterMapType::iterator where = writers_.find(pub_id);
   if (writers_.end() != where) {
     // Stop filtering these
-    where->second->awaiting_historic_samples_ = false;
+    if (where->second->historic_samples_timer_ != 0) {
+      if (where->second->historic_samples_timer_ > 0) {
+        reactor_->cancel_timer(where->second->historic_samples_timer_);
+      }
+      where->second->historic_samples_timer_ = 0;
+    }
   }
+}
+
+void
+DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
+{
+  TransportClient::add_link(link, peer);
+  // Chek impl?
+  TransportImpl_rch impl = link->impl();
+  std::string type = impl->transport_type();
+
+  // If this is an RTPS link
+  if (type == "rtps_udp") {
+    resume_sample_processing(peer);
+  }
+}
+
+EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(
+  DataReaderImpl* reader) : reader_(reader)
+{
+}
+
+EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
+{
+  if (DCPS_debug_level >= 5) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper\n"));
+  }
+}
+
+int EndHistoricSamplesMissedSweeper::handle_timeout(
+    const ACE_Time_Value& ,
+    const void* arg)
+{
+  PublicationId pub_id = *reinterpret_cast<const PublicationId*>(arg);
+
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout\n"));
+  }
+
+  reader_->resume_sample_processing(pub_id);
+  return 0;
 }
 
 } // namespace DCPS

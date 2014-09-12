@@ -84,7 +84,7 @@ class RTDMonitorImpl {
     std::string getNodeValue(const std::string& nodeId, int column) const
     {
       TreeNode* node = getNode(nodeId);
-      if (node == NULL || column >= node->width()) {
+      if (!node || column >= node->width()) {
         return "#N/A";
       }
 
@@ -94,7 +94,7 @@ class RTDMonitorImpl {
     std::string getNodeColor(const std::string& nodeId, int column) const
     {
       TreeNode* node = getNode(nodeId);
-      if (node == NULL || column >= node->width()) {
+      if (!node || column >= node->width()) {
         return "";
       }
 

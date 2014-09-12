@@ -57,122 +57,126 @@ ParticipantTask::svc()
                         ACE_TEXT("%N:%l: svc()")
                         ACE_TEXT(" create_participant failed!\n")), 1);
 
-    // Create Publisher
-    publisher =
-      participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                    DDS::PublisherListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(publisher.in()))
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: svc()")
-                        ACE_TEXT(" create_publisher failed!\n")), 1);
-
-
-    // Register Type (FooType)
-    FooTypeSupport_var ts = new FooTypeSupportImpl;
-    if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: svc()")
-                        ACE_TEXT(" register_type failed!\n")), 1);
-
-    // Create Topic (FooTopic)
-    DDS::Topic_var topic =
-      participant->create_topic("FooTopic",
-                                ts->get_type_name(),
-                                TOPIC_QOS_DEFAULT,
-                                DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(topic.in()))
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: svc()")
-                        ACE_TEXT(" create_topic failed!\n")), 1);
-
-    // Create DataWriter
-    DDS::DataWriterQos writer_qos;
-    publisher->get_default_datawriter_qos(writer_qos);
-
-    writer_qos.history.depth = samples_per_thread_;
-
-    writer =
-      publisher->create_datawriter(topic.in(),
-                                   writer_qos,
-                                   DDS::DataWriterListener::_nil(),
-                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-    if (CORBA::is_nil(writer.in()))
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: svc()")
-                        ACE_TEXT(" create_datawriter failed!\n")), 1);
-
-    writer_i = FooDataWriter::_narrow(writer);
-    if (CORBA::is_nil(writer_i))
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l: svc()")
-                        ACE_TEXT(" _narrow failed!\n")), 1);
-
-    // Block until Subscriber is available
-    cond = writer->get_statuscondition();
-    cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-    ws->attach_condition(cond);
-
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-    do
     {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
+      // Create Publisher
+      publisher =
+        participant->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                      DDS::PublisherListener::_nil(),
+                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (CORBA::is_nil(publisher.in()))
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("%N:%l: svc()")
-                          ACE_TEXT(" wait failed!\n")), 1);
+                          ACE_TEXT(" create_publisher failed!\n")), 1);
 
-      if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
+
+      // Register Type (FooType)
+      FooTypeSupport_var ts = new FooTypeSupportImpl;
+      if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: svc()")
+                          ACE_TEXT(" register_type failed!\n")), 1);
+
+      // Create Topic (FooTopic)
+      DDS::Topic_var topic =
+        participant->create_topic("FooTopic",
+                                  ts->get_type_name(),
+                                  TOPIC_QOS_DEFAULT,
+                                  DDS::TopicListener::_nil(),
+                                  ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (CORBA::is_nil(topic.in()))
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: svc()")
+                          ACE_TEXT(" create_topic failed!\n")), 1);
+
+      // Create DataWriter
+      DDS::DataWriterQos writer_qos;
+      publisher->get_default_datawriter_qos(writer_qos);
+
+      writer_qos.history.depth = samples_per_thread_;
+
+      writer =
+        publisher->create_datawriter(topic.in(),
+                                     writer_qos,
+                                     DDS::DataWriterListener::_nil(),
+                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+      if (CORBA::is_nil(writer.in()))
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: svc()")
+                          ACE_TEXT(" create_datawriter failed!\n")), 1);
+
+      writer_i = FooDataWriter::_narrow(writer);
+      if (CORBA::is_nil(writer_i))
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: svc()")
+                          ACE_TEXT(" _narrow failed!\n")), 1);
+
+      // Block until Subscriber is available
+      cond = writer->get_statuscondition();
+      cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+
+      ws->attach_condition(cond);
+
+      DDS::Duration_t timeout =
+        { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+      DDS::ConditionSeq conditions;
+      DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
+      do
       {
-        ACE_ERROR ((LM_ERROR,
-          "(%P|%t) ERROR: failed to get publication matched status\n"));
-        ACE_OS::exit (1);
+        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l: svc()")
+                            ACE_TEXT(" wait failed!\n")), 1);
+
+        if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
+        {
+          ACE_ERROR ((LM_ERROR,
+            "(%P|%t) ERROR: failed to get publication matched status\n"));
+          ACE_OS::exit (1);
+        }
+      }
+      while (matches.current_count < 1);
+
+      ws->detach_condition(cond);
+
+      // The following is intentionally inefficient to stress various
+      // pathways related to publication; we should be especially dull
+      // and write only one sample at a time per writer.
+
+      ProgressIndicator progress("(%P|%t)       PARTICIPANT %d%% (%d samples sent)\n",
+                                 samples_per_thread_);
+
+      for (std::size_t i = 0; i < samples_per_thread_; ++i)
+      {
+        Foo foo;
+        foo.key = 3;
+        DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
+
+        if (writer_i->write(foo, handle) != DDS::RETCODE_OK)
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("%N:%l: svc()")
+                            ACE_TEXT(" write failed!\n")), 1);
+        ++progress;
+      }
+
+      DDS::Duration_t interval = { 30, 0};
+      if( DDS::RETCODE_OK != writer->wait_for_acknowledgments( interval)) {
+        ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P:%t) ERROR: svc() - ")
+          ACE_TEXT("timed out waiting for acks!\n")
+        ), 1);
       }
     }
-    while (matches.current_count < 1);
-
-    ws->detach_condition(cond);
-
-    // The following is intentionally inefficient to stress various
-    // pathways related to publication; we should be especially dull
-    // and write only one sample at a time per writer.
-
-    ProgressIndicator progress("(%P|%t)       PARTICIPANT %d%% (%d samples sent)\n",
-                               samples_per_thread_);
-
-    for (std::size_t i = 0; i < samples_per_thread_; ++i)
-    {
-      Foo foo;
-      foo.key = 3;
-      DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
-
-      if (writer_i->write(foo, handle) != DDS::RETCODE_OK)
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: svc()")
-                          ACE_TEXT(" write failed!\n")), 1);
-      ++progress;
-    }
-
-    DDS::Duration_t interval = { 30, 0};
-    if( DDS::RETCODE_OK != writer->wait_for_acknowledgments( interval)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P:%t) ERROR: svc() - ")
-        ACE_TEXT("timed out waiting for acks!\n")
-      ), 1);
-    }
-    publisher->delete_datawriter(writer);
 
     // Clean-up!
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER PARTICIPANT DEL CONT ENTITIES\n")));
     participant->delete_contained_entities();
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER DELETE PARTICIPANT\n")));
     dpf->delete_participant(participant.in());
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER PARTICIPANT VARS GOING OUT OF SCOPE\n")));
   }
   catch (const CORBA::Exception& e)
   {

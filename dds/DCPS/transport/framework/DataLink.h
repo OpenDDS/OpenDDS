@@ -14,6 +14,7 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "ReceiveListenerSetMap.h"
 #include "RepoIdSetMap.h"
+#include "SendResponseListener.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportSendStrategy.h"
@@ -44,7 +45,7 @@ class  TransportReceiveListener;
 class  TransportSendListener;
 class  TransportQueueElement;
 class  ReceivedDataSample;
-struct DataSampleListElement;
+class  DataSampleElement;
 class  ThreadPerConnectionSendTask;
 
 typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan> DataLinkSetMap;
@@ -130,13 +131,13 @@ public:
   /// configuration is true or just simply delegate to the send strategy.
   void send_start();
   void send(TransportQueueElement* element);
-  void send_stop();
+  void send_stop(RepoId repoId);
 
   // ciju: Called by LinkSet with locks held
   /// This method is essentially an "undo_send()" method.  It's goal
   /// is to remove all traces of the sample from this DataLink (if
   /// the sample is even known to the DataLink).
-  RemoveResult remove_sample(const DataSampleListElement* sample);
+  RemoveResult remove_sample(const DataSampleElement* sample);
 
   // ciju: Called by LinkSet with locks held
   void remove_all_msgs(RepoId pub_id);
@@ -299,7 +300,7 @@ protected:
   /// delegate to the send strategy.
   void send_start_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
-  void send_stop_i();
+  void send_stop_i(RepoId repoId);
 
   /// For a given local RepoId (publication or subscription), return the list
   /// of remote peer RepoIds (subscriptions or publications) that this link
@@ -443,6 +444,9 @@ protected:
   /// Is pub or sub ?
   bool is_active_;
   bool start_failed_;
+
+  /// Listener for TransportSendControlElements created in send_control
+  SendResponseListener send_response_listener_;
 };
 
 } // namespace DCPS

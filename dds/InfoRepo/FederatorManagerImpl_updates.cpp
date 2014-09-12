@@ -60,7 +60,7 @@ ManagerImpl::create(const Update::UTopic& topic)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( TopicUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ topic %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(topic_converter).c_str()));
@@ -91,7 +91,7 @@ ManagerImpl::create(const Update::UParticipant& participant)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( ParticipantUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(converter).c_str()));
   }
@@ -128,7 +128,7 @@ ManagerImpl::create(const Update::URActor& reader)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( SubscriptionUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ subscription %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(sub_converter).c_str()));
@@ -164,7 +164,7 @@ ManagerImpl::create(const Update::UWActor& writer)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) Federator::ManagerImpl::create( PublicationUpdate): ")
                ACE_TEXT("repo %d - [ domain %d/ participant %C/ publication %C ]\n"),
-               this->id(),
+               this->id().id(),
                sample.domain,
                std::string(part_converter).c_str(),
                std::string(pub_converter).c_str()));
@@ -710,11 +710,17 @@ ManagerImpl::processCreate(const ParticipantUpdate* sample, const DDS::SampleInf
     sample->domain,
     sample->id,
     sample->qos);
-  this->info_->changeOwnership(
+  bool ownershipChanged = this->info_->changeOwnership(
     sample->domain,
     sample->id,
     sample->sender,
     sample->owner);
+  if (!ownershipChanged) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("OpenDDS::Federator::ManagerImpl::processCreate(), ")
+               ACE_TEXT("Could not change ownership\n")));
+  }
   this->processDeferred();
 }
 

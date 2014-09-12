@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "DataLink_rch.h"
+#include "SendResponseListener.h"
 #include "TransportDefs.h"
 #include "TransportSendControlElement.h"
 
@@ -23,7 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TransportSendListener;
-struct DataSampleListElement;
+class DataSampleElement;
 
 class OpenDDS_Dcps_Export DataLinkSet : public RcObject<ACE_SYNCH_MUTEX> {
 public:
@@ -38,7 +39,7 @@ public:
   void remove_link(const DataLink_rch& link);
 
   /// Send to each DataLink in the set.
-  void send(DataSampleListElement* sample);
+  void send(DataSampleElement* sample);
 
   /// Send control message to each DataLink in the set.
   SendControlStatus send_control(RepoId                  pub_id,
@@ -50,22 +51,17 @@ public:
                      const DataSampleHeader& header,
                      ACE_Message_Block* response);
 
-  bool remove_sample(const DataSampleListElement* sample);
+  bool remove_sample(const DataSampleElement* sample);
 
   bool remove_all_msgs(RepoId pub_id);
 
-  /// This will do several things, including adding to the membership
-  /// of the send_links_ set.  Any DataLinks added to the send_links_
-  /// set will be also told about the send_start() event.  Those
-  /// DataLinks (in the pub_links set) that are already in the
-  /// send_links_ set will not be told about the send_start() event
-  /// since they heard about it when they were inserted into the
-  /// send_links_ set.
+  /// Calls send_start() on the links in link_set and also adds
+  /// the links from link_set to *this.
   void send_start(DataLinkSet* link_set);
 
-  /// This will inform each DataLink in the set about the send_stop()
-  /// event.  It will then clear the send_links_ set.
-  void send_stop();
+  /// Calls send_stop() on the links with ID repoId and then
+  /// clears the set.
+  void send_stop(RepoId repoId);
 
   DataLinkSet* select_links(const RepoId* remoteIds,
                             const CORBA::ULong num_targets);
@@ -94,6 +90,12 @@ private:
   /// This lock will protect critical sections of code that play a
   /// role in the sending of data.
   LockType lock_;
+
+  /// Listener for TransportSendControlElements created in send_response
+  SendResponseListener send_response_listener_;
+
+  /// lock and copy map for lock-free access
+  void copy_map_to(MapType& target);
 };
 
 } // namespace DCPS

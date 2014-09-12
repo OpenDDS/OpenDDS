@@ -126,6 +126,13 @@ TransportReassembly::insert(std::list<FragRange>& flist,
             ACE_Message_Block::release(fr.rec_ds_.sample_);
             fr.rec_ds_.sample_ = 0;
           } else {
+            if (!fr.rec_ds_.sample_) {
+              ACE_ERROR((LM_ERROR,
+                         ACE_TEXT("(%P|%t) ERROR: ")
+                         ACE_TEXT("OpenDDS::DCPS::TransportReassembly::insert, ")
+                         ACE_TEXT("Cannot dereference null pointer fr.rec_ds_.sample_\n")));
+              return false;
+            }
             ACE_Message_Block* last;
             for (last = fr.rec_ds_.sample_; last->cont(); last = last->cont()) ;
             last->cont(it->rec_ds_.sample_);

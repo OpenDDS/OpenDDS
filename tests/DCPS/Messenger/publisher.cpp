@@ -29,9 +29,7 @@
 
 bool dw_reliable() {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
-  std::string cfg_name = gc->instances_[0]->name();
-  return ((cfg_name == "the_rtps_transport") ||
-          (cfg_name == "transport"));
+  return !(gc->instances_[0]->transport_type_ == "udp");
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -46,7 +44,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-    std::cout << "Starting publisher with " << argc << " args" << std::endl;
+      std::cout << "Starting publisher with " << argc << " args" << std::endl;
       int error;
       if ((error = parse_args(argc, argv)) != 0) {
         return error;
@@ -108,6 +106,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DataWriterQos qos;
       pub->get_default_datawriter_qos(qos);
       if (dw_reliable()) {
+        std::cout << "Reliable DataWriter" << std::endl;
         qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
         qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       }
@@ -137,7 +136,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep(small_time);
       }
 
-      std::cout << "Writer finihed " << std::endl;
+      std::cout << "Writer finished " << std::endl;
       writer->end();
 
       if (wait_for_acks) {

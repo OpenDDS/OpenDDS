@@ -55,7 +55,7 @@ void parse_args(int argc, ACE_TCHAR* argv[], bool& reliable)
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  bool ok = true;
+  int status = EXIT_SUCCESS;
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
@@ -163,31 +163,44 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     const long received = listener_svt->num_samples();
     const bool data_consistent = listener_svt->data_consistent();
+    std::string error = "";
+    bool show_data_loss = true;
+
     if (reliable && data_consistent && received < num_messages_expected) {
-      std::cout << "ERROR: data loss (" << received << "/"
-                << num_messages_expected << " received)\n";
-      ok = false;
+      error = "ERROR: ";
+      status = EXIT_FAILURE;
     }
     else if (!data_consistent) {
-      ok = false;
+      status = EXIT_FAILURE;
+      show_data_loss = false;
     }
-    else {
-      const unsigned int percent = ((num_messages_expected - received) * 100) / num_messages_expected;
-      std::cout << "data loss == " << percent << "% (" << received << "/"
+
+    if (show_data_loss && num_messages_expected) {
+      const unsigned int missed_msgs = (num_messages_expected - received);
+      const unsigned int percent = (missed_msgs * 100) / num_messages_expected;
+
+      std::cout << error
+                << "data loss == " << percent << "% (" << received << "/"
                 << num_messages_expected << " received)\n";
     }
 
     // Clean-up!
+    ACE_DEBUG((LM_DEBUG, "Subscriber delete contained entities\n"));
     participant->delete_contained_entities();
+    ACE_DEBUG((LM_DEBUG, "Subscriber delete participant\n"));
     dpf->delete_participant(participant);
 
+    ACE_DEBUG((LM_DEBUG, "Subscriber shutdown\n"));
     TheServiceParticipant->shutdown();
+    ACE_DEBUG((LM_DEBUG, "Subscriber wait for thread manager\n"));
     ACE_Thread_Manager::instance()->wait();
 
+    ACE_DEBUG((LM_DEBUG, "Subscriber vars going out of scope\n"));
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
-    return -1;
+    status = EXIT_FAILURE;
   }
 
-  return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+  ACE_DEBUG((LM_DEBUG, "Subscriber exiting with status=%d\n", status));
+  return status;
 }

@@ -21,7 +21,7 @@
 #include "TransportDefs.h"
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
@@ -387,6 +387,9 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "adjust_packet_after_send", 6);
 
+  //Used to track elements that will need to be notified after releasing lock
+  std::vector<TransportQueueElement*> elems_to_notify;
+
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Adjusting the current packet because %d bytes of the packet "
         "have been sent.\n", num_bytes_sent));
@@ -406,265 +409,272 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
   // This is the element currently at the front of elems_.
   TransportQueueElement* element = this->elems_->peek();
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Use the element's msg() to find the last block in "
-        "the msg() chain.\n"));
-
-  // Get a pointer to the last message block in the element.
-  const ACE_Message_Block* elem_tail_block = element->msg();
-
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Start with tail block == element->msg().\n"));
-
-  while (elem_tail_block->cont() != 0) {
+  if(!element){
+    ACE_DEBUG((LM_INFO, "(%P|%t) WARNING: adjust_packet_after_send skipping due to NULL element\n"));
+  } else {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "Set tail block to its cont() block (next in chain).\n"));
-    elem_tail_block = elem_tail_block->cont();
-  }
+          "Use the element's msg() to find the last block in "
+          "the msg() chain.\n"));
 
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Tail block now set (because tail block's cont() is 0).\n"));
-
-  VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-        "Start the 'while (num_bytes_left > 0)' loop.\n"));
-
-  while (num_bytes_left > 0) {
-    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "At top of 'num bytes left' loop.  num_bytes_left == [%d].\n",
-          num_bytes_left));
-
-    const int block_length = static_cast<int>(this->pkt_chain_->length());
+    // Get a pointer to the last message block in the element.
+    const ACE_Message_Block* elem_tail_block = element->msg();
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-          "Length of block at front of pkt_chain_ is [%d].\n",
-          block_length));
+          "Start with tail block == element->msg().\n"));
 
-    if (block_length <= num_bytes_left) {
+    while (elem_tail_block->cont() != 0) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "The whole block at the front of pkt_chain_ was sent.\n"));
+            "Set tail block to its cont() block (next in chain).\n"));
+      elem_tail_block = elem_tail_block->cont();
+    }
 
-      // The entire message block at the front of the chain has been sent.
-      // Detach the head message block from the chain and adjust
-      // the pkt_chain_ to point to the next block (if any) in
-      // the chain.
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+          "Tail block now set (because tail block's cont() is 0).\n"));
+
+    VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+          "Start the 'while (num_bytes_left > 0)' loop.\n"));
+
+    while (num_bytes_left > 0) {
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Extract the fully sent block from the pkt_chain_.\n"));
+            "At top of 'num bytes left' loop.  num_bytes_left == [%d].\n",
+            num_bytes_left));
 
-      ACE_Message_Block* fully_sent_block = this->pkt_chain_;
-
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Set pkt_chain_ to pkt_chain_->cont().\n"));
-
-      this->pkt_chain_ = this->pkt_chain_->cont();
-
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Set the fully sent block's cont() to 0.\n"));
-
-      fully_sent_block->cont(0);
-
-      // Update the num_bytes_left to indicate that we have
-      // processed the entire length of the block.
-      num_bytes_left -= block_length;
+      const int block_length = static_cast<int>(this->pkt_chain_->length());
 
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Updated num_bytes_left to account for fully sent "
-            "block (block_length == [%d]).\n", block_length));
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Now, num_bytes_left == [%d].\n", num_bytes_left));
+            "Length of block at front of pkt_chain_ is [%d].\n",
+            block_length));
 
-      if (!this->header_complete_) {
+      if (block_length <= num_bytes_left) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Since the header_complete_ flag is false, it means "
-              "that the packet header block was still in the "
-              "pkt_chain_.\n"));
+              "The whole block at the front of pkt_chain_ was sent.\n"));
 
+        // The entire message block at the front of the chain has been sent.
+        // Detach the head message block from the chain and adjust
+        // the pkt_chain_ to point to the next block (if any) in
+        // the chain.
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Not anymore...  Set the header_complete_ flag "
-              "to true.\n"));
+              "Extract the fully sent block from the pkt_chain_.\n"));
 
-        // That was the packet header block.  And now we know that it
-        // has been completely sent.
-        this->header_complete_ = true;
+        ACE_Message_Block* fully_sent_block = this->pkt_chain_;
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Release the fully sent block.\n"));
+              "Set pkt_chain_ to pkt_chain_->cont().\n"));
 
-        // Release the fully_sent_block
-        fully_sent_block->release();
-
-      } else {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Since the header_complete_ flag is true, it means "
-              "that the packet header block was not in the "
-              "pkt_chain_.\n"));
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "So, the fully sent block was part of an element.\n"));
-
-        // That wasn't the packet header block.  It was from the
-        // element currently at the front of the elems_
-        // collection.  If it was the last block from the
-        // element, then we need to extract the element from the
-        // elems_ collection and invoke data_delivered() on it.
-        num_non_header_bytes_sent += block_length;
+        this->pkt_chain_ = this->pkt_chain_->cont();
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Updated num_non_header_bytes_sent to account for "
-              "fully sent block (block_length == [%d]).\n",
-              block_length));
+              "Set the fully sent block's cont() to 0.\n"));
+
+        fully_sent_block->cont(0);
+
+        // Update the num_bytes_left to indicate that we have
+        // processed the entire length of the block.
+        num_bytes_left -= block_length;
 
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Now, num_non_header_bytes_sent == [%d].\n",
-              num_non_header_bytes_sent));
+              "Updated num_bytes_left to account for fully sent "
+              "block (block_length == [%d]).\n", block_length));
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "Now, num_bytes_left == [%d].\n", num_bytes_left));
 
-        if (fully_sent_block->base() == elem_tail_block->base()) {
+        if (!this->header_complete_) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "Ok.  The fully sent block was a duplicate of "
-                "the tail block of the element that is at the "
-                "front of the packet elems_.\n"));
+                "Since the header_complete_ flag is false, it means "
+                "that the packet header block was still in the "
+                "pkt_chain_.\n"));
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "This means that we have completely sent the "
-                "element at the front of the packet elems_.\n"));
+                "Not anymore...  Set the header_complete_ flag "
+                "to true.\n"));
 
-          // This means that we have completely sent the element
-          // that is currently at the front of the elems_ collection.
+          // That was the packet header block.  And now we know that it
+          // has been completely sent.
+          this->header_complete_ = true;
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "We can release the fully sent block now.\n"));
+                "Release the fully sent block.\n"));
 
           // Release the fully_sent_block
           fully_sent_block->release();
-
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "We can extract the element from the front of "
-                "the packet elems_ (we were just peeking).\n"));
-
-          // Extract the element from the elems_ collection
-          element = this->elems_->get();
-
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "Tell the element that a decision has been made "
-                "regarding its fate - data_delivered().\n"));
-
-          // Inform the element that the data has been delivered.
-
-          if ((delay_notification == DELAY_NOTIFICATION) &&
-              (this->num_delayed_notifications_ < this->max_samples_)) {
-            // If we can delay notification.
-            this->add_delayed_notification(element);
-
-          } else {
-            // Ciju: If not, do a best effort immediate notification.
-            // I have noticed instances of immediate notification producing
-            // cores ocassionally. I believe the reason is
-            // if (delay_notification == NOTIFY_IMMEADIATELY)
-
-            // ciju: We need to release this->lock_ before
-            // calling data_dropped/data_delivered. Else we have a potential
-            // deadlock in our hands.
-            const SendMode mode = this->mode_;
-            ACE_Reverse_Lock<LockType> reverse(this->lock_);
-            ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
-            if (mode == MODE_TERMINATED) {
-              element->data_dropped(true /*dropped_by_transport*/);
-
-            } else {
-              element->data_delivered();
-
-            }
-          }
-
-          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "Peek at the next element in the packet "
-                "elems_.\n"));
-
-          // Set up for the next element in elems_ by peek()'ing.
-          element = this->elems_->peek();
-
-          if (element != 0) {
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "The is an element still in the packet "
-                  "elems_ (we are peeking at it now).\n"));
-
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "We are going to find the tail block for the "
-                  "current element (we are peeking at).\n"));
-
-            // There was a "next element".  Determine the
-            // elem_tail_block for it.
-            elem_tail_block = element->msg();
-
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Start w/tail block == element->msg().\n"));
-
-            while (elem_tail_block->cont() != 0) {
-              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                    "Set tail block to next in chain.\n"));
-              elem_tail_block = elem_tail_block->cont();
-            }
-
-            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                  "Done finding tail block.\n"));
-          }
 
         } else {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "Ok.  The fully sent block is *not* a "
-                "duplicate of the tail block of the element "
-                "at the front of the packet elems_.\n"));
+                "Since the header_complete_ flag is true, it means "
+                "that the packet header block was not in the "
+                "pkt_chain_.\n"));
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "So, the fully sent block was part of an element.\n"));
+
+          // That wasn't the packet header block.  It was from the
+          // element currently at the front of the elems_
+          // collection.  If it was the last block from the
+          // element, then we need to extract the element from the
+          // elems_ collection and invoke data_delivered() on it.
+          num_non_header_bytes_sent += block_length;
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "Thus, we have not completely sent the "
-                "element yet.\n"));
-
-          // We didn't completely send the element - it has more
-          // message blocks that haven't been sent (that we know of).
+                "Updated num_non_header_bytes_sent to account for "
+                "fully sent block (block_length == [%d]).\n",
+                block_length));
 
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-                "We can release the fully_sent_block now.\n"));
+                "Now, num_non_header_bytes_sent == [%d].\n",
+                num_non_header_bytes_sent));
 
-          // Release the fully_sent_block
-          fully_sent_block->release();
+          if (fully_sent_block->base() == elem_tail_block->base()) {
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Ok.  The fully sent block was a duplicate of "
+                  "the tail block of the element that is at the "
+                  "front of the packet elems_.\n"));
+
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "This means that we have completely sent the "
+                  "element at the front of the packet elems_.\n"));
+
+            // This means that we have completely sent the element
+            // that is currently at the front of the elems_ collection.
+
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "We can release the fully sent block now.\n"));
+
+            // Release the fully_sent_block
+            fully_sent_block->release();
+
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "We can extract the element from the front of "
+                  "the packet elems_ (we were just peeking).\n"));
+
+            // Extract the element from the elems_ collection
+            element = this->elems_->get();
+
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Tell the element that a decision has been made "
+                  "regarding its fate - data_delivered().\n"));
+
+            // Inform the element that the data has been delivered.
+
+            if ((delay_notification == DELAY_NOTIFICATION) &&
+                (this->num_delayed_notifications_ < this->max_samples_)) {
+              // If we can delay notification.
+              this->add_delayed_notification(element);
+
+            } else {
+              // later, inform the element that the data has been delivered.
+              elems_to_notify.push_back(element);
+
+//              // Ciju: If not, do a best effort immediate notification.
+//              // I have noticed instances of immediate notification producing
+//              // cores ocassionally. I believe the reason is
+//              // if (delay_notification == NOTIFY_IMMEADIATELY)
+//
+//              // ciju: We need to release this->lock_ before
+//              // calling data_dropped/data_delivered. Else we have a potential
+//              // deadlock in our hands.
+//              const SendMode mode = this->mode_;
+//              ACE_Reverse_Lock<LockType> reverse(this->lock_);
+//              ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
+//              if (mode == MODE_TERMINATED) {
+//                element->data_dropped(true /*dropped_by_transport*/);
+//
+//              } else {
+//                element->data_delivered();
+//
+//              }
+            }
+
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Peek at the next element in the packet "
+                  "elems_.\n"));
+
+            // Set up for the next element in elems_ by peek()'ing.
+            element = this->elems_->peek();
+
+            if (element != 0) {
+              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "The is an element still in the packet "
+                    "elems_ (we are peeking at it now).\n"));
+
+              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "We are going to find the tail block for the "
+                    "current element (we are peeking at).\n"));
+
+              // There was a "next element".  Determine the
+              // elem_tail_block for it.
+              elem_tail_block = element->msg();
+
+              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Start w/tail block == element->msg().\n"));
+
+              while (elem_tail_block->cont() != 0) {
+                VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                      "Set tail block to next in chain.\n"));
+                elem_tail_block = elem_tail_block->cont();
+              }
+
+              VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                    "Done finding tail block.\n"));
+            }
+
+          } else {
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Ok.  The fully sent block is *not* a "
+                  "duplicate of the tail block of the element "
+                  "at the front of the packet elems_.\n"));
+
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "Thus, we have not completely sent the "
+                  "element yet.\n"));
+
+            // We didn't completely send the element - it has more
+            // message blocks that haven't been sent (that we know of).
+
+            VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                  "We can release the fully_sent_block now.\n"));
+
+            // Release the fully_sent_block
+            fully_sent_block->release();
+          }
         }
+
+      } else {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "Only part of the block at the front of pkt_chain_ "
+              "was sent.\n"));
+
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "Advance the rd_ptr() of the front block (of pkt_chain_) "
+              "by the num_bytes_left (%d).\n", num_bytes_left));
+
+        // Only part of the current block was sent.
+        this->pkt_chain_->rd_ptr(num_bytes_left);
+
+        if (this->header_complete_) {
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "And since the packet header block has already been "
+                "completely sent, add num_bytes_left to the "
+                "num_non_header_bytes_sent.\n"));
+
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "Before, num_non_header_bytes_sent == %d.\n",
+                num_non_header_bytes_sent));
+
+          // We know that the current block isn't the packet header
+          // block because the packet header block has already been
+          // completely sent.  We need to count these bytes in the
+          // num_non_header_bytes_sent.
+          num_non_header_bytes_sent += num_bytes_left;
+
+          VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+                "After, num_non_header_bytes_sent == %d.\n",
+                num_non_header_bytes_sent));
+        }
+
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "Set the num_bytes_left to 0 now.\n"));
+
+        num_bytes_left = 0;
       }
-
-    } else {
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Only part of the block at the front of pkt_chain_ "
-            "was sent.\n"));
-
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Advance the rd_ptr() of the front block (of pkt_chain_) "
-            "by the num_bytes_left (%d).\n", num_bytes_left));
-
-      // Only part of the current block was sent.
-      this->pkt_chain_->rd_ptr(num_bytes_left);
-
-      if (this->header_complete_) {
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "And since the packet header block has already been "
-              "completely sent, add num_bytes_left to the "
-              "num_non_header_bytes_sent.\n"));
-
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "Before, num_non_header_bytes_sent == %d.\n",
-              num_non_header_bytes_sent));
-
-        // We know that the current block isn't the packet header
-        // block because the packet header block has already been
-        // completely sent.  We need to count these bytes in the
-        // num_non_header_bytes_sent.
-        num_non_header_bytes_sent += num_bytes_left;
-
-        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-              "After, num_non_header_bytes_sent == %d.\n",
-              num_non_header_bytes_sent));
-      }
-
-      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
-            "Set the num_bytes_left to 0 now.\n"));
-
-      num_bytes_left = 0;
     }
   }
 
@@ -688,7 +698,26 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
 
   // Returns 0 if the entire packet was sent, and returns 1 otherwise.
   int rc = (this->header_.length_ == 0) ? 0 : 1;
+  // Now notify the pending elements
+  {
+    std::vector<TransportQueueElement*>::iterator eiter;
+    for (eiter = elems_to_notify.begin();
+         eiter != elems_to_notify.end();
+         ++eiter)
+    {
+      const SendMode mode = this->mode_;
+      {
+        ACE_Reverse_Lock<LockType> reverse(this->lock_);
+        ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
+        if (mode == MODE_TERMINATED) {
+          (*eiter)->data_dropped(true); // dropped_by_transport
 
+        } else {
+          (*eiter)->data_delivered();
+        }
+      }
+    }
+  }
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Adjustments all done.  Returning [%d].  0 means entire packet "
         "has been sent.  1 means otherwise.\n",
@@ -986,6 +1015,10 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
   }
 
   DBG_ENTRY_LVL("TransportSendStrategy", "send", 6);
+  //used for send_delayed_notifications at end of send(), must create local copy of pub_id
+  //now to prevent element being destroyed prior to accessing for publication_id() for match creation
+  RepoId pub_id(element->publication_id());
+
   {
     GuardType guard(this->lock_);
 
@@ -1265,12 +1298,13 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       }
     }
   }
-
-  send_delayed_notifications();
+  const TransportQueueElement::MatchOnPubId match(pub_id);
+  send_delayed_notifications(&match);
+  //send_delayed_notifications();
 }
 
 void
-TransportSendStrategy::send_stop()
+TransportSendStrategy::send_stop(RepoId repoId)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
@@ -1351,8 +1385,14 @@ TransportSendStrategy::send_stop()
                                           "stayed in MODE_DIRECT" )));
     }
   }
-
-  send_delayed_notifications();
+  if(repoId == GUID_UNKNOWN) {
+    //Then this is a ThreadPerConnectionSendTask call and there will be no deadlock by
+    //TransportSendStrategy::send_stop calling into send_delayed_notifications() with no match
+    send_delayed_notifications();
+  } else {
+    const TransportQueueElement::MatchOnPubId match(repoId);
+    send_delayed_notifications(&match);
+  }
 }
 
 void
@@ -1375,11 +1415,11 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
 }
 
 RemoveResult
-TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
+TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "remove_sample", 6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@\n", sample->sample_), 5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t)  Removing sample: %@\n", sample->get_sample()), 5);
 
   // The sample to remove is either in temporary delayed notification list or
   // internal list (elems_ or queue_). If it's going to be removed from temporary delayed
@@ -1391,7 +1431,7 @@ TransportSendStrategy::remove_sample(const DataSampleListElement* sample)
   // in which case the element carry the info if the sample is released so the datalinkset
   // can stop calling rest datalinks to remove this sample if it's already released..
 
-  const char* const payload = sample->sample_->cont()->rd_ptr();
+  const char* const payload = sample->get_sample()->cont()->rd_ptr();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
   if (send_delayed_notifications(&modp)) {
     return REMOVE_RELEASED;

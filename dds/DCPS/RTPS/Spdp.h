@@ -53,7 +53,8 @@ public:
   // Participant
   void ignore_domain_participant(const DCPS::RepoId& ignoreId);
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
-  void bit_subscriber(const DDS::Subscriber_var& bit_subscriber);
+  void init_bit(const DDS::Subscriber_var& bit_subscriber);
+  void fini_bit();
   DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
   bool get_default_locators(const DCPS::RepoId& part_id,
                             LocatorSeq& target,
@@ -111,6 +112,8 @@ public:
 
   bool associated() const;
   bool has_discovered_participant(const DCPS::RepoId& guid);
+
+  WaitForAcks& wait_for_acks();
 private:
   ACE_Reactor* reactor() const;
 
@@ -132,8 +135,9 @@ private:
     explicit SpdpTransport(Spdp* outer);
     ~SpdpTransport();
 
-    int handle_timeout(const ACE_Time_Value&, const void*);
-    int handle_input(ACE_HANDLE h);
+    virtual int handle_timeout(const ACE_Time_Value&, const void*);
+    virtual int handle_input(ACE_HANDLE h);
+    virtual int handle_exception(ACE_HANDLE fd = ACE_INVALID_HANDLE);
 
     void open();
     void write();
@@ -141,6 +145,7 @@ private:
     void close();
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
+    void acknowledge();
 
     Spdp* outer_;
     Header hdr_;
@@ -160,7 +165,7 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> shutdown_flag_; // Spdp shutting down
 
   struct DiscoveredParticipant {
-    DiscoveredParticipant() {}
+    DiscoveredParticipant() : bit_ih_(0) {}
     DiscoveredParticipant(const SPDPdiscoveredParticipantData& p,
                           const ACE_Time_Value& t)
       : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL) {}
@@ -179,6 +184,9 @@ private:
   void get_discovered_participant_ids(RepoIdSet& results) const;
 
   Sedp sedp_;
+  // wait for acknoledgements from SpdpTransport and Sedp::Task
+  // when BIT is being removed (fini_bit)
+  WaitForAcks wait_for_acks_;
 };
 
 }

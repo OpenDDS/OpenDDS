@@ -84,20 +84,23 @@ OpenDDS::Model::WriterSync::wait_ack(const DDS::DataWriter_var& writer)
   return 0;
 }
 
-OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var reader) :
-reader_(reader)
+OpenDDS::Model::ReaderSync::ReaderSync(DDS::DataReader_var reader,
+                                       unsigned int num_writers) :
+reader_(reader),
+num_writers_(num_writers)
 {
 }
 
 OpenDDS::Model::ReaderSync::~ReaderSync()
 {
-  if (wait_unmatch(reader_)) {
+  if (wait_unmatch(reader_, num_writers_)) {
     throw std::runtime_error("wait_unmatch failure");
   }
 }
 
 int
-OpenDDS::Model::ReaderSync::wait_unmatch(const DDS::DataReader_var& reader)
+OpenDDS::Model::ReaderSync::wait_unmatch(const DDS::DataReader_var& reader,
+                                         unsigned int num_writers)
 {
   DDS::ReturnCode_t stat;
   DDS::StatusCondition_var condition = reader->get_statuscondition();
@@ -118,7 +121,7 @@ OpenDDS::Model::ReaderSync::wait_unmatch(const DDS::DataReader_var& reader)
                   ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_unmatch() -")
                   ACE_TEXT(" get_subscription_matched_status failed!\n")),
                  -1);
-    } else if (ms.current_count == 0 && ms.total_count > 0) {
+    } else if (ms.current_count == 0 && (unsigned int)ms.total_count >= num_writers) {
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_NOTICE, ACE_TEXT("ReaderSync: sub match count %d total count %d\n"),
                                        ms.current_count, ms.total_count));

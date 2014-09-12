@@ -13,6 +13,7 @@
 #include "ArrDelAdapter.h"
 
 #include "dds/DCPS/RepoIdConverter.h"
+#include "dds/DCPS/GuidUtils.h"
 
 #include "ace/Malloc_T.h"
 #include "ace/MMAP_Memory_Pool.h"
@@ -176,6 +177,7 @@ struct ActorStrt<QosSeq, QosSeq,
 };
 
 PersistenceUpdater::IdType_ExtId::IdType_ExtId()
+  : id_(OpenDDS::DCPS::GUID_UNKNOWN)
 {}
 
 PersistenceUpdater::IdType_ExtId::IdType_ExtId(IdType id)
@@ -208,6 +210,11 @@ PersistenceUpdater::PersistenceUpdater()
   : persistence_file_(ACE_TEXT("InforepoPersist"))
   , reset_(false)
   , um_(0)
+  , allocator_(0)
+  , topic_index_(0)
+  , participant_index_(0)
+  , actor_index_(0)
+
 {}
 
 PersistenceUpdater::~PersistenceUpdater()

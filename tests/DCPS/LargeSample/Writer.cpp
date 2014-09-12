@@ -67,7 +67,7 @@ namespace {
 }
 
 void
-Writer::write()
+Writer::write(bool reliable)
 {
   DDS::InstanceHandleSeq handles;
 
@@ -122,7 +122,10 @@ Writer::write()
     DDS::InstanceHandle_t handle2 = message_dw2->register_instance(message2);
 
     for (int i = 0; i < num_messages; i++) {
-      ACE_OS::sleep(1);
+
+      if (!reliable) {
+        ACE_OS::sleep(1);
+      }
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
@@ -131,19 +134,20 @@ Writer::write()
                  message1.process_id.in(),
                  message1.writer_id,
                  message1.sample_id));
-      DDS::ReturnCode_t error = message_dw1->write(message1, handle1);
+      DDS::ReturnCode_t error;
+      do {
+        error = message_dw1->write(message1, handle1);
 
-      if (error != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: write dw1 returned %d!\n"), error));
-
-        if (error == DDS::RETCODE_TIMEOUT) {
-          timeout_writes_++;
+        if (error != DDS::RETCODE_OK) {
+          if (error == DDS::RETCODE_TIMEOUT) {
+            timeout_writes_++;
+          } else {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("%N:%l: svc()")
+                       ACE_TEXT(" ERROR: write dw1 returned %d!\n"), error));
+          }
         }
-      }
-
-      ACE_OS::sleep(1);
+      } while (error == DDS::RETCODE_TIMEOUT);
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
@@ -152,17 +156,18 @@ Writer::write()
                  message2.process_id.in(),
                  message2.writer_id,
                  message2.sample_id));
-      error = message_dw2->write(message2, handle2);
-
-      if (error != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: write dw2 returned %d!\n"), error));
-
-        if (error == DDS::RETCODE_TIMEOUT) {
-          timeout_writes_++;
+      do {
+        error = message_dw2->write(message2, handle2);
+        if (error != DDS::RETCODE_OK) {
+          if (error == DDS::RETCODE_TIMEOUT) {
+            timeout_writes_++;
+          } else {
+            ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("%N:%l: svc()")
+                       ACE_TEXT(" ERROR: write dw2 returned %d!\n"), error));
+          }
         }
-      }
+      } while (error == DDS::RETCODE_TIMEOUT);
 
       ++message1.sample_id;
       ++message2.sample_id;

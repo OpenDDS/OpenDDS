@@ -6,10 +6,11 @@
 
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Definitions.h"
 
 class SimplePublisher;
-
+class DataSampleElement;
 
 class SimpleDataWriter
   : public OpenDDS::DCPS::TransportSendListener
@@ -21,7 +22,11 @@ class SimpleDataWriter
     virtual ~SimpleDataWriter();
 
     void init(const OpenDDS::DCPS::AssociationData& subscription);
-    int run(int num_msgs, int msg_size);
+
+    // Implement in derived DDS_TEST class since internals of SendStateDataSampleList
+    // and DataSampleElement need to be accessed and DDS_TEST is a friend of
+    // SendStateDataSampleList and DataSampleElement.
+    virtual int run(int num_msgs, int msg_size) = 0;
 
     // This means that the TransportImpl has been shutdown, making the
     // transport_interface sent to the run() method no longer valid.
@@ -34,8 +39,8 @@ class SimpleDataWriter
     void transport_lost();
 
     // Implementing TransportSendListener
-    void data_delivered(const OpenDDS::DCPS::DataSampleListElement* sample);
-    void data_dropped(const OpenDDS::DCPS::DataSampleListElement* sample,
+    void data_delivered(const OpenDDS::DCPS::DataSampleElement* sample);
+    void data_dropped(const OpenDDS::DCPS::DataSampleElement* sample,
                       bool dropped_by_transport = false);
     void notify_publication_disconnected(const OpenDDS::DCPS::ReaderIdSeq&) {}
     void notify_publication_reconnected(const OpenDDS::DCPS::ReaderIdSeq&) {}
@@ -58,11 +63,22 @@ class SimpleDataWriter
     using OpenDDS::DCPS::TransportClient::enable_transport;
     using OpenDDS::DCPS::TransportClient::disassociate;
 
-  private:
+  protected:
 
     const OpenDDS::DCPS::RepoId& pub_id_;
     int num_messages_sent_;
     int num_messages_delivered_;
+};
+
+class DDS_TEST : public SimpleDataWriter
+{
+public:
+    explicit DDS_TEST(const OpenDDS::DCPS::RepoId& pub_id);
+    virtual int run(int num_msgs, int msg_size);
+
+    static void cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc,
+                        OpenDDS::DCPS::SendStateDataSampleList& list);
+
 };
 
 #endif  /* SIMPLEDATAWRITER_H */

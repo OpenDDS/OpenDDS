@@ -55,25 +55,25 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       this->config_.typeName().c_str(),
       this->config_.transportAddressName().c_str()
     ));
-    for( int index = 0; index < this->config_.infoRepoIorSize(); ++index) {
+    for( TestConfig::StringVector::size_type index = 0; index < this->config_.infoRepoIorSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE:     InforRepoIOR[ %d] == %C\n"),
         index, this->config_.infoRepoIor( index).c_str()
       ));
     }
-    for( int index = 0; index < this->config_.readerTopicNameSize(); ++index) {
+    for( TestConfig::StringVector::size_type index = 0; index < this->config_.readerTopicNameSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE:  readerTopicName[ %d] == %C\n"),
         index, this->config_.readerTopicName( index).c_str()
       ));
     }
-    for( int index = 0; index < this->config_.writerTopicNameSize(); ++index) {
+    for( TestConfig::StringVector::size_type index = 0; index < this->config_.writerTopicNameSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE:  writerTopicName[ %d] == %C\n"),
         index, this->config_.writerTopicName( index).c_str()
       ));
     }
-    for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
+    for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE: subscriberDomain[ %d] == %d\n")
         ACE_TEXT("(%P|%t) %T COMMANDLINE:    using repository key %d\n"),
@@ -81,7 +81,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
         this->config_.domainToRepo( this->config_.subscriberDomain( index))
       ));
     }
-    for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
+    for( TestConfig::DomainVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE:  publisherDomain[ %d] == %d\n")
         ACE_TEXT("(%P|%t) %T COMMANDLINE:    using repository key %d\n"),
@@ -91,7 +91,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     }
   }
 
-  for( int index = 0; index < this->config_.infoRepoIorSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.infoRepoIorSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: loading repository %d.\n"),
       index
@@ -109,7 +109,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // command line - otherwise this is done during configuration file
   // processing.
   if( this->config_.infoRepoIorSize() > 0) {
-    for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
+    for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T INFO: binding subscriber domain %d to repository %d.\n"),
         this->config_.subscriberDomain( index),
@@ -124,7 +124,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       );
     }
 
-    for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
+    for( TestConfig::StringVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T INFO: binding publisher domain %d to repository %d.\n"),
         this->config_.publisherDomain( index),
@@ -143,7 +143,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   //
   // Establish DomainParticipants for the subscription domains.
   //
-  for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating subscriber participant in domain %d.\n"),
       this->config_.subscriberDomain( index)
@@ -176,7 +176,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   //
   // Establish DomainParticipants for the publication domains.
   //
-  for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating publisher participant in domain %d.\n"),
       this->config_.publisherDomain( index)
@@ -225,10 +225,10 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // information available to us.  Drat.
   //
   std::set< OpenDDS::DCPS::Discovery::RepoKey> keylist;
-  for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.subscriberDomain( index)));
   }
-  for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
     keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.publisherDomain( index)));
   }
 
@@ -237,7 +237,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // Establish the listeners.
   //
 
-  for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating data reader listener for domain %d.\n"),
       this->config_.subscriberDomain( index)
@@ -293,7 +293,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // Establish the Subscriber Topics.
   //
 
-  for( int index = 0; index < this->config_.readerTopicNameSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.readerTopicNameSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating subscription[ %d] topic: %C.\n"),
       index,
@@ -322,7 +322,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // Establish the Publisher Topics.
   //
 
-  for( int index = 0; index < this->config_.writerTopicNameSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.writerTopicNameSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating publication[ %d] topic: %C.\n"),
       index,
@@ -351,7 +351,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // Establish the Subscribers.
   //
 
-  for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating subscriber[ %d].\n"),
       index
@@ -375,7 +375,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // Establish the Publishers.
   //
 
-  for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating publisher[ %d].\n"),
       index
@@ -399,7 +399,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // Establish and install the DataWriter.
   //
 
-  for( int index = 0; index < this->config_.publisherDomainSize(); ++index) {
+  for( TestConfig::StringVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating datawriter[ %d].\n"),
       index
@@ -458,7 +458,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   // round.
   //
 
-  for( int index = 0; index < this->config_.subscriberDomainSize(); ++index) {
+  for( TestConfig::DomainVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating data reader[ %d].\n"),
       index

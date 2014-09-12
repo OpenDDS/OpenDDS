@@ -16,6 +16,7 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
 : writer_ (::DDS::DataWriter::_duplicate (writer)),
   num_thread_to_write_ (num_thread_to_write),
   num_writes_per_thread_ (num_writes_per_thread),
+  multiple_instances_(0),
   finished_sending_ (false)
 {
 }

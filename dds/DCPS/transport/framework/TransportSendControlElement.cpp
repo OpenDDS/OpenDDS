@@ -27,6 +27,21 @@ OpenDDS::DCPS::TransportSendControlElement::requires_exclusive_packet() const
   return true;
 }
 
+namespace
+{
+  void handle_message(const bool dropped,
+                      ACE_Message_Block* const msg,
+                      OpenDDS::DCPS::TransportSendListener* const listener,
+                      const bool dropped_by_transport)
+  {
+    if (dropped) {
+      listener->control_dropped(msg, dropped_by_transport);
+    } else {
+      listener->control_delivered(msg);
+    }
+  }
+}
+
 void
 OpenDDS::DCPS::TransportSendControlElement::release_element(bool dropped_by_transport)
 {
@@ -34,16 +49,17 @@ OpenDDS::DCPS::TransportSendControlElement::release_element(bool dropped_by_tran
 
   DBG_ENTRY_LVL("TransportSendControlElement","release_element",6);
 
-  if (this->was_dropped()) {
-    this->listener_->control_dropped(this->msg_, dropped_by_transport);
-
-  } else {
-    this->listener_->control_delivered(this->msg_);
-  }
+  // store off local copies to use after "this" pointer deleted
+  const bool dropped = this->was_dropped();
+  ACE_Message_Block* const msg = this->msg_;
+  TransportSendListener* const listener = this->listener_;
 
   if (allocator_) {
     ACE_DES_FREE(this, allocator_->free, TransportSendControlElement);
   }
+
+  // reporting the message w/o using "this" pointer
+  handle_message(dropped, msg, listener, dropped_by_transport);
 }
 
 OpenDDS::DCPS::RepoId

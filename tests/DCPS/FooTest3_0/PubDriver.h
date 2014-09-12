@@ -50,7 +50,6 @@ class PubDriver : public ACE_Task_Base
     ::DDS::DomainParticipant_var participant_;
     ::DDS::Topic_var             topic_;
     ::DDS::Publisher_var         publisher_;
-    ::OpenDDS::DCPS::PublisherImpl*  publisher_servant_;
     ::DDS::DataWriter_var        datawriter_;
     ::OpenDDS::DCPS::DataWriterImpl* datawriter_servant_;
     ::Xyz::FooDataWriter_var    foo_datawriter_;

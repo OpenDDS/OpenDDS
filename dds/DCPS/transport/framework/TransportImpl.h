@@ -233,6 +233,8 @@ public:
   /// by parameter on supported Windows platforms only.
   void create_reactor_task(bool useAsyncSend = false);
 
+  virtual std::string transport_type() const = 0;
+
 private:
   /// Called by our friend, the TransportClient.
   /// Accessor for the TransportInterfaceInfo.  Accepts a reference
@@ -240,8 +242,6 @@ private:
   /// with this TransportImpl's connection information (ie, how
   /// another process would connect to this TransportImpl).
   bool connection_info(TransportLocator& local_info) const;
-
-  virtual std::string transport_type() const = 0;
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;

@@ -1,3 +1,283 @@
+Fri Sep 12 15:36:11 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+          Merge from the trunk back out to the branch.
+
+        * .:
+        * AUTHORS:
+        * ChangeLog:
+        * DDS.mwc:
+        * DDS_TAO.mwc:
+        * DDS_TAOv2.mwc:
+        * NEWS:
+        * PROBLEM-REPORT-FORM:
+        * README:
+        * VERSION:
+
+        * bin/PerlDDS/Cross_Sync.pm:
+        * bin/PerlDDS/Cross_Sync_Common.pm:
+        * bin/PerlDDS/Run_Test.pm:
+
+        * bin/dcps_tests.lst:
+
+        * configure:
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+        * dds/DCPS/DataCollector_T.cpp:
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataSampleElement.cpp:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+        * dds/DCPS/InstanceDataSampleList.h:
+        * dds/DCPS/InstanceDataSampleList.inl:
+        * dds/DCPS/InstanceDataSampleList.cpp:
+        * dds/DCPS/MessageTracker.h:
+        * dds/DCPS/MessageTracker.cpp:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/SendStateDataSampleList.inl:
+        * dds/DCPS/SendStateDataSampleList.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterDataSampleList.h:
+        * dds/DCPS/WriterDataSampleList.inl:
+        * dds/DCPS/WriterDataSampleList.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.cpp:
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/EntryExit.h:
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/QueueRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/RemoveAllVisitor.cpp:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/SendResponseListener.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.h:
+        * dds/DCPS/transport/framework/ThreadPerConRemoveVisitor.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.h:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportQueueElement.h:
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.h:
+        * dds/DCPS/transport/framework/TransportSendElement.inl:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+
+        * dds/DdsDcpsSubscriptionExt.idl:
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/FederatorConfig.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+
+        * dds/Version.h:
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+        * docs/design/UML/OpenDDS_UML_sketches.asta:
+        * docs/design/UML/README:
+        * docs/design/UML/history:
+
+        * docs/history/ChangeLog-3.5.1:
+        * docs/history/ChangeLog-DataSampleList_split:
+        * docs/history/ChangeLog-writerlocks_2:
+
+        * java/jms/example/jbossas/opendds-ds.xml:
+        * java/jms/example/jbossas/opendds-repo-ds.xml:
+
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/StatisticalValue.h:
+        * performance-tests/Bench/src/StatisticalValue.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+
+        * performance-tests/DCPS/Priority/PublicationProfile.cpp:
+
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+
+        * performance-tests/DCPS/Sync/SyncServer_i.h:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+
+        * tests/DCPS/ConfigTransports/DataReaderListener.cpp:
+        * tests/DCPS/ConfigTransports/Options.cpp:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+
+        * tests/DCPS/FooType/Foo_Singleton_Transport.cpp:
+
+        * tests/DCPS/Instances:
+
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/multicast.ini:
+        * tests/DCPS/LargeSample/pub_multicast_async.ini:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+        * tests/DCPS/LivelinessTest/Writer.cpp:
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+
+        * tests/DCPS/ManyToMany:
+
+        * tests/DCPS/ManyToMany/README:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/rtps_disc.ini:
+        * tests/DCPS/ManyToMany/rtps_disc_tcp.ini:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+        * tests/DCPS/ManyToMany/svc_csdtp.conf:
+
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+        * tests/DCPS/MultiRepoTest/TestConfig.h:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+        * tests/DCPS/PersistentInfoRepo:
+
+        * tests/DCPS/QueryCondition/run_test.pl:
+
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.h:
+        * tests/DCPS/Reliability/sub/DataReaderListenerImpl.cpp:
+
+        * tests/DCPS/StringKey/DataReaderListener.cpp:
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Publisher.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+
+        * tests/DCPS/unit/Main.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+        * tests/Utils:
+
+        * tests/transport/error_handling/SimpleTransportClient.h:
+
+        * tests/transport/rtps/publisher.cpp:
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataWriter.h:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+        * tools/excelRTD/RTDMonitor.cpp:
+        * tools/excelRTD/RTDServerDLL.cpp:
+
+        * tools/modeling/codegen/model/Sync.h:
+        * tools/modeling/codegen/model/Sync.cpp:
+
+        * tools/monitor/Viewer.cpp:
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataSampleList.cpp:
+
+        * docs/design/UML/Analysis.unt:
+        * docs/design/UML/Create_DataReader_Detail.jpg:
+        * docs/design/UML/Create_DataReader_Simple.jpg:
+        * docs/design/UML/Create_DataWriter_Detail.jpg:
+        * docs/design/UML/Create_DataWriter_Simple.jpg:
+        * docs/design/UML/DDS.uml:
+        * docs/design/UML/DDS.xmi:
+        * docs/design/UML/InDepthOverview.unt:
+        * docs/design/UML/Overview.unt:
+        * docs/design/UML/Register_Sample_Detail.jpg:
+        * docs/design/UML/Register_Sample_Simple.jpg:
+        * docs/design/UML/Repo_Pub_Sub_Detail.jpg:
+        * docs/design/UML/Repo_Pub_Sub_Simple.jpg:
+        * docs/design/UML/Send_Remote_Detail.jpg:
+        * docs/design/UML/Send_Remote_Simple.jpg:
+        * docs/design/UML/Write_Data_Detail.jpg:
+        * docs/design/UML/Write_Data_Simple.jpg:
+
+          Removed these files.
+
 Thu Sep 11 17:03:59 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/modeling/codegen/model/Service_T.cpp:

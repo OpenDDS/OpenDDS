@@ -14,7 +14,7 @@
 #include "ThreadPerConRemoveVisitor.h"
 #include "DirectPriorityMapper.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/DataSampleList.h"
+#include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Auto_Ptr.h"
@@ -200,13 +200,13 @@ int ThreadPerConnectionSendTask::close(u_long flag)
 }
 
 RemoveResult
-ThreadPerConnectionSendTask::remove_sample(const DataSampleListElement* element)
+ThreadPerConnectionSendTask::remove_sample(const DataSampleElement* element)
 {
   DBG_ENTRY("ThreadPerConnectionSendTask", "remove_sample");
 
   GuardType guard(this->lock_);
 
-  ACE_Message_Block* payload = element->sample_->cont();
+  ACE_Message_Block* payload = element->get_sample()->cont();
   ThreadPerConRemoveVisitor visitor(payload);
 
   this->queue_.accept_visitor(visitor);
@@ -218,6 +218,8 @@ void ThreadPerConnectionSendTask::execute(SendRequest& req)
 {
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "execute", 6);
 
+
+
   switch (req.op_) {
   case SEND_START:
     this->link_->send_start_i();
@@ -226,7 +228,11 @@ void ThreadPerConnectionSendTask::execute(SendRequest& req)
     this->link_->send_i(req.element_);
     break;
   case SEND_STOP:
-    this->link_->send_stop_i();
+    //DataLink::send_stop_i expects the RepoId of the message sender, however, in ThreadPerConnectionSendTask
+    //the control element will be a null element with only the op_ set.  Thus pass in GUID_UNKNOWN which will
+    //allow send_stop to call send_delayed_notifications without a match.  In the case of ThreadPerConnectionSendTask
+    //this is allowable because only one thread will be managing the sending thus no deadlock down in send_delayed_notifications()
+    this->link_->send_stop_i(GUID_UNKNOWN);
     break;
   default:
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ThreadPerConnectionSendTask::execute unknown command %d\n",

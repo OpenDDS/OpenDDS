@@ -11,6 +11,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "TransportSendListener.h"
+#include "dds/DCPS/MessageTracker.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -27,10 +28,11 @@ namespace DCPS {
 class OpenDDS_Dcps_Export SendResponseListener
   : public TransportSendListener {
 public:
+  SendResponseListener(const std::string& msg_src);
   virtual ~SendResponseListener();
 
-  virtual void data_delivered(const DataSampleListElement* sample);
-  virtual void data_dropped(const DataSampleListElement* sample,
+  virtual void data_delivered(const DataSampleElement* sample);
+  virtual void data_dropped(const DataSampleElement* sample,
                             bool dropped_by_transport);
 
   virtual void control_delivered(ACE_Message_Block* sample);
@@ -42,6 +44,10 @@ public:
   void notify_publication_lost(const ReaderIdSeq&) {}
   void notify_connection_deleted() {}
   void remove_associations(const ReaderIdSeq&, bool) {}
+
+  void track_message();
+private:
+  MessageTracker tracker_;
 };
 
 } // namespace DCPS
