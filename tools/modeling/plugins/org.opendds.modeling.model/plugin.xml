@@ -57,24 +57,21 @@
       <!-- @generated OpenDDS -->
       <package
             uri="http://www.opendds.org/modeling/schemas/Application/1.0"
-            class="org.opendds.modeling.model.application.ApplicationPackage"
-            genModel="model/OpenDDS.genmodel"/>
+            class="org.opendds.modeling.model.application.ApplicationPackage"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated OpenDDS -->
       <package
             uri="http://www.opendds.org/modeling/schemas/Enumerations/1.0"
-            class="org.opendds.modeling.model.enumerations.EnumerationsPackage"
-            genModel="model/OpenDDS.genmodel"/>
+            class="org.opendds.modeling.model.enumerations.EnumerationsPackage"/>
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated OpenDDS -->
       <package
             uri="http://www.opendds.org/modeling/schemas/Types/1.0"
-            class="org.opendds.modeling.model.types.TypesPackage"
-            genModel="model/OpenDDS.genmodel"/>
+            class="org.opendds.modeling.model.types.TypesPackage"/>
    </extension>
    <extension
          id="openddsnature"

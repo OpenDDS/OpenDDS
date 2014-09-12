@@ -20,8 +20,7 @@
       <!-- @generated Generator -->
       <package
             uri="http://www.opendds.org/modeling/schemas/Generator/1.0"
-            class="org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage"
-            genModel="model/Generator.genmodel"/>
+            class="org.opendds.modeling.sdk.model.GeneratorSpecification.GeneratorPackage"/>
    </extension>
 
 </plugin>

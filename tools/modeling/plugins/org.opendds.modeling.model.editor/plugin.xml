@@ -116,22 +116,6 @@
       </editor>
    </extension>
 
-   <extension point="org.eclipse.ui.newWizards">
-      <!-- @generated OpenDDS -->
-      <category
-            id="org.eclipse.emf.ecore.Wizard.category.ID"
-            name="%_UI_Wizard_category"/>
-      <wizard
-            id="org.opendds.modeling.model.opendds.presentation.OpenDDSModelWizardID"
-            name="%_UI_OpenDDSModelWizard_label"
-            class="org.opendds.modeling.model.opendds.presentation.OpenDDSModelWizard"
-            category="org.eclipse.emf.ecore.Wizard.category.ID"
-            icon="icons/full/obj16/OpenDDSModelFile.gif">
-         <description>%_UI_OpenDDSModelWizard_description</description>
-         <selection class="org.eclipse.core.resources.IResource"/>
-      </wizard>
-   </extension>
-
    <extension point="org.eclipse.ui.editors">
       <!-- @generated OpenDDS -->
       <editor

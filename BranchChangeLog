@@ -1,3 +1,19 @@
+Fri Sep 12 19:18:49 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/part/OpenDDSDataLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DeadlineQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LifespanQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/OpenDDSDcpsLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.model/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorActionBarContributor.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditorPlugin.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
+
+          Generated code updates.
+
 Fri Sep 12 15:36:11 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
           Merge from the trunk back out to the branch.

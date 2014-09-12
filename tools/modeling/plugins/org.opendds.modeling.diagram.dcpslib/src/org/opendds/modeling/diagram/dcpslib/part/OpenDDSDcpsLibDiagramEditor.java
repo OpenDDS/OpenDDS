@@ -38,6 +38,7 @@ import org.eclipse.gmf.runtime.diagram.ui.resources.editor.document.IDocumentPro
 import org.eclipse.gmf.runtime.diagram.ui.resources.editor.parts.DiagramDocumentEditor;
 import org.eclipse.gmf.runtime.notation.Diagram;
 import org.eclipse.gmf.runtime.notation.View;
+import org.eclipse.gmf.tooling.runtime.part.LastClickPositionProvider;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -78,6 +79,11 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	 * @generated
 	 */
 	public static final String CONTEXT_ID = "org.opendds.modeling.diagram.dcpslib.ui.diagramContext"; //$NON-NLS-1$
+
+	/**
+	 * @generated
+	 */
+	private LastClickPositionProvider myLastClickPositionProvider;
 
 	/**
 	 * @generated
@@ -343,6 +349,37 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 					}
 
 				});
+		startupLastClickPositionProvider();
+	}
+
+	/**
+	 * @generated
+	 */
+	protected void startupLastClickPositionProvider() {
+		if (myLastClickPositionProvider == null) {
+			myLastClickPositionProvider = new LastClickPositionProvider(this);
+			myLastClickPositionProvider.attachToService();
+		}
+	}
+
+	/**
+	 * @generated
+	 */
+	protected void shutDownLastClickPositionProvider() {
+		if (myLastClickPositionProvider != null) {
+			myLastClickPositionProvider.detachFromService();
+			myLastClickPositionProvider.dispose();
+			myLastClickPositionProvider = null;
+		}
+	}
+
+	/**
+	 * @generated
+	 */
+	@Override
+	public void dispose() {
+		shutDownLastClickPositionProvider();
+		super.dispose();
 	}
 
 	/**

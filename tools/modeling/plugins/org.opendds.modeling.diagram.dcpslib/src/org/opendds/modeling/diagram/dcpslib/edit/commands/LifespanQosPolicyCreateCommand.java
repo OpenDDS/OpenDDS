@@ -63,7 +63,8 @@ public class LifespanQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
-		ElementInitializers.getInstance().init_LifespanQosPolicy_3027(newElement);
+		ElementInitializers.getInstance().init_LifespanQosPolicy_3027(
+				newElement);
 
 		doConfigure(newElement, monitor, info);
 

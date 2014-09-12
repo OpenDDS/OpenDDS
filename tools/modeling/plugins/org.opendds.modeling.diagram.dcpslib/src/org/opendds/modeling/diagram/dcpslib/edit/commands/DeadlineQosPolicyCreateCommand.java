@@ -66,7 +66,8 @@ public class DeadlineQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
-		ElementInitializers.getInstance().init_DeadlineQosPolicy_3022(newElement);
+		ElementInitializers.getInstance().init_DeadlineQosPolicy_3022(
+				newElement);
 
 		doConfigure(newElement, monitor, info);
 
