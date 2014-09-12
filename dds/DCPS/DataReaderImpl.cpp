@@ -190,10 +190,13 @@ DataReaderImpl::cleanup()
     // Cancel any uncancelled sweeper timers
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      if (writer->second->historic_samples_timer_ > 0) {
+      if (writer->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
         reactor_->cancel_timer(writer->second->historic_samples_timer_);
+        if (DCPS_debug_level) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::cleanup() - Unscheduled sweeper %d\n", writer->second->historic_samples_timer_));
+        }
       }
-      writer->second->historic_samples_timer_ = 0;
+      writer->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
     }
   }
 }
@@ -334,13 +337,17 @@ DataReaderImpl::add_association(const RepoId& yourId,
           info));
 
       // Scheule timer if necessary
-      if (info->historic_samples_timer_ == -1) {
+      //   - only need to check reader qos - we know the writer must be >= reader
+      if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
         ACE_Time_Value ten_seconds(10);
         const void* arg = reinterpret_cast<const void*>(&writer.writerId);
         info->historic_samples_timer_ =
             reactor_->schedule_timer(&end_historic_sweeper_,
                                      arg,
                                      ten_seconds);
+        if (DCPS_debug_level) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::add_association() - Scheduled sweeper %d\n", info->historic_samples_timer_));
+        }
       }
 
       this->statistics_.insert(
@@ -2752,7 +2759,8 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 
     WriterMapType::iterator where = writers_.find(header.publication_id_);
     if (writers_.end() != where) {
-      return where->second->historic_samples_timer_ != 0;
+      // Filter this sample if we are waiting for end historic samples
+      return where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING;
     }
   }
 
@@ -3297,11 +3305,12 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
   WriterMapType::iterator where = writers_.find(pub_id);
   if (writers_.end() != where) {
     // Stop filtering these
-    if (where->second->historic_samples_timer_ != 0) {
-      if (where->second->historic_samples_timer_ > 0) {
-        reactor_->cancel_timer(where->second->historic_samples_timer_);
+    if (where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
+      reactor_->cancel_timer(where->second->historic_samples_timer_);
+      if (DCPS_debug_level) {
+        ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::resume_sample_processing() - Unscheduled sweeper %d\n", where->second->historic_samples_timer_));
       }
-      where->second->historic_samples_timer_ = 0;
+      where->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
     }
   }
 }
@@ -3327,7 +3336,7 @@ EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(
 
 EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
 {
-  if (DCPS_debug_level >= 5) {
+  if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper\n"));
   }
 }
@@ -3338,7 +3347,7 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
 {
   PublicationId pub_id = *reinterpret_cast<const PublicationId*>(arg);
 
-  if (DCPS_debug_level >= 1) {
+  if (DCPS_debug_level >= 5) {
     ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout\n"));
   }
 

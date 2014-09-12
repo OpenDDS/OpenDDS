@@ -73,6 +73,7 @@ class OpenDDS_Dcps_Export WriterInfo : public RcObject<ACE_SYNCH_MUTEX> {
 
 public:
   enum WriterState { NOT_SET, ALIVE, DEAD };
+  enum HistoricSamplesState { NOT_WAITING = -1 };
 
   WriterInfo();  // needed for maps
 
@@ -143,7 +144,7 @@ public:
 
   bool seen_data_;
 
-  // Non-zero if this a durable writer for which we are awaiting an
+  // Non-negative if this a durable writer for which we are awaiting an
   // end historic samples control message
   long historic_samples_timer_;
 
