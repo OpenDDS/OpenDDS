@@ -63,7 +63,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::topic(
   if(!this->topics_[ participant][ topic]) {
     this->createTopicDescription(participant, topic);
   }
-  return DDS::TopicDescription::_duplicate(this->topics_[ participant][ topic]);
+  return this->topics_[ participant][ topic];
 }
 
 template< typename ModelName, class InstanceTraits>
@@ -287,7 +287,7 @@ OpenDDS::Model::Service< ModelName, InstanceTraits>::createPublication( typename
   this->writers_[writer] = this->delegate_.createPublication(
     writer,
     this->publishers_[publisher],
-    dynamic_cast<DDS::Topic*>(this->topics_[participant][topic]),
+    dynamic_cast<DDS::Topic*>(this->topics_[participant][topic].ptr()),
     this->modelData_.qos(writer),
     this->modelData_.mask(writer),
     this->configName(this->modelData_.transportConfigName(writer)),
