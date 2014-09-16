@@ -43,6 +43,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -62,6 +63,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 
 import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 
 import org.eclipse.swt.events.ControlAdapter;
@@ -232,7 +234,7 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	protected PropertySheetPage propertySheetPage;
+	protected List<PropertySheetPage> propertySheetPages = new ArrayList<PropertySheetPage>();
 
 	/**
 	 * This is the viewer that shadows the selection in the content outline.
@@ -350,7 +352,8 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 					setCurrentViewer(contentOutlineViewer);
 				}
 			} else if (p instanceof PropertySheet) {
-				if (((PropertySheet) p).getCurrentPage() == propertySheetPage) {
+				if (propertySheetPages.contains(((PropertySheet) p)
+						.getCurrentPage())) {
 					getActionBarContributor().setActiveEditor(
 							OpenDDSEditor.this);
 					handleActivate();
@@ -441,8 +444,8 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 					}
 
 					if (updateProblemIndication) {
-						getSite().getShell().getDisplay().asyncExec(
-								new Runnable() {
+						getSite().getShell().getDisplay()
+								.asyncExec(new Runnable() {
 									public void run() {
 										updateProblemIndication();
 									}
@@ -464,6 +467,14 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 		@Override
 		protected void unsetTarget(Resource target) {
 			basicUnsetTarget(target);
+			resourceToDiagnosticMap.remove(target);
+			if (updateProblemIndication) {
+				getSite().getShell().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						updateProblemIndication();
+					}
+				});
+			}
 		}
 	};
 
@@ -488,8 +499,8 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 							if (delta.getKind() == IResourceDelta.REMOVED
 									|| delta.getKind() == IResourceDelta.CHANGED
 									&& delta.getFlags() != IResourceDelta.MARKERS) {
-								Resource resource = resourceSet.getResource(
-										URI
+								Resource resource = resourceSet
+										.getResource(URI
 												.createPlatformResourceURI(
 														delta.getFullPath()
 																.toString(),
@@ -502,6 +513,7 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 									}
 								}
 							}
+							return false;
 						}
 
 						return true;
@@ -606,8 +618,9 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 					} catch (IOException exception) {
 						if (!resourceToDiagnosticMap.containsKey(resource)) {
 							resourceToDiagnosticMap
-									.put(resource, analyzeResourceProblems(
-											resource, exception));
+									.put(resource,
+											analyzeResourceProblems(resource,
+													exception));
 						}
 					}
 				}
@@ -749,9 +762,14 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 							setSelectionToViewer(mostRecentCommand
 									.getAffectedObjects());
 						}
-						if (propertySheetPage != null
-								&& !propertySheetPage.getControl().isDisposed()) {
-							propertySheetPage.refresh();
+						for (Iterator<PropertySheetPage> i = propertySheetPages
+								.iterator(); i.hasNext();) {
+							PropertySheetPage propertySheetPage = i.next();
+							if (propertySheetPage.getControl().isDisposed()) {
+								i.remove();
+							} else {
+								propertySheetPage.refresh();
+							}
 						}
 					}
 				});
@@ -965,7 +983,9 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 				new UnwrappingSelectionProvider(viewer));
 
 		int dndOperations = DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance() };
+		Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance(),
+				LocalSelectionTransfer.getTransfer(),
+				FileTransfer.getInstance() };
 		viewer.addDragSupport(dndOperations, transfers, new ViewerDragAdapter(
 				viewer));
 		viewer.addDropSupport(dndOperations, transfers,
@@ -995,8 +1015,8 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 
 		Diagnostic diagnostic = analyzeResourceProblems(resource, exception);
 		if (diagnostic.getSeverity() != Diagnostic.OK) {
-			resourceToDiagnosticMap.put(resource, analyzeResourceProblems(
-					resource, exception));
+			resourceToDiagnosticMap.put(resource,
+					analyzeResourceProblems(resource, exception));
 		}
 		editingDomain.getResourceSet().eAdapters()
 				.add(problemIndicationAdapter);
@@ -1465,25 +1485,24 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 	 * @generated
 	 */
 	public IPropertySheetPage getPropertySheetPage() {
-		if (propertySheetPage == null) {
-			propertySheetPage = new ExtendedPropertySheetPage(editingDomain) {
-				@Override
-				public void setSelectionToViewer(List<?> selection) {
-					OpenDDSEditor.this.setSelectionToViewer(selection);
-					OpenDDSEditor.this.setFocus();
-				}
+		PropertySheetPage propertySheetPage = new ExtendedPropertySheetPage(
+				editingDomain) {
+			@Override
+			public void setSelectionToViewer(List<?> selection) {
+				OpenDDSEditor.this.setSelectionToViewer(selection);
+				OpenDDSEditor.this.setFocus();
+			}
 
-				@Override
-				public void setActionBars(IActionBars actionBars) {
-					super.setActionBars(actionBars);
-					getActionBarContributor().shareGlobalActions(this,
-							actionBars);
-				}
-			};
-			propertySheetPage
-					.setPropertySourceProvider(new AdapterFactoryContentProvider(
-							adapterFactory));
-		}
+			@Override
+			public void setActionBars(IActionBars actionBars) {
+				super.setActionBars(actionBars);
+				getActionBarContributor().shareGlobalActions(this, actionBars);
+			}
+		};
+		propertySheetPage
+				.setPropertySourceProvider(new AdapterFactoryContentProvider(
+						adapterFactory));
+		propertySheetPages.add(propertySheetPage);
 
 		return propertySheetPage;
 	}
@@ -1577,8 +1596,9 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 							}
 						} catch (Exception exception) {
 							resourceToDiagnosticMap
-									.put(resource, analyzeResourceProblems(
-											resource, exception));
+									.put(resource,
+											analyzeResourceProblems(resource,
+													exception));
 						}
 						first = false;
 					}
@@ -1608,7 +1628,7 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 
 	/**
 	 * This returns whether something has been persisted to the URI of the specified resource.
-	 * The implementation uses the URI converter from the editor's resource set to try to open an input stream. 
+	 * The implementation uses the URI converter from the editor's resource set to try to open an input stream.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -1681,22 +1701,10 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 	 * @generated
 	 */
 	public void gotoMarker(IMarker marker) {
-		try {
-			if (marker.getType().equals(EValidator.MARKER)) {
-				String uriAttribute = marker.getAttribute(
-						EValidator.URI_ATTRIBUTE, null);
-				if (uriAttribute != null) {
-					URI uri = URI.createURI(uriAttribute);
-					EObject eObject = editingDomain.getResourceSet()
-							.getEObject(uri, true);
-					if (eObject != null) {
-						setSelectionToViewer(Collections
-								.singleton(editingDomain.getWrapper(eObject)));
-					}
-				}
-			}
-		} catch (CoreException exception) {
-			OpenDDSEditorPlugin.INSTANCE.log(exception);
+		List<?> targetObjects = markerHelper.getTargetObjects(editingDomain,
+				marker);
+		if (!targetObjects.isEmpty()) {
+			setSelectionToViewer(targetObjects);
 		}
 	}
 
@@ -1773,8 +1781,7 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 		editorSelection = selection;
 
 		for (ISelectionChangedListener listener : selectionChangedListeners) {
-			listener
-					.selectionChanged(new SelectionChangedEvent(this, selection));
+			listener.selectionChanged(new SelectionChangedEvent(this, selection));
 		}
 		setStatusLineManager(selection);
 	}
@@ -1809,8 +1816,8 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 				}
 				default: {
 					statusLineManager.setMessage(getString(
-							"_UI_MultiObjectSelected", Integer
-									.toString(collection.size())));
+							"_UI_MultiObjectSelected",
+							Integer.toString(collection.size())));
 					break;
 				}
 				}
@@ -1899,7 +1906,7 @@ public class OpenDDSEditor extends MultiPageEditorPart implements
 			getActionBarContributor().setActiveEditor(null);
 		}
 
-		if (propertySheetPage != null) {
+		for (PropertySheetPage propertySheetPage : propertySheetPages) {
 			propertySheetPage.dispose();
 		}
 

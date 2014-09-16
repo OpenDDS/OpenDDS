@@ -22,6 +22,7 @@ import org.eclipse.emf.common.ui.URIEditorInput;
 import org.eclipse.emf.common.util.URI;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.resource.Resource;
+import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.emf.edit.ui.dnd.LocalTransfer;
 import org.eclipse.emf.transaction.TransactionalEditingDomain;
 import org.eclipse.emf.workspace.util.WorkspaceSynchronizer;
@@ -37,6 +38,7 @@ import org.eclipse.gmf.runtime.diagram.ui.resources.editor.document.IDocumentPro
 import org.eclipse.gmf.runtime.diagram.ui.resources.editor.parts.DiagramDocumentEditor;
 import org.eclipse.gmf.runtime.notation.Diagram;
 import org.eclipse.gmf.runtime.notation.View;
+import org.eclipse.gmf.tooling.runtime.part.LastClickPositionProvider;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -81,6 +83,11 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	/**
 	 * @generated
 	 */
+	private LastClickPositionProvider myLastClickPositionProvider;
+
+	/**
+	 * @generated
+	 */
 	public OpenDDSDcpsLibDiagramEditor() {
 		super(true);
 	}
@@ -118,6 +125,7 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 	/**
 	 * @generated
 	 */
+	@SuppressWarnings("rawtypes")
 	public Object getAdapter(Class type) {
 		if (type == IShowInTargetList.class) {
 			return new IShowInTargetList() {
@@ -195,8 +203,7 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 		IEditorInput input = getEditorInput();
 		SaveAsDialog dialog = new SaveAsDialog(shell);
 		IFile original = input instanceof IFileEditorInput ? ((IFileEditorInput) input)
-				.getFile()
-				: null;
+				.getFile() : null;
 		if (original != null) {
 			dialog.setOriginalFile(original);
 		}
@@ -287,6 +294,9 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 			return StructuredSelection.EMPTY;
 		}
 		Diagram diagram = document.getDiagram();
+		if (diagram == null || diagram.eResource() == null) {
+			return StructuredSelection.EMPTY;
+		}
 		IFile file = WorkspaceSynchronizer.getFile(diagram.eResource());
 		if (file != null) {
 			OpenDDSDcpsLibNavigatorItem item = new OpenDDSDcpsLibNavigatorItem(
@@ -339,6 +349,37 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 					}
 
 				});
+		startupLastClickPositionProvider();
+	}
+
+	/**
+	 * @generated
+	 */
+	protected void startupLastClickPositionProvider() {
+		if (myLastClickPositionProvider == null) {
+			myLastClickPositionProvider = new LastClickPositionProvider(this);
+			myLastClickPositionProvider.attachToService();
+		}
+	}
+
+	/**
+	 * @generated
+	 */
+	protected void shutDownLastClickPositionProvider() {
+		if (myLastClickPositionProvider != null) {
+			myLastClickPositionProvider.detachFromService();
+			myLastClickPositionProvider.dispose();
+			myLastClickPositionProvider = null;
+		}
+	}
+
+	/**
+	 * @generated
+	 */
+	@Override
+	public void dispose() {
+		shutDownLastClickPositionProvider();
+		super.dispose();
 	}
 
 	/**
@@ -358,12 +399,12 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 		 */
 		protected List getObjectsBeingDropped() {
 			TransferData data = getCurrentEvent().currentDataType;
-			Collection uris = new HashSet();
+			HashSet<URI> uris = new HashSet<URI>();
 
 			Object transferedObject = getJavaObject(data);
 			if (transferedObject instanceof IStructuredSelection) {
 				IStructuredSelection selection = (IStructuredSelection) transferedObject;
-				for (Iterator it = selection.iterator(); it.hasNext();) {
+				for (Iterator<?> it = selection.iterator(); it.hasNext();) {
 					Object nextSelectedObject = it.next();
 					if (nextSelectedObject instanceof OpenDDSDcpsLibNavigatorItem) {
 						View view = ((OpenDDSDcpsLibNavigatorItem) nextSelectedObject)
@@ -377,18 +418,13 @@ public class OpenDDSDcpsLibDiagramEditor extends DiagramDocumentEditor
 
 					if (nextSelectedObject instanceof EObject) {
 						EObject modelElement = (EObject) nextSelectedObject;
-						Resource modelElementResource = modelElement
-								.eResource();
-						uris.add(modelElementResource.getURI().appendFragment(
-								modelElementResource
-										.getURIFragment(modelElement)));
+						uris.add(EcoreUtil.getURI(modelElement));
 					}
 				}
 			}
 
-			List result = new ArrayList();
-			for (Iterator it = uris.iterator(); it.hasNext();) {
-				URI nextURI = (URI) it.next();
+			ArrayList<EObject> result = new ArrayList<EObject>(uris.size());
+			for (URI nextURI : uris) {
 				EObject modelObject = getEditingDomain().getResourceSet()
 						.getEObject(nextURI, true);
 				result.add(modelObject);

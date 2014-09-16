@@ -302,15 +302,52 @@
 
    <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
       <?gmfgen generated="true"?>
-      <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.OpenDDSModelingAssistantProvider">
+      <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfOpenDDSModelEditPart">
          <Priority name="Lowest"/>
          <object class="org.opendds.modeling.diagram.main.edit.parts.OpenDDSModelEditPart" id="OpenDDSModel_1000"/>
-         <object class="org.opendds.modeling.diagram.main.edit.parts.DcpsLibEditPart" id="DcpsLib_2007"/>
-         <object class="org.opendds.modeling.diagram.main.edit.parts.PolicyLibEditPart" id="PolicyLib_2008"/>
-         <object class="org.opendds.modeling.diagram.main.edit.parts.DataLibEditPart" id="DataLib_2009"/>
-         <object class="org.opendds.modeling.diagram.main.edit.parts.LibPackageEditPart" id="LibPackage_2010"/>
-         <context elements="OpenDDSModel_1000,DcpsLib_2007,PolicyLib_2008,DataLib_2009,LibPackage_2010"/>
+         <context elements="OpenDDSModel_1000"/>
       </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfDcpsLibEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.main.edit.parts.DcpsLibEditPart" id="DcpsLib_2007"/>
+         <context elements="DcpsLib_2007"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfPolicyLibEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.main.edit.parts.PolicyLibEditPart" id="PolicyLib_2008"/>
+         <context elements="PolicyLib_2008"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfDataLibEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.main.edit.parts.DataLibEditPart" id="DataLib_2009"/>
+         <context elements="DataLib_2009"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfLibPackageEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.main.edit.parts.LibPackageEditPart" id="LibPackage_2010"/>
+         <context elements="LibPackage_2010"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfLibPackage2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.main.edit.parts.LibPackage2EditPart" id="LibPackage_3001"/>
+         <context elements="LibPackage_3001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfDataLib2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.main.edit.parts.DataLib2EditPart" id="DataLib_3002"/>
+         <context elements="DataLib_3002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfDcpsLib2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.main.edit.parts.DcpsLib2EditPart" id="DcpsLib_3003"/>
+         <context elements="DcpsLib_3003"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.main.providers.assistants.OpenDDSModelingAssistantProviderOfPolicyLib2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.main.edit.parts.PolicyLib2EditPart" id="PolicyLib_3004"/>
+         <context elements="PolicyLib_3004"/>
+      </modelingAssistantProvider>
+      
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">

@@ -101,6 +101,7 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 	/**
 	 * @generated
 	 */
+	@SuppressWarnings("rawtypes")
 	public Object getAdapter(Class type) {
 		if (type == IShowInTargetList.class) {
 			return new IShowInTargetList() {
@@ -178,8 +179,7 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 		IEditorInput input = getEditorInput();
 		SaveAsDialog dialog = new SaveAsDialog(shell);
 		IFile original = input instanceof IFileEditorInput ? ((IFileEditorInput) input)
-				.getFile()
-				: null;
+				.getFile() : null;
 		if (original != null) {
 			dialog.setOriginalFile(original);
 		}
@@ -272,6 +272,9 @@ public class OpenDDSPolicyLibDiagramEditor extends DiagramDocumentEditor
 			return StructuredSelection.EMPTY;
 		}
 		Diagram diagram = document.getDiagram();
+		if (diagram == null || diagram.eResource() == null) {
+			return StructuredSelection.EMPTY;
+		}
 		IFile file = WorkspaceSynchronizer.getFile(diagram.eResource());
 		if (file != null) {
 			OpenDDSPolicyLibNavigatorItem item = new OpenDDSPolicyLibNavigatorItem(

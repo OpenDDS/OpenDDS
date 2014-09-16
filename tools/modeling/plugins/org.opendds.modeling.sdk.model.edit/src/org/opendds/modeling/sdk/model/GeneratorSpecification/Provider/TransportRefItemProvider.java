@@ -72,9 +72,10 @@ public class TransportRefItemProvider extends ItemProviderAdapter implements
 	protected void addTransportPropertyDescriptor(Object object) {
 		itemPropertyDescriptors.add(createItemPropertyDescriptor(
 				((ComposeableAdapterFactory) adapterFactory)
-						.getRootAdapterFactory(), getResourceLocator(),
-				getString("_UI_TransportRef_transport_feature"), getString(
-						"_UI_PropertyDescriptor_description",
+						.getRootAdapterFactory(),
+				getResourceLocator(),
+				getString("_UI_TransportRef_transport_feature"),
+				getString("_UI_PropertyDescriptor_description",
 						"_UI_TransportRef_transport_feature",
 						"_UI_TransportRef_type"),
 				GeneratorPackage.Literals.TRANSPORT_REF__TRANSPORT, true,
@@ -89,8 +90,11 @@ public class TransportRefItemProvider extends ItemProviderAdapter implements
 	 */
 	@Override
 	public Object getImage(Object object) {
-		return overlayImage(object, getResourceLocator().getImage(
-				"full/obj16/" + Plugin.INSTANCE.imageMapping("TransportRef")));
+		return overlayImage(
+				object,
+				getResourceLocator().getImage(
+						"full/obj16/"
+								+ Plugin.INSTANCE.imageMapping("TransportRef")));
 	}
 
 	/**

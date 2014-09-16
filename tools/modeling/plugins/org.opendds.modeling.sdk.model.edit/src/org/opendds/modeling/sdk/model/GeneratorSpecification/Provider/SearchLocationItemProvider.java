@@ -111,8 +111,12 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 	 */
 	@Override
 	public Object getImage(Object object) {
-		return overlayImage(object, getResourceLocator().getImage(
-				"full/obj16/" + Plugin.INSTANCE.imageMapping("SearchLocation")));
+		return overlayImage(
+				object,
+				getResourceLocator().getImage(
+						"full/obj16/"
+								+ Plugin.INSTANCE
+										.imageMapping("SearchLocation")));
 	}
 
 	@Override
@@ -139,9 +143,12 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 			return itemLabelProvider.getImage(path);
 
 		default:
-			return overlayImage(object, getResourceLocator().getImage(
-					"full/obj16/"
-							+ Plugin.INSTANCE.imageMapping("SearchLocation")));
+			return overlayImage(
+					object,
+					getResourceLocator().getImage(
+							"full/obj16/"
+									+ Plugin.INSTANCE
+											.imageMapping("SearchLocation")));
 		}
 	}
 
@@ -188,8 +195,8 @@ public class SearchLocationItemProvider extends ItemProviderAdapter implements
 		switch (notification.getFeatureID(SearchLocation.class)) {
 		case GeneratorPackage.SEARCH_LOCATION__VARIABLE:
 		case GeneratorPackage.SEARCH_LOCATION__PATH:
-			fireNotifyChanged(new ViewerNotification(notification, notification
-					.getNotifier(), true, false));
+			fireNotifyChanged(new ViewerNotification(notification,
+					notification.getNotifier(), true, false));
 			return;
 		}
 		super.notifyChanged(notification);

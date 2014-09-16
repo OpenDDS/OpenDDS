@@ -65,8 +65,8 @@ public class RdlQosPolicy2ItemSemanticEditPolicy extends
 					// For the OpenDDS Modeling SDK, elements behind compartment children may not necessarily be in the same
 					// library as the element behind the compartment's parent (e.g. a DataReader's shared policies).
 					// In this case avoid destroying the child.
-					if (!OpenDDSLibHelper.areElementsInSameLib(view
-							.getElement(), cnode.getElement())) {
+					if (!OpenDDSLibHelper.areElementsInSameLib(
+							view.getElement(), cnode.getElement())) {
 						break;
 					}
 					switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(cnode)) {
@@ -87,8 +87,8 @@ public class RdlQosPolicy2ItemSemanticEditPolicy extends
 					// For the OpenDDS Modeling SDK, elements behind compartment children may not necessarily be in the same
 					// library as the element behind the compartment's parent (e.g. a DataReader's shared policies).
 					// In this case avoid destroying the child.
-					if (!OpenDDSLibHelper.areElementsInSameLib(view
-							.getElement(), cnode.getElement())) {
+					if (!OpenDDSLibHelper.areElementsInSameLib(
+							view.getElement(), cnode.getElement())) {
 						break;
 					}
 					switch (OpenDDSDcpsLibVisualIDRegistry.getVisualID(cnode)) {

@@ -77,6 +77,7 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ContentViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -94,12 +95,16 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlAdapter;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeColumn;
 import org.eclipse.ui.IActionBars;
@@ -178,7 +183,7 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 	 * <!-- end-user-doc -->
 	 * @generated
 	 */
-	protected PropertySheetPage propertySheetPage;
+	protected List<PropertySheetPage> propertySheetPages = new ArrayList<PropertySheetPage>();
 
 	/**
 	 * This is the viewer that shadows the selection in the content outline.
@@ -196,6 +201,14 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 	 * @generated
 	 */
 	protected TreeViewer parentViewer;
+
+	/**
+	 * This shows how a tree view works.
+	 * <!-- begin-user-doc -->
+	 * <!-- end-user-doc -->
+	 * @generated
+	 */
+	protected TreeViewer treeViewer;
 
 	/**
 	 * Model customization tab viewer.
@@ -311,7 +324,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 					setCurrentViewer(contentOutlineViewer);
 				}
 			} else if (p instanceof PropertySheet) {
-				if (((PropertySheet) p).getCurrentPage() == propertySheetPage) {
+				if (propertySheetPages.contains(((PropertySheet) p)
+						.getCurrentPage())) {
 					getActionBarContributor().setActiveEditor(
 							GeneratorEditor.this);
 					handleActivate();
@@ -402,8 +416,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 					}
 
 					if (updateProblemIndication) {
-						getSite().getShell().getDisplay().asyncExec(
-								new Runnable() {
+						getSite().getShell().getDisplay()
+								.asyncExec(new Runnable() {
 									public void run() {
 										updateProblemIndication();
 									}
@@ -425,6 +439,14 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 		@Override
 		protected void unsetTarget(Resource target) {
 			basicUnsetTarget(target);
+			resourceToDiagnosticMap.remove(target);
+			if (updateProblemIndication) {
+				getSite().getShell().getDisplay().asyncExec(new Runnable() {
+					public void run() {
+						updateProblemIndication();
+					}
+				});
+			}
 		}
 	};
 
@@ -449,8 +471,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 							if (delta.getKind() == IResourceDelta.REMOVED
 									|| delta.getKind() == IResourceDelta.CHANGED
 									&& delta.getFlags() != IResourceDelta.MARKERS) {
-								Resource resource = resourceSet.getResource(
-										URI
+								Resource resource = resourceSet
+										.getResource(URI
 												.createPlatformResourceURI(
 														delta.getFullPath()
 																.toString(),
@@ -463,6 +485,7 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 									}
 								}
 							}
+							return false;
 						}
 
 						return true;
@@ -567,8 +590,9 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 					} catch (IOException exception) {
 						if (!resourceToDiagnosticMap.containsKey(resource)) {
 							resourceToDiagnosticMap
-									.put(resource, analyzeResourceProblems(
-											resource, exception));
+									.put(resource,
+											analyzeResourceProblems(resource,
+													exception));
 						}
 					}
 				}
@@ -698,9 +722,14 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 							setSelectionToViewer(mostRecentCommand
 									.getAffectedObjects());
 						}
-						if (propertySheetPage != null
-								&& !propertySheetPage.getControl().isDisposed()) {
-							propertySheetPage.refresh();
+						for (Iterator<PropertySheetPage> i = propertySheetPages
+								.iterator(); i.hasNext();) {
+							PropertySheetPage propertySheetPage = i.next();
+							if (propertySheetPage.getControl().isDisposed()) {
+								i.remove();
+							} else {
+								propertySheetPage.refresh();
+							}
 						}
 					}
 				});
@@ -914,7 +943,9 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				new UnwrappingSelectionProvider(viewer));
 
 		int dndOperations = DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK;
-		Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance() };
+		Transfer[] transfers = new Transfer[] { LocalTransfer.getInstance(),
+				LocalSelectionTransfer.getTransfer(),
+				FileTransfer.getInstance() };
 		viewer.addDragSupport(dndOperations, transfers, new ViewerDragAdapter(
 				viewer));
 		viewer.addDropSupport(dndOperations, transfers,
@@ -944,8 +975,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 
 		Diagnostic diagnostic = analyzeResourceProblems(resource, exception);
 		if (diagnostic.getSeverity() != Diagnostic.OK) {
-			resourceToDiagnosticMap.put(resource, analyzeResourceProblems(
-					resource, exception));
+			resourceToDiagnosticMap.put(resource,
+					analyzeResourceProblems(resource, exception));
 		}
 		editingDomain.getResourceSet().eAdapters()
 				.add(problemIndicationAdapter);
@@ -964,8 +995,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				|| !resource.getWarnings().isEmpty()) {
 			BasicDiagnostic basicDiagnostic = new BasicDiagnostic(
 					Diagnostic.ERROR, "org.opendds.modeling.sdk.model.editor",
-					0, getString("_UI_CreateModelError_message", resource
-							.getURI()),
+					0, getString("_UI_CreateModelError_message",
+							resource.getURI()),
 					new Object[] { exception == null ? (Object) resource
 							: exception });
 			basicDiagnostic.merge(EcoreUtil.computeDiagnostic(resource, true));
@@ -1047,8 +1078,9 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				customizationViewer
 						.setContentProvider(new AdapterFactoryContentProvider(
 								adapterFactory));
-				customizationViewer.setLabelProvider(new AdapterFactoryLabelProvider(
-						adapterFactory));
+				customizationViewer
+						.setLabelProvider(new AdapterFactoryLabelProvider(
+								adapterFactory));
 
 				new AdapterFactoryTreeEditor(customizationViewer.getTree(),
 						adapterFactory);
@@ -1099,13 +1131,15 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				viewerPane.createControl(getContainer());
 				environmentViewer = (DeploymentTab) viewerPane.getViewer();
 				environmentViewer.setEditor(this);
-				environmentViewer.setContentProvider(new AdapterFactoryContentProvider(
-						adapterFactory));
-				environmentViewer.setLabelProvider(new AdapterFactoryLabelProvider(
-						adapterFactory));
+				environmentViewer
+						.setContentProvider(new AdapterFactoryContentProvider(
+								adapterFactory));
+				environmentViewer
+						.setLabelProvider(new AdapterFactoryLabelProvider(
+								adapterFactory));
 
-//				new AdapterFactoryTreeEditor(environmentViewer.getTree(),
-//						adapterFactory);
+				//				new AdapterFactoryTreeEditor(environmentViewer.getTree(),
+				//						adapterFactory);
 
 				Tree tree = environmentViewer.getTree();
 				TableLayout layout = new TableLayout();
@@ -1123,7 +1157,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				valueColumn.setText(PATH_COLUMN_ID);
 				valueColumn.setResizable(true);
 
-				environmentViewer.setColumnProperties(new String[] { VARIABLE_COLUMN_ID, PATH_COLUMN_ID });
+				environmentViewer.setColumnProperties(new String[] {
+						VARIABLE_COLUMN_ID, PATH_COLUMN_ID });
 
 				// Do this specifically for the contained table viewer here,
 				// since we don't want the containing widget to intercept.
@@ -1161,7 +1196,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 
 		// Restrict the tree editors to the desired scope.
 		//
-		EList<Resource> resources = editingDomain.getResourceSet().getResources();
+		EList<Resource> resources = editingDomain.getResourceSet()
+				.getResources();
 		if (resources.size() > 0) {
 			Resource resource = resources.get(0);
 			EList<EObject> contents = resource.getContents();
@@ -1169,7 +1205,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				EObject root = contents.get(0);
 				if (root instanceof CodeGen) {
 					customizationViewer.setTreeInput(root);
-					environmentViewer.setTableInput(((CodeGen) root).getSearchPaths());
+					environmentViewer.setTableInput(((CodeGen) root)
+							.getSearchPaths());
 				}
 			}
 		}
@@ -1367,11 +1404,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 					// Set the input to the widget.
 					//
 					if (currentViewerPane.getViewer().getInput() != selectedElement) {
-						ContentViewer viewer = (ContentViewer)currentViewerPane.getViewer();
-						if (viewer.getContentProvider() != null) {
-							viewer.setInput(selectedElement);
-							currentViewerPane.setTitle(selectedElement);
-						}
+						currentViewerPane.getViewer().setInput(selectedElement);
+						currentViewerPane.setTitle(selectedElement);
 					}
 				}
 			}
@@ -1385,25 +1419,24 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 	 * @generated
 	 */
 	public IPropertySheetPage getPropertySheetPage() {
-		if (propertySheetPage == null) {
-			propertySheetPage = new ExtendedPropertySheetPage(editingDomain) {
-				@Override
-				public void setSelectionToViewer(List<?> selection) {
-					GeneratorEditor.this.setSelectionToViewer(selection);
-					GeneratorEditor.this.setFocus();
-				}
+		PropertySheetPage propertySheetPage = new ExtendedPropertySheetPage(
+				editingDomain) {
+			@Override
+			public void setSelectionToViewer(List<?> selection) {
+				GeneratorEditor.this.setSelectionToViewer(selection);
+				GeneratorEditor.this.setFocus();
+			}
 
-				@Override
-				public void setActionBars(IActionBars actionBars) {
-					super.setActionBars(actionBars);
-					getActionBarContributor().shareGlobalActions(this,
-							actionBars);
-				}
-			};
-			propertySheetPage
-					.setPropertySourceProvider(new AdapterFactoryContentProvider(
-							adapterFactory));
-		}
+			@Override
+			public void setActionBars(IActionBars actionBars) {
+				super.setActionBars(actionBars);
+				getActionBarContributor().shareGlobalActions(this, actionBars);
+			}
+		};
+		propertySheetPage
+				.setPropertySourceProvider(new AdapterFactoryContentProvider(
+						adapterFactory));
+		propertySheetPages.add(propertySheetPage);
 
 		return propertySheetPage;
 	}
@@ -1457,8 +1490,9 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 							}
 						} catch (Exception exception) {
 							resourceToDiagnosticMap
-									.put(resource, analyzeResourceProblems(
-											resource, exception));
+									.put(resource,
+											analyzeResourceProblems(resource,
+													exception));
 						}
 						first = false;
 					}
@@ -1488,7 +1522,7 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 
 	/**
 	 * This returns whether something has been persisted to the URI of the specified resource.
-	 * The implementation uses the URI converter from the editor's resource set to try to open an input stream. 
+	 * The implementation uses the URI converter from the editor's resource set to try to open an input stream.
 	 * <!-- begin-user-doc -->
 	 * <!-- end-user-doc -->
 	 * @generated
@@ -1561,22 +1595,10 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 	 * @generated
 	 */
 	public void gotoMarker(IMarker marker) {
-		try {
-			if (marker.getType().equals(EValidator.MARKER)) {
-				String uriAttribute = marker.getAttribute(
-						EValidator.URI_ATTRIBUTE, null);
-				if (uriAttribute != null) {
-					URI uri = URI.createURI(uriAttribute);
-					EObject eObject = editingDomain.getResourceSet()
-							.getEObject(uri, true);
-					if (eObject != null) {
-						setSelectionToViewer(Collections
-								.singleton(editingDomain.getWrapper(eObject)));
-					}
-				}
-			}
-		} catch (CoreException exception) {
-			GeneratorEditorPlugin.INSTANCE.log(exception);
+		List<?> targetObjects = markerHelper.getTargetObjects(editingDomain,
+				marker);
+		if (!targetObjects.isEmpty()) {
+			setSelectionToViewer(targetObjects);
 		}
 	}
 
@@ -1653,8 +1675,7 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 		editorSelection = selection;
 
 		for (ISelectionChangedListener listener : selectionChangedListeners) {
-			listener
-					.selectionChanged(new SelectionChangedEvent(this, selection));
+			listener.selectionChanged(new SelectionChangedEvent(this, selection));
 		}
 		setStatusLineManager(selection);
 	}
@@ -1689,8 +1710,8 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 				}
 				default: {
 					statusLineManager.setMessage(getString(
-							"_UI_MultiObjectSelected", Integer
-									.toString(collection.size())));
+							"_UI_MultiObjectSelected",
+							Integer.toString(collection.size())));
 					break;
 				}
 				}
@@ -1780,7 +1801,7 @@ public class GeneratorEditor extends MultiPageEditorPart implements
 			getActionBarContributor().setActiveEditor(null);
 		}
 
-		if (propertySheetPage != null) {
+		for (PropertySheetPage propertySheetPage : propertySheetPages) {
 			propertySheetPage.dispose();
 		}
 

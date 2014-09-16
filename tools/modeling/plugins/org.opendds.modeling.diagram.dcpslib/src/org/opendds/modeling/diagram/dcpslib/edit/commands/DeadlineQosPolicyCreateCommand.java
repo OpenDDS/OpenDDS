@@ -11,6 +11,7 @@ import org.eclipse.gmf.runtime.emf.type.core.commands.EditElementCommand;
 import org.eclipse.gmf.runtime.emf.type.core.requests.ConfigureRequest;
 import org.eclipse.gmf.runtime.emf.type.core.requests.CreateElementRequest;
 import org.eclipse.gmf.runtime.notation.View;
+import org.opendds.modeling.diagram.dcpslib.providers.ElementInitializers;
 import org.opendds.modeling.model.opendds.DcpsLib;
 import org.opendds.modeling.model.opendds.OpenDDSFactory;
 import org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibElementTypes;
@@ -65,7 +66,8 @@ public class DeadlineQosPolicyCreateCommand extends EditElementCommand {
 		QosPolicyCreationHelper.addPolicy(newElement, policyAssociationName,
 				getElementToEdit());
 
-		OpenDDSDcpsLibElementTypes.init_DeadlineQosPolicy_3022(newElement);
+		ElementInitializers.getInstance().init_DeadlineQosPolicy_3022(
+				newElement);
 
 		doConfigure(newElement, monitor, info);
 

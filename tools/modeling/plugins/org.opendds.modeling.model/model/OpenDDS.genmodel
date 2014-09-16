@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<genmodel:GenModel xmi:version="2.0"
-    xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
-    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.model/src"
-    creationIcons="false" modelPluginID="org.opendds.modeling.model" templateDirectory="org.opendds.modeling.common/templates"
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/org.opendds.modeling.model/src" creationIcons="false"
+    modelPluginID="org.opendds.modeling.model" templateDirectory="org.opendds.modeling.common/templates"
     dynamicTemplates="true" modelName="OpenDDS" generateSchema="true" codeFormatting="true"
     importerID="org.eclipse.emf.importer.ecore" complianceLevel="6.0" copyrightFields="false">
   <foreignModel>OpenDDS.ecore</foreignModel>
   <genPackages prefix="OpenDDS" basePackage="org.opendds.modeling.model" disposableProviderFactory="true"
-      ecorePackage="OpenDDS.ecore#/">
+      generateModelWizard="false" ecorePackage="OpenDDS.ecore#/">
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//ddsSpecification"/>
     <genClasses image="false" ecoreClass="OpenDDS.ecore#//ddsProperty"/>
     <genClasses ecoreClass="OpenDDS.ecore#//qosProperty"/>
