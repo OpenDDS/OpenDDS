@@ -61,27 +61,28 @@ DataReaderImpl::DataReaderImpl()
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   owner_manager_ (0),
 #endif
-  coherent_(false),
-  subqos_ (TheServiceParticipant->initial_SubscriberQos()),
-  topic_desc_(0),
-  listener_mask_(DEFAULT_STATUS_MASK),
-  domain_id_(0),
-  subscriber_servant_(0),
-  n_chunks_(TheServiceParticipant->n_chunks()),
-  reverse_pub_handle_lock_(publication_handle_lock_),
-  reactor_(0),
-  liveliness_timer_id_(-1),
-  last_deadline_missed_total_count_(0),
-  watchdog_(),
-  is_bit_(false),
-  initialized_(false),
-  always_get_history_(false),
-  statistics_enabled_(false),
-  raw_latency_buffer_size_(0),
-  raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-  monitor_(0),
-  periodic_monitor_(0),
-  transport_disabled_(false)
+    coherent_(false),
+    subqos_ (TheServiceParticipant->initial_SubscriberQos()),
+    topic_desc_(0),
+    listener_mask_(DEFAULT_STATUS_MASK),
+    domain_id_(0),
+    subscriber_servant_(0),
+    end_historic_sweeper_(this),
+    n_chunks_(TheServiceParticipant->n_chunks()),
+    reverse_pub_handle_lock_(publication_handle_lock_),
+    reactor_(0),
+    liveliness_timer_id_(-1),
+    last_deadline_missed_total_count_(0),
+    watchdog_(),
+    is_bit_(false),
+    initialized_(false),
+    always_get_history_(false),
+    statistics_enabled_(false),
+    raw_latency_buffer_size_(0),
+    raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
+    monitor_(0),
+    periodic_monitor_(0),
+    transport_disabled_(false)
 {
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::DataReaderImpl() --> enter (DR: %@)\n", this));
@@ -194,6 +195,23 @@ DataReaderImpl::cleanup()
     content_filtered_topic_ = DDS::ContentFilteredTopic::_nil ();
   }
 #endif
+
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+                   read_guard,
+                   this->writers_lock_);
+    // Cancel any uncancelled sweeper timers
+    WriterMapType::iterator writer;
+    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
+      if (writer->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
+        reactor_->cancel_timer(writer->second->historic_samples_timer_);
+        if (DCPS_debug_level) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::cleanup() - Unscheduled sweeper %d\n", writer->second->historic_samples_timer_));
+        }
+      }
+      writer->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
+    }
+  }
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::cleanup() --> exit \n"));
 }
@@ -326,9 +344,24 @@ DataReaderImpl::add_association(const RepoId& yourId,
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
-            writer_id,
-            info));
-    statistics_.insert(
+          writer_id,
+          info));
+
+      // Scheule timer if necessary
+      //   - only need to check reader qos - we know the writer must be >= reader
+      if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+        ACE_Time_Value ten_seconds(10);
+        const void* arg = reinterpret_cast<const void*>(&writer.writerId);
+        info->historic_samples_timer_ =
+            reactor_->schedule_timer(&end_historic_sweeper_,
+                                     arg,
+                                     ten_seconds);
+        if (DCPS_debug_level) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::add_association() - Scheduled sweeper %d\n", info->historic_samples_timer_));
+        }
+      }
+
+      this->statistics_.insert(
         StatsMapType::value_type(
             writer_id,
             WriterStats(raw_latency_buffer_size_, raw_latency_buffer_type_)));
@@ -600,6 +633,10 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
   //### Debug statements to track where test is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::remove_associations --> enter (current num writers: %d)\n", writers_.size()));
   DBG_ENTRY_LVL("DataReaderImpl", "remove_associations", 6);
+
+  if (writers.length() == 0) {
+    return;
+  }
 
   if (DCPS_debug_level >= 1) {
     GuidConverter reader_converter(subscription_id_);
@@ -1524,7 +1561,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING);
     }
 
-    if (DCPS_debug_level >= 5) {
+    // Per sample logging
+    if (DCPS_debug_level >= 8) {
       GuidConverter reader_converter(subscription_id_);
       GuidConverter writer_converter(header.publication_id_);
 
@@ -2910,16 +2948,16 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 
   // Ignore this sample if it is NOT a historic sample, and we are
   // waiting for historic sample from this writer
-/* Commenting out for 3.5.1 release - not backward compatible with 3.5.0
   if (!header.historic_sample_) {
     ACE_READ_GUARD_RETURN(
         ACE_RW_Thread_Mutex, read_guard, this->writers_lock_, false);
 
     WriterMapType::iterator where = writers_.find(header.publication_id_);
     if (writers_.end() != where) {
-      return where->second->awaiting_historic_samples_;
+      // Filter this sample if we are waiting for end historic samples
+      return where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING;
     }
-  } */
+  }
 
   return false;
 }
@@ -3467,7 +3505,13 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
   WriterMapType::iterator where = writers_.find(pub_id);
   if (writers_.end() != where) {
     // Stop filtering these
-    where->second->awaiting_historic_samples_ = false;
+    if (where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
+      reactor_->cancel_timer(where->second->historic_samples_timer_);
+      if (DCPS_debug_level) {
+        ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::resume_sample_processing() - Unscheduled sweeper %d\n", where->second->historic_samples_timer_));
+      }
+      where->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
+    }
   }
 }
 
@@ -3483,6 +3527,32 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   if (type == "rtps_udp") {
     resume_sample_processing(peer);
   }
+}
+
+EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(
+  DataReaderImpl* reader) : reader_(reader)
+{
+}
+
+EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
+{
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper\n"));
+  }
+}
+
+int EndHistoricSamplesMissedSweeper::handle_timeout(
+    const ACE_Time_Value& ,
+    const void* arg)
+{
+  PublicationId pub_id = *reinterpret_cast<const PublicationId*>(arg);
+
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout\n"));
+  }
+
+  reader_->resume_sample_processing(pub_id);
+  return 0;
 }
 
 } // namespace DCPS

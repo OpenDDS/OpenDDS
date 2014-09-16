@@ -608,19 +608,23 @@ void
 DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
       CORBA::Boolean notify_lost)
 {
+  if (readers.length() == 0) {
+    return;
+  }
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> enter\n"));
-   if (DCPS_debug_level >= 1) {
-      GuidConverter writer_converter(publication_id_);
-      GuidConverter reader_converter(readers[0]);
-      ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
-            ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
-            is_bit_,
-            std::string(writer_converter).c_str(),
-            std::string(reader_converter).c_str(),
-            readers.length()));
-   }
+
+  if (DCPS_debug_level >= 1) {
+    GuidConverter writer_converter(publication_id_);
+    GuidConverter reader_converter(readers[0]);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
+               ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
+               is_bit_,
+               std::string(writer_converter).c_str(),
+               std::string(reader_converter).c_str(),
+               readers.length()));
+  }
 
    //### stop pending associations
    //### Debug statements to track where associate is failing

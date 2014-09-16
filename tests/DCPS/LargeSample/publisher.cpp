@@ -25,9 +25,24 @@
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 
+namespace {
+
+void parse_args(int argc, ACE_TCHAR* argv[], bool& reliable)
+{
+  ACE_Get_Opt getopt(argc, argv, "r:");
+  for (int opt = 0; (opt = getopt()) != EOF;) {
+    if (opt == 'r') {
+      reliable = ACE_OS::atoi(getopt.opt_arg());
+    }
+  }
+}
+
+}
+
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
+
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
@@ -122,8 +137,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     {
+      bool reliable = true;
+      parse_args(argc, argv, reliable);
       Writer writer(dw, dw2);
-      writer.write();
+      writer.write(reliable);
     }
 
     ACE_DEBUG((LM_DEBUG, "Publisher delete contained entities\n"));

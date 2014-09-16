@@ -1,3 +1,97 @@
+Fri Sep 12 21:23:28 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tools/modeling/codegen/model/Delegate.cpp:
+        * tools/modeling/codegen/model/Entities.h:
+        * tools/modeling/codegen/model/Service_T.h:
+        * tools/modeling/codegen/model/Service_T.cpp:
+
+          Fix memory leak of domain participant and topic description
+          in modeling library.
+
+Fri Sep 12 17:52:19 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          0 is a legitimate timer value.  Use -1 to indicate not
+          waiting for historic samples.
+
+Thu Sep 11 19:00:07 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+
+          Fix fuzz
+
+Thu Sep 11 16:22:40 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/pub_multicast_async.ini:
+
+          Make multicast_async have sufficient nak depth for resends.
+
+Thu Sep 11 15:58:21 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Only log when debug level is set.
+
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Make entities go out of scope prior to calling
+          partiipant->delete_containe_entities().
+
+Tue Sep  9 21:11:22 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+
+          Fix parsing of -r to be non-destructive.
+
+Tue Sep  9 20:58:14 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Restore sleep of 1 second when non-reliable (udp).
+
+Tue Sep  9 18:38:46 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          TransientLocalTest fix - wait for up to 10 seconds for
+          EndHistoricSamples message, and block non-durable messages until
+          then.  Cancel timer when cleaning up.
+
+Fri Sep  5 21:20:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Check lengths of readers and writers before accessing in
+          remove_associations().
+
+Fri Sep  5 16:25:41 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Check for nil result from pub_map_.find() in
+          DataLink::target_intersection().
+
+Sun Aug 31 17:54:04 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataCollector_T.cpp:
+
+          Fix build error.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Increase log level for common messages
+
 Thu Aug 28 20:02:32 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/FooTest5/subscriber.cpp:
