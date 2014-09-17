@@ -1,3 +1,10 @@
+Wed Sep 17 21:44:28 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          Redmine issue 1461 Logging incorrect after failed add_association() call.
+
 Wed Sep 17 19:06:39 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/BitPubListenerImpl.cpp:
