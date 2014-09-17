@@ -1,3 +1,38 @@
+Wed Sep 17 19:06:39 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+
+          In on_data_available(), call take_next_sample() in a loop,
+          to get all samples in a timely manor.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Call on_data_available() when attaching listener.
+
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Rename OwnerEvaluateFlag to OwnerEvaluateFlags.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Check status of write() call.
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Ownership/Writer.h:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+
+          Wait for acknowledgements before exiting.
+
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+
+          Additional logging of failure reasons.
+
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Make all entties go out of scope before calling delete_contained_entities().
+
 Tue Sep 16 14:16:34 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/modeling/README.dev:

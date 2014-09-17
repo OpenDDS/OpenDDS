@@ -120,9 +120,10 @@ void DataReaderListenerImpl::on_liveliness_changed(
 throw(CORBA::SystemException)
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %s: on_liveliness_changed(): ")
-          ACE_TEXT(" handle %d alive_count_change %d not_alive_count_change %d \n"),
-          this->reader_id_, status.last_publication_handle, status.alive_count_change,
-          status.alive_count_change));
+          ACE_TEXT(" last pub handle %d alive_count %d change %d; not_alive_count %d change %d \n"),
+          reader_id_, status.last_publication_handle, 
+          status.alive_count, status.alive_count_change,
+          status.not_alive_count, status.not_alive_count_change));
 }
 
 void DataReaderListenerImpl::on_subscription_matched(
@@ -152,8 +153,12 @@ throw(CORBA::SystemException)
 bool
 DataReaderListenerImpl::verify (const Messenger::Message& msg)
 {
-  if (msg.subject_id != msg.count % 2)
+  if (msg.subject_id != msg.count % 2) {
+    ACE_DEBUG((LM_ERROR, 
+        "(%P|%t) ERROR: subject id %d not count mod 2",
+        msg.subject_id));
     return false;
+  }
 
   int previous_strength = this->current_strength_[msg.subject_id];
   // record the strength of writer that sample is from.
@@ -164,6 +169,9 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
   {
     // strength should be not be less then before
     if (msg.strength < previous_strength) {
+    ACE_DEBUG((LM_ERROR, 
+        "(%P|%t) ERROR: strength %d less than prev %d\n",
+        msg.strength, previous_strength));
       // record the strength of writer that sample is from.
       return false;
     }
@@ -174,6 +182,9 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
   {
     ACE_Time_Value now = ACE_OS::gettimeofday();
     if (msg.count == 5 && msg.strength != 12) {
+      ACE_DEBUG((LM_ERROR, 
+          "(%P|%t) ERROR: count is %d while strength is %d\n",
+          msg.count, msg.strength));
       return false;
     }
     else {
@@ -181,20 +192,34 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
     }
 
     if (msg.count == 6 && msg.strength != 12) {
+      ACE_DEBUG((LM_ERROR, 
+          "(%P|%t) ERROR: count is %d while strength is %d\n",
+          msg.count, msg.strength));
       return false;
     }
     else {
       end_missing_ = now;
     }
 
-    if (now < end_missing_ && now > start_missing_ && msg.strength != 10)
+    if (now < end_missing_ && now > start_missing_ && msg.strength != 10) {
+      ACE_DEBUG((LM_ERROR, 
+          "(%P|%t) ERROR: now < end_missing, > start_missing with stength %d\n",
+          msg.strength));
       return false;
+    }
   }
   break;
   case update_strength:
   {
+    ACE_DEBUG((LM_INFO,
+         "(%P|%t) prev strength %d\n",
+          previous_strength));
+
     // strength should not be less then before
-    if (! result_verify_complete_ && msg.strength < previous_strength) {
+    if ((! result_verify_complete_) && (msg.strength < previous_strength)) {
+      ACE_DEBUG((LM_ERROR, 
+          "(%P|%t) ERROR: !result_verify_complete_ and strength %d less than prev %d\n",
+          msg.strength, previous_strength));
       return false;
     }
 
@@ -205,6 +230,9 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
       this->result_verify_complete_ = true;
 
       if (msg.strength != 15) {
+        ACE_DEBUG((LM_ERROR, 
+          "(%P|%t) ERROR: owner complete while strength is %d\n",
+          msg.strength));
         return false;
       }
     }

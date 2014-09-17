@@ -197,6 +197,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(small_time);
     }
 
+    writer->wait_for_acks();
     writer->end();
     delete writer;
 

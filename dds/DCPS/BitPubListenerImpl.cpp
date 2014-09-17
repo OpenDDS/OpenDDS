@@ -44,41 +44,44 @@ void BitPubListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     ::DDS::PublicationBuiltinTopicData data;
     DDS::SampleInfo si;
+    DDS::ReturnCode_t status;
 
-    DDS::ReturnCode_t const status = bit_dr->take_next_sample(data, si);
+    do {
+      status = bit_dr->take_next_sample(data, si);
 
-    if (status == DDS::RETCODE_OK) {
-      if (si.valid_data) {
+      if (status == DDS::RETCODE_OK) {
+        if (si.valid_data) {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-        Discovery_rch disc =
-          TheServiceParticipant->get_discovery(partipant_->get_domain_id());
-        PublicationId pub_id =
-          disc->bit_key_to_repo_id(partipant_, BUILT_IN_PUBLICATION_TOPIC, data.key);
-        CORBA::Long const ownership_strength = data.ownership_strength.value;
-        this->partipant_->update_ownership_strength(pub_id, ownership_strength);
-        GuidConverter writer_converter(pub_id);
-        if (DCPS_debug_level > 4) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available: %X ")
-            ACE_TEXT("reset ownership strength %d for writer %C.\n"),
-            this, ownership_strength, std::string(writer_converter).c_str()));
-        }
+          Discovery_rch disc =
+            TheServiceParticipant->get_discovery(partipant_->get_domain_id());
+          PublicationId pub_id =
+            disc->bit_key_to_repo_id(partipant_, BUILT_IN_PUBLICATION_TOPIC, data.key);
+          CORBA::Long const ownership_strength = data.ownership_strength.value;
+          this->partipant_->update_ownership_strength(pub_id, ownership_strength);
+          if (DCPS_debug_level > 4) {
+            GuidConverter writer_converter(pub_id);
+            ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available: %X ")
+              ACE_TEXT("reset ownership strength %d for writer %C.\n"),
+              this, ownership_strength, std::string(writer_converter).c_str()));
+          }
 #endif
-      }
-      else if (si.instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE
-               && si.instance_state != DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+        }
+        else if (si.instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE
+                 && si.instance_state != DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+          ACE_ERROR((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: BitPubListenerImpl::on_data_available:")
+                ACE_TEXT(" unknown instance state: %d\n"),
+                si.instance_state));
+        }
+      } else if (status != DDS::RETCODE_NO_DATA) {
         ACE_ERROR((LM_ERROR,
-              ACE_TEXT("(%P|%t) ERROR: BitPubListenerImpl::on_data_available:")
-              ACE_TEXT(" unknown instance state: %d\n"),
-              si.instance_state));
+                   ACE_TEXT("(%P|%t) ERROR: BitPubListenerImpl::on_data_available:")
+                   ACE_TEXT(" unexpected status: %d\n"),
+                   status));
       }
-    }
-    else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: BitPubListenerImpl::on_data_available:")
-                 ACE_TEXT(" unexpected status: %d\n"),
-                 status));
-    }
+    } while (status == DDS::RETCODE_OK);
+
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in BitPubListenerImpl::on_data_available():");
   }

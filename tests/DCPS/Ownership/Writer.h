@@ -26,6 +26,8 @@ public:
 
   bool is_finished() const;
 
+  void wait_for_acks();
+
   int get_timeout_writes() const;
 
 private:

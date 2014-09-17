@@ -1837,6 +1837,8 @@ DomainParticipantImpl::ownership_manager()
       DDS::DataReaderListener_var bit_pub_listener =
         new BitPubListenerImpl(this);
       bit_pub_dr->set_listener(bit_pub_listener, DDS::DATA_AVAILABLE_STATUS);
+      // Must call on_data_available when attaching a listener late - samples may be waiting
+      bit_pub_listener->on_data_available(bit_pub_dr.in());
     }
   }
 
@@ -1848,9 +1850,6 @@ void
 DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
                                                   const CORBA::Long& ownership_strength)
 {
-  if (this->get_deleted ())
-    return;
-
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             tao_mon,
             this->subscribers_protector_);

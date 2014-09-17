@@ -15,6 +15,7 @@
 
 #include "MessengerTypeSupportC.h"
 #include "Writer.h"
+#include "model/Sync.h"
 
 const int num_instances_per_writer = 1;
 const int num_messages = 20;
@@ -107,8 +108,8 @@ Writer::svc()
 
     for (int i = 0; i < num_messages; i++) {
       message.subject_id = message.count % 2;  // 0 or 1
-      ACE_DEBUG ((LM_DEBUG, "(%P|%t) %s writes instance %d count %d\n",
-      ownership_dw_id_.c_str(), message.subject_id, message.count));
+      ACE_DEBUG ((LM_DEBUG, "(%P|%t) %s writes instance %d count %d str %d\n",
+      ownership_dw_id_.c_str(), message.subject_id, message.count, message.strength));
       DDS::ReturnCode_t error = message_dw->write(message, ::DDS::HANDLE_NIL);
 
       if (error != DDS::RETCODE_OK) {
@@ -146,6 +147,17 @@ Writer::svc()
           }
           else {
             message.strength   =  reset_ownership_strength;
+            ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ownership strength in message is now %d\n"),
+              message.strength));
+            error = this->writer_->get_qos(qos);
+            if (error != ::DDS::RETCODE_OK) {
+              ACE_ERROR((LM_ERROR,
+                       ACE_TEXT("%N:%l: svc()")
+                       ACE_TEXT(" ERROR: get_qos returned %d!\n"), error));
+            } else {
+              ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ownership strength in qos is now %d\n"),
+                qos.ownership_strength.value));
+            }
           }
         }
 
@@ -178,6 +190,12 @@ bool
 Writer::is_finished() const
 {
   return finished_instances_ == num_instances_per_writer;
+}
+
+void
+Writer::wait_for_acks()
+{
+  OpenDDS::Model::WriterSync::wait_ack(writer_);
 }
 
 int

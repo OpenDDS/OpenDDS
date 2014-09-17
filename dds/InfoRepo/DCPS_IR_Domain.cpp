@@ -1280,8 +1280,12 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
                      data.key.value[0], data.key.value[1], data.key.value[2], handle));
         }
 
-        bitPublicationDataWriter_->write(data,
-                                         handle);
+        DDS::ReturnCode_t status = bitPublicationDataWriter_->write(data, handle);
+        if (status != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                       "(%P|%t) DCPS_IR_Domain::publish_publication_bit: write() status of %d\n",
+                       status));
+        }
 
       } catch (const CORBA::Exception& ex) {
         ex._tao_print_exception(
