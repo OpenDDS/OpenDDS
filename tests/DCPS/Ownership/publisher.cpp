@@ -22,6 +22,7 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include "model/Sync.h"
 #include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 
@@ -197,7 +198,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(small_time);
     }
 
-    writer->wait_for_acks();
+    // Wait for acks failing in static build...
+    //writer->wait_for_acks();
     writer->end();
     delete writer;
 

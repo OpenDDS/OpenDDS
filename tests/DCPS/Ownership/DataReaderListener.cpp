@@ -38,7 +38,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 throw(CORBA::SystemException)
 {
-  num_reads_ ++;
 
   try {
     Messenger::MessageDataReader_var message_dr =
@@ -51,43 +50,47 @@ throw(CORBA::SystemException)
       ACE_OS::exit(-1);
     }
 
-    Messenger::Message message;
-    DDS::SampleInfo si;
+    DDS::ReturnCode_t status = DDS::RETCODE_OK;
+    while (status == DDS::RETCODE_OK) {
+      num_reads_ ++;
+      Messenger::Message message;
+      DDS::SampleInfo si;
 
-    DDS::ReturnCode_t status = message_dr->take_next_sample(message, si) ;
+      status = message_dr->take_next_sample(message, si) ;
 
-    if (status == DDS::RETCODE_OK) {
-      if (si.valid_data) {
-        ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) %s->%s subject_id: %d ")
-          ACE_TEXT("count: %d strength: %d\n"),
-          message.from.in(), this->reader_id_, message.subject_id,
-          message.count, message.strength));
-        std::cout << message.from.in() << "->" << this->reader_id_
-        << " subject_id: " << message.subject_id
-        << " count: " << message.count
-        << " strength: " << message.strength
-        << std::endl;
-        bool result = verify (message);
-        this->verify_result_ &= result;
+      if (status == DDS::RETCODE_OK) {
+        if (si.valid_data) {
+          ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) %s->%s subject_id: %d ")
+            ACE_TEXT("count: %d strength: %d\n"),
+            message.from.in(), this->reader_id_, message.subject_id,
+            message.count, message.strength));
+          std::cout << message.from.in() << "->" << this->reader_id_
+          << " subject_id: " << message.subject_id
+          << " count: " << message.count
+          << " strength: " << message.strength
+          << std::endl;
+          bool result = verify (message);
+          this->verify_result_ &= result;
 
-      } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
+        } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 
-      } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
+        } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is unregistered\n")));
 
-      } else {
+        } else {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l: on_data_available()")
+                     ACE_TEXT(" ERROR: unknown instance state: %d\n"),
+                     si.instance_state));
+        }
+
+      } else if (status != DDS::RETCODE_NO_DATA) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: on_data_available()")
-                   ACE_TEXT(" ERROR: unknown instance state: %d\n"),
-                   si.instance_state));
+                   ACE_TEXT(" ERROR: unexpected status: %d\n"),
+                   status));
       }
-
-    } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("%N:%l: on_data_available()")
-                 ACE_TEXT(" ERROR: unexpected status: %d\n"),
-                 status));
     }
 
   } catch (const CORBA::Exception& e) {
