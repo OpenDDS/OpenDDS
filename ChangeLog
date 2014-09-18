@@ -1,3 +1,16 @@
+Thu Sep 18 22:00:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+
+          Fix copy and paste errors in nil checks and logging.
+
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+
+          Make ini file more standard - add TCP transport, set
+          DCPSGlobalTransportConfig.
+
 Thu Sep 18 21:47:51 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Ownership/publisher.cpp:
@@ -7,7 +20,7 @@ Thu Sep 18 21:47:51 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
         * tests/DCPS/Ownership/sub.ini:
         * tests/DCPS/Ownership/pub.ini:
 
-          Make ini file more standard - add TCP transport, set 
+          Make ini file more standard - add TCP transport, set
           DCPSGlobalTransportConfig.  Was loading UDP in static
           builds.
 
