@@ -1,8 +1,16 @@
+Mon Sep 22 19:59:33 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_Reassembly.cpp:
+
+          Comment out for now...
+
 Mon Sep 22 14:43:48 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/UnitTests:
         * tests/DCPS/UnitTests/UnitTests.mpc:
         * tests/DCPS/UnitTests/ut_Reassembly.cpp:
+
+          Test of reassembly of fragments.
 
 Thu Sep 18 22:00:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
