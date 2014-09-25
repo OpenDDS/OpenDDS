@@ -19,8 +19,6 @@
 #include <sstream>
 #include <iomanip>
 
-const int num_messages = 10;
-
 Writer::Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2)
   : writer1_(DDS::DataWriter::_duplicate(writer1)),
     writer2_(DDS::DataWriter::_duplicate(writer2)),
@@ -67,7 +65,7 @@ namespace {
 }
 
 void
-Writer::write(bool reliable)
+Writer::write(bool reliable, int num_messages)
 {
   DDS::InstanceHandleSeq handles;
 
@@ -123,8 +121,9 @@ Writer::write(bool reliable)
 
     for (int i = 0; i < num_messages; i++) {
 
+      // Because the reader does not have infinite buffer space
       if (!reliable) {
-        ACE_OS::sleep(1);
+        ACE_OS::sleep(ACE_Time_Value(0,100000));
       }
 
       ACE_DEBUG((LM_DEBUG,

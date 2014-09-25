@@ -36,16 +36,16 @@
 
 namespace {
 
-const long num_messages_expected = DataReaderListenerImpl::NUM_PROCESSES *
-                                   DataReaderListenerImpl::NUM_WRITERS_PER_PROCESS *
-                                   DataReaderListenerImpl::NUM_SAMPLES_PER_WRITER;
-
-void parse_args(int argc, ACE_TCHAR* argv[], bool& reliable)
+void parse_args(int argc, ACE_TCHAR* argv[],
+                bool& reliable,
+                int& num_msgs)
 {
-  ACE_Get_Opt getopt(argc, argv, "r:");
+  ACE_Get_Opt getopt(argc, argv, "r:n:");
   for (int opt = 0; (opt = getopt()) != EOF;) {
     if (opt == 'r') {
       reliable = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'n') {
+      num_msgs = ACE_OS::atoi(getopt.opt_arg());
     }
   }
 }
@@ -60,6 +60,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+
+    bool reliable = true;
+    int num_messages_expected = 40;
+    parse_args(argc, argv, reliable, num_messages_expected);
 
     // handle test performance issue on one platform
 #if defined (sun)
@@ -138,8 +142,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     qos.liveliness.lease_duration.nanosec = 0;
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 
-    bool reliable = true;
-    parse_args(argc, argv, reliable);
     if (reliable) {
       qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
     }

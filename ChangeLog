@@ -1,3 +1,24 @@
+Thu Sep 25 15:22:23 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+
+          Send num messages based on command line param.
+          For unreliable, reduce sleep to 100ms between sends.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Expect  num messages based on command line param.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Set -n commane line params for publisher and subscriber.
+
+        * tests/DCPS/LargeSample/udp.ini:
+
+          Increse buffer size. Default is only large enough to hold one message.
+
 Mon Sep 22 19:59:33 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/UnitTests/ut_Reassembly.cpp:

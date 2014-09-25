@@ -17,8 +17,10 @@ my $status = 0;
 my $pub_opts = "";
 my $sub_opts = "";
 my $reliable = 1;
+my $num_msgs = 10;
 
 my $test = new PerlDDS::TestFramework();
+# $test->{dcps_transport_debug_level} = 10;
 
 # let TestFramework handle ini file, but also need to identify that
 # we are using a non-reliable transport
@@ -31,8 +33,8 @@ elsif ($test->flag('multicast_async')) {
     $sub_opts .= "-DCPSConfigFile multicast.ini ";
 }
 
-$pub_opts .= " -r $reliable";
-$sub_opts .= " -r $reliable";
+$pub_opts .= " -r $reliable -n $num_msgs";
+$sub_opts .= " -r $reliable -n " . ($num_msgs * 4);
 
 $test->report_unused_flags();
 # use tcp if no transport is set on command line
