@@ -397,75 +397,81 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   OpenDDS::DCPS::Serializer ss2(&mb);
 
   Xyz::Foo ss_foo;
-  if (!(ss2 >> ss_foo)) {
-    ACE_ERROR((LM_ERROR, "Deserializing failed\n"));
-    failed = true;
-  }
+  try {
+    if (!(ss2 >> ss_foo)) {
+      ACE_ERROR((LM_ERROR, "Deserializing failed\n"));
+      failed = true;
+    }
 
-  if (dump_buffer) {
-    ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("AFTER READING, LENGTH: %B, BUFFER:\n%s\n"),
-      mb.length(), ebuffer));
+    if (dump_buffer) {
+      ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("AFTER READING, LENGTH: %B, BUFFER:\n%s\n"),
+        mb.length(), ebuffer));
 
-    ACE::format_hexdump( (char*)&(my_foo.key), sizeof(ACE_CDR::ULong),
-      ebuffer, sizeof(ebuffer));
-    ACE::format_hexdump( (char*)&(ss_foo.key), sizeof(ACE_CDR::ULong),
-      obuffer, sizeof(obuffer));
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("key (expected:\n%s, observed:\n%s)\n"),
-               ebuffer, obuffer));
-    ACE::format_hexdump( (char*)&(my_foo.x), sizeof(ACE_CDR::Float),
-      ebuffer, sizeof(ebuffer));
-    ACE::format_hexdump( (char*)&(ss_foo.x), sizeof(ACE_CDR::Float),
-      obuffer, sizeof(obuffer));
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("x (expected:\n%s, observed:\n%s)\n"),
-               ebuffer, obuffer));
-    ACE::format_hexdump( (char*)&(my_foo.y), sizeof(ACE_CDR::Float),
-      ebuffer, sizeof(ebuffer));
-    ACE::format_hexdump( (char*)&(ss_foo.y), sizeof(ACE_CDR::Float),
-      obuffer, sizeof(obuffer));
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("y (expected:\n%s, observed:\n%s)\n"),
-               ebuffer, obuffer));
-    ACE::format_hexdump( (char*)&(my_foo.xcolor), sizeof(ACE_CDR::UShort), ebuffer, sizeof(ebuffer));
-    ACE::format_hexdump( (char*)&(ss_foo.xcolor), sizeof(ACE_CDR::UShort), obuffer, sizeof(obuffer));
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("xcolor (expected:\n%s, observed:\n%s)\n"),
-               ebuffer, obuffer));
-    ACE::format_hexdump( (char*)&(my_foo.octer), sizeof(ACE_CDR::Octet), ebuffer, sizeof(ebuffer));
-    ACE::format_hexdump( (char*)&(ss_foo.octer), sizeof(ACE_CDR::Octet), obuffer, sizeof(obuffer));
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("octer (expected:\n%s, observed:\n%s)\n"),
-               ebuffer, obuffer));
-  }
+      ACE::format_hexdump( (char*)&(my_foo.key), sizeof(ACE_CDR::ULong),
+        ebuffer, sizeof(ebuffer));
+      ACE::format_hexdump( (char*)&(ss_foo.key), sizeof(ACE_CDR::ULong),
+        obuffer, sizeof(obuffer));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("key (expected:\n%s, observed:\n%s)\n"),
+                 ebuffer, obuffer));
+      ACE::format_hexdump( (char*)&(my_foo.x), sizeof(ACE_CDR::Float),
+        ebuffer, sizeof(ebuffer));
+      ACE::format_hexdump( (char*)&(ss_foo.x), sizeof(ACE_CDR::Float),
+        obuffer, sizeof(obuffer));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("x (expected:\n%s, observed:\n%s)\n"),
+                 ebuffer, obuffer));
+      ACE::format_hexdump( (char*)&(my_foo.y), sizeof(ACE_CDR::Float),
+        ebuffer, sizeof(ebuffer));
+      ACE::format_hexdump( (char*)&(ss_foo.y), sizeof(ACE_CDR::Float),
+        obuffer, sizeof(obuffer));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("y (expected:\n%s, observed:\n%s)\n"),
+                 ebuffer, obuffer));
+      ACE::format_hexdump( (char*)&(my_foo.xcolor), sizeof(ACE_CDR::UShort), ebuffer, sizeof(ebuffer));
+      ACE::format_hexdump( (char*)&(ss_foo.xcolor), sizeof(ACE_CDR::UShort), obuffer, sizeof(obuffer));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("xcolor (expected:\n%s, observed:\n%s)\n"),
+                 ebuffer, obuffer));
+      ACE::format_hexdump( (char*)&(my_foo.octer), sizeof(ACE_CDR::Octet), ebuffer, sizeof(ebuffer));
+      ACE::format_hexdump( (char*)&(ss_foo.octer), sizeof(ACE_CDR::Octet), obuffer, sizeof(obuffer));
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("octer (expected:\n%s, observed:\n%s)\n"),
+                 ebuffer, obuffer));
+    }
 
-  if (ss_foo.key != my_foo.key) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize key\n")));
-    failed = true;
-  } else if (ss_foo.x != my_foo.x) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize x\n")));
-    failed = true;
-  } else if (ss_foo.y != my_foo.y) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize y\n")));
-    failed = true;
-  } else if (ss_foo.xcolor != my_foo.xcolor) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize xcolor\n")));
-    failed = true;
-  } else if (ss_foo.octer != my_foo.octer) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize octer\n")));
-    failed = true;
-  } else if (0 != strcmp(ss_foo.theString.in(), my_foo.theString.in())) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
-      my_foo.theString.in(), ss_foo.theString.in()));
-    failed = true;
-  } else if (ss_foo.ooo[0] != my_foo.ooo[0]
-             || ss_foo.ooo[1] != my_foo.ooo[1]
-             || ss_foo.ooo[2] != my_foo.ooo[2]) {
-    ACE_ERROR((LM_ERROR, "Failed to serialize ooo\n"));
-    failed = true;
+    if (ss_foo.key != my_foo.key) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize key\n")));
+      failed = true;
+    } else if (ss_foo.x != my_foo.x) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize x\n")));
+      failed = true;
+    } else if (ss_foo.y != my_foo.y) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize y\n")));
+      failed = true;
+    } else if (ss_foo.xcolor != my_foo.xcolor) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize xcolor\n")));
+      failed = true;
+    } else if (ss_foo.octer != my_foo.octer) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize octer\n")));
+      failed = true;
+    } else if (0 != strcmp(ss_foo.theString.in(), my_foo.theString.in())) {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
+        my_foo.theString.in(), ss_foo.theString.in()));
+      failed = true;
+    } else if (ss_foo.ooo[0] != my_foo.ooo[0]
+               || ss_foo.ooo[1] != my_foo.ooo[1]
+               || ss_foo.ooo[2] != my_foo.ooo[2]) {
+      ACE_ERROR((LM_ERROR, "Failed to serialize ooo\n"));
+      failed = true;
+    }
+
+  } catch (const CORBA::Exception& e) {
+    e._tao_print_exception("Exception caught in main():");
+    return -1;
   }
 
   if (failed)

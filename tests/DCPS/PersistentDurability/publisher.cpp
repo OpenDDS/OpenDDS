@@ -24,6 +24,7 @@
 #include <ace/Get_Opt.h>
 
 #include <memory>
+#include <stdexcept>
 
 using namespace Messenger;
 
@@ -267,13 +268,15 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       TheServiceParticipant->shutdown ();
-  }
-  catch (CORBA::Exception& e)
-    {
-       cerr << "PUB: Exception caught in main.cpp:" << endl
-         << e << endl;
+  } catch (CORBA::Exception& e) {
+     cerr << "PUB: Exception caught in main.cpp:" << endl
+          << e << endl;
       exit (1);
     }
+  catch (const std::runtime_error& err) {
+    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: main() - %s\n"),
+                      err.what()), -1);
+  }
 
   return 0;
 }
