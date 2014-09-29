@@ -14,8 +14,9 @@ use PerlDDS::Run_Test;
 $status = 0;
 
 
-$pub_opts = "-DCPSConfigFile pub.ini";
-$sub_opts = "-DCPSConfigFile sub.ini";
+# Run at high debug level for additional function coverage.
+$pub_opts = "-DCPSConfigFile pub.ini -DCPSDebugLevel 8";
+$sub_opts = "-DCPSConfigFile sub.ini -DCPSDebugLevel 8";
 
 $dcpsrepo_ior = "repo.ior";
 
