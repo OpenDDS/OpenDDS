@@ -113,12 +113,14 @@ my $Subscriber = PerlDDS::create_process
       ("subscriber"
        , "-a $num_reads_before_crash"
        . " -n $num_expected_reads -i $read_delay_ms -l $lost_subscription_callback"
-       . " -c $verify_lost_sub_notification -e $end_with_publisher -DCPSConfigFile opendds.ini");
+       . " -c $verify_lost_sub_notification -e $end_with_publisher -DCPSConfigFile opendds.ini"
+       . " -DCPSDebugLevel 2");
 my $Publisher = PerlDDS::create_process
       ("publisher"
        , "-a $num_writes_before_crash"
        . " -n $num_writes -i $write_delay_ms -l $lost_publication_callback"
-       . " -d $expected_deleted_connections -DCPSConfigFile opendds.ini");
+       . " -d $expected_deleted_connections -DCPSConfigFile opendds.ini"
+       . " -DCPSDebugLevel 2");
 
 print $DCPSREPO->CommandLine () . "\n";
 $DCPSREPO->Spawn ();

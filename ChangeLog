@@ -1,3 +1,9 @@
+Mon Sep 29 17:32:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Increased Debug level for function coverage.
+
 Mon Sep 29 17:26:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/run_test.pl:
