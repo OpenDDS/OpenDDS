@@ -1,3 +1,12 @@
+Tue Sep 30 14:57:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/pub_multicast_async.ini:
+        * tests/DCPS/ManyToMany/pub_multicast_async.ini:
+        * tests/DCPS/ManyToMany/udp.ini:
+        * tests/DCPS/PersistentInfoRepo/pub_multicast_async.ini:
+
+          Adjust buffer sizes, nak depths.
+
 Mon Sep 29 18:21:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Compiler/idl_test1_main/main.cpp:
