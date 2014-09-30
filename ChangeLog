@@ -1,3 +1,9 @@
+Tue Sep 30 21:38:37 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+        Catch exceptions.
+
 Tue Sep 30 20:56:17 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * performance-tests/DCPS/Priority/publisher_main.cpp:

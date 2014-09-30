@@ -35,36 +35,45 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample,
 }
 
 bool testEval() {
-  TBTD sample;
-  sample.name = "Adam";
-  sample.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
-  sample.durability_service.history_depth = 15;
-  sample.durability_service.service_cleanup_delay.sec = 0;
-  sample.durability_service.service_cleanup_delay.nanosec = 10;
-  DDS::StringSeq params;
-  params.length(1);
-  params[0] = "3";
 
-  static const char* filters_pass[] = {"name LIKE 'Ad%'",
-    "durability.kind = 'PERSISTENT_DURABILITY_QOS'",
-    "durability_service.history_depth > %0",
-    "durability_service.service_cleanup_delay.sec = 0 AND "
-      "durability_service.service_cleanup_delay.nanosec >= 10",
-    "durability_service.service_cleanup_delay.sec < "
-      "durability_service.service_cleanup_delay.nanosec"};
+  try {
 
-  static const char* filters_fail[] = {"name LIKE 'ZZ%'",
-    "durability.kind = 'TRANSIENT_DURABILITY_QOS'",
-    "durability_service.history_depth < %0",
-    "durability_service.service_cleanup_delay.sec = 0 AND "
-      "durability_service.service_cleanup_delay.nanosec BETWEEN 3 AND 5",
-    "durability_service.service_cleanup_delay.sec = "
-      "durability_service.service_cleanup_delay.nanosec"};
+    TBTD sample;
+    sample.name = "Adam";
+    sample.durability.kind = DDS::PERSISTENT_DURABILITY_QOS;
+    sample.durability_service.history_depth = 15;
+    sample.durability_service.service_cleanup_delay.sec = 0;
+    sample.durability_service.service_cleanup_delay.nanosec = 10;
 
-  std::cout << std::boolalpha;
-  bool ok = doEvalTest(filters_pass, true, sample, params);
-  ok &= doEvalTest(filters_fail, false, sample, params);
-  return ok;
+    DDS::StringSeq params;
+    params.length(1);
+    params[0] = "3";
+
+    static const char* filters_pass[] = {"name LIKE 'Ad%'",
+      "durability.kind = 'PERSISTENT_DURABILITY_QOS'",
+      "durability_service.history_depth > %0",
+      "durability_service.service_cleanup_delay.sec = 0 AND "
+        "durability_service.service_cleanup_delay.nanosec >= 10",
+      "durability_service.service_cleanup_delay.sec < "
+        "durability_service.service_cleanup_delay.nanosec"};
+
+    static const char* filters_fail[] = {"name LIKE 'ZZ%'",
+      "durability.kind = 'TRANSIENT_DURABILITY_QOS'",
+      "durability_service.history_depth < %0",
+      "durability_service.service_cleanup_delay.sec = 0 AND "
+        "durability_service.service_cleanup_delay.nanosec BETWEEN 3 AND 5",
+      "durability_service.service_cleanup_delay.sec = "
+        "durability_service.service_cleanup_delay.nanosec"};
+
+    std::cout << std::boolalpha;
+    bool ok = doEvalTest(filters_pass, true, sample, params);
+    ok &= doEvalTest(filters_fail, false, sample, params);
+    return ok;
+
+  } catch (const CORBA::BAD_PARAM&) {
+    return false;
+  }
+
 }
 
 // parsing test helpers
