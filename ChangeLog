@@ -1,3 +1,9 @@
+Tue Sep 30 22:55:34 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/transport/rtps/subscriber.cpp:
+
+        Catch exceptions.
+
 Tue Sep 30 22:27:26 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/transport/rtps/publisher.cpp:
