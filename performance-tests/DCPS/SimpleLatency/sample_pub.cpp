@@ -15,6 +15,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <ace/streams.h>
 
 
@@ -63,6 +64,8 @@ long total_samples = 500;
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  try {
+
        // Calling TheParticipantFactoryWithArgs before user application parse command
        // line.
        DDS::DomainParticipantFactory_var dpf =
@@ -235,5 +238,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        dpf->delete_participant (dp.in ());
        TheServiceParticipant->shutdown ();
 
+  } catch (const OpenDDS::DCPS::Transport::MiscProblem &) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) sample_pub() - ")
+      ACE_TEXT("Transport::MiscProblem exception caught during processing.\n")
+    ));
+    return 1;
+  }
+
        return(0);
+
 }
