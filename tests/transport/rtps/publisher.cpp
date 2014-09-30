@@ -7,6 +7,7 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
@@ -519,22 +520,31 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  ACE_TString host;
-  u_short port = 0;
+  try {
+    ACE_TString host;
+    u_short port = 0;
 
-  ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
-  int option = 0;
+    ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
+    int option = 0;
 
-  while ((option = opts()) != EOF) {
-    switch (option) {
-    case 'h':
-      host = opts.opt_arg();
-      break;
-    case 'p':
-      port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
-      break;
+    while ((option = opts()) != EOF) {
+      switch (option) {
+      case 'h':
+        host = opts.opt_arg();
+        break;
+      case 'p':
+        port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
+        break;
+      }
     }
-  }
 
-  return DDS_TEST::test(host, port);
+    return DDS_TEST::test(host, port);
+
+  } catch (const CORBA::BAD_PARAM& ) {
+    std::cerr << "ERROR: caught CORBA::BAD_PARAM exception\n";
+    return 1;
+  } catch (const OpenDDS::DCPS::Transport::NotConfigured& ) {
+    std::cerr << "ERROR: caught OpenDDS::DCPS::Transport::NotConfigured exception\n";
+    return 1;
+  }
 }
