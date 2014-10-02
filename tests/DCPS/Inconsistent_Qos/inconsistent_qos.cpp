@@ -128,9 +128,17 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       // Use the qos xml file for that
       OpenDDS::DCPS::QOS_XML_File_Handler *xml_file_loader =
         new OpenDDS::DCPS::QOS_XML_File_Handler ();
-      xml_file_loader->add_search_path (
-        ACE_TEXT("DDS_ROOT"),
-        ACE_TEXT("/docs/schema/"));
+
+      try {
+        xml_file_loader->add_search_path (
+          ACE_TEXT("DDS_ROOT"),
+          ACE_TEXT("/docs/schema/"));
+      } catch (const std::exception&) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("%N:%l: main()")
+                          ACE_TEXT(" ERROR: create_publisher failed!\n")),
+                        -1);
+      }
 
       DDS::ReturnCode_t const retcode = xml_file_loader->init (xml_file_);
       if (retcode != ::DDS::RETCODE_OK)
