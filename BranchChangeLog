@@ -1,3 +1,14 @@
+Thu Oct  2 21:37:28 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+
+          Release lock in info repo prior to calling 
+          add_subscription on participant.
+
+        * tests/DCPS/Federation/run_test.pl:
+
+          Save output to log files.
+
 Tue Sep 16 13:58:21 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * Merged from trunk r6508 through r6526

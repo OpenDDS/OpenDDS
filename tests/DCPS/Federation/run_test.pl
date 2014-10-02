@@ -94,8 +94,6 @@ unlink $debugFile if $debugFile;
 
 # Configure the repositories.
 
-
-
 my @REPO;
 my @PUB;
 my @SUB;
@@ -127,6 +125,7 @@ for my $index ( 1 .. $repoCount) {
   $repoArgs[ $index - 1] .= "-FederationId $federationId ";
   $repoArgs[ $index - 1] .= "-FederateWith " .  $repo_manager[ $index - 2] . " " if $index > 1;
   $repoArgs[ $index - 1] .= "-o " . $repo_ior[ $index - 1] . " ";
+  $repoArgs[ $index - 1] .= " -ORBLogFile inforepo_$index.log ";
 
   $REPO[ $index - 1] = PerlDDS::create_process(
                              "$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs[ $index - 1]
@@ -150,10 +149,11 @@ $appOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $deb
   #
 
 my @pubArgs;
-for my $index ( 1 .. $subCount) {
+for my $index ( 1 .. $pubCount) {
   my $repoIndex = $index;
   $pubArgs[ $index - 1] .= "$appOpts -Samples $samples -SampleInterval $sample_interval ";
   $pubArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
+  $pubArgs[ $index - 1] .= "-ORBLogFile publisher_$index.log ";
 
   $PUB[ $index - 1]  = PerlDDS::create_process ("publisher", $pubArgs[ $index - 1]);
 }
@@ -163,6 +163,7 @@ for my $index ( 1 .. $subCount) {
   my $repoIndex = (1 + $index) % $repoCount;
   $subArgs[ $index - 1] .= "$appOpts -Samples $samples ";
   $subArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
+  $subArgs[ $index - 1] .= "-ORBLogFile subscriber_$index.log ";
 
   $SUB[ $index - 1]  = PerlDDS::create_process ("subscriber", $subArgs[ $index - 1]);
 }
