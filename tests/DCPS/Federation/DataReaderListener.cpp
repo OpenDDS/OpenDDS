@@ -102,7 +102,9 @@ void
 DataReaderListenerImpl::waitForCompletion()
 {
   ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
+  std::cout << "Subscriber waiting for complete signal" << std::endl;
   this->condition_.wait();
+  std::cout << "Subscriber Got complete signal" << std::endl;
 }
 
 void DataReaderListenerImpl::on_requested_deadline_missed (
@@ -196,6 +198,7 @@ void DataReaderListenerImpl::on_data_available(
   }
 
   if( ++this->samples_ >= this->expected_) {
+    std::cout << "Subscriber signaling complete" << std::endl;
     this->condition_.signal();
   }
 }

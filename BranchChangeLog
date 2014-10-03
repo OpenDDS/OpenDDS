@@ -1,8 +1,20 @@
+Fri Oct  3 14:48:05 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Federation/DataReaderListener.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+
+          Additional stdout logging.
+
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/run_test.pl:
+
+          Remove sleeps, shorten test.
+
 Thu Oct  2 21:37:28 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/InfoRepo/DCPSInfo_i.cpp:
 
-          Release lock in info repo prior to calling 
+          Release lock in info repo prior to calling
           add_subscription on participant.
 
         * tests/DCPS/Federation/run_test.pl:

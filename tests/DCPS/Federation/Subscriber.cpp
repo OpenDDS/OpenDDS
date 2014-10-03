@@ -213,10 +213,6 @@ Subscriber::~Subscriber()
 void
 Subscriber::run()
 {
-  // NOTE: This is a kluge to avoid a race condition - it is still
-  //       possible, though unlikely, to lock up due to the race.
-  ACE_OS::sleep(5);
-
   //
   // Wait until we receive the final message at the last receiver, then
   // we are done.

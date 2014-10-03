@@ -30,7 +30,6 @@ my $for_monitor_test;
 #
 # Specific options.
 #
-my $interval  = 10;
 my $repoCount = 2;
 my $pubCount  = 1;
 my $subCount  = 1;
@@ -182,7 +181,6 @@ for my $index ( 1 .. $repoCount) {
       exit 1;
   }
 }
-print "\nLetting repository federation operations settle a bit...\n"; #sleep 2*$interval;
 
 # Fire up the subscribers.
 
@@ -190,9 +188,7 @@ for my $index ( 1 .. $subCount) {
   print "\nSUBSCRIBER $index\n";
   print $SUB[ $index - 1]->CommandLine() . "\n";
   $SUB[ $index - 1]->Spawn();
-  sleep $interval;
 }
-print "\nLetting subscribers settle a bit...\n"; sleep $interval;
 
 # Fire up the publishers.
 
@@ -200,13 +196,12 @@ for my $index ( 1 .. $pubCount) {
   print "\nPUBLISHER $index\n";
   print $PUB[ $index - 1]->CommandLine() . "\n";
   $PUB[ $index - 1]->Spawn();
-  sleep $interval;
 }
 
-# Wait for the subscribers to terminate nicely, kill them after 5 minutes
+# Wait for the subscribers to terminate nicely, kill them after 1 minute
 # otherwise.
 
-my $killDelay = 300;
+my $killDelay = 60;
 for my $index ( 1 .. $subCount) {
   $status = $SUB[ $index - 1]->WaitKill( $killDelay);
   if( $status != 0) {
