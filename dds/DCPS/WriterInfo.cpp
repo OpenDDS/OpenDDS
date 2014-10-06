@@ -135,9 +135,9 @@ WriterInfo::set_owner_evaluated (::DDS::InstanceHandle_t instance, bool flag)
 bool
 WriterInfo::is_owner_evaluated (::DDS::InstanceHandle_t instance)
 {
-  OwnerEvaluateFlag::iterator iter = owner_evaluated_.find (instance);
+  OwnerEvaluateFlags::iterator iter = owner_evaluated_.find (instance);
   if (iter == owner_evaluated_.end ()) {
-    this->owner_evaluated_.insert (OwnerEvaluateFlag::value_type (instance, false));
+    this->owner_evaluated_.insert (OwnerEvaluateFlags::value_type (instance, false));
     return false;
   }
   else

@@ -50,6 +50,14 @@ project(*Fragmentation): dcpsexe {
   }
 }
 
+project(*Reassembly): dcpsexe {
+  exename   = *
+
+  Source_Files {
+    ut_Reassembly.cpp
+  }
+}
+
 project(*RtpsFragmentation): dcpsexe, dcps_rtps_udp {
   exename   = *
 

@@ -27,12 +27,16 @@
 
 namespace {
 
-void parse_args(int argc, ACE_TCHAR* argv[], bool& reliable)
+void parse_args(int argc, ACE_TCHAR* argv[],
+                bool& reliable,
+                int& num_msgs)
 {
-  ACE_Get_Opt getopt(argc, argv, "r:");
+  ACE_Get_Opt getopt(argc, argv, "r:n:");
   for (int opt = 0; (opt = getopt()) != EOF;) {
     if (opt == 'r') {
       reliable = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'n') {
+      num_msgs = ACE_OS::atoi(getopt.opt_arg());
     }
   }
 }
@@ -47,6 +51,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
+
+    bool reliable = true;
+    int num_msgs = 10;
+
+    parse_args(argc, argv, reliable, num_msgs);
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
@@ -137,10 +146,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     {
-      bool reliable = true;
-      parse_args(argc, argv, reliable);
       Writer writer(dw, dw2);
-      writer.write(reliable);
+      writer.write(reliable, num_msgs);
     }
 
     ACE_DEBUG((LM_DEBUG, "Publisher delete contained entities\n"));

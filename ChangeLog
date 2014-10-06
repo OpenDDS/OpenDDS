@@ -1,3 +1,272 @@
+Thu Oct  2 17:57:36 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/Inconsistent_Qos/inconsistent_qos.cpp:
+        * tests/transport/error_handling/SimpleTransportClient.h:
+         
+         Catch exceptions.
+
+Tue Sep 30 22:55:34 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/transport/rtps/subscriber.cpp:
+
+        Catch exceptions.
+
+Tue Sep 30 22:27:26 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+
+        Catch exceptions.
+
+Tue Sep 30 21:38:37 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * tests/DCPS/FilterExpression/FilterExpression.cpp:
+
+        Catch exceptions.
+
+Tue Sep 30 20:56:17 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
+
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+        Catch exceptions.
+
+Tue Sep 30 14:57:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/pub_multicast_async.ini:
+        * tests/DCPS/ManyToMany/pub_multicast_async.ini:
+        * tests/DCPS/ManyToMany/udp.ini:
+        * tests/DCPS/PersistentInfoRepo/pub_multicast_async.ini:
+
+          Adjust buffer sizes, nak depths.
+
+Mon Sep 29 18:21:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+
+          Catch exceptions.
+
+Mon Sep 29 17:32:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reconnect/run_test.pl:
+
+          Increased Debug level for function coverage.
+
+Mon Sep 29 17:26:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+
+          Increased Debug level for function coverage.
+
+Thu Sep 25 15:22:23 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+
+          Send num messages based on command line param.
+          For unreliable, reduce sleep to 100ms between sends.
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Expect  num messages based on command line param.
+
+        * tests/DCPS/LargeSample/run_test.pl:
+
+          Set -n commane line params for publisher and subscriber.
+
+        * tests/DCPS/LargeSample/udp.ini:
+
+          Increse buffer size. Default is only large enough to hold one message.
+
+Mon Sep 22 19:59:33 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/UnitTests/ut_Reassembly.cpp:
+
+          Comment out for now...
+
+Mon Sep 22 14:43:48 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/UnitTests:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/UnitTests/ut_Reassembly.cpp:
+
+          Test of reassembly of fragments.
+
+Thu Sep 18 22:00:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+
+          Fix copy and paste errors in nil checks and logging.
+
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+
+          Make ini file more standard - add TCP transport, set
+          DCPSGlobalTransportConfig.
+
+Thu Sep 18 21:47:51 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Ownership/publisher.cpp:
+
+          Restore call to wait_ack().
+
+        * tests/DCPS/Ownership/sub.ini:
+        * tests/DCPS/Ownership/pub.ini:
+
+          Make ini file more standard - add TCP transport, set
+          DCPSGlobalTransportConfig.  Was loading UDP in static
+          builds.
+
+Thu Sep 18 18:49:53 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+
+          take_next_sample() in a loop.
+
+        * tests/DCPS/Ownership/publisher.cpp:
+
+          Don't call wait_ack(), causing timeout in static builds.
+
+Thu Sep 18 04:50:38 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+
+          Fix fuzz.
+
+Wed Sep 17 21:44:28 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+
+          Redmine issue 1461 Logging incorrect after failed add_association() call.
+
+Wed Sep 17 19:06:39 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+
+          In on_data_available(), call take_next_sample() in a loop,
+          to get all samples in a timely manor.
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Call on_data_available() when attaching listener.
+
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Rename OwnerEvaluateFlag to OwnerEvaluateFlags.
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Check status of write() call.
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Ownership/Writer.h:
+        * tests/DCPS/Ownership/Writer.cpp:
+        * tests/DCPS/Ownership/publisher.cpp:
+
+          Wait for acknowledgements before exiting.
+
+        * tests/DCPS/Ownership/DataReaderListener.cpp:
+
+          Additional logging of failure reasons.
+
+        * tests/DCPS/Ownership/subscriber.cpp:
+
+          Make all entties go out of scope before calling delete_contained_entities().
+
+Tue Sep 16 14:16:34 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/modeling/README.dev:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/StructFieldsEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/edit/parts/StructKeysEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/part/OpenDDSDataLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/src/org/opendds/modeling/diagram/datalib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DeadlineQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/DsQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LbQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LifespanQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/LivelinessQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/RdlQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/ReliabilityQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/commands/TbfQosPolicyCreateCommand.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataReaderQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DataWriterQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/DomainParticipantQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/MultiTopicDataTypeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/PublisherQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/PublisherQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/SubscriberQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicDataTypeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicQoSPoliciesCustomEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/parts/TopicQoSPoliciesSharedEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DeadlineQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/DsQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LbQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LifespanQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/LivelinessQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/RdlQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/ReliabilityQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/edit/policies/TbfQosPolicy2ItemSemanticEditPolicy.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/part/OpenDDSDcpsLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/src/org/opendds/modeling/diagram/dcpslib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackage2EditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/LibPackageEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/edit/parts/OpenDDSModelEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSCreationWizard.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/part/OpenDDSDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/src/org/opendds/modeling/diagram/main/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DestinationOrderQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DsQosPolicyHistory_kindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/DurabilityQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/HistoryQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/LivelinessQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/OwnershipQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/PresentationQosPolicyAccess_scopeEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/edit/parts/ReliabilityQosPolicyKindEditPart.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/part/OpenDDSPolicyLibDiagramEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/src/org/opendds/modeling/diagram/policylib/preferences/DiagramPreferenceInitializer.java:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/templates/aspects/parsers/PredefinedParser.xpt:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/src/org/opendds/modeling/model/opendds/presentation/OpenDDSModelWizard.java:
+        * tools/modeling/plugins/org.opendds.modeling.model/model/OpenDDS.genmodel:
+        * tools/modeling/plugins/org.opendds.modeling.model/plugin.xml:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/build.properties:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/LocationPathItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/LocationVariableItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/SearchLocationItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportInstItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Provider/TransportRefItemProvider.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorActionBarContributor.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditor.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/src/org/opendds/modeling/sdk/model/GeneratorSpecification/Presentation/GeneratorEditorPlugin.java:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/plugin.xml:
+
+           Modeling changes to support GMF 3.1.X
+           Merged from branch modeling_using_gmf_3.1
+
 Fri Sep 12 21:23:28 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tools/modeling/codegen/model/Delegate.cpp:

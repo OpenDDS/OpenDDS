@@ -197,6 +197,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(small_time);
     }
 
+    // Wait for acks failing in static build...
+    writer->wait_for_acks();
     writer->end();
     delete writer;
 

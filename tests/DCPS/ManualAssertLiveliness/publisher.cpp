@@ -151,7 +151,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                dw_qos,
                                dwl.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil (dw2.in ())) {
+      if (CORBA::is_nil (dw3.in ())) {
         cerr << "create_datawriter failed." << endl;
         exit(1);
       }
@@ -161,7 +161,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                dw_qos,
                                dwl.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      if (CORBA::is_nil (dw2.in ())) {
+      if (CORBA::is_nil (dw4.in ())) {
         cerr << "create_datawriter failed." << endl;
         exit(1);
       }

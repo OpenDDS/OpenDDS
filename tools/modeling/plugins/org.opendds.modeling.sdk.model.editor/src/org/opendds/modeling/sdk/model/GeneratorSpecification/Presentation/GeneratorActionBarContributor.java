@@ -190,8 +190,9 @@ public class GeneratorActionBarContributor extends
 
 		// Prepare for CreateChild item addition or removal.
 		//
-		createChildMenuManager = new MenuManager(GeneratorEditorPlugin.INSTANCE
-				.getString("_UI_CreateChild_menu_item"));
+		createChildMenuManager = new MenuManager(
+				GeneratorEditorPlugin.INSTANCE
+						.getString("_UI_CreateChild_menu_item"));
 		submenuManager.insertBefore("additions", createChildMenuManager);
 
 		// Prepare for CreateSibling item addition or removal.
@@ -401,13 +402,15 @@ public class GeneratorActionBarContributor extends
 		super.menuAboutToShow(menuManager);
 		MenuManager submenuManager = null;
 
-		submenuManager = new MenuManager(GeneratorEditorPlugin.INSTANCE
-				.getString("_UI_CreateChild_menu_item"));
+		submenuManager = new MenuManager(
+				GeneratorEditorPlugin.INSTANCE
+						.getString("_UI_CreateChild_menu_item"));
 		populateManager(submenuManager, createChildActions, null);
 		menuManager.insertBefore("edit", submenuManager);
 
-		submenuManager = new MenuManager(GeneratorEditorPlugin.INSTANCE
-				.getString("_UI_CreateSibling_menu_item"));
+		submenuManager = new MenuManager(
+				GeneratorEditorPlugin.INSTANCE
+						.getString("_UI_CreateSibling_menu_item"));
 		populateManager(submenuManager, createSiblingActions, null);
 		menuManager.insertBefore("edit", submenuManager);
 	}

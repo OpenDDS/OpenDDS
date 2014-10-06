@@ -81,19 +81,18 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
 
         writer_->add_association(id_, association, active);
 
+        if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) DCPS_IR_Publication::add_associated_subscription: ")
+                     ACE_TEXT("successfully added subscription %x.\n"),
+                     sub));
+        }
       } catch (const CORBA::Exception& ex) {
         ex._tao_print_exception(
           "(%P|%t) ERROR: Exception caught in DCPS_IR_Publication::add_associated_subscription:");
         participant_->mark_dead();
         status = -1;
       }
-    }
-
-    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DCPS_IR_Publication::add_associated_subscription: ")
-                 ACE_TEXT("successfully added subscription %x.\n"),
-                 sub));
     }
   }
   break;

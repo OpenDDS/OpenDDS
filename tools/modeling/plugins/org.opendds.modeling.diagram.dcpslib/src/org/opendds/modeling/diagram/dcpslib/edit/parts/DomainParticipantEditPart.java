@@ -31,6 +31,7 @@ import org.eclipse.gmf.runtime.emf.type.core.IElementType;
 import org.eclipse.gmf.runtime.gef.ui.figures.DefaultSizeNodeFigure;
 import org.eclipse.gmf.runtime.gef.ui.figures.NodeFigure;
 import org.eclipse.gmf.runtime.notation.View;
+import org.eclipse.gmf.tooling.runtime.edit.policies.reparent.CreationEditPolicyWithCustomReparent;
 import org.eclipse.swt.graphics.Color;
 import org.opendds.modeling.diagram.dcpslib.edit.policies.DomainParticipantItemSemanticEditPolicy;
 import org.opendds.modeling.diagram.dcpslib.edit.policies.OpenDDSDcpsLibTextSelectionEditPolicy;
@@ -69,7 +70,8 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 */
 	protected void createDefaultEditPolicies() {
 		installEditPolicy(EditPolicyRoles.CREATION_ROLE,
-				new CreationEditPolicy());
+				new CreationEditPolicyWithCustomReparent(
+						OpenDDSDcpsLibVisualIDRegistry.TYPED_INSTANCE));
 		super.createDefaultEditPolicies();
 		installEditPolicy(EditPolicyRoles.SEMANTIC_ROLE,
 				new DomainParticipantItemSemanticEditPolicy());
@@ -101,8 +103,7 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected IFigure createNodeShape() {
-		DomainParticipantFigure figure = new DomainParticipantFigure();
-		return primaryShape = figure;
+		return primaryShape = new DomainParticipantFigure();
 	}
 
 	/**
@@ -116,12 +117,6 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected boolean addFixedChild(EditPart childEditPart) {
-		if (childEditPart instanceof DomainParticipantTransportConfigEditPart) {
-			((DomainParticipantTransportConfigEditPart) childEditPart)
-					.setLabel(getPrimaryShape()
-							.getFigureDomainParticipantTransportConfigFigure());
-			return true;
-		}
 		if (childEditPart instanceof DomainParticipantNameEditPart) {
 			((DomainParticipantNameEditPart) childEditPart)
 					.setLabel(getPrimaryShape()
@@ -134,6 +129,12 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 							.getFigureDomainParticipantStereotypeFigure());
 			return true;
 		}
+		if (childEditPart instanceof DomainParticipantTransportConfigEditPart) {
+			((DomainParticipantTransportConfigEditPart) childEditPart)
+					.setLabel(getPrimaryShape()
+							.getFigureDomainParticipantTransportConfigFigure());
+			return true;
+		}
 		return false;
 	}
 
@@ -141,13 +142,13 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	 * @generated
 	 */
 	protected boolean removeFixedChild(EditPart childEditPart) {
-		if (childEditPart instanceof DomainParticipantTransportConfigEditPart) {
-			return true;
-		}
 		if (childEditPart instanceof DomainParticipantNameEditPart) {
 			return true;
 		}
 		if (childEditPart instanceof DomainParticipantName2EditPart) {
+			return true;
+		}
+		if (childEditPart instanceof DomainParticipantTransportConfigEditPart) {
 			return true;
 		}
 		return false;
@@ -272,39 +273,6 @@ public class DomainParticipantEditPart extends ShapeNodeEditPart {
 	public EditPart getPrimaryChildEditPart() {
 		return getChildBySemanticHint(OpenDDSDcpsLibVisualIDRegistry
 				.getType(DomainParticipantNameEditPart.VISUAL_ID));
-	}
-
-	/**
-	 * @generated
-	 */
-	public List/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/getMARelTypesOnSource() {
-		List/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/types = new ArrayList/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/();
-		types.add(OpenDDSDcpsLibElementTypes.DomainParticipantDomain_4007);
-		return types;
-	}
-
-	/**
-	 * @generated
-	 */
-	public List/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/getMARelTypesOnSourceAndTarget(
-			IGraphicalEditPart targetEditPart) {
-		List/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/types = new ArrayList/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/();
-		if (targetEditPart instanceof DomainEditPart) {
-			types.add(OpenDDSDcpsLibElementTypes.DomainParticipantDomain_4007);
-		}
-		return types;
-	}
-
-	/**
-	 * @generated
-	 */
-	public List/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/getMATypesForTarget(
-			IElementType relationshipType) {
-		List/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/types = new ArrayList/*<org.eclipse.gmf.runtime.emf.type.core.IElementType>*/();
-		if (relationshipType == OpenDDSDcpsLibElementTypes.DomainParticipantDomain_4007) {
-			types.add(OpenDDSDcpsLibElementTypes.Domain_2002);
-		}
-		return types;
 	}
 
 	/**

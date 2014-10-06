@@ -14,6 +14,7 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -181,6 +182,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
+    return -1;
+  } catch (const OpenDDS::DCPS::Transport::Exception& e) {
+    ACE_DEBUG((LM_ERROR, "Transport exception caught in publisher main\n"));
+    return -1;
   }
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%T (%P|%t) Publisher exiting\n")));

@@ -42,7 +42,8 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.gef;visibility:=reexport,
  com.ociweb.gmf,
  org.eclipse.emf.validation;visibility:=reexport,
- org.eclipse.emf.validation.ocl;visibility:=reexport
+ org.eclipse.emf.validation.ocl;visibility:=reexport,
+ org.eclipse.gmf.tooling.runtime;visibility:=reexport
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-LazyStart: true

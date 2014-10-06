@@ -5,6 +5,7 @@
 #include "Test.h"
 #include "Options.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include <sstream>
 
@@ -50,6 +51,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ));
     return 1;
 
+  } catch (const OpenDDS::DCPS::Transport::MiscProblem &) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) publisher_main() - ")
+      ACE_TEXT("Transport::MiscProblem exception caught during processing.\n")
+    ));
+    return 1;
   }
 
   return 0;

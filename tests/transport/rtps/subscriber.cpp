@@ -6,7 +6,9 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
+#include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
+
 
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/GuidConverter.h"
@@ -43,8 +45,13 @@ public:
 
   bool init(const AssociationData& publication)
   {
-    pub_id_ = publication.remote_id_;
-    return associate(publication, false /* active */);
+    try {
+      pub_id_ = publication.remote_id_;
+      return associate(publication, false /* active */);
+    } catch (const CORBA::BAD_PARAM& ) {
+        ACE_DEBUG((LM_ERROR, "ERROR: caught CORBA::BAD_PARAM exception\n"));
+        return false;
+    }
   }
 
   // Implementing TransportReceiveListener
@@ -183,95 +190,101 @@ public:
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  std::cerr << "STARTING MAIN IN SUBSCRIBER\n";
-  ACE_TString host;
-  u_short port = 0;
+  try {
+    std::cerr << "STARTING MAIN IN SUBSCRIBER\n";
+    ACE_TString host;
+    u_short port = 0;
 
-  ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
-  int option = 0;
+    ACE_Get_Opt opts(argc, argv, ACE_TEXT("h:p:"));
+    int option = 0;
 
-  while ((option = opts()) != EOF) {
-    switch (option) {
-    case 'h':
-      host = opts.opt_arg();
-      break;
-    case 'p':
-      port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
-      break;
+    while ((option = opts()) != EOF) {
+      switch (option) {
+      case 'h':
+        host = opts.opt_arg();
+        break;
+      case 'p':
+        port = static_cast<u_short>(ACE_OS::atoi(opts.opt_arg()));
+        break;
+      }
     }
-  }
 
-  if (host.empty() || port == 0) {
-    std::cerr << "ERROR: -h <host> and -p <port> options are required\n";
+    if (host.empty() || port == 0) {
+      std::cerr << "ERROR: -h <host> and -p <port> options are required\n";
+      return 1;
+    }
+
+    TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
+                                                               "rtps_udp");
+
+    RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
+    rtps_inst->local_address_.set(port, host.c_str());
+    rtps_inst->datalink_release_delay_ = 0;
+
+    TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
+    cfg->instances_.push_back(inst);
+
+    TheTransportRegistry->global_config(cfg);
+
+    RepoIdBuilder local;
+    local.federationId(0x01234567);  // guidPrefix1
+    local.participantId(0xefcdab89); // guidPrefix2
+    local.entityKey(0x452310);
+    local.entityKind(ENTITYKIND_USER_READER_WITH_KEY);
+
+    RepoIdBuilder remote; // these values must match what's in publisher.cpp
+    remote.federationId(0x01234567);  // guidPrefix1
+    remote.participantId(0x89abcdef); // guidPrefix2
+    remote.entityKey(0x012345);
+    remote.entityKind(ENTITYKIND_USER_WRITER_WITH_KEY);
+
+    SimpleDataReader sdr(local);
+    sdr.enable_transport(false /*reliable*/, false /*durable*/);
+    // Write a file so that test script knows we're ready
+    FILE* file = std::fopen("subready.txt", "w");
+    std::fprintf(file, "Ready\n");
+    std::fclose(file);
+
+    std::cerr << "***Ready written to subready.txt\n";
+
+    AssociationData publication;
+    publication.remote_id_ = remote;
+    publication.remote_reliable_ = true;
+    publication.remote_data_.length(1);
+    publication.remote_data_[0].transport_type = "rtps_udp";
+    publication.remote_data_[0].data.length(5);
+    for (CORBA::ULong i = 0; i < 5; ++i) {
+      publication.remote_data_[0].data[i] = 0;
+    }
+
+    std::cerr << "***Association Data created for Publication for SimpleDataReader to init\n";
+    std::cout << "Associating with pub..." << std::endl;
+    if (!sdr.init(publication)) {
+      std::cerr << "subscriber TransportClient::associate() failed\n";
+      return 1;
+    }
+
+    std::cerr << "***Simple Data Reader init:: publication completed\n";
+
+    while (!sdr.done_) {
+      ACE_OS::sleep(1);
+    }
+
+    if (sdr.control_msg_count_ != 4) {
+      ACE_DEBUG((LM_ERROR, "ERROR: Expected 4 control messages, received %d\n",
+                 sdr.control_msg_count_));
+    }
+
+    sdr.disassociate(publication.remote_id_);
+
+    TheServiceParticipant->shutdown();
+    ACE_Thread_Manager::instance()->wait();
+
+    return 0;
+  } catch (const OpenDDS::DCPS::Transport::NotConfigured& ) {
+    ACE_DEBUG((LM_ERROR,
+               "ERROR: caught OpenDDS::DCPS::Transport::NotConfigured exception.\n"));
     return 1;
   }
 
-  TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
-                                                             "rtps_udp");
-
-  RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
-  rtps_inst->local_address_.set(port, host.c_str());
-  rtps_inst->datalink_release_delay_ = 0;
-
-  TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
-  cfg->instances_.push_back(inst);
-
-  TheTransportRegistry->global_config(cfg);
-
-  RepoIdBuilder local;
-  local.federationId(0x01234567);  // guidPrefix1
-  local.participantId(0xefcdab89); // guidPrefix2
-  local.entityKey(0x452310);
-  local.entityKind(ENTITYKIND_USER_READER_WITH_KEY);
-
-  RepoIdBuilder remote; // these values must match what's in publisher.cpp
-  remote.federationId(0x01234567);  // guidPrefix1
-  remote.participantId(0x89abcdef); // guidPrefix2
-  remote.entityKey(0x012345);
-  remote.entityKind(ENTITYKIND_USER_WRITER_WITH_KEY);
-
-  SimpleDataReader sdr(local);
-  sdr.enable_transport(false /*reliable*/, false /*durable*/);
-  // Write a file so that test script knows we're ready
-  FILE* file = std::fopen("subready.txt", "w");
-  std::fprintf(file, "Ready\n");
-  std::fclose(file);
-
-  std::cerr << "***Ready written to subready.txt\n";
-
-  AssociationData publication;
-  publication.remote_id_ = remote;
-  publication.remote_reliable_ = true;
-  publication.remote_data_.length(1);
-  publication.remote_data_[0].transport_type = "rtps_udp";
-  publication.remote_data_[0].data.length(5);
-  for (CORBA::ULong i = 0; i < 5; ++i) {
-    publication.remote_data_[0].data[i] = 0;
-  }
-
-  std::cerr << "***Association Data created for Publication for SimpleDataReader to init\n";
-
-  std::cout << "Associating with pub..." << std::endl;
-  if (!sdr.init(publication)) {
-    std::cerr << "subscriber TransportClient::associate() failed\n";
-    return 1;
-  }
-
-  std::cerr << "***Simple Data Reader init:: publication completed\n";
-
-  while (!sdr.done_) {
-    ACE_OS::sleep(1);
-  }
-
-  if (sdr.control_msg_count_ != 4) {
-    ACE_DEBUG((LM_ERROR, "ERROR: Expected 4 control messages, received %d\n",
-               sdr.control_msg_count_));
-  }
-
-  sdr.disassociate(publication.remote_id_);
-
-  TheServiceParticipant->shutdown();
-  ACE_Thread_Manager::instance()->wait();
-
-  return 0;
 }

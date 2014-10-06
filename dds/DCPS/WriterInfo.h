@@ -167,8 +167,8 @@ public:
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
-  typedef std::map < ::DDS::InstanceHandle_t, bool> OwnerEvaluateFlag;
-  OwnerEvaluateFlag owner_evaluated_;
+  typedef std::map < ::DDS::InstanceHandle_t, bool> OwnerEvaluateFlags;
+  OwnerEvaluateFlags owner_evaluated_;
 
   /// Data to support GROUP access scope.
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE

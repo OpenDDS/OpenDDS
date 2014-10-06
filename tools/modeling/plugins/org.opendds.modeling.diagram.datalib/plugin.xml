@@ -257,32 +257,147 @@
 
    <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
       <?gmfgen generated="true"?>
-      <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibModelingAssistantProvider">
+      <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfDataLibEditPart">
          <Priority name="Lowest"/>
          <object class="org.opendds.modeling.diagram.datalib.edit.parts.DataLibEditPart" id="DataLib_1000"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongEditPart" id="Long_2001"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongDoubleEditPart" id="LongDouble_2023"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongLongEditPart" id="LongLong_2002"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ShortEditPart" id="Short_2003"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ULongEditPart" id="ULong_2004"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ULongLongEditPart" id="ULongLong_2005"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.UShortEditPart" id="UShort_2006"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.DoubleEditPart" id="Double_2007"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.FloatEditPart" id="Float_2008"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.CharEditPart" id="Char_2009"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.WCharEditPart" id="WChar_2010"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.OctetEditPart" id="Octet_2011"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.BooleanEditPart" id="Boolean_2012"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ArrayEditPart" id="Array_2013"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.EnumEditPart" id="Enum_2014"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.SequenceEditPart" id="Sequence_2015"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.StringEditPart" id="String_2016"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.WStringEditPart" id="WString_2017"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.TypedefEditPart" id="Typedef_2018"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.UnionEditPart" id="Union_2021"/>
-         <object class="org.opendds.modeling.diagram.datalib.edit.parts.StructEditPart" id="Struct_2022"/>
-         <context elements="DataLib_1000,Long_2001,LongDouble_2023,LongLong_2002,Short_2003,ULong_2004,ULongLong_2005,UShort_2006,Double_2007,Float_2008,Char_2009,WChar_2010,Octet_2011,Boolean_2012,Array_2013,Enum_2014,Sequence_2015,String_2016,WString_2017,Typedef_2018,Union_2021,Struct_2022"/>
+         <context elements="DataLib_1000"/>
       </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfLongEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongEditPart" id="Long_2001"/>
+         <context elements="Long_2001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfLongDoubleEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongDoubleEditPart" id="LongDouble_2023"/>
+         <context elements="LongDouble_2023"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfLongLongEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongLongEditPart" id="LongLong_2002"/>
+         <context elements="LongLong_2002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfShortEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ShortEditPart" id="Short_2003"/>
+         <context elements="Short_2003"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfULongEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ULongEditPart" id="ULong_2004"/>
+         <context elements="ULong_2004"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfULongLongEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ULongLongEditPart" id="ULongLong_2005"/>
+         <context elements="ULongLong_2005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfUShortEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.UShortEditPart" id="UShort_2006"/>
+         <context elements="UShort_2006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfDoubleEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.DoubleEditPart" id="Double_2007"/>
+         <context elements="Double_2007"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfFloatEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.FloatEditPart" id="Float_2008"/>
+         <context elements="Float_2008"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfCharEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.CharEditPart" id="Char_2009"/>
+         <context elements="Char_2009"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfWCharEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.WCharEditPart" id="WChar_2010"/>
+         <context elements="WChar_2010"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfOctetEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.OctetEditPart" id="Octet_2011"/>
+         <context elements="Octet_2011"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfBooleanEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.BooleanEditPart" id="Boolean_2012"/>
+         <context elements="Boolean_2012"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfArrayEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ArrayEditPart" id="Array_2013"/>
+         <context elements="Array_2013"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfEnumEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.EnumEditPart" id="Enum_2014"/>
+         <context elements="Enum_2014"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfSequenceEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.SequenceEditPart" id="Sequence_2015"/>
+         <context elements="Sequence_2015"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfStringEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.StringEditPart" id="String_2016"/>
+         <context elements="String_2016"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfWStringEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.WStringEditPart" id="WString_2017"/>
+         <context elements="WString_2017"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfTypedefEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.TypedefEditPart" id="Typedef_2018"/>
+         <context elements="Typedef_2018"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfUnionEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.UnionEditPart" id="Union_2021"/>
+         <context elements="Union_2021"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfStructEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.StructEditPart" id="Struct_2022"/>
+         <context elements="Struct_2022"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfFieldEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.FieldEditPart" id="Field_3002"/>
+         <context elements="Field_3002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfBranchEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.BranchEditPart" id="Branch_3005"/>
+         <context elements="Branch_3005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfField2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.Field2EditPart" id="Field_3001"/>
+         <context elements="Field_3001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfCaseEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.CaseEditPart" id="Case_3006"/>
+         <context elements="Case_3006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfField3EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.Field3EditPart" id="Field_3003"/>
+         <context elements="Field_3003"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfKeyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.KeyEditPart" id="Key_3004"/>
+         <context elements="Key_3004"/>
+      </modelingAssistantProvider>
+      
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">

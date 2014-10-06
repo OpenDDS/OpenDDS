@@ -1,3 +1,7 @@
+Mon Oct  6 21:35:11 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * Merged from trunk r6527 through r6549
+
 Fri Oct  3 14:48:05 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Federation/DataReaderListener.cpp:

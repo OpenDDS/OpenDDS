@@ -240,25 +240,328 @@
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
-      <?gmfgen generated="false"?>
-      <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibModelingAssistantProvider">
+      <?gmfgen generated="true"?>
+      <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDcpsLibEditPart">
          <Priority name="Lowest"/>
          <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DcpsLibEditPart" id="DcpsLib_1000"/>
-         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainParticipantEditPart" id="DomainParticipant_2001"/>
-         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainEditPart" id="Domain_2002"/>
-         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TopicEditPart" id="Topic_2007"/>
-         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart" id="ContentFilteredTopic_2005"/>
-         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.MultiTopicEditPart" id="MultiTopic_2006"/>
-         <!-- Custom changes begin -->
-         <!-- By default only top-level nodes have modeling assistance activated. This means that compartment child
-         like DataReader and DataWriter would not have connection handles available to link to topic figures.
-         Therefore these are manually included. Note that if new elements are added to the DcpsLib diagram it
-         may be necessary to manually update this extension. -->
-         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DataWriterEditPart" id="DataWriter_3059"/>
-         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DataReaderEditPart" id="DataReader_3060"/>
-         <context elements="DcpsLib_1000,DomainParticipant_2001,Domain_2002,Topic_2007,ContentFilteredTopic_2005,MultiTopic_2006,DataWriter_3059,DataReader_3060"/>
-         <!-- Custom changes end -->
+         <context elements="DcpsLib_1000"/>
       </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDomainParticipantEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainParticipantEditPart" id="DomainParticipant_2001"/>
+         <context elements="DomainParticipant_2001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDomainEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainEditPart" id="Domain_2002"/>
+         <context elements="Domain_2002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTopicEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TopicEditPart" id="Topic_2007"/>
+         <context elements="Topic_2007"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfContentFilteredTopicEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart" id="ContentFilteredTopic_2005"/>
+         <context elements="ContentFilteredTopic_2005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfMultiTopicEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.MultiTopicEditPart" id="MultiTopic_2006"/>
+         <context elements="MultiTopic_2006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPublisherEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PublisherEditPart" id="Publisher_3001"/>
+         <context elements="Publisher_3001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDataWriterEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DataWriterEditPart" id="DataWriter_3059"/>
+         <context elements="DataWriter_3059"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDeadlineQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DeadlineQosPolicyEditPart" id="DeadlineQosPolicy_3022"/>
+         <context elements="DeadlineQosPolicy_3022"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriodEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PeriodEditPart" id="Period_3005"/>
+         <context elements="Period_3005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDestinationOrderQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DestinationOrderQosPolicyEditPart" id="DestinationOrderQosPolicy_3023"/>
+         <context elements="DestinationOrderQosPolicy_3023"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDsQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DsQosPolicyEditPart" id="DsQosPolicy_3024"/>
+         <context elements="DsQosPolicy_3024"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period2EditPart" id="Period_3006"/>
+         <context elements="Period_3006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfHistoryQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.HistoryQosPolicyEditPart" id="HistoryQosPolicy_3025"/>
+         <context elements="HistoryQosPolicy_3025"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLbQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LbQosPolicyEditPart" id="LbQosPolicy_3026"/>
+         <context elements="LbQosPolicy_3026"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod3EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period3EditPart" id="Period_3007"/>
+         <context elements="Period_3007"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLifespanQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LifespanQosPolicyEditPart" id="LifespanQosPolicy_3027"/>
+         <context elements="LifespanQosPolicy_3027"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod4EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period4EditPart" id="Period_3008"/>
+         <context elements="Period_3008"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLivelinessQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LivelinessQosPolicyEditPart" id="LivelinessQosPolicy_3028"/>
+         <context elements="LivelinessQosPolicy_3028"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod5EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period5EditPart" id="Period_3009"/>
+         <context elements="Period_3009"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfOsQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.OsQosPolicyEditPart" id="OsQosPolicy_3029"/>
+         <context elements="OsQosPolicy_3029"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfOwnershipQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.OwnershipQosPolicyEditPart" id="OwnershipQosPolicy_3030"/>
+         <context elements="OwnershipQosPolicy_3030"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfReliabilityQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ReliabilityQosPolicyEditPart" id="ReliabilityQosPolicy_3031"/>
+         <context elements="ReliabilityQosPolicy_3031"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod6EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period6EditPart" id="Period_3010"/>
+         <context elements="Period_3010"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfRlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.RlQosPolicyEditPart" id="RlQosPolicy_3032"/>
+         <context elements="RlQosPolicy_3032"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTpQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TpQosPolicyEditPart" id="TpQosPolicy_3033"/>
+         <context elements="TpQosPolicy_3033"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfWdlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.WdlQosPolicyEditPart" id="WdlQosPolicy_3034"/>
+         <context elements="WdlQosPolicy_3034"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDurabilityQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DurabilityQosPolicyEditPart" id="DurabilityQosPolicy_3035"/>
+         <context elements="DurabilityQosPolicy_3035"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfUdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.UdQosPolicyEditPart" id="UdQosPolicy_3013"/>
+         <context elements="UdQosPolicy_3013"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDeadlineQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DeadlineQosPolicy2EditPart" id="DeadlineQosPolicy_3036"/>
+         <context elements="DeadlineQosPolicy_3036"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDestinationOrderQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DestinationOrderQosPolicy2EditPart" id="DestinationOrderQosPolicy_3037"/>
+         <context elements="DestinationOrderQosPolicy_3037"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDsQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DsQosPolicy2EditPart" id="DsQosPolicy_3038"/>
+         <context elements="DsQosPolicy_3038"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDurabilityQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DurabilityQosPolicy2EditPart" id="DurabilityQosPolicy_3039"/>
+         <context elements="DurabilityQosPolicy_3039"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfHistoryQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.HistoryQosPolicy2EditPart" id="HistoryQosPolicy_3040"/>
+         <context elements="HistoryQosPolicy_3040"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLbQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LbQosPolicy2EditPart" id="LbQosPolicy_3041"/>
+         <context elements="LbQosPolicy_3041"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLifespanQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LifespanQosPolicy2EditPart" id="LifespanQosPolicy_3042"/>
+         <context elements="LifespanQosPolicy_3042"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLivelinessQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LivelinessQosPolicy2EditPart" id="LivelinessQosPolicy_3043"/>
+         <context elements="LivelinessQosPolicy_3043"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfOsQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.OsQosPolicy2EditPart" id="OsQosPolicy_3044"/>
+         <context elements="OsQosPolicy_3044"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfOwnershipQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.OwnershipQosPolicy2EditPart" id="OwnershipQosPolicy_3045"/>
+         <context elements="OwnershipQosPolicy_3045"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfReliabilityQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ReliabilityQosPolicy2EditPart" id="ReliabilityQosPolicy_3046"/>
+         <context elements="ReliabilityQosPolicy_3046"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfRlQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.RlQosPolicy2EditPart" id="RlQosPolicy_3047"/>
+         <context elements="RlQosPolicy_3047"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTpQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TpQosPolicy2EditPart" id="TpQosPolicy_3048"/>
+         <context elements="TpQosPolicy_3048"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfUdQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.UdQosPolicy2EditPart" id="UdQosPolicy_3021"/>
+         <context elements="UdQosPolicy_3021"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfWdlQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.WdlQosPolicy2EditPart" id="WdlQosPolicy_3061"/>
+         <context elements="WdlQosPolicy_3061"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfEfQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.EfQosPolicyEditPart" id="EfQosPolicy_3012"/>
+         <context elements="EfQosPolicy_3012"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfGdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.GdQosPolicyEditPart" id="GdQosPolicy_3014"/>
+         <context elements="GdQosPolicy_3014"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPartitionQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PartitionQosPolicyEditPart" id="PartitionQosPolicy_3015"/>
+         <context elements="PartitionQosPolicy_3015"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPresentationQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PresentationQosPolicyEditPart" id="PresentationQosPolicy_3016"/>
+         <context elements="PresentationQosPolicy_3016"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfEfQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.EfQosPolicy2EditPart" id="EfQosPolicy_3017"/>
+         <context elements="EfQosPolicy_3017"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfGdQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.GdQosPolicy2EditPart" id="GdQosPolicy_3018"/>
+         <context elements="GdQosPolicy_3018"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPartitionQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PartitionQosPolicy2EditPart" id="PartitionQosPolicy_3019"/>
+         <context elements="PartitionQosPolicy_3019"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPresentationQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PresentationQosPolicy2EditPart" id="PresentationQosPolicy_3020"/>
+         <context elements="PresentationQosPolicy_3020"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfSubscriberEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.SubscriberEditPart" id="Subscriber_3002"/>
+         <context elements="Subscriber_3002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDataReaderEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DataReaderEditPart" id="DataReader_3060"/>
+         <context elements="DataReader_3060"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfRdlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.RdlQosPolicyEditPart" id="RdlQosPolicy_3049"/>
+         <context elements="RdlQosPolicy_3049"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod7EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period7EditPart" id="Period_3055"/>
+         <context elements="Period_3055"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod8EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period8EditPart" id="Period_3056"/>
+         <context elements="Period_3056"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTbfQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TbfQosPolicyEditPart" id="TbfQosPolicy_3050"/>
+         <context elements="TbfQosPolicy_3050"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod9EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period9EditPart" id="Period_3057"/>
+         <context elements="Period_3057"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TdQosPolicyEditPart" id="TdQosPolicy_3051"/>
+         <context elements="TdQosPolicy_3051"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfRdlQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.RdlQosPolicy2EditPart" id="RdlQosPolicy_3052"/>
+         <context elements="RdlQosPolicy_3052"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTbfQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TbfQosPolicy2EditPart" id="TbfQosPolicy_3053"/>
+         <context elements="TbfQosPolicy_3053"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTdQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TdQosPolicy2EditPart" id="TdQosPolicy_3054"/>
+         <context elements="TdQosPolicy_3054"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfStructEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.StructEditPart" id="Struct_3058"/>
+         <context elements="Struct_3058"/>
+      </modelingAssistantProvider>
+      
    </extension>
 
    <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">
