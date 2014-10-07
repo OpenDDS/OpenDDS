@@ -1,8 +1,16 @@
+Mon Oct  6 23:06:11 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+
+          Fix some problems that manifest when various profiles are
+          disabled in a footprint build.
+
 Thu Oct  2 17:57:36 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>
 
         * tests/DCPS/Inconsistent_Qos/inconsistent_qos.cpp:
         * tests/transport/error_handling/SimpleTransportClient.h:
-         
+
          Catch exceptions.
 
 Tue Sep 30 22:55:34 UTC 2014  Phillip LaBanca  <labancap@ociweb.com>

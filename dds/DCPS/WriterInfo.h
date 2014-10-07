@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_WRITERINFO_H
 
 #include <list>
+#include <map>
 #include "dds/DdsDcpsInfoUtilsC.h"
 // #include "RcHandle_T.h"
 #include "RcObject_T.h"
