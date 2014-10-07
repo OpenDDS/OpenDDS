@@ -26,6 +26,7 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
 
 #include "ace/Arg_Shifter.h"
 
@@ -239,6 +240,13 @@ create_publisher (::DDS::DomainParticipant_ptr participant,
   catch (const CORBA::Exception& ex)
     {
       ex._tao_print_exception ("Exception caught in create_publisher().");
+      return ::DDS::Publisher::_nil () ;
+    }
+  catch (const OpenDDS::DCPS::Transport::MiscProblem &)
+    {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) Transport::MiscProblem exception caught during processing.\n")
+      ));
       return ::DDS::Publisher::_nil () ;
     }
   return pub._retn ();

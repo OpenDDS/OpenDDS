@@ -27,6 +27,7 @@
 
 #include "../common/TestSupport.h"
 #include "../FooType4/FooDefTypeSupportImpl.h"
+#include <stdexcept>
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -180,6 +181,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   {
     ex._tao_print_exception("Exception caught in main.cpp:");
     return 1;
+  }
+  catch (const std::runtime_error& rte)
+  {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) main() exception: %s\n"), rte.what()), -1);
   }
 
   ACE_ERROR_RETURN((LM_INFO,

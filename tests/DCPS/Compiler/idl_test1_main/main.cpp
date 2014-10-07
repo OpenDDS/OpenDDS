@@ -382,22 +382,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       mb.length(), ebuffer));
   }
 
-  if (!(ss << my_foo)) {
-    ACE_ERROR((LM_ERROR, "Serializing failed\n"));
-    failed = true;
-  }
-
-  if (dump_buffer) {
-    ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("AFTER WRITING, LENGTH: %B, BUFFER:\n%s\n"),
-      mb.length(), ebuffer));
-  }
-
   OpenDDS::DCPS::Serializer ss2(&mb);
 
   Xyz::Foo ss_foo;
   try {
+    if (!(ss << my_foo)) {
+      ACE_ERROR((LM_ERROR, "Serializing failed\n"));
+      failed = true;
+    }
+
+    if (dump_buffer) {
+      ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("AFTER WRITING, LENGTH: %B, BUFFER:\n%s\n"),
+        mb.length(), ebuffer));
+    }
+
     if (!(ss2 >> ss_foo)) {
       ACE_ERROR((LM_ERROR, "Deserializing failed\n"));
       failed = true;

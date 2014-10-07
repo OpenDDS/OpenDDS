@@ -1,3 +1,16 @@
+Tue Oct  7 17:49:08 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Catch exceptions reported by Coverity.
+
 Mon Oct  6 23:06:11 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/ReplayerImpl.cpp:
