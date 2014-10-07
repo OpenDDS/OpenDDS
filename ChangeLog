@@ -1,3 +1,26 @@
+Tue Oct  7 20:56:13 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Footprint:
+        * tests/DCPS/Footprint/Args.h:
+        * tests/DCPS/Footprint/DataReaderListener.h:
+        * tests/DCPS/Footprint/DataReaderListener.cpp:
+        * tests/DCPS/Footprint/Footprint.mpc:
+        * tests/DCPS/Footprint/Messenger.idl:
+        * tests/DCPS/Footprint/Messenger_export.h:
+        * tests/DCPS/Footprint/Writer.h:
+        * tests/DCPS/Footprint/Writer.cpp:
+        * tests/DCPS/Footprint/pub.ini:
+        * tests/DCPS/Footprint/rtps.ini:
+        * tests/DCPS/Footprint/rtpspublisher.cpp:
+        * tests/DCPS/Footprint/rtpssubscriber.cpp:
+        * tests/DCPS/Footprint/run_test.pl:
+        * tests/DCPS/Footprint/sub.ini:
+        * tests/DCPS/Footprint/tcppublisher.cpp:
+        * tests/DCPS/Footprint/tcpsubscriber.cpp:
+
+          Add footprint publishers and subscribers for both RTPS and
+          InfoRepo/tcp.
+
 Tue Oct  7 17:49:08 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
