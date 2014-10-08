@@ -1,3 +1,13 @@
+Wed Oct  8 15:41:58 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * MPC/config/dcps_inforepodiscovery.mpb:
+
+          Move dependency on the TAO Portable Server library from the dcps
+          project to the dcps_inforepodiscovery project.  OpenDDS applications
+          not using InfoRepo discovery are not CORBA servers and do not
+          require the TAO Portable Server library.
+
 Tue Oct  7 20:56:13 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/Footprint:
