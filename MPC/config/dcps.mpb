@@ -1,7 +1,7 @@
 // -*- MPC -*-
 // $Id$
 
-project: taolib, dcps_ts_defaults, dcps_optional_features, dds_suppress_any_support, taoidldefaults, coverage_optional, dds_macros {
+project: taolib, portableserver, dcps_ts_defaults, dcps_optional_features, dds_suppress_any_support, taoidldefaults, coverage_optional, dds_macros {
   libs        += OpenDDS_Dcps
   after       += OpenDDS_Dcps
   libpaths    += $(DDS_ROOT)/lib

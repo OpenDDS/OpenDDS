@@ -1,3 +1,12 @@
+Thu Oct  9 18:00:05 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/monitor/monitor.mpc:
+
+          Revert the previous two changes.  Changing the dependency on
+          the TAO portable server library needs to be rethought.
+
 Thu Oct  9 14:48:51 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/multicast/ReliableSession.cpp:

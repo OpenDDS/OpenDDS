@@ -1,4 +1,4 @@
-project(OpenDDS*): dcpslib, portableserver, install {
+project(OpenDDS*): dcpslib, install {
   dynamicflags = OPENDDS_INFOREPODISCOVERY_BUILD_DLL
 
   idlflags += -Wb,export_macro=OpenDDS_InfoRepoDiscovery_Export -Wb,export_include=InfoRepoDiscovery_Export.h
