@@ -246,7 +246,7 @@ ReliableSession::send_naks()
 
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
-          ACE_TEXT("remote %d ignore missing %q - %q \n"),
+          ACE_TEXT("remote %d ignore missing [%q - %q]\n"),
           this->link_->local_peer(), this->remote_peer_, low.getValue(), high.getValue()));
       }
 
@@ -317,10 +317,12 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   for (CORBA::ULong i = 0; i < size; ++i) {
     bool ret = send_buffer->resend(ranges[i]);
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::nak_received")
-                            ACE_TEXT (" %d <- %d %q - %q resend result %d\n"),
-                            this->link_->local_peer(), this->remote_peer_,
-                            ranges[i].first.getValue(), ranges[i].second.getValue(), ret));
+      ACE_DEBUG ((LM_DEBUG,
+                  ACE_TEXT ("(%P|%t) ReliableSession::nak_received")
+                  ACE_TEXT (" local %d remote %d [%q - %q] resend result %s\n"),
+                  this->link_->local_peer(), this->remote_peer_,
+                  ranges[i].first.getValue(), ranges[i].second.getValue(),
+                  ret ? "SUCCESS" : "FAILED"));
     }
   }
 }
@@ -349,7 +351,7 @@ ReliableSession::send_naks(DisjointSequence& received)
     serializer << iter->second;
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks")
-                            ACE_TEXT (" %d -> %d %q - %q \n"),
+                            ACE_TEXT (" local %d remote %d [%q - %q]\n"),
                             this->link_->local_peer(), remote_peer_,
                             iter->first.getValue(), iter->second.getValue()));
     }
@@ -388,8 +390,8 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
 
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_WARNING,
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("ReliableSession::nakack_received %d <- %d %q - %q ")
+                ACE_TEXT("(%P|%t) WARNING: ReliableSession::nakack_received ")
+                ACE_TEXT("local %d remote %d [%q - %q] ")
                 ACE_TEXT("not repaired.\n"),
                 this->link_->local_peer(), this->remote_peer_,
                 this->nak_sequence_.low().getValue(), low.getValue()));
