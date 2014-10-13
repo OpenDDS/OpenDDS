@@ -27,6 +27,7 @@
 
 #include "../common/TestSupport.h"
 #include "../FooType4/FooDefTypeSupportImpl.h"
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -173,6 +174,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     {
       ex._tao_print_exception("Exception caught in main.cpp:");
       return 1;
+    }
+  catch (const OpenDDS::DCPS::Transport::MiscProblem& )
+    {
+      ACE_ERROR_RETURN((LM_ERROR,
+                    ACE_TEXT("(%P|%t) Transport::MiscProblem caught.\n")), -1);
     }
 
   ACE_ERROR_RETURN((LM_INFO,

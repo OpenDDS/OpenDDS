@@ -632,10 +632,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   Xyz::Foo ss_foo;
 
   const size_t sz = 4530, pad = 630; // see running totals above
-  if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
-                     "Xyz::Foo")) {
 
-    try {
+  try {
+    if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
+                       "Xyz::Foo")) {
       if (ss_foo.key != my_foo.key) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize key\n")));
         failed = true;
@@ -686,11 +686,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         failed = true;
       }
     }
-    catch (const CORBA::BAD_PARAM& ex)
-    {
-      ex._tao_print_exception("Exception caught in main.cpp:");
-      return 1;
-    }
+  }
+  catch (const CORBA::BAD_PARAM& ex)
+  {
+    ex._tao_print_exception("Exception caught in main.cpp:");
+    return 1;
   }
 
   if (failed)

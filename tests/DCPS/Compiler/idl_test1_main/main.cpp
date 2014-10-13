@@ -360,32 +360,32 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     failed = true;
   }
 
-  TAO_OutputCDR cdr;
-  if (!(cdr << my_foo)) {
-    ACE_ERROR((LM_ERROR, "TAO_OutputCDR << failed\n"));
-    failed = true;
-  }
-
-  ACE_TCHAR ebuffer[512]; ebuffer[0] = ACE_TEXT('\0');
-  ACE_TCHAR obuffer[512]; obuffer[0] = ACE_TEXT('\0');
-
   // test serializing
 
   const size_t buff_size = bounded ? ms : cs;
   ACE_Message_Block mb(buff_size);
   OpenDDS::DCPS::Serializer ss(&mb);
-
-  if (dump_buffer) {
-    ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
-    ACE_DEBUG((LM_DEBUG,
-      ACE_TEXT("BEFORE WRITING, LENGTH: %B, BUFFER:\n%s\n"),
-      mb.length(), ebuffer));
-  }
-
+  TAO_OutputCDR cdr;
   OpenDDS::DCPS::Serializer ss2(&mb);
 
   Xyz::Foo ss_foo;
   try {
+    if (!(cdr << my_foo)) {
+      ACE_ERROR((LM_ERROR, "TAO_OutputCDR << failed\n"));
+      failed = true;
+    }
+
+    ACE_TCHAR ebuffer[512]; ebuffer[0] = ACE_TEXT('\0');
+    ACE_TCHAR obuffer[512]; obuffer[0] = ACE_TEXT('\0');
+
+
+    if (dump_buffer) {
+      ACE::format_hexdump(mb.rd_ptr(), mb.length(), ebuffer, sizeof(ebuffer));
+      ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("BEFORE WRITING, LENGTH: %B, BUFFER:\n%s\n"),
+        mb.length(), ebuffer));
+    }
+
     if (!(ss << my_foo)) {
       ACE_ERROR((LM_ERROR, "Serializing failed\n"));
       failed = true;

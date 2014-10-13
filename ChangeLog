@@ -1,3 +1,20 @@
+Mon Oct 13 16:30:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Don't run RTPS tests on mosquito with no BITs
+
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Catch exceptions pointed out by Coverity
+
+        * tools/modeling/codegen/model/Entities.cpp:
+
+          Check return code pointed out by Coverity
+
 Thu Oct  9 18:00:05 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * MPC/config/dcps.mpb:

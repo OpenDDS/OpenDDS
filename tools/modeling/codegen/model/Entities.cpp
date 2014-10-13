@@ -47,7 +47,11 @@ OpenDDS::Model::Entities::registerTypes( const std::string& participant,
         participant.c_str()
       ));
     }
-    queue.front()->register_type(p, "");
+    DDS::ReturnCode_t result = queue.front()->register_type(p, "");
+    if (result != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) Entities::registerTypes() - "
+                           "register_type returned %d\n", result));
+    }
     queue.pop();
   }
 }
