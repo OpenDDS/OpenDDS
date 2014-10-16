@@ -1,3 +1,10 @@
+Thu Oct 16 21:19:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+
+          Log level changes
+
 Thu Oct 16 19:18:34 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/InfoRepo/DCPS_IR_Publication.cpp:

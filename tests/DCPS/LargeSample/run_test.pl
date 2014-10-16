@@ -39,7 +39,7 @@ $sub_opts .= " -r $reliable -n " . ($num_msgs * 4);
 $test->report_unused_flags();
 # use tcp if no transport is set on command line
 $test->default_transport("tcp");
-$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log");
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log -DCPSDebugLevel 1");
 
 $test->process("subscriber", "subscriber", $sub_opts);
 $test->process("publisher #1", "publisher", $pub_opts);

@@ -20,7 +20,7 @@ $sub_opts = "$sub_conf ";
 
 if ($ARGV[0] eq 'lost') {
     $pub_opts = "$pub_conf -l -n 4 -t 10 -c 8";
-    $sub_opts = "$sub_conf -l -n 4 -c 16";
+    $sub_opts = "$sub_conf -l -n 4 -c 16 -DCPSDebugLevel 6";
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
