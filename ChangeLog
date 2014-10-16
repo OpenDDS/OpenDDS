@@ -1,3 +1,12 @@
+Thu Oct 16 19:18:34 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/InfoRepoMulticastResponder.cpp:
+
+          Change a number of debug statements from using TAO_debug_level
+          to OpenDDS::DCPS::DCPS_debug_level.
+
 Mon Oct 13 16:30:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:

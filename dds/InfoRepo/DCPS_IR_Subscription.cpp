@@ -155,7 +155,7 @@ int DCPS_IR_Subscription::remove_associated_publication(DCPS_IR_Publication* pub
 
     if (participant_->is_alive() && this->participant_->isOwner()) {
       try {
-        if (TAO_debug_level > 0) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DCPS_IR_Subscription::remove_associated_publication:")
                      ACE_TEXT(" calling sub %d with pub %d\n"),

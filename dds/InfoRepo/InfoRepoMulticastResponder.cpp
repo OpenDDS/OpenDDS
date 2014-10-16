@@ -7,6 +7,7 @@
  */
 
 #include "InfoRepoMulticastResponder.h"
+#include "dds/DCPS/debug.h"
 
 #include "tao/debug.h"
 #include "tao/Object.h"
@@ -150,7 +151,7 @@ InfoRepoMulticastResponder::handle_timeout(const ACE_Time_Value &,
 int
 InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 {
-  if (TAO_debug_level > 0)
+  if (OpenDDS::DCPS::DCPS_debug_level > 0)
     ACE_DEBUG((LM_DEBUG, "Entered InfoRepoMulticastResponder::handle_input\n"));
 
   // The length of the service name string that follows.
@@ -202,7 +203,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
                       n),
                      0);
 
-  if (TAO_debug_level > 0) {
+  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_TCHAR addr[64];
     remote_addr.addr_to_string(addr, sizeof(addr));
     ACE_DEBUG((LM_DEBUG,
@@ -283,7 +284,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
 
 #endif /* ACE_HAS_IPV6 */
 
-  if (TAO_debug_level > 0) {
+  if (OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_TCHAR addr[64];
     peer_addr.addr_to_string(addr, sizeof(addr));
     ACE_DEBUG((LM_DEBUG,
@@ -322,7 +323,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   if (result == -1)
     ACE_ERROR_RETURN((LM_ERROR, "InfoRepoMulticastResponder::send failed\n"), 0);
 
-  if (TAO_debug_level > 0)
+  if (OpenDDS::DCPS::DCPS_debug_level > 0)
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) InfoRepoMulticastResponder::handle_input() ior: <%C>\n"
                "sent to %C:%u.\n"
