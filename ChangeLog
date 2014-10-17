@@ -1,3 +1,19 @@
+Fri Oct 17 21:22:55 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fix some bugs with IPv6 addresses.
+
+        * tests/DCPS/BidirMessenger/pubsub_ipv6.ini:
+        * tests/DCPS/Messenger/pub_ipv6.ini:
+        * tests/DCPS/Messenger/sub_ipv6.ini:
+        * tests/DCPS/RecorderReplayer/pub_ipv6.ini:
+        * tests/DCPS/RecorderReplayer/relay_ipv6.ini:
+        * tests/DCPS/ZeroCopyDataReaderListener/pub_ipv6.ini:
+
+          Fix some problems with IPv6 addresses used in these tests.
+
+
 Thu Oct 16 21:19:37 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/LargeSample/run_test.pl:

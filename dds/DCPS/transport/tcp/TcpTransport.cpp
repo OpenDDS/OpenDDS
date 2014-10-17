@@ -423,8 +423,12 @@ TcpTransport::configure_i(TransportInst* config)
     this->tcp_config_->local_address_.set_port_number(port);
 
     if (this->tcp_config_->local_address_str_.length() > 0) {
-      size_t pos = this->tcp_config_->local_address_str_.find(':');
+      size_t pos = this->tcp_config_->local_address_str_.find_last_of(
+                                                ":]", std::string::npos, 2);
       std::string str = this->tcp_config_->local_address_str_.substr(0, pos + 1);
+      if (this->tcp_config_->local_address_str_[pos] == ']') {
+        str += ":";
+      }
       str += out.str();
       this->tcp_config_->local_address_str_ = str;
     }
