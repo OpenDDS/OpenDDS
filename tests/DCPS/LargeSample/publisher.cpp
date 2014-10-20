@@ -22,7 +22,6 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 
 namespace {
@@ -149,6 +148,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       Writer writer(dw, dw2);
       writer.write(reliable, num_msgs);
     }
+
+    // Sleep to give subscriber a chance to nak before exiting
+    ACE_OS::sleep(3);
 
     ACE_DEBUG((LM_DEBUG, "Publisher delete contained entities\n"));
     // Clean-up!

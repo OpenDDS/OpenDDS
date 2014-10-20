@@ -1,3 +1,9 @@
+Mon Oct 20 19:02:17 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+
+          Sleep before exiting to allow naks to be received.
+
 Mon Oct 20 18:05:18 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
