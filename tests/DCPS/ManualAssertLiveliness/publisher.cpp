@@ -55,7 +55,10 @@ parse_args (int argc, ACE_TCHAR *argv[])
     default:
       ACE_ERROR_RETURN ((LM_ERROR,
         "usage:  %s "
-        "-l <assert_liveliness_period>\n",
+        "[-t <assert_liveliness_period>]\n"
+        "[-n <num_messages>]\n"
+        "[-l]\n"
+        "[-c <num_callbacks>]\n",
         argv [0]),
         -1);
     }
@@ -194,6 +197,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
           num_liveliness_lost_callbacks << endl;
       }
 
+      ACE_OS::sleep(1);
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       TheServiceParticipant->shutdown ();
