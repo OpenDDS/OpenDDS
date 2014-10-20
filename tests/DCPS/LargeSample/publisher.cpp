@@ -22,6 +22,7 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include "MessengerTypeSupportImpl.h"
 #include "Writer.h"
 
 namespace {

@@ -1,3 +1,9 @@
+Mon Oct 20 21:58:03 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/publisher.cpp:
+
+          Restored a #include that was removed in r6563.
+
 Mon Oct 20 19:02:17 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/LargeSample/publisher.cpp:
