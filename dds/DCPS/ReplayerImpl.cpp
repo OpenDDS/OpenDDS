@@ -193,7 +193,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const ::DDS::PublisherQos & publisher_q
                                          const DDS::DataWriterQos &  qos)
 {
 
-  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
+  OPENDDS_NO_OBJECT_MODEL_PROFILE_COMPATIBILITY_CHECK(publisher_qos, DDS::RETCODE_UNSUPPORTED);
 
   if (Qos_Helper::valid(publisher_qos) && Qos_Helper::consistent(publisher_qos)) {
     if (publisher_qos_ == publisher_qos)

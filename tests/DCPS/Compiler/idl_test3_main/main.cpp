@@ -632,58 +632,65 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   Xyz::Foo ss_foo;
 
   const size_t sz = 4530, pad = 630; // see running totals above
-  if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
-                     "Xyz::Foo")) {
 
-    if (ss_foo.key != my_foo.key) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize key\n")));
-      failed = true;
+  try {
+    if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
+                       "Xyz::Foo")) {
+      if (ss_foo.key != my_foo.key) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize key\n")));
+        failed = true;
 
-    } else if (ss_foo.x != my_foo.x) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize x\n")));
-      failed = true;
+      } else if (ss_foo.x != my_foo.x) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize x\n")));
+        failed = true;
 
-    } else if (ss_foo.y != my_foo.y) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize y\n")));
-      failed = true;
+      } else if (ss_foo.y != my_foo.y) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize y\n")));
+        failed = true;
 
-    } else if (ss_foo.xcolor != my_foo.xcolor) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize xcolor\n")));
-      failed = true;
+      } else if (ss_foo.xcolor != my_foo.xcolor) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize xcolor\n")));
+        failed = true;
 
-    } else if (ss_foo.octer != my_foo.octer) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize octer\n")));
-      failed = true;
+      } else if (ss_foo.octer != my_foo.octer) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize octer\n")));
+        failed = true;
 
-    } else if (0 != strcmp(ss_foo.theString.in(), my_foo.theString.in())) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
-                 my_foo.theString.in(), ss_foo.theString.in()));
-      failed = true;
+      } else if (0 != strcmp(ss_foo.theString.in(), my_foo.theString.in())) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
+                   my_foo.theString.in(), ss_foo.theString.in()));
+        failed = true;
 
-    } else if (ss_foo.ooo[0] != my_foo.ooo[0]
-               || ss_foo.ooo[1] != my_foo.ooo[1]
-               || ss_foo.ooo[2] != my_foo.ooo[2]) {
-      ACE_ERROR((LM_ERROR, "Failed to serialize ooo\n"));
-      failed = true;
+      } else if (ss_foo.ooo[0] != my_foo.ooo[0]
+                 || ss_foo.ooo[1] != my_foo.ooo[1]
+                 || ss_foo.ooo[2] != my_foo.ooo[2]) {
+        ACE_ERROR((LM_ERROR, "Failed to serialize ooo\n"));
+        failed = true;
 
-    } else if (ss_foo.theUnion._d() != my_foo.theUnion._d()
-               || ss_foo.theUnion.bv().length() != my_foo.theUnion.bv().length()
-               || ss_foo.theUnion.bv()[0] != my_foo.theUnion.bv()[0]
-               || ss_foo.theUnion.bv()[1] != my_foo.theUnion.bv()[1]) {
-      ACE_ERROR((LM_ERROR, "Failed to serialize foo.theUnion\n"));
-      failed = true;
+      } else if (ss_foo.theUnion._d() != my_foo.theUnion._d()
+                 || ss_foo.theUnion.bv().length() != my_foo.theUnion.bv().length()
+                 || ss_foo.theUnion.bv()[0] != my_foo.theUnion.bv()[0]
+                 || ss_foo.theUnion.bv()[1] != my_foo.theUnion.bv()[1]) {
+        ACE_ERROR((LM_ERROR, "Failed to serialize foo.theUnion\n"));
+        failed = true;
 
-    } else if (ss_foo.theSeqOfUnion.length() != my_foo.theSeqOfUnion.length()
-               || ss_foo.theSeqOfUnion[0]._d() != my_foo.theSeqOfUnion[0]._d()
-               || 0 != std::strcmp(ss_foo.theSeqOfUnion[0].rv(),
-                                   my_foo.theSeqOfUnion[0].rv())
-               || ss_foo.theSeqOfUnion[1]._d() != my_foo.theSeqOfUnion[1]._d()
-               || ss_foo.theSeqOfUnion[1].gv().f5 !=
-                  my_foo.theSeqOfUnion[1].gv().f5) {
-      ACE_ERROR((LM_ERROR, "Failed to serialize foo.theSeqOfUnion\n"));
-      failed = true;
+      } else if (ss_foo.theSeqOfUnion.length() != my_foo.theSeqOfUnion.length()
+                 || ss_foo.theSeqOfUnion[0]._d() != my_foo.theSeqOfUnion[0]._d()
+                 || 0 != std::strcmp(ss_foo.theSeqOfUnion[0].rv(),
+                                     my_foo.theSeqOfUnion[0].rv())
+                 || ss_foo.theSeqOfUnion[1]._d() != my_foo.theSeqOfUnion[1]._d()
+                 || ss_foo.theSeqOfUnion[1].gv().f5 !=
+                    my_foo.theSeqOfUnion[1].gv().f5) {
+        ACE_ERROR((LM_ERROR, "Failed to serialize foo.theSeqOfUnion\n"));
+        failed = true;
+      }
     }
+  }
+  catch (const CORBA::BAD_PARAM& ex)
+  {
+    ex._tao_print_exception("Exception caught in main.cpp:");
+    return 1;
   }
 
   if (failed)

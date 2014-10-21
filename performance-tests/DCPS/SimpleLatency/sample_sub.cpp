@@ -194,8 +194,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   } catch (const OpenDDS::DCPS::Transport::MiscProblem &) {
     ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) sample_pub() - ")
+      ACE_TEXT("(%P|%t) sample_sub() - ")
       ACE_TEXT("Transport::MiscProblem exception caught during processing.\n")
+    ));
+    return 1;
+  } catch (const OpenDDS::DCPS::Transport::NotFound &) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) sample_sub() - ")
+      ACE_TEXT("Transport::NotFound exception caught during processing.\n")
     ));
     return 1;
   }

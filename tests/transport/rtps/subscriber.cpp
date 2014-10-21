@@ -285,6 +285,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_DEBUG((LM_ERROR,
                "ERROR: caught OpenDDS::DCPS::Transport::NotConfigured exception.\n"));
     return 1;
+  } catch (const CORBA::BAD_PARAM& ex) {
+    ex._tao_print_exception("Exception caught in subscriber.cpp:");
+    return 1;
   }
-
 }

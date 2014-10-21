@@ -150,6 +150,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       writer.write(reliable, num_msgs);
     }
 
+    // Sleep to give subscriber a chance to nak before exiting
+    ACE_OS::sleep(3);
+
     ACE_DEBUG((LM_DEBUG, "Publisher delete contained entities\n"));
     // Clean-up!
     participant->delete_contained_entities();
