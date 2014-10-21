@@ -30,6 +30,7 @@
 #include "dds/DCPS/transport/framework/DataLinkSet.h"
 
 #include "tao/debug.h"
+#include "async_debug.h"
 
 #include "ace/Auto_Ptr.h"
 #include "ace/Vector_T.h"

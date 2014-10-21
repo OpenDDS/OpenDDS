@@ -25,6 +25,7 @@
 #include "dds/DCPS/transport/framework/TransportDebug.h"
 
 #include "tao/debug.h"
+#include "dds/DCPS/async_debug.h"
 
 #include <sstream>
 

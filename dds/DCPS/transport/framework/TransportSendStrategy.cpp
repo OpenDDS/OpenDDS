@@ -25,6 +25,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
+#include "dds/DCPS/async_debug.h"
+
 #include "ace/Reverse_Lock_T.h"
 
 #include <vector>

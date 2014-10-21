@@ -18,6 +18,7 @@
 
 #include "tao/ORB_Core.h"
 #include "ace/Reactor.h"
+#include "dds/DCPS/async_debug.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/DomainParticipantImpl.h"
