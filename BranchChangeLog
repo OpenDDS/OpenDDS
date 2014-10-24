@@ -550,12 +550,256 @@ Wed Apr 23 19:05:55 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
         * Merged from trunk  r6049 through r6127.
         * Created BranchChangeLog
 
-*************************************************************************************
-NOTE BRANCH CHANGELOG CREATED APR 23 ABOVE, CHANGES PRIOR TO APR 23 NOT RECORDED
+2014-04-22 17:26  oschwaldp
+
+	* dds/DCPS/transport/framework/DataLinkWatchdog_T.h: Changed
+	  DataLinkWatchdog_T.h to remove prior assumption about cancelling
+	  timers within schedule_i if timer_id was not -1
+
+2014-04-22 17:25  oschwaldp
+
+	* dds/DCPS/transport/multicast/MulticastTransport.cpp: Changed
+	  MulticastTransport to hold links lock until after session was
+	  started during connect_datalink
+
+2014-04-22 14:12  oschwaldp
+
+	* dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp: Removed unused
+	  args in RtpsUdpTransport.cpp to alleviate compile warnings
+
+2014-04-21 22:18  oschwaldp
+
+	* dds/DCPS/transport/framework/DataLinkWatchdog_T.h,
+	  dds/DCPS/transport/multicast/MulticastSession.cpp,
+	  dds/DCPS/transport/multicast/MulticastSession.h,
+	  dds/DCPS/transport/multicast/MulticastTransport.cpp,
+	  dds/DCPS/transport/multicast/ReliableSession.cpp: Multicast
+	  Transport changes to work through deadlock between reactor on
+	  passive_connection side and start_lock_ in session's start method
+	  on the add_association path
+
+2014-04-21 22:17  oschwaldp
+
+	* dds/DCPS/DataReaderImpl.cpp, dds/DCPS/DataReaderImpl.h: changed
+	  how the DataReaderImpl locks the publication_handle_lock during
+	  add_association
+
+2014-04-21 22:15  oschwaldp
+
+	* dds/DCPS/transport/tcp/TcpConnection.cpp: Changed type from bool
+	  to int to match return type in TcpConnection
+
+2014-04-18 19:33  oschwaldp
+
+	* dds/DCPS/transport/multicast/MulticastTransport.cpp,
+	  dds/DCPS/transport/multicast/MulticastTransport.h,
+	  dds/DCPS/transport/multicast/ReliableSession.cpp: Added
+	  links_lock_ to stop contention during connect_datalink causing
+	  multiple datalink instances to be created
+
+2014-04-18 14:09  oschwaldp
+
+	* dds/DCPS/DataDurabilityCache.cpp, dds/DCPS/DataReaderImpl.cpp,
+	  dds/DCPS/DataWriterImpl.cpp,
+	  dds/DCPS/transport/framework/TransportClient.cpp,
+	  dds/DCPS/transport/multicast/MulticastDataLink.cpp,
+	  dds/DCPS/transport/multicast/MulticastSession.cpp,
+	  dds/DCPS/transport/multicast/MulticastTransport.cpp,
+	  dds/DCPS/transport/udp/UdpTransport.cpp: Multicast Transport work
+	  -removed possible deadlocking in MulticastTransport.cpp, added
+	  logging to trace assoc failures throughout multicast, removed an
+	  unused TransportClient* arg in UdpTransport
+
+2014-04-16 16:52  oschwaldp
+
+	* dds/DCPS/transport/multicast/MulticastDataLink.cpp,
+	  dds/DCPS/transport/multicast/MulticastTransport.cpp:
+	  MulticastDataLink released lock prior to calling
+	  passive_connection to alleviate deadlock with accept_datalink
+	  start_session needing to acquire lock for find_or_create_session
+
+2014-04-16 16:38  oschwaldp
+
+	* dds/InfoRepo/DCPS_IR_Domain.cpp: removed 'FAILED' in debug
+	  statements
+
+2014-04-16 16:37  oschwaldp
+
+	* dds/DCPS/transport/framework/TransportClient.cpp: removed
+	  'FAILED' in debug statements
+
+2014-04-16 16:36  oschwaldp
+
+	* dds/DCPS/transport/tcp/TcpConnection.cpp,
+	  dds/DCPS/transport/tcp/TcpDataLink.cpp: removed 'FAILED' in debug
+	  statements
+
+2014-04-10 16:20  oschwaldp
+
+	* dds/DCPS/DataReaderImpl.cpp, dds/DCPS/DataWriterImpl.cpp,
+	  dds/DCPS/transport/framework/TransportClient.cpp,
+	  dds/DCPS/transport/udp/UdpTransport.cpp,
+	  dds/DCPS/transport/udp/UdpTransport.h,
+	  dds/InfoRepo/DCPS_IR_Domain.cpp,
+	  tests/DCPS/LargeSample/run_test.pl: UdpTransport updated to
+	  remove deadlock scenario between connections_lock_ and
+	  DataReaderImpl::publication_handle_lock_ as well as
+	  TransportClient::use_datalink_i to use a local copy of the RepoId
+	  for remote instead of the reference passed in to alleviate memory
+	  access violation caused when stop_accepting_or_connecting deletes
+	  callback but use_datalink_i still requires the RepoId to call
+	  transport_assoc_done
+
+2014-04-01 20:52  oschwaldp
+
+	* dds/DCPS/DataReaderImpl.cpp, dds/DCPS/DataWriterImpl.cpp,
+	  dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp,
+	  dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp,
+	  dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp,
+	  dds/DCPS/PublisherImpl.cpp, dds/DCPS/SubscriberImpl.cpp,
+	  dds/DCPS/transport/framework/DataLink.cpp,
+	  dds/DCPS/transport/framework/TransportClient.cpp,
+	  dds/DCPS/transport/framework/TransportClient.h,
+	  dds/DCPS/transport/framework/TransportImpl.h,
+	  dds/DCPS/transport/framework/TransportRegistry.cpp,
+	  dds/DCPS/transport/framework/TransportSendStrategy.cpp,
+	  dds/DCPS/transport/multicast/MulticastDataLink.cpp,
+	  dds/DCPS/transport/multicast/ReliableSession.cpp,
+	  dds/DCPS/transport/tcp/TcpConnection.cpp,
+	  dds/DCPS/transport/tcp/TcpDataLink.cpp,
+	  dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.cpp,
+	  dds/DCPS/transport/udp/UdpReceiveStrategy.cpp,
+	  dds/InfoRepo/DCPSInfoRepo.cpp, dds/InfoRepo/DCPSInfoRepoServ.cpp,
+	  dds/InfoRepo/DCPSInfo_i.cpp, dds/InfoRepo/DCPS_IR_Domain.cpp,
+	  tests/DCPS/LargeSample/run_test.pl,
+	  tests/transport/rtps/run_test.pl,
+	  tests/transport/rtps/subscriber.cpp: working to fix deadlock
+	  during association between reactor lock and transportclient
+	  lock_, ACE_DEBUG comments abound
+
+2014-03-07 19:36  oschwaldp
+
+	* dds/DCPS/transport/multicast/MulticastTransport.cpp,
+	  dds/DCPS/transport/multicast/MulticastTransport.h: Implemented
+	  updates to MulticastTransport for async_assoc
+
+2014-02-17 20:42  oschwaldp
+
+	* Merged from trunk r6013 through r6048
+          to get OpenDDS-3.5 release update
+
+2013-09-22 16:13  mitza
+
+	* dds/DCPS/transport/framework/DataLink.h,
+	  dds/DCPS/transport/framework/PriorityKey.inl,
+	  dds/DCPS/transport/framework/TransportClient.cpp,
+	  dds/DCPS/transport/framework/TransportClient.h,
+	  dds/DCPS/transport/multicast/MulticastTransport.h,
+	  dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp,
+	  dds/DCPS/transport/shmem/ShmemTransport.cpp,
+	  dds/DCPS/transport/shmem/ShmemTransport.h,
+	  dds/DCPS/transport/tcp/TcpTransport.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.h,
+	  dds/DCPS/transport/udp/UdpTransport.cpp,
+	  dds/DCPS/transport/udp/UdpTransport.h: more work in progress, udp
+	  transport compiles, fixed locking in TransportClient
+
+2013-09-21 19:14  mitza
+
+	* dds/DCPS/AssociationData.h, dds/DCPS/DataReaderImpl.h,
+	  dds/DCPS/transport/framework/DataLink.cpp,
+	  dds/DCPS/transport/framework/DataLink.h,
+	  dds/DCPS/transport/framework/DataLink.inl,
+	  dds/DCPS/transport/framework/DirectPriorityMapper.cpp,
+	  dds/DCPS/transport/framework/DirectPriorityMapper.h,
+	  dds/DCPS/transport/framework/DirectPriorityMapper.inl,
+	  dds/DCPS/transport/framework/PriorityKey.h,
+	  dds/DCPS/transport/framework/PriorityKey.inl,
+	  dds/DCPS/transport/framework/PriorityMapper.h,
+	  dds/DCPS/transport/framework/PriorityMapper.inl,
+	  dds/DCPS/transport/framework/TransportClient.h,
+	  dds/DCPS/transport/framework/TransportDefs.h,
+	  dds/DCPS/transport/framework/TransportImpl.h,
+	  dds/DCPS/transport/framework/TransportSendStrategy.cpp,
+	  dds/DCPS/transport/framework/TransportSendStrategy.h,
+	  dds/DCPS/transport/multicast/MulticastTransport.cpp,
+	  dds/DCPS/transport/multicast/MulticastTransport.h,
+	  dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h,
+	  dds/DCPS/transport/shmem/ShmemTransport.h,
+	  dds/DCPS/transport/tcp/TcpConnection.cpp,
+	  dds/DCPS/transport/tcp/TcpConnection.h,
+	  dds/DCPS/transport/tcp/TcpConnection.inl,
+	  dds/DCPS/transport/tcp/TcpDataLink.cpp,
+	  dds/DCPS/transport/tcp/TcpDataLink.h,
+	  dds/DCPS/transport/tcp/TcpSendStrategy.cpp,
+	  dds/DCPS/transport/tcp/TcpSendStrategy.h,
+	  dds/DCPS/transport/tcp/TcpTransport.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.h,
+	  dds/DCPS/transport/udp/UdpDataLink.cpp,
+	  dds/DCPS/transport/udp/UdpDataLink.h,
+	  dds/DCPS/transport/udp/UdpTransport.cpp,
+	  dds/DCPS/transport/udp/UdpTransport.h: use a Priority typedef
+	  instead of CORBA::Long inside the transport directory; made
+	  active/passive part of the PriorityKey comparison in order to fix
+	  a bug where both sides were passive
+
+2013-09-18 19:34  mitza
+
+	* dds/DCPS/transport/framework/TransportClient.cpp,
+	  dds/DCPS/transport/framework/TransportImpl.h,
+	  dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp,
+	  dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h,
+	  dds/DCPS/transport/tcp/TcpTransport.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.h: improved error indication
+	  from specific transport to framework
+
+2013-09-18 15:53  mitza
+
+	* dds/DCPS/transport/framework/DataLink.cpp,
+	  dds/DCPS/transport/tcp/TcpConnection.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.cpp: fixed bugs in locking
+	  and reactor interactions
+
+2013-09-17 20:24  mitza
+
+	* dds/DCPS/transport/tcp/TcpConnection.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.cpp: fixed logging and use of
+	  local addr during connect
+
+2013-09-17 18:49  mitza
+
+	* dds/DCPS/transport/framework/DataLink.h,
+	  dds/DCPS/transport/tcp/TcpConnection.cpp,
+	  dds/DCPS/transport/tcp/TcpConnection.h,
+	  dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.h: more work in progress,
+	  implementing async assoc within tcp transport (ACE nonblocking
+	  connect, etc)
+
+2013-09-12 23:57  mitza
+
+	* dds/DCPS/DataReaderImpl.cpp, dds/DCPS/DataReaderImpl.h,
+	  dds/DCPS/DataWriterImpl.cpp, dds/DCPS/DataWriterImpl.h,
+	  dds/DCPS/transport/framework/DataLink.cpp,
+	  dds/DCPS/transport/framework/DataLink.h,
+	  dds/DCPS/transport/framework/DataLink.inl,
+	  dds/DCPS/transport/framework/TransportClient.cpp,
+	  dds/DCPS/transport/framework/TransportClient.h,
+	  dds/DCPS/transport/framework/TransportImpl.cpp,
+	  dds/DCPS/transport/framework/TransportImpl.h,
+	  dds/DCPS/transport/framework/TransportImpl.inl,
+	  dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp,
+	  dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp,
+	  dds/DCPS/transport/rtps_udp/RtpsUdpTransport.h,
+	  dds/DCPS/transport/tcp/TcpTransport.cpp,
+	  dds/DCPS/transport/tcp/TcpTransport.h: work in progress on async
+	  associations
+
 Thu Sep 12 23:56:45 UTC 2013  Adam Mitz  <mitza@ociweb.com>
 
         * creating branch async_assoc
-*************************************************************************************
 
 Local Variables:
 mode: change-log
