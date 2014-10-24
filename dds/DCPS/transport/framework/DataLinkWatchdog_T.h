@@ -59,11 +59,13 @@ public:
     this->timer_id_ = -1;
     this->reactor_ = 0;
     this->cancelled_ = true;
+    int n_cancelled;
 
     {
       ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
-      reactor->cancel_timer(timer_id);
+      n_cancelled = reactor->cancel_timer(this);
     }
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::cancel --> after cancel_timer timer_id: %d n: %d %@\n", timer_id, n_cancelled, static_cast<ACE_Event_Handler*>(this)));
   }
 
   int handle_timeout(const ACE_Time_Value& now, const void* arg) {
@@ -141,7 +143,8 @@ private:
     }
 
     //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> after schedule timer this->timer_id_: %d and timer_id: %d \n", this->timer_id_, timer_id));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> after schedule timer this->timer_id_: %d and timer_id: %d %@\n", this->timer_id_, timer_id,
+      static_cast<ACE_Event_Handler*>(this)));
 
    //after re-acquiring lock_ need to check cancelled_
     //### Thought maybe would have to check timer_id_ for cancellation/prior completion
