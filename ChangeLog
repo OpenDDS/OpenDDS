@@ -1,3 +1,9 @@
+Tue Oct 28 14:44:41 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Removed some checking when an unreliable transport is used.
+
 Mon Oct 27 22:02:48 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/LargeSample/multicast.ini:

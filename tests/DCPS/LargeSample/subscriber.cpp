@@ -165,7 +165,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     const long received = listener_svt->num_samples();
-    const bool data_consistent = listener_svt->data_consistent();
+    const bool data_consistent = reliable ? listener_svt->data_consistent() : true;
     std::string error = "";
     bool show_data_loss = true;
 
