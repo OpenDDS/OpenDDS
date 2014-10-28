@@ -1590,6 +1590,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
   case DATAWRITER_LIVELINESS: {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
+                 ACE_TEXT("got datawriter liveliness\n")));
+    }
     this->writer_activity(sample.header_);
 
     // tell all instances they got a liveliness message
