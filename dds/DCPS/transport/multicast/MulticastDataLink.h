@@ -22,12 +22,14 @@
 #include "MulticastTransport.h"
 #include "MulticastTypes.h"
 
-#include "ace/SOCK_Dgram_Mcast.h"
-#include "ace/Synch_Traits.h"
+#include "dds/DCPS/DisjointSequence.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
 #include "dds/DCPS/transport/framework/TransportSendBuffer.h"
+
+#include "ace/SOCK_Dgram_Mcast.h"
+#include "ace/Synch_Traits.h"
 
 #include <map>
 
@@ -102,10 +104,15 @@ private:
   typedef std::map<MulticastPeer, MulticastSession_rch> MulticastSessionMap;
   MulticastSessionMap sessions_;
 
+  std::map<RepoId, DisjointSequence, OpenDDS::DCPS::GUID_tKeyLessThan> data_samples_seen_;
+
   virtual void stop_i();
 
   void syn_received_no_session(MulticastPeer source, ACE_Message_Block* data,
                                bool swap_bytes);
+
+  void release_remote_i(const RepoId& remote);
+  bool duplicate_data_sample(const DataSampleHeader& header);
 };
 
 } // namespace DCPS

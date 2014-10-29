@@ -1,3 +1,30 @@
+Wed Oct 29 14:56:50 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Disable use of END_HISTORIC_SAMPLES control messages
+          with multicast DataLinks.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Discard duplicate messages as defined by the DataSampleHeader
+          GUID and sequence number.  These can occur with durability resending
+          a data sample at the same time a nak-based resend occurs.
+          Removing duplicates here is sufficient to provide the functionality
+          that END_HISTORIC_SAMPLES at the DataReaderImpl level used to do.
+
+        * tests/DCPS/LargeSample/multicast.ini:
+
+          Improve multicast nak tuning for this test.
+
+        * DDS_TAO_all.mwc:
+        * DDS_TAOv2_all.mwc:
+
+          Added TAO CSD Threadpool which was added as a runtime dependency
+          for tests back on Fri Jul 11 20:43:52 UTC 2014 (before version 3.5.1).
+
 Tue Oct 28 21:56:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

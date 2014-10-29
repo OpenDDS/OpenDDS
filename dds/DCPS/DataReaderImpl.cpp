@@ -336,7 +336,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
           writer_id,
           info));
 
-      // Scheule timer if necessary
+      // Schedule timer if necessary
       //   - only need to check reader qos - we know the writer must be >= reader
       if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
         ACE_Time_Value ten_seconds(10);
@@ -3324,12 +3324,11 @@ void
 DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
 {
   TransportClient::add_link(link, peer);
-  // Chek impl?
   TransportImpl_rch impl = link->impl();
   std::string type = impl->transport_type();
 
-  // If this is an RTPS link
-  if (type == "rtps_udp") {
+  // If this is an RTPS link or a multicast link
+  if (type == "rtps_udp" || type == "multicast") {
     resume_sample_processing(peer);
   }
 }
