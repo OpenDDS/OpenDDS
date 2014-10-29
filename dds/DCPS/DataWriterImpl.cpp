@@ -1268,9 +1268,9 @@ DataWriterImpl::assert_liveliness()
 
   ACE_Time_Value now = ACE_OS::gettimeofday();
 
+  // Check if not recent enough then send liveliness message.
   if (last_liveliness_activity_time_ == ACE_Time_Value::zero
       || now - last_liveliness_activity_time_ >= liveliness_check_interval_) {
-    //Not recent enough then send liveliness message.
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
@@ -1279,8 +1279,15 @@ DataWriterImpl::assert_liveliness()
                  std::string(converter).c_str()));
     }
 
-    if (this->send_liveliness(now) == false)
+    if (this->send_liveliness(now) == false) {
       return DDS::RETCODE_ERROR;
+    }
+  } else if (DCPS_debug_level > 9) {
+    GuidConverter converter(publication_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
+               ACE_TEXT("%C too soon to send LIVELINESS message.\n"),
+               std::string(converter).c_str()));
   }
 
   return DDS::RETCODE_OK;

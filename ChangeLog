@@ -1,3 +1,13 @@
+Wed Oct 29 17:55:02 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Log when liveliness is skipped due to timing.
+
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+
+          Run at higher debug log level.
+
 Wed Oct 29 14:56:50 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

@@ -19,7 +19,7 @@ $pub_opts = "$pub_conf ";
 $sub_opts = "$sub_conf ";
 
 if ($ARGV[0] eq 'lost') {
-    $pub_opts = "$pub_conf -l -n 4 -t 10 -c 8";
+    $pub_opts = "$pub_conf -l -n 4 -t 10 -c 8 -DCPSDebugLevel 10";
     $sub_opts = "$sub_conf -l -n 4 -c 16 -DCPSDebugLevel 6";
 }
 elsif ($ARGV[0] ne '') {
