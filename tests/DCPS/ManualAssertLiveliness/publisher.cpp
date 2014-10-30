@@ -81,19 +81,34 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         cerr << "create_participant failed." << endl;
         return 1;
       }
+      DDS::DomainParticipant_var participant2 =
+        dpf->create_participant(411,
+                                PARTICIPANT_QOS_DEFAULT,
+                                DDS::DomainParticipantListener::_nil(),
+                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil (participant2.in ())) {
+        cerr << "create_participant failed." << endl;
+        return 1;
+      }
 
       if (parse_args (argc, argv) == -1) {
         return -1;
       }
 
       MessageTypeSupport_var mts = new MessageTypeSupportImpl();
+      MessageTypeSupport_var mts2 = new MessageTypeSupportImpl();
 
       if (DDS::RETCODE_OK != mts->register_type(participant.in (), "")) {
         cerr << "register_type failed." << endl;
         exit(1);
       }
+      if (DDS::RETCODE_OK != mts2->register_type(participant2.in (), "")) {
+        cerr << "register_type failed." << endl;
+        exit(1);
+      }
 
       CORBA::String_var type_name = mts->get_type_name ();
+      CORBA::String_var type_name2 = mts2->get_type_name ();
 
       DDS::Topic_var topic =
         participant->create_topic ("Movie Discussion List",
@@ -102,6 +117,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
                                    DDS::TopicListener::_nil(),
                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (topic.in ())) {
+        cerr << "create_topic failed." << endl;
+        exit(1);
+      }
+      DDS::Topic_var topic2 =
+        participant2->create_topic ("Movie Discussion List",
+                                   type_name2.in (),
+                                   TOPIC_QOS_DEFAULT,
+                                   DDS::TopicListener::_nil(),
+                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil (topic2.in ())) {
         cerr << "create_topic failed." << endl;
         exit(1);
       }
@@ -114,6 +139,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         cerr << "create_publisher failed." << endl;
         exit(1);
       }
+      DDS::Publisher_var pub2 =
+        participant2->create_publisher(PUBLISHER_QOS_DEFAULT,
+        DDS::PublisherListener::_nil(),
+        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      if (CORBA::is_nil (pub2.in ())) {
+        cerr << "create_publisher failed." << endl;
+        exit(1);
+      }
 
       DataWriterListenerImpl * dwl_servant = new DataWriterListenerImpl;
       ::DDS::DataWriterListener_var dwl (dwl_servant);
@@ -121,10 +154,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       // Create the datawriters
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos (dw_qos);
+      ::DDS::DataWriterQos dw2_qos;
+      pub2->get_default_datawriter_qos (dw2_qos);
 
       dw_qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
       dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
       dw_qos.liveliness.lease_duration.nanosec = 0;
+      dw2_qos.liveliness.kind = ::DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+      dw2_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;
+      dw2_qos.liveliness.lease_duration.nanosec = 0;
 
       // Create the datawriter
       DDS::DataWriter_var dw1 =
@@ -138,8 +176,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       }
       // Create the datawriter
       DDS::DataWriter_var dw2 =
-        pub->create_datawriter(topic.in (),
-                               dw_qos,
+        pub2->create_datawriter(topic2.in (),
+                               dw2_qos,
                                dwl.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw2.in ())) {
@@ -170,7 +208,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       }
 
       Manual_By_Participant_Writer_1* writer1 = new Manual_By_Participant_Writer_1(dw1.in());
-      Manual_By_Participant_Writer_2* writer2 = new Manual_By_Participant_Writer_2(participant.in(), dw2.in());
+      Manual_By_Participant_Writer_2* writer2 = new Manual_By_Participant_Writer_2(dw2.in());
       Manual_By_Topic_Writer_1* writer3 = new Manual_By_Topic_Writer_1(dw3.in());
       Manual_By_Topic_Writer_2* writer4 = new Manual_By_Topic_Writer_2(dw4.in());
 
@@ -198,8 +236,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       }
 
       ACE_OS::sleep(1);
+      ACE_DEBUG((LM_INFO, "publisher deleteing entities\n"));
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
+      participant2->delete_contained_entities();
+      dpf->delete_participant(participant2.in ());
       TheServiceParticipant->shutdown ();
   }
   catch (CORBA::Exception& e)

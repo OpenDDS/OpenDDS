@@ -119,10 +119,11 @@ Manual_By_Participant_Writer_1::svc ()
 }
 
 
-Manual_By_Participant_Writer_2::Manual_By_Participant_Writer_2(::DDS::DomainParticipant_ptr part,
-               ::DDS::DataWriter_ptr writer)
+Manual_By_Participant_Writer_2::Manual_By_Participant_Writer_2(
+    ::DDS::DataWriter_ptr writer)
     : Writer_Base(writer),
-      participant_ (::DDS::DomainParticipant::_duplicate (part))
+      participant_ (::DDS::DomainParticipant::_duplicate (
+        writer->get_publisher()->get_participant()))
 {
 }
 
@@ -331,7 +332,3 @@ Manual_By_Topic_Writer_2::svc ()
 
   return 0;
 }
-
-
-
-

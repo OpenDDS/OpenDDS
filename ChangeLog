@@ -1,3 +1,16 @@
+Thu Oct 30 17:25:46 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+
+          Use a second participant for MBP Writer 2, in case order
+          of liveliness change calls are reversed.
+          Sleep in subscriber before deleting entities, so that
+          final liveliness messages can be received and handled.
+
 Wed Oct 29 17:55:02 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
