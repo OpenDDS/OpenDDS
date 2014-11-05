@@ -202,6 +202,10 @@ private:
   typedef std::map<RepoId, RtpsWriter, GUID_tKeyLessThan> RtpsWriterMap;
   RtpsWriterMap writers_;
 
+  void end_historic_samples(RtpsWriterMap::iterator writer,
+                            const DataSampleHeader& header,
+                            ACE_Message_Block* body);
+
 
   // RTPS reliability support for local readers:
 

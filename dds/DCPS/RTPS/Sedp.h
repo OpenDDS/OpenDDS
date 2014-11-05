@@ -213,6 +213,8 @@ private:
                                    DCPS::SequenceNumber& sequence);
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
 
+    void end_historic_samples(const DCPS::RepoId& reader);
+
   private:
     DCPS::TransportSendElementAllocator alloc_;
     Header header_;
@@ -220,7 +222,9 @@ private:
 
     void write_control_msg(ACE_Message_Block& payload,
                            size_t size,
-                           DCPS::MessageId id);
+                           DCPS::MessageId id,
+                           DCPS::SequenceNumber seq = DCPS::SequenceNumber());
+
     void set_header_fields(DCPS::DataSampleHeader& dsh,
                            size_t size,
                            const DCPS::RepoId& reader,

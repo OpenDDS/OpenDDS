@@ -2120,13 +2120,25 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
 }
 
 void
-Sedp::Writer::write_control_msg(
-    ACE_Message_Block& payload,
-    size_t size,
-    DCPS::MessageId id)
+Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
+{
+  const void* pReader = static_cast<const void*>(&reader);
+  ACE_Message_Block mb(DCPS::DataSampleHeader::max_marshaled_size(),
+                       ACE_Message_Block::MB_DATA,
+                       new ACE_Message_Block(static_cast<const char*>(pReader),
+                                             sizeof(reader)));
+  mb.cont()->wr_ptr(sizeof(reader));
+  // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
+  write_control_msg(mb, sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
+                    DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN());
+}
+
+void
+Sedp::Writer::write_control_msg(ACE_Message_Block& payload, size_t size,
+                                DCPS::MessageId id,
+                                DCPS::SequenceNumber seq)
 {
   DCPS::DataSampleHeader header;
-  DCPS::SequenceNumber seq;
   set_header_fields(header, size, GUID_UNKNOWN, seq, id);
   // no need to serialize header since rtps_udp transport ignores it
   send_control(header, &payload);
@@ -2155,7 +2167,6 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
   }
 
   dsh.sequence_ = sequence;
-
 
   const ACE_Time_Value now = ACE_OS::gettimeofday();
   dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
@@ -2337,6 +2348,7 @@ Sedp::write_durable_publication_data(const DCPS::RepoId& reader)
   for (pub = local_publications_.begin(); pub != end; ++pub) {
     write_publication_data(pub->first, pub->second, reader);
   }
+  publications_writer_.end_historic_samples(reader);
 }
 
 void
@@ -2346,6 +2358,7 @@ Sedp::write_durable_subscription_data(const DCPS::RepoId& reader)
   for (sub = local_subscriptions_.begin(); sub != end; ++sub) {
     write_subscription_data(sub->first, sub->second, reader);
   }
+  subscriptions_writer_.end_historic_samples(reader);
 }
 
 DDS::ReturnCode_t
