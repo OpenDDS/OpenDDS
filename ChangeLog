@@ -1,3 +1,20 @@
+Thu Nov  6 16:30:10 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Send the relevant reader RepoId as the message payload
+          of the END_HISTORIC_SAMPLES control message.
+
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Support sending a DCPS control message to a specific
+          DataLink instead of the entire DataLinkSet.
+
 Thu Oct 30 17:25:46 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:

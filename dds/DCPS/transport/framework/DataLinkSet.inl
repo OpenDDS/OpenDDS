@@ -77,7 +77,8 @@ ACE_INLINE OpenDDS::DCPS::SendControlStatus
 OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
                                          TransportSendListener*  listener,
                                          const DataSampleHeader& header,
-                                         ACE_Message_Block*      msg)
+                                         ACE_Message_Block*      msg,
+                                         TransportSendControlElementAllocator* allocator)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_control",6);
   //Optimized - use cached allocator.
@@ -100,15 +101,17 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
     return SEND_CONTROL_OK;
   }
 
+  TransportSendControlElementAllocator& use_alloc =
+    allocator ? *allocator : send_control_element_allocator_;
+
   ACE_NEW_MALLOC_RETURN(send_element,
-    static_cast<TransportSendControlElement*>(
-      send_control_element_allocator_.malloc()),
+    static_cast<TransportSendControlElement*>(use_alloc.malloc()),
     TransportSendControlElement(static_cast<int>(dup_map.size()),
                                 pub_id,
                                 listener,
                                 header,
                                 msg,
-                                &send_control_element_allocator_),
+                                &use_alloc),
     SEND_CONTROL_ERROR);
 
   for (MapType::iterator itr = dup_map.begin();

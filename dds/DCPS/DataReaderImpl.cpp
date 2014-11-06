@@ -1701,13 +1701,19 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   break;
 
   case END_HISTORIC_SAMPLES: {
+    if (sample.header_.message_length_ >= sizeof(RepoId)) {
+      Serializer ser(sample.sample_);
+      RepoId readerId = GUID_UNKNOWN;
+      ser >> readerId;
+      if (readerId != GUID_UNKNOWN && readerId != get_repo_id()) {
+        break; // not our message
+      }
+    }
+    if (DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) Received END_HISTORIC_SAMPLES control message\n"));
+    }
     // Going to acquire writers lock, release samples lock
     ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-    if (DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_INFO,
-        "(%P|%t) Received END_HISTORIC_SAMPLES control message\n"));
-    }
     this->resume_sample_processing(sample.header_.publication_id_);
     if (DCPS_debug_level > 4) {
       GuidConverter pub_id(sample.header_.publication_id_);

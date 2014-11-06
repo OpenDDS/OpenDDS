@@ -440,6 +440,25 @@ TransportClient::send_control(const DataSampleHeader& header,
   }
 }
 
+SendControlStatus
+TransportClient::send_control_to(const DataSampleHeader& header,
+                                 ACE_Message_Block* msg,
+                                 const RepoId& destination)
+{
+  DataLinkSet singular;
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, SEND_CONTROL_ERROR);
+    DataLinkIndex::iterator found = data_link_index_.find(destination);
+    if (found == data_link_index_.end()) {
+      msg->release();
+      return SEND_CONTROL_ERROR;
+    }
+    singular.insert_link(found->second.in());
+  }
+  return singular.send_control(repo_id_, get_send_listener(), header, msg,
+    &links_.tsce_allocator());
+}
+
 bool
 TransportClient::remove_sample(const DataSampleElement* sample)
 {

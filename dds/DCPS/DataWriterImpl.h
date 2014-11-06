@@ -679,7 +679,7 @@ private:
   bool need_sequence_repair();
   bool need_sequence_repair_i() const;
 
-  DDS::ReturnCode_t send_end_historic_samples();
+  DDS::ReturnCode_t send_end_historic_samples(const RepoId& readerId);
 
 };
 
