@@ -138,6 +138,10 @@ DataReaderImpl::~DataReaderImpl()
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::~DataReaderImpl() --> enter (DR: %@)\n", this));
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
 
+  //cancel all timers for EndHistoricSamplesMissedSweeper
+  int timers_canceled = this->reactor_->cancel_timer(&end_historic_sweeper_);
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::~DataReaderImpl --> cancel_timer all timers for end_historic_sweeper_ (%@) (Num canceled: %d)\n", static_cast<ACE_Event_Handler*>(this), timers_canceled));
+
   if (initialized_) {
     delete rd_allocator_;
   }
@@ -205,11 +209,14 @@ DataReaderImpl::cleanup()
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
       if (writer->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
         reactor_->cancel_timer(writer->second->historic_samples_timer_);
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::cleanup --> cancel_timer historic_samples_timer (%d)\n", writer->second->historic_samples_timer_));
+
         if (DCPS_debug_level) {
           ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::cleanup() - Unscheduled sweeper %d\n", writer->second->historic_samples_timer_));
         }
       }
       writer->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
+      writer->second->_remove_ref();
     }
   }
   //### Debug statements to track where associate is failing
@@ -347,11 +354,13 @@ DataReaderImpl::add_association(const RepoId& yourId,
           writer_id,
           info));
 
-      // Scheule timer if necessary
+      // Schedule timer if necessary
       //   - only need to check reader qos - we know the writer must be >= reader
       if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
         ACE_Time_Value ten_seconds(10);
-        const void* arg = reinterpret_cast<const void*>(&writer.writerId);
+        //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
+        const void* arg = reinterpret_cast<const void*>(info.in());
+        info->_add_ref();
         info->historic_samples_timer_ =
             reactor_->schedule_timer(&end_historic_sweeper_,
                                      arg,
@@ -359,6 +368,8 @@ DataReaderImpl::add_association(const RepoId& yourId,
         if (DCPS_debug_level) {
           ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::add_association() - Scheduled sweeper %d\n", info->historic_samples_timer_));
         }
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::add_association --> schedule_timer end_historic_sweeper (%@)\n", static_cast<ACE_Event_Handler*>(&end_historic_sweeper_)));
+
       }
 
       this->statistics_.insert(
@@ -1483,7 +1494,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
 
       if (writer->seen_data_ && !header.sequence_repair_) {
         // Data samples should be acknowledged prior to any
-        // reader-side filtering to ensure discontiguities
+        // reader-side filtering to ensure discontinuities
         // are not unintentionally introduced.
         writer->ack_sequence(header.sequence_);
 
@@ -2261,6 +2272,8 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
           ACE_TEXT(" %p. \n"), ACE_TEXT("schedule_timer")));
+    } else {
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::handle_timeout --> schedule_timer liveliness_timer SUCCESSFUL (%@)\n", static_cast<ACE_Event_Handler*>(this)));
     }
   }
 
@@ -3507,10 +3520,13 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
     // Stop filtering these
     if (where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
       reactor_->cancel_timer(where->second->historic_samples_timer_);
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::resume_sample_processing --> cancel_timer end_historic_samples (%d)\n", where->second->historic_samples_timer_));
+
       if (DCPS_debug_level) {
         ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::resume_sample_processing() - Unscheduled sweeper %d\n", where->second->historic_samples_timer_));
       }
       where->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
+      where->second->_remove_ref();
     }
   }
 }
@@ -3545,7 +3561,9 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
     const ACE_Time_Value& ,
     const void* arg)
 {
-  PublicationId pub_id = *reinterpret_cast<const PublicationId*>(arg);
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::EndHistoricSamplesMissedSweeper::handle_timeout --> end_historic_sweeper (%@)\n", static_cast<ACE_Event_Handler*>(this)));
+
+  PublicationId pub_id = reinterpret_cast<const WriterInfo*>(arg)->writer_id_;
 
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout\n"));
