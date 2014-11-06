@@ -1,3 +1,30 @@
+Thu Nov  6 23:41:57 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * BranchChangeLog:
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Only print out PendingMap if size > 0 to avoid access violation.
+          Added some logging for scheduling/canceling timers.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Only invoke on start callbacks if link exists.
+
+        * dds/InfoRepo/FederatorManagerImpl_updates.cpp:
+
+          Catch Invalid_Participant possibly thrown when removing domain participant.
+
+Thu Nov  6 23:33:32 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fix issue with EndHistoricSamplesMissedSweeper's timers not being
+          cancelled on DataWriterImpl's destruction.
+          Now pass pointer to WriterInfo instead of reference into discovery object
+          for pub_id when scheduling timer for end historic sweeper.  Manually ref count.
+          Added some logging when scheduling/canceling timers.
+
 Wed Nov  5 19:35:03 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.h:

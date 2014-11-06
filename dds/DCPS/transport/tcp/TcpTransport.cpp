@@ -192,11 +192,12 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
    links_.unbind(key);
    guard.release();
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::async_connect_failed --> invoke_on_start_callbacks\n"));
+   if (link.in()) {
+     //### Debug statements to track where connection is failing
+     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::async_connect_failed --> invoke_on_start_callbacks\n"));
 
-   link->invoke_on_start_callbacks(false);
-
+     link->invoke_on_start_callbacks(false);
+   }
    //### Debug statements to track where connection is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::async_connect_failed --> end\n"));
 }

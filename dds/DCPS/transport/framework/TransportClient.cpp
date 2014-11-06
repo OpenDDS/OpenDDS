@@ -76,10 +76,13 @@ TransportClient::~TransportClient()
          impls_[i]->stop_accepting_or_connecting(this, it->second.data_.remote_id_);
       }
       //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::~TransportClient --> cancel_timer for PENDING ASSOC \n"));
+      //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::~TransportClient --> cancel_timer for PENDING ASSOC \n"));
       //### shouldn't really do this, timer should never be 0, right?
-      if (timer != 0)
+      if (timer != 0) {
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::~TransportClient --> cancel_timer for PENDING ASSOC pend (%@)\n", static_cast<ACE_Event_Handler*>(&it->second)));
+
         timer->cancel_timer(&it->second);
+      }
    }
 
    for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
@@ -385,7 +388,7 @@ TransportClient::associate(const AssociationData& data, bool active)
          //pend.impls_.push_back(impls_[i]);
       }
       //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side about to try to schedule timer\n"));
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side about to try to schedule_timer for pend (%@)\n", static_cast<ACE_Event_Handler*>(&pend)));
       ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
       timer->schedule_timer(&pend, this, passive_connect_duration_);
 
@@ -402,7 +405,7 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
       const void* arg)
 {
   //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::PendingAssoc::handle_timeout --> begin \n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::PendingAssoc::handle_timeout --> begin pend (%@)\n", static_cast<ACE_Event_Handler*>(this)));
    TransportClient* tc = static_cast<TransportClient*>(const_cast<void*>(arg));
    //### Debug statements to track where connection is failing
    GuidConverter converter(data_.remote_id_);
@@ -563,17 +566,19 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
    //### do all further uses simply look up by value and modify references that way?
    RepoId remote_id(remote_id_ref);
 
-   PendingMap::iterator iter_print = pending_.begin();
-   //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i PRINT OUT ALL PENDING ASSOC IN PENDINGMAP (current size: %d)\n", pending_.size()));
-      int i = 0;
-   while(iter_print != pending_.end()) {
-      //### Debug statements to track where associate is failing
-     GuidConverter remote_print(iter_print->first);
-     GuidConverter local_conv(this->repo_id_);
-        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i --> PendingAssoc #%d (%C) is for remote: %C\n", i, std::string(local_conv).c_str(), std::string(remote_print).c_str()));
-         iter_print++;
-         i++;
+   if (pending_.size() > 0) {
+     PendingMap::iterator iter_print = pending_.begin();
+     //### Debug statements to track where associate is failing
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i PRINT OUT ALL PENDING ASSOC IN PENDINGMAP (current size: %d)\n", pending_.size()));
+        int i = 0;
+     while(iter_print != pending_.end()) {
+        //### Debug statements to track where associate is failing
+       GuidConverter remote_print(iter_print->first);
+       GuidConverter local_conv(this->repo_id_);
+          if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i --> PendingAssoc #%d (%C) is for remote: %C\n", i, std::string(local_conv).c_str(), std::string(remote_print).c_str()));
+           iter_print++;
+           i++;
+     }
    }
 
 
@@ -644,10 +649,11 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
    }
 
    //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i cancel time for pend\n"));
    //### shouldn't really do this, timer should never be 0, right?
-   if (timer != 0)
+   if (timer != 0) {
+     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i cancel_timer for pend (%@)\n", static_cast<ACE_Event_Handler*>(&pend)));
      timer->cancel_timer(&pend);
+   }
 
    //### Debug statements to track where associate is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i canceled timer, now delete iter which is pend\n"));
