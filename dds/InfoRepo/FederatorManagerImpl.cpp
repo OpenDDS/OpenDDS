@@ -27,6 +27,7 @@
 #include "FederatorTypeSupportImpl.h"
 
 #include <sstream>
+#include "dds/DCPS/async_debug.h"
 
 #if !defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"
@@ -106,7 +107,6 @@ ManagerImpl::initialize()
                this->config_.federationDomain()));
     throw Incomplete();
   }
-
   //
   // Add type support for update topics
   //
@@ -1048,14 +1048,14 @@ ManagerImpl::join_federation(
 
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception(
-      "ERROR: Federator::ManagerImpl::join_federation() - unsuccsessful call to remote->join: ");
+      "ERROR: Federator::ManagerImpl::join_federation() - unsuccessful call to remote->join: ");
     throw Incomplete();
   }
 
   if (CORBA::is_nil(this->participantWriter_.in())) {
     //
     // Establish our update publications and subscriptions *after* we
-    // have exhanged internal state with the first joining repository.
+    // have exchanged internal state with the first joining repository.
     //
     this->initialize();
   }

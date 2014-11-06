@@ -1,3 +1,10 @@
+Thu Nov  6 23:49:10 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * BranchChangeLog:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Fixed spelling
+
 Thu Nov  6 23:41:57 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * BranchChangeLog:
