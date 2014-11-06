@@ -133,6 +133,8 @@ private:
       timer_id = reactor->schedule_timer(this,  // event_handler
                                          arg,
                                          delay);
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> schedule_timer: %d (%@)\n", timer_id, static_cast<ACE_Event_Handler*>(this)));
+
       if (timer_id == -1) {
         ACE_ERROR_RETURN ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
@@ -153,7 +155,7 @@ private:
     //### multiple timers to be scheduled, since  they are not interval timers it won't keep firing after each expires the first time
     if (this->cancelled_) {
        //### Debug statements to track where associate is failing
-       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> about to cancel timer\n"));
+       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> about to cancel timer timer_id: %d watchdog:(%@)\n", timer_id, static_cast<ACE_Event_Handler*>(this)));
       reactor->cancel_timer(timer_id);
       return true;
     }

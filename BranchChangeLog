@@ -1,11 +1,26 @@
-Thu Nov  6 23:49:10 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+Thu Nov  6 23:50:53 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * BranchChangeLog:
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Added async logging for scheduling/canceling of timers.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Uncommented async logging for destructor/shutdown actions.
+
+Thu Nov  6 23:49:10 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * BranchChangeLog:
         * dds/InfoRepo/FederatorManagerImpl.cpp:
 
           Fixed spelling
 
-Thu Nov  6 23:41:57 UTC 2014  Peter Oschwald  <oschwald_p@ociweb.com>
+Thu Nov  6 23:41:57 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * BranchChangeLog:
 

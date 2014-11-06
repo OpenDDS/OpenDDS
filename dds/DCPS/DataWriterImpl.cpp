@@ -1630,7 +1630,7 @@ max_total_samples);
             TheServiceParticipant->liveliness_factor()/100.0;
 
       //### Debug statements to track where connection is failing
-        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> about to schedule liveliness_timer\n"));
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> about to try schedule_timer for liveliness \n"));
 
       if (reactor_->schedule_timer(this,
             0,
@@ -1642,7 +1642,7 @@ max_total_samples);
 
       } else {
          //### Debug statements to track where connection is failing
-           if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> liveliness_timer SUCCESSFULLY SCHEDULED\n"));
+           if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> schedule_timer liveliness_timer SUCCESSFUL (%@)\n", static_cast<ACE_Event_Handler*>(this)));
          cancel_timer_ = true;
          this->_add_ref();
       }
@@ -2481,6 +2481,8 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
                ACE_TEXT("DataWriterImpl::handle_timeout: %p.\n"),
                ACE_TEXT("schedule_timer")),
                -1);
+      } else {
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::handle_timeout --> schedule_timer liveliness_timer SUCCESSFUL (%@)\n", static_cast<ACE_Event_Handler*>(this)));
       }
    }
 

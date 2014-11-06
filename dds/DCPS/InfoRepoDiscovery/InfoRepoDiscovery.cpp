@@ -117,15 +117,18 @@ InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
 
 InfoRepoDiscovery::~InfoRepoDiscovery()
 {
+  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::~InfoRepoDiscovery() --> enter (%@)\n", this));
   delete this->failoverListener_;
-
+  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::~InfoRepoDiscovery() --> failoverListener_ deleted (%@)\n", this));
   if (!orb_from_user_ && orb_runner_) {
     if (0 == --orb_runner_->use_count_) {
+      if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::~InfoRepoDiscovery() --> orb->shutdown (%@)\n", this));
       orb_runner_->shutdown();
       delete orb_runner_;
       orb_runner_ = 0;
     }
   }
+  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepoDiscovery::~InfoRepoDiscovery() --> exit (%@)\n", this));
 }
 
 bool

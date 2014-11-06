@@ -180,24 +180,24 @@ Service_Participant::Service_Participant()
 Service_Participant::~Service_Participant()
 {
   //### Debug statements to track where test is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant try to LOCK factory_lock_\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant try to LOCK factory_lock_\n"));
   ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
   //### Debug statements to track where test is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant LOCKED factory_lock_\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant LOCKED factory_lock_\n"));
   typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
   //### Debug statements to track where test is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete discovery_types\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete discovery_types\n"));
   for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
     delete it->second;
   }
   //### Debug statements to track where test is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete monitor\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete monitor\n"));
   delete monitor_;
   //### Debug statements to track where test is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete reactor\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete reactor\n"));
   delete reactor_;
   //### Debug statements to track where test is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant done deleting objects\n"));
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant done deleting objects\n"));
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,

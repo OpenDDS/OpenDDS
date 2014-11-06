@@ -95,6 +95,7 @@ public:
                  ACE_TEXT("(%P|%t) OpenDDS - Cleaning up ")
                  ACE_TEXT("data durability cache.\n")));
     }
+    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:OpenDDS::DCPS::Cleanup_Handler::handle_timeout  'cancel_timer' for cleanup_handler (%@) \n", static_cast<ACE_Event_Handler*>(this)));
 
     typedef OpenDDS::DCPS::DurabilityQueue<
     OpenDDS::DCPS::DataDurabilityCache::sample_data_type>
@@ -436,6 +437,8 @@ OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache()
          this->cleanup_timer_ids_.begin());
        i != end;
        ++i) {
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:OpenDDS::DCPS::DataDurabilityCache::~DataDurabilityCache  cancel_timer for cleanup timer_id (%d) \n", *i));
+
     (void) this->reactor_->cancel_timer(*i);
   }
 
@@ -689,11 +692,11 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
                           path,
                           this->data_dir_);
     ACE_Event_Handler_var safe_cleanup(cleanup);   // Transfer ownership
-
     long const tid =
       this->reactor_->schedule_timer(cleanup,
                                      0, // ACT
                                      cleanup_delay);
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:OpenDDS::DCPS::DataDurabilityCache::insert  schedule_timer for cleanup timer_id (%d) (%@)\n", tid, static_cast<ACE_Event_Handler*>(cleanup)));
 
     if (tid == -1) {
       ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
