@@ -93,12 +93,18 @@ void DataReaderListenerImpl::on_liveliness_changed (
   throw (CORBA::SystemException)
 {
   ++ num_liveliness_change_callbacks_;
-  cerr << "DataReaderListenerImpl::on_liveliness_changed " << endl;
-  cerr << "  alive_count = " << status.alive_count << endl;
-  cerr << "  not_alive_count = " << status.not_alive_count << endl;
-  cerr << "  alive_count_change = " << status.alive_count_change << endl;
-  cerr << "  not_alive_count_change = " << status.not_alive_count_change << endl;
-  cerr << "  last_publication_handle = " << status.last_publication_handle << endl;
+  ACE_DEBUG((LM_INFO, "%T DataReaderListenerImpl::on_liveliness_changed #%d\n"
+                      "  alive_count = %d\n"
+                      "  not_alive_count = %d\n"
+                      "  alive_count_change = %d\n"
+                      "  not_alive_count_change = %d\n"
+                      "  last_publiction_handle = %d\n",
+                      num_liveliness_change_callbacks_,
+                      status.alive_count,
+                      status.not_alive_count,
+                      status.alive_count_change,
+                      status.not_alive_count_change,
+                      status.last_publication_handle));
 }
 
 void DataReaderListenerImpl::on_subscription_matched (

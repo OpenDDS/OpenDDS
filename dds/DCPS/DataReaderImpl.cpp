@@ -1776,6 +1776,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
   case DATAWRITER_LIVELINESS: {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
+                 ACE_TEXT("got datawriter liveliness\n")));
+    }
     this->writer_activity(sample.header_);
 
     // tell all instances they got a liveliness message
@@ -1882,13 +1887,19 @@ this->watchdog_->cancel_timer(instance);
   break;
 
   case END_HISTORIC_SAMPLES: {
+    if (sample.header_.message_length_ >= sizeof(RepoId)) {
+      Serializer ser(sample.sample_);
+      RepoId readerId = GUID_UNKNOWN;
+      ser >> readerId;
+      if (readerId != GUID_UNKNOWN && readerId != get_repo_id()) {
+        break; // not our message
+      }
+    }
+    if (DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) Received END_HISTORIC_SAMPLES control message\n"));
+    }
     // Going to acquire writers lock, release samples lock
     ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-
-    if (DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_INFO,
-          "(%P|%t) Received END_HISTORIC_SAMPLES control message\n"));
-    }
     this->resume_sample_processing(sample.header_.publication_id_);
     if (DCPS_debug_level > 4) {
       GuidConverter pub_id(sample.header_.publication_id_);
@@ -3535,12 +3546,11 @@ void
 DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
 {
   TransportClient::add_link(link, peer);
-  // Chek impl?
   TransportImpl_rch impl = link->impl();
   std::string type = impl->transport_type();
 
-  // If this is an RTPS link
-  if (type == "rtps_udp") {
+  // If this is an RTPS link or a multicast link
+  if (type == "rtps_udp" || type == "multicast") {
     resume_sample_processing(peer);
   }
 }

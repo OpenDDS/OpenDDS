@@ -1,3 +1,93 @@
+Thu Nov  6 16:30:10 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Send the relevant reader RepoId as the message payload
+          of the END_HISTORIC_SAMPLES control message.
+
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Support sending a DCPS control message to a specific
+          DataLink instead of the entire DataLinkSet.
+
+Thu Oct 30 17:25:46 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+
+          Use a second participant for MBP Writer 2, in case order
+          of liveliness change calls are reversed.
+          Sleep in subscriber before deleting entities, so that
+          final liveliness messages can be received and handled.
+
+Wed Oct 29 17:55:02 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Log when liveliness is skipped due to timing.
+
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+
+          Run at higher debug log level.
+
+Wed Oct 29 14:56:50 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Disable use of END_HISTORIC_SAMPLES control messages
+          with multicast DataLinks.
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Discard duplicate messages as defined by the DataSampleHeader
+          GUID and sequence number.  These can occur with durability resending
+          a data sample at the same time a nak-based resend occurs.
+          Removing duplicates here is sufficient to provide the functionality
+          that END_HISTORIC_SAMPLES at the DataReaderImpl level used to do.
+
+        * tests/DCPS/LargeSample/multicast.ini:
+
+          Improve multicast nak tuning for this test.
+
+        * DDS_TAO_all.mwc:
+        * DDS_TAOv2_all.mwc:
+
+          Added TAO CSD Threadpool which was added as a runtime dependency
+          for tests back on Fri Jul 11 20:43:52 UTC 2014 (before version 3.5.1).
+
+Tue Oct 28 21:56:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added a log message to diagnose liveliness lost
+
+Tue Oct 28 14:44:41 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Removed some checking when an unreliable transport is used.
+
+Mon Oct 27 22:02:48 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/multicast.ini:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+
+          Test requires durability QoS to ensure delivery of all samples
+          with rtps_udp transport.  Can't just depend on association_complete
+          because the transport will not request resends for lost data with
+          sequence numbers less than the first received without durability.
+
 Mon Oct 20 21:58:03 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/LargeSample/publisher.cpp:

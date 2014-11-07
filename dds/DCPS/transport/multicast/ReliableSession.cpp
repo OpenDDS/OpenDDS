@@ -320,7 +320,7 @@ ReliableSession::nak_received(ACE_Message_Block* control)
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("(%P|%t) ReliableSession::nak_received")
-                  ACE_TEXT (" local %d remote %d [%q - %q] resend result %s\n"),
+                  ACE_TEXT (" local %d remote %d [%q - %q] resend result %C\n"),
                   this->link_->local_peer(), this->remote_peer_,
                   ranges[i].first.getValue(), ranges[i].second.getValue(),
                   ret ? "SUCCESS" : "FAILED"));

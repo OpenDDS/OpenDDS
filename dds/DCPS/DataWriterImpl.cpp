@@ -32,6 +32,7 @@
 
 #include "AssociationData.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
@@ -597,7 +598,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     }
 
     if (qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-      send_end_historic_samples();
+      send_end_historic_samples(remote_id);
     }
   }
    //### Debug statements to track where associate is failing
@@ -1408,20 +1409,27 @@ DataWriterImpl::assert_liveliness()
 
    ACE_Time_Value now = ACE_OS::gettimeofday();
 
-   if (last_liveliness_activity_time_ == ACE_Time_Value::zero
-         || now - last_liveliness_activity_time_ >= liveliness_check_interval_) {
-      //Not recent enough then send liveliness message.
-      if (DCPS_debug_level > 9) {
-         GuidConverter converter(publication_id_);
-         ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
-               ACE_TEXT("%C sending LIVELINESS message.\n"),
-               std::string(converter).c_str()));
-      }
+  // Check if not recent enough then send liveliness message.
+  if (last_liveliness_activity_time_ == ACE_Time_Value::zero
+      || now - last_liveliness_activity_time_ >= liveliness_check_interval_) {
+    if (DCPS_debug_level > 9) {
+      GuidConverter converter(publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
+                 ACE_TEXT("%C sending LIVELINESS message.\n"),
+                 std::string(converter).c_str()));
+    }
 
-      if (this->send_liveliness(now) == false)
-         return DDS::RETCODE_ERROR;
-   }
+    if (this->send_liveliness(now) == false) {
+      return DDS::RETCODE_ERROR;
+    }
+  } else if (DCPS_debug_level > 9) {
+    GuidConverter converter(publication_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
+               ACE_TEXT("%C too soon to send LIVELINESS message.\n"),
+               std::string(converter).c_str()));
+  }
 
    return DDS::RETCODE_OK;
 }
@@ -2769,26 +2777,31 @@ DataWriterImpl::need_sequence_repair_i() const
 }
 
 DDS::ReturnCode_t
-DataWriterImpl::send_end_historic_samples()
+DataWriterImpl::send_end_historic_samples(const RepoId& readerId)
 {
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_INFO, "(%P|%t) Sending end of historic samples\n"));
   }
 
-  DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
+  size_t size = 0, padding = 0;
+  gen_find_size(readerId, size, padding);
+  ACE_Message_Block* data = new ACE_Message_Block(size);
+  Serializer ser(data);
+  ser << readerId;
 
+  DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
   DataSampleHeader header;
   ACE_Message_Block* end_historic_samples =
     this->create_control_message(END_HISTORIC_SAMPLES,
                                  header,
-                                 NULL,
+                                 data,
                                  source_timestamp);
 
-  if (send_control(header, end_historic_samples) == SEND_CONTROL_ERROR) {
+  if (send_control_to(header, end_historic_samples, readerId) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::send_end_historic_samples: ")
-                      ACE_TEXT("send_control failed.\n")),
+                      ACE_TEXT("send_control_to failed.\n")),
                      DDS::RETCODE_ERROR);
   }
 

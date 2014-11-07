@@ -81,6 +81,9 @@ protected:
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,
                                  void* extra = 0);
+  SendControlStatus send_control_to(const DataSampleHeader& header,
+                                    ACE_Message_Block* msg,
+                                    const RepoId& destination);
   bool remove_sample(const DataSampleElement* sample);
   bool remove_all_msgs();
 

@@ -140,10 +140,19 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         exit(1);
       }
 
-
-      while ( listener_servant.num_reads() < total_num_messages ) {
+      int count = 0;
+      while ((++count < 60) && ((listener_servant.num_reads() < total_num_messages)))
+      {
         ACE_OS::sleep (1);
       }
+
+      ACE_OS::sleep(2);
+
+      ACE_DEBUG((LM_INFO,
+                 "%T Subscriber got %d of %d messages, "
+                 "and %d of %d callbacks, deleting entities\n",
+                 listener_servant.num_reads(), total_num_messages,
+                 listener_servant.num_liveliness_change_callbacks(), num_liveliness_change_callbacks));
 
       if (!CORBA::is_nil (participant.in ())) {
         participant->delete_contained_entities();

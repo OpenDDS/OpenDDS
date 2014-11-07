@@ -45,7 +45,8 @@ public:
   SendControlStatus send_control(RepoId                  pub_id,
                                  TransportSendListener*  listener,
                                  const DataSampleHeader& header,
-                                 ACE_Message_Block*      msg);
+                                 ACE_Message_Block*      msg,
+                                 TransportSendControlElementAllocator* allocator = 0);
 
   void send_response(RepoId sub_id,
                      const DataSampleHeader& header,
@@ -78,6 +79,10 @@ public:
   LockType& lock() { return lock_; }
   MapType& map() { return map_; }
   //@}
+
+  TransportSendControlElementAllocator& tsce_allocator() {
+    return send_control_element_allocator_;
+  }
 
 private:
 

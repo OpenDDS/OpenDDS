@@ -359,9 +359,29 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
     break;
 
   default:
-    data_received(sample);
+    if (!duplicate_data_sample(sample.header_)) {
+      data_received(sample);
+    }
     break;
   }
+}
+
+bool
+MulticastDataLink::duplicate_data_sample(const DataSampleHeader& header)
+{
+  if (header.sequence_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()
+      || header.publication_id_ == GUID_UNKNOWN) {
+    return false;
+  }
+  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, session_lock_, false);
+  return !data_samples_seen_[header.publication_id_].insert(header.sequence_);
+}
+
+void
+MulticastDataLink::release_remote_i(const RepoId& remote)
+{
+  ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX, guard, session_lock_);
+  data_samples_seen_.erase(remote);
 }
 
 void

@@ -35,8 +35,7 @@ class Manual_By_Participant_Writer_2 : public Writer_Base
 {
 public:
 
-  Manual_By_Participant_Writer_2 (::DDS::DomainParticipant_ptr part,
-                                ::DDS::DataWriter_ptr writer);
+  Manual_By_Participant_Writer_2 (::DDS::DataWriter_ptr writer);
 
   /** Lanch a thread to write. **/
   virtual int svc ();
