@@ -1,3 +1,13 @@
+Fri Nov  7 22:15:37 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Allow rtps_udp to process END_HISTORIC_SAMPLES message.
+
+        * tests/DCPS/Federation/run_test.pl:
+
+          Put logging in Federation test back to normal.
+
 Fri Nov  7 17:03:42 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * Merged from trunk r6566 through r6580
