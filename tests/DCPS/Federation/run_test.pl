@@ -22,7 +22,7 @@ my $failed = 0;
 #
 # Basic options.
 #
-my $debug ;
+my $debug = 10;
 my $man ;
 my $help ;
 my $verbose ;
@@ -36,7 +36,7 @@ my $subCount  = 1;
 my $samples   = 10;
 my $sample_interval   = 0;
 my $debugFile;
-my $transport;
+my $transport = 5;
 
 ########################################################################
 #
