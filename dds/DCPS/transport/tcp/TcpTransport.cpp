@@ -210,7 +210,6 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::find_datalink_i enter method\n"));
 
    if (links_.find(key, link) == 0 /*OK*/) {
-      //TODO: check old TcpTransport::find_datalink_i interaction with TcpConnection
       if (!link->add_on_start_callback(client, remote_id)) {
          VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
                ACE_TEXT("link found, already started.\n")), 2);

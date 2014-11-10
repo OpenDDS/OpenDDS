@@ -234,170 +234,171 @@ TransportClient::transport_detached(TransportImpl* which)
 bool
 TransportClient::associate(const AssociationData& data, bool active)
 {
+  //### Debug statements to track where associate is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate begun (TransportClient: %@)\n", this));
 
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate begun (TransportClient: %@)\n", this));
+  //### Debug statements to track where connection is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> TRYING TO lock_\n"));
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> TRYING TO lock_\n"));
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
-   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
+  //### Debug statements to track where connection is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> GOT lock_  \n"));
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> GOT lock_  \n"));
+  repo_id_ = get_repo_id();
 
-   repo_id_ = get_repo_id();
+  if (impls_.empty()) {
+    //### Debug statements to track where connection is failing
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
+    return false;
+  }
 
-   if (impls_.empty()) {
+  PendingMap::iterator iter = pending_.find(data.remote_id_);
+  if (iter == pending_.end()) {
+    //### use local copy instead of reference
+    RepoId remote_copy(data.remote_id_);
+    iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc())).first;
+    //### Debug statements to track where connection is failing
+    GuidConverter tc_assoc(this->repo_id_);
+    GuidConverter remote_new(data.remote_id_);
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> INSERTED NEW PENDING ASSOC TransportClient: %C remote_id: %C\n", std::string(tc_assoc).c_str(), std::string(remote_new).c_str()));
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> after insertion there are %d pending assocs\n", pending_.size()));
+
+    PendingMap::iterator iter_print = pending_.begin();
+    //### Debug statements to track where associate is failing
+        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> PRINT OUT ALL PENDING ASSOC IN PENDINGMAP (current size: %d)\n", pending_.size()));
+        int i = 0;
+    while(iter_print != pending_.end()) {
+        //### Debug statements to track where associate is failing
+        GuidConverter remote_print(iter_print->first);
+        GuidConverter local_conv(this->repo_id_);
+          if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> PendingAssoc #%d (%C) is for remote: %C\n", i, std::string(local_conv).c_str(), std::string(remote_print).c_str()));
+          iter_print++;
+          i++;
+    }
+
+
+  } else {
+    if (iter->second.removed_) {
+        iter->second.removed_ = false;
+    } else {
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: TransportClient::associate ")
+        ACE_TEXT("already associating with remote.\n")));
+      //### Debug statements to track where associate is failing
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate already associated, exiting false\n"));
       //### Debug statements to track where connection is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
       return false;
-   }
+    }
+  }
 
-   PendingMap::iterator iter = pending_.find(data.remote_id_);
-   if (iter == pending_.end()) {
-     //### use local copy instead of reference
-     RepoId remote_copy(data.remote_id_);
-      iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc())).first;
-      //### Debug statements to track where connection is failing
-      GuidConverter tc_assoc(this->repo_id_);
-      GuidConverter remote_new(data.remote_id_);
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> INSERTED NEW PENDING ASSOC TransportClient: %C remote_id: %C\n", std::string(tc_assoc).c_str(), std::string(remote_new).c_str()));
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> after insertion there are %d pending assocs\n", pending_.size()));
+  PendingAssoc& pend = iter->second;
+  pend.active_ = active;
+  pend.impls_.clear();
+  pend.blob_index_ = 0;
+  pend.data_ = data;
+  pend.attribs_.local_id_ = repo_id_;
+  pend.attribs_.priority_ = get_priority_value(data);
+  pend.attribs_.local_reliable_ = reliable_;
+  pend.attribs_.local_durable_ = durable_;
 
-      PendingMap::iterator iter_print = pending_.begin();
-      //### Debug statements to track where associate is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> PRINT OUT ALL PENDING ASSOC IN PENDINGMAP (current size: %d)\n", pending_.size()));
-         int i = 0;
-      while(iter_print != pending_.end()) {
-         //### Debug statements to track where associate is failing
-         GuidConverter remote_print(iter_print->first);
-         GuidConverter local_conv(this->repo_id_);
-            if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> PendingAssoc #%d (%C) is for remote: %C\n", i, std::string(local_conv).c_str(), std::string(remote_print).c_str()));
-            iter_print++;
-            i++;
-      }
+  //### Debug statements to track where associate is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate PendingAssoc created\n"));
+
+  if (active) {
+    //### Debug statements to track where associate is failing
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate active side about to call initiate_connect\n"));
+    pend.impls_.reserve(impls_.size());
+    std::reverse_copy(impls_.begin(), impls_.end(),
+          std::back_inserter(pend.impls_));
 
 
-   } else {
-      if (iter->second.removed_) {
-         iter->second.removed_ = false;
-      } else {
-         //TODO: ACE_ERROR blah blah... already associated with remote
-         //### Debug statements to track where associate is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate already associated, exiting false\n"));
-         //### Debug statements to track where connection is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
-         return false;
-      }
-   }
+    pend.initiate_connect(this, guard);
+    //### Debug statements to track where connection is failing
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
+    //### Debug statements to track where associate is failing
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate active side assoc complete about to return initiate_connect\n"));
+    //return pend.initiate_connect(this, guard);
+    return true;
 
-   PendingAssoc& pend = iter->second;
-   pend.active_ = active;
-   pend.impls_.clear();
-   pend.blob_index_ = 0;
-   pend.data_ = data;
-   pend.attribs_.local_id_ = repo_id_;
-   pend.attribs_.priority_ = get_priority_value(data);
-   pend.attribs_.local_reliable_ = reliable_;
-   pend.attribs_.local_durable_ = durable_;
+  } else { // passive
+    //### Debug statements to track where associate is failing
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side about to try to accept_datalink and use_datalink (num impls_: %d)\n", impls_.size()));
 
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate PendingAssoc created\n"));
+    for (size_t ix = 0; ix < impls_.size(); ++ix) {
+      std::string transport_type = impls_[ix].in()->transport_type();
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive print out all impls impl #%d, type: %s \n",ix, transport_type.c_str()));
+    }
 
-   if (active) {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate active side about to call initiate_connect\n"));
-      pend.impls_.reserve(impls_.size());
-      std::reverse_copy(impls_.begin(), impls_.end(),
-            std::back_inserter(pend.impls_));
+    // call accept_datalink for each impl / blob pair of the same type
+    for (size_t i = 0; i < impls_.size(); ++i) {
+      std::string transport_type_loop = impls_[i].in()->transport_type();
 
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side about to try to push back impl #%d, type: %s \n",i, transport_type_loop.c_str()));
 
-      pend.initiate_connect(this, guard);
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate active side assoc complete about to return initiate_connect\n"));
-      //return pend.initiate_connect(this, guard);
-      return true;
-
-   } else { // passive
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side about to try to accept_datalink and use_datalink (num impls_: %d)\n", impls_.size()));
-
-      for (size_t ix = 0; ix < impls_.size(); ++ix) {
-        std::string transport_type = impls_[ix].in()->transport_type();
-        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive print out all impls impl #%d, type: %s \n",ix, transport_type.c_str()));
-      }
-
-      // call accept_datalink for each impl / blob pair of the same type
-      for (size_t i = 0; i < impls_.size(); ++i) {
-        std::string transport_type_loop = impls_[i].in()->transport_type();
-
-        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side about to try to push back impl #%d, type: %s \n",i, transport_type_loop.c_str()));
-
-        pend.impls_.push_back(impls_[i]);
-         const std::string type = impls_[i]->transport_type();
-         for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
-            if (data.remote_data_[j].transport_type.in() == type) {
-               const TransportImpl::RemoteTransport remote = {
-                     data.remote_id_, data.remote_data_[j].data,
-                     data.publication_transport_priority_,
-                     data.remote_reliable_, data.remote_durable_};
+      pend.impls_.push_back(impls_[i]);
+        const std::string type = impls_[i]->transport_type();
+        for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
+          if (data.remote_data_[j].transport_type.in() == type) {
+              const TransportImpl::RemoteTransport remote = {
+                    data.remote_id_, data.remote_data_[j].data,
+                    data.publication_transport_priority_,
+                    data.remote_reliable_, data.remote_durable_};
 
 
-               TransportImpl::AcceptConnectResult res;
-               //### Debug statements to track where associate is failing
-              //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side pre-accept_datalink res Success? : %s \n", res.success_ ? "TRUE": "FALSE"));
-               {
-                  //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
-                  ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-                  //### Debug statements to track where connection is failing
-                  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ using LOCK reverse_lock_\n"));
-               //const TransportImpl::AcceptConnectResult res =
-                  res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
-               }
-               //### Debug statements to track where connection is failing
-               if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> LOCKED lock_ after RELEASE reverse_lock \n"));
+              TransportImpl::AcceptConnectResult res;
+              //### Debug statements to track where associate is failing
+            //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side pre-accept_datalink res Success? : %s \n", res.success_ ? "TRUE": "FALSE"));
+              {
+                //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
+                ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+                //### Debug statements to track where connection is failing
+                if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ using LOCK reverse_lock_\n"));
+              //const TransportImpl::AcceptConnectResult res =
+                res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
+              }
+              //### Debug statements to track where connection is failing
+              if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> LOCKED lock_ after RELEASE reverse_lock \n"));
 
-               //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
-               PendingMap::iterator iter_after_accept = pending_.find(data.remote_id_);
-               if (iter_after_accept == pending_.end()) {
-                 //If Pending Assoc is no longer in pending_ then use_datalink_i has been called from an
-                 //active side connection and completed, thus pend was removed from pending_.  Can return true.
-                 return true;
-               }
-               //### Debug statements to track where associate is failing
-               if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side post-accept_datalink pend's reactor still valid? %s, (%p)\n", pend.reactor() == 0 ? "NO": "YES", pend.reactor()));
+              //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
+              PendingMap::iterator iter_after_accept = pending_.find(data.remote_id_);
+              if (iter_after_accept == pending_.end()) {
+                //If Pending Assoc is no longer in pending_ then use_datalink_i has been called from an
+                //active side connection and completed, thus pend was removed from pending_.  Can return true.
+                return true;
+              }
+              //### Debug statements to track where associate is failing
+              if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side post-accept_datalink pend's reactor still valid? %s, (%p)\n", pend.reactor() == 0 ? "NO": "YES", pend.reactor()));
 
-               //### Debug statements to track where associate is failing
-               if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side post-accept_datalink res Success? : %s with res.link: %s\n", res.success_ ? "TRUE": "FALSE", res.link_.is_nil() ? "NIL" :"NOT NIL"));
+              //### Debug statements to track where associate is failing
+              if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side post-accept_datalink res Success? : %s with res.link: %s\n", res.success_ ? "TRUE": "FALSE", res.link_.is_nil() ? "NIL" :"NOT NIL"));
 
-               if (res.success_ && !res.link_.is_nil()) {
-                  //### Debug statements to track where associate is failing
-                  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side About to use_datalink_i \n"));
-                  use_datalink_i(data.remote_id_, res.link_, guard);
-                  //### Debug statements to track where connection is failing
-                  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
-                  //### Debug statements to track where associate is failing
-                  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side use_datalink_i returned: associate to return true\n"));
-                  return true;
-               }
-            }
-         }
-         //pend.impls_.push_back(impls_[i]);
-      }
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side about to try to schedule_timer for pend (%@)\n", static_cast<ACE_Event_Handler*>(&pend)));
-      ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
-      timer->schedule_timer(&pend, this, passive_connect_duration_);
+              if (res.success_ && !res.link_.is_nil()) {
+                //### Debug statements to track where associate is failing
+                if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side About to use_datalink_i \n"));
+                use_datalink_i(data.remote_id_, res.link_, guard);
+                //### Debug statements to track where connection is failing
+                if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
+                //### Debug statements to track where associate is failing
+                if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side use_datalink_i returned: associate to return true\n"));
+                return true;
+              }
+          }
+        }
+        //pend.impls_.push_back(impls_[i]);
+    }
+    //### Debug statements to track where associate is failing
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side about to try to schedule_timer for pend (%@)\n", static_cast<ACE_Event_Handler*>(&pend)));
+    ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
+    timer->schedule_timer(&pend, this, passive_connect_duration_);
 
-   }
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate associate about to return from associate\n"));
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
-   return true;
+  }
+  //### Debug statements to track where associate is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate associate about to return from associate\n"));
+  //### Debug statements to track where connection is failing
+  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
+  return true;
 }
 
 int
@@ -941,7 +942,7 @@ TransportClient::get_receive_listener()
 SendControlStatus
 TransportClient::send_control(const DataSampleHeader& header,
       ACE_Message_Block* msg,
-      void* extra /* = 0*/)
+      void* extra /* = 0 */)
 {
    TransportSendListener* listener = get_send_listener();
 

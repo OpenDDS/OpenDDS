@@ -101,7 +101,6 @@ public:
                   bool local_durable, bool remote_durable);
 
   bool check_handshake_complete(const RepoId& local, const RepoId& remote);
-  //bool wait_for_handshake(const RepoId& local_id, const RepoId& remote_id);
 
 private:
   virtual void stop_i();
@@ -241,13 +240,10 @@ private:
 
   void deliver_held_data(const RepoId& readerId, WriterInfo& info, bool durable);
 
-  bool handshake_done(const RepoId& local, const RepoId& remote);
-
   /// lock_ protects data structures accessed by both the transport's thread
   /// (TransportReactorTask) and an external thread which is responsible
   /// for adding/removing associations from the DataLink.
   mutable ACE_Thread_Mutex lock_;
-  ACE_Thread_Condition<ACE_Thread_Mutex> handshake_condition_;
 
   size_t generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nack_frags,
                              WriterInfo& wi, const RepoId& pub_id);

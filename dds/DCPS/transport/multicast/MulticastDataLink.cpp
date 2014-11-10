@@ -320,38 +320,21 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       //### Debug statements to track where connection is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> not going to call syn_received_no_session\n"));
 
-      MulticastSessionMap temp_sessions;
-      temp_sessions.insert(this->sessions_.begin(), this->sessions_.end());
+      MulticastSessionMap temp_sessions(sessions_);
       guard.release();
 
       for (MulticastSessionMap::iterator it(temp_sessions.begin());
           it != temp_sessions.end(); ++it) {
         //### Debug statements to track where connection is failing
         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> to call control_received (Current number of sessions: %d)\n", temp_sessions.size()));
-//TODO
-        //### this is not a safe procedure without session lock
-        if(this->sessions_.count(it->first)){
-          it->second->control_received(sample.header_.submessage_id_,
-              sample.sample_);
-          // reset read pointer
-          if (ptr) {
-            sample.sample_->rd_ptr(ptr);
-          }
-        }
-      }
-      /*      for (MulticastSessionMap::iterator it(this->sessions_.begin());
-          it != this->sessions_.end(); ++it) {
-         //### Debug statements to track where connection is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> to call control_received\n"));
-
         it->second->control_received(sample.header_.submessage_id_,
-                                     sample.sample_);
+            sample.sample_);
         // reset read pointer
         if (ptr) {
           sample.sample_->rd_ptr(ptr);
         }
       }
-       */    }
+    }
   } break;
 
   case SAMPLE_ACK:

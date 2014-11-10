@@ -60,7 +60,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
     reactor_task_(reactor_task, false),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
-    handshake_condition_(lock_),
     nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
@@ -273,35 +272,8 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 }
 
 bool
-RtpsUdpDataLink::check_handshake_complete(const RepoId& local,
-                                          const RepoId& remote)
-{
-  return this->handshake_done(local, remote);
-}
-
-
-/*
-bool
-RtpsUdpDataLink::wait_for_handshake(const RepoId& local_id,
-                                    const RepoId& remote_id)
-{
-  if (0 == std::memcmp(local_id.guidPrefix, remote_id.guidPrefix,
-                       sizeof(GuidPrefix_t))) {
-    return true; // no wait for "loopback" connection
-  }
-  ACE_Time_Value abs_timeout = ACE_OS::gettimeofday()
-    + config_->handshake_timeout_;
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  while (!handshake_done(local_id, remote_id)) {
-    if (handshake_condition_.wait(&abs_timeout) == -1) {
-      return false;
-    }
-  }
-  return true;
-}
-*/
-bool
-RtpsUdpDataLink::handshake_done(const RepoId& local_id, const RepoId& remote_id)
+RtpsUdpDataLink::check_handshake_complete(const RepoId& local_id,
+                                          const RepoId& remote_id)
 {
   const GuidConverter conv(local_id);
   const EntityKind kind = conv.entityKind();
@@ -532,7 +504,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
       data = msg->cont()->duplicate();
       // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
       RtpsSampleHeader::populate_data_control_submessages(
-                subm, *tsce, this->requires_inline_qos(pub_id));
+                subm, *tsce, requires_inline_qos(pub_id));
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples(rw, tsce->header(), msg->cont());
       element->data_delivered();
@@ -548,7 +520,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     const DataSampleElement* dsle = tse->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
-              subm, *dsle, this->requires_inline_qos(pub_id));
+              subm, *dsle, requires_inline_qos(pub_id));
     durable = dsle->get_header().historic_sample_;
 
   } else if (tce) {  // Customized data message
@@ -557,7 +529,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     const DataSampleElement* dsle = tce->original_send_element()->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
-              subm, *dsle, this->requires_inline_qos(pub_id));
+              subm, *dsle, requires_inline_qos(pub_id));
     durable = dsle->get_header().historic_sample_;
 
   } else {
@@ -568,7 +540,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   hdr->cont(data);
   RtpsCustomizedElement* rtps =
     RtpsCustomizedElement::alloc(element, hdr,
-      &this->rtps_customized_element_allocator_);
+      &rtps_customized_element_allocator_);
 
   // Handle durability resends
   if (durable && rw != writers_.end()) {
@@ -645,7 +617,7 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
 bool
 RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
 {
-  if (this->force_inline_qos_) {
+  if (force_inline_qos_) {
     // Force true for testing purposes
     return true;
   } else {
@@ -1267,12 +1239,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 
   ri->second.acknack_recvd_count_ = acknack.count.value;
 
-  //### broadcast on the condition shouldn't need to happen in async_assoc
-  //TODO:
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    this->invoke_on_start_callbacks(true);
-    //handshake_condition_.broadcast();
+    invoke_on_start_callbacks(true);
   }
 
   std::map<SequenceNumber, TransportQueueElement*> pendingCallbacks;

@@ -160,7 +160,6 @@ void
 RtpsUdpTransport::stop_accepting_or_connecting(TransportClient* client,
                                                const RepoId& remote_id)
 {
-  //TODO: implement
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:RtpsUdpTransport::stop_accepting_or_connecting --> enter\n"));
   //### Debug statements to track where connection is failing

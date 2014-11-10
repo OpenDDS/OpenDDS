@@ -1,3 +1,20 @@
+Mon Nov 10 23:16:12 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Removed and addressed various TODO comments
+          that were added on this branch.
+          Removed unused and commented-out code.
+
 Mon Nov 10 17:34:44 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/InfoRepoDiscovery/Info.idl:

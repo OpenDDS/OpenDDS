@@ -311,7 +311,6 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
    if (ret <= 0) {
       //### Debug statements to track where connection is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpConnection::handle_setup_input --> nothing received connection closed???\n"));
-      //TODO: connection closed, call back to transport?
       return -1;
    }
 

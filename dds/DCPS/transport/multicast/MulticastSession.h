@@ -58,7 +58,6 @@ public:
   MulticastPeer remote_peer() const;
 
   bool acked();
-  bool wait_for_ack();
 
   void syn_received(ACE_Message_Block* control);
   void send_syn();
@@ -96,7 +95,6 @@ protected:
   Reverse_Lock_t reverse_start_lock_;
 
   ACE_Thread_Mutex start_lock_;
-  //###ACE_SYNCH_MUTEX start_lock_;
   bool started_;
 
   // A session must be for a publisher
@@ -112,9 +110,7 @@ protected:
   bool acked_;
 
 private:
-  ACE_SYNCH_MUTEX ack_lock_;
-  ACE_SYNCH_CONDITION ack_cond_;
-
+  ACE_Thread_Mutex ack_lock_;
   SynWatchdog syn_watchdog_;
 };
 

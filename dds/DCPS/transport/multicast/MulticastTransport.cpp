@@ -288,33 +288,9 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
       return AcceptConnectResult();
    }
 
-   if (remote_peer == RepoIdConverter(attribs.local_id_).participantId()) {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::connect_datalink_i "
-            "loopback on peer: 0x%x, skipping wait_for_ack\n",
-            this->config_i_->name().c_str(), remote_peer), 2);
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> exit SUCCESS w/link, loopback\n"));
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> link is nil? %s\n", link.is_nil() ? "YES":"NO"));
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
-      return AcceptConnectResult(link._retn());
-   }
    //### Debug statements to track where associate is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
    return AcceptConnectResult(link._retn());
-   /*
-   if (session->acked()) {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> exit SUCCESS w/ link, session acked\n"));
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> link is nil? %s\n", link.is_nil() ? "YES":"NO"));
-      return AcceptConnectResult(link._retn());
-   }
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> exit SUCCESS, nil link (catch_all)\n"));
-   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);\
-    */
 }
 
 TransportImpl::AcceptConnectResult

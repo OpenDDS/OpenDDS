@@ -77,7 +77,6 @@ MulticastSession::MulticastSession(MulticastDataLink* link,
   , started_(false)
   , active_(true)
   , acked_(false)
-  , ack_cond_(ack_lock_)
   , syn_watchdog_(this)
 {
 }
@@ -93,19 +92,6 @@ MulticastSession::acked()
   return this->acked_;
 }
 
-bool
-MulticastSession::wait_for_ack()
-{
-  ACE_Time_Value abs_timeout = ACE_OS::gettimeofday() +
-    this->link_->config()->syn_timeout_;
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->ack_lock_, false);
-  while (!this->acked_) {
-    if (this->ack_cond_.wait(&abs_timeout) == -1) {
-      return false;
-    }
-  }
-  return true;
-}
 
 bool
 MulticastSession::start_syn(ACE_Reactor* reactor)
@@ -203,8 +189,6 @@ MulticastSession::syn_received(ACE_Message_Block* control)
 
     if (!this->acked_) {
       this->acked_ = true;
-      this->ack_cond_.broadcast();
-
       syn_hook(header.sequence_);
     }
   }
@@ -317,9 +301,6 @@ MulticastSession::synack_received(ACE_Message_Block* control)
     //### Debug statements to track where connection is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> set acked_ to true \n"));
     this->acked_ = true;
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> broadcast ack_cond_ \n"));
-    this->ack_cond_.broadcast();
     //### Debug statements to track where connection is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> RELEASING ack_lock_ \n"));
   }
