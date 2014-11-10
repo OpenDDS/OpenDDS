@@ -1463,12 +1463,12 @@ void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
 
   DCPS_IR_Domain_Map::iterator dom_iter = this->domains_.find(domainId);
   if (dom_iter == this->domains_.end()) {
-    throw OpenDDS::DCPS::Invalid_Domain();
+    return;
   }
 
   DCPS_IR_Participant* partPtr = dom_iter->second->participant(participantId);
   if (0 == partPtr) {
-    throw OpenDDS::DCPS::Invalid_Participant();
+    return;
   }
 
   // localId could be pub or sub (initial implementation will only use sub
@@ -1482,9 +1482,6 @@ void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
     sub->association_complete(remoteId);
   } else if (0 == partPtr->find_publication_reference(localId, pub)) {
     pub->association_complete(remoteId);
-  } else {
-    // arbitrary selection of which exception to throw
-    throw OpenDDS::DCPS::Invalid_Subscription();
   }
 }
 
