@@ -161,16 +161,6 @@ private:
   TcpInst_rch tcp_config_;
   /// Datalink object which is needed for connection lost callback.
   TcpDataLink_rch      link_;
-  /// TODO: This can be removed since we do not need it for checking the
-  /// the new connection state during handle_timeout.
-  /// The "new" TcpConnection that replaces this "old" object in the
-  /// TcpDataLink object. This is needed for checking if the connection is
-  /// re-established as the acceptor side when timer goes off.
-  TcpConnection_rch    new_con_;
-
-  /// Keep a copy of the old connection object in the new connection object
-  /// to help control of the old connection object deletion.
-  TcpConnection_rch    old_con_;
 
   /// The id of the scheduled timer. The timer is scheduled to check if the connection
   /// is re-established during the passive_reconnect_duration_. This id controls

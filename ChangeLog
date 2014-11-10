@@ -1,3 +1,22 @@
+Mon Nov 10 23:15:57 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Make a couple of changes that prevent the Reconnect test 
+          from "leaking" threads on the subscriber side.  The main
+          change is to explicitly tear down the link after the
+          timer goes off indicating the reconnect delay is over.
+          In addition, some doubly linked lists between the old
+          and new connections were removed. 
+
+        * dds/DCPS/transport/framework/TransportQueueElement.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+
+          Cleanup some of the DBG_ macro usage.
+
 Thu Nov  6 16:30:10 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

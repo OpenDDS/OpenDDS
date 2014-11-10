@@ -62,11 +62,6 @@ OpenDDS::DCPS::TcpConnection::~TcpConnection()
 {
   DBG_ENTRY_LVL("TcpConnection","~TcpConnection",6);
 
-  // Remove the reference of the old connection object
-  // or the reference of new connection object.
-  this->old_con_ = 0;
-  this->new_con_ = 0;
-
   // The Reconnect task belongs to the Connection object.
   // Cleanup before leaving the house.
   this->reconnect_task_.close(1);
@@ -683,11 +678,11 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
 {
   DBG_ENTRY_LVL("TcpConnection","handle_timeout",6);
 
-  this->reconnect_state_ = PASSIVE_TIMEOUT_CALLED_STATE;
   GuardType guard(this->reconnect_lock_);
 
   switch (this->reconnect_state_) {
-  case PASSIVE_TIMEOUT_CALLED_STATE: {
+  case PASSIVE_WAITING_STATE: {
+    this->reconnect_state_ = PASSIVE_TIMEOUT_CALLED_STATE;
     // We stay in PASSIVE_TIMEOUT_CALLED_STATE indicates there is no new connection.
     // Now we need declare the connection is lost.
     this->link_->notify(DataLink::LOST);
@@ -698,6 +693,9 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
       this->send_strategy_->terminate_send();
 
     this->reconnect_state_ = LOST_STATE;
+
+    this->tear_link();
+
   }
   break;
   case RECONNECTED_STATE:
@@ -784,15 +782,6 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
   connection->local_address_ = this->local_address_;
   connection->tcp_config_ = this->tcp_config_;
   connection->link_ = this->link_;
-
-  //Make the "old" and "new" connection object keep a copy each other.
-  //Note only does the "old" connection object call this transfer () function
-  //since we need use the lock to synch this function and handle_timeout.
-  connection->_add_ref();
-  this->new_con_ = connection;
-
-  this->_add_ref();
-  connection->old_con_ = this;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "transfer(%C:%d->%C:%d) passive reconnected. new con %X   "
