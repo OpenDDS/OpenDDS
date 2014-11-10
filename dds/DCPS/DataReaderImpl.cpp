@@ -3550,7 +3550,7 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   std::string type = impl->transport_type();
 
   // If this is a multicast link
-  if (type == "multicast") {
+  if (type == "rtps_udp" || type == "multicast") {
     resume_sample_processing(peer);
   }
 }

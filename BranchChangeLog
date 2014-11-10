@@ -1,3 +1,10 @@
+Mon Nov 10 15:55:30 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Put DataReaderImpl ignoring END_HISTORIC_SAMPLES processing for
+          rtps_udp and simple resume sample processing.
+
 Fri Nov  7 22:15:37 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
