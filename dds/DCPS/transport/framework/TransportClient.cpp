@@ -50,13 +50,7 @@ TransportClient::~TransportClient()
             std::string(converter).c_str()));
    }
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::~TransportClient --> TRYING TO lock_\n"));
-
    ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::~TransportClient --> GOT lock_\n"));
 
    for (DataLinkSet::MapType::iterator iter = links_.map().begin();
          iter != links_.map().end(); ++iter) {
@@ -92,8 +86,6 @@ TransportClient::~TransportClient()
 
       (*it)->detach_client(this);
    }
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::~TransportClient --> exit RELEASING lock_\n"));
 }
 
 void
@@ -183,13 +175,7 @@ void
 TransportClient::transport_detached(TransportImpl* which)
 {
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::transport_detached --> TRYING TO lock_\n"));
-
    ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::transport_detached --> GOT lock_\n"));
 
    // Remove any DataLinks created by the 'which' TransportImpl from our local
    // data structures (both links_ and data_link_index_).
@@ -221,14 +207,9 @@ TransportClient::transport_detached(TransportImpl* which)
                it2 != pending_.end(); ++it2) {
             which->stop_accepting_or_connecting(this, it2->first);
          }
-         //### Debug statements to track where connection is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::transport_detached --> RELEASE lock_ \n"));
          return;
       }
    }
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::transport_detached --> RELEASE lock_ \n"));
 }
 
 bool
@@ -237,19 +218,11 @@ TransportClient::associate(const AssociationData& data, bool active)
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate begun (TransportClient: %@)\n", this));
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> TRYING TO lock_\n"));
-
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> GOT lock_  \n"));
 
   repo_id_ = get_repo_id();
 
   if (impls_.empty()) {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
     return false;
   }
 
@@ -287,8 +260,6 @@ TransportClient::associate(const AssociationData& data, bool active)
         ACE_TEXT("already associating with remote.\n")));
       //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate already associated, exiting false\n"));
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
       return false;
     }
   }
@@ -315,8 +286,6 @@ TransportClient::associate(const AssociationData& data, bool active)
 
 
     pend.initiate_connect(this, guard);
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
     //### Debug statements to track where associate is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate active side assoc complete about to return initiate_connect\n"));
     //return pend.initiate_connect(this, guard);
@@ -353,13 +322,9 @@ TransportClient::associate(const AssociationData& data, bool active)
               {
                 //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
                 ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-                //### Debug statements to track where connection is failing
-                if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ using LOCK reverse_lock_\n"));
               //const TransportImpl::AcceptConnectResult res =
                 res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
               }
-              //### Debug statements to track where connection is failing
-              if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> LOCKED lock_ after RELEASE reverse_lock \n"));
 
               //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
               PendingMap::iterator iter_after_accept = pending_.find(data.remote_id_);
@@ -378,8 +343,6 @@ TransportClient::associate(const AssociationData& data, bool active)
                 //### Debug statements to track where associate is failing
                 if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side About to use_datalink_i \n"));
                 use_datalink_i(data.remote_id_, res.link_, guard);
-                //### Debug statements to track where connection is failing
-                if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
                 //### Debug statements to track where associate is failing
                 if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate passive side use_datalink_i returned: associate to return true\n"));
                 return true;
@@ -396,8 +359,6 @@ TransportClient::associate(const AssociationData& data, bool active)
   }
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate associate about to return from associate\n"));
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::associate --> RELEASE lock_ \n"));
   return true;
 }
 
@@ -529,24 +490,13 @@ TransportClient::use_datalink(const RepoId& remote_id,
    GuidConverter remote(remote_id);
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink with this TransportClient: %C connecting to remote_id = %C\n", std::string(tc_repo).c_str(), std::string(remote).c_str()));
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink --> TRYING TO lock_\n"));
-
    ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink --> GOT lock_\n"));
    GuidConverter tc_repo_post_lock(this->repo_id_);
    GuidConverter remote_post_lock(remote_id);
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink AFTER LOCKING with this TransportClient: %C connecting to remote_id = %C\n", std::string(tc_repo_post_lock).c_str(), std::string(remote_post_lock).c_str()));
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink --> got the lock_ so can call use_datalink_i\n"));
-
    use_datalink_i(remote_id, link, guard);
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink --> RELEASE lock_ \n"));
 
    //### Debug statements to track where connection is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink --> end\n"));
@@ -665,9 +615,6 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i search iter(which is pend) successfully erased\n"));
 
    guard.release();
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i --> RELEASE lock_ guard.release() ??? \n"));
-
 
    //### Debug statements to track where associate is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i guard released about to call transport_assoc_done  \n"));
@@ -702,13 +649,7 @@ TransportClient::stop_associating()
   //### Debug statements to track where connection is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::stop_associating --> TransportClient(%@) to stop_associating \n", this));
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::stop_associating --> TRYING TO lock_\n"));
-
    ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::stop_associating --> GOT lock_\n"));
 
    PendingMap::iterator iter = pending_.begin();
    while (iter != pending_.end()) {
@@ -717,8 +658,6 @@ TransportClient::stop_associating()
       iter->second.removed_ = true;
       ++iter;
    }
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::stop_associating --> exit RELEASE lock_\n"));
 }
 
 void
@@ -728,13 +667,7 @@ TransportClient::disassociate(const RepoId& peerId)
   GuidConverter peerId_conv(peerId);
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::disassociate --> TransportClient(%@) to disassociate %C\n", this, std::string(peerId_conv).c_str()));
 
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::disassociate --> TRYING TO lock_\n"));
-
    ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::disassociate --> GOT lock_\n"));
 
    const PendingMap::iterator iter = pending_.find(peerId);
    if (iter != pending_.end()) {
@@ -753,9 +686,6 @@ TransportClient::disassociate(const RepoId& peerId)
                ACE_TEXT("no link for remote peer %C\n"),
                std::string(converter).c_str()));
       }
-
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::disassociate --> RELEASE lock_ \n"));
       return;
    }
 
@@ -770,12 +700,8 @@ TransportClient::disassociate(const RepoId& peerId)
    {
      //can't call release_reservations while holding lock due to possible reactor deadlock
      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
-     //### Debug statements to track where connection is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::disassociate --> RELEASE lock_ using LOCK reverse_lock_\n"));
      link->release_reservations(peerId, repo_id_, released);
    }
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::disassociate --> LOCKED lock_ after RELEASE reverse_lock \n"));
    //### Debug statements to track where connection is failing
 
    if (!released.empty()) {
@@ -788,9 +714,6 @@ TransportClient::disassociate(const RepoId& peerId)
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::disassociate --> removing link from links_\n"));
       links_.remove_link(link);
    }
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::disassociate --> RELEASE lock_ \n"));
 }
 
 bool

@@ -93,19 +93,13 @@ InfoRepo::run()
   this->finalize();
   //###Debugging for failure to associate
   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> DONE finalize()\n"));
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> LOCKING lock_\n"));
   ACE_GUARD(ACE_Thread_Mutex, g, this->lock_);
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> LOCKED lock_\n"));
   this->shutdown_complete_ = true;
   //###Debugging for failure to associate
   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> SIGNAL cond_\n"));
   this->cond_.signal();
   //###Debugging for failure to associate
   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> DONE signalling cond_\n"));
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> RELEASING lock_\n"));
   //###Debugging for failure to associate
   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> end\n"));
 }

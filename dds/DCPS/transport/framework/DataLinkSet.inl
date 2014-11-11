@@ -26,12 +26,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
   DBG_ENTRY_LVL("DataLinkSet", "send", 6);
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
             sample), 5);
-  //### Debug statements to track where connection is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send --> trying to LOCK lock_\n"));
   GuardType guard(this->lock_);
-    //### debugging many to many test failure 2to1
-      //### Debug statements to track where connection is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send --> LOCKED lock_\n"));
   TransportSendElement* send_element =
     TransportSendElement::alloc(static_cast<int>(map_.size()), sample);
 
@@ -139,13 +134,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   DBG_ENTRY_LVL("DataLinkSet","send_response",6);
   TransportSendControlElement* send_element = 0;
 
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send_response --> trying to LOCK lock_\n"));
-
   GuardType guard(this->lock_);
-
-    //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send_response --> LOCKED lock_\n"));
 
   ACE_NEW_MALLOC(send_element,
     static_cast<TransportSendControlElement*>(
@@ -171,11 +160,7 @@ ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_sample", 6);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::remove_sample --> trying to LOCK lock_\n"));
   GuardType guard(this->lock_);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::remove_sample --> LOCKED lock_\n"));
   const MapType::iterator end = this->map_.end();
   for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
 
@@ -191,11 +176,7 @@ ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_all_msgs", 6);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::remove_all_msgs --> trying to LOCK lock_\n"));
   GuardType guard(this->lock_);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::remove_all_msgs --> LOCKED lock_\n"));
   const MapType::iterator end = this->map_.end();
   for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
     itr->second->remove_all_msgs(pub_id);
@@ -208,11 +189,7 @@ ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_start",6);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send_start --> trying to LOCK lock_\n"));
   GuardType guard1(this->lock_);
-    //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send_start --> LOCKED lock_\n"));
   GuardType guard2(link_set->lock_);
 
   for (MapType::iterator itr = link_set->map_.begin();
@@ -243,11 +220,7 @@ OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_stop",6);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send_stop --> trying to LOCK lock_\n"));
   GuardType guard(this->lock_);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::send_stop --> LOCKED lock_\n"));
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {

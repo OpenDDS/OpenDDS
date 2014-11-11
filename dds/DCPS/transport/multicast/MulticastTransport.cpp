@@ -236,11 +236,7 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> enter\n"));
 
 
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> trying to LOCK links_lock_\n"));
    GuardThreadType guard_links(this->links_lock_);
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> LOCKED links_lock_\n"));
   const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
   Links::const_iterator link_iter = this->client_links_.find(local_peer);
   MulticastDataLink_rch link;
@@ -264,8 +260,6 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     link = link_iter->second;
   }
 
-   //### Debug statements to track where associate is failing
-   //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
    //guard_links.release();
 
    //### Debug statements to track where associate is failing
@@ -283,13 +277,9 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
    if (session.is_nil()) {
       //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> exit, FAILURE, session is nil\n"));
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
       return AcceptConnectResult();
    }
 
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::connect_datalink --> RELEASING links_lock_\n"));
    return AcceptConnectResult(link._retn());
 }
 
@@ -302,11 +292,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> enter\n"));
   const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
 
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> trying to LOCK links_lock_\n"));
    GuardThreadType guard_links(this->links_lock_);
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> LOCKED links_lock_\n"));
 
   Links::const_iterator link_iter = this->server_links_.find(local_peer);
   MulticastDataLink_rch link;
@@ -319,20 +305,12 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
   else {
     link = link_iter->second;
   }
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> RELEASING links_lock_\n"));
 
    guard_links.release();
 
    MulticastPeer remote_peer = RepoIdConverter(remote.repo_id_).participantId();
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> trying to LOCK connections_lock_\n"));
    GuardThreadType guard(this->connections_lock_);
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> LOCKED connections_lock_\n"));
   if (connections_.count(std::make_pair(remote_peer, local_peer))) {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> connection found, RELEASE connections_lock_, start session\n"));
     //###can't call start session with connections_lock_ due to reactor call in session->start which could deadlock with passive_connection
     guard.release();
 
@@ -346,15 +324,11 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
          link = 0;
       }
       //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> RELEASE connections_lock_\n"));
-      //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> exit SUCCESS with link\n"));
       //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> link is nil? %s\n", link.is_nil() ? "YES":"NO"));
       return AcceptConnectResult(link._retn());
   } else {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> no connection found, add callback, RELEASE connections_lock_ and try to start_session\n"));
 
     this->pending_connections_[std::make_pair(remote_peer, local_peer)].
       push_back(std::pair<TransportClient*, RepoId>(client, remote.repo_id_));
@@ -362,8 +336,6 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
       guard.release();
     MulticastSession_rch session =
       this->start_session(link, remote_peer, false /*!active*/);
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> RELEASE connections_lock_\n"));
       //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::accept_datalink --> exit SUCCESS with no link, added callback\n"));
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -379,11 +351,7 @@ MulticastTransport::stop_accepting_or_connecting(TransportClient* client,
 
    //### Debug statements to track where associate is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::stop_accepting_or_connection --> enter\n"));
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::stop_accepting_or_connecting --> trying to LOCK connections_lock_\n"));
    GuardThreadType guard(this->connections_lock_);
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::stop_accepting_or_connecting --> LOCKED connections_lock_\n"));
    for (PendConnMap::iterator it = this->pending_connections_.begin();
          it != this->pending_connections_.end(); ++it) {
       for (size_t i = 0; i < it->second.size(); ++i) {
@@ -398,19 +366,12 @@ MulticastTransport::stop_accepting_or_connecting(TransportClient* client,
       }
    }
    //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::stop_accepting_or_connecting --> RELEASING connections_lock_\n"));
-   //### Debug statements to track where associate is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::stop_accepting_or_connecting --> exit\n"));
 }
 
 void
 MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer)
 {
-
-
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> about to LOCK connections_lock_\n"));
-
    GuardThreadType guard(this->connections_lock_);
 
    //### Don't think sending synack is needed due to any call to passive_connection
@@ -423,9 +384,6 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
    //        session->send_synack();
    //     }
    //   }
-
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> LOCKED connections_lock_\n"));
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::passive_connection "
             "from remote peer 0x%x to local peer 0x%x\n",
@@ -463,16 +421,11 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
          //for(size_t i=0; i < num_callbacks; ++i) {
          //### Debug statements to track where associate is failing
          if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> about to call use_datalink in loop\n"));
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> RELEASE connections_lock_ to call use_datalink\n"));
          guard.release();
-         //### Debug statements to track where associate is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> RELEASED connections_lock_\n"));
          pend_client->use_datalink(remote_repo, link);
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> trying to LOCK connections_lock_ after use_datalink\n"));
 
          guard.acquire();
 
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> LOCKED connections_lock_ after use_datalink\n"));
          //pend->second[i].first->use_datalink(pend->second[i].second, link);
          //### Debug statements to track where associate is failing
          if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> finished use_datalink in loop\n"));
@@ -483,8 +436,6 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
   //if connection was pending, calls to use_datalink finalized the connection
   //if it was not previously pending, accept_datalink() will finalize connection
   this->connections_.insert(peers);
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastTransport::passive_connection --> RELEASING connections_lock_\n"));
 }
 
 bool

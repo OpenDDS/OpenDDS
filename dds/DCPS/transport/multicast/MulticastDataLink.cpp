@@ -286,15 +286,9 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
     {
       char* const ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
 
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> trying to LOCK session_lock_\n"));
-
       ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
           guard,
           this->session_lock_);
-
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> LOCKED session_lock_\n"));
 
       const TransportHeader& theader = receive_strategy()->received_header();
 

@@ -179,11 +179,7 @@ Service_Participant::Service_Participant()
 
 Service_Participant::~Service_Participant()
 {
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant try to LOCK factory_lock_\n"));
   ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant LOCKED factory_lock_\n"));
   typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
   //### Debug statements to track where test is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete discovery_types\n"));

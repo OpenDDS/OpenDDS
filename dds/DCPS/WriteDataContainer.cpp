@@ -1095,13 +1095,9 @@ WriteDataContainer::unregister_all()
   {
     //The internal list needs protection since this call may result from the
     //the delete_datawriter call which does not acquire the lock in advance.
-    //### Debug statements to track where test is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> LOCKING lock_\n"));
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
               this->lock_);
-    //### Debug statements to track where test is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> LOCKED lock_\n"));
     //### Debug statements to track where test is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriteDataContainer::unregister_all --> remove_all_messages\n"));
     // Tell transport remove all control messages currently

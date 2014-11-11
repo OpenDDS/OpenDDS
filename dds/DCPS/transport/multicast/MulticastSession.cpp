@@ -282,12 +282,7 @@ MulticastSession::synack_received(ACE_Message_Block* control)
                       this->link()->local_peer(), this->remote_peer_), 2);
 
   {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> trying to LOCK ack_lock_ \n"));
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
-
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> LOCKED ack_lock_ \n"));
 
     //### Debug statements to track where connection is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> if already acked (%d) return \n", this->acked_));
@@ -301,8 +296,6 @@ MulticastSession::synack_received(ACE_Message_Block* control)
     //### Debug statements to track where connection is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> set acked_ to true \n"));
     this->acked_ = true;
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> RELEASING ack_lock_ \n"));
   }
 }
 

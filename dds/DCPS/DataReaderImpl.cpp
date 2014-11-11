@@ -319,14 +319,8 @@ DataReaderImpl::add_association(const RepoId& yourId,
     subscription_id_ = yourId;
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::add_association: trying to LOCK publication_handle_lock_\n"));
-
   //Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::add_association: LOCKED publication_handle_lock_\n"));
 
 
   // For each writer in the list of writers to associate with, we
@@ -334,13 +328,9 @@ DataReaderImpl::add_association(const RepoId& yourId,
   // our internal maps.
   //
   {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::add_association: trying to LOCK writers_lock_\n"));
 
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::add_association: LOCKED writers_lock_\n"));
     //### Debug statements to track where associate is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::add_association: About to try to insert? Num writers before: %d\n", writers_.size()));
     const PublicationId& writer_id = writer.writerId;
@@ -405,8 +395,6 @@ DataReaderImpl::add_association(const RepoId& yourId,
             std::string(writer_converter).c_str()));
       }
     }
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::add_association: RELEASE writers_lock_\n"));
   }
 
   // Propagate the add_associations processing down into the Transport
@@ -457,23 +445,13 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
   const bool active = flags & ASSOC_ACTIVE;
   {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::transport_assoc_done: trying to LOCK publication_handle_lock_\n"));
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::transport_assoc_done: LOCKED publication_handle_lock_\n"));
-
     // Check if any publications have already sent a REQUEST_ACK message.
     {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::transport_assoc_done: trying to LOCK writers_lock_\n"));
 
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
-
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::transport_assoc_done: LOCKED writers_lock_\n"));
 
       //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::transport_assoc_done: about to look for writer associated with remote id\n"));
@@ -668,13 +646,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
   DDS::InstanceHandleSeq handles;
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::remove_associations: trying to LOCK publication_handle_lock_\n"));
-
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::remove_associations: LOCKED publication_handle_lock_\n"));
 
   // This is used to hold the list of writers which were actually
   // removed, which is a proper subset of the writers which were
@@ -826,13 +798,8 @@ DataReaderImpl::remove_all_associations()
   OpenDDS::DCPS::WriterIdSeq writers;
   int size;
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::remove_all_associations: trying to LOCK publication_handle_lock_\n"));
-
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::remove_all_associations: LOCKED publication_handle_lock_\n"));
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
@@ -870,15 +837,11 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataReaderListener_var listener =
       listener_for(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::update_incompatible_qos: trying to LOCK publication_handle_lock_\n"));
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
       guard,
       this->publication_handle_lock_);
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::update_incompatible_qos: LOCKED publication_handle_lock_\n"));
 
   if (this->requested_incompatible_qos_status_.total_count == status.total_count) {
     // This test should make the method idempotent.
@@ -1145,15 +1108,9 @@ DDS::ReturnCode_t
 DataReaderImpl::get_requested_incompatible_qos_status(
     DDS::RequestedIncompatibleQosStatus & status)
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::get_requested_incompatible_qos_status: trying to LOCK publication_handle_lock_\n"));
-
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
       this->publication_handle_lock_);
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::get_requested_incompatible_qos_status: LOCKED publication_handle_lock_\n"));
 
   set_status_changed_flag(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
       false);
@@ -1167,15 +1124,9 @@ DDS::ReturnCode_t
 DataReaderImpl::get_subscription_matched_status(
     DDS::SubscriptionMatchedStatus & status)
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::get_subscription_matched_status: trying to LOCK publication_handle_lock_\n"));
-
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
       this->publication_handle_lock_);
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::get_subscription_matched_status: LOCKED publication_handle_lock_\n"));
 
   set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, false);
   status = subscription_match_status_;
@@ -1215,18 +1166,11 @@ DataReaderImpl::get_matched_publications(
         ACE_TEXT(" Entity is not enabled. \n")),
         DDS::RETCODE_NOT_ENABLED);
   }
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::get_matched_publications: trying to LOCK publication_handle_lock_\n"));
-
-
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
       this->publication_handle_lock_,
       DDS::RETCODE_ERROR);
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::get_matched_publications: LOCKED publication_handle_lock_\n"));
 
   // Copy out the handles for the current set of publications.
   int index = 0;
@@ -1257,17 +1201,10 @@ DataReaderImpl::get_matched_publication_data(
   }
 
 
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::get_matched_publication_data: trying to LOCK publication_handle_lock_\n"));
-
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
       this->publication_handle_lock_,
       DDS::RETCODE_ERROR);
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::get_matched_publication_data: LOCKED publication_handle_lock_\n"));
 
 
   BIT_Helper_1 < DDS::PublicationBuiltinTopicDataDataReader,
@@ -1451,11 +1388,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
   // (in handle_timeout). This could cause deadlock when there are writers
   // waiting.
   {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::writer_activity --> trying to LOCK writers_lock_\n"));
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderImpl::writer_activity --> LOCKED writers_lock_\n"));
     WriterMapType::iterator iter = writers_.find(header.publication_id_);
 
     if (iter != writers_.end()) {

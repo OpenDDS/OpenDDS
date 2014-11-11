@@ -269,13 +269,9 @@ DataLink::add_on_start_callback(TransportClient* client, const RepoId& remote)
 {
   //### Debug statements to track where connection is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> enter\n"));
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> trying to LOCK strategy_lock_\n"));
 
   GuardType guard(strategy_lock_);
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> LOCKED strategy_lock_\n"));
   //### Debug statements to track where connection is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::add_on_start_callback --> NUM CALLBACKS BEFORE ADD: %d\n", on_start_callbacks_.size()));
 
@@ -300,11 +296,7 @@ DataLink::remove_on_start_callback(TransportClient* client, const RepoId& remote
 {
   //### Debug statements to track where connection is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> enter\n"));
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> trying to LOCK strategy_lock_\n"));
   GuardType guard(strategy_lock_);
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> LOCKED strategy_lock_\n"));
   //### Debug statements to track where connection is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::remove_on_start_callback --> NUM CALLBACKS BEFORE REMOVE: %d\n", on_start_callbacks_.size()));
 

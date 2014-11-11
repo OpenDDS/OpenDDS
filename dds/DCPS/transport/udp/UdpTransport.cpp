@@ -110,11 +110,7 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
 {
    //### Debug statements to track where associate is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> enter\n"));
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> about to LOCK connections_lock_\n"));
    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
-   //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> LOCKED connections_lock_\n"));
   //GuardType guard(connections_lock_);
   const PriorityKey key = blob_to_key(remote.blob_,
                                       attribs.priority_, false /* !active */);
@@ -122,8 +118,6 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
      //### Debug statements to track where associate is failing
         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> found server_link_key so return link\n"));
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink found\n"));
-    //### Debug statements to track where associate is failing
-       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> about to RELEASE connections_lock_\n"));
     return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
   }
 
@@ -133,8 +127,6 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
     pending_server_link_keys_.erase(key);
     server_link_keys_.insert(key);
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink completed\n"));
-    //### Debug statements to track where associate is failing
-       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> about to RELEASE connections_lock_\n"));
     return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
   } else {
      //### Debug statements to track where associate is failing
@@ -142,12 +134,8 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
     const DataLink::OnStartCallback callback(client, remote.repo_id_);
     pending_connections_[key].push_back(callback);
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink pending\n"));
-    //### Debug statements to track where associate is failing
-       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> about to RELEASE connections_lock_\n"));
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
-  //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> about to RELEASE connections_lock_ SHOULD NOT HAPPEN\n"));
      return AcceptConnectResult();
 }
 
@@ -161,14 +149,8 @@ UdpTransport::stop_accepting_or_connecting(TransportClient* client,
 
   VDBG((LM_DEBUG, "(%P|%t) UdpTransport::stop_accepting_or_connecting\n"));
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::stop_accepting_or_connecting --> trying to LOCK connections_lock_\n"));
-
   //GuardType guard(connections_lock_);
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::stop_accepting_or_connecting --> LOCKED connections_lock_\n"));
 
   for (PendConnMap::iterator it = pending_connections_.begin();
        it != pending_connections_.end(); ++it) {
@@ -188,13 +170,9 @@ UdpTransport::stop_accepting_or_connecting(TransportClient* client,
       pending_connections_.erase(it);
       //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::stop_accepting_or_connecting --> exit after erasing pending_connection\n"));
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::stop_accepting_or_connecting --> RELEASING connections_lock_\n"));
       return;
     }
   }
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::stop_accepting_or_connecting --> RELEASING connections_lock_\n"));
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::stop_accepting_or_connecting --> exit\n"));
 }
@@ -335,13 +313,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
   const PriorityKey key = blob_to_key(blob, priority, false /* passive */);
 
-  //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> about to LOCK connections_lock_\n"));
-
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
-
-  //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> LOCKED connections_lock_\n"));
 
   //GuardType guard(connections_lock_);
   const PendConnMap::iterator pend = pending_connections_.find(key);
@@ -350,8 +322,6 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
      //don't hold connections_lock_ while calling use_datalink
      //guard.release();
-     //### Debug statements to track where associate is failing
-       // if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> RELEASED connections_lock_\n"));
 
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection completing\n"));
 
@@ -378,12 +348,9 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
     //for(size_t i=0; i < num_callbacks; ++i) {
        //### Debug statements to track where associate is failing
        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> about to call use_datalink in loop\n"));
-       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> RELEASE connections_lock_ to call use_datalink\n"));
        guard.release();
        pend_client->use_datalink(remote_repo, link);
-       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> trying to LOCK connections_lock_ after use_datalink\n"));
        guard.acquire();
-       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> LOCKED connections_lock_ after use_datalink\n"));
       //pend->second[i].first->use_datalink(pend->second[i].second, link);
       //### Debug statements to track where associate is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> finished use_datalink in loop\n"));
@@ -394,13 +361,9 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
 
 
-    //### Debug statements to track where associate is failing
-       //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> about to LOCK connections_lock_\n"));
        //need to protect server_link_keys_ access below
     //ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
 
-    //### Debug statements to track where associate is failing
-      // if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> LOCKED connections_lock_\n"));
 
        //### Debug statements to track where associate is failing
        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> inserting key into server_link_keys\n"));
@@ -418,8 +381,6 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
     // accept_datalink() will complete the connection.
     pending_server_link_keys_.insert(key);
   }
-  //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> about to RELEASE connections_lock_\n"));
   //### Debug statements to track where associate is failing
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::passive_connection --> exit\n"));
 }

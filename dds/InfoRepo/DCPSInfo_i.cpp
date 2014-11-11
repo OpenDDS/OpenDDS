@@ -168,11 +168,7 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
    //### Debug statements to track where connection is failing
    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> begin\n"));
 
-   //### Debug statements to track where connection is failing
-   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> LOCKING lock_\n"));
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> LOCKED lock_\n"));
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find(domainId);
 
@@ -211,8 +207,6 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
                  domainId));
     }
   }
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> RELEASE lock_\n"));
   //### Debug statements to track where connection is failing
   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TAO_DDS_DCPSInfo_i::assert_topic --> end\n"));
 

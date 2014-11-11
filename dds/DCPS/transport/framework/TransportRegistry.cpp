@@ -332,18 +332,15 @@ TransportRegistry::create_inst(const std::string& name,
 {
    //### Debug statements to track where connection is failing
 if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> begin\n"));
-if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> LOCKING lock_\n"));
   GuardType guard(this->lock_);
   TransportType_rch type;
 
   if (find(this->type_map_, transport_type, type) != 0) {
 #if !defined(ACE_AS_STATIC_LIBS)
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> RELEASING guard lock_ b/c no ACE_AS_STATIC_LIBS\n"));
     guard.release();
     // Not present, try to load library
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> !defined(ACE_AS_STATIC_LIBS) -> load_transport_lib\n"));
     this->load_transport_lib(transport_type);
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> ACQUIRING guard lock_ after loading transport lib\n"));
     guard.acquire();
 
     // Try to find it again
@@ -374,8 +371,6 @@ if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::c
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> insert new inst into inst_map_\n"));
   this->inst_map_[name] = inst;
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> DONE inserting new inst into inst_map_\n"));
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> RELEASING lock_\n"));
 if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> end SUCCESS\n"));
   return inst;
 }

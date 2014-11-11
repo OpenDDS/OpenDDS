@@ -51,12 +51,7 @@ OpenDDS::DCPS::DataLinkSet::insert_link(DataLink* link)
 {
   DBG_ENTRY_LVL("DataLinkSet","insert_link",6);
   DataLink_rch mylink(link, false);
-  //### debugging many to many test failure 2to1
-  //### Debug statements to track where connection is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::insert_link --> trying to LOCK lock_\n"));
   GuardType guard(this->lock_);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::insert_link --> LOCKED lock_\n"));
   return OpenDDS::DCPS::bind(map_, mylink->id(), mylink);
 }
 
@@ -64,11 +59,7 @@ void
 OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_link", 6);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::remove_link --> trying to LOCK lock_\n"));
   GuardType guard1(this->lock_);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::remove_link --> LOCKED lock_\n"));
   if (unbind(map_, link->id()) != 0) {
     // Just report to the log that we tried.
     VDBG((LM_DEBUG,
@@ -85,11 +76,7 @@ OpenDDS::DCPS::DataLinkSet::select_links(const RepoId* remoteIds,
   DBG_ENTRY_LVL("DataLinkSet","select_links",6);
 
   DataLinkSet_rch selected_links = new DataLinkSet();
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::select_links --> trying to LOCK lock_\n"));
   GuardType guard(this->lock_);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::select_links --> LOCKED lock_\n"));
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
@@ -108,11 +95,7 @@ OpenDDS::DCPS::DataLinkSet::select_links(const RepoId* remoteIds,
 bool
 OpenDDS::DCPS::DataLinkSet::empty()
 {
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::empty --> trying to LOCK lock_\n"));
   GuardType guard(this->lock_);
-  //### debugging many to many test failure 2to1
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkSet::empty --> LOCKED lock_\n"));
 
   return map_.empty();
 }

@@ -288,6 +288,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
 void
 DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 {
+  DBG_ENTRY_LVL("DataWriterImpl", "transport_assoc_done", 6);
    //### Debug statements to track where associate is failing
   GuidConverter rem_converter(remote_id);
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::transport_assoc_done: enter method (DW: %@) assoc to remote: %C\n", this, std::string(rem_converter).c_str()));
@@ -300,19 +301,12 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
                ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
                std::string(conv).c_str()));
       }
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::transport_assoc_done: ERROR - exit method\n"));
       return;
    }
 
    if (flags & ASSOC_ACTIVE) {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::transport_assoc_done --> trying to LOCK lock_ \n"));
 
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
-
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::transport_assoc_done --> LOCKED lock_\n"));
 
       // Have we already received an association_complete() callback?
       if (assoc_complete_readers_.count(remote_id)) {
@@ -399,13 +393,8 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
             std::string(writer_converter).c_str(),
             std::string(reader_converter).c_str()));
    }
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete --> trying to LOCK lock_\n"));
 
    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete --> LOCKED lock_\n"));
 
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete --> is remote_id in assoc_complete_readers? %s  is it in pending_readers_? %s\n", assoc_complete_readers_.count(remote_id) ? "YES" : "NO", pending_readers_.count(remote_id) ? "YES" : "NO"));
 
@@ -422,8 +411,6 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete --> removed remote_id from pending_readers_ now call association_complete_i\n"));
       association_complete_i(remote_id);
    }
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete --> RELEASING lock_\n"));
 }
 
 void
@@ -473,14 +460,9 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       {         //### Debug statements to track where associate is failing
          if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> this is not a bit\n"));
-         //### Debug statements to track where associate is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> trying to LOCK lock_\n"));
 
          // protect publication_match_status_ and status changed flags.
          ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-         //### Debug statements to track where associate is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> LOCKED lock_\n"));
 
          //### Debug statements to track where associate is failing
          if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> updating publication_match_status_\n"));
@@ -639,17 +621,9 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
    DDS::InstanceHandleSeq handles;
 
    {
-     //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> LOCKING wfaLock_\n"));
       // Ensure the same acquisition order as in wait_for_acknowledgments().
       ACE_GUARD(ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> LOCKED wfaLock_\n"));
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> LOCKING lock_\n"));
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> LOCKED lock_\n"));
       //Remove the readers from fully associated reader list.
       //If the supplied reader is not in the cached reader list then it is
       //already removed. We just need remove the readers in the list that have
@@ -792,11 +766,8 @@ void DataWriterImpl::remove_all_associations()
    OpenDDS::DCPS::ReaderIdSeq readers;
    CORBA::ULong size;
    CORBA::ULong num_pending_readers;
-   {  //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_all_associations --> LOCKING lock_\n"));
+   {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_all_associations --> LOCKED lock_\n"));
 
       num_pending_readers = static_cast<CORBA::ULong>(pending_readers_.size());
       size = static_cast<CORBA::ULong>(readers_.size()) + num_pending_readers;

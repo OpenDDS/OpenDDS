@@ -86,16 +86,10 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 
    TcpDataLink_rch link;
    {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink LOCKING links_lock_\n"));
       GuardType guard(links_lock_);
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink LOCKED links_lock_\n"));
       if (find_datalink_i(key, link, client, remote.repo_id_)) {
          //### Debug statements to track where associate is failing
          if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink Found existing datalink\n"));
-         //### Debug statements to track where associate is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink RELEASE links_lock_\n"));
          return AcceptConnectResult(link._retn());
       }
       link = new TcpDataLink(key.address(), this, attribs.priority_,
@@ -104,12 +98,8 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
                "Unable to bind new TcpDataLink to "
                "TcpTransport in links_ map.\n"));
-         //### Debug statements to track where associate is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink RELEASE links_lock_\n"));
          return AcceptConnectResult();
       }
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink RELEASE links_lock_\n"));
    }
 
    //### Debug statements to track where associate is failing
@@ -330,11 +320,7 @@ TcpTransport::stop_accepting_or_connecting(TransportClient* client,
    //### Debug statements to track where connection is failing
    GuidConverter remote_converted(remote_id);
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::stop_accepting_or_connecting --> enter to stop TransportClient connecting to Remote: %C\n", std::string(remote_converted).c_str() ));
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::stop_accepting_or_connecting --> trying to LOCK connections_lock_\n"));
    GuardType guard(connections_lock_);
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::stop_accepting_or_connecting --> LOCKED connections_lock_\n"));
    typedef std::multimap<TransportClient*, DataLink_rch>::iterator iter_t;
    const std::pair<iter_t, iter_t> range =
          pending_connections_.equal_range(client);
@@ -345,8 +331,6 @@ TcpTransport::stop_accepting_or_connecting(TransportClient* client,
       iter->second->remove_on_start_callback(client, remote_id);
    }
    pending_connections_.erase(range.first, range.second);
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::stop_accepting_or_connecting --> RELEASING connections_lock_\n"));
    //### Debug statements to track where connection is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::stop_accepting_or_connecting --> exit\n"));
 }
