@@ -65,6 +65,16 @@ namespace {
 }
 
 void
+Writer::extend_sample(Messenger::Message& message)
+{
+  // Writer ID is 1 or 2
+  // Message ID is 0 to 9
+  // Lengths will vary from 15k to 165k
+  // Over 65K will require multiple fragments for udp/mcast
+  message.data.length(calc_sample_length(message.writer_id, message.sample_id));
+}
+
+void
 Writer::write(bool reliable, int num_messages)
 {
   DDS::InstanceHandleSeq handles;
@@ -109,13 +119,6 @@ Writer::write(bool reliable, int num_messages)
     message2.writer_id  = 2;
     message2.from       = "Comic Book Guy 2";
 
-    message1.data.length(66 * 1000); // requires 2 fragments for udp/mcast
-    message2.data.length(66 * 1000); // requires 2 fragments for udp/mcast
-    for (CORBA::ULong j = 0; j < message1.data.length(); ++j) {
-      message1.data[j] = j % 256;
-      message2.data[j] = 255 - (j % 256);
-    }
-
     DDS::InstanceHandle_t handle1 = message_dw1->register_instance(message1);
     DDS::InstanceHandle_t handle2 = message_dw2->register_instance(message2);
 
@@ -126,13 +129,20 @@ Writer::write(bool reliable, int num_messages)
         ACE_OS::sleep(ACE_Time_Value(0,100000));
       }
 
+      extend_sample(message1);
+      for (CORBA::ULong j = 0; j < message1.data.length(); ++j) {
+        message1.data[j] = j % 256;
+      }
+
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
                  ACE_TEXT("writer_id = %d ")
                  ACE_TEXT("sample_id = %d\n"),
+                 ACE_TEXT("extra data length = %d\n"),
                  message1.process_id.in(),
                  message1.writer_id,
-                 message1.sample_id));
+                 message1.sample_id,
+                 message1.data.length()));
       DDS::ReturnCode_t error;
       do {
         error = message_dw1->write(message1, handle1);
@@ -148,13 +158,20 @@ Writer::write(bool reliable, int num_messages)
         }
       } while (error == DDS::RETCODE_TIMEOUT);
 
+      extend_sample(message2);
+      for (CORBA::ULong j = 0; j < message2.data.length(); ++j) {
+        message2.data[j] = 255 - (j % 256);
+      }
+
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
                  ACE_TEXT("writer_id = %d ")
                  ACE_TEXT("sample_id = %d\n"),
+                 ACE_TEXT("extra data length = %d\n"),
                  message2.process_id.in(),
                  message2.writer_id,
-                 message2.sample_id));
+                 message2.sample_id,
+                 message2.data.length()));
       do {
         error = message_dw2->write(message2, handle2);
         if (error != DDS::RETCODE_OK) {
