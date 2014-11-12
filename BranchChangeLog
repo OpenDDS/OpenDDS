@@ -1,3 +1,10 @@
+Wed Nov 12 16:03:00 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Removed block of commented-out code from invoke_on_start_callbacks()
+          and simplified loop/lock interactions.
+
 Wed Nov 12 15:02:30 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/SetQosDeadline/subscriber.cpp:

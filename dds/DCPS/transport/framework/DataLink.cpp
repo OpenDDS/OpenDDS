@@ -126,51 +126,24 @@ DataLink::impl() const
 void
 DataLink::invoke_on_start_callbacks(bool success)
 {
-
    //### Debug statements to track where connection is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks with success = %s --> begin\n", success ? "true" : "false"));
 
-
    const DataLink_rch link(success ? this : 0, false);
-
-   do {
+   while (true) {
       GuardType guard(strategy_lock_);
       //### Debug statements to track where connection is failing
       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks before pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
-      if (!on_start_callbacks_.empty()) {
-         OnStartCallback last_callback = on_start_callbacks_.back();
-         on_start_callbacks_.pop_back();
-         //### Debug statements to track where connection is failing
-         if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks after pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
-         guard.release();
-         last_callback.first->use_datalink(last_callback.second, link);
+      if (on_start_callbacks_.empty()) {
+        break;
       }
-   } while (!on_start_callbacks_.empty());
-
-   //### this implementation wasn't working for when TransportClient is destroyed if there is a copy of an on start callback
-   //### out there then the TransportClient* will be invalidated while still being used
-/*
-   std::vector<OnStartCallback> local;
-   {
-      GuardType guard(strategy_lock_);
-
+      OnStartCallback last_callback = on_start_callbacks_.back();
+      on_start_callbacks_.pop_back();
       //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks swapping vector\n"));
-
-      local.swap(on_start_callbacks_);
+      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks after pop_back NUM CALLBACKS: %d\n", on_start_callbacks_.size()));
+      guard.release();
+      last_callback.first->use_datalink(last_callback.second, link);
    }
-   const DataLink_rch link(success ? this : 0, false);
-   for (size_t i = 0; i < local.size(); ++i) {
-
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks use_datalink on each callback\n"));
-
-      local[i].first->use_datalink(local[i].second, link);
-
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks use_datalink returned for callback\n"));
-   }
-*/
 
    //### Debug statements to track where connection is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLink::invoke_on_start_callbacks --> end\n"));
