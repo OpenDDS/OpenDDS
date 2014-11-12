@@ -1,3 +1,11 @@
+Wed Nov 12 15:02:30 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+
+          Updated check for subscription unmatched status to account for the
+          possibility of both events (unmatched, matched) happening before we
+          get a chance to check the status.
+
 Tue Nov 11 21:37:57 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

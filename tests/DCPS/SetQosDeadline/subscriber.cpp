@@ -168,7 +168,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       DDS::SubscriptionMatchedStatus matched;
       const DDS::Duration_t timeout = {5, 0}; // seconds
       while (dr1->get_subscription_matched_status(matched) == DDS::RETCODE_OK
-             && matched.current_count)
+             && matched.current_count == matched.total_count)
       {
         DDS::ConditionSeq active;
         ACE_DEBUG((LM_DEBUG, "(%P|%t) wait for dr1 unmatch\n"));
