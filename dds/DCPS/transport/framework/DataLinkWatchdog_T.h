@@ -148,7 +148,7 @@ private:
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> after schedule timer this->timer_id_: %d and timer_id: %d %@\n", this->timer_id_, timer_id,
       static_cast<ACE_Event_Handler*>(this)));
 
-   //after re-acquiring lock_ need to check cancelled_
+    //after re-acquiring lock_ need to check cancelled_
     //### Thought maybe would have to check timer_id_ for cancellation/prior completion
     //### this check would from scheduling multiple timers for the watchdog at the same time while starting
     //### but seems that if you check that value you may lose necessary timers down the line so simply allow

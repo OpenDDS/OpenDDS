@@ -110,7 +110,7 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
 {
    //### Debug statements to track where associate is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:UdpTransport::accept_datalink --> enter\n"));
-   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
   //GuardType guard(connections_lock_);
   const PriorityKey key = blob_to_key(remote.blob_,
                                       attribs.priority_, false /* !active */);

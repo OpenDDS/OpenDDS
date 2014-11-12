@@ -1,3 +1,30 @@
+Wed Nov 12 21:37:13 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Manual style and formatting adjustments to avoid spurious
+          changes relative to the trunk.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Automated style and formatting changes (with some manual tweaks)
+          using the scripts in...
+
+        * tools/scripts/style/astyle.options:
+        * tools/scripts/style/style.sh:
+
+          Updated
+
 Wed Nov 12 16:03:00 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

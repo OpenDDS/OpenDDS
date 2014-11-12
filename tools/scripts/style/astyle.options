@@ -9,5 +9,6 @@
 --min-conditional-indent=0
 --break-blocks=all
 --unpad-paren
+--pad-header
 --convert-tabs
 --preserve-date

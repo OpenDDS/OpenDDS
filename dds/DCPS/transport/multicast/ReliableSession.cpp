@@ -422,7 +422,7 @@ ReliableSession::start(bool active, bool acked)
    //### Debug statements to track where associate is failing
    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:ReliableSession::start --> enter\n"));
 
-   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->start_lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->start_lock_, false);
   //###ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->start_lock_, false);
 
   if (this->started_) {
