@@ -1,3 +1,7 @@
+Wed Nov 12 23:23:42 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6581 through r6592
+
 Wed Nov 12 21:37:13 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

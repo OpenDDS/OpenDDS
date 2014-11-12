@@ -61,7 +61,6 @@ TransportQueueElement::clone_mb(const ACE_Message_Block* msg,
                                 MessageBlockAllocator* mb_allocator,
                                 DataBlockAllocator* db_allocator)
 {
-  DBG_ENTRY_LVL("TransportQueueElement", "clone_mb", 6);
   ACE_Message_Block* cur_block = const_cast<ACE_Message_Block*>(msg);
   ACE_Message_Block* head_copy = 0;
   ACE_Message_Block* cur_copy  = 0;

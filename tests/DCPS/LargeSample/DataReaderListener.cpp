@@ -12,6 +12,7 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/Service_Participant.h>
 
+#include "Writer.h"
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
@@ -94,7 +95,9 @@ throw(CORBA::SystemException)
             valid_ = false;
           }
 
-          const unsigned int data_size = 66 * 1000;
+          const unsigned int data_size = Writer::calc_sample_length(
+            message.writer_id, message.sample_id
+          );
           if (message.data.length() != data_size) {
             std::cout << "ERROR: Expected message.data to have a size of " << data_size
                       << " but it is " << message.data.length() << "\n";
