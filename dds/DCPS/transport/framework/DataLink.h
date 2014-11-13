@@ -377,13 +377,15 @@ private:
   /// data_received() on the default_listener_.
   TransportReceiveListener* default_listener_;
 
+  mutable LockType pub_sub_maps_lock_;
+
   /// Map associating each publisher_id with a set of
   /// TransportReceiveListener objects (each with an associated
   /// subscriber_id).  This map is used for delivery of incoming
   /// (aka, received) data samples.
   ReceiveListenerSetMap pub_map_;
 
-  mutable LockType pub_map_lock_;
+  //mutable LockType pub_map_lock_;
 
   /// Map associating each subscriber_id with the set of publisher_ids.
   /// In essence, the pub_map_ and sub_map_ are the "mirror image" of
@@ -391,7 +393,7 @@ private:
   /// association being managed here.
   RepoIdSetMap sub_map_;
 
-  mutable LockType sub_map_lock_;
+  //mutable LockType sub_map_lock_;
 
   /// A (smart) pointer to the TransportImpl that created this DataLink.
   TransportImpl_rch impl_;

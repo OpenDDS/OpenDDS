@@ -1,3 +1,12 @@
+Thu Nov 13 22:52:28 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Changed locking in DataLink to use a single lock to guard
+          both pub and sub maps.
+
 Wed Nov 12 23:23:42 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r6581 through r6592

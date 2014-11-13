@@ -333,13 +333,10 @@ ACE_INLINE
 void
 DataLink::remove_listener(const RepoId& local_id)
 {
-  {
-    GuardType guard(this->pub_map_lock_);
+  GuardType guard(this->pub_sub_maps_lock_);
     if (this->send_listeners_.erase(local_id)) {
       return;
     }
-  }
-  GuardType guard(this->sub_map_lock_);
   this->recv_listeners_.erase(local_id);
 }
 
@@ -375,7 +372,7 @@ ACE_INLINE
 void
 DataLink::default_listener(TransportReceiveListener* trl)
 {
-  GuardType guard(this->pub_map_lock_);
+  GuardType guard(this->pub_sub_maps_lock_);
   this->default_listener_ = trl;
 }
 
@@ -383,7 +380,7 @@ ACE_INLINE
 TransportReceiveListener*
 DataLink::default_listener() const
 {
-  GuardType guard(this->pub_map_lock_);
+  GuardType guard(this->pub_sub_maps_lock_);
   return this->default_listener_;
 }
 
