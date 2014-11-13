@@ -137,7 +137,7 @@ Writer::write(bool reliable, int num_messages)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
                  ACE_TEXT("writer_id = %d ")
-                 ACE_TEXT("sample_id = %d\n"),
+                 ACE_TEXT("sample_id = %d ")
                  ACE_TEXT("extra data length = %d\n"),
                  message1.process_id.in(),
                  message1.writer_id,
@@ -166,7 +166,7 @@ Writer::write(bool reliable, int num_messages)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)%N:%l: Sending Message: process_id = %C ")
                  ACE_TEXT("writer_id = %d ")
-                 ACE_TEXT("sample_id = %d\n"),
+                 ACE_TEXT("sample_id = %d ")
                  ACE_TEXT("extra data length = %d\n"),
                  message2.process_id.in(),
                  message2.writer_id,

@@ -1,3 +1,10 @@
+Thu Nov 13 16:03:35 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+
+          Fixed a warning and corrected ACE_DEBUG varargs error.
+
 Tue Nov 11 19:03:42 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Footprint:
