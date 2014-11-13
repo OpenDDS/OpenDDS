@@ -947,18 +947,21 @@ DomainParticipantImpl::delete_contained_entities()
                      this->topics_protector_,
                      DDS::RETCODE_ERROR);
 
-    while (1) {
-      if (topics_.begin() == topics_.end()) {
-        break;
-      }
+    TopicMap::iterator topicIter = topics_.begin();
+    DDS::Topic_ptr topicPtr;
+    size_t topicsize = topics_.size();
+
+    while (topicsize > 0) {
+      topicPtr = topicIter->second.pair_.obj_.in();
+      ++topicIter;
 
       // Delete the topic the reference count.
-      DDS::ReturnCode_t result = this->delete_topic_i(
-                                     topics_.begin()->second.pair_.obj_.in(), true);
+      DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
 
       if (result != DDS::RETCODE_OK) {
-        ret = result;
+        return result;
       }
+      topicsize--;
     }
   }
 
