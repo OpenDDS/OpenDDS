@@ -2608,6 +2608,13 @@ DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
   }
 }
 
+void
+DataWriterImpl::prepare_to_delete()
+{
+  this->set_deleted(true);
+  this->stop_associating();
+}
+
 PublicationInstance*
 DataWriterImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 {

@@ -50,9 +50,11 @@ TransportClient::~TransportClient()
                std::string(converter).c_str()));
   }
 
+  this->stop_associating();
+
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  for (DataLinkSet::MapType::iterator iter = links_.map().begin();
+    for (DataLinkSet::MapType::iterator iter = links_.map().begin();
        iter != links_.map().end(); ++iter) {
     //### Debug statements to track where connection is failing
     GuidConverter repo_converted(repo_id_);
@@ -580,26 +582,6 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   //### do all further uses simply look up by value and modify references that way?
   RepoId remote_id(remote_id_ref);
 
-  if (pending_.size() > 0) {
-    PendingMap::iterator iter_print = pending_.begin();
-
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i PRINT OUT ALL PENDING ASSOC IN PENDINGMAP (current size: %d)\n", pending_.size()));
-
-    int i = 0;
-
-    while (iter_print != pending_.end()) {
-      //### Debug statements to track where associate is failing
-      GuidConverter remote_print(iter_print->first);
-      GuidConverter local_conv(this->repo_id_);
-
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i --> PendingAssoc #%d (%C) is for remote: %C\n", i, std::string(local_conv).c_str(), std::string(remote_print).c_str()));
-
-      iter_print++;
-      i++;
-    }
-  }
-
   PendingMap::iterator iter = pending_.find(remote_id);
 
   if (iter == pending_.end()) {
@@ -619,7 +601,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   if (pend.removed_) { // no-op
     //### Debug statements to track where associate is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i pend was removed previously\n"));
-
+    return;
   } else if (link.is_nil()) {
     //### Debug statements to track where associate is failing
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportClient::use_datalink_i pend's link is nil try to initiate_connect if active(%b)\n", pend.active_));

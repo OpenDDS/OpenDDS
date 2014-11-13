@@ -2685,6 +2685,13 @@ DataReaderImpl::statistics_enabled(
   this->statistics_enabled_ = statistics_enabled;
 }
 
+void
+DataReaderImpl::prepare_to_delete()
+{
+  this->set_deleted(true);
+  this->stop_associating();
+}
+
 SubscriptionInstance*
 DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 {

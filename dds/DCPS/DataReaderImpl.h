@@ -146,6 +146,7 @@ class OpenDDS_Dcps_Export DataReaderImpl
 public:
   friend class RequestedDeadlineWatchdog;
   friend class QueryConditionImpl;
+  friend class SubscriberImpl;
 
   typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
 
@@ -497,6 +498,8 @@ public:
   void disable_transport();
 
 protected:
+
+  void prepare_to_delete();
 
   SubscriberImpl* get_subscriber_servant();
 

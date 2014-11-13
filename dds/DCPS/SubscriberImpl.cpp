@@ -274,7 +274,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:SubscriberImpl::delete_datareader --> setting deleted_ to true\n"));
     //### toggle deleted_ to stop any future associating
     // mark that the entity is being deleted
-    dr_servant->set_deleted(true);
+    dr_servant->prepare_to_delete();
   }
 
   {

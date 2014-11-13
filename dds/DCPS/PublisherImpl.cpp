@@ -198,8 +198,10 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
   DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
   if (dw_servant) {
+    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::delete_datawriter --> setting deleted_ to true\n"));
+
     // mark that the entity is being deleted
-    dw_servant->set_deleted(true);
+    dw_servant->prepare_to_delete();
   }
 
   if (!dw_servant) {
@@ -226,10 +228,6 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
  //### Debug statements to track where test is failing
   GuidConverter pubID_conv2(dw_servant->get_publication_id());
   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::delete_datawriter --> to delete datawriter: %C\n", std::string(pubID_conv2).c_str()));
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:PublisherImpl::delete_datawriter --> setting deleted_ to true\n"));
-  // mark that the entity is being deleted
-  dw_servant->set_deleted(true);
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so

@@ -465,6 +465,8 @@ public:
 
 protected:
 
+  void prepare_to_delete();
+
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
 
