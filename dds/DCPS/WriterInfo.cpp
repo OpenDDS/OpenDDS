@@ -12,7 +12,6 @@
 #include "WriterInfo.h"
 
 #include "ace/OS_NS_sys_time.h"
-#include "async_debug.h"
 
 #include <sstream>
 
@@ -168,13 +167,7 @@ WriterInfo::check_activity(const ACE_Time_Value& now)
 void
 WriterInfo::removed()
 {
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriterInfo::removed --> enter\n"));
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriterInfo::removed --> call writer_removed\n"));
   reader_->writer_removed(*this);
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:WriterInfo::removed --> exit\n"));
 }
 
 void

@@ -16,7 +16,6 @@
 #include "TransportSendListener.h"
 
 #include "EntryExit.h"
-#include "dds/DCPS/async_debug.h"
 
 #if !defined (__ACE_INLINE__)
 #include "DataLinkSet.inl"

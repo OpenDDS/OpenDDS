@@ -24,8 +24,6 @@
 #include "SendStateDataSampleList.h"
 #include "DataSampleElement.h"
 
-#include "async_debug.h"
-
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif
@@ -132,21 +130,12 @@ DataWriterImpl::~DataWriterImpl()
 void
 DataWriterImpl::cleanup()
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::cleanup --> enter\n"));
-
   if (cancel_timer_) {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::cleanup --> need to cancel timer --> calls handle_close\n"));
-
     // The cancel_timer will call handle_close to
     // remove_ref.
     (void) reactor_->cancel_timer(this, 0);
     cancel_timer_ = false;
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::cleanup --> release topic\n"));
 
   // release our Topic_var
   topic_objref_ = DDS::Topic::_nil();
@@ -155,9 +144,6 @@ DataWriterImpl::cleanup()
   topic_servant_ = 0;
 
   dw_local_objref_ = DDS::DataWriter::_nil();
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::cleanup --> exit\n"));
 }
 
 void
@@ -225,10 +211,6 @@ DataWriterImpl::add_association(const RepoId& yourId,
                                 const ReaderAssociation& reader,
                                 bool active)
 {
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::add_association: enter method\n"));
-
   DBG_ENTRY_LVL("DataWriterImpl", "add_association", 6);
 
   if (DCPS_debug_level) {
@@ -285,19 +267,12 @@ DataWriterImpl::add_association(const RepoId& yourId,
                  ACE_TEXT("ERROR: transport layer failed to associate.\n")));
     }
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::add_association: DONE exit method\n"));
 }
 
 void
 DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "transport_assoc_done", 6);
-  //### Debug statements to track where associate is failing
-  GuidConverter rem_converter(remote_id);
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::transport_assoc_done: enter method (DW: %@) assoc to remote: %C\n", this, std::string(rem_converter).c_str()));
 
   if (!(flags & ASSOC_OK)) {
     if (DCPS_debug_level) {
@@ -317,8 +292,6 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     // Have we already received an association_complete() callback?
     if (assoc_complete_readers_.count(remote_id)) {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::transport_assoc_done --> found assoc_complete_reader_ about to call association_complete_i\n"));
 
       assoc_complete_readers_.erase(remote_id);
       association_complete_i(remote_id);
@@ -350,9 +323,6 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     disco->association_complete(domain_id_, participant_servant_->get_id(),
                                 publication_id_, remote_id);
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::transport_assoc_done: exit method\n"));
 }
 
 DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
@@ -407,20 +377,13 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete --> is remote_id in assoc_complete_readers? %s  is it in pending_readers_? %s\n", assoc_complete_readers_.count(remote_id) ? "YES" : "NO", pending_readers_.count(remote_id) ? "YES" : "NO"));
-
   if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete --> failed to remove remote_id from pending_readers_ so insert into assoc_complete_readers_\n"));
 
     // Not found in pending_readers_, defer calling association_complete_i()
     // until add_association() resumes and sees this ID in assoc_complete_readers_.
     assoc_complete_readers_.insert(remote_id);
 
   } else {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete --> removed remote_id from pending_readers_ now call association_complete_i\n"));
-
     association_complete_i(remote_id);
   }
 }
@@ -428,9 +391,6 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
 void
 DataWriterImpl::association_complete_i(const RepoId& remote_id)
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> enter\n"));
-
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
   bool reader_durable = false;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -465,23 +425,14 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     this->monitor_->report();
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> about to check if is_bit_ (if not start sending stuff)\n"));
-
   if (!is_bit_) {
 
     DDS::InstanceHandle_t handle =
       this->participant_servant_->get_handle(remote_id);
 
     {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> this is not a bit\n"));
-
       // protect publication_match_status_ and status changed flags.
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
-
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> updating publication_match_status_\n"));
 
       // update the publication_match_status_
       ++publication_match_status_.total_count;
@@ -509,25 +460,13 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       publication_match_status_.last_subscription_handle = handle;
 
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> set status_changed_flag()\n"));
-
       set_status_changed_flag(DDS::PUBLICATION_MATCHED_STATUS, true);
     }
 
     DDS::DataWriterListener_var listener =
       listener_for(DDS::PUBLICATION_MATCHED_STATUS);
 
-    if (CORBA::is_nil(listener.in())) {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> listener IS NIL\n"));
-
-    }
-
     if (!CORBA::is_nil(listener.in())) {
-
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> about to call on_publication_matched on listener\n"));
 
       listener->on_publication_matched(dw_local_objref_.in(),
                                        publication_match_status_);
@@ -538,20 +477,11 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       publication_match_status_.current_count_change = 0;
     }
 
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> notify_status_condition()\n"));
-
     notify_status_condition();
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> about to check if reader_durable\n"));
-
   // Support DURABILITY QoS
   if (reader_durable) {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> reader IS DURABLE\n"));
-
     // Tell the WriteDataContainer to resend all sending/sent
     // samples.
     this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
@@ -600,9 +530,6 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       send_end_historic_samples(remote_id);
     }
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::association_complete_i --> exit\n"));
 }
 
 void
@@ -612,9 +539,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   if (readers.length() == 0) {
     return;
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> enter\n"));
 
   if (DCPS_debug_level >= 1) {
     GuidConverter writer_converter(publication_id_);
@@ -628,10 +552,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                readers.length()));
   }
 
-  //### stop pending associations
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> call stop_associating\n"));
-
+  // stop pending associations
   this->stop_associating();
 
   ReaderIdSeq fully_associated_readers;
@@ -691,9 +612,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                    std::string(converter).c_str()));
       }
 
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> erase reader from reader_info_\n"));
-
       ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
       reader_info_.erase(readers[i]);
       //else reader is already removed which indicates remove_association()
@@ -706,9 +624,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
       if (this->lookup_instance_handles(fully_associated_readers, handles) == false) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::remove_associations: "
                    "lookup_instance_handles failed, notify %d \n", notify_lost));
-
-        //### Debug statements to track where associate is failing
-        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> exit lookup_instance_handles failed\n"));
 
         return;
       }
@@ -755,18 +670,12 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
           this->publication_match_status_.current_count_change = 0;
         }
 
-        //### Debug statements to track where associate is failing
-        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> notify status_condition\n"));
-
         this->notify_status_condition();
       }
     }
   }
 
   for (CORBA::ULong i = 0; i < rds.length(); ++i) {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> call TransportClient disassociate\n"));
-
     this->disassociate(rds[i]);
   }
 
@@ -774,25 +683,14 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   // detects a lost reader then make a callback to notify
   // subscription lost.
   if (notify_lost && handles.length() > 0) {
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> notify_publication_lost\n"));
-
     this->notify_publication_lost(handles);
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> exit\n"));
 }
 
 void DataWriterImpl::remove_all_associations()
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_all_associations --> enter\n"));
-
-  //### stop pending associations
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_associations --> call stop_associating\n"));
-
+  DBG_ENTRY_LVL("DataWriterImpl", "remove_all_associations", 6);
+  // stop pending associations
   this->stop_associating();
 
   OpenDDS::DCPS::ReaderIdSeq readers;
@@ -828,22 +726,16 @@ void DataWriterImpl::remove_all_associations()
 
   try {
     if (0 < size) {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_all_associations --> set dont_notify_lost = false\n"));
-
       CORBA::Boolean dont_notify_lost = false;
-
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_all_associations --> remove_associations\n"));
 
       this->remove_associations(readers, dont_notify_lost);
     }
 
   } catch (const CORBA::Exception&) {
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_all_associations() - ")
+                 ACE_TEXT("caught exception from remove_associations.\n")));
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::remove_all_associations --> exit\n"));
 }
 
 void
@@ -1536,9 +1428,6 @@ DataWriterImpl::get_matched_subscription_data(
 DDS::ReturnCode_t
 DataWriterImpl::enable()
 {
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> enter \n"));
-
   //According spec:
   // - Calling enable on an already enabled Entity returns OK and has no
   // effect.
@@ -1546,16 +1435,10 @@ DataWriterImpl::enable()
   // and return PRECONDITION_NOT_MET.
 
   if (this->is_enabled()) {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> ALREADY ENABLED (exiting)\n"));
-
     return DDS::RETCODE_OK;
   }
 
   if (this->publisher_servant_->is_enabled() == false) {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> publisher_servant NOT ENABLED YET (exiting)\n"));
-
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -1663,9 +1546,6 @@ DataWriterImpl::enable()
     liveliness_check_interval_ *=
       TheServiceParticipant->liveliness_factor()/100.0;
 
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> about to try schedule_timer for liveliness \n"));
-
     if (reactor_->schedule_timer(this,
                                  0,
                                  liveliness_check_interval_,
@@ -1675,9 +1555,6 @@ DataWriterImpl::enable()
                  ACE_TEXT("schedule_timer")));
 
     } else {
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> schedule_timer liveliness_timer SUCCESSFUL (%@)\n", static_cast<ACE_Event_Handler*>(this)));
-
       cancel_timer_ = true;
       this->_add_ref();
     }
@@ -1729,11 +1606,6 @@ DataWriterImpl::enable()
                            trans_conf_info,
                            pub_qos);
 
-  //### Debug statements to track where connection is failing
-  GuidConverter pub_after_add(this->publication_id_);
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> after disco->add_publication for publication: %C\n", std::string(pub_after_add).c_str()));
-
   if (this->publication_id_ == GUID_UNKNOWN) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable, ")
@@ -1756,11 +1628,6 @@ DataWriterImpl::enable()
   // queue.
   if (durability_cache != 0) {
 
-    //### Debug statements to track where connection is failing
-    GuidConverter pub_on_get_data(this->publication_id_);
-
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> durability_cache !=0 so try to get_data for publication: %C\n", std::string(pub_on_get_data).c_str()));
-
     if (!durability_cache->get_data(this->domain_id_,
                                     get_topic_name(),
                                     get_type_name(),
@@ -1776,11 +1643,6 @@ DataWriterImpl::enable()
 
 #endif
 
-  //### Debug statements to track where connection is failing
-  GuidConverter pub_on_exit(this->publication_id_);
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::enable --> exit returning writer_enabled_result: %s for enabling publication: %C\n", writer_enabled_result == DDS::RETCODE_OK ? "ENABLED" : "NOT ENABLED" ,std::string(pub_on_exit).c_str()));
-
   return writer_enabled_result;
 }
 
@@ -1789,11 +1651,6 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                                     DataSample* data,
                                     const DDS::Time_t & source_timestamp)
 {
-  //### Debug statements to track where connection is failing
-  GuidConverter pub_to_register(this->publication_id_);
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::register_instance_i --> enter trying to register publication: %C\n", std::string(pub_to_register).c_str()));
-
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
 
   if (enabled_ == false) {
@@ -1818,11 +1675,6 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
     this->monitor_->report();
   }
 
-  //### Debug statements to track where connection is failing
-  GuidConverter pub_cntrl(this->publication_id_);
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::register_instance_i --> about to create_control_message INSTANCE_REGISTRATION for publication: %C\n", std::string(pub_cntrl).c_str()));
-
   // Add header with the registration sample data.
   DataSampleHeader header;
   ACE_Message_Block* registered_sample =
@@ -1830,11 +1682,6 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                                  header,
                                  data,
                                  source_timestamp);
-
-  //### Debug statements to track where connection is failing
-  GuidConverter pub_send_cntrl(this->publication_id_);
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::register_instance_i --> about to send_control INSTANCE_REGISTRATION for publication: %C\n", std::string(pub_send_cntrl).c_str()));
 
   if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1851,9 +1698,6 @@ DDS::ReturnCode_t
 DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
                                       const DDS::Time_t & source_timestamp)
 {
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instance_i --> enter\n"));
-
   DBG_ENTRY_LVL("DataWriterImpl","unregister_instance_i",6);
 
   if (enabled_ == false) {
@@ -1866,16 +1710,10 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
   // According to spec 1.2, autodispose_unregistered_instances true causes
   // dispose on the instance prior to calling unregister operation.
   if (this->qos_.writer_data_lifecycle.autodispose_unregistered_instances) {
-    //### Debug statements to track where test is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instance_i --> try to dispose if autodispose unregistered instances\n"));
-
     this->dispose(handle, source_timestamp);
   }
 
   DataSample* unregistered_sample_data = 0;
-
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instance_i --> data_container_ unregister()\n"));
 
   DDS::ReturnCode_t const ret =
     this->data_container_->unregister(handle,
@@ -1889,18 +1727,12 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
                      ret);
   }
 
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instance_i --> create constrol message UNREGISTER_INSTANCE\n"));
-
   DataSampleHeader header;
   ACE_Message_Block* message =
     this->create_control_message(UNREGISTER_INSTANCE,
                                  header,
                                  unregistered_sample_data,
                                  source_timestamp);
-
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instance_i --> send UNREGISTER_INSTANCE control message\n"));
 
   if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1909,18 +1741,12 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
                      DDS::RETCODE_ERROR);
   }
 
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instance_i --> exit\n"));
-
   return ret;
 }
 
 void
 DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 {
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instances --> enter\n"));
-
   PublicationInstanceMapType::iterator it =
     this->data_container_->instances_.begin();
 
@@ -1928,14 +1754,8 @@ DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
     DDS::InstanceHandle_t handle = it->first;
     ++it; // avoid mangling the iterator
 
-    //### Debug statements to track where test is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instances --> u\n"));
-
     this->unregister_instance_i(handle, source_timestamp);
   }
-
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_instances --> end\n"));
 }
 
 DDS::ReturnCode_t
@@ -2102,25 +1922,13 @@ DataWriterImpl::num_samples(DDS::InstanceHandle_t handle,
 void
 DataWriterImpl::unregister_all()
 {
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_all --> enter\n"));
-
   if (cancel_timer_) {
-    //### Debug statements to track where test is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_all --> cancel timer for DataWriterImpl\n"));
-
     // The cancel_timer will call handle_close to remove_ref.
     (void) reactor_->cancel_timer(this, 0);
     cancel_timer_ = false;
   }
 
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_all --> data_container_ -> unregister_all\n"));
-
   data_container_->unregister_all();
-
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::unregister_all --> exit\n"));
 }
 
 RepoId
@@ -2558,8 +2366,6 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
                         ACE_TEXT("schedule_timer")),
                        -1);
 
-    } else {
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterImpl::handle_timeout --> schedule_timer liveliness_timer SUCCESSFUL (%@)\n", static_cast<ACE_Event_Handler*>(this)));
     }
   }
 

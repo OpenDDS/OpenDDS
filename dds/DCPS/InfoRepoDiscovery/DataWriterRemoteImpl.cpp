@@ -9,7 +9,6 @@
 #include "DataWriterRemoteImpl.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/async_debug.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -48,44 +47,30 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
                                       const ReaderAssociation& reader,
                                       bool active)
 {
-   //### Debug statements to track where associate is failing
-  GuidConverter yourID_converted(yourId);
-  GuidConverter remoteID_converted(reader.readerId);
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::add_association: enter method yourID: %C remoteID: %C\n", std::string(yourID_converted).c_str(), std::string(remoteID_converted).c_str()));
+  if (DCPS_debug_level) {
+    GuidConverter writer_converter(yourId);
+    GuidConverter reader_converter(reader.readerId);
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterRemoteImpl::add_association - ")
+               ACE_TEXT("local %C remote %C\n"),
+               std::string(writer_converter).c_str(),
+               std::string(reader_converter).c_str()));
+  }
 
   DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
-     //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::add_association: about to guard mutex_ method\n"));
     ACE_GUARD(ACE_Thread_Mutex, g, this->mutex_);
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::add_association: mutex_ LOCKED to getDataWriter\n"));
     dwv = getDataWriter(this->parent_);
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::add_association: got dataWriter assigning to parent\n"));
     parent = this->parent_;
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::add_association: mutex_ RELEASED\n"));
   }
   if (parent) {
-     //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::add_association: have parent, add_association\n"));
     parent->add_association(yourId, reader, active);
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::add_association: parent done with add_association\n"));
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::add_association: exit method\n"));
 }
 
 void
 DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
 {
-
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::association_complete: enter method\n"));
   DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {
@@ -96,9 +81,6 @@ DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
   if (parent) {
     parent->association_complete(remote_id);
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataWriterRemoteImpl::association_complete: exit method\n"));
 }
 
 void

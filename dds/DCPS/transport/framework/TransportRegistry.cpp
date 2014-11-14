@@ -16,7 +16,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/ConfigUtils.h"
-#include "dds/DCPS/async_debug.h"
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
@@ -330,8 +329,6 @@ TransportInst_rch
 TransportRegistry::create_inst(const std::string& name,
                                const std::string& transport_type)
 {
-   //### Debug statements to track where connection is failing
-if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> begin\n"));
   GuardType guard(this->lock_);
   TransportType_rch type;
 
@@ -339,7 +336,6 @@ if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::c
 #if !defined(ACE_AS_STATIC_LIBS)
     guard.release();
     // Not present, try to load library
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> !defined(ACE_AS_STATIC_LIBS) -> load_transport_lib\n"));
     this->load_transport_lib(transport_type);
     guard.acquire();
 
@@ -350,7 +346,6 @@ if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::c
                  ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
                  ACE_TEXT("transport_type=%C is not registered.\n"),
                  transport_type.c_str()));
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> NOT REGISTERED returning\n"));
       return TransportInst_rch();
 #if !defined(ACE_AS_STATIC_LIBS)
     }
@@ -362,16 +357,10 @@ if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::c
                ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
                ACE_TEXT("name=%C is already in use.\n"),
                name.c_str()));
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> ALREADY IN USE returning\n"));
     return TransportInst_rch();
   }
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> create new_inst()\n"));
   TransportInst_rch inst = type->new_inst(name);
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> DONE creating new_inst()\n"));
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> insert new inst into inst_map_\n"));
   this->inst_map_[name] = inst;
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> DONE inserting new inst into inst_map_\n"));
-if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::create_inst --> end SUCCESS\n"));
   return inst;
 }
 
@@ -488,8 +477,6 @@ TransportRegistry::register_type(const TransportType_rch& type)
 void
 TransportRegistry::release()
 {
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::release --> enter\n"));
   DBG_ENTRY_LVL("TransportRegistry", "release", 6);
   GuardType guard(this->lock_);
 
@@ -505,8 +492,6 @@ TransportRegistry::release()
   domain_default_config_map_.clear();
   global_config_ = 0;
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportRegistry::release --> exit\n"));
 }
 
 

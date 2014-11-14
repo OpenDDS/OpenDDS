@@ -13,8 +13,6 @@
 #include "TcpDataLink.h"
 #include "TcpConnection.h"
 
-#include "dds/DCPS/async_debug.h"
-
 #include <sstream>
 
 #if !defined (__ACE_INLINE__)
@@ -30,9 +28,6 @@ OpenDDS::DCPS::TcpReceiveStrategy::TcpReceiveStrategy(
   , reactor_task_(task)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","TcpReceiveStrategy",6);
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpReceiveStrategy::TcpReceiveStrategy --> constructor finishing\n"));
 }
 
 OpenDDS::DCPS::TcpReceiveStrategy::~TcpReceiveStrategy()
@@ -65,8 +60,6 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
   (ReceivedDataSample& sample, const ACE_INET_Addr&)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","deliver_sample",6);
-  //### Debug statements to track where connection is failing
-  //if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpReceiveStrategy::deliver_sample --> message_id: %d \n", sample.header_.message_id_));
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
     this->gracefully_disconnected_ = true;
@@ -83,10 +76,6 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
 int
 OpenDDS::DCPS::TcpReceiveStrategy::start_i()
 {
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpReceiveStrategy::start_i --> begin\n"));
-
   DBG_ENTRY_LVL("TcpReceiveStrategy","start_i",6);
 
   // Tell the TcpConnection that we are the object that it should
@@ -120,9 +109,6 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
                       "reactor %@ %p\n", this->connection_.in(), ACE_TEXT("register_handler")),
                      -1);
   }
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpReceiveStrategy::start_i --> end SUCCESS\n"));
 
   return 0;
 }

@@ -24,8 +24,6 @@
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidConverter.h"
 
-#include "dds/DCPS/async_debug.h"
-
 #include <sstream>
 
 namespace OpenDDS {
@@ -73,9 +71,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_datalink", 6);
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink ENTRY\n"));
-
   const PriorityKey key =
     blob_to_key(remote.blob_, attribs.priority_, true /*active*/);
 
@@ -90,9 +85,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
-      //### Debug statements to track where associate is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink Found existing datalink\n"));
-
       return AcceptConnectResult(link._retn());
     }
 
@@ -107,9 +99,6 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     }
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink CREATING NEW LINK AND CONNECTION\n"));
-
   TcpConnection_rch connection =
     new TcpConnection(key.address(), link->transport_priority(), tcp_config_);
   connection->set_datalink(link.in());
@@ -117,36 +106,18 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   TcpConnection* pConn = connection.in();
   TcpConnection_rch reactor_refcount(connection); // increment for reactor callback
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink ABOUT TO TELL connector_ TO CONNECT\n"));
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink ABOUT TO TELL connector_ TO CONNECT, is pConn nil? %s\n", pConn==0 ? "YES" : "NO"));
-
   ACE_TCHAR str[64];
   key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]));
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink ABOUT TO TELL connector_ TO CONNECT, remote_address is: %s  \n",str));
 
   // Can't make this call while holding onto TransportClient::lock_
   const int ret =
     connector_.connect(pConn, key.address(), ACE_Synch_Options::asynch);
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink CALL TO CONNECT RETURNED\n"));
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink CALL TO CONNECT RETURNED WITH errno = %s\n", errno == EWOULDBLOCK ? "EWOULDBLOCK" : "OTHER"));
-
   if (ret == -1 && errno != EWOULDBLOCK) {
-
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink ERROR\n"));
 
     VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"), 2);
     return AcceptConnectResult();
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink CONNECT RETURNED WITH VALUE: %d\n", ret));
 
   // Don't decrement count when reactor_refcount goes out of scope, see
   // TcpConnection::open()
@@ -159,20 +130,12 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link._retn());
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink ABOUT TO ADD_ON_START_CALLBACK\n"));
-
   if (!link->add_on_start_callback(client, remote.repo_id_)) {
     // link was started by the reactor thread before we could add a callback
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink COULDN'T ADD_ON_START_CALLBACK B/C REACTOR THREAD STARTED LINK ALREADY\n"));
 
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink got link.\n"), 2);
     return AcceptConnectResult(link._retn());
   }
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_datalink ADD_ON_START_CALLBACK SUCCESSFUL CONNECT_DATALINK PENDING\n"));
 
   add_pending_connection(client, link.in());
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 2);
@@ -183,9 +146,6 @@ void
 TcpTransport::async_connect_failed(const PriorityKey& key)
 {
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::async_connect_failed --> begin\n"));
-
   ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to make active connection.\n"));
   GuardType guard(links_lock_);
   TcpDataLink_rch link;
@@ -194,23 +154,15 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
   guard.release();
 
   if (link.in()) {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::async_connect_failed --> invoke_on_start_callbacks\n"));
-
     link->invoke_on_start_callbacks(false);
   }
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::async_connect_failed --> end\n"));
 }
 
 bool
 TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
                               TransportClient* client, const RepoId& remote_id)
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::find_datalink_i enter method\n"));
-
   if (links_.find(key, link) == 0 /*OK*/) {
     if (!link->add_on_start_callback(client, remote_id)) {
       VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
@@ -250,11 +202,13 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
                               const ConnectionAttribs& attribs,
                               TransportClient* client)
 {
-  //### Debug statements to track where connection is failing
   GuidConverter remote_conv(remote.repo_id_);
   GuidConverter local_conv(attribs.local_id_);
 
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> enter %C accepting connection from %C\n", std::string(local_conv).c_str(), std::string(remote_conv).c_str()));
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink local %C "
+            "accepting connection from remote %C\n",
+            std::string(local_conv).c_str(),
+            std::string(remote_conv).c_str()), 5);
 
   GuardType guard(connections_lock_);
   const PriorityKey key =
@@ -270,14 +224,10 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> found datalink, return link\n"));
 
       return AcceptConnectResult(link._retn());
 
     } else {
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> link not found, create link\n"));
 
       link = new TcpDataLink(key.address(), this, key.priority(),
                              key.is_loopback(), key.is_active());
@@ -296,39 +246,21 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
   const ConnectionMap::iterator iter = connections_.find(key);
 
   if (iter != connections_.end()) {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> existing connection found\n"));
-
     connection = iter->second;
     connections_.erase(iter);
   }
 
   if (connection.is_nil()) {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> no existing connection found\n"));
-
     if (!link->add_on_start_callback(client, remote.repo_id_)) {
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> couldn't add_on_start_callback\n"));
-
       VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
                 "got started link %@.\n", link.in()), 2);
       return AcceptConnectResult(link._retn());
     }
 
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> add_on_start_callback successful\n"));
-
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
               "no existing TcpConnection.\n"), 2);
 
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> try to add_pending_connection\n"));
-
     add_pending_connection(client, link.in());
-
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::accept_datalink --> return ACR_SUCCESS and finish connection later\n"));
 
     // no link ready, passive_connection will complete later
     return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -351,10 +283,10 @@ void
 TcpTransport::stop_accepting_or_connecting(TransportClient* client,
                                            const RepoId& remote_id)
 {
-  //### Debug statements to track where connection is failing
   GuidConverter remote_converted(remote_id);
-
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::stop_accepting_or_connecting --> enter to stop TransportClient connecting to Remote: %C\n", std::string(remote_converted).c_str()));
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::stop_accepting_or_connecting "
+            "stop connecting to remote: %C\n",
+            std::string(remote_converted).c_str()), 5);
 
   GuardType guard(connections_lock_);
   typedef std::multimap<TransportClient*, DataLink_rch>::iterator iter_t;
@@ -362,26 +294,15 @@ TcpTransport::stop_accepting_or_connecting(TransportClient* client,
     pending_connections_.equal_range(client);
 
   for (iter_t iter = range.first; iter != range.second; ++iter) {
-    //### Debug statements
-    GuidConverter remote_rosc(remote_id);
-
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::stop_accepting_or_connecting --> about to remove_on_start_callback for client connecting to Remote: %C\n", std::string(remote_rosc).c_str()));
-
     iter->second->remove_on_start_callback(client, remote_id);
   }
 
   pending_connections_.erase(range.first, range.second);
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::stop_accepting_or_connecting --> exit\n"));
 }
 
 bool
 TcpTransport::configure_i(TransportInst* config)
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::configure_i --> BEGIN\n"));
-
   DBG_ENTRY_LVL("TcpTransport", "configure_i", 6);
 
   // Downcast the config argument to a TcpInst*
@@ -480,9 +401,6 @@ TcpTransport::configure_i(TransportInst* config)
     }
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::configure_i --> END SUCCESS\n"));
-
   // Ahhh...  The sweet smell of success!
   return true;
 }
@@ -580,10 +498,6 @@ TcpTransport::connection_info_i(TransportLocator& local_info) const
 void
 TcpTransport::release_datalink(DataLink* link)
 {
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::release_datalink --> begin\n"));
-
   DBG_ENTRY_LVL("TcpTransport", "release_datalink", 6);
 
   TcpDataLink* tcp_link = static_cast<TcpDataLink*>(link);
@@ -637,9 +551,6 @@ TcpTransport::release_datalink(DataLink* link)
                 link->datalink_release_delay().usec()), 4);
 
       // Atomic value update, safe to perform here.
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::release_datalink --> set_release_pending(true)\n"));
-
       released_link->set_release_pending(true);
 
       switch (this->pending_release_links_.bind(key, released_link)) {
@@ -674,16 +585,10 @@ TcpTransport::release_datalink(DataLink* link)
   switch (linkAction) {
   case StopLink:
 
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::release_datalink --> stop link\n"));
-
     link->stop();
     break;
 
   case ScheduleLinkRelease:
-
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::release_datalink --> schedule_delayed_release\n"));
 
     link->schedule_delayed_release();
     break;
@@ -701,9 +606,6 @@ TcpTransport::release_datalink(DataLink* link)
                link->transport_priority(),
                buffer.str().c_str()));
   }
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::release_datalink --> end\n"));
 }
 
 TcpInst*
@@ -721,10 +623,6 @@ void
 TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                  const TcpConnection_rch& connection)
 {
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::passive_connection --> begin\n"));
-
   DBG_ENTRY_LVL("TcpTransport", "passive_connection", 6);
 
   const PriorityKey key(connection->transport_priority(),
@@ -787,10 +685,6 @@ int
 TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
                                    const TcpConnection_rch& connection)
 {
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_tcp_datalink --> begin\n"));
-
   DBG_ENTRY_LVL("TcpTransport", "connect_tcp_datalink", 6);
 
   ++last_link_;
@@ -804,33 +698,18 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
 
   connection->id() = last_link_;
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_tcp_datalink --> create send_strategy\n"));
-
   TransportSendStrategy_rch send_strategy =
     new TcpSendStrategy(last_link_, link, this->tcp_config_, connection,
                         new TcpSynchResource(connection,
                                              this->tcp_config_->max_output_pause_period_),
                         this->reactor_task_, link->transport_priority());
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_tcp_datalink --> create receive_strategy\n"));
-
   TransportStrategy_rch receive_strategy =
     new TcpReceiveStrategy(link, connection, this->reactor_task_);
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_tcp_datalink --> call connect on link\n"));
-
   if (link->connect(connection, send_strategy, receive_strategy) != 0) {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_tcp_datalink --> connect failed --> end FAILURE\n"));
-
     return -1;
   }
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TcpTransport::connect_tcp_datalink --> end SUCCESS\n"));
 
   return 0;
 }

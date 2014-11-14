@@ -24,8 +24,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/Sock_Connect.h"
 
-#include "dds/DCPS/async_debug.h"
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -97,20 +95,12 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link._retn());
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:RtpsUdpTransport::connect_datalink ABOUT TO ADD_ON_START_CALLBACK\n"));
-
   if (!link->add_on_start_callback(client, remote.repo_id_)) {
      // link was started by the reactor thread before we could add a callback
-     //### Debug statements to track where associate is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:RtpsUdpTransport::connect_datalink COULDN'T ADD_ON_START_CALLBACK B/C REACTOR THREAD STARTED LINK ALREADY\n"));
-
      VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink got link.\n"), 2);
      return AcceptConnectResult(link._retn());
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:RtpsUdpTransport::connect_datalink ADD_ON_START_CALLBACK SUCCESSFUL CONNECT_DATALINK PENDING\n"));
   GuardType guard(connections_lock_);
   add_pending_connection(client, link.in());
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink pending.\n"), 2);
@@ -160,25 +150,14 @@ void
 RtpsUdpTransport::stop_accepting_or_connecting(TransportClient* client,
                                                const RepoId& remote_id)
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:RtpsUdpTransport::stop_accepting_or_connecting --> enter\n"));
-  //### Debug statements to track where connection is failing
-  GuidConverter remote_converted(remote_id);
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:RtpsUdpTransport::stop_accepting_or_connecting --> enter to stop TransportClient connecting to Remote: %C\n", std::string(remote_converted).c_str() ));
   GuardType guard(connections_lock_);
   typedef std::multimap<TransportClient*, DataLink_rch>::iterator iter_t;
   const std::pair<iter_t, iter_t> range =
         pending_connections_.equal_range(client);
   for (iter_t iter = range.first; iter != range.second; ++iter) {
-     //### Debug statements
-     GuidConverter remote_rosc(remote_id);
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:RtpsUdpTransport::stop_accepting_or_connecting --> about to remove_on_start_callback for client connecting to Remote: %C\n", std::string(remote_rosc).c_str() ));
      iter->second->remove_on_start_callback(client, remote_id);
   }
   pending_connections_.erase(range.first, range.second);
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:RtpsUdpTransport::stop_accepting_or_connecting --> exit\n"));
-
 }
 
 void

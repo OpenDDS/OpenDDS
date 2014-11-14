@@ -13,7 +13,6 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/async_debug.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"

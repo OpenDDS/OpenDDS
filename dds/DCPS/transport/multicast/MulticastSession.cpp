@@ -10,7 +10,6 @@
 
 #include "ace/Log_Msg.h"
 #include <cmath>
-#include "dds/DCPS/async_debug.h"
 #ifndef __ACE_INLINE__
 # include "MulticastSession.inl"
 #endif  /* __ACE_INLINE__ */
@@ -128,10 +127,6 @@ bool
 MulticastSession::control_received(char submessage_id,
                                    ACE_Message_Block* control)
 {
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::control_received -> enter SESSION: %@ \n", this));
-
-
   // Record that we've gotten this message so we don't nak for it later.
   if (!this->acked()) {
     const TransportHeader& header =
@@ -160,9 +155,6 @@ MulticastSession::control_received(char submessage_id,
 void
 MulticastSession::syn_received(ACE_Message_Block* control)
 {
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::syn_received --> enter\n"));
-
   if (this->active_) return; // pub send syn, then doesn't receive them.
 
   const TransportHeader& header =
@@ -193,20 +185,12 @@ MulticastSession::syn_received(ACE_Message_Block* control)
     }
   }
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::syn_received --> about to send_synack\n"));
-
   // MULTICAST_SYN control samples are always positively
   // acknowledged by a matching remote peer:
   send_synack();
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::syn_received --> call passive_connection\n"));
-
   this->link_->transport()->passive_connection(this->link_->local_peer(), this->remote_peer_);
 
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::syn_received --> exit\n"));
 }
 
 void
@@ -233,48 +217,24 @@ MulticastSession::send_syn()
 void
 MulticastSession::synack_received(ACE_Message_Block* control)
 {
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> enter (SESSION:%@) \n", this));
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> check if active %d \n", this->active_));
-
   if (!this->active_) return; // sub send syn, then doesn't receive them.
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> check if acked %d \n", this->acked()));
 
   // Already received ack.
   if (this->acked()) return;
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> get transport header \n"));
-
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> check if from remote peer for session \n"));
-
   // Not from the remote peer for this session.
   if (this->remote_peer_ != header.source_) return;
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> from correct peer for session \n"));
 
   Serializer serializer(control, header.swap_bytes());
 
   MulticastPeer local_peer;
   serializer >> local_peer; // sent as remote_peer
 
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> check if we should ignore sample \n"));
-
   // Ignore sample if not destined for us:
   if (local_peer != this->link_->local_peer()) return;
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> did not ignore sample\n"));
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::synack_received "
                       "local 0x%x remote 0x%x\n",
@@ -284,17 +244,9 @@ MulticastSession::synack_received(ACE_Message_Block* control)
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
 
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> if already acked (%d) return \n", this->acked_));
-
     if (this->acked_) return; // already acked
 
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> wasn't acked so cancel watchdog \n"));
-
     this->syn_watchdog_.cancel();
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastSession::synack_received -> set acked_ to true \n"));
     this->acked_ = true;
   }
 }

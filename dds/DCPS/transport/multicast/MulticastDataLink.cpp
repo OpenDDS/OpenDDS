@@ -20,7 +20,6 @@
 #include "tao/ORB_Core.h"
 
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/async_debug.h"
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
@@ -180,16 +179,10 @@ MulticastDataLink::find_session(MulticastPeer remote_peer)
 MulticastSession*
 MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::find_or_create_session --> enter\n"));
-
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
       guard,
       this->session_lock_,
       0);
-
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::find_or_create_session --> current number of sessions: %d\n", this->sessions_.size()));
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
@@ -218,8 +211,6 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
         remote_peer),
         0);
   }
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::find_or_create_session --> exit\n"));
   return session._retn();
 }
 
@@ -278,9 +269,6 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
 {
   switch (sample.header_.message_id_) {
   case TRANSPORT_CONTROL: {
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> case TRANSPORT_CONTROL %@ \n", this));
-
     // Transport control samples are delivered to all sessions
     // regardless of association status:
     {
@@ -292,16 +280,11 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
 
       const TransportHeader& theader = receive_strategy()->received_header();
 
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> %d %d %d \n", is_active(), sample.header_.submessage_id_, (sessions_.find(theader.source_) == sessions_.end())));
-
       if (!is_active() && sample.header_.submessage_id_ == MULTICAST_SYN &&
           sessions_.find(theader.source_) == sessions_.end()) {
         // We have received a SYN but there is no session (yet) for this source.
         // Depending on the data, we may need to send SYNACK.
 
-        //### Debug statements to track where connection is failing
-        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> to call syn_received_no_session\n"));
         guard.release();
         syn_received_no_session(theader.source_, sample.sample_,
             theader.swap_bytes());
@@ -311,16 +294,11 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
         return;
       }
 
-      //### Debug statements to track where connection is failing
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> not going to call syn_received_no_session\n"));
-
       MulticastSessionMap temp_sessions(sessions_);
       guard.release();
 
       for (MulticastSessionMap::iterator it(temp_sessions.begin());
           it != temp_sessions.end(); ++it) {
-        //### Debug statements to track where connection is failing
-        if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:MulticastDataLink::sample_received -> to call control_received (Current number of sessions: %d)\n", temp_sessions.size()));
         it->second->control_received(sample.header_.submessage_id_,
             sample.sample_);
         // reset read pointer

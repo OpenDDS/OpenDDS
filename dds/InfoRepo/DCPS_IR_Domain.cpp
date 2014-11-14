@@ -30,7 +30,6 @@
 #include "dds/DCPS/Transient_Kludge.h"
 
 #include /**/ "tao/debug.h"
-#include "dds/DCPS/async_debug.h"
 
 #include <algorithm>
 #include <sstream>
@@ -178,8 +177,6 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out t
                                                      const DDS::TopicQos & qos,
                                                      DCPS_IR_Participant* participantPtr)
 {
-   //### Debug statements to track where connection is failing
-   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::add_topic --> begin\n"));
   topicId = OpenDDS::DCPS::GUID_UNKNOWN;
 
   OpenDDS::DCPS::RepoId topic_id = participantPtr->get_next_topic_id();
@@ -191,8 +188,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out t
 
     topicId = topic_id;
   }
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::add_topic --> end\n"));
+
   return status;
 }
 
@@ -203,16 +199,11 @@ DCPS_IR_Domain::force_add_topic(const OpenDDS::DCPS::RepoId& topicId,
                                 const DDS::TopicQos & qos,
                                 DCPS_IR_Participant* participantPtr)
 {
-   //### Debug statements to track where connection is failing
-   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::force_add_topic --> begin\n"));
-
   OpenDDS::DCPS::RepoId topic_id = topicId;
   OpenDDS::DCPS::TopicStatus status = add_topic_i(topic_id, topicName
                                                   , dataTypeName
                                                   , qos, participantPtr);
 
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::force_add_topic --> end\n"));
   return status;
 }
 
@@ -222,9 +213,6 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
                                                        const DDS::TopicQos & qos,
                                                        DCPS_IR_Participant* participantPtr)
 {
-   //### Debug statements to track where connection is failing
-   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::add_topic_i --> begin\n"));
-
   DCPS_IR_Topic_Description* description;
   int descriptionLookup = find_topic_description(topicName, dataTypeName, description);
 
@@ -357,8 +345,6 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& to
   }
   break;
   }
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::add_topic_i --> end\n"));
 
   return topicStatus;
 }
@@ -516,9 +502,6 @@ int DCPS_IR_Domain::init_built_in_topics(bool /* federated */)
 #else
 int DCPS_IR_Domain::init_built_in_topics(bool federated)
 {
-   //### Debug statements to track where connection is failing
-   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> begin\n"));
-
   // Indicates that BIT subscriber and datareaders should not be created.
   TheTransientKludge->enable();
 
@@ -549,44 +532,21 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
     }
 
 
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> init_built_in_topics_transport\n"));
-
     int transportResult = init_built_in_topics_transport();
 
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> DONE init_built_in_topics_transport\n"));
-
     if (0 != transportResult) {
-       //### Debug statements to track where connection is failing
-       if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> FAILURE init_built_in_topics_transport return\n"));
       return transportResult;
     }
 
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> init_built_in_topics_topics\n"));
-
     int topicsResult = init_built_in_topics_topics();
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> DONE init_built_in_topics_topics\n"));
 
     if (0 != topicsResult) {
-       //### Debug statements to track where connection is failing
-       if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> FAILURE init_built_in_topics_topics return\n"));
       return topicsResult;
     }
 
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> init_built_in_topics_datawriters\n"));
-
     int datawritersResult = init_built_in_topics_datawriters(federated);
 
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> DONE init_built_in_topics_datawriters\n"));
-
     if (0 != datawritersResult) {
-       //### Debug statements to track where connection is failing
-       if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> FAILURE init_built_in_topics_datawriters\n"));
       return datawritersResult;
     }
 
@@ -597,8 +557,6 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
 
   // enable the Built-In Topics
   useBIT_ = true;
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics --> end SUCCESS\n"));
   return 0;
 }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -780,8 +738,6 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool /* federated */)
 #else
 int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
 {
-   //### Debug statements to track where connection is failing
-   if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics_datawriters --> begin\n"));
 
   try {
     DDS::DataWriter_var datawriter;
@@ -795,9 +751,6 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
       participantWriterQos.liveliness.lease_duration.sec
       = TheServiceParticipant->federation_liveliness();
     }
-
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics_datawriters --> create_datawriter 1 -- Participant DataWriter\n"));
 
     // Participant DataWriter
     datawriter =
@@ -821,9 +774,6 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
     bitPublisher_->get_default_datawriter_qos(dw_qos);
     dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics_datawriters --> create_datawriter 2 -- Topic DataWriter\n"));
-
     // Topic DataWriter
     datawriter =
       bitPublisher_->create_datawriter(bitTopicTopic_.in(),
@@ -841,9 +791,6 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
                         ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
                        1);
     }
-
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics_datawriters --> create_datawriter 3 -- Subscription DataWriter\n"));
 
     // Subscription DataWriter
     datawriter =
@@ -863,9 +810,6 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
                         ACE_TEXT("DCPS_IR_Domain::init_built_in_topics.\n")),
                        1);
     }
-
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics_datawriters --> create_datawriter 4 -- Publication DataWriter\n"));
 
     // Publication DataWriter
     datawriter =
@@ -890,8 +834,6 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
       "ERROR: Exception caught in DCPS_IR_Domain::init_built_in_topics_datawriters:");
     return 1;
   }
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::init_built_in_topics_datawriters --> end SUCCESS\n"));
   return 0;
 }
 #endif // defined (DDS_HAS_MINIMUM_BIT)
@@ -1210,8 +1152,6 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
 
 void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription)
 {
-   //### Debug statements to track where test is failing
-             if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::publish_subscription_bit --> begin\n"));
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -1283,19 +1223,13 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
   ACE_UNUSED_ARG(subscription);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-  //### Debug statements to track where test is failing
-              if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::publish_subscription_bit --> end\n"));
 }
 
 void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
 {
-   //### Debug statements to track where test is failing
-             if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::publish_publication_bit --> begin\n"));
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   if (useBIT_) {
-     //### Debug statements to track where test is failing
-               if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::publish_publication_bit --> USEBIT\n"));
 
     DCPS_IR_Topic_Description* desc =
       publication->get_topic_description();
@@ -1309,8 +1243,6 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
       ACE_OS::strcmp(dataTypeName, OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
     if (isNotBIT) {
-       //### Debug statements to track where test is failing
-                 if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::publish_publication_bit --> ISNOTBIT\n"));
       try {
         const DDS::DataWriterQos* writerQos = publication->get_datawriter_qos();
         const DDS::PublisherQos* publisherQos = publication->get_publisher_qos();
@@ -1364,8 +1296,6 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
       }
 
     } else {
-       //### Debug statements to track where test is failing
-                 if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::publish_publication_bit --> else set_bit_status\n"));
       publication->set_bit_status(1);
     }
   }
@@ -1374,8 +1304,6 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
   ACE_UNUSED_ARG(publication);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-  //### Debug statements to track where test is failing
-            if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DCPS_IR_Domain::publish_publication_bit --> end\n"));
 }
 
 void DCPS_IR_Domain::dispose_participant_bit(DCPS_IR_Participant* participant)

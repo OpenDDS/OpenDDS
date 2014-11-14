@@ -25,8 +25,6 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "EntryExit.h"
 
-#include "dds/DCPS/async_debug.h"
-
 #include "ace/Reverse_Lock_T.h"
 
 #include <vector>
@@ -912,10 +910,6 @@ TransportSendStrategy::clear(SendMode mode)
 int
 TransportSendStrategy::start()
 {
-
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportSendStrategy::start --> begin\n"));
-
   DBG_ENTRY_LVL("TransportSendStrategy","start",6);
 
   {
@@ -961,9 +955,6 @@ TransportSendStrategy::start()
                       "as a worker with the ThreadSynch object.\n"),
                      -1);
   }
-
-  //### Debug statements to track where connection is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:TransportSendStrategy::start --> end SUCCESS\n"));
 
   return 0;
 }

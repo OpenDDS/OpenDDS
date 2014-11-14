@@ -15,7 +15,6 @@
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
-#include "dds/DCPS/async_debug.h"
 
 //If we need BIT support, pull in TCP so that static builds will have it.
 #if !defined(DDS_HAS_MINIMUM_BIT)
@@ -57,21 +56,12 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 , cond_(lock_)
 , shutdown_complete_(false)
 {
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::InfoRepo CONSTRUCTOR --> begin\n"));
-
   try {
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::InfoRepo CONSTRUCTOR --> begin  init()\n"));
     this->init();
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::InfoRepo CONSTRUCTOR --> end  init()\n"));
   } catch (...) {
     this->finalize();
     throw;
   }
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::InfoRepo CONSTRUCTOR --> end\n"));
 }
 
 InfoRepo::~InfoRepo()
@@ -82,26 +72,12 @@ InfoRepo::~InfoRepo()
 void
 InfoRepo::run()
 {
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> begin\n"));
   this->shutdown_complete_ = false;
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> tell orb_ to run\n"));
   this->orb_->run();
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> DONE orb_->run()\n"));
   this->finalize();
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> DONE finalize()\n"));
   ACE_GUARD(ACE_Thread_Mutex, g, this->lock_);
   this->shutdown_complete_ = true;
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> SIGNAL cond_\n"));
   this->cond_.signal();
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> DONE signalling cond_\n"));
-  //###Debugging for failure to associate
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::run --> end\n"));
 }
 
 void
@@ -231,23 +207,14 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
 void
 InfoRepo::init()
 {
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> begin\n"));
-
   ACE_Argv_Type_Converter cvt(this->federatorConfig_.argc(),
                               this->federatorConfig_.argv());
   this->orb_ = CORBA::ORB_init(cvt.get_argc(), cvt.get_ASCII_argv(), "");
-
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> instantiate info_servant_ = TAO_DDS_DCPSInfo_i\n"));
 
   this->info_servant_ =
     new TAO_DDS_DCPSInfo_i(this->orb_, this->resurrect_, this,
                            this->federatorConfig_.federationId());
   PortableServer::ServantBase_var servant(this->info_servant_);
-
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> DONE instantiating info_servant_ = TAO_DDS_DCPSInfo_i\n"));
 
   // Install the DCPSInfo_i into the Federator::Manager.
   this->federator_.info() = this->info_servant_;
@@ -286,16 +253,10 @@ InfoRepo::init()
   CORBA::String_var objref_str =
     orb_->object_to_string(info_repo);
 
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> Initialize the DomainParticipantFactory\n"));
-
   // Initialize the DomainParticipantFactory
   DDS::DomainParticipantFactory_var dpf =
     TheParticipantFactoryWithArgs(cvt.get_argc(),
                                   cvt.get_TCHAR_argv());
-
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> DONE initializing the DomainParticipantFactory\n"));
 
   // We need parse the command line options for DCPSInfoRepo after parsing DCPS specific
   // command line options.
@@ -307,13 +268,7 @@ InfoRepo::init()
   // so invocations can be processed.
   poa_manager->activate();
 
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> about to init BIT's checking if it should 'use_bits_' \n"));
-
   if (this->use_bits_) {
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> about to 'init_transport'\n"));
-
     if (this->info_servant_->init_transport(this->listen_address_given_,
         this->listen_address_str_.c_str())
         != 0 /* init_transport returns 0 for success */) {
@@ -323,14 +278,8 @@ InfoRepo::init()
     }
 
   } else {
-    //### Debug statements to track where connection is failing
-    if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> NOT USING BITS\n"));
-
     TheServiceParticipant->set_BIT(false);
   }
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> DONE init_transport\n"));
-
 
   // This needs to be done after initialization since we create the reference
   // to ourselves in the service here.
@@ -463,9 +412,6 @@ InfoRepo::init()
     peer->join_federation(federator,
                           this->federatorConfig_.federationDomain());
   }
-  //### Debug statements to track where connection is failing
-  if (OpenDDS::DCPS::ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:InfoRepo::init --> end\n"));
-
 }
 
 InfoRepo_Shutdown::InfoRepo_Shutdown(InfoRepo &ir)

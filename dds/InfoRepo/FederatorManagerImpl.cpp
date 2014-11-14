@@ -27,7 +27,6 @@
 #include "FederatorTypeSupportImpl.h"
 
 #include <sstream>
-#include "dds/DCPS/async_debug.h"
 
 #if !defined (__ACE_INLINE__)
 # include "FederatorManagerImpl.inl"

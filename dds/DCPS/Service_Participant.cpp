@@ -15,8 +15,6 @@
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
 
-#include "async_debug.h"
-
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/ORB_Core.h"
@@ -181,19 +179,11 @@ Service_Participant::~Service_Participant()
 {
   ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
   typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete discovery_types\n"));
   for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
     delete it->second;
   }
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete monitor\n"));
   delete monitor_;
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant delete reactor\n"));
   delete reactor_;
-  //### Debug statements to track where test is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::~Service_Participant done deleting objects\n"));
 
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
@@ -228,11 +218,7 @@ Service_Participant::timer() const
 void
 Service_Participant::shutdown()
 {
-   //### Debug statements to track where connection is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::shutdown --> enter\n"));
   try {
-     //### Debug statements to track where connection is failing
-     if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::shutdown --> about to call TransportRegistry::instance()->release()\n"));
     TransportRegistry::instance()->release();
 
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
@@ -257,8 +243,6 @@ Service_Participant::shutdown()
       delete i->second;
     }
     discovery_types_.clear();
-    //### Debug statements to track where connection is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:Service_Participant::shutdown --> exit (end of try block)\n"));
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
   }

@@ -550,7 +550,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
       if (ri != rw->second.remote_readers_.end()) {
         ri->second.durable_data_[rtps->sequence()] = rtps;
         ri->second.durable_timestamp_ = ACE_OS::gettimeofday();
-        if (ASYNC_debug || Transport_debug_level > 3) {
+        if (Transport_debug_level > 3) {
           const GuidConverter conv(pub_id), sub_conv(sub);
           ACE_DEBUG((LM_DEBUG,
             "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
@@ -560,7 +560,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
         return 0;
       }
     }
-  } else if (durable && (ASYNC_debug || Transport_debug_level)) {
+  } else if (durable && (Transport_debug_level)) {
     const GuidConverter conv(pub_id);
     ACE_DEBUG((LM_ERROR,
       "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
@@ -586,7 +586,7 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
     }
     typedef ReaderInfoMap::iterator iter_t;
     if (sub == GUID_UNKNOWN) {
-      if (ASYNC_debug || Transport_debug_level > 3) {
+      if (Transport_debug_level > 3) {
         const GuidConverter conv(writer->first);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::end_historic_samples "
                    "local %C all readers\n", std::string(conv).c_str()));
@@ -602,7 +602,7 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
       if (iter != writer->second.remote_readers_.end()) {
         if (iter->second.durable_) {
           iter->second.durable_timestamp_ = now;
-          if (ASYNC_debug || Transport_debug_level > 3) {
+          if (Transport_debug_level > 3) {
             const GuidConverter conv(writer->first), sub_conv(sub);
             ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::end_historic_samples"
                        " local %C remote %C\n", std::string(conv).c_str(),
@@ -1248,9 +1248,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
 
   if (!ri->second.durable_data_.empty()) {
-    if (ASYNC_debug) {
+    if (Transport_debug_level > 5) {
       const GuidConverter local_conv(local), remote_conv(remote);
-      ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::received(ACKNACK) "
+      ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
                  "local %C has durable for remote %C\n",
                  std::string(local_conv).c_str(),
                  std::string(remote_conv).c_str()));
@@ -1262,8 +1262,8 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     if (ack > dd_last) {
       // Reader acknowledges durable data, we no longer need to store it
       ri->second.durable_data_.swap(pendingCallbacks);
-      if (ASYNC_debug) {
-        ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::received(ACKNACK) "
+      if (Transport_debug_level > 5) {
+        ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
                    "durable data acked\n"));
       }
     } else {
@@ -1291,8 +1291,8 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
              && it->first < psr[i].first; ++it) ; // empty for-loop
         for (; it != ri->second.durable_data_.end()
              && it->first <= psr[i].second; ++it) {
-          if (ASYNC_debug) {
-            ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::received(ACKNACK) "
+          if (Transport_debug_level > 5) {
+            ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
                        "durable resend %d\n", int(it->first.getValue())));
           }
           durability_resend(it->second);
@@ -1308,8 +1308,8 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
         }
       }
       if (!gaps.empty()) {
-        if (ASYNC_debug) {
-          ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::received(ACKNACK) "
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
                      "sending durability gaps: "));
           gaps.dump();
         }
@@ -1321,8 +1321,8 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       const SequenceNumber& dd_first = ri->second.durable_data_.begin()->first;
       if (!requests.empty() && requests.high() < dd_first) {
         // All nacks were below the start of the durable data.
-        if (ASYNC_debug) {
-          ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::received(ACKNACK) "
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
                      "sending durability gaps for all requests: "));
           requests.dump();
         }
@@ -1338,8 +1338,8 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
           gaps.insert(SequenceRange(psr[i].first,
                                     std::min(psr[i].second, dd_first)));
         }
-        if (ASYNC_debug) {
-          ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::received(ACKNACK) "
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
                      "sending durability gaps for some requests: "));
           gaps.dump();
         }
@@ -1457,9 +1457,9 @@ RtpsUdpDataLink::send_nack_replies()
       if (ri->second.requested_changes_.size()) {
         if (locators_.count(ri->first)) {
           recipients.insert(locators_[ri->first].addr_);
-          if (ASYNC_debug) {
+          if (Transport_debug_level > 5) {
             const GuidConverter local_conv(rw->first), remote_conv(ri->first);
-            ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::send_nack_replies "
+            ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
                        "local %C remote %C requested resend\n",
                        std::string(local_conv).c_str(),
                        std::string(remote_conv).c_str()));
@@ -1480,8 +1480,8 @@ RtpsUdpDataLink::send_nack_replies()
         const RtpsUdpSendStrategy::OverrideToken ot =
           send_strategy_->override_destinations(recipients);
         for (size_t i = 0; i < ranges.size(); ++i) {
-          if (ASYNC_debug) {
-            ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::send_nack_replies "
+          if (Transport_debug_level > 5) {
+            ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
                        "resend data %d-%d\n", int(ranges[i].first.getValue()),
                        int(ranges[i].second.getValue())));
           }
@@ -1493,8 +1493,8 @@ RtpsUdpDataLink::send_nack_replies()
     send_nackfrag_replies(writer, gaps, recipients);
 
     if (!gaps.empty()) {
-      if (ASYNC_debug) {
-        ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::send_nack_replies "
+      if (Transport_debug_level > 5) {
+        ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
                    "GAPs:"));
         gaps.dump();
       }
@@ -1601,9 +1601,9 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
   // For durable writers, change a non-directed Gap into multiple directed gaps.
   std::vector<RepoId> readers;
   if (durable && reader.entityId == ENTITYID_UNKNOWN) {
-    if (ASYNC_debug) {
+    if (Transport_debug_level > 5) {
       const GuidConverter local_conv(writer);
-      ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::marshal_gaps local %C "
+      ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::marshal_gaps local %C "
                  "durable writer\n", std::string(local_conv).c_str()));
     }
     const RtpsWriterMap::iterator iter = writers_.find(writer);
@@ -1612,9 +1612,9 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
          ri != rw.remote_readers_.end(); ++ri) {
       if (!ri->second.expecting_durable_data()) {
         readers.push_back(ri->first);
-      } else if (ASYNC_debug) {
+      } else if (Transport_debug_level > 5) {
         const GuidConverter remote_conv(ri->first);
-        ACE_DEBUG((LM_DEBUG, "ASYNC_DBG:RtpsUdpDataLink::marshal_gaps reader "
+        ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::marshal_gaps reader "
                    "%C is expecting durable data, no GAP sent\n",
                    std::string(remote_conv).c_str()));
       }

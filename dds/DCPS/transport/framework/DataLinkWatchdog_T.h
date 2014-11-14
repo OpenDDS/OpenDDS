@@ -17,7 +17,6 @@
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_time.h"
 #include "ace/Reverse_Lock_T.h"
-#include "dds/DCPS/async_debug.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -65,7 +64,6 @@ public:
       ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
       n_cancelled = reactor->cancel_timer(this);
     }
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::cancel --> after cancel_timer timer_id: %d n: %d %@\n", timer_id, n_cancelled, static_cast<ACE_Event_Handler*>(this)));
   }
 
   int handle_timeout(const ACE_Time_Value& now, const void* arg) {
@@ -133,7 +131,6 @@ private:
       timer_id = reactor->schedule_timer(this,  // event_handler
                                          arg,
                                          delay);
-      if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> schedule_timer: %d (%@)\n", timer_id, static_cast<ACE_Event_Handler*>(this)));
 
       if (timer_id == -1) {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -144,18 +141,8 @@ private:
       }
     }
 
-    //### Debug statements to track where associate is failing
-    if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> after schedule timer this->timer_id_: %d and timer_id: %d %@\n", this->timer_id_, timer_id,
-      static_cast<ACE_Event_Handler*>(this)));
-
     //after re-acquiring lock_ need to check cancelled_
-    //### Thought maybe would have to check timer_id_ for cancellation/prior completion
-    //### this check would from scheduling multiple timers for the watchdog at the same time while starting
-    //### but seems that if you check that value you may lose necessary timers down the line so simply allow
-    //### multiple timers to be scheduled, since  they are not interval timers it won't keep firing after each expires the first time
     if (this->cancelled_) {
-       //### Debug statements to track where associate is failing
-       if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataLinkWatchdog_T.h::schedule_i --> about to cancel timer timer_id: %d watchdog:(%@)\n", timer_id, static_cast<ACE_Event_Handler*>(this)));
       reactor->cancel_timer(timer_id);
       return true;
     }

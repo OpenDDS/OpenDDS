@@ -8,7 +8,6 @@
 
 #include "DataReaderRemoteImpl.h"
 #include "dds/DCPS/DataReaderCallbacks.h"
-#include "dds/DCPS/async_debug.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -47,8 +46,6 @@ DataReaderRemoteImpl::add_association(const RepoId& yourId,
                                       const WriterAssociation& writer,
                                       bool active)
 {
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderRemoteImpl::add_association: enter method\n"));
   DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
@@ -59,15 +56,11 @@ DataReaderRemoteImpl::add_association(const RepoId& yourId,
   if (parent) {
     parent->add_association(yourId, writer, active);
   }
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderRemoteImpl::add_association: exit method\n"));
 }
 
 void
 DataReaderRemoteImpl::association_complete(const RepoId& remote_id)
 {
-   //### Debug statements to track where associate is failing
-   if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderRemoteImpl::association_complete: enter method\n"));
   DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
@@ -78,16 +71,12 @@ DataReaderRemoteImpl::association_complete(const RepoId& remote_id)
   if (parent) {
     parent->association_complete(remote_id);
   }
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderRemoteImpl::association_complete: exit method\n"));
 }
 
 void
 DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
                                           CORBA::Boolean notify_lost)
 {
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderRemoteImpl::remove_associations: enter method\n"));
   DataReaderCallbacks* parent = 0;
   DDS::DataReader_var drv;
   {
@@ -98,8 +87,6 @@ DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
   if (parent) {
     parent->remove_associations(writers, notify_lost);
   }
-  //### Debug statements to track where associate is failing
-  if (ASYNC_debug) ACE_DEBUG((LM_DEBUG, "(%P|%t|%T) ASYNC_DBG:DataReaderRemoteImpl::remove_associations: exit method\n"));
 }
 
 void

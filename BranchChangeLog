@@ -1,3 +1,56 @@
+Fri Nov 14 20:43:11 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy_T.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpReconnectTask.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Removed superfluous ASYNC_debug logging and modified useful
+          log statements to use regular logging mechanisms.
+
+        * dds/DCPS/async_debug.h:
+        * dds/DCPS/async_debug.cpp:
+
+          Removed these files.
+
 Thu Nov 13 23:00:54 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
@@ -14,7 +67,7 @@ Thu Nov 13 23:00:54 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:
 
-          Fixed conflict where both TransportClient destructor and 
+          Fixed conflict where both TransportClient destructor and
           use_datalink_i were trying to remove a pending association
           from the map.  Now use_datalink_i respects the 'removed' flag
           and lets destructor clean up pending assoc.
