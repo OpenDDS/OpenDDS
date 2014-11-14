@@ -1,3 +1,9 @@
+Fri Nov 14 17:10:13 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * DDS_TAOv2.mwc:
+
+          Add TAO CSD libraries to this workspace file.
+
 Thu Nov 13 17:59:51 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:
