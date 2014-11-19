@@ -1,3 +1,7 @@
+Wed Nov 19 15:17:03 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6593 through r6601
+
 Fri Nov 14 20:43:11 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:

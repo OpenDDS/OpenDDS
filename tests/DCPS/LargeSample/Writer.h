@@ -26,7 +26,7 @@ public:
     // Writer ID is 1 or 2
     // Sample ID is 0 to 9
     // Lengths will vary from 10k to 155k
-    return ((sample_id * 1.5) + writer_id) * 10 * 1024;
+    return int((sample_id * 1.5) + writer_id) * 10 * 1024;
   }
 
   void extend_sample(Messenger::Message& message);
