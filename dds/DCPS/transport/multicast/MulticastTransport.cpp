@@ -197,7 +197,8 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
   GuardThreadType guard(this->connections_lock_);
 
   if (connections_.count(std::make_pair(remote_peer, local_peer))) {
-    //###can't call start session with connections_lock_ due to reactor call in session->start which could deadlock with passive_connection
+    //can't call start session with connections_lock_ due to reactor
+    //call in session->start which could deadlock with passive_connection
     guard.release();
 
     VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::accept_datalink found\n"));
@@ -214,7 +215,8 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
     this->pending_connections_[std::make_pair(remote_peer, local_peer)].
     push_back(std::pair<TransportClient*, RepoId>(client, remote.repo_id_));
-    //###can't call start session with connections_lock_ due to reactor call in session->start which could deadlock with passive_connection
+    //can't call start session with connections_lock_ due to reactor
+    //call in session->start which could deadlock with passive_connection
     guard.release();
     MulticastSession_rch session =
       this->start_session(link, remote_peer, false /*!active*/);

@@ -392,6 +392,18 @@ void
 DataWriterImpl::association_complete_i(const RepoId& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
+
+  if (DCPS_debug_level >= 1) {
+    GuidConverter writer_converter(this->publication_id_);
+    GuidConverter reader_converter(remote_id);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i - ")
+               ACE_TEXT("bit %d local %C remote %C\n"),
+               is_bit_,
+               std::string(writer_converter).c_str(),
+               std::string(reader_converter).c_str()));
+  }
+
   bool reader_durable = false;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   RcHandle<FilterEvaluator> eval;

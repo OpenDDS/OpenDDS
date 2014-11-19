@@ -419,7 +419,6 @@ bool
 ReliableSession::start(bool active, bool acked)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->start_lock_, false);
-  //###ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->start_lock_, false);
 
   if (this->started_) {
      return true;  // already started

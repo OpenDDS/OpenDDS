@@ -640,7 +640,8 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
   for (CORBA::ULong i = 0; i < updated_writers.length(); ++i) {
     {
-      //###can't hold publication_handle_lock_ here due to possible reactor deadlock when scheduling time in schedule_delayed_release
+      // can't hold publication_handle_lock_ here due to possible
+      // reactor deadlock when scheduling timer in schedule_delayed_release
       ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_pub_handle_lock_);
       this->disassociate(updated_writers[i]);
     }

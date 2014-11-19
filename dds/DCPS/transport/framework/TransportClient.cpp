@@ -66,7 +66,9 @@ TransportClient::~TransportClient()
       impls_[i]->stop_accepting_or_connecting(this, it->second.data_.remote_id_);
     }
 
-    //### shouldn't really do this, timer should never be 0, right?
+    //timer should always be instantiated by the participant factory, however
+    //in some transport test cases it isn't therefore check timer existence
+    //before use.  Future: Could resolve tests to always instantiate timer interface.
     if (timer != 0) {
       timer->cancel_timer(&it->second);
     }
@@ -219,7 +221,6 @@ TransportClient::associate(const AssociationData& data, bool active)
   PendingMap::iterator iter = pending_.find(data.remote_id_);
 
   if (iter == pending_.end()) {
-    //### use local copy instead of reference
     RepoId remote_copy(data.remote_id_);
     iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc())).first;
 
@@ -260,7 +261,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
     pend.initiate_connect(this, guard);
 
-    //### Why is this commented out and only returning true?
+    //Revisit if this should be used instead of always returning true.
     //return pend.initiate_connect(this, guard);
     return true;
 
@@ -383,8 +384,6 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           data_.publication_transport_priority_,
           data_.remote_reliable_, data_.remote_durable_};
 
-        //###some transport impl's rely on reactor call to connect which can't be done while holding lock_
-        //###this AcceptConnectResult used to be const...should it still be?
         TransportImpl::AcceptConnectResult res;
 
         if (!tc->initiate_connect_i(res, impl, remote, attribs_, guard)) {
@@ -432,10 +431,11 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
                                 const DataLink_rch& link,
                                 Guard& guard)
 {
-  //### try to make a local copy of remote_id to use in calls because the reference could be invalidated if the caller
-  //### reference location is deleted (i.e. in stop_accepting_or_connecting if user_datalink_i was called from passive_connection)
-  //### Does changing this from a reference to a local affect anything going forward?  Anything need to specifically access that memory, or
-  //### do all further uses simply look up by value and modify references that way?
+  //try to make a local copy of remote_id to use in calls
+  //because the reference could be invalidated if the caller
+  //reference location is deleted (i.e. in stop_accepting_or_connecting
+  //if user_datalink_i was called from passive_connection)
+  //Does changing this from a reference to a local affect anything going forward?
   RepoId remote_id(remote_id_ref);
 
   PendingMap::iterator iter = pending_.find(remote_id);

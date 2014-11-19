@@ -254,10 +254,14 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
   }
   invoke_on_start_callbacks(true);
   {
-  //### catch any associations coming on during the initial callbacks
+    //catch any associations added during initial invoke_on_start_callbacks
+    //only after first use_datalink has resolved does datalink's state truly
+    //change to started, thus can't let pending associations proceed normally yet
     GuardType guard(this->strategy_lock_);
     this->started = true;
   }
+  //Now state transitioned to started so no new on_start_callbacks will be added
+  //so resolve any added during transition to started.
   invoke_on_start_callbacks(true);
   return 0;
 }

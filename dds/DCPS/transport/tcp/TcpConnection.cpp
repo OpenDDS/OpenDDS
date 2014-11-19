@@ -567,12 +567,7 @@ OpenDDS::DCPS::TcpConnection::active_open()
     return 0;
   }
 
-  int active_establishment_return_val = active_establishment(false /* !initiate_connect */);
-
-  return active_establishment_return_val;
-
-  //###commented out return of method call for association trials
-  //return active_establishment(false /* !initiate_connect */);
+  return active_establishment(false /* !initiate_connect */);
 }
 
 int

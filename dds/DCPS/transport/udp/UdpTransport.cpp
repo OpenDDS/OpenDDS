@@ -19,8 +19,6 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
-//### just for log messages
-#include "dds/DCPS/GuidConverter.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -316,22 +314,23 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
        guard.acquire();
       //pend->second[i].first->use_datalink(pend->second[i].second, link);
     } while ((updated_pend = pending_connections_.find(key)) != pending_connections_.end());
-    //### don't need to erase pending_connection here because stop_accepting_or_connecting
-    //### will take care of the clean up when appropriate (called from use_datalink above)
-    //### this allows no duplicate erase of pend, allowing connections_lock_ to be recursive
 
-
+    // don't need to erase pending_connection here because stop_accepting_or_connecting
+    // will take care of the clean up when appropriate (called from use_datalink above)
+    // this allows no duplicate erase of pend, allowing connections_lock_ to be recursive
 
     //need to protect server_link_keys_ access below
     //ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
 
-    //Delegate deletion of pending connection to stop_accepting_or_connecting called from use_datalink_i after link known to be valid
+    //Delegate deletion of pending connection to stop_accepting_or_connecting
+    //called from use_datalink_i after link known to be valid
     //pending_connections_.erase(pend);
     server_link_keys_.insert(key);
 
 
   } else {
-    //still hold guard(connections_lock_) at this point so pending_server_link_keys_ is protected for insert
+    // still hold guard(connections_lock_) at this point so
+    // pending_server_link_keys_ is protected for insert
 
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::passive_connection pending\n"));
     // accept_datalink() will complete the connection.

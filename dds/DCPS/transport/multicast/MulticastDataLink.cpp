@@ -40,8 +40,6 @@ MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
   reactor_task_(0),
   send_buffer_(0)
 {
-  //### debugging many to many test failure 2to1
-  ACE_DEBUG((LM_DEBUG, "MulticastDataLink::MulticastDataLink() %@\n", this));
 }
 
 MulticastDataLink::~MulticastDataLink()
