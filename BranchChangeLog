@@ -1,3 +1,15 @@
+Wed Nov 19 19:09:42 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RTPS/ParameterListConverter.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+
+          Fixed compiler warnings due to unused variables/params/functions.
+
 Wed Nov 19 18:11:13 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:

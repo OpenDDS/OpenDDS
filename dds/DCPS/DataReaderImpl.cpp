@@ -131,7 +131,7 @@ DataReaderImpl::~DataReaderImpl()
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
 
   //cancel all timers for EndHistoricSamplesMissedSweeper
-  int timers_canceled = this->reactor_->cancel_timer(&end_historic_sweeper_);
+  this->reactor_->cancel_timer(&end_historic_sweeper_);
 
   if (initialized_) {
     delete rd_allocator_;

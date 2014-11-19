@@ -209,12 +209,6 @@ namespace {
         TheServiceParticipant->initial_LivelinessQosPolicy();
     return qos != def_qos;
   }
-  bool not_default(const DDS::ReliabilityQosPolicy& qos, bool is_datawriter) {
-    DDS::ReliabilityQosPolicy def_qos = is_datawriter ?
-        TheServiceParticipant->initial_DataWriterQos().reliability :
-        TheServiceParticipant->initial_DataReaderQos().reliability;
-    return qos != def_qos;
-  }
   bool not_default(const DDS::OwnershipQosPolicy& qos) {
     DDS::OwnershipQosPolicy def_qos =
         TheServiceParticipant->initial_OwnershipQosPolicy();
@@ -417,7 +411,6 @@ int to_param_list(const DiscoveredWriterData& writer_data,
 
   // Interoperability note:
   // For interoperability, always write the reliability info
-  // if (not_default(writer_data.ddsPublicationData.reliability, true))
   {
     Parameter param;
     // Interoperability note:

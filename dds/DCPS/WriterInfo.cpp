@@ -70,7 +70,7 @@ WriterInfo::WriterInfo()
 WriterInfo::WriterInfo(WriterInfoListener*         reader,
                        const PublicationId&        writer_id,
                        const ::DDS::DataWriterQos& writer_qos,
-                       const ::DDS::DataReaderQos& reader_qos)
+                       const ::DDS::DataReaderQos& /*reader_qos*/)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
   seen_data_(false),
   historic_samples_timer_(NOT_WAITING),

@@ -471,8 +471,6 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
   }
 
-  Service_Participant * this_serv_part = TheServiceParticipant->instance();
-
   ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
 
   if (timer != 0) {

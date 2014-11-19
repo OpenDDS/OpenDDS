@@ -53,16 +53,14 @@ public:
 
     if (this->timer_id_ == -1) return;
 
-    long timer_id = this->timer_id_;
     ACE_Reactor* reactor = this->reactor_;
     this->timer_id_ = -1;
     this->reactor_ = 0;
     this->cancelled_ = true;
-    int n_cancelled;
 
     {
       ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
-      n_cancelled = reactor->cancel_timer(this);
+      reactor->cancel_timer(this);
     }
   }
 
