@@ -157,6 +157,7 @@ DDS::ReturnCode_t
 DomainParticipantFactoryImpl::delete_participant(
   DDS::DomainParticipant_ptr a_participant)
 {
+
 //xxx rc = 4
   if (CORBA::is_nil(a_participant)) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -180,6 +181,7 @@ DomainParticipantFactoryImpl::delete_participant(
                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
                ACE_TEXT("the participant %C is not empty.\n"),
                std::string(converter).c_str()));
+
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
@@ -244,7 +246,6 @@ DomainParticipantFactoryImpl::delete_participant(
                       ACE_TEXT("could not remove domain participant.\n")),
                      DDS::RETCODE_ERROR);
   }
-
   return DDS::RETCODE_OK;
 }
 

@@ -6,8 +6,14 @@
  * See: http://www.opendds.org/license.html
  */
 
+namespace OpenDDS {
+namespace DCPS {
+
 ACE_INLINE
-OpenDDS::DCPS::DirectPriorityMapper::DirectPriorityMapper(CORBA::Long priority)
+DirectPriorityMapper::DirectPriorityMapper(Priority priority)
   : PriorityMapper(priority)
 {
+}
+
+}
 }

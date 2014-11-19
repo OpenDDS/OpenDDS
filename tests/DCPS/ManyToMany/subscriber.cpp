@@ -229,7 +229,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
     return -1;
-  } catch (const OpenDDS::DCPS::Transport::Exception& e) {
+  } catch (const OpenDDS::DCPS::Transport::Exception&) {
     ACE_DEBUG((LM_ERROR, "Transport exception caught in subscriber main\n"));
     return -1;
   }

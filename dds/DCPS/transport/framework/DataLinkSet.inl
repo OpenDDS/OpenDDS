@@ -25,7 +25,6 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
   DBG_ENTRY_LVL("DataLinkSet", "send", 6);
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send element %@.\n",
             sample), 5);
-
   GuardType guard(this->lock_);
   TransportSendElement* send_element =
     TransportSendElement::alloc(static_cast<int>(map_.size()), sample);
@@ -135,6 +134,7 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   TransportSendControlElement* send_element = 0;
 
   GuardType guard(this->lock_);
+
   ACE_NEW_MALLOC(send_element,
     static_cast<TransportSendControlElement*>(
       send_control_element_allocator_.malloc()),
@@ -159,9 +159,7 @@ ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_sample", 6);
-
   GuardType guard(this->lock_);
-
   const MapType::iterator end = this->map_.end();
   for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
 
@@ -177,9 +175,7 @@ ACE_INLINE bool
 OpenDDS::DCPS::DataLinkSet::remove_all_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_all_msgs", 6);
-
   GuardType guard(this->lock_);
-
   const MapType::iterator end = this->map_.end();
   for (MapType::iterator itr = this->map_.begin(); itr != end; ++itr) {
     itr->second->remove_all_msgs(pub_id);
@@ -192,7 +188,6 @@ ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_start",6);
-
   GuardType guard1(this->lock_);
   GuardType guard2(link_set->lock_);
 
@@ -224,9 +219,7 @@ OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_stop",6);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
-
   GuardType guard(this->lock_);
-
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {

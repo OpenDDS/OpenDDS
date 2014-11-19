@@ -20,6 +20,7 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   try {
+
     InfoRepo infoRepo(argc, argv);
 
     InfoRepo_Shutdown ir_shutdown(infoRepo);
@@ -36,6 +37,5 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ex._tao_print_exception("ERROR: DDS DCPS Info Repo caught exception");
     return -1;
   }
-
   return 0;
 }

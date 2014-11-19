@@ -191,6 +191,7 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
+    std::cerr << "STARTING MAIN IN SUBSCRIBER\n";
     ACE_TString host;
     u_short port = 0;
 
@@ -244,6 +245,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::fprintf(file, "Ready\n");
     std::fclose(file);
 
+    std::cerr << "***Ready written to subready.txt\n";
+
     AssociationData publication;
     publication.remote_id_ = remote;
     publication.remote_reliable_ = true;
@@ -254,11 +257,14 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       publication.remote_data_[0].data[i] = 0;
     }
 
+    std::cerr << "***Association Data created for Publication for SimpleDataReader to init\n";
     std::cout << "Associating with pub..." << std::endl;
     if (!sdr.init(publication)) {
       std::cerr << "subscriber TransportClient::associate() failed\n";
       return 1;
     }
+
+    std::cerr << "***Simple Data Reader init:: publication completed\n";
 
     while (!sdr.done_) {
       ACE_OS::sleep(1);

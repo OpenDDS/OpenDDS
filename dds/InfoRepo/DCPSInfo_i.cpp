@@ -165,7 +165,6 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
   bool /*hasDcpsKey -- only used for RTPS Discovery*/)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::INTERNAL_ERROR);
-
   // Grab the domain.
   DCPS_IR_Domain_Map::iterator where = this->domains_.find(domainId);
 
@@ -204,7 +203,6 @@ OpenDDS::DCPS::TopicStatus TAO_DDS_DCPSInfo_i::assert_topic(
                  domainId));
     }
   }
-
   return topicStatus;
 }
 
@@ -658,70 +656,77 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
   const char* filterExpression,
   const DDS::StringSeq& exprParams)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::GUID_UNKNOWN);
-
-  // Grab the domain.
-  DCPS_IR_Domain_Map::iterator where = this->domains_.find(domainId);
-
-  if (where == this->domains_.end()) {
-    throw OpenDDS::DCPS::Invalid_Domain();
-  }
-
-  // Grab the participant.
-  DCPS_IR_Participant* partPtr
-  = where->second->participant(participantId);
-
-  if (0 == partPtr) {
-    throw OpenDDS::DCPS::Invalid_Participant();
-  }
-
-  DCPS_IR_Topic* topic = where->second->find_topic(topicId);
-
-  if (topic == 0) {
-    throw OpenDDS::DCPS::Invalid_Topic();
-  }
-
-  OpenDDS::DCPS::RepoId subId = partPtr->get_next_subscription_id();
-
-  // Remarshall the remote reference onto the dispatching orb.
-  OpenDDS::DCPS::DataReaderRemote_var marshalledSub (
-    OpenDDS::DCPS::DataReaderRemote::_duplicate(subscription));
-  if (CORBA::is_nil(marshalledSub.in())) {
-    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
-                 ACE_TEXT("invalid subscription reference.\n")));
-    }
-    return OpenDDS::DCPS::GUID_UNKNOWN;
-  }
-
-  CORBA::String_var subStr = orb_->object_to_string(marshalledSub.in());
-  CORBA::Object_var subObj = dispatchingOrb_->string_to_object(subStr.in());
-  if (CORBA::is_nil(subObj.in())) {
-    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
-                 ACE_TEXT("failure marshalling subscription on dispatching orb.\n")));
-    }
-    return OpenDDS::DCPS::GUID_UNKNOWN;
-  }
-  OpenDDS::DCPS::DataReaderRemote_var dispatchingSubscription
-  = OpenDDS::DCPS::DataReaderRemote::_unchecked_narrow(subObj.in());
-
+  DCPS_IR_Domain* domainPtr;
+  DCPS_IR_Participant* partPtr;
   DCPS_IR_Subscription* subPtr;
-  ACE_NEW_RETURN(subPtr,
-                 DCPS_IR_Subscription(
-                   subId,
-                   partPtr,
-                   topic,
-                   dispatchingSubscription.in(),
-                   qos,
-                   transInfo,
-                   subscriberQos,
-                   filterExpression,
-                   exprParams),
-                 OpenDDS::DCPS::GUID_UNKNOWN);
+  DCPS_IR_Topic* topic;
+  OpenDDS::DCPS::RepoId subId;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, OpenDDS::DCPS::GUID_UNKNOWN);
 
+    // Grab the domain.
+    DCPS_IR_Domain_Map::iterator where = this->domains_.find(domainId);
+
+    if (where == this->domains_.end()) {
+      throw OpenDDS::DCPS::Invalid_Domain();
+    }
+
+    // Grab the domain and participant.
+    domainPtr = where->second;
+    partPtr = domainPtr->participant(participantId);
+
+    if (0 == partPtr) {
+      throw OpenDDS::DCPS::Invalid_Participant();
+    }
+
+    topic = where->second->find_topic(topicId);
+
+    if (topic == 0) {
+      throw OpenDDS::DCPS::Invalid_Topic();
+    }
+
+    subId = partPtr->get_next_subscription_id();
+
+    // Remarshall the remote reference onto the dispatching orb.
+    OpenDDS::DCPS::DataReaderRemote_var marshalledSub (
+      OpenDDS::DCPS::DataReaderRemote::_duplicate(subscription));
+    if (CORBA::is_nil(marshalledSub.in())) {
+      if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
+                   ACE_TEXT("invalid subscription reference.\n")));
+      }
+      return OpenDDS::DCPS::GUID_UNKNOWN;
+    }
+
+    CORBA::String_var subStr = orb_->object_to_string(marshalledSub.in());
+    CORBA::Object_var subObj = dispatchingOrb_->string_to_object(subStr.in());
+    if (CORBA::is_nil(subObj.in())) {
+      if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i:add_subscription: ")
+                   ACE_TEXT("failure marshalling subscription on dispatching orb.\n")));
+      }
+      return OpenDDS::DCPS::GUID_UNKNOWN;
+    }
+    OpenDDS::DCPS::DataReaderRemote_var dispatchingSubscription
+    = OpenDDS::DCPS::DataReaderRemote::_unchecked_narrow(subObj.in());
+
+    ACE_NEW_RETURN(subPtr,
+                   DCPS_IR_Subscription(
+                     subId,
+                     partPtr,
+                     topic,
+                     dispatchingSubscription.in(),
+                     qos,
+                     transInfo,
+                     subscriberQos,
+                     filterExpression,
+                     exprParams),
+                   OpenDDS::DCPS::GUID_UNKNOWN);
+
+    // Release lock
+  }
   if (partPtr->add_subscription(subPtr) != 0) {
     // failed to add.  we are responsible for the memory.
     subId = OpenDDS::DCPS::GUID_UNKNOWN;
@@ -758,7 +763,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
     }
   }
 
-  where->second->remove_dead_participants();
+  domainPtr->remove_dead_participants();
 
   return subId;
 }
@@ -1043,7 +1048,6 @@ OpenDDS::DCPS::AddDomainStatus TAO_DDS_DCPSInfo_i::add_domain_participant(
                std::string(converter).c_str(),
                participant));
   }
-
   return value;
 }
 
@@ -1441,12 +1445,12 @@ void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
 
   DCPS_IR_Domain_Map::iterator dom_iter = this->domains_.find(domainId);
   if (dom_iter == this->domains_.end()) {
-    throw OpenDDS::DCPS::Invalid_Domain();
+    return;
   }
 
   DCPS_IR_Participant* partPtr = dom_iter->second->participant(participantId);
   if (0 == partPtr) {
-    throw OpenDDS::DCPS::Invalid_Participant();
+    return;
   }
 
   // localId could be pub or sub (initial implementation will only use sub
@@ -1460,9 +1464,6 @@ void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
     sub->association_complete(remoteId);
   } else if (0 == partPtr->find_publication_reference(localId, pub)) {
     pub->association_complete(remoteId);
-  } else {
-    // arbitrary selection of which exception to throw
-    throw OpenDDS::DCPS::Invalid_Subscription();
   }
 }
 
@@ -2045,7 +2046,6 @@ TAO_DDS_DCPSInfo_i::domain(DDS::DomainId_t domain)
                  domain,
                  domainPtr));
     }
-
     return domainPtr;
 
   } else {
@@ -2086,7 +2086,6 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
 
     OpenDDS::DCPS::TcpInst_rch tcp_inst =
       OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
-
     inst->datalink_release_delay_ = 0;
 
     tcp_inst->conn_retry_attempts_ = 0;
@@ -2102,7 +2101,6 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     // beyond this point.
     status = 1;
   }
-
   return status;
 }
 

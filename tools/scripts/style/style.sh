@@ -8,7 +8,7 @@ if [ ! "$DDS_ROOT" ]; then
   exit 1
 fi
 
-TOOLS_HOME="$DDS_ROOT/tools"
+TOOLS_HOME="$DDS_ROOT/tools/scripts"
 
 if [ $# = 0 ]; then
   echo "Usage: `basename $0` file..."

@@ -1085,17 +1085,14 @@ void
 WriteDataContainer::unregister_all()
 {
   DBG_ENTRY_LVL("WriteDataContainer","unregister_all",6);
-
   shutdown_ = true;
 
   {
     //The internal list needs protection since this call may result from the
     //the delete_datawriter call which does not acquire the lock in advance.
-
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
               this->lock_);
-
     // Tell transport remove all control messages currently
     // transport is processing.
     (void) this->writer_->remove_all_msgs();
@@ -1120,7 +1117,6 @@ WriteDataContainer::unregister_all()
                  ACE_TEXT("dispose instance %X failed\n"),
                  it->first));
     }
-
     // Mark the instance unregistered.
     ret = unregister(it->first, registered_sample, false);
 

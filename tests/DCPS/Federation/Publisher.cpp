@@ -273,6 +273,7 @@ Publisher::run()
   // End when the subscriber disconnects.
   //this->sync_->wait_for_completion();
 
+  std::cout << "Publisher waiting for subscriber to exit" << std::endl;
   while (1)
     {
       dataWriter_->get_matched_subscriptions(handles);
@@ -286,5 +287,6 @@ Publisher::run()
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) Publisher::run shutting down.\n")
   ));
+  std::cout << "Publisher exiting" << std::endl;
 }
 

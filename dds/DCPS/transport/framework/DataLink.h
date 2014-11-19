@@ -31,6 +31,8 @@
 
 #include <list>
 #include <map>
+#include <utility>
+#include <vector>
 
 #include <iosfwd> // For operator<<() diagnostic formatter.
 
@@ -47,6 +49,7 @@ class  TransportQueueElement;
 class  ReceivedDataSample;
 class  DataSampleElement;
 class  ThreadPerConnectionSendTask;
+class  TransportClient;
 
 typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan> DataLinkSetMap;
 
@@ -79,7 +82,7 @@ public:
   /// created this DataLink.  The ability to specifiy a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(TransportImpl* impl, CORBA::Long priority, bool is_loopback, bool is_active);
+  DataLink(TransportImpl* impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
   /// The stop method is used to stop the DataLink prior to shutdown.
@@ -213,8 +216,8 @@ public:
 
   /// Accessors for the TRANSPORT_PRIORITY value associated with
   /// this link.
-  CORBA::Long& transport_priority();
-  CORBA::Long  transport_priority() const;
+  Priority& transport_priority();
+  Priority  transport_priority() const;
 
   bool& is_loopback();
   bool  is_loopback() const;
@@ -247,14 +250,13 @@ public:
 
   TransportImpl_rch impl() const;
 
-  /// A second thread may try to use this DataLink before the creating thread
-  /// has completed the start() method.  In this case, call wait_for_start()
-  /// to block the current thread until start() completes.
-  void wait_for_start();
-  void unblock_wait_for_start();
-
   void default_listener(TransportReceiveListener* trl);
   TransportReceiveListener* default_listener() const;
+
+  typedef std::pair<TransportClient*, RepoId> OnStartCallback;
+  bool add_on_start_callback(TransportClient* client, const RepoId& remote);
+  void remove_on_start_callback(TransportClient* client, const RepoId& remote);
+  void invoke_on_start_callbacks(bool success);
 
 protected:
 
@@ -375,13 +377,15 @@ private:
   /// data_received() on the default_listener_.
   TransportReceiveListener* default_listener_;
 
+  mutable LockType pub_sub_maps_lock_;
+
   /// Map associating each publisher_id with a set of
   /// TransportReceiveListener objects (each with an associated
   /// subscriber_id).  This map is used for delivery of incoming
   /// (aka, received) data samples.
   ReceiveListenerSetMap pub_map_;
 
-  mutable LockType pub_map_lock_;
+  //mutable LockType pub_map_lock_;
 
   /// Map associating each subscriber_id with the set of publisher_ids.
   /// In essence, the pub_map_ and sub_map_ are the "mirror image" of
@@ -389,7 +393,7 @@ private:
   /// association being managed here.
   RepoIdSetMap sub_map_;
 
-  mutable LockType sub_map_lock_;
+  //mutable LockType sub_map_lock_;
 
   /// A (smart) pointer to the TransportImpl that created this DataLink.
   TransportImpl_rch impl_;
@@ -412,7 +416,7 @@ private:
   RepoIdSetMap sub_map_releasing_;
 
   /// TRANSPORT_PRIORITY value associated with the link.
-  CORBA::Long transport_priority_;
+  Priority transport_priority_;
 
   bool scheduled_;
 
@@ -424,7 +428,7 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
-  ACE_SYNCH_CONDITION strategy_condition_;
+  std::vector<OnStartCallback> on_start_callbacks_;
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.
@@ -443,7 +447,7 @@ protected:
   bool is_loopback_;
   /// Is pub or sub ?
   bool is_active_;
-  bool start_failed_;
+  bool started;
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;

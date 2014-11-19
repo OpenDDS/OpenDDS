@@ -359,7 +359,6 @@ TransportRegistry::create_inst(const std::string& name,
                name.c_str()));
     return TransportInst_rch();
   }
-
   TransportInst_rch inst = type->new_inst(name);
   this->inst_map_[name] = inst;
   return inst;
@@ -492,6 +491,7 @@ TransportRegistry::release()
   config_map_.clear();
   domain_default_config_map_.clear();
   global_config_ = 0;
+
 }
 
 

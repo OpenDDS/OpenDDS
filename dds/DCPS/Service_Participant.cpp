@@ -177,13 +177,14 @@ Service_Participant::Service_Participant()
 
 Service_Participant::~Service_Participant()
 {
+  ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
   typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
   for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
     delete it->second;
   }
-
   delete monitor_;
   delete reactor_;
+
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                "%T (%P|%t) Service_Participant::~Service_Participant()\n"));
@@ -218,7 +219,6 @@ void
 Service_Participant::shutdown()
 {
   try {
-
     TransportRegistry::instance()->release();
 
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
@@ -243,7 +243,6 @@ Service_Participant::shutdown()
       delete i->second;
     }
     discovery_types_.clear();
-
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
   }

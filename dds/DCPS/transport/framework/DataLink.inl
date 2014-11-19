@@ -15,14 +15,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-CORBA::Long&
+Priority&
 DataLink::transport_priority()
 {
   return this->transport_priority_;
 }
 
 ACE_INLINE
-CORBA::Long
+Priority
 DataLink::transport_priority() const
 {
   return this->transport_priority_;
@@ -230,6 +230,7 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
   // make sure to stop() any strategy that was already start()'ed.
   if (send_strategy->start() != 0) {
     // Failed to start the TransportSendStrategy.
+    invoke_on_start_callbacks(false);
     return -1;
   }
 
@@ -239,7 +240,7 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
     // Remember to stop() the TransportSendStrategy since we did start it,
     // and now need to "undo" that action.
     send_strategy->stop();
-
+    invoke_on_start_callbacks(false);
     return -1;
   }
 
@@ -250,19 +251,45 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
 
     this->send_strategy_    = send_strategy;
     this->receive_strategy_ = receive_strategy;
-
-    this->strategy_condition_.broadcast();
   }
+  invoke_on_start_callbacks(true);
+  {
+    //catch any associations added during initial invoke_on_start_callbacks
+    //only after first use_datalink has resolved does datalink's state truly
+    //change to started, thus can't let pending associations proceed normally yet
+    GuardType guard(this->strategy_lock_);
+    this->started = true;
+  }
+  //Now state transitioned to started so no new on_start_callbacks will be added
+  //so resolve any added during transition to started.
+  invoke_on_start_callbacks(true);
   return 0;
 }
 
 ACE_INLINE
-void
-DataLink::unblock_wait_for_start()
+bool
+DataLink::add_on_start_callback(TransportClient* client, const RepoId& remote)
 {
-  GuardType guard(this->strategy_lock_);
-  this->start_failed_ = true;
-  this->strategy_condition_.broadcast();
+  GuardType guard(strategy_lock_);
+
+  if (started && !send_strategy_.is_nil()) {
+    return false; // link already started
+  }
+  on_start_callbacks_.push_back(std::make_pair(client, remote));
+
+  return true;
+}
+
+ACE_INLINE
+void
+DataLink::remove_on_start_callback(TransportClient* client, const RepoId& remote)
+{
+  GuardType guard(strategy_lock_);
+
+  on_start_callbacks_.erase(std::remove(on_start_callbacks_.begin(),
+                                        on_start_callbacks_.end(),
+                                        std::make_pair(client, remote)),
+                            on_start_callbacks_.end());
 }
 
 ACE_INLINE
@@ -288,13 +315,10 @@ ACE_INLINE
 void
 DataLink::remove_listener(const RepoId& local_id)
 {
-  {
-    GuardType guard(this->pub_map_lock_);
+  GuardType guard(this->pub_sub_maps_lock_);
     if (this->send_listeners_.erase(local_id)) {
       return;
     }
-  }
-  GuardType guard(this->sub_map_lock_);
   this->recv_listeners_.erase(local_id);
 }
 
@@ -330,7 +354,7 @@ ACE_INLINE
 void
 DataLink::default_listener(TransportReceiveListener* trl)
 {
-  GuardType guard(this->pub_map_lock_);
+  GuardType guard(this->pub_sub_maps_lock_);
   this->default_listener_ = trl;
 }
 
@@ -338,7 +362,7 @@ ACE_INLINE
 TransportReceiveListener*
 DataLink::default_listener() const
 {
-  GuardType guard(this->pub_map_lock_);
+  GuardType guard(this->pub_sub_maps_lock_);
   return this->default_listener_;
 }
 

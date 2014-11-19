@@ -999,15 +999,14 @@ DomainParticipantImpl::delete_contained_entities()
     replayers_.clear();
   }
 
-
   bit_subscriber_ = DDS::Subscriber::_nil();
 
   OpenDDS::DCPS::Registered_Data_Types->unregister_participant(this);
+
   participant_objref_ = DDS::DomainParticipant::_nil();
 
   // the participant can now start creating new contained entities
   set_deleted(false);
-
   return ret;
 }
 
@@ -1779,7 +1778,6 @@ DomainParticipantImpl::is_clean() const
     sub_is_clean = sub_is_clean == 0 ? subscribers_.size() == 1 : 1;
     topics_is_clean = topics_is_clean == 0 ? topics_.size() == 4 : 1;
   }
-
   return (publishers_.empty()
           && sub_is_clean == 1
           && topics_is_clean == 1);

@@ -262,9 +262,10 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     }
   }
   if (dr_servant) {
-    // mark that the entity is being deleted
-    dr_servant->set_deleted(true);
+    // marks entity as deleted and stops future associating
+    dr_servant->prepare_to_delete();
   }
+
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
@@ -305,7 +306,6 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     }
 
     datareader_map_.erase(it);
-
     datareader_set_.erase(dr_servant);
   }
 
@@ -314,7 +314,6 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   }
 
   RepoId subscription_id  = dr_servant->get_subscription_id();
-
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   participant_->get_id(),
@@ -328,15 +327,11 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
   // Call remove association before unregistering the datareader from the transport,
   // otherwise some callbacks resulted from remove_association may lost.
-
   dr_servant->remove_all_associations();
-
   dr_servant->cleanup();
-
   // Decrease the ref count after the servant is removed
   // from the datareader map.
   dr_servant->_remove_ref();
-
   return DDS::RETCODE_OK;
 }
 

@@ -10,7 +10,6 @@
 
 #include "ace/Log_Msg.h"
 #include <cmath>
-
 #ifndef __ACE_INLINE__
 # include "MulticastSession.inl"
 #endif  /* __ACE_INLINE__ */
@@ -73,10 +72,10 @@ MulticastSession::MulticastSession(MulticastDataLink* link,
                                    MulticastPeer remote_peer)
   : link_(link)
   , remote_peer_(remote_peer)
+  , reverse_start_lock_(start_lock_)
   , started_(false)
   , active_(true)
   , acked_(false)
-  , ack_cond_(ack_lock_)
   , syn_watchdog_(this)
 {
 }
@@ -92,19 +91,6 @@ MulticastSession::acked()
   return this->acked_;
 }
 
-bool
-MulticastSession::wait_for_ack()
-{
-  ACE_Time_Value abs_timeout = ACE_OS::gettimeofday() +
-    this->link_->config()->syn_timeout_;
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->ack_lock_, false);
-  while (!this->acked_) {
-    if (this->ack_cond_.wait(&abs_timeout) == -1) {
-      return false;
-    }
-  }
-  return true;
-}
 
 bool
 MulticastSession::start_syn(ACE_Reactor* reactor)
@@ -195,8 +181,6 @@ MulticastSession::syn_received(ACE_Message_Block* control)
 
     if (!this->acked_) {
       this->acked_ = true;
-      this->ack_cond_.broadcast();
-
       syn_hook(header.sequence_);
     }
   }
@@ -206,6 +190,7 @@ MulticastSession::syn_received(ACE_Message_Block* control)
   send_synack();
 
   this->link_->transport()->passive_connection(this->link_->local_peer(), this->remote_peer_);
+
 }
 
 void
@@ -263,7 +248,6 @@ MulticastSession::synack_received(ACE_Message_Block* control)
 
     this->syn_watchdog_.cancel();
     this->acked_ = true;
-    this->ack_cond_.broadcast();
   }
 }
 

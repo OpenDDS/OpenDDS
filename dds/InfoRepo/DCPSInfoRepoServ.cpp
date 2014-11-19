@@ -41,20 +41,20 @@
 #include <sstream>
 
 InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
-  : ior_file_(ACE_TEXT("repo.ior"))
-  , listen_address_given_(0)
+: ior_file_(ACE_TEXT("repo.ior"))
+, listen_address_given_(0)
 #ifdef DDS_HAS_MINIMUM_BIT
-  , use_bits_(false)
+, use_bits_(false)
 #else
-  , use_bits_(true)
+, use_bits_(true)
 #endif
-  , resurrect_(true)
-  , finalized_(false)
-  , federator_(this->federatorConfig_)
-  , federatorConfig_(argc, argv)
-  , lock_()
-  , cond_(lock_)
-  , shutdown_complete_(false)
+, resurrect_(true)
+, finalized_(false)
+, federator_(this->federatorConfig_)
+, federatorConfig_(argc, argv)
+, lock_()
+, cond_(lock_)
+, shutdown_complete_(false)
 {
   try {
     this->init();
@@ -210,6 +210,7 @@ InfoRepo::init()
   ACE_Argv_Type_Converter cvt(this->federatorConfig_.argc(),
                               this->federatorConfig_.argv());
   this->orb_ = CORBA::ORB_init(cvt.get_argc(), cvt.get_ASCII_argv(), "");
+
   this->info_servant_ =
     new TAO_DDS_DCPSInfo_i(this->orb_, this->resurrect_, this,
                            this->federatorConfig_.federationId());
@@ -269,7 +270,7 @@ InfoRepo::init()
 
   if (this->use_bits_) {
     if (this->info_servant_->init_transport(this->listen_address_given_,
-                                            this->listen_address_str_.c_str())
+        this->listen_address_str_.c_str())
         != 0 /* init_transport returns 0 for success */) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                  ACE_TEXT("Unable to initialize transport.\n")));
@@ -304,7 +305,7 @@ InfoRepo::init()
 
   // Initialize reassociation.
   if (this->reassociate_delay_ != ACE_Time_Value::zero &&
-     !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
+      !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                ACE_TEXT("Unable to initialize reassociation.\n")));
     throw InitError("Unable to initialize reassociation.");
@@ -379,7 +380,7 @@ InfoRepo::init()
 
   // Initial federation join if specified on command line.
   if (this->federator_.id().overridden()
-      && !this->federatorConfig_.federateIor().empty()) {
+       && !this->federatorConfig_.federateIor().empty()) {
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) INFO: DCPSInfoRepo::init() - ")
@@ -388,7 +389,7 @@ InfoRepo::init()
     }
 
     obj = this->orb_->string_to_object(
-      this->federatorConfig_.federateIor().c_str());
+          this->federatorConfig_.federateIor().c_str());
 
     if (CORBA::is_nil(obj)) {
       ACE_ERROR((LM_ERROR,
@@ -414,7 +415,7 @@ InfoRepo::init()
 }
 
 InfoRepo_Shutdown::InfoRepo_Shutdown(InfoRepo &ir)
-  : ir_(ir)
+: ir_(ir)
 {
 }
 

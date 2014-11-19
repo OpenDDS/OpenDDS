@@ -1187,10 +1187,17 @@ ManagerImpl::processDelete(const ParticipantUpdate* sample, const DDS::SampleInf
                sample->domain,
                std::string(converter).c_str()));
   }
-
-  this->info_->remove_domain_participant(
-    sample->domain,
-    sample->id);
+  try {
+    this->info_->remove_domain_participant(
+      sample->domain,
+      sample->id);
+  } catch (OpenDDS::DCPS::Invalid_Participant&) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) Federator::ManagerImpl::processDelete( ParticipantUpdate): ")
+                 ACE_TEXT("the participant was already removed.\n")));
+    }
+  }
 }
 
 void

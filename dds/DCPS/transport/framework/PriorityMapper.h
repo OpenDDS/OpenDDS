@@ -11,7 +11,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 
-#include "tao/Basic_Types.h"
+#include "TransportDefs.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -38,14 +38,14 @@ namespace DCPS {
 class OpenDDS_Dcps_Export PriorityMapper {
 public:
   /// Construct with a priority value.
-  PriorityMapper(CORBA::Long priority = 0);
+  PriorityMapper(Priority priority = 0);
 
   /// Virtual destructor.
   virtual ~PriorityMapper();
 
   /// Accessors for the TRANSPORT_PRIORITY value.
-  CORBA::Long& priority();
-  CORBA::Long  priority() const;
+  Priority& priority();
+  Priority  priority() const;
 
   /// Access the mapped DiffServ codepoint value.
   virtual short codepoint() const = 0;
@@ -55,7 +55,7 @@ public:
 
 private:
   /// The TRANSPORT_PRIORITY value.
-  CORBA::Long priority_;
+  Priority priority_;
 };
 
 } // namespace DCPS

@@ -117,7 +117,6 @@ InfoRepoDiscovery::InfoRepoDiscovery(const RepoKey& key,
 InfoRepoDiscovery::~InfoRepoDiscovery()
 {
   delete this->failoverListener_;
-
   if (!orb_from_user_ && orb_runner_) {
     if (0 == --orb_runner_->use_count_) {
       orb_runner_->shutdown();
@@ -532,6 +531,7 @@ InfoRepoDiscovery::add_publication(DDS::DomainId_t domainId,
                                    const DDS::PublisherQos& publisherQos)
 {
   RepoId pubId;
+
   try {
     DCPS::DataWriterRemoteImpl* writer_remote_impl = 0;
     ACE_NEW_RETURN(writer_remote_impl,
@@ -624,6 +624,7 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const DDS::StringSeq& params)
 {
   RepoId subId;
+
   try {
     DCPS::DataReaderRemoteImpl* reader_remote_impl = 0;
     ACE_NEW_RETURN(reader_remote_impl,
@@ -663,10 +664,8 @@ InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::remove_subscription: ");
   }
-
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
   removeDataReaderRemote(subscriptionId);
-
   return removed;
 }
 

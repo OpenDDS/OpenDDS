@@ -60,7 +60,6 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
   (ReceivedDataSample& sample, const ACE_INET_Addr&)
 {
   DBG_ENTRY_LVL("TcpReceiveStrategy","deliver_sample",6);
-
   if (sample.header_.message_id_ == GRACEFUL_DISCONNECT) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
     this->gracefully_disconnected_ = true;
@@ -107,7 +106,7 @@ OpenDDS::DCPS::TcpReceiveStrategy::start_i()
     this->connection_->_remove_ref();
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: TcpReceiveStrategy::start_i TcpConnection can't register with "
-                      "reactor %X %p\n", this->connection_.in(), ACE_TEXT("register_handler")),
+                      "reactor %@ %p\n", this->connection_.in(), ACE_TEXT("register_handler")),
                      -1);
   }
 

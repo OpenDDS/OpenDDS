@@ -81,14 +81,12 @@ class OpenDDS_Dcps_Export DataWriterImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportSendListener,
-    public virtual ACE_Event_Handler
-{
+    public virtual ACE_Event_Handler {
 public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
 
-  typedef std::map<RepoId, SequenceNumber, GUID_tKeyLessThan>
-    RepoIdToSequenceMap;
+  typedef std::map<RepoId, SequenceNumber, GUID_tKeyLessThan> RepoIdToSequenceMap;
 
   struct AckToken {
     ACE_Time_Value tstamp_;
@@ -98,7 +96,7 @@ public:
 
     AckToken(const DDS::Duration_t& max_wait,
              const SequenceNumber& sequence)
-        : tstamp_(ACE_OS::gettimeofday()),
+      : tstamp_(ACE_OS::gettimeofday()),
         max_wait_(max_wait),
         sequence_(sequence) {}
 
@@ -178,6 +176,8 @@ public:
   virtual void add_association(const RepoId& yourId,
                                const ReaderAssociation& reader,
                                bool active);
+
+  virtual void transport_assoc_done(int flags, const RepoId& remote_id);
 
   virtual void association_complete(const RepoId& remote_id);
 
@@ -465,6 +465,8 @@ public:
 
 protected:
 
+  void prepare_to_delete();
+
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
 
@@ -548,9 +550,12 @@ private:
   bool lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-
-  const RepoId& get_repo_id() const { return this->publication_id_; }
-  DDS::DomainId_t domain_id() const { return this->domain_id_; }
+  const RepoId& get_repo_id() const {
+    return this->publication_id_;
+  }
+  DDS::DomainId_t domain_id() const {
+    return this->domain_id_;
+  }
 
   CORBA::Long get_priority_value(const AssociationData&) const {
     return this->qos_.transport_priority.value;

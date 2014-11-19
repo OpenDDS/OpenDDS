@@ -64,14 +64,14 @@ OpenDDS::DCPS::TcpConnection::get_remote_address()
 }
 
 ACE_INLINE
-CORBA::Long&
+OpenDDS::DCPS::Priority&
 OpenDDS::DCPS::TcpConnection::transport_priority()
 {
   return this->transport_priority_;
 }
 
 ACE_INLINE
-CORBA::Long
+OpenDDS::DCPS::Priority
 OpenDDS::DCPS::TcpConnection::transport_priority() const
 {
   return this->transport_priority_;

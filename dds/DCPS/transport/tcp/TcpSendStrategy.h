@@ -30,7 +30,7 @@ public:
                   const TcpConnection_rch& connection,
                   TcpSynchResource* synch_resource,
                   const TransportReactorTask_rch& task,
-                  CORBA::Long priority);
+                  Priority priority);
   virtual ~TcpSendStrategy();
 
   /// This is called by the datalink object to associate with the "new" connection object.

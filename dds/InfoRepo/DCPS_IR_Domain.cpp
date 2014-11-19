@@ -531,6 +531,7 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
                        1);
     }
 
+
     int transportResult = init_built_in_topics_transport();
 
     if (0 != transportResult) {
@@ -556,7 +557,6 @@ int DCPS_IR_Domain::init_built_in_topics(bool federated)
 
   // enable the Built-In Topics
   useBIT_ = true;
-
   return 0;
 }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -738,6 +738,7 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool /* federated */)
 #else
 int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
 {
+
   try {
     DDS::DataWriter_var datawriter;
 
@@ -833,7 +834,6 @@ int DCPS_IR_Domain::init_built_in_topics_datawriters(bool federated)
       "ERROR: Exception caught in DCPS_IR_Domain::init_built_in_topics_datawriters:");
     return 1;
   }
-
   return 0;
 }
 #endif // defined (DDS_HAS_MINIMUM_BIT)
@@ -1152,6 +1152,7 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
 
 void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription)
 {
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   if (useBIT_) {
@@ -1221,6 +1222,7 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
 #else
   ACE_UNUSED_ARG(subscription);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+
 }
 
 void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
@@ -1228,6 +1230,7 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
   if (useBIT_) {
+
     DCPS_IR_Topic_Description* desc =
       publication->get_topic_description();
 
@@ -1300,6 +1303,7 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
 #else
   ACE_UNUSED_ARG(publication);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+
 }
 
 void DCPS_IR_Domain::dispose_participant_bit(DCPS_IR_Participant* participant)

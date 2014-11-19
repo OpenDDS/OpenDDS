@@ -32,23 +32,16 @@ public:
                           ACE_Message_Block* data);
 
 protected:
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
-                                    const ConnectionAttribs& attribs,
-                                    bool active);
+  virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
+                                               const ConnectionAttribs& attribs,
+                                               TransportClient* client);
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs);
+  virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
+                                              const ConnectionAttribs& attribs,
+                                              TransportClient* client);
 
-  virtual DataLink* accept_datalink(ConnectionEvent& ce);
-  virtual void stop_accepting(ConnectionEvent& ce);
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
 
@@ -63,8 +56,10 @@ protected:
 
 private:
   UdpDataLink* make_datalink(const ACE_INET_Addr& remote_address,
-                             CORBA::Long          priority,
-                             bool                 active);
+                             Priority priority, bool active);
+
+  PriorityKey blob_to_key(const TransportBLOB& remote,
+                          Priority priority, bool active);
 
   RcHandle<UdpInst> config_i_;
 
@@ -85,7 +80,8 @@ private:
 
   /// This protects the pending_connections_, pending_server_link_keys_,
   /// and server_link_keys_ data members.
-  LockType connections_lock_;
+  //LockType connections_lock_;
+  ACE_Recursive_Thread_Mutex connections_lock_;
 
   /// Locked by connections_lock_.
   /// These are passive-side PriorityKeys that have been fully associated
@@ -93,19 +89,17 @@ private:
   /// ready for use and reuse via server_link_.
   std::set<PriorityKey> server_link_keys_;
 
+  typedef std::vector<DataLink::OnStartCallback> Callbacks;
+  typedef std::map<PriorityKey, Callbacks> PendConnMap;
   /// Locked by connections_lock_.  Tracks expected connections
   /// that we have learned about in accept_datalink() but have
   /// not yet performed the handshake.
-  std::multimap<ConnectionEvent*, PriorityKey> pending_connections_;
+  PendConnMap pending_connections_;
 
   /// Locked by connections_lock_.
   /// These are passive-side PriorityKeys that have finished handshaking,
   /// but have not been processed by accept_datalink()
   std::set<PriorityKey> pending_server_link_keys_;
-
-  PriorityKey blob_to_key(const TransportBLOB& remote,
-                          CORBA::Long priority,
-                          bool active);
 };
 
 } // namespace DCPS

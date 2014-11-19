@@ -17,7 +17,6 @@
 #include "ace/Truncate.h"
 
 #include "dds/DCPS/Serializer.h"
-
 #include <cstdlib>
 
 namespace OpenDDS {
@@ -95,6 +94,7 @@ ReliableSession::control_received(char submessage_id,
                ACE_TEXT("ReliableSession::control_received: ")
                ACE_TEXT("unknown TRANSPORT_CONTROL submessage: 0x%x!\n"),
                submessage_id));
+    break;
   }
   return true;
 }
@@ -418,11 +418,14 @@ ReliableSession::send_nakack(SequenceNumber low)
 bool
 ReliableSession::start(bool active, bool acked)
 {
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->start_lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->start_lock_, false);
 
-  if (this->started_) return true;  // already started
+  if (this->started_) {
+     return true;  // already started
+  }
 
   ACE_Reactor* reactor = this->link_->get_reactor();
+
   if (reactor == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -432,36 +435,41 @@ ReliableSession::start(bool active, bool acked)
   }
 
   this->active_  = active;
-  // A watchdog timer is scheduled to periodically check for gaps in
-  // received data. If a gap is discovered, MULTICAST_NAK control
-  // samples will be sent to initiate repairs.
-  // Only subscriber send naks so just schedule for sub role.
-  if (!active) {
-    if (acked) {
-      this->acked_ = true;
+  {
+    //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
+    ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, this->reverse_start_lock_, false);
+
+    // A watchdog timer is scheduled to periodically check for gaps in
+    // received data. If a gap is discovered, MULTICAST_NAK control
+    // samples will be sent to initiate repairs.
+    // Only subscriber send naks so just schedule for sub role.
+    if (!active) {
+      if (acked) {
+        this->acked_ = true;
+      }
+      if (!this->nak_watchdog_.schedule(reactor)) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ERROR: ")
+                          ACE_TEXT("ReliableSession::start: ")
+                          ACE_TEXT("failed to schedule NAK watchdog!\n")),
+                         false);
+      }
     }
-    if (!this->nak_watchdog_.schedule(reactor)) {
+
+    // Active peers schedule a watchdog timer to initiate a 2-way
+    // handshake to verify that passive endpoints can send/receive
+    // data reliably. This process must be executed using the
+    // transport reactor thread to prevent blocking.
+    // Only publisher send syn so just schedule for pub role.
+    if (active && !this->start_syn(reactor)) {
+      this->nak_watchdog_.cancel();
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("ReliableSession::start: ")
-                        ACE_TEXT("failed to schedule NAK watchdog!\n")),
+                        ACE_TEXT("failed to schedule SYN watchdog!\n")),
                        false);
     }
-  }
-
-  // Active peers schedule a watchdog timer to initiate a 2-way
-  // handshake to verify that passive endpoints can send/receive
-  // data reliably. This process must be executed using the
-  // transport reactor thread to prevent blocking.
-  // Only publisher send syn so just schedule for pub role.
-  if (active && !this->start_syn(reactor)) {
-    this->nak_watchdog_.cancel();
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableSession::start: ")
-                      ACE_TEXT("failed to schedule SYN watchdog!\n")),
-                     false);
-  }
+  } //Reacquire start_lock_ after releasing unlock_guard with release_start_lock_
 
   return this->started_ = true;
 }

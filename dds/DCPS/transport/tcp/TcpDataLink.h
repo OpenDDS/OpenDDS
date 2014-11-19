@@ -25,7 +25,7 @@ public:
 
   TcpDataLink(const ACE_INET_Addr& remote_address,
                     TcpTransport*  transport_impl,
-                    CORBA::Long          priority,
+                    Priority          priority,
                     bool                 is_loopback,
                     bool                 is_active);
   virtual ~TcpDataLink();

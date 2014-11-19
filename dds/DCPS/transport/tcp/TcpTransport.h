@@ -14,12 +14,17 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "TcpInst_rch.h"
 #include "TcpDataLink_rch.h"
+#include "TcpConnection.h"
 #include "TcpConnection_rch.h"
+
 #include "dds/DCPS/transport/framework/TransportReactorTask_rch.h"
 #include "dds/DCPS/transport/framework/PriorityKey.h"
+
 #include "ace/INET_Addr.h"
 #include "ace/Hash_Map_Manager.h"
 #include "ace/Synch.h"
+#include "ace/Connector.h"
+#include "ace/SOCK_Connector.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -49,25 +54,18 @@ public:
 
   virtual void unbind_link(DataLink* link);
 
-protected:
 
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
-                                    const ConnectionAttribs& attribs,
-                                    bool active);
+private:
+  virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
+                                               const ConnectionAttribs& attribs,
+                                               TransportClient* client);
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs);
+  virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
+                                              const ConnectionAttribs& attribs,
+                                              TransportClient* client);
 
-  virtual DataLink* accept_datalink(ConnectionEvent& ce);
-  virtual void stop_accepting(ConnectionEvent& ce);
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
 
@@ -81,7 +79,7 @@ protected:
 
   virtual std::string transport_type() const { return "tcp"; }
 
-private:
+  void async_connect_failed(const PriorityKey& key);
 
   /// The TcpConnection is our friend.  It tells us when it
   /// has been created (by our acceptor_), and is seeking the
@@ -97,9 +95,8 @@ private:
   void passive_connection(const ACE_INET_Addr& remote_address,
                           const TcpConnection_rch& connection);
 
-  /// Called by find_or_create_datalink().
-  int make_active_connection(const ACE_INET_Addr& remote_address,
-                             const TcpDataLink_rch& link);
+  bool find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
+                       TransportClient* client, const RepoId& remote_id);
 
   /// Code common to make_active_connection() and
   /// make_passive_connection().
@@ -107,7 +104,7 @@ private:
                            const TcpConnection_rch& connection);
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
-                          CORBA::Long priority,
+                          Priority priority,
                           bool active);
 
   /// Map Type: (key) PriorityKey to (value) TcpDataLink_rch
@@ -125,9 +122,6 @@ private:
   typedef ACE_Guard<LockType>     GuardType;
   typedef ACE_Condition<LockType> ConditionType;
 
-  void unbind_all(const std::vector<PriorityKey>& keys, GuardType* guard);
-  void unbind_all(const std::vector<PriorityKey>& keys);
-
 // TBD SOON - Something needs to protect the tcp_config_ reference
 //            because it gets set in our configure() method, and
 //            dropped in our shutdown_i() method.  Maybe we can just
@@ -143,6 +137,9 @@ private:
 
   /// Used to accept passive connections on our local_address_.
   TcpAcceptor* acceptor_;
+
+  /// Open TcpConnections using non-blocking connect.
+  ACE_Connector<TcpConnection, ACE_SOCK_Connector> connector_;
 
   /// Our configuration object, supplied to us in config_i().
   TcpInst_rch tcp_config_;
@@ -170,11 +167,6 @@ private:
   /// TODO: reuse the reconnect_task in the TcpConnection
   ///       for new connection checking.
   TcpConnectionReplaceTask* con_checker_;
-
-  /// Locked by connections_lock_.  Tracks expected connections
-  /// that we have learned about in accept_datalink() but have not yet
-  /// arrived.
-  std::multimap<ConnectionEvent*, PriorityKey> pending_connections_;
 };
 
 } // namespace DCPS

@@ -59,6 +59,7 @@ UdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 
   default:
     this->link_->data_received(sample);
+    break;
   }
 }
 

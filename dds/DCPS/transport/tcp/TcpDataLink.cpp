@@ -22,13 +22,13 @@
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
   const ACE_INET_Addr& remote_address,
   OpenDDS::DCPS::TcpTransport*  transport_impl,
-  CORBA::Long priority,
+  Priority priority,
   bool        is_loopback,
   bool        is_active)
   : DataLink(transport_impl, priority, is_loopback, is_active),
     remote_address_(remote_address),
     graceful_disconnect_sent_(false),
-    release_is_pending_ (false)
+    release_is_pending_(false)
 {
   DBG_ENTRY_LVL("TcpDataLink","TcpDataLink",6);
   transport_impl->_add_ref();
@@ -68,7 +68,7 @@ OpenDDS::DCPS::TcpDataLink::pre_stop_i()
   DataLink::pre_stop_i();
 
   TcpReceiveStrategy * rs
-  = dynamic_cast <TcpReceiveStrategy*>(this->receive_strategy_.in());
+    = dynamic_cast <TcpReceiveStrategy*>(this->receive_strategy_.in());
 
   if (rs != NULL) {
     // If we received the GRACEFUL_DISCONNECT message from peer before we
@@ -170,6 +170,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(TcpConnection* connection)
   }
 
   TcpConnection_rch conn_rch(connection, false);
+
   if (released) {
     TcpDataLink_rch this_rch(this, false);
     return this->transport_->connect_tcp_datalink(this_rch, conn_rch);
@@ -269,21 +270,19 @@ OpenDDS::DCPS::TcpDataLink::send_graceful_disconnect_message()
   ACE_NEW(send_element, TransportControlElement(message));
 
   // give the message block ownership to TransportControlElement
-  message->release ();
+  message->release();
 
   // I don't want to rebuild a connection in order to send
   // a graceful disconnect message.
   this->send_i(send_element, false);
 }
 
-
-void OpenDDS::DCPS::TcpDataLink::set_release_pending (bool flag)
+void OpenDDS::DCPS::TcpDataLink::set_release_pending(bool flag)
 {
   this->release_is_pending_ = flag;
 }
 
-bool OpenDDS::DCPS::TcpDataLink::is_release_pending () const
+bool OpenDDS::DCPS::TcpDataLink::is_release_pending() const
 {
   return this->release_is_pending_.value();
 }
-

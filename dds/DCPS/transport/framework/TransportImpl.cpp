@@ -29,8 +29,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportImpl::TransportImpl()
-  : rlock_thread_id_(0),
-    monitor_(0),
+  : monitor_(0),
     last_link_(0)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
@@ -159,6 +158,12 @@ TransportImpl::configure(TransportInst* config)
 }
 
 void
+TransportImpl::add_pending_connection(TransportClient* client, DataLink* link)
+{
+  pending_connections_.insert(std::make_pair(client, DataLink_rch(link, false)));
+}
+
+void
 TransportImpl::create_reactor_task(bool useAsyncSend)
 {
   if (this->reactor_task_.in()) {
@@ -188,94 +193,6 @@ TransportImpl::detach_client(TransportClient* client)
   pre_detach(client);
   GuardType guard(this->lock_);
   clients_.erase(client);
-}
-
-DataLink*
-TransportImpl::find_connect_i(const RepoId& local_id,
-                              const AssociationData& remote_association,
-                              const ConnectionAttribs& attribs,
-                              bool active, bool connect)
-{
-  const CORBA::ULong num_blobs = remote_association.remote_data_.length();
-  const std::string ttype = transport_type();
-
-  for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
-    if (remote_association.remote_data_[idx].transport_type.in() == ttype) {
-      DataLink_rch link;
-      if (connect) {
-        link = connect_datalink_i(local_id, remote_association.remote_id_,
-                                  remote_association.remote_data_[idx].data,
-                                  remote_association.remote_reliable_,
-                                  remote_association.remote_durable_, attribs);
-      } else {
-        link = find_datalink_i(local_id, remote_association.remote_id_,
-                               remote_association.remote_data_[idx].data,
-                               remote_association.remote_reliable_,
-                               remote_association.remote_durable_,
-                               attribs, active);
-      }
-      if (!link.is_nil()) {
-        return link._retn();
-      }
-    }
-  }
-  return 0;
-}
-
-DataLink*
-TransportImpl::find_datalink(const RepoId& local_id,
-                             const AssociationData& remote_association,
-                             const ConnectionAttribs& attribs,
-                             bool active)
-{
-  return find_connect_i(local_id, remote_association, attribs, active, false);
-}
-
-DataLink*
-TransportImpl::connect_datalink(const RepoId& local_id,
-                                const AssociationData& remote_association,
-                                const ConnectionAttribs& attribs)
-{
-  return find_connect_i(local_id, remote_association, attribs, true, true);
-}
-
-TransportImpl::ConnectionEvent::ConnectionEvent(const RepoId& local_id,
-                                  const AssociationData& remote_association,
-                                  const ConnectionAttribs& attribs)
-  : local_id_(local_id)
-  , remote_association_(remote_association)
-  , attribs_(attribs)
-  , cond_(mtx_)
-{}
-
-void
-TransportImpl::ConnectionEvent::wait(const ACE_Time_Value& timeout)
-{
-  ACE_Time_Value deadline;
-  ACE_Time_Value* p_deadline = 0;
-  if (timeout != ACE_Time_Value::zero) {
-    deadline = ACE_OS::gettimeofday() + timeout;
-    p_deadline = &deadline;
-  }
-
-  ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
-  while (link_.is_nil()) {
-    if (cond_.wait(p_deadline) == -1) {
-      return;
-    }
-  }
-}
-
-bool
-TransportImpl::ConnectionEvent::complete(const DataLink_rch& link)
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, false);
-  if (link_.is_nil()) {
-    link_ = link;
-    cond_.signal();
-    return true;
-  }
-  return false;
 }
 
 void

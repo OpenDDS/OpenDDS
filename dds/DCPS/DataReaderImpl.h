@@ -146,6 +146,7 @@ class OpenDDS_Dcps_Export DataReaderImpl
 public:
   friend class RequestedDeadlineWatchdog;
   friend class QueryConditionImpl;
+  friend class SubscriberImpl;
 
   typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
 
@@ -163,6 +164,8 @@ public:
   virtual void add_association(const RepoId& yourId,
                                const WriterAssociation& writer,
                                bool active);
+
+  virtual void transport_assoc_done(int flags, const RepoId& remote_id);
 
   virtual void association_complete(const RepoId& remote_id);
 
@@ -496,6 +499,8 @@ public:
 
 protected:
 
+  void prepare_to_delete();
+
   SubscriberImpl* get_subscriber_servant();
 
   void post_read_or_take();
@@ -611,7 +616,7 @@ private:
   const RepoId& get_repo_id() const { return this->subscription_id_; }
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
 
-  CORBA::Long get_priority_value(const AssociationData& data) const {
+  Priority get_priority_value(const AssociationData& data) const {
     return data.publication_transport_priority_;
   }
 
@@ -633,7 +638,9 @@ private:
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
 
+  //Used to protect access to id_to_handle_map_
   ACE_Recursive_Thread_Mutex   publication_handle_lock_;
+  Reverse_Lock_t reverse_pub_handle_lock_;
 
   typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
   RepoIdToHandleMap            id_to_handle_map_;

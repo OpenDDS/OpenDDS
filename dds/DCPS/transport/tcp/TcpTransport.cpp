@@ -22,6 +22,8 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/debug.h"
+#include "dds/DCPS/GuidConverter.h"
+
 #include <sstream>
 
 namespace OpenDDS {
@@ -32,6 +34,7 @@ TcpTransport::TcpTransport(const TransportInst_rch& inst)
     con_checker_(new TcpConnectionReplaceTask(this))
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
+
   if (!inst.is_nil()) {
     if (!configure(inst.in())) {
       delete con_checker_;
@@ -52,289 +55,249 @@ TcpTransport::~TcpTransport()
 
 PriorityKey
 TcpTransport::blob_to_key(const TransportBLOB& remote,
-                          CORBA::Long priority,
+                          Priority priority,
                           bool active)
 {
-  ACE_INET_Addr remote_address = AssociationData::get_remote_address(remote);
-
-  const bool is_loopback = remote_address == this->tcp_config_->local_address_;
-
+  const ACE_INET_Addr remote_address =
+    AssociationData::get_remote_address(remote);
+  const bool is_loopback = remote_address == tcp_config_->local_address_;
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
 
-DataLink*
-TcpTransport::find_datalink_i(const RepoId& /*local_id*/,
-                              const RepoId& /*remote_id*/,
-                              const TransportBLOB& remote_data,
-                              bool /*remote_reliable*/,
-                              bool /*remote_durable*/,
-                              const ConnectionAttribs& attribs,
-                              bool active)
+TransportImpl::AcceptConnectResult
+TcpTransport::connect_datalink(const RemoteTransport& remote,
+                               const ConnectionAttribs& attribs,
+                               TransportClient* client)
 {
-  DBG_ENTRY_LVL("TcpTransport", "find_datalink_i", 6);
+  DBG_ENTRY_LVL("TcpTransport", "connect_datalink", 6);
 
   const PriorityKey key =
-    this->blob_to_key(remote_data, attribs.priority_, active);
+    blob_to_key(remote.blob_, attribs.priority_, true /*active*/);
 
-  VDBG_LVL((LM_DEBUG,
-            ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-            ACE_TEXT("remote_address \"%C:%d priority %d ")
-            ACE_TEXT("is_loopback %d\"\n"),
-            key.address().get_host_name(),
-            key.address().get_port_number(),
-            attribs.priority_, key.is_loopback()),
-          2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink PriorityKey "
+            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            key.priority(), key.address().get_host_addr(),
+            key.address().get_port_number(), key.is_loopback(),
+            key.is_active()), 2);
 
   TcpDataLink_rch link;
-  GuardType guard(this->links_lock_);
+  {
+    GuardType guard(links_lock_);
 
-  // First, we have to try to find an existing (connected) DataLink
-  // that suits the caller's needs.
-
-  if (this->links_.find(key, link) == 0) {
-
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-              ACE_TEXT("link found, waiting for start.\n")), 2);
-
-    {
-      ACE_Reverse_Lock<LockType> rev(this->links_lock_);
-      ACE_GUARD_RETURN(ACE_Reverse_Lock<LockType>, rev_guard, rev, 0);
-      link->wait_for_start();
+    if (find_datalink_i(key, link, client, remote.repo_id_)) {
+      return AcceptConnectResult(link._retn());
     }
 
-    TcpConnection_rch con = link->get_connection();
+    link = new TcpDataLink(key.address(), this, attribs.priority_,
+                           key.is_loopback(), true /*active*/);
 
-    if (con.is_nil()) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: Unable to use found datalink for "
-                        "remote %C:%d.\n",
-                        key.address().get_host_addr(),
-                        key.address().get_port_number()),
-                       0);
+    if (links_.bind(key, link) != 0 /*OK*/) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
+                 "Unable to bind new TcpDataLink to "
+                 "TcpTransport in links_ map.\n"));
+      return AcceptConnectResult();
+    }
+  }
+
+  TcpConnection_rch connection =
+    new TcpConnection(key.address(), link->transport_priority(), tcp_config_);
+  connection->set_datalink(link.in());
+
+  TcpConnection* pConn = connection.in();
+  TcpConnection_rch reactor_refcount(connection); // increment for reactor callback
+
+  ACE_TCHAR str[64];
+  key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]));
+
+  // Can't make this call while holding onto TransportClient::lock_
+  const int ret =
+    connector_.connect(pConn, key.address(), ACE_Synch_Options::asynch);
+
+  if (ret == -1 && errno != EWOULDBLOCK) {
+
+    VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"), 2);
+    return AcceptConnectResult();
+  }
+
+  // Don't decrement count when reactor_refcount goes out of scope, see
+  // TcpConnection::open()
+  (void) reactor_refcount._retn();
+
+  if (ret == 0) {
+    // connect() completed synchronously and called TcpConnection::active_open().
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink "
+              "completed synchronously.\n"), 2);
+    return AcceptConnectResult(link._retn());
+  }
+
+  if (!link->add_on_start_callback(client, remote.repo_id_)) {
+    // link was started by the reactor thread before we could add a callback
+
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink got link.\n"), 2);
+    return AcceptConnectResult(link._retn());
+  }
+
+  add_pending_connection(client, link.in());
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 2);
+  return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
+}
+
+void
+TcpTransport::async_connect_failed(const PriorityKey& key)
+{
+
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Failed to make active connection.\n"));
+  GuardType guard(links_lock_);
+  TcpDataLink_rch link;
+  links_.find(key, link);
+  links_.unbind(key);
+  guard.release();
+
+  if (link.in()) {
+    link->invoke_on_start_callbacks(false);
+  }
+
+}
+
+bool
+TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
+                              TransportClient* client, const RepoId& remote_id)
+{
+  if (links_.find(key, link) == 0 /*OK*/) {
+    if (!link->add_on_start_callback(client, remote_id)) {
+      VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+                ACE_TEXT("link found, already started.\n")), 2);
+      // Since the link was already started, we won't get an "on start"
+      // callback, and the link is immediately usable.
+      return true;
     }
 
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-              ACE_TEXT("done waiting for start.\n")), 2);
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+              ACE_TEXT("link found, pending.\n")), 2);
+    add_pending_connection(client, link.in());
+    link = 0; // don't return link to TransportClient
+    return true;
 
-    if (con->is_connector() && !con->is_connected()) {
-      bool on_new_association = true;
-
-      if (con->reconnect(on_new_association) == -1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "(%P|%t) ERROR: Unable to reconnect to remote %C:%d.\n",
-                          key.address().get_host_addr(),
-                          key.address().get_port_number()),
-                         0);
-      }
-    }
-
-    // else, This means we may or may not find a suitable (and already connected) DataLink.
-    // if con is not a connector and not connected, the passive connecting side will wait
-    // for the connection establishment.
-
-    if (DCPS_debug_level >= 5) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) Found existing connection,"
-        " No need for passive connection establishment, transport: %C.\n",
-        this->config()->name().c_str()));
-    }
-    return link._retn();
-
-  } else if (this->pending_release_links_.find(key, link) == 0) {
+  } else if (pending_release_links_.find(key, link) == 0 /*OK*/) {
     if (link->cancel_release()) {
       link->set_release_pending(false);
-      if (this->pending_release_links_.unbind(key, link) == 0 && this->links_.bind(key, link) == 0) {
-        VDBG_LVL((LM_DEBUG, "(%P|%t) Move link prio=%d addr=%C:%d to links_\n",
-                  link->transport_priority(), link->remote_address().get_host_name(),
-                  link->remote_address().get_port_number()), 5);
-        return link._retn();
 
-      } else {
-        // This should not happen.
-        ACE_ERROR((LM_ERROR, "(%P|%t) Failed to move link prio=%d addr=%C:%d to links_\n",
-                   link->transport_priority(), link->remote_address().get_host_name(),
-                   link->remote_address().get_port_number()));
+      if (pending_release_links_.unbind(key, link) == 0 /*OK*/
+          && links_.bind(key, link) == 0 /*OK*/) {
+        VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+                  ACE_TEXT("link from pending release list.\n")), 2);
+        return true;
       }
     }
+
+    link = 0; // don't return link to TransportClient
+    return false;
   }
 
-  VDBG_LVL((LM_DEBUG,
-            ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-            ACE_TEXT("no datalink found.\n")), 2);
-
-  return 0;
+  return false;
 }
 
-DataLink*
-TcpTransport::connect_datalink_i(const RepoId& /*local_id*/,
-                                 const RepoId& /*remote_id*/,
-                                 const TransportBLOB& remote_data,
-                                 bool /*remote_reliable*/,
-                                 bool /*remote_durable*/,
-                                 const ConnectionAttribs& attribs)
+TransportImpl::AcceptConnectResult
+TcpTransport::accept_datalink(const RemoteTransport& remote,
+                              const ConnectionAttribs& attribs,
+                              TransportClient* client)
 {
-  DBG_ENTRY_LVL("TcpTransport", "connect_datalink_i", 6);
+  GuidConverter remote_conv(remote.repo_id_);
+  GuidConverter local_conv(attribs.local_id_);
 
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink local %C "
+            "accepting connection from remote %C\n",
+            std::string(local_conv).c_str(),
+            std::string(remote_conv).c_str()), 5);
+
+  GuardType guard(connections_lock_);
   const PriorityKey key =
-    this->blob_to_key(remote_data, attribs.priority_, true /*active*/);
+    blob_to_key(remote.blob_, attribs.priority_, false /* !active */);
 
-  TcpDataLink_rch link =
-    new TcpDataLink(key.address(), this, attribs.priority_,
-                    key.is_loopback(), true /*active*/);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink PriorityKey "
+            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n", attribs.priority_,
+            key.address().get_host_addr(), key.address().get_port_number(),
+            key.is_loopback(), key.is_active()), 2);
 
-  VDBG_LVL((LM_DEBUG,
-            "(%P|%t) TcpTransport::connect_datalink_i link %@ PriorityKey "
-            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
-            link.in(), link->transport_priority(),
-            link->remote_address().get_host_addr(),
-            link->remote_address().get_port_number(),
-            (int)link->is_loopback(),
-            (int)link->is_active()), 2);
+  TcpDataLink_rch link;
+  {
+    GuardType guard(links_lock_);
 
-  { // guard scope
-    GuardType guard(this->links_lock_);
+    if (find_datalink_i(key, link, client, remote.repo_id_)) {
 
-    // Attempt to bind the TcpDataLink to our links_ map.
-    if (this->links_.bind(key, link) != 0) {
-      // We failed to bind the new DataLink into our links_ map.
-      // On error, we return a NULL pointer.
-      ACE_ERROR_RETURN((LM_ERROR,
-                        "(%P|%t) ERROR: TcpTransport::connect_datalink_i "
-                        "Unable to bind new TcpDataLink to "
-                        "TcpTransport in links_ map.\n"), 0);
+      return AcceptConnectResult(link._retn());
+
+    } else {
+
+      link = new TcpDataLink(key.address(), this, key.priority(),
+                             key.is_loopback(), key.is_active());
+
+      if (links_.bind(key, link) != 0 /*OK*/) {
+        ACE_ERROR((LM_ERROR,
+                   "(%P|%t) ERROR: TcpTransport::accept_datalink "
+                   "Unable to bind new TcpDataLink to "
+                   "TcpTransport in links_ map.\n"));
+        return AcceptConnectResult();
+      }
     }
   }
 
-  // Now we need to attempt to establish a connection for the DataLink.
-  int result = this->make_active_connection(key.address(), link);
-
-  if (result != 0) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: Failed to make active connection.\n"));
-
-    link->unblock_wait_for_start();
-
-    GuardType guard(this->links_lock_);
-    // Make sure that we unbind the link (that failed to establish a
-    // connection) from our links_ map.  We intentionally ignore the
-    // return code from the unbind() call since we know that we just
-    // did the bind() moments ago - and with the links_lock_ acquired
-    // the whole time.
-    this->links_.unbind(key);
-
-    // On error, return a NULL pointer.
-    return 0;
-  }
-
-  // That worked.  Return a reference to the DataLink that the caller will
-  // be responsible for.
-  return link._retn();
-}
-
-DataLink*
-TcpTransport::accept_datalink(TransportImpl::ConnectionEvent& ce)
-{
-  const std::string ttype = "tcp";
-  const CORBA::ULong num_blobs = ce.remote_association_.remote_data_.length();
-
-  GuardType guard(this->connections_lock_);
-  std::vector<PriorityKey> keys;
-  TcpDataLink_rch ready_link; // a datalink that's already ready to use
-  PriorityKey ready_key; // key for ready_link
   TcpConnection_rch connection;
+  const ConnectionMap::iterator iter = connections_.find(key);
 
-  for (CORBA::ULong idx = 0; idx < num_blobs; ++idx) {
-    if (ce.remote_association_.remote_data_[idx].transport_type.in() == ttype) {
-
-      const PriorityKey key =
-        this->blob_to_key(ce.remote_association_.remote_data_[idx].data,
-                          ce.attribs_.priority_, false /*active == false*/);
-
-      TcpDataLink_rch link =
-        new TcpDataLink(key.address(), this, ce.attribs_.priority_,
-                        key.is_loopback(), false /*active == false*/);
-      VDBG_LVL((LM_DEBUG,
-                "(%P|%t) TcpTransport::accept_datalink link %@ PriorityKey"
-                "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
-                link.in(), link->transport_priority(),
-                link->remote_address().get_host_addr(),
-                link->remote_address().get_port_number(),
-                (int)link->is_loopback(),
-                (int)link->is_active()), 2);
-
-      {
-        GuardType guard(this->links_lock_);
-        if (this->links_.bind(key, link) != 0) {
-          this->unbind_all(keys, &guard);
-          ACE_ERROR_RETURN((LM_ERROR,
-                            "(%P|%t) ERROR: TcpTransport::accept_datalink "
-                            "Unable to bind new TcpDataLink to "
-                            "TcpTransport in links_ map.\n"), 0);
-        }
-      }
-
-      ConnectionMap::iterator iter = this->connections_.find(key);
-      if (iter != this->connections_.end()) {
-        connection = iter->second;
-        this->connections_.erase(iter);
-        ready_link = link;
-        ready_key = key;
-        break;
-      }
-      keys.push_back(key);
-    }
+  if (iter != connections_.end()) {
+    connection = iter->second;
+    connections_.erase(iter);
   }
 
-  if (ready_link.is_nil()) {
-    for (size_t i = 0; i < keys.size(); ++i) {
-      this->pending_connections_.insert(
-        std::pair<ConnectionEvent* const, PriorityKey>(&ce, keys[i]));
-      // SunCC doesn't like using make_pair() here.
+  if (connection.is_nil()) {
+    if (!link->add_on_start_callback(client, remote.repo_id_)) {
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
+                "got started link %@.\n", link.in()), 2);
+      return AcceptConnectResult(link._retn());
     }
 
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) TcpTransport::accept_datalink ")
-              ACE_TEXT("no existing connection.\n")), 2);
-    return 0; // no link ready, passive_connection will signal the event later
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
+              "no existing TcpConnection.\n"), 2);
+
+    add_pending_connection(client, link.in());
+
+    // no link ready, passive_connection will complete later
+    return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
   }
 
   guard.release(); // connect_tcp_datalink() isn't called with connections_lock_
-  if (this->connect_tcp_datalink(ready_link, connection) == -1) {
-    GuardType guard(this->links_lock_);
-    this->links_.unbind(ready_key);
-    ready_link = 0;
+
+  if (connect_tcp_datalink(link, connection) == -1) {
+    GuardType guard(links_lock_);
+    links_.unbind(key);
+    link = 0;
   }
-  this->unbind_all(keys); // these are the blobs that didn't connect
-  return ready_link._retn();
+
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
+            "connected link %@.\n", link.in()), 2);
+  return AcceptConnectResult(link._retn());
 }
 
 void
-TcpTransport::unbind_all(const std::vector<PriorityKey>& keys)
+TcpTransport::stop_accepting_or_connecting(TransportClient* client,
+                                           const RepoId& remote_id)
 {
-  GuardType guard(this->links_lock_);
-  this->unbind_all(keys, &guard);
-}
+  GuidConverter remote_converted(remote_id);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::stop_accepting_or_connecting "
+            "stop connecting to remote: %C\n",
+            std::string(remote_converted).c_str()), 5);
 
-void
-TcpTransport::unbind_all(const std::vector<PriorityKey>& keys, GuardType*)
-{
-  for (size_t i = 0; i < keys.size(); ++i) {
-    this->links_.unbind(keys[i]);
-  }
-}
+  GuardType guard(connections_lock_);
+  typedef std::multimap<TransportClient*, DataLink_rch>::iterator iter_t;
+  const std::pair<iter_t, iter_t> range =
+    pending_connections_.equal_range(client);
 
-void
-TcpTransport::stop_accepting(TransportImpl::ConnectionEvent& ce)
-{
-  GuardType guard(this->connections_lock_);
-  typedef std::multimap<ConnectionEvent*, PriorityKey>::iterator iter_t;
-  std::pair<iter_t, iter_t> range = this->pending_connections_.equal_range(&ce);
   for (iter_t iter = range.first; iter != range.second; ++iter) {
-    GuardType guard(this->links_lock_);
-    this->links_.unbind(iter->second);
+    iter->second->remove_on_start_callback(client, remote_id);
   }
-  this->pending_connections_.erase(range.first, range.second);
+
+  pending_connections_.erase(range.first, range.second);
 }
 
 bool
@@ -358,6 +321,8 @@ TcpTransport::configure_i(TransportInst* config)
 
   // Ask our base class for a "copy" of the reference to the reactor task.
   this->reactor_task_ = reactor_task();
+
+  connector_.open(reactor_task_->get_reactor());
 
   // Make a "copy" of the reference for ourselves.
   tcp_config->_add_ref();
@@ -424,11 +389,13 @@ TcpTransport::configure_i(TransportInst* config)
 
     if (this->tcp_config_->local_address_str_.length() > 0) {
       size_t pos = this->tcp_config_->local_address_str_.find_last_of(
-                                                ":]", std::string::npos, 2);
+                     ":]", std::string::npos, 2);
       std::string str = this->tcp_config_->local_address_str_.substr(0, pos + 1);
+
       if (this->tcp_config_->local_address_str_[pos] == ']') {
         str += ":";
       }
+
       str += out.str();
       this->tcp_config_->local_address_str_ = str;
     }
@@ -469,6 +436,7 @@ TcpTransport::shutdown_i()
     GuardType guard(this->connections_lock_);
 
     this->connections_.clear();
+    this->pending_connections_.clear();
   }
 
   // Disconnect all of our DataLinks, and clear our links_ collection.
@@ -548,7 +516,8 @@ TcpTransport::release_datalink(DataLink* link)
   enum LinkAction { None, StopLink, ScheduleLinkRelease };
   LinkAction linkAction = None;
 
-  { // Scope for locking to protect the links (and pending_release) containers.
+  {
+    // Scope for locking to protect the links (and pending_release) containers.
     GuardType guard(this->links_lock_);
 
     // Attempt to remove the TcpDataLink from our links_ map.
@@ -591,15 +560,18 @@ TcpTransport::release_datalink(DataLink* link)
                    "pending_release_links_ map: %p\n", ACE_TEXT("bind")));
         linkAction = StopLink;
         break;
+
       case 1:
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Unable to bind released TcpDataLink to "
                    "pending_release_links_ map: already bound\n"));
         linkAction = StopLink;
         break;
+
       case 0:
         linkAction = ScheduleLinkRelease;
         break;
+
       default:
         break;
       }
@@ -610,18 +582,20 @@ TcpTransport::release_datalink(DataLink* link)
   } // End of locking scope.
 
   // Actions are executed outside of the lock scope.
-  switch( linkAction) {
-    case StopLink:
-      link->stop();
-      break;
+  switch (linkAction) {
+  case StopLink:
 
-    case ScheduleLinkRelease:
-      link->schedule_delayed_release();
-      break;
+    link->stop();
+    break;
 
-    case None:
-      break;
-  };
+  case ScheduleLinkRelease:
+
+    link->schedule_delayed_release();
+    break;
+
+  case None:
+    break;
+  }
 
   if (DCPS_debug_level > 9) {
     std::stringstream buffer;
@@ -651,85 +625,46 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 {
   DBG_ENTRY_LVL("TcpTransport", "passive_connection", 6);
 
-  if (Transport_debug_level > 5) {
-    std::stringstream os;
-    dump(os);
-
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
-               ACE_TEXT("established with %C:%d.\n%C"),
-               remote_address.get_host_name(),
-               remote_address.get_port_number(),
-               os.str().c_str()));
-  }
-
   const PriorityKey key(connection->transport_priority(),
                         remote_address,
-                        remote_address == this->tcp_config_->local_address_,
+                        remote_address == tcp_config_->local_address_,
                         connection->is_connector());
 
-  VDBG_LVL((LM_DEBUG,
-            ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
+  VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
             ACE_TEXT("established with %C:%d.\n"),
             remote_address.get_host_name(),
             remote_address.get_port_number()), 2);
 
-  GuardType guard(this->connections_lock_);
+  GuardType connection_guard(connections_lock_);
   TcpDataLink_rch link;
-  ConnectionEvent* evt = 0;
-  typedef std::multimap<ConnectionEvent*, PriorityKey>::iterator iter_t;
-  for (iter_t iter = this->pending_connections_.begin();
-       iter != pending_connections_.end(); ++iter) {
-    if (iter->second == key) {
-      GuardType guard(this->links_lock_);
-      if (this->links_.find(key, link) == 0 /* found */) {
-        VDBG_LVL((LM_DEBUG,
-                  ACE_TEXT("(%P|%t) found matching key in links_ and ")
-                  ACE_TEXT("pending_connections_\n")), 5);
-        evt = iter->first;
-        this->pending_connections_.erase(iter);
-        break;
-      }
-    }
+  {
+    GuardType guard(links_lock_);
+    links_.find(key, link);
   }
 
-  if (!link.is_nil()) { // found in pending_connections_
-    // remove other entries for this ConnectionEvent in pending_connections_
-    std::pair<iter_t, iter_t> range =
-      this->pending_connections_.equal_range(evt);
-    for (iter_t iter = range.first; iter != range.second; ++iter) {
-      GuardType guard(this->links_lock_);
-      this->links_.unbind(iter->second);
-    }
-    this->pending_connections_.erase(range.first, range.second);
+  if (!link.is_nil()) {
+    connection_guard.release();
 
-    if (this->connect_tcp_datalink(link, connection) == -1) {
+    if (connect_tcp_datalink(link, connection) == -1) {
       VDBG_LVL((LM_ERROR,
                 ACE_TEXT("(%P|%t) ERROR: connect_tcp_datalink failed\n")), 5);
-      GuardType guard(this->links_lock_);
-      this->links_.unbind(key);
-    } else if (!evt->complete(link._retn())) {
-      VDBG_LVL((LM_DEBUG,
-                ACE_TEXT("(%P|%t) another connection completed first\n")), 5);
-      GuardType guard(this->links_lock_);
-      this->links_.unbind(key);
+      GuardType guard(links_lock_);
+      links_.unbind(key);
+
     } else {
-      this->con_checker_->add(connection);
+      con_checker_->add(connection);
     }
+
     return;
   }
 
-  // If we reach this point, this key was not in pending_connections_, so the
+  // If we reach this point, this link was not in links_, so the
   // accept_datalink() call hasn't happened yet.  Store in connections_ for the
   // accept_datalink() method to find.
+  VDBG_LVL((LM_DEBUG, "(%P|%t) # of bef connections: %d\n", connections_.size()), 5);
+  const ConnectionMap::iterator where = connections_.find(key);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) # of bef connections: %d\n",
-            this->connections_.size()), 5);
-
-  // Check and report and problems.
-  ConnectionMap::iterator where = this->connections_.find(key);
-
-  if (where != this->connections_.end()) {
+  if (where != connections_.end()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpTransport::passive_connection() - ")
                ACE_TEXT("connection with %C:%d at priority %d already exists, ")
@@ -739,50 +674,13 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                connection->transport_priority()));
   }
 
-  this->connections_[key] = connection;
+  connections_[key] = connection;
+  VDBG_LVL((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n", connections_.size()), 5);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n",
-            this->connections_.size()), 5);
-
-  // Enqueue the connection to the reconnect task that verifies if the connection
-  // is re-established.
-  this->con_checker_->add(connection);
+  con_checker_->add(connection);
 }
 
-/// Actively establish a connection to the remote address.
-int
-TcpTransport::make_active_connection(const ACE_INET_Addr& remote_address,
-                                     const TcpDataLink_rch& link)
-{
-  DBG_ENTRY_LVL("TcpTransport", "make_active_connection", 6);
-
-  // Create the connection object here.
-  TcpConnection_rch connection = new TcpConnection;
-
-  if (DCPS_debug_level > 9) {
-    std::stringstream buffer;
-    buffer << *link;
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TcpTransport::make_active_connection() - ")
-               ACE_TEXT("established with %C:%d and priority %d.\n%C"),
-               remote_address.get_host_name(),
-               remote_address.get_port_number(),
-               link->transport_priority(),
-               buffer.str().c_str()));
-  }
-
-  // Ask the connection object to attempt the active connection establishment.
-  if (connection->active_connect(remote_address,
-                                 this->tcp_config_->local_address_,
-                                 link->transport_priority(),
-                                 this->tcp_config_) != 0) {
-    return -1;
-  }
-
-  return this->connect_tcp_datalink(link, connection);
-}
-
-/// Common code used by accept_datalink(), passive_connection(), and make_active_connection().
+/// Common code used by accept_datalink(), passive_connection(), and active completion.
 int
 TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
                                    const TcpConnection_rch& connection)
@@ -790,18 +688,20 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
   DBG_ENTRY_LVL("TcpTransport", "connect_tcp_datalink", 6);
 
   ++last_link_;
+
   if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpTransport::connect_tcp_datalink() [%d] - ")
                ACE_TEXT("creating send strategy with priority %d.\n"),
                last_link_, link->transport_priority()));
   }
+
   connection->id() = last_link_;
 
   TransportSendStrategy_rch send_strategy =
     new TcpSendStrategy(last_link_, link, this->tcp_config_, connection,
                         new TcpSynchResource(connection,
-                          this->tcp_config_->max_output_pause_period_),
+                                             this->tcp_config_->max_output_pause_period_),
                         this->reactor_task_, link->transport_priority());
 
   TransportStrategy_rch receive_strategy =

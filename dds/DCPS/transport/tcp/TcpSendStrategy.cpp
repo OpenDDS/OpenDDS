@@ -25,7 +25,7 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   const TcpConnection_rch& connection,
   TcpSynchResource* synch_resource,
   const TransportReactorTask_rch& task,
-  CORBA::Long priority)
+  Priority priority)
   : TransportSendStrategy(id, static_rchandle_cast<TransportInst>(config),
                           synch_resource, priority,
                           new ReactorSynchStrategy(
@@ -142,8 +142,9 @@ OpenDDS::DCPS::TcpSendStrategy::relink(bool do_suspend)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","relink",6);
 
-  if (!this->connection_.is_nil())
+  if (!this->connection_.is_nil()) {
     this->connection_->relink(do_suspend);
+  }
 }
 
 void

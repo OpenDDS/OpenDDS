@@ -13,6 +13,7 @@
 #include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
 #include "dds/DCPS/debug.h"
 #include "ace/Basic_Types.h"
+#include "ace/CDR_Base.h"
 #include "TransportDebug.h"
 #include <vector>
 
@@ -226,6 +227,8 @@ enum {
 enum RemoveResult {
   REMOVE_ERROR, REMOVE_NOT_FOUND, REMOVE_FOUND, REMOVE_RELEASED
 };
+
+typedef ACE_CDR::Long Priority;
 
 } // namespace DCPS
 } // namespace OpenDDS

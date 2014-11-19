@@ -32,23 +32,16 @@ public:
   void passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer);
 
 protected:
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
-                                    const ConnectionAttribs& attribs,
-                                    bool active);
+  virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
+                                               const ConnectionAttribs& attribs,
+                                               TransportClient* client);
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs);
+  virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
+                                              const ConnectionAttribs& attribs,
+                                              TransportClient* client);
 
-  virtual DataLink* accept_datalink(ConnectionEvent& ce);
-  virtual void stop_accepting(ConnectionEvent& ce);
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
 
@@ -61,11 +54,15 @@ protected:
   virtual std::string transport_type() const { return "multicast"; }
 
 private:
+
+  typedef ACE_SYNCH_MUTEX         LockType;
+  typedef ACE_Guard<LockType>     GuardType;
+
   typedef ACE_Thread_Mutex         ThreadLockType;
   typedef ACE_Guard<ThreadLockType>     GuardThreadType;
 
   MulticastDataLink* make_datalink(const RepoId& local_id,
-                                   CORBA::Long priority,
+                                   Priority priority,
                                    bool active);
 
   MulticastSession* start_session(const MulticastDataLink_rch& link,
@@ -81,15 +78,17 @@ private:
   Links server_links_;
 
   // Used by the passive side to track the virtual "connections" to remote
-  // peers: the pending_connections_ are potentential peers that the framework
+  // peers: the pending_connections_ are potential peers that the framework
   // has already informed us about (in accept_datalink) but have not yet sent
   // a SYN TRANSPORT_CONTROL message; the connections_ are remote peers that
   // have already sent the SYN message -- we can consider these "complete"
   // from the framework's point of view.
   ThreadLockType connections_lock_;
-  std::multimap<ConnectionEvent*, MulticastPeer> pending_connections_;
-  // remote peer to local peer
+  typedef std::vector<DataLink::OnStartCallback> Callbacks;
   typedef std::pair<MulticastPeer, MulticastPeer> Peers;
+  typedef std::map<Peers, Callbacks> PendConnMap;
+  PendConnMap pending_connections_;
+  // remote peer to local peer
   std::set<Peers> connections_;
 };
 

@@ -687,12 +687,10 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
                           path,
                           this->data_dir_);
     ACE_Event_Handler_var safe_cleanup(cleanup);   // Transfer ownership
-
     long const tid =
       this->reactor_->schedule_timer(cleanup,
                                      0, // ACT
                                      cleanup_delay);
-
     if (tid == -1) {
       ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->lock_, false);
 
@@ -865,7 +863,6 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
       }
     }
   }
-
   return true;
 }
 

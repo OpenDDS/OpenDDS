@@ -25,8 +25,8 @@ OpenDDS::DCPS::DirectPriorityMapper::~DirectPriorityMapper()
 short
 OpenDDS::DCPS::DirectPriorityMapper::codepoint() const
 {
-  static const CORBA::Long dscp_min = 0;
-  static const CORBA::Long dscp_max = 63;
+  static const Priority dscp_min = 0;
+  static const Priority dscp_max = 63;
 
   // We know that the DiffServ codepoints range from a low number to a
   // high number, with the high number being a higher priority - which

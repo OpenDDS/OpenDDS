@@ -29,12 +29,12 @@ namespace DCPS {
 
 // Implementation skeleton constructor
 PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
-                             RepoId                     id,
-                             const DDS::PublisherQos&   qos,
-                             DDS::PublisherListener_ptr a_listener,
-                             const DDS::StatusMask&     mask,
-                             DomainParticipantImpl*     participant)
-  : handle_(handle),
+    RepoId                     id,
+    const DDS::PublisherQos&   qos,
+    DDS::PublisherListener_ptr a_listener,
+    const DDS::StatusMask&     mask,
+    DomainParticipantImpl*     participant)
+: handle_(handle),
   qos_(qos),
   default_datawriter_qos_(TheServiceParticipant->initial_DataWriterQos()),
   listener_mask_(mask),
@@ -61,9 +61,9 @@ PublisherImpl::~PublisherImpl()
   //publisher.
   if (!is_clean()) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::~PublisherImpl, ")
-               ACE_TEXT("some datawriters still exist.\n")));
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::~PublisherImpl, ")
+        ACE_TEXT("some datawriters still exist.\n")));
   }
 }
 
@@ -77,12 +77,12 @@ bool
 PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   DDS::RETCODE_ERROR);
+      guard,
+      this->pi_lock_,
+      DDS::RETCODE_ERROR);
 
   for (DataWriterMap::iterator it(datawriter_map_.begin());
-       it != datawriter_map_.end(); ++it) {
+      it != datawriter_map_.end(); ++it) {
     if (a_handle == it->second->get_instance_handle()) {
       return true;
     }
@@ -93,10 +93,10 @@ PublisherImpl::contains_writer(DDS::InstanceHandle_t a_handle)
 
 DDS::DataWriter_ptr
 PublisherImpl::create_datawriter(
-  DDS::Topic_ptr              a_topic,
-  const DDS::DataWriterQos &  qos,
-  DDS::DataWriterListener_ptr a_listener,
-  DDS::StatusMask             mask)
+    DDS::Topic_ptr              a_topic,
+    const DDS::DataWriterQos &  qos,
+    DDS::DataWriterListener_ptr a_listener,
+    DDS::StatusMask             mask)
 {
   DDS::DataWriterQos dw_qos;
 
@@ -107,41 +107,42 @@ PublisherImpl::create_datawriter(
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic);
 
   OpenDDS::DCPS::TypeSupport_ptr typesupport =
-    topic_servant->get_type_support();
+      topic_servant->get_type_support();
 
   if (typesupport == 0) {
     CORBA::String_var name = topic_servant->get_name();
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("typesupport(topic_name=%C) is nil.\n"),
-               name.in()));
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter, ")
+        ACE_TEXT("typesupport(topic_name=%C) is nil.\n"),
+        name.in()));
     return DDS::DataWriter::_nil();
   }
 
   DDS::DataWriter_var dw_obj = typesupport->create_datawriter();
 
   DataWriterImpl* dw_servant =
-    dynamic_cast <DataWriterImpl*>(dw_obj.in());
+      dynamic_cast <DataWriterImpl*>(dw_obj.in());
 
   dw_servant->init(a_topic,
-                   topic_servant,
-                   dw_qos,
-                   a_listener,
-                   mask,
-                   participant_,
-                   this,
-                   dw_obj.in());
+      topic_servant,
+      dw_qos,
+      a_listener,
+      mask,
+      participant_,
+      this,
+      dw_obj.in());
 
   if (this->enabled_ == true
       && qos_.entity_factory.autoenable_created_entities == 1) {
+
     DDS::ReturnCode_t ret = dw_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("PublisherImpl::create_datawriter, ")
-                 ACE_TEXT("enable failed.\n")));
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::create_datawriter, ")
+          ACE_TEXT("enable failed.\n")));
       return DDS::DataWriter::_nil();
     }
   }
@@ -153,6 +154,10 @@ DDS::ReturnCode_t
 PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 {
   DataWriterImpl* dw_servant = dynamic_cast<DataWriterImpl*>(a_datawriter);
+  if (dw_servant) {
+    // marks entity as deleted and stops future associating
+    dw_servant->prepare_to_delete();
+  }
 
   if (!dw_servant) {
     ACE_ERROR((LM_ERROR,
@@ -168,15 +173,13 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
       RepoId id = dw_servant->get_publication_id();
       GuidConverter converter(id);
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
-                 ACE_TEXT("the data writer %C doesn't ")
-                 ACE_TEXT("belong to this subscriber \n"),
-                 std::string(converter).c_str()));
+          ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
+          ACE_TEXT("the data writer %C doesn't ")
+          ACE_TEXT("belong to this subscriber \n"),
+          std::string(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
-  // mark that the entity is being deleted
-  dw_servant->set_deleted(true);
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Trigger data to be persisted, i.e. made durable, if so
@@ -184,9 +187,9 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   // because unregister_instances may cause instance dispose.
   if (!dw_servant->persist_data() && DCPS_debug_level >= 2) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::delete_datawriter, ")
-               ACE_TEXT("failed to make data durable.\n")));
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::delete_datawriter, ")
+        ACE_TEXT("failed to make data durable.\n")));
   }
 #endif
 
@@ -202,20 +205,21 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   RepoId publication_id  = GUID_UNKNOWN;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->pi_lock_,
-                     DDS::RETCODE_ERROR);
+        guard,
+        this->pi_lock_,
+        DDS::RETCODE_ERROR);
 
     publication_id = dw_servant->get_publication_id();
+
     PublicationMap::iterator it = publication_map_.find(publication_id);
 
     if (it == publication_map_.end()) {
       GuidConverter converter(publication_id);
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("PublisherImpl::delete_datawriter, ")
-                        ACE_TEXT("datawriter %C not found.\n"),
-                        std::string(converter).c_str()), DDS::RETCODE_ERROR);
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::delete_datawriter, ")
+          ACE_TEXT("datawriter %C not found.\n"),
+          std::string(converter).c_str()), DDS::RETCODE_ERROR);
     }
 
     // We can not erase the datawriter from datawriter map by the topic name
@@ -227,8 +231,8 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     DataWriterMap::iterator the_writ = datawriter_map_.end();
 
     for (writ = datawriter_map_.begin();
-         writ != datawriter_map_.end();
-         ++writ) {
+        writ != datawriter_map_.end();
+        ++writ) {
       if (writ->second == it->second) {
         the_writ = writ;
         break;
@@ -246,35 +250,29 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     // pi_lock_, TransportClient reservation_lock and TransportImpl
     // lock_) in reverse order.
     ACE_GUARD_RETURN(reverse_lock_type, reverse_monitor, this->reverse_pi_lock_,
-                     DDS::RETCODE_ERROR);
-
+        DDS::RETCODE_ERROR);
     // Wait for pending samples to drain prior to removing associations
     // and unregistering the publication.
     dw_servant->wait_pending();
-
     // Call remove association before unregistering the datawriter
     // with the transport, otherwise some callbacks resulted from
     // remove_association may lost.
     dw_servant->remove_all_associations();
-
     dw_servant->cleanup();
   }
-
   // not just unregister but remove any pending writes/sends.
   dw_servant->unregister_all();
-
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_publication(
-        this->domain_id_,
-        this->participant_->get_id(),
-        publication_id)) {
+      this->domain_id_,
+      this->participant_->get_id(),
+      publication_id)) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("PublisherImpl::delete_datawriter, ")
-                      ACE_TEXT("publication not removed from discovery.\n")),
-                     DDS::RETCODE_ERROR);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::delete_datawriter, ")
+        ACE_TEXT("publication not removed from discovery.\n")),
+        DDS::RETCODE_ERROR);
   }
-
   // Decrease ref count after the servant is removed from the maps.
   dw_servant->_remove_ref();
 
@@ -285,9 +283,9 @@ DDS::DataWriter_ptr
 PublisherImpl::lookup_datawriter(const char* topic_name)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   DDS::DataWriter::_nil());
+      guard,
+      this->pi_lock_,
+      DDS::DataWriter::_nil());
 
   // If multiple entries whose key is "topic_name" then which one is
   // returned ? Spec does not limit which one should give.
@@ -296,10 +294,10 @@ PublisherImpl::lookup_datawriter(const char* topic_name)
   if (it == datawriter_map_.end()) {
     if (DCPS_debug_level >= 2) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ")
-                 ACE_TEXT("PublisherImpl::lookup_datawriter, ")
-                 ACE_TEXT("The datawriter(topic_name=%C) is not found\n"),
-                 topic_name));
+          ACE_TEXT("(%P|%t) ")
+          ACE_TEXT("PublisherImpl::lookup_datawriter, ")
+          ACE_TEXT("The datawriter(topic_name=%C) is not found\n"),
+          topic_name));
     }
 
     return DDS::DataWriter::_nil();
@@ -321,9 +319,9 @@ PublisherImpl::delete_contained_entities()
 
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                       guard,
-                       this->pi_lock_,
-                       DDS::RETCODE_ERROR);
+          guard,
+          this->pi_lock_,
+          DDS::RETCODE_ERROR);
 
       if (datawriter_map_.empty()) {
         break;
@@ -338,12 +336,12 @@ PublisherImpl::delete_contained_entities()
     if (ret != DDS::RETCODE_OK) {
       GuidConverter converter(pub_id);
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("PublisherImpl::")
-                        ACE_TEXT("delete_contained_entities: ")
-                        ACE_TEXT("failed to delete ")
-                        ACE_TEXT("datawriter %C.\n"),
-                        std::string(converter).c_str()),ret);
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("PublisherImpl::")
+          ACE_TEXT("delete_contained_entities: ")
+          ACE_TEXT("failed to delete ")
+          ACE_TEXT("datawriter %C.\n"),
+          std::string(converter).c_str()),ret);
     }
   }
 
@@ -373,27 +371,27 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
       DwIdToQosMap idToQosMap;
       {
         ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                         guard,
-                         this->pi_lock_,
-                         DDS::RETCODE_ERROR);
+            guard,
+            this->pi_lock_,
+            DDS::RETCODE_ERROR);
 
         for (PublicationMap::iterator iter = publication_map_.begin();
-             iter != publication_map_.end();
-             ++iter) {
+            iter != publication_map_.end();
+            ++iter) {
           DDS::DataWriterQos qos;
           iter->second->get_qos(qos);
           RepoId id = iter->second->get_publication_id();
           std::pair<DwIdToQosMap::iterator, bool> pair =
-            idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
+              idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
           if (pair.second == false) {
             GuidConverter converter(id);
             ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) ")
-                              ACE_TEXT("PublisherImpl::set_qos: ")
-                              ACE_TEXT("insert id %d to DwIdToQosMap ")
-                              ACE_TEXT("failed.\n"),
-                              std::string(converter).c_str()), DDS::RETCODE_ERROR);
+                ACE_TEXT("(%P|%t) ")
+                ACE_TEXT("PublisherImpl::set_qos: ")
+                ACE_TEXT("insert id %d to DwIdToQosMap ")
+                ACE_TEXT("failed.\n"),
+                std::string(converter).c_str()), DDS::RETCODE_ERROR);
           }
         }
       }
@@ -403,18 +401,18 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
       while (iter != idToQosMap.end()) {
         Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
         const bool status
-          = disco->update_publication_qos(
-          participant_->get_domain_id(),
-          participant_->get_id(),
-          iter->first,
-          iter->second,
-          this->qos_);
+        = disco->update_publication_qos(
+            participant_->get_domain_id(),
+            participant_->get_id(),
+            iter->first,
+            iter->second,
+            this->qos_);
 
         if (!status) {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
-                            ACE_TEXT("failed. \n")),
-                           DDS::RETCODE_ERROR);
+              ACE_TEXT("(%P|%t) PublisherImpl::set_qos, ")
+              ACE_TEXT("failed. \n")),
+              DDS::RETCODE_ERROR);
         }
 
         ++iter;
@@ -437,7 +435,7 @@ PublisherImpl::get_qos(DDS::PublisherQos & qos)
 
 DDS::ReturnCode_t
 PublisherImpl::set_listener(DDS::PublisherListener_ptr a_listener,
-                            DDS::StatusMask            mask)
+    DDS::StatusMask            mask)
 {
   listener_mask_ = mask;
   //note: OK to duplicate  a nil object ref
@@ -456,16 +454,16 @@ PublisherImpl::suspend_publications()
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("PublisherImpl::suspend_publications, ")
-                      ACE_TEXT(" Entity is not enabled. \n")),
-                     DDS::RETCODE_NOT_ENABLED);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::suspend_publications, ")
+        ACE_TEXT(" Entity is not enabled. \n")),
+        DDS::RETCODE_NOT_ENABLED);
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   DDS::RETCODE_ERROR);
+      guard,
+      this->pi_lock_,
+      DDS::RETCODE_ERROR);
   ++suspend_depth_count_;
   return DDS::RETCODE_OK;
 }
@@ -474,9 +472,9 @@ bool
 PublisherImpl::is_suspended() const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   false);
+      guard,
+      this->pi_lock_,
+      false);
   return suspend_depth_count_;
 }
 
@@ -485,16 +483,16 @@ PublisherImpl::resume_publications()
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("PublisherImpl::resume_publications, ")
-                      ACE_TEXT(" Entity is not enabled. \n")),
-                     DDS::RETCODE_NOT_ENABLED);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::resume_publications, ")
+        ACE_TEXT(" Entity is not enabled. \n")),
+        DDS::RETCODE_NOT_ENABLED);
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   DDS::RETCODE_ERROR);
+      guard,
+      this->pi_lock_,
+      DDS::RETCODE_ERROR);
 
   --suspend_depth_count_;
 
@@ -506,7 +504,7 @@ PublisherImpl::resume_publications()
   if (suspend_depth_count_ == 0) {
 
     for (PublicationMap::iterator it = this->publication_map_.begin();
-         it != this->publication_map_.end(); ++it) {
+        it != this->publication_map_.end(); ++it) {
       it->second->send_suspended_data();
     }
   }
@@ -521,22 +519,22 @@ PublisherImpl::begin_coherent_changes()
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
-                      ACE_TEXT(" Publisher is not enabled!\n")),
-                     DDS::RETCODE_NOT_ENABLED);
+        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
+        ACE_TEXT(" Publisher is not enabled!\n")),
+        DDS::RETCODE_NOT_ENABLED);
   }
 
   if (!qos_.presentation.coherent_access) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
-                      ACE_TEXT(" QoS policy does not support coherent access!\n")),
-                     DDS::RETCODE_ERROR);
+        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
+        ACE_TEXT(" QoS policy does not support coherent access!\n")),
+        DDS::RETCODE_ERROR);
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   DDS::RETCODE_ERROR);
+      guard,
+      this->pi_lock_,
+      DDS::RETCODE_ERROR);
 
   ++this->change_depth_;
 
@@ -550,7 +548,7 @@ PublisherImpl::begin_coherent_changes()
   // and last change to the current change set:
   if (this->change_depth_ == 1) {
     for (PublicationMap::iterator it = this->publication_map_.begin();
-         it != this->publication_map_.end(); ++it) {
+        it != this->publication_map_.end(); ++it) {
       it->second->begin_coherent_changes();
     }
   }
@@ -563,28 +561,28 @@ PublisherImpl::end_coherent_changes()
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
-                      ACE_TEXT(" Publisher is not enabled!\n")),
-                     DDS::RETCODE_NOT_ENABLED);
+        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+        ACE_TEXT(" Publisher is not enabled!\n")),
+        DDS::RETCODE_NOT_ENABLED);
   }
 
   if (!qos_.presentation.coherent_access) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
-                      ACE_TEXT(" QoS policy does not support coherent access!\n")),
-                     DDS::RETCODE_ERROR);
+        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+        ACE_TEXT(" QoS policy does not support coherent access!\n")),
+        DDS::RETCODE_ERROR);
   }
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   DDS::RETCODE_ERROR);
+      guard,
+      this->pi_lock_,
+      DDS::RETCODE_ERROR);
 
   if (this->change_depth_ == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
-                      ACE_TEXT(" No matching call to begin_coherent_changes!\n")),
-                     DDS::RETCODE_PRECONDITION_NOT_MET);
+        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
+        ACE_TEXT(" No matching call to begin_coherent_changes!\n")),
+        DDS::RETCODE_PRECONDITION_NOT_MET);
   }
 
   --this->change_depth_;
@@ -600,28 +598,28 @@ PublisherImpl::end_coherent_changes()
   if (this->change_depth_ == 0) {
     GroupCoherentSamples group_samples;
     for (PublicationMap::iterator it = this->publication_map_.begin();
-         it != this->publication_map_.end(); ++it) {
+        it != this->publication_map_.end(); ++it) {
 
       if (it->second->coherent_samples_ == 0) {
         continue;
       }
 
       std::pair<GroupCoherentSamples::iterator, bool> pair =
-        group_samples.insert(GroupCoherentSamples::value_type(
-                               it->second->get_publication_id(),
-                               WriterCoherentSample(it->second->coherent_samples_,
-                                                    it->second->sequence_number_)));
+          group_samples.insert(GroupCoherentSamples::value_type(
+              it->second->get_publication_id(),
+              WriterCoherentSample(it->second->coherent_samples_,
+                  it->second->sequence_number_)));
 
       if (pair.second == false) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
-                          ACE_TEXT("failed to insert to GroupCoherentSamples.\n")),
-                         DDS::RETCODE_ERROR);
+            ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes: ")
+            ACE_TEXT("failed to insert to GroupCoherentSamples.\n")),
+            DDS::RETCODE_ERROR);
       }
     }
 
     for (PublicationMap::iterator it = this->publication_map_.begin();
-         it != this->publication_map_.end(); ++it) {
+        it != this->publication_map_.end(); ++it) {
       if (it->second->coherent_samples_ == 0) {
         continue;
       }
@@ -637,39 +635,39 @@ PublisherImpl::end_coherent_changes()
 
 DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(
-  const DDS::Duration_t& max_wait)
+    const DDS::Duration_t& max_wait)
 {
   if (enabled_ == false) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
-                      ACE_TEXT("Entity is not enabled.\n")),
-                     DDS::RETCODE_NOT_ENABLED);
+        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
+        ACE_TEXT("Entity is not enabled.\n")),
+        DDS::RETCODE_NOT_ENABLED);
   }
 
   typedef std::map<DataWriterImpl*, DataWriterImpl::AckToken> DataWriterAckMap;
   DataWriterAckMap ack_writers;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     this->pi_lock_,
-                     DDS::RETCODE_ERROR);
+        guard,
+        this->pi_lock_,
+        DDS::RETCODE_ERROR);
 
     // Collect writers to request acks
     for (DataWriterMap::iterator it(this->datawriter_map_.begin());
-         it != this->datawriter_map_.end(); ++it) {
+        it != this->datawriter_map_.end(); ++it) {
       DataWriterImpl* writer = it->second;
 
       if (writer->should_ack()) {
         DataWriterImpl::AckToken token = writer->create_ack_token(max_wait);
 
         std::pair<DataWriterAckMap::iterator, bool> pair =
-          ack_writers.insert(DataWriterAckMap::value_type(writer, token));
+            ack_writers.insert(DataWriterAckMap::value_type(writer, token));
 
         if (!pair.second) {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
-                            ACE_TEXT("Unable to insert AckToken into DataWriterAckMap!\n")),
-                           DDS::RETCODE_ERROR);
+              ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
+              ACE_TEXT("Unable to insert AckToken into DataWriterAckMap!\n")),
+              DDS::RETCODE_ERROR);
         }
       }
     }
@@ -678,8 +676,8 @@ PublisherImpl::wait_for_acknowledgments(
   if (ack_writers.empty()) {
     if (DCPS_debug_level > 0) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) PublisherImpl::wait_for_acknowledgments() - ")
-                 ACE_TEXT("not blocking due to no writers requiring acks.\n")));
+          ACE_TEXT("(%P|%t) PublisherImpl::wait_for_acknowledgments() - ")
+          ACE_TEXT("not blocking due to no writers requiring acks.\n")));
     }
 
     return DDS::RETCODE_OK;
@@ -687,20 +685,20 @@ PublisherImpl::wait_for_acknowledgments(
 
   // Send ack requests to all associated readers
   for (DataWriterAckMap::iterator it(ack_writers.begin());
-       it != ack_writers.end(); ++it) {
+      it != ack_writers.end(); ++it) {
     it->first->send_ack_requests(it->second);
   }
 
   // Wait for ack responses from all associated readers
   for (DataWriterAckMap::iterator it(ack_writers.begin());
-       it != ack_writers.end(); ++it) {
+      it != ack_writers.end(); ++it) {
     DataWriterImpl::AckToken token = it->second;
 
     if (token.deadline() <= ACE_OS::gettimeofday()) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
-                        ACE_TEXT("Timed out waiting for acknowledgments!\n")),
-                       DDS::RETCODE_TIMEOUT);
+          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
+          ACE_TEXT("Timed out waiting for acknowledgments!\n")),
+          DDS::RETCODE_TIMEOUT);
     }
 
     it->first->wait_for_ack_responses(token);
@@ -736,7 +734,7 @@ PublisherImpl::get_default_datawriter_qos(DDS::DataWriterQos & qos)
 
 DDS::ReturnCode_t
 PublisherImpl::copy_from_topic_qos(DDS::DataWriterQos &  a_datawriter_qos,
-                                   const DDS::TopicQos & a_topic_qos)
+    const DDS::TopicQos & a_topic_qos)
 {
   if (Qos_Helper::copy_from_topic_qos(a_datawriter_qos, a_topic_qos)) {
     return DDS::RETCODE_OK;
@@ -774,35 +772,35 @@ bool
 PublisherImpl::is_clean() const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   false);
+      guard,
+      this->pi_lock_,
+      false);
   return datawriter_map_.empty() && publication_map_.empty();
 }
 
 DDS::ReturnCode_t
 PublisherImpl::writer_enabled(const char*     topic_name,
-                              DataWriterImpl* writer)
+    DataWriterImpl* writer)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   DDS::RETCODE_ERROR);
+      guard,
+      this->pi_lock_,
+      DDS::RETCODE_ERROR);
 
   datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
 
   const RepoId publication_id = writer->get_publication_id();
 
   std::pair<PublicationMap::iterator, bool> pair =
-    publication_map_.insert(PublicationMap::value_type(publication_id, writer));
+      publication_map_.insert(PublicationMap::value_type(publication_id, writer));
 
   if (pair.second == false) {
     GuidConverter converter(publication_id);
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("PublisherImpl::writer_enabled: ")
-                      ACE_TEXT("insert publication %C failed.\n"),
-                      std::string(converter).c_str()), DDS::RETCODE_ERROR);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::writer_enabled: ")
+        ACE_TEXT("insert publication %C failed.\n"),
+        std::string(converter).c_str()), DDS::RETCODE_ERROR);
   }
 
   // Increase ref count when the servant is added to the
@@ -833,7 +831,7 @@ PublisherImpl::assert_liveliness_by_participant()
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   for (DataWriterMap::iterator it(datawriter_map_.begin());
-       it != datawriter_map_.end(); ++it) {
+      it != datawriter_map_.end(); ++it) {
     DDS::ReturnCode_t dw_ret = it->second->assert_liveliness_by_participant();
 
     if (dw_ret != DDS::RETCODE_OK) {
@@ -848,14 +846,14 @@ void
 PublisherImpl::get_publication_ids(PublicationIdVec& pubs)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->pi_lock_,
-                   );
+      guard,
+      this->pi_lock_,
+  );
 
   pubs.reserve(publication_map_.size());
   for (PublicationMap::iterator iter = publication_map_.begin();
-       iter != publication_map_.end();
-       ++iter) {
+      iter != publication_map_.end();
+      ++iter) {
     pubs.push_back(iter->first);
   }
 }
@@ -868,15 +866,15 @@ PublisherImpl::parent() const
 
 bool
 PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
-                                       const DDS::DataWriterQos& default_qos,
-                                       DDS::Topic_ptr            a_topic,
-                                       DDS::DataWriterQos&       dw_qos)
+    const DDS::DataWriterQos& default_qos,
+    DDS::Topic_ptr            a_topic,
+    DDS::DataWriterQos&       dw_qos)
 {
   if (CORBA::is_nil(a_topic)) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("topic is nil.\n")));
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter, ")
+        ACE_TEXT("topic is nil.\n")));
     return DDS::DataWriter::_nil();
   }
 
@@ -902,17 +900,17 @@ PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
 
   if (!Qos_Helper::valid(dw_qos)) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("invalid qos.\n")));
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter, ")
+        ACE_TEXT("invalid qos.\n")));
     return DDS::DataWriter::_nil();
   }
 
   if (!Qos_Helper::consistent(dw_qos)) {
     ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("PublisherImpl::create_datawriter, ")
-               ACE_TEXT("inconsistent qos.\n")));
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("PublisherImpl::create_datawriter, ")
+        ACE_TEXT("inconsistent qos.\n")));
     return DDS::DataWriter::_nil();
   }
   return true;

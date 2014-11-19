@@ -8,6 +8,7 @@
 
 #include "DataWriterRemoteImpl.h"
 #include "dds/DCPS/DataWriterCallbacks.h"
+#include "dds/DCPS/GuidConverter.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -46,6 +47,15 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
                                       const ReaderAssociation& reader,
                                       bool active)
 {
+  if (DCPS_debug_level) {
+    GuidConverter writer_converter(yourId);
+    GuidConverter reader_converter(reader.readerId);
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterRemoteImpl::add_association - ")
+               ACE_TEXT("local %C remote %C\n"),
+               std::string(writer_converter).c_str(),
+               std::string(reader_converter).c_str()));
+  }
+
   DataWriterCallbacks* parent = 0;
   DDS::DataWriter_var dwv;
   {

@@ -14,7 +14,6 @@
 #include "RtpsUdpDataLink.h"
 #include "RtpsUdpDataLink_rch.h"
 
-#include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include "dds/DCPS/RTPS/RtpsBaseMessageTypesC.h"
@@ -31,23 +30,16 @@ public:
   explicit RtpsUdpTransport(const TransportInst_rch& inst);
 
 private:
-  virtual DataLink* find_datalink_i(const RepoId& local_id,
-                                    const RepoId& remote_id,
-                                    const TransportBLOB& remote_data,
-                                    bool remote_reliable,
-                                    bool remote_durable,
-                                    const ConnectionAttribs& attribs,
-                                    bool active);
+  virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
+                                               const ConnectionAttribs& attribs,
+                                               TransportClient* client);
 
-  virtual DataLink* connect_datalink_i(const RepoId& local_id,
-                                       const RepoId& remote_id,
-                                       const TransportBLOB& remote_data,
-                                       bool remote_reliable,
-                                       bool remote_durable,
-                                       const ConnectionAttribs& attribs);
+  virtual AcceptConnectResult accept_datalink(const RemoteTransport& remote,
+                                              const ConnectionAttribs& attribs,
+                                              TransportClient* client);
 
-  virtual DataLink* accept_datalink(ConnectionEvent& ce);
-  virtual void stop_accepting(ConnectionEvent& ce);
+  virtual void stop_accepting_or_connecting(TransportClient* client,
+                                            const RepoId& remote_id);
 
   virtual bool configure_i(TransportInst* config);
 
@@ -71,6 +63,17 @@ private:
                     bool local_durable, bool remote_durable);
 
   RcHandle<RtpsUdpInst> config_i_;
+
+  //protects access to link_ for duration of make_datalink
+  typedef ACE_Thread_Mutex         ThreadLockType;
+  typedef ACE_Guard<ThreadLockType>     GuardThreadType;
+  ThreadLockType links_lock_;
+
+  /// This protects the connections_ and the pending_connections_
+  /// data members.
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  LockType connections_lock_;
 
   /// RTPS uses only one link per transport.
   /// This link can be safely reused by any clients that belong to the same

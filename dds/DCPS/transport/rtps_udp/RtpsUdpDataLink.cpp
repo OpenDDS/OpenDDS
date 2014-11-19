@@ -25,7 +25,7 @@
 #include "ace/Reactor.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
-#include <cstring>
+#include <string.h>
 
 #ifndef __ACE_INLINE__
 # include "RtpsUdpDataLink.inl"
@@ -60,7 +60,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
     reactor_task_(reactor_task, false),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
-    handshake_condition_(lock_),
     nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
@@ -273,26 +272,8 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 }
 
 bool
-RtpsUdpDataLink::wait_for_handshake(const RepoId& local_id,
-                                    const RepoId& remote_id)
-{
-  if (0 == std::memcmp(local_id.guidPrefix, remote_id.guidPrefix,
-                       sizeof(GuidPrefix_t))) {
-    return true; // no wait for "loopback" connection
-  }
-  ACE_Time_Value abs_timeout = ACE_OS::gettimeofday()
-    + config_->handshake_timeout_;
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  while (!handshake_done(local_id, remote_id)) {
-    if (handshake_condition_.wait(&abs_timeout) == -1) {
-      return false;
-    }
-  }
-  return true;
-}
-
-bool
-RtpsUdpDataLink::handshake_done(const RepoId& local_id, const RepoId& remote_id)
+RtpsUdpDataLink::check_handshake_complete(const RepoId& local_id,
+                                          const RepoId& remote_id)
 {
   const GuidConverter conv(local_id);
   const EntityKind kind = conv.entityKind();
@@ -523,7 +504,11 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
       data = msg->cont()->duplicate();
       // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
       RtpsSampleHeader::populate_data_control_submessages(
-                subm, *tsce, this->requires_inline_qos(pub_id));
+                subm, *tsce, requires_inline_qos(pub_id));
+    } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
+      end_historic_samples(rw, tsce->header(), msg->cont());
+      element->data_delivered();
+      return 0;
     } else {
       element->data_dropped(true /*dropped_by_transport*/);
       return 0;
@@ -535,7 +520,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     const DataSampleElement* dsle = tse->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
-              subm, *dsle, this->requires_inline_qos(pub_id));
+              subm, *dsle, requires_inline_qos(pub_id));
     durable = dsle->get_header().historic_sample_;
 
   } else if (tce) {  // Customized data message
@@ -544,7 +529,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     const DataSampleElement* dsle = tce->original_send_element()->sample();
     // Create RTPS Submessage(s) in place of the OpenDDS DataSampleHeader
     RtpsSampleHeader::populate_data_sample_submessages(
-              subm, *dsle, this->requires_inline_qos(pub_id));
+              subm, *dsle, requires_inline_qos(pub_id));
     durable = dsle->get_header().historic_sample_;
 
   } else {
@@ -555,7 +540,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   hdr->cont(data);
   RtpsCustomizedElement* rtps =
     RtpsCustomizedElement::alloc(element, hdr,
-      &this->rtps_customized_element_allocator_);
+      &rtps_customized_element_allocator_);
 
   // Handle durability resends
   if (durable && rw != writers_.end()) {
@@ -566,15 +551,16 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
         ri->second.durable_data_[rtps->sequence()] = rtps;
         ri->second.durable_timestamp_ = ACE_OS::gettimeofday();
         if (Transport_debug_level > 3) {
-          const GuidConverter conv(pub_id);
+          const GuidConverter conv(pub_id), sub_conv(sub);
           ACE_DEBUG((LM_DEBUG,
             "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
-            "storing durable data for local %C\n", std::string(conv).c_str()));
+            "storing durable data for local %C remote %C\n",
+            std::string(conv).c_str(), std::string(sub_conv).c_str()));
         }
         return 0;
       }
     }
-  } else if (durable && Transport_debug_level) {
+  } else if (durable && (Transport_debug_level)) {
     const GuidConverter conv(pub_id);
     ACE_DEBUG((LM_ERROR,
       "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
@@ -585,10 +571,53 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   return rtps;
 }
 
+void
+RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
+                                      const DataSampleHeader& header,
+                                      ACE_Message_Block* body)
+{
+  // Set the ReaderInfo::durable_timestamp_ for the case where no
+  // durable samples exist in the DataWriter.
+  if (writer != writers_.end() && writer->second.durable_) {
+    const ACE_Time_Value now = ACE_OS::gettimeofday();
+    RepoId sub = GUID_UNKNOWN;
+    if (body && header.message_length_ >= sizeof(sub)) {
+      std::memcpy(&sub, body->rd_ptr(), header.message_length_);
+    }
+    typedef ReaderInfoMap::iterator iter_t;
+    if (sub == GUID_UNKNOWN) {
+      if (Transport_debug_level > 3) {
+        const GuidConverter conv(writer->first);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::end_historic_samples "
+                   "local %C all readers\n", std::string(conv).c_str()));
+      }
+      for (iter_t iter = writer->second.remote_readers_.begin();
+           iter != writer->second.remote_readers_.end(); ++iter) {
+        if (iter->second.durable_) {
+          iter->second.durable_timestamp_ = now;
+        }
+      }
+    } else {
+      iter_t iter = writer->second.remote_readers_.find(sub);
+      if (iter != writer->second.remote_readers_.end()) {
+        if (iter->second.durable_) {
+          iter->second.durable_timestamp_ = now;
+          if (Transport_debug_level > 3) {
+            const GuidConverter conv(writer->first), sub_conv(sub);
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::end_historic_samples"
+                       " local %C remote %C\n", std::string(conv).c_str(),
+                       std::string(sub_conv).c_str()));
+          }
+        }
+      }
+    }
+  }
+}
+
 bool
 RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
 {
-  if (this->force_inline_qos_) {
+  if (force_inline_qos_) {
     // Force true for testing purposes
     return true;
   } else {
@@ -738,7 +767,15 @@ RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
     SequenceNumber base;
     base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
     sr.second = base.previous();
-    wi->second.recvd_.insert(sr);
+    if (sr.first <= sr.second) {
+      wi->second.recvd_.insert(sr);
+    } else {
+      const GuidConverter conv(src);
+      VDBG_LVL((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_gap_i "
+                "received GAP with invalid range [%q, %q] from %C\n",
+                sr.first.getValue(), sr.second.getValue(),
+                std::string(conv).c_str()), 2);
+    }
     wi->second.recvd_.insert(base, gap.gapList.numBits,
                              gap.gapList.bitmap.get_buffer());
     deliver_held_data(rr.first, wi->second, rr.second.durable_);
@@ -1204,19 +1241,31 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 
   if (!ri->second.handshake_done_) {
     ri->second.handshake_done_ = true;
-    handshake_condition_.broadcast();
+    invoke_on_start_callbacks(true);
   }
 
   std::map<SequenceNumber, TransportQueueElement*> pendingCallbacks;
   const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
 
   if (!ri->second.durable_data_.empty()) {
+    if (Transport_debug_level > 5) {
+      const GuidConverter local_conv(local), remote_conv(remote);
+      ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+                 "local %C has durable for remote %C\n",
+                 std::string(local_conv).c_str(),
+                 std::string(remote_conv).c_str()));
+    }
     SequenceNumber ack;
     ack.setValue(acknack.readerSNState.bitmapBase.high,
                  acknack.readerSNState.bitmapBase.low);
-    if (ack > ri->second.durable_data_.rbegin()->first) {
+    const SequenceNumber& dd_last = ri->second.durable_data_.rbegin()->first;
+    if (ack > dd_last) {
       // Reader acknowledges durable data, we no longer need to store it
       ri->second.durable_data_.swap(pendingCallbacks);
+      if (Transport_debug_level > 5) {
+        ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+                   "durable data acked\n"));
+      }
     } else {
       DisjointSequence requests;
       if (!requests.insert(ack, acknack.readerSNState.numBits,
@@ -1232,9 +1281,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
       iter_t it = ri->second.durable_data_.begin();
       const std::vector<SequenceRange> psr = requests.present_sequence_ranges();
-      SequenceNumber::Value lastSent = 0;
+      SequenceNumber lastSent = SequenceNumber::ZERO();
       if (!requests.empty()) {
-        lastSent = requests.low().getValue() - 1;
+        lastSent = requests.low().previous();
       }
       DisjointSequence gaps;
       for (size_t i = 0; i < psr.size(); ++i) {
@@ -1242,25 +1291,60 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
              && it->first < psr[i].first; ++it) ; // empty for-loop
         for (; it != ri->second.durable_data_.end()
              && it->first <= psr[i].second; ++it) {
+          if (Transport_debug_level > 5) {
+            ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+                       "durable resend %d\n", int(it->first.getValue())));
+          }
           durability_resend(it->second);
           //FUTURE: combine multiple resends into one RTPS Message?
           sent_some = true;
-          if (it->first.getValue() > lastSent + 1) {
+          if (it->first > lastSent + 1) {
             gaps.insert(SequenceRange(lastSent + 1, it->first.previous()));
           }
-          lastSent = it->first.getValue();
+          lastSent = it->first;
+        }
+        if (sent_some && lastSent < psr[i].second && psr[i].second < dd_last) {
+          gaps.insert(SequenceRange(lastSent + 1, psr[i].second));
         }
       }
       if (!gaps.empty()) {
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+                     "sending durability gaps: "));
+          gaps.dump();
+        }
         send_durability_gaps(local, remote, gaps);
       }
       if (sent_some) {
         return;
       }
-      if (gaps.empty() && !requests.empty() &&
-          requests.high() < ri->second.durable_data_.begin()->first) {
+      const SequenceNumber& dd_first = ri->second.durable_data_.begin()->first;
+      if (!requests.empty() && requests.high() < dd_first) {
         // All nacks were below the start of the durable data.
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+                     "sending durability gaps for all requests: "));
+          requests.dump();
+        }
         send_durability_gaps(local, remote, requests);
+        return;
+      }
+      if (!requests.empty() && requests.low() < dd_first) {
+        // Lowest nack was below the start of the durable data.
+        for (size_t i = 0; i < psr.size(); ++i) {
+          if (psr[i].first > dd_first) {
+            break;
+          }
+          gaps.insert(SequenceRange(psr[i].first,
+                                    std::min(psr[i].second, dd_first)));
+        }
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
+                     "sending durability gaps for some requests: "));
+          gaps.dump();
+        }
+        send_durability_gaps(local, remote, gaps);
+        return;
       }
     }
   }
@@ -1373,6 +1457,13 @@ RtpsUdpDataLink::send_nack_replies()
       if (ri->second.requested_changes_.size()) {
         if (locators_.count(ri->first)) {
           recipients.insert(locators_[ri->first].addr_);
+          if (Transport_debug_level > 5) {
+            const GuidConverter local_conv(rw->first), remote_conv(ri->first);
+            ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
+                       "local %C remote %C requested resend\n",
+                       std::string(local_conv).c_str(),
+                       std::string(remote_conv).c_str()));
+          }
         }
         ri->second.requested_changes_.clear();
       }
@@ -1389,6 +1480,11 @@ RtpsUdpDataLink::send_nack_replies()
         const RtpsUdpSendStrategy::OverrideToken ot =
           send_strategy_->override_destinations(recipients);
         for (size_t i = 0; i < ranges.size(); ++i) {
+          if (Transport_debug_level > 5) {
+            ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
+                       "resend data %d-%d\n", int(ranges[i].first.getValue()),
+                       int(ranges[i].second.getValue())));
+          }
           sb.resend_i(ranges[i], &gaps);
         }
       }
@@ -1397,6 +1493,11 @@ RtpsUdpDataLink::send_nack_replies()
     send_nackfrag_replies(writer, gaps, recipients);
 
     if (!gaps.empty()) {
+      if (Transport_debug_level > 5) {
+        ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
+                   "GAPs:"));
+        gaps.dump();
+      }
       ACE_Message_Block* mb_gap =
         marshal_gaps(rw->first, GUID_UNKNOWN, gaps, writer.durable_);
       if (mb_gap) {
@@ -1500,12 +1601,22 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
   // For durable writers, change a non-directed Gap into multiple directed gaps.
   std::vector<RepoId> readers;
   if (durable && reader.entityId == ENTITYID_UNKNOWN) {
+    if (Transport_debug_level > 5) {
+      const GuidConverter local_conv(writer);
+      ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::marshal_gaps local %C "
+                 "durable writer\n", std::string(local_conv).c_str()));
+    }
     const RtpsWriterMap::iterator iter = writers_.find(writer);
     RtpsWriter& rw = iter->second;
     for (ReaderInfoMap::iterator ri = rw.remote_readers_.begin();
          ri != rw.remote_readers_.end(); ++ri) {
       if (!ri->second.expecting_durable_data()) {
         readers.push_back(ri->first);
+      } else if (Transport_debug_level > 5) {
+        const GuidConverter remote_conv(ri->first);
+        ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::marshal_gaps reader "
+                   "%C is expecting durable data, no GAP sent\n",
+                   std::string(remote_conv).c_str()));
       }
     }
     if (readers.empty()) return 0;

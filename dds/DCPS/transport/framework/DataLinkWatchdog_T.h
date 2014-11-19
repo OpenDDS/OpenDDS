@@ -53,7 +53,6 @@ public:
 
     if (this->timer_id_ == -1) return;
 
-    long timer_id = this->timer_id_;
     ACE_Reactor* reactor = this->reactor_;
     this->timer_id_ = -1;
     this->reactor_ = 0;
@@ -61,7 +60,7 @@ public:
 
     {
       ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
-      reactor->cancel_timer(timer_id);
+      reactor->cancel_timer(this);
     }
   }
 
@@ -130,6 +129,7 @@ private:
       timer_id = reactor->schedule_timer(this,  // event_handler
                                          arg,
                                          delay);
+
       if (timer_id == -1) {
         ACE_ERROR_RETURN ((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
@@ -139,6 +139,7 @@ private:
       }
     }
 
+    //after re-acquiring lock_ need to check cancelled_
     if (this->cancelled_) {
       reactor->cancel_timer(timer_id);
       return true;

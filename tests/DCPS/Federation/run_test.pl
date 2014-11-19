@@ -30,14 +30,13 @@ my $for_monitor_test;
 #
 # Specific options.
 #
-my $interval  = 10;
 my $repoCount = 2;
 my $pubCount  = 1;
 my $subCount  = 1;
 my $samples   = 10;
 my $sample_interval   = 0;
 my $debugFile;
-my $transport;
+my $transport ;
 
 ########################################################################
 #
@@ -94,8 +93,6 @@ unlink $debugFile if $debugFile;
 
 # Configure the repositories.
 
-
-
 my @REPO;
 my @PUB;
 my @SUB;
@@ -127,6 +124,7 @@ for my $index ( 1 .. $repoCount) {
   $repoArgs[ $index - 1] .= "-FederationId $federationId ";
   $repoArgs[ $index - 1] .= "-FederateWith " .  $repo_manager[ $index - 2] . " " if $index > 1;
   $repoArgs[ $index - 1] .= "-o " . $repo_ior[ $index - 1] . " ";
+  $repoArgs[ $index - 1] .= " -ORBLogFile inforepo_$index.log ";
 
   $REPO[ $index - 1] = PerlDDS::create_process(
                              "$ENV{DDS_ROOT}/bin/DCPSInfoRepo", $repoArgs[ $index - 1]
@@ -150,10 +148,11 @@ $appOpts .= "-ORBLogFile $debugFile " if ($appDebug or $transportDebug) and $deb
   #
 
 my @pubArgs;
-for my $index ( 1 .. $subCount) {
+for my $index ( 1 .. $pubCount) {
   my $repoIndex = $index;
   $pubArgs[ $index - 1] .= "$appOpts -Samples $samples -SampleInterval $sample_interval ";
   $pubArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
+  $pubArgs[ $index - 1] .= "-ORBLogFile publisher_$index.log ";
 
   $PUB[ $index - 1]  = PerlDDS::create_process ("publisher", $pubArgs[ $index - 1]);
 }
@@ -163,6 +162,7 @@ for my $index ( 1 .. $subCount) {
   my $repoIndex = (1 + $index) % $repoCount;
   $subArgs[ $index - 1] .= "$appOpts -Samples $samples ";
   $subArgs[ $index - 1] .= "-DCPSInfoRepo file://$repo_ior[ $repoIndex] ";
+  $subArgs[ $index - 1] .= "-ORBLogFile subscriber_$index.log ";
 
   $SUB[ $index - 1]  = PerlDDS::create_process ("subscriber", $subArgs[ $index - 1]);
 }
@@ -181,7 +181,6 @@ for my $index ( 1 .. $repoCount) {
       exit 1;
   }
 }
-print "\nLetting repository federation operations settle a bit...\n"; #sleep 2*$interval;
 
 # Fire up the subscribers.
 
@@ -189,9 +188,7 @@ for my $index ( 1 .. $subCount) {
   print "\nSUBSCRIBER $index\n";
   print $SUB[ $index - 1]->CommandLine() . "\n";
   $SUB[ $index - 1]->Spawn();
-  sleep $interval;
 }
-print "\nLetting subscribers settle a bit...\n"; sleep $interval;
 
 # Fire up the publishers.
 
@@ -199,13 +196,12 @@ for my $index ( 1 .. $pubCount) {
   print "\nPUBLISHER $index\n";
   print $PUB[ $index - 1]->CommandLine() . "\n";
   $PUB[ $index - 1]->Spawn();
-  sleep $interval;
 }
 
-# Wait for the subscribers to terminate nicely, kill them after 5 minutes
+# Wait for the subscribers to terminate nicely, kill them after 1 minute
 # otherwise.
 
-my $killDelay = 300;
+my $killDelay = 60;
 for my $index ( 1 .. $subCount) {
   $status = $SUB[ $index - 1]->WaitKill( $killDelay);
   if( $status != 0) {

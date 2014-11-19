@@ -41,7 +41,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export DirectPriorityMapper : public PriorityMapper {
 public:
   /// Construct with a priority value.
-  DirectPriorityMapper(CORBA::Long priority = 0);
+  DirectPriorityMapper(Priority priority = 0);
 
   /// Virtual destructor.
   virtual ~DirectPriorityMapper();

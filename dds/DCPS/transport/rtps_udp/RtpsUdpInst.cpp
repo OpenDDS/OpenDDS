@@ -72,7 +72,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
 
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, size_t);
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, short);
 
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_response_delay"),
                         nak_response_delay_);

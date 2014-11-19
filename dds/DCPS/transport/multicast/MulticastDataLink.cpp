@@ -29,16 +29,16 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastDataLink::MulticastDataLink(MulticastTransport* transport,
-                                     MulticastSessionFactory* session_factory,
-                                     MulticastPeer local_peer,
-                                     bool is_active)
-  : DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
-    transport_(transport),
-    session_factory_(session_factory, false),
-    local_peer_(local_peer),
-    config_(0),
-    reactor_task_(0),
-    send_buffer_(0)
+    MulticastSessionFactory* session_factory,
+    MulticastPeer local_peer,
+    bool is_active)
+: DataLink(transport, 0 /*priority*/, false /*loopback*/, is_active),
+  transport_(transport),
+  session_factory_(session_factory, false),
+  local_peer_(local_peer),
+  config_(0),
+  reactor_task_(0),
+  send_buffer_(0)
 {
 }
 
@@ -52,7 +52,7 @@ MulticastDataLink::~MulticastDataLink()
 
 void
 MulticastDataLink::configure(MulticastInst* config,
-                             TransportReactorTask* reactor_task)
+    TransportReactorTask* reactor_task)
 {
   this->config_ = config;
   this->reactor_task_ = reactor_task;
@@ -65,13 +65,13 @@ MulticastDataLink::send_strategy(MulticastSendStrategy* send_strategy)
   // configured number of most-recent datagrams are retained:
   if (this->session_factory_->requires_send_buffer()) {
     ACE_NEW_NORETURN(this->send_buffer_,
-                     SingleSendBuffer(this->config_->nak_depth_,
-                                      this->config_->max_samples_per_packet_));
+        SingleSendBuffer(this->config_->nak_depth_,
+            this->config_->max_samples_per_packet_));
     if (!this->send_buffer_) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("MulticastDataLink::send_strategy: ")
-                 ACE_TEXT("failed to create SingleSendBuffer!\n")));
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("MulticastDataLink::send_strategy: ")
+          ACE_TEXT("failed to create SingleSendBuffer!\n")));
       return;
     }
     send_strategy->send_buffer(this->send_buffer_);
@@ -90,12 +90,12 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
 {
   const std::string& net_if = this->config_->local_address_;
   if (this->socket_.join(group_address, 1,
-                         net_if.empty() ? 0 :
-                         ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str())) != 0) {
+      net_if.empty() ? 0 :
+          ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str())) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed %m.\n")),
-                     false);
+        ACE_TEXT("(%P|%t) ERROR: MulticastDataLink::join: ")
+        ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed %m.\n")),
+        false);
   }
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) MulticastDataLink::join OK\n")), 6);
 
@@ -103,56 +103,56 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
   char ttl = this->config_->ttl_;
 
   if (ACE_OS::setsockopt(handle,
-                         IPPROTO_IP,
-                         IP_MULTICAST_TTL,
-                         &ttl,
-                         sizeof(ttl)) < 0) {
+      IPPROTO_IP,
+      IP_MULTICAST_TTL,
+      &ttl,
+      sizeof(ttl)) < 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_OS::setsockopt TTL failed.\n")),
-                     false);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("MulticastDataLink::join: ")
+        ACE_TEXT("ACE_OS::setsockopt TTL failed.\n")),
+        false);
   }
 
   int rcv_buffer_size = ACE_Utils::truncate_cast<int>(this->config_->rcv_buffer_size_);
   if (rcv_buffer_size != 0
       && ACE_OS::setsockopt(handle, SOL_SOCKET,
-                            SO_RCVBUF,
-                            (char *) &rcv_buffer_size,
-                            sizeof (int)) < 0) {
+          SO_RCVBUF,
+          (char *) &rcv_buffer_size,
+          sizeof (int)) < 0) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_OS::setsockopt RCVBUF failed.\n")),
-                     false);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("MulticastDataLink::join: ")
+        ACE_TEXT("ACE_OS::setsockopt RCVBUF failed.\n")),
+        false);
   }
 
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
 
   if (ACE_OS::setsockopt(handle, SOL_SOCKET,
-                         SO_SNDBUF,
-                         (char *) &snd_size,
-                         sizeof(snd_size)) < 0
+      SO_SNDBUF,
+      (char *) &snd_size,
+      sizeof(snd_size)) < 0
       && errno != ENOTSUP) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("ACE_OS::setsockopt SNDBUF failed to set the send buffer size to %d errno %m\n"),
-                      snd_size),
-                     false);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("MulticastDataLink::join: ")
+        ACE_TEXT("ACE_OS::setsockopt SNDBUF failed to set the send buffer size to %d errno %m\n"),
+        snd_size),
+        false);
   }
 #endif /* ACE_DEFAULT_MAX_SOCKET_BUFSIZ */
 
   if (start(static_rchandle_cast<TransportSendStrategy>(this->send_strategy_),
-            static_rchandle_cast<TransportStrategy>(this->recv_strategy_))
+      static_rchandle_cast<TransportStrategy>(this->recv_strategy_))
       != 0) {
     this->socket_.close();
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::join: ")
-                      ACE_TEXT("DataLink::start failed!\n")),
-                     false);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("MulticastDataLink::join: ")
+        ACE_TEXT("DataLink::start failed!\n")),
+        false);
   }
 
   return true;
@@ -162,9 +162,9 @@ MulticastSession*
 MulticastDataLink::find_session(MulticastPeer remote_peer)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
-                   guard,
-                   this->session_lock_,
-                   0);
+      guard,
+      this->session_lock_,
+      0);
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
@@ -178,9 +178,9 @@ MulticastSession*
 MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
-                   guard,
-                   this->session_lock_,
-                   0);
+      guard,
+      this->session_lock_,
+      0);
 
   MulticastSessionMap::iterator it(this->sessions_.find(remote_peer));
   if (it != this->sessions_.end()) {
@@ -189,27 +189,26 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
   }
 
   MulticastSession_rch session =
-    this->session_factory_->create(this, remote_peer);
+      this->session_factory_->create(this, remote_peer);
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::find_or_create_session: ")
-                      ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
-                      remote_peer),
-                     0);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("MulticastDataLink::find_or_create_session: ")
+        ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
+        remote_peer),
+        0);
   }
 
   std::pair<MulticastSessionMap::iterator, bool> pair = this->sessions_.insert(
-    MulticastSessionMap::value_type(remote_peer, session));
+      MulticastSessionMap::value_type(remote_peer, session));
   if (pair.first == this->sessions_.end()) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("MulticastDataLink::find_or_create_session: ")
-                      ACE_TEXT("failed to insert session for remote peer: 0x%x!\n"),
-                      remote_peer),
-                     0);
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("MulticastDataLink::find_or_create_session: ")
+        ACE_TEXT("failed to insert session for remote peer: 0x%x!\n"),
+        remote_peer),
+        0);
   }
-
   return session._retn();
 }
 
@@ -217,9 +216,9 @@ bool
 MulticastDataLink::check_header(const TransportHeader& header)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
-                   guard,
-                   this->session_lock_,
-                   false);
+      guard,
+      this->session_lock_,
+      false);
 
   MulticastSessionMap::iterator it(this->sessions_.find(header.source_));
   if (it == this->sessions_.end() && is_active()) {
@@ -238,9 +237,9 @@ MulticastDataLink::check_header(const DataSampleHeader& header)
   if (header.message_id_ == TRANSPORT_CONTROL) return true;
 
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
-                   guard,
-                   this->session_lock_,
-                   false);
+      guard,
+      this->session_lock_,
+      false);
 
   // Skip data sample unless there is a session for it.
   return (this->sessions_.count(receive_strategy()->received_header().source_) > 0);
@@ -248,12 +247,12 @@ MulticastDataLink::check_header(const DataSampleHeader& header)
 
 bool
 MulticastDataLink::reassemble(ReceivedDataSample& data,
-                              const TransportHeader& header)
+    const TransportHeader& header)
 {
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
-                   guard,
-                   this->session_lock_,
-                   false);
+      guard,
+      this->session_lock_,
+      false);
 
   MulticastSessionMap::iterator it(this->sessions_.find(header.source_));
   if (it == this->sessions_.end()) return false;
@@ -274,26 +273,32 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       char* const ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
 
       ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
-                guard,
-                this->session_lock_);
+          guard,
+          this->session_lock_);
 
       const TransportHeader& theader = receive_strategy()->received_header();
+
       if (!is_active() && sample.header_.submessage_id_ == MULTICAST_SYN &&
           sessions_.find(theader.source_) == sessions_.end()) {
         // We have received a SYN but there is no session (yet) for this source.
         // Depending on the data, we may need to send SYNACK.
+
+        guard.release();
         syn_received_no_session(theader.source_, sample.sample_,
-                                theader.swap_bytes());
+            theader.swap_bytes());
         if (ptr) {
           sample.sample_->rd_ptr(ptr);
         }
         return;
       }
 
-      for (MulticastSessionMap::iterator it(this->sessions_.begin());
-          it != this->sessions_.end(); ++it) {
+      MulticastSessionMap temp_sessions(sessions_);
+      guard.release();
+
+      for (MulticastSessionMap::iterator it(temp_sessions.begin());
+          it != temp_sessions.end(); ++it) {
         it->second->control_received(sample.header_.submessage_id_,
-                                     sample.sample_);
+            sample.sample_);
         // reset read pointer
         if (ptr) {
           sample.sample_->rd_ptr(ptr);
@@ -310,6 +315,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
     if (!duplicate_data_sample(sample.header_)) {
       data_received(sample);
     }
+    break;
   }
 }
 
@@ -333,8 +339,8 @@ MulticastDataLink::release_remote_i(const RepoId& remote)
 
 void
 MulticastDataLink::syn_received_no_session(MulticastPeer source,
-                                           ACE_Message_Block* data,
-                                           bool swap_bytes)
+    ACE_Message_Block* data,
+    bool swap_bytes)
 {
   Serializer serializer_read(data, swap_bytes);
 
@@ -346,8 +352,8 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastDataLink[%C]::syn_received_no_session "
-                      "send_synack local 0x%x remote 0x%x\n",
-                      config_->name().c_str(), local_peer, source), 2);
+      "send_synack local 0x%x remote 0x%x\n",
+      config_->name().c_str(), local_peer, source), 2);
 
   ACE_Message_Block* synack_data = new ACE_Message_Block(sizeof(MulticastPeer));
 
@@ -356,12 +362,12 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
 
   DataSampleHeader header;
   ACE_Message_Block* control =
-    create_control(MULTICAST_SYNACK, header, synack_data);
+      create_control(MULTICAST_SYNACK, header, synack_data);
 
   const int error = send_control(header, control);
   if (error != SEND_CONTROL_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) MulticastDataLink::syn_received_no_session: "
-                         "ERROR: send_control failed: %d!\n", error));
+        "ERROR: send_control failed: %d!\n", error));
     return;
   }
 
@@ -372,11 +378,11 @@ void
 MulticastDataLink::stop_i()
 {
   ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
-            guard,
-            this->session_lock_);
+      guard,
+      this->session_lock_);
 
   for (MulticastSessionMap::iterator it(this->sessions_.begin());
-       it != this->sessions_.end(); ++it) {
+      it != this->sessions_.end(); ++it) {
     it->second->stop();
   }
   this->sessions_.clear();
