@@ -64,7 +64,7 @@ can add a new configuration value:
 # on_publication_disconencted and/or
 # on_subscription_disconnected after detecting a
 # connection closed or failed.
-# If the remove_assocaitions call(s) from the RepoInfo
+# If the remove_associations call(s) from the RepoInfo
 # arrive(s) before this period then the
 # connection will be abandoned and the
 # callbacks will not be made.
@@ -94,7 +94,7 @@ point of view:
 3) the connection close/failure is detected
 4) after the graceful_disconnected_period call
 on_publication_disconnected()
-Note: remove_assocaitions() will never get called because the
+Note: remove_associations() will never get called because the
 subscriber crashed.
 5) try to reconnect 0 or more times
 6) > conn_retry_attempts so call on_publication_lost

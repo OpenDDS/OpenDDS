@@ -37,7 +37,7 @@ $Publisher = PerlDDS::create_process ("publisher",
 
 #print $NS->CommandLine() . "\n";
 $NS->Spawn();
-if (PerlACE::waitforfile_timed ($ns_ior, 5) == -1) {
+if (PerlACE::waitforfile_timed ($ns_ior, $PerlACE::wait_interval_for_process_creation) == -1) {
     print STDERR "ERROR: cannot find file <$ns_ior>\n";
     $NS->Kill();
     exit 1;

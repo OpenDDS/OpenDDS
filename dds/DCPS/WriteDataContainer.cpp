@@ -289,7 +289,7 @@ WriteDataContainer::register_instance(
                  instance_handle));
 
       return DDS::RETCODE_ERROR;
-    } // if (0 != insert_attempt)
+    } // if (0 != find_attempt)
 
     // don't need this - the PublicationInstances already has a sample.
     registered_sample->release();
@@ -327,7 +327,7 @@ WriteDataContainer::unregister(
                       ACE_TEXT("is not registered yet.\n"),
                       instance_handle),
                      DDS::RETCODE_PRECONDITION_NOT_MET);
-  } // if (0 != insert_attempt)
+  } // if (0 != find_attempt)
 
   instance->unregistered_ = true;
 

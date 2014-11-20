@@ -133,7 +133,7 @@ int init (int argc, ACE_TCHAR *argv[])
       // try ignore before the association
       if (ignore_before_association)
       {
-        ACE_DEBUG((LM_DEBUG, "Ignoring before the assocaition\n"));
+        ACE_DEBUG((LM_DEBUG, "Ignoring before the association\n"));
         ignore ();
       }
 
