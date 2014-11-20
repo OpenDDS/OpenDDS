@@ -368,9 +368,12 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_close",6);
 
-  // TBD SOON - Find out exactly when handle_close() is called.
-  //            My guess is that it happens if the reactor is closed
-  //            while we are still registered with the reactor.  Right?
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_close() called on transport: %C to %C:%d.\n",
+               this->link_->get_transport_impl()->config()->name().c_str(),
+               this->remote_address_.get_host_addr(),
+               this->remote_address_.get_port_number()));
+  }
 
   if (!this->send_strategy_.is_nil())
     this->send_strategy_->terminate_send();
@@ -532,6 +535,13 @@ int
 OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
 {
   DBG_ENTRY_LVL("TcpConnection","reconnect",6);
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) reconnect initiated on transport: %C to %C:%d.\n",
+               this->link_->get_transport_impl()->config()->name().c_str(),
+               this->remote_address_.get_host_addr(),
+               this->remote_address_.get_port_number()));
+  }
+
 
   if (on_new_association) {
     return this->active_reconnect_on_new_association();
@@ -746,6 +756,11 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
 
   switch (this->reconnect_state_) {
   case PASSIVE_WAITING_STATE: {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection on transport: %C to %C:%d.\n",
+               this->link_->get_transport_impl()->config()->name().c_str(),
+               this->remote_address_.get_host_addr(),
+               this->remote_address_.get_port_number()));
+
     this->reconnect_state_ = PASSIVE_TIMEOUT_CALLED_STATE;
     // We stay in PASSIVE_TIMEOUT_CALLED_STATE indicates there is no new connection.
     // Now we need declare the connection is lost.
@@ -765,6 +780,10 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
 
   case RECONNECTED_STATE:
     // reconnected successfully.
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
+               this->link_->get_transport_impl()->config()->name().c_str(),
+               this->remote_address_.get_host_addr(),
+               this->remote_address_.get_port_number()));
     break;
 
   default :
