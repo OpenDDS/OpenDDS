@@ -12,8 +12,6 @@
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
-  DBG_ENTRY("sub_main.cpp", "main");
-
   ACE_LOG_MSG->priority_mask(LM_TRACE     |
                              LM_DEBUG     |
                              LM_INFO      |
