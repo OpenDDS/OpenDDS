@@ -1,3 +1,9 @@
+Thu Nov 20 20:09:46 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Made debug logging conditional on DCPS_debug_level.
+
 Thu Nov 20 19:37:43 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportImpl.cpp:

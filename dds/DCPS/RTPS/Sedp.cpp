@@ -2479,7 +2479,10 @@ int
 Sedp::Task::svc()
 {
   for (Msg* msg = 0; getq(msg) != -1; /*no increment*/) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc got message from queue type %d\n", msg->type_));
+    if (DCPS::DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc "
+        "got message from queue type %d\n", msg->type_));
+    }
     ACE_Auto_Basic_Ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
     case Msg::MSG_PARTICIPANT:
@@ -2509,7 +2512,9 @@ Sedp::Task::svc()
       }
       return 0;
     }
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc done with message\n"));
+    if (DCPS::DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::Task::svc done with message\n"));
+    }
   }
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::Task::svc - ")
