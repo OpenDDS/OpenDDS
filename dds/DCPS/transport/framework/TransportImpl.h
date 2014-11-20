@@ -88,11 +88,6 @@ public:
 
   void report();
 
-protected:
-  TransportImpl();
-
-  bool configure(TransportInst* config);
-
   struct ConnectionAttribs {
     RepoId local_id_;
     Priority priority_;
@@ -119,6 +114,11 @@ protected:
     /// TransportClient::use_datalink() is called later.
     DataLink_rch link_;
   };
+
+protected:
+  TransportImpl();
+
+  bool configure(TransportInst* config);
 
   /// connect_datalink() is called from TransportClient to initiate an
   /// association as the active peer.  A DataLink may be returned if

@@ -1,3 +1,11 @@
+Thu Nov 20 17:54:16 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.h:
+
+          Promote nested structs from protected to public, vc71 won't compile
+          the TransportClient header when they are protected even though the
+          friend declaration is present.
+
 Thu Nov 20 17:11:19 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:
