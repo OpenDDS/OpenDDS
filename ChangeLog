@@ -1,3 +1,13 @@
+Thu Nov 20 17:11:19 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportConfig.h:
+        * dds/DCPS/transport/framework/TransportConfig.cpp:
+
+          If the passive_connect_duration_ is set to 0, treat it as the
+          default value of 60 seconds.  With the async_assoc changes,
+          0 will cause the timer to expire immediately and fail the association.
+
 Wed Nov 19 19:16:30 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * Merged the branch async_assoc which lets the association process,

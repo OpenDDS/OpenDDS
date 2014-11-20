@@ -30,6 +30,8 @@ namespace DCPS {
 class OpenDDS_Dcps_Export TransportConfig : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
+  static const unsigned long DEFAULT_PASSIVE_CONNECT_DURATION = 60000;
+
   std::string name() const { return name_; }
 
   std::vector<TransportInst_rch> instances_;
@@ -38,7 +40,7 @@ public:
 
   /// The time period in milliseconds for the acceptor side
   /// of a connection to wait for the connection.
-  /// The default is 0 (wait forever)
+  /// The default is 60 seconds
   unsigned long passive_connect_duration_;
 
   /// Insert the TransportInst in sorted order (by name) in the instances_ list.

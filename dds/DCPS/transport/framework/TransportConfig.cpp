@@ -19,7 +19,7 @@ namespace DCPS {
 
 TransportConfig::TransportConfig(const std::string& name)
   : swap_bytes_(false)
-  , passive_connect_duration_(60000)
+  , passive_connect_duration_(DEFAULT_PASSIVE_CONNECT_DURATION)
   , name_(name)
 {}
 

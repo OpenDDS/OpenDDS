@@ -130,8 +130,17 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   cdr_encapsulation_ = false;
   reliable_ = reliable;
   durable_ = durable;
-  passive_connect_duration_.set(tc->passive_connect_duration_ / 1000,
-                                (tc->passive_connect_duration_ % 1000) * 1000);
+  unsigned long duration = tc->passive_connect_duration_;
+  if (duration == 0) {
+    duration = TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) TransportClient::enable_transport_using_config ")
+        ACE_TEXT("passive_connect_duration_ configured as 0, changing to ")
+        ACE_TEXT("default value\n")));
+    }
+  }
+  passive_connect_duration_.set(duration / 1000, (duration % 1000) * 1000);
 
   const size_t n = tc->instances_.size();
 
