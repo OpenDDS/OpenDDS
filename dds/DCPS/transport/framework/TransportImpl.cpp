@@ -160,7 +160,8 @@ TransportImpl::configure(TransportInst* config)
 void
 TransportImpl::add_pending_connection(TransportClient* client, DataLink* link)
 {
-  pending_connections_.insert(std::make_pair(client, DataLink_rch(link, false)));
+  pending_connections_.insert(std::pair<TransportClient* const, DataLink_rch>(
+    client, DataLink_rch(link, false)));
 }
 
 void
