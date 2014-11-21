@@ -19,11 +19,15 @@
 #include /**/ "dds/DCPS/RepoIdConverter.h"
 #include /**/ "dds/DCPS/Qos_Helper.h"
 #include /**/ "tao/debug.h"
+#include /**/ "tao/TimeBaseC.h"
+#include /**/ "tao/Messaging/Messaging.h"
+#include /**/ "orbsvcs/Time_Utilities.h"
 
 DCPS_IR_Publication::DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
                                          DCPS_IR_Participant* participant,
                                          DCPS_IR_Topic* topic,
                                          OpenDDS::DCPS::DataWriterRemote_ptr writer,
+                                         const ACE_Time_Value& writer_timeout,
                                          const DDS::DataWriterQos& qos,
                                          const OpenDDS::DCPS::TransportLocatorSeq& info,
                                          const DDS::PublisherQos& publisherQos)
@@ -37,6 +41,33 @@ DCPS_IR_Publication::DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
     publisherQos_(publisherQos)
 {
   writer_ =  OpenDDS::DCPS::DataWriterRemote::_duplicate(writer);
+
+  if (writer_timeout != ACE_Time_Value::zero) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DCPS_IR_Publication::DCPS_IR_Publication:")
+                 ACE_TEXT(" Writer Remote timeout of %d milliseconds.\n"),
+                 writer_timeout.msec()));
+    }
+
+    // Create a second writer object reference with a timeout
+    TimeBase::TimeT timeout;
+    ORBSVCS_Time::Time_Value_to_TimeT(timeout, writer_timeout);
+    CORBA::Any timeout_any;
+    timeout_any <<= timeout;
+    CORBA::PolicyList policy_list;
+    policy_list.length(1);
+    CORBA::ORB_var orb = writer_->_get_orb();
+    policy_list[0] = orb->create_policy(Messaging::RELATIVE_RT_TIMEOUT_POLICY_TYPE,
+                                        timeout_any);
+    CORBA::Object_var timeout_obj = writer_->_set_policy_overrides(policy_list,
+                                                                   CORBA::ADD_OVERRIDE);
+    timeout_writer_ =
+      OpenDDS::DCPS::DataWriterRemote::_unchecked_narrow(timeout_obj.in());
+  } else {
+    // If no timeout is set, then just use the other object reference
+    timeout_writer_ = writer_;
+  }
 
   incompatibleQosStatus_.total_count = 0;
   incompatibleQosStatus_.count_since_last_send = 0;
@@ -79,7 +110,13 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
                      std::string(sub_converter).c_str()));
         }
 
-        writer_->add_association(id_, association, active);
+        timeout_writer_->add_association(id_, association, active);
+
+      } catch (const CORBA::TIMEOUT& ex) {
+        ex._tao_print_exception(
+          "(%P|%t) ERROR: Timeout exception caught in DCPS_IR_Publication::add_associated_subscription:");
+        participant_->mark_dead();
+        status = -1;
 
       } catch (const CORBA::Exception& ex) {
         ex._tao_print_exception(

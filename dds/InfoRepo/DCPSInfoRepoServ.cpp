@@ -176,6 +176,12 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
 
       arg_shifter.consume_arg();
 
+    } else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-WriterTimeout"))) != 0) {
+      int msec = ACE_OS::atoi(current_arg);
+      this->writer_timeout_.msec(msec);
+
+      arg_shifter.consume_arg();
+
     } else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
       this->ior_file_ = current_arg;
       arg_shifter.consume_arg();
@@ -301,6 +307,9 @@ InfoRepo::init()
                ACE_TEXT("Unable to initialize persistence.\n")));
     throw InitError("Unable to initialize persistence.");
   }
+
+  // Set the timeout for the writer remote
+  this->info_servant_->init_writer_timeout(this->writer_timeout_);
 
   // Initialize reassociation.
   if (this->reassociate_delay_ != ACE_Time_Value::zero &&

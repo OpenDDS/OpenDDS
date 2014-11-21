@@ -42,6 +42,7 @@ public:
                       DCPS_IR_Participant* participant,
                       DCPS_IR_Topic* topic,
                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
+                      const ACE_Time_Value& writer_timeout,
                       const DDS::DataWriterQos& qos,
                       const OpenDDS::DCPS::TransportLocatorSeq& info,
                       const DDS::PublisherQos& publisherQos);
@@ -185,6 +186,7 @@ private:
 
   /// the corresponding DataWriterRemote object
   OpenDDS::DCPS::DataWriterRemote_var writer_;
+  OpenDDS::DCPS::DataWriterRemote_var timeout_writer_;
   DDS::DataWriterQos qos_;
   OpenDDS::DCPS::TransportLocatorSeq info_;
   DDS::PublisherQos publisherQos_;

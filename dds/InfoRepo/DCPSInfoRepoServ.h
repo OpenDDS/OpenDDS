@@ -62,6 +62,7 @@ private:
   bool use_bits_;
   bool resurrect_;
   ACE_Time_Value reassociate_delay_;
+  ACE_Time_Value writer_timeout_;
 
   /// Flag to indicate that finalization has already occurred.
   bool finalized_;

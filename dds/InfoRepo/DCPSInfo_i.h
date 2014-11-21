@@ -402,6 +402,8 @@ public:
 
   bool init_reassociation(const ACE_Time_Value& delay);
 
+  void init_writer_timeout(const ACE_Time_Value& timeout);
+
   /// Cleanup state for shutdown.
   void finalize();
 
@@ -422,6 +424,8 @@ private:
   ACE_Recursive_Thread_Mutex lock_;
 
   long reassociate_timer_id_;
+
+  ACE_Time_Value writer_timeout_;
 };
 
 #endif /* DCPSINFO_I_H */

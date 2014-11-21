@@ -415,6 +415,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_publication(
                    partPtr,
                    topic,
                    dispatchingPublication.in(),
+                   writer_timeout_,
                    qos,
                    transInfo,
                    publisherQos),
@@ -537,6 +538,7 @@ TAO_DDS_DCPSInfo_i::add_publication(DDS::DomainId_t domainId,
                    partPtr,
                    topic,
                    publication.in(),
+                   writer_timeout_,
                    qos,
                    transInfo,
                    publisherQos),
@@ -2294,6 +2296,12 @@ TAO_DDS_DCPSInfo_i::init_reassociation(const ACE_Time_Value& delay)
 
   this->reassociate_timer_id_ = reactor->schedule_timer(this, 0, delay, delay);
   return this->reassociate_timer_id_ != -1;
+}
+
+void
+TAO_DDS_DCPSInfo_i::init_writer_timeout(const ACE_Time_Value& timeout)
+{
+  writer_timeout_ = timeout;
 }
 
 void
