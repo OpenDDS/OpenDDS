@@ -1,3 +1,10 @@
+Mon Nov 24 22:28:30 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/src/Options.cpp:
+        * tools/modeling/codegen/model/Config.cpp:
+
+          Resolved compiler warnings when building with --no-ownership-profile.
+
 Mon Nov 24 22:01:52 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * BranchChangeLog:
