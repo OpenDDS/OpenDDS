@@ -85,7 +85,9 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
-      return AcceptConnectResult(link._retn());
+      return link.is_nil()
+        ? AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS)
+        : AcceptConnectResult(link._retn());
     }
 
     link = new TcpDataLink(key.address(), this, attribs.priority_,
@@ -224,11 +226,11 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
-
-      return AcceptConnectResult(link._retn());
+      return link.is_nil()
+        ? AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS)
+        : AcceptConnectResult(link._retn());
 
     } else {
-
       link = new TcpDataLink(key.address(), this, key.priority(),
                              key.is_loopback(), key.is_active());
 

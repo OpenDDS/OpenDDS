@@ -1,3 +1,14 @@
+Mon Nov 24 17:24:12 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Corrected handling of find_datalink_i return value
+          in how it's presented to the framework.
+
+        * tests/DCPS/Instances/SubDriver.h:
+
+          Fixed a (spurious) compiler warning.
+
 Thu Nov 20 20:09:46 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:
