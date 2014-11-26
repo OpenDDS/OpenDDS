@@ -34,11 +34,16 @@ public:
   /// passive connections.
   ACE_INET_Addr local_address_;
 
-  /// The address string used to provide to DCPSInfoRepo.
+  /// The address string used to configure the acceptor.
   /// This string is either from configuration file or default
   /// to hostname:port. The hostname is fully qualified hostname
   /// and the port is randomly picked by os.
   std::string local_address_str_;
+
+  /// The address string provided to DCPSInfoRepo for connectors.
+  /// This string is either from configuration file or defaults
+  /// to the local address.
+  std::string pub_address_str_;
 
   bool enable_nagle_algorithm_;
 
@@ -79,6 +84,13 @@ public:
   int passive_reconnect_duration_;
 
   bool is_reliable() const { return true; }
+
+  /// The public address is our publicly advertised address.
+  /// Usually this is the same as the local address, but if
+  /// a public address is explicitly specified, use that.
+  const std::string& get_public_address() const {
+    return (pub_address_str_ == "") ? local_address_str_ : pub_address_str_;
+  }
 
 private:
   friend class TcpType;

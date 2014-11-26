@@ -42,6 +42,8 @@ OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
     this->local_address_.set(local_address_str_.c_str());
   }
 
+  GET_CONFIG_STRING_VALUE(cf, trans_sect, ACE_TEXT("pub_address"), pub_address_str_);
+
   GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("enable_nagle_algorithm"),
                    this->enable_nagle_algorithm_, bool)
 
@@ -69,6 +71,7 @@ OpenDDS::DCPS::TcpInst::dump(std::ostream& os)
   TransportInst::dump(os);
 
   os << formatNameForDump("local_address")                 << this->local_address_str_ << std::endl;
+  os << formatNameForDump("pub_address")                   << this->pub_address_str_ << std::endl;
   os << formatNameForDump("enable_nagle_algorithm")        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;
   os << formatNameForDump("conn_retry_initial_delay")      << this->conn_retry_initial_delay_ << std::endl;
   os << formatNameForDump("conn_retry_backoff_multiplier") << this->conn_retry_backoff_multiplier_ << std::endl;

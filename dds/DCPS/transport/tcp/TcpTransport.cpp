@@ -480,11 +480,11 @@ TcpTransport::connection_info_i(TransportLocator& local_info) const
 {
   DBG_ENTRY_LVL("TcpTransport", "connection_info_i", 6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport local address str %C\n",
-            this->tcp_config_->local_address_str_.c_str()), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
+            this->tcp_config_->get_public_address().c_str()), 2);
 
-  //Always use local address string to provide to DCPSInfoRepo for advertisement.
-  NetworkAddress network_order_address(this->tcp_config_->local_address_str_);
+  // Get the public address string from the inst (usually the local address)
+  NetworkAddress network_order_address(this->tcp_config_->get_public_address());
 
   ACE_OutputCDR cdr;
   cdr << network_order_address;

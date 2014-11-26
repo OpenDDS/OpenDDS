@@ -1,3 +1,21 @@
+Wed Nov 26 15:50:09 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Add a public_address config option for tcp.  This
+          option allows a transport to explicitly specify
+          an address that is used as the publicly advertised
+          address (during discovery) for that instance.
+          When not specified, the local_address is used,
+          preserving the current behavior.
+
+          This option is used in some reconnect testing but
+          should also be useful for firewall traversal and
+          other situations.
+
 Mon Nov 24 17:24:12 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpTransport.cpp:
