@@ -1,3 +1,37 @@
+Wed Nov 26 19:20:55 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/transport/tcp/TcpConnectionReplaceTask.h:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Fixed spelling.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Added ability for passive side to reuse an existing
+          connection when receiving a passive connect.  This
+          occurs when the active side recognizes the datalink
+          has been released and tries to make a new connection
+          to the passive side before discovery has propagated
+          the release to the passive side.  Passive side will
+          now reuse the datalink but properly associate it with the
+          reused connection.
+
+          find_datalink_i now properly handles case of moving
+          a pending release link back into the active links.
+
+          Fixed an issue with the interleaving of cancel_release
+          and schedule_delayed_release when releasing the datalink
+          from TcpTransport.  Added intermediate state indicators:
+          scheduling_release_, cancelled_release_, and
+          scheduled_release_ to manage the interleaving correctly.
+
 Wed Nov 26 19:02:26 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/auto_run_tests.pl:

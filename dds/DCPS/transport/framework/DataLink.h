@@ -79,7 +79,7 @@ public:
 
   /// A DataLink object is always created by a TransportImpl object.
   /// Thus, the TransportImpl object passed-in here is the object that
-  /// created this DataLink.  The ability to specifiy a priority
+  /// created this DataLink.  The ability to specify a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
   DataLink(TransportImpl* impl, Priority priority, bool is_loopback, bool is_active);
@@ -195,7 +195,7 @@ public:
   bool is_target(const RepoId& sub_id);
 
   /// Check if the remote_id/local_id is associated with this link
-  /// and if they are the last assoication using this link.
+  /// and if they are the last association using this link.
   bool exist(const RepoId& remote_id,
              const RepoId& local_id,
              const bool&   pub_side,
@@ -257,6 +257,8 @@ public:
   bool add_on_start_callback(TransportClient* client, const RepoId& remote);
   void remove_on_start_callback(TransportClient* client, const RepoId& remote);
   void invoke_on_start_callbacks(bool success);
+
+  void set_scheduling_release(bool scheduling_release);
 
 protected:
 
@@ -418,7 +420,9 @@ private:
   /// TRANSPORT_PRIORITY value associated with the link.
   Priority transport_priority_;
 
-  bool scheduled_;
+  bool scheduled_release_;
+  bool scheduling_release_;
+  bool cancelled_release_;
 
 protected:
 
@@ -447,7 +451,7 @@ protected:
   bool is_loopback_;
   /// Is pub or sub ?
   bool is_active_;
-  bool started;
+  bool started_;
 
   /// Listener for TransportSendControlElements created in send_control
   SendResponseListener send_response_listener_;

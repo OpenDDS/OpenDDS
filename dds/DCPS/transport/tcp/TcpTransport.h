@@ -163,7 +163,7 @@ private:
   TransportReactorTask_rch reactor_task_;
 
   /// This task is used to resolve some deadlock situation
-  /// duing reconnecting.
+  /// during reconnecting.
   /// TODO: reuse the reconnect_task in the TcpConnection
   ///       for new connection checking.
   TcpConnectionReplaceTask* con_checker_;

@@ -885,7 +885,7 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 
 }
 
-/// This function is called when the backpresure occurs and timed out after
+/// This function is called when the backpressure occurs and timed out after
 /// "max_output_pause_period". The lost connection notification should be sent
 /// and the connection needs be closed since we declared it as a "lost"
 /// connection.

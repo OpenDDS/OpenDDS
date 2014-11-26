@@ -162,6 +162,12 @@ DataLink::send_stop_i(RepoId repoId)
   }
 }
 
+ACE_INLINE
+void  DataLink::set_scheduling_release(bool scheduling_release)
+{
+  this->scheduling_release_ = scheduling_release;
+}
+
 ACE_INLINE RemoveResult
 DataLink::remove_sample(const DataSampleElement* sample)
 {
@@ -258,7 +264,7 @@ DataLink::start(const TransportSendStrategy_rch& send_strategy,
     //only after first use_datalink has resolved does datalink's state truly
     //change to started, thus can't let pending associations proceed normally yet
     GuardType guard(this->strategy_lock_);
-    this->started = true;
+    this->started_ = true;
   }
   //Now state transitioned to started so no new on_start_callbacks will be added
   //so resolve any added during transition to started.
@@ -272,7 +278,7 @@ DataLink::add_on_start_callback(TransportClient* client, const RepoId& remote)
 {
   GuardType guard(strategy_lock_);
 
-  if (started && !send_strategy_.is_nil()) {
+  if (started_ && !send_strategy_.is_nil()) {
     return false; // link already started
   }
   on_start_callbacks_.push_back(std::make_pair(client, remote));

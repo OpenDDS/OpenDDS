@@ -47,13 +47,15 @@ DataLink::DataLink(TransportImpl* impl, Priority priority, bool is_loopback,
     default_listener_(0),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
-    scheduled_(false),
+    scheduled_release_(false),
+    scheduling_release_(false),
+    cancelled_release_(false),
     send_control_allocator_(0),
     mb_allocator_(0),
     db_allocator_(0),
     is_loopback_(is_loopback),
     is_active_(is_active),
-    started(false),
+    started_(false),
     send_response_listener_("DataLink")
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
@@ -579,6 +581,9 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
 void
 DataLink::schedule_delayed_release()
 {
+  DBG_ENTRY_LVL("DataLink", "schedule_delayed_release", 6);
+
+  cancelled_release_ = false;
   // Add reference before schedule timer with reactor and remove reference after
   // handle_timeout is called. This would avoid DataLink deletion while handling
   // timeout.
@@ -595,15 +600,37 @@ DataLink::schedule_delayed_release()
   ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
 
   reactor->schedule_timer(this, 0, this->datalink_release_delay_);
-  this->scheduled_ = true;
+  this->scheduled_release_ = true;
+  if (cancelled_release_) {
+
+    if (reactor->cancel_timer(this) > 0) {
+      // Remove the extra reference added when scheduled with the reactor.
+      this->_remove_ref();
+    }
+    this->scheduled_release_ = false;
+  }
+  this->cancelled_release_ = false;
+  this->scheduling_release_=false;
 }
 
 bool
 DataLink::cancel_release()
 {
-  if (scheduled_) {
+  DBG_ENTRY_LVL("DataLink", "cancel_release", 6);
+
+  this->cancelled_release_ = true;
+  if (scheduled_release_) {
     ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
-    return reactor->cancel_timer(this) > 0;
+    bool retval = false;
+    retval = reactor->cancel_timer(this) > 0;
+    if (retval) {
+      // Remove the extra reference added when scheduled with the reactor.
+      this->_remove_ref();
+      scheduled_release_ = false;
+    }
+    return retval;
+  } else if (scheduling_release_) {
+    return true;
   }
 
   return false;
@@ -952,13 +979,7 @@ DataLink::transport_shutdown()
     this->send_strategy_->transport_shutdown();
   }
 
-  if (this->cancel_release()) {
-    // Remove the extra reference added when schedule with the reactor.
-    // All other shutdown-related activites are handled by stop().
-    // This can't be the last reference because we are called from
-    // the TransportImpl-derived class which still has a reference.
-    this->_remove_ref();
-  }
+  this->cancel_release();
 
   this->stop();
 
@@ -1359,7 +1380,6 @@ int
 DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 {
   VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
-
   this->impl_->unbind_link(this);
 
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {

@@ -133,6 +133,61 @@ OpenDDS::DCPS::TcpDataLink::connect(
   return 0;
 }
 
+//Allows the passive side to detect that the active side is connecting again
+//prior to discovery identifying the released datalink from the active side.
+//The passive side still believes it has a connection to the remote, however,
+//the connect has created a new link/connection, thus the passive side can try
+//to reuse the existing structures but reset it to associate the datalink with
+//this new connection.
+int
+OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& connection)
+{
+  DBG_ENTRY_LVL("TcpDataLink","reuse_existing_connection",6);
+
+  if (this->is_active_) {
+    return -1;
+  }
+  //Need to check if connection is nil.  If connection is not nil, then connection
+  //has previously gone through connection phase so this is a reuse of the connection
+  //proceed to determine if we can reuse/reset existing mechanisms or need to start from
+  //scratch.
+  if (!this->connection_.is_nil()) {
+
+    this->connection_->transfer(connection.in());
+
+    //Connection already exists.
+    TransportStrategy_rch brs;
+    TransportSendStrategy_rch bss;
+
+    if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
+      this->connection_ = 0;
+      return -1;
+    } else {
+      brs = this->receive_strategy_;
+      bss = this->send_strategy_;
+
+      this->connection_ = connection;
+
+      TcpReceiveStrategy* rs = static_cast<TcpReceiveStrategy*>(brs.in());
+
+      TcpSendStrategy* ss = static_cast<TcpSendStrategy*>(bss.in());
+
+      // Associate the new connection object with the receiving strategy and disassociate
+      // the old connection object with the receiving strategy.
+      int rs_result = rs->reset(this->connection_.in());
+
+      // Associate the new connection object with the sending strategy and disassociate
+      // the old connection object with the sending strategy.
+      int ss_result = ss->reset(this->connection_.in());
+
+      if (rs_result == 0 && ss_result == 0) {
+        return 0;
+      }
+    }
+  }
+  return -1;
+}
+
 /// Associate the new connection object with this datalink object.
 /// The states of the "old" connection object are copied to the new
 /// connection object and the "old" connection object is replaced by
