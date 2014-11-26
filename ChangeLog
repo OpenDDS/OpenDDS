@@ -1,3 +1,9 @@
+Wed Nov 26 19:02:26 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Log start and stop time of each test.
+
 Wed Nov 26 15:50:09 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpConnection.cpp:

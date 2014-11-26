@@ -80,7 +80,9 @@ foreach my $test_lst (@file_list) {
             $program = $test;
         }
 
+        my $start_time_string = localtime;
         print "auto_run_tests: $test\n";
+        print "start $test at $start_time_string\n";
 
         chdir($DDS_ROOT."/$directory")
             || die "Error: Cannot chdir to $DDS_ROOT/$directory";
@@ -134,6 +136,8 @@ foreach my $test_lst (@file_list) {
                 print "Error: $test returned with status $result\n";
             }
 
+            my $stop_time_string = localtime;
+            print "stop $test at $stop_time_string\n";
             print "\nauto_run_tests_finished: $test Time:$time"
                 . "s Result:$result\n";
         }
