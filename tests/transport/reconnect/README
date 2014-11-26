@@ -1,0 +1,12 @@
+
+This test currently requires installation of the socat utility is /usr/bin
+on the system being tested.  This utility should eventually be replaced 
+with a custom built utility using ACE.
+
+The run_test.pl starts a simple publisher that connects to socat which
+in turn connects to the simple subscriber.  The publisher begins 
+publishing samples (one per message) through socat.  After a delay,
+socat is killed and restarted by the run_test.pl script, forcing a 
+reconnect.  The publisher, continues publishing until the expexted 
+number of messages are received while the socat utility is repeatedly
+killed and more reconnects are forced.
