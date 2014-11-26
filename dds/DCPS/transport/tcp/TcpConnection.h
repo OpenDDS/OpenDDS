@@ -188,6 +188,10 @@ private:
 
   /// Small unique identifying value.
   std::size_t id_;
+
+  /// Flag that determines whether a close should schedule
+  /// a reconnect.
+  bool reconnect_on_close_;
 };
 
 } // namespace DCPS

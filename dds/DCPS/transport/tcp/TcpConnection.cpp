@@ -46,7 +46,8 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
     last_reconnect_attempted_(ACE_Time_Value::zero),
     transport_priority_(0),  // TRANSPORT_PRIORITY.value default value - 0.
     shutdown_(false),
-    id_(0)
+    id_(0),
+    reconnect_on_close_(false)
 {
   DBG_ENTRY_LVL("TcpConnection","TcpConnection",6);
 
@@ -295,8 +296,8 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
                this->remote_address_.get_port_number()));
   }
 
-
-  if (!this->send_strategy_.is_nil())
+  // Only call terminate_send() if we aren't reconnecting
+  if (!this->reconnect_on_close_ && !this->send_strategy_.is_nil())
     this->send_strategy_->terminate_send();
 
   this->disconnect();
@@ -304,6 +305,12 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
   if (!this->receive_strategy_.is_nil() && this->receive_strategy_->gracefully_disconnected())
   {
     this->link_->notify (DataLink::DISCONNECTED);
+  }
+
+  if (this->reconnect_on_close_) {
+    ReconnectOpType op = DO_RECONNECT;
+    this->reconnect_task_.add(op);
+    this->reconnect_on_close_ = false;
   }
 
   return 0;
@@ -667,6 +674,13 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
                  this->link_->get_transport_impl()->config()->name().c_str(),
                  this->remote_address_.get_host_addr(),
                  this->remote_address_.get_port_number()));
+      if (this->receive_strategy_->get_reactor()->register_handler
+          (this, ACE_Event_Handler::READ_MASK) == -1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "(%P|%t) ERROR: OpenDDS::DCPS::TcpConnection::active_reconnect_i() can't register with "
+                          "reactor %X %p\n", this, ACE_TEXT("register_handler")),
+                         -1);
+      }
       this->reconnect_state_ = RECONNECTED_STATE;
       this->link_->notify(DataLink::RECONNECTED);
       this->send_strategy_->resume_send();
@@ -850,8 +864,7 @@ OpenDDS::DCPS::TcpConnection::relink(bool do_suspend)
   if (do_suspend && !this->send_strategy_.is_nil())
     this->send_strategy_->suspend_send();
 
-  ReconnectOpType op = DO_RECONNECT;
-  this->reconnect_task_.add(op);
+  this->reconnect_on_close_ = true;
 }
 
 bool
