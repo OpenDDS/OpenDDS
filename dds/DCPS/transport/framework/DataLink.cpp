@@ -470,6 +470,14 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
                std::string(remote).c_str()));
   }
 
+  //let the specific class release its reservations
+  //done this way to prevent deadlock of holding pub_sub_maps_lock_
+  //then obtaining a specific class lock in release_reservations_i
+  //which reverses lock ordering of the active send logic of needing
+  //the specific class lock before obtaining the over arching DataLink
+  //pub_sub_maps_lock_
+  this->release_reservations_i(remote_id, local_id);
+
   // See if the remote_id is a publisher_id.
   ReceiveListenerSet_rch listener_set;
 
@@ -500,7 +508,6 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
         VDBG_LVL((LM_DEBUG,
                   ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
                   ACE_TEXT("the link has no reservations.\n")), 5);
-        this->release_reservations_i(remote_id, local_id);
 
         this->release_remote_i(remote_id);
         DataLinkSet_rch& rel_set = released_locals[local_id];
@@ -525,7 +532,6 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
         VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::release_reservations: the remote_id is a sub id.\n"), 5);
 
         // The remote_id is a subscriber_id.
-        this->release_reservations_i(remote_id, local_id);
 
         this->release_remote_subscriber(remote_id,
                                         local_id,
@@ -549,7 +555,6 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
                 ACE_TEXT("the remote_id is a pub id.\n")), 5);
 
       // The remote_id is a publisher_id.
-      this->release_reservations_i(remote_id, local_id);
 
       this->release_remote_publisher(remote_id,
                                      local_id,
@@ -565,7 +570,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
       }
 
     }
-  }
+  } //end lock_ scope
 
   VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataLink::release_reservations: ")

@@ -1,3 +1,11 @@
+Mon Dec  1 18:56:43 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Moved call to release_reservations_i forward in DataLink
+          release_reservations to mitigate deadlock between
+          RtpsDataLink::lock_ and DataLink::pub_sub_maps_lock_.
+
 Mon Dec  1 18:39:28 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
