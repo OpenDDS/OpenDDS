@@ -1,3 +1,24 @@
+Mon Dec  1 15:22:23 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Sedp used to associate with endpoints for participants that Spdp
+          had not discovered.  Now Sedp caches discovery messages until Spdp
+          has discovered the participant.  We need to determine if/when
+          cached messages should be discarded.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Removed magic numbers.  Added option to change data values.
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc_group2.ini:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Added test scenarios to check for distinct Sedp multicast groups
+          but a shared Sedp multicast group.
+
 Wed Nov 26 19:20:55 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:

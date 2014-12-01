@@ -354,6 +354,9 @@ private:
                    DCPS::GUID_tKeyLessThan> DiscoveredPublicationMap;
   typedef DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
   DiscoveredPublicationMap discovered_publications_;
+  typedef std::map<DCPS::RepoId, std::pair<DCPS::MessageId, DiscoveredWriterData>,
+                   DCPS::GUID_tKeyLessThan> DeferredPublicationMap;
+  DeferredPublicationMap deferred_publications_;  // Publications that Spdp has not discovered.
 
   struct DiscoveredSubscription {
     DiscoveredSubscription() : bit_ih_(DDS::HANDLE_NIL) {}
@@ -366,6 +369,9 @@ private:
                    DCPS::GUID_tKeyLessThan> DiscoveredSubscriptionMap;
   typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
   DiscoveredSubscriptionMap discovered_subscriptions_;
+  typedef std::map<DCPS::RepoId, std::pair<DCPS::MessageId, DiscoveredReaderData>,
+                   DCPS::GUID_tKeyLessThan> DeferredSubscriptionMap;
+  DeferredSubscriptionMap deferred_subscriptions_; // Subscriptions that Sedp has not discovered.
 
   void assign_bit_key(DiscoveredPublication& pub);
   void assign_bit_key(DiscoveredSubscription& sub);
