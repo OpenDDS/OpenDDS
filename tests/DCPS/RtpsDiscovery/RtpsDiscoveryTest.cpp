@@ -791,7 +791,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         // New scope.
         ACE_Arg_Shifter shifter (argc, argv);
         while (shifter.is_anything_left ()) {
-          const ACE_TCHAR* x = shifter.get_the_parameter ("-value_base");
+          const ACE_TCHAR* x = shifter.get_the_parameter (ACE_TEXT("-value_base"));
           if (x != NULL) {
             TestConfig::set (ACE_OS::atoi (x));
           }
