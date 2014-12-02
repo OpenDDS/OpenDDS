@@ -1,3 +1,27 @@
+Tue Dec  2 21:40:08 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added method to detect whether link currently has any publications
+          or subscriptions registered with it to determine if link is defunct
+          and can be released.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Added check to see if link is defunct before removing the link due
+          to asynchronous ability to reuse a datalink and add a pub or sub
+          to an existing link after release has begun.
+
+          Added debug logging to help trace asynchronous associations and
+          disassociation.
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Added debug logging to help trace asynchronous associations and
+          disassociation during connect_datalink.
+
 Mon Dec  1 18:56:43 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

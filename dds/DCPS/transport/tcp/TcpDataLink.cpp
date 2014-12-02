@@ -12,6 +12,7 @@
 #include "TcpInst.h"
 #include "TcpSendStrategy.h"
 #include "dds/DCPS/transport/framework/TransportControlElement.h"
+#include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/DataSampleHeader.h"
 #include "ace/Log_Msg.h"
 

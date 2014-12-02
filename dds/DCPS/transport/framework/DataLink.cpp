@@ -579,8 +579,17 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
            5);
 
   if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
+              ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
     this->impl_->release_datalink(this);
   }
+}
+
+bool
+DataLink::is_defunct()
+{
+  return this->pub_map_.size() + this->sub_map_.size() == 0;
 }
 
 void
