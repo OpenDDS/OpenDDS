@@ -1,5 +1,9 @@
 Wed Dec  3 14:04:04 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
+        * configure
+
+          updated for mavericks
+
         * dds/DCPS/transport/framework/DataLink.h:
         * dds/DCPS/transport/framework/DataLink.cpp:
         * dds/DCPS/transport/framework/TransportClient.cpp:
