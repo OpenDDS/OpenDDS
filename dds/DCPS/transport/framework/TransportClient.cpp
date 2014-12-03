@@ -53,7 +53,7 @@ TransportClient::~TransportClient()
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-    for (DataLinkSet::MapType::iterator iter = links_.map().begin();
+  for (DataLinkSet::MapType::iterator iter = links_.map().begin();
        iter != links_.map().end(); ++iter) {
 
     iter->second->remove_listener(repo_id_);
@@ -586,10 +586,7 @@ TransportClient::disassociate(const RepoId& peerId)
     link->release_reservations(peerId, repo_id_, released);
   }
 
-  //link could have had its release cancelled and put back into use
-  //so check if it is indeed defunct as well as check whether it was initially
-  //determined to be released in the set map
-  if (!released.empty()  && link->is_defunct()) {
+  if (!released.empty()) {
     // Datalink is no longer used for any remote peer
     link->remove_listener(repo_id_);
     if (DCPS_debug_level > 4) {

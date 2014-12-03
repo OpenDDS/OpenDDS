@@ -116,7 +116,7 @@ public:
   void release_reservations(RepoId          remote_id,
                             RepoId          local_id,
                             DataLinkSetMap& released_locals);
-  bool is_defunct();
+
   void schedule_delayed_release();
 
   const ACE_Time_Value& datalink_release_delay() const;

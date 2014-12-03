@@ -586,12 +586,6 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   }
 }
 
-bool
-DataLink::is_defunct()
-{
-  return this->pub_map_.size() + this->sub_map_.size() == 0;
-}
-
 void
 DataLink::schedule_delayed_release()
 {

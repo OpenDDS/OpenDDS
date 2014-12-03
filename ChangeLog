@@ -1,3 +1,12 @@
+Wed Dec  3 14:04:04 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          reverting code changes from svn commit 6630 leaving
+          additional debug logging in place.
+
 Tue Dec  2 21:40:08 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:
