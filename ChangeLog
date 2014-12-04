@@ -1,3 +1,13 @@
+Thu Dec 04 07:02:40 UTC 2014  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+
+          Added regular running of dispatching orb in info repo to handle
+          any pending connection cleanup.
+
 Wed Dec  3 14:04:04 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * configure

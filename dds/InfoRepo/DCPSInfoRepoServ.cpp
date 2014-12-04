@@ -55,6 +55,7 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 , lock_()
 , cond_(lock_)
 , shutdown_complete_(false)
+, dispatch_cleanup_delay_(30,0)
 {
   try {
     this->init();
@@ -142,6 +143,7 @@ InfoRepo::usage(const ACE_TCHAR* cmd)
              ACE_TEXT("    -FederationId <number> value for this repository\n")
              ACE_TEXT("    -FederateWith <ior> federate initially with object at <ior>\n")
              ACE_TEXT("    -ReassociateDelay <msec> delay between reassociations\n")
+             ACE_TEXT("    -DispatchingCheckDelay <sec> delay between checks for cleaning up dispatching connections.\n")
              ACE_TEXT("    -?\n")
              ACE_TEXT("\n"),
              cmd));
@@ -186,6 +188,11 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
 
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0) {
       TURN_ON_VERBOSE_DEBUG;
+      arg_shifter.consume_arg();
+
+    } else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-DispatchingCheckDelay"))) != 0) {
+      long sec = ACE_OS::atoi(current_arg);
+      this->dispatch_cleanup_delay_.sec(sec);
       arg_shifter.consume_arg();
 
     }
@@ -305,10 +312,18 @@ InfoRepo::init()
 
   // Initialize reassociation.
   if (this->reassociate_delay_ != ACE_Time_Value::zero &&
-      !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
+     !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                ACE_TEXT("Unable to initialize reassociation.\n")));
     throw InitError("Unable to initialize reassociation.");
+  }
+
+  // Initialize dispatch checking
+  if (this->dispatch_cleanup_delay_ != ACE_Time_Value::zero &&
+     !this->info_servant_->init_dispatchChecking(this->dispatch_cleanup_delay_)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+               ACE_TEXT("Unable to initialize Dispatch checking.\n")));
+    throw InitError("Unable to initialize dispatch checking.");
   }
 
   // Fire up the federator.

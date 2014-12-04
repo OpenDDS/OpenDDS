@@ -75,6 +75,8 @@ private:
   ACE_Thread_Mutex lock_;
   ACE_Condition_Thread_Mutex cond_;
   bool shutdown_complete_;
+
+  ACE_Time_Value dispatch_cleanup_delay_;
 };
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo_Shutdown :
