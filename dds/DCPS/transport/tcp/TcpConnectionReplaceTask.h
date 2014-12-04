@@ -30,8 +30,8 @@ class TcpTransport;
  *
  *  This task is dedicated to check if the incoming connections are re-established
  *  connection from the remote. This would resolve the deadlock problem between the
- *  reactor thread (calling TcpTransport::passive_connction()) and the orb
- *  thread (calling TcpTransport::make_passive_connction()). The reactor
+ *  reactor thread (calling TcpTransport::passive_connection()) and the orb
+ *  thread (calling TcpTransport::make_passive_connection()). The reactor
  *  thread will enqueue the new connection to this task and let this task dequeue
  *  and check the connection. This task handles all connections associated with
  *  a TransportImpl object.

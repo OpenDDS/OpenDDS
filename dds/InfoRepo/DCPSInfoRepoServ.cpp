@@ -50,11 +50,13 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 #endif
 , resurrect_(true)
 , finalized_(false)
+, servant_finalized_(false)
 , federator_(this->federatorConfig_)
 , federatorConfig_(argc, argv)
 , lock_()
 , cond_(lock_)
 , shutdown_complete_(false)
+, dispatch_cleanup_delay_(30,0)
 {
   try {
     this->init();
@@ -87,6 +89,14 @@ InfoRepo::finalize()
     return;
   }
 
+  if (!this->servant_finalized_) {
+    // reached if the ImR caused the ORB to shut down,
+    // which bypasses InfoRepo::handle_exception()
+    this->info_servant_->finalize();
+    this->federator_.finalize();
+    this->servant_finalized_ = true;
+  }
+
   TheServiceParticipant->shutdown();
 
   if (!CORBA::is_nil(this->orb_)) {
@@ -102,6 +112,7 @@ InfoRepo::handle_exception(ACE_HANDLE /* fd */)
   // these should occur before ORB::shutdown() since they use the ORB/reactor
   this->info_servant_->finalize();
   this->federator_.finalize();
+  this->servant_finalized_ = true;
 
   this->orb_->shutdown(true);
   return 0;
@@ -142,6 +153,7 @@ InfoRepo::usage(const ACE_TCHAR* cmd)
              ACE_TEXT("    -FederationId <number> value for this repository\n")
              ACE_TEXT("    -FederateWith <ior> federate initially with object at <ior>\n")
              ACE_TEXT("    -ReassociateDelay <msec> delay between reassociations\n")
+             ACE_TEXT("    -DispatchingCheckDelay <sec> delay between checks for cleaning up dispatching connections.\n")
              ACE_TEXT("    -?\n")
              ACE_TEXT("\n"),
              cmd));
@@ -188,6 +200,11 @@ InfoRepo::parse_args(int argc, ACE_TCHAR *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
 
+    } else if ((current_arg = arg_shifter.get_the_parameter(ACE_TEXT("-DispatchingCheckDelay"))) != 0) {
+      long sec = ACE_OS::atoi(current_arg);
+      this->dispatch_cleanup_delay_.sec(sec);
+      arg_shifter.consume_arg();
+
     }
 
     // The '-?' option
@@ -214,10 +231,9 @@ InfoRepo::init()
   this->info_servant_ =
     new TAO_DDS_DCPSInfo_i(this->orb_, this->resurrect_, this,
                            this->federatorConfig_.federationId());
-  PortableServer::ServantBase_var servant(this->info_servant_);
 
   // Install the DCPSInfo_i into the Federator::Manager.
-  this->federator_.info() = this->info_servant_;
+  this->federator_.info() = this->info_servant_.in();
 
   CORBA::Object_var obj =
     this->orb_->resolve_initial_references("RootPOA");
@@ -242,7 +258,7 @@ InfoRepo::init()
 
   PortableServer::ObjectId_var oid =
     PortableServer::string_to_ObjectId("InfoRepo");
-  info_poa->activate_object_with_id(oid, this->info_servant_);
+  info_poa->activate_object_with_id(oid, this->info_servant_.in());
   obj = info_poa->id_to_reference(oid);
   // the object is created locally, so it is safe to do an
   // _unchecked_narrow, this was needed to prevent an exception
@@ -305,10 +321,18 @@ InfoRepo::init()
 
   // Initialize reassociation.
   if (this->reassociate_delay_ != ACE_Time_Value::zero &&
-      !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
+     !this->info_servant_->init_reassociation(this->reassociate_delay_)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
                ACE_TEXT("Unable to initialize reassociation.\n")));
     throw InitError("Unable to initialize reassociation.");
+  }
+
+  // Initialize dispatch checking
+  if (this->dispatch_cleanup_delay_ != ACE_Time_Value::zero &&
+     !this->info_servant_->init_dispatchChecking(this->dispatch_cleanup_delay_)) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DCPSInfoRepo::init: ")
+               ACE_TEXT("Unable to initialize Dispatch checking.\n")));
+    throw InitError("Unable to initialize dispatch checking.");
   }
 
   // Fire up the federator.

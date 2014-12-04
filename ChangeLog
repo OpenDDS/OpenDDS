@@ -1,3 +1,170 @@
+Thu Dec  4 20:30:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Made InfoRepo shutdown compatible with TAO ImR.
+          The ImR can be commanded to shut down the ORB which will
+          not run any of the InfoRepo's usual pre-ORB::shutdown() code.
+
+Thu Dec  4 16:37:51 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed locking order in transport_assoc_done to respect the
+          established order of sample_lock_ before writers_lock_.
+
+Thu Dec 04 07:02:40 UTC 2014  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.h:
+
+          Added regular running of dispatching orb in info repo to handle
+          any pending connection cleanup.
+
+Wed Dec  3 14:04:04 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * configure
+
+          updated for mavericks
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          reverting code changes from svn commit 6630 leaving
+          additional debug logging in place.
+
+Tue Dec  2 21:40:08 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added method to detect whether link currently has any publications
+          or subscriptions registered with it to determine if link is defunct
+          and can be released.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Added check to see if link is defunct before removing the link due
+          to asynchronous ability to reuse a datalink and add a pub or sub
+          to an existing link after release has begun.
+
+          Added debug logging to help trace asynchronous associations and
+          disassociation.
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Added debug logging to help trace asynchronous associations and
+          disassociation during connect_datalink.
+
+Mon Dec  1 18:56:43 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Moved call to release_reservations_i forward in DataLink
+          release_reservations to mitigate deadlock between
+          RtpsDataLink::lock_ and DataLink::pub_sub_maps_lock_.
+
+Mon Dec  1 18:39:28 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Wrapped string literal with ACE_TEXT for wide-character builds.
+
+Mon Dec  1 15:22:23 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Sedp used to associate with endpoints for participants that Spdp
+          had not discovered.  Now Sedp caches discovery messages until Spdp
+          has discovered the participant.  We need to determine if/when
+          cached messages should be discarded.
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Removed magic numbers.  Added option to change data values.
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc_group2.ini:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Added test scenarios to check for distinct Sedp multicast groups
+          but a shared Sedp multicast group.
+
+Wed Nov 26 19:20:55 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/transport/tcp/TcpConnectionReplaceTask.h:
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Fixed spelling.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Added ability for passive side to reuse an existing
+          connection when receiving a passive connect.  This
+          occurs when the active side recognizes the datalink
+          has been released and tries to make a new connection
+          to the passive side before discovery has propagated
+          the release to the passive side.  Passive side will
+          now reuse the datalink but properly associate it with the
+          reused connection.
+
+          find_datalink_i now properly handles case of moving
+          a pending release link back into the active links.
+
+          Fixed an issue with the interleaving of cancel_release
+          and schedule_delayed_release when releasing the datalink
+          from TcpTransport.  Added intermediate state indicators:
+          scheduling_release_, cancelled_release_, and
+          scheduled_release_ to manage the interleaving correctly.
+
+Wed Nov 26 19:02:26 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/auto_run_tests.pl:
+
+          Log start and stop time of each test.
+
+Wed Nov 26 15:50:09 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpInst.h:
+        * dds/DCPS/transport/tcp/TcpInst.cpp:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Add a public_address config option for tcp.  This
+          option allows a transport to explicitly specify
+          an address that is used as the publicly advertised
+          address (during discovery) for that instance.
+          When not specified, the local_address is used,
+          preserving the current behavior.
+
+          This option is used in some reconnect testing but
+          should also be useful for firewall traversal and
+          other situations.
+
+Mon Nov 24 17:24:12 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Corrected handling of find_datalink_i return value
+          in how it's presented to the framework.
+
+        * tests/DCPS/Instances/SubDriver.h:
+
+          Fixed a (spurious) compiler warning.
+
 Thu Nov 20 20:09:46 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/Sedp.cpp:

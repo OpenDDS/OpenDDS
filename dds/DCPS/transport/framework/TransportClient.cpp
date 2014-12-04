@@ -53,7 +53,7 @@ TransportClient::~TransportClient()
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-    for (DataLinkSet::MapType::iterator iter = links_.map().begin();
+  for (DataLinkSet::MapType::iterator iter = links_.map().begin();
        iter != links_.map().end(); ++iter) {
 
     iter->second->remove_listener(repo_id_);
@@ -447,6 +447,13 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   //Does changing this from a reference to a local affect anything going forward?
   RepoId remote_id(remote_id_ref);
 
+  GuidConverter peerId_conv(remote_id);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
+            "TransportClient(%@) using datalink[%@] from %C\n",
+            this,
+            link.in(),
+            std::string(peerId_conv).c_str()), 5);
+
   PendingMap::iterator iter = pending_.find(remote_id);
 
   if (iter == pending_.end()) {
@@ -466,6 +473,11 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
 
   } else { // link is ready to use
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
+              "TransportClient(%@) about to add_link[%@] to remote: %C\n",
+              this,
+              link.in(),
+              std::string(peerId_conv).c_str()), 5);
 
     add_link(link, remote_id);
     ok = true;
@@ -564,12 +576,25 @@ TransportClient::disassociate(const RepoId& peerId)
   {
     //can't call release_reservations while holding lock due to possible reactor deadlock
     ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
+    if (DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
+                 ACE_TEXT("about to release_reservations for link[%@] \n"),
+                 link.in()));
+    }
+
     link->release_reservations(peerId, repo_id_, released);
   }
 
   if (!released.empty()) {
     // Datalink is no longer used for any remote peer
     link->remove_listener(repo_id_);
+    if (DCPS_debug_level > 4) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
+                 ACE_TEXT("about to remove_link[%@] from links_\n"),
+                 link.in()));
+    }
 
     links_.remove_link(link);
   }

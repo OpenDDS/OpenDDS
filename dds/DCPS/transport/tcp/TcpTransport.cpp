@@ -85,16 +85,19 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
-      return AcceptConnectResult(link._retn());
+      VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink found datalink link[%@]\n", link.in()), 2);
+      return link.is_nil()
+        ? AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS)
+        : AcceptConnectResult(link._retn());
     }
 
     link = new TcpDataLink(key.address(), this, attribs.priority_,
                            key.is_loopback(), true /*active*/);
-
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink create new link[%@]\n", link.in()), 2);
     if (links_.bind(key, link) != 0 /*OK*/) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
-                 "Unable to bind new TcpDataLink to "
-                 "TcpTransport in links_ map.\n"));
+                 "Unable to bind new TcpDataLink[%@] to "
+                 "TcpTransport in links_ map.\n", link.in()));
       return AcceptConnectResult();
     }
   }
@@ -159,21 +162,24 @@ TcpTransport::async_connect_failed(const PriorityKey& key)
 
 }
 
+//Called with links_lock_ held
 bool
 TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
                               TransportClient* client, const RepoId& remote_id)
 {
+  DBG_ENTRY_LVL("TcpTransport", "find_datalink_i", 6);
+
   if (links_.find(key, link) == 0 /*OK*/) {
     if (!link->add_on_start_callback(client, remote_id)) {
       VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-                ACE_TEXT("link found, already started.\n")), 2);
+                ACE_TEXT("link[%@] found, already started.\n"), link.in()), 2);
       // Since the link was already started, we won't get an "on start"
       // callback, and the link is immediately usable.
       return true;
     }
 
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-              ACE_TEXT("link found, pending.\n")), 2);
+              ACE_TEXT("link[%@] found, add to pending connections.\n"), link.in()), 2);
     add_pending_connection(client, link.in());
     link = 0; // don't return link to TransportClient
     return true;
@@ -185,11 +191,15 @@ TcpTransport::find_datalink_i(const PriorityKey& key, TcpDataLink_rch& link,
       if (pending_release_links_.unbind(key, link) == 0 /*OK*/
           && links_.bind(key, link) == 0 /*OK*/) {
         VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
-                  ACE_TEXT("link from pending release list.\n")), 2);
+                  ACE_TEXT("found link[%@] in pending release list, cancelled release and moved back to links_.\n"), link.in()), 2);
         return true;
       }
+      VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+                ACE_TEXT("found link[%@] in pending release list but was unable to shift back to links_.\n"), link.in()), 2);
+    } else {
+      VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::find_datalink_i ")
+                ACE_TEXT("found link[%@] in pending release list but was unable to cancel release.\n"), link.in()), 2);
     }
-
     link = 0; // don't return link to TransportClient
     return false;
   }
@@ -224,11 +234,11 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     GuardType guard(links_lock_);
 
     if (find_datalink_i(key, link, client, remote.repo_id_)) {
-
-      return AcceptConnectResult(link._retn());
+      return link.is_nil()
+        ? AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS)
+        : AcceptConnectResult(link._retn());
 
     } else {
-
       link = new TcpDataLink(key.address(), this, key.priority(),
                              key.is_loopback(), key.is_active());
 
@@ -478,11 +488,11 @@ TcpTransport::connection_info_i(TransportLocator& local_info) const
 {
   DBG_ENTRY_LVL("TcpTransport", "connection_info_i", 6);
 
-  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport local address str %C\n",
-            this->tcp_config_->local_address_str_.c_str()), 2);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
+            this->tcp_config_->get_public_address().c_str()), 2);
 
-  //Always use local address string to provide to DCPSInfoRepo for advertisement.
-  NetworkAddress network_order_address(this->tcp_config_->local_address_str_);
+  // Get the public address string from the inst (usually the local address)
+  NetworkAddress network_order_address(this->tcp_config_->get_public_address());
 
   ACE_OutputCDR cdr;
   cdr << network_order_address;
@@ -528,7 +538,7 @@ TcpTransport::release_datalink(DataLink* link)
       tcp_link->is_active());
 
     VDBG_LVL((LM_DEBUG,
-              "(%P|%t) TcpTransport::release_datalink link %@ PriorityKey "
+              "(%P|%t) TcpTransport::release_datalink link[%@] PriorityKey "
               "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
               link,
               tcp_link->transport_priority(),
@@ -538,10 +548,7 @@ TcpTransport::release_datalink(DataLink* link)
               (int)tcp_link->is_active()), 2);
 
     if (this->links_.unbind(key, released_link) != 0) {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: Unable to locate DataLink in order to "
-                 "release and it.\n"));
-
+      //No op
     } else if (link->datalink_release_delay() > ACE_Time_Value::zero) {
 
       VDBG_LVL((LM_DEBUG,
@@ -556,20 +563,21 @@ TcpTransport::release_datalink(DataLink* link)
       switch (this->pending_release_links_.bind(key, released_link)) {
       case -1:
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: Unable to bind released TcpDataLink to "
-                   "pending_release_links_ map: %p\n", ACE_TEXT("bind")));
+                   "(%P|%t) ERROR: Unable to bind released TcpDataLink[%@] to "
+                   "pending_release_links_ map: %p\n", released_link.in(), ACE_TEXT("bind")));
         linkAction = StopLink;
         break;
 
       case 1:
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: Unable to bind released TcpDataLink to "
-                   "pending_release_links_ map: already bound\n"));
+                   "(%P|%t) ERROR: Unable to bind released TcpDataLink[%@] to "
+                   "pending_release_links_ map: already bound\n", released_link.in()));
         linkAction = StopLink;
         break;
 
       case 0:
         linkAction = ScheduleLinkRelease;
+        link->set_scheduling_release(true);
         break;
 
       default:
@@ -602,7 +610,8 @@ TcpTransport::release_datalink(DataLink* link)
     buffer << *link;
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpTransport::release_datalink() - ")
-               ACE_TEXT("link with priority %d released.\n%C"),
+               ACE_TEXT("link[%@] with priority %d released.\n%C"),
+               link,
                link->transport_priority(),
                buffer.str().c_str()));
   }
@@ -675,7 +684,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   }
 
   connections_[key] = connection;
-  VDBG_LVL((LM_DEBUG, "(%P|%t) # of aftr connections: %d\n", connections_.size()), 5);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) # of after connections: %d\n", connections_.size()), 5);
 
   con_checker_->add(connection);
 }
@@ -686,6 +695,10 @@ TcpTransport::connect_tcp_datalink(const TcpDataLink_rch& link,
                                    const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpTransport", "connect_tcp_datalink", 6);
+
+  if (link->reuse_existing_connection(connection) == 0) {
+    return 0;
+  }
 
   ++last_link_;
 

@@ -192,13 +192,6 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         pdata.leaseDuration.seconds));
     }
 
-    // notify Sedp of association
-    sedp_.associate(pdata);
-
-    // Since we've just seen a new participant, let's send out our
-    // own announcement, so they don't have to wait.
-    this->tport_->write_i();
-
     // add a new participant
     participants_[guid] = DiscoveredParticipant(pdata, time);
     DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
@@ -209,6 +202,16 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         bit->store_synthetic_data(pdata.ddsParticipantData,
                                   DDS::NEW_VIEW_STATE);
     }
+
+    // notify Sedp of association
+    // Sedp may call has_discovered_participant.
+    // This is what the participant must be added before this call to associate.
+    sedp_.associate(pdata);
+
+    // Since we've just seen a new participant, let's send out our
+    // own announcement, so they don't have to wait.
+    this->tport_->write_i();
+
     // Iterator is no longer valid
     iter = participants_.find(guid);
     if (iter != participants_.end()) {

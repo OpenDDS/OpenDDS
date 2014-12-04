@@ -90,7 +90,7 @@ class SubDriver
                    ACE_TEXT("(%P|%t) Sub Creating Reader\n")));
       }
 
-      SetDataReaderQosUseTopicQos data_reader_qos;
+      SetDataReaderQosUseTopicQos data_reader_qos = {};
 
       DDS::DataReader_var reader = topic_facade.reader(listener,data_reader_qos);
 

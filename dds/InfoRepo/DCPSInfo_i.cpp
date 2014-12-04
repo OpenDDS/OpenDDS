@@ -43,6 +43,7 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , reincarnate_(reincarnate)
   , shutdown_(shutdown)
   , reassociate_timer_id_(-1)
+  , dispatch_check_timer_id_(-1)
 {
   int argc = 0;
   char** no_argv = 0;
@@ -56,10 +57,21 @@ TAO_DDS_DCPSInfo_i::~TAO_DDS_DCPSInfo_i()
 
 int
 TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
-                                   const void* /*arg*/)
+                                   const void* arg)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
+  if (arg == this) {
+    if ( !CORBA::is_nil(this->dispatchingOrb_.in())){
+      if (this->dispatchingOrb_->work_pending())
+      {
+        // Ten microseconds
+        ACE_Time_Value small(0,10);
+        this->dispatchingOrb_->perform_work(small);
+      }
+    }
+  }
+  else {
   // NOTE: This is a purposefully naive approach to addressing defunct
   // associations.  In the future, it may be worthwhile to introduce a
   // callback model to fix the heinous runtime cost below:
@@ -82,6 +94,7 @@ TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
         pub->second->reevaluate_defunct_associations();
       }
     }
+  }
   }
 
   return 0;
@@ -2294,6 +2307,17 @@ TAO_DDS_DCPSInfo_i::init_reassociation(const ACE_Time_Value& delay)
   return this->reassociate_timer_id_ != -1;
 }
 
+bool
+TAO_DDS_DCPSInfo_i::init_dispatchChecking(const ACE_Time_Value& delay)
+{
+  if (this->dispatch_check_timer_id_ != -1) return false;  // already scheduled
+
+  ACE_Reactor* reactor = this->orb_->orb_core()->reactor();
+
+  this->dispatch_check_timer_id_ = reactor->schedule_timer(this, this, delay, delay);
+  return this->dispatch_check_timer_id_ != -1;
+}
+
 void
 TAO_DDS_DCPSInfo_i::finalize()
 {
@@ -2302,6 +2326,13 @@ TAO_DDS_DCPSInfo_i::finalize()
 
     reactor->cancel_timer(this->reassociate_timer_id_);
     this->reassociate_timer_id_ = -1;
+  }
+
+  if (dispatch_check_timer_id_ != -1) {
+    ACE_Reactor* reactor = this->orb_->orb_core()->reactor();
+
+    reactor->cancel_timer(this->dispatch_check_timer_id_);
+    this->dispatch_check_timer_id_ = -1;
   }
 }
 

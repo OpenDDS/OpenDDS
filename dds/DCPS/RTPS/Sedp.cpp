@@ -541,6 +541,22 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
   }
   //FUTURE: if/when topic propagation is supported, add it here
 
+  // Process deferred publications and subscriptions.
+  for (DeferredSubscriptionMap::iterator pos = sedp_->deferred_subscriptions_.lower_bound (proto.remote_id_),
+         limit = sedp_->deferred_subscriptions_.upper_bound (proto.remote_id_);
+       pos != limit;
+       /* Increment in body. */) {
+    sedp_->data_received (pos->second.first, pos->second.second);
+    sedp_->deferred_subscriptions_.erase (pos++);
+  }
+  for (DeferredPublicationMap::iterator pos = sedp_->deferred_publications_.lower_bound (proto.remote_id_),
+         limit = sedp_->deferred_publications_.upper_bound (proto.remote_id_);
+       pos != limit;
+       /* Increment in body. */) {
+    sedp_->data_received (pos->second.first, pos->second.second);
+    sedp_->deferred_publications_.erase (pos++);
+  }
+
   ACE_GUARD(ACE_Thread_Mutex, g, sedp_->lock_);
   if (spdp_->shutting_down()) { return; }
 
@@ -1160,6 +1176,11 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
+  if (!spdp_.has_discovered_participant (guid_participant)) {
+    deferred_publications_[guid] = std::make_pair (message_id, wdata);
+    return;
+  }
+
   std::string topic_name;
   // Find the publication  - iterator valid only as long as we hold the lock
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
@@ -1309,6 +1330,11 @@ Sedp::data_received(DCPS::MessageId message_id,
   if (ignoring(guid)
       || ignoring(guid_participant)
       || ignoring(rdata.ddsSubscriptionData.topic_name)) {
+    return;
+  }
+
+  if (!spdp_.has_discovered_participant (guid_participant)) {
+    deferred_subscriptions_[guid] = std::make_pair (message_id, rdata);
     return;
   }
 

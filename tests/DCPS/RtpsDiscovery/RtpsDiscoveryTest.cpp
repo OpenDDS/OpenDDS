@@ -17,6 +17,73 @@
 #endif
 
 #include "model/Sync.h"
+#include "ace/Arg_Shifter.h"
+
+class TestConfig {
+public:
+  static void set(int base) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("TestConfig::set base=%d\n"), base));
+    topic_data_ = base;
+    topic_data2_ = base + 1;
+    participant_user_data_ = base + 2;
+    participant_user_data2_ = base + 3;
+    data_writer_user_data_ = base + 4;
+    data_writer_user_data2_ = base + 5;
+    data_reader_user_data_ = base + 6;
+    data_reader_user_data2_ = base + 7;
+  }
+
+  static int TOPIC_DATA() {
+    return topic_data_;
+  }
+
+  static int TOPIC_DATA2() {
+    return topic_data2_;
+  }
+
+  static int PARTICIPANT_USER_DATA() {
+    return participant_user_data_;
+  }
+
+  static int PARTICIPANT_USER_DATA2() {
+    return participant_user_data2_;
+  }
+
+  static int DATA_WRITER_USER_DATA() {
+    return data_writer_user_data_;
+  }
+
+  static int DATA_WRITER_USER_DATA2() {
+    return data_writer_user_data2_;
+  }
+
+  static int DATA_READER_USER_DATA() {
+    return data_reader_user_data_;
+  }
+
+  static int DATA_READER_USER_DATA2() {
+    return data_reader_user_data2_;
+  }
+
+private:
+  static int topic_data_;
+  static int topic_data2_;
+  static int participant_user_data_;
+  static int participant_user_data2_;
+  static int data_writer_user_data_;
+  static int data_writer_user_data2_;
+  static int data_reader_user_data_;
+  static int data_reader_user_data2_;
+};
+
+int TestConfig::topic_data_ = 1;
+int TestConfig::topic_data2_ = 2;
+int TestConfig::participant_user_data_ = 3;
+int TestConfig::participant_user_data2_ = 4;
+int TestConfig::data_writer_user_data_ = 5;
+int TestConfig::data_writer_user_data2_ = 6;
+int TestConfig::data_reader_user_data_ = 7;
+int TestConfig::data_reader_user_data2_ = 8;
 
 using namespace DDS;
 using OpenDDS::DCPS::TransportConfig_rch;
@@ -128,7 +195,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
 
   TopicQos topic_qos;
   dp2->get_default_topic_qos(topic_qos);
-  set_qos(topic_qos.topic_data.value, 1);
+  set_qos(topic_qos.topic_data.value, TestConfig::TOPIC_DATA());
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp2->create_topic("Movie Discussion List",
                                       type_name,
@@ -152,7 +219,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
 
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
-  set_qos(dw_qos.user_data.value, 2);
+  set_qos(dw_qos.user_data.value, TestConfig::DATA_WRITER_USER_DATA());
 
   DataWriter_var dw = pub->create_datawriter(topic,
                                              dw_qos,
@@ -224,7 +291,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
 
   TopicQos topic_qos;
   dp->get_default_topic_qos(topic_qos);
-  set_qos(topic_qos.topic_data.value, 1);
+  set_qos(topic_qos.topic_data.value, TestConfig::TOPIC_DATA());
   CORBA::String_var type_name = ts->get_type_name();
   Topic_var topic = dp->create_topic("Movie Discussion List",
                                      type_name,
@@ -249,7 +316,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
-  set_qos(dr_qos.user_data.value, 4);
+  set_qos(dr_qos.user_data.value, TestConfig::DATA_READER_USER_DATA());
 
   DataReader_var dr = sub->create_datareader(topic,
                                              dr_qos,
@@ -535,7 +602,7 @@ bool run_test(DomainParticipant_var& dp,
 
   Subscriber_var bit_sub = dp->get_builtin_subscriber();
 
-  if (!read_participant_bit(bit_sub, 128)) {
+  if (!read_participant_bit(bit_sub, TestConfig::PARTICIPANT_USER_DATA())) {
     return false;
   }
 
@@ -555,7 +622,7 @@ bool run_test(DomainParticipant_var& dp,
     return false;
   }
 
-  if (!read_publication_bit(bit_sub, pub_ih, 2, 1)) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
     return false;
   }
 
@@ -564,7 +631,7 @@ bool run_test(DomainParticipant_var& dp,
     ACE_DEBUG((LM_DEBUG, "ERROR: could not create Data Reader (participant 1)\n"));
     return false;
   }
-  if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, 4, 1)) {
+  if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, TestConfig::DATA_READER_USER_DATA(), TestConfig::TOPIC_DATA())) {
     return false;
   }
 
@@ -582,7 +649,7 @@ bool run_test(DomainParticipant_var& dp,
   wait_match(dr, 1);
 
   // Get the new instance handle as pub_ih
-  if (!read_publication_bit(bit_sub, pub_ih, 2, 1)) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
     return false;
   }
 
@@ -631,32 +698,32 @@ bool run_test(DomainParticipant_var& dp,
   {
     DomainParticipantQos dp_qos;
     dp2->get_qos(dp_qos);
-    set_qos(dp_qos.user_data.value, 8);
+    set_qos(dp_qos.user_data.value, TestConfig::PARTICIPANT_USER_DATA2());
     dp2->set_qos(dp_qos);
   }
   // Change dw qos
   {
     DataWriterQos dw_qos;
     dw->get_qos(dw_qos);
-    set_qos(dw_qos.user_data.value, 16);
+    set_qos(dw_qos.user_data.value, TestConfig::DATA_WRITER_USER_DATA2());
     dw->set_qos(dw_qos);
   }
   // Change dr qos
   {
     DataReaderQos dr_qos;
     dr->get_qos(dr_qos);
-    set_qos(dr_qos.user_data.value, 32);
+    set_qos(dr_qos.user_data.value, TestConfig::DATA_READER_USER_DATA2());
     dr->set_qos(dr_qos);
   }
   // Wait for propagation
   ACE_OS::sleep(3);
-  if (!read_participant_bit(bit_sub, 8)) {
+  if (!read_participant_bit(bit_sub, TestConfig::PARTICIPANT_USER_DATA2())) {
     return false;
   }
-  if (!read_publication_bit(bit_sub, ig_ih, 16, 1)) {
+  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
     return false;
   }
-  if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, 32, 1)) {
+  if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
     return false;
   }
 
@@ -664,34 +731,34 @@ bool run_test(DomainParticipant_var& dp,
   Topic_var topic = dw->get_topic();
   TopicQos topic_qos;
   topic->get_qos(topic_qos);
-  set_qos(topic_qos.topic_data.value, 64);
+  set_qos(topic_qos.topic_data.value, TestConfig::TOPIC_DATA2());
   topic->set_qos(topic_qos);
 
   // Set dr topic qos
   TopicDescription_var topic_desc = dr->get_topicdescription();
   topic = Topic::_narrow(topic_desc);
   topic->get_qos(topic_qos);
-  set_qos(topic_qos.topic_data.value, 64);
+  set_qos(topic_qos.topic_data.value, TestConfig::TOPIC_DATA2());
   topic->set_qos(topic_qos);
 
   // Wait for propagation
   ACE_OS::sleep(3);
-  if (!read_publication_bit(bit_sub, ig_ih, 16, 64)) {
+  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
     return false;
   }
-  if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, 32, 64)) {
+  if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
     return false;
   }
 
   // Test ignore
   dp->ignore_publication(pub_ih);
-  if (!read_publication_bit(bit_sub, pub_ih, 16, 64, 0)) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 0)) {
     ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("Could not ignore publication\n")), false);
   }
 
   dp2->ignore_subscription(sub_ih);
-  if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, 32, 64, 0)) {
+  if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 0)) {
     ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("Could not ignore subscription\n")), false);
   }
@@ -720,9 +787,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_DEBUG((LM_DEBUG, "ERROR: could not create Domain Participant 1\n"));
 
     } else {
+      {
+        // New scope.
+        ACE_Arg_Shifter shifter (argc, argv);
+        while (shifter.is_anything_left ()) {
+          const ACE_TCHAR* x = shifter.get_the_parameter (ACE_TEXT("-value_base"));
+          if (x != NULL) {
+            TestConfig::set (ACE_OS::atoi (x));
+          }
+
+          shifter.consume_arg ();
+        }
+      }
+
       DomainParticipantQos dp_qos;
       dpf->get_default_participant_qos(dp_qos);
-      set_qos(dp_qos.user_data.value, 128);
+      set_qos(dp_qos.user_data.value, TestConfig::PARTICIPANT_USER_DATA());
       dp2 = dpf->create_participant(9, dp_qos, 0, DEFAULT_STATUS_MASK);
 
       if (!dp2) {

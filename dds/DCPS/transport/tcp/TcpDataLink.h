@@ -40,6 +40,7 @@ public:
               const TransportSendStrategy_rch& send_strategy,
               const TransportStrategy_rch& receive_strategy);
 
+  int reuse_existing_connection(const TcpConnection_rch& connection);
   int reconnect(TcpConnection* connection);
 
   TcpConnection_rch get_connection();

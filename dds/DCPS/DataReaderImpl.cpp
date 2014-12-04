@@ -425,14 +425,14 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     // Check if any publications have already sent a REQUEST_ACK message.
     {
-
+      //locking order should be sample_lock_ before writers_lock_
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
 
       WriterMapType::iterator where = writers_.find(remote_id);
       if (where != writers_.end()) {
 
         const ACE_Time_Value now = ACE_OS::gettimeofday();
-        ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
         if (where->second->should_ack(now)) {
 
           const SequenceNumber sequence = where->second->ack_sequence();

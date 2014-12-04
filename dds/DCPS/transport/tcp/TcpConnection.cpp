@@ -481,12 +481,12 @@ OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
   set_sock_options(tcp_config_.in());
 
   // In order to complete the connection establishment from the active
-  // side, we need to tell the remote side about our local_address.
+  // side, we need to tell the remote side about our public address.
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  ACE_UINT32 len =
-    static_cast<ACE_UINT32>(tcp_config_->local_address_str_.length()) + 1;
+  std::string address = tcp_config_->get_public_address();
+  ACE_UINT32 len = static_cast<ACE_UINT32>(address.length()) + 1;
 
   ACE_UINT32 nlen = htonl(len);
 
@@ -500,8 +500,7 @@ OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
                      -1);
   }
 
-  if (this->peer().send_n(tcp_config_->local_address_str_.c_str(),
-                          len)  == -1) {
+  if (this->peer().send_n(address.c_str(), len)  == -1) {
     // TBD later - Anything we are supposed to do to close the connection.
     ACE_ERROR_RETURN((LM_ERROR,
                       "(%P|%t) ERROR: Unable to send our address to "
@@ -886,7 +885,7 @@ OpenDDS::DCPS::TcpConnection::transfer(TcpConnection* connection)
 
 }
 
-/// This function is called when the backpresure occurs and timed out after
+/// This function is called when the backpressure occurs and timed out after
 /// "max_output_pause_period". The lost connection notification should be sent
 /// and the connection needs be closed since we declared it as a "lost"
 /// connection.

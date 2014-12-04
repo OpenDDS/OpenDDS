@@ -17,6 +17,7 @@
 #include "ace/Condition_Thread_Mutex.h"
 
 #include "tao/ORB_Core.h"
+#include "tao/PortableServer/Servant_var.h"
 
 #include "DCPSInfoRepoServ_Export.h"
 #include "FederatorConfig.h"
@@ -65,16 +66,19 @@ private:
 
   /// Flag to indicate that finalization has already occurred.
   bool finalized_;
+  bool servant_finalized_;
 
   /// Repository Federation behaviors
   OpenDDS::Federator::ManagerImpl federator_;
   OpenDDS::Federator::Config      federatorConfig_;
 
-  TAO_DDS_DCPSInfo_i* info_servant_;
+  PortableServer::Servant_var<TAO_DDS_DCPSInfo_i> info_servant_;
 
   ACE_Thread_Mutex lock_;
   ACE_Condition_Thread_Mutex cond_;
   bool shutdown_complete_;
+
+  ACE_Time_Value dispatch_cleanup_delay_;
 };
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo_Shutdown :
