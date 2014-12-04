@@ -16,11 +16,12 @@ project {
       $(DDS_ROOT)/dds/idl/HTemplate.txt $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_flags = commandflags
     inputext              = .idl
-    source_outputext      = TypeSupportImpl.cpp
-    header_outputext      = TypeSupportImpl.h
-//  The following is now handled by $DDS_ROOT/MPC/modules/TYPESUPPORTHelper.pm
-//  because MPC can't currently have both a Helper.pm and generic_output:
-//    generic_outputext     = TypeSupport.idl
+    pre_extension         = TypeSupportImpl
+    source_outputext      = .cpp
+    header_outputext      = .h
+
+    // See $DDS_ROOT/MPC/modules/TYPESUPPORTHelper.pm for .idl and .java output
+    // files and additional source and header files due to the -Gface option.
   }
 
 }

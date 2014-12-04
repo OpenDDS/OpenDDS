@@ -291,3 +291,5 @@ tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter keyed: !DCP
 tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter keyed: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+
+tests/FACE/Messenger/run_test.pl: !DCPS_MIN

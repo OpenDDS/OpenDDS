@@ -35,6 +35,7 @@ BE_GlobalData::BE_GlobalData()
     suppress_idl_(false),
     generate_wireshark_(false),
     v8_(false),
+    face_(false),
     seq_("Seq")
 {
 }
@@ -130,6 +131,16 @@ bool BE_GlobalData::v8() const
   return this->v8_;
 }
 
+void BE_GlobalData::face(bool b)
+{
+  this->face_ = b;
+}
+
+bool BE_GlobalData::face() const
+{
+  return this->face_;
+}
+
 bool
 BE_GlobalData::do_included_files() const
 {
@@ -163,8 +174,9 @@ BE_GlobalData::open_streams(const char* filename)
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
   ws_config_name_ = (filebase + "_ws.ini").c_str();
+  face_header_name_ = (filebase + "_TSS.hpp").c_str();
+  face_impl_name_ = (filebase + "_TSS.cpp").c_str();
 }
-
 
 void
 BE_GlobalData::multicast(const char* str)
@@ -220,8 +232,10 @@ BE_GlobalData::parse_args(long& i, char** av)
     }
     break;
   case 'G':
-    if (0 == ACE_OS::strcmp(av[i],"-Gws"))
+    if (0 == ACE_OS::strcmp(av[i], "-Gws"))
       generate_wireshark_ = true;
+    else if (0 == ACE_OS::strcmp(av[i], "-Gface"))
+      face(true);
     else
       {
         ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
@@ -304,7 +318,7 @@ BE_GlobalData::writeFile(const char* fileName, const string& content)
 
 namespace {
   typedef set<string> Includes_t;
-  Includes_t inc_h_, inc_c_, inc_idl_, referenced_idl_, inc_path_;
+  Includes_t inc_h_, inc_c_, inc_idl_, referenced_idl_, inc_path_, inc_face_h_;
 }
 
 void
@@ -313,6 +327,7 @@ BE_GlobalData::reset_includes()
   inc_h_.clear();
   inc_c_.clear();
   inc_idl_.clear();
+  inc_face_h_.clear();
   referenced_idl_.clear();
 }
 
@@ -351,6 +366,9 @@ BE_GlobalData::add_include(const char* file,
     break;
   case STREAM_IDL:
     inc = &inc_idl_;
+    break;
+  case STREAM_FACE_H:
+    inc = &inc_face_h_;
     break;
   default:
     return;
@@ -417,6 +435,9 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     break;
   case STREAM_IDL:
     inc = &inc_idl_;
+    break;
+  case STREAM_FACE_H:
+    inc = &inc_face_h_;
     break;
   default:
     return "";

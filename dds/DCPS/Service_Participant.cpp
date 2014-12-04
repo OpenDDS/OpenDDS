@@ -177,6 +177,7 @@ Service_Participant::Service_Participant()
 
 Service_Participant::~Service_Participant()
 {
+  shutdown();
   ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
   typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
   for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {

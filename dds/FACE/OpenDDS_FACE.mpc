@@ -1,0 +1,3 @@
+project: dcpslib {
+  dynamicflags = OPENDDS_FACE_BUILD_DLL
+}

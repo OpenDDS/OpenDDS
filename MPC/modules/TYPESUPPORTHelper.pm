@@ -42,11 +42,18 @@ sub get_output {
     }
   }
 
+  if ($flags =~ /-Gface/) {
+    my $name = basename($file, '.idl');
+    foreach my $suffix ('_TSS.hpp', '_TSS.cpp') {
+      push(@out, $dir . $name . $suffix);
+    }
+  }
+
   return \@out;
 }
 
 sub get_outputexts {
-  return ['TypeSupport\\.idl', '\\.java']; #these are regular expressions
+  return ['\\.idl', '\\.java']; # these are regular expressions
 }
 
 1;

@@ -1,3 +1,39 @@
+Thu Dec  4 15:39:28 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+        * MPC/config/opendds_face.mpb:
+        * MPC/modules/TYPESUPPORTHelper.pm:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/OpenDDS_FACE.mpc:
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/be_util.cpp:
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+        * face/OpenDDS_FACE_Export.h:
+        * face/README.txt:
+        * face/common.hpp:
+        * face/tss.hpp:
+        * tests/FACE/Messenger/Idl/FaceMessage.idl:
+        * tests/FACE/Messenger/Idl/FaceMessengerIdl.mpc:
+        * tests/FACE/Messenger/Idl/FaceMessenger_Export.h:
+        * tests/FACE/Messenger/Publisher/FaceMessengerPublisher.mpc:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/FaceMessengerSubscriber.mpc:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Messenger/run_test.pl:
+
+          Initial support for the Future Airborne Capability Environment,
+          specifically the Transport Services Segment API.  See face/README.txt
+          for details.  Since there is no support for a config file in this
+          version, the library is hard-coded to use the types in the Messenger
+          test and the configurations for that test.
+
 Mon Nov 24 22:28:30 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/Bench/src/Options.cpp:
