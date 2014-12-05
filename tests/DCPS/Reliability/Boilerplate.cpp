@@ -104,9 +104,13 @@ createDataWriter(
   dw_qos.reliability.max_blocking_time.sec = 1;
   dw_qos.reliability.max_blocking_time.nanosec = 0;
 
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
   dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+#endif
+
   dw_qos.resource_limits.max_samples = 10;
   dw_qos.resource_limits.max_samples_per_instance = 10;
+
   // Create DataWriter
   DDS::DataWriter_var writer =
     publisher->create_datawriter(topic,
@@ -133,8 +137,12 @@ createDataReader(
   // RELIABLE/KEEP_LAST/10 works
   subscriber->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
   dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
   dr_qos.history.depth = 10;
+#endif
+
   // Create DataReader
   DDS::DataReader_var reader =
     subscriber->create_datareader(topic,

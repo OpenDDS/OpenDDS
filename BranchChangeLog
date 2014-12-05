@@ -1,3 +1,24 @@
+Fri Dec  5 21:02:11 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Adapted tests to the Minimum Profile build (in particular, removing
+          history depth either all the time or when the profile is disabled).
+          The following tests need more work: Reliability, Rejects,
+          ManualAssertLiveliness.
+
 Thu Dec  4 20:33:58 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r6617 through r6636.

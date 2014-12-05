@@ -225,13 +225,13 @@ tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN
 tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN
 tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN
-tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
-tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN
-tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN
+tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN

@@ -112,7 +112,10 @@ if (!$is_rtps_disc) {
   }
 }
 
-run_compatibility_tests("false", "transient", "topic", "infinite", "best_effort", "transient_local", "topic", "infinite", "reliable");
+my $configs = new PerlACE::ConfigList;
+my $has_persist = !$configs->check_config('DDS_NO_PERSISTENCE_PROFILE');
+
+run_compatibility_tests("false", "transient", "topic", "infinite", "best_effort", "transient_local", "topic", "infinite", "reliable") if $has_persist;
 
 run_compatibility_tests("true", "transient_local", "automatic", "5", "reliable", "transient_local", "automatic", "5", "reliable");
 run_compatibility_tests("true", "transient_local", "automatic", "6", "reliable", "volatile", "automatic", "7", "best_effort");

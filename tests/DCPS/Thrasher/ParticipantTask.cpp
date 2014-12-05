@@ -93,8 +93,9 @@ ParticipantTask::svc()
       // Create DataWriter
       DDS::DataWriterQos writer_qos;
       publisher->get_default_datawriter_qos(writer_qos);
-
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       writer_qos.history.depth = samples_per_thread_;
+#endif
 
       writer =
         publisher->create_datawriter(topic.in(),

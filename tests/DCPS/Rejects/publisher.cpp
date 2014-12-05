@@ -93,8 +93,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
       dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCES;
       dw_qos.resource_limits.max_samples = MAX_SAMPLES;
       dw_qos.resource_limits.max_instances = MAX_INSTANCES;
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       dw_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dw_qos.history.depth = MAX_SAMPLES_PER_INSTANCES;
+#endif
 
       DDS::DataWriter_var dw =
         pub->create_datawriter (topic.in (),

@@ -15,9 +15,8 @@ PerlDDS::add_lib_path('./IDL');
 
 $status = 0;
 
-$pub_opts = "-DCPSTransportDebugLevel 1";
+$pub_opts = "";
 $sub_opts = "";
-
 
 if (($ARGV[0] eq 'shmem') ||  ($ARGV[1] eq 'shmem')) {
   $pub_opts = "$pub_opts -DCPSConfigFile shmem.ini ";
