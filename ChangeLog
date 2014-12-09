@@ -1,3 +1,9 @@
+Tue Dec  9 17:31:44 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Fixed bug caused by lag between association and propagation to BIT.
+
 Thu Dec  4 20:30:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepoServ.h:

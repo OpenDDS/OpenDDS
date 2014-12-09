@@ -233,7 +233,23 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
   return dw;
 }
 
-void recreate_data_writer_and_topic(DataWriter_var& dw)
+void wait_match(const DataReader_var& dr, int n)
+{
+  StatusCondition_var condition = dr->get_statuscondition();
+  condition->set_enabled_statuses(SUBSCRIPTION_MATCHED_STATUS);
+  WaitSet_var ws = new DDS::WaitSet;
+  ws->attach_condition(condition);
+  ConditionSeq conditions;
+  SubscriptionMatchedStatus ms = {0, 0, 0, 0, 0};
+  const Duration_t timeout = {1, 0};
+  while (dr->get_subscription_matched_status(ms) == RETCODE_OK
+         && ms.current_count != n) {
+    ws->wait(conditions, timeout);
+  }
+  ws->detach_condition(condition);
+}
+
+void recreate_data_writer_and_topic(DataWriter_var& dw, const DataReader_var& dr)
 {
   DataWriterQos dw_qos;
   dw->get_qos(dw_qos);
@@ -252,6 +268,9 @@ void recreate_data_writer_and_topic(DataWriter_var& dw)
   dp->delete_topic(topic);
   topic = 0;
 
+  // Wait until the data reader is not associated with the writer.
+  wait_match (dr, 0);
+
   topic = dp->create_topic(topic_name, type_name, topic_qos, 0, 0);
   if (!topic) {
     ACE_DEBUG((LM_DEBUG, "ERROR: failed to re-create topic\n"));
@@ -262,22 +281,6 @@ void recreate_data_writer_and_topic(DataWriter_var& dw)
   if (!dw) {
     ACE_DEBUG((LM_DEBUG, "ERROR: failed to re-create data writer\n"));
   }
-}
-
-void wait_match(const DataReader_var& dr, int n)
-{
-  StatusCondition_var condition = dr->get_statuscondition();
-  condition->set_enabled_statuses(SUBSCRIPTION_MATCHED_STATUS);
-  WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(condition);
-  ConditionSeq conditions;
-  SubscriptionMatchedStatus ms = {0, 0, 0, 0, 0};
-  const Duration_t timeout = {1, 0};
-  while (dr->get_subscription_matched_status(ms) == RETCODE_OK
-         && ms.current_count != n) {
-    ws->wait(conditions, timeout);
-  }
-  ws->detach_condition(condition);
 }
 
 DataReader_var create_data_reader(const DomainParticipant_var& dp)
@@ -334,104 +337,117 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                           InstanceHandle_t& handle,
                           int user_data,
                           int topic_data,
+                          bool poll,
                           int num_expected = 1)
 {
-  DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-  if (num_expected) {
-    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
-                                                    ANY_VIEW_STATE,
-                                                    ALIVE_INSTANCE_STATE);
-    WaitSet_var waiter = new WaitSet;
-    waiter->attach_condition(rc);
-    ConditionSeq activeConditions;
-    Duration_t forever = { DURATION_INFINITE_SEC,
-                           DURATION_INFINITE_NSEC };
-    ReturnCode_t result = waiter->wait(activeConditions, forever);
-    waiter->detach_condition(rc);
-    if (result != RETCODE_OK) {
-      ACE_DEBUG((LM_DEBUG,
-        "ERROR: (publication BIT) could not wait for condition: %d\n", result));
+  int num_valid = 0;
+
+  do {
+    DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
+    if (num_expected) {
+      ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                      ANY_VIEW_STATE,
+                                                      ALIVE_INSTANCE_STATE);
+      WaitSet_var waiter = new WaitSet;
+      waiter->attach_condition(rc);
+      ConditionSeq activeConditions;
+      Duration_t forever = { DURATION_INFINITE_SEC,
+                             DURATION_INFINITE_NSEC };
+      ReturnCode_t result = waiter->wait(activeConditions, forever);
+      waiter->detach_condition(rc);
+      if (result != RETCODE_OK) {
+        ACE_DEBUG((LM_DEBUG,
+                   "ERROR: (publication BIT) could not wait for condition: %d\n", result));
+        return false;
+      }
+    } else {
+      ACE_OS::sleep(1);
+    }
+
+    PublicationBuiltinTopicDataDataReader_var pub_bit =
+      PublicationBuiltinTopicDataDataReader::_narrow(dr);
+
+    PublicationBuiltinTopicDataSeq data;
+    SampleInfoSeq infos;
+    ReturnCode_t ret =
+      pub_bit->read(data, infos, LENGTH_UNLIMITED,
+                    ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+    if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: could not read ignored publication BIT: %d\n",
+                 ret));
+      return false;
+    } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
+      ACE_DEBUG((LM_DEBUG, "ERROR: could not read publication BIT: %d\n", ret));
       return false;
     }
-  } else {
-    ACE_OS::sleep(1);
-  }
 
-  PublicationBuiltinTopicDataDataReader_var pub_bit =
-    PublicationBuiltinTopicDataDataReader::_narrow(dr);
-
-  PublicationBuiltinTopicDataSeq data;
-  SampleInfoSeq infos;
-  ReturnCode_t ret =
-    pub_bit->read(data, infos, LENGTH_UNLIMITED,
-                  ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
-  if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not read ignored publication BIT: %d\n",
-               ret));
-    return false;
-  } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not read publication BIT: %d\n", ret));
-    return false;
-  }
-
-  int num_valid = 0;
-  for (CORBA::ULong i = 0; i < data.length(); ++i) {
-    if (infos[i].valid_data) {
-      ++num_valid;
-      ACE_DEBUG((LM_DEBUG,
-                 "Read Publication BIT with key: %x %x %x and handle %d\n"
-                 "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
-                 data[i].key.value[0], data[i].key.value[1],
-                 data[i].key.value[2], infos[i].instance_handle,
-                 data[i].participant_key.value[0],
-                 data[i].participant_key.value[1],
-                 data[i].participant_key.value[2], data[i].topic_name.in(),
-                 data[i].type_name.in()));
-      if (data[i].user_data.value.length() != 1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR publication [%d] user data length %d "
-                          "not expected length of 1\n",
-                          i,
-                          data[i].user_data.value.length()),
-                         false);
+    num_valid = 0;
+    for (CORBA::ULong i = 0; i < data.length(); ++i) {
+      if (infos[i].valid_data) {
+        ++num_valid;
+        ACE_DEBUG((LM_DEBUG,
+                   "Read Publication BIT with key: %x %x %x and handle %d\n"
+                   "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
+                   data[i].key.value[0], data[i].key.value[1],
+                   data[i].key.value[2], infos[i].instance_handle,
+                   data[i].participant_key.value[0],
+                   data[i].participant_key.value[1],
+                   data[i].participant_key.value[2], data[i].topic_name.in(),
+                   data[i].type_name.in()));
+        if (data[i].user_data.value.length() != 1) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR publication [%d] user data length %d "
+                            "not expected length of 1\n",
+                            i,
+                            data[i].user_data.value.length()),
+                           false);
+        }
+        if (data[i].topic_data.value.length() != 1) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR publication [%d] topic data length %d "
+                            "not expected length of 1\n",
+                            i,
+                            data[i].topic_data.value.length()),
+                           false);
+        }
+        if (i != data.length() - 1) {
+          continue;
+        }
+        if (data[i].user_data.value[0] != user_data) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR publication [%d] user data value %d "
+                            "not expected value %d\n",
+                            i,
+                            data[i].user_data.value[0],
+                            user_data),
+                           false);
+        }
+        if (data[i].topic_data.value[0] != topic_data) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR publication [%d] topic data value %d "
+                            "not expected value %d\n",
+                            i,
+                            data[i].topic_data.value[0],
+                            topic_data),
+                           false);
+        }
+        handle = infos[i].instance_handle;
       }
-      if (data[i].topic_data.value.length() != 1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR publication [%d] topic data length %d "
-                          "not expected length of 1\n",
-                          i,
-                          data[i].topic_data.value.length()),
-                         false);
-      }
-      if (i != data.length() - 1) {
-        continue;
-      }
-      if (data[i].user_data.value[0] != user_data) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR publication [%d] user data value %d "
-                          "not expected value %d\n",
-                          i,
-                          data[i].user_data.value[0],
-                          user_data),
-                         false);
-      }
-      if (data[i].topic_data.value[0] != topic_data) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR publication [%d] topic data value %d "
-                          "not expected value %d\n",
-                          i,
-                          data[i].topic_data.value[0],
-                          topic_data),
-                         false);
-      }
-      handle = infos[i].instance_handle;
     }
-  }
-  if (num_valid != num_expected) {
-    ACE_ERROR_RETURN((LM_ERROR, "ERROR expected %d discovered "
-                                "publications, found %d\n",
-                                num_expected, num_valid), false);
-  }
+    if (!poll && num_valid != num_expected) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR expected %d discovered "
+                        "publications, found %d\n",
+                        num_expected, num_valid), false);
+    }
+
+    if (poll && num_valid != num_expected) {
+      ACE_DEBUG((LM_DEBUG,
+                 "Expected number of publications (%d) different from actual (%d).  Sleeping...\n", num_expected, num_valid));
+      ACE_OS::sleep(1);
+    }
+
+  } while (poll && num_valid != num_expected);
+
   return true;
 }
 
@@ -459,7 +475,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
       return false;
     }
   } else {
-  ACE_OS::sleep(1);
+    ACE_OS::sleep(1);
   }
   SubscriptionBuiltinTopicDataDataReader_var pub_bit =
     SubscriptionBuiltinTopicDataDataReader::_narrow(dr);
@@ -622,7 +638,7 @@ bool run_test(DomainParticipant_var& dp,
     return false;
   }
 
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), false)) {
     return false;
   }
 
@@ -640,7 +656,7 @@ bool run_test(DomainParticipant_var& dp,
   // Remove the writer and its topic, then re-create them.  The writer's
   // participant should still have discovery info about the reader so that
   // the association between the new writer and old reader can be established.
-  recreate_data_writer_and_topic(dw);
+  recreate_data_writer_and_topic(dw, dr);
 
   WriterSync::wait_match(dw);
 
@@ -649,7 +665,7 @@ bool run_test(DomainParticipant_var& dp,
   wait_match(dr, 1);
 
   // Get the new instance handle as pub_ih
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), true)) {
     return false;
   }
 
@@ -720,7 +736,7 @@ bool run_test(DomainParticipant_var& dp,
   if (!read_participant_bit(bit_sub, TestConfig::PARTICIPANT_USER_DATA2())) {
     return false;
   }
-  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA(), false)) {
     return false;
   }
   if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
@@ -743,7 +759,7 @@ bool run_test(DomainParticipant_var& dp,
 
   // Wait for propagation
   ACE_OS::sleep(3);
-  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
+  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), false)) {
     return false;
   }
   if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
@@ -752,7 +768,7 @@ bool run_test(DomainParticipant_var& dp,
 
   // Test ignore
   dp->ignore_publication(pub_ih);
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 0)) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), false, 0)) {
     ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("Could not ignore publication\n")), false);
   }
