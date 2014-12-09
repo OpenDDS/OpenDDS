@@ -130,8 +130,12 @@ static bool got_pending_timeout = false;
 static bool got_persistent_data_dir = false;
 #endif
 static bool got_default_discovery = false;
-#if !defined (DDS_DEFAULT_DISCOVERY_METHOD)
-# define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_REPO
+#ifndef DDS_DEFAULT_DISCOVERY_METHOD
+# ifdef DDS_SAFETY_PROFILE
+#  define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_RTPS
+# else
+#  define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_REPO
+# endif
 #endif
 static bool got_log_fname = false;
 static bool got_log_verbose = false;

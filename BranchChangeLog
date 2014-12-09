@@ -1,3 +1,11 @@
+Tue Dec  9 16:51:52 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Safety Profile excludes DCPSInfoRepo.
+
 Tue Dec  9 16:26:03 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_optional_features.mpb:
