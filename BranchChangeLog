@@ -1,3 +1,19 @@
+Tue Dec  9 16:26:03 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_optional_features.mpb:
+        * dds/idl/opendds_idl.mpc:
+
+          MPC feature for Safety Profile.  Set no_opendds_safety_profile=0.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+
+          Revert prior change to Reliabilty and disable the test on this
+          branch.  Other problems with default History and non-default
+          Resource Limits need to be resolved in trunk first before we can
+          adapt this test to DDS minimum profile (only default History).
+
 Fri Dec  5 21:02:11 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
