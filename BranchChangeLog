@@ -1,3 +1,9 @@
+Wed Dec 10 21:56:51 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_taolib.mpb:
+
+          Crud, two revisions ago was correct.
+
 Wed Dec 10 20:22:42 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * MPC/config/dds_taolib.mpb:
