@@ -1,3 +1,15 @@
+Wed Dec 10 17:46:40 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_taolib.mpb:
+
+          New feature, to optionally inherit taolib
+
+        * MPC/config/dcps.mpb:
+        * dds/DdsDcps.mpc:
+
+          Inherit from dds_taolib, so that taolib is skipped for
+          safety profile builds.
+
 Tue Dec  9 16:51:52 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
