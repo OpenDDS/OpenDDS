@@ -1,2 +1,2 @@
-feature(no_opendds_safety_profile) : taolib {
+feature(no_opendds_safety_profile) : taolib, portableserver {
 }
