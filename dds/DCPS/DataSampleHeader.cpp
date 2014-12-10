@@ -484,6 +484,8 @@ std::ostream& operator<<(std::ostream& str, const MessageId value)
     return str << "TRANSPORT_CONTROL";
   case DISPOSE_UNREGISTER_INSTANCE:
     return str << "DISPOSE_UNREGISTER_INSTANCE";
+  case END_HISTORIC_SAMPLES:
+    return str << "END_HISTORIC_SAMPLES";
   default:
     return str << "Unknown";
   }

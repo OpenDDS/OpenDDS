@@ -1,3 +1,9 @@
+Wed Dec 10 17:16:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Updated operator<<(MessageId) to account for the new enumerator.
+
 Tue Dec  9 17:31:44 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
