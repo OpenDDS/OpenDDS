@@ -13,6 +13,8 @@ typedef ACE_INT64 SYSTEM_TIME_TYPE;
 // forever for an operation to complete and does not wish to timeout.
 static const ACE_INT64 INF_TIME_VALUE = -1;
 
+typedef char CONFIGURATION_RESOURCE[256];
+
 // This enumeration defines the possible set of status codes which may be
 // returned by a method defined in the FACE API.
 enum RETURN_CODE_TYPE {
@@ -50,21 +52,11 @@ enum RETURN_CODE_TYPE {
 typedef void* SYSTEM_ADDRESS_TYPE;
 
 // This type has a one nanosecond resolution.
-typedef FACE::SYSTEM_TIME_TYPE TIMEOUT_TYPE;
+typedef SYSTEM_TIME_TYPE TIMEOUT_TYPE;
 
 // This type is used to represent the message range, number of messages,
 // and message type in the I/O and Transport APIs.
 typedef ACE_INT32 MESSAGE_RANGE_TYPE;
-
-enum RELIABILITY_TYPE {
-  RELIABLE,
-  NON_RELIABLE
-};
-
-enum READ_WRITE_BEHAVIOR_TYPE {
-  QUEUING,
-  SAMPLING
-};
 
 }
 

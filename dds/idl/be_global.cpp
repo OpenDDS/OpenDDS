@@ -174,8 +174,8 @@ BE_GlobalData::open_streams(const char* filename)
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
   ws_config_name_ = (filebase + "_ws.ini").c_str();
-  face_header_name_ = (filebase + "_TSS.hpp").c_str();
-  face_impl_name_ = (filebase + "_TSS.cpp").c_str();
+  face_header_name_ = (filebase + "_TS.hpp").c_str();
+  face_impl_name_ = (filebase + "_TS.cpp").c_str();
 }
 
 void

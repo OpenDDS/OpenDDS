@@ -43,6 +43,7 @@ ownership_kind_exclusive ?= 1
 object_model_profile ?= 1
 persistence_profile ?= 1
 exceptions ?= 1
+no_opendds_safety_profile ?= 1
 
 # Turn on symbol versioning. The scheme that we follow is to allow
 # applications dependent on libraries, with same version numbers (major,

@@ -44,7 +44,7 @@ sub get_output {
 
   if ($flags =~ /-Gface/) {
     my $name = basename($file, '.idl');
-    foreach my $suffix ('_TSS.hpp', '_TSS.cpp') {
+    foreach my $suffix ('_TS.hpp', '_TS.cpp') {
       push(@out, $dir . $name . $suffix);
     }
   }

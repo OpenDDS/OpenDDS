@@ -1,4 +1,4 @@
-#include "face/tss.hpp"
+#include "FACE/TS.hpp"
 #include "FaceTSS.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -36,13 +36,13 @@ namespace {
 
 using OpenDDS::FaceTSS::Entities;
 
-void Initialize(const CONFIGURATION_FILE_NAME configuration_file,
+void Initialize(const CONFIGURATION_RESOURCE configuration_file,
                 RETURN_CODE_TYPE& return_code)
 {
   return_code = NO_ERROR;
 }
 
-void create_connection(const CONNECTION_NAME_TYPE connection_name,
+void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
                        MESSAGING_PATTERN_TYPE pattern,
                        CONNECTION_ID_TYPE& connection_id,
                        CONNECTION_DIRECTION_TYPE& connection_direction,
@@ -71,7 +71,7 @@ void create_connection(const CONNECTION_NAME_TYPE connection_name,
   return_code = INVALID_PARAM;
 }
 
-void get_connection_parameters(CONNECTION_NAME_TYPE& connection_name,
+void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
                                CONNECTION_ID_TYPE& connection_id,
                                TRANSPORT_CONNECTION_STATUS_TYPE& status,
                                RETURN_CODE_TYPE& return_code)
@@ -80,7 +80,7 @@ void get_connection_parameters(CONNECTION_NAME_TYPE& connection_name,
   return_code = NO_ERROR;
 }
 
-void destroy_connection(CONNECTION_ID_TYPE connection_id,
+void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
                         RETURN_CODE_TYPE& return_code)
 {
   std::map<int, DDS::DataWriter_var>& writers = Entities::instance()->writers_;

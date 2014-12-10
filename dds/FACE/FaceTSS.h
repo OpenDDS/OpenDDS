@@ -1,7 +1,7 @@
 #ifndef OPENDDS_FACE_TSS_H
 #define OPENDDS_FACE_TSS_H
 
-#include "face/tss.hpp"
+#include "FACE/TS.hpp"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/TypeSupportImpl.h"
@@ -78,10 +78,10 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
 
 template <typename Msg>
 void send_message(FACE::CONNECTION_ID_TYPE connection_id,
-                  const Msg& message,
-                  FACE::MESSAGE_SIZE_TYPE message_size,
                   FACE::TIMEOUT_TYPE timeout,
                   FACE::TRANSACTION_ID_TYPE& transaction_id,
+                  const Msg& message,
+                  FACE::MESSAGE_SIZE_TYPE message_size,
                   FACE::RETURN_CODE_TYPE& return_code) {
   std::map<int, DDS::DataWriter_var>& writers = Entities::instance()->writers_;
   if (!writers.count(connection_id)) {
@@ -104,11 +104,11 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
 }
 
 template <typename Callback>
-void register_read_callback(FACE::CONNECTION_ID_TYPE connection_id,
-                            const FACE::WAITSET_TYPE waitset,
-                            Callback callback,
-                            FACE::MESSAGE_SIZE_TYPE max_message_size,
-                            FACE::RETURN_CODE_TYPE& return_code) {
+void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
+                       const FACE::WAITSET_TYPE waitset,
+                       Callback callback,
+                       FACE::MESSAGE_SIZE_TYPE max_message_size,
+                       FACE::RETURN_CODE_TYPE& return_code) {
   //TODO: implement
 }
 

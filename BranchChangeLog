@@ -1,3 +1,29 @@
+Wed Dec 10 18:43:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * rules.dds.GNU:
+
+          This file needs to set the safety profile feature for gnuace builds.
+
+        * FACE/README.txt:
+        * FACE/TS.hpp:
+        * FACE/TS_common.hpp:
+        * FACE/common.hpp:
+        * FACE/tss.hpp:
+        * MPC/modules/TYPESUPPORTHelper.pm:
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/opendds_idl.mpc:
+        * dds/idl/ts_generator.cpp:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+
+          Updated FACE support to match spec 2.1 (conformance test 2.1.1).
+
+        * face:
+
+          Removed these files (renamed to FACE).
+
 Wed Dec 10 18:40:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * MPC/config/dcps.mpb:

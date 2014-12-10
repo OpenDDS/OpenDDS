@@ -1,4 +1,4 @@
-project: aceexe, crosscompile, install {
+project: aceexe, dds_macros, crosscompile, install {
 
   exename   = *
   exeout    = $(DDS_ROOT)/bin
