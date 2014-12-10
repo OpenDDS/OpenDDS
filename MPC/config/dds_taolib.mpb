@@ -1,2 +1,6 @@
-feature(no_opendds_safety_profile) : taolib, portableserver {
+feature(no_opendds_safety_profile) {
+  includes    += $(TAO_ROOT)
+}
+
+feature(!no_opendds_safety_profile) : taolib, portableserver {
 }
