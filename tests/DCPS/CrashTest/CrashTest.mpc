@@ -1,0 +1,44 @@
+// -*- MPC -*-
+//
+// $Id$
+
+project(*Publisher): dcpsexe_with_tcp {
+  exename = publisher
+  after       += *idl
+
+  Source_Files {
+    pub_main.cpp
+    PubDriver.cpp
+    InstanceDataMap.cpp
+    Writer.cpp
+  }
+  TypeSupport_Files {
+    SampleType.idl
+  }
+}
+
+project(*Subscriber): dcpsexe_with_tcp {
+  exename = subscriber
+  after       += *idl
+
+  Source_Files {
+    sub_main.cpp
+    SubDriver.cpp
+    DataReaderListener.cpp
+  }
+  TypeSupport_Files {
+    SampleType.idl
+  }
+}
+
+project (*idl) : dcps {
+  libout         = .
+
+  Source_Files {
+  }
+
+  TypeSupport_Files {
+    SampleType.idl
+  }
+}
+
