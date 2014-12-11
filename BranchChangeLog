@@ -1,3 +1,14 @@
+Thu Dec 11 18:48:35 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dcps_default_discovery.mpb:
+
+          New base to include dcps_inforepodisovery or dcps_rtps optionally,
+          according to no_opendds_safety_profile feature.
+
+        * MPC/config/dcpsexe.mpb:
+
+          Use dcps_default_discovery as a base.
+
 Thu Dec 11 18:17:50 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * MPC/config/dcps_rtpsexe.mpb:
