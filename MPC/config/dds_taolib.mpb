@@ -1,4 +1,4 @@
-feature(!no_opendds_safety_profile) {
+feature(!no_opendds_safety_profile) : acelib {
   includes    += $(TAO_ROOT)
 }
 

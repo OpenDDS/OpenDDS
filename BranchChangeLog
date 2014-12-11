@@ -1,3 +1,14 @@
+Thu Dec 11 18:17:50 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dcps_rtpsexe.mpb:
+        * MPC/config/dcpsexe.mpb:
+
+          Remove reliance on taoexe.
+
+        * MPC/config/dds_taolib.mpb:
+
+          Add acelib as a base when building safety profile.
+
 Wed Dec 10 21:56:51 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * MPC/config/dds_taolib.mpb:
