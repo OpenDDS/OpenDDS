@@ -418,13 +418,13 @@ DomainParticipantImpl::create_topic_i(
 
   } else {
 
-    OpenDDS::DCPS::TypeSupport_ptr type_support=0;
+    OpenDDS::DCPS::TypeSupport_var type_support;
     bool has_keys = (topic_mask & TOPIC_TYPE_HAS_KEYS);
 
-    if (0 == topic_mask){
-      // creating a topic with compile time type
-       type_support= Registered_Data_Types->lookup(this, type_name);
-       has_keys = type_support->has_dcps_key();
+    if (0 == topic_mask) {
+       // creating a topic with compile time type
+      type_support = Registered_Data_Types->lookup(this, type_name);
+      has_keys = type_support->has_dcps_key();
     }
     RepoId topic_id;
 
@@ -598,7 +598,8 @@ DomainParticipantImpl::find_topic(
 
 
     if (status == FOUND) {
-      OpenDDS::DCPS::TypeSupport_ptr type_support = Registered_Data_Types->lookup(this, type_name.in());
+      OpenDDS::DCPS::TypeSupport_var type_support =
+        Registered_Data_Types->lookup(this, type_name.in());
       if (0 == type_support) {
         if (DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")

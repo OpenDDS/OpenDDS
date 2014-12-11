@@ -14,9 +14,8 @@
 #include "dds/DdsDcpsDomainC.h"
 
 #include "ace/Singleton.h"
-#include "ace/SString.h"
 
-#include <set>
+#include <cstring>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -27,165 +26,64 @@ Data_Types_Register::Data_Types_Register()
 
 Data_Types_Register::~Data_Types_Register()
 {
-  TypeSupportHash*  supportHash;
-
-  if (!domains_.empty()) {
-    std::set<OpenDDS::DCPS::TypeSupport_ptr> typeSupports;
-    DomainHash::iterator domainIter = domains_.begin();
-    DomainHash::iterator domainEnd = domains_.end();
-
-    while (domainIter != domainEnd) {
-      supportHash = domainIter->second;
-      ++domainIter;
-
-      if (!supportHash->empty()) {
-        TypeSupportHash::iterator supportIter = supportHash->begin();
-        TypeSupportHash::iterator supportEnd = supportHash->end();
-
-        while (supportIter != supportEnd) {
-          // ignore the error of adding a duplicate pointer.
-          // this done to handle a pointer having been registered
-          // to multiple names.
-          typeSupports.insert(supportIter->second);
-          ++supportIter;
-
-        } /* while (supportIter != supportEnd) */
-
-      } /* if (0 < supportHash->current_size() ) */
-
-      delete supportHash;
-
-    } /* while (domainIter != domainEnd) */
-
-    domains_.clear();
-
-    std::set<OpenDDS::DCPS::TypeSupport_ptr>::iterator typesIter =
-      typeSupports.begin();
-    std::set<OpenDDS::DCPS::TypeSupport_ptr>::iterator typesEnd =
-      typeSupports.end();
-
-    while (typesEnd != typesIter) {
-      OpenDDS::DCPS::TypeSupport_ptr type = *typesIter;
-      ++typesIter;
-      // if there are no more references then it will be deleted
-      type->_remove_ref();
-    }
-
-  } /* if (0 < domains_.current_size() ) */
-
 }
 
 Data_Types_Register*
 Data_Types_Register::instance()
 {
-  // Hide the template instantiation to prevent multiple instances
-  // from being created.
-
   return ACE_Singleton<Data_Types_Register, ACE_SYNCH_MUTEX>::instance();
 }
 
 DDS::ReturnCode_t Data_Types_Register::register_type(
   DDS::DomainParticipant_ptr domain_participant,
-  ACE_CString type_name,
-  OpenDDS::DCPS::TypeSupport_ptr the_type)
+  const char* type_name,
+  TypeSupport_ptr the_type)
 {
-  DDS::ReturnCode_t retCode = DDS::RETCODE_ERROR;
-  TypeSupportHash*  supportHash = NULL;
-  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, retCode);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, lock_, DDS::RETCODE_ERROR);
 
-  if (0 == find(domains_, reinterpret_cast <void*>(domain_participant), supportHash)) {
-    int lookup = OpenDDS::DCPS::bind(*supportHash, type_name.c_str(), the_type);
+  TypeSupportMap& tsm = participants_[domain_participant];
+  const TypeSupport_var typeSupport = TypeSupport::_duplicate(the_type);
 
-    if (0 == lookup) {
-      the_type->_add_ref();
-      retCode = DDS::RETCODE_OK;
+  TypeSupportMap::iterator iter = tsm.find(type_name);
+  if (iter == tsm.end()) {
+    tsm[type_name] = typeSupport;
+    return DDS::RETCODE_OK;
+  }
 
-    } else if (1 == lookup) {
-      OpenDDS::DCPS::TypeSupport_ptr currentType = NULL;
+  if (std::strcmp(typeSupport->_interface_repository_id(),
+                  iter->second->_interface_repository_id()) == 0) {
+    return DDS::RETCODE_OK;
+  }
 
-      if (0 == find(*supportHash, type_name.c_str(), currentType)) {
-        // Allow different TypeSupport instances of the same TypeSupport
-        // type register with the same type name in the same
-        // domain pariticipant. The second (and subsequent) registrations
-        // will be ignored.
-
-        if (ACE_OS::strcmp(the_type->_interface_repository_id(),
-                           currentType->_interface_repository_id()) == 0) {
-          retCode = DDS::RETCODE_OK;
-        } /* if (the_type == currentType) */
-      } /* if ( 0 == supportHash->find(type_name, currentType) ) */
-    } /* else if (1 == lookup) */
-
-  } else {
-    // new domain id!
-    supportHash = new TypeSupportHash;
-
-    if (0 == OpenDDS::DCPS::bind(domains_, reinterpret_cast<void*>(domain_participant), supportHash)) {
-      if (0 == OpenDDS::DCPS::bind(*supportHash, type_name.c_str(), the_type)) {
-        the_type->_add_ref();
-        retCode = DDS::RETCODE_OK;
-      }
-
-    } else {
-      delete supportHash;
-    } /* if (0 == domains_.bind(domain_participant, supportHash)) */
-  } /* if (0 == domains_.find(domain_participant, supportHash)) */
-
-  return retCode;
+  return DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t Data_Types_Register::unregister_participant(
   DDS::DomainParticipant_ptr domain_participant)
 {
-  DDS::ReturnCode_t retCode = DDS::RETCODE_ERROR;
-  TypeSupportHash*  supportHash = NULL;
-  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, retCode);
-
-  if ((!domains_.empty()) &&
-      (0 == find(domains_, reinterpret_cast <void*>(domain_participant), supportHash))) {
-    if (!supportHash->empty()) {
-      TypeSupportHash::iterator supportIter = supportHash->begin();
-
-      while (supportIter != supportHash->end()) {
-        // ignore the error of adding a duplicate pointer.
-        // this done to handle a pointer having been registered
-        // to multiple names.
-        supportIter->second->_remove_ref();
-        ++supportIter;
-
-      } /* while (supportIter != supportEnd) */
-
-      supportHash->clear();
-    }
-
-    if (0 != unbind(domains_, reinterpret_cast <void*>(domain_participant))) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Data_Types_Register::unregister_participant failed to unbind domain_participant for %d\n", domain_participant->get_domain_id()));
-    }
-
-    delete supportHash;
-  }
-
-  return retCode;
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, lock_, DDS::RETCODE_ERROR);
+  participants_.erase(domain_participant);
+  return DDS::RETCODE_OK;
 }
 
-OpenDDS::DCPS::TypeSupport_ptr Data_Types_Register::lookup(
+TypeSupport_ptr Data_Types_Register::lookup(
   DDS::DomainParticipant_ptr domain_participant,
-  ACE_CString type_name)
+  const char* type_name) const
 {
-  OpenDDS::DCPS::TypeSupport_ptr typeSupport = 0;
-  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, lock_, typeSupport);
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, lock_, 0);
 
-  TypeSupportHash*  supportHash = NULL;
-
-  if (0 == find(domains_, reinterpret_cast<void*>(domain_participant), supportHash)) {
-    if (0 != find(*supportHash, type_name.c_str(), typeSupport)) {
-      // reassign to nil to make sure that there was no partial
-      // assignment in the find.
-      typeSupport = 0;
-    }
+  ParticipantMap::const_iterator iter1 = participants_.find(domain_participant);
+  if (iter1 == participants_.end()) {
+    return 0;
   }
 
-  return typeSupport;
+  TypeSupportMap::const_iterator iter2 = iter1->second.find(type_name);
+  if (iter2 == iter1->second.end()) {
+    return 0;
+  }
+
+  TypeSupport_var typeSupport = iter2->second;
+  return typeSupport._retn();
 }
 
 } // namespace DCPS

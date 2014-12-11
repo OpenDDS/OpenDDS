@@ -15,6 +15,10 @@
 #include "WriterDataSampleList.h"
 #include "OfferedDeadlineWatchdog.h"
 
+#ifdef OPENDDS_SAFETY_PROFILE
+#include "PoolAllocator.h"
+#endif
+
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 
 #include <map>
@@ -29,18 +33,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 class InstanceDataSampleList;
-
-
-
 class DataWriterImpl;
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
 class FilterEvaluator;
 
-
-
-typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanceMapType;
+typedef OPENDDS_MAP(DDS::InstanceHandle_t, PublicationInstance*)
+  PublicationInstanceMapType;
 
 /**
  * @class WriteDataContainer

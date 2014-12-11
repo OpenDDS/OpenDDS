@@ -15,6 +15,10 @@
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
 
+#ifdef OPENDDS_SAFETY_PROFILE
+#include "SafetyProfilePool.h"
+#endif
+
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/ORB_Core.h"
@@ -28,6 +32,7 @@
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/Sched_Params.h"
+#include "ace/Malloc_Allocator.h"
 
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
@@ -174,7 +179,12 @@ Service_Participant::Service_Participant()
     persistent_data_cache_(),
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
-    pending_timeout_(ACE_Time_Value::zero)
+    pending_timeout_(ACE_Time_Value::zero),
+#ifdef OPENDDS_SAFETY_PROFILE
+    memory_pool_(&safety_profile_pool_)
+#else
+    memory_pool_(ACE_Allocator::instance())
+#endif
 {
   initialize();
 }
@@ -1826,6 +1836,17 @@ Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participan
   }
   return participant_servant->create_typeless_topic(topic_name, type_name, type_has_keys, qos, a_listener, mask);
 }
+
+void* Service_Participant::pool_malloc(std::size_t bytes)
+{
+  return memory_pool_->malloc(bytes);
+}
+
+void Service_Participant::pool_free(void* ptr)
+{
+  memory_pool_->free(ptr);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

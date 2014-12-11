@@ -26,7 +26,7 @@ namespace {
   TypeSupport_ptr findTypeSupport(DomainParticipantImpl* participant,
     const char* type_name)
   {
-    TypeSupport_ptr p = Registered_Data_Types->lookup(participant, type_name);
+    TypeSupport_var p = Registered_Data_Types->lookup(participant, type_name);
     if (!p) {
       throw std::runtime_error(std::string("Data type: ") + type_name +
         " is not registered.");

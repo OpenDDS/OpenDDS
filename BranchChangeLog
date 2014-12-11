@@ -1,8 +1,36 @@
+Thu Dec 11 22:33:07 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/PoolAllocator.h:
+        * dds/DCPS/SafetyProfilePool.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added a memory pool for the Safety Profile.
+          This version doesn't attempt to reuse the free()'d memory.
+
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          Adapted a few C++ STL containers for use with the memory pool.
+          Completely overhauled the Registered_Data_Types, but its interface
+          stayed the same except for one detail:
+          - the object returned from lookup() obeys normal refcounting rules
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Adjust to the fact that Registered_Data_Types->lookup()
+          now deals with the reference count correctly.
+
 Thu Dec 11 18:48:35 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * MPC/config/dcps_default_discovery.mpb:
 
-          New base to include dcps_inforepodisovery or dcps_rtps optionally,
+          New base to include dcps_inforepodiscovery or dcps_rtps optionally,
           according to no_opendds_safety_profile feature.
 
         * MPC/config/dcpsexe.mpb:
