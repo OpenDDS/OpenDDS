@@ -85,7 +85,8 @@ DataWriterImpl::DataWriterImpl()
     initialized_(false),
     wfaCondition_(this->wfaLock_),
     monitor_(0),
-    periodic_monitor_(0)
+    periodic_monitor_(0),
+    db_lock_pool_(0)
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -105,6 +106,8 @@ DataWriterImpl::DataWriterImpl()
   publication_match_status_.current_count_change = 0;
   publication_match_status_.last_subscription_handle = DDS::HANDLE_NIL;
 
+  db_lock_pool_ = new DataBlockLockPool(n_chunks_);
+
   monitor_ =
     TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this);
   periodic_monitor_ =
@@ -123,6 +126,7 @@ DataWriterImpl::~DataWriterImpl()
     delete db_allocator_;
     delete header_allocator_;
   }
+  delete db_lock_pool_;
 }
 
 // this method is called when delete_datawriter is called.
@@ -1920,22 +1924,25 @@ DataWriterImpl::create_control_message(MessageId message_id,
   }
 
   ACE_Message_Block* message = 0;
-  ACE_NEW_MALLOC_RETURN(message,
-                        static_cast<ACE_Message_Block*>(
-                          mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(
-                          DataSampleHeader::max_marshaled_size(),
-                          ACE_Message_Block::MB_DATA,
-                          header_data.message_length_ ? data : 0, //cont
-                          0, //data
-                          0, //allocator_strategy
-                          0, //locking_strategy
-                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                          ACE_Time_Value::zero,
-                          ACE_Time_Value::max_time,
-                          db_allocator_,
-                          mb_allocator_),
-                        0);
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(this->db_lock_pool_lock_);
+    ACE_NEW_MALLOC_RETURN(message,
+                          static_cast<ACE_Message_Block*>(
+                            mb_allocator_->malloc(sizeof(ACE_Message_Block))),
+                          ACE_Message_Block(
+                            DataSampleHeader::max_marshaled_size(),
+                            ACE_Message_Block::MB_DATA,
+                            header_data.message_length_ ? data : 0, //cont
+                            0, //data
+                            0, //allocator_strategy
+                            db_lock_pool_->get_lock(), //locking_strategy
+                            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                            ACE_Time_Value::zero,
+                            ACE_Time_Value::max_time,
+                            db_allocator_,
+                            mb_allocator_),
+                          0);
+  }
 
   *message << header_data;
   // If we incremented sequence number for this control message
@@ -2005,21 +2012,24 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
   header_data.publisher_id_ = this->publisher_servant_->publisher_id_;
   size_t max_marshaled_size = header_data.max_marshaled_size();
 
-  ACE_NEW_MALLOC_RETURN(message,
-                        static_cast<ACE_Message_Block*>(
-                          mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-                        ACE_Message_Block(max_marshaled_size,
-                                          ACE_Message_Block::MB_DATA,
-                                          data, //cont
-                                          0, //data
-                                          header_allocator_, //alloc_strategy
-                                          0, //locking_strategy
-                                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-                                          ACE_Time_Value::zero,
-                                          ACE_Time_Value::max_time,
-                                          db_allocator_,
-                                          mb_allocator_),
-                        DDS::RETCODE_ERROR);
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(this->db_lock_pool_lock_);
+    ACE_NEW_MALLOC_RETURN(message,
+                          static_cast<ACE_Message_Block*>(
+                            mb_allocator_->malloc(sizeof(ACE_Message_Block))),
+                          ACE_Message_Block(max_marshaled_size,
+                                            ACE_Message_Block::MB_DATA,
+                                            data, //cont
+                                            0, //data
+                                            header_allocator_, //alloc_strategy
+                                            db_lock_pool_->get_lock(), //locking_strategy
+                                            ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                                            ACE_Time_Value::zero,
+                                            ACE_Time_Value::max_time,
+                                            db_allocator_,
+                                            mb_allocator_),
+                          DDS::RETCODE_ERROR);
+  }
 
   *message << header_data;
   return DDS::RETCODE_OK;
@@ -2173,7 +2183,15 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   ACE_Message_Block* data = 0;
   size_t max_marshaled_size = end_msg.max_marshaled_size();
 
-  ACE_NEW(data, ACE_Message_Block(max_marshaled_size));
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(this->db_lock_pool_lock_);
+    ACE_NEW(data, ACE_Message_Block(max_marshaled_size,
+                                    ACE_Message_Block::MB_DATA,
+                                    0, //cont
+                                    0, //data
+                                    0, //alloc_strategy
+                                    db_lock_pool_->get_lock())); //locking_strategy
+  }
 
   Serializer serializer(
       data,

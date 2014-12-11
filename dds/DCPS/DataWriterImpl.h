@@ -16,6 +16,7 @@
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/MessageTracker.h"
+#include "dds/DCPS/DataBlockLockPool.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleHeader.h"
@@ -673,6 +674,12 @@ private:
 
   /// Periodic Monitor object for this entity
   Monitor* periodic_monitor_;
+
+  /// Lock pool for use by data sample header data blocks
+  DataBlockLockPool*  db_lock_pool_;
+
+  /// Lock for the db_lock_pool_
+  ACE_Thread_Mutex db_lock_pool_lock_;
 
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number
