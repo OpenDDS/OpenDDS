@@ -1,0 +1,6 @@
+project {
+  libout       = $(DDS_ROOT)/lib
+  libpaths    += $(DDS_ROOT)/lib
+  includes    += $(DDS_ROOT)/dds/CORBA $(TAO_ROOT)
+  dynamicflags = TAO_BUILD_DLL
+}

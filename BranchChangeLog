@@ -1,3 +1,17 @@
+Fri Dec 12 19:56:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_corba.mpb:
+        * MPC/config/dds_taolib.mpb:
+
+          Update to link in OpenDDS_Corba lib when NOT linking TAO
+
+        * dds/CORBA/tao:
+        * dds/CORBA/tao/LocalObject.cpp:
+        * dds/CORBA/tao/Object.cpp:
+        * dds/CORBA/tao/OpenDDS_Corba.mpc:
+
+          New files for start of OpenDDS_Corba lib.
+
 Fri Dec 12 14:51:33 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Registered_Data_Types.h:
