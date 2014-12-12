@@ -89,7 +89,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
     "dds/DCPS/DataWriterImpl.h", "dds/DCPS/DataReaderImpl.h",
     "dds/DCPS/TypeSupportImpl.h",
     "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h",
-    "dds/DCPS/DataBlockLockPool.h", "dds/DCPS/SubscriptionInstance.h"
+    "dds/DCPS/SubscriptionInstance.h"
   };
   add_includes(h_includes, BE_GlobalData::STREAM_H);
 

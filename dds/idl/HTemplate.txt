@@ -184,9 +184,6 @@ private:
    InstanceMap  instance_map_;
    size_t       marshaled_size_;
    size_t       key_marshaled_size_;
-   // The lock pool will be thread safe because
-   // only one write call is allowed at a time.
-   DataBlockLockPool*  db_lock_pool_;
    DataAllocator* data_allocator_;
    ::OpenDDS::DCPS::MessageBlockAllocator* mb_allocator_;
    ::OpenDDS::DCPS::DataBlockAllocator*    db_allocator_;

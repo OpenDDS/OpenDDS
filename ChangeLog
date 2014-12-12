@@ -1,3 +1,33 @@
+Fri Dec 12 20:23:17 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+          Fix problems from ACE_Message_Blocks created with a 
+          null locking strategy that are then accessed by multiple
+          threads simultaneously.  The chief one causing problems
+          was the Data Sample Header message block created by
+          the DataWriterImpl.
+
+        * dds/DCPS/DataBlockLockPool.h:
+
+          Make this class thread-safe by using an atomic op for
+          the counter.  Make it all inline as well.
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+
+          Move the DataBlockLockPool of the writer object into
+          the DataWriterImpl base class.  Use a lock whenever
+          creating message blocks that could be sent to multiple
+          data links.
+
+        * dds/DCPS/DataBlockLockPool.cpp:
+
+          Removed this file.
+
 Wed Dec 10 17:16:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleHeader.cpp:

@@ -23,24 +23,33 @@
  *
  * @NOTE: The lock returned is not guaranteed to be unique.
  *
- * @NOTE: This class is NOT thread safe.
+ * @NOTE: This class is thread safe.
  */
 class OpenDDS_Dcps_Export DataBlockLockPool {
 public:
   typedef ACE_Lock_Adapter<ACE_Thread_Mutex> DataBlockLock;
 
-  DataBlockLockPool(size_t size);
-  virtual ~DataBlockLockPool();
+  DataBlockLockPool(unsigned long size)
+    : pool_(size),
+      size_(size),
+      iterator_(0)
+  {
+  }
 
-  DataBlockLock * get_lock();
+  ~DataBlockLockPool() { }
+
+  DataBlockLock * get_lock() {
+    unsigned long index = iterator_++ % size_;
+    return &(pool_[index]);
+  }
 
 private:
   typedef ACE_Array<DataBlockLock> Pool;
 
   Pool   pool_;
-  size_t size_;
-  /// Used to track which lock to give out next.
-  size_t iterator_;
+  const unsigned long size_;
+  /// Counter used to track which lock to give out next (modulus size_)
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> iterator_;
 };
 
 #endif /* DATABLOCKLOCKPOOL_H  */
