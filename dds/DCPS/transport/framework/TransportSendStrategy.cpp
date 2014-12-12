@@ -76,9 +76,6 @@ TransportSendStrategy::TransportSendStrategy(
     start_counter_(0),
     mode_(MODE_DIRECT),
     mode_before_suspend_(MODE_NOT_SET),
-    delayed_delivered_notification_queue_(0),
-    delayed_notification_mode_(0),
-    num_delayed_notifications_(0),
     header_mb_allocator_(0),
     header_db_allocator_(0),
     synch_(0),
@@ -115,9 +112,7 @@ TransportSendStrategy::TransportSendStrategy(
                &replaced_element_allocator_, NUM_REPLACED_ELEMENT_CHUNKS));
   }
 
-  this->delayed_delivered_notification_queue_ =
-    new TransportQueueElement*[max_samples_];
-  this->delayed_notification_mode_ = new SendMode[max_samples_];
+  delayed_delivered_notification_queue_.reserve(this->max_samples_);
 }
 
 TransportSendStrategy::~TransportSendStrategy()
@@ -126,15 +121,7 @@ TransportSendStrategy::~TransportSendStrategy()
 
   delete this->synch_;
 
-  if (this->delayed_delivered_notification_queue_) {
-    delete [] this->delayed_delivered_notification_queue_;
-    this->delayed_delivered_notification_queue_ = 0;
-  }
-
-  if (this->delayed_notification_mode_) {
-    delete [] this->delayed_notification_mode_;
-    this->delayed_notification_mode_ = 0;
-  }
+  this->delayed_delivered_notification_queue_.clear();
 
   delete this->elems_;
   delete this->queue_;
@@ -266,7 +253,7 @@ TransportSendStrategy::perform_work()
     // from the queue_ (and subsequently prepared for sending) - it doesn't
     // matter.  Just attempt to send as many of the "unsent" bytes in the
     // packet as possible.
-    outcome = this->send_packet(DELAY_NOTIFICATION);
+    outcome = this->send_packet();
 
     // If we sent the whole packet (eg, partial_send is false), and the queue_
     // is now empty, then we've cleared the backpressure situation.
@@ -382,13 +369,9 @@ TransportSendStrategy::perform_work()
 // may be packet header bytes and shouldn't affect the header_.length_
 // which doesn't include the packet header bytes.
 int
-TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
-  UseDelayedNotification delay_notification)
+TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "adjust_packet_after_send", 6);
-
-  //Used to track elements that will need to be notified after releasing lock
-  std::vector<TransportQueueElement*> elems_to_notify;
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Adjusting the current packet because %d bytes of the packet "
@@ -554,34 +537,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
 
             // Inform the element that the data has been delivered.
 
-            if ((delay_notification == DELAY_NOTIFICATION) &&
-                (this->num_delayed_notifications_ < this->max_samples_)) {
-              // If we can delay notification.
-              this->add_delayed_notification(element);
-
-            } else {
-              // later, inform the element that the data has been delivered.
-              elems_to_notify.push_back(element);
-
-//              // Ciju: If not, do a best effort immediate notification.
-//              // I have noticed instances of immediate notification producing
-//              // cores ocassionally. I believe the reason is
-//              // if (delay_notification == NOTIFY_IMMEADIATELY)
-//
-//              // ciju: We need to release this->lock_ before
-//              // calling data_dropped/data_delivered. Else we have a potential
-//              // deadlock in our hands.
-//              const SendMode mode = this->mode_;
-//              ACE_Reverse_Lock<LockType> reverse(this->lock_);
-//              ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
-//              if (mode == MODE_TERMINATED) {
-//                element->data_dropped(true /*dropped_by_transport*/);
-//
-//              } else {
-//                element->data_delivered();
-//
-//              }
-            }
+            this->add_delayed_notification(element);
 
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                   "Peek at the next element in the packet "
@@ -698,26 +654,7 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent,
 
   // Returns 0 if the entire packet was sent, and returns 1 otherwise.
   int rc = (this->header_.length_ == 0) ? 0 : 1;
-  // Now notify the pending elements
-  {
-    std::vector<TransportQueueElement*>::iterator eiter;
-    for (eiter = elems_to_notify.begin();
-         eiter != elems_to_notify.end();
-         ++eiter)
-    {
-      const SendMode mode = this->mode_;
-      {
-        ACE_Reverse_Lock<LockType> reverse(this->lock_);
-        ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
-        if (mode == MODE_TERMINATED) {
-          (*eiter)->data_dropped(true); // dropped_by_transport
 
-        } else {
-          (*eiter)->data_delivered();
-        }
-      }
-    }
-  }
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Adjustments all done.  Returning [%d].  0 means entire packet "
         "has been sent.  1 means otherwise.\n",
@@ -734,8 +671,7 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
   TransportQueueElement* sample = 0;
   SendMode mode = MODE_NOT_SET;
 
-  std::vector<TransportQueueElement*> samples;
-  std::vector<SendMode> modes;
+  std::vector<std::pair<TransportQueueElement*, SendMode> > samples;
 
   size_t num_delayed_notifications = 0;
   bool found_element = false;
@@ -743,7 +679,7 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
   {
     GuardType guard(lock_);
 
-    num_delayed_notifications = num_delayed_notifications_;
+    num_delayed_notifications = delayed_delivered_notification_queue_.size();
 
     if (num_delayed_notifications == 0) {
       return false;
@@ -751,39 +687,25 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
     } else if (num_delayed_notifications == 1) {
       // Optimization for the most common case (doesn't need vectors)
 
-      if (!match || match->matches(*delayed_delivered_notification_queue_[0])) {
+      if (!match || match->matches(*delayed_delivered_notification_queue_[0].first)) {
         found_element = true;
-        sample = delayed_delivered_notification_queue_[0];
-        mode = delayed_notification_mode_[0];
+        sample = delayed_delivered_notification_queue_[0].first;
+        mode = delayed_delivered_notification_queue_[0].second;
 
-        delayed_delivered_notification_queue_[0] = 0;
-        delayed_notification_mode_[0] = MODE_NOT_SET;
-        num_delayed_notifications_ = 0;
+        delayed_delivered_notification_queue_.clear();
       }
 
     } else {
-      for (size_t i = 0; i < num_delayed_notifications; ++i) {
-        sample = delayed_delivered_notification_queue_[i];
+      std::vector<std::pair<TransportQueueElement*, SendMode> >::iterator iter;
+      for (iter = delayed_delivered_notification_queue_.begin(); iter != delayed_delivered_notification_queue_.end(); ) {
+        sample = iter->first;
+        mode = iter->second;
         if (!match || match->matches(*sample)) {
           found_element = true;
-          samples.push_back(sample);
-          modes.push_back(delayed_notification_mode_[i]);
-
-          delayed_delivered_notification_queue_[i] = 0;
-          delayed_notification_mode_[i] = MODE_NOT_SET;
-        }
-      }
-
-      if (found_element) {
-        for (size_t i = 0, gap = 0; i < num_delayed_notifications; ++i) {
-          if (!delayed_delivered_notification_queue_[i]) {
-            ++gap;
-            --num_delayed_notifications_;
-          } else if (gap) {
-            delayed_delivered_notification_queue_[i - gap] =
-              delayed_delivered_notification_queue_[i];
-            delayed_notification_mode_[i - gap] = delayed_notification_mode_[i];
-          }
+          samples.push_back(*iter);
+          iter = delayed_delivered_notification_queue_.erase(iter);
+        } else {
+          ++iter;
         }
       }
     }
@@ -806,13 +728,13 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
 
   } else {
     for (size_t i = 0; i < samples.size(); ++i) {
-      if (modes[i] == MODE_TERMINATED) {
-        if (!transport_shutdown_ || samples[i]->owned_by_transport()) {
-          samples[i]->data_dropped(true);
+      if (samples[i].second == MODE_TERMINATED) {
+        if (!transport_shutdown_ || samples[i].first->owned_by_transport()) {
+          samples[i].first->data_dropped(true);
         }
       } else {
-        if (!transport_shutdown_ || samples[i]->owned_by_transport()) {
-          samples[i]->data_delivered();
+        if (!transport_shutdown_ || samples[i].first->owned_by_transport()) {
+          samples[i].first->data_delivered();
         }
       }
     }
@@ -867,7 +789,7 @@ TransportSendStrategy::clear(SendMode mode)
       // Clear the messages in the pkt_chain_ that is partially sent.
       // We just reuse these functions for normal partial send except actual sending.
       int num_bytes_left = static_cast<int>(this->pkt_chain_->total_length());
-      int result = this->adjust_packet_after_send(num_bytes_left, DELAY_NOTIFICATION);
+      int result = this->adjust_packet_after_send(num_bytes_left);
 
       if (result == 0) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1024,18 +946,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 
     if (this->link_released_) {
 
-      if (this->num_delayed_notifications_ < this->max_samples_) {
-        this->add_delayed_notification(element);
-      } else {
-        const SendMode mode = this->mode_;
-        ACE_Reverse_Lock<LockType> reverse(this->lock_);
-        ACE_Guard<ACE_Reverse_Lock<LockType> > reverseGuard(reverse);
-        if (mode == MODE_TERMINATED) {
-          element->data_dropped(true /*dropped_by_transport*/);
-        } else {
-          element->data_delivered();
-        }
-      }
+      this->add_delayed_notification(element);
 
     } else {
       if (this->mode_ == MODE_TERMINATED && !this->graceful_disconnecting_) {
@@ -1300,7 +1211,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
   }
   const TransportQueueElement::MatchOnPubId match(pub_id);
   send_delayed_notifications(&match);
-  //send_delayed_notifications();
 }
 
 void
@@ -1561,33 +1471,8 @@ TransportSendStrategy::direct_send(bool relink)
   // We will try resend the packet if the send() fails and then connection
   // is re-established.  Only loops if the "continue" line is hit.
   while (true) {
-    // ciju: I have changed the default. Immediate notification
-    // path enters the Data Store with the local locks held. This
-    // can lead to deadlocks often. I have added temporary fixes
-    // for the immediate notification, but they don't guarantee
-    // deadlock prevention. The flaw is in the design and
-    // my solution is just best effort in the given context.
-    /* ChangeLog comment
-       In TransportSendStrategy set DELAY_NOTIFICATION to be default
-       for direct_send(). This could delay things a bit in the normal
-       case but doing an immediate notification has been observed to
-       deadlock in the DCPS layer in stress conditions. This occurs
-       when the data_deliverd () call winds its way from the transport
-       to DCPS layer while another thread is winding its way up.
-    */
-    //UseDelayedNotification when = NOTIFY_IMMEADIATELY;
-    UseDelayedNotification when = DELAY_NOTIFICATION;
-
-    // If the thread per connection is used we can not hold the send strategy
-    // lock and try to call data_delivered since the
-    // DataWriterImpl::remove_sample() might hold the locks in reverse order
-    // and cause datalock.
-    if (this->transport_inst_->thread_per_connection_) {
-      when = DELAY_NOTIFICATION;
-    }
-
     // Attempt to send the packet
-    const SendPacketOutcome outcome = this->send_packet(when);
+    const SendPacketOutcome outcome = this->send_packet();
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "The outcome of the send_packet() was %d.\n", outcome));
@@ -1868,7 +1753,7 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 }
 
 TransportSendStrategy::SendPacketOutcome
-TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
+TransportSendStrategy::send_packet()
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "send_packet", 6);
 
@@ -1923,7 +1808,7 @@ TransportSendStrategy::send_packet(UseDelayedNotification delay_notification)
   // We sent some bytes - adjust the current packet (elems_ and pkt_chain_)
   // to account for the bytes that have been sent.
   const int result =
-    this->adjust_packet_after_send(num_bytes_sent, delay_notification);
+    this->adjust_packet_after_send(num_bytes_sent);
 
   if (result == 0) {
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1989,10 +1874,15 @@ TransportSendStrategy::non_blocking_send(const iovec iov[], int n, int& bp)
 void
 TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
 {
-  const size_t ndn = this->num_delayed_notifications_;
-  this->delayed_delivered_notification_queue_[ndn] = element;
-  this->delayed_notification_mode_[ndn] = this->mode_;
-  ++this->num_delayed_notifications_;
+  if (DCPS_debug_level) {
+    size_t size = this->delayed_delivered_notification_queue_.size();
+    if ((size > 0) && (size % this->max_samples_ == 0)) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Transport send strategy notification queue threshold, size=%d\n",
+                 size));
+    }
+  }
+  this->delayed_delivered_notification_queue_.push_back(std::make_pair(element, this->mode_));
 }
 
 size_t

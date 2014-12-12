@@ -191,11 +191,6 @@ private:
     OUTCOME_SEND_ERROR
   };
 
-  enum UseDelayedNotification {
-    NOTIFY_IMMEADIATELY,
-    DELAY_NOTIFICATION
-  };
-
   void add_delayed_notification(TransportQueueElement* element);
 
   /// Called from send() when it is time to attempt to send our
@@ -230,7 +225,7 @@ private:
   /// This is called to send the current packet.  The current packet
   /// will either be a "partially sent" packet, or a packet that has
   /// just been prepared via a call to prepare_packet().
-  SendPacketOutcome send_packet(UseDelayedNotification delay_notification);
+  SendPacketOutcome send_packet();
 
   /// Form an IOV and call the send_bytes() template method.
   ssize_t do_send_packet(const ACE_Message_Block* packet, int& bp);
@@ -242,8 +237,7 @@ private:
   /// and the data_delivered() calls on the fully sent elements.
   /// Returns 0 if the entire packet was sent, and returns 1 if
   /// the entire packet was not sent.
-  int adjust_packet_after_send(ssize_t num_bytes_sent,
-                               UseDelayedNotification delay_notification);
+  int adjust_packet_after_send(ssize_t num_bytes_sent);
 
   /// If delayed notifications were queued up, issue those callbacks here.
   /// The default match is "match all", otherwise match can be used to specify
@@ -355,9 +349,7 @@ private:
   SendMode mode_before_suspend_;
 
   /// Used for delayed notifications when performing work.
-  TransportQueueElement** delayed_delivered_notification_queue_;
-  SendMode* delayed_notification_mode_;
-  size_t num_delayed_notifications_;
+  std::vector<std::pair<TransportQueueElement*, SendMode> > delayed_delivered_notification_queue_;
 
   /// Allocator for header data block.
   TransportMessageBlockAllocator* header_mb_allocator_;

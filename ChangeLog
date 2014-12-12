@@ -1,6 +1,17 @@
+Fri Dec 12 22:06:13 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Eliminate all immediate notification and make the delayed
+          notification queue a vector (so it can grow).  This solves
+          some deadlocks when writing to the same data link from
+          multiple writers/threads.
+
 Fri Dec 12 20:23:17 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
-          Fix problems from ACE_Message_Blocks created with a 
+          Fix problems from ACE_Message_Blocks created with a
           null locking strategy that are then accessed by multiple
           threads simultaneously.  The chief one causing problems
           was the Data Sample Header message block created by
