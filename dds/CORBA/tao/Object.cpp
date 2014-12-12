@@ -28,24 +28,31 @@
 # include "tao/Object.inl"
 #endif /* ! __ACE_INLINE__ */
 
+
+ACE_RCSID (tao,
+           Object,
+           "$Id$")
+
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
 CORBA::Object::~Object (void)
 {
   if (this->protocol_proxy_)
     (void) this->protocol_proxy_->_decr_refcnt ();
+
+  delete this->object_init_lock_;
 }
 
 CORBA::Object::Object (TAO_Stub * protocol_proxy,
                        CORBA::Boolean collocated,
                        TAO_Abstract_ServantBase * servant,
                        TAO_ORB_Core *orb_core)
-  : refcount_ (1)
-    , is_local_ (false)
+  : is_local_ (false)
     , is_evaluated_ (true)
     , ior_ (0)
     , orb_core_ (orb_core)
     , protocol_proxy_ (protocol_proxy)
+    , object_init_lock_ (0)
 {
   /// This constructor should not be called when the protocol proxy is
   /// null ie. when the object is a LocalObject. Assert that
@@ -54,6 +61,12 @@ CORBA::Object::Object (TAO_Stub * protocol_proxy,
 
   if (this->orb_core_ == 0)
     this->orb_core_ = this->protocol_proxy_->orb_core ();
+
+  this->object_init_lock_ =
+    this->orb_core_->resource_factory ()->create_corba_object_lock ();
+
+  this->refcount_ =
+    this->orb_core_->resource_factory ()->create_corba_object_refcount ();
 
   // Set the collocation marker on the stub. This may not be news to it.
   // This may also change the stub's object proxy broker.
@@ -65,13 +78,18 @@ CORBA::Object::Object (TAO_Stub * protocol_proxy,
 
 CORBA::Object::Object (IOP::IOR *ior,
                        TAO_ORB_Core *orb_core)
-  : refcount_ (1)
-    , is_local_ (false)
+  : is_local_ (false)
     , is_evaluated_ (false)
     , ior_ (ior)
     , orb_core_ (orb_core)
     , protocol_proxy_ (0)
+    , object_init_lock_ (0)
 {
+  this->object_init_lock_ =
+    this->orb_core_->resource_factory ()->create_corba_object_lock ();
+
+  this->refcount_ =
+    this->orb_core_->resource_factory ()->create_corba_object_refcount ();
 }
 
 // Too lazy to do this check in every method properly! This is useful
@@ -79,7 +97,7 @@ CORBA::Object::Object (IOP::IOR *ior,
 #define TAO_OBJECT_IOR_EVALUATE \
 if (!this->is_evaluated_) \
   { \
-    ACE_GUARD (TAO_SYNCH_MUTEX , mon, this->object_init_lock_); \
+    ACE_GUARD (ACE_Lock , mon, *this->object_init_lock_); \
       if (!this->is_evaluated_) \
         CORBA::Object::tao_object_initialize (this); \
   }
@@ -87,7 +105,7 @@ if (!this->is_evaluated_) \
 #define TAO_OBJECT_IOR_EVALUATE_RETURN \
 if (!this->is_evaluated_) \
   { \
-    ACE_GUARD_RETURN (TAO_SYNCH_MUTEX , mon, this->object_init_lock_, 0); \
+    ACE_GUARD_RETURN (ACE_Lock , mon, *this->object_init_lock_, 0); \
     if (!this->is_evaluated_) \
       CORBA::Object::tao_object_initialize (this); \
   }
@@ -95,16 +113,16 @@ if (!this->is_evaluated_) \
 void
 CORBA::Object::_add_ref (void)
 {
-  ++this->refcount_;
+  this->refcount_.increment ();
 }
 
 void
 CORBA::Object::_remove_ref (void)
 {
-  if (--this->refcount_ == 0)
-    {
-      delete this;
-    }
+  if (this->refcount_.decrement () != 0)
+    return;
+
+  delete this;
 }
 
 CORBA::ULong
@@ -128,7 +146,8 @@ CORBA::Object::marshal (TAO_OutputCDR &cdr)
 }
 
 /*static*/ CORBA::Boolean
-CORBA::Object::marshal (const CORBA::Object_ptr x, TAO_OutputCDR &cdr)
+CORBA::Object::marshal (const CORBA::Object_ptr x,
+                        TAO_OutputCDR &cdr)
 {
   if (x == 0)
     {
@@ -209,14 +228,7 @@ CORBA::Object::_is_a (const char *type_id)
   // XXX if type_id is that of CORBA::Object, "yes, we comply" :-)
 
   if (this->protocol_proxy_ == 0)
-    {
-      if (TAO_debug_level > 0)
-        TAOLIB_ERROR ((LM_ERROR,
-                    ACE_TEXT ("TAO (%P|%t) - No protocol proxy for %C\n"),
-                    type_id));
-
-      throw ::CORBA::NO_IMPLEMENT ();
-    }
+    throw ::CORBA::NO_IMPLEMENT ();
 
   if (this->_stubobj ()->type_id.in () != 0
       && ACE_OS::strcmp (type_id,
@@ -241,6 +253,13 @@ CORBA::Object::_is_collocated (void) const
     }
 
   return false;
+}
+
+void
+CORBA::Object::set_collocated_servant (TAO_Abstract_ServantBase *b)
+{
+  this->protocol_proxy_->collocated_servant (b);
+  this->protocol_proxy_->is_collocated (true);
 }
 
 CORBA::Boolean
@@ -317,7 +336,7 @@ CORBA::Object::_key (void)
 
   if (TAO_debug_level > 2)
     {
-      TAOLIB_ERROR ((LM_ERROR,
+      ACE_ERROR ((LM_ERROR,
                   ACE_TEXT ("TAO (%P|%t) Null object key return from ")
                   ACE_TEXT ("profile in use\n")));
     }
@@ -374,11 +393,6 @@ CORBA::Object::_create_request (CORBA::Context_ptr ctx,
   // object references.
   if (ctx != 0 || this->protocol_proxy_ == 0)
     {
-      if (TAO_debug_level > 0)
-        TAOLIB_ERROR ((LM_ERROR,
-                    ACE_TEXT ("TAO (%P|%t) - No protocol proxy for %C\n"),
-                    operation));
-
       throw ::CORBA::NO_IMPLEMENT ();
     }
 
@@ -419,11 +433,6 @@ CORBA::Object::_create_request (CORBA::Context_ptr ctx,
   // object references.
   if (ctx != 0 || this->protocol_proxy_ == 0)
     {
-      if (TAO_debug_level > 0)
-        TAOLIB_ERROR ((LM_ERROR,
-                    ACE_TEXT ("TAO (%P|%t) - No protocol proxy for %C\n"),
-                    operation));
-
       throw ::CORBA::NO_IMPLEMENT ();
     }
 
@@ -462,11 +471,6 @@ CORBA::Object::_request (const char *operation)
     }
   else
     {
-      if (TAO_debug_level > 0)
-        TAOLIB_ERROR ((LM_ERROR,
-                    ACE_TEXT ("TAO (%P|%t) - No protocol proxy for %C\n"),
-                    operation));
-
       throw ::CORBA::NO_IMPLEMENT ();
     }
 }
@@ -537,13 +541,7 @@ CORBA::Object::_get_policy (CORBA::PolicyType type)
   if (this->protocol_proxy_)
     return this->protocol_proxy_->get_policy (type);
   else
-    {
-      if (TAO_debug_level > 0)
-        TAOLIB_ERROR ((LM_ERROR,
-                    ACE_TEXT ("TAO (%P|%t) - No protocol proxy in _get_policy\n")));
-
-      throw ::CORBA::NO_IMPLEMENT ();
-    }
+    throw ::CORBA::NO_IMPLEMENT ();
 }
 
 CORBA::Policy_ptr
@@ -554,13 +552,7 @@ CORBA::Object::_get_cached_policy (TAO_Cached_Policy_Type type)
   if (this->protocol_proxy_)
     return this->protocol_proxy_->get_cached_policy (type);
   else
-    {
-      if (TAO_debug_level > 0)
-        TAOLIB_ERROR ((LM_ERROR,
-                    ACE_TEXT ("TAO (%P|%t) - No protocol proxy in _get_policy\n")));
-
-      throw ::CORBA::NO_IMPLEMENT ();
-    }
+    throw ::CORBA::NO_IMPLEMENT ();
 }
 
 CORBA::Object_ptr
@@ -571,13 +563,7 @@ CORBA::Object::_set_policy_overrides (
   TAO_OBJECT_IOR_EVALUATE_RETURN;
 
   if (!this->protocol_proxy_)
-    {
-      if (TAO_debug_level > 0)
-        TAOLIB_ERROR ((LM_ERROR,
-                    ACE_TEXT ("TAO (%P|%t) - No protocol proxy in _get_policy\n")));
-
-      throw ::CORBA::NO_IMPLEMENT ();
-    }
+    throw ::CORBA::NO_IMPLEMENT ();
 
   TAO_Stub* stub =
     this->protocol_proxy_->set_policy_overrides (policies, set_add);
@@ -614,13 +600,7 @@ CORBA::Object::_get_policy_overrides (const CORBA::PolicyTypeSeq & types)
   if (this->protocol_proxy_)
     return this->protocol_proxy_->get_policy_overrides (types);
   else
-    {
-      if (TAO_debug_level > 0)
-        TAOLIB_ERROR ((LM_ERROR,
-                    ACE_TEXT ("TAO (%P|%t) - No protocol proxy in _get_policy\n")));
-
-      throw ::CORBA::NO_IMPLEMENT ();
-    }
+    throw ::CORBA::NO_IMPLEMENT ();
 }
 
 CORBA::Boolean
@@ -673,13 +653,7 @@ CORBA::Object::_get_orb (void)
       if (this->protocol_proxy_)
         return CORBA::ORB::_duplicate (this->protocol_proxy_->orb_core ()->orb ());
       else
-        {
-          if (TAO_debug_level > 0)
-            TAOLIB_ERROR ((LM_ERROR,
-                        ACE_TEXT ("TAO (%P|%t) - No protocol proxy in _get_policy\n")));
-
-          throw ::CORBA::NO_IMPLEMENT ();
-        }
+        throw ::CORBA::INTERNAL ();
     }
 }
 
@@ -752,7 +726,7 @@ CORBA::Object::tao_object_initialize (CORBA::Object *obj)
       orb_core = TAO_ORB_Core_instance ();
       if (TAO_debug_level > 0)
         {
-          TAOLIB_DEBUG ((LM_WARNING,
+          ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("TAO (%P|%t) - Object::tao_object_initialize ")
                       ACE_TEXT ("WARNING: extracting object from ")
                       ACE_TEXT ("default ORB_Core\n")));
@@ -786,14 +760,7 @@ CORBA::Object::tao_object_initialize (CORBA::Object *obj)
           TAO_Profile *pfile = connector_registry->create_profile (cdr);
 
           if (pfile != 0)
-            {
-              if (mp.give_profile (pfile) == -1)
-              {
-                TAOLIB_ERROR ((LM_ERROR,
-                            ACE_TEXT ("TAO (%P|%t) ERROR: give_profile\n")
-                            ACE_TEXT (" returned -1\n")));
-              }
-            }
+            mp.give_profile (pfile);
         }
 
       // Make sure we got some profiles!
@@ -801,7 +768,7 @@ CORBA::Object::tao_object_initialize (CORBA::Object *obj)
         {
           // @@ This occurs when profile creation fails when decoding the
           //    profile from the IOR.
-          TAOLIB_ERROR ((LM_ERROR,
+          ACE_ERROR ((LM_ERROR,
                       ACE_TEXT ("TAO (%P|%t) ERROR: XXXXX Could not create all ")
                       ACE_TEXT ("profiles while extracting object\n")
                       ACE_TEXT ("TAO (%P|%t) ERROR: reference from the ")
@@ -851,7 +818,7 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
       orb_core = TAO_ORB_Core_instance ();
       if (TAO_debug_level > 0)
         {
-          TAOLIB_DEBUG ((LM_WARNING,
+          ACE_DEBUG ((LM_WARNING,
                       ACE_TEXT ("TAO (%P|%t) WARNING: extracting object from ")
                       ACE_TEXT ("default ORB_Core\n")));
         }
@@ -860,9 +827,7 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
     {
       if (orb_core->resource_factory ()->resource_usage_strategy () ==
           TAO_Resource_Factory::TAO_LAZY)
-        {
-          lazy_strategy = true;
-        }
+        lazy_strategy = true;
     }
 
   if (!lazy_strategy)
@@ -870,11 +835,11 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
       // If the user has set up a eager strategy..
       CORBA::String_var type_hint;
 
-      if (!(cdr >> type_hint.inout ()))
+      if ((cdr >> type_hint.inout ()) == 0)
         return false;
 
       CORBA::ULong profile_count;
-      if (!(cdr >> profile_count))
+      if ((cdr >> profile_count) == 0)
         return false;
 
       if (profile_count == 0)
@@ -892,7 +857,7 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
           orb_core = TAO_ORB_Core_instance ();
           if (TAO_debug_level > 0)
             {
-              TAOLIB_DEBUG ((LM_WARNING,
+              ACE_DEBUG ((LM_WARNING,
                           ACE_TEXT ("TAO (%P|%t) - Object::tao_object_initialize ")
                           ACE_TEXT ("WARNING: extracting object from ")
                           ACE_TEXT ("default ORB_Core\n")));
@@ -913,14 +878,7 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
             {
               TAO_Profile *pfile = connector_registry->create_profile (cdr);
               if (pfile != 0)
-                {
-                  if (mp.give_profile (pfile) == -1)
-                    {
-                      TAOLIB_ERROR ((LM_ERROR,
-                                  ACE_TEXT ("TAO (%P|%t) ERROR: give_profile\n")
-                                  ACE_TEXT (" returned -1\n")));
-                    }
-                }
+                mp.give_profile (pfile);
             }
 
           // Make sure we got some profiles!
@@ -928,12 +886,11 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
             {
               // @@ This occurs when profile creation fails when decoding the
               //    profile from the IOR.
-              TAOLIB_ERROR_RETURN ((LM_ERROR,
-                                 ACE_TEXT ("TAO (%P|%t) - ERROR: Could not create all ")
-                                 ACE_TEXT ("profiles while extracting object [%d, %d]\n")
-                                 ACE_TEXT ("TAO (%P|%t) - ERROR: reference from the ")
-                                 ACE_TEXT ("CDR stream.\n"),
-                                 mp.profile_count (), profile_count),
+              ACE_ERROR_RETURN ((LM_ERROR,
+                                 ACE_TEXT ("TAO (%P|%t) ERROR: Could not create all ")
+                                 ACE_TEXT ("profiles while extracting object\n")
+                                 ACE_TEXT ("TAO (%P|%t) ERROR: reference from the ")
+                                 ACE_TEXT ("CDR stream.\n")),
                                 false);
             }
 
@@ -943,7 +900,7 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
         {
           if (TAO_debug_level > 0)
             ex._tao_print_exception (
-              ACE_TEXT ("TAO (%P|%t) - ERROR creating stub ")
+              ACE_TEXT ("TAO - ERROR creating stub ")
               ACE_TEXT ("object when demarshaling object ")
               ACE_TEXT ("reference.\n"));
 
@@ -953,10 +910,8 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
       TAO_Stub_Auto_Ptr safe_objdata (objdata);
 
       x = orb_core->create_object (safe_objdata.get ());
-      if (!x)
-        {
-          return false;
-        }
+      if (x == 0)
+        return false;
 
       // Transfer ownership to the CORBA::Object
       (void) safe_objdata.release ();
@@ -968,16 +923,12 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
 
       ACE_NEW_RETURN (ior,
                       IOP::IOR (),
-                      false);
+                      0);
 
-      if (!(cdr >> *ior))
-        {
-          return false;
-        }
-
+      cdr >> *ior;
       ACE_NEW_RETURN (x,
                       CORBA::Object (ior, orb_core),
-                      false);
+                      0);
     }
 
   return (CORBA::Boolean) cdr.good_bit ();

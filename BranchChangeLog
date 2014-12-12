@@ -1,3 +1,14 @@
+Fri Dec 12 22:15:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_corba.mpb:
+
+          Build after OpenDDS_Corba
+
+        * dds/CORBA/tao/LocalObject.cpp:
+        * dds/CORBA/tao/Object.cpp:
+
+          Overwrite with 1.6a versions.
+
 Fri Dec 12 19:56:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * MPC/config/dds_corba.mpb:
