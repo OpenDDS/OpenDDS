@@ -1,3 +1,9 @@
+Fri Dec 12 14:51:33 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.h:
+
+          Needed an extra #include for the non-safety-profile build.
+
 Thu Dec 11 22:33:07 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Definitions.h:

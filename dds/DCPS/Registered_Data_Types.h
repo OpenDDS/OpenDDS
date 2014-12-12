@@ -12,6 +12,7 @@
 #include "dcps_export.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTypeSupportExtC.h"
+#include "Definitions.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "PoolAllocator.h"
