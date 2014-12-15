@@ -2,6 +2,10 @@
 // and transport.  This file will be included by the code in the executable
 // so that the static link includes the initializers for these libraries.
 #ifdef ACE_AS_STATIC_LIBS
-#include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
+# ifdef OPENDDS_SAFETY_PROFILE
+#  include "dds/DCPS/RTPS/RtpsDiscovery.h"
+# else
+#  include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
+# endif
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #endif

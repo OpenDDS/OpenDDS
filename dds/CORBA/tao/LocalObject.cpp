@@ -13,10 +13,6 @@
 #include "ace/Log_Msg.h"
 #include "ace/Guard_T.h"
 
-ACE_RCSID (tao,
-           LocalObject,
-           "$Id$")
-
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
 CORBA::LocalObject::~LocalObject (void)
@@ -49,7 +45,7 @@ CORBA::LocalObject::_hash (CORBA::ULong maximum)
 CORBA::Boolean
 CORBA::LocalObject::_is_equivalent (CORBA::Object_ptr other_obj)
 {
-  return (other_obj == this) ? true : false;
+  return other_obj == this;
 }
 
 // TAO's extensions
@@ -58,11 +54,7 @@ CORBA::LocalObject::_is_equivalent (CORBA::Object_ptr other_obj)
 TAO::ObjectKey *
 CORBA::LocalObject::_key (void)
 {
-  if (TAO_debug_level > 0)
-    ACE_ERROR ((LM_ERROR,
-                ACE_TEXT ("(%P|%t) Cannot get _key from a LocalObject!\n")));
-
-  throw ::CORBA::NO_IMPLEMENT ();
+  throw ::CORBA::NO_IMPLEMENT();
 }
 
 #if (TAO_HAS_MINIMUM_CORBA == 0)
@@ -74,7 +66,6 @@ CORBA::LocalObject::_key (void)
 CORBA::Boolean
 CORBA::LocalObject::_non_existent (void)
 {
-  // Always return false.
   return false;
 }
 

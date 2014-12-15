@@ -1,3 +1,29 @@
+Mon Dec 15 23:02:05 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+        * rules.dds.GNU:
+
+          Allow the location of opendds_idl to be specified in
+          user_macros.GNU instead of always using $DDS_ROOT/bin.
+          Useful for cross-compiles and safety profile.
+
+        * dds/CORBA/tao/LocalObject.cpp:
+        * dds/CORBA/tao/Object.cpp:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/ConfigUtils.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FileSystemStorage.cpp:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/RcObject_T.h:
+        * dds/DCPS/StaticIncludes.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+
+          Safety profile build and trying to compile
+          with the ancient LynxOS compiler.
+
 Fri Dec 12 22:15:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * MPC/config/dds_corba.mpb:

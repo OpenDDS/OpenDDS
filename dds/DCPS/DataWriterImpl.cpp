@@ -44,7 +44,6 @@
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 
-#include <sstream>
 #include <stdexcept>
 
 namespace OpenDDS {
@@ -2573,18 +2572,18 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
 {
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
-    const char* separator = "";
-    std::stringstream buffer;
+    std::string separator;
+    std::string buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer << separator << GuidConverter(ids[i]);
+      buffer += separator + std::string(GuidConverter(ids[i]));
       separator = ", ";
     }
 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::lookup_instance_handles: ")
                ACE_TEXT("searching for handles for reader Ids: %C.\n"),
-               buffer.str().c_str()));
+               buffer.c_str()));
   }
 
   CORBA::ULong const num_rds = ids.length();

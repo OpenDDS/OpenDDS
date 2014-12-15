@@ -9,7 +9,7 @@
 #ifndef DCPS_GUIDCONVERTER_H
 #define DCPS_GUIDCONVERTER_H
 
-#include <ostream>
+#include <iostream>
 #include <string>
 
 #include "tao/Basic_Types.h"

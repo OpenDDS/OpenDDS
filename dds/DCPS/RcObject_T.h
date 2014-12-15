@@ -43,7 +43,7 @@ public:
       if (allocator) {
         ACE_DES_FREE(this,
                      allocator->free,
-                     RcObject<T>);
+                     RcObject);
 
       } else {
         delete this;

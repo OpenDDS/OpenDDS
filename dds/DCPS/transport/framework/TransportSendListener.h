@@ -52,13 +52,10 @@ public:
   /// Hook for the listener to override a normal control message with
   /// customized messages to different DataLinks.
   virtual SendControlStatus send_control_customized(
-    const DataLinkSet_rch& /* links */,
-    const DataSampleHeader& /* header */,
-    ACE_Message_Block* /* msg */,
-    void* /* extra */)
-  {
-    return SEND_CONTROL_OK;
-  }
+    const DataLinkSet_rch& links,
+    const DataSampleHeader& header,
+    ACE_Message_Block* msg,
+    void* extra);
 
   /// Handle reception of SAMPLE_ACK message.
   virtual void deliver_ack(

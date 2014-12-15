@@ -45,6 +45,9 @@ persistence_profile ?= 1
 exceptions ?= 1
 no_opendds_safety_profile ?= 1
 
+OPENDDS_IDL = $(DDS_ROOT)/bin/opendds_idl
+OPENDDS_IDL_DEP = $(OPENDDS_IDL)
+
 # Turn on symbol versioning. The scheme that we follow is to allow
 # applications dependent on libraries, with same version numbers (major,
 # minor and beta) to run, but applications with dependencies on libraries
