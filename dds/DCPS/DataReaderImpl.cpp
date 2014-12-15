@@ -640,9 +640,6 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
   for (CORBA::ULong i = 0; i < updated_writers.length(); ++i) {
     {
-      // can't hold publication_handle_lock_ here due to possible
-      // reactor deadlock when scheduling timer in schedule_delayed_release
-      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_pub_handle_lock_);
       this->disassociate(updated_writers[i]);
     }
   }
@@ -1584,7 +1581,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         GuidConverter sub_id(this->subscription_id_);
         GuidConverter pub_id(sample.header_.publication_id_);
         ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received()")
+            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
             ACE_TEXT(" subscription %C failed to find ")
             ACE_TEXT(" publication data for %C!\n"),
             std::string(sub_id).c_str(),
@@ -1808,9 +1805,10 @@ DataReaderImpl::send_sample_ack(
     GuidConverter subscriptionBuffer(this->subscription_id_);
     GuidConverter publicationBuffer(publication);
     ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::send_sample_ack() - ")
+        ACE_TEXT("(%P|%t) DataReaderImpl[%@]::send_sample_ack() - ")
         ACE_TEXT("%C sending SAMPLE_ACK message with sequence %q ")
         ACE_TEXT("to publication %C.\n"),
+        this,
         std::string(subscriptionBuffer).c_str(),
         sequence.getValue(),
         std::string(publicationBuffer).c_str()));
@@ -3381,7 +3379,11 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
   PublicationId pub_id = reinterpret_cast<const WriterInfo*>(arg)->writer_id_;
 
   if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout\n"));
+    GuidConverter sub_repo(reader_->get_repo_id());
+    GuidConverter pub_repo(pub_id);
+    ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout reader: %C waiting on writer: %C\n",
+               std::string(sub_repo).c_str(),
+               std::string(pub_repo).c_str()));
   }
 
   reader_->resume_sample_processing(pub_id);

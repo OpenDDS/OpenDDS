@@ -179,7 +179,7 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
 
       // Associate the new connection object with the sending strategy and disassociate
       // the old connection object with the sending strategy.
-      int ss_result = ss->reset(this->connection_.in());
+      int ss_result = ss->reset(this->connection_.in(), true);
 
       if (rs_result == 0 && ss_result == 0) {
         return 0;

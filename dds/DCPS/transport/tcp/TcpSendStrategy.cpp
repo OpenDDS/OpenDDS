@@ -70,7 +70,7 @@ OpenDDS::DCPS::TcpSendStrategy::schedule_output()
 }
 
 int
-OpenDDS::DCPS::TcpSendStrategy::reset(TcpConnection* connection)
+OpenDDS::DCPS::TcpSendStrategy::reset(TcpConnection* connection, bool reset_mode)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","reset",6);
 
@@ -104,6 +104,15 @@ OpenDDS::DCPS::TcpSendStrategy::reset(TcpConnection* connection)
   // reference (to this object) that we pass-in here.
   this->connection_->set_send_strategy(this);
 
+  //For the case of a send_strategy being reused for a new connection (not reconnect)
+  //need to reset the state
+  if (reset_mode) {
+    //Need to make sure that the send mode is set back to MODE_DIRECT in case
+    //it was terminated prior to being reused/reset.
+    this->clear(MODE_DIRECT);
+    //reset graceful_disconnecting_ to initial state
+    this->set_graceful_disconnecting(false);
+  }
   return 0;
 }
 

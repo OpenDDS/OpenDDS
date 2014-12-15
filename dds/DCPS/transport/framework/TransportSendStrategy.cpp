@@ -1718,6 +1718,12 @@ TransportSendStrategy::prepare_packet_i()
   // Default implementation does nothing.
 }
 
+void
+TransportSendStrategy::set_graceful_disconnecting(bool flag)
+{
+  this->graceful_disconnecting_ = flag;
+}
+
 ssize_t
 TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 {

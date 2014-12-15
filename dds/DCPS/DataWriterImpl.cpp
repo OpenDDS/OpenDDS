@@ -1220,12 +1220,38 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
 
   GuidConverter converter(this->publication_id_);
   ACE_DEBUG((LM_WARNING,
-             ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_ack_responses() - ")
+             ACE_TEXT("(%P|%t) WARNING: DataWriterImpl[%@]::wait_for_ack_responses() - ")
              ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
              ACE_TEXT("from %d subscriptions.\n"),
+             this,
              std::string(converter).c_str(),
              token.sequence_.getValue(),
              this->readers_.size()));
+
+  if (DCPS_debug_level > 0) {
+    {
+      ACE_GUARD_RETURN(
+        ACE_Recursive_Thread_Mutex,
+        readersGuard,
+        this->lock_,
+        DDS::RETCODE_ERROR);
+
+      for (IdSet::const_iterator current = this->readers_.begin();
+           current != this->readers_.end();
+           ++current) {
+        GuidConverter converter2(*current);
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl[%@]::wait_for_ack_responses() - ")
+                   ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
+                   ACE_TEXT("from subscription %C.\n"),
+                   this,
+                   std::string(converter).c_str(),
+                   token.sequence_.getValue(),
+                   std::string(converter2).c_str()));
+      }
+    }
+  }
+
   return DDS::RETCODE_TIMEOUT;
 }
 

@@ -1,3 +1,68 @@
+Mon Dec 15 15:44:19 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          No longer have to release the pub_handle_lock_ when
+          disassociating which allows remove_associations to be
+          a single transaction.
+
+          Added some more detail to certain log statements to
+          make debugging easier.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added logging of which subscriptions the writer is waiting
+          for ack responses from.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+
+          Added Reactor callback handle_exception for notify calls of
+          schedule_stop and schedule_delayed_release to use the
+          scheduled_to_stop_at_ time and scheduling_release_ flag to
+          coordinate release.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added schedule_stop and reworked schedule_delayed_release
+          to notify the reactor instead of directly interacting with
+          the reactor.  This alleviates potential deadlock and moves
+          the scheduling and cancelling of timers as well as the calls
+          to stop all onto the reactor thread.  The reactor will call
+          handle_exception which determines how to proceed based on
+          whether scheduled_to_stop_at_ has been set and how it
+          compares to the current time as well as if scheduling_release_
+          is set.
+
+          release_reservations can now happen as a transaction, holding
+          the pub_sub_maps_lock the entire time.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Disassociate can hold the lock for entire disassociate
+          transaction now.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added mutator for graceful_disconnecting flag
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          For reuse case needs to reset send mode and
+          graceful_disconnecting flag
+
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Transport now notifies the reactor of the need to stop or
+          schedule a delayed release to avoid reactor deadlock from
+          this thread.  Stopping and Scheduling of timers now happens
+          on the reactor thread when it calls handle_exception on the
+          DataLink. This allows scope of links_lock_ to be expanded
+          for entire transaction of the release.
+
 Fri Dec 12 22:06:13 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportSendStrategy.h:

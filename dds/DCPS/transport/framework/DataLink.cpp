@@ -44,12 +44,11 @@ namespace DCPS {
 DataLink::DataLink(TransportImpl* impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
+    scheduled_to_stop_at_(ACE_Time_Value::zero),
     default_listener_(0),
     thr_per_con_send_task_(0),
     transport_priority_(priority),
-    scheduled_release_(false),
     scheduling_release_(false),
-    cancelled_release_(false),
     send_control_allocator_(0),
     mb_allocator_(0),
     db_allocator_(0),
@@ -99,9 +98,10 @@ DataLink::~DataLink()
 
   if ((this->pub_map_.size() > 0) || (this->sub_map_.size() > 0)) {
     ACE_DEBUG((LM_WARNING,
-               ACE_TEXT("(%P|%t) WARNING: DataLink::~DataLink() - ")
+               ACE_TEXT("(%P|%t) WARNING: DataLink[%@]::~DataLink() - ")
                ACE_TEXT("link still in use by %d publications ")
                ACE_TEXT("and %d subscriptions when deleted!\n"),
+               this,
                this->pub_map_.size(),
                this->sub_map_.size()));
   }
@@ -143,6 +143,74 @@ DataLink::invoke_on_start_callbacks(bool success)
   }
 }
 
+//Reactor invokes this after being notified in schedule_stop or cancel_release
+int
+DataLink::handle_exception(ACE_HANDLE /* fd */)
+{
+  if(this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));
+    }
+    ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
+    if (reactor->cancel_timer(this) > 0) {
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataLink::handle_exception() - cancelled future release timer\n")));
+      }
+    }
+    this->_remove_ref();
+    return 0;
+  } else if (this->scheduled_to_stop_at_ <= ACE_OS::gettimeofday()) {
+    if (this->scheduling_release_) {
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataLink::handle_exception() - delay already elapsed so handle_timeout now\n")));
+      }
+      this->handle_timeout(ACE_Time_Value::zero, 0);
+      return 0;
+    }
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataLink::handle_exception() - stopping now\n")));
+    }
+    this->stop();
+    this->_remove_ref();
+    return 0;
+  } else /* SCHEDULE TO STOP IN THE FUTURE*/ {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
+    }
+    ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
+    ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
+    reactor->schedule_timer(this, 0, future_release_time);
+  }
+  return 0;
+}
+
+//Allows DataLink::stop to be done on the reactor thread so that
+//this thread avoids possibly deadlocking trying to access reactor
+//to stop strategies or schedule timers
+void
+DataLink::schedule_stop(ACE_Time_Value& schedule_to_stop_at)
+{
+  if (!this->stopped_ && this->scheduled_to_stop_at_ == ACE_Time_Value::zero) {
+    //Add ref before handing to the reactor
+    //ref removed in handle_exception or in handle_timeout based on stopping now or delayed
+    this->_add_ref();
+    this->scheduled_to_stop_at_ = schedule_to_stop_at;
+    TransportReactorTask_rch reactor(this->impl_->reactor_task(), false);
+    reactor.in()->get_reactor()->notify(this);
+    // reactor will invoke our DataLink::handle_exception()
+  } else {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataLink::schedule_stop() - Already stopped or already scheduled for stop\n")));
+    }
+  }
+}
+
 void
 DataLink::stop()
 {
@@ -173,6 +241,7 @@ DataLink::stop()
 
   this->stop_i();
   this->stopped_ = true;
+  this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
 }
 
 void
@@ -481,96 +550,94 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   // See if the remote_id is a publisher_id.
   ReceiveListenerSet_rch listener_set;
 
-  {
-    GuardType guard(this->pub_sub_maps_lock_);
-    listener_set = this->pub_map_.find(remote_id);
+  GuardType guard(this->pub_sub_maps_lock_);
+  listener_set = this->pub_map_.find(remote_id);
 
-    if (listener_set.is_nil()) {
-      // The remote_id is not a publisher_id.
-      // See if it is a subscriber_id by looking in our sub_map_.
-      RepoIdSet_rch id_set;
-      bool has_local_listener = false;
+  if (listener_set.is_nil()) {
+    // The remote_id is not a publisher_id.
+    // See if it is a subscriber_id by looking in our sub_map_.
+    RepoIdSet_rch id_set;
+    bool has_local_listener = false;
 
-      id_set = this->sub_map_.find(remote_id);
-      if (id_set.is_nil()) {
-        has_local_listener = this->recv_listener_for(local_id);
-      }
+    id_set = this->sub_map_.find(remote_id);
+    if (id_set.is_nil()) {
+      has_local_listener = this->recv_listener_for(local_id);
+    }
 
-      if (id_set.is_nil() && !has_local_listener) {
-        has_local_listener = this->send_listener_for(local_id);
-      }
+    if (id_set.is_nil() && !has_local_listener) {
+      has_local_listener = this->send_listener_for(local_id);
+    }
 
-      if (has_local_listener) {
-        // Special case for "loopback" use of one DataLink for both
-        // publication and subscription: if the first release_reservations()
-        // has already completed, the second may not find anything in pub_map_
-        // and sub_map_.
-        VDBG_LVL((LM_DEBUG,
-                  ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
-                  ACE_TEXT("the link has no reservations.\n")), 5);
-
-        this->release_remote_i(remote_id);
-        DataLinkSet_rch& rel_set = released_locals[local_id];
-
-        if (!rel_set.in())
-          rel_set = new DataLinkSet;
-
-        rel_set->insert_link(this);
-
-        return;
-      }
-
-      if (id_set.is_nil()) {
-        // We don't know about the remote_id.
-        GuidConverter converter(remote_id);
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: DataLink::release_reservations: ")
-                   ACE_TEXT("unable to locate remote %C in pub_map_ or sub_map_.\n"),
-                   std::string(converter).c_str()));
-
-      } else {
-        VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::release_reservations: the remote_id is a sub id.\n"), 5);
-
-        // The remote_id is a subscriber_id.
-
-        this->release_remote_subscriber(remote_id,
-                                        local_id,
-                                        id_set,
-                                        released_locals);
-
-        if (id_set->size() == 0) {
-          // Remove the remote_id(sub) after the remote/local ids is released
-          // and there are no local pubs associated with this sub.
-
-          id_set = this->sub_map_.remove_set(remote_id);
-
-          this->release_remote_i(remote_id);
-        }
-
-      }
-
-    } else {
+    if (has_local_listener) {
+      // Special case for "loopback" use of one DataLink for both
+      // publication and subscription: if the first release_reservations()
+      // has already completed, the second may not find anything in pub_map_
+      // and sub_map_.
       VDBG_LVL((LM_DEBUG,
                 ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
-                ACE_TEXT("the remote_id is a pub id.\n")), 5);
+                ACE_TEXT("the link has no reservations.\n")), 5);
 
-      // The remote_id is a publisher_id.
+      this->release_remote_i(remote_id);
+      DataLinkSet_rch& rel_set = released_locals[local_id];
 
-      this->release_remote_publisher(remote_id,
-                                     local_id,
-                                     listener_set,
-                                     released_locals);
+      if (!rel_set.in())
+        rel_set = new DataLinkSet;
 
-      if (listener_set->size() == 0) {
-        // Remove the remote_id(pub) after the remote/local ids is released
-        // and there are no local subs associated with this pub.
-        listener_set = this->pub_map_.remove_set(remote_id);
+      rel_set->insert_link(this);
+
+      return;
+    }
+
+    if (id_set.is_nil()) {
+      // We don't know about the remote_id.
+      GuidConverter converter(remote_id);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataLink::release_reservations: ")
+                 ACE_TEXT("unable to locate remote %C in pub_map_ or sub_map_.\n"),
+                 std::string(converter).c_str()));
+
+    } else {
+      VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::release_reservations: the remote_id is a sub id.\n"), 5);
+
+      // The remote_id is a subscriber_id.
+
+      this->release_remote_subscriber(remote_id,
+                                      local_id,
+                                      id_set,
+                                      released_locals);
+
+      if (id_set->size() == 0) {
+        // Remove the remote_id(sub) after the remote/local ids is released
+        // and there are no local pubs associated with this sub.
+
+        id_set = this->sub_map_.remove_set(remote_id);
 
         this->release_remote_i(remote_id);
       }
 
     }
-  } //end lock_ scope
+
+  } else {
+    VDBG_LVL((LM_DEBUG,
+              ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
+              ACE_TEXT("the remote_id is a pub id.\n")), 5);
+
+    // The remote_id is a publisher_id.
+
+    this->release_remote_publisher(remote_id,
+                                   local_id,
+                                   listener_set,
+                                   released_locals);
+
+    if (listener_set->size() == 0) {
+      // Remove the remote_id(pub) after the remote/local ids is released
+      // and there are no local subs associated with this pub.
+      listener_set = this->pub_map_.remove_set(remote_id);
+
+      this->release_remote_i(remote_id);
+    }
+
+  }
 
   VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
@@ -591,11 +658,6 @@ DataLink::schedule_delayed_release()
 {
   DBG_ENTRY_LVL("DataLink", "schedule_delayed_release", 6);
 
-  cancelled_release_ = false;
-  // Add reference before schedule timer with reactor and remove reference after
-  // handle_timeout is called. This would avoid DataLink deletion while handling
-  // timeout.
-  this->_add_ref();
   VDBG((LM_DEBUG, "(%P|%t) DataLink[%@]::schedule_delayed_release\n", this));
 
   // The samples have to be removed at this point, otherwise the samples
@@ -605,43 +667,19 @@ DataLink::schedule_delayed_release()
     this->send_strategy_->clear();
   }
 
-  ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
-
-  reactor->schedule_timer(this, 0, this->datalink_release_delay_);
-  this->scheduled_release_ = true;
-  if (cancelled_release_) {
-
-    if (reactor->cancel_timer(this) > 0) {
-      // Remove the extra reference added when scheduled with the reactor.
-      this->_remove_ref();
-    }
-    this->scheduled_release_ = false;
-  }
-  this->cancelled_release_ = false;
-  this->scheduling_release_=false;
+  ACE_Time_Value future_release_time = ACE_OS::gettimeofday() + this->datalink_release_delay_;
+  this->schedule_stop(future_release_time);
 }
 
 bool
 DataLink::cancel_release()
 {
   DBG_ENTRY_LVL("DataLink", "cancel_release", 6);
-
-  this->cancelled_release_ = true;
-  if (scheduled_release_) {
-    ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
-    bool retval = false;
-    retval = reactor->cancel_timer(this) > 0;
-    if (retval) {
-      // Remove the extra reference added when scheduled with the reactor.
-      this->_remove_ref();
-      scheduled_release_ = false;
-    }
-    return retval;
-  } else if (scheduling_release_) {
-    return true;
-  }
-
-  return false;
+  this->set_scheduling_release(false);
+  this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+  TransportReactorTask_rch reactor(this->impl_->reactor_task(), false);
+  reactor.in()->get_reactor()->notify(this);
+  return true;
 }
 
 int
@@ -1138,8 +1176,9 @@ DataLink::notify_connection_deleted()
 
   if (Transport_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
+               ACE_TEXT("(%P|%t) DataLink[%@]::notify_connection_deleted: ")
                ACE_TEXT("pmap %d smap %d\n"),
+               this,
                released_local_pubs_.map().size(),
                released_local_subs_.map().size()));
   }
@@ -1387,13 +1426,14 @@ void DataLink::clear_associations()
 int
 DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 {
-  VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
-  this->impl_->unbind_link(this);
+  if (this->scheduled_to_stop_at_ != ACE_Time_Value::zero) {
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
+    this->impl_->unbind_link(this);
 
-  if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
-    this->stop();
+    if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
+      this->stop();
+    }
   }
-
   this->_remove_ref();
   return 0;
 }

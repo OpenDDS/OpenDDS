@@ -573,9 +573,6 @@ TransportClient::disassociate(const RepoId& peerId)
   data_link_index_.erase(found);
   DataLinkSetMap released;
 
-  {
-    //can't call release_reservations while holding lock due to possible reactor deadlock
-    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
     if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
@@ -584,10 +581,9 @@ TransportClient::disassociate(const RepoId& peerId)
     }
 
     link->release_reservations(peerId, repo_id_, released);
-  }
 
   if (!released.empty()) {
-    // Datalink is no longer used for any remote peer
+    // Datalink is no longer used for any remote peer by this TransportClient
     link->remove_listener(repo_id_);
     if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,

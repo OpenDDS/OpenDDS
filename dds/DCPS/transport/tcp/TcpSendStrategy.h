@@ -37,7 +37,7 @@ public:
   /// The "old" connection object is unregistered with the reactor and the "new" connection
   /// object is registered for sending. The implementation of this method is borrowed from
   /// the ReceiveStrategy.
-  int reset(TcpConnection* connection);
+  int reset(TcpConnection* connection, bool reset_mode = false);
 
   /// Enable or disable output processing by the reactor according to mode.
   virtual void schedule_output();

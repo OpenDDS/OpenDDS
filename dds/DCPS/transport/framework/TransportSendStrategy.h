@@ -181,6 +181,9 @@ protected:
   /// actually be a little larger.
   static const size_t UDP_MAX_MESSAGE_SIZE = 65466;
 
+  /// Set graceful disconnecting flag.
+  void set_graceful_disconnecting(bool flag);
+
 private:
 
   enum SendPacketOutcome {
