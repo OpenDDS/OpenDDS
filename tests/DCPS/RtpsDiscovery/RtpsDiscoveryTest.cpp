@@ -770,13 +770,13 @@ bool run_test(DomainParticipant_var& dp,
   dp->ignore_publication(pub_ih);
   if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), false, 0)) {
     ACE_ERROR_RETURN((LM_ERROR,
-                     ACE_TEXT("Could not ignore publication\n")), false);
+                     ACE_TEXT("ERROR: Could not ignore publication\n")), false);
   }
 
   dp2->ignore_subscription(sub_ih);
   if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 0)) {
     ACE_ERROR_RETURN((LM_ERROR,
-                     ACE_TEXT("Could not ignore subscription\n")), false);
+                     ACE_TEXT("ERROR: Could not ignore subscription\n")), false);
   }
 
   dp->ignore_participant(dp2_ih);
@@ -784,7 +784,7 @@ bool run_test(DomainParticipant_var& dp,
   dp->get_discovered_participants(handles);
   if (handles.length()) {
     ACE_ERROR_RETURN((LM_ERROR,
-                     ACE_TEXT("Could not ignore participant\n")), false);
+                     ACE_TEXT("ERROR: Could not ignore participant\n")), false);
   }
 
   return ok;
