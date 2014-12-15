@@ -112,7 +112,7 @@ Wed Dec 10 18:43:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
         * tests/FACE/Messenger/Publisher/Publisher.cpp:
         * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
 
-          Updated FACE support to match spec 2.1 (conformance test 2.1.1).
+          Updated FACE support to match spec 2.1 (conformance test 2.1.2).
 
         * face:
 
