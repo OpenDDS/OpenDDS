@@ -1,3 +1,11 @@
+Mon Dec 15 20:25:37 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          fixed a deadlock when ShmemTransport does a read_from_links
+          it can't hold the links_lock_ so make a local copy of all
+          the ShmemDatalink_rch's then release lock and call read() on each.
+
 Mon Dec 15 19:10:22 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/PubScalability/README:
