@@ -1,3 +1,29 @@
+Mon Dec 15 17:01:59 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability:
+        * tests/DCPS/PubScalability/DataReaderListener.h:
+        * tests/DCPS/PubScalability/DataReaderListener.cpp:
+        * tests/DCPS/PubScalability/InstanceDataMap.h:
+        * tests/DCPS/PubScalability/InstanceDataMap.cpp:
+        * tests/DCPS/PubScalability/PubDriver.h:
+        * tests/DCPS/PubScalability/PubDriver.cpp:
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+        * tests/DCPS/PubScalability/README:
+        * tests/DCPS/PubScalability/SampleType.idl:
+        * tests/DCPS/PubScalability/SubDriver.h:
+        * tests/DCPS/PubScalability/SubDriver.cpp:
+        * tests/DCPS/PubScalability/TestException.h:
+        * tests/DCPS/PubScalability/Writer.h:
+        * tests/DCPS/PubScalability/Writer.cpp:
+        * tests/DCPS/PubScalability/pub_main.cpp:
+        * tests/DCPS/PubScalability/run_test.pl:
+        * tests/DCPS/PubScalability/sub_main.cpp:
+
+          Add a scalability test that was derived from the ELAC work.
+          This was used to find the two problems fixed last week and
+          allows multiple writers/threads to publish to large number
+          of subscriber processes (100s).
+
 Mon Dec 15 15:44:19 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
