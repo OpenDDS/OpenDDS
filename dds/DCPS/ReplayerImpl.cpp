@@ -938,7 +938,7 @@ ReplayerImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
 }
 
 void
-ReplayerImpl::notify_connection_deleted()
+ReplayerImpl::notify_connection_deleted(const RepoId&)
 {
 }
 

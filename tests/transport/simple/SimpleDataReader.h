@@ -25,7 +25,7 @@ class SimpleDataReader
     void notify_subscription_disconnected(const OpenDDS::DCPS::WriterIdSeq&) {}
     void notify_subscription_reconnected(const OpenDDS::DCPS::WriterIdSeq&) {}
     void notify_subscription_lost(const OpenDDS::DCPS::WriterIdSeq&) {}
-    void notify_connection_deleted() {}
+    void notify_connection_deleted(const OpenDDS::DCPS::RepoId&) {}
     void remove_associations(const OpenDDS::DCPS::WriterIdSeq&, bool) {}
 
     // Implementing TransportClient

@@ -98,6 +98,11 @@ OpenDDS::DCPS::TcpConnection::~TcpConnection()
   //this->reconnect_task_.wait ();
 
   if (!this->link_.is_nil()) {
+    if (Transport_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TcpConnection::~TcpConnection: about to notify link[%@] connection deleted\n"),
+                 this->link_.in()));
+    }
     this->link_->notify_connection_deleted();
   }
 

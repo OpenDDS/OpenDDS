@@ -2595,10 +2595,10 @@ DataWriterImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
 }
 
 void
-DataWriterImpl::notify_connection_deleted()
+DataWriterImpl::notify_connection_deleted(const RepoId& peerId)
 {
   DBG_ENTRY_LVL("DataWriterImpl","notify_connection_deleted",6);
-
+  on_notification_of_connection_deletion(peerId);
   // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
   // is given to this DataWriter then narrow() fails.
   DataWriterListener_var the_listener =

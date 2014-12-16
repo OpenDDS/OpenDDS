@@ -46,6 +46,8 @@ public:
   TcpConnection_rch get_connection();
   TcpTransport_rch get_transport_impl();
 
+  virtual bool issues_on_deleted_callback() const;
+
   virtual void pre_stop_i();
 
   /// Set release pending flag.

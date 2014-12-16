@@ -1,3 +1,47 @@
+Tue Dec 16 22:58:42 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.inl:
+
+          For transports that notify that a connection was deleted, prolong
+          the TransportClient's registration on the link as a listener until
+          the datalink has a chance to notify it that the conneciton is
+          indeed being deleted.  This allows the TransportSendListener or
+          TransportReceiveListener to actually receive the callback and then
+          finalize the removal of the TransportClient's knowledge of the link
+          as well as removing the link's knowledge of the listener.
+          The Data(Writer/Reader)Impl will then call into the TransportClient
+          to register the receipt of the notification.
+
+          Some additional debug logging was added to help document this
+          change
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/TransportReceiveListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataWriter.h:
+
+          Adding peerId argument to notify_connection_deleted.
+
 Tue Dec 16 22:31:10 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/PubScalability/PubScalability.mpc:

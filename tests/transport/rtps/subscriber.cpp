@@ -163,7 +163,7 @@ public:
   void notify_subscription_disconnected(const WriterIdSeq&) {}
   void notify_subscription_reconnected(const WriterIdSeq&) {}
   void notify_subscription_lost(const WriterIdSeq&) {}
-  void notify_connection_deleted() {}
+  void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const WriterIdSeq&, bool) {}
 
   // Implementing TransportClient

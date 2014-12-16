@@ -239,7 +239,7 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 
 }
 
-void RecorderImpl::notify_connection_deleted()
+void RecorderImpl::notify_connection_deleted(const RepoId&)
 {
 
 }

@@ -1200,7 +1200,15 @@ DataLink::notify_connection_deleted()
                    std::string(converter).c_str()));
       }
 
-      tsl->notify_connection_deleted();
+      tsl->notify_connection_deleted(itr->second);
+    } else {
+      if (Transport_debug_level > 0) {
+        GuidConverter converter(itr->first);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
+                   ACE_TEXT("could not find tsl for pub %C.\n"),
+                   std::string(converter).c_str()));
+      }
     }
   }
 
@@ -1221,7 +1229,15 @@ DataLink::notify_connection_deleted()
                    std::string(converter).c_str()));
       }
 
-      trl->notify_connection_deleted();
+      trl->notify_connection_deleted(itr2->second);
+    } else {
+      if (Transport_debug_level > 0) {
+        GuidConverter converter(itr2->first);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
+                   ACE_TEXT("could not find tsl for pub %C.\n"),
+                   std::string(converter).c_str()));
+      }
     }
   }
 }

@@ -182,6 +182,7 @@ public:
   void notify(ConnectionNotice notice);
 
   void notify_connection_deleted();
+  virtual bool issues_on_deleted_callback() const;
 
   /// Called before release the datalink or before shutdown to let
   /// the concrete DataLink to do anything necessary.
