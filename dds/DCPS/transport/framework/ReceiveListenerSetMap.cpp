@@ -11,8 +11,6 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 
-#include <sstream>
-
 #if !defined (__ACE_INLINE__)
 #include "ReceiveListenerSetMap.inl"
 #endif /* __ACE_INLINE__ */

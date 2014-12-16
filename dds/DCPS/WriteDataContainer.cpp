@@ -26,8 +26,6 @@
 
 #include "tao/debug.h"
 
-#include <sstream>
-
 namespace OpenDDS {
 namespace DCPS {
 

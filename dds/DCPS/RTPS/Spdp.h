@@ -114,7 +114,11 @@ public:
   bool has_discovered_participant(const DCPS::RepoId& guid);
 
   WaitForAcks& wait_for_acks();
+
+#ifndef ACE_LYNXOS_MAJOR
 private:
+#endif
+
   ACE_Reactor* reactor() const;
 
   ACE_Thread_Mutex lock_;

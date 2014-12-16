@@ -292,10 +292,24 @@ DataLink::remove_on_start_callback(TransportClient* client, const RepoId& remote
 {
   GuardType guard(strategy_lock_);
 
+#ifdef ACE_LYNXOS_MAJOR
+  // std::remove() is broken, this version doesn't attempt to preserve order
+  typedef std::vector<OnStartCallback>::iterator iter_t;
+  const OnStartCallback to_remove = std::make_pair(client, remote);
+  const iter_t last = on_start_callbacks_.end();
+  iter_t found = std::find(on_start_callbacks_.begin(), last, to_remove);
+  iter_t removed = last;
+  while (found != removed) {
+    std::swap(*found++, *--removed);
+    found = std::find(found, removed, to_remove);
+  }
+  on_start_callbacks_.erase(removed, last);
+#else
   on_start_callbacks_.erase(std::remove(on_start_callbacks_.begin(),
                                         on_start_callbacks_.end(),
                                         std::make_pair(client, remote)),
                             on_start_callbacks_.end());
+#endif
 }
 
 ACE_INLINE

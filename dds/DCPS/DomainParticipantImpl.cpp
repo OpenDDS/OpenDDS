@@ -29,7 +29,6 @@
 
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
-#include <sstream>
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"

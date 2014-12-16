@@ -344,14 +344,12 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
   assign(dest_guid_prefix_, local_);
 
   unicast_reply_locator_list_.length(1);
-  unicast_reply_locator_list_[0].kind =
-    addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  unicast_reply_locator_list_[0].kind = address_to_kind(addr);
   unicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
   RTPS::address_to_bytes(unicast_reply_locator_list_[0].address, addr);
 
   multicast_reply_locator_list_.length(1);
-  multicast_reply_locator_list_[0].kind =
-    addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  multicast_reply_locator_list_[0].kind = address_to_kind(addr);
   multicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
   assign(multicast_reply_locator_list_[0].address, LOCATOR_ADDRESS_INVALID);
 

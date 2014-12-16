@@ -1,3 +1,58 @@
+Tue Dec 16 21:22:05 UTC 2014  General TAO team Account  <tao_g@ociweb.com>
+
+        * MPC/config/dcps_transports_for_test.mpb:
+        * dds/DCPS/DataCollector_T.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/PoolAllocator.h:
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/RepoIdConverter.h:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticIncludes.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Changes for LynxOS build with safety profile.
+          Can now build static libs for OpenDDS_Dcps, OpenDDS_Rtps,
+          and OpenDDS_Rtps_Udp.  The tests/DCPS/Messenger test can
+          compile but doesn't link yet.
+          Lots of compiler/stdlib workarounds under ACE_LYNXOS_MAJOR,
+          these can be removed once a GCC 4.x compiler is available.
+
 Tue Dec 16 15:11:28 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/CORBA/tao/OpenDDS_Corba.mpc:

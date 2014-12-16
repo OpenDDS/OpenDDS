@@ -8,13 +8,18 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include <iomanip>
-#include <sstream>
+#include "GuidConverter.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #include "ace/ACE.h"
 
-#include "GuidConverter.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include <iomanip>
+
+#ifdef ACE_LYNXOS_MAJOR
+#include <strstream>
+#else
+#include <sstream>
+#endif
 
 namespace OpenDDS {
 namespace DCPS {
@@ -95,7 +100,11 @@ GuidConverter::entityKind() const
 
 GuidConverter::operator std::string() const
 {
+#ifdef ACE_LYNXOS_MAJOR
+  std::ostrstream os;
+#else
   std::ostringstream os;
+#endif
 
   os << guid_ << "(" << std::hex << checksum() << ")";
 

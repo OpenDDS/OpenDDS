@@ -37,7 +37,14 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/OS_NS_sys_time.h"
 
+#ifdef ACE_LYNXOS_MAJOR
+#include <strstream>
+#define STRINGSTREAM std::strstream
+#else
 #include <sstream>
+#define STRINGSTREAM std::stringstream
+#endif
+
 #include <stdexcept>
 
 #if !defined (__ACE_INLINE__)
@@ -1361,7 +1368,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
   if (DCPS_debug_level > 9) {
-    std::stringstream buffer;
+    STRINGSTREAM buffer;
     buffer << sample.header_ << std::ends;
     GuidConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
@@ -1564,7 +1571,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     serializer >> control;
 
     if (DCPS_debug_level > 0) {
-      std::stringstream buffer;
+      STRINGSTREAM buffer;
       buffer << control << std::endl;
 
       ACE_DEBUG((LM_DEBUG,
@@ -2714,7 +2721,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
     const char* separator = "";
-    std::stringstream buffer;
+    STRINGSTREAM buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
       buffer << separator << GuidConverter(ids[i]);
@@ -2938,7 +2945,7 @@ void DataReaderImpl::notify_liveliness_change()
   notify_status_condition();
 
   if (DCPS_debug_level > 9) {
-    std::stringstream buffer;
+    STRINGSTREAM buffer;
     buffer << "subscription " << GuidConverter(subscription_id_);
     buffer << ", listener at: 0x" << std::hex << this->listener_.in ();
 

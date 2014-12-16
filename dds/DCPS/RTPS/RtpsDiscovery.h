@@ -283,7 +283,7 @@ private:
   mutable ACE_Thread_Mutex lock_;
 
 public:
-  class Config : public Discovery::Config {
+  class Config : public DCPS::Discovery::Config {
   public:
     int discovery_config(ACE_Configuration_Heap& cf);
   };

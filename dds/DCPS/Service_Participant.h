@@ -412,7 +412,14 @@ private:
 
   ACE_ARGV ORB_argv_;
 
+#ifdef ACE_LYNXOS_MAJOR
+public:
+#endif
   ACE_Reactor* reactor_; //TODO: integrate with threadpool
+#ifdef ACE_LYNXOS_MAJOR
+private:
+#endif
+
   struct ReactorTask : ACE_Task_Base {
     int svc();
   } reactor_task_;

@@ -60,7 +60,11 @@ DataSampleElement::DataSampleElement(const DataSampleElement& elem)
   , previous_send_sample_(elem.previous_send_sample_)
 
 {
+#ifdef ACE_LYNXOS_MAJOR
+  std::copy(static_cast<const GUID_t*>(elem.subscription_ids_),
+#else
   std::copy(elem.subscription_ids_,
+#endif
             elem.subscription_ids_ + num_subs_,
             subscription_ids_);
 }
@@ -81,9 +85,15 @@ DataSampleElement::operator=(const DataSampleElement& rhs)
   sample_ = rhs.sample_->duplicate();
   publication_id_ = rhs.publication_id_;
   num_subs_ = rhs.num_subs_;
-  std::copy(rhs.subscription_ids_,
+
+#ifdef ACE_LYNXOS_MAJOR
+  std::copy(static_cast<const GUID_t*>(rhs.subscription_ids_),
+#else
+  std::copy(elem.subscription_ids_,
+#endif
             rhs.subscription_ids_ + num_subs_,
             subscription_ids_);
+
   previous_writer_sample_ = rhs.previous_writer_sample_;
   next_writer_sample_ = rhs.next_writer_sample_;
   next_instance_sample_ = rhs.next_instance_sample_;

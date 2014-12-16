@@ -512,6 +512,8 @@ std::ostream& operator<<(std::ostream& os, const SubMessageId rhs)
 extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 {
+  //TODO:
+#ifndef ACE_LYNXOS_MAJOR
   struct SaveAndRestoreStreamState {
     explicit SaveAndRestoreStreamState(std::ostream& s)
       : fill_(s.fill()), fmt_(s.flags()), s_(s) {}
@@ -524,6 +526,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     std::ios_base::fmtflags fmt_;
     std::ostream& s_;
   } stream_state(str);
+#endif
 
   if (value.submessage_id_ != SUBMESSAGE_NONE) {
     str << SubMessageId(value.submessage_id_)

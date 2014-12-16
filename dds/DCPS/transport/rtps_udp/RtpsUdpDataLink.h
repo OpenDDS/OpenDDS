@@ -121,6 +121,10 @@ private:
   void add_gap_submsg(RTPS::SubmessageSeq& msg,
                       const TransportQueueElement& tqe);
 
+#ifdef ACE_LYNXOS_MAJOR
+public:
+#endif
+
   RtpsUdpInst* config_;
   TransportReactorTask_rch reactor_task_;
 
@@ -317,9 +321,15 @@ private:
 
   // Timers for reliability:
 
+#ifdef ACE_LYNXOS_MAJOR
+public:
+#endif
   void send_nack_replies();
   void send_heartbeats();
   void send_heartbeat_replies();
+#ifdef ACE_LYNXOS_MAJOR
+private:
+#endif
 
   struct TimedDelay : ACE_Event_Handler {
 

@@ -139,8 +139,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
   info_reply_.smHeader.flags = 1 /*FLAG_E*/;
   info_reply_.unicastLocatorList.length(1);
   info_reply_.unicastLocatorList[0].kind =
-    (config_->local_address_.get_type() == AF_INET6)
-    ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+    address_to_kind(config_->local_address_);
   info_reply_.unicastLocatorList[0].port =
     config_->local_address_.get_port_number();
   RTPS::address_to_bytes(info_reply_.unicastLocatorList[0].address,
@@ -149,8 +148,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     info_reply_.smHeader.flags |= 2 /*FLAG_M*/;
     info_reply_.multicastLocatorList.length(1);
     info_reply_.multicastLocatorList[0].kind =
-      (config_->multicast_group_address_.get_type() == AF_INET6)
-      ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+      address_to_kind(config_->multicast_group_address_);
     info_reply_.multicastLocatorList[0].port =
       config_->multicast_group_address_.get_port_number();
     RTPS::address_to_bytes(info_reply_.multicastLocatorList[0].address,

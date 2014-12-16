@@ -30,24 +30,31 @@ public:
   template <typename U>
   PoolAllocator(const PoolAllocator<U>&) {}
 
-  T* allocate(std::size_t n)
+  static T* allocate(std::size_t n)
   {
     void* raw_mem = TheServiceParticipant->pool_malloc(n * sizeof(T));
     if (!raw_mem) throw std::bad_alloc();
     return static_cast<T*>(raw_mem);
   }
 
-  void deallocate(T* ptr, std::size_t)
+  static void deallocate(T* ptr, std::size_t)
   {
     TheServiceParticipant->pool_free(ptr);
   }
 
-  void construct(T* ptr, const T& value)
+#ifdef ACE_LYNXOS_MAJOR
+  static void deallocate(void* ptr, std::size_t)
+  {
+    TheServiceParticipant->pool_free(ptr);
+  }
+#endif
+
+  static void construct(T* ptr, const T& value)
   {
     new (static_cast<void*>(ptr)) T(value);
   }
 
-  void destroy(T* ptr)
+  static void destroy(T* ptr)
   {
     ptr->~T();
   }

@@ -13,7 +13,11 @@
 
 #include "ace/OS_NS_sys_time.h"
 
+#ifdef ACE_LYNXOS_MAJOR
+#include <strstream>
+#else
 #include <sstream>
+#endif
 
 namespace OpenDDS {
 namespace DCPS {
@@ -98,7 +102,11 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
 std::string
 WriterInfo::get_state_str() const
 {
+#ifdef ACE_LYNXOS_MAJOR
+  std::ostrstream oss;
+#else
   std::ostringstream oss;
+#endif
 
   switch (this->state_) {
   case WriterInfo::NOT_SET:

@@ -15,7 +15,10 @@
 #include "ace/Configuration.h"
 
 #include <iomanip>
+
+#ifndef ACE_LYNXOS_MAJOR
 #include <sstream>
+#endif
 
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
@@ -58,12 +61,14 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
 void
 OpenDDS::DCPS::TransportInst::dump()
 {
+#ifndef ACE_LYNXOS_MAJOR
   std::stringstream os;
   dump(os);
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
              os.str().c_str()));
+#endif
 }
 
 namespace {
@@ -74,10 +79,14 @@ namespace {
 std::string
 OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 {
+#ifndef ACE_LYNXOS_MAJOR
   std::ostringstream oss;
   oss << std::setw(NAME_INDENT) << "" << std::setw(NAME_WIDTH) << std::left
       << name << ": ";
   return oss.str();
+#else
+  return "not implemented";
+#endif
 }
 
 void

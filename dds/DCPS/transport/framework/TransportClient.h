@@ -102,6 +102,10 @@ private:
   friend class TransportImpl;
   void transport_detached(TransportImpl* which);
 
+#ifdef ACE_LYNXOS_MAJOR
+public:
+#endif
+
   // helpers
   typedef ACE_Guard<ACE_Thread_Mutex> Guard;
   void use_datalink_i(const RepoId& remote_id,
@@ -118,6 +122,9 @@ private:
                           const TransportImpl::RemoteTransport& remote,
                           const TransportImpl::ConnectionAttribs& attribs_,
                           Guard& guard);
+#ifdef ACE_LYNXOS_MAJOR
+private:
+#endif
 
   // A class, normally provided by an unit test, who needs access to a client's
   // privates.

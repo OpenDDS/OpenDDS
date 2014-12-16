@@ -38,7 +38,6 @@
 #include "ReplayerImpl.h"
 
 #include <vector>
-#include <sstream>
 #include <fstream>
 
 #if !defined (__ACE_INLINE__)
