@@ -831,7 +831,7 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::lookup_instance_handles: ")
                ACE_TEXT("searching for handles for writer Ids: %C.\n"),
-               buffer.str().c_str()));
+               buffer.c_str()));
   }
 
   CORBA::ULong const num_wrts = ids.length();

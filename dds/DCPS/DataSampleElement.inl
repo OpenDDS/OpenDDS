@@ -89,7 +89,7 @@ DataSampleElement::operator=(const DataSampleElement& rhs)
 #ifdef ACE_LYNXOS_MAJOR
   std::copy(static_cast<const GUID_t*>(rhs.subscription_ids_),
 #else
-  std::copy(elem.subscription_ids_,
+  std::copy(rhs.subscription_ids_,
 #endif
             rhs.subscription_ids_ + num_subs_,
             subscription_ids_);

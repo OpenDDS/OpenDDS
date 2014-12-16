@@ -1101,7 +1101,7 @@ ReplayerImpl::lookup_instance_handles(const ReaderIdSeq&       ids,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::lookup_instance_handles: ")
                ACE_TEXT("searching for handles for reader Ids: %C.\n"),
-               buffer.str().c_str()));
+               buffer.c_str()));
   }
 
   CORBA::ULong const num_rds = ids.length();

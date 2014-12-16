@@ -1,4 +1,12 @@
-Tue Dec 16 21:22:05 UTC 2014  General TAO team Account  <tao_g@ociweb.com>
+Tue Dec 16 23:28:15 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+
+          Fixed issues with previous commit.
+
+Tue Dec 16 21:22:05 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_transports_for_test.mpb:
         * dds/DCPS/DataCollector_T.cpp:
