@@ -1,4 +1,5 @@
 project {
+  avoids      += no_opendds_safety_profile
   libout       = $(DDS_ROOT)/lib
   libpaths    += $(DDS_ROOT)/lib
   includes    += $(DDS_ROOT)/dds/CORBA $(TAO_ROOT)
