@@ -1,3 +1,10 @@
+Tue Dec 16 22:31:10 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+        * tests/DCPS/PubScalability/sampletypelib_export.h:
+
+          Redo how this test's IDL code was compiled because of VC++ 7.1.
+
 Mon Dec 15 20:52:49 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:

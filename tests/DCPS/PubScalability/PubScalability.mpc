@@ -5,6 +5,7 @@
 project(*Publisher): dcpsexe_with_tcp {
   exename = publisher
   after       += *idl
+  libs        += *idl
 
   Source_Files {
     pub_main.cpp
@@ -12,26 +13,26 @@ project(*Publisher): dcpsexe_with_tcp {
     InstanceDataMap.cpp
     Writer.cpp
   }
-  TypeSupport_Files {
-    SampleType.idl
-  }
 }
 
 project(*Subscriber): dcpsexe_with_tcp {
   exename = subscriber
   after       += *idl
+  libs        += *idl
 
   Source_Files {
     sub_main.cpp
     SubDriver.cpp
     DataReaderListener.cpp
   }
-  TypeSupport_Files {
-    SampleType.idl
-  }
 }
 
 project (*idl) : dcps {
+  libout         = .
+  idlflags      += -Wb,export_macro=SampleTypeLib_Export -Wb,export_include=sampletypelib_export.h
+  dynamicflags   = SAMPLETYPE_BUILD_DLL
+  dcps_ts_flags += -Wb,export_macro=SampleTypeLib_Export
+
   libout         = .
 
   Source_Files {
