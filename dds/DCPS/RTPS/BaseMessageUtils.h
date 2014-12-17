@@ -116,8 +116,7 @@ inline int
 address_to_kind(const ACE_INET_Addr& addr)
 {
 #ifdef ACE_HAS_IPV6
-  return (local_addr.get_type() == AF_INET6) ?
-    LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  return addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
 #else
   ACE_UNUSED_ARG(addr);
   return LOCATOR_KIND_UDPv4;

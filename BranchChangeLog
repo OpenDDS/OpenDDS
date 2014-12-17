@@ -1,3 +1,9 @@
+Wed Dec 17 15:35:59 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Fixed IPv6-enabled build.
+
 Tue Dec 16 23:28:15 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataSampleElement.inl:
