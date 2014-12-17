@@ -380,8 +380,13 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
                this->remote_address_.get_port_number()));
   }
 
-  if (!this->send_strategy_.is_nil())
-    this->send_strategy_->terminate_send();
+  if (!this->send_strategy_.is_nil()) {
+    if (!this->receive_strategy_.is_nil() && this->receive_strategy_->gracefully_disconnected()) {
+      this->send_strategy_->terminate_send();
+    } else {
+      this->send_strategy_->suspend_send();
+    }
+  }
 
   this->disconnect();
 
@@ -545,7 +550,6 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
   }
-
 
   if (on_new_association) {
     return this->active_reconnect_on_new_association();
@@ -737,6 +741,12 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
                  this->link_->get_transport_impl()->config()->name().c_str(),
                  this->remote_address_.get_host_addr(),
                  this->remote_address_.get_port_number()));
+      if (this->receive_strategy_->get_reactor()->register_handler(this, ACE_Event_Handler::READ_MASK) == -1) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          "(%P|%t) ERROR: OpenDDS::DCPS::TcpConnection::active_reconnect_i() can't register "
+                          "with reactor %X %p\n", this, ACE_TEXT("register_handler")),
+                         -1);
+      }
       this->reconnect_state_ = RECONNECTED_STATE;
       this->link_->notify(DataLink::RECONNECTED);
       this->send_strategy_->resume_send();

@@ -87,6 +87,10 @@ OpenDDS::DCPS::TransportSendStrategy::resume_send()
   } else if (this->mode_ == MODE_SUSPEND) {
     this->mode_ = this->mode_before_suspend_;
     this->mode_before_suspend_ = MODE_NOT_SET;
+    if (this->queue_->size() > 0) {
+      this->mode_ = MODE_QUEUE;
+      this->synch_->work_available();
+    }
 
   } else {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportSendStrategy::resume_send  The suspend or terminate"

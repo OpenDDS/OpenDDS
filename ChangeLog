@@ -1,3 +1,35 @@
+Wed Dec 17 15:59:19 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/TcpReconnect:
+        * tests/DCPS/TcpReconnect/Args.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.cpp:
+        * tests/DCPS/TcpReconnect/Messenger.idl:
+        * tests/DCPS/TcpReconnect/Messenger_export.h:
+        * tests/DCPS/TcpReconnect/TcpReconnect.mpc:
+        * tests/DCPS/TcpReconnect/Writer.h:
+        * tests/DCPS/TcpReconnect/Writer.cpp:
+        * tests/DCPS/TcpReconnect/publisher.cpp:
+        * tests/DCPS/TcpReconnect/repub.ini:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+        * tests/DCPS/TcpReconnect/stub.cpp:
+        * tests/DCPS/TcpReconnect/subscriber.cpp:
+
+          Add a new tcp reconnect test that truly tests the
+          reconnect functionality between two processes.  The
+          existing "Reconnect" test really only tests what 
+          happens when the other process is killed and restarted.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Fix some reconnect related bugs.  First, re-establish
+          the receive strategy on the active side after a reconnect.
+          This allows for multiple reconnects.  Second, properly
+          suspend and resume the send strategy around a disconnect
+          and subsequent reconnect.  This allows for samples published
+          while disconnected to be received by the readers.
+
 Wed Dec 17 15:28:03 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/PubScalability/SampleType.idl:
