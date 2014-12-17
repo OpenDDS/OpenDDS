@@ -149,7 +149,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int i = 1;
   while (i < argc) {
-    std::string arg = argv[i];
+    std::string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
     if (arg == "-v") {
       debug_level = 1;
     } else if (arg.substr(0, 3) == "-s:") {

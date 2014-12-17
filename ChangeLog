@@ -1,3 +1,9 @@
+Wed Dec 17 21:04:31 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          Fix a TCHAR conversion.
+
 Wed Dec 17 18:47:39 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:
