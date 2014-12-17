@@ -1,5 +1,6 @@
 
 project(Monitor*idl): dcps_test_lib {
+  requires += no_opendds_safety_profile
   idlflags      += -Wb,stub_export_include=Messenger_export.h \
                    -Wb,stub_export_macro=Messenger_Export
   dcps_ts_flags += -Wb,export_macro=Messenger_Export
@@ -12,7 +13,7 @@ project(Monitor*idl): dcps_test_lib {
 
 
 project(Monitor*Publisher): dcpsexe_with_tcp, dcps_monitor {
-
+  requires += no_opendds_safety_profile
   exename   = publisher
   after    += Monitor*idl
   libs     += Monitor*idl
@@ -27,7 +28,7 @@ project(Monitor*Publisher): dcpsexe_with_tcp, dcps_monitor {
 }
 
 project(Monitor*Subscriber): dcpsexe_with_tcp, dcps_monitor {
-
+  requires += no_opendds_safety_profile
   exename   = subscriber
   after    += Monitor*idl
   libs     += Monitor*idl
@@ -42,7 +43,7 @@ project(Monitor*Subscriber): dcpsexe_with_tcp, dcps_monitor {
 }
 
 project(Monitor*monitor): dcpsexe_with_tcp, dcps_monitor {
-
+  requires += no_opendds_safety_profile
   exename   = monitor
   after    += Monitor*idl
   libs     += Monitor*idl

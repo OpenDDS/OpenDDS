@@ -1,4 +1,5 @@
 project: dcpsexe_with_tcp  {
+  requires += no_opendds_safety_profile
   exename   = repoctl
   exeout    = $(DDS_ROOT)/bin
   libs     += OpenDDS_InfoRepoLib OpenDDS_Federator

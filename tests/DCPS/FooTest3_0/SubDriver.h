@@ -31,8 +31,6 @@ class SubDriver
     void init(int& argc, ACE_TCHAR* argv[]);
     void run();
 
-    CORBA::ORB_var orb_;
-
     OpenDDS::DCPS::RepoId sub_id_;
 
     int               num_writes_;

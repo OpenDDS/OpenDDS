@@ -1,4 +1,5 @@
 project(*idl) : taoidldefaults, dcps_ts_defaults {
+  requires += no_opendds_safety_profile
   idlflags += -I../Sync -I$(DDS_ROOT)
   after    += Sync_Idl
 
@@ -11,6 +12,7 @@ project(*idl) : taoidldefaults, dcps_ts_defaults {
 
 
 project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional, dds_macros {
+  requires += no_opendds_safety_profile
   exename   = syncServer
   includes += ../Sync
   libs     += SyncServer
@@ -30,6 +32,7 @@ project(*SyncServer) : taoexe, portableserver, iortable, coverage_optional, dds_
 }
 
 project(*Publisher) : dcpsexe_with_tcp {
+  requires += no_opendds_safety_profile
   exename   = publisher
   libs     += SyncClient
   includes += ../Sync
@@ -48,6 +51,7 @@ project(*Publisher) : dcpsexe_with_tcp {
 }
 
 project(*Subscriber) : dcpsexe_with_tcp {
+  requires += no_opendds_safety_profile
   exename   = subscriber
   libs     += SyncClient
   includes += ../Sync

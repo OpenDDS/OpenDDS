@@ -1,5 +1,3 @@
-// @(#) $Id$
-//
 // Copyright 1994-1995 by Sun Microsystems Inc.
 // Copyright 1997-2002 by Washington University
 // All Rights Reserved

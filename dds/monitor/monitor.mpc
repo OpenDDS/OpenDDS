@@ -1,4 +1,5 @@
 project(OpenDDS_monitor) : dcpslib, install {
+  requires += no_opendds_safety_profile
   sharedname   = OpenDDS_monitor
   dynamicflags = MONITOR_BUILD_DLL
 

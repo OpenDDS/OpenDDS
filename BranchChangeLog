@@ -1,3 +1,42 @@
+Wed Dec 17 21:10:21 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        Safety profile build (Linux)
+
+        * dds/CORBA/tao/BasicSequences.cpp:
+        * dds/CORBA/tao/Exception.cpp:
+        * dds/CORBA/tao/LocalObject.cpp:
+        * dds/CORBA/tao/ORB_Misc.cpp:
+        * dds/CORBA/tao/Object.cpp:
+        * dds/CORBA/tao/OctetSeqC.cpp:
+        * dds/CORBA/tao/PolicyS.h:
+        * dds/CORBA/tao/String_Alloc.cpp:
+        * dds/CORBA/tao/SystemException.cpp:
+
+          Added fundamental types normally found in libTAO.
+
+        * dds/monitor/monitor.mpc:
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/Sync/Sync.mpc:
+        * tests/DCPS/Compiler/idl_test1_main/idl_test1_main.mpc:
+        * tests/DCPS/Compiler/idl_test3_main/idl_test3_main.mpc:
+        * tests/DCPS/ConfigFile/ConfigFile.mpc:
+        * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
+        * tests/DCPS/FileSystemStorage/FileSystemStorage.mpc:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tools/dcpsinfo_dump/dcpsinfo_dump.mpc:
+        * tools/repoctl/repoctl.mpc:
+
+          Removed from safety profile build.
+
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_2/SubDriver.h:
+        * tests/DCPS/FooType/Foo_Singleton_Transport.h:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/unit/Main.cpp:
+
+          Fixed false dependency on TAO.
+
 Wed Dec 17 15:35:59 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/BaseMessageUtils.h:
