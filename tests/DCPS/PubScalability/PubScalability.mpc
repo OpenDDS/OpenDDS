@@ -30,7 +30,7 @@ project(*Subscriber): dcpsexe_with_tcp {
 project (*idl) : dcps {
   libout         = .
   idlflags      += -Wb,export_macro=SampleTypeLib_Export -Wb,export_include=sampletypelib_export.h
-  dynamicflags   = SAMPLETYPE_BUILD_DLL
+  dynamicflags   = SAMPLETYPELIB_BUILD_DLL
   dcps_ts_flags += -Wb,export_macro=SampleTypeLib_Export
 
   libout         = .

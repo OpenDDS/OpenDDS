@@ -1,3 +1,9 @@
+Wed Dec 17 19:01:53 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+
+          Fix macro name.
+
 Wed Dec 17 15:59:19 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/TcpReconnect:
@@ -17,7 +23,7 @@ Wed Dec 17 15:59:19 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
           Add a new tcp reconnect test that truly tests the
           reconnect functionality between two processes.  The
-          existing "Reconnect" test really only tests what 
+          existing "Reconnect" test really only tests what
           happens when the other process is killed and restarted.
 
         * dds/DCPS/transport/framework/TransportSendStrategy.inl:
