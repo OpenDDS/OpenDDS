@@ -549,6 +549,7 @@ TcpTransport::release_datalink(DataLink* link)
   if (this->links_.unbind(key, released_link) != 0) {
     //No op
   } else if (link->datalink_release_delay() > ACE_Time_Value::zero) {
+    link->set_scheduling_release(true);
 
     VDBG_LVL((LM_DEBUG,
               "(%P|%t) TcpTransport::release_datalink datalink_release_delay "
@@ -576,7 +577,6 @@ TcpTransport::release_datalink(DataLink* link)
 
     case 0:
       linkAction = ScheduleLinkRelease;
-      link->set_scheduling_release(true);
       break;
 
     default:
@@ -584,6 +584,8 @@ TcpTransport::release_datalink(DataLink* link)
     }
 
   } else { // datalink_release_delay_ is 0
+    link->set_scheduling_release(true);
+
     linkAction = StopLink;
   }
 
@@ -793,12 +795,14 @@ TcpTransport::unbind_link(DataLink* link)
 
   GuardType guard(this->links_lock_);
 
-  if (this->pending_release_links_.unbind(key) != 0) {
+  if (this->pending_release_links_.unbind(key) != 0 &&
+      link->datalink_release_delay() > ACE_Time_Value::zero) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) TcpTransport::unbind_link INTERNAL ERROR - "
-               "Failed to find link %@ PriorityKey "
+               "Failed to find link %@ tcp_link %@ PriorityKey "
                "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
                link,
+               tcp_link,
                tcp_link->transport_priority(),
                tcp_link->remote_address().get_host_addr(),
                tcp_link->remote_address().get_port_number(),

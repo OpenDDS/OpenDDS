@@ -1,3 +1,26 @@
+Wed Dec 17 18:47:39 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Modified the cancel_release logic to properly deal with
+          already stopped links as well as links that are already
+          scheduled.  This allows logic line from transport_shutdown
+          to progress correctly.
+
+          Fixed some reference counting issues with the reactor_task
+          which were causing the multicast_async tests to fail due
+          to the proactor not being released properly due to wrong
+          ref counts.
+
+          modified handle_exception to guard against the impl_ already
+          going away before the callback.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Don't try to unbind from pending_release_links_ if release
+          delay isn't set because links are only shifted to pending
+          if there is a schedule_delayed_release.
+
 Wed Dec 17 19:01:53 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/PubScalability/PubScalability.mpc:

@@ -152,11 +152,18 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));
     }
-    ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
-    if (reactor->cancel_timer(this) > 0) {
+    if (this->impl_ != 0) {
+      ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
+      if (reactor->cancel_timer(this) > 0) {
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) DataLink::handle_exception() - cancelled future release timer\n")));
+        }
+      }
+    } else {
       if (DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink::handle_exception() - cancelled future release timer\n")));
+                   ACE_TEXT("(%P|%t) DataLink::handle_exception() - impl_ == 0\n")));
       }
     }
     this->_remove_ref();
@@ -182,6 +189,7 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
     }
+    this->_add_ref();
     ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
     ACE_Time_Value future_release_time = this->scheduled_to_stop_at_ - ACE_OS::gettimeofday();
     reactor->schedule_timer(this, 0, future_release_time);
@@ -200,8 +208,8 @@ DataLink::schedule_stop(ACE_Time_Value& schedule_to_stop_at)
     //ref removed in handle_exception or in handle_timeout based on stopping now or delayed
     this->_add_ref();
     this->scheduled_to_stop_at_ = schedule_to_stop_at;
-    TransportReactorTask_rch reactor(this->impl_->reactor_task(), false);
-    reactor.in()->get_reactor()->notify(this);
+    TransportReactorTask_rch reactor(this->impl_->reactor_task());
+    reactor->get_reactor()->notify(this);
     // reactor will invoke our DataLink::handle_exception()
   } else {
     if (DCPS_debug_level > 0) {
@@ -675,10 +683,21 @@ bool
 DataLink::cancel_release()
 {
   DBG_ENTRY_LVL("DataLink", "cancel_release", 6);
-  this->set_scheduling_release(false);
-  this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
-  TransportReactorTask_rch reactor(this->impl_->reactor_task(), false);
-  reactor.in()->get_reactor()->notify(this);
+  if (stopped_) {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::cancel_release - link[%@] already stopped_ cannot cancel release\n", this));
+    }
+    return false;
+  }
+  if (scheduling_release_) {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::cancel_release - link[%@] currently scheduling release, notify reactor of cancel\n", this));
+    }
+    this->set_scheduling_release(false);
+    this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+    TransportReactorTask_rch reactor(this->impl_->reactor_task());
+    reactor->get_reactor()->notify(this);
+  }
   return true;
 }
 
@@ -1025,7 +1044,11 @@ DataLink::transport_shutdown()
     this->send_strategy_->transport_shutdown();
   }
 
-  this->cancel_release();
+  //this->cancel_release();
+  this->set_scheduling_release(false);
+  this->scheduled_to_stop_at_ = ACE_Time_Value::zero;
+  ACE_Reactor_Timer_Interface* reactor = this->impl_->timer();
+  reactor->cancel_timer(this);
 
   this->stop();
 
