@@ -1,3 +1,10 @@
+Thu Dec 18 17:18:55 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Improved debugging messages.
+
 Thu Dec 18 15:10:25 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/PubScalability/PubScalability.mpc:
