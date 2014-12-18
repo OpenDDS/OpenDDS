@@ -8,6 +8,7 @@
 #include "ace/SOCK_Connector.h"
 
 #include <iostream>
+#include <string>
 
 class Pub_Handler;
 
