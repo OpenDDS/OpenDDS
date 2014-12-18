@@ -779,10 +779,17 @@ bool run_test(DomainParticipant_var& dp,
                      ACE_TEXT("ERROR: %P Could not ignore subscription\n")), false);
   }
 
+  InstanceHandleSeq pre_ignore_handles;
+  dp->get_discovered_participants(pre_ignore_handles);
+  if (pre_ignore_handles.length() > 1) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("ERROR: Discovered %d participants before ignore, should only be 1\n"),
+               pre_ignore_handles.length()));
+  }
   dp->ignore_participant(dp2_ih);
   InstanceHandleSeq handles;
   dp->get_discovered_participants(handles);
-  if (handles.length()) {
+  if (pre_ignore_handles.length() - handles.length() != 1) {
     ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("ERROR: %P Could not ignore participant\n")), false);
   }
