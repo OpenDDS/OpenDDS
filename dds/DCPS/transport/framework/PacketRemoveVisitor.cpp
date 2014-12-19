@@ -79,6 +79,14 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
     this->current_block_ = this->head_;
     this->previous_block_ = 0;
 
+    // If the current_block_ is still zero, there is nothing to do here,
+    // so cancel the visitation
+    if (this->current_block_ == 0) {
+      VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+            "No blocks to iterate through, ending visitation.\n"));
+      return 0;
+    }
+
     // There is a chance that the head_ block (and thus the current_block_)
     // is actually a duplicate of the packet header_block_.  If so, we
     // need to adust the current_block_ and previous_block_ appropriately.

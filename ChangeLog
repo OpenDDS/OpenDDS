@@ -1,3 +1,12 @@
+Fri Dec 19 19:44:08 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+
+          Add a check to bail out of the visitation if a core
+          is imminent.  This was seen to happen in a high fan-out
+          writer with some back pressure from one or more of the
+          readers.
+
 Thu Dec 18 17:18:55 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
