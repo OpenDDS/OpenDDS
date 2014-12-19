@@ -1,3 +1,8 @@
 project: dcpslib {
   dynamicflags = OPENDDS_FACE_BUILD_DLL
+
+  Source_Files {
+    .
+    ./config
+  }
 }
