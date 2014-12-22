@@ -1,3 +1,10 @@
+Mon Dec 22 16:18:59 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+
+          Implement publisher and subscriber qos parsing.
+
 Fri Dec 19 20:30:14 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/OpenDDS_FACE.mpc:

@@ -13,27 +13,32 @@ class QosSettings {
 
     enum QosLevel {
       publisher,
-      data_writer,
       subscriber,
+      data_writer,
       data_reader
     };
 
-    void set(QosLevel level, const char* name, const char* value);
 
-    void apply_to(DDS::PublisherQos&  publisher_qos) const;
-    void apply_to(DDS::DataWriterQos& writer_qos) const;
-    void apply_to(DDS::SubscriberQos& subscriber_qos) const;
-    void apply_to(DDS::DataReaderQos& reader_qos) const;
+    void apply_to(DDS::PublisherQos&  target) const;
+    void apply_to(DDS::SubscriberQos& target) const;
+    void apply_to(DDS::DataWriterQos& target) const;
+    void apply_to(DDS::DataReaderQos& target) const;
+
+    static void parse(FILE* configFile, QosSettings& settings);
 
   private:
     // DomainPartipantFactory, DomainParticipant, and Topic qos 
     // are not usable in FACE
     DDS::PublisherQos publisher_qos_;
-    DDS::DataWriterQos writer_qos_;
-
     DDS::SubscriberQos subscriber_qos_;
-    DDS::DataReaderQos reader_qos_;
+    DDS::DataWriterQos data_writer_qos_;
+    DDS::DataReaderQos data_reader_qos_;
 
+    void set_qos(QosLevel level, const char* name, const char* value);
+    void set_qos(DDS::PublisherQos& target, const char* name, const char* value);
+    void set_qos(DDS::SubscriberQos& target, const char* name, const char* value);
+    void set_qos(DDS::DataWriterQos& target, const char* name, const char* value);
+    void set_qos(DDS::DataReaderQos& target, const char* name, const char* value);
 };
 
 typedef OPENDDS_MAP(OPENDDS_STRING, QosSettings) QosMap;
