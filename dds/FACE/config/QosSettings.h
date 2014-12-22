@@ -4,10 +4,11 @@
 #include <map>
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Definitions.h"
+#include "FACE/OpenDDS_FACE_Export.h"
 
 namespace OpenDDS { namespace FACE { namespace config {
 
-class QosSettings {
+class OpenDDS_FACE_Export QosSettings {
   public:
     QosSettings();
 
@@ -18,15 +19,14 @@ class QosSettings {
       data_reader
     };
 
-
     void apply_to(DDS::PublisherQos&  target) const;
     void apply_to(DDS::SubscriberQos& target) const;
     void apply_to(DDS::DataWriterQos& target) const;
     void apply_to(DDS::DataReaderQos& target) const;
 
-    static void parse(FILE* configFile, QosSettings& settings);
-
   private:
+    friend class QosSettingsAccessor;
+
     // DomainPartipantFactory, DomainParticipant, and Topic qos 
     // are not usable in FACE
     DDS::PublisherQos publisher_qos_;

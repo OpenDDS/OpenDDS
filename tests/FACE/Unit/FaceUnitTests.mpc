@@ -1,0 +1,10 @@
+project(*QosSettings) :dcps_test {
+  libs += OpenDDS_FACE
+  libpaths    += $(DDS_ROOT)/lib
+  includes    += $(DDS_ROOT)
+
+  Source_Files {
+    QosSettingsTest.cpp
+  }
+}
+

@@ -1,3 +1,16 @@
+Mon Dec 22 22:36:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+
+          Export settings, make testable.
+
+        * tests/FACE/Unit:
+        * tests/FACE/Unit/FaceUnitTests.mpc:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Unit test for QosSettings.
+
 Mon Dec 22 19:39:56 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.h:

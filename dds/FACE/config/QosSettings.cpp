@@ -114,7 +114,7 @@ set_presentation_ordered_access_qos(
 {
   bool matched = false;
   if (!strcmp(name, "presentation.ordered_access")) {
-    matched = set_bool_qos_value(target.coherent_access, value);
+    matched = set_bool_qos_value(target.ordered_access, value);
   }
   return matched;
 }
@@ -132,34 +132,92 @@ set_partition_name_qos(
   return matched;
 }
 
-void set_qos(DDS::PublisherQos& target, const char* name, const char* value)
+bool
+set_durability_kind_qos(
+  DDS::DurabilityQosPolicy& target, const char* name, const char* value)
 {
-  set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
-  set_presentation_coherent_access_qos(target.presentation, name, value) ||
-  set_presentation_ordered_access_qos(target.presentation, name, value) ||
-  set_partition_name_qos(target.partition, name, value);
-  // group data not settable
-  // entity factory not settable
+  bool matched = false;
+  if (!strcmp(name, "durability.kind")) {
+    if (!strcmp(value, "VOLATILE")) {
+      target.kind = DDS::VOLATILE_DURABILITY_QOS;
+      matched = true;
+    } else if (!strcmp(value, "TRANSIENT_LOCAL")) {
+      target.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+      matched = true;
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+    } else if (!strcmp(value, "TRANSIENT")) {
+      target.kind = DDS::TRANSIENT_DURABILITY_QOS;
+      matched = true;
+    } else if (!strcmp(value, "PERSISTENT")) {
+      target.kind = DDS::PERSISTENT_DURABILITY_QOS;
+      matched = true;
+#endif
+    }
+  }
+  return matched;
 }
 
-void set_qos(DDS::SubscriberQos& target, const char* name, const char* value)
+void
+log_parser_error(const char* section, const char* name, const char* value)
 {
-  set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
-  set_presentation_coherent_access_qos(target.presentation, name, value) ||
-  set_presentation_ordered_access_qos(target.presentation, name, value) ||
-  set_partition_name_qos(target.partition, name, value);
-  // group data not settable
-  // entity factory not settable
+  ACE_DEBUG((LM_ERROR, "Could not set %s QOS setting %s to value %s\n",
+    section, name, value));
 }
 
-void set_qos(DDS::DataWriterQos& target, const char* name, const char* value)
+void QosSettings::set_qos(
+  DDS::PublisherQos& target, const char* name, const char* value)
 {
+  bool matched = 
+    set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
+    set_presentation_coherent_access_qos(target.presentation, name, value) ||
+    set_presentation_ordered_access_qos(target.presentation, name, value) ||
+    set_partition_name_qos(target.partition, name, value);
+    // group data not settable
+    // entity factory not settable
+
+  if (!matched) {
+    log_parser_error("publisher", name, value);
+  }
 }
 
-void set_qos(DDS::DataReaderQos& target, const char* name, const char* value)
+void QosSettings::set_qos(
+  DDS::SubscriberQos& target, const char* name, const char* value)
 {
+  bool matched = 
+    set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
+    set_presentation_coherent_access_qos(target.presentation, name, value) ||
+    set_presentation_ordered_access_qos(target.presentation, name, value) ||
+    set_partition_name_qos(target.partition, name, value);
+    // group data not settable
+    // entity factory not settable
+  if (!matched) {
+    log_parser_error("subscriber", name, value);
+  }
 }
 
+void QosSettings::set_qos(
+  DDS::DataWriterQos& target, const char* name, const char* value)
+{
+  bool matched = 
+    set_durability_kind_qos(target.durability, name, value) ||
+    false;
+
+  if (!matched) {
+    log_parser_error("data writer", name, value);
+  }
+}
+
+void QosSettings::set_qos(
+  DDS::DataReaderQos& target, const char* name, const char* value)
+{
+  bool matched = 
+    set_durability_kind_qos(target.durability, name, value) ||
+    false;
+
+  if (!matched) {
+    log_parser_error("data reader", name, value);
+  }
+}
 
 } } }
 
