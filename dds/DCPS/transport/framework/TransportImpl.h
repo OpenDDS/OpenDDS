@@ -84,7 +84,9 @@ public:
 
   /// Diagnostic aid.
   void dump();
+#ifndef ACE_FACE_SAFETY_BASE
   void dump(ostream& os);
+#endif
 
   void report();
 

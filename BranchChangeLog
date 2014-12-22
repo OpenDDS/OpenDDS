@@ -1,3 +1,14 @@
+Mon Dec 22 19:39:56 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          #ifdef away use of std::ostream for diagnostics.
+
 Mon Dec 22 16:18:59 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/config/QosSettings.h:

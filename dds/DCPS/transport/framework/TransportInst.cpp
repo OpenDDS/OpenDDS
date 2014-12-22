@@ -89,6 +89,7 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 #endif
 }
 
+#ifndef ACE_FACE_SAFETY_BASE
 void
 OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
 {
@@ -103,6 +104,7 @@ OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
   os << formatNameForDump("datalink_release_delay")  << this->datalink_release_delay_ << std::endl;
   os << formatNameForDump("datalink_control_chunks") << this->datalink_control_chunks_ << std::endl;
 }
+#endif
 
 void
 OpenDDS::DCPS::TransportInst::shutdown()

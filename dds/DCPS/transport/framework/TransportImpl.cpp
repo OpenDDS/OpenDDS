@@ -242,6 +242,7 @@ TransportImpl::dump()
 #endif
 }
 
+#ifndef ACE_FACE_SAFETY_BASE
 void
 TransportImpl::dump(ostream& os)
 {
@@ -251,6 +252,7 @@ TransportImpl::dump(ostream& os)
     this->config_->dump(os);
   }
 }
+#endif
 
 }
 }
