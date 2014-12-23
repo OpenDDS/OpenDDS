@@ -190,6 +190,50 @@ void test_set_subscriber_presentation_access_scope_group() {
   TEST_CHECK(DDS::GROUP_PRESENTATION_QOS == qos.presentation.access_scope);
 }
 
+void test_set_subscriber_presentation_coherent_access_true() {
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::subscriber, "presentation.coherent_access", "true");
+  DDS::SubscriberQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(qos.presentation.coherent_access);
+}
+
+void test_set_subscriber_presentation_coherent_access_false() {
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::subscriber, "presentation.coherent_access", "false");
+  DDS::SubscriberQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(!qos.presentation.coherent_access);
+}
+
+void test_set_subscriber_presentation_ordered_access_true() {
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::subscriber, "presentation.ordered_access", "true");
+  DDS::SubscriberQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(qos.presentation.ordered_access);
+}
+
+void test_set_subscriber_presentation_ordered_access_false() {
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::subscriber, "presentation.ordered_access", "false");
+  DDS::SubscriberQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(!qos.presentation.ordered_access);
+}
+
 int main(int, const char** )
 {
   test_set_publisher_single_partition();
@@ -206,6 +250,10 @@ int main(int, const char** )
   test_set_subscriber_presentation_access_scope_instance();
   test_set_subscriber_presentation_access_scope_topic();
   test_set_subscriber_presentation_access_scope_group();
+  test_set_subscriber_presentation_coherent_access_true();
+  test_set_subscriber_presentation_coherent_access_false();
+  test_set_subscriber_presentation_ordered_access_true();
+  test_set_subscriber_presentation_ordered_access_false();
 
   return 0;
 }
