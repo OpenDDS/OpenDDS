@@ -61,7 +61,7 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
 void
 OpenDDS::DCPS::TransportInst::dump()
 {
-#ifndef ACE_LYNXOS_MAJOR
+#ifndef OPENDDS_SAFETY_PROFILE
   std::stringstream os;
   dump(os);
 
@@ -79,7 +79,7 @@ namespace {
 std::string
 OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 {
-#ifndef ACE_LYNXOS_MAJOR
+#ifndef OPENDDS_SAFETY_PROFILE
   std::ostringstream oss;
   oss << std::setw(NAME_INDENT) << "" << std::setw(NAME_WIDTH) << std::left
       << name << ": ";

@@ -148,7 +148,7 @@ TransportImpl::configure(TransportInst* config)
     this->monitor_->report();
   }
 
-#ifndef ACE_LYNXOS_MAJOR
+#ifndef OPENDDS_SAFETY_PROFILE
   if (Transport_debug_level > 0) {
     std::stringstream os;
     dump(os);
@@ -232,7 +232,7 @@ TransportImpl::report()
 void
 TransportImpl::dump()
 {
-#ifndef ACE_LYNXOS_MAJOR
+#ifndef OPENDDS_SAFETY_PROFILE
   std::stringstream os;
   dump(os);
 
