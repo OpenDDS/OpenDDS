@@ -17,6 +17,7 @@
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "SafetyProfilePool.h"
+#include "FileLogger.h"
 #endif
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -46,6 +47,15 @@
 
 namespace {
 
+# ifdef OPENDDS_SAFETY_PROFILE
+void set_log_file_name(const char* fname)
+{
+  ACE_LOG_MSG->clr_flags(ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
+  ACE_LOG_MSG->msg_backend(new OpenDDS::DCPS::FileLogger(fname));
+  ACE_LOG_MSG->set_flags(ACE_Log_Msg::CUSTOM);
+}
+
+# else
 void set_log_file_name(const char* fname)
 {
   std::ofstream* output_stream = new std::ofstream();
@@ -60,6 +70,7 @@ void set_log_file_name(const char* fname)
   ACE_LOG_MSG->clr_flags (ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
   ACE_LOG_MSG->set_flags (ACE_Log_Msg::OSTREAM);
 }
+# endif
 
 void set_log_verbose(unsigned long verbose_logging)
 {
