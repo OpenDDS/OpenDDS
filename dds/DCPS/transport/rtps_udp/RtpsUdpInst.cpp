@@ -85,6 +85,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   return 0;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 void
 RtpsUdpInst::dump(std::ostream& os)
 {
@@ -117,6 +118,7 @@ RtpsUdpInst::dump(std::ostream& os)
   os.flags(flags);
 #endif
 }
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

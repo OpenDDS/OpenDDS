@@ -1,5 +1,11 @@
-Tue Dec 23 20:42:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+Tue Dec 23 20:53:13 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Don't use streams in dump() when building for safety.
+
+Tue Dec 23 20:42:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/shmem/OpenDDS_Shmem.mpc:
         * dds/DCPS/transport/udp/OpenDDS_Udp.mpc:
