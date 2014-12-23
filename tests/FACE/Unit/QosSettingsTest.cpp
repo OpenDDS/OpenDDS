@@ -56,7 +56,7 @@ void test_set_publisher_presentation_access_scope_instance() {
   QosSettings settings;
   QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "INSTANCE_PRESENTATION_QOS");
+  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "INSTANCE");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -67,7 +67,7 @@ void test_set_publisher_presentation_access_scope_topic() {
   QosSettings settings;
   QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "TOPIC_PRESENTATION_QOS");
+  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "TOPIC");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -78,7 +78,7 @@ void test_set_publisher_presentation_access_scope_group() {
   QosSettings settings;
   QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "GROUP_PRESENTATION_QOS");
+  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "GROUP");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -161,7 +161,7 @@ void test_set_subscriber_presentation_access_scope_instance() {
   QosSettings settings;
   QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "INSTANCE_PRESENTATION_QOS");
+  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "INSTANCE");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -172,7 +172,7 @@ void test_set_subscriber_presentation_access_scope_topic() {
   QosSettings settings;
   QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "TOPIC_PRESENTATION_QOS");
+  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "TOPIC");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -183,7 +183,7 @@ void test_set_subscriber_presentation_access_scope_group() {
   QosSettings settings;
   QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "GROUP_PRESENTATION_QOS");
+  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "GROUP");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -234,8 +234,59 @@ void test_set_subscriber_presentation_ordered_access_false() {
   TEST_CHECK(!qos.presentation.ordered_access);
 }
 
+/////// DataWriter tests 
+void test_set_datawriter_durability_volatile()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "durability.kind", "VOLATILE");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::VOLATILE_DURABILITY_QOS == qos.durability.kind);
+}
+
+void test_set_datawriter_durability_transient_local()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "durability.kind", "TRANSIENT_LOCAL");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::TRANSIENT_LOCAL_DURABILITY_QOS == qos.durability.kind);
+}
+
+void test_set_datawriter_durability_transient()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "durability.kind", "TRANSIENT");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::TRANSIENT_DURABILITY_QOS == qos.durability.kind);
+}
+
+void test_set_datawriter_durability_persistent()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "durability.kind", "PERSISTENT");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::PERSISTENT_DURABILITY_QOS == qos.durability.kind);
+}
+
+/////// DataReader tests 
 int main(int, const char** )
 {
+  // Publisher QOS
   test_set_publisher_single_partition();
   test_set_publisher_multiple_partitions();
   test_set_publisher_presentation_access_scope_instance();
@@ -245,6 +296,7 @@ int main(int, const char** )
   test_set_publisher_presentation_coherent_access_false();
   test_set_publisher_presentation_ordered_access_true();
   test_set_publisher_presentation_ordered_access_false();
+  // Subscriber QOS
   test_set_subscriber_single_partition();
   test_set_subscriber_multiple_partitions();
   test_set_subscriber_presentation_access_scope_instance();
@@ -254,6 +306,12 @@ int main(int, const char** )
   test_set_subscriber_presentation_coherent_access_false();
   test_set_subscriber_presentation_ordered_access_true();
   test_set_subscriber_presentation_ordered_access_false();
+  // DataWriter QOS
+  test_set_datawriter_durability_volatile();
+  test_set_datawriter_durability_transient_local();
+  test_set_datawriter_durability_transient();
+  test_set_datawriter_durability_persistent();
+
 
   return 0;
 }

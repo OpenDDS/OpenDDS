@@ -1,4 +1,4 @@
-project(*QosSettings) {
+project(*QosSettings) : dcps {
   libs += OpenDDS_FACE
   libpaths    += $(DDS_ROOT)/lib
   includes    += $(DDS_ROOT)

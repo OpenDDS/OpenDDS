@@ -62,15 +62,15 @@ set_presentation_access_scope_kind_qos(
 {
   bool matched = false;
   if (!strcmp(name, "presentation.access_scope")) {
-    if (!strcmp(value, "INSTANCE_PRESENTATION_QOS")) {
+    if (!strcmp(value, "INSTANCE")) {
       target.access_scope = DDS::INSTANCE_PRESENTATION_QOS;
       matched = true;
     }
-    if (!strcmp(value, "TOPIC_PRESENTATION_QOS")) {
+    if (!strcmp(value, "TOPIC")) {
       target.access_scope = DDS::TOPIC_PRESENTATION_QOS;
       matched = true;
     }
-    if (!strcmp(value, "GROUP_PRESENTATION_QOS")) {
+    if (!strcmp(value, "GROUP")) {
       target.access_scope = DDS::GROUP_PRESENTATION_QOS;
       matched = true;
     }

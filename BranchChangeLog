@@ -1,3 +1,16 @@
+Tue Dec 23 21:38:10 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Unit/FaceUnitTests.mpc:
+
+          Use base dcps.
+
+        * dds/FACE/config/QosSettings.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Don't require full enumeration identifier in config file.
+          Test data writer/reader durability.
+
+
 Tue Dec 23 20:53:13 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
