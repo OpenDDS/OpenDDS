@@ -4,6 +4,7 @@
 #include <map>
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "FACE/OpenDDS_FACE_Export.h"
 
 namespace OpenDDS { namespace FACE { namespace config {
