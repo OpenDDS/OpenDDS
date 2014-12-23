@@ -1,3 +1,14 @@
+Tue Dec 23 17:15:59 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          Guard with OPENDDS_FACE_SAFETY_PROFILE, rather than ACE_FACE_SAFETY_BASE
+
 Mon Dec 22 22:36:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/config/QosSettings.h:

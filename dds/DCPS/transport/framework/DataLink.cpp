@@ -1487,7 +1487,7 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
   }
 }
 
-#ifndef ACE_FACE_SAFETY_BASE
+#ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
 {

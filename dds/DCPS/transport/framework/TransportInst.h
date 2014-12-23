@@ -60,7 +60,7 @@ public:
 
   /// Diagnostic aid.
   void dump();
-#ifndef ACE_FACE_SAFETY_BASE
+#ifndef OPENDDS_SAFETY_PROFILE
   virtual void dump(std::ostream& os);
 #endif
 

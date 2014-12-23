@@ -89,7 +89,7 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 #endif
 }
 
-#ifndef ACE_FACE_SAFETY_BASE
+#ifndef OPENDDS_SAFETY_PROFILE
 void
 OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
 {
