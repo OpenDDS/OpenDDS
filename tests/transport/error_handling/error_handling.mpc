@@ -1,4 +1,4 @@
 // -*- MPC -*-
 
-project: dcpsexe_with_tcp {
+project: dcpsexe, dcps_tcp {
 }

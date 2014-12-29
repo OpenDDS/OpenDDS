@@ -11,7 +11,7 @@ project(*idl): dcps_test_lib {
 }
 
 
-project(*Publisher) : dcpsexe_with_tcp, dds_model, dcps_rtps_udp {
+project(*Publisher) : dcpsexe, dcps_tcp, dds_model, dcps_rtps_udp {
   exename = publisher
   after  += *idl
   libs   += *idl
@@ -25,7 +25,7 @@ project(*Publisher) : dcpsexe_with_tcp, dds_model, dcps_rtps_udp {
   }
 }
 
-project(*Subscriber) : dcpsexe_with_tcp, dcps_rtps_udp {
+project(*Subscriber) : dcpsexe, dcps_tcp, dcps_rtps_udp {
   exename = subscriber
   after  += *idl
   libs   += *idl

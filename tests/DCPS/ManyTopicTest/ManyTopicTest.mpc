@@ -1,4 +1,4 @@
-project(ManyTopicTestPublisher): dcpsexe_with_tcp, dcps_rtps_udp, dds_model {
+project(ManyTopicTestPublisher): dcpsexe, dcps_tcp, dcps_rtps_udp, dds_model {
   exename   = publisher
   libpaths += ../ManyTopicTypes
   libpaths += ../common
@@ -16,7 +16,7 @@ project(ManyTopicTestPublisher): dcpsexe_with_tcp, dcps_rtps_udp, dds_model {
 }
 
 
-project(ManyTopicTestSubscriber): dcpsexe_with_tcp, dcps_rtps_udp {
+project(ManyTopicTestSubscriber): dcpsexe, dcps_tcp, dcps_rtps_udp {
   exename   = subscriber
   libpaths += ../ManyTopicTypes
   libpaths += ../common

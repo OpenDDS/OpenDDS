@@ -1,4 +1,4 @@
-project(*Publisher): dcpsexe_with_tcp {
+project(*Publisher): dcpsexe, dcps_tcp {
   exename   = publisher
   libpaths += ../FooType5
   libs     +=  DcpsFooType5
@@ -12,7 +12,7 @@ project(*Publisher): dcpsexe_with_tcp {
   }
 }
 
-project(*Subscriber): dcpsexe_with_tcp {
+project(*Subscriber): dcpsexe, dcps_tcp {
   exename   = subscriber
   libpaths += ../FooType5
   libs     +=  DcpsFooType5

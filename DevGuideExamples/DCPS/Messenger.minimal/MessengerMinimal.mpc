@@ -9,7 +9,7 @@ project(*idl): dcps {
   custom_only = 1
 }
 
-project(*publisher) : dcpsexe_with_tcp, dds_model {
+project(*publisher) : dcpsexe, dcps_tcp, dds_model {
   exename   = publisher
   after    += *idl
 
@@ -23,7 +23,7 @@ project(*publisher) : dcpsexe_with_tcp, dds_model {
   }
 }
 
-project(*subscriber) : dcpsexe_with_tcp, dds_model {
+project(*subscriber) : dcpsexe, dcps_tcp, dds_model {
   exename   = subscriber
   after    += *publisher
 

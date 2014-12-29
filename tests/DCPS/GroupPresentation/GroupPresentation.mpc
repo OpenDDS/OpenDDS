@@ -14,7 +14,7 @@ project(DDS*idl): dcps_test_lib {
 }
 
 
-project(DDS*Publisher) : dcpsexe_with_tcp {
+project(DDS*Publisher) : dcpsexe, dcps_tcp {
 
   exename   = publisher
   requires += object_model_profile
@@ -31,7 +31,7 @@ project(DDS*Publisher) : dcpsexe_with_tcp {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe_with_tcp {
+project(DDS*Subscriber) : dcpsexe, dcps_tcp {
 
   exename   = subscriber
   requires += object_model_profile

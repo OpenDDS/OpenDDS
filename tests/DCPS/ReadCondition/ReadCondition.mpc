@@ -1,4 +1,4 @@
-project: dcpsexe_with_tcp {
+project: dcpsexe, dcps_tcp {
   exename = ReadConditionTest
   TypeSupport_Files {
     Messenger.idl

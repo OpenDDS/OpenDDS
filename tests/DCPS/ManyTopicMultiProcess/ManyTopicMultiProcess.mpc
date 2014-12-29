@@ -10,7 +10,7 @@ project(DDS*idl): dcps_test_lib {
   }
 }
 
-project(ManyTopicMultiProcessPublisher): dcpsexe_with_tcp, dcps_rtps_udp, dds_model {
+project(ManyTopicMultiProcessPublisher): dcpsexe, dcps_tcp, dcps_rtps_udp, dds_model {
   exename   = publisher
   libpaths += ../common
   after    += common DDS*idl
@@ -31,7 +31,7 @@ project(ManyTopicMultiProcessPublisher): dcpsexe_with_tcp, dcps_rtps_udp, dds_mo
   }
 }
 
-project(ManyTopicMultiProcessSubscriber): dcpsexe_with_tcp, dcps_rtps_udp, dds_model {
+project(ManyTopicMultiProcessSubscriber): dcpsexe, dcps_tcp, dcps_rtps_udp, dds_model {
   exename   = subscriber
   libpaths += ../common
   after    += common DDS*idl

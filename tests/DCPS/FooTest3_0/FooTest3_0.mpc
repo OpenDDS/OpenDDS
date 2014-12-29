@@ -2,7 +2,7 @@
 //
 // $Id$
 
-project(*Publisher): dcpsexe_with_tcp {
+project(*Publisher): dcpsexe, dcps_tcp {
   exename = FooTest3_publisher
   after       += DcpsFooType3
   libs     +=  DcpsFooType3
@@ -17,7 +17,7 @@ project(*Publisher): dcpsexe_with_tcp {
   }
 }
 
-project(*Subscriber): dcpsexe_with_tcp {
+project(*Subscriber): dcpsexe, dcps_tcp {
   exename = FooTest3_subscriber
   after       += DcpsFooType4 *Publisher
   libs     += DcpsFooType3

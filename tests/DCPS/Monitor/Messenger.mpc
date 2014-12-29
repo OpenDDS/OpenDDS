@@ -12,7 +12,7 @@ project(Monitor*idl): dcps_test_lib {
 }
 
 
-project(Monitor*Publisher): dcpsexe_with_tcp, dcps_monitor {
+project(Monitor*Publisher): dcpsexe, dcps_tcp, dcps_monitor {
   requires += no_opendds_safety_profile
   exename   = publisher
   after    += Monitor*idl
@@ -27,7 +27,7 @@ project(Monitor*Publisher): dcpsexe_with_tcp, dcps_monitor {
   }
 }
 
-project(Monitor*Subscriber): dcpsexe_with_tcp, dcps_monitor {
+project(Monitor*Subscriber): dcpsexe, dcps_tcp, dcps_monitor {
   requires += no_opendds_safety_profile
   exename   = subscriber
   after    += Monitor*idl
@@ -42,7 +42,7 @@ project(Monitor*Subscriber): dcpsexe_with_tcp, dcps_monitor {
   }
 }
 
-project(Monitor*monitor): dcpsexe_with_tcp, dcps_monitor {
+project(Monitor*monitor): dcpsexe, dcps_tcp, dcps_monitor {
   requires += no_opendds_safety_profile
   exename   = monitor
   after    += Monitor*idl

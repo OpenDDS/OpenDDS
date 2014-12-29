@@ -2,7 +2,7 @@
 // $Id$
 
 
-project(Reliability*) : dcpsexe_with_tcp, dds_model, dcps_shmem {
+project(Reliability*) : dcpsexe, dcps_tcp, dds_model, dcps_shmem {
   exename   = publisher
   after    += Reliability
   
