@@ -1,3 +1,14 @@
+Mon Dec 29 19:23:21 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/DestinationOrder.mpc:
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+
+          Use more maintainable project bases.
+
+        * MPC/config/dcps_test_tcp.mpb:
+
+          Removed this file.
+
 Mon Dec 29 17:47:11 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
