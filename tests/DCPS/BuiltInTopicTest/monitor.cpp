@@ -23,6 +23,9 @@
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
+#include "tests/Utils/ExceptionStreams.h"
+
+using namespace std;
 
 int delay_before_read_sec = 0;
 unsigned int num_parts = 3;

@@ -8,10 +8,9 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include <ace/streams.h>
 #include <iostream>
+#include "tests/Utils/ExceptionStreams.h"
 
 using namespace std;
-//using std::cerr;
-//using std::endl;
 
 
 // Implementation skeleton constructor

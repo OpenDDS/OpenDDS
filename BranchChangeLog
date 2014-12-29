@@ -1,3 +1,14 @@
+Mon Dec 29 21:02:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/Utils/ExceptionStreams.h:
+
+          Handle cout, cerr and endl in tests.
+
 Mon Dec 29 19:46:28 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
