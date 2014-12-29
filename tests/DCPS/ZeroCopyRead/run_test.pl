@@ -10,16 +10,17 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
+my $status = 0;
 
-$dcpsrepo_ior = "repo.ior";
+my $dcpsrepo_ior = "repo.ior";
 
 
 unlink $dcpsrepo_ior;
 
 # -b
-$parameters = "-DcpsBit 0";
+my $parameters = "-DcpsBit 0";
 # or could have
 # $parameters = "-b -DcpsBit 1";
 
@@ -28,38 +29,37 @@ if ($ARGV[0] eq 'by_instance') {
 }
 
 # -ORBDebugLevel 1 -NOBITS
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                     "-o $dcpsrepo_ior"
                                     . " -NOBITS");
 
-$ZCTest = PerlDDS::create_process ("main", $parameters);
+my $ZCTest = PerlDDS::create_process("main", $parameters);
 
-print $DCPSREPO->CommandLine(), "\n";
-if ($DCPSREPO->Spawn () != 0) {
+if (!$PerlDDS::SafetyProfile && $DCPSREPO->Spawn () != 0) {
     print STDERR "ERROR: Couldn't spawn InfoRepo\ntest FAILED.\n";
-    return 1;
+    exit 1;
 }
 
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
+if (!$PerlDDS::SafetyProfile && PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
     print STDERR "ERROR: waiting for Info Repo IOR file\n";
     $DCPSREPO->Kill ();
     exit 1;
 }
 
-print $ZCTest->CommandLine(), "\n";
 if ($ZCTest->Spawn () != 0) {
     print STDERR "ERROR: Couldn't spawn main\ntest FAILED.\n";
-    return 1;
+    exit 1;
 }
 
-$result = $ZCTest->WaitKill (60);
+my $result = $ZCTest->WaitKill(60);
 
 if ($result != 0) {
     print STDERR "ERROR: main returned $result \n";
     $status = 1;
 }
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
+my $ir = 0;
+$DCPSREPO->TerminateWaitKill(5) unless $PerlDDS::SafetyProfile;
 
 if ($ir != 0) {
     print STDERR "ERROR: DCPSInfoRepo returned $ir\n";

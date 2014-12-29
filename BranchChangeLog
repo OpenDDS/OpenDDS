@@ -1,3 +1,22 @@
+Mon Dec 29 21:43:34 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+
+          Adapt tests for safety profile.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.cpp:
+
+          Fixed default transport & discovery for safety profile.
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+
+          Exclusions for safety profile
+
 Mon Dec 29 21:02:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:

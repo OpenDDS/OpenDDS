@@ -142,6 +142,7 @@ sub report_errors_in_file {
 # load gcov helpers in case this is a coverage build
 my $config = new PerlACE::ConfigList;
 $PerlDDS::Coverage_Test = $config->check_config("Coverage");
+$PerlDDS::SafetyProfile = $config->check_config("OPENDDS_SAFETY_PROFILE");
 
 # used to prevent multiple special processes from running remotely
 $PerlDDS::Special_Process_Created = 0;

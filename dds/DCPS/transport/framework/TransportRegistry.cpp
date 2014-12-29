@@ -42,7 +42,11 @@ namespace {
   }
 
   // transport type to try loading if none are loaded when DCPS attempts to use
+#ifdef OPENDDS_SAFETY_PROFILE
+  const char FALLBACK_TYPE[] = "rtps_udp";
+#else
   const char FALLBACK_TYPE[] = "tcp";
+#endif
 }
 
 namespace OpenDDS {
