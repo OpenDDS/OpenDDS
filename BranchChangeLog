@@ -1,3 +1,13 @@
+Mon Dec 29 16:53:05 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/FileLogger.cpp:
+
+          Include missing methods.
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+
+          Explicitly use namespace std.
+
 Tue Dec 23 21:38:10 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/FACE/Unit/FaceUnitTests.mpc:

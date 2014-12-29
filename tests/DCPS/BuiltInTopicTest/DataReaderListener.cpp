@@ -7,6 +7,11 @@
 #include <dds/DCPS/Service_Participant.h>
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include <ace/streams.h>
+#include <iostream>
+
+using namespace std;
+//using std::cerr;
+//using std::endl;
 
 
 // Implementation skeleton constructor

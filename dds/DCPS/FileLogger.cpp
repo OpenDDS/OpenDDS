@@ -4,6 +4,14 @@
 # ifdef OPENDDS_SAFETY_PROFILE
 namespace OpenDDS { namespace DCPS {
 
+FileLogger::FileLogger(const char* name)
+{
+}
+
+FileLogger::~FileLogger()
+{
+}
+
 int
 FileLogger::open(const ACE_TCHAR *logger_key)
 {
