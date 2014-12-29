@@ -4,6 +4,7 @@ project(*Common) : dcps {
   dynamicflags   = STOCKQUOTERCOMMON_BUILD_DLL
   libout         = .
   requires += tao_orbsvcs
+  requires += no_opendds_safety_profile
   after    += Svc_Utils
   includes      += $(TAO_ROOT)/orbsvcs
   idlflags      += -I$(TAO_ROOT)/orbsvcs \
@@ -33,6 +34,7 @@ project(*Publisher) : dcpsexe, dcps_tcp, svc_utils {
   after    += *Common
   exename   = publisher
   requires += tao_orbsvcs
+  requires += no_opendds_safety_profile
 
   includes += $(TAO_ROOT)/orbsvcs
   libs     += StockQuoterCommon
@@ -61,6 +63,7 @@ project(*Subscriber) : dcpsexe, dcps_tcp {
   after    += *Common
   exename   = subscriber
   requires += tao_orbsvcs
+  requires += no_opendds_safety_profile
 
   includes += $(TAO_ROOT)/orbsvcs
   libs     += StockQuoterCommon

@@ -1,5 +1,5 @@
 
-project(DDS*Publisher): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_shmem, dcps_rtps_udp {
+project(DDS*Publisher): dcpsexe, dcps_transports_for_test {
 
   exename   = publisher
   libpaths += ../LargeSample
@@ -15,7 +15,7 @@ project(DDS*Publisher): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_shmem,
   }
 }
 
-project(DDS*Subscriber): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_shmem, dcps_rtps_udp {
+project(DDS*Subscriber): dcpsexe, dcps_transports_for_test {
 
   exename   = subscriber
   libpaths += ../LargeSample

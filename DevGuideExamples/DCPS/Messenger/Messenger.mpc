@@ -3,6 +3,7 @@
 //
 
 project(*idl): dcps {
+  requires += no_opendds_safety_profile
   TypeSupport_Files {
     Messenger.idl
   }
@@ -11,6 +12,7 @@ project(*idl): dcps {
 }
 
 project(*publisher) : dcpsexe, dcps_tcp {
+  requires += no_opendds_safety_profile
   exename   = publisher
   after    += *idl
 
@@ -24,6 +26,7 @@ project(*publisher) : dcpsexe, dcps_tcp {
 }
 
 project(*subscriber) : dcpsexe, dcps_tcp {
+  requires += no_opendds_safety_profile
   exename   = subscriber
   after    += *publisher
 

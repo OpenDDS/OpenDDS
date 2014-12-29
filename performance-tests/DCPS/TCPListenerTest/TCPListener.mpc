@@ -1,4 +1,4 @@
-project(DCPS_Perf*Pub): dcpsexe, dcps_tcp {
+project(DCPS_Perf*Pub): dcpsexe, dcps_transports_for_test {
   exename   = publisher
   libpaths += ../TypeNoKeyBounded
   libs     += DCPS_Perf_TypeNoKeyBounded
@@ -15,7 +15,7 @@ project(DCPS_Perf*Pub): dcpsexe, dcps_tcp {
 }
 
 
-project(DCPS_Perf*Sub): dcpsexe, dcps_tcp {
+project(DCPS_Perf*Sub): dcpsexe, dcps_transports_for_test {
   exename   = subscriber
   libpaths += ../TypeNoKeyBounded
   libs     += DCPS_Perf_TypeNoKeyBounded

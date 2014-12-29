@@ -1,4 +1,4 @@
-project(LivelinessTestPublisher): dcpsexe, dcps_tcp, dcps_udp {
+project(LivelinessTestPublisher): dcpsexe, dcps_transports_for_test {
   exename   = publisher
   libpaths += ../FooType4
   libpaths += ../common
@@ -13,7 +13,7 @@ project(LivelinessTestPublisher): dcpsexe, dcps_tcp, dcps_udp {
 }
 
 
-project(LivelinessTestSubscriber): dcpsexe, dcps_tcp, dcps_udp {
+project(LivelinessTestSubscriber): dcpsexe, dcps_transports_for_test {
   exename   = subscriber
   libpaths += ../FooType4
   libpaths += ../common

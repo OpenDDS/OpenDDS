@@ -1,4 +1,4 @@
-project(DcpsFooTest4): dcpsexe, dcps_tcp {
+project(DcpsFooTest4): dcpsexe, dcps_transports_for_test {
   exename   = FooTest4
   libpaths += ../FooType4
   libpaths += ../common

@@ -1,5 +1,5 @@
 
-project(*Publisher) : dcpsexe, dcps_tcp {
+project(*Publisher) : dcpsexe, dcps_transports_for_test {
   exename   = publisher
 
   TypeSupport_Files {
@@ -12,7 +12,7 @@ project(*Publisher) : dcpsexe, dcps_tcp {
   }
 }
 
-project(*Subscriber) : dcpsexe, dcps_tcp {
+project(*Subscriber) : dcpsexe, dcps_transports_for_test {
   exename   = subscriber
   after    += *Publisher
 

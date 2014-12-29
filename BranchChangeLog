@@ -1,3 +1,87 @@
+Mon Dec 29 19:33:15 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+        * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/TCPListenerTest/TCPListener.mpc:
+        * tests/DCPS/BidirMessenger/BidirMessenger.mpc:
+        * tests/DCPS/BuiltInTopic/BuiltInTopic.mpc:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+        * tests/DCPS/DPFactoryQos/DPFactoryQos.mpc:
+        * tests/DCPS/DcpsIntegration/dcps_integration.mpc:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Dispose/Dispose.mpc:
+        * tests/DCPS/DpShutdown/DpShutdown.mpc:
+        * tests/DCPS/Federation/Federation.mpc:
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest4/FooTest4.mpc:
+        * tests/DCPS/FooTest4_0/FooTest4_0.mpc:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/Footprint/Footprint.mpc:
+        * tests/DCPS/Inconsistent_Qos/Inconsistent_Qos.mpc:
+        * tests/DCPS/Instances/Instances.mpc:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/LargeSample/LargeSample.mpc:
+        * tests/DCPS/LatencyBudget/LatencyBudget.mpc:
+        * tests/DCPS/Lifespan/Lifespan.mpc:
+        * tests/DCPS/LivelinessTest/LivelinessTest.mpc:
+        * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManyToMany/ManyToMany.mpc:
+        * tests/DCPS/ManyTopicMultiProcess/ManyTopicMultiProcess.mpc:
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/MultiDPTest/MultiDPTest.mpc:
+        * tests/DCPS/MultiRepoTest/MultiRepoTest.mpc:
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/Partition/Partition.mpc:
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+        * tests/DCPS/PubScalability/SubDriver.h:
+        * tests/DCPS/ReadCondition/ReadCondition.mpc:
+        * tests/DCPS/ReaderDataLifecycle/ReaderDataLifecycle.mpc:
+        * tests/DCPS/Reconnect/Reconnect.mpc:
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+        * tests/DCPS/Rejects/Rejects.mpc:
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline.mpc:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/StatusCondition/StatusCondition.mpc:
+        * tests/DCPS/StringKey/StringKey.mpc:
+        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
+        * tests/DCPS/TcpReconnect/TcpReconnect.mpc:
+        * tests/DCPS/Thrasher/Thrasher.mpc:
+        * tests/DCPS/TimeBasedFilter/TimeBasedFilter.mpc:
+        * tests/DCPS/TopicReuse/TopicReuse.mpc:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/WaitForAck/WaitForAck.mpc:
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+        * tests/DCPS/unit/UnitTest.mpc:
+        * tests/transport/error_handling/error_handling.mpc:
+        * tests/transport/simple/DDS_transport_simple.mpc:
+
+          Updated test & example mpc files for safety profile.
+
 Mon Dec 29 19:23:21 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/DestinationOrder/DestinationOrder.mpc:

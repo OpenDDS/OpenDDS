@@ -13,7 +13,7 @@ project(DDS*idl): dcps_test_lib {
 }
 
 
-project(DDS*Publisher) : dcpsexe, dcps_tcp {
+project(DDS*Publisher) : dcpsexe, dcps_transports_for_test {
   exename = publisher
   after  += DDS*idl
   libs   += DDS*idl
@@ -27,7 +27,7 @@ project(DDS*Publisher) : dcpsexe, dcps_tcp {
   }
 }
 
-project(DDS*Subscriber) : dcpsexe, dcps_tcp {
+project(DDS*Subscriber) : dcpsexe, dcps_transports_for_test {
   exename = subscriber
   after  += DDS*idl
   libs   += DDS*idl

@@ -11,7 +11,7 @@ project(ZeroCopyDRL_idl): dcps_test_lib {
   }
 }
 
-project(ZeroCopyDRL_Publisher): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
+project(ZeroCopyDRL_Publisher): dcpsexe, dcps_transports_for_test, dds_model {
 
   exename   = publisher
   after    += ZeroCopyDRL_idl
@@ -26,7 +26,7 @@ project(ZeroCopyDRL_Publisher): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcp
   }
 }
 
-project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem, dds_model {
+project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_transports_for_test, dds_model {
 
   exename   = subscriber
   after    += ZeroCopyDRL_idl
@@ -41,7 +41,7 @@ project(ZeroCopyDRL_Subscriber): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dc
   }
 }
 
-project(ZeroCopyDRL_StackSubscriber) : dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dds_model {
+project(ZeroCopyDRL_StackSubscriber) : dcpsexe, dcps_transports_for_test, dds_model {
 
   exename   = stack_subscriber
   after    += ZeroCopyDRL_idl

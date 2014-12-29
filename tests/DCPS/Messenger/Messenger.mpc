@@ -41,7 +41,7 @@ project(DDS*Subscriber): dcpsexe, dcps_transports_for_test {
   }
 }
 
-project(DDS*StackSubscriber) : dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp {
+project(DDS*StackSubscriber) : dcpsexe, dcps_transports_for_test {
 
   exename   = stack_subscriber
   after    += DDS*idl

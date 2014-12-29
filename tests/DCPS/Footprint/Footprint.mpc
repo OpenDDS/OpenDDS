@@ -41,7 +41,7 @@ project(DDS*RtpsSubscriber): dcps_rtps_udp {
   }
 }
 
-project(DDS*TcpPublisher): dcpsexe, dcps_tcp {
+project(DDS*TcpPublisher): dcpsexe, dcps_transports_for_test {
 
   exename   = tcppublisher
   after    += DDS*idl
@@ -56,7 +56,7 @@ project(DDS*TcpPublisher): dcpsexe, dcps_tcp {
   }
 }
 
-project(DDS*TcpSubscriber): dcpsexe, dcps_tcp {
+project(DDS*TcpSubscriber): dcpsexe, dcps_transports_for_test {
 
   exename   = tcpsubscriber
   after    += DDS*idl

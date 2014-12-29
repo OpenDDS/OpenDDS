@@ -1,4 +1,4 @@
-project(DdsDcps_UnitTest): dcpsexe, dcps_tcp {
+project(DdsDcps_UnitTest): dcpsexe, dcps_transports_for_test {
   exename = DdsDcps_UnitTest
 
   IDL_Files {

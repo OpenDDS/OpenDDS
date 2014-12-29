@@ -11,7 +11,7 @@ project(*idl): dcps_test_lib {
   }
 }
 
-project(*Publisher): dcpsexe, dcps_tcp {
+project(*Publisher): dcpsexe, dcps_transports_for_test {
   exename = publisher
   libs   += *idl
   after  += *idl
@@ -25,7 +25,7 @@ project(*Publisher): dcpsexe, dcps_tcp {
   }
 }
 
-project(*Subscriber): dcpsexe, dcps_tcp {
+project(*Subscriber): dcpsexe, dcps_transports_for_test {
   exename = subscriber
   libs   += *idl
   after  += *idl

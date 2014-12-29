@@ -13,7 +13,7 @@ project(DDS*idl): dcps_test_lib {
 }
 
 
-project(DDS*PubSub) : dcpsexe, dcps_tcp, dcps_udp, dcps_multicast {
+project(DDS*PubSub) : dcpsexe, dcps_transports_for_test {
 
   exename   = pubsub
   after    += DDS*idl

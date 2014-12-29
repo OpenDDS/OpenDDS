@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project(*publisher): dcpsexe, dcps_tcp {
+project(*publisher): dcpsexe, dcps_transports_for_test {
   exename   = publisher
 
   after    += DcpsFooType
@@ -18,7 +18,7 @@ project(*publisher): dcpsexe, dcps_tcp {
   }
 }
 
-project(*subscriber): dcpsexe, dcps_tcp, content_subscription {
+project(*subscriber): dcpsexe, dcps_transports_for_test, content_subscription {
   exename   = subscriber
   requires += content_filtered_topic
 

@@ -1,7 +1,7 @@
 // -*- MPC -*-
 
 
-project(Reliability*) : dcpsexe, dcps_tcp, dds_model, dcps_shmem {
+project(Reliability*) : dcpsexe, dcps_transports_for_test, dds_model {
   exename   = subscriber
   after    += Reliability
   
