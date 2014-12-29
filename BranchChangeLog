@@ -1,3 +1,9 @@
+Mon Dec 29 21:58:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/Utils/ExceptionStreams.h:
+
+          Fix build errors.
+
 Mon Dec 29 21:43:34 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
