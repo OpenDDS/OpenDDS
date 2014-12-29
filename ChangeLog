@@ -7,6 +7,13 @@ Fri Dec 19 19:44:08 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
           writer with some back pressure from one or more of the
           readers.
 
+Thu Dec 18 17:33:00 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Added Error log for discovering multiple participants when
+          only 1 excpected.
+
 Thu Dec 18 17:18:55 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
