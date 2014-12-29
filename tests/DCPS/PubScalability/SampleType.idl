@@ -1,0 +1,14 @@
+
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::SampleType"
+#pragma DCPS_DATA_KEY "Xyz::SampleType a_long_value"
+
+  struct SampleType {
+    long  a_long_value;
+    long  handle_value;
+    long  sample_sequence;
+    long  writer_id;
+  };
+
+};

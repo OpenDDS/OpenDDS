@@ -85,6 +85,13 @@ public:
   DataLink(TransportImpl* impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
+  //Reactor invokes this after being notified in schedule_stop or cancel_release
+  int handle_exception(ACE_HANDLE /* fd */);
+
+  //Allows DataLink::stop to be done on the reactor thread so that
+  //this thread avoids possibly deadlocking trying to access reactor
+  //to stop strategies or schedule timers
+  void schedule_stop(ACE_Time_Value& schedule_to_stop_at);
   /// The stop method is used to stop the DataLink prior to shutdown.
   void stop();
 
@@ -175,6 +182,7 @@ public:
   void notify(ConnectionNotice notice);
 
   void notify_connection_deleted();
+  virtual bool issues_on_deleted_callback() const;
 
   /// Called before release the datalink or before shutdown to let
   /// the concrete DataLink to do anything necessary.
@@ -367,6 +375,7 @@ private:
   /// A boolean indicating if the DataLink has been stopped. This
   /// value is protected by the strategy_lock_.
   bool stopped_;
+  ACE_Time_Value scheduled_to_stop_at_;
 
   /// Map publication Id value to TransportSendListener.
   typedef std::map<RepoId, TransportSendListener*, GUID_tKeyLessThan> IdToSendListenerMap;
@@ -422,9 +431,7 @@ private:
   /// TRANSPORT_PRIORITY value associated with the link.
   Priority transport_priority_;
 
-  bool scheduled_release_;
   bool scheduling_release_;
-  bool cancelled_release_;
 
 protected:
 

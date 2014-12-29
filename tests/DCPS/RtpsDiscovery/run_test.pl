@@ -35,7 +35,7 @@ for my $cfg (@configs) {
     my $res1 = $TEST1->WaitKill(150);
     my $res2 = $TEST2->WaitKill(150);
     if ($res1 != 0 || $res2 != 0) {
-        print STDERR "ERROR: test with returned $res1 $res2\n";
+        print STDERR "ERROR: sedp discovery leak test (different user data) returned $res1 $res2\n";
         $result += $res1 + $res2;
     }
 }
@@ -51,7 +51,7 @@ for my $cfg (@configs) {
     my $res1 = $TEST1->WaitKill(150);
     my $res2 = $TEST2->WaitKill(150);
     if ($res1 != 0 || $res2 != 0) {
-        print STDERR "ERROR: test with returned $res1 $res2\n";
+        print STDERR "ERROR: sedp discovery leak test (same user data) returned $res1 $res2\n";
         $result += $res1 + $res2;
     }
 }

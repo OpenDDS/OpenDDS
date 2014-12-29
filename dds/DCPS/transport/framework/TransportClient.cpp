@@ -53,9 +53,27 @@ TransportClient::~TransportClient()
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
+  for (DataLinkIndex::iterator iter = links_waiting_for_on_deleted_callback_.begin();
+       iter != links_waiting_for_on_deleted_callback_.end(); ++iter) {
+    if (Transport_debug_level > 5) {
+      GuidConverter converter(repo_id_);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C from link waiting for callback\n"),
+                 this,
+                 std::string(converter).c_str()));
+    }
+    iter->second->remove_listener(repo_id_);
+  }
+
   for (DataLinkSet::MapType::iterator iter = links_.map().begin();
        iter != links_.map().end(); ++iter) {
-
+    if (Transport_debug_level > 5) {
+      GuidConverter converter(repo_id_);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C\n"),
+                 this,
+                 std::string(converter).c_str()));
+    }
     iter->second->remove_listener(repo_id_);
   }
 
@@ -191,7 +209,13 @@ TransportClient::transport_detached(TransportImpl* which)
           ++it2;
         }
       }
-
+      if (DCPS_debug_level > 4) {
+        GuidConverter converter(repo_id_);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) TransportClient::transport_detached: calling remove_listener %C on link[%@]\n"),
+                   std::string(converter).c_str(),
+                   iter->second.in()));
+      }
       iter->second->remove_listener(repo_id_);
       links_.map().erase(iter++);
 
@@ -522,6 +546,41 @@ TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
 }
 
 void
+TransportClient::on_notification_of_connection_deletion(const RepoId& peerId)
+{
+  DBG_ENTRY_LVL("TransportClient","on_notification_of_connection_deletion",6);
+
+  GuidConverter peerId_conv(peerId);
+  VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::on_notification_of_connection_deletion "
+            "TransportClient(%@) connection to %C deleted\n",
+            this,
+            std::string(peerId_conv).c_str()), 5);
+
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+
+  const DataLinkIndex::iterator found = links_waiting_for_on_deleted_callback_.find(peerId);
+
+  if (found == links_waiting_for_on_deleted_callback_.end()) {
+    if (DCPS_debug_level > 4) {
+      const GuidConverter converter(peerId);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) TransportClient::on_notification_of_connection_deletion: ")
+                 ACE_TEXT("no link for remote peer %C\n"),
+                 std::string(converter).c_str()));
+    }
+
+    return;
+  }
+
+  const DataLink_rch link = found->second;
+
+  //now that an _rch is created for the link, remove the iterator from links_waiting_for_on_deleted_callback_ while still holding lock
+  links_waiting_for_on_deleted_callback_.erase(found);
+
+  link->remove_listener(repo_id_);
+}
+
+void
 TransportClient::stop_associating()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
@@ -573,9 +632,6 @@ TransportClient::disassociate(const RepoId& peerId)
   data_link_index_.erase(found);
   DataLinkSetMap released;
 
-  {
-    //can't call release_reservations while holding lock due to possible reactor deadlock
-    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
     if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
@@ -584,19 +640,37 @@ TransportClient::disassociate(const RepoId& peerId)
     }
 
     link->release_reservations(peerId, repo_id_, released);
-  }
 
   if (!released.empty()) {
-    // Datalink is no longer used for any remote peer
-    link->remove_listener(repo_id_);
+
     if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
                  ACE_TEXT("about to remove_link[%@] from links_\n"),
                  link.in()));
     }
-
     links_.remove_link(link);
+
+    if (link->issues_on_deleted_callback()) {
+      if (DCPS_debug_level > 4) {
+        GuidConverter converter(repo_id_);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) TransportClient::disassociate: wait for connection deleted callback for %C on link[%@]\n"),
+                   std::string(converter).c_str(),
+                   link.in()));
+      }
+      links_waiting_for_on_deleted_callback_[peerId] = link;
+    } else {
+      if (DCPS_debug_level > 4) {
+        GuidConverter converter(repo_id_);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) TransportClient::disassociate: calling remove_listener %C on link[%@]\n"),
+                   std::string(converter).c_str(),
+                   link.in()));
+      }
+      // Datalink is no longer used for any remote peer by this TransportClient
+      link->remove_listener(repo_id_);
+    }
   }
 }
 

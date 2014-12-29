@@ -1,3 +1,325 @@
+Fri Dec 19 19:44:08 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
+
+          Add a check to bail out of the visitation if a core
+          is imminent.  This was seen to happen in a high fan-out
+          writer with some back pressure from one or more of the
+          readers.
+
+Thu Dec 18 17:18:55 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Improved debugging messages.
+
+Thu Dec 18 15:10:25 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+
+          More gyrations to get windows builds to work.
+
+Thu Dec 18 04:16:45 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          Add missing include.
+
+Wed Dec 17 22:44:22 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability/SampleType.idl:
+
+          Force the scoreboard code generation again.
+
+Wed Dec 17 21:04:31 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          Fix a TCHAR conversion.
+
+Wed Dec 17 18:47:39 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Modified the cancel_release logic to properly deal with
+          already stopped links as well as links that are already
+          scheduled.  This allows logic line from transport_shutdown
+          to progress correctly.
+
+          Fixed some reference counting issues with the reactor_task
+          which were causing the multicast_async tests to fail due
+          to the proactor not being released properly due to wrong
+          ref counts.
+
+          modified handle_exception to guard against the impl_ already
+          going away before the callback.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Don't try to unbind from pending_release_links_ if release
+          delay isn't set because links are only shifted to pending
+          if there is a schedule_delayed_release.
+
+Wed Dec 17 19:01:53 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+
+          Fix macro name.
+
+Wed Dec 17 15:59:19 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/TcpReconnect:
+        * tests/DCPS/TcpReconnect/Args.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.cpp:
+        * tests/DCPS/TcpReconnect/Messenger.idl:
+        * tests/DCPS/TcpReconnect/Messenger_export.h:
+        * tests/DCPS/TcpReconnect/TcpReconnect.mpc:
+        * tests/DCPS/TcpReconnect/Writer.h:
+        * tests/DCPS/TcpReconnect/Writer.cpp:
+        * tests/DCPS/TcpReconnect/publisher.cpp:
+        * tests/DCPS/TcpReconnect/repub.ini:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+        * tests/DCPS/TcpReconnect/stub.cpp:
+        * tests/DCPS/TcpReconnect/subscriber.cpp:
+
+          Add a new tcp reconnect test that truly tests the
+          reconnect functionality between two processes.  The
+          existing "Reconnect" test really only tests what
+          happens when the other process is killed and restarted.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Fix some reconnect related bugs.  First, re-establish
+          the receive strategy on the active side after a reconnect.
+          This allows for multiple reconnects.  Second, properly
+          suspend and resume the send strategy around a disconnect
+          and subsequent reconnect.  This allows for samples published
+          while disconnected to be received by the readers.
+
+Wed Dec 17 15:28:03 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability/SampleType.idl:
+
+          Change this code to force the scoreboard builds to regenerate.
+
+Tue Dec 16 22:58:42 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpDataLink.h:
+        * dds/DCPS/transport/tcp/TcpDataLink.inl:
+
+          For transports that notify that a connection was deleted, prolong
+          the TransportClient's registration on the link as a listener until
+          the datalink has a chance to notify it that the conneciton is
+          indeed being deleted.  This allows the TransportSendListener or
+          TransportReceiveListener to actually receive the callback and then
+          finalize the removal of the TransportClient's knowledge of the link
+          as well as removing the link's knowledge of the listener.
+          The Data(Writer/Reader)Impl will then call into the TransportClient
+          to register the receipt of the notification.
+
+          Some additional debug logging was added to help document this
+          change
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/transport/framework/SendResponseListener.h:
+        * dds/DCPS/transport/framework/TransportReceiveListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+        * tests/transport/simple/SimpleDataWriter.h:
+
+          Adding peerId argument to notify_connection_deleted.
+
+Tue Dec 16 22:31:10 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+        * tests/DCPS/PubScalability/sampletypelib_export.h:
+
+          Redo how this test's IDL code was compiled because of VC++ 7.1.
+
+Mon Dec 15 20:52:49 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Added ERROR output for test to catch.
+
+Mon Dec 15 20:25:37 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          fixed a deadlock when ShmemTransport does a read_from_links
+          it can't hold the links_lock_ so make a local copy of all
+          the ShmemDatalink_rch's then release lock and call read() on each.
+
+Mon Dec 15 19:10:22 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/PubScalability/README:
+
+          fixed fuzz errors.
+
+Mon Dec 15 17:01:59 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/PubScalability:
+        * tests/DCPS/PubScalability/DataReaderListener.h:
+        * tests/DCPS/PubScalability/DataReaderListener.cpp:
+        * tests/DCPS/PubScalability/InstanceDataMap.h:
+        * tests/DCPS/PubScalability/InstanceDataMap.cpp:
+        * tests/DCPS/PubScalability/PubDriver.h:
+        * tests/DCPS/PubScalability/PubDriver.cpp:
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+        * tests/DCPS/PubScalability/README:
+        * tests/DCPS/PubScalability/SampleType.idl:
+        * tests/DCPS/PubScalability/SubDriver.h:
+        * tests/DCPS/PubScalability/SubDriver.cpp:
+        * tests/DCPS/PubScalability/TestException.h:
+        * tests/DCPS/PubScalability/Writer.h:
+        * tests/DCPS/PubScalability/Writer.cpp:
+        * tests/DCPS/PubScalability/pub_main.cpp:
+        * tests/DCPS/PubScalability/run_test.pl:
+        * tests/DCPS/PubScalability/sub_main.cpp:
+
+          Add a scalability test that was derived from the ELAC work.
+          This was used to find the two problems fixed last week and
+          allows multiple writers/threads to publish to large number
+          of subscriber processes (100s).
+
+Mon Dec 15 15:44:19 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          No longer have to release the pub_handle_lock_ when
+          disassociating which allows remove_associations to be
+          a single transaction.
+
+          Added some more detail to certain log statements to
+          make debugging easier.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added logging of which subscriptions the writer is waiting
+          for ack responses from.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+
+          Added Reactor callback handle_exception for notify calls of
+          schedule_stop and schedule_delayed_release to use the
+          scheduled_to_stop_at_ time and scheduling_release_ flag to
+          coordinate release.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added schedule_stop and reworked schedule_delayed_release
+          to notify the reactor instead of directly interacting with
+          the reactor.  This alleviates potential deadlock and moves
+          the scheduling and cancelling of timers as well as the calls
+          to stop all onto the reactor thread.  The reactor will call
+          handle_exception which determines how to proceed based on
+          whether scheduled_to_stop_at_ has been set and how it
+          compares to the current time as well as if scheduling_release_
+          is set.
+
+          release_reservations can now happen as a transaction, holding
+          the pub_sub_maps_lock the entire time.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Disassociate can hold the lock for entire disassociate
+          transaction now.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Added mutator for graceful_disconnecting flag
+
+        * dds/DCPS/transport/tcp/TcpDataLink.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          For reuse case needs to reset send mode and
+          graceful_disconnecting flag
+
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Transport now notifies the reactor of the need to stop or
+          schedule a delayed release to avoid reactor deadlock from
+          this thread.  Stopping and Scheduling of timers now happens
+          on the reactor thread when it calls handle_exception on the
+          DataLink. This allows scope of links_lock_ to be expanded
+          for entire transaction of the release.
+
+Fri Dec 12 22:06:13 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/framework/TransportSendStrategy.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Eliminate all immediate notification and make the delayed
+          notification queue a vector (so it can grow).  This solves
+          some deadlocks when writing to the same data link from
+          multiple writers/threads.
+
+Fri Dec 12 20:23:17 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+          Fix problems from ACE_Message_Blocks created with a
+          null locking strategy that are then accessed by multiple
+          threads simultaneously.  The chief one causing problems
+          was the Data Sample Header message block created by
+          the DataWriterImpl.
+
+        * dds/DCPS/DataBlockLockPool.h:
+
+          Make this class thread-safe by using an atomic op for
+          the counter.  Make it all inline as well.
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/ts_generator.cpp:
+
+          Move the DataBlockLockPool of the writer object into
+          the DataWriterImpl base class.  Use a lock whenever
+          creating message blocks that could be sent to multiple
+          data links.
+
+        * dds/DCPS/DataBlockLockPool.cpp:
+
+          Removed this file.
+
+Wed Dec 10 17:16:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Updated operator<<(MessageId) to account for the new enumerator.
+
+Tue Dec  9 17:31:44 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Fixed bug caused by lag between association and propagation to BIT.
+
 Thu Dec  4 20:30:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * dds/InfoRepo/DCPSInfoRepoServ.h:

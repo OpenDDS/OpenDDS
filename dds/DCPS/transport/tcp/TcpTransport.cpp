@@ -526,74 +526,74 @@ TcpTransport::release_datalink(DataLink* link)
   enum LinkAction { None, StopLink, ScheduleLinkRelease };
   LinkAction linkAction = None;
 
-  {
-    // Scope for locking to protect the links (and pending_release) containers.
-    GuardType guard(this->links_lock_);
+  // Scope for locking to protect the links (and pending_release) containers.
+  GuardType guard(this->links_lock_);
 
-    // Attempt to remove the TcpDataLink from our links_ map.
-    PriorityKey key(
-      tcp_link->transport_priority(),
-      tcp_link->remote_address(),
-      tcp_link->is_loopback(),
-      tcp_link->is_active());
+  // Attempt to remove the TcpDataLink from our links_ map.
+  PriorityKey key(
+    tcp_link->transport_priority(),
+    tcp_link->remote_address(),
+    tcp_link->is_loopback(),
+    tcp_link->is_active());
+
+  VDBG_LVL((LM_DEBUG,
+            "(%P|%t) TcpTransport::release_datalink link[%@] PriorityKey "
+            "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
+            link,
+            tcp_link->transport_priority(),
+            tcp_link->remote_address().get_host_addr(),
+            tcp_link->remote_address().get_port_number(),
+            (int)tcp_link->is_loopback(),
+            (int)tcp_link->is_active()), 2);
+
+  if (this->links_.unbind(key, released_link) != 0) {
+    //No op
+  } else if (link->datalink_release_delay() > ACE_Time_Value::zero) {
+    link->set_scheduling_release(true);
 
     VDBG_LVL((LM_DEBUG,
-              "(%P|%t) TcpTransport::release_datalink link[%@] PriorityKey "
-              "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
-              link,
-              tcp_link->transport_priority(),
-              tcp_link->remote_address().get_host_addr(),
-              tcp_link->remote_address().get_port_number(),
-              (int)tcp_link->is_loopback(),
-              (int)tcp_link->is_active()), 2);
+              "(%P|%t) TcpTransport::release_datalink datalink_release_delay "
+              "is %: sec %d usec\n",
+              link->datalink_release_delay().sec(),
+              link->datalink_release_delay().usec()), 4);
 
-    if (this->links_.unbind(key, released_link) != 0) {
-      //No op
-    } else if (link->datalink_release_delay() > ACE_Time_Value::zero) {
+    // Atomic value update, safe to perform here.
+    released_link->set_release_pending(true);
 
-      VDBG_LVL((LM_DEBUG,
-                "(%P|%t) TcpTransport::release_datalink datalink_release_delay "
-                "is %: sec %d usec\n",
-                link->datalink_release_delay().sec(),
-                link->datalink_release_delay().usec()), 4);
-
-      // Atomic value update, safe to perform here.
-      released_link->set_release_pending(true);
-
-      switch (this->pending_release_links_.bind(key, released_link)) {
-      case -1:
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: Unable to bind released TcpDataLink[%@] to "
-                   "pending_release_links_ map: %p\n", released_link.in(), ACE_TEXT("bind")));
-        linkAction = StopLink;
-        break;
-
-      case 1:
-        ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: Unable to bind released TcpDataLink[%@] to "
-                   "pending_release_links_ map: already bound\n", released_link.in()));
-        linkAction = StopLink;
-        break;
-
-      case 0:
-        linkAction = ScheduleLinkRelease;
-        link->set_scheduling_release(true);
-        break;
-
-      default:
-        break;
-      }
-
-    } else { // datalink_release_delay_ is 0
+    switch (this->pending_release_links_.bind(key, released_link)) {
+    case -1:
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Unable to bind released TcpDataLink[%@] to "
+                 "pending_release_links_ map: %p\n", released_link.in(), ACE_TEXT("bind")));
       linkAction = StopLink;
+      break;
+
+    case 1:
+      ACE_ERROR((LM_ERROR,
+                 "(%P|%t) ERROR: Unable to bind released TcpDataLink[%@] to "
+                 "pending_release_links_ map: already bound\n", released_link.in()));
+      linkAction = StopLink;
+      break;
+
+    case 0:
+      linkAction = ScheduleLinkRelease;
+      break;
+
+    default:
+      break;
     }
-  } // End of locking scope.
+
+  } else { // datalink_release_delay_ is 0
+    link->set_scheduling_release(true);
+
+    linkAction = StopLink;
+  }
 
   // Actions are executed outside of the lock scope.
+  ACE_Time_Value cancel_now = ACE_OS::gettimeofday();
   switch (linkAction) {
   case StopLink:
-
-    link->stop();
+    link->schedule_stop(cancel_now);
     break;
 
   case ScheduleLinkRelease:
@@ -795,12 +795,14 @@ TcpTransport::unbind_link(DataLink* link)
 
   GuardType guard(this->links_lock_);
 
-  if (this->pending_release_links_.unbind(key) != 0) {
+  if (this->pending_release_links_.unbind(key) != 0 &&
+      link->datalink_release_delay() > ACE_Time_Value::zero) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) TcpTransport::unbind_link INTERNAL ERROR - "
-               "Failed to find link %@ PriorityKey "
+               "Failed to find link %@ tcp_link %@ PriorityKey "
                "prio=%d, addr=%C:%hu, is_loopback=%d, is_active=%d\n",
                link,
+               tcp_link,
                tcp_link->transport_priority(),
                tcp_link->remote_address().get_host_addr(),
                tcp_link->remote_address().get_port_number(),

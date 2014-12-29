@@ -16,6 +16,7 @@
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/MessageTracker.h"
+#include "dds/DCPS/DataBlockLockPool.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleHeader.h"
@@ -112,7 +113,7 @@ public:
 
     SequenceNumber expected(const RepoId& subscriber) const;
 
-    bool marshal(ACE_Message_Block*& mblock, bool swap_bytes) const;
+    bool marshal(ACE_Message_Block*& mblock, bool swap_bytes, DataBlockLockPool::DataBlockLock* lock) const;
   };
 
   ///Constructor
@@ -409,7 +410,7 @@ public:
   void notify_publication_reconnected(const ReaderIdSeq& subids);
   void notify_publication_lost(const ReaderIdSeq& subids);
 
-  void notify_connection_deleted();
+  virtual void notify_connection_deleted(const RepoId& peerId);
 
   /// Statistics counter.
   int         data_dropped_count_;
@@ -462,6 +463,10 @@ public:
    * or dropped.
    */
   void wait_control_pending();
+
+  DataBlockLockPool::DataBlockLock* get_db_lock() {
+    return db_lock_pool_->get_lock();
+  }
 
 protected:
 
@@ -678,6 +683,9 @@ private:
 
   /// Periodic Monitor object for this entity
   Monitor* periodic_monitor_;
+
+  // Data block local pool for this data writer.
+  DataBlockLockPool*  db_lock_pool_;
 
   // Do we need to set the sequence repair header bit?
   //   must call prior to incrementing sequence number

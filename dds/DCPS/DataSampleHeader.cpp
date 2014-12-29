@@ -91,7 +91,7 @@ DataSampleHeader::alloc_msgblock(const ACE_Message_Block& mb,
                         0, // cont
                         0, // data
                         use_data_alloc ? allocators[DATA] : 0,
-                        0, // locking_strategy
+                        mut_mb.locking_strategy(), // locking_strategy
                         ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                         ACE_Time_Value::zero,
                         ACE_Time_Value::max_time,
@@ -105,7 +105,7 @@ DataSampleHeader::alloc_msgblock(const ACE_Message_Block& mb,
                                   0, // cont
                                   0, // data
                                   use_data_alloc ? allocators[DATA] : 0,
-                                  0, // locking_strategy
+                                  mut_mb.locking_strategy(), // locking_strategy
                                   ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                   ACE_Time_Value::zero,
                                   ACE_Time_Value::max_time,
@@ -484,6 +484,8 @@ std::ostream& operator<<(std::ostream& str, const MessageId value)
     return str << "TRANSPORT_CONTROL";
   case DISPOSE_UNREGISTER_INSTANCE:
     return str << "DISPOSE_UNREGISTER_INSTANCE";
+  case END_HISTORIC_SAMPLES:
+    return str << "END_HISTORIC_SAMPLES";
   default:
     return str << "Unknown";
   }

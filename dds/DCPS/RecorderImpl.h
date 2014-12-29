@@ -77,7 +77,7 @@ public:
   virtual void notify_subscription_disconnected(const WriterIdSeq& pubids);
   virtual void notify_subscription_reconnected(const WriterIdSeq& pubids);
   virtual void notify_subscription_lost(const WriterIdSeq& pubids);
-  virtual void notify_connection_deleted();
+  virtual void notify_connection_deleted(const RepoId&);
 
   // Implement DataReaderCallbacks
 

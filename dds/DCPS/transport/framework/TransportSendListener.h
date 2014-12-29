@@ -47,7 +47,7 @@ public:
   virtual void notify_publication_disconnected(const ReaderIdSeq& subids) = 0;
   virtual void notify_publication_reconnected(const ReaderIdSeq& subids) = 0;
   virtual void notify_publication_lost(const ReaderIdSeq& subids) = 0;
-  virtual void notify_connection_deleted() = 0;
+  virtual void notify_connection_deleted(const RepoId& peerId) = 0;
 
   virtual void remove_associations(const ReaderIdSeq& subids, bool notify) = 0;
 

@@ -85,7 +85,8 @@ DataWriterImpl::DataWriterImpl()
     initialized_(false),
     wfaCondition_(this->wfaLock_),
     monitor_(0),
-    periodic_monitor_(0)
+    periodic_monitor_(0),
+    db_lock_pool_(0)
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -109,6 +110,8 @@ DataWriterImpl::DataWriterImpl()
     TheServiceParticipant->monitor_factory_->create_data_writer_monitor(this);
   periodic_monitor_ =
     TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
+
+  db_lock_pool_ = new DataBlockLockPool(n_chunks_);
 }
 
 // This method is called when there are no longer any reference to the
@@ -123,6 +126,7 @@ DataWriterImpl::~DataWriterImpl()
     delete db_allocator_;
     delete header_allocator_;
   }
+  delete db_lock_pool_;
 }
 
 // this method is called when delete_datawriter is called.
@@ -945,13 +949,19 @@ DataWriterImpl::AckToken::expected(const RepoId& subscriber) const
 }
 
 bool
-DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap) const
+DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap, DataBlockLockPool::DataBlockLock* lock) const
 {
   size_t dataSize = 0, padding = 0;
   gen_find_size(sequence_, dataSize, padding);
   gen_find_size(max_wait_, dataSize, padding);
 
-  ACE_NEW_RETURN(mblock, ACE_Message_Block(dataSize), false);
+  ACE_NEW_RETURN(mblock, ACE_Message_Block(dataSize,
+                                           ACE_Message_Block::MB_DATA,
+                                           0, //cont
+                                           0, //data
+                                           0, //alloc_strategy
+                                           lock),
+                 false);
 
   Serializer ser(mblock, swap);
   ser << sequence_;
@@ -977,7 +987,7 @@ DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
 
   ACE_Message_Block* data = 0;
 
-  if (!token.marshal(data, this->swap_bytes())) {
+  if (!token.marshal(data, this->swap_bytes(), get_db_lock())) {
     delete data;
     return DDS::RETCODE_OUT_OF_RESOURCES;
   }
@@ -1209,12 +1219,38 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
 
   GuidConverter converter(this->publication_id_);
   ACE_DEBUG((LM_WARNING,
-             ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::wait_for_ack_responses() - ")
+             ACE_TEXT("(%P|%t) WARNING: DataWriterImpl[%@]::wait_for_ack_responses() - ")
              ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
              ACE_TEXT("from %d subscriptions.\n"),
+             this,
              std::string(converter).c_str(),
              token.sequence_.getValue(),
              this->readers_.size()));
+
+  if (DCPS_debug_level > 0) {
+    {
+      ACE_GUARD_RETURN(
+        ACE_Recursive_Thread_Mutex,
+        readersGuard,
+        this->lock_,
+        DDS::RETCODE_ERROR);
+
+      for (IdSet::const_iterator current = this->readers_.begin();
+           current != this->readers_.end();
+           ++current) {
+        GuidConverter converter2(*current);
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl[%@]::wait_for_ack_responses() - ")
+                   ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
+                   ACE_TEXT("from subscription %C.\n"),
+                   this,
+                   std::string(converter).c_str(),
+                   token.sequence_.getValue(),
+                   std::string(converter2).c_str()));
+      }
+    }
+  }
+
   return DDS::RETCODE_TIMEOUT;
 }
 
@@ -2022,7 +2058,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
                           header_data.message_length_ ? data : 0, //cont
                           0, //data
                           0, //allocator_strategy
-                          0, //locking_strategy
+                          get_db_lock(), //locking_strategy
                           ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                           ACE_Time_Value::zero,
                           ACE_Time_Value::max_time,
@@ -2109,7 +2145,7 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
                                           data, //cont
                                           0, //data
                                           header_allocator_, //alloc_strategy
-                                          0, //locking_strategy
+                                          get_db_lock(), //locking_strategy
                                           ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                                           ACE_Time_Value::zero,
                                           ACE_Time_Value::max_time,
@@ -2270,7 +2306,12 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   ACE_Message_Block* data = 0;
   size_t max_marshaled_size = end_msg.max_marshaled_size();
 
-  ACE_NEW(data, ACE_Message_Block(max_marshaled_size));
+  ACE_NEW(data, ACE_Message_Block(max_marshaled_size,
+                                  ACE_Message_Block::MB_DATA,
+                                  0, //cont
+                                  0, //data
+                                  0, //alloc_strategy
+                                  get_db_lock()));
 
   Serializer serializer(
     data,
@@ -2553,10 +2594,10 @@ DataWriterImpl::notify_publication_lost(const DDS::InstanceHandleSeq& handles)
 }
 
 void
-DataWriterImpl::notify_connection_deleted()
+DataWriterImpl::notify_connection_deleted(const RepoId& peerId)
 {
   DBG_ENTRY_LVL("DataWriterImpl","notify_connection_deleted",6);
-
+  on_notification_of_connection_deletion(peerId);
   // Narrow to DDS::DCPS::DataWriterListener. If a DDS::DataWriterListener
   // is given to this DataWriter then narrow() fails.
   DataWriterListener_var the_listener =
@@ -2680,7 +2721,12 @@ DataWriterImpl::send_end_historic_samples(const RepoId& readerId)
 
   size_t size = 0, padding = 0;
   gen_find_size(readerId, size, padding);
-  ACE_Message_Block* data = new ACE_Message_Block(size);
+  ACE_Message_Block* data = new ACE_Message_Block(size,
+                                                  ACE_Message_Block::MB_DATA,
+                                                  0, //cont
+                                                  0, //data
+                                                  0, //alloc_strategy
+                                                  get_db_lock());
   Serializer ser(data);
   ser << readerId;
 

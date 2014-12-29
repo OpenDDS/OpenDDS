@@ -121,7 +121,7 @@ public:
   virtual void notify_publication_disconnected(const ReaderIdSeq& subids);
   virtual void notify_publication_reconnected(const ReaderIdSeq& subids);
   virtual void notify_publication_lost(const ReaderIdSeq& subids);
-  virtual void notify_connection_deleted();
+  virtual void notify_connection_deleted(const RepoId&);
 
   /// Statistics counter.
   int data_dropped_count_;

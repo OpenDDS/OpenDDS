@@ -763,7 +763,12 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
   // Don't use the cached allocator for the registered sample message
   // block.
   std::auto_ptr<DataSample> registration_sample(
-    new ACE_Message_Block(marshaled_sample_length));
+    new ACE_Message_Block(marshaled_sample_length,
+                          ACE_Message_Block::MB_DATA,
+                          0, //cont
+                          0, //data
+                          0, //alloc_strategy
+                          data_writer->get_db_lock()));
 
   ACE_OS::memcpy(registration_sample->wr_ptr(),
                  marshaled_sample,
@@ -819,7 +824,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
                               0, // cont
                               0, // data
                               0, // allocator_strategy
-                              0, // data block locking_strategy
+                              data_writer->get_db_lock(), // data block locking_strategy
                               ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                               ACE_Time_Value::zero,
                               ACE_Time_Value::max_time,

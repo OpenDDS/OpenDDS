@@ -1,0 +1,53 @@
+// -*- MPC -*-
+//
+// $Id$
+
+project(*Publisher): dcpsexe_with_tcp {
+  exename = publisher
+  after       += *idl
+  libs        += *idl
+
+  Source_Files {
+    pub_main.cpp
+    PubDriver.cpp
+    InstanceDataMap.cpp
+    Writer.cpp
+  }
+  Idl_Files {
+  }
+  TypeSupport_Files {
+  }
+}
+
+project(*Subscriber): dcpsexe_with_tcp {
+  exename = subscriber
+  after       += *idl
+  libs        += *idl
+
+  Source_Files {
+    sub_main.cpp
+    SubDriver.cpp
+    DataReaderListener.cpp
+  }
+  Idl_Files {
+  }
+  TypeSupport_Files {
+  }
+}
+
+project (*idl) : dcps {
+  libout         = .
+  idlflags      += -Wb,export_macro=SampleTypeLib_Export -Wb,export_include=sampletypelib_export.h
+  dynamicflags   = SAMPLETYPELIB_BUILD_DLL
+  dcps_ts_flags += -Wb,export_macro=SampleTypeLib_Export
+
+  libout         = .
+
+  Source_Files {
+  }
+
+  TypeSupport_Files {
+    SampleType.idl
+  }
+}
+

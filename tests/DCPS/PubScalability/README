@@ -1,0 +1,17 @@
+
+This test is a scalability test that creates a large number of subscriber
+processes on a single topic and then writes to them with a single
+publishing process with multiple threads and/or writers.  It stresses the
+system in two major ways.  First, the large number of readers in different
+processes forces a large number of connections and the data published to
+be shared by all these connections.  Second, the writers writing on separate
+threads must share the common resources of these connections.
+
+To run this test, use the run_test.pl script.  When run with no parameters
+it starts 4 publishing threads (each with its own writer) and 500 subscribing
+processes.  It can also be passed the number of writers and readers. For
+example:
+
+        ./run_test.pl 20 20
+
+runs the test with 20 writers and 20 readers.

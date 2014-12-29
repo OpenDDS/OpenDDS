@@ -10,9 +10,18 @@
 #include "TransportStrategy.h"
 #include "ThreadPerConnectionSendTask.h"
 #include "EntryExit.h"
+#include "dds/DCPS/GuidConverter.h"
+
 
 namespace OpenDDS {
 namespace DCPS {
+
+ACE_INLINE
+bool
+DataLink::issues_on_deleted_callback() const
+{
+  return false;
+}
 
 ACE_INLINE
 Priority&
@@ -337,7 +346,19 @@ DataLink::remove_listener(const RepoId& local_id)
 {
   GuardType guard(this->pub_sub_maps_lock_);
     if (this->send_listeners_.erase(local_id)) {
+      if (Transport_debug_level > 5) {
+        GuidConverter converter(local_id);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataLink::remove_listener: removed %C from send_listeners\n"),
+                   std::string(converter).c_str()));
+      }
       return;
+    }
+    if (Transport_debug_level > 5) {
+      GuidConverter converter(local_id);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataLink::remove_listener: removed %C from recv_listeners\n"),
+                 std::string(converter).c_str()));
     }
   this->recv_listeners_.erase(local_id);
 }

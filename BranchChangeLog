@@ -1,3 +1,7 @@
+Mon Dec 29 16:56:39 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6637 through r6695.
+
 Mon Dec 29 16:53:05 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/FileLogger.cpp:

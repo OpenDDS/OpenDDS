@@ -28,3 +28,10 @@ OpenDDS::DCPS::TcpDataLink::get_transport_impl()
 {
   return this->transport_;
 }
+
+ACE_INLINE
+bool
+OpenDDS::DCPS::TcpDataLink::issues_on_deleted_callback() const
+{
+  return true;
+}

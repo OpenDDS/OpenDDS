@@ -368,7 +368,7 @@ public:
   void notify_subscription_disconnected(const WriterIdSeq& pubids);
   void notify_subscription_reconnected(const WriterIdSeq& pubids);
   void notify_subscription_lost(const WriterIdSeq& pubids);
-  void notify_connection_deleted();
+  virtual void notify_connection_deleted(const RepoId& peerId);
   void notify_liveliness_change();
 
   bool is_bit() const;

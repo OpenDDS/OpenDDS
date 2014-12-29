@@ -309,10 +309,19 @@ ShmemTransport::ReadTask::stop()
 void
 ShmemTransport::read_from_links()
 {
-  GuardType guard(links_lock_);
-  typedef ShmemDataLinkMap::iterator iter_t;
-  for (iter_t it = links_.begin(); it != links_.end(); ++it) {
-    it->second->read();
+  std::vector<ShmemDataLink_rch> dl_copies;
+  {
+    GuardType guard(links_lock_);
+    typedef ShmemDataLinkMap::iterator iter_t;
+    for (iter_t it = links_.begin(); it != links_.end(); ++it) {
+      ShmemDataLink_rch link = it->second;
+      dl_copies.push_back(link);
+    }
+  }
+
+  typedef std::vector<ShmemDataLink_rch>::iterator dl_iter_t;
+  for (dl_iter_t dl_it = dl_copies.begin(); dl_it != dl_copies.end(); ++dl_it) {
+    dl_it->in()->read();
   }
 }
 

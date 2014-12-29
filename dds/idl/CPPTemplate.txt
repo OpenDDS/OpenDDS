@@ -57,7 +57,6 @@ bool
 <%TYPE%>DataWriterImpl::<%TYPE%>DataWriterImpl ()
   : marshaled_size_ (0)
   , key_marshaled_size_ (0)
-  , db_lock_pool_(0)
   , data_allocator_ (0)
   , mb_allocator_ (0)
   , db_allocator_ (0)
@@ -69,7 +68,6 @@ bool
   delete data_allocator_;
   delete mb_allocator_;
   delete db_allocator_;
-  delete db_lock_pool_;
 }
 
 ::DDS::InstanceHandle_t
@@ -419,8 +417,6 @@ void
                  n_chunks_));
     }
 
-  db_lock_pool_ = new DataBlockLockPool(n_chunks_);
-
   return ::DDS::RETCODE_OK;
 }
 
@@ -451,7 +447,12 @@ ACE_Message_Block*
     if (cdr) {
       effective_size += padding;
     }
-    ACE_NEW_RETURN(mb, ACE_Message_Block(effective_size), 0);
+    ACE_NEW_RETURN(mb, ACE_Message_Block(effective_size,
+                                         ACE_Message_Block::MB_DATA,
+                                         0, //cont
+                                         0, //data
+                                         0, //alloc_strategy
+                                         get_db_lock()), 0);
     OpenDDS::DCPS::Serializer serializer(mb, swap, cdr
       ? OpenDDS::DCPS::Serializer::ALIGN_CDR
       : OpenDDS::DCPS::Serializer::ALIGN_NONE);
@@ -485,7 +486,7 @@ ACE_Message_Block*
                               0, //cont
                               0, //data
                               data_allocator_, //allocator_strategy
-                              db_lock_pool_->get_lock(), //data block locking_strategy
+                              get_db_lock(), //data block locking_strategy
                               ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                               ACE_Time_Value::zero,
                               ACE_Time_Value::max_time,

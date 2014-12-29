@@ -128,7 +128,7 @@ private:
 //            assume that configure() can remain unlocked (why not lock it
 //            though - it isn't in the send or receive path?)
 //            Step back and take a look at when the various locks in here
-//            get used - and if not in the direct send or recieve path,
+//            get used - and if not in the direct send or receive path,
 //            maybe we can simplify this at the expense of a little more
 //            locking (ie, longer critical sections).  And the base
 //            class has a lock that might work for us - check out if

@@ -206,7 +206,7 @@ private:
     void notify_publication_disconnected(const DCPS::ReaderIdSeq&) {}
     void notify_publication_reconnected(const DCPS::ReaderIdSeq&) {}
     void notify_publication_lost(const DCPS::ReaderIdSeq&) {}
-    void notify_connection_deleted() {}
+    void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::ReaderIdSeq&, bool) {}
     void retrieve_inline_qos_data(InlineQosData&) const {}
 
@@ -252,7 +252,7 @@ private:
     void notify_subscription_disconnected(const DCPS::WriterIdSeq&) {}
     void notify_subscription_reconnected(const DCPS::WriterIdSeq&) {}
     void notify_subscription_lost(const DCPS::WriterIdSeq&) {}
-    void notify_connection_deleted() {}
+    void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
 
   } publications_reader_, subscriptions_reader_;

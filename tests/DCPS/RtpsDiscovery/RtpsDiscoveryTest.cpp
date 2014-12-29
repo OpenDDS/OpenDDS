@@ -22,7 +22,7 @@
 class TestConfig {
 public:
   static void set(int base) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("TestConfig::set base=%d\n"), base));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("%P TestConfig::set base=%d\n"), base));
     topic_data_ = base;
     topic_data2_ = base + 1;
     participant_user_data_ = base + 2;
@@ -100,13 +100,13 @@ void cleanup(const DomainParticipantFactory_var& dpf,
 
   ReturnCode_t ret = dp->delete_contained_entities();
   if (ret != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: delete_contained_entities() returned %d\n",
+    ACE_DEBUG((LM_ERROR, "ERROR: %P delete_contained_entities() returned %d\n",
                ret));
   }
 
   ret = dpf->delete_participant(dp);
   if (ret != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: delete_participant() returned %d\n", ret));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P delete_participant() returned %d\n", ret));
   }
 }
 
@@ -131,7 +131,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   ReturnCode_t result = waiter->wait(activeConditions, forever);
   waiter->detach_condition(rc);
   if (result != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not wait for condition: %d\n", result));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not wait for condition: %d\n", result));
     return false;
   }
 
@@ -143,14 +143,14 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   ReturnCode_t ret =
     part_bit->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
   if (ret != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not read participant BIT: %d\n", ret));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read participant BIT: %d\n", ret));
     return false;
   }
 
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
       ACE_DEBUG((LM_DEBUG,
-                 "Read Participant BIT with key: %x %x %x and handle %d\n",
+                 "%P Read Participant BIT with key: %x %x %x and handle %d\n",
                  data[i].key.value[0],
                  data[i].key.value[1],
                  data[i].key.value[2],
@@ -158,7 +158,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
 
       if (data[i].user_data.value.length() != 1) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR particpant[%d] user data length %d "
+                          "ERROR: %P particpant[%d] user data length %d "
                           "not expected length of 1\n",
                           i,
                           data[i].user_data.value.length()),
@@ -170,7 +170,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
       }
       if (data[i].user_data.value[0] != user_data) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR particpant[%d] user data value %d "
+                          "ERROR: %P particpant[%d] user data value %d "
                           "not expected value %d\n",
                           i,
                           data[i].user_data.value[0],
@@ -189,7 +189,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
   TypeSupport_var ts = new TestMsgTypeSupportImpl;
 
   if (ts->register_type(dp2, "") != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to register type support\n"));
     return 0;
   }
 
@@ -204,7 +204,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                       DEFAULT_STATUS_MASK);
 
   if (!topic) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create topic\n"));
     return 0;
   }
 
@@ -213,7 +213,7 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                             DEFAULT_STATUS_MASK);
 
   if (!pub) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create publisher\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create publisher\n"));
     return 0;
   }
 
@@ -227,41 +227,10 @@ DataWriter_var create_data_writer(const DomainParticipant_var& dp2)
                                              DEFAULT_STATUS_MASK);
 
   if (!dw) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data writer\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create data writer\n"));
     return 0;
   }
   return dw;
-}
-
-void recreate_data_writer_and_topic(DataWriter_var& dw)
-{
-  DataWriterQos dw_qos;
-  dw->get_qos(dw_qos);
-
-  Topic_var topic = dw->get_topic();
-  TopicQos topic_qos;
-  topic->get_qos(topic_qos);
-  CORBA::String_var topic_name = topic->get_name(),
-    type_name = topic->get_type_name();
-
-  Publisher_var pub = dw->get_publisher();
-  DomainParticipant_var dp = pub->get_participant();
-  pub->delete_datawriter(dw);
-  dw = 0;
-
-  dp->delete_topic(topic);
-  topic = 0;
-
-  topic = dp->create_topic(topic_name, type_name, topic_qos, 0, 0);
-  if (!topic) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to re-create topic\n"));
-    return;
-  }
-
-  dw = pub->create_datawriter(topic, dw_qos, 0, 0);
-  if (!dw) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to re-create data writer\n"));
-  }
 }
 
 void wait_match(const DataReader_var& dr, int n)
@@ -280,12 +249,46 @@ void wait_match(const DataReader_var& dr, int n)
   ws->detach_condition(condition);
 }
 
+void recreate_data_writer_and_topic(DataWriter_var& dw, const DataReader_var& dr)
+{
+  DataWriterQos dw_qos;
+  dw->get_qos(dw_qos);
+
+  Topic_var topic = dw->get_topic();
+  TopicQos topic_qos;
+  topic->get_qos(topic_qos);
+  CORBA::String_var topic_name = topic->get_name(),
+    type_name = topic->get_type_name();
+
+  Publisher_var pub = dw->get_publisher();
+  DomainParticipant_var dp = pub->get_participant();
+  pub->delete_datawriter(dw);
+  dw = 0;
+
+  dp->delete_topic(topic);
+  topic = 0;
+
+  // Wait until the data reader is not associated with the writer.
+  wait_match (dr, 0);
+
+  topic = dp->create_topic(topic_name, type_name, topic_qos, 0, 0);
+  if (!topic) {
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to re-create topic\n"));
+    return;
+  }
+
+  dw = pub->create_datawriter(topic, dw_qos, 0, 0);
+  if (!dw) {
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to re-create data writer\n"));
+  }
+}
+
 DataReader_var create_data_reader(const DomainParticipant_var& dp)
 {
   TypeSupport_var ts = new TestMsgTypeSupportImpl;
 
   if (ts->register_type(dp, "") != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to register type support\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to register type support\n"));
     return 0;
   }
 
@@ -300,7 +303,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                      DEFAULT_STATUS_MASK);
 
   if (!topic) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create topic\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create topic\n"));
     return 0;
   }
 
@@ -309,7 +312,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                              DEFAULT_STATUS_MASK);
 
   if (!sub) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create subscriber\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create subscriber\n"));
     return 0;
   }
 
@@ -324,7 +327,7 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
                                              DEFAULT_STATUS_MASK);
 
   if (!dr) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: failed to create data reader\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P failed to create data reader\n"));
     return 0;
   }
   return dr;
@@ -334,104 +337,117 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                           InstanceHandle_t& handle,
                           int user_data,
                           int topic_data,
+                          bool poll,
                           int num_expected = 1)
 {
-  DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-  if (num_expected) {
-    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
-                                                    ANY_VIEW_STATE,
-                                                    ALIVE_INSTANCE_STATE);
-    WaitSet_var waiter = new WaitSet;
-    waiter->attach_condition(rc);
-    ConditionSeq activeConditions;
-    Duration_t forever = { DURATION_INFINITE_SEC,
-                           DURATION_INFINITE_NSEC };
-    ReturnCode_t result = waiter->wait(activeConditions, forever);
-    waiter->detach_condition(rc);
-    if (result != RETCODE_OK) {
-      ACE_DEBUG((LM_DEBUG,
-        "ERROR: (publication BIT) could not wait for condition: %d\n", result));
+  int num_valid = 0;
+
+  do {
+    DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
+    if (num_expected) {
+      ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                      ANY_VIEW_STATE,
+                                                      ALIVE_INSTANCE_STATE);
+      WaitSet_var waiter = new WaitSet;
+      waiter->attach_condition(rc);
+      ConditionSeq activeConditions;
+      Duration_t forever = { DURATION_INFINITE_SEC,
+                             DURATION_INFINITE_NSEC };
+      ReturnCode_t result = waiter->wait(activeConditions, forever);
+      waiter->detach_condition(rc);
+      if (result != RETCODE_OK) {
+        ACE_DEBUG((LM_ERROR,
+                   "ERROR: %P (publication BIT) could not wait for condition: %d\n", result));
+        return false;
+      }
+    } else {
+      ACE_OS::sleep(1);
+    }
+
+    PublicationBuiltinTopicDataDataReader_var pub_bit =
+      PublicationBuiltinTopicDataDataReader::_narrow(dr);
+
+    PublicationBuiltinTopicDataSeq data;
+    SampleInfoSeq infos;
+    ReturnCode_t ret =
+      pub_bit->read(data, infos, LENGTH_UNLIMITED,
+                    ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+    if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
+      ACE_DEBUG((LM_ERROR, "ERROR: %P could not read ignored publication BIT: %d\n",
+                 ret));
+      return false;
+    } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
+      ACE_DEBUG((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
       return false;
     }
-  } else {
-    ACE_OS::sleep(1);
-  }
 
-  PublicationBuiltinTopicDataDataReader_var pub_bit =
-    PublicationBuiltinTopicDataDataReader::_narrow(dr);
-
-  PublicationBuiltinTopicDataSeq data;
-  SampleInfoSeq infos;
-  ReturnCode_t ret =
-    pub_bit->read(data, infos, LENGTH_UNLIMITED,
-                  ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
-  if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not read ignored publication BIT: %d\n",
-               ret));
-    return false;
-  } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not read publication BIT: %d\n", ret));
-    return false;
-  }
-
-  int num_valid = 0;
-  for (CORBA::ULong i = 0; i < data.length(); ++i) {
-    if (infos[i].valid_data) {
-      ++num_valid;
-      ACE_DEBUG((LM_DEBUG,
-                 "Read Publication BIT with key: %x %x %x and handle %d\n"
-                 "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
-                 data[i].key.value[0], data[i].key.value[1],
-                 data[i].key.value[2], infos[i].instance_handle,
-                 data[i].participant_key.value[0],
-                 data[i].participant_key.value[1],
-                 data[i].participant_key.value[2], data[i].topic_name.in(),
-                 data[i].type_name.in()));
-      if (data[i].user_data.value.length() != 1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR publication [%d] user data length %d "
-                          "not expected length of 1\n",
-                          i,
-                          data[i].user_data.value.length()),
-                         false);
+    num_valid = 0;
+    for (CORBA::ULong i = 0; i < data.length(); ++i) {
+      if (infos[i].valid_data) {
+        ++num_valid;
+        ACE_DEBUG((LM_DEBUG,
+                   "%P Read Publication BIT with key: %x %x %x and handle %d\n"
+                   "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
+                   data[i].key.value[0], data[i].key.value[1],
+                   data[i].key.value[2], infos[i].instance_handle,
+                   data[i].participant_key.value[0],
+                   data[i].participant_key.value[1],
+                   data[i].participant_key.value[2], data[i].topic_name.in(),
+                   data[i].type_name.in()));
+        if (data[i].user_data.value.length() != 1) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P publication [%d] user data length %d "
+                            "not expected length of 1\n",
+                            i,
+                            data[i].user_data.value.length()),
+                           false);
+        }
+        if (data[i].topic_data.value.length() != 1) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P publication [%d] topic data length %d "
+                            "not expected length of 1\n",
+                            i,
+                            data[i].topic_data.value.length()),
+                           false);
+        }
+        if (i != data.length() - 1) {
+          continue;
+        }
+        if (data[i].user_data.value[0] != user_data) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P publication [%d] user data value %d "
+                            "not expected value %d\n",
+                            i,
+                            data[i].user_data.value[0],
+                            user_data),
+                           false);
+        }
+        if (data[i].topic_data.value[0] != topic_data) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P publication [%d] topic data value %d "
+                            "not expected value %d\n",
+                            i,
+                            data[i].topic_data.value[0],
+                            topic_data),
+                           false);
+        }
+        handle = infos[i].instance_handle;
       }
-      if (data[i].topic_data.value.length() != 1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR publication [%d] topic data length %d "
-                          "not expected length of 1\n",
-                          i,
-                          data[i].topic_data.value.length()),
-                         false);
-      }
-      if (i != data.length() - 1) {
-        continue;
-      }
-      if (data[i].user_data.value[0] != user_data) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR publication [%d] user data value %d "
-                          "not expected value %d\n",
-                          i,
-                          data[i].user_data.value[0],
-                          user_data),
-                         false);
-      }
-      if (data[i].topic_data.value[0] != topic_data) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR publication [%d] topic data value %d "
-                          "not expected value %d\n",
-                          i,
-                          data[i].topic_data.value[0],
-                          topic_data),
-                         false);
-      }
-      handle = infos[i].instance_handle;
     }
-  }
-  if (num_valid != num_expected) {
-    ACE_ERROR_RETURN((LM_ERROR, "ERROR expected %d discovered "
-                                "publications, found %d\n",
-                                num_expected, num_valid), false);
-  }
+    if (!poll && num_valid != num_expected) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected %d discovered "
+                        "publications, found %d\n",
+                        num_expected, num_valid), false);
+    }
+
+    if (poll && num_valid != num_expected) {
+      ACE_DEBUG((LM_DEBUG,
+                 "%P Expected number of publications (%d) different from actual (%d).  Sleeping...\n", num_expected, num_valid));
+      ACE_OS::sleep(1);
+    }
+
+  } while (poll && num_valid != num_expected);
+
   return true;
 }
 
@@ -454,12 +470,12 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     ReturnCode_t result = waiter->wait(activeConditions, forever);
     waiter->detach_condition(rc);
     if (result != RETCODE_OK) {
-      ACE_DEBUG((LM_DEBUG,
-        "ERROR: (subscription BIT) could not wait for condition: %d\n", result));
+      ACE_DEBUG((LM_ERROR,
+        "ERROR: %P (subscription BIT) could not wait for condition: %d\n", result));
       return false;
     }
   } else {
-  ACE_OS::sleep(1);
+    ACE_OS::sleep(1);
   }
   SubscriptionBuiltinTopicDataDataReader_var pub_bit =
     SubscriptionBuiltinTopicDataDataReader::_narrow(dr);
@@ -470,11 +486,11 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     pub_bit->read(data, infos, LENGTH_UNLIMITED,
                   ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
   if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not read ignored subscription BIT: %d\n",
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read ignored subscription BIT: %d\n",
                ret));
     return false;
   } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not read subscription BIT: %d\n", ret));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read subscription BIT: %d\n", ret));
     return false;
   }
 
@@ -483,7 +499,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     if (infos[i].valid_data) {
       ++num_valid;
       ACE_DEBUG((LM_DEBUG,
-                 "Read Subscription BIT with key: %x %x %x and handle %d\n"
+                 "%P Read Subscription BIT with key: %x %x %x and handle %d\n"
                  "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
                  data[i].key.value[0], data[i].key.value[1],
                  data[i].key.value[2], infos[i].instance_handle,
@@ -493,7 +509,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
                  data[i].type_name.in()));
       if (data[i].user_data.value.length() != 1) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR subscription [%d] user data length %d "
+                          "ERROR: %P subscription [%d] user data length %d "
                           "not expected length of 1\n",
                           i,
                           data[i].user_data.value.length()),
@@ -501,7 +517,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
       }
       if (data[i].topic_data.value.length() != 1) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR subscription [%d] topic data length %d "
+                          "ERROR: %P subscription [%d] topic data length %d "
                           "not expected length of 1\n",
                           i,
                           data[i].topic_data.value.length()),
@@ -512,7 +528,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
       }
       if (data[i].user_data.value[0] != user_data) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR subscription [%d] user data value %d "
+                          "ERROR: %P subscription [%d] user data value %d "
                           "not expected value %d\n",
                           i,
                           data[i].user_data.value[0],
@@ -521,7 +537,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
       }
       if (data[i].topic_data.value[0] != topic_data) {
         ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR subscription [%d] topic data value %d "
+                          "ERROR: %P subscription [%d] topic data value %d "
                           "not expected value %d\n",
                           i,
                           data[i].topic_data.value[0],
@@ -532,7 +548,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
     }
   }
   if (num_valid != num_expected) {
-    ACE_ERROR_RETURN((LM_ERROR, "ERROR expected %d discovered "
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected %d discovered "
                                 "subscriptionsd, found %d\n",
                                 num_expected, num_valid), false);
   }
@@ -555,11 +571,11 @@ bool check_discovered_participants(DomainParticipant_var& dp,
   if (stat == RETCODE_OK) {
     CORBA::ULong len = part_handles.length();
     if (len != 1) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR expected to discover")
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P expected to discover")
                                   ACE_TEXT("one other participant handle but ")
                                   ACE_TEXT("found %d\n"), len), false);
     } else if (part_handles[0] == my_handle) {
-      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR discovered own ")
+      ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P discovered own ")
                                   ACE_TEXT("participant handle\n")), false);
     } else {
       DDS::ParticipantBuiltinTopicData data;
@@ -574,7 +590,7 @@ bool check_discovered_participants(DomainParticipant_var& dp,
           OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
           data.key);
       if (dp_impl->get_handle(repo_id) != part_handles[0]) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR discovered participant ")
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("ERROR: %P discovered participant ")
                                     ACE_TEXT("BIT key could not be converted ")
                                     ACE_TEXT("to repo id, then handle\n")),
                          false);
@@ -618,17 +634,17 @@ bool run_test(DomainParticipant_var& dp,
 
   DataWriter_var dw = create_data_writer(dp2);
   if (!dw) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not create Data Writer (participant 2)\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Data Writer (participant 2)\n"));
     return false;
   }
 
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), false)) {
     return false;
   }
 
   DataReader_var dr = create_data_reader(dp);
   if (!dr) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not create Data Reader (participant 1)\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Data Reader (participant 1)\n"));
     return false;
   }
   if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, TestConfig::DATA_READER_USER_DATA(), TestConfig::TOPIC_DATA())) {
@@ -640,7 +656,7 @@ bool run_test(DomainParticipant_var& dp,
   // Remove the writer and its topic, then re-create them.  The writer's
   // participant should still have discovery info about the reader so that
   // the association between the new writer and old reader can be established.
-  recreate_data_writer_and_topic(dw);
+  recreate_data_writer_and_topic(dw, dr);
 
   WriterSync::wait_match(dw);
 
@@ -649,7 +665,7 @@ bool run_test(DomainParticipant_var& dp,
   wait_match(dr, 1);
 
   // Get the new instance handle as pub_ih
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), true)) {
     return false;
   }
 
@@ -667,8 +683,8 @@ bool run_test(DomainParticipant_var& dp,
   ReturnCode_t result = waiter->wait(activeConditions, timeout);
   waiter->detach_condition(rc);
   if (result != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG,
-      "ERROR: TestMsg reader could not wait for condition: %d\n", result));
+    ACE_DEBUG((LM_ERROR,
+      "ERROR: %P TestMsg reader could not wait for condition: %d\n", result));
     return false;
   }
 
@@ -678,7 +694,7 @@ bool run_test(DomainParticipant_var& dp,
   SampleInfoSeq infos;
   ReturnCode_t ret = tmdr->read_w_condition(data, infos, LENGTH_UNLIMITED, rc);
   if (ret != RETCODE_OK) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: could not read TestMsg: %d\n", ret));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read TestMsg: %d\n", ret));
     return false;
   }
 
@@ -686,12 +702,12 @@ bool run_test(DomainParticipant_var& dp,
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
       ok = true;
-      ACE_DEBUG((LM_DEBUG, "Read data sample: %d\n", data[i].value));
+      ACE_DEBUG((LM_DEBUG, "%P Read data sample: %d\n", data[i].value));
     }
   }
 
   if (!ok) {
-    ACE_DEBUG((LM_DEBUG, "ERROR: no valid data from TestMsg data reader\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P no valid data from TestMsg data reader\n"));
   }
 
   // Change dp qos
@@ -720,7 +736,7 @@ bool run_test(DomainParticipant_var& dp,
   if (!read_participant_bit(bit_sub, TestConfig::PARTICIPANT_USER_DATA2())) {
     return false;
   }
-  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA(), false)) {
     return false;
   }
   if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
@@ -743,7 +759,7 @@ bool run_test(DomainParticipant_var& dp,
 
   // Wait for propagation
   ACE_OS::sleep(3);
-  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
+  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), false)) {
     return false;
   }
   if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
@@ -752,23 +768,30 @@ bool run_test(DomainParticipant_var& dp,
 
   // Test ignore
   dp->ignore_publication(pub_ih);
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 0)) {
+  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), false, 0)) {
     ACE_ERROR_RETURN((LM_ERROR,
-                     ACE_TEXT("Could not ignore publication\n")), false);
+                     ACE_TEXT("ERROR: %P Could not ignore publication\n")), false);
   }
 
   dp2->ignore_subscription(sub_ih);
   if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 0)) {
     ACE_ERROR_RETURN((LM_ERROR,
-                     ACE_TEXT("Could not ignore subscription\n")), false);
+                     ACE_TEXT("ERROR: %P Could not ignore subscription\n")), false);
   }
 
+  InstanceHandleSeq pre_ignore_handles;
+  dp->get_discovered_participants(pre_ignore_handles);
+  if (pre_ignore_handles.length() > 1) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("ERROR: Discovered %d participants before ignore, should only be 1\n"),
+               pre_ignore_handles.length()));
+  }
   dp->ignore_participant(dp2_ih);
   InstanceHandleSeq handles;
   dp->get_discovered_participants(handles);
-  if (handles.length()) {
+  if (pre_ignore_handles.length() - handles.length() != 1) {
     ACE_ERROR_RETURN((LM_ERROR,
-                     ACE_TEXT("Could not ignore participant\n")), false);
+                     ACE_TEXT("ERROR: %P Could not ignore participant\n")), false);
   }
 
   return ok;
@@ -784,7 +807,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     dp = dpf->create_participant(9, PARTICIPANT_QOS_DEFAULT,
                                  0, DEFAULT_STATUS_MASK);
     if (!dp) {
-      ACE_DEBUG((LM_DEBUG, "ERROR: could not create Domain Participant 1\n"));
+      ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Domain Participant 1\n"));
 
     } else {
       {
@@ -806,32 +829,32 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       dp2 = dpf->create_participant(9, dp_qos, 0, DEFAULT_STATUS_MASK);
 
       if (!dp2) {
-        ACE_DEBUG((LM_DEBUG, "ERROR: could not create Domain Participant 2\n"));
+        ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Domain Participant 2\n"));
 
       } else {
         ok = run_test(dp, dp2);
 
         if (!ok) {
-          ACE_DEBUG((LM_ERROR, "ERROR from run_test\n"));
+          ACE_DEBUG((LM_ERROR, "ERROR: %P from run_test\n"));
           return -1;
         }
       }
     }
   } catch (const std::exception& e) {
-    ACE_DEBUG((LM_ERROR, "ERROR: Exception thrown: %C\n", e.what()));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P Exception thrown: %C\n", e.what()));
     return -2;
   } catch (const CORBA::Exception& e) {
-    e._tao_print_exception("ERROR: Exception thrown:");
+    e._tao_print_exception("ERROR: %P Exception thrown:");
     return -2;
   } catch (const OpenDDS::DCPS::Transport::Exception&) {
-    ACE_DEBUG((LM_ERROR, "ERROR: Transport exception thrown\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P Transport exception thrown\n"));
     return -2;
   } catch (...) {
-    ACE_DEBUG((LM_ERROR, "ERROR: unknown exception thrown\n"));
+    ACE_DEBUG((LM_ERROR, "ERROR: %P unknown exception thrown\n"));
     return -2;
   }
 
-  ACE_DEBUG((LM_INFO, "Cleaning up test\n"));
+  ACE_DEBUG((LM_INFO, "%P Cleaning up test\n"));
   cleanup(dpf, dp);
   ACE_OS::sleep(2);
   cleanup(dpf, dp2);
