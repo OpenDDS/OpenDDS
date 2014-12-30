@@ -1,3 +1,11 @@
+Tue Dec 30 18:50:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+
+          Missed includes.
+
 Tue Dec 30 18:46:12 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
