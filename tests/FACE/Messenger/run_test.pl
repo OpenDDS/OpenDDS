@@ -12,23 +12,15 @@ use strict;
 my $status = 0;
 
 PerlDDS::add_lib_path("Idl");
-my $Subscriber = PerlDDS::create_process("Subscriber/subscriber");
-my $Publisher = PerlDDS::create_process("Publisher/publisher");
 
-$Subscriber->Spawn();
+my $test = new PerlDDS::TestFramework();
+
+$test->setup_discovery();
+
+$test->process('Subscriber', 'Subscriber/subscriber');
+$test->start_process('Subscriber');
 sleep 5;
 
-$Publisher->Spawn();
-my $PublisherResult = $Publisher->WaitKill(30);
-if ($PublisherResult != 0) {
-  print STDERR "ERROR: publisher returned $PublisherResult\n";
-  $status = 1;
-}
-
-my $SubscriberResult = $Subscriber->WaitKill(30);
-if ($SubscriberResult != 0) {
-  print STDERR "ERROR: subscriber returned $SubscriberResult\n";
-  $status = 1;
-}
-
-exit $status;
+$test->process('Publisher', 'Publisher/publisher');
+$test->start_process('Publisher');
+exit $test->finish(30);
