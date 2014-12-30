@@ -1,3 +1,18 @@
+Tue Dec 30 17:20:39 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Instances/SubDriver.h:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/Utils/TestUtils.mpc:
+
+          Updated TestUtils to not depend on the model library.
+          These two tests can use the model library directly.
+
+        * tests/Utils/Sync.h:
+        * tests/Utils/Sync.cpp:
+
+          Removed these files.
+
 Tue Dec 30 15:47:29 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * tests/FACE/Messenger/run_test.pl:
