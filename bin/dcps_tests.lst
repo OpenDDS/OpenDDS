@@ -19,9 +19,9 @@ tests/DCPS/ZeroCopyDataReaderListener/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVER
 tests/DCPS/DCPSInfoRepo/run_test.pl: !OPENDDS_SAFETY_PROFILE
 tests/DCPS/DCPSInfoRepo/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/unit/run_test.pl:  !SAFETY_TODO_CONVERT
-tests/DCPS/DestinationOrder/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/DestinationOrder/run_test.pl source: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/Dispose/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/DestinationOrder/run_test.pl: !DCPS_MIN
+tests/DCPS/DestinationOrder/run_test.pl source: !DCPS_MIN
+tests/DCPS/Dispose/run_test.pl: !DCPS_MIN
 tests/DCPS/FooTest3_0/run_test.pl: !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl unregister: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl dispose: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
@@ -99,7 +99,7 @@ tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN
 
 tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !SAFETY_TODO_CONVERT
 tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS !SAFETY_TODO_CONVERT
@@ -200,7 +200,7 @@ tests/DCPS/SetQosPartition/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !
 tests/DCPS/StringKey/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
 tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
-tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
 tests/DCPS/RegisterInstance/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/Rejects/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Rejects/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS

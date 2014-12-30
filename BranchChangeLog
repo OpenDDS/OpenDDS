@@ -1,3 +1,13 @@
+Tue Dec 30 23:27:52 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DestinationOrder/run_test.pl:
+        * tests/DCPS/Dispose/run_test.pl:
+        * tests/DCPS/ReadCondition/run_test.pl:
+        * tests/DCPS/TimeBasedFilter/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
 Tue Dec 30 21:55:50 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
