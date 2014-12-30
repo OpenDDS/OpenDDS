@@ -19,8 +19,11 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include <ace/Get_Opt.h>
 #include "ace/OS_NS_sys_stat.h"
+
+using namespace std;
 
 const char* pub_ready_filename    = "publisher_ready.txt";
 const char* pub_finished_filename = "publisher_finished.txt";
