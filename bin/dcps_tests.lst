@@ -100,6 +100,7 @@ tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN
 tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN
+tests/DCPS/TcpReconnect/run_test.pl: !DCPS_MIN
 
 tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS

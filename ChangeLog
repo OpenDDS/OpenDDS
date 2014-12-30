@@ -1,3 +1,9 @@
+Tue Dec 30 20:20:23 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add TcpReconnect test to test list.
+
 Fri Dec 19 19:44:08 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
