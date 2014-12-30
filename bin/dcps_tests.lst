@@ -180,7 +180,7 @@ tests/DCPS/RecorderReplayer/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_
 
 examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !CORBA_E_MICRO !DDS_NO_ORBSVCS !OPENDDS_SAFETY_PROFILE
 
-tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN
 tests/DCPS/KeyTest/run_test.pl: !DCPS_MIN
 tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
