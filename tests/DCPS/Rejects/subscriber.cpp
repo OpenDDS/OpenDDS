@@ -25,9 +25,11 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include <ace/Time_Value.h>
 
 #include <cassert>
+using namespace std;
 
 static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);

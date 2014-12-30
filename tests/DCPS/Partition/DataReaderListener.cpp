@@ -4,7 +4,8 @@
 #include "TestTypeSupportC.h"
 #include "TestTypeSupportImpl.h"
 
-#include <iostream>
+#include <ace/streams>
+#include "tests/Utils/ExceptionStreams.h"
 
 using std::cerr;
 using std::endl;

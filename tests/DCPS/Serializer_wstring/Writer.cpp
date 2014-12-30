@@ -5,9 +5,11 @@
 #include "MessengerTypeSupportC.h"
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include <ace/OS_NS_wchar.h>
 
 using namespace Messenger;
+using namespace std;
 
 const int num_instances_per_writer = 1;
 const int num_messages = 10;

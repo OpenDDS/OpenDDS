@@ -24,12 +24,14 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 
 #include <memory>
 #include <assert.h>
 
 using namespace Messenger;
+using namespace std;
 
 
 const int MAX_INSTANCES = 2;
