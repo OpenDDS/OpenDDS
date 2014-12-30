@@ -10,7 +10,7 @@
 #include "tests/Utils/ExceptionStreams.h"
 
 using namespace Messenger;
-using namspace std;
+using namespace std;
 
 DataReaderListenerImpl::DataReaderListenerImpl ()
   : num_reads_(0),

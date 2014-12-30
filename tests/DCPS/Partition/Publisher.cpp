@@ -13,7 +13,7 @@
 
 #include <vector>
 #include <algorithm>
-#include <ace/streams>
+#include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
 
 using std::cerr;

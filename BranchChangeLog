@@ -1,3 +1,11 @@
+Tue Dec 30 19:34:35 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+
+          Fixed build errors.
+
 Tue Dec 30 19:16:05 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/StringKey/DataReaderListener.cpp:
@@ -11,7 +19,7 @@ Tue Dec 30 19:16:05 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
         * tests/DCPS/sub_init_loop/publisher.cpp:
 
           Third round of using namespace std and including ExceptionStreams.
-         
+
 Tue Dec 30 18:50:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
