@@ -6,6 +6,7 @@
 #include <ace/streams.h>
 #include <math.h>
 #include "ace/os_include/netinet/os_tcp.h"
+using namespace std;
 
 
 
@@ -31,8 +32,8 @@ add_stats (
     )
 {
   data = data / (ACE_hrtime_t) 1000;
-    std::cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data))
-              << std::endl;
+    cout << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (data))
+              << endl;
 
     stats.average = (stats.count * stats.average + data)/(stats.count + 1);
     stats.min     = (stats.count == 0 || data < stats.min) ? data : stats.min;
@@ -193,11 +194,11 @@ void
 TcpPublisher::dump_stats ()
 {
   time_t clock = ACE_OS::time (NULL);
-  std::cout << "# MY Pub Sub measurements (in us) \n";
-  std::cout << "# Executed at:" << ACE_OS::ctime(&clock);
-  std::cout << "#       Roundtrip time [us]\n";
-  std::cout << "Count     mean      min      max   std_dev\n";
-  std::cout << " "
+  cout << "# MY Pub Sub measurements (in us) \n";
+  cout << "# Executed at:" << ACE_OS::ctime(&clock);
+  cout << "#       Roundtrip time [us]\n";
+  cout << "Count     mean      min      max   std_dev\n";
+  cout << " "
             << round_trip.count
             << "        "
             << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (round_trip.average))
@@ -207,6 +208,6 @@ TcpPublisher::dump_stats ()
             << static_cast<double> (ACE_UINT64_DBLCAST_ADAPTER (round_trip.max))
             << "      "
             << std_dev (round_trip)
-            << std::endl;
+            << endl;
 }
 

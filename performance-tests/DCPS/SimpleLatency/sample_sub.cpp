@@ -27,6 +27,7 @@
 using namespace DDS;
 using namespace CORBA;
 using namespace DDSPerfTest;
+using namespace std;
 
 
 

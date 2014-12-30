@@ -1,3 +1,11 @@
+Tue Dec 30 20:59:46 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+          Fourth round of using namespace std and including ExceptionStreams.
+
 Tue Dec 30 19:34:35 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Partition/DataReaderListener.cpp:

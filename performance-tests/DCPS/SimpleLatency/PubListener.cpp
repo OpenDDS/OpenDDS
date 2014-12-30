@@ -13,6 +13,7 @@
 #include <math.h>
 
 using namespace DDSPerfTest;
+using namespace std;
 
 typedef struct
 {
