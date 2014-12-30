@@ -533,7 +533,7 @@ sub setup_discovery {
   my $executable = shift;
   $params = "" if !defined($params);
   $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo" if !defined($executable);
-  if ($self->{discovery} ne "info_repo") {
+  if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
     $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
       . "since discovery=" . $self->{discovery} . "\n");
     return;
@@ -663,7 +663,7 @@ sub stop_discovery {
 
   $self->_info("TestFramework::stop_discovery in $timed_wait seconds\n");
 
-  if ($self->{discovery} ne "info_repo") {
+  if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
     $self->_info("TestFramework::stop_discovery no discovery to stop " .
         "since discovery=" . $self->{discovery} . "\n");
     return;

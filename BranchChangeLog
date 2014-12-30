@@ -1,3 +1,14 @@
+Tue Dec 30 15:25:50 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * bin/dcps_tests.lst:
+        * tests/FACE/Messenger/run_test.pl:
+
+          Updated tests for safety profile.
+          Those marked with SAFETY_TODO_CONVERT in the lst file need have their
+          Perl scripts converted to use the TestFramework so they don't try to
+          start the DCPSInfoRepo when safety profile is enabled.
+
 Mon Dec 29 21:58:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/Utils/ExceptionStreams.h:
