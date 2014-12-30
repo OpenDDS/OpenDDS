@@ -181,17 +181,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) subscriber: ")
           ACE_TEXT("liviness deadline not violated enough for test. ")
-          ACE_TEXT("threshold( %d) < num missed( %d).\n"),
+          ACE_TEXT("threshold(%d) < num missed(%d).\n"),
           threshold_liveliness_lost,
           drl_servant->deadline_missed()
         ));
         return 1;
 
       } else {
-        ACE_ERROR((LM_ERROR,
+        ACE_DEBUG((LM_INFO,
           ACE_TEXT("(%P|%t) subscriber: ")
           ACE_TEXT("liviness deadline violated enough to pass test. ")
-          ACE_TEXT("threshold( %d) < num missed( %d).\n"),
+          ACE_TEXT("threshold(%d) < num missed(%d).\n"),
           threshold_liveliness_lost,
           drl_servant->deadline_missed()
         ));

@@ -28,7 +28,7 @@ sub orbsvcs {
 sub formatted_time {
   my $seconds = shift;
 
-  my $sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst;
+  my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst);
   if (defined($seconds)) {
     ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
       localtime($seconds);
@@ -337,6 +337,7 @@ sub new {
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
   $self->{add_orb_log_file} = 1;
+  $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;
 
   my $index = 0;
@@ -495,7 +496,7 @@ sub process {
     $params .= $debug;
   }
 
-  if ($params !~ /-ORBLogFile ([^ ]+)/) {
+  if ($self->{add_orb_log_file} && $params !~ /-ORBLogFile ([^ ]+)/) {
     my $file_name = "$name";
 
     # account for "blah #2"
@@ -650,7 +651,7 @@ sub stop_processes {
     $self->stop_process($timed_wait, $name);
     # make next loop
     $name = undef;
-    $timed_wait = 25;
+    $timed_wait = $self->{wait_after_first_proc};
   }
 
   $self->stop_discovery($timed_wait);
@@ -691,6 +692,13 @@ sub ignore_error {
   $self->_info("TestFramework::ignore_error will ignore error messages "
     . "containing \"$error_msg\"\n");
   push(@{$self->{errors_to_ignore}}, $error_msg);
+}
+
+sub enable_console_logging {
+  my $self = shift;
+  $self->{dcps_debug_level} = 0;
+  $self->{dcps_transport_debug_level} = 0;
+  $self->{add_orb_log_file} = 0;
 }
 
 sub _prefix {

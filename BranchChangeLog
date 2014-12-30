@@ -1,3 +1,11 @@
+Tue Dec 30 21:55:50 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Updated LivelinessTimeout to use PerlDDS::TestFramework.
+
 Tue Dec 30 20:59:46 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
