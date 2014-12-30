@@ -25,12 +25,14 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 
 #include <memory>
 #include <assert.h>
 
 using namespace Messenger;
+using namespace std;
 
 // Set up a 4 second recurring deadline.
 static DDS::Duration_t const DEADLINE_PERIOD =

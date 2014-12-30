@@ -7,6 +7,7 @@
 #include <ace/streams.h>
 
 using namespace Messenger;
+using namespace std;
 
 const int num_instances_per_writer = 1;
 const int num_messages = 10;

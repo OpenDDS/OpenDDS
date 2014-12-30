@@ -8,6 +8,7 @@
 #include <ace/streams.h>
 
 using namespace Messenger;
+using namespace std;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()

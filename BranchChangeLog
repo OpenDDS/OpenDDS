@@ -1,3 +1,28 @@
+Tue Dec 30 18:10:53 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+        * tests/DCPS/LatencyBudget/Writer.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/Lifespan/DataReaderListener.cpp:
+        * tests/DCPS/Lifespan/Writer.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+
+          First round of using namespace std and including ExceptionStreams.
+
 Tue Dec 30 17:20:39 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/Instances/SubDriver.h:

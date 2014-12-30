@@ -20,6 +20,7 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 using namespace Messenger;
+using namespace std;
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   try {
