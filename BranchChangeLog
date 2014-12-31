@@ -1,3 +1,13 @@
+Wed Dec 31 19:05:02 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/FileLogger.cpp:
+
+          Open and close file.
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+
+          Build errors.
+
 Tue Dec 30 23:27:52 UTC 2014  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

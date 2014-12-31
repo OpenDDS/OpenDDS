@@ -4,11 +4,10 @@
 #include "ace/Log_Msg.h"
 
 #include <ace/streams.h>
+#include <iostream>
 #include <math.h>
 #include "ace/os_include/netinet/os_tcp.h"
 using namespace std;
-
-
 
 typedef struct
 {

@@ -1,15 +1,18 @@
 
 #include "FileLogger.h"
+#include <stdio.h>
 
 # ifdef OPENDDS_SAFETY_PROFILE
 namespace OpenDDS { namespace DCPS {
 
 FileLogger::FileLogger(const char* name)
 {
+  log_ = fopen(name, "w+");
 }
 
 FileLogger::~FileLogger()
 {
+  fclose(log_);
 }
 
 int
