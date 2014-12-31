@@ -1,6 +1,7 @@
 project (DCPS_Perf*): aceexe {
   exename = raw_tcp_publisher
   exeout  = ..
+  requires      += no_opendds_safety_profile
 
   includes += ../common
 

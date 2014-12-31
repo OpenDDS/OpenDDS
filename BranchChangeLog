@@ -1,3 +1,11 @@
+Wed Dec 31 19:26:47 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
+
+          Don't build with safety profile.
+
 Wed Dec 31 19:05:02 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * dds/DCPS/FileLogger.cpp:
