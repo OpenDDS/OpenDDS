@@ -1,3 +1,10 @@
+Fri Jan  2 15:36:03 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Temporarily disable TcpReconnect test until some race
+          condition fixes can be made.
+
 Tue Dec 30 20:20:23 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * bin/dcps_tests.lst:
