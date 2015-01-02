@@ -1,3 +1,38 @@
+Fri Jan  2 19:16:08 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        
+          Removed FooTest3_1, since the only difference between it and 3_2
+          is that 3_2 has unbounded sequences.
+
+        * tests/DCPS/Instances/PubDriver.h:
+
+          Added TODO to indicate how this test can be added to
+          to remove need for some FooTest3_2 tests scenarios.
+
+        * tests/DCPS/FooTest3_1:
+        * tests/DCPS/FooTest3_1/DataReaderListener.h:
+        * tests/DCPS/FooTest3_1/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/InstanceDataMap.h:
+        * tests/DCPS/FooTest3_1/InstanceDataMap.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/README:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/TestException.h:
+        * tests/DCPS/FooTest3_1/Writer.h:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_1/pub_main.cpp:
+        * tests/DCPS/FooTest3_1/rtps.ini:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_1/sub_main.cpp:
+
+          Removed these files.
+
 Fri Jan  2 18:39:59 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

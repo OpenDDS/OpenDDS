@@ -106,6 +106,7 @@ public:
       msg.handle_value    = -1;
       msg.writer_id       = writer_id_;
 
+      // TODO: need to add unbounded_sequence to NoKeyData.idl and add setting here (and verifying on sub side), then get rid of FooTest3_2 test runs (<no param>, mi, and mw)
       if (true == multiple_instances_)
       {
         // Use the thread id as the instance key.
