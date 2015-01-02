@@ -1,3 +1,13 @@
+Fri Jan  2 18:39:59 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Merged convenience method from FACE.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Used convenience method.
+
 Fri Jan  2 18:33:07 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

@@ -692,6 +692,13 @@ sub ignore_error {
   push(@{$self->{errors_to_ignore}}, $error_msg);
 }
 
+sub enable_console_logging {
+  my $self = shift;
+  $self->{dcps_debug_level} = 0;
+  $self->{dcps_transport_debug_level} = 0;
+  $self->{add_orb_log_file} = 0;
+}
+
 sub _prefix {
   my $self = shift;
   my $str = "";

@@ -125,9 +125,7 @@ unlink $publisher_ready;
 
 my $test = new PerlDDS::TestFramework();
 
-$test->{dcps_debug_level} = 0;
-$test->{dcps_transport_debug_level} = 0;
-$test->{add_orb_log_file} = 0;
+$test->enable_console_logging();
 
 $test->report_unused_flags();
 
