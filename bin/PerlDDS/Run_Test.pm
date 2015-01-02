@@ -494,7 +494,7 @@ sub process {
     $params .= $debug;
   }
 
-  if ($params !~ /-ORBLogFile ([^ ]+)/) {
+  if ($self->{add_orb_log_file} && $params !~ /-ORBLogFile ([^ ]+)/) {
     my $file_name = "$name";
 
     # account for "blah #2"

@@ -113,22 +113,32 @@ else {
   exit 1;
 }
 
-my $dcpsrepo_ior = 'repo.ior';
-
 my $subscriber_completed = 'subscriber_finished.txt';
 my $subscriber_ready = 'subscriber_ready.txt';
 my $publisher_completed = 'publisher_finished.txt';
 my $publisher_ready = 'publisher_ready.txt';
 
-unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
 unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
 
-my $DCPSREPO = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
-                                       "-o $dcpsrepo_ior");
-print $DCPSREPO->CommandLine(), "\n";
+my $test = new PerlDDS::TestFramework();
+
+$test->{dcps_debug_level} = 0;
+$test->{dcps_transport_debug_level} = 0;
+$test->{add_orb_log_file} = 0;
+
+$test->report_unused_flags();
+
+my $orig_ACE_LOG_TIMESTAMP = $ENV{ACE_LOG_TIMESTAMP};
+$ENV{ACE_LOG_TIMESTAMP} = "TIME";
+sub cleanup
+{
+  $ENV{ACE_LOG_TIMESTAMP} = $orig_ACE_LOG_TIMESTAMP;
+}
+
+$test->setup_discovery();
 
 my $sub_parameters = "-DCPSConfigFile all.ini -u $use_udp -c $use_multicast"
     . " -p $use_rtps_transport -s $use_shmem -r $num_readers -t $use_take"
@@ -143,50 +153,18 @@ my $pub_parameters = "-DCPSConfigFile all.ini -u $use_udp -c $use_multicast "
     . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"
     . " -f $mixed_trans";
 
-my $Subscriber = PerlDDS::create_process('subscriber', $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
+$test->process("subscriber", "subscriber", $sub_parameters);
+$test->process("publisher", "publisher", $pub_parameters);
 
-my $Publisher = PerlDDS::create_process('publisher', $pub_parameters);
-print $Publisher->CommandLine(), "\n";
+$test->start_process("publisher");
+$test->start_process("subscriber");
 
-my $orig_ACE_LOG_TIMESTAMP = $ENV{ACE_LOG_TIMESTAMP};
-$ENV{ACE_LOG_TIMESTAMP} = "TIME";
-sub cleanup
-{
-  $ENV{ACE_LOG_TIMESTAMP} = $orig_ACE_LOG_TIMESTAMP;
-}
+my $status = $test->finish(300, "publisher");
 
-$DCPSREPO->Spawn();
-
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-  print STDERR "ERROR: waiting for Info Repo IOR file\n";
-  $DCPSREPO->Kill();
-  exit 1;
-}
-
-
-$Publisher->Spawn();
-
-$Subscriber->Spawn();
-
-my $status = 0;
-$status |= PerlDDS::wait_kill($Publisher, 300, "publisher");
-
-$status |= PerlDDS::wait_kill($Subscriber, 15, "subscriber");
-$status |= PerlDDS::terminate_wait_kill($DCPSREPO);
-
-unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
 unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-}
-else {
-  print STDERR "test FAILED.\n";
-}
 
 cleanup();
 exit $status;

@@ -1,3 +1,13 @@
+Fri Jan  2 18:33:07 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Merged fix from FACE branch needed to convert FooTest5.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Converted test to use TestFramework.
+
 Fri Jan  2 17:44:21 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * bin/dcps_tests.lst:
