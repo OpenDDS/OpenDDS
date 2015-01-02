@@ -1,3 +1,12 @@
+Fri Jan  2 17:44:21 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/TcpReconnect/Args.h:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+
+          Tweak the TcpReconnect test to allow for more time between
+          reconnects.  Re-enable the scoreboard test.
+
 Fri Jan  2 15:36:03 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * bin/dcps_tests.lst:

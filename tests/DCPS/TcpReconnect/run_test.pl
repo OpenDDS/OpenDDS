@@ -41,7 +41,7 @@ my $stubPubSideHost  = "localhost";
 my $stubPubSidePort = PerlACE::random_port();;
 my $stubSubSideHost = "localhost";
 my $stubSubSidePort = PerlACE::random_port();;
-my $stubKillDelay = 3;
+my $stubKillDelay = 4;
 my $stubKillCount = 2;
 
 #
@@ -100,7 +100,7 @@ $test->ignore_error("(Redmine Issue# 1446)");
 $test->ignore_error("Failed to connect. connect: Connection refused");
 $test->ignore_error("Unrecoverable problem with data link detected");
 
-# start killing processes in 300 seconds
+# start killing processes in 60 seconds
 my $fin = $test->finish(60);
 $stub->Kill();
 exit $fin;
