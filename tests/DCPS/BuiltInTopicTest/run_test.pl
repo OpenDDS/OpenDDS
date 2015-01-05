@@ -10,100 +10,39 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
-
+my $test = new PerlDDS::TestFramework();
 
 # Run at high debug level for additional function coverage.
-$pub_opts = "-DCPSConfigFile pub.ini -DCPSDebugLevel 8";
-$sub_opts = "-DCPSConfigFile sub.ini -DCPSDebugLevel 8";
+$test->{dcps_debug_level} = 8;
+# give each process 300 seconds to complete
+$test->{wait_after_first_proc} = 300;
+$test->{add_pending_timeout} = 0;
+$test->{add_transport_config} = 0;
 
-$dcpsrepo_ior = "repo.ior";
+$test->report_unused_flags(1);
+$test->setup_discovery();
 
-unlink $dcpsrepo_ior;
+$test->process("subscriber", "subscriber", " -DCPSConfigFile tcp.ini");
+$test->process("publisher", "publisher", " -DCPSConfigFile tcp.ini");
+$test->process("monitor1", "monitor", " -l 7");
+$test->process("monitor2", "monitor", " -u");
+my $synch_file = "monitor1_done";
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "-o $dcpsrepo_ior");
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
-$Monitor1 = PerlDDS::create_process ("monitor", " $opts -l 7");
-$Monitor2 = PerlDDS::create_process ("monitor", " $opts -u");
-$synch_file = "monitor1_done";
-
-$data_file = "test_run.data";
-unlink $data_file;
 unlink $synch_file;
 
-print $DCPSREPO->CommandLine() . "\n";
-print $Publisher->CommandLine() . "\n";
-print $Subscriber->CommandLine() . "\n";
-print $Monitor1->CommandLine() . "\n";
-print $Monitor2->CommandLine() . "\n";
+$test->start_process("monitor1");
 
-
-open (OLDOUT, ">&STDOUT");
-open (STDOUT, ">$data_file") or die "can't redirect stdout: $!";
-open (OLDERR, ">&STDERR");
-open (STDERR, ">&STDOUT") or die "can't redirect stderror: $!";
-
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
-}
-
-$Monitor1->Spawn ();
-
-$Publisher->Spawn ();
-$Subscriber->Spawn ();
+$test->start_process("publisher");
+$test->start_process("subscriber");
 
 sleep (15);
 
-$Monitor2->Spawn ();
+$test->start_process("monitor2");
 
-$MonitorResult = $Monitor1->WaitKill (300);
-if ($MonitorResult != 0) {
-    print STDERR "ERROR: Monitor1 returned $MonitorResult \n";
-    $status = 1;
-}
-$MonitorResult = $Monitor2->WaitKill (300);
-if ($MonitorResult != 0) {
-    print STDERR "ERROR: Monitor2 returned $MonitorResult \n";
-    $status = 1;
-}
+my $status = $test->finish(300, "monitor1");
 
-$SubscriberResult = $Subscriber->WaitKill (300);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-}
-
-$PublisherResult = $Publisher->WaitKill (300);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-close (STDERR);
-close (STDOUT);
-open (STDOUT, ">&OLDOUT");
-open (STDERR, ">&OLDERR");
-
-unlink $dcpsrepo_ior;
-#unlink $data_file;
 unlink $synch_file;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
 
 exit $status;

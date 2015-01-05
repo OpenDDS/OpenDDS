@@ -438,8 +438,6 @@ sub finish {
     print STDERR _prefix() . "test FAILED.\n";
   }
 
-  unlink $self->{info_repo}->{file};
-
   return $self->{status};
 }
 
@@ -619,6 +617,7 @@ sub setup_discovery {
       . "file, adding \"$ior_str\" to InfoRepo's parameters.\n");
     $params .= $ior_str;
   }
+  $self->_info("TestFramework::setup_discovery unlink $self->{info_repo}->{file}\n");
   unlink $self->{info_repo}->{file};
 
   if ($self->{nobits}) {
@@ -635,6 +634,7 @@ sub setup_discovery {
   print $self->{info_repo}->{process}->CommandLine() . "\n";
   $self->{info_repo}->{process}->Spawn();
 
+  $self->_info("TestFramework::setup_discovery waiting for $self->{info_repo}->{file}\n");
   if (PerlACE::waitforfile_timed($self->{info_repo}->{file}, 30) == -1) {
     print STDERR "ERROR: waiting for $executable IOR file\n";
     $self->{status} = -1;
@@ -741,11 +741,17 @@ sub stop_discovery {
     return;
   }
 
-  $self->{status} |=
+  my $term_status =
     PerlDDS::terminate_wait_kill($self->{info_repo}->{process},
                                  $timed_wait,
                                  $name,
                                  $self->{test_verbose});
+  $self->{status} |= $term_status;
+
+  $self->_info("TestFramework::stop_discovery unlink $self->{info_repo}->{file}\n");
+  unlink $self->{info_repo}->{file};
+
+  $self->{info_repo}->{state} = "shutdown" if $term_status == 0;
 }
 
 sub ignore_error {

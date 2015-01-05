@@ -1,3 +1,26 @@
+Mon Jan  5 20:45:00 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added unlinking repo ior file and added more test debug output.
+
+        * bin/dcps_tests.lst:
+
+          Removed !SAFETY_TODO_CONVERT flags for converted test.
+
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+
+          Converted to use TestFramework.
+
+        * tests/DCPS/BuiltInTopicTest/tcp.ini:
+
+          Replaced duplicate pub.ini and sub.ini with tcp.ini.
+
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+
+          Removed these files.
+
 Mon Jan  5 19:46:30 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
