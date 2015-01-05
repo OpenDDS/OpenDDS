@@ -27,7 +27,6 @@ my $orbVerbose;
 my $dFile;
 my $transportDebug;
 my $repoDebug;
-my $noaction;
 
 # single reader with single instances test
 my $num_messages=500;
@@ -58,7 +57,6 @@ GetOptions( "verbose!"            => \$verbose,
             "debug|d=i"           => \$debug,
             "tdebug|T=i"          => \$transportDebug,
             "rdebug|R=i"          => \$repoDebug,
-            "noaction|x"          => \$noaction,
             "dfile|f=s"           => \$dFile,
             "bit|b"               => \$bit,
             "zerocopy|c"          => \$copy_sample,
@@ -140,13 +138,7 @@ foreach my $index (0..($num_writers-1)) {
   $test->process("publisher$index", "publisher", $pubOpts . " -i $index");
 }
 
-# $noaction will still start an info repo
 $test->setup_discovery($repoOpts);
-
-if( $noaction) {
-  $test->command_lines() if $verbose;
-  exit;
-}
 
 foreach my $index (0..($num_readers-1)) {
   $test->start_process("subscriber$index");
@@ -187,8 +179,6 @@ Options:
   -? | --help            brief help message
 
   --man                  full documentation
-
-  -x | --noaction        do not execute any processing
 
   -v | --verbose         be chatty while executing
 
@@ -231,11 +221,6 @@ Print a brief help message and exits.
 =item B<--man>
 
 Prints the manual page and exits.
-
-=item B<-x> | B<--noaction>
-
-Print the commands that would be executed with the current set of command
-line options and exit without performing any processing.
 
 =item B<-v> | B<--verbose>
 

@@ -1,3 +1,17 @@
+Mon Jan  5 15:30:54 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Removed command_lines subroutine.
+
+        * bin/dcps_tests.lst:
+
+          Added back !SAFETY_TODO_CONVERT to tests that were not yet converted.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+          Removed noaction flag and command_lines call.
+
 Mon Jan  5 14:30:03 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:

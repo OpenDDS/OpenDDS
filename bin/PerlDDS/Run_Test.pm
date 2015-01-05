@@ -658,17 +658,6 @@ sub start_process {
   $process->Spawn();
 }
 
-sub command_lines {
-  my $self = shift;
-  print $self->{info_repo}->{process}->CommandLine() . "\n";
-
-  my @keys = sort(keys($self->{processes}->{process}));
-  foreach my $key (@keys) {
-    my $process = $self->{processes}->{process}->{$key}->{process};
-    print $process->CommandLine() . "\n";
-  }
-}
-
 sub stop_process {
   my $self = shift;
   my $timed_wait = shift;
