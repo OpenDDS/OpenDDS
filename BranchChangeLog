@@ -1,3 +1,51 @@
+Sat Jan  3 14:11:35 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added debugging, added feature to support just reporting command lines, and
+          added support for flags with values.
+
+        * bin/dcps_tests.lst:
+
+          Removed !SAFETY_TODO_CONVERT flags for converted tests and removed unneeded
+          FooTest3_1 tests.
+
+        * dds/CORBA/tao/OpenDDS_Corba.mpc:
+
+          Added needed include path for ACE.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Convereted tests to use TestFramework.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Cleanup.
+
+        * tests/DCPS/FooTest3_1:
+        * tests/DCPS/FooTest3_1/DataReaderListener.h:
+        * tests/DCPS/FooTest3_1/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/InstanceDataMap.h:
+        * tests/DCPS/FooTest3_1/InstanceDataMap.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/README:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/TestException.h:
+        * tests/DCPS/FooTest3_1/Writer.h:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_1/pub_main.cpp:
+        * tests/DCPS/FooTest3_1/rtps.ini:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_1/sub_main.cpp:
+
+          Removed these files.
+
 Wed Dec 31 19:26:47 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:

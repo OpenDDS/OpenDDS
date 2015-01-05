@@ -342,7 +342,23 @@ sub new {
 
   my $index = 0;
   foreach my $arg (@ARGV) {
-    $self->{flags}->{$arg} = $index;
+    $arg =~ /^([^=]*)(:?=(.*))?$/;
+    $self->_info("TestFramework parsing \"$arg\"\n");
+    my $flag_name = $1;
+    if ($flag_name eq "") {
+      print STDERR "ERROR: TestFramework got \"$arg\", which is a name value" .
+        " pair with an empty name.\n";
+      $flag_name = "<No Name Provided>";
+    }
+    my $flag_value;
+    if (defined($2)) {
+      $flag_value = $2;
+    }
+    else {
+      $flag_value = "<FLAG>";
+    }
+    $self->_info("TestFramework storing \"$flag_name\"=\"$flag_value\"\n");
+    $self->{flags}->{$flag_name} = $flag_value;
     my $transport = _is_transport($arg);
     if ($transport && $self->{transport} eq "") {
       $self->{transport} = $arg;
@@ -356,13 +372,14 @@ sub new {
       $self->{discovery} = "rtps";
     } elsif ($arg eq "--test_verbose") {
       $self->{test_verbose} = 1;
-      $self->_time_info("Test starting\n");
+      my $left = $#ARGV - $index;
+      $self->_time_info("Test starting ($left arguments remaining)\n");
     } elsif (lc($arg) eq "nobits") {
       $self->{nobits} = 1;
     } elsif (!$transport) {
       # also keep a copy to delete so we can see which parameters
       # are unused (above args are already "used")
-      $self->{flags}->{unused}->{$arg} = $index;
+      $self->{flags}->{unused}->{$flag_name} = $flag_value;
     }
     ++$index;
   }
@@ -431,8 +448,51 @@ sub flag {
   my $flag_passed = shift;
 
   my $present = defined($self->{flags}->{$flag_passed});
+  $self->_info("TestFramework::flag $flag_passed present=$present\n");
   if ($present) {
+    if ($self->{flags}->{$flag_passed} ne "<FLAG>") {
+      print STDERR "WARNING: you are treating a name-value pair as a flag, should call value_flag. \"$flag_passed=" . 
+        $self->{flags}->{$flag_passed} . "\"\n";
+    }
     delete($self->{flags}->{unused}->{$flag_passed});
+  }
+  return $present;
+}
+
+sub value_flag {
+  my $self = shift;
+  my $flag_passed = shift;
+
+  my $present = defined($self->{flags}->{$flag_passed});
+  $self->_info("TestFramework::value_flag $flag_passed present=$present\n");
+  if ($present) {
+    if ($self->{flags}->{$flag_passed} eq "<FLAG>") {
+      # this is indicating if a flag with a value is present, but this is just a flag
+      return 0;
+    }
+    delete($self->{flags}->{unused}->{$flag_passed});
+  }
+  return $present;
+}
+
+sub get_value_flag {
+  my $self = shift;
+  my $flag_passed = shift;
+
+  my $present = defined($self->{flags}->{$flag_passed});
+  $self->_info("TestFramework::get_value_flag $flag_passed present=$present\n");
+  if ($present) {
+    if ($self->{flags}->{$flag_passed} eq "<FLAG>") {
+      print STDERR "ERROR: $flag_passed does not have a value, should not call get_value_flag\n";
+    }
+    if (defined($self->{flags}->{unused}->{$flag_passed})) {
+      print STDERR "WARNING: calling get_value_flag($flag_passed) without first verifying that "
+        . "it is present with value_flag($flag_passed)\n";
+      delete($self->{flags}->{unused}->{$flag_passed});
+    }
+  }
+  else {
+    print STDERR "ERROR: $flag_passed is not present, should have called value_flag before calling get_value_flag\n";
   }
   return $present;
 }
@@ -598,6 +658,17 @@ sub start_process {
   $process->Spawn();
 }
 
+sub command_lines {
+  my $self = shift;
+  print $self->{info_repo}->{process}->CommandLine() . "\n";
+
+  my @keys = sort(keys($self->{processes}->{process}));
+  foreach my $key (@keys) {
+    my $process = $self->{processes}->{process}->{$key}->{process};
+    print $process->CommandLine() . "\n";
+  }
+}
+
 sub stop_process {
   my $self = shift;
   my $timed_wait = shift;
@@ -606,7 +677,7 @@ sub stop_process {
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
     $self->{status} = -1;
-    return;
+    return 0;
   }
 
   # remove $name from the order list
@@ -618,12 +689,14 @@ sub stop_process {
     }
   }
 
-  $self->{status} |=
+  my $kill_status =
     PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
                        $timed_wait,
                        $name,
                        $self->{test_verbose});
+  $self->{status} |= $kill_status;
   delete($self->{processes}->{process}->{$name});
+  return !$kill_status;
 }
 
 sub stop_processes {

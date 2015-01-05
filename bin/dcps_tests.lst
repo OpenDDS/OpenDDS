@@ -29,15 +29,18 @@ tests/DCPS/FooTest3_0/run_test.pl resume: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl listener: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl allocator: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/FooTest3_0/run_test.pl liveliness: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
-tests/DCPS/FooTest3_1/run_test.pl bp_remove: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/FooTest3_1/run_test.pl b: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/FooTest3_1/run_test.pl rtps_b: !DCPS_MIN RTPS !STATIC !SAFETY_TODO_CONVERT
+
+# only difference between FooTest3_1 and 3_2 is that 3_2 has unbounded sequences, so no need to maintain 3_1
+# FooTest3_2 <no args>, mi, and mw options will be covered by Instances tests once PubDriver populates unbounded_sequence
 tests/DCPS/FooTest3_2/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_2/run_test.pl mi: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest3_2/run_test.pl mw: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/FooTest3_2/run_test.pl bp_remove: !DCPS_MIN !SAFETY_TODO_CONVERT
+
+# these tests are testing blocking and are not covered by Instances tests
+tests/DCPS/FooTest3_2/run_test.pl bp_remove: !DCPS_MIN
 tests/DCPS/FooTest3_2/run_test.pl b: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/FooTest3_2/run_test.pl rtps_b: !DCPS_MIN RTPS !STATIC !SAFETY_TODO_CONVERT
+tests/DCPS/FooTest3_2/run_test.pl rtps_b: !DCPS_MIN RTPS !STATIC
+
 tests/DCPS/LivelinessTest/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LivelinessTest/run_test.pl take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LivelinessTest/run_test.pl udp: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
@@ -64,22 +67,22 @@ tests/DCPS/FooTest4_0/run_test.pl: !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FooTest5/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE
-tests/DCPS/FooTest5/run_test.pl rtps: !DCPS_MIN RTPS !SAFETY_TODO_CONVERT
+tests/DCPS/FooTest5/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/FooTest5/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5/run_test.pl mi: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5/run_test.pl udp mi: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/FooTest5/run_test.pl rtps mi: !DCPS_MIN RTPS !SAFETY_TODO_CONVERT
+tests/DCPS/FooTest5/run_test.pl rtps mi: !DCPS_MIN RTPS
 tests/DCPS/FooTest5/run_test.pl shmem mi: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5/run_test.pl nokey mi: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5/run_test.pl nokey udp mi: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/FooTest5/run_test.pl nokey rtps mi: !DCPS_MIN RTPS !SAFETY_TODO_CONVERT
+tests/DCPS/FooTest5/run_test.pl nokey rtps mi: !DCPS_MIN RTPS
 tests/DCPS/FooTest5/run_test.pl nokey shmem mi: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
-tests/DCPS/FooTest5/run_test.pl blocking: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/FooTest5/run_test.pl mr: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/FooTest5/run_test.pl multicast mr: !DCPS_MIN !SAFETY_TODO_CONVERT
-tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/FooTest5/run_test.pl blocking: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl mr: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl multicast mr: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN
 tests/DCPS/FooTest5_0/run_test.pl: !STATIC !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5_0/run_test.pl rtps: !DCPS_MIN !STATIC RTPS !DDS_NO_OWNERSHIP_PROFILE
@@ -127,11 +130,11 @@ tests/transport/error_handling/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS
 
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA !OPENDDS_SAFETY_PROFILE
 
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN !SAFETY_TODO_CONVERT
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1 -c: !DCPS_MIN !SAFETY_TODO_CONVERT
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN !SAFETY_TODO_CONVERT
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !SAFETY_TODO_CONVERT
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !SAFETY_TODO_CONVERT
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1 -c: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN
 
 ## N.B. There appear to be some bad assumptions in the following tests:
 #performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl: !DCPS_MIN
