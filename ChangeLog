@@ -1,3 +1,13 @@
+Mon Jan  5 16:33:31 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Fixed string conversions.
+
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Processes are created then spawned in multi-process tests.
+
 Mon Jan  5 15:10:55 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:

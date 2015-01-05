@@ -168,8 +168,8 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
       OpenDDS::DCPS::GuidConverter converter(repo_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("%P ")
-                 ACE_TEXT("Read Participant BIT GUID=%s handle=%d\n"),
-                 std::basic_string<ACE_TCHAR>(converter).c_str(), infos[i].instance_handle));
+                 ACE_TEXT("Read Participant BIT GUID=%C handle=%d\n"),
+                 std::string(converter).c_str(), infos[i].instance_handle));
 
       if (repo_id == other_dp_repo_id) {
         if (data[i].user_data.value.length() != 1) {
@@ -426,10 +426,10 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
 
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Publication BIT with key: %x %x %x and handle %d\n"
-                 "\tParticipant's GUID=%s\n\tTopic: %C\tType: %C\n",
+                 "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
                  data[i].key.value[0], data[i].key.value[1],
                  data[i].key.value[2], infos[i].instance_handle,
-                 std::basic_string<ACE_TCHAR>(converter).c_str (), data[i].topic_name.in(),
+                 std::string(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
 
       if (repo_id == publisher_repo_id) {
@@ -559,10 +559,10 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
 
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Subscription BIT with key: %x %x %x and handle %d\n"
-                 "\tParticipant's GUID=%s\n\tTopic: %C\tType: %C\n",
+                 "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
                  data[i].key.value[0], data[i].key.value[1],
                  data[i].key.value[2], infos[i].instance_handle,
-                 std::basic_string<ACE_TCHAR>(converter).c_str (), data[i].topic_name.in(),
+                 std::string(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
       if (repo_id == subscriber_repo_id) {
         found_subscriber = true;
@@ -670,9 +670,9 @@ bool check_discovered_participants(DomainParticipant_var& dp,
         OpenDDS::DCPS::GuidConverter converter2(repo_id);
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT("%P ")
-                    ACE_TEXT("%s discovered %s\n"),
-                    std::basic_string<ACE_TCHAR>(converter1).c_str(),
-                    std::basic_string<ACE_TCHAR>(converter2).c_str()));
+                    ACE_TEXT("%C discovered %C\n"),
+                    std::string(converter1).c_str(),
+                    std::string(converter2).c_str()));
       }
     }
   }
@@ -691,8 +691,8 @@ bool run_test(DomainParticipant_var& dp_sub,
     OpenDDS::DCPS::GuidConverter converter(sub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("%P ")
-                ACE_TEXT("Sub Domain Participant GUID=%s\n"),
-                std::basic_string<ACE_TCHAR>(converter).c_str()));
+                ACE_TEXT("Sub Domain Participant GUID=%C\n"),
+                std::string(converter).c_str()));
   }
 
   {
@@ -702,8 +702,8 @@ bool run_test(DomainParticipant_var& dp_sub,
     OpenDDS::DCPS::GuidConverter converter(pub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("%P ")
-                ACE_TEXT("Pub Domain Participant GUID=%s\n"),
-                std::basic_string<ACE_TCHAR>(converter).c_str()));
+                ACE_TEXT("Pub Domain Participant GUID=%C\n"),
+                std::string(converter).c_str()));
   }
 
   // If we are running with an rtps_udp transport, it can't be shared between
