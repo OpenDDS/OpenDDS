@@ -1,7 +1,14 @@
+Mon Jan  5 15:10:55 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Added knowledge of discovered participant/publication/subscription
+          to checks.  Prints GUIDs instead of key data.
+
 Fri Jan  2 19:16:08 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
-        
+
           Removed FooTest3_1, since the only difference between it and 3_2
           is that 3_2 has unbounded sequences.
 

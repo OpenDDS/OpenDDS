@@ -9,6 +9,7 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -117,8 +118,15 @@ void set_qos(OctetSeq& qos, CORBA::Octet value)
 }
 
 bool read_participant_bit(const Subscriber_var& bit_sub,
+                          const DomainParticipant_var& dp,
+                          const OpenDDS::DCPS::RepoId& other_dp_repo_id,
                           int user_data)
 {
+  OpenDDS::DCPS::Discovery_rch disc =
+    TheServiceParticipant->get_discovery(dp->get_domain_id());
+  OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp.in());
+
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
   ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
                                                   ANY_VIEW_STATE,
@@ -131,8 +139,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
   ReturnCode_t result = waiter->wait(activeConditions, forever);
   waiter->detach_condition(rc);
   if (result != RETCODE_OK) {
-    ACE_DEBUG((LM_ERROR, "ERROR: %P could not wait for condition: %d\n", result));
-    return false;
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P could not wait for condition: %d\n", result), false);
   }
 
   ParticipantBuiltinTopicDataDataReader_var part_bit =
@@ -147,40 +154,58 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
     return false;
   }
 
+  bool found_other_dp = false;
+  int num_valid = 0;
+
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
+      ++num_valid;
+      OpenDDS::DCPS::RepoId repo_id =
+        disc->bit_key_to_repo_id(dp_impl,
+                                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+                                 data[i].key);
+
+      OpenDDS::DCPS::GuidConverter converter(repo_id);
       ACE_DEBUG((LM_DEBUG,
-                 "%P Read Participant BIT with key: %x %x %x and handle %d\n",
-                 data[i].key.value[0],
-                 data[i].key.value[1],
-                 data[i].key.value[2],
-                 infos[i].instance_handle));
+                 ACE_TEXT("%P ")
+                 ACE_TEXT("Read Participant BIT GUID=%s handle=%d\n"),
+                 std::basic_string<ACE_TCHAR>(converter).c_str(), infos[i].instance_handle));
 
-      if (data[i].user_data.value.length() != 1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR: %P particpant[%d] user data length %d "
-                          "not expected length of 1\n",
-                          i,
-                          data[i].user_data.value.length()),
-                         false);
-      }
+      if (repo_id == other_dp_repo_id) {
+        if (data[i].user_data.value.length() != 1) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P participant[%d] user data length %d "
+                            "not expected length of 1\n",
+                            i,
+                            data[i].user_data.value.length()),
+                           false);
+        }
 
-      if (i != data.length() - 1) {
-        continue;
-      }
-      if (data[i].user_data.value[0] != user_data) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR: %P particpant[%d] user data value %d "
-                          "not expected value %d\n",
-                          i,
-                          data[i].user_data.value[0],
-                          user_data),
-                         false);
+        if (data[i].user_data.value[0] != user_data) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P participant[%d] user data value %d "
+                            "not expected value %d\n",
+                            i,
+                            data[i].user_data.value[0],
+                            user_data),
+                           false);
+        }
+
+        found_other_dp = true;
       }
     }
   }
 
   part_bit->return_loan(data, infos);
+
+  if (num_valid != 1) {
+    ACE_DEBUG((LM_ERROR, "ERROR: %P expected to discover 1 other participant, found %d\n", data.length ()));
+  }
+
+  if (!found_other_dp) {
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P did not find expected participant\n"), false);
+  }
+
   return true;
 }
 
@@ -334,66 +359,81 @@ DataReader_var create_data_reader(const DomainParticipant_var& dp)
 }
 
 bool read_publication_bit(const Subscriber_var& bit_sub,
+                          const DomainParticipant_var& subscriber,
+                          const OpenDDS::DCPS::RepoId& publisher_repo_id,
                           InstanceHandle_t& handle,
                           int user_data,
                           int topic_data,
-                          bool poll,
-                          int num_expected = 1)
+                          bool ignored_publication = false)
 {
+  OpenDDS::DCPS::Discovery_rch disc =
+    TheServiceParticipant->get_discovery(subscriber->get_domain_id());
+  OpenDDS::DCPS::DomainParticipantImpl* subscriber_impl =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(subscriber.in());
+
   int num_valid = 0;
 
-  do {
-    DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-    if (num_expected) {
-      ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
-                                                      ANY_VIEW_STATE,
-                                                      ALIVE_INSTANCE_STATE);
-      WaitSet_var waiter = new WaitSet;
-      waiter->attach_condition(rc);
-      ConditionSeq activeConditions;
-      Duration_t forever = { DURATION_INFINITE_SEC,
-                             DURATION_INFINITE_NSEC };
-      ReturnCode_t result = waiter->wait(activeConditions, forever);
-      waiter->detach_condition(rc);
-      if (result != RETCODE_OK) {
-        ACE_DEBUG((LM_ERROR,
-                   "ERROR: %P (publication BIT) could not wait for condition: %d\n", result));
-        return false;
-      }
-    } else {
-      ACE_OS::sleep(1);
-    }
-
-    PublicationBuiltinTopicDataDataReader_var pub_bit =
-      PublicationBuiltinTopicDataDataReader::_narrow(dr);
-
-    PublicationBuiltinTopicDataSeq data;
-    SampleInfoSeq infos;
-    ReturnCode_t ret =
-      pub_bit->read(data, infos, LENGTH_UNLIMITED,
-                    ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
-    if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
-      ACE_DEBUG((LM_ERROR, "ERROR: %P could not read ignored publication BIT: %d\n",
-                 ret));
-      return false;
-    } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-      ACE_DEBUG((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
+  DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
+  if (!ignored_publication) {
+    ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
+                                                    ANY_VIEW_STATE,
+                                                    ALIVE_INSTANCE_STATE);
+    WaitSet_var waiter = new WaitSet;
+    waiter->attach_condition(rc);
+    ConditionSeq activeConditions;
+    Duration_t forever = { DURATION_INFINITE_SEC,
+                           DURATION_INFINITE_NSEC };
+    ReturnCode_t result = waiter->wait(activeConditions, forever);
+    waiter->detach_condition(rc);
+    if (result != RETCODE_OK) {
+      ACE_DEBUG((LM_ERROR,
+                 "ERROR: %P (publication BIT) could not wait for condition: %d\n", result));
       return false;
     }
+  } else {
+    ACE_OS::sleep(1);
+  }
 
-    num_valid = 0;
-    for (CORBA::ULong i = 0; i < data.length(); ++i) {
-      if (infos[i].valid_data) {
-        ++num_valid;
-        ACE_DEBUG((LM_DEBUG,
-                   "%P Read Publication BIT with key: %x %x %x and handle %d\n"
-                   "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
-                   data[i].key.value[0], data[i].key.value[1],
-                   data[i].key.value[2], infos[i].instance_handle,
-                   data[i].participant_key.value[0],
-                   data[i].participant_key.value[1],
-                   data[i].participant_key.value[2], data[i].topic_name.in(),
-                   data[i].type_name.in()));
+  PublicationBuiltinTopicDataDataReader_var pub_bit =
+    PublicationBuiltinTopicDataDataReader::_narrow(dr);
+
+  PublicationBuiltinTopicDataSeq data;
+  SampleInfoSeq infos;
+  ReturnCode_t ret =
+    pub_bit->read(data, infos, LENGTH_UNLIMITED,
+                  ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+  if (ignored_publication && (ret != RETCODE_NO_DATA)) {
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read ignored publication BIT: %d\n",
+               ret));
+    return false;
+  } else if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
+    ACE_DEBUG((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
+    return false;
+  }
+
+  num_valid = 0;
+  bool found_publisher = false;
+  for (CORBA::ULong i = 0; i < data.length(); ++i) {
+    if (infos[i].valid_data) {
+      ++num_valid;
+
+      OpenDDS::DCPS::RepoId repo_id =
+        disc->bit_key_to_repo_id(subscriber_impl,
+                                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+                                 data[i].participant_key);
+
+      OpenDDS::DCPS::GuidConverter converter(repo_id);
+
+      ACE_DEBUG((LM_DEBUG,
+                 "%P Read Publication BIT with key: %x %x %x and handle %d\n"
+                 "\tParticipant's GUID=%s\n\tTopic: %C\tType: %C\n",
+                 data[i].key.value[0], data[i].key.value[1],
+                 data[i].key.value[2], infos[i].instance_handle,
+                 std::basic_string<ACE_TCHAR>(converter).c_str (), data[i].topic_name.in(),
+                 data[i].type_name.in()));
+
+      if (repo_id == publisher_repo_id) {
+        found_publisher = true;
         if (data[i].user_data.value.length() != 1) {
           ACE_ERROR_RETURN((LM_ERROR,
                             "ERROR: %P publication [%d] user data length %d "
@@ -409,9 +449,6 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                             i,
                             data[i].topic_data.value.length()),
                            false);
-        }
-        if (i != data.length() - 1) {
-          continue;
         }
         if (data[i].user_data.value[0] != user_data) {
           ACE_ERROR_RETURN((LM_ERROR,
@@ -431,34 +468,47 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                             topic_data),
                            false);
         }
-        handle = infos[i].instance_handle;
       }
+      handle = infos[i].instance_handle;
     }
-    if (!poll && num_valid != num_expected) {
-      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected %d discovered "
+  }
+
+  if (ignored_publication) {
+    if (num_valid != 0) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected 0 discovered "
                         "publications, found %d\n",
-                        num_expected, num_valid), false);
+                        num_valid), false);
     }
-
-    if (poll && num_valid != num_expected) {
-      ACE_DEBUG((LM_DEBUG,
-                 "%P Expected number of publications (%d) different from actual (%d).  Sleeping...\n", num_expected, num_valid));
-      ACE_OS::sleep(1);
+  }
+  else {
+    if (num_valid != 1) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected 1 discovered "
+                        "publications, found %d\n",
+                        num_valid), false);
     }
-
-  } while (poll && num_valid != num_expected);
+    if (!found_publisher) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P did not find expected publication\n"), false);
+    }
+  }
 
   return true;
 }
 
 bool read_subscription_bit(const Subscriber_var& bit_sub,
+                           const DomainParticipant_var& publisher,
+                           const OpenDDS::DCPS::RepoId& subscriber_repo_id,
                            InstanceHandle_t& handle,
                            int user_data,
                            int topic_data,
-                           int num_expected = 1)
+                           bool ignored_subscription = false)
 {
+  OpenDDS::DCPS::Discovery_rch disc =
+    TheServiceParticipant->get_discovery(publisher->get_domain_id());
+  OpenDDS::DCPS::DomainParticipantImpl* publisher_impl =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(publisher.in());
+
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
-  if (num_expected) {
+  if (!ignored_subscription) {
     ReadCondition_var rc = dr->create_readcondition(ANY_SAMPLE_STATE,
                                                     ANY_VIEW_STATE,
                                                     ALIVE_INSTANCE_STATE);
@@ -485,7 +535,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
   ReturnCode_t ret =
     pub_bit->read(data, infos, LENGTH_UNLIMITED,
                   ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
-  if ((num_expected == 0) && (ret != RETCODE_NO_DATA)) {
+  if (ignored_subscription && (ret != RETCODE_NO_DATA)) {
     ACE_DEBUG((LM_ERROR, "ERROR: %P could not read ignored subscription BIT: %d\n",
                ret));
     return false;
@@ -495,62 +545,81 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
   }
 
   int num_valid = 0;
+  bool found_subscriber = false;
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
       ++num_valid;
+
+      OpenDDS::DCPS::RepoId repo_id =
+        disc->bit_key_to_repo_id(publisher_impl,
+                                 OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
+                                 data[i].participant_key);
+
+      OpenDDS::DCPS::GuidConverter converter(repo_id);
+
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Subscription BIT with key: %x %x %x and handle %d\n"
-                 "\tParticipant's key: %x %x %x\n\tTopic: %C\tType: %C\n",
+                 "\tParticipant's GUID=%s\n\tTopic: %C\tType: %C\n",
                  data[i].key.value[0], data[i].key.value[1],
                  data[i].key.value[2], infos[i].instance_handle,
-                 data[i].participant_key.value[0],
-                 data[i].participant_key.value[1],
-                 data[i].participant_key.value[2], data[i].topic_name.in(),
+                 std::basic_string<ACE_TCHAR>(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
-      if (data[i].user_data.value.length() != 1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR: %P subscription [%d] user data length %d "
-                          "not expected length of 1\n",
-                          i,
-                          data[i].user_data.value.length()),
-                         false);
-      }
-      if (data[i].topic_data.value.length() != 1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR: %P subscription [%d] topic data length %d "
-                          "not expected length of 1\n",
-                          i,
-                          data[i].topic_data.value.length()),
-                         false);
-      }
-      if (i != data.length() - 1) {
-        continue;
-      }
-      if (data[i].user_data.value[0] != user_data) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR: %P subscription [%d] user data value %d "
-                          "not expected value %d\n",
-                          i,
-                          data[i].user_data.value[0],
-                          user_data),
-                         false);
-      }
-      if (data[i].topic_data.value[0] != topic_data) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          "ERROR: %P subscription [%d] topic data value %d "
-                          "not expected value %d\n",
-                          i,
-                          data[i].topic_data.value[0],
-                          topic_data),
-                         false);
+      if (repo_id == subscriber_repo_id) {
+        found_subscriber = true;
+        if (data[i].user_data.value.length() != 1) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P subscription [%d] user data length %d "
+                            "not expected length of 1\n",
+                            i,
+                            data[i].user_data.value.length()),
+                           false);
+        }
+        if (data[i].topic_data.value.length() != 1) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P subscription [%d] topic data length %d "
+                            "not expected length of 1\n",
+                            i,
+                            data[i].topic_data.value.length()),
+                           false);
+        }
+        if (data[i].user_data.value[0] != user_data) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P subscription [%d] user data value %d "
+                            "not expected value %d\n",
+                            i,
+                            data[i].user_data.value[0],
+                            user_data),
+                           false);
+        }
+        if (data[i].topic_data.value[0] != topic_data) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "ERROR: %P subscription [%d] topic data value %d "
+                            "not expected value %d\n",
+                            i,
+                            data[i].topic_data.value[0],
+                            topic_data),
+                           false);
+        }
       }
       handle = infos[i].instance_handle;
     }
   }
-  if (num_valid != num_expected) {
-    ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected %d discovered "
-                                "subscriptionsd, found %d\n",
-                                num_expected, num_valid), false);
+  if (ignored_subscription) {
+    if (num_valid != 0) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected 0 discovered "
+                        "subscriptions, found %d\n",
+                        num_valid), false);
+    }
+  }
+  else {
+    if (num_valid != 1) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected 1 discovered "
+                        "subscriptions, found %d\n",
+                        num_valid), false);
+    }
+    if (!found_subscriber) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P did not find expected subscription\n"), false);
+    }
   }
 
   return true;
@@ -596,58 +665,90 @@ bool check_discovered_participants(DomainParticipant_var& dp,
                          false);
       }
       handle = part_handles[0];
+      {
+        OpenDDS::DCPS::GuidConverter converter1(dp_impl->get_id ());
+        OpenDDS::DCPS::GuidConverter converter2(repo_id);
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT("%P ")
+                    ACE_TEXT("%s discovered %s\n"),
+                    std::basic_string<ACE_TCHAR>(converter1).c_str(),
+                    std::basic_string<ACE_TCHAR>(converter2).c_str()));
+      }
     }
   }
   return (stat == RETCODE_OK);
 }
 
-bool run_test(DomainParticipant_var& dp,
-              DomainParticipant_var& dp2)
+bool run_test(DomainParticipant_var& dp_sub,
+              DomainParticipant_var& dp_pub)
 {
+  OpenDDS::DCPS::RepoId sub_repo_id, pub_repo_id;
+
+  {
+    OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
+      dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp_sub.in());
+    sub_repo_id = dp_impl->get_id ();
+    OpenDDS::DCPS::GuidConverter converter(sub_repo_id);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT("%P ")
+                ACE_TEXT("Sub Domain Participant GUID=%s\n"),
+                std::basic_string<ACE_TCHAR>(converter).c_str()));
+  }
+
+  {
+    OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
+      dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(dp_pub.in());
+    pub_repo_id = dp_impl->get_id ();
+    OpenDDS::DCPS::GuidConverter converter(pub_repo_id);
+    ACE_DEBUG ((LM_DEBUG,
+                ACE_TEXT("%P ")
+                ACE_TEXT("Pub Domain Participant GUID=%s\n"),
+                std::basic_string<ACE_TCHAR>(converter).c_str()));
+  }
 
   // If we are running with an rtps_udp transport, it can't be shared between
   // participants.
   TransportConfig_rch cfg = TheTransportRegistry->get_config("dp1");
   if (!cfg.is_nil()) {
-    TheTransportRegistry->bind_config(cfg, dp);
+    TheTransportRegistry->bind_config(cfg, dp_sub);
   }
   cfg = TheTransportRegistry->get_config("dp2");
   if (!cfg.is_nil()) {
-    TheTransportRegistry->bind_config(cfg, dp2);
+    TheTransportRegistry->bind_config(cfg, dp_pub);
   }
 
-  Subscriber_var bit_sub = dp->get_builtin_subscriber();
+  Subscriber_var bit_sub = dp_sub->get_builtin_subscriber();
 
-  if (!read_participant_bit(bit_sub, TestConfig::PARTICIPANT_USER_DATA())) {
+  if (!read_participant_bit(bit_sub, dp_sub, pub_repo_id, TestConfig::PARTICIPANT_USER_DATA())) {
     return false;
   }
 
   // Each domain participant's handle to the other
-  InstanceHandle_t dp_ih, dp2_ih;
+  InstanceHandle_t dp_sub_ih, dp_pub_ih;
   InstanceHandle_t pub_ih, sub_ih, ig_ih;
 
-  if (!(check_discovered_participants(dp, dp2_ih) &&
-        check_discovered_participants(dp2, dp_ih)))
+  if (!(check_discovered_participants(dp_sub, dp_pub_ih) &&
+        check_discovered_participants(dp_pub, dp_sub_ih)))
   {
     return false;
   }
 
-  DataWriter_var dw = create_data_writer(dp2);
+  DataWriter_var dw = create_data_writer(dp_pub);
   if (!dw) {
     ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Data Writer (participant 2)\n"));
     return false;
   }
 
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), false)) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
     return false;
   }
 
-  DataReader_var dr = create_data_reader(dp);
+  DataReader_var dr = create_data_reader(dp_sub);
   if (!dr) {
     ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Data Reader (participant 1)\n"));
     return false;
   }
-  if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, TestConfig::DATA_READER_USER_DATA(), TestConfig::TOPIC_DATA())) {
+  if (!read_subscription_bit(dp_pub->get_builtin_subscriber(), dp_pub, sub_repo_id, sub_ih, TestConfig::DATA_READER_USER_DATA(), TestConfig::TOPIC_DATA())) {
     return false;
   }
 
@@ -665,7 +766,7 @@ bool run_test(DomainParticipant_var& dp,
   wait_match(dr, 1);
 
   // Get the new instance handle as pub_ih
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), true)) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
     return false;
   }
 
@@ -713,9 +814,9 @@ bool run_test(DomainParticipant_var& dp,
   // Change dp qos
   {
     DomainParticipantQos dp_qos;
-    dp2->get_qos(dp_qos);
+    dp_pub->get_qos(dp_qos);
     set_qos(dp_qos.user_data.value, TestConfig::PARTICIPANT_USER_DATA2());
-    dp2->set_qos(dp_qos);
+    dp_pub->set_qos(dp_qos);
   }
   // Change dw qos
   {
@@ -733,13 +834,13 @@ bool run_test(DomainParticipant_var& dp,
   }
   // Wait for propagation
   ACE_OS::sleep(3);
-  if (!read_participant_bit(bit_sub, TestConfig::PARTICIPANT_USER_DATA2())) {
+  if (!read_participant_bit(bit_sub, dp_sub, pub_repo_id, TestConfig::PARTICIPANT_USER_DATA2())) {
     return false;
   }
-  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA(), false)) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
     return false;
   }
-  if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
+  if (!read_subscription_bit(dp_pub->get_builtin_subscriber(), dp_pub, sub_repo_id, ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
     return false;
   }
 
@@ -759,39 +860,36 @@ bool run_test(DomainParticipant_var& dp,
 
   // Wait for propagation
   ACE_OS::sleep(3);
-  if (!read_publication_bit(bit_sub, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), false)) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
     return false;
   }
-  if (!read_subscription_bit(dp2->get_builtin_subscriber(), ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
+  if (!read_subscription_bit(dp_pub->get_builtin_subscriber(), dp_pub, sub_repo_id, ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
     return false;
   }
 
   // Test ignore
-  dp->ignore_publication(pub_ih);
-  if (!read_publication_bit(bit_sub, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), false, 0)) {
+  dp_sub->ignore_publication(pub_ih);
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), true)) {
     ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("ERROR: %P Could not ignore publication\n")), false);
   }
 
-  dp2->ignore_subscription(sub_ih);
-  if (!read_subscription_bit(dp2->get_builtin_subscriber(), sub_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 0)) {
+  dp_pub->ignore_subscription(sub_ih);
+  if (!read_subscription_bit(dp_pub->get_builtin_subscriber(), dp_pub, sub_repo_id, sub_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2(), true)) {
     ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("ERROR: %P Could not ignore subscription\n")), false);
   }
 
-  InstanceHandleSeq pre_ignore_handles;
-  dp->get_discovered_participants(pre_ignore_handles);
-  if (pre_ignore_handles.length() > 1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("ERROR: Discovered %d participants before ignore, should only be 1\n"),
-               pre_ignore_handles.length()));
-  }
-  dp->ignore_participant(dp2_ih);
+  dp_sub->ignore_participant(dp_pub_ih);
   InstanceHandleSeq handles;
-  dp->get_discovered_participants(handles);
-  if (pre_ignore_handles.length() - handles.length() != 1) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                     ACE_TEXT("ERROR: %P Could not ignore participant\n")), false);
+  dp_sub->get_discovered_participants(handles);
+  // Check that the handle is no longer in the sequence.
+  for (CORBA::ULong i = 0; i < handles.length (); ++i) {
+    if (handles[i] == dp_pub_ih) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %P Could not ignore participant\n")), false);
+
+    }
   }
 
   return ok;
@@ -801,13 +899,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   bool ok = false;
   DomainParticipantFactory_var dpf;
-  DomainParticipant_var dp, dp2;
+  DomainParticipant_var dp_sub, dp_pub;
   try {
     dpf = TheParticipantFactoryWithArgs(argc, argv);
-    dp = dpf->create_participant(9, PARTICIPANT_QOS_DEFAULT,
-                                 0, DEFAULT_STATUS_MASK);
-    if (!dp) {
-      ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Domain Participant 1\n"));
+    dp_sub = dpf->create_participant(9, PARTICIPANT_QOS_DEFAULT,
+                                     0, DEFAULT_STATUS_MASK);
+    if (!dp_sub) {
+      ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Sub Domain Participant\n"));
 
     } else {
       {
@@ -826,13 +924,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       DomainParticipantQos dp_qos;
       dpf->get_default_participant_qos(dp_qos);
       set_qos(dp_qos.user_data.value, TestConfig::PARTICIPANT_USER_DATA());
-      dp2 = dpf->create_participant(9, dp_qos, 0, DEFAULT_STATUS_MASK);
+      dp_pub = dpf->create_participant(9, dp_qos, 0, DEFAULT_STATUS_MASK);
 
-      if (!dp2) {
+      if (!dp_pub) {
         ACE_DEBUG((LM_ERROR, "ERROR: %P could not create Domain Participant 2\n"));
 
       } else {
-        ok = run_test(dp, dp2);
+        ok = run_test(dp_sub, dp_pub);
 
         if (!ok) {
           ACE_DEBUG((LM_ERROR, "ERROR: %P from run_test\n"));
@@ -855,9 +953,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ACE_DEBUG((LM_INFO, "%P Cleaning up test\n"));
-  cleanup(dpf, dp);
+  cleanup(dpf, dp_sub);
   ACE_OS::sleep(2);
-  cleanup(dpf, dp2);
+  cleanup(dpf, dp_pub);
   TheServiceParticipant->shutdown();
   ACE_Thread_Manager::instance()->wait();
   return ok ? EXIT_SUCCESS : EXIT_FAILURE;
