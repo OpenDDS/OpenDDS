@@ -1,3 +1,15 @@
+Mon Jan  5 23:20:39 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+
+          Updated this test to use PerlDDS::TestFramework.
+
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+
+          Removed these files.
+
 Mon Jan  5 20:45:00 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
