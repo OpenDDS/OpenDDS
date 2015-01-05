@@ -1,3 +1,15 @@
+Mon Jan  5 23:29:10 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Serializer_wstring/run_test.pl:
+
+          Updated this test to use PerlDDS::TestFramework.
+
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+
+          Removed these files.
+
 Mon Jan  5 23:20:39 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

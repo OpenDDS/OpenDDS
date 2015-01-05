@@ -235,7 +235,7 @@ tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN !SAFETY_TODO_CONVERT
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
 tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE
