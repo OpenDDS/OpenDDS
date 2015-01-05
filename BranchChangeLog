@@ -1,3 +1,9 @@
+Mon Jan  5 18:41:00 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Fixed passed parameters.
+
 Mon Jan  5 15:30:54 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
