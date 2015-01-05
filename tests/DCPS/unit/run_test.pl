@@ -10,53 +10,15 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
-my $debugFile;
-my $debug;
-# $debug = 10;
-$debugFile = "test.log";
-my $debugOpts = "";
-$debugOpts .= "-DCPSDebugLevel $debug " if $debug;
-$debugOpts .= "-ORBLogFile $debugFile ";
+my $test = new PerlDDS::TestFramework();
+$test->setup_discovery();
 
-unlink $debugFile;
+# LM_ERROR is expected in the log due to unit tests
+my $logFile = 'test.log';
+$test->{'report_errors_in_log_file'} = 0;
 
-$iorfile = "repo.ior";
-unlink $iorfile;
-
-$REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo"
-                              , "$debugOpts -o $iorfile");
-
-$CL = PerlDDS::create_process ("DdsDcps_UnitTest",
-                              "$debugOpts -DCPSInfoRepo file://$iorfile ");
-
-print $REPO->CommandLine() . "\n";
-$REPO->Spawn ();
-
-if (PerlACE::waitforfile_timed ($iorfile, 30) == -1) {
-    print STDERR "ERROR: cannot find file <$iorfile>\n";
-    $REPO->Kill (); $REPO->TimedWait (1);
-    exit 1;
-}
-
-print $CL->CommandLine() . "\n";
-
-$client = $CL->SpawnWaitKill (30);
-
-if ($client != 0) {
-    print STDERR "ERROR: client returned $client\n";
-    $status = 1;
-}
-
-$REPO->TerminateWaitKill (5);
-
-unlink $iorfile;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+$test->process('ut', 'DdsDcps_UnitTest', "-ORBLogFile $logFile");
+$test->start_process('ut');
+exit $test->finish(30);

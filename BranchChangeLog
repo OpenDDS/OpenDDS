@@ -1,3 +1,19 @@
+Mon Jan  5 19:46:30 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ZeroCopyDataReaderListener/run_test.pl:
+        * tests/DCPS/ZeroCopyDataReaderListener/tcp.ini:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
+        * tests/DCPS/ZeroCopyDataReaderListener/pub.ini:
+        * tests/DCPS/ZeroCopyDataReaderListener/sub.ini:
+
+          Removed these files.
+
 Mon Jan  5 18:41:00 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/dcps_tests.lst:
