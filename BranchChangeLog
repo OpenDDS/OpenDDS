@@ -1,3 +1,13 @@
+Mon Jan  5 14:30:03 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed !SAFETY_TODO_CONVERT flags for converted test.
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Converted to use TestFramework.
+
 Sat Jan  3 14:11:35 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

@@ -10,81 +10,36 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
 PerlDDS::add_lib_path('../FooType4');
 
-$ignore_kind=0;
+my $test = new PerlDDS::TestFramework();
+$test->{add_pending_timeout} = 0;
+$test->enable_console_logging();
 
-if ($ARGV[0] eq 'ignore_part') {
+# default get_builtin_subscriber test
+my $ignore_kind=0;
+
+if ($test->flag('ignore_part')) {
   $ignore_kind = 1;
 }
-elsif ($ARGV[0] eq 'ignore_topic') {
+elsif ($test->flag('ignore_topic')) {
   $ignore_kind = 2;
 }
-elsif ($ARGV[0] eq 'ignore_pub') {
+elsif ($test->flag('ignore_pub')) {
   $ignore_kind = 3;
 }
-elsif ($ARGV[0] eq 'ignore_sub') {
+elsif ($test->flag('ignore_sub')) {
   $ignore_kind = 4;
 }
-elsif ($ARGV[0] eq '') {
-  # default get_builtin_subscriber test
-  $ignore_kind = 0;
-}
-else {
-  print STDERR "ERROR: invalid parameter $ARGV[0] \n";
-  exit 1;
-}
 
-$iorfile = "repo.ior";
-unlink $iorfile;
-$status = 0;
-$client_orb = "";
+$test->report_unused_flags(1);
 
-my $repoDebug;
-my $appDebug;
-# $repoDebug = 10;
-# $appDebug  = 10;
+$test->setup_discovery();
 
-my $repoOpts = "";
-$repoOpts  = "-DCPSDebugLevel $repoDebug "               if $repoDebug;
-$repoOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
+$test->process("client", "bit", " -i $ignore_kind ");
+$test->start_process("client");
 
-my $appOpts = "";
-$appOpts  = "-DCPSDebugLevel $appDebug "                if $appDebug;
-$appOpts .= "-DCPSTransportDebugLevel $transportDebug " if $transportDebug;
-
-
-$REPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                "$repoOpts -o $iorfile $dynamic_tcp ");
-$CL = PerlDDS::create_process ("bit", "-DCPSInfoRepo file://$iorfile " .
-                              "$dynamic_tcp -i $ignore_kind $appOpts ");
-
-print $REPO->CommandLine() . "\n";
-$REPO->Spawn ();
-
-if (PerlACE::waitforfile_timed ($iorfile, 30) == -1) {
-    print STDERR "ERROR: cannot find file <$iorfile>\n";
-    $REPO->Kill (); $REPO->TimedWait (1);
-    exit 1;
-}
-
-print $CL->CommandLine() . "\n";
-$result = $CL->SpawnWaitKill (60);
-
-if ($result != 0) {
-    print STDERR "ERROR: client returned $result\n";
-    $status = 1;
-}
-
-$REPO->TerminateWaitKill (5);
-
-unlink $iorfile;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-}
-else {
-  print STDERR "test FAILED.\n";
-}
+my $status = $test->finish(60);
 exit $status;
