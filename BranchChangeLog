@@ -17,7 +17,7 @@ Sat Jan  3 14:11:35 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
         * performance-tests/DCPS/TCPListenerTest/run_test.pl:
         * tests/DCPS/FooTest3_2/run_test.pl:
 
-          Convereted tests to use TestFramework.
+          Converted tests to use TestFramework.
 
         * tests/DCPS/FooTest5/run_test.pl:
 
