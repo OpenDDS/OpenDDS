@@ -1,3 +1,12 @@
+Mon Jan  5 22:56:30 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.h:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Added liveliness lease duration to give multicast transport
+          the notion of a heartbeat to allow reliability to function
+          correctly.
+
 Mon Jan  5 19:42:32 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
