@@ -196,11 +196,11 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
     }
   }
 
-  part_bit->return_loan(data, infos);
-
   if (num_valid != 1) {
     ACE_DEBUG((LM_ERROR, "ERROR: %P expected to discover 1 other participant, found %d\n", data.length ()));
   }
+
+  part_bit->return_loan(data, infos);
 
   if (!found_other_dp) {
     ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P did not find expected participant\n"), false);

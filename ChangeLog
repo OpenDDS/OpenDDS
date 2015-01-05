@@ -1,3 +1,9 @@
+Mon Jan  5 19:42:32 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Print length of array before clearing it.
+
 Mon Jan  5 18:55:31 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/RTPS/Spdp.cpp:
