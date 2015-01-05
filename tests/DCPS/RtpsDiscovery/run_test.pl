@@ -9,6 +9,9 @@ use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+# Force to number.
+my $original_d0 = $ENV{'OPENDDS_RTPS_DEFAULT_D0'} + 0;
+
 my $result = 0;
 my @configs = qw/rtps_disc.ini rtps_disc_tcp.ini rtps_disc_group.ini/;
 
@@ -26,11 +29,14 @@ for my $cfg (@configs) {
 
 {
     print "Running sedp discovery leak test (different user data)\n";
+
     my $TEST1 = PerlDDS::create_process('RtpsDiscoveryTest',
                                         "-DCPSConfigFile rtps_disc_group.ini");
     my $TEST2 = PerlDDS::create_process('RtpsDiscoveryTest',
-                                        "-DCPSConfigFile rtps_disc_group2.ini -value_base 100");
+                                        "-DCPSConfigFile rtps_disc_group.ini -value_base 100");
+    $ENV{'OPENDDS_RTPS_DEFAULT_D0'} = $original_d0;
     $TEST1->Spawn();
+    $ENV{'OPENDDS_RTPS_DEFAULT_D0'} = $original_d0 + 100;
     $TEST2->Spawn();
     my $res1 = $TEST1->WaitKill(150);
     my $res2 = $TEST2->WaitKill(150);
@@ -45,8 +51,10 @@ for my $cfg (@configs) {
     my $TEST1 = PerlDDS::create_process('RtpsDiscoveryTest',
                                         "-DCPSConfigFile rtps_disc_group.ini");
     my $TEST2 = PerlDDS::create_process('RtpsDiscoveryTest',
-                                        "-DCPSConfigFile rtps_disc_group2.ini");
+                                        "-DCPSConfigFile rtps_disc_group.ini");
+    $ENV{'OPENDDS_RTPS_DEFAULT_D0'} = $original_d0;
     $TEST1->Spawn();
+    $ENV{'OPENDDS_RTPS_DEFAULT_D0'} = $original_d0 + 100;
     $TEST2->Spawn();
     my $res1 = $TEST1->WaitKill(150);
     my $res2 = $TEST2->WaitKill(150);

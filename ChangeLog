@@ -1,3 +1,17 @@
+Mon Jan  5 18:55:31 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added debugging message indicating Spdp multicast group.
+
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Set D0 through OPENDDS_RTPS_DEFAULT_D0 correctly.
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc_group2.ini:
+
+          Removed this file.
+
 Mon Jan  5 16:33:31 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
