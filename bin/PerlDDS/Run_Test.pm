@@ -572,6 +572,7 @@ sub setup_discovery {
 
   print $self->{info_repo}->{process}->CommandLine() . "\n";
   $self->{info_repo}->{process}->Spawn();
+  print "InfoRepo PID: " . $self->{info_repo}->{process}->{PROCESS} . "\n";
 
   if (PerlACE::waitforfile_timed($self->{info_repo}->{file}, 30) == -1) {
     print STDERR "ERROR: waiting for $executable IOR file\n";
@@ -594,6 +595,7 @@ sub start_process {
   my $process = $self->{processes}->{process}->{$name}->{process};
   print $process->CommandLine() . "\n";
   $process->Spawn();
+  print "$name PID: " . $process->{PROCESS} . "\n";
 }
 
 sub stop_process {
