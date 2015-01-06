@@ -526,6 +526,16 @@ sub process {
     $self->_create_process($executable, $params);
 }
 
+sub _getpid {
+    my $process = shift;
+    if ($^O eq 'Win32') {
+        return $process->{PROCESS}->GetProcessID();
+    }
+    else {
+        return $process->{PROCESS};
+    }
+}
+
 sub setup_discovery {
   my $self = shift;
   my $params = shift;
@@ -572,7 +582,7 @@ sub setup_discovery {
 
   print $self->{info_repo}->{process}->CommandLine() . "\n";
   $self->{info_repo}->{process}->Spawn();
-  print "InfoRepo PID: " . $self->{info_repo}->{process}->{PROCESS} . "\n";
+  print "InfoRepo PID: " . _getpid ($self->{info_repo}->{process}) . "\n";
 
   if (PerlACE::waitforfile_timed($self->{info_repo}->{file}, 30) == -1) {
     print STDERR "ERROR: waiting for $executable IOR file\n";
@@ -595,7 +605,7 @@ sub start_process {
   my $process = $self->{processes}->{process}->{$name}->{process};
   print $process->CommandLine() . "\n";
   $process->Spawn();
-  print "$name PID: " . $process->{PROCESS} . "\n";
+  print "$name PID: " . _getpid($process) . "\n";
 }
 
 sub stop_process {
