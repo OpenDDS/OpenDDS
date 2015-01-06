@@ -91,7 +91,8 @@ my @explicit_configuration = (
     protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Alexis Aquila'
   },
 
   {
@@ -101,7 +102,8 @@ my @explicit_configuration = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Feidlimid Chi'
   },
 
   {
@@ -111,7 +113,8 @@ my @explicit_configuration = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Nikephoros Romilda'
   },
 
   {
@@ -125,7 +128,8 @@ my @explicit_configuration = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Chandra Ananta'
   },
 
 );
@@ -141,6 +145,7 @@ my @explicit_configuration_and_negotiation = (
     # The hash referred-to by qos ...
     publisher     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
     subscriber    => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
+    name          => 'Feidlimid Puck'
   },
 
     {
@@ -151,7 +156,8 @@ my @explicit_configuration_and_negotiation = (
     compatibility => 'true',
     negotiated => ['udp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Vijaya Puck'
   },
 
   {
@@ -162,7 +168,8 @@ my @explicit_configuration_and_negotiation = (
     compatibility => 'true',
     negotiated => ['mytcp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Kamala Fedlimid'
   },
 
   {
@@ -173,7 +180,8 @@ my @explicit_configuration_and_negotiation = (
     negotiated => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Bala Fedlimid'
   },
 
   {
@@ -184,7 +192,8 @@ my @explicit_configuration_and_negotiation = (
     negotiated => ['mytcp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Padma Columba'
   },
 
   {
@@ -199,7 +208,8 @@ my @explicit_configuration_and_negotiation = (
     compatibility => 'true',
     negotiated => ['udp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Padma Feidlimid'
   },
 
  {
@@ -214,7 +224,8 @@ my @explicit_configuration_and_negotiation = (
     compatibility => 'true',
     negotiated => ['mytcp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Lalita Kamala'
   },
 
 
@@ -236,7 +247,8 @@ my @configuration_file_unused = (
     protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Fedlimid Puck'
   },
 );
 
@@ -253,6 +265,7 @@ my @without_configuration_file = (
     compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos,
+    name          => 'Ananta Chi'
   },
 );
 
@@ -265,7 +278,8 @@ my @explicit_configuration_collocated = (
     protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Alexis Columba'
   },
 
   {
@@ -275,7 +289,8 @@ my @explicit_configuration_collocated = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Puck Alexis'
   },
 
   {
@@ -285,7 +300,8 @@ my @explicit_configuration_collocated = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Puck Aeron'
   },
 
   {
@@ -299,7 +315,8 @@ my @explicit_configuration_collocated = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Agrippa Fedelmid'
   },
 
 );
@@ -315,7 +332,8 @@ my @test_configuration = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Aeron Chi'
   },
 
 {
@@ -326,7 +344,8 @@ my @test_configuration = (
     compatibility => 'true',
     negotiated => ['mytcp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Agrippa Nikephoros'
   },
 
  {
@@ -339,6 +358,7 @@ my @test_configuration = (
     publisher     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
     subscriber     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
 #    subscriber    => {%$qos, negotiated => ['_OPENDDS_0500_TCP'],},
+    name          => 'Fedlimid Aeron'
   },
 
 );
@@ -435,7 +455,7 @@ sub finalize($) {
 
 sub run($$$$) {
 
-  my ($Publisher, $pub_time, $Subscriber, $sub_time) = @_;
+  my ($Subscriber, $sub_time, $Publisher, $pub_time) = @_;
 
   my $status = 0;
 
@@ -501,15 +521,15 @@ for my $hasbuiltins (@builtinscases) {
 
         my $status = 0;
 
-        my $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
-        my ($process, $parameters) = command('publisher', $pub_parameters, $pub_time, $debug);
+        my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
+        my ($process, $parameters) = command('subscriber', $sub_parameters, $sub_time, $debug);
         my $S = PerlDDS::create_process ($process, $parameters);
 
-        my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
-        ($process, $parameters) = command('subscriber', $sub_parameters, $sub_time, $debug);
+        my $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
+        ($process, $parameters) = command('publisher', $pub_parameters, $pub_time, $debug);
         my $P = PerlDDS::create_process ($process, $parameters);
 
-        if (0 != run($P, $pub_time, $S, $sub_time)) {
+        if (0 != run($S, $sub_time, $P, $pub_time)) {
           $status++;
         }
 
@@ -520,7 +540,7 @@ for my $hasbuiltins (@builtinscases) {
         if (0 != $status) {
             $failed++;
             $Data::Dumper::Terse = 1;
-            print "Test FAILED " . Dumper(\%$i) . "\n";
+            print "Test FAILED (hasbuiltins=" . $hasbuiltins . ")" . Dumper(\%$i) . "\n";
             exit(-1);
         }
 
@@ -540,4 +560,3 @@ else {
 }
 
 exit $failed;
-
