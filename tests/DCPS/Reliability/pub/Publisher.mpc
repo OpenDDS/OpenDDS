@@ -7,7 +7,6 @@ project(Reliability*) : dcpsexe_with_tcp, dds_model, dcps_shmem {
   after    += Reliability
   
   includes += ../IDL ..
-  exeout = ..
   libs += Reliability
   libpaths += ../IDL
   

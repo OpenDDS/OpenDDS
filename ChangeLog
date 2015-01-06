@@ -1,3 +1,15 @@
+Tue Jan  6 19:59:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+
+          Fixed warnings.
+
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+
+          Changed location of executables to get rid of a GNU Make warning.
+
 Tue Jan  6 19:56:54 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:

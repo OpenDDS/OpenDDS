@@ -29,7 +29,7 @@ OpenDDS::DCPS::ScheduleOutputHandler::schedule_output()
     if( ( (state_ ==  Enabled) && (mode == TransportSendStrategy::MODE_DIRECT))
      || ( (state_ == Disabled) && ( (mode == TransportSendStrategy::MODE_QUEUE)
                                  || (mode == TransportSendStrategy::MODE_SUSPEND)))) {
-      (int)reactor()->notify(this);
+      reactor()->notify(this);
     }
   }
 }
@@ -58,7 +58,7 @@ OpenDDS::DCPS::ScheduleOutputHandler::handle_exception(ACE_HANDLE)
   if( mode == TransportSendStrategy::MODE_DIRECT) {
     // Don't cancel a canceled handle.
     if( state_ == Enabled) {
-      (int)reactor()->cancel_wakeup( handle_, ACE_Event_Handler::WRITE_MASK);
+      reactor()->cancel_wakeup(handle_, ACE_Event_Handler::WRITE_MASK);
       state_ = Disabled;
       changed = true;
     }
@@ -68,7 +68,7 @@ OpenDDS::DCPS::ScheduleOutputHandler::handle_exception(ACE_HANDLE)
 
     // Don't schedule a scheduled handle.
     if( state_ == Disabled) {
-      (int)reactor()->schedule_wakeup( handle_, ACE_Event_Handler::WRITE_MASK);
+      reactor()->schedule_wakeup(handle_, ACE_Event_Handler::WRITE_MASK);
       state_ = Enabled;
       changed = true;
     }
