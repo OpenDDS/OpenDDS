@@ -93,6 +93,29 @@ set_bool_qos_value(bool& target, const char* value)
   return matched;
 }
 
+// Set duration on the target and return true if it was a valid value
+bool
+set_duration_qos_value(DDS::Duration_t& target, 
+                       const char* prefix_match, // prefix to match
+                       const char* name,         // config name provided 
+                       const char* value)        // config value provided
+{
+  char buffer[64];
+  strncpy(buffer, prefix_match, 64 - 4);
+  strcat(buffer, ".sec");
+  if (!strcmp(name, buffer)) {
+    target.sec = atoi(value);
+    return true;
+  }
+  strncpy(buffer, prefix_match, 64 - 7);
+  strcat(buffer, ".nanosec");
+  if (!strcmp(name, buffer)) {
+    target.nanosec = atoi(value);
+    return true;
+  }
+  return false;
+}
+
 bool
 set_presentation_coherent_access_qos(
   DDS::PresentationQosPolicy& target,
@@ -157,6 +180,127 @@ set_durability_kind_qos(
   return matched;
 }
 
+bool
+set_deadline_period_qos(
+  DDS::DeadlineQosPolicy& target, const char* name, const char* value)
+{
+  return set_duration_qos_value(target.period, "deadline.period", name, value);
+}
+
+bool
+set_latency_budget_duration_qos(
+  DDS::LatencyBudgetQosPolicy& target, const char* name, const char* value)
+{
+  return set_duration_qos_value(
+    target.duration, "latency_budget.duration", name, value);
+}
+
+bool set_liveliness_lease_duration_qos(
+   DDS::LivelinessQosPolicy& target, const char* name, const char* value)
+{
+  return set_duration_qos_value(
+    target.lease_duration, "liveliness.lease_duration", name, value);
+}
+
+bool set_reliability_kind_qos(
+  DDS::ReliabilityQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "reliability.kind")) {
+    if (!strcmp(value, "BEST_EFFORT")) {
+      target.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+      matched = true;
+    } else if (!strcmp(value, "RELIABLE")) {
+      target.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      matched = true;
+    }
+  }
+  return matched;
+}
+
+bool set_reliability_max_blocking_time_qos(
+  DDS::ReliabilityQosPolicy& target, const char* name, const char* value)
+{
+  return set_duration_qos_value(
+    target.max_blocking_time, "reliability.max_blocking_time", name, value);
+}
+
+bool set_destination_order_kind_qos(
+  DDS::DestinationOrderQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "destination_order.kind")) {
+    if (!strcmp(value, "BY_RECEPTION_TIMESTAMP")) {
+      target.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+      matched = true;
+    } else if (!strcmp(value, "BY_SOURCE_TIMESTAMP")) {
+      target.kind = DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
+      matched = true;
+    }
+  }
+  return matched;
+}
+
+bool set_history_kind_qos(
+  DDS::HistoryQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "history.kind")) {
+    if (!strcmp(value, "KEEP_ALL")) {
+      target.kind = DDS::KEEP_ALL_HISTORY_QOS;
+      matched = true;
+    } else if (!strcmp(value, "KEEP_LAST")) {
+      target.kind = DDS::KEEP_LAST_HISTORY_QOS;
+      matched = true;
+    }
+  }
+  return matched;
+}
+
+bool set_history_depth_qos(
+  DDS::HistoryQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "history.depth")) {
+    target.depth = atoi(value);
+    matched = true;
+  }
+  return matched;
+}
+
+bool set_resource_limits_max_samples_qos(
+  DDS::ResourceLimitsQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "resource_limits.max_samples")) {
+    target.max_samples = atoi(value);
+    matched = true;
+  }
+  return matched;
+}
+
+bool set_resource_limits_max_instances_qos(
+  DDS::ResourceLimitsQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "resource_limits.max_instances")) {
+    target.max_instances = atoi(value);
+    matched = true;
+  }
+  return matched;
+}
+
+bool set_resource_limits_max_samples_per_instance_qos(
+  DDS::ResourceLimitsQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "resource_limits.max_samples_per_instance")) {
+    target.max_samples_per_instance = atoi(value);
+    matched = true;
+  }
+  return matched;
+}
+
 void
 log_parser_error(const char* section, const char* name, const char* value)
 {
@@ -200,7 +344,28 @@ void QosSettings::set_qos(
 {
   bool matched = 
     set_durability_kind_qos(target.durability, name, value) ||
-    false;
+    // durability service not settable - not supporting those durabilities
+    set_deadline_period_qos(target.deadline, name, value) ||
+    set_latency_budget_duration_qos(target.latency_budget, name, value) ||
+    // liveliness kind not settable - can't be manual
+    set_liveliness_lease_duration_qos(target.liveliness, name, value) ||
+    set_reliability_kind_qos(target.reliability, name, value) ||
+    set_reliability_max_blocking_time_qos(target.reliability, name, value) ||
+    set_destination_order_kind_qos(target.destination_order, name, value) ||
+    set_history_kind_qos(target.history, name, value) ||
+    set_history_depth_qos(target.history, name, value) ||
+    set_resource_limits_max_samples_qos(target.resource_limits, name, value) ||
+    set_resource_limits_max_instances_qos(target.resource_limits, name, value) ||
+    set_resource_limits_max_samples_per_instance_qos(target.resource_limits, name, value) ||
+false
+    // TransportPriorityQosPolicy transport_priority;
+
+    // LifespanQosPolicy lifespan;
+    // UserDataQosPolicy user_data;
+    // OwnershipQosPolicy ownership;
+    // OwnershipStrengthQosPolicy ownership_strength;
+    // WriterDataLifecycleQosPolicy writer_data_lifecycle;
+  ;
 
   if (!matched) {
     log_parser_error("data writer", name, value);
@@ -212,7 +377,25 @@ void QosSettings::set_qos(
 {
   bool matched = 
     set_durability_kind_qos(target.durability, name, value) ||
-    false;
+    // durability service not settable
+    set_deadline_period_qos(target.deadline, name, value) || 
+    set_latency_budget_duration_qos(target.latency_budget, name, value) ||
+    // liveliness kind not settable - can't be manual
+    set_liveliness_lease_duration_qos(target.liveliness, name, value) ||
+    set_reliability_kind_qos(target.reliability, name, value) ||
+    set_reliability_max_blocking_time_qos(target.reliability, name, value) ||
+    set_destination_order_kind_qos(target.destination_order, name, value) ||
+    set_history_kind_qos(target.history, name, value) ||
+    set_history_depth_qos(target.history, name, value) ||
+    set_resource_limits_max_samples_qos(target.resource_limits, name, value) ||
+    set_resource_limits_max_instances_qos(target.resource_limits, name, value) ||
+    set_resource_limits_max_samples_per_instance_qos(target.resource_limits, name, value) ||
+false
+    // user_data not settable - can't be retrieved
+    // OwnershipQosPolicy ownership;
+    // TimeBasedFilterQosPolicy time_based_filter;
+    // ReaderDataLifecycleQosPolicy reader_data_lifecycle;
+  ;
 
   if (!matched) {
     log_parser_error("data reader", name, value);
