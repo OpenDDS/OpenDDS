@@ -96,7 +96,7 @@ tests/DCPS/MultiRepoTest/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
 tests/DCPS/MultiRepoTest/run_test.pl fileconfig: !DCPS_MIN !SAFETY_TODO_CONVERT
 tests/DCPS/Presentation/run_test.pl: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/ReaderDataLifecycle/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ReaderDataLifecycle/run_test.pl rtps: !DCPS_MIN RTPS !SAFETY_TODO_CONVERT
+tests/DCPS/ReaderDataLifecycle/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/Reconnect/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -118,7 +118,7 @@ tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN
 tests/DCPS/ViewState/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 
-tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
 tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 
 tests/transport/simple/run_test.pl bp: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -192,7 +192,7 @@ tests/DCPS/KeyTest/run_test.pl: !DCPS_MIN
 tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/CompatibilityTest/run_test.pl rtps_disc: !DCPS_MIN RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/CompatibilityTest/run_test.pl rtps_disc_tcp: !DCPS_MIN RTPS !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
-tests/DCPS/Partition/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/Partition/run_test.pl: !DCPS_MIN
 tests/DCPS/Deadline/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Deadline/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/Lifespan/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
@@ -258,7 +258,7 @@ tests/DCPS/LargeSample/run_test.pl multicast_async: !DCPS_MIN !NO_MCAST !OPENDDS
 tests/DCPS/LargeSample/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LargeSample/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN !SAFETY_TODO_CONVERT
+tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN
 tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS !SAFETY_TODO_CONVERT
 tests/DCPS/SubscriberCycle/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_FILTERED_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION

@@ -1,3 +1,20 @@
+Wed Jan  7 22:02:06 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/Partition/pub.ini:
+        * tests/DCPS/Partition/sub.ini:
+
+          Removed these files.
+
 Wed Jan  7 16:41:05 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r6696 through r6748.

@@ -35,4 +35,9 @@ $test->process('pub', 'publisher', "-DCPSConfigFile pub.ini $verbose_opt");
 $test->start_process('sub');
 $test->start_process('pub');
 
-exit $test->finish(300);
+my $result = $test->finish(300);
+
+unlink $subscriber_completed;
+unlink $subscriber_ready;
+unlink $publisher_ready;
+exit $result;

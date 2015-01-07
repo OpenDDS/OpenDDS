@@ -10,75 +10,28 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
-
-$pub_conf = "-DCPSConfigFile pub.ini";
-$sub_conf = "-DCPSConfigFile sub.ini";
-$pub_opts = "$pub_conf -d -u";
-$sub_opts = "$sub_conf -d -u";
+my $opts = "-d -u";
 
 if ($ARGV[0] eq 'unregister') {
-    $pub_opts = "$pub_conf -u";
-    $sub_opts = "$sub_conf -u";
+    $opts = "-u";
 }
 elsif ($ARGV[0] eq 'dispose') {
-    $pub_opts = "$pub_conf -d";
-    $sub_opts = "$sub_conf -d";
+    $opts = "-d";
 }
 elsif ($ARGV[0] ne '') {
     print STDERR "ERROR: invalid test case\n";
     exit 1;
 }
 
-$dcpsrepo_ior = "repo.ior";
+my $test = new PerlDDS::TestFramework();
 
-unlink $dcpsrepo_ior;
+$test->process('pub', 'publisher', $opts);
+$test->process('sub', 'subscriber', $opts);
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "-o $dcpsrepo_ior ");
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+$test->setup_discovery();
+$test->start_process('pub');
+$test->start_process('sub');
 
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
-}
-
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn ();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn ();
-
-
-$PublisherResult = $Publisher->WaitKill (300);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
-$SubscriberResult = $Subscriber->WaitKill (15);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-}
-
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish(300);
