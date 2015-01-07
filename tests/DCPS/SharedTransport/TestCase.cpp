@@ -28,13 +28,38 @@ const int num_messages = 100;
 
 } // namespace
 
+DDS::ReturnCode_t
+TestCase::init_datawriter(
+  DDS::DataWriterQos& qos,
+  DDS::DataWriterListener_ptr&,
+  DDS::StatusMask&)
+{
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: TestCase::init_datawriter\n")));
+
+  qos.liveliness.lease_duration.sec = 1;
+  qos.liveliness.lease_duration.nanosec = 0;
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t
+TestCase::init_datareader(
+  DDS::DataReaderQos& qos,
+  DDS::DataReaderListener_ptr&,
+  DDS::StatusMask&)
+{
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: TestCase::init_datareader\n")));
+
+  qos.liveliness.lease_duration.sec = 1;
+  qos.liveliness.lease_duration.nanosec = 0;
+  return DDS::RETCODE_OK;
+}
 
 int
 TestCase::test()
 {
   wait_for_subscribers(); // wait for association
 
-  // As there are no fully assoication establishment between pub and sub for UDP
+  // As there are no fully association establishment between pub and sub for UDP
   // transport, a delay is required for the test to receive all messages.
   ACE_OS::sleep (2);
 

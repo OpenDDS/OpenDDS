@@ -7,7 +7,6 @@ project(Reliability*) : dcpsexe, dcps_transports_for_test, dds_model {
   after    += Reliability
   
   includes += ../IDL ..
-  exeout = ..
   libs += Reliability
   libpaths += ../IDL
   

@@ -402,6 +402,16 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   }
 
   const std::string& net_if = outer_->disco_->multicast_interface();
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) Spdp::SpdpTransport::SpdpTransport ")
+               ACE_TEXT("joining group %C %C:%hd\n"),
+               net_if.c_str (),
+               mc_addr.c_str (),
+               mc_port));
+  }
+
   if (0 != multicast_socket_.join(default_multicast, 1,
                                   net_if.empty() ? 0 :
                                   ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str()))) {

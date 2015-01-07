@@ -1,3 +1,168 @@
+Tue Jan  6 20:58:01 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Comment out TcpReconnect test.  Has 8 failures of
+          "received 16 messages, but expected 60"
+
+Tue Jan  6 19:59:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+
+          Fixed warnings.
+
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+
+          Changed location of executables to get rid of a GNU Make warning.
+
+Tue Jan  6 19:56:54 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Attempt to print PID in platform specific way.
+
+Tue Jan  6 17:59:30 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Print PID of spawned process.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Converted to use PerlDDS::TestFramework.
+
+Tue Jan  6 16:29:12 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Added names to test scenarios.  Prints if BITs were enabled upon
+          failure.  Correct publisher/subscriber swap.
+
+Mon Jan  5 22:56:30 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.h:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Added liveliness lease duration to give multicast transport
+          the notion of a heartbeat to allow reliability to function
+          correctly.
+
+Mon Jan  5 19:42:32 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Print length of array before clearing it.
+
+Mon Jan  5 18:55:31 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Added debugging message indicating Spdp multicast group.
+
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Set D0 through OPENDDS_RTPS_DEFAULT_D0 correctly.
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc_group2.ini:
+
+          Removed this file.
+
+Mon Jan  5 16:33:31 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Fixed string conversions.
+
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Processes are created then spawned in multi-process tests.
+
+Mon Jan  5 15:10:55 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Added knowledge of discovered participant/publication/subscription
+          to checks.  Prints GUIDs instead of key data.
+
+Fri Jan  2 19:16:08 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed FooTest3_1, since the only difference between it and 3_2
+          is that 3_2 has unbounded sequences.
+
+        * tests/DCPS/Instances/PubDriver.h:
+
+          Added TODO to indicate how this test can be added to
+          to remove need for some FooTest3_2 tests scenarios.
+
+        * tests/DCPS/FooTest3_1:
+        * tests/DCPS/FooTest3_1/DataReaderListener.h:
+        * tests/DCPS/FooTest3_1/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/InstanceDataMap.h:
+        * tests/DCPS/FooTest3_1/InstanceDataMap.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/README:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/TestException.h:
+        * tests/DCPS/FooTest3_1/Writer.h:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_1/pub_main.cpp:
+        * tests/DCPS/FooTest3_1/rtps.ini:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_1/sub_main.cpp:
+
+          Removed these files.
+
+Fri Jan  2 18:39:59 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Merged convenience method from FACE.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Used convenience method.
+
+Fri Jan  2 18:33:07 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Merged fix from FACE branch needed to convert FooTest5.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Converted test to use TestFramework.
+
+Fri Jan  2 17:44:21 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/TcpReconnect/Args.h:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+
+          Tweak the TcpReconnect test to allow for more time between
+          reconnects.  Re-enable the scoreboard test.
+
+Fri Jan  2 15:36:03 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Temporarily disable TcpReconnect test until some race
+          condition fixes can be made.
+
+Tue Dec 30 20:20:23 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add TcpReconnect test to test list.
+
 Fri Dec 19 19:44:08 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/transport/framework/PacketRemoveVisitor.cpp:
@@ -6,6 +171,13 @@ Fri Dec 19 19:44:08 UTC 2014  Paul Calabrese  <calabrese_p@ociweb.com>
           is imminent.  This was seen to happen in a high fan-out
           writer with some back pressure from one or more of the
           readers.
+
+Thu Dec 18 17:33:00 UTC 2014  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Added Error log for discovering multiple participants when
+          only 1 excpected.
 
 Thu Dec 18 17:18:55 UTC 2014  Justin Wilson  <wilsonj@ociweb.com>
 

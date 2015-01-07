@@ -29,9 +29,6 @@ my $port=29804;
 my $sub_time = $pub_time;
 my $sub_addr = "localhost:16701";
 
-
-my $dcpsrepo_ior = "repo.ior";
-
 my $qos = {
     autoenable    => undef,
     durability => 'transient_local',
@@ -91,7 +88,8 @@ my @explicit_configuration = (
     protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Alexis Aquila'
   },
 
   {
@@ -101,7 +99,8 @@ my @explicit_configuration = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Feidlimid Chi'
   },
 
   {
@@ -111,7 +110,8 @@ my @explicit_configuration = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Nikephoros Romilda'
   },
 
   {
@@ -125,7 +125,8 @@ my @explicit_configuration = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Chandra Ananta'
   },
 
 );
@@ -141,6 +142,7 @@ my @explicit_configuration_and_negotiation = (
     # The hash referred-to by qos ...
     publisher     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
     subscriber    => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
+    name          => 'Feidlimid Puck'
   },
 
     {
@@ -151,7 +153,8 @@ my @explicit_configuration_and_negotiation = (
     compatibility => 'true',
     negotiated => ['udp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Vijaya Puck'
   },
 
   {
@@ -162,7 +165,8 @@ my @explicit_configuration_and_negotiation = (
     compatibility => 'true',
     negotiated => ['mytcp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Kamala Fedlimid'
   },
 
   {
@@ -173,7 +177,8 @@ my @explicit_configuration_and_negotiation = (
     negotiated => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Bala Fedlimid'
   },
 
   {
@@ -184,7 +189,8 @@ my @explicit_configuration_and_negotiation = (
     negotiated => ['mytcp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Padma Columba'
   },
 
   {
@@ -199,7 +205,8 @@ my @explicit_configuration_and_negotiation = (
     compatibility => 'true',
     negotiated => ['udp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Padma Feidlimid'
   },
 
  {
@@ -214,7 +221,8 @@ my @explicit_configuration_and_negotiation = (
     compatibility => 'true',
     negotiated => ['mytcp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Lalita Kamala'
   },
 
 
@@ -236,7 +244,8 @@ my @configuration_file_unused = (
     protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Fedlimid Puck'
   },
 );
 
@@ -253,6 +262,7 @@ my @without_configuration_file = (
     compatibility => 'true',
     publisher     => $qos,
     subscriber    => $qos,
+    name          => 'Ananta Chi'
   },
 );
 
@@ -265,7 +275,8 @@ my @explicit_configuration_collocated = (
     protocol      => ['_OPENDDS_0300_UDP', '_OPENDDS_0410_MCAST_UNRELIABLE', '_OPENDDS_0420_MCAST_RELIABLE', '_OPENDDS_0500_TCP'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Alexis Columba'
   },
 
   {
@@ -275,7 +286,8 @@ my @explicit_configuration_collocated = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Puck Alexis'
   },
 
   {
@@ -285,7 +297,8 @@ my @explicit_configuration_collocated = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Puck Aeron'
   },
 
   {
@@ -299,7 +312,8 @@ my @explicit_configuration_collocated = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Agrippa Fedelmid'
   },
 
 );
@@ -315,7 +329,8 @@ my @test_configuration = (
     protocol      => ['udp1'],
     compatibility => 'true',
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Aeron Chi'
   },
 
 {
@@ -326,7 +341,8 @@ my @test_configuration = (
     compatibility => 'true',
     negotiated => ['mytcp1'],
     publisher     => $qos,
-    subscriber    => $qos
+    subscriber    => $qos,
+    name          => 'Agrippa Nikephoros'
   },
 
  {
@@ -339,6 +355,7 @@ my @test_configuration = (
     publisher     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
     subscriber     => {%$qos, negotiated => ['_OPENDDS_0300_UDP'],},
 #    subscriber    => {%$qos, negotiated => ['_OPENDDS_0500_TCP'],},
+    name          => 'Fedlimid Aeron'
   },
 
 );
@@ -400,91 +417,29 @@ sub parse($$$) {
   return $result;
 }
 
+# This was retained for debugging.
+# sub command($$$$) {
 
-sub initialize($) {
+#   my ($pub_process, $pub_parameters, $pub_time, $debug) = @_;
 
-  my ($hasbuiltins) = @_;
+#   if ($debug eq 'nemiver') {
+#     return ('/usr/bin/nemiver', $pub_process . ' ' . $pub_parameters);
+#   }
 
-  unlink $dcpsrepo_ior;
+#   if ($debug eq 'gdb') {
+#     my $gdbrc = "/tmp/$pub_process.gdb";
+#     open(FF1, ">$gdbrc");
+#     print FF1 <<EOF;
+# break main
+# run $pub_parameters -x $pub_time
+# EOF
+#     close(FF1);
 
-  my $pub_builtins = "-NOBITS" unless $hasbuiltins;
+#     return ('/usr/bin/xterm', '-T ' . $pub_process . ' -e /usr/bin/gdb -x ' . $gdbrc . ' ' . $pub_process);
+#   }
 
-  my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                          "$pub_builtins -o $dcpsrepo_ior");
-  print $DCPSREPO->CommandLine() . "\n";
-  $DCPSREPO->Spawn ();
-  print "Repository PID: " . $DCPSREPO->{PROCESS} . "\n" if $DCPSREPO->{PROCESS};
-
-  if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-      print STDERR "ERROR: waiting for Info Repo IOR file\n";
-      $DCPSREPO->Kill ();
-      exit 1;
-  }
-
-  return $DCPSREPO;
-}
-
-sub finalize($) {
-  my $DCPSREPO = shift;
-  my $ir = PerlDDS::terminate_wait_kill($DCPSREPO);
-
-  unlink $dcpsrepo_ior;
-
-  return $ir;
-}
-
-sub run($$$$) {
-
-  my ($Publisher, $pub_time, $Subscriber, $sub_time) = @_;
-
-  my $status = 0;
-
-  print $Subscriber->CommandLine() . "\n";
-
-  my $sublife = (($sub_time + 30) * 2);
-  my $SubscriberResult = $Subscriber->Spawn();
-  print "Subscriber PID: " . $Subscriber->{PROCESS} . ". Killing in " . $sublife . " seconds ...\n" if $Subscriber->{PROCESS};
-
-  if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-  }
-
-  print $Publisher->CommandLine() . "\n";
-
-  my $publife = (($pub_time + 30) * 2);
-  my $PublisherResult = $Publisher->Spawn();
-  print "Publisher PID: " . $Publisher->{PROCESS} . ". Killing in " . $publife . " seconds ...\n" if $Publisher->{PROCESS};
-
-  $status |= PerlDDS::wait_kill($Publisher, $publife, "publisher");
-
-  $status |= PerlDDS::wait_kill($Subscriber, $sublife, "subscriber");
-
-  return $status;
-}
-
-sub command($$$$) {
-
-  my ($pub_process, $pub_parameters, $pub_time, $debug) = @_;
-
-  if ($debug eq 'nemiver') {
-    return ('/usr/bin/nemiver', $pub_process . ' ' . $pub_parameters);
-  }
-
-  if ($debug eq 'gdb') {
-    my $gdbrc = "/tmp/$pub_process.gdb";
-    open(FF1, ">$gdbrc");
-    print FF1 <<EOF;
-break main
-run $pub_parameters -x $pub_time
-EOF
-    close(FF1);
-
-    return ('/usr/bin/xterm', '-T ' . $pub_process . ' -e /usr/bin/gdb -x ' . $gdbrc . ' ' . $pub_process);
-  }
-
-    return ($pub_process, $pub_parameters . ' -x ' . $pub_time);
-}
+#     return ($pub_process, $pub_parameters . ' -x ' . $pub_time);
+# }
 
 
 
@@ -497,21 +452,24 @@ my @builtinscases = $debug ? (undef) : (undef, 'true');
 for my $hasbuiltins (@builtinscases) {
 
     for my $i (@scenario) {
-        my $DCPSREPO = initialize($hasbuiltins);
+        my $test = new PerlDDS::TestFramework();
+        $test->enable_console_logging();
+        $test->report_unused_flags();
 
-        my $status = 0;
+        # Setup the InfoRepo.
+        my $info_params = "-NOBITS" unless $hasbuiltins;
+        $test->setup_discovery($info_params);
 
-        my $pub_parameters = parse('publisher', $hasbuiltins, \%$i);
-        my ($process, $parameters) = command('publisher', $pub_parameters, $pub_time, $debug);
-        my $S = PerlDDS::create_process ($process, $parameters);
+        my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i) . " -x $sub_time";
+        $test->process("subscriber", "subscriber", $sub_parameters);
 
-        my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i);
-        ($process, $parameters) = command('subscriber', $sub_parameters, $sub_time, $debug);
-        my $P = PerlDDS::create_process ($process, $parameters);
+        my $pub_parameters = parse('publisher', $hasbuiltins, \%$i) . " -x $pub_time";
+        $test->process("publisher", "publisher", $pub_parameters);
 
-        if (0 != run($P, $pub_time, $S, $sub_time)) {
-          $status++;
-        }
+        # What if start fails?
+        $test->start_process("subscriber");
+        $test->start_process("publisher");
+        my $status = $test->finish(($pub_time + 30) * 2, "publisher");
 
         $count++;
         print "count->$count\nstatus->$status\nfailed->$failed\n";
@@ -520,15 +478,10 @@ for my $hasbuiltins (@builtinscases) {
         if (0 != $status) {
             $failed++;
             $Data::Dumper::Terse = 1;
-            print "Test FAILED " . Dumper(\%$i) . "\n";
+            print "Test FAILED (hasbuiltins=" . $hasbuiltins . ")" . Dumper(\%$i) . "\n";
             exit(-1);
         }
-
-        if (0 != finalize($DCPSREPO)) {
-          #$failed++;
-        }
     }
-
 }
 
 
@@ -540,4 +493,3 @@ else {
 }
 
 exit $failed;
-

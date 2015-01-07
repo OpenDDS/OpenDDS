@@ -14,6 +14,16 @@
 class TestCase : public virtual TestPair<TestMessageDataReader,
                                          TestMessageDataWriter> {
 public:
+  virtual DDS::ReturnCode_t init_datawriter(
+    DDS::DataWriterQos& qos,
+    DDS::DataWriterListener_ptr& listener,
+    DDS::StatusMask& status);
+
+  virtual DDS::ReturnCode_t init_datareader(
+    DDS::DataReaderQos& qos,
+    DDS::DataReaderListener_ptr& listener,
+    DDS::StatusMask& status);
+
   DDS::ReturnCode_t init_transport(const std::string& transport_type);
 
   virtual int test();
