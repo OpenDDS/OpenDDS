@@ -565,6 +565,92 @@ void test_set_datawriter_resource_limits_max_samples_per_instance()
   TEST_CHECK(14 == qos.resource_limits.max_samples_per_instance);
 }
 
+void test_set_datawriter_transport_priority_value()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "transport_priority.value", "3");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(3 == qos.transport_priority.value);
+}
+
+void test_set_datawriter_lifespan_duration_sec()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "lifespan.duration.sec", "3");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(3 == qos.lifespan.duration.sec);
+}
+
+void test_set_datawriter_lifespan_duration_nanosec()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "lifespan.duration.nanosec", "100");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(100 == qos.lifespan.duration.nanosec);
+}
+
+void test_set_datawriter_lifespan_duration_both()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "lifespan.duration.sec", "1");
+  accessor.set_qos(QosSettings::data_writer, "lifespan.duration.nanosec", "100");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(1 == qos.lifespan.duration.sec);
+  TEST_CHECK(100 == qos.lifespan.duration.nanosec);
+}
+
+void test_set_datawriter_ownership_kind_shared()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "ownership.kind", "SHARED");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::SHARED_OWNERSHIP_QOS == qos.ownership.kind);
+}
+
+void test_set_datawriter_ownership_kind_exclusive()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "ownership.kind", "EXCLUSIVE");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::EXCLUSIVE_OWNERSHIP_QOS == qos.ownership.kind);
+}
+
+void test_set_datawriter_ownership_strength_value()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_writer, "ownership_strength.value", "32");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(32 == qos.ownership_strength.value);
+}
+
 /////// DataReader tests 
 void test_set_datareader_durability_volatile()
 {
@@ -856,6 +942,150 @@ void test_set_datareader_resource_limits_max_samples_per_instance()
   TEST_CHECK(14 == qos.resource_limits.max_samples_per_instance);
 }
 
+void test_set_datareader_ownership_kind_shared()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "ownership.kind", "SHARED");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::SHARED_OWNERSHIP_QOS == qos.ownership.kind);
+}
+
+void test_set_datareader_ownership_kind_exclusive()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "ownership.kind", "EXCLUSIVE");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::EXCLUSIVE_OWNERSHIP_QOS == qos.ownership.kind);
+}
+
+void test_set_datareader_time_based_filter_minimum_separation_sec()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.sec", "2");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(2 == qos.time_based_filter.minimum_separation.sec);
+  TEST_CHECK(0 == qos.time_based_filter.minimum_separation.nanosec);
+}
+
+void test_set_datareader_time_based_filter_minimum_separation_nanosec()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.nanosec", "170");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(0 == qos.time_based_filter.minimum_separation.sec);
+  TEST_CHECK(170 == qos.time_based_filter.minimum_separation.nanosec);
+}
+
+void test_set_datareader_time_based_filter_minimum_separation_both()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.sec", "1");
+  accessor.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.nanosec", "100");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(1 == qos.time_based_filter.minimum_separation.sec);
+  TEST_CHECK(100 == qos.time_based_filter.minimum_separation.nanosec);
+}
+
+void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_sec()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec", "5");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(5 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
+  TEST_CHECK(0 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
+}
+
+void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_nanosec()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec", "5000");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(0 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
+  TEST_CHECK(5000 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
+}
+
+void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_both()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec", "1000");
+  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec", "1");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(1 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.sec);
+  TEST_CHECK(1000 == qos.reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec);
+}
+
+void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_sec()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.sec", "5");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(5 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
+  TEST_CHECK(0 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
+}
+
+void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec", "5000");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(0 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
+  TEST_CHECK(5000 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
+}
+
+void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both()
+{
+  QosSettings settings;
+  QosSettingsAccessor accessor(settings);
+
+  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec", "1000");
+  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.sec", "1");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(1 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.sec);
+  TEST_CHECK(1000 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
+}
+
 int main(int, const char** )
 {
   // Publisher QOS
@@ -907,6 +1137,13 @@ int main(int, const char** )
   test_set_datawriter_resource_limits_max_samples();
   test_set_datawriter_resource_limits_max_instances();
   test_set_datawriter_resource_limits_max_samples_per_instance();
+  test_set_datawriter_transport_priority_value();
+  test_set_datawriter_lifespan_duration_sec();
+  test_set_datawriter_lifespan_duration_nanosec();
+  test_set_datawriter_lifespan_duration_both();
+  test_set_datawriter_ownership_kind_shared();
+  test_set_datawriter_ownership_kind_exclusive();
+  test_set_datawriter_ownership_strength_value();
 
   // DataReader QOS
   test_set_datareader_durability_volatile();
@@ -932,6 +1169,17 @@ int main(int, const char** )
   test_set_datareader_resource_limits_max_samples();
   test_set_datareader_resource_limits_max_instances();
   test_set_datareader_resource_limits_max_samples_per_instance();
+  test_set_datareader_ownership_kind_shared();
+  test_set_datareader_ownership_kind_exclusive();
+  test_set_datareader_time_based_filter_minimum_separation_sec();
+  test_set_datareader_time_based_filter_minimum_separation_nanosec();
+  test_set_datareader_time_based_filter_minimum_separation_both();
+  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_sec();
+  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_nanosec();
+  test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_both();
+  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_sec();
+  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec();
+  test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both();
 
   printf("%d assertions passed\n", assertions);
   return 0;

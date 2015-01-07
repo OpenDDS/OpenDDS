@@ -301,6 +301,74 @@ bool set_resource_limits_max_samples_per_instance_qos(
   return matched;
 }
 
+bool set_transport_priority_qos(
+  DDS::TransportPriorityQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "transport_priority.value")) {
+    target.value = atoi(value);
+    matched = true;
+  }
+  return matched;
+}
+
+bool set_lifespan_duration_qos(
+  DDS::LifespanQosPolicy& target, const char* name, const char* value)
+{
+  return set_duration_qos_value(
+    target.duration, "lifespan.duration", name, value);
+}
+
+bool set_ownership_kind_qos(
+  DDS::OwnershipQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "ownership.kind")) {
+    if (!strcmp(value, "SHARED")) {
+      target.kind = DDS::SHARED_OWNERSHIP_QOS;
+      matched = true;
+    } else if (!strcmp(value, "EXCLUSIVE")) {
+      target.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
+      matched = true;
+    }
+  }
+  return matched;
+}
+
+bool set_ownership_strength_value_qos(
+  DDS::OwnershipStrengthQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!strcmp(name, "ownership_strength.value")) {
+    target.value = atoi(value);
+    matched = true;
+  }
+  return matched;
+}
+
+bool set_time_based_filter_minimum_separation(
+  DDS::TimeBasedFilterQosPolicy& target, const char* name, const char* value)
+{
+  return set_duration_qos_value(
+    target.minimum_separation, "time_based_filter.minimum_separation", name, value);
+}
+
+bool set_reader_data_lifecycle_autopurge_nowriter_samples_delay(
+  DDS::ReaderDataLifecycleQosPolicy& target, const char* name, const char* value)
+{
+  return set_duration_qos_value(
+    target.autopurge_nowriter_samples_delay, 
+    "reader_data_lifecycle.autopurge_nowriter_samples_delay", name, value);
+}
+
+bool set_reader_data_lifecycle_autopurge_disposed_samples_delay(
+  DDS::ReaderDataLifecycleQosPolicy& target, const char* name, const char* value)
+{
+  return set_duration_qos_value(
+    target.autopurge_disposed_samples_delay, 
+    "reader_data_lifecycle.autopurge_disposed_samples_delay", name, value);
+}
+
 void
 log_parser_error(const char* section, const char* name, const char* value)
 {
@@ -357,15 +425,12 @@ void QosSettings::set_qos(
     set_resource_limits_max_samples_qos(target.resource_limits, name, value) ||
     set_resource_limits_max_instances_qos(target.resource_limits, name, value) ||
     set_resource_limits_max_samples_per_instance_qos(target.resource_limits, name, value) ||
-false
-    // TransportPriorityQosPolicy transport_priority;
-
-    // LifespanQosPolicy lifespan;
-    // UserDataQosPolicy user_data;
-    // OwnershipQosPolicy ownership;
-    // OwnershipStrengthQosPolicy ownership_strength;
-    // WriterDataLifecycleQosPolicy writer_data_lifecycle;
-  ;
+    set_transport_priority_qos(target.transport_priority, name, value) ||
+    set_lifespan_duration_qos(target.lifespan, name, value) ||
+    // user_data not settable - can't be retrieved
+    set_ownership_kind_qos(target.ownership, name, value) ||
+    set_ownership_strength_value_qos(target.ownership_strength, name, value);
+    // writer_data_lifecycle not settable - no interface to dispose
 
   if (!matched) {
     log_parser_error("data writer", name, value);
@@ -388,13 +453,20 @@ void QosSettings::set_qos(
     set_history_kind_qos(target.history, name, value) ||
     set_history_depth_qos(target.history, name, value) ||
     set_resource_limits_max_samples_qos(target.resource_limits, name, value) ||
-    set_resource_limits_max_instances_qos(target.resource_limits, name, value) ||
-    set_resource_limits_max_samples_per_instance_qos(target.resource_limits, name, value) ||
-false
-    // user_data not settable - can't be retrieved
-    // OwnershipQosPolicy ownership;
-    // TimeBasedFilterQosPolicy time_based_filter;
+    set_resource_limits_max_instances_qos(
+        target.resource_limits, name, value) ||
+    set_resource_limits_max_samples_per_instance_qos(
+        target.resource_limits, name, value) ||
+    set_ownership_kind_qos(target.ownership, name, value) ||
+    set_time_based_filter_minimum_separation(
+        target.time_based_filter, name, value) ||
+    set_reader_data_lifecycle_autopurge_nowriter_samples_delay(
+        target.reader_data_lifecycle, name, value) ||
+    set_reader_data_lifecycle_autopurge_disposed_samples_delay(
+        target.reader_data_lifecycle, name, value) ||
     // ReaderDataLifecycleQosPolicy reader_data_lifecycle;
+    // Read about this ??
+false
   ;
 
   if (!matched) {
