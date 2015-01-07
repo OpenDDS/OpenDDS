@@ -1,3 +1,9 @@
+Wed Jan  7 16:13:06 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Test now allows two discovered publications when two are possible.
+
 Wed Jan  7 15:14:17 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

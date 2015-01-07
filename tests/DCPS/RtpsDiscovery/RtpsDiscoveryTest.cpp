@@ -364,14 +364,13 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                           InstanceHandle_t& handle,
                           int user_data,
                           int topic_data,
-                          bool ignored_publication = false)
+                          int expected_min,
+                          int expected_max)
 {
   OpenDDS::DCPS::Discovery_rch disc =
     TheServiceParticipant->get_discovery(subscriber->get_domain_id());
   OpenDDS::DCPS::DomainParticipantImpl* subscriber_impl =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(subscriber.in());
-
-  int num_valid = 0;
 
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
   if (!ignored_publication) {
@@ -411,7 +410,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     return false;
   }
 
-  num_valid = 0;
+  int num_valid = 0;
   bool found_publisher = false;
   for (CORBA::ULong i = 0; i < data.length(); ++i) {
     if (infos[i].valid_data) {
@@ -473,22 +472,13 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     }
   }
 
-  if (ignored_publication) {
-    if (num_valid != 0) {
-      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected 0 discovered "
-                        "publications, found %d\n",
-                        num_valid), false);
-    }
+  if (num_valid < expected_min || num_valid > expected_max != 1) {
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected %d to %d discovered "
+                      "publications, found %d\n",
+                      expected_min, expected_max, num_valid), false);
   }
-  else {
-    if (num_valid != 1) {
-      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected 1 discovered "
-                        "publications, found %d\n",
-                        num_valid), false);
-    }
-    if (!found_publisher) {
-      ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P did not find expected publication\n"), false);
-    }
+  if (expected_min > 0 && !found_publisher) {
+    ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P did not find expected publication\n"), false);
   }
 
   return true;
@@ -739,7 +729,7 @@ bool run_test(DomainParticipant_var& dp_sub,
     return false;
   }
 
-  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), 1, 1)) {
     return false;
   }
 
@@ -752,6 +742,7 @@ bool run_test(DomainParticipant_var& dp_sub,
     return false;
   }
 
+  // Wait for the reader to associate with the writer.
   WriterSync::wait_match(dw);
 
   // Remove the writer and its topic, then re-create them.  The writer's
@@ -759,6 +750,7 @@ bool run_test(DomainParticipant_var& dp_sub,
   // the association between the new writer and old reader can be established.
   recreate_data_writer_and_topic(dw, dr);
 
+  // Wait for the reader to associate with the writer.
   WriterSync::wait_match(dw);
 
   // The new writer is associated with the reader, but the reader may still
@@ -766,7 +758,7 @@ bool run_test(DomainParticipant_var& dp_sub,
   wait_match(dr, 1);
 
   // Get the new instance handle as pub_ih
-  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA(), TestConfig::TOPIC_DATA(), 1, 2)) {
     return false;
   }
 
@@ -837,7 +829,7 @@ bool run_test(DomainParticipant_var& dp_sub,
   if (!read_participant_bit(bit_sub, dp_sub, pub_repo_id, TestConfig::PARTICIPANT_USER_DATA2())) {
     return false;
   }
-  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA(), 1, 1)) {
     return false;
   }
   if (!read_subscription_bit(dp_pub->get_builtin_subscriber(), dp_pub, sub_repo_id, ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA())) {
@@ -860,7 +852,7 @@ bool run_test(DomainParticipant_var& dp_sub,
 
   // Wait for propagation
   ACE_OS::sleep(3);
-  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, ig_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 1, 1)) {
     return false;
   }
   if (!read_subscription_bit(dp_pub->get_builtin_subscriber(), dp_pub, sub_repo_id, ig_ih, TestConfig::DATA_READER_USER_DATA2(), TestConfig::TOPIC_DATA2())) {
@@ -869,7 +861,7 @@ bool run_test(DomainParticipant_var& dp_sub,
 
   // Test ignore
   dp_sub->ignore_publication(pub_ih);
-  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), true)) {
+  if (!read_publication_bit(bit_sub, dp_sub, pub_repo_id, pub_ih, TestConfig::DATA_WRITER_USER_DATA2(), TestConfig::TOPIC_DATA2(), 0, 0)) {
     ACE_ERROR_RETURN((LM_ERROR,
                      ACE_TEXT("ERROR: %P Could not ignore publication\n")), false);
   }
