@@ -10,11 +10,12 @@
 #ifndef OPENDDS_DDS_DCPS_FILE_LOGGER_H
 #define OPENDDS_DDS_DCPS_FILE_LOGGER_H
 
+# ifdef OPENDDS_SAFETY_PROFILE
 
 #include "ace/Log_Msg_Backend.h"
 
+#include <stdio.h>
 
-# ifdef OPENDDS_SAFETY_PROFILE
 namespace OpenDDS { namespace DCPS {
 
 class FileLogger : public ACE_Log_Msg_Backend {
@@ -31,6 +32,6 @@ private:
 };
 
 } }
-#endif
 
+# endif
 #endif
