@@ -412,6 +412,7 @@ sub parse($$$) {
          . " -k " . $pub_liveliness_kind
          . " -r " . $pub_reliability_kind
          . " -l " . $pub_lease_time
+         . " -DCPSDebugLevel 1"
          ;
 
   return $result;
@@ -458,6 +459,7 @@ for my $hasbuiltins (@builtinscases) {
 
         # Setup the InfoRepo.
         my $info_params = "-NOBITS" unless $hasbuiltins;
+        $info_params = $info_params . " -DCPSDebugLevel 1";
         $test->setup_discovery($info_params);
 
         my $sub_parameters = parse('subscriber', $hasbuiltins, \%$i) . " -x $sub_time";

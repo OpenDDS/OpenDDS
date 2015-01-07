@@ -1,3 +1,17 @@
+Wed Jan  7 15:14:17 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added debugging
+
+        * tests/DCPS/ConfigTransports/Factory.cpp:
+
+          Changed LM_ERROR to LM_DEBUG for test output.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Set DCPSDebugLevel to 1.
+
 Tue Jan  6 20:58:01 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:

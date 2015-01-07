@@ -53,7 +53,7 @@ Factory::topic(const DDS::DomainParticipant_var& dp) const
   TEST_CHECK(DDS::RETCODE_OK == dp->get_default_topic_qos(topic_qos));
 
   CORBA::String_var tn = typsup_->get_type_name();
-  ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) Topic name: %C\n"), tn.in()));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Topic name: %C\n"), tn.in()));
   DDS::Topic_var p(dp->create_topic(topicname.c_str(),
                                     tn,
                                     TOPIC_QOS_DEFAULT,
