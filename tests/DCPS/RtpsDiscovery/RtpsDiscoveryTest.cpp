@@ -367,6 +367,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                           int expected_min,
                           int expected_max)
 {
+  bool ignored_publication = expected_max == 0;
   OpenDDS::DCPS::Discovery_rch disc =
     TheServiceParticipant->get_discovery(subscriber->get_domain_id());
   OpenDDS::DCPS::DomainParticipantImpl* subscriber_impl =
@@ -472,7 +473,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
     }
   }
 
-  if (num_valid < expected_min || num_valid > expected_max != 1) {
+  if (num_valid < expected_min || num_valid > expected_max) {
     ACE_ERROR_RETURN((LM_ERROR, "ERROR: %P expected %d to %d discovered "
                       "publications, found %d\n",
                       expected_min, expected_max, num_valid), false);
