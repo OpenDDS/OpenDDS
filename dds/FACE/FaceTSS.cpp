@@ -1,5 +1,6 @@
 #include "FACE/TS.hpp"
 #include "FaceTSS.h"
+#include "config/Parser.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Registered_Data_Types.h"
@@ -39,7 +40,17 @@ using OpenDDS::FaceTSS::Entities;
 void Initialize(const CONFIGURATION_RESOURCE configuration_file,
                 RETURN_CODE_TYPE& return_code)
 {
-  return_code = NO_ERROR;
+  OpenDDS::FaceTSS::Parser parser;
+  int status = parser.parse(configuration_file);
+  if (status != 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Initialize() ")
+               ACE_TEXT("import_config () returned %d\n"),
+               status));
+    return_code = INVALID_PARAM;
+  } else {
+    return_code = NO_ERROR;
+  }
 }
 
 void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
