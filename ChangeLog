@@ -1,3 +1,33 @@
+Thu Jan  8 23:03:23 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReactorSynch.h:
+        * dds/DCPS/transport/framework/ReactorSynch.inl:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.h:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.inl:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.h:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.inl:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          Fix a couple of reconnect-related issues that affected
+          Windows (and possibly other platforms).  First, a race
+          condition was corrected by deferring reconnect actions
+          when the receive strategy detects a disconnect until
+          the handle_close() method is called.  Second, the
+          ACE_HANDLE is no longer stored in the ReactorSynch
+          object because it changes when there is a reconnect.
+          The ReactorSynch object now fetches the handle from
+          the Send Strategy when it needs it.
+
+        * bin/dcps_tests.lst:
+
+          Re-enable the TcpReconnect test.
+
 Thu Jan  8 15:55:34 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/dissector/README:

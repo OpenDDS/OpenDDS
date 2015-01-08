@@ -137,6 +137,10 @@ public:
   /// Precondition: iov must be an iovec[] of size MAX_SEND_BLOCKS or greater.
   static int mb_to_iov(const ACE_Message_Block& msg, iovec* iov);
 
+  // Subclasses which make use of acceptors should override
+  // this method and return the peer handle.
+  virtual ACE_HANDLE get_handle();
+
 protected:
 
   TransportSendStrategy(std::size_t id,
@@ -152,10 +156,6 @@ protected:
   virtual ssize_t send_bytes(const iovec iov[], int n, int& bp);
 
   virtual ssize_t non_blocking_send(const iovec iov[], int n, int& bp);
-
-  // Subclasses which make use of acceptors should override
-  // this method and return the peer handle.
-  virtual ACE_HANDLE get_handle();
 
   virtual ssize_t send_bytes_i(const iovec iov[], int n) = 0;
 

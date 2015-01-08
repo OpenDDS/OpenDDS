@@ -30,8 +30,7 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
                           synch_resource, priority,
                           new ReactorSynchStrategy(
                                 this,
-                                task->get_reactor(),
-                                connection->peer().get_handle()))
+                                task->get_reactor()))
   , connection_(connection)
   , link_(link)
   , reactor_task_(task)
@@ -152,7 +151,7 @@ OpenDDS::DCPS::TcpSendStrategy::relink(bool do_suspend)
   DBG_ENTRY_LVL("TcpSendStrategy","relink",6);
 
   if (!this->connection_.is_nil()) {
-    this->connection_->relink(do_suspend);
+    this->connection_->relink_from_send(do_suspend);
   }
 }
 

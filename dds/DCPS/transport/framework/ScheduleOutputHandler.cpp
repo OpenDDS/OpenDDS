@@ -54,11 +54,12 @@ OpenDDS::DCPS::ScheduleOutputHandler::handle_exception(ACE_HANDLE)
   TransportSendStrategy::SendMode mode = strategy_->mode();
   bool changed = false;
 
+  ACE_HANDLE handle = strategy_->get_handle();
   // We need to recheck the mode here since it might have already changed.
   if( mode == TransportSendStrategy::MODE_DIRECT) {
     // Don't cancel a canceled handle.
     if( state_ == Enabled) {
-      reactor()->cancel_wakeup(handle_, ACE_Event_Handler::WRITE_MASK);
+      reactor()->cancel_wakeup(handle, ACE_Event_Handler::WRITE_MASK);
       state_ = Disabled;
       changed = true;
     }
@@ -68,7 +69,7 @@ OpenDDS::DCPS::ScheduleOutputHandler::handle_exception(ACE_HANDLE)
 
     // Don't schedule a scheduled handle.
     if( state_ == Disabled) {
-      reactor()->schedule_wakeup(handle_, ACE_Event_Handler::WRITE_MASK);
+      reactor()->schedule_wakeup(handle, ACE_Event_Handler::WRITE_MASK);
       state_ = Enabled;
       changed = true;
     }
@@ -80,7 +81,7 @@ OpenDDS::DCPS::ScheduleOutputHandler::handle_exception(ACE_HANDLE)
                ACE_TEXT("%C data queueing for handle %d.\n"),
                strategy_->id(),
                (changed? ((state_ == Enabled)? "starting": "canceling"): "declining to change"),
-               handle_));
+               handle));
   }
 
   // Terminate the upcall and remove from the reactor, if there (and

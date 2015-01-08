@@ -13,11 +13,10 @@ ACE_INLINE
 OpenDDS::DCPS::ReactorSynch::ReactorSynch(
   ThreadSynchResource* synch_resource,
   TransportSendStrategy* strategy,
-  ACE_Reactor* reactor,
-  ACE_HANDLE handle
+  ACE_Reactor* reactor
 )
   : ThreadSynch(synch_resource),
-    scheduleOutputHandler_( new ScheduleOutputHandler( strategy, reactor, handle))
+    scheduleOutputHandler_( new ScheduleOutputHandler( strategy, reactor))
 {
   DBG_ENTRY_LVL("ReactorSynch","ReactorSynch",6);
 
