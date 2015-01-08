@@ -12,22 +12,9 @@ namespace FACE {
 namespace TS {
 
 namespace {
+  OpenDDS::FaceTSS::config::Parser parser;
   const DDS::DomainId_t TSS_DOMAIN = 3;
   const char MessageType[] = "IDL:Messenger/MessageTypeSupport:1.0";
-
-  struct Params {
-    CONNECTION_ID_TYPE id_;
-    CONNECTION_DIRECTION_TYPE dir_;
-    MESSAGE_SIZE_TYPE max_;
-  };
-
-  const char* FakeParamNames[] = {"pub", "sub"};
-  const char* FakeParamTopics[] = {"Message", "Message"};
-  const char* FakeParamTypes[] = {MessageType, MessageType};
-  const Params FakeParams[] = {
-    {1, SOURCE, 300}, // pub
-    {2, DESTINATION, 300}, // sub
-  };
 
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
                                            const char* topic,
@@ -40,12 +27,11 @@ using OpenDDS::FaceTSS::Entities;
 void Initialize(const CONFIGURATION_RESOURCE configuration_file,
                 RETURN_CODE_TYPE& return_code)
 {
-  OpenDDS::FaceTSS::config::Parser parser;
   int status = parser.parse(configuration_file);
   if (status != 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Initialize() ")
-               ACE_TEXT("import_config () returned %d\n"),
+               ACE_TEXT("Parser::parse () returned %d\n"),
                status));
     return_code = INVALID_PARAM;
   } else {
@@ -65,18 +51,23 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     return;
   }
 
-  const std::string nameStr = connection_name;
-  const size_t numParams = sizeof FakeParamNames / sizeof FakeParamNames[0];
-  for (size_t i = 0; i < numParams; ++i) {
-    if (FakeParamNames[i] == nameStr) {
-      connection_id = FakeParams[i].id_;
-      connection_direction = FakeParams[i].dir_;
-      max_message_size = FakeParams[i].max_;
-      return_code = create_opendds_entities(connection_id, FakeParamTopics[i],
-                                            FakeParamTypes[i],
+  OpenDDS::FaceTSS::config::ConnectionSettings connection;
+  OpenDDS::FaceTSS::config::TopicSettings topic;
+
+  if (!parser.find_connection(connection_name, connection)) {
+    // Find topic
+    if (!parser.find_topic(connection.topic_name_, topic)) {
+      // Copy out parameters
+      connection_id = connection.connection_id_;
+      connection_direction = connection.direction_;
+      max_message_size = topic.max_message_size_;
+      
+      return_code = create_opendds_entities(connection_id,
+                                            connection.topic_name_,
+                                            topic.type_name_,
                                             connection_direction);
-      return;
     }
+    return;
   }
 
   return_code = INVALID_PARAM;

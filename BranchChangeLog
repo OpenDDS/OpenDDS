@@ -1,3 +1,26 @@
+Thu Jan  8 22:37:55 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/ConnectionSettings.h:
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/Parser.h:
+        * dds/FACE/config/Parser.cpp:
+        * dds/FACE/config/TopicSettings.h:
+        * dds/FACE/config/TopicSettings.cpp:
+
+          Parse topic and connection settings.
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Use the parsed connection and topic settings to configure
+          entites, instead of hard-coded values.  Still need to use
+          parsed domain ID and type name.
+
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Messenger/face_config.ini:
+
+          Supply proper config file name to Initialize().
+
 Thu Jan  8 16:50:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/FaceTSS.cpp:

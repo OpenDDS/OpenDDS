@@ -5,7 +5,7 @@
 int main()
 {
   FACE::RETURN_CODE_TYPE status;
-  FACE::TS::Initialize("fake_config.xml", status);
+  FACE::TS::Initialize("face_config.ini", status);
   if (status != FACE::NO_ERROR) return static_cast<int>(status);
 
   FACE::CONNECTION_ID_TYPE connId;

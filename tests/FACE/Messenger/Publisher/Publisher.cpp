@@ -6,7 +6,7 @@
 int main()
 {
   FACE::RETURN_CODE_TYPE status;
-  FACE::TS::Initialize("fake_config.xml", status);
+  FACE::TS::Initialize("face_config.ini", status);
   if (status != FACE::NO_ERROR) return static_cast<int>(status);
 
   FACE::CONNECTION_ID_TYPE connId;
@@ -21,7 +21,7 @@ int main()
   std::cout << "Publisher: about to send_message()" << std::endl;
   FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
   if (status != FACE::NO_ERROR) return static_cast<int>(status);
-  ACE_OS::sleep(5); // Subscriber receives message
+  ACE_OS::sleep(15); // Subscriber receives message
 
   FACE::TS::Destroy_Connection(connId, status);
   if (status != FACE::NO_ERROR) return static_cast<int>(status);
