@@ -1,3 +1,9 @@
+Thu Jan  8 22:58:53 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Missing include.
+
 Thu Jan  8 22:37:55 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/config/ConnectionSettings.h:
