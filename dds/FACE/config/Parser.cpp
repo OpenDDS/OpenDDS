@@ -1,7 +1,7 @@
 #include "Parser.h"
 #include "ace/Configuration_Import_Export.h"
 
-namespace OpenDDS { namespace FaceTSS {
+namespace OpenDDS { namespace FaceTSS { namespace config {
 
 namespace {
 
@@ -31,7 +31,7 @@ printf("parsing section\n");
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
-        printf("  name %s value %s\n", value_name.c_str(), value.c_str());
+        printf("  %s: %s\n", value_name.c_str(), value.c_str());
       }
     } else {
       status = -1;
@@ -42,7 +42,7 @@ printf("parsing section\n");
   return status;
 }
 
-} // namespace
+} // anon namespace
 
 int
 Parser::parse(const char* filename)
@@ -88,4 +88,4 @@ printf("found section %s\n", section_name.c_str());
   return status;
 }
 
-} }
+} } }

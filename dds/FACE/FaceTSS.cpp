@@ -40,7 +40,7 @@ using OpenDDS::FaceTSS::Entities;
 void Initialize(const CONFIGURATION_RESOURCE configuration_file,
                 RETURN_CODE_TYPE& return_code)
 {
-  OpenDDS::FaceTSS::Parser parser;
+  OpenDDS::FaceTSS::config::Parser parser;
   int status = parser.parse(configuration_file);
   if (status != 0) {
     ACE_ERROR((LM_ERROR,

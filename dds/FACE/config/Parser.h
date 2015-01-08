@@ -3,7 +3,7 @@
 
 #include "FACE/OpenDDS_FACE_Export.h"
 
-namespace OpenDDS { namespace FaceTSS {
+namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class OpenDDS_FACE_Export Parser {
 public:
@@ -14,6 +14,6 @@ private:
   int foo;
 };
 
-} }
+} } }
 
 #endif

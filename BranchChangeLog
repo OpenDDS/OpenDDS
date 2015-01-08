@@ -1,3 +1,11 @@
+Thu Jan  8 16:50:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/Parser.h:
+        * dds/FACE/config/Parser.cpp:
+
+          Change namespace to config.
+
 Wed Jan  7 22:51:47 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/FaceTSS.cpp:
