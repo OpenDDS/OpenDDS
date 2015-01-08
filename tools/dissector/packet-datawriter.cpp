@@ -134,7 +134,7 @@ namespace OpenDDS
     explicit_datawriter_callback
     (tvbuff_t *tvb, packet_info *pinfo,
      proto_tree *ptree, int *offset,
-     ::MessageHeader *header, gchar *operation,
+     ::MessageHeader *header, WS_CONST gchar *operation,
      gchar *idlname)
     {
       DataWriterRemote_Dissector &dissector =
@@ -157,7 +157,7 @@ namespace OpenDDS
                              proto_tree *ptree,
                              int *offset,
                              ::MessageHeader *header,
-                             gchar *operation,
+                             WS_CONST gchar *operation,
                              gchar *)
     {
       DataWriterRemote_Dissector &dissector =

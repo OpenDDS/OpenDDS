@@ -7,6 +7,7 @@
  */
 
 #include "tools/dissector/giop_base.h"
+#include "tools/dissector/ws_common.h"
 
 
 #include "dds/DCPS/GuidConverter.h"
@@ -59,7 +60,7 @@ namespace OpenDDS
 
     int
     GIOP_Base::dissect_giop (::MessageHeader *header,
-                             gchar *operation,
+                             const gchar *operation,
                              gchar *idlname)
     {
       if (idlname != 0 &&
@@ -76,7 +77,7 @@ namespace OpenDDS
     }
 
     gboolean
-    GIOP_Base::dissect_heur(::MessageHeader* header, gchar* operation)
+    GIOP_Base::dissect_heur(::MessageHeader* header, const gchar* operation)
     {
       this->is_big_endian_ = ::is_big_endian(header);
 
@@ -104,7 +105,7 @@ namespace OpenDDS
     }
 
     DecodeFN
-    GIOP_Base::find_giop_decoder(gchar* opname)
+    GIOP_Base::find_giop_decoder(const gchar* opname)
     {
       if (op_functions_.count(opname) == 0) {
         return 0;
@@ -175,7 +176,7 @@ namespace OpenDDS
     GIOP_Base::add_string (int fieldId, proto_tree *subtree)
     {
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
-      gchar *strbuf = 0;
+      WS_CONST gchar *strbuf = 0;
       int slen = ::get_CDR_string(tvb_,&strbuf, offset_, is_big_endian_, 4);
       proto_tree_add_string (tree, fieldId, tvb_, *offset_-slen, slen, strbuf);
       return strbuf;

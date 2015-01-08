@@ -141,6 +141,8 @@ const value_string sample_id_vals[] = {
   { OpenDDS::DCPS::SAMPLE_ACK,             "SAMPLE_ACK"            },
   { OpenDDS::DCPS::END_COHERENT_CHANGES,   "END_COHERENT_CHANGES"  },
   { OpenDDS::DCPS::TRANSPORT_CONTROL,      "TRANSPORT_CONTROL"     },
+  { OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE, "DISPOSE_UNREGISTER_INSTANCE" },
+  { OpenDDS::DCPS::END_HISTORIC_SAMPLES,   "END_HISTORIC_SAMPLES"  },
   { 0,                                     NULL                    }
 };
 
@@ -347,7 +349,7 @@ namespace OpenDDS
           nstime_t ns =
             {
               sample.source_timestamp_sec_,
-              sample.source_timestamp_nanosec_
+              int(sample.source_timestamp_nanosec_)
             };
           proto_tree_add_time(ltree, hf_sample_timestamp, tvb_, offset, len, &ns);
         }
@@ -363,7 +365,7 @@ namespace OpenDDS
               nstime_t ns =
                 {
                   sample.lifespan_duration_sec_,
-                  sample.lifespan_duration_nanosec_
+                  int(sample.lifespan_duration_nanosec_)
                 };
               proto_tree_add_time(ltree, hf_sample_lifespan, tvb_,
                                   offset, len, &ns);
@@ -511,27 +513,21 @@ namespace OpenDDS
         }
     }
 
-    void
+    int
     DDS_Dissector::dissect ()
     {
 
       gint offset = 0;
 
-      if (check_col(pinfo_->cinfo, COL_PROTOCOL)) {
-        col_set_str(pinfo_->cinfo, COL_PROTOCOL, "OpenDDS");
-      }
+      col_set_str(pinfo_->cinfo, COL_PROTOCOL, "OpenDDS");
 
-      if (check_col(pinfo_->cinfo, COL_INFO)) {
-        col_clear(pinfo_->cinfo, COL_INFO);
-      }
+      col_clear(pinfo_->cinfo, COL_INFO);
 
       TransportHeader trans =
         demarshal_data<TransportHeader>(tvb_, offset);
       std::string trans_str(format(trans));
 
-      if (check_col(pinfo_->cinfo, COL_INFO)) {
-        col_add_fstr(pinfo_->cinfo, COL_INFO, "DCPS %s", trans_str.c_str());
-      }
+      col_add_fstr(pinfo_->cinfo, COL_INFO, "DCPS %s", trans_str.c_str());
 
       if (tree_ != NULL) {
         proto_item* item =
@@ -570,13 +566,14 @@ namespace OpenDDS
 
           }
       }
+      return offset;
     }
 
     bool
     DDS_Dissector::dissect_heur()
     {
       gint len = sizeof(DCPS::TransportHeader::DCPS_PROTOCOL);
-      guint8* data = ::tvb_get_ephemeral_string(tvb_, 0, len);
+      guint8* data = ws_tvb_get_ephemeral_string(tvb_, 0, len);
 
       if (std::memcmp(data, DCPS::TransportHeader::DCPS_PROTOCOL, len) != 0)
         {
@@ -639,10 +636,14 @@ namespace OpenDDS
 
     // function passed to tcp pdu parser to do actual work.
     extern "C"
-    void
-    dissect_common(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+    WS_DISSECTOR_T_RETURN_TYPE
+    dissect_common(tvbuff_t* tvb, packet_info* pinfo,
+                   proto_tree* tree WS_DISSECTOR_T_EXTRA_PARAM)
     {
       DDS_Dissector::instance().setPacket(tvb, pinfo, tree);
+#ifdef WS_DISSECTOR_T_RETURN_TYPE_INT
+      return
+#endif
       DDS_Dissector::instance().dissect();
     }
 
@@ -657,12 +658,14 @@ namespace OpenDDS
                        opendds_desegment,
                        sizeof (OpenDDS::DCPS::TransportHeader),
                        get_pdu_len,
-                       dissect_common);
+                       dissect_common
+                       WS_TCP_DISSECT_PDUS_EXTRA_ARG);
     }
 
     extern "C"
     dissector_Export gboolean
-    dissect_dds_heur(tvbuff_t* tvb, packet_info* pinfo, proto_tree* tree)
+    dissect_dds_heur(tvbuff_t* tvb, packet_info* pinfo,
+                     proto_tree* tree WS_HEUR_DISSECTOR_T_EXTRA_PARAM)
     {
       DDS_Dissector::instance().setPacket(tvb, pinfo, tree);
 

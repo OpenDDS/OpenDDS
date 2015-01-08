@@ -26,6 +26,7 @@ extern "C" {
 } // extern "C"
 
 #include "tools/dissector/dissector_export.h"
+#include "tools/dissector/ws_common.h"
 
 #include "dds/DCPS/DataSampleHeader.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
@@ -68,7 +69,7 @@ namespace OpenDDS
         tvb_ = buf; pinfo_ = pi; tree_ = pt;
       }
 
-      virtual void dissect () = 0;
+      virtual int dissect () = 0;
 
       virtual bool dissect_heur () = 0;
 
@@ -81,9 +82,12 @@ namespace OpenDDS
 
     extern "C" {
       dissector_Export guint get_pdu_len (packet_info *, tvbuff_t *, int);
-      dissector_Export void dissect_common (tvbuff_t*, packet_info*, proto_tree*);
+      dissector_Export WS_DISSECTOR_T_RETURN_TYPE dissect_common (
+                             tvbuff_t*, packet_info*,
+                             proto_tree* WS_DISSECTOR_T_EXTRA_PARAM);
       dissector_Export void dissect_dds (tvbuff_t*, packet_info*, proto_tree*);
-      dissector_Export gboolean dissect_dds_heur (tvbuff_t*, packet_info*, proto_tree*);
+      dissector_Export gboolean dissect_dds_heur (tvbuff_t*, packet_info*,
+                                                  proto_tree* WS_HEUR_DISSECTOR_T_EXTRA_PARAM);
     }
 
 
@@ -94,7 +98,7 @@ namespace OpenDDS
 
       virtual ~DDS_Dissector() {}
 
-      void dissect ();
+      int dissect ();
       bool dissect_heur ();
 
       virtual void init ();

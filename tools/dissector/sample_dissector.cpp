@@ -8,6 +8,7 @@
 
 #include "tools/dissector/sample_dissector.h"
 #include "tools/dissector/sample_manager.h"
+#include "tools/dissector/ws_common.h"
 
 #include "dds/DCPS/Serializer.h"
 
@@ -33,7 +34,7 @@ namespace OpenDDS
     Wireshark_Bundle::get_remainder ()
     {
       gint remainder = tvb_length(tvb) - offset;
-      return reinterpret_cast<guint8 *>(ep_tvb_memdup(tvb, offset, remainder));
+      return reinterpret_cast<guint8 *>(ws_ep_tvb_memdup(tvb, offset, remainder));
     }
 
     Sample_Field::Sample_Field (IDLTypeID id, const std::string &label)

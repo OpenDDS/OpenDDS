@@ -1,3 +1,27 @@
+Thu Jan  8 15:55:34 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/dissector/README:
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/ws_common.h:
+
+          Update wireshark dissector to support newer versions.
+          This should now work with versions 1.6.x, 1.8.x, 1.10.x, and
+          1.99.x.  ws_common.h contains portability related macros
+          and functions.  The main changes involved signature changes
+          to function pointer, increased const correctness, removal
+          of check_col() calls, and allocator changes.
+
+          I also added some missing DataSampleHeader message type ID
+          values.
+
 Wed Jan  7 17:46:23 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:

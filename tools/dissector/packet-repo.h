@@ -25,6 +25,7 @@ extern "C" {
 #include "dds/DCPS/Definitions.h"
 #include "tools/dissector/dissector_export.h"
 #include "tools/dissector/giop_base.h"
+#include "tools/dissector/ws_common.h"
 
 #include "ace/Synch.h"
 #include "ace/Hash_Map_Manager.h"
@@ -58,11 +59,11 @@ namespace OpenDDS
     extern "C" {
       gboolean explicit_inforepo_callback (tvbuff_t *, packet_info *,
                                            proto_tree *,int *,
-                                           ::MessageHeader *, gchar *,
+                                           ::MessageHeader *, WS_CONST gchar *,
                                            gchar *);
       gboolean heuristic_inforepo_callback (tvbuff_t *, packet_info *,
                                             proto_tree *,int *,
-                                            ::MessageHeader *, gchar *,
+                                            ::MessageHeader *, WS_CONST gchar *,
                                             gchar *);
     }
 
