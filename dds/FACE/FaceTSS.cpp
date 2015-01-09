@@ -16,7 +16,7 @@ namespace {
   OpenDDS::FaceTSS::config::Parser parser;
 
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
-                                           const DDS::DomainId_t domainId,
+                                           const ::DDS::DomainId_t domainId,
                                            const char* topic,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir);
@@ -115,7 +115,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
 
 namespace {
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
-                                           const DDS::DomainId_t domainId,
+                                           const ::DDS::DomainId_t domainId,
                                            const char* topicName,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir) {

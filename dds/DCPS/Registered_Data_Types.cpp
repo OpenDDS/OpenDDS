@@ -88,3 +88,15 @@ TypeSupport_ptr Data_Types_Register::lookup(
 
 } // namespace DCPS
 } // namespace OpenDDS
+
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_LYNXOS_178
+
+template <>
+basic_string<char, string_char_traits<char>, OpenDDS::DCPS::PoolAllocator<char> >::Rep
+basic_string<char, string_char_traits<char>, OpenDDS::DCPS::PoolAllocator<char> >::nilRep = { 0, 0, 1, false };
+
+template <>
+const basic_string<char, string_char_traits<char>, OpenDDS::DCPS::PoolAllocator<char> >::size_type
+basic_string<char, string_char_traits<char>, OpenDDS::DCPS::PoolAllocator<char> >::npos;
+
+#endif

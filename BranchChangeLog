@@ -1,3 +1,10 @@
+Fri Jan  9 17:26:51 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/FACE/FaceTSS.cpp:
+
+          Fixes for LynxOS build.
+
 Fri Jan  9 17:05:49 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
