@@ -933,7 +933,7 @@ OpenDDS::DCPS::TcpConnection::notify_lost_on_backpressure_timeout()
 }
 
 /// This is called by TcpSendStrategy when a send fails
-/// and a reconnect should be initiated. This method 
+/// and a reconnect should be initiated. This method
 /// suspends any sends and kicks the reconnect thread into
 /// action.
 void
