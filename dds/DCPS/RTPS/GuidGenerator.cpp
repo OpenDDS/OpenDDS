@@ -27,7 +27,11 @@ GuidGenerator::GuidGenerator()
 
   if (pid_ == -1) {
     unsigned seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
+#if ACE_MAJOR_VERSION >= 6
+    pid_ = static_cast<pid_t>(ACE_OS::rand_r(&seed));
+#else
     pid_ = static_cast<pid_t>(ACE_OS::rand_r(seed));
+#endif
   }
 
   ACE_OS::macaddr_node_t macaddress;
