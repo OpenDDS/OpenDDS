@@ -1,3 +1,24 @@
+Fri Jan  9 21:36:18 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          Safety profile doesn't have getpid(), need to use a
+          random number for that part of the GUID.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Safety profile doesn't have sendmsg/recvmsg, work-arounds here.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Cleaned up code for configuring the ACE logger to output to a file.
+
+        * dds/DCPS/FileLogger.h:
+        * dds/DCPS/FileLogger.cpp:
+
+          Removed these files.
+
 Fri Jan  9 17:26:51 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Registered_Data_Types.cpp:

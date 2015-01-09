@@ -17,7 +17,6 @@
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "SafetyProfilePool.h"
-#include "FileLogger.h"
 #endif
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -39,7 +38,12 @@
 #include "ReplayerImpl.h"
 
 #include <vector>
+
+#ifdef OPENDDS_SAFETY_PROFILE
+#include <cstdio>
+#else
 #include <fstream>
+#endif
 
 #if !defined (__ACE_INLINE__)
 #include "Service_Participant.inl"
@@ -47,30 +51,22 @@
 
 namespace {
 
-# ifdef OPENDDS_SAFETY_PROFILE
 void set_log_file_name(const char* fname)
 {
-  ACE_LOG_MSG->clr_flags(ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
-  ACE_LOG_MSG->msg_backend(new OpenDDS::DCPS::FileLogger(fname));
-  ACE_LOG_MSG->set_flags(ACE_Log_Msg::CUSTOM);
-}
-
-# else
-void set_log_file_name(const char* fname)
-{
-  std::ofstream* output_stream = new std::ofstream();
-
-  output_stream->open (fname,
-                       ios::out | ios::app);
-
-  if (!output_stream->bad ()) {
-    ACE_LOG_MSG->msg_ostream (output_stream, 1);
+#ifdef OPENDDS_SAFETY_PROFILE
+  ACE_LOG_MSG->msg_ostream(std::fopen(fname, "a"), true);
+#else
+  std::ofstream* output_stream = new std::ofstream(fname, ios::app);
+  if (output_stream->bad()) {
+    delete output_stream;
+  } else {
+    ACE_LOG_MSG->msg_ostream(output_stream, true);
   }
-
-  ACE_LOG_MSG->clr_flags (ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
-  ACE_LOG_MSG->set_flags (ACE_Log_Msg::OSTREAM);
+#endif
+  ACE_LOG_MSG->clr_flags(ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
+  ACE_LOG_MSG->set_flags(ACE_Log_Msg::OSTREAM);
 }
-# endif
+
 
 void set_log_verbose(unsigned long verbose_logging)
 {

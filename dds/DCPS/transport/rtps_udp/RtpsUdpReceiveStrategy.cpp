@@ -44,7 +44,20 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   const ACE_SOCK_Dgram& socket =
     (fd == link_->unicast_socket().get_handle())
     ? link_->unicast_socket() : link_->multicast_socket();
+#ifdef ACE_LACKS_SENDMSG
+  char buffer[0x10000];
+  ssize_t scatter = socket.recv(buffer, sizeof buffer, remote_address);
+  char* iter = buffer;
+  for (int i = 0; scatter > 0 && i < n; ++i) {
+    const size_t chunk = std::min(iov[i].iov_len, static_cast<size_t>(scatter));
+    std::memcpy(iov[i].iov_base, iter, chunk);
+    scatter -= chunk;
+    iter += chunk;
+  }
+  const ssize_t ret = (scatter < 0) ? scatter : (iter - buffer);
+#else
   const ssize_t ret = socket.recv(iov, n, remote_address);
+#endif
   remote_address_ = remote_address;
   return ret;
 }
