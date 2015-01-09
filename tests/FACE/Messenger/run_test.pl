@@ -9,8 +9,6 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $status = 0;
-
 PerlDDS::add_lib_path("Idl");
 
 my $test = new PerlDDS::TestFramework();

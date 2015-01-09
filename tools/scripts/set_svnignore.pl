@@ -24,9 +24,11 @@ for my $dir (keys %dirs) {
   open SVN, "svn pg svn:ignore $dir|" or die "can't spawn svn pg";
   my @existing = <SVN>;
   close SVN;
+  chomp @existing;
   open SVN, "|svn ps svn:ignore -F - $dir" or die "can't spawn svn ps";
-  print SVN grep /\S/, @existing;
-  for my $file (@{$dirs{$dir}}) {
+  my @files = grep /\S/, @existing;
+  push(@files, @{$dirs{$dir}});
+  for my $file (sort {lc($a) cmp lc($b)} @files) {
     print SVN "$file\n";
   }
   close SVN;

@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "ace/Configuration_Import_Export.h"
+#include <cstring>
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
@@ -157,9 +158,9 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
         break;
       }
 
-      if (strcmp(section_type, CONNECTION_SECTION) == 0) {
+      if (std::strcmp(section_type, CONNECTION_SECTION) == 0) {
         status = parse_connection(config, subkey, section_name.c_str());
-      } else if (strcmp(section_type, TOPIC_SECTION) == 0) {
+      } else if (std::strcmp(section_type, TOPIC_SECTION) == 0) {
         status = parse_topic(config, subkey, section_name.c_str());
       } else {
         printf("unknown section %s\n", section_type);

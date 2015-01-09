@@ -7,13 +7,14 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 
 #include <string>
+#include <map>
 
 namespace FACE {
 namespace TS {
 
 namespace {
   OpenDDS::FaceTSS::config::Parser parser;
-  const DDS::DomainId_t TSS_DOMAIN = 3;
+  const ::DDS::DomainId_t TSS_DOMAIN = 3;
   const char MessageType[] = "IDL:Messenger/MessageTypeSupport:1.0";
 
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
@@ -85,17 +86,18 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
 void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
                         RETURN_CODE_TYPE& return_code)
 {
-  std::map<int, DDS::DataWriter_var>& writers = Entities::instance()->writers_;
-  std::map<int, DDS::DataReader_var>& readers = Entities::instance()->readers_;
+  Entities& entities = *Entities::instance();
+  std::map<int, ::DDS::DataWriter_var>& writers = entities.writers_;
+  std::map<int, ::DDS::DataReader_var>& readers = entities.readers_;
 
-  DDS::DomainParticipant_var dp;
+  ::DDS::DomainParticipant_var dp;
   if (writers.count(connection_id)) {
-    const DDS::Publisher_var pub = writers[connection_id]->get_publisher();
+    const ::DDS::Publisher_var pub = writers[connection_id]->get_publisher();
     writers.erase(connection_id);
     dp = pub->get_participant();
 
   } else if (readers.count(connection_id)) {
-    const DDS::Subscriber_var sub = readers[connection_id]->get_subscriber();
+    const ::DDS::Subscriber_var sub = readers[connection_id]->get_subscriber();
     readers.erase(connection_id);
     dp = sub->get_participant();
   }
@@ -106,7 +108,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
   }
 
   dp->delete_contained_entities();
-  const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  const ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(dp);
   return_code = NO_ERROR;
 }
@@ -122,10 +124,10 @@ namespace {
     TheServiceParticipant->set_BIT(false);
 #endif
 
-    const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+    const ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     if (!dpf) return INVALID_PARAM;
 
-    const DDS::DomainParticipant_var dp =
+    const ::DDS::DomainParticipant_var dp =
       dpf->create_participant(TSS_DOMAIN, PARTICIPANT_QOS_DEFAULT, 0, 0);
     if (!dp) return INVALID_PARAM;
 
@@ -138,27 +140,27 @@ namespace {
       Registered_Data_Types->register_type(dp, type, ts);
     }
 
-    const DDS::Topic_var topic =
+    const ::DDS::Topic_var topic =
       dp->create_topic(topicName, type, TOPIC_QOS_DEFAULT, 0, 0);
     if (!topic) return INVALID_PARAM;
 
     if (dir == SOURCE) {
-      const DDS::Publisher_var pub =
+      const ::DDS::Publisher_var pub =
         dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0, 0);
       if (!pub) return INVALID_PARAM;
 
-      const DDS::DataWriter_var dw =
+      const ::DDS::DataWriter_var dw =
         pub->create_datawriter(topic, DATAWRITER_QOS_USE_TOPIC_QOS, 0, 0);
       if (!dw) return INVALID_PARAM;
 
       Entities::instance()->writers_[connectionId] = dw;
 
     } else { // dir == DESTINATION
-      const DDS::Subscriber_var sub =
+      const ::DDS::Subscriber_var sub =
         dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, 0);
       if (!sub) return INVALID_PARAM;
 
-      const DDS::DataReader_var dr =
+      const ::DDS::DataReader_var dr =
         sub->create_datareader(topic, DATAREADER_QOS_USE_TOPIC_QOS, 0, 0);
       if (!dr) return INVALID_PARAM;
 

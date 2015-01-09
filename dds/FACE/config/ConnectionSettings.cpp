@@ -1,4 +1,5 @@
 #include "ConnectionSettings.h"
+#include <cstring>
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
@@ -6,16 +7,16 @@ int
 ConnectionSettings::set(const char* name, const char* value)
 {
   int status = 0;
-  if (!strcmp(name, "id")) {
+  if (!std::strcmp(name, "id")) {
     connection_id_ = atoi(value);
-  } else if (!strcmp(name, "domain")) {
+  } else if (!std::strcmp(name, "domain")) {
     domain_id_ = atoi(value);
-  } else if (!strcmp(name, "topic")) {
+  } else if (!std::strcmp(name, "topic")) {
     strncpy(topic_name_, value, sizeof(topic_name_));
-  } else if (!strcmp(name, "direction")) {
-    if (!strcmp(value, "source")) {
+  } else if (!std::strcmp(name, "direction")) {
+    if (!std::strcmp(value, "source")) {
       direction_ = FACE::SOURCE;
-    } else if (!strcmp(value, "destination")) {
+    } else if (!std::strcmp(value, "destination")) {
       direction_ = FACE::DESTINATION;
     } else {
       printf("Don't know of direction %s\n", value);

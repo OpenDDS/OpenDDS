@@ -1,5 +1,7 @@
 #include "QosSettings.h"
 
+#include <cstring>
+
 namespace OpenDDS { namespace FACE { namespace config {
 
 QosSettings::QosSettings() :
@@ -61,16 +63,16 @@ set_presentation_access_scope_kind_qos(
   const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "presentation.access_scope")) {
-    if (!strcmp(value, "INSTANCE")) {
+  if (!std::strcmp(name, "presentation.access_scope")) {
+    if (!std::strcmp(value, "INSTANCE")) {
       target.access_scope = DDS::INSTANCE_PRESENTATION_QOS;
       matched = true;
     }
-    if (!strcmp(value, "TOPIC")) {
+    if (!std::strcmp(value, "TOPIC")) {
       target.access_scope = DDS::TOPIC_PRESENTATION_QOS;
       matched = true;
     }
-    if (!strcmp(value, "GROUP")) {
+    if (!std::strcmp(value, "GROUP")) {
       target.access_scope = DDS::GROUP_PRESENTATION_QOS;
       matched = true;
     }
@@ -83,10 +85,10 @@ bool
 set_bool_qos_value(bool& target, const char* value)
 {
   bool matched = false;
-  if (!strcmp(value, "true")) {
+  if (!std::strcmp(value, "true")) {
     target = true;
     matched = true;
-  } else if (!strcmp(value, "false")) {
+  } else if (!std::strcmp(value, "false")) {
     target = false;
     matched = true;
   }
@@ -103,13 +105,13 @@ set_duration_qos_value(DDS::Duration_t& target,
   char buffer[64];
   strncpy(buffer, prefix_match, 64 - 4);
   strcat(buffer, ".sec");
-  if (!strcmp(name, buffer)) {
+  if (!std::strcmp(name, buffer)) {
     target.sec = atoi(value);
     return true;
   }
   strncpy(buffer, prefix_match, 64 - 7);
   strcat(buffer, ".nanosec");
-  if (!strcmp(name, buffer)) {
+  if (!std::strcmp(name, buffer)) {
     target.nanosec = atoi(value);
     return true;
   }
@@ -123,7 +125,7 @@ set_presentation_coherent_access_qos(
   const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "presentation.coherent_access")) {
+  if (!std::strcmp(name, "presentation.coherent_access")) {
     matched = set_bool_qos_value(target.coherent_access, value);
   }
   return matched;
@@ -136,7 +138,7 @@ set_presentation_ordered_access_qos(
   const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "presentation.ordered_access")) {
+  if (!std::strcmp(name, "presentation.ordered_access")) {
     matched = set_bool_qos_value(target.ordered_access, value);
   }
   return matched;
@@ -147,7 +149,7 @@ set_partition_name_qos(
   DDS::PartitionQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "partition.name")) {
+  if (!std::strcmp(name, "partition.name")) {
     target.name.length(target.name.length() + 1);
     target.name[target.name.length() - 1] = value;
     matched = true;
@@ -160,18 +162,18 @@ set_durability_kind_qos(
   DDS::DurabilityQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "durability.kind")) {
-    if (!strcmp(value, "VOLATILE")) {
+  if (!std::strcmp(name, "durability.kind")) {
+    if (!std::strcmp(value, "VOLATILE")) {
       target.kind = DDS::VOLATILE_DURABILITY_QOS;
       matched = true;
-    } else if (!strcmp(value, "TRANSIENT_LOCAL")) {
+    } else if (!std::strcmp(value, "TRANSIENT_LOCAL")) {
       target.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
       matched = true;
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    } else if (!strcmp(value, "TRANSIENT")) {
+    } else if (!std::strcmp(value, "TRANSIENT")) {
       target.kind = DDS::TRANSIENT_DURABILITY_QOS;
       matched = true;
-    } else if (!strcmp(value, "PERSISTENT")) {
+    } else if (!std::strcmp(value, "PERSISTENT")) {
       target.kind = DDS::PERSISTENT_DURABILITY_QOS;
       matched = true;
 #endif
@@ -206,11 +208,11 @@ bool set_reliability_kind_qos(
   DDS::ReliabilityQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "reliability.kind")) {
-    if (!strcmp(value, "BEST_EFFORT")) {
+  if (!std::strcmp(name, "reliability.kind")) {
+    if (!std::strcmp(value, "BEST_EFFORT")) {
       target.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
       matched = true;
-    } else if (!strcmp(value, "RELIABLE")) {
+    } else if (!std::strcmp(value, "RELIABLE")) {
       target.kind = DDS::RELIABLE_RELIABILITY_QOS;
       matched = true;
     }
@@ -229,11 +231,11 @@ bool set_destination_order_kind_qos(
   DDS::DestinationOrderQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "destination_order.kind")) {
-    if (!strcmp(value, "BY_RECEPTION_TIMESTAMP")) {
+  if (!std::strcmp(name, "destination_order.kind")) {
+    if (!std::strcmp(value, "BY_RECEPTION_TIMESTAMP")) {
       target.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
       matched = true;
-    } else if (!strcmp(value, "BY_SOURCE_TIMESTAMP")) {
+    } else if (!std::strcmp(value, "BY_SOURCE_TIMESTAMP")) {
       target.kind = DDS::BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS;
       matched = true;
     }
@@ -245,11 +247,11 @@ bool set_history_kind_qos(
   DDS::HistoryQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "history.kind")) {
-    if (!strcmp(value, "KEEP_ALL")) {
+  if (!std::strcmp(name, "history.kind")) {
+    if (!std::strcmp(value, "KEEP_ALL")) {
       target.kind = DDS::KEEP_ALL_HISTORY_QOS;
       matched = true;
-    } else if (!strcmp(value, "KEEP_LAST")) {
+    } else if (!std::strcmp(value, "KEEP_LAST")) {
       target.kind = DDS::KEEP_LAST_HISTORY_QOS;
       matched = true;
     }
@@ -261,7 +263,7 @@ bool set_history_depth_qos(
   DDS::HistoryQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "history.depth")) {
+  if (!std::strcmp(name, "history.depth")) {
     target.depth = atoi(value);
     matched = true;
   }
@@ -272,7 +274,7 @@ bool set_resource_limits_max_samples_qos(
   DDS::ResourceLimitsQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "resource_limits.max_samples")) {
+  if (!std::strcmp(name, "resource_limits.max_samples")) {
     target.max_samples = atoi(value);
     matched = true;
   }
@@ -283,7 +285,7 @@ bool set_resource_limits_max_instances_qos(
   DDS::ResourceLimitsQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "resource_limits.max_instances")) {
+  if (!std::strcmp(name, "resource_limits.max_instances")) {
     target.max_instances = atoi(value);
     matched = true;
   }
@@ -294,7 +296,7 @@ bool set_resource_limits_max_samples_per_instance_qos(
   DDS::ResourceLimitsQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "resource_limits.max_samples_per_instance")) {
+  if (!std::strcmp(name, "resource_limits.max_samples_per_instance")) {
     target.max_samples_per_instance = atoi(value);
     matched = true;
   }
@@ -305,7 +307,7 @@ bool set_transport_priority_qos(
   DDS::TransportPriorityQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "transport_priority.value")) {
+  if (!std::strcmp(name, "transport_priority.value")) {
     target.value = atoi(value);
     matched = true;
   }
@@ -323,11 +325,11 @@ bool set_ownership_kind_qos(
   DDS::OwnershipQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "ownership.kind")) {
-    if (!strcmp(value, "SHARED")) {
+  if (!std::strcmp(name, "ownership.kind")) {
+    if (!std::strcmp(value, "SHARED")) {
       target.kind = DDS::SHARED_OWNERSHIP_QOS;
       matched = true;
-    } else if (!strcmp(value, "EXCLUSIVE")) {
+    } else if (!std::strcmp(value, "EXCLUSIVE")) {
       target.kind = DDS::EXCLUSIVE_OWNERSHIP_QOS;
       matched = true;
     }
@@ -339,7 +341,7 @@ bool set_ownership_strength_value_qos(
   DDS::OwnershipStrengthQosPolicy& target, const char* name, const char* value)
 {
   bool matched = false;
-  if (!strcmp(name, "ownership_strength.value")) {
+  if (!std::strcmp(name, "ownership_strength.value")) {
     target.value = atoi(value);
     matched = true;
   }

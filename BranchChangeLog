@@ -1,3 +1,24 @@
+Fri Jan  9 15:27:06 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Updates to build on LynxOS.
+
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/Parser.cpp:
+        * dds/FACE/config/QosSettings.cpp:
+        * dds/FACE/config/TopicSettings.cpp:
+
+          Build fixes for inline=0.
+
+        * tests/FACE/Messenger/run_test.pl:
+
+          Removed unused variable.
+
+        * tools/scripts/set_svnignore.pl:
+
+          Keep the svn:ignore list sorted.
+
 Thu Jan  8 22:58:53 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/MultiTopicDataReader_T.cpp:
