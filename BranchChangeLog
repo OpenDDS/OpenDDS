@@ -1,3 +1,14 @@
+Fri Jan  9 16:27:34 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/CORBA/tao/Inlines.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * tests/DCPS/UnitTests/ut_Reassembly.cpp:
+        * tests/DCPS/UnitTests/ut_RepoIdSequence.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Updates to compile on Linux inline=0 safety-enabled.
+
 Fri Jan  9 16:16:41 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/FaceTSS.cpp:

@@ -6,6 +6,8 @@
 #include "dds/DCPS/transport/framework/TransportReassembly.h"
 #include "dds/DCPS/RepoIdGenerator.h"
 
+#include <string.h>
+
 using namespace OpenDDS::DCPS;
 
 namespace {

@@ -1,5 +1,7 @@
 #include "dds/FACE/config/QosSettings.h"
 
+#include <string.h>
+
 unsigned int assertions = 0;
 
 #define TEST_CHECK(COND) \
