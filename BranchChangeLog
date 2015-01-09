@@ -1,3 +1,18 @@
+Fri Jan  9 22:47:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LatencyBudget/run_test.pl:
+        * tests/DCPS/Lifespan/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
+        * tests/DCPS/LatencyBudget/pub.ini:
+        * tests/DCPS/LatencyBudget/sub.ini:
+        * tests/DCPS/Lifespan/pub.ini:
+        * tests/DCPS/Lifespan/sub.ini:
+
+          Removed these files.
+
 Fri Jan  9 21:53:23 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/GuidGenerator.cpp:
