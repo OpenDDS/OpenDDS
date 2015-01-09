@@ -14,10 +14,9 @@ namespace TS {
 
 namespace {
   OpenDDS::FaceTSS::config::Parser parser;
-  const ::DDS::DomainId_t TSS_DOMAIN = 3;
-  const char MessageType[] = "IDL:Messenger/MessageTypeSupport:1.0";
 
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
+                                           const DDS::DomainId_t domainId,
                                            const char* topic,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir);
@@ -64,6 +63,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
       max_message_size = topic.max_message_size_;
       
       return_code = create_opendds_entities(connection_id,
+                                            connection.domain_id_,
                                             connection.topic_name_,
                                             topic.type_name_,
                                             connection_direction);
@@ -115,6 +115,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
 
 namespace {
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
+                                           const DDS::DomainId_t domainId,
                                            const char* topicName,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir) {
@@ -128,7 +129,7 @@ namespace {
     if (!dpf) return INVALID_PARAM;
 
     const ::DDS::DomainParticipant_var dp =
-      dpf->create_participant(TSS_DOMAIN, PARTICIPANT_QOS_DEFAULT, 0, 0);
+      dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
     if (!dp) return INVALID_PARAM;
 
     using OpenDDS::DCPS::Data_Types_Register;
