@@ -1,3 +1,10 @@
+Fri Jan  9 17:05:49 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
+
+          Added MPC base project for safety profile settings.
+
 Fri Jan  9 16:27:34 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/CORBA/tao/Inlines.cpp:

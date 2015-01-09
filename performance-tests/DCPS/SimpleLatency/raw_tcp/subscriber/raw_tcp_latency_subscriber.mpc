@@ -1,4 +1,4 @@
-project (DCPS_Perf*) : aceexe {
+project(DCPS_Perf*): aceexe, dds_macros {
   exename = raw_tcp_subscriber
   exeout  = ..
   requires      += no_opendds_safety_profile
