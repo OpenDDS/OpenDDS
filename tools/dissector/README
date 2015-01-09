@@ -76,7 +76,7 @@ according to the Wireshark Developer's Guide (see above).
 
 6. Run Wireshark
 
-   You may verify the plugin is installed correctly by looking at the 
+   You may verify the plugin is installed correctly by looking at the
    Supported Protocols list.  Depending on the wireshark version, this
    can usually be found somewhere under the Help or Internals menus.
    The OpenDDS_Dissector library we created above should appear in the
