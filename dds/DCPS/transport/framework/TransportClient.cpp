@@ -302,8 +302,6 @@ TransportClient::associate(const AssociationData& data, bool active)
 
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
-      std::string transport_type_loop = impls_[i].in()->transport_type();
-
       pend.impls_.push_back(impls_[i]);
       const std::string type = impls_[i]->transport_type();
 
@@ -314,6 +312,10 @@ TransportClient::associate(const AssociationData& data, bool active)
             data.publication_transport_priority_,
             data.remote_reliable_, data.remote_durable_};
 
+          // JRW on 2015-01-12
+          // When called as passive_connection -> use_datalink -> use_datalink_i, the caller
+          // typically releases their lock before calling.  Once this is verified, then this
+          // reverse lock can be removed.
           TransportImpl::AcceptConnectResult res;
           {
             //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection

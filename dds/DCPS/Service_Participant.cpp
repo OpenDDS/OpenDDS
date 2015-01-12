@@ -218,45 +218,30 @@ Service_Participant::timer() const
 void
 Service_Participant::shutdown()
 {
-  if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
-
   try {
     TransportRegistry::instance()->release();
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
 
     domainRepoMap_.clear();
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
     discoveryMap_.clear();
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
 
     if (0 != reactor_) {
-      if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
       reactor_->end_reactor_event_loop();
-      if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
       reactor_task_.wait();
-      if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
     }
 
     dp_factory_ = DDS::DomainParticipantFactory::_nil();
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     transient_data_cache_.reset();
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
     persistent_data_cache_.reset();
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
 #endif
 
     typedef std::map<std::string, Discovery::Config*>::iterator iter;
     for (iter i = discovery_types_.begin(); i != discovery_types_.end(); ++i) {
-      if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
       delete i->second;
     }
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
     discovery_types_.clear();
-    if (DCPS_debug_level) { ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) %s:%d\n"), __FILE__, __LINE__)); }
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: Service_Participant::shutdown");
   }

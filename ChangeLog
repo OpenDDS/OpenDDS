@@ -1,3 +1,23 @@
+Mon Jan 12 21:17:53 UTC 2015  Justin Wilson  <wilson_j@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Removed debugging statements.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Removed unused variable.  Added comment about reverse lock.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed bug where reliable multicast would associate with
+          unreliable multicast (and vice versa) by checking that remote has
+          the same reliability setting.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Removed debugging flag.
+
 Mon Jan 12 17:53:21 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
