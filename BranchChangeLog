@@ -1,3 +1,9 @@
+Mon Jan 12 20:40:50 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Messenger/face_config.ini:
+
+          DCPSDebugLevel 10
+
 Mon Jan 12 17:41:47 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
