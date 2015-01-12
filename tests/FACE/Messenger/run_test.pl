@@ -13,7 +13,6 @@ PerlDDS::add_lib_path("Idl");
 
 my $test = new PerlDDS::TestFramework();
 
-$test->{discovery} = "rtps";
 $test->setup_discovery();
 
 $test->process('Subscriber', 'Subscriber/subscriber');

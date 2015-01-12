@@ -1,10 +1,16 @@
+Mon Jan 12 17:32:13 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Messenger/run_test.pl:
+ 
+          Undo last change.
+
 Mon Jan 12 16:49:18 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
         * dds/DCPS/Service_Participant.cpp:
         * dds/FACE/config/Parser.cpp:
 
-          Use ini file provided to TS::Initialize() as config for 
+          Use ini file provided to TS::Initialize() as config for
           Service Participant.
 
         * tests/FACE/Messenger/run_test.pl:
