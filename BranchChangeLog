@@ -1,3 +1,16 @@
+Mon Jan 12 16:49:18 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/FACE/config/Parser.cpp:
+
+          Use ini file provided to TS::Initialize() as config for 
+          Service Participant.
+
+        * tests/FACE/Messenger/run_test.pl:
+
+          Don't start info repo.
+
 Fri Jan  9 22:47:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

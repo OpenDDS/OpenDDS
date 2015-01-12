@@ -1250,9 +1250,18 @@ Service_Participant::load_configuration()
                       ACE_TEXT("import_config () returned %d\n"),
                       status),
                      -1);
+  } else {
+    status = this->load_configuration(this->cf_);
   }
+  return status;
+}
 
-  status = this->load_common_configuration(this->cf_);
+int
+Service_Participant::load_configuration(
+  ACE_Configuration_Heap& config)
+{
+  int status = 0;
+  status = this->load_common_configuration(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1262,7 +1271,7 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  status = this->load_discovery_configuration(this->cf_, RTPS_SECTION_NAME);
+  status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1272,7 +1281,7 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  status = this->load_discovery_configuration(this->cf_, REPO_SECTION_NAME);
+  status = this->load_discovery_configuration(config, REPO_SECTION_NAME);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1283,7 +1292,7 @@ Service_Participant::load_configuration()
   }
 
   status = TransportRegistry::instance()->load_transport_configuration(
-             ACE_TEXT_ALWAYS_CHAR(config_fname.c_str()), this->cf_);
+             ACE_TEXT_ALWAYS_CHAR(config_fname.c_str()), config);
   if (this->global_transport_config_ != ACE_TEXT("")) {
     TransportConfig_rch config = TransportRegistry::instance()->get_config(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
@@ -1309,7 +1318,7 @@ Service_Participant::load_configuration()
   // sections to allow error reporting on bad discovery config names.
   // Also loaded after the transport configuration so that
   // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
-  status = this->load_domain_configuration(this->cf_);
+  status = this->load_domain_configuration(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,

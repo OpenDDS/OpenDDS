@@ -29,6 +29,8 @@ Parser::parse(const char* filename)
   } else {
     status = parse_sections(config, TOPIC_SECTION) ||
              parse_sections(config, CONNECTION_SECTION);
+
+    status = TheServiceParticipant->load_configuration(config);
   }
   return status;
 }

@@ -363,6 +363,15 @@ public:
  void* pool_malloc(std::size_t bytes);
  void pool_free(void* ptr);
 
+  /**
+   * Import the configuration file to the ACE_Configuration_Heap
+   * object and load common section configuration to the
+   * Service_Participant singleton and load the factory and
+   * transport section configuration to the TransportRegistry
+   * singleton.
+   */
+  int load_configuration(ACE_Configuration_Heap& cf);
+
 private:
 
   /// Initialize default qos.
