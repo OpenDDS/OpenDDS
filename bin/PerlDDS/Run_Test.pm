@@ -528,7 +528,7 @@ sub process {
 
 sub _getpid {
     my $process = shift;
-    if ($^O eq 'Win32') {
+    if ($^O eq 'MSWin32') {
         return $process->{PROCESS}->GetProcessID();
     }
     else {
