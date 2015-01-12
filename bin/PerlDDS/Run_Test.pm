@@ -754,10 +754,11 @@ sub stop_discovery {
   }
 
   my $term_status =
-    PerlDDS::terminate_wait_kill($self->{info_repo}->{process},
-                                 $timed_wait,
-                                 $name,
-                                 $self->{test_verbose});
+      $self->{info_repo}->{process} ?
+      PerlDDS::terminate_wait_kill($self->{info_repo}->{process},
+                                   $timed_wait,
+                                   $name,
+                                   $self->{test_verbose}) : 0;
   $self->{status} |= $term_status;
 
   $self->_info("TestFramework::stop_discovery unlink $self->{info_repo}->{file}\n");
