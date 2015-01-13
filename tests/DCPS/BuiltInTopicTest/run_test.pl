@@ -24,10 +24,13 @@ $test->{add_transport_config} = 0;
 $test->report_unused_flags(1);
 $test->setup_discovery();
 
-$test->process("subscriber", "subscriber", " -DCPSConfigFile tcp.ini");
-$test->process("publisher", "publisher", " -DCPSConfigFile tcp.ini");
-$test->process("monitor1", "monitor", " -l 7");
-$test->process("monitor2", "monitor", " -u");
+my ($rtps_cfg, $rtps_mon) = ($test->{info_repo}->{state} eq 'none') ?
+    ('-DCPSConfigFile rtps_disc.ini', '-t 0') : ('', '');
+
+$test->process("subscriber", "subscriber", $rtps_cfg);
+$test->process("publisher", "publisher", $rtps_cfg);
+$test->process("monitor1", "monitor", "-l 7 $rtps_mon $rtps_cfg");
+$test->process("monitor2", "monitor", "-u $rtps_mon $rtps_cfg");
 my $synch_file = "monitor1_done";
 
 unlink $synch_file;

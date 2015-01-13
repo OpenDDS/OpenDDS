@@ -41,7 +41,7 @@ my $default_tport = ($test->{'flags'}->{'default_tcp'} ||
     $test->{'flags'}->{'default_udp'} ? '-t udp' :
     $test->{'flags'}->{'default_multicast'} ? '-t multicast' : '';
 
-$test->{'transport'} = 'tcp'
+$test->{'transport'} = ($PerlDDS::SafetyProfile ? 'rtps_disc' : 'tcp')
     if $default_tport eq '' && $test->{'transport'} eq '';
 
 my $stack_based = $test->{'flags'}->{'stack'} ? 1 : 0;

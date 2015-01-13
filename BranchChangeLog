@@ -1,3 +1,16 @@
+Tue Jan 13 17:46:19 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/rtps_disc.ini:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/ZeroCopyDataReaderListener/run_test.pl:
+
+          Fixed tests to work with saftey profile.
+
+        * tests/DCPS/BuiltInTopicTest/tcp.ini:
+
+          Removed this file.
+
 Mon Jan 12 20:40:50 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/FACE/Messenger/face_config.ini:

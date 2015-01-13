@@ -18,6 +18,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Discovery.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/RTPS/RtpsDiscovery.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 
@@ -149,8 +150,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1 ;
       }
 
+      OpenDDS::DCPS::Discovery_rch disc =
+        TheServiceParticipant->get_discovery(participant->get_domain_id());
+
       OpenDDS::DCPS::DomainParticipantImpl* part_svt
-        = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in ());
+        = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+
+      const bool ignoredEntitiesAreInBIT =
+        !dynamic_cast<OpenDDS::RTPS::RtpsDiscovery*>(disc.in());
+      const bool ownEntitiesAreInBIT = ignoredEntitiesAreInBIT;
 
       // give time for BIT datareader/datawriter fully association.
       ACE_OS::sleep (2);
@@ -229,8 +237,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           ::DDS::ParticipantBuiltinTopicData data;
           participant->get_discovered_participant_data(data, handles[i]);
 
-          OpenDDS::DCPS::Discovery_rch disc =
-            TheServiceParticipant->get_discovery(participant->get_domain_id());
           OpenDDS::DCPS::RepoId id =
             disc->bit_key_to_repo_id(part_svt,
                                      OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
@@ -258,6 +264,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           return 1;
         }
 
+        if (!ignoredEntitiesAreInBIT) --num_parts;
+
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover participants test PASSED.\n"));
       }
 
@@ -268,7 +276,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                                  10,
                                                  ::DDS::ANY_SAMPLE_STATE,
                                                  ::DDS::ANY_VIEW_STATE,
-                                                 ::DDS::ANY_INSTANCE_STATE);
+                                                 ::DDS::ALIVE_INSTANCE_STATE);
 
       if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
         {
@@ -279,7 +287,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       CORBA::ULong len = partdata.length ();
 
-      if (len != num_parts)
+      if (len != num_parts - !ownEntitiesAreInBIT)
       {
         ACE_ERROR_RETURN ((LM_ERROR,
           "(%P|%t) monitor:  read %d BIT part data, expected %d parts.\n", len, num_parts),
@@ -289,6 +297,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       CORBA::ULong cur_dps_with_user_data = 0;
       CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_PART_USER_DATA));
+
       for (CORBA::ULong i = 0; i < len; ++i)
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Participant: key = %d, %x, %x \n",
@@ -305,7 +314,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
       }
 
-      if (cur_dps_with_user_data == dps_with_user_data)
+      if (cur_dps_with_user_data == dps_with_user_data - !ignoredEntitiesAreInBIT)
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DomainParticipant changeable qos test PASSED.\n"));
       }
@@ -318,8 +327,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       {
         ::DDS::InstanceHandleSeq handles;
-        if (participant->get_discovered_topics (handles) != ::DDS::RETCODE_OK
-          || handles.length () == 0)
+        if (participant->get_discovered_topics (handles) != ::DDS::RETCODE_OK)
         {
           ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topics test failed.\n"));
           return 1;
@@ -353,15 +361,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           }
         }
 
-        if (participant->ignore_topic (handles[0]) != ::DDS::RETCODE_OK)
+        if (len && participant->ignore_topic(handles[0]) != ::DDS::RETCODE_OK)
         {
           ACE_ERROR((LM_ERROR, "(%P|%t) monitor: ignore_topic failed.\n"));
           return 1;
         }
 
         handles.length (0);
-        if (participant->get_discovered_topics (handles) != ::DDS::RETCODE_OK
-          || handles.length () != num_parts - 2)
+        if (len &&
+            (participant->get_discovered_topics(handles) != ::DDS::RETCODE_OK
+             || handles.length() != num_topics - 2))
         {
           ACE_ERROR((LM_ERROR, ACE_TEXT ("(%P|%t) monitor: get_discovered_topics ")
                                ACE_TEXT ("skip ignored topic test failed.\n")));
@@ -449,7 +458,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         10,
         ::DDS::ANY_SAMPLE_STATE,
         ::DDS::ANY_VIEW_STATE,
-        ::DDS::ANY_INSTANCE_STATE);
+        ::DDS::ALIVE_INSTANCE_STATE);
 
       if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
         {
@@ -459,12 +468,20 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
       len = pubdata.length ();
-
+      bool pubWasIgnored = false;
       if (len != num_pubs)
       {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  read %d BIT pub data, expected %d pubs.\n", len, num_pubs),
-          1);
+        if (!ignoredEntitiesAreInBIT && len == num_pubs - 1) 
+        {
+          pubWasIgnored = true;
+          ACE_DEBUG((LM_INFO, "(%P|%t) monitor: pub assumed to be ignored\n"));
+        }
+        else
+        {
+          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor:  read %d BIT pub data,"
+                            "expected %d pubs.\n", len, num_pubs),
+                           1);
+        }
       }
 
       CORBA::ULong num_dws_with_data = 0;
@@ -529,7 +546,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         10,
         ::DDS::ANY_SAMPLE_STATE,
         ::DDS::ANY_VIEW_STATE,
-        ::DDS::ANY_INSTANCE_STATE);
+        ::DDS::ALIVE_INSTANCE_STATE);
 
       if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
         {
@@ -542,9 +559,17 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (len != num_subs)
       {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  read %d BIT sub data, expected %d subs.\n", len, num_subs),
-          1);
+        if (!pubWasIgnored && !ignoredEntitiesAreInBIT && len == num_subs - 1) 
+        {
+          ACE_DEBUG((LM_INFO, "(%P|%t) monitor: sub assumed to be ignored\n"));
+        }
+        else
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "(%P|%t) monitor:  read %d BIT sub data, "
+                            "expected %d subs.\n", len, num_subs),
+                           1);
+        }
       }
 
       CORBA::ULong num_drs_with_data = 0;
@@ -589,7 +614,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       }
 
-      if (num_drs_with_data == num_subs)
+      if (num_drs_with_data == len)
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader changeable qos test PASSED. \n"));
       }
