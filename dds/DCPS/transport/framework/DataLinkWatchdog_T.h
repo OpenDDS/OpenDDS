@@ -17,6 +17,7 @@
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_time.h"
 #include "ace/Reverse_Lock_T.h"
+#include <queue>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -24,43 +25,39 @@ namespace DCPS {
 template<typename ACE_LOCK>
 class DataLinkWatchdog : public ACE_Event_Handler {
 public:
+  typedef DataLinkWatchdog<ACE_LOCK> ThisType;
+
   virtual ~DataLinkWatchdog() {
-    cancel();
+    ACE_GUARD(ACE_LOCK, guard, this->lock_);
+    cancel_i();
+    while (!command_queue_.empty ()) {
+      delete command_queue_.front ();
+      command_queue_.pop ();
+    }
   }
 
   bool schedule(ACE_Reactor* reactor, const void* arg = 0) {
-    ACE_GUARD_RETURN(ACE_LOCK,
-                     guard,
-                     this->lock_,
-                     false);
-
-    return schedule_i(reactor, arg, false);
+    ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, false);
+    command_queue_.push (new ScheduleCommand (reactor, arg, false));
+    reactor->notify (this);
+    return true;
   }
 
   bool schedule_now(ACE_Reactor* reactor, const void* arg = 0) {
-    ACE_GUARD_RETURN(ACE_LOCK,
-                     guard,
-                     this->lock_,
-                     false);
-
-    return schedule_i(reactor, arg, true);
+    ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, false);
+    command_queue_.push (new ScheduleCommand (reactor, arg, true));
+    reactor->notify (this);
+    return true;
   }
 
   void cancel() {
-    ACE_GUARD(ACE_LOCK,
-              guard,
-              this->lock_);
-
-    if (this->timer_id_ == -1) return;
-
-    ACE_Reactor* reactor = this->reactor_;
-    this->timer_id_ = -1;
-    this->reactor_ = 0;
-    this->cancelled_ = true;
-
-    {
-      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
-      reactor->cancel_timer(this);
+    ACE_GUARD(ACE_LOCK, guard, this->lock_);
+    if (reactor_) {
+      command_queue_.push (new CancelCommand ());
+      reactor_->notify (this);
+    }
+    else {
+      cancel_i();
     }
   }
 
@@ -71,20 +68,39 @@ public:
       timeout += this->epoch_;
       if (now > timeout) {
         on_timeout(arg);
-        cancel();
+        {
+          ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, 0);
+          cancel_i();
+        }
         return 0;
       }
     }
 
     on_interval(arg);
 
-    if (!schedule(reactor(), arg)) {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("DataLinkWatchdog::handle_timeout: ")
-                 ACE_TEXT("unable to reschedule watchdog timer!\n")));
+    {
+      ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, 0);
+      if (!schedule_i(reactor(), arg, false)) {
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("DataLinkWatchdog::handle_timeout: ")
+                   ACE_TEXT("unable to reschedule watchdog timer!\n")));
+      }
     }
 
+    return 0;
+  }
+
+  int handle_exception(ACE_HANDLE /*fd*/) {
+    ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, 0);
+
+    if (!command_queue_.empty ()) {
+      Command* command = command_queue_.front ();
+      command_queue_.pop ();
+      command->execute (this);
+      delete command;
+      reactor()->notify (this);
+    }
     return 0;
   }
 
@@ -103,6 +119,37 @@ protected:
   virtual void on_timeout(const void* /*arg*/) {}
 
 private:
+  class Command {
+  public:
+    virtual ~Command() { }
+    virtual void execute(ThisType* watchdog) = 0;
+  };
+
+  class ScheduleCommand : public Command {
+  public:
+    ScheduleCommand (ACE_Reactor* reactor, const void* arg, bool nodelay) :
+    reactor_ (reactor),
+      arg_ (arg),
+      nodelay_ (nodelay)
+      { }
+
+    virtual void execute(ThisType* watchdog) {
+      watchdog->schedule_i(reactor_, arg_, nodelay_);
+    }
+
+  private:
+    ACE_Reactor* reactor_;
+    const void* arg_;
+    bool nodelay_;
+  };
+
+  class CancelCommand : public Command {
+  public:
+    virtual void execute(ThisType* watchdog) {
+      watchdog->cancel_i();
+    }
+  };
+
   ACE_LOCK lock_;
   typedef ACE_Reverse_Lock<ACE_LOCK> Reverse_Lock_t;
   Reverse_Lock_t reverse_lock_;
@@ -112,6 +159,8 @@ private:
 
   ACE_Time_Value epoch_;
   bool cancelled_;
+
+  std::queue<Command*> command_queue_;
 
   bool schedule_i(ACE_Reactor* reactor, const void* arg, bool nodelay) {
     if (this->cancelled_) return true;
@@ -150,6 +199,20 @@ private:
     }
 
     return this->timer_id_ != -1;
+  }
+
+  void cancel_i() {
+    if (this->timer_id_ == -1) return;
+
+    ACE_Reactor* reactor = this->reactor_;
+    this->timer_id_ = -1;
+    this->reactor_ = 0;
+    this->cancelled_ = true;
+
+    {
+      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
+      reactor->cancel_timer(this);
+    }
   }
 };
 

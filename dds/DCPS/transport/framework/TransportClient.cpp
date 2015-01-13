@@ -312,25 +312,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             data.publication_transport_priority_,
             data.remote_reliable_, data.remote_durable_};
 
-          // JRW on 2015-01-12
-          // When called as passive_connection -> use_datalink -> use_datalink_i, the caller
-          // typically releases their lock before calling.  Once this is verified, then this
-          // reverse lock can be removed.
-          TransportImpl::AcceptConnectResult res;
-          {
-            //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
-            ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-            res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
-          }
-
-          //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
-          PendingMap::iterator iter_after_accept = pending_.find(data.remote_id_);
-
-          if (iter_after_accept == pending_.end()) {
-            //If Pending Assoc is no longer in pending_ then use_datalink_i has been called from an
-            //active side connection and completed, thus pend was removed from pending_.  Can return true.
-            return true;
-          }
+          TransportImpl::AcceptConnectResult res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
 
           if (res.success_ && !res.link_.is_nil()) {
 

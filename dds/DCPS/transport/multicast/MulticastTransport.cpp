@@ -201,7 +201,6 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
     return AcceptConnectResult();
   }
 
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) accept_datalink called this=%@\n", this));
   const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
 
   GuardThreadType guard_links(this->links_lock_);
