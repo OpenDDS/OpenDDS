@@ -29,32 +29,30 @@ public:
 
   virtual ~DataLinkWatchdog() {
     ACE_GUARD(ACE_LOCK, guard, this->lock_);
+    dump_command_queue();
     cancel_i();
-    while (!command_queue_.empty ()) {
-      delete command_queue_.front ();
-      command_queue_.pop ();
-    }
   }
 
   bool schedule(ACE_Reactor* reactor, const void* arg = 0) {
     ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, false);
-    command_queue_.push (new ScheduleCommand (reactor, arg, false));
-    reactor->notify (this);
+    command_queue_.push(new ScheduleCommand(reactor, arg, false));
+    reactor->notify(this);
     return true;
   }
 
   bool schedule_now(ACE_Reactor* reactor, const void* arg = 0) {
     ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, false);
-    command_queue_.push (new ScheduleCommand (reactor, arg, true));
-    reactor->notify (this);
+    command_queue_.push(new ScheduleCommand (reactor, arg, true));
+    reactor->notify(this);
     return true;
   }
 
   void cancel() {
     ACE_GUARD(ACE_LOCK, guard, this->lock_);
     if (reactor_) {
-      command_queue_.push (new CancelCommand ());
-      reactor_->notify (this);
+      dump_command_queue();
+      command_queue_.push(new CancelCommand ());
+      reactor_->notify(this);
     }
     else {
       cancel_i();
@@ -94,12 +92,11 @@ public:
   int handle_exception(ACE_HANDLE /*fd*/) {
     ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, 0);
 
-    if (!command_queue_.empty ()) {
-      Command* command = command_queue_.front ();
-      command_queue_.pop ();
-      command->execute (this);
+    while (!command_queue_.empty()) {
+      Command* command = command_queue_.front();
+      command_queue_.pop();
+      command->execute(this);
       delete command;
-      reactor()->notify (this);
     }
     return 0;
   }
@@ -212,6 +209,13 @@ private:
     {
       ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
       reactor->cancel_timer(this);
+    }
+  }
+
+  void dump_command_queue() {
+    while (!command_queue_.empty ()) {
+      delete command_queue_.front ();
+      command_queue_.pop ();
     }
   }
 };
