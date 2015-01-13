@@ -102,7 +102,7 @@ tests/DCPS/Reconnect/run_test.pl restart_sub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reconnect/run_test.pl restart_pub: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN
+tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN
 # Still failing
 # tests/DCPS/TcpReconnect/run_test.pl: !DCPS_MIN
@@ -224,8 +224,8 @@ tests/DCPS/MetaStruct/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_SUBSCRIPTION
 
 tests/DCPS/Federation/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/FileSystemStorage/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
-tests/DCPS/Priority/run_test.pl: !DCPS_MIN !QNX
-tests/DCPS/Priority/run_test.pl --instances: !DCPS_MIN !QNX
+tests/DCPS/Priority/run_test.pl: !DCPS_MIN !QNX !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Priority/run_test.pl --instances: !DCPS_MIN !QNX !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LatencyBudget/run_test.pl: !DCPS_MIN
 tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN
 tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN

@@ -13,7 +13,8 @@ use strict;
 my $original_d0 = $ENV{'OPENDDS_RTPS_DEFAULT_D0'} + 0;
 
 my $result = 0;
-my @configs = qw/rtps_disc.ini rtps_disc_tcp.ini rtps_disc_group.ini/;
+my @configs = $PerlDDS::SafetyProfile ? qw/rtps_disc.ini rtps_disc_group.ini/ :
+    qw/rtps_disc.ini rtps_disc_tcp.ini rtps_disc_group.ini/;
 
 for my $cfg (@configs) {
 
@@ -28,6 +29,8 @@ for my $cfg (@configs) {
     $result += $res;
   }
 }
+
+exit $result if $PerlDDS::SafetyProfile;
 
 sub run2proc {
   my $arg4proc2 = shift;

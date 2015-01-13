@@ -526,7 +526,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       }
 
-      if (num_dws_with_data == num_pubs)
+      if (num_dws_with_data == len)
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter changeable qos test PASSED. \n"));
       }
