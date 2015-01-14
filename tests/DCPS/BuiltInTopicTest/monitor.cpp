@@ -370,10 +370,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         handles.length (0);
         if (len &&
             (participant->get_discovered_topics(handles) != ::DDS::RETCODE_OK
-             || handles.length() != num_topics - 2))
+             || handles.length() != num_topics - 1))
         {
-          ACE_ERROR((LM_ERROR, ACE_TEXT ("(%P|%t) monitor: get_discovered_topics ")
-                               ACE_TEXT ("skip ignored topic test failed.\n")));
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topics "
+                     "skip ignored topic test failed with len = %d, "
+                     "handles.length() = %d, num_topics = %d\n",
+                     len, handles.length(), num_topics));
           return 1;
         }
 

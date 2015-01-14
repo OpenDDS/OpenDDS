@@ -1,3 +1,9 @@
+Wed Jan 14 16:52:35 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Fixed expected result when running with DCPSInfoRepo.
+
 Wed Jan 14 16:34:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/PerlDDS/Run_Test.pm:
