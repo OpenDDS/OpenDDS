@@ -29,6 +29,9 @@ public:
 
   virtual ~DataLinkWatchdog() {
     ACE_GUARD(ACE_LOCK, guard, this->lock_);
+    if(this->reactor_) {
+      this->reactor_->purge_pending_notifications(this);
+    }
     dump_command_queue();
     cancel_i();
   }
