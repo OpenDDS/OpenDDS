@@ -187,6 +187,10 @@ private:
    DataAllocator* data_allocator_;
    ::OpenDDS::DCPS::MessageBlockAllocator* mb_allocator_;
    ::OpenDDS::DCPS::DataBlockAllocator*    db_allocator_;
+   
+   // A class, normally provided by an unit test, that needs access to
+   // private methods/members.
+   friend class ::DDS_TEST;
 };
 
 /** Servant for DataReader interface of <%TYPE%> data type.

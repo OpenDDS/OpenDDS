@@ -1496,8 +1496,7 @@ DataWriterImpl::enable()
 
   // Configure WriteDataContainer constructor parameters from qos.
 
-  const bool reliable = qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
-             should_block = reliable && qos_.history.kind == DDS::KEEP_ALL_HISTORY_QOS;
+  const bool reliable = qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS;
 
   CORBA::Long const depth =
     get_instance_sample_list_depth(
@@ -1547,7 +1546,6 @@ DataWriterImpl::enable()
   // it is OK that we cannot change the size of our allocators.
   data_container_ = new WriteDataContainer(this,
                                            depth,
-                                           should_block,
                                            qos_.reliability.max_blocking_time,
                                            n_chunks_,
                                            domain_id_,

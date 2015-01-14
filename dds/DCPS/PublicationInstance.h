@@ -60,9 +60,6 @@ struct OpenDDS_Dcps_Export PublicationInstance {
   /// History of the instance samples.
   InstanceDataSampleList   samples_;
 
-  /// The list of samples that wait for available space.
-  InstanceDataSampleList   waiting_list_;
-
   /// The flag to indicate whether the instance is unregistered.
   bool             unregistered_;
 

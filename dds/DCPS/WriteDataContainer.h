@@ -59,24 +59,31 @@ typedef std::map<DDS::InstanceHandle_t, PublicationInstance*> PublicationInstanc
  * PublicationInstance links samples via the next_instance_sample_
  * thread.
  *
- * There are four state transition lists - unsent, sending, sent
- * and released during the data writing. These lists are linked
+ * There are three state transition lists used during write operations:
+ * unsent, sending, and sent.  These lists are linked
  * via the next_send_sample_/previous_send_sample_ thread. Any
- * DataSampleElement should be in one of these four lists and
- * SHOULD NOT be shared between these four lists. A normal
- * transition of a DataSampleElement would be
- * unsent->sending->sent, but a DataSampleElement could be
- * moved from sending to released list when the instance reaches
- * maximum samples allowed and the transport is still using the
- * sample. A DataSampleElement is removed from released or
- * sent list after it's delivered or dropped and is freed when
- * it's removed from release list or when the instance queue needs
- * more space.  The real data sample will be freed when the
- * reference counting goes 0.  The resend list is only used when
- * the datawriter uses TRANSIENT_LOCAL_DURABILITY_QOS. It holds
- * the DataSampleElements for the data sample duplicates of the
- * sending and sent list and are pushed to the released list after
- * giving to the transport.
+ * DataSampleElement should be in one of these three lists and
+ * SHOULD NOT be shared between these three lists.
+ * A normal transition of a DataSampleElement would be
+ * unsent->sending->sent.  A DataSampleElement transitions from unsent
+ * to sent naturally during a write operation when get_unsent_data is called.
+ * A DataSampleElement transitions from sending to sent when data_delivered
+ * is called notifying the container that the transport is finished with the
+ * sample and it can be marked as a historical sample.
+ * A DataSampleElement may transition back to unsent from sending if
+ * the transport notifies that the sample was dropped and should be resent.
+ * A DataSampleElement is removed from sent list and freed when the instance
+ * queue or container (for another instance) needs more space.
+ * A DataSampleElement may be removed and freed directly from sending when
+ * and unreliable writer needs space.  In this case the transport will be
+ * notified that the sample should be removed.
+ * A DataSampleElement may also be removed directly from unsent if an unreliable
+ * writer needs space for new samples.
+ * Note: The real data sample will be freed when the reference counting goes 0.
+ * The resend list is only used when the datawriter uses
+ * TRANSIENT_LOCAL_DURABILITY_QOS. It holds the DataSampleElements
+ * for the data sample duplicates of the sending and sent list and
+ * hands this list off to the transport.
  *
  *
  *
@@ -119,8 +126,6 @@ public:
     DataWriterImpl*  writer,
     /// Depth of the instance sample queue.
     CORBA::Long      depth,
-    /// Should the write wait for available space?
-    bool             should_block ,
     /// The timeout for write.
     ::DDS::Duration_t max_blocking_time,
     /// The number of chunks that the DataSampleElementAllocator
@@ -236,13 +241,12 @@ public:
   /**
    * Obtain a list of data for resending. This is only used when
    * TRANSIENT_LOCAL_DURABILITY_QOS is used. The data on the list
-   * returned is moved from the resend list to the released list
-   * as part of this call.
+   * returned is not put on any SendStateDataSampleList.
    */
   SendStateDataSampleList get_resend_data() ;
 
   /**
-   * Returns if pending data exists.  This includes released,
+   * Returns if pending data exists.  This includes
    * sending, and unsent data.
    */
   bool pending_data();
@@ -250,9 +254,8 @@ public:
   /**
    * Acknowledge the delivery of data.  The sample that resides in
    * this container will be moved from sending_data_ list to the
-   * internal sent_data_ list or released from the released_data_
-   * list.  If there is any threads waiting for available space
-   *  then it needs wake up these threads.
+   * internal sent_data_ list. If there are any threads waiting for
+   * available space, it wakes up these threads.
    */
   void data_delivered(const DataSampleElement* sample);
 
@@ -261,8 +264,7 @@ public:
    * is dropped.  Which the transport was told to do by the
    * publication code by calling
    * TransportClient::remove_sample(). If the sample was
-   * "sending" the it is moved to "unsent" list. If the sample was
-   * "released" then the sample is released. If there are any
+   * "sending" then it is moved to the "unsent" list. If there are any
    * threads waiting for available space then it needs wake up
    * these threads. The dropped_by_transport flag true indicates
    * the dropping initiated by transport when the transport send
@@ -276,15 +278,15 @@ public:
 
   /**
    * Allocate a DataSampleElement object and check the space
-   * availability in the instance list for newly allocated element.
-   * For the blocking write case, if the instance list size reaches
-   * depth_, then the new element will be added to the waiting list
-   * and is blocked until a previous sample is delivered or dropped
-   * by the transport. If there are several threads waiting then
+   * availability for newly allocated element according to qos settings.
+   * For the blocking write case, if resource limits or history qos limits
+   * are reached, then it blocks for max blocking time for a previous sample
+   * to be delivered or dropped by the transport. In non-blocking write
+   * case, if resource limits or history qos limits are reached, will attempt
+   * to remove oldest samples (forcing the transport to drop samples if necessary)
+   * to make space.  If there are several threads waiting then
    * the first one in the waiting list can enqueue, others continue
    * waiting.
-   * For the non-blocking write case, it asks the transport to drop
-   * the oldest sample.
    */
   DDS::ReturnCode_t obtain_buffer(
     DataSampleElement*& element,
@@ -334,6 +336,10 @@ public:
 
 private:
 
+  // A class, normally provided by an unit test, that needs access to
+  // private methods/members.
+  friend class ::DDS_TEST;
+
   // --------------------------
   // Preventing copying
   // --------------------------
@@ -351,6 +357,17 @@ private:
                        const DDS::StringSeq& params
 #endif
                        );
+  /**
+   * Remove the sample (head) from the instance list if it is only being
+   * used for history purposes (located on sent_data_ list).
+   * This method also updates the internal lists to reflect
+   * the change.
+   * The "released" boolean value indicates whether a sample was
+   * released.
+   */
+  DDS::ReturnCode_t remove_oldest_historical_sample(
+    InstanceDataSampleList& instance_list,
+    bool& released);
 
   /**
    * Remove the oldest sample (head) from the instance history list.
@@ -358,7 +375,8 @@ private:
    * the change.
    * If the sample is in the unsent_data_ or sent_data_ list then
    * it will be released. If the sample is in the sending_data_ list
-   * then it will be moved to released_data_ list. Otherwise an error
+   * then the transport will be notified to release the sample, then
+   * the sample will be released. Otherwise an error
    * is returned.
    * The "released" boolean value indicates whether the sample is
    * released.
@@ -367,6 +385,10 @@ private:
     InstanceDataSampleList& instance_list,
     bool& released);
 
+  /**
+   * Called when data has been dropped or delivered and any
+   * blocked writers should be notified
+   */
   void wakeup_blocking_writers (DataSampleElement* stale,
                                PublicationInstance* instance);
 
@@ -381,19 +403,14 @@ private:
   /// List of data that has already been sent.
   SendStateDataSampleList   sent_data_;
 
-  /// List of data that has been released, but it
-  /// still in use externally (by the transport).
-  SendStateDataSampleList   released_data_;
-
   /// The list of all samples written to this datawriter in
   /// writing order.
   WriterDataSampleList   data_holder_;
 
   /// List of the data reenqueued to support the
   /// TRANSIENT_LOCAL_DURABILITY_QOS policy. It duplicates the
-  /// samples in sent and sending list. These
-  /// DataSampleElement will be appended to released_data_
-  /// list after passing to the transport.
+  /// samples in sent and sending list. This
+  /// list will be passed to the transport for re-sending.
   SendStateDataSampleList   resend_data_;
 
   /// The individual instance queue threads in the data.
@@ -405,8 +422,8 @@ private:
   /// The writer that owns this container.
   DataWriterImpl*  writer_;
 
-  /// The maximum size of an instance sample list which are to
-  /// be maintained in the container.
+  /// The maximum size a container should allow for
+  /// an instance sample list
   /// It corresponds to the QoS.HISTORY.depth value for
   /// QoS.HISTORY.kind==KEEP_LAST and corresponds to the
   /// QoS.RESOURCE_LIMITS.max_samples_per_instance for
@@ -423,14 +440,9 @@ private:
   /// to indicate unlimited.
   /// It corresponds to the QoS.RESOURCE_LIMITS.max_instances
   /// when QoS.RELIABILITY.kind == DDS::RELIABLE_RELIABILITY_QOS
+  /// It also covers QoS.RESOURCE_LIMITS.max_samples and
+  /// max_instances * depth
   CORBA::Long                     max_num_samples_;
-
-
-  /// Flag to indicate whether the write operation should block
-  /// to wait for space to become avaliable.
-  /// Is true when the DataWriter's QoS has RELIABILITY.kind=RELIABLE
-  /// and HISTORY.kind=KEEP_ALL.
-  bool                            should_block_;
 
   /// The maximum time to block on write operation.
   /// This comes from DataWriter's QoS HISTORY.max_blocking_time

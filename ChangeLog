@@ -1,3 +1,57 @@
+Wed Jan 14 22:10:07 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Enable WriteDataContainerTest
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed calculating 'should_block' which WriteDataContainer
+          no longer requires in the constructor.  WriteDataContainer
+          now determines if it should block directly from qos.
+
+        * dds/DCPS/PublicationInstance.h:
+
+          Removed waiting_list_ as it is no longer needed
+
+        * dds/DCPS/WriteDataContainer.h:
+
+          Updated and documented changes based on rework of WriteDataContainer
+          as detailed below.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Reworked how obtain_buffer determines if it should block or
+          release samples when a write is occuring to be more in line
+          with the dds spec.  Now properly blocks and returns timeout
+          when space is not made available within max blocking time,
+          as well as waking up and proceeding when space becomes available.
+
+          Removed released_data_ list as it is no longer needed.
+          Lists are now unsent_data_, sending_data_, and sent_data_
+          which simplifies the states and transitions between.
+
+          Added remove_oldest_historical_sample which allows a reliable
+          writer to free up samples which are only being held for
+          history purposes.  Non-reliable writers will not block and
+          will free up space by either releasing history or forcing the
+          transport to release samples it has not signalled being done with.
+
+        * dds/idl/HTemplate.txt:
+
+          Made DDS_TEST a friend
+
+        * tests/DCPS/WriteDataContainer:
+        * tests/DCPS/WriteDataContainer/Simple.idl:
+        * tests/DCPS/WriteDataContainer/WriteDataContainer.mpc:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+        * tests/DCPS/WriteDataContainer/run_test.pl:
+
+          Added new WriteDataContainer test as a unit test for
+          compliance with the dds specification specifically
+          with regards to reliability, resource limits, and
+          history qos settings.
+
 Wed Jan 14 17:51:05 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
