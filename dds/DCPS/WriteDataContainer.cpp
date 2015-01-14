@@ -1300,30 +1300,11 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 
 void
 WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale,
-                                            PublicationInstance* instance)
+                                            PublicationInstance* )
 {
   if (stale && waiting_on_release_) {
     waiting_on_release_ = false;
-//    bool removed = false;
-//    DDS::ReturnCode_t ret;
-//    ret = this->remove_oldest_historical_sample(instance->samples_, removed);
-//    if (ret != DDS::RETCODE_OK) {
-//      ACE_ERROR((LM_ERROR,
-//                 ACE_TEXT("(%P|%t) ERROR: ")
-//                 ACE_TEXT("WriteDataContainer::wakeup_blocking_writers, ")
-//                 ACE_TEXT("remove_oldest_sample returned an error removing %X\n"), stale));
-//      return;
-//    }
-//    // Broadcast the blocked enqueue threads.
-//    if (DCPS_debug_level >= 2) {
-//      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wakeup_blocking_writers ")
-//                            ACE_TEXT("removed sample %X and broadcast to wake up ")
-//                            ACE_TEXT("blocking threads for available spot \n"),
-//                            stale));
-//    }
-//    if (removed) {
-//      waiting_on_release_ = false;
-//    }
+
     condition_.broadcast();
   }
 }

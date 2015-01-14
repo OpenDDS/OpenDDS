@@ -1,3 +1,14 @@
+Wed Jan 14 23:47:38 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Cleaned up wakeup_blocking_writers to remove commented out
+          code and remove unsused parameter 'instance'
+
+        * dds/idl/HTemplate.txt:
+
+          Remove trailing whitespace.
+
 Wed Jan 14 22:10:07 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * bin/dcps_tests.lst:
