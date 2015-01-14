@@ -67,7 +67,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     // Find topic
     if (!parser.find_topic(connection.topic_name_, topic)) {
       // If qos name was specified for the connection
-      if (strlen(connection.qos_name_)) {
+      if (connection.qos_name_[0]) {
         // Find Qos by specified name
         if (parser.find_qos(connection.qos_name_, qos)) {
           return_code = INVALID_CONFIG;
