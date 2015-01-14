@@ -1,3 +1,10 @@
+Wed Jan 14 21:26:32 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+
+          Preserve failed status when closing connection.
+
 Wed Jan 14 21:11:32 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/FaceTSS.cpp:
