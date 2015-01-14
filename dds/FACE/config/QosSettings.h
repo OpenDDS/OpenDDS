@@ -7,7 +7,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "FACE/OpenDDS_FACE_Export.h"
 
-namespace OpenDDS { namespace FACE { namespace config {
+namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class OpenDDS_FACE_Export QosSettings {
   public:
@@ -19,6 +19,8 @@ class OpenDDS_FACE_Export QosSettings {
       data_writer,
       data_reader
     };
+
+    int set_qos(QosLevel level, const char* name, const char* value);
 
     void apply_to(DDS::PublisherQos&  target) const;
     void apply_to(DDS::SubscriberQos& target) const;
@@ -35,11 +37,10 @@ class OpenDDS_FACE_Export QosSettings {
     DDS::DataWriterQos data_writer_qos_;
     DDS::DataReaderQos data_reader_qos_;
 
-    void set_qos(QosLevel level, const char* name, const char* value);
-    void set_qos(DDS::PublisherQos& target, const char* name, const char* value);
-    void set_qos(DDS::SubscriberQos& target, const char* name, const char* value);
-    void set_qos(DDS::DataWriterQos& target, const char* name, const char* value);
-    void set_qos(DDS::DataReaderQos& target, const char* name, const char* value);
+    int set_qos(DDS::PublisherQos& target, const char* name, const char* value);
+    int set_qos(DDS::SubscriberQos& target, const char* name, const char* value);
+    int set_qos(DDS::DataWriterQos& target, const char* name, const char* value);
+    int set_qos(DDS::DataReaderQos& target, const char* name, const char* value);
 };
 
 typedef OPENDDS_MAP(OPENDDS_STRING, QosSettings) QosMap;

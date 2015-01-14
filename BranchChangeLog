@@ -1,3 +1,16 @@
+Wed Jan 14 18:46:06 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/ConnectionSettings.h:
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/Parser.h:
+        * dds/FACE/config/Parser.cpp:
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+
+          Parse in Qos Settings also, and use them when creating datareaders,
+          datawriters, publishers, and subscribers.
+
 Wed Jan 14 16:52:35 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/BuiltInTopicTest/monitor.cpp:

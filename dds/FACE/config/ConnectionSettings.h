@@ -13,6 +13,7 @@ public:
   int set(const char* name, const char* value);
 
   char topic_name_[64];
+  char qos_name_[64];
   FACE::CONNECTION_ID_TYPE connection_id_;
   FACE::CONNECTION_DIRECTION_TYPE direction_;
   int domain_id_;

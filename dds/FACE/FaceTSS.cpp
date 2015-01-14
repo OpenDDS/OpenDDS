@@ -12,6 +12,10 @@
 namespace FACE {
 namespace TS {
 
+using OpenDDS::FaceTSS::config::ConnectionSettings;
+using OpenDDS::FaceTSS::config::TopicSettings;
+using OpenDDS::FaceTSS::config::QosSettings;
+
 namespace {
   OpenDDS::FaceTSS::config::Parser parser;
 
@@ -19,7 +23,8 @@ namespace {
                                            const ::DDS::DomainId_t domainId,
                                            const char* topic,
                                            const char* type,
-                                           CONNECTION_DIRECTION_TYPE dir);
+                                           CONNECTION_DIRECTION_TYPE dir,
+                                           QosSettings& qos);
 }
 
 using OpenDDS::FaceTSS::Entities;
@@ -51,9 +56,11 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     return;
   }
 
-  OpenDDS::FaceTSS::config::ConnectionSettings connection;
-  OpenDDS::FaceTSS::config::TopicSettings topic;
+  ConnectionSettings connection;
+  TopicSettings topic;
+  QosSettings qos;
 
+  // Find connection
   if (!parser.find_connection(connection_name, connection)) {
     // Find topic
     if (!parser.find_topic(connection.topic_name_, topic)) {
@@ -62,11 +69,15 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
       connection_direction = connection.direction_;
       max_message_size = topic.max_message_size_;
       
+      // Find Qos
+      parser.find_qos(connection.qos_name_, qos);
+
       return_code = create_opendds_entities(connection_id,
                                             connection.domain_id_,
                                             connection.topic_name_,
                                             topic.type_name_,
-                                            connection_direction);
+                                            connection_direction,
+                                            qos);
     }
     return;
   }
@@ -118,7 +129,8 @@ namespace {
                                            const ::DDS::DomainId_t domainId,
                                            const char* topicName,
                                            const char* type,
-                                           CONNECTION_DIRECTION_TYPE dir) {
+                                           CONNECTION_DIRECTION_TYPE dir,
+                                           QosSettings& qos_settings) {
 #ifdef DEBUG_OPENDDS_FACETSS
     OpenDDS::DCPS::set_DCPS_debug_level(8);
     OpenDDS::DCPS::Transport_debug_level = 5;
@@ -146,23 +158,35 @@ namespace {
     if (!topic) return INVALID_PARAM;
 
     if (dir == SOURCE) {
+      DDS::PublisherQos publisher_qos;
+      qos_settings.apply_to(publisher_qos);
+      
       const ::DDS::Publisher_var pub =
-        dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0, 0);
+        dp->create_publisher(publisher_qos, 0, 0);
       if (!pub) return INVALID_PARAM;
 
+      DDS::DataWriterQos datawriter_qos;
+      qos_settings.apply_to(datawriter_qos);
+
       const ::DDS::DataWriter_var dw =
-        pub->create_datawriter(topic, DATAWRITER_QOS_USE_TOPIC_QOS, 0, 0);
+        pub->create_datawriter(topic, datawriter_qos, 0, 0);
       if (!dw) return INVALID_PARAM;
 
       Entities::instance()->writers_[connectionId] = dw;
 
     } else { // dir == DESTINATION
+      DDS::SubscriberQos subscriber_qos;
+      qos_settings.apply_to(subscriber_qos);
+      
       const ::DDS::Subscriber_var sub =
-        dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, 0);
+        dp->create_subscriber(subscriber_qos, 0, 0);
       if (!sub) return INVALID_PARAM;
 
+      DDS::DataReaderQos datareader_qos;
+      qos_settings.apply_to(datareader_qos);
+
       const ::DDS::DataReader_var dr =
-        sub->create_datareader(topic, DATAREADER_QOS_USE_TOPIC_QOS, 0, 0);
+        sub->create_datareader(topic, datareader_qos, 0, 0);
       if (!dr) return INVALID_PARAM;
 
       Entities::instance()->readers_[connectionId] = dr;

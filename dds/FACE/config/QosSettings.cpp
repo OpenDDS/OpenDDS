@@ -2,13 +2,13 @@
 
 #include <cstring>
 
-namespace OpenDDS { namespace FACE { namespace config {
+namespace OpenDDS { namespace FaceTSS { namespace config {
 
 QosSettings::QosSettings() :
-  publisher_qos_()
-, subscriber_qos_()
-, data_writer_qos_()
-, data_reader_qos_()
+  publisher_qos_(TheServiceParticipant->initial_PublisherQos())
+, subscriber_qos_(TheServiceParticipant->initial_SubscriberQos())
+, data_writer_qos_(TheServiceParticipant->initial_DataWriterQos())
+, data_reader_qos_(TheServiceParticipant->initial_DataReaderQos())
 {
 
 }
@@ -37,23 +37,25 @@ QosSettings::apply_to(DDS::DataReaderQos&  target) const
   target = data_reader_qos_;
 }
 
-void
+int
 QosSettings::set_qos(QosLevel level, const char* name, const char* value)
 {
+  int status = 0;
   switch(level) {
     case publisher:
-      set_qos(publisher_qos_, name, value);
+      status = set_qos(publisher_qos_, name, value);
       break;
     case subscriber:
-      set_qos(subscriber_qos_, name, value);
+      status = set_qos(subscriber_qos_, name, value);
       break;
     case data_writer:
-      set_qos(data_writer_qos_, name, value);
+      status = set_qos(data_writer_qos_, name, value);
       break;
     case data_reader:
-      set_qos(data_reader_qos_, name, value);
+      status = set_qos(data_reader_qos_, name, value);
       break;
   }
+  return status;
 }
 
 bool
@@ -378,7 +380,7 @@ log_parser_error(const char* section, const char* name, const char* value)
     section, name, value));
 }
 
-void QosSettings::set_qos(
+int QosSettings::set_qos(
   DDS::PublisherQos& target, const char* name, const char* value)
 {
   bool matched = 
@@ -392,9 +394,10 @@ void QosSettings::set_qos(
   if (!matched) {
     log_parser_error("publisher", name, value);
   }
+  return matched ? 0 : 1;
 }
 
-void QosSettings::set_qos(
+int QosSettings::set_qos(
   DDS::SubscriberQos& target, const char* name, const char* value)
 {
   bool matched = 
@@ -407,9 +410,10 @@ void QosSettings::set_qos(
   if (!matched) {
     log_parser_error("subscriber", name, value);
   }
+  return matched ? 0 : 1;
 }
 
-void QosSettings::set_qos(
+int QosSettings::set_qos(
   DDS::DataWriterQos& target, const char* name, const char* value)
 {
   bool matched = 
@@ -437,9 +441,10 @@ void QosSettings::set_qos(
   if (!matched) {
     log_parser_error("data writer", name, value);
   }
+  return matched ? 0 : 1;
 }
 
-void QosSettings::set_qos(
+int QosSettings::set_qos(
   DDS::DataReaderQos& target, const char* name, const char* value)
 {
   bool matched = 
@@ -465,15 +470,14 @@ void QosSettings::set_qos(
     set_reader_data_lifecycle_autopurge_nowriter_samples_delay(
         target.reader_data_lifecycle, name, value) ||
     set_reader_data_lifecycle_autopurge_disposed_samples_delay(
-        target.reader_data_lifecycle, name, value) ||
+        target.reader_data_lifecycle, name, value);
     // ReaderDataLifecycleQosPolicy reader_data_lifecycle;
     // Read about this ??
-false
-  ;
 
   if (!matched) {
     log_parser_error("data reader", name, value);
   }
+  return matched ? 0 : 1;
 }
 
 } } }

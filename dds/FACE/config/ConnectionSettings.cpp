@@ -13,6 +13,8 @@ ConnectionSettings::set(const char* name, const char* value)
     domain_id_ = atoi(value);
   } else if (!std::strcmp(name, "topic")) {
     strncpy(topic_name_, value, sizeof(topic_name_));
+  } else if (!std::strcmp(name, "qos")) {
+    strncpy(qos_name_, value, sizeof(qos_name_));
   } else if (!std::strcmp(name, "direction")) {
     if (!std::strcmp(value, "source")) {
       direction_ = FACE::SOURCE;

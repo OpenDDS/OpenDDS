@@ -3,6 +3,7 @@
 
 #include "FACE/OpenDDS_FACE_Export.h"
 #include "ConnectionSettings.h"
+#include "QosSettings.h"
 #include "TopicSettings.h"
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
@@ -13,10 +14,12 @@ public:
   int parse(const char* filename);
   int find_connection(const char* name, ConnectionSettings& target);
   int find_topic(const char* name, TopicSettings& target);
+  int find_qos(const char* name, QosSettings& target);
 
 private:
   int foo;
   static ConnectionMap connection_map_;
+  static QosMap qos_map_;
   static TopicMap topic_map_;
 
   int parse_topic(ACE_Configuration_Heap& config,
@@ -25,8 +28,13 @@ private:
   int parse_connection(ACE_Configuration_Heap& config,
                        ACE_Configuration_Section_Key& key,
                        const char* connection_name);
+  int parse_qos(ACE_Configuration_Heap& config,
+                ACE_Configuration_Section_Key& key,
+                const char* qos_name,
+                QosSettings::QosLevel level);
   int parse_sections(ACE_Configuration_Heap& config,
-                     const char* section_type);
+                     const char* section_type,
+                     bool required);
 };
 
 } } }
