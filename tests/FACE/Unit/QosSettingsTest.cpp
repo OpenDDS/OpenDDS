@@ -10,7 +10,7 @@ unsigned int assertions = 0;
       ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l %a\n",\
         #COND , -1));
 
-namespace OpenDDS { namespace FACE { namespace config {
+namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class QosSettingsAccessor {
 public:
@@ -27,7 +27,7 @@ private:
 
 } } }
 
-using namespace OpenDDS::FACE::config;
+using namespace OpenDDS::FaceTSS::config;
 
 /////// Publisher tests 
 void test_set_publisher_single_partition() {

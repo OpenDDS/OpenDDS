@@ -1,3 +1,9 @@
+Wed Jan 14 18:59:22 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Fix build error.
+
 Wed Jan 14 18:49:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:
