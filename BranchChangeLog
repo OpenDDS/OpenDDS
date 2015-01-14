@@ -1,3 +1,14 @@
+Wed Jan 14 16:34:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Corrected date/time formatting, month number was off by one
+          and we shoudln't be reinventing the wheel of strftime.
+
+        * bin/dcps_tests.lst:
+
+          Disabled ConfigTransports test under safety profile.
+
 Tue Jan 13 22:11:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

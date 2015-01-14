@@ -7,6 +7,7 @@ use PerlACE::Run_Test;
 use PerlDDS::Process;
 use PerlDDS::ProcessFactory;
 use Cwd;
+use POSIX qw(strftime);
 
 package PerlDDS;
 
@@ -27,23 +28,8 @@ sub orbsvcs {
 
 sub formatted_time {
   my $seconds = shift;
-
-  my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst);
-  if (defined($seconds)) {
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-      localtime($seconds);
-  } else {
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-      localtime;
-  }
-  $year += 1900;
-  my $mon2 = sprintf("%02d", $mon);
-  my $mday2 = sprintf("%02d", $mday);
-  my $hour2 = sprintf("%02d", $hour);
-  my $min2 = sprintf("%02d", $min);
-  my $sec2 = sprintf("%02d", $sec);
-  my $time_str = "$year-$mon2-$mday2 $hour2:$min2:$sec2";
-  return $time_str;
+  return strftime('%Y-%m-%d %H:%M:%S',
+                  $seconds ? localtime($seconds) : localtime());
 }
 
 sub wait_kill {
@@ -54,13 +40,13 @@ sub wait_kill {
   $verbose = 0 if !defined($verbose);
 
   my $ret_status = 0;
-  my $start_time = formatted_time;
+  my $start_time = formatted_time();
   if ($verbose) {
     print STDERR "$start_time: waiting $wait_time seconds for $desc before "
       . "calling kill\n";
   }
   my $result = $process->WaitKill($wait_time);
-  my $time_str = formatted_time;
+  my $time_str = formatted_time();
   if ($result != 0) {
       my $ext = ($verbose ? "" : "(started at $start_time)");
       print STDERR "$time_str: ERROR: $desc returned $result $ext\n";
@@ -80,7 +66,7 @@ sub terminate_wait_kill {
 
   my $result = $process->TerminateWaitKill($wait_time);
   my $ret_status = 0;
-  my $time_str = formatted_time;
+  my $time_str = formatted_time();
   if ($result != 0) {
       print STDERR "$time_str: ERROR: $desc returned $result\n";
       $ret_status = 1;
@@ -786,7 +772,7 @@ sub _prefix {
   my $self = shift;
   my $str = "";
   if ($self->{test_verbose}) {
-    my $time_str = PerlDDS::formatted_time();
+    my $time_str = formatted_time();
     $str = "$time_str: ";
   }
   return $str;
