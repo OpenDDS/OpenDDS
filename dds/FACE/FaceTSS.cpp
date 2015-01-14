@@ -51,6 +51,8 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
                        MESSAGE_SIZE_TYPE& max_message_size,
                        RETURN_CODE_TYPE& return_code)
 {
+  return_code = NO_ERROR;
+
   if (pattern != PUB_SUB) {
     return_code = INVALID_CONFIG;
     return;
@@ -64,21 +66,36 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
   if (!parser.find_connection(connection_name, connection)) {
     // Find topic
     if (!parser.find_topic(connection.topic_name_, topic)) {
-      // Copy out parameters
-      connection_id = connection.connection_id_;
-      connection_direction = connection.direction_;
-      max_message_size = topic.max_message_size_;
-      
-      // Find Qos
-      parser.find_qos(connection.qos_name_, qos);
-
-      return_code = create_opendds_entities(connection_id,
-                                            connection.domain_id_,
-                                            connection.topic_name_,
-                                            topic.type_name_,
-                                            connection_direction,
-                                            qos);
+      // If qos name was specified for the connection
+      if (strlen(connection.qos_name_)) {
+        // Find Qos by specified name
+        if (parser.find_qos(connection.qos_name_, qos)) {
+          return_code = INVALID_CONFIG;
+        }
+      } else {
+        // Find Qos by default (topic) name
+        parser.find_qos(connection.topic_name_, qos);
+        // Ignore result, not required
+      }
+    } else {
+      return_code = INVALID_CONFIG;
     }
+  } else {
+    return_code = INVALID_CONFIG;
+  }
+
+  if (return_code == NO_ERROR) {
+    // Copy out parameters
+    connection_id = connection.connection_id_;
+    connection_direction = connection.direction_;
+    max_message_size = topic.max_message_size_;
+    
+    return_code = create_opendds_entities(connection_id,
+                                          connection.domain_id_,
+                                          connection.topic_name_,
+                                          topic.type_name_,
+                                          connection_direction,
+                                          qos);
     return;
   }
 
