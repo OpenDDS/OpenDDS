@@ -107,11 +107,11 @@ tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN
 # Still failing
 # tests/DCPS/TcpReconnect/run_test.pl: !DCPS_MIN
 
-tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
-tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS
-tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS
-tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS
-tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS
+tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS
 tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 
@@ -133,11 +133,11 @@ tests/transport/error_handling/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS
 
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA !OPENDDS_SAFETY_PROFILE
 
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1 -c: !DCPS_MIN
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN
-performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1 -c: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 4: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 2 -s 3: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+performance-tests/DCPS/TCPListenerTest/run_test.pl -p 4 -s 1: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 
 ## N.B. There appear to be some bad assumptions in the following tests:
 #performance-tests/DCPS/UDPListenerTest/run_test-1p1s.pl: !DCPS_MIN

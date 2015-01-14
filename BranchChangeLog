@@ -1,3 +1,12 @@
+Wed Jan 14 19:14:11 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/rtps.ini:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/TransientLocalTest/rtps.ini:
+
+          Fixed tests to work with saftey profile.
+
 Wed Jan 14 19:08:12 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/config/QosSettings.h:
