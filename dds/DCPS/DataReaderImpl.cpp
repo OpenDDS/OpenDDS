@@ -3367,9 +3367,6 @@ EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(
 
 EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
 {
-  if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper\n"));
-  }
 }
 
 int EndHistoricSamplesMissedSweeper::handle_timeout(
