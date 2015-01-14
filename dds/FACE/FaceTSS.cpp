@@ -111,6 +111,19 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
   return_code = NO_ERROR;
 }
 
+void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
+                         RETURN_CODE_TYPE& return_code)
+{
+  Entities& entities = *Entities::instance();
+  std::map<int, ::DDS::DataReader_var>& readers = entities.readers_;
+  if (readers.count(connection_id)) {
+    readers[connection_id]->set_listener(NULL, 0);
+    return_code = NO_ERROR;
+    return;
+  }
+  return_code = INVALID_PARAM;
+}
+
 void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
                         RETURN_CODE_TYPE& return_code)
 {

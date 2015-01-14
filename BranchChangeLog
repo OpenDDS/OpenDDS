@@ -1,3 +1,18 @@
+Wed Jan 14 23:18:18 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+
+          Started impelementation of callback-based FACE TS reads.
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Messenger/face_config.ini:
+        * tests/FACE/Messenger/run_test.pl:
+
+          Testing callbacks.
+
 Wed Jan 14 21:26:32 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/FACE/Reliability/Publisher/Publisher.cpp:

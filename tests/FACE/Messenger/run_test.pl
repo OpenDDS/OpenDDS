@@ -13,10 +13,13 @@ PerlDDS::add_lib_path("Idl");
 
 my $test = new PerlDDS::TestFramework();
 
-$test->setup_discovery();
+$test->enable_console_logging();
 
 $test->process('Subscriber', 'Subscriber/subscriber');
 $test->start_process('Subscriber');
+
+$test->process('Callback Subscriber', 'Subscriber/subscriber', 'callback');
+$test->start_process('Callback Subscriber');
 sleep 5;
 
 $test->process('Publisher', 'Publisher/publisher');
