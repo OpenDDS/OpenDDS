@@ -3,6 +3,15 @@
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
+ConnectionSettings::ConnectionSettings()
+: connection_id_(0),
+  direction_(FACE::SOURCE),
+  domain_id_(0)
+{
+  strcpy(topic_name_, "");
+  strcpy(qos_name_, "");
+}
+
 int 
 ConnectionSettings::set(const char* name, const char* value)
 {

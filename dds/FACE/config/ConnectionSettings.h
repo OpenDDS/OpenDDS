@@ -10,6 +10,8 @@ namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class OpenDDS_FACE_Export ConnectionSettings {
 public:
+  ConnectionSettings();
+
   int set(const char* name, const char* value);
 
   char topic_name_[64];
