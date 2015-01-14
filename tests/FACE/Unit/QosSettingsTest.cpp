@@ -32,9 +32,8 @@ using namespace OpenDDS::FaceTSS::config;
 /////// Publisher tests 
 void test_set_publisher_single_partition() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "partition.name", "Foo123");
+  settings.set_qos(QosSettings::publisher, "partition.name", "Foo123");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -44,10 +43,9 @@ void test_set_publisher_single_partition() {
 
 void test_set_publisher_multiple_partitions() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "partition.name", "Foo123");
-  accessor.set_qos(QosSettings::publisher, "partition.name", "Bar234");
+  settings.set_qos(QosSettings::publisher, "partition.name", "Foo123");
+  settings.set_qos(QosSettings::publisher, "partition.name", "Bar234");
 
   DDS::PublisherQos qos;
   settings.apply_to(qos);
@@ -59,9 +57,8 @@ void test_set_publisher_multiple_partitions() {
 
 void test_set_publisher_presentation_access_scope_instance() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "INSTANCE");
+  settings.set_qos(QosSettings::publisher, "presentation.access_scope", "INSTANCE");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -70,9 +67,8 @@ void test_set_publisher_presentation_access_scope_instance() {
 
 void test_set_publisher_presentation_access_scope_topic() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "TOPIC");
+  settings.set_qos(QosSettings::publisher, "presentation.access_scope", "TOPIC");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -81,9 +77,8 @@ void test_set_publisher_presentation_access_scope_topic() {
 
 void test_set_publisher_presentation_access_scope_group() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.access_scope", "GROUP");
+  settings.set_qos(QosSettings::publisher, "presentation.access_scope", "GROUP");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -92,9 +87,8 @@ void test_set_publisher_presentation_access_scope_group() {
 
 void test_set_publisher_presentation_coherent_access_true() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.coherent_access", "true");
+  settings.set_qos(QosSettings::publisher, "presentation.coherent_access", "true");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -103,9 +97,8 @@ void test_set_publisher_presentation_coherent_access_true() {
 
 void test_set_publisher_presentation_coherent_access_false() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.coherent_access", "false");
+  settings.set_qos(QosSettings::publisher, "presentation.coherent_access", "false");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -114,9 +107,8 @@ void test_set_publisher_presentation_coherent_access_false() {
 
 void test_set_publisher_presentation_ordered_access_true() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.ordered_access", "true");
+  settings.set_qos(QosSettings::publisher, "presentation.ordered_access", "true");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -125,9 +117,8 @@ void test_set_publisher_presentation_ordered_access_true() {
 
 void test_set_publisher_presentation_ordered_access_false() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::publisher, "presentation.ordered_access", "false");
+  settings.set_qos(QosSettings::publisher, "presentation.ordered_access", "false");
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
@@ -137,9 +128,8 @@ void test_set_publisher_presentation_ordered_access_false() {
 /////// Subscriber tests 
 void test_set_subscriber_single_partition() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "partition.name", "Foo123");
+  settings.set_qos(QosSettings::subscriber, "partition.name", "Foo123");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -149,10 +139,9 @@ void test_set_subscriber_single_partition() {
 
 void test_set_subscriber_multiple_partitions() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "partition.name", "Foo123");
-  accessor.set_qos(QosSettings::subscriber, "partition.name", "Bar234");
+  settings.set_qos(QosSettings::subscriber, "partition.name", "Foo123");
+  settings.set_qos(QosSettings::subscriber, "partition.name", "Bar234");
 
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
@@ -164,9 +153,8 @@ void test_set_subscriber_multiple_partitions() {
 
 void test_set_subscriber_presentation_access_scope_instance() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "INSTANCE");
+  settings.set_qos(QosSettings::subscriber, "presentation.access_scope", "INSTANCE");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -175,9 +163,8 @@ void test_set_subscriber_presentation_access_scope_instance() {
 
 void test_set_subscriber_presentation_access_scope_topic() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "TOPIC");
+  settings.set_qos(QosSettings::subscriber, "presentation.access_scope", "TOPIC");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -186,9 +173,8 @@ void test_set_subscriber_presentation_access_scope_topic() {
 
 void test_set_subscriber_presentation_access_scope_group() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.access_scope", "GROUP");
+  settings.set_qos(QosSettings::subscriber, "presentation.access_scope", "GROUP");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -197,9 +183,8 @@ void test_set_subscriber_presentation_access_scope_group() {
 
 void test_set_subscriber_presentation_coherent_access_true() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.coherent_access", "true");
+  settings.set_qos(QosSettings::subscriber, "presentation.coherent_access", "true");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -208,9 +193,8 @@ void test_set_subscriber_presentation_coherent_access_true() {
 
 void test_set_subscriber_presentation_coherent_access_false() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.coherent_access", "false");
+  settings.set_qos(QosSettings::subscriber, "presentation.coherent_access", "false");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -219,9 +203,8 @@ void test_set_subscriber_presentation_coherent_access_false() {
 
 void test_set_subscriber_presentation_ordered_access_true() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.ordered_access", "true");
+  settings.set_qos(QosSettings::subscriber, "presentation.ordered_access", "true");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -230,9 +213,8 @@ void test_set_subscriber_presentation_ordered_access_true() {
 
 void test_set_subscriber_presentation_ordered_access_false() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::subscriber, "presentation.ordered_access", "false");
+  settings.set_qos(QosSettings::subscriber, "presentation.ordered_access", "false");
   DDS::SubscriberQos qos;
   settings.apply_to(qos);
 
@@ -243,9 +225,8 @@ void test_set_subscriber_presentation_ordered_access_false() {
 void test_set_datawriter_durability_volatile()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "durability.kind", "VOLATILE");
+  settings.set_qos(QosSettings::data_writer, "durability.kind", "VOLATILE");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -255,9 +236,8 @@ void test_set_datawriter_durability_volatile()
 void test_set_datawriter_durability_transient_local()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "durability.kind", "TRANSIENT_LOCAL");
+  settings.set_qos(QosSettings::data_writer, "durability.kind", "TRANSIENT_LOCAL");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -267,9 +247,8 @@ void test_set_datawriter_durability_transient_local()
 void test_set_datawriter_durability_transient()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "durability.kind", "TRANSIENT");
+  settings.set_qos(QosSettings::data_writer, "durability.kind", "TRANSIENT");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -279,9 +258,8 @@ void test_set_datawriter_durability_transient()
 void test_set_datawriter_durability_persistent()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "durability.kind", "PERSISTENT");
+  settings.set_qos(QosSettings::data_writer, "durability.kind", "PERSISTENT");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -290,9 +268,9 @@ void test_set_datawriter_durability_persistent()
 
 void test_set_datawriter_deadline_sec() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "deadline.period.sec", "2");
+  settings.set_qos(QosSettings::data_writer, "deadline.period.sec", "2");
+  settings.set_qos(QosSettings::data_writer, "deadline.period.nanosec", "0");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -302,9 +280,9 @@ void test_set_datawriter_deadline_sec() {
 
 void test_set_datawriter_deadline_nanosec() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "deadline.period.nanosec", "200");
+  settings.set_qos(QosSettings::data_writer, "deadline.period.sec", "0");
+  settings.set_qos(QosSettings::data_writer, "deadline.period.nanosec", "200");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -314,10 +292,9 @@ void test_set_datawriter_deadline_nanosec() {
 
 void test_set_datawriter_deadline_both() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "deadline.period.sec", "3");
-  accessor.set_qos(QosSettings::data_writer, "deadline.period.nanosec", "500");
+  settings.set_qos(QosSettings::data_writer, "deadline.period.sec", "3");
+  settings.set_qos(QosSettings::data_writer, "deadline.period.nanosec", "500");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -327,9 +304,8 @@ void test_set_datawriter_deadline_both() {
 
 void test_set_datawriter_latency_budget_sec() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "latency_budget.duration.sec", "2");
+  settings.set_qos(QosSettings::data_writer, "latency_budget.duration.sec", "2");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -339,9 +315,8 @@ void test_set_datawriter_latency_budget_sec() {
 
 void test_set_datawriter_latency_budget_nanosec() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "latency_budget.duration.nanosec", "350");
+  settings.set_qos(QosSettings::data_writer, "latency_budget.duration.nanosec", "350");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -351,10 +326,9 @@ void test_set_datawriter_latency_budget_nanosec() {
 
 void test_set_datawriter_latency_budget_both() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "latency_budget.duration.sec", "1");
-  accessor.set_qos(QosSettings::data_writer, "latency_budget.duration.nanosec", "150");
+  settings.set_qos(QosSettings::data_writer, "latency_budget.duration.sec", "1");
+  settings.set_qos(QosSettings::data_writer, "latency_budget.duration.nanosec", "150");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -366,9 +340,9 @@ void
 test_set_datawriter_liveliness_lease_duration_sec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "liveliness.lease_duration.sec", "2");
+  settings.set_qos(QosSettings::data_writer, "liveliness.lease_duration.sec", "2");
+  settings.set_qos(QosSettings::data_writer, "liveliness.lease_duration.nanosec", "0");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -380,9 +354,9 @@ void
 test_set_datawriter_liveliness_lease_duration_nanosec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "liveliness.lease_duration.nanosec", "333");
+  settings.set_qos(QosSettings::data_writer, "liveliness.lease_duration.sec", "0");
+  settings.set_qos(QosSettings::data_writer, "liveliness.lease_duration.nanosec", "333");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -394,10 +368,9 @@ void
 test_set_datawriter_liveliness_lease_duration_both()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "liveliness.lease_duration.sec", "1");
-  accessor.set_qos(QosSettings::data_writer, "liveliness.lease_duration.nanosec", "333");
+  settings.set_qos(QosSettings::data_writer, "liveliness.lease_duration.sec", "1");
+  settings.set_qos(QosSettings::data_writer, "liveliness.lease_duration.nanosec", "333");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -408,9 +381,8 @@ test_set_datawriter_liveliness_lease_duration_both()
 void test_set_datawriter_reliability_kind_best_effort()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "reliability.kind", "BEST_EFFORT");
+  settings.set_qos(QosSettings::data_writer, "reliability.kind", "BEST_EFFORT");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -420,9 +392,8 @@ void test_set_datawriter_reliability_kind_best_effort()
 void test_set_datawriter_reliability_kind_reliable()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "reliability.kind", "RELIABLE");
+  settings.set_qos(QosSettings::data_writer, "reliability.kind", "RELIABLE");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -432,9 +403,9 @@ void test_set_datawriter_reliability_kind_reliable()
 void test_set_datawriter_reliability_max_blocking_time_sec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.sec", "2");
+  settings.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.sec", "2");
+  settings.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.nanosec", "0");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -445,9 +416,8 @@ void test_set_datawriter_reliability_max_blocking_time_sec()
 void test_set_datawriter_reliability_max_blocking_time_nanosec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.nanosec", "175");
+  settings.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.nanosec", "175");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -458,10 +428,9 @@ void test_set_datawriter_reliability_max_blocking_time_nanosec()
 void test_set_datawriter_reliability_max_blocking_time_both()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.sec", "1");
-  accessor.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.nanosec", "175");
+  settings.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.sec", "1");
+  settings.set_qos(QosSettings::data_writer, "reliability.max_blocking_time.nanosec", "175");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -472,9 +441,8 @@ void test_set_datawriter_reliability_max_blocking_time_both()
 void test_set_datawriter_destination_order_kind_by_source_timestamp()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "destination_order.kind", "BY_SOURCE_TIMESTAMP");
+  settings.set_qos(QosSettings::data_writer, "destination_order.kind", "BY_SOURCE_TIMESTAMP");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -485,9 +453,8 @@ void test_set_datawriter_destination_order_kind_by_source_timestamp()
 void test_set_datawriter_destination_order_kind_by_reception_timestamp()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "destination_order.kind", "BY_RECEPTION_TIMESTAMP");
+  settings.set_qos(QosSettings::data_writer, "destination_order.kind", "BY_RECEPTION_TIMESTAMP");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -498,9 +465,8 @@ void test_set_datawriter_destination_order_kind_by_reception_timestamp()
 void test_set_datawriter_history_kind_keep_all()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "history.kind", "KEEP_ALL");
+  settings.set_qos(QosSettings::data_writer, "history.kind", "KEEP_ALL");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -510,9 +476,8 @@ void test_set_datawriter_history_kind_keep_all()
 void test_set_datawriter_history_kind_keep_last()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "history.kind", "KEEP_LAST");
+  settings.set_qos(QosSettings::data_writer, "history.kind", "KEEP_LAST");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -522,9 +487,8 @@ void test_set_datawriter_history_kind_keep_last()
 void test_set_datawriter_history_depth()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "history.depth", "14");
+  settings.set_qos(QosSettings::data_writer, "history.depth", "14");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -534,9 +498,8 @@ void test_set_datawriter_history_depth()
 void test_set_datawriter_resource_limits_max_samples()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "resource_limits.max_samples", "14");
+  settings.set_qos(QosSettings::data_writer, "resource_limits.max_samples", "14");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -546,9 +509,8 @@ void test_set_datawriter_resource_limits_max_samples()
 void test_set_datawriter_resource_limits_max_instances()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "resource_limits.max_instances", "14");
+  settings.set_qos(QosSettings::data_writer, "resource_limits.max_instances", "14");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -558,9 +520,8 @@ void test_set_datawriter_resource_limits_max_instances()
 void test_set_datawriter_resource_limits_max_samples_per_instance()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "resource_limits.max_samples_per_instance", "14");
+  settings.set_qos(QosSettings::data_writer, "resource_limits.max_samples_per_instance", "14");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -570,9 +531,8 @@ void test_set_datawriter_resource_limits_max_samples_per_instance()
 void test_set_datawriter_transport_priority_value()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "transport_priority.value", "3");
+  settings.set_qos(QosSettings::data_writer, "transport_priority.value", "3");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -582,9 +542,8 @@ void test_set_datawriter_transport_priority_value()
 void test_set_datawriter_lifespan_duration_sec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "lifespan.duration.sec", "3");
+  settings.set_qos(QosSettings::data_writer, "lifespan.duration.sec", "3");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -594,9 +553,8 @@ void test_set_datawriter_lifespan_duration_sec()
 void test_set_datawriter_lifespan_duration_nanosec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "lifespan.duration.nanosec", "100");
+  settings.set_qos(QosSettings::data_writer, "lifespan.duration.nanosec", "100");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -606,10 +564,9 @@ void test_set_datawriter_lifespan_duration_nanosec()
 void test_set_datawriter_lifespan_duration_both()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "lifespan.duration.sec", "1");
-  accessor.set_qos(QosSettings::data_writer, "lifespan.duration.nanosec", "100");
+  settings.set_qos(QosSettings::data_writer, "lifespan.duration.sec", "1");
+  settings.set_qos(QosSettings::data_writer, "lifespan.duration.nanosec", "100");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -620,9 +577,8 @@ void test_set_datawriter_lifespan_duration_both()
 void test_set_datawriter_ownership_kind_shared()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "ownership.kind", "SHARED");
+  settings.set_qos(QosSettings::data_writer, "ownership.kind", "SHARED");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -632,9 +588,8 @@ void test_set_datawriter_ownership_kind_shared()
 void test_set_datawriter_ownership_kind_exclusive()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "ownership.kind", "EXCLUSIVE");
+  settings.set_qos(QosSettings::data_writer, "ownership.kind", "EXCLUSIVE");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -644,9 +599,8 @@ void test_set_datawriter_ownership_kind_exclusive()
 void test_set_datawriter_ownership_strength_value()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_writer, "ownership_strength.value", "32");
+  settings.set_qos(QosSettings::data_writer, "ownership_strength.value", "32");
   DDS::DataWriterQos qos;
   settings.apply_to(qos);
 
@@ -657,9 +611,8 @@ void test_set_datawriter_ownership_strength_value()
 void test_set_datareader_durability_volatile()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "durability.kind", "VOLATILE");
+  settings.set_qos(QosSettings::data_reader, "durability.kind", "VOLATILE");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -669,9 +622,8 @@ void test_set_datareader_durability_volatile()
 void test_set_datareader_durability_transient_local()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "durability.kind", "TRANSIENT_LOCAL");
+  settings.set_qos(QosSettings::data_reader, "durability.kind", "TRANSIENT_LOCAL");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -681,9 +633,8 @@ void test_set_datareader_durability_transient_local()
 void test_set_datareader_durability_transient()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "durability.kind", "TRANSIENT");
+  settings.set_qos(QosSettings::data_reader, "durability.kind", "TRANSIENT");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -693,9 +644,8 @@ void test_set_datareader_durability_transient()
 void test_set_datareader_durability_persistent()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "durability.kind", "PERSISTENT");
+  settings.set_qos(QosSettings::data_reader, "durability.kind", "PERSISTENT");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -704,9 +654,8 @@ void test_set_datareader_durability_persistent()
 
 void test_set_datareader_deadline_sec() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "deadline.period.sec", "2");
+  settings.set_qos(QosSettings::data_reader, "deadline.period.sec", "2");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -716,9 +665,8 @@ void test_set_datareader_deadline_sec() {
 
 void test_set_datareader_deadline_nanosec() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "deadline.period.nanosec", "200");
+  settings.set_qos(QosSettings::data_reader, "deadline.period.nanosec", "200");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -728,10 +676,9 @@ void test_set_datareader_deadline_nanosec() {
 
 void test_set_datareader_deadline_both() {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "deadline.period.sec", "3");
-  accessor.set_qos(QosSettings::data_reader, "deadline.period.nanosec", "500");
+  settings.set_qos(QosSettings::data_reader, "deadline.period.sec", "3");
+  settings.set_qos(QosSettings::data_reader, "deadline.period.nanosec", "500");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -743,9 +690,8 @@ void
 test_set_datareader_liveliness_lease_duration_sec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "liveliness.lease_duration.sec", "2");
+  settings.set_qos(QosSettings::data_reader, "liveliness.lease_duration.sec", "2");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -757,9 +703,8 @@ void
 test_set_datareader_liveliness_lease_duration_nanosec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "liveliness.lease_duration.nanosec", "333");
+  settings.set_qos(QosSettings::data_reader, "liveliness.lease_duration.nanosec", "333");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -771,10 +716,9 @@ void
 test_set_datareader_liveliness_lease_duration_both()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "liveliness.lease_duration.sec", "1");
-  accessor.set_qos(QosSettings::data_reader, "liveliness.lease_duration.nanosec", "333");
+  settings.set_qos(QosSettings::data_reader, "liveliness.lease_duration.sec", "1");
+  settings.set_qos(QosSettings::data_reader, "liveliness.lease_duration.nanosec", "333");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -785,9 +729,8 @@ test_set_datareader_liveliness_lease_duration_both()
 void test_set_datareader_reliability_kind_best_effort()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reliability.kind", "BEST_EFFORT");
+  settings.set_qos(QosSettings::data_reader, "reliability.kind", "BEST_EFFORT");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -797,9 +740,8 @@ void test_set_datareader_reliability_kind_best_effort()
 void test_set_datareader_reliability_kind_reliable()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reliability.kind", "RELIABLE");
+  settings.set_qos(QosSettings::data_reader, "reliability.kind", "RELIABLE");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -809,9 +751,8 @@ void test_set_datareader_reliability_kind_reliable()
 void test_set_datareader_reliability_max_blocking_time_sec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.sec", "2");
+  settings.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.sec", "2");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -822,9 +763,8 @@ void test_set_datareader_reliability_max_blocking_time_sec()
 void test_set_datareader_reliability_max_blocking_time_nanosec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.nanosec", "175");
+  settings.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.nanosec", "175");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -835,10 +775,9 @@ void test_set_datareader_reliability_max_blocking_time_nanosec()
 void test_set_datareader_reliability_max_blocking_time_both()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.sec", "1");
-  accessor.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.nanosec", "175");
+  settings.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.sec", "1");
+  settings.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.nanosec", "175");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -849,9 +788,8 @@ void test_set_datareader_reliability_max_blocking_time_both()
 void test_set_datareader_destination_order_kind_by_source_timestamp()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "destination_order.kind", "BY_SOURCE_TIMESTAMP");
+  settings.set_qos(QosSettings::data_reader, "destination_order.kind", "BY_SOURCE_TIMESTAMP");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -862,9 +800,8 @@ void test_set_datareader_destination_order_kind_by_source_timestamp()
 void test_set_datareader_destination_order_kind_by_reception_timestamp()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "destination_order.kind", "BY_RECEPTION_TIMESTAMP");
+  settings.set_qos(QosSettings::data_reader, "destination_order.kind", "BY_RECEPTION_TIMESTAMP");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -875,9 +812,8 @@ void test_set_datareader_destination_order_kind_by_reception_timestamp()
 void test_set_datareader_history_kind_keep_all()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "history.kind", "KEEP_ALL");
+  settings.set_qos(QosSettings::data_reader, "history.kind", "KEEP_ALL");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -887,9 +823,8 @@ void test_set_datareader_history_kind_keep_all()
 void test_set_datareader_history_kind_keep_last()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "history.kind", "KEEP_LAST");
+  settings.set_qos(QosSettings::data_reader, "history.kind", "KEEP_LAST");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -899,9 +834,8 @@ void test_set_datareader_history_kind_keep_last()
 void test_set_datareader_history_depth()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "history.depth", "21");
+  settings.set_qos(QosSettings::data_reader, "history.depth", "21");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -911,9 +845,8 @@ void test_set_datareader_history_depth()
 void test_set_datareader_resource_limits_max_samples()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "resource_limits.max_samples", "14");
+  settings.set_qos(QosSettings::data_reader, "resource_limits.max_samples", "14");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -923,9 +856,8 @@ void test_set_datareader_resource_limits_max_samples()
 void test_set_datareader_resource_limits_max_instances()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "resource_limits.max_instances", "14");
+  settings.set_qos(QosSettings::data_reader, "resource_limits.max_instances", "14");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -935,9 +867,8 @@ void test_set_datareader_resource_limits_max_instances()
 void test_set_datareader_resource_limits_max_samples_per_instance()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "resource_limits.max_samples_per_instance", "14");
+  settings.set_qos(QosSettings::data_reader, "resource_limits.max_samples_per_instance", "14");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -947,9 +878,8 @@ void test_set_datareader_resource_limits_max_samples_per_instance()
 void test_set_datareader_ownership_kind_shared()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "ownership.kind", "SHARED");
+  settings.set_qos(QosSettings::data_reader, "ownership.kind", "SHARED");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -959,9 +889,8 @@ void test_set_datareader_ownership_kind_shared()
 void test_set_datareader_ownership_kind_exclusive()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "ownership.kind", "EXCLUSIVE");
+  settings.set_qos(QosSettings::data_reader, "ownership.kind", "EXCLUSIVE");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -971,9 +900,8 @@ void test_set_datareader_ownership_kind_exclusive()
 void test_set_datareader_time_based_filter_minimum_separation_sec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.sec", "2");
+  settings.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.sec", "2");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -984,9 +912,8 @@ void test_set_datareader_time_based_filter_minimum_separation_sec()
 void test_set_datareader_time_based_filter_minimum_separation_nanosec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.nanosec", "170");
+  settings.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.nanosec", "170");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -997,10 +924,9 @@ void test_set_datareader_time_based_filter_minimum_separation_nanosec()
 void test_set_datareader_time_based_filter_minimum_separation_both()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.sec", "1");
-  accessor.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.nanosec", "100");
+  settings.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.sec", "1");
+  settings.set_qos(QosSettings::data_reader, "time_based_filter.minimum_separation.nanosec", "100");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -1011,9 +937,8 @@ void test_set_datareader_time_based_filter_minimum_separation_both()
 void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_sec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec", "5");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec", "5");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -1024,9 +949,8 @@ void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_
 void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_nanosec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec", "5000");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec", "5000");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -1037,10 +961,9 @@ void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_
 void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_both()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec", "1000");
-  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec", "1");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec", "1000");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec", "1");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -1051,9 +974,8 @@ void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_
 void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_sec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.sec", "5");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.sec", "5");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -1064,9 +986,8 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
 void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec", "5000");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec", "5000");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -1077,10 +998,9 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
 void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both()
 {
   QosSettings settings;
-  QosSettingsAccessor accessor(settings);
 
-  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec", "1000");
-  accessor.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.sec", "1");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec", "1000");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.sec", "1");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 

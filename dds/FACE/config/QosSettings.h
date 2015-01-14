@@ -28,8 +28,6 @@ class OpenDDS_FACE_Export QosSettings {
     void apply_to(DDS::DataReaderQos& target) const;
 
   private:
-    friend class QosSettingsAccessor;
-
     // DomainPartipantFactory, DomainParticipant, and Topic qos 
     // are not usable in FACE
     DDS::PublisherQos publisher_qos_;

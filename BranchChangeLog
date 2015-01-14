@@ -1,3 +1,10 @@
+Wed Jan 14 19:08:12 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.h:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Fix test failures, remove accessor.
+
 Wed Jan 14 18:59:22 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/FACE/Unit/QosSettingsTest.cpp:
