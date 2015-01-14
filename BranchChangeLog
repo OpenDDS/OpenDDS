@@ -1,3 +1,10 @@
+Wed Jan 14 18:49:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Reliability:
+
+          New test that sets qos policy on datawriter and datareader.
+
 Wed Jan 14 18:46:06 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/FaceTSS.cpp:
