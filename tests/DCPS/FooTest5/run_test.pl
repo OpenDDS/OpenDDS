@@ -47,7 +47,7 @@ elsif ($test->flag('multicast')) {
   $use_multicast = 1;
   $write_interval_ms = 50;
 }
-elsif ($test->flag('rtps')) {
+elsif ($test->flag('rtps') || $PerlDDS::SafetyProfile) {
   $use_rtps_transport = 1;
   $write_interval_ms = 50;
 }
