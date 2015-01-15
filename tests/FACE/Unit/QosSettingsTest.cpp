@@ -1,6 +1,7 @@
 #include "dds/FACE/config/QosSettings.h"
 
 #include <string.h>
+#include <iostream>
 
 unsigned int assertions = 0;
 
