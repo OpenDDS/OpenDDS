@@ -6,6 +6,7 @@
 #include "SimpleTypeSupportImpl.h"
 #include "dds/DCPS/InstanceHandle.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "../common/TestSupport.h"
 
@@ -83,7 +84,7 @@ public:
   void delayed_deliver () {
     ACE_DEBUG((LM_INFO,"DDS_TEST delayed deliver\n"));
 
-    sleep (3);
+    ACE_OS::sleep (3);
     ACE_DEBUG((LM_INFO,"DDS_TEST calling data_delivered\n"));
 
     this->delayed_deliver_container_->data_delivered(this->element_to_deliver_);
