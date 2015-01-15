@@ -22,7 +22,11 @@ int main(int argc, const char* argv[])
   if (!status) {
     FACE::CONNECTION_DIRECTION_TYPE dir;
     char connection_name[16];
+#if defined OPENDDS_SAFETY_PROFILE
+    snprintf(connection_name, sizeof(connection_name), "sub_%d", part);
+#else
     ACE_OS::snprintf(connection_name, sizeof(connection_name), "sub_%d", part);
+#endif
     FACE::TS::Create_Connection(
       connection_name, FACE::PUB_SUB, connId, dir, size, status);
   }

@@ -1,3 +1,10 @@
+Thu Jan 15 22:53:01 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+
+          Only use ACE_OS::snprintf when NOT using safety profile build.
+
 Thu Jan 15 22:11:39 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:
