@@ -312,7 +312,24 @@ TransportClient::associate(const AssociationData& data, bool active)
             data.publication_transport_priority_,
             data.remote_reliable_, data.remote_durable_};
 
-          TransportImpl::AcceptConnectResult res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
+          TransportImpl::AcceptConnectResult res;
+          {
+            // This thread acquired lock_ at the beginning of this method.  Calling accept_datalink might require getting the lock for the transport's reactor.
+            // If the current thread is not an event handler for the transport's reactor, e.g., the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
+            // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
+            // To avoid deadlock, we must reverse the lock.
+            ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+            res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
+          }
+
+          //NEED to check that pend is still valid here after you re-acquire the lock_ after accepting the datalink
+          PendingMap::iterator iter_after_accept = pending_.find(data.remote_id_);
+
+          if (iter_after_accept == pending_.end()) {
+            //If Pending Assoc is no longer in pending_ then use_datalink_i has been called from an
+            //active side connection and completed, thus pend was removed from pending_.  Can return true.
+            return true;
+          }
 
           if (res.success_ && !res.link_.is_nil()) {
 
