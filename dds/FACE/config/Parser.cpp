@@ -233,7 +233,11 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
         status = parse_qos(
             config, subkey, section_name.c_str(), QosSettings::data_reader);
       } else if (std::strcmp(section_type, PUBLISHER_QOS_SECTION) == 0) {
+        status = parse_qos(
+            config, subkey, section_name.c_str(), QosSettings::publisher);
       } else if (std::strcmp(section_type, SUBSCRIBER_QOS_SECTION) == 0) {
+        status = parse_qos(
+            config, subkey, section_name.c_str(), QosSettings::subscriber);
       } else {
         printf("unknown section %s\n", section_type);
       }

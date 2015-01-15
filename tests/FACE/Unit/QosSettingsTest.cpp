@@ -44,13 +44,13 @@ void test_set_publisher_single_partition() {
 void test_set_publisher_multiple_partitions() {
   QosSettings settings;
 
-  settings.set_qos(QosSettings::publisher, "partition.name", "Foo123");
-  settings.set_qos(QosSettings::publisher, "partition.name", "Bar234");
+  settings.set_qos(QosSettings::publisher, "partition.name", "Foo123,Bar234");
 
   DDS::PublisherQos qos;
   settings.apply_to(qos);
 
   TEST_CHECK(2 == qos.partition.name.length());
+std::cout << "part 0 " << qos.partition.name[0] << std::endl;
   TEST_CHECK(!strcmp(qos.partition.name[0], "Foo123"));
   TEST_CHECK(!strcmp(qos.partition.name[1], "Bar234"));
 }
@@ -656,6 +656,7 @@ void test_set_datareader_deadline_sec() {
   QosSettings settings;
 
   settings.set_qos(QosSettings::data_reader, "deadline.period.sec", "2");
+  settings.set_qos(QosSettings::data_reader, "deadline.period.nanosec", "0");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -666,6 +667,7 @@ void test_set_datareader_deadline_sec() {
 void test_set_datareader_deadline_nanosec() {
   QosSettings settings;
 
+  settings.set_qos(QosSettings::data_reader, "deadline.period.sec", "0");
   settings.set_qos(QosSettings::data_reader, "deadline.period.nanosec", "200");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
@@ -692,6 +694,7 @@ test_set_datareader_liveliness_lease_duration_sec()
   QosSettings settings;
 
   settings.set_qos(QosSettings::data_reader, "liveliness.lease_duration.sec", "2");
+  settings.set_qos(QosSettings::data_reader, "liveliness.lease_duration.nanosec", "0");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -704,6 +707,7 @@ test_set_datareader_liveliness_lease_duration_nanosec()
 {
   QosSettings settings;
 
+  settings.set_qos(QosSettings::data_reader, "liveliness.lease_duration.sec", "0");
   settings.set_qos(QosSettings::data_reader, "liveliness.lease_duration.nanosec", "333");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
@@ -753,6 +757,7 @@ void test_set_datareader_reliability_max_blocking_time_sec()
   QosSettings settings;
 
   settings.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.sec", "2");
+  settings.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.nanosec", "0");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -764,6 +769,7 @@ void test_set_datareader_reliability_max_blocking_time_nanosec()
 {
   QosSettings settings;
 
+  settings.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.sec", "0");
   settings.set_qos(QosSettings::data_reader, "reliability.max_blocking_time.nanosec", "175");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
@@ -939,6 +945,7 @@ void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_
   QosSettings settings;
 
   settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec", "5");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec", "0");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -950,6 +957,7 @@ void test_set_datareader_reader_data_lifecycle_autopurge_nowriter_samples_delay_
 {
   QosSettings settings;
 
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.sec", "0");
   settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_nowriter_samples_delay.nanosec", "5000");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
@@ -976,6 +984,7 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
   QosSettings settings;
 
   settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.sec", "5");
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec", "0");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);
 
@@ -987,6 +996,7 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
 {
   QosSettings settings;
 
+  settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.sec", "0");
   settings.set_qos(QosSettings::data_reader, "reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec", "5000");
   DDS::DataReaderQos qos;
   settings.apply_to(qos);

@@ -152,8 +152,25 @@ set_partition_name_qos(
 {
   bool matched = false;
   if (!std::strcmp(name, "partition.name")) {
+    // Value can be a comma-separated list
+    const char* start = value;
+    char buffer[128];
+    memset(buffer, 0, sizeof(buffer));
+    while (const char* next_comma = strchr(start, ',')) {
+      // Copy into temp buffer, won't have null
+      strncpy(buffer, start, next_comma - start);
+      // Append null
+      buffer[next_comma - start] = '\0';
+      // Add to QOS
+      target.name.length(target.name.length() + 1);
+      target.name[target.name.length() - 1] = static_cast<const char*>(buffer);
+      // Advance pointer
+      start = next_comma + 1;
+    }
+    // Append everything after last comma
     target.name.length(target.name.length() + 1);
-    target.name[target.name.length() - 1] = value;
+    target.name[target.name.length() - 1] = start;
+
     matched = true;
   }
   return matched;
