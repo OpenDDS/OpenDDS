@@ -22,7 +22,6 @@ DataSampleElement::DataSampleElement(
     publication_id_(publication_id),
     num_subs_(0),
     send_listener_(send_listener),
-    space_available_(false),
     handle_(handle),
     transport_send_element_allocator_(tse_allocator),
     transport_customized_element_allocator_(tce_allocator),
@@ -45,7 +44,6 @@ DataSampleElement::DataSampleElement(const DataSampleElement& elem)
   , publication_id_(elem.publication_id_)
   , num_subs_(elem.num_subs_)
   , send_listener_(elem.send_listener_)
-  , space_available_(elem.space_available_)
   , handle_(elem.handle_)
   , transport_send_element_allocator_(
       elem.transport_send_element_allocator_)
@@ -90,7 +88,6 @@ DataSampleElement::operator=(const DataSampleElement& rhs)
   next_send_sample_ = rhs.next_send_sample_;
   previous_send_sample_ = rhs.previous_send_sample_;
   send_listener_ = rhs.send_listener_;
-  space_available_ = rhs.space_available_;
   handle_ = rhs.handle_;
   transport_send_element_allocator_ = rhs.transport_send_element_allocator_;
   transport_customized_element_allocator_ =
@@ -204,20 +201,6 @@ TransportSendListener*
 DataSampleElement::get_send_listener()
 {
   return send_listener_;
-}
-
-ACE_INLINE
-bool
-DataSampleElement::space_available() const
-{
-  return space_available_;
-}
-
-ACE_INLINE
-void
-DataSampleElement::set_space_available(bool is_space_available)
-{
-  this->space_available_ = is_space_available;
 }
 
 ACE_INLINE

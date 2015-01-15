@@ -93,9 +93,6 @@ public:
   TransportSendListener* get_send_listener() const;
   TransportSendListener* get_send_listener();
 
-  bool space_available() const;
-  void set_space_available(bool is_space_available);
-
   PublicationInstance* get_handle() const;
 
   TransportSendElementAllocator* get_transport_send_element_allocator() const;
@@ -127,9 +124,6 @@ private:
   /// been delivered.  This needs to be set prior to using the
   /// TransportClient to send().
   TransportSendListener* send_listener_;
-
-  /// The flag indicates space availability for this waiting DataSample.
-  bool space_available_;
 
   /// The pointer to the object that contains the instance information
   /// and data sample list.

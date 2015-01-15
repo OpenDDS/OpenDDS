@@ -1,3 +1,15 @@
+Thu Jan 15 20:22:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Removed is_space_available and accessors/mutators.
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Added debugging in Test Case 3 to see where some tests
+          are timing out.
+
 Thu Jan 15 16:56:30 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:

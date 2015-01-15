@@ -760,9 +760,14 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           test->log_send_state_lists("After TEST_ASSERT 4th obtain_buffer successful (block & wakeup)", test_data_container);
 
+          ACE_DEBUG((LM_DEBUG, "Cleanup Test Case 3: about to unregister all from the test data container\n"));
           test_data_container->unregister_all();
 
+          ACE_DEBUG((LM_DEBUG, "Cleanup Test Case 3: about to wait for the Delayed_Delivery_Handler\n"));
+
           ddh.wait();
+          ACE_DEBUG((LM_DEBUG, "Cleanup Test Case 3: deleting test_data_container and fase_dw\n"));
+
           delete test_data_container;
           delete fast_dw;
         } //End Test Case 3 scope
