@@ -10,6 +10,8 @@
 
 #include "../common/TestSupport.h"
 
+#include "ace/Task.h"
+
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -84,7 +86,6 @@ public:
   void delayed_deliver () {
     ACE_DEBUG((LM_INFO,"DDS_TEST delayed deliver\n"));
 
-    ACE_OS::sleep (3);
     ACE_DEBUG((LM_INFO,"DDS_TEST calling data_delivered\n"));
 
     this->delayed_deliver_container_->data_delivered(this->element_to_deliver_);
@@ -277,15 +278,23 @@ public:
 };
 
 // Writer thread.
-static void *
-delayed_deliver (void *arg)
+class Delayed_Deliver_Handler : public ACE_Task_Base
 {
-  DDS_TEST* test = (DDS_TEST *) arg;
+public:
+  DDS_TEST* test_;
 
-  test->delayed_deliver();
+  Delayed_Deliver_Handler (DDS_TEST* test) : test_(test)
+  {}
 
-  return 0;
-}
+  virtual int svc (void)
+  {
+    ACE_OS::sleep(3);
+
+    test_->delayed_deliver();
+
+    return 0;
+  }
+};
 
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
@@ -710,16 +719,15 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           TEST_ASSERT(errno == ETIME);
 
-          // threads manager
-          ACE_Thread_Manager& tm = *ACE_Thread_Manager::instance ();
+          test->log_send_state_lists("After TEST_ASSERT 3rd obtain_buffer TIMED OUT", test_data_container);
 
           // Create reader thread.
           test->prep_delayed_deliver(test_data_container, element_1);
-          ACE_thread_t my_thread;
-          int spawn_retval = tm.spawn ((ACE_THR_FUNC) delayed_deliver,(void *) test, THR_NEW_LWP | THR_JOINABLE | THR_INHERIT_SCHED, &my_thread );
 
-          if (spawn_retval == -1)
-            ACE_ERROR_RETURN ((LM_ERROR, "thread create for reader failed"), -1);
+          // Create delayed deliver thread to wait then call data_delivered
+          // simulating transport being finished with a sample
+          Delayed_Deliver_Handler ddh (test);
+          ddh.activate();
 
           DataSampleElement* element_3 = 0;
 
@@ -748,15 +756,13 @@ int run_test(int argc, ACE_TCHAR *argv[])
             ACE_ERROR((LM_ERROR, "failed to enqueue element 3\n"));
           }
 
-          // Wait
-          if (tm.count_threads() > 1 && tm.join(my_thread, 0) == -1)
-            ACE_ERROR_RETURN ((LM_ERROR, "thread join failed"), -1);
-
           TEST_ASSERT(ret == DDS::RETCODE_OK);
 
-          test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
+          test->log_send_state_lists("After TEST_ASSERT 4th obtain_buffer successful (block & wakeup)", test_data_container);
 
           test_data_container->unregister_all();
+
+          ddh.wait();
           delete test_data_container;
           delete fast_dw;
         } //End Test Case 3 scope

@@ -1,3 +1,9 @@
+Thu Jan 15 15:22:54 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Made delayed deliver use ACE_Task instead of Thread_Manager
+
 Thu Jan 15 04:03:38 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/idl/HTemplate.txt:
