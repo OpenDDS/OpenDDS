@@ -51,7 +51,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
   const DDS::ReadCondition_var rc =
     typedReader->create_readcondition(DDS::NOT_READ_SAMPLE_STATE,
                                       DDS::ANY_VIEW_STATE,
-                                      DDS::ANY_INSTANCE_STATE);
+                                      DDS::ALIVE_INSTANCE_STATE);
   const DDS::WaitSet_var ws = new DDS::WaitSet;
   ws->attach_condition(rc);
 

@@ -1,3 +1,9 @@
+Thu Jan 15 20:30:23 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+
+          Set readcondition to filter ALIVE_INSTANCE_STATE
+
 Thu Jan 15 18:11:02 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest5/run_test.pl:
