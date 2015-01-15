@@ -1,3 +1,9 @@
+Thu Jan 15 04:03:38 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/idl/HTemplate.txt:
+
+          Remove trailing whitespace.
+
 Thu Jan 15 00:44:35 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
