@@ -1,3 +1,9 @@
+Fri Jan 16 17:29:13 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Fixed test timing out due to race in logging the send state lists.
+
 Thu Jan 15 20:22:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:

@@ -84,14 +84,13 @@ public:
 
 
   void delayed_deliver () {
-    ACE_DEBUG((LM_INFO,"DDS_TEST delayed deliver\n"));
-
-    ACE_DEBUG((LM_INFO,"DDS_TEST calling data_delivered\n"));
+    ACE_GUARD (ACE_Recursive_Thread_Mutex,
+        guard,
+        this->lock_wdc(delayed_deliver_container_));
 
     this->delayed_deliver_container_->data_delivered(this->element_to_deliver_);
     this->log_send_state_lists("DDS_TEST data_delivered complete:", this->delayed_deliver_container_);
 
-    ACE_DEBUG((LM_INFO,"DDS_TEST done calling data_delivered\n"));
   }
 
   void log_send_state_lists (std::string description, WriteDataContainer* wdc) const {
@@ -288,10 +287,7 @@ public:
 
   virtual int svc (void)
   {
-    ACE_OS::sleep(3);
-
     test_->delayed_deliver();
-
     return 0;
   }
 };
@@ -601,7 +597,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           dw_qos.resource_limits.max_samples = 2;
 
-          dw_qos.reliability.max_blocking_time.sec = 5;
+          dw_qos.reliability.max_blocking_time.sec = 2;
           dw_qos.reliability.max_blocking_time.nanosec = MAX_BLOCKING_TIME_NANO;
 
           Test::SimpleDataWriterImpl* fast_dw = new Test::SimpleDataWriterImpl();
@@ -760,13 +756,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           test->log_send_state_lists("After TEST_ASSERT 4th obtain_buffer successful (block & wakeup)", test_data_container);
 
-          ACE_DEBUG((LM_DEBUG, "Cleanup Test Case 3: about to unregister all from the test data container\n"));
-          test_data_container->unregister_all();
-
-          ACE_DEBUG((LM_DEBUG, "Cleanup Test Case 3: about to wait for the Delayed_Delivery_Handler\n"));
-
           ddh.wait();
-          ACE_DEBUG((LM_DEBUG, "Cleanup Test Case 3: deleting test_data_container and fase_dw\n"));
+
+          test_data_container->unregister_all();
 
           delete test_data_container;
           delete fast_dw;
