@@ -32,6 +32,8 @@ int main(int argc, const char* argv[])
 
     std::cout << "Publisher: about to send_message()" << std::endl;
     for (CORBA::Long i = 0; i < part; ++i) {
+      if (i) ACE_OS::sleep(1);
+      
       Messenger::Message msg = {"Hello, world.", part};
       FACE::TRANSACTION_ID_TYPE txn;
       std::cout << "  sending part " << part << std::endl;

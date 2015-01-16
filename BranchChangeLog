@@ -1,3 +1,13 @@
+Fri Jan 16 22:11:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+
+          Sleep between sends, as we don't have reliability.
+
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+
+          Log which subscriber got message.
+
 Fri Jan 16 20:53:39 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/config/QosSettings.cpp:

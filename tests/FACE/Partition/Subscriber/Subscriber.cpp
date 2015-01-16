@@ -39,7 +39,7 @@ int main(int argc, const char* argv[])
     for (long i = 0; i < part; ++i) {
       FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
       if (status != FACE::NO_ERROR) break;
-      std::cout << msg.text.in() << "\tpart: " << msg.count << std::endl;
+      std::cout << "Sub " << part << ": " << msg.text.in() << "\tpart: " << msg.count << std::endl;
       partitions_received[msg.count - 1] = true;
     }
     if (status) {
