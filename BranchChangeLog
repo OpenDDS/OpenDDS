@@ -1,3 +1,9 @@
+Fri Jan 16 23:07:46 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Partition/face_config.ini:
+
+          Explicitly set DCPSGlobalTransportConfig, was running with TCP.
+
 Fri Jan 16 22:11:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/FACE/Partition/Publisher/Publisher.cpp:
