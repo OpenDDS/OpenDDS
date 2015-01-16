@@ -1,3 +1,10 @@
+Fri Jan 16 20:53:39 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Set liveliness kind from file.
+
 Fri Jan 16 17:35:20 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/ManyTopicTest/publisher.cpp:

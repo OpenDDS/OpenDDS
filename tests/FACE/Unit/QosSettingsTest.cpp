@@ -338,6 +338,42 @@ void test_set_datawriter_latency_budget_both() {
 }
 
 void
+test_set_datawriter_liveliness_kind_automatic()
+{
+  QosSettings settings;
+
+  settings.set_qos(QosSettings::data_writer, "liveliness.kind", "AUTOMATIC");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::AUTOMATIC_LIVELINESS_QOS  == qos.liveliness.kind);
+}
+
+void
+test_set_datawriter_liveliness_kind_manual_by_topic()
+{
+  QosSettings settings;
+
+  settings.set_qos(QosSettings::data_writer, "liveliness.kind", "MANUAL_BY_TOPIC");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS  == qos.liveliness.kind);
+}
+
+void
+test_set_datawriter_liveliness_kind_manual_by_participant()
+{
+  QosSettings settings;
+
+  settings.set_qos(QosSettings::data_writer, "liveliness.kind", "MANUAL_BY_PARTICIPANT");
+  DDS::DataWriterQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS  == qos.liveliness.kind);
+}
+
+void
 test_set_datawriter_liveliness_lease_duration_sec()
 {
   QosSettings settings;
@@ -687,6 +723,42 @@ void test_set_datareader_deadline_both() {
 
   TEST_CHECK(3 == qos.deadline.period.sec);
   TEST_CHECK(500 == qos.deadline.period.nanosec);
+}
+
+void
+test_set_datareader_liveliness_kind_automatic()
+{
+  QosSettings settings;
+
+  settings.set_qos(QosSettings::data_reader, "liveliness.kind", "AUTOMATIC");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::AUTOMATIC_LIVELINESS_QOS  == qos.liveliness.kind);
+}
+
+void
+test_set_datareader_liveliness_kind_manual_by_topic()
+{
+  QosSettings settings;
+
+  settings.set_qos(QosSettings::data_reader, "liveliness.kind", "MANUAL_BY_TOPIC");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS  == qos.liveliness.kind);
+}
+
+void
+test_set_datareader_liveliness_kind_manual_by_participant()
+{
+  QosSettings settings;
+
+  settings.set_qos(QosSettings::data_reader, "liveliness.kind", "MANUAL_BY_PARTICIPANT");
+  DDS::DataReaderQos qos;
+  settings.apply_to(qos);
+
+  TEST_CHECK(DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS  == qos.liveliness.kind);
 }
 
 void
@@ -1054,6 +1126,9 @@ int main(int, const char** )
   test_set_datawriter_latency_budget_sec();
   test_set_datawriter_latency_budget_nanosec();
   test_set_datawriter_latency_budget_both();
+  test_set_datawriter_liveliness_kind_automatic();
+  test_set_datawriter_liveliness_kind_manual_by_topic();
+  test_set_datawriter_liveliness_kind_manual_by_participant();
   test_set_datawriter_liveliness_lease_duration_sec();
   test_set_datawriter_liveliness_lease_duration_nanosec();
   test_set_datawriter_liveliness_lease_duration_both();
@@ -1086,6 +1161,9 @@ int main(int, const char** )
   test_set_datareader_deadline_sec();
   test_set_datareader_deadline_nanosec();
   test_set_datareader_deadline_both();
+  test_set_datareader_liveliness_kind_automatic();
+  test_set_datareader_liveliness_kind_manual_by_topic();
+  test_set_datareader_liveliness_kind_manual_by_participant();
   test_set_datareader_liveliness_lease_duration_sec();
   test_set_datareader_liveliness_lease_duration_nanosec();
   test_set_datareader_liveliness_lease_duration_both();

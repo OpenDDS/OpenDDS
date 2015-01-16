@@ -216,6 +216,25 @@ set_latency_budget_duration_qos(
     target.duration, "latency_budget.duration", name, value);
 }
 
+bool set_liveliness_kind_qos(
+   DDS::LivelinessQosPolicy& target, const char* name, const char* value)
+{
+  bool matched = false;
+  if (!std::strcmp(name, "liveliness.kind")) {
+    if (!std::strcmp(value, "AUTOMATIC")) {
+      target.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+      matched = true;
+    } else if (!std::strcmp(value, "MANUAL_BY_TOPIC")) {
+      target.kind = DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS;
+      matched = true;
+    } else if (!std::strcmp(value, "MANUAL_BY_PARTICIPANT")) {
+      target.kind = DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS;
+      matched = true;
+    }
+  }
+  return matched;
+}
+
 bool set_liveliness_lease_duration_qos(
    DDS::LivelinessQosPolicy& target, const char* name, const char* value)
 {
@@ -438,7 +457,7 @@ int QosSettings::set_qos(
     // durability service not settable - not supporting those durabilities
     set_deadline_period_qos(target.deadline, name, value) ||
     set_latency_budget_duration_qos(target.latency_budget, name, value) ||
-    // liveliness kind not settable - can't be manual
+    set_liveliness_kind_qos(target.liveliness, name, value) ||
     set_liveliness_lease_duration_qos(target.liveliness, name, value) ||
     set_reliability_kind_qos(target.reliability, name, value) ||
     set_reliability_max_blocking_time_qos(target.reliability, name, value) ||
@@ -469,7 +488,7 @@ int QosSettings::set_qos(
     // durability service not settable
     set_deadline_period_qos(target.deadline, name, value) || 
     set_latency_budget_duration_qos(target.latency_budget, name, value) ||
-    // liveliness kind not settable - can't be manual
+    set_liveliness_kind_qos(target.liveliness, name, value) ||
     set_liveliness_lease_duration_qos(target.liveliness, name, value) ||
     set_reliability_kind_qos(target.reliability, name, value) ||
     set_reliability_max_blocking_time_qos(target.reliability, name, value) ||
@@ -488,8 +507,6 @@ int QosSettings::set_qos(
         target.reader_data_lifecycle, name, value) ||
     set_reader_data_lifecycle_autopurge_disposed_samples_delay(
         target.reader_data_lifecycle, name, value);
-    // ReaderDataLifecycleQosPolicy reader_data_lifecycle;
-    // Read about this ??
 
   if (!matched) {
     log_parser_error("data reader", name, value);
