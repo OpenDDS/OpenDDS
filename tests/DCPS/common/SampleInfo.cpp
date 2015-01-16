@@ -68,28 +68,28 @@ void PrintSampleInfo(const ::DDS::SampleInfo& si)
 
   char buf[512] ;
 
-  ACE_OS::sprintf(buf, "  source_timestamp: %d %d\n",
+  ACE_OS::snprintf(buf, sizeof buf, "  source_timestamp: %d %d\n",
                        si.source_timestamp.sec, si.source_timestamp.nanosec) ;
   out += buf ;
 
-  ACE_OS::sprintf(buf, "  instance_handle: %x\n", si.instance_handle) ;
+  ACE_OS::snprintf(buf, sizeof buf, "  instance_handle: %x\n", si.instance_handle) ;
   out += buf ;
 
-  ACE_OS::sprintf(buf, "  disposed_generation_count: %d\n",
+  ACE_OS::snprintf(buf, sizeof buf, "  disposed_generation_count: %d\n",
                   si.disposed_generation_count) ;
   out += buf ;
 
-  ACE_OS::sprintf(buf, "  no_writers_generation_count: %d\n",
+  ACE_OS::snprintf(buf, sizeof buf, "  no_writers_generation_count: %d\n",
                   si.no_writers_generation_count) ;
   out += buf ;
 
-  ACE_OS::sprintf(buf, "  sample_rank: %d\n", si.sample_rank) ;
+  ACE_OS::snprintf(buf, sizeof buf, "  sample_rank: %d\n", si.sample_rank) ;
   out += buf ;
 
-  ACE_OS::sprintf(buf, "  generation_rank: %d\n", si.generation_rank) ;
+  ACE_OS::snprintf(buf, sizeof buf, "  generation_rank: %d\n", si.generation_rank) ;
   out += buf ;
 
-  ACE_OS::sprintf(buf, "  absolute_generation_rank: %d\n",
+  ACE_OS::snprintf(buf, sizeof buf, "  absolute_generation_rank: %d\n",
                   si.absolute_generation_rank) ;
   out += buf ;
 

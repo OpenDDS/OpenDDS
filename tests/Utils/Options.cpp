@@ -29,7 +29,7 @@ std::string
 Arguments::get_as_string(double val)
 {
   char str_val[100];
-  ACE_OS::sprintf(str_val, "%f", val);
+  ACE_OS::snprintf(str_val, sizeof str_val, "%f", val);
   return str_val;
 }
 
