@@ -1,3 +1,13 @@
+Fri Jan 16 15:43:07 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated for tests that won't run under safety profile.
+
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+
+          Cleaned up unused or unneeded cruft in the script.
+
 Thu Jan 15 22:53:01 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/FACE/Partition/Publisher/Publisher.cpp:

@@ -82,8 +82,8 @@ tests/DCPS/FooTest5/run_test.pl blocking: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl blocking_timeout: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mwmr: !DCPS_MIN
 tests/DCPS/FooTest5/run_test.pl mr: !DCPS_MIN
-tests/DCPS/FooTest5/run_test.pl multicast mr: !DCPS_MIN
-tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN
+tests/DCPS/FooTest5/run_test.pl multicast mr: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/FooTest5/run_test.pl mixed_trans: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5_0/run_test.pl: !STATIC !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5_0/run_test.pl udp: !DCPS_MIN !STATIC !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/FooTest5_0/run_test.pl rtps: !DCPS_MIN !STATIC RTPS !DDS_NO_OWNERSHIP_PROFILE
