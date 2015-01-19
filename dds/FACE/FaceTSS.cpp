@@ -188,14 +188,14 @@ namespace {
     if (!topic) return INVALID_PARAM;
 
     if (dir == SOURCE) {
-      DDS::PublisherQos publisher_qos;
+      ::DDS::PublisherQos publisher_qos;
       qos_settings.apply_to(publisher_qos);
       
       const ::DDS::Publisher_var pub =
         dp->create_publisher(publisher_qos, 0, 0);
       if (!pub) return INVALID_PARAM;
 
-      DDS::DataWriterQos datawriter_qos;
+      ::DDS::DataWriterQos datawriter_qos;
       qos_settings.apply_to(datawriter_qos);
 
       const ::DDS::DataWriter_var dw =
@@ -205,14 +205,14 @@ namespace {
       Entities::instance()->writers_[connectionId] = dw;
 
     } else { // dir == DESTINATION
-      DDS::SubscriberQos subscriber_qos;
+      ::DDS::SubscriberQos subscriber_qos;
       qos_settings.apply_to(subscriber_qos);
       
       const ::DDS::Subscriber_var sub =
         dp->create_subscriber(subscriber_qos, 0, 0);
       if (!sub) return INVALID_PARAM;
 
-      DDS::DataReaderQos datareader_qos;
+      ::DDS::DataReaderQos datareader_qos;
       qos_settings.apply_to(datareader_qos);
 
       const ::DDS::DataReader_var dr =

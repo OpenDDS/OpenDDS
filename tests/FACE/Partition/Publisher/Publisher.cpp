@@ -1,6 +1,8 @@
 #include "Idl/FaceMessage_TS.hpp"
 
 #include "ace/OS_NS_unistd.h"
+#include "ace/OS_NS_stdio.h"
+
 #include <iostream>
 
 int main(int argc, const char* argv[])
@@ -19,11 +21,7 @@ int main(int argc, const char* argv[])
     FACE::CONNECTION_DIRECTION_TYPE dir;
     FACE::MESSAGE_SIZE_TYPE size;
     char connection_name[16];
-#if defined OPENDDS_SAFETY_PROFILE
-    snprintf(connection_name, sizeof(connection_name), "pub_%d", part);
-#else
     ACE_OS::snprintf(connection_name, sizeof(connection_name), "pub_%d", part);
-#endif
     FACE::TS::Create_Connection(
       connection_name, FACE::PUB_SUB, connId, dir, size, status);
     if (status != FACE::NO_ERROR) return static_cast<int>(status);

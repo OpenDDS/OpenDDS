@@ -40,9 +40,11 @@
 #ifdef ACE_LYNXOS_MAJOR
 #include <strstream>
 #define STRINGSTREAM std::strstream
+#define STRINGSTREAM_CSTR
 #else
 #include <sstream>
 #define STRINGSTREAM std::stringstream
+#define STRINGSTREAM_CSTR .c_str()
 #endif
 
 #include <stdexcept>
@@ -1372,7 +1374,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
         ACE_TEXT("%C received sample: %C.\n"),
         std::string(converter).c_str(),
-        buffer.str().c_str()));
+        buffer.str() STRINGSTREAM_CSTR));
   }
 
   switch (sample.header_.message_id_) {
@@ -1568,7 +1570,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     serializer >> control;
 
     if (DCPS_debug_level > 0) {
-      STRINGSTREAM buffer;
+      std::stringstream buffer;
       buffer << control << std::endl;
 
       ACE_DEBUG((LM_DEBUG,
@@ -2729,7 +2731,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::lookup_instance_handles: ")
         ACE_TEXT("searching for handles for writer Ids: %C.\n"),
-        buffer.str().c_str()));
+        buffer.str() STRINGSTREAM_CSTR));
   }
 
   CORBA::ULong const num_wrts = ids.length();
@@ -2962,7 +2964,7 @@ void DataReaderImpl::notify_liveliness_change()
         ACE_TEXT("\tNOTIFY: %C\n"),
         listener.in (),
         listener_mask_,
-        buffer.str().c_str()));
+        buffer.str() STRINGSTREAM_CSTR));
   }
 }
 

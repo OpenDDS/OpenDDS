@@ -49,7 +49,8 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   ssize_t scatter = socket.recv(buffer, sizeof buffer, remote_address);
   char* iter = buffer;
   for (int i = 0; scatter > 0 && i < n; ++i) {
-    const size_t chunk = std::min(iov[i].iov_len, static_cast<size_t>(scatter));
+    const size_t chunk = std::min(static_cast<size_t>(iov[i].iov_len), // int on LynxOS
+                                  static_cast<size_t>(scatter));
     std::memcpy(iov[i].iov_base, iter, chunk);
     scatter -= chunk;
     iter += chunk;
