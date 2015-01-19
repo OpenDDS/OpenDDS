@@ -1,8 +1,4 @@
-project(*QosSettings) : dcps {
-  libs += OpenDDS_FACE
-  libpaths    += $(DDS_ROOT)/lib
-  includes    += $(DDS_ROOT)
-
+project(*QosSettings) : dcps, opendds_face {
   Source_Files {
     QosSettingsTest.cpp
   }
