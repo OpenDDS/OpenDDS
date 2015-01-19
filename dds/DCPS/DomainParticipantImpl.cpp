@@ -83,7 +83,9 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     dp_id_(dp_id),
     federated_(federated),
     monitor_(0),
-    pub_id_gen_(dp_id_)
+    pub_id_gen_(dp_id_),
+    automatic_liveliness_timer_ (*this),
+    participant_liveliness_timer_ (*this)
 {
   (void) this->set_listener(a_listener, mask);
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
@@ -1347,6 +1349,8 @@ DomainParticipantImpl::assert_liveliness()
     it->svt_->assert_liveliness_by_participant();
   }
 
+  last_liveliness_activity_ = ACE_OS::gettimeofday();
+
   return DDS::RETCODE_OK;
 }
 
@@ -2049,6 +2053,162 @@ DomainParticipantImpl::delete_replayer(Replayer_rch replayer)
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(replayers_protector_);
   replayers_.erase(replayer);
+}
+
+void
+DomainParticipantImpl::add_adjust_liveliness_timers(DataWriterImpl* writer)
+{
+  automatic_liveliness_timer_.add_adjust(writer);
+  participant_liveliness_timer_.add_adjust(writer);
+}
+
+void
+DomainParticipantImpl::remove_adjust_liveliness_timers()
+{
+  automatic_liveliness_timer_.remove_adjust();
+  participant_liveliness_timer_.remove_adjust();
+}
+
+DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& impl,
+                                                        DDS::LivelinessQosPolicyKind kind)
+  : impl_(impl)
+  , kind_ (kind)
+  , interval_ (ACE_Time_Value::max_time)
+  , recalculate_interval_ (false)
+  , scheduled_ (false)
+{ }
+
+DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
+{
+  if (scheduled_) {
+    TheServiceParticipant->timer()->cancel_timer(this);
+  }
+}
+
+void
+DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl* writer)
+{
+  ACE_GUARD(ACE_Thread_Mutex,
+            guard,
+            this->lock_);
+
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+
+  // Calculate the time remaining to liveliness check.
+  const ACE_Time_Value remaining = interval_ - (now - last_liveliness_check_);
+
+  // Adopt a smaller interval.
+  const ACE_Time_Value i = writer->liveliness_check_interval(kind_);
+  if (i < interval_) {
+    interval_ = i;
+  }
+
+  // Reschedule or schedule a timer if necessary.
+  if (scheduled_ && interval_ < remaining) {
+    TheServiceParticipant->timer()->cancel_timer(this);
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+  } else if (!scheduled_) {
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+    scheduled_ = true;
+    last_liveliness_check_ = now;
+  }
+}
+
+void
+DomainParticipantImpl::LivelinessTimer::remove_adjust()
+{
+  ACE_GUARD(ACE_Thread_Mutex,
+            guard,
+            this->lock_);
+
+  recalculate_interval_ = true;
+}
+
+int
+DomainParticipantImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value & tv, const void* /* arg */)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
+                   guard,
+                   this->lock_,
+                   0);
+
+  scheduled_ = false;
+
+  if (recalculate_interval_) {
+    interval_ = impl_.liveliness_check_interval(kind_);
+    recalculate_interval_ = false;
+  }
+
+  if (interval_ != ACE_Time_Value::max_time) {
+    dispatch(tv);
+    last_liveliness_check_ = tv;
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+    scheduled_ = true;
+  }
+
+  return 0;
+}
+
+DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(DomainParticipantImpl& impl)
+  : LivelinessTimer (impl, DDS::AUTOMATIC_LIVELINESS_QOS)
+{ }
+
+void
+DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const ACE_Time_Value& /* tv */)
+{
+  // TODO: Tell discovery about our liveliness.
+}
+
+DomainParticipantImpl::ParticipantLivelinessTimer::ParticipantLivelinessTimer(DomainParticipantImpl& impl)
+  : LivelinessTimer (impl, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS)
+{ }
+
+void
+DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const ACE_Time_Value& tv)
+{
+  if (impl_.participant_liveliness_activity_after (tv - interval())) {
+    // TODO: Tell discovery about our liveliness.
+  }
+}
+
+ACE_Time_Value
+DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
+{
+  ACE_Time_Value tv = ACE_Time_Value::max_time;
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    tao_mon,
+                    this->publishers_protector_,
+                    tv);
+
+  for (PublisherSet::iterator it(publishers_.begin());
+       it != publishers_.end(); ++it) {
+    tv = std::min (tv, it->svt_->liveliness_check_interval(kind));
+  }
+
+  return tv;
+}
+
+bool
+DomainParticipantImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+{
+  if (last_liveliness_activity_ > tv) {
+    return true;
+  }
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    tao_mon,
+                    this->publishers_protector_,
+                    tv);
+
+  for (PublisherSet::iterator it(publishers_.begin());
+       it != publishers_.end(); ++it) {
+    if (it->svt_->participant_liveliness_activity_after(tv)) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 } // namespace DCPS

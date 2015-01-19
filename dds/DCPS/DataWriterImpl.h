@@ -153,6 +153,10 @@ public:
   virtual DDS::ReturnCode_t get_publication_matched_status(
     DDS::PublicationMatchedStatus & status);
 
+  ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
+
+  bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
+
   virtual DDS::ReturnCode_t assert_liveliness();
 
   virtual DDS::ReturnCode_t assert_liveliness_by_participant();
@@ -694,6 +698,7 @@ private:
 
   DDS::ReturnCode_t send_end_historic_samples(const RepoId& readerId);
 
+  bool liveliness_asserted_;
 };
 
 } // namespace DCPS

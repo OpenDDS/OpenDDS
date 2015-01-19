@@ -87,7 +87,8 @@ DataWriterImpl::DataWriterImpl()
     wfaCondition_(this->wfaLock_),
     monitor_(0),
     periodic_monitor_(0),
-    db_lock_pool_(0)
+    db_lock_pool_(0),
+    liveliness_asserted_(false)
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -1359,37 +1360,17 @@ DataWriterImpl::get_publication_matched_status(
 DDS::ReturnCode_t
 DataWriterImpl::assert_liveliness()
 {
-  // This operation need only be used if the LIVELINESS setting
-  // is either MANUAL_BY_PARTICIPANT or MANUAL_BY_TOPIC.
-  // Otherwise, it has no effect.
-
-  if (this->qos_.liveliness.kind == DDS::AUTOMATIC_LIVELINESS_QOS) {
-    return DDS::RETCODE_OK;
-  }
-
-  ACE_Time_Value now = ACE_OS::gettimeofday();
-
-  // Check if not recent enough then send liveliness message.
-  if (last_liveliness_activity_time_ == ACE_Time_Value::zero
-      || now - last_liveliness_activity_time_ >= liveliness_check_interval_) {
-    if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
-                 ACE_TEXT("%C sending LIVELINESS message.\n"),
-                 std::string(converter).c_str()));
-    }
-
-    if (this->send_liveliness(now) == false) {
+  switch (this->qos_.liveliness.kind) {
+  case DDS::AUTOMATIC_LIVELINESS_QOS:
+    // Do nothing.
+    break;
+  case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
+    return participant_servant_->assert_liveliness();
+  case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
+    if (this->send_liveliness(ACE_OS::gettimeofday()) == false) {
       return DDS::RETCODE_ERROR;
     }
-
-  } else if (DCPS_debug_level > 9) {
-    GuidConverter converter(publication_id_);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::assert_liveliness: ")
-               ACE_TEXT("%C too soon to send LIVELINESS message.\n"),
-               std::string(converter).c_str()));
+    break;
   }
 
   return DDS::RETCODE_OK;
@@ -1400,11 +1381,32 @@ DataWriterImpl::assert_liveliness_by_participant()
 {
   // This operation is called by participant.
 
-  if (this->qos_.liveliness.kind != DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
-    return DDS::RETCODE_OK;
+  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
+    // Set a flag indicating that we should send a liveliness message on the timer if necessary.
+    liveliness_asserted_ = true;
   }
 
-  return this->assert_liveliness();
+  return DDS::RETCODE_OK;
+}
+
+ACE_Time_Value
+DataWriterImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
+{
+  if (this->qos_.liveliness.kind == kind) {
+    return liveliness_check_interval_;
+  } else {
+    return ACE_Time_Value::max_time;
+  }
+}
+
+bool
+DataWriterImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+{
+  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
+    return last_liveliness_activity_time_ > tv;
+  } else {
+    return false;
+  }
 }
 
 DDS::ReturnCode_t
@@ -2378,22 +2380,30 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
 
   ACE_Time_Value elapsed = tv - last_liveliness_activity_time_;
 
-  if (elapsed >= liveliness_check_interval_) {
-    if (this->qos_.liveliness.kind == DDS::AUTOMATIC_LIVELINESS_QOS) {
-      //Not recent enough then send liveliness message.
-      if (DCPS_debug_level > 9) {
-        GuidConverter converter(publication_id_);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataWriterImpl::handle_timeout: ")
-                   ACE_TEXT("%C sending LIVELINESS message.\n"),
-                   std::string(converter).c_str()));
-      }
+  if (elapsed >= duration_to_time_value(qos_.liveliness.lease_duration)) {
 
-      if (this->send_liveliness(tv) == false)
+    switch (this->qos_.liveliness.kind) {
+    case DDS::AUTOMATIC_LIVELINESS_QOS:
+      if (this->send_liveliness(tv) == false) {
         liveliness_lost = true;
+      }
+      break;
 
-    } else
+    case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
+      if (liveliness_asserted_) {
+        if (this->send_liveliness(tv) == false) {
+          liveliness_lost = true;
+        }
+        liveliness_asserted_ = false;
+      } else {
+        liveliness_lost = true;
+      }
+      break;
+
+    case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
       liveliness_lost = true;
+      break;
+    }
 
   } else {
     // Recent enough. Schedule the interval.

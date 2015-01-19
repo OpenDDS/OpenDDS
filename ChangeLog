@@ -1,3 +1,28 @@
+Mon Jan 19 15:54:56 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          assert_liveliness for MANUAL_BY_PARTICIPANT_LIVELINESS_QOS now
+          processed by dispatching to participant and setting a flag that is
+          processed by liveliness timer.  assert_liveliness for
+          MANUAL_BY_TOPIC_LIVELINESS_QOS now processed by sending liveliness
+          immediately.  Liveliness activity now compared against qos
+          interval instead of check interval.  Added helper methods to get
+          check intervals and liveliness activity status.
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added timers to process AUTOMATIC_LIVELINESS_QOS and
+          MANUAL_BY_PARTICIPANT_QOS.  The timers run with the minimum period
+          necessary.  This change prepares for RTPS liveliness.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Added helper methods.
+
 Fri Jan 16 17:29:13 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:

@@ -369,6 +369,9 @@ private:
   void delete_recorder(Recorder_rch recorder);
   void delete_replayer(Replayer_rch replayer);
 
+  void add_adjust_liveliness_timers(DataWriterImpl* writer);
+  void remove_adjust_liveliness_timers();
+
 private:
 
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
@@ -498,6 +501,47 @@ private:
   ACE_Recursive_Thread_Mutex recorders_protector_;
   /// Protect the replayers collection.
   ACE_Recursive_Thread_Mutex replayers_protector_;
+
+  class LivelinessTimer : public ACE_Event_Handler {
+  public:
+    LivelinessTimer(DomainParticipantImpl& impl, DDS::LivelinessQosPolicyKind kind);
+    virtual ~LivelinessTimer();
+    void add_adjust(OpenDDS::DCPS::DataWriterImpl* writer);
+    void remove_adjust();
+    int handle_timeout(const ACE_Time_Value &tv, const void * /* arg */);
+    virtual void dispatch(const ACE_Time_Value& tv) = 0;
+
+  protected:
+    DomainParticipantImpl& impl_;
+
+    ACE_Time_Value interval () const { return interval_; }
+
+  private:
+    DDS::LivelinessQosPolicyKind kind_;
+    ACE_Time_Value interval_;
+    bool recalculate_interval_;
+    ACE_Time_Value last_liveliness_check_;
+    bool scheduled_;
+    ACE_Thread_Mutex lock_;
+  };
+
+  class AutomaticLivelinessTimer : public LivelinessTimer {
+  public:
+    AutomaticLivelinessTimer(DomainParticipantImpl& impl);
+    virtual void dispatch(const ACE_Time_Value& tv);
+  };
+  AutomaticLivelinessTimer automatic_liveliness_timer_;
+
+  class ParticipantLivelinessTimer : public LivelinessTimer {
+  public:
+    ParticipantLivelinessTimer(DomainParticipantImpl& impl);
+    virtual void dispatch(const ACE_Time_Value& tv);
+  };
+  ParticipantLivelinessTimer participant_liveliness_timer_;
+
+  ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
+  bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
+  ACE_Time_Value last_liveliness_activity_;
 };
 
 } // namespace DCPS

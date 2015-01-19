@@ -138,6 +138,8 @@ public:
   DDS::PublisherListener_ptr listener_for(::DDS::StatusKind kind);
 
   DDS::ReturnCode_t assert_liveliness_by_participant();
+  ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
+  bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
 
   typedef std::vector<PublicationId> PublicationIdVec;
   /// Populates a std::vector with the PublicationIds (GUIDs)
