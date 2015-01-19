@@ -1118,8 +1118,10 @@ int main(int, const char** )
   // DataWriter QOS
   test_set_datawriter_durability_volatile();
   test_set_datawriter_durability_transient_local();
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   test_set_datawriter_durability_transient();
   test_set_datawriter_durability_persistent();
+#endif // OPENDDS_NO_PERSISTENCE_PROFILE
   test_set_datawriter_deadline_sec();
   test_set_datawriter_deadline_nanosec();
   test_set_datawriter_deadline_both();
@@ -1156,8 +1158,10 @@ int main(int, const char** )
   // DataReader QOS
   test_set_datareader_durability_volatile();
   test_set_datareader_durability_transient_local();
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   test_set_datareader_durability_transient();
   test_set_datareader_durability_persistent();
+#endif // OPENDDS_NO_PERSISTENCE_PROFILE
   test_set_datareader_deadline_sec();
   test_set_datareader_deadline_nanosec();
   test_set_datareader_deadline_both();

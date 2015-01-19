@@ -1,3 +1,9 @@
+Mon Jan 19 18:12:06 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Don't try to set durability kind to those not supported by build.
+
 Mon Jan 19 17:34:33 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
