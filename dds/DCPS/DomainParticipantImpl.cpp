@@ -14,6 +14,7 @@
 #include "GuidConverter.h"
 #include "PublisherImpl.h"
 #include "SubscriberImpl.h"
+#include "DataWriterImpl.h"
 #include "Marked_Default_Qos.h"
 #include "Registered_Data_Types.h"
 #include "Transient_Kludge.h"
