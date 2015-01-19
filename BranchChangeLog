@@ -1,3 +1,9 @@
+Mon Jan 19 16:47:04 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Added back in support for passing mi and mw.
+
 Fri Jan 16 23:07:46 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/FACE/Partition/face_config.ini:

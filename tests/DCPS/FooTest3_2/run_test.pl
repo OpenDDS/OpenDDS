@@ -18,6 +18,7 @@ PerlDDS::add_lib_path('../FooType3Unbounded');
 
 my $test = new PerlDDS::TestFramework();
 
+my $multiple_instance=0;
 my $num_threads_to_write=1;
 my $num_writes_per_thread=1000;
 my $num_writers=1;
@@ -35,13 +36,17 @@ $test->enable_console_logging();
 
 # multiple instances test
 if ($test->flag('mi')) {
-  print STDERR "ERROR: parameter mi no longer supported, see Instances test \n";
-  exit 1;
+  $multiple_instance=1;
+  $num_threads_to_write=5;
+  $num_writes_per_thread=2;
+  $num_writers=1;
 }
 # multiple datawriters with multiple instances test
 elsif ($test->flag('mw')) {
-  print STDERR "ERROR: parameter mi no longer supported, see Instances test \n";
-  exit 1;
+  $multiple_instance=1;
+  $num_threads_to_write=5;
+  $num_writes_per_thread=2;
+  $num_writers=4;
 }
 #tbd: add test for message dropped due to the depth limit.
 elsif ($test->flag('bp_remove')) {
@@ -63,7 +68,7 @@ $test->setup_discovery();
 
 my $pub_parameters = " -t $num_threads_to_write"
                      . " -w $num_writers"
-                     . " -m 0"
+                     . " -m $multiple_instance"
                      . " -i $num_writes_per_thread "
                      . " -n $max_samples_per_instance"
                      . " -d $history_depth"
