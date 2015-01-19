@@ -48,6 +48,7 @@ namespace DCPS {
 
 class PublisherImpl;
 class SubscriberImpl;
+class DataWriterImpl;
 class DomainParticipantFactoryImpl;
 class Monitor;
 
