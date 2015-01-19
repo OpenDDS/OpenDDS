@@ -38,6 +38,7 @@
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "tao/debug.h"
+#include "ace/Reactor.h"
 
 namespace Util {
 

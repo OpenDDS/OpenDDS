@@ -1,3 +1,9 @@
+Mon Jan 19 20:52:00 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added missing include.
+
 Mon Jan 19 19:44:06 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.h:
