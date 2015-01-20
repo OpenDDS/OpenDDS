@@ -77,7 +77,7 @@ DataWriterImpl::DataWriterImpl()
     db_allocator_(0),
     header_allocator_(0),
     reactor_(0),
-    liveliness_check_interval_(ACE_Time_Value::zero),
+    liveliness_check_interval_(ACE_Time_Value::max_time),
     last_liveliness_activity_time_(ACE_Time_Value::zero),
     last_deadline_missed_total_count_(0),
     watchdog_(),
@@ -1392,9 +1392,7 @@ DataWriterImpl::assert_liveliness_by_participant()
 ACE_Time_Value
 DataWriterImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
-  if (this->qos_.liveliness.kind == kind &&
-      qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC &&
-      qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
+  if (this->qos_.liveliness.kind == kind) {
     return liveliness_check_interval_;
   } else {
     return ACE_Time_Value::max_time;
@@ -1589,12 +1587,14 @@ DataWriterImpl::enable()
                n_chunks_));
   }
 
-  if (qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC
-      && qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    liveliness_check_interval_ =
-      duration_to_time_value(qos_.liveliness.lease_duration);
-    liveliness_check_interval_ *=
-      TheServiceParticipant->liveliness_factor()/100.0;
+  if (qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC &&
+      qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
+    liveliness_check_interval_ = duration_to_time_value(qos_.liveliness.lease_duration);
+    liveliness_check_interval_ *= TheServiceParticipant->liveliness_factor()/100.0;
+    // Must be at least 1 micro second.
+    if (liveliness_check_interval_ == ACE_Time_Value::zero) {
+      liveliness_check_interval_ = ACE_Time_Value (0, 1);
+    }
 
     if (reactor_->schedule_timer(this,
                                  0,
@@ -1609,6 +1609,8 @@ DataWriterImpl::enable()
       this->_add_ref();
     }
   }
+
+  participant_servant_->add_adjust_liveliness_timers(this);
 
   // Setup the offered deadline watchdog if the configured deadline
   // period is not the default (infinite).
@@ -2460,8 +2462,8 @@ DataWriterImpl::handle_close(ACE_HANDLE,
 bool
 DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
 {
-  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS/* ||
-                                                                          !TheServiceParticipant->get_discovery(domain_id_)->supports_liveliness()*/) {
+  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS ||
+      !TheServiceParticipant->get_discovery(domain_id_)->supports_liveliness()) {
     DDS::Time_t t = time_value_to_time(now);
     DataSampleHeader header;
     ACE_Message_Block* liveliness_msg =

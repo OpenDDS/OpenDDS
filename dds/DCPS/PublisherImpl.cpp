@@ -133,8 +133,6 @@ PublisherImpl::create_datawriter(
       this,
       dw_obj.in());
 
-  participant_->add_adjust_liveliness_timers(dw_servant);
-
   if (this->enabled_ == true
       && qos_.entity_factory.autoenable_created_entities == 1) {
 

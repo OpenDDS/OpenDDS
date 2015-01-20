@@ -2158,7 +2158,7 @@ DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(Domain
 void
 DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const ACE_Time_Value& /* tv */)
 {
-  // TODO: Tell discovery about our liveliness.
+  impl_.signal_liveliness (kind_);
 }
 
 DomainParticipantImpl::ParticipantLivelinessTimer::ParticipantLivelinessTimer(DomainParticipantImpl& impl)
@@ -2169,7 +2169,7 @@ void
 DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const ACE_Time_Value& tv)
 {
   if (impl_.participant_liveliness_activity_after (tv - interval())) {
-    // TODO: Tell discovery about our liveliness.
+    impl_.signal_liveliness (kind_);
   }
 }
 
@@ -2211,6 +2211,12 @@ DomainParticipantImpl::participant_liveliness_activity_after(const ACE_Time_Valu
   }
 
   return false;
+}
+
+void
+DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
+{
+  TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
 }
 
 } // namespace DCPS

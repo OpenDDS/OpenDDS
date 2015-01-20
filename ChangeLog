@@ -1,3 +1,16 @@
+Tue Jan 20 19:11:12 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Changed initialization of liveliness_check_interval.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added support methods for discovery-based liveliness.
+
 Tue Jan 20 17:20:00 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
