@@ -1392,7 +1392,9 @@ DataWriterImpl::assert_liveliness_by_participant()
 ACE_Time_Value
 DataWriterImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 {
-  if (this->qos_.liveliness.kind == kind) {
+  if (this->qos_.liveliness.kind == kind &&
+      qos_.liveliness.lease_duration.sec != DDS::DURATION_INFINITE_SEC &&
+      qos_.liveliness.lease_duration.nanosec != DDS::DURATION_INFINITE_NSEC) {
     return liveliness_check_interval_;
   } else {
     return ACE_Time_Value::max_time;
@@ -2458,17 +2460,23 @@ DataWriterImpl::handle_close(ACE_HANDLE,
 bool
 DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
 {
-  DDS::Time_t t = time_value_to_time(now);
-  DataSampleHeader header;
-  ACE_Message_Block* liveliness_msg =
-    this->create_control_message(DATAWRITER_LIVELINESS, header, 0, t);
+  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS ||
+      !TheServiceParticipant->get_discovery(domain_id_)->supports_liveliness()) {
+    DDS::Time_t t = time_value_to_time(now);
+    DataSampleHeader header;
+    ACE_Message_Block* liveliness_msg =
+      this->create_control_message(DATAWRITER_LIVELINESS, header, 0, t);
 
-  if (this->send_control(header, liveliness_msg) == SEND_CONTROL_ERROR) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
-                      ACE_TEXT(" send_control failed. \n")),
-                     false);
+    if (this->send_control(header, liveliness_msg) == SEND_CONTROL_ERROR) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_liveliness: ")
+                        ACE_TEXT(" send_control failed. \n")),
+                       false);
 
+    } else {
+      last_liveliness_activity_time_ = now;
+      return true;
+    }
   } else {
     last_liveliness_activity_time_ = now;
     return true;
