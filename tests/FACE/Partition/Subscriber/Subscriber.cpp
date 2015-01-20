@@ -18,13 +18,13 @@ int main(int argc, const char* argv[])
   } else {
     FACE::TS::Initialize("face_config.ini", status);
     if (status != FACE::NO_ERROR) return static_cast<int>(status);
-
   }
 
   if (!status) {
     FACE::CONNECTION_DIRECTION_TYPE dir;
     char connection_name[16];
     ACE_OS::snprintf(connection_name, sizeof(connection_name), "sub_%d", part);
+
     FACE::TS::Create_Connection(
       connection_name, FACE::PUB_SUB, connId, dir, size, status);
   }

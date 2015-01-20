@@ -1251,16 +1251,18 @@ Service_Participant::load_configuration()
                       status),
                      -1);
   } else {
-    status = this->load_configuration(this->cf_);
+    status = this->load_configuration(this->cf_, config_fname.c_str());
   }
   return status;
 }
 
 int
 Service_Participant::load_configuration(
-  ACE_Configuration_Heap& config)
+  ACE_Configuration_Heap& config,
+  const char* filename)
 {
   int status = 0;
+
   status = this->load_common_configuration(config);
 
   if (status != 0) {
@@ -1292,7 +1294,7 @@ Service_Participant::load_configuration(
   }
 
   status = TransportRegistry::instance()->load_transport_configuration(
-             ACE_TEXT_ALWAYS_CHAR(config_fname.c_str()), config);
+             ACE_TEXT_ALWAYS_CHAR(filename), config);
   if (this->global_transport_config_ != ACE_TEXT("")) {
     TransportConfig_rch config = TransportRegistry::instance()->get_config(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));

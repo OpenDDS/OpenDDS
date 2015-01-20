@@ -39,7 +39,8 @@ Parser::parse(const char* filename)
              parse_sections(config, TOPIC_SECTION, true) ||
              parse_sections(config, CONNECTION_SECTION, true);
 
-    status = status || TheServiceParticipant->load_configuration(config);
+    status = status || TheServiceParticipant->load_configuration(config,
+                                                                 filename);
   }
   return status;
 }

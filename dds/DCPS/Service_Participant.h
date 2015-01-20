@@ -370,7 +370,8 @@ public:
    * transport section configuration to the TransportRegistry
    * singleton.
    */
-  int load_configuration(ACE_Configuration_Heap& cf);
+  int load_configuration(ACE_Configuration_Heap& cf,
+                         const char* filename);
 
 private:
 
