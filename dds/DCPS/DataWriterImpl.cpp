@@ -2384,8 +2384,8 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
 
   ACE_Time_Value elapsed = tv - last_liveliness_activity_time_;
 
-  if (elapsed >= duration_to_time_value(qos_.liveliness.lease_duration)) {
-
+  // Do we need to send a liveliness message?
+  if (elapsed >= liveliness_check_interval_) {
     switch (this->qos_.liveliness.kind) {
     case DDS::AUTOMATIC_LIVELINESS_QOS:
       if (this->send_liveliness(tv) == false) {
@@ -2399,39 +2399,20 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
           liveliness_lost = true;
         }
         liveliness_asserted_ = false;
-      } else {
-        liveliness_lost = true;
       }
       break;
 
     case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
-      liveliness_lost = true;
+      // Do nothing.
       break;
     }
+  }
 
-  } else {
-    // Recent enough. Schedule the interval.
-    if (reactor_->cancel_timer(this) == -1) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("DataWriterImpl::handle_timeout: %p.\n"),
-                        ACE_TEXT("cancel_timer")),
-                       -1);
-    }
+  elapsed = tv - last_liveliness_activity_time_;
 
-    ACE_Time_Value remain = liveliness_check_interval_ - elapsed;
-
-    if (reactor_->schedule_timer(this,
-                                 0,
-                                 remain,
-                                 liveliness_check_interval_) == -1) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("DataWriterImpl::handle_timeout: %p.\n"),
-                        ACE_TEXT("schedule_timer")),
-                       -1);
-
-    }
+  // Have we lost liveliness?
+  if (elapsed >= duration_to_time_value(qos_.liveliness.lease_duration)) {
+    liveliness_lost = true;
   }
 
   if (!this->liveliness_lost_ && liveliness_lost) {
