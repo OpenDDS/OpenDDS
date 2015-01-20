@@ -2460,8 +2460,8 @@ DataWriterImpl::handle_close(ACE_HANDLE,
 bool
 DataWriterImpl::send_liveliness(const ACE_Time_Value& now)
 {
-  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS ||
-      !TheServiceParticipant->get_discovery(domain_id_)->supports_liveliness()) {
+  if (this->qos_.liveliness.kind == DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS/* ||
+                                                                          !TheServiceParticipant->get_discovery(domain_id_)->supports_liveliness()*/) {
     DDS::Time_t t = time_value_to_time(now);
     DataSampleHeader header;
     ACE_Message_Block* liveliness_msg =
