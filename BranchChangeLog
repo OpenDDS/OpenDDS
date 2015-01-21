@@ -1,3 +1,9 @@
+Wed Jan 21 17:41:32 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Changed MutliRepoTest to have !OPENDDS_SAFETY_PROFILE flag, since it is a InfoRepo specific test.
+
 Tue Jan 20 18:18:11 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:
@@ -5,7 +11,7 @@ Tue Jan 20 18:18:11 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
         * dds/FACE/config/Parser.cpp:
         * tests/FACE/Partition/face_config.ini:
 
-          Accept filename into load_configuration, and pass to transport 
+          Accept filename into load_configuration, and pass to transport
           configuration, so that Global default transports may be loaded.
 
         * tests/FACE/Partition/Subscriber/Subscriber.cpp:
