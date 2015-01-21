@@ -646,7 +646,10 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
       }
 
       for (CORBA::ULong i = 0; i < fully_associated_len; ++i) {
+        ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::remove_associations - erasing fully associate reader (tot: %d) from id_to_handle_map (cur size: %d)\n", fully_associated_len, id_to_handle_map_.size()));
         id_to_handle_map_.erase(fully_associated_readers[i]);
+        ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::remove_associations - after erase from id_to_handle_map (cur size: %d)\n", id_to_handle_map_.size()));
+
       }
     }
 
@@ -1701,7 +1704,9 @@ DataWriterImpl::enable()
 DDS::ReturnCode_t
 DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                                     DataSample* data,
-                                    const DDS::Time_t & source_timestamp)
+                                    const DDS::Time_t & source_timestamp,
+                                    DataSampleHeader& header,
+                                    ACE_Message_Block*& registered_sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
 
@@ -1728,19 +1733,56 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   }
 
   // Add header with the registration sample data.
-  DataSampleHeader header;
-  ACE_Message_Block* registered_sample =
-    this->create_control_message(INSTANCE_REGISTRATION,
+//  DataSampleHeader header;
+//  ACE_Message_Block* registered_sample =
+    registered_sample =
+        this->create_control_message(INSTANCE_REGISTRATION,
                                  header,
                                  data,
                                  source_timestamp);
 
+//  if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
+//    ACE_ERROR_RETURN((LM_ERROR,
+//                      ACE_TEXT("(%P|%t) ERROR: ")
+//                      ACE_TEXT("DataWriterImpl::register_instance_i: ")
+//                      ACE_TEXT("send_control failed.\n")),
+//                     DDS::RETCODE_ERROR);
+//  }
+
+  return ret;
+}
+
+DDS::ReturnCode_t
+DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handle,
+                                    DataSample* data,
+                                    const DDS::Time_t & source_timestamp)
+{
+  DBG_ENTRY_LVL("DataWriterImpl","register_instance_from_durable_data",6);
+
+  DataSampleHeader header;
+  ACE_Message_Block* registered_sample;
+
+  DDS::ReturnCode_t ret =
+      register_instance_i(handle,
+                          data,
+                          source_timestamp,
+                          header,
+                          registered_sample);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
+                      ACE_TEXT("register instance with container failed.\n")),
+                      ret);
+  }
+
+
   if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DataWriterImpl::register_instance_i: ")
+                      ACE_TEXT("DataWriterImpl::register_instance_from_durable_data: ")
                       ACE_TEXT("send_control failed.\n")),
-                     DDS::RETCODE_ERROR);
+                      DDS::RETCODE_ERROR);
   }
 
   return ret;
@@ -1818,6 +1860,11 @@ DataWriterImpl::write(DataSample* data,
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
 
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
+                    ::DDS::RETCODE_ERROR);
+
   // take ownership of sequence allocated in FooDWImpl::write_w_timestamp()
   GUIDSeq_var filter_out_var(filter_out);
 
@@ -1867,19 +1914,30 @@ DataWriterImpl::write(DataSample* data,
                       ACE_TEXT("enqueue failed.\n")),
                      ret);
   }
+  this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
 
+  track_sequence_number(filter_out);
+
+  if (this->coherent_) {
+    ++this->coherent_samples_;
+  }
   SendStateDataSampleList list = this->get_unsent_data();
 
   if (this->publisher_servant_->is_suspended()) {
     this->available_data_list_.enqueue_tail(list);
 
   } else {
+    guard.release();
     this->send(list);
   }
 
-  this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
+  return DDS::RETCODE_OK;
+}
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, DDS::RETCODE_ERROR);
+void
+DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
+{
+  ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
@@ -1907,11 +1965,6 @@ DataWriterImpl::write(DataSample* data,
 
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
-  if (this->coherent_) {
-    ++this->coherent_samples_;
-  }
-
-  return DDS::RETCODE_OK;
 }
 
 void
@@ -2178,6 +2231,14 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
                std::string(writer_converter).c_str()));
     return;
   }
+  GuidConverter sample_converter(sample->get_pub_id());
+  GuidConverter writer_converter(publication_id_);
+  ACE_DEBUG((LM_INFO,
+             ACE_TEXT("(%P|%t) DataWriterImpl::data_delivered: ")
+             ACE_TEXT(" The publication id %C from delivered element ")
+             ACE_TEXT("matches the datawriter's id %C so calling data_delivered\n"),
+             std::string(sample_converter).c_str(),
+             std::string(writer_converter).c_str()));
 
   this->data_container_->data_delivered(sample);
 
@@ -2348,6 +2409,14 @@ DataWriterImpl::data_dropped(const DataSampleElement* element,
                              bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_dropped",6);
+  GuidConverter sample_converter(element->get_pub_id());
+  GuidConverter writer_converter(publication_id_);
+  ACE_DEBUG((LM_INFO,
+             ACE_TEXT("(%P|%t) DataWriterImpl::data_dropped: ")
+             ACE_TEXT(" The publication id %C from dropped element ")
+             ACE_TEXT("matches the datawriter's id %C so calling data_dropped\n"),
+             std::string(sample_converter).c_str(),
+             std::string(writer_converter).c_str()));
   this->data_container_->data_dropped(element, dropped_by_transport);
 
   ++data_dropped_count_;

@@ -137,6 +137,7 @@ void
 SubDriver::run()
 {
   while (this->listener_->samples_read() != num_writes_) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) SubDriver::run - currently have seen %d writes expecting %d\n", this->listener_->samples_read(), num_writes_));
     ACE_OS::sleep(1);
   }
 

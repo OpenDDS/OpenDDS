@@ -48,7 +48,7 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
   DBG_ENTRY_LVL("TransportQueueElement", "decision_made", 6);
 
   const unsigned long new_count = --this->sub_loan_count_;
-
+  ACE_DEBUG((LM_INFO, "(%P|%t) TransportQueueElement::decision_made - TransportQueueElement's new count = %d\n", new_count));
   if (new_count == 0) {
     // All interested subscriptions have been satisfied.
 
@@ -59,9 +59,12 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
     // accessible. Note it can not be set after release_element
     // call.
     // this->released_ = true;
+    ACE_DEBUG((LM_INFO, "(%P|%t) TransportQueueElement::decision_made - TransportQueueElement's being released\n"));
+
     this->release_element(dropped_by_transport);
     return true;
   }
+  ACE_DEBUG((LM_INFO, "(%P|%t) TransportQueueElement::decision_made - TransportQueueElement's count != 0 therefore not releasing element\n"));
 
   // ciju: The sub_loan_count_ has been observed to drop below zero.
   // Since it isn't exactly a ref count and the object is created in

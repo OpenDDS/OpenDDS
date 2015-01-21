@@ -14,6 +14,7 @@ use PerlDDS::Run_Test;
 $status = 0;
 
 $pub_conf = "-DCPSConfigFile pub.ini";
+#$pub_conf = "-DCPSConfigFile pub.ini -DCPSDebugLevel 10 -DCPSTransportDebugLevel 7";
 $sub_conf = "-DCPSConfigFile sub.ini";
 $pub_opts = "$pub_conf ";
 $sub_opts = "$sub_conf ";

@@ -816,8 +816,12 @@ TransportClient::send(const SendStateDataSampleList& samples)
   // The reason that the send_links_ set is cleared is because we continually
   // reuse the same send_links_ object over and over for each call to this
   // send method.
+  GuidConverter pub(this->repo_id_);
+  ACE_DEBUG((LM_INFO, "(%P|%t) TransportClient::send - Pub(%C) about to call send_stop\n", std::string(pub).c_str()));
   RepoId pub_id(this->repo_id_);
   send_links_.send_stop(pub_id);
+  ACE_DEBUG((LM_INFO, "(%P|%t) TransportClient::send - Pub(%C) done calling send_stop\n", std::string(pub).c_str()));
+
 }
 
 TransportSendListener*

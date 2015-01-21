@@ -179,7 +179,8 @@ private:
   ::DDS::ReturnCode_t get_or_create_instance_handle(
     ::DDS::InstanceHandle_t& handle,
     const ::<%SCOPED%>& instance_data,
-    const ::DDS::Time_t & source_timestamp);
+    const ::DDS::Time_t & source_timestamp,
+    ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
 
    InstanceMap  instance_map_;
    size_t       marshaled_size_;

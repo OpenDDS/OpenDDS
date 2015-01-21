@@ -215,11 +215,24 @@ public:
     DDS::DataWriter_ptr                   dw_local);
 
   /**
+   * Delegate to the WriteDataContainer to register
+   * Must tell the transport to broadcast the registered
+   * instance upon returning.
+   */
+  DDS::ReturnCode_t
+  register_instance_i(
+    DDS::InstanceHandle_t& handle,
+    DataSample* data,
+    const DDS::Time_t & source_timestamp,
+    DataSampleHeader& header,
+    ACE_Message_Block*& registered_sample);
+
+  /**
    * Delegate to the WriteDataContainer to register and tell
    * the transport to broadcast the registered instance.
    */
   DDS::ReturnCode_t
-  register_instance_i(
+  register_instance_from_durable_data(
     DDS::InstanceHandle_t& handle,
     DataSample* data,
     const DDS::Time_t & source_timestamp);
@@ -537,6 +550,8 @@ protected:
   bool pending_control();
 
 private:
+
+  void track_sequence_number(GUIDSeq* filter_out);
 
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 
