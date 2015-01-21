@@ -652,6 +652,8 @@ private:
   ACE_Time_Value             liveliness_check_interval_;
   /// Timestamp of last write/dispose/assert_liveliness.
   ACE_Time_Value             last_liveliness_activity_time_;
+  /// Timestamp of the last time liveliness was checked.
+  ACE_Time_Value             last_liveliness_check_time_;
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.
   CORBA::Long last_deadline_missed_total_count_;
