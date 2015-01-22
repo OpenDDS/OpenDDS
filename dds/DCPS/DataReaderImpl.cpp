@@ -780,6 +780,49 @@ DataReaderImpl::inconsistent_topic()
   topic_servant_->inconsistent_topic();
 }
 
+void
+DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
+{
+  RepoId prefix = remote_participant;
+  prefix.entityId = EntityId_t();
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+
+  typedef std::vector<std::pair<RepoId, RcHandle<WriterInfo> > > WriterSet;
+  WriterSet writers;
+
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+    for (WriterMapType::iterator pos = writers_.lower_bound(prefix),
+           limit = writers_.end();
+         pos != limit && GuidPrefixEqual() (pos->first.guidPrefix, prefix.guidPrefix);
+         ++pos) {
+      writers.push_back(*pos);
+    }
+  }
+
+  ACE_Time_Value when = ACE_OS::gettimeofday();
+  for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
+       pos != limit;
+       ++pos) {
+    pos->second->received_activity(when);
+  }
+
+  if (!writers.empty()) {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
+         pos != limit;
+         ++pos) {
+      for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+           iter != instances_.end();
+           ++iter) {
+        SubscriptionInstance *ptr = iter->second;
+        ptr->instance_state_.lively(pos->first);
+      }
+    }
+  }
+}
+
 DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,

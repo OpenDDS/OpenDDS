@@ -720,6 +720,35 @@ RecorderImpl::inconsistent_topic()
   topic_servant_->inconsistent_topic();
 }
 
+void
+RecorderImpl::signal_liveliness(const RepoId& remote_participant)
+{
+  RepoId prefix = remote_participant;
+  prefix.entityId = EntityId_t();
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+
+  typedef std::vector<std::pair<RepoId, RcHandle<WriterInfo> > > WriterSet;
+  WriterSet writers;
+
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+    for (WriterMapType::iterator pos = writers_.lower_bound(prefix),
+           limit = writers_.end();
+         pos != limit && GuidPrefixEqual() (pos->first.guidPrefix, prefix.guidPrefix);
+         ++pos) {
+      writers.push_back(*pos);
+    }
+  }
+
+  ACE_Time_Value when = ACE_OS::gettimeofday();
+  for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
+       pos != limit;
+       ++pos) {
+    pos->second->received_activity(when);
+  }
+}
+
 DDS::ReturnCode_t RecorderImpl::set_qos(
   const DDS::SubscriberQos & subscriber_qos,
   const DDS::DataReaderQos & qos)

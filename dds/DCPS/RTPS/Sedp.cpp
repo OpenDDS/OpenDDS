@@ -241,14 +241,22 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , subscriptions_writer_(make_id(participant_id,
                                   ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER),
                           *this)
+  , participant_writer_(make_id(participant_id,
+                                ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER),
+                        *this)
   , publications_reader_(make_id(participant_id,
                                  ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
                          *this)
   , subscriptions_reader_(make_id(participant_id,
                                   ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
                           *this)
+  , participant_reader_(make_id(participant_id,
+                                ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
+                        *this)
   , task_(this)
   , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
+  , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
   pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
   sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
@@ -326,6 +334,10 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
                                                       transport_cfg);
   subscriptions_reader_.enable_transport_using_config(reliability, durability,
                                                       transport_cfg);
+  participant_writer_.enable_transport_using_config(reliability, durability,
+                                                    transport_cfg);
+  participant_reader_.enable_transport_using_config(reliability, durability,
+                                                    transport_cfg);
   return DDS::RETCODE_OK;
 }
 
@@ -509,6 +521,11 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
     subscriptions_reader_.assoc(peer);
   }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+    participant_reader_.assoc(peer);
+  }
 
   SPDPdiscoveredParticipantData* dpd =
     new SPDPdiscoveredParticipantData(pdata);
@@ -539,6 +556,12 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER;
     sedp_->subscriptions_writer_.assoc(peer);
   }
+  if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
+    DCPS::AssociationData peer = proto;
+    peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
+    sedp_->participant_writer_.assoc(peer);
+  }
+
   //FUTURE: if/when topic propagation is supported, add it here
 
   // Process deferred publications and subscriptions.
@@ -652,6 +675,16 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
       RepoId id = part;
       id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
       subscriptions_reader_.disassociate(id);
+    }
+    if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
+      RepoId id = part;
+      id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER;
+      participant_writer_.disassociate(id);
+    }
+    if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
+      RepoId id = part;
+      id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+      participant_reader_.disassociate(id);
     }
     //FUTURE: if/when topic propagation is supported, add it here
   }
@@ -1501,6 +1534,56 @@ Sedp::data_received(DCPS::MessageId message_id,
   }
 }
 
+void
+Sedp::Task::svc_i(DCPS::MessageId message_id,
+                  const ParticipantMessageData* data)
+{
+  ACE_Auto_Basic_Ptr<const ParticipantMessageData> delete_the_data(data);
+  sedp_->data_received(message_id, *data);
+}
+
+void
+Sedp::data_received(DCPS::MessageId /*message_id*/,
+                    const ParticipantMessageData& data)
+{
+  if (spdp_.shutting_down()) { return; }
+
+  const RepoId& guid = data.participantGuid;
+  RepoId guid_participant = guid;
+  guid_participant.entityId = ENTITYID_PARTICIPANT;
+  RepoId prefix = data.participantGuid;
+  prefix.entityId = EntityId_t();
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (ignoring(guid)
+      || ignoring(guid_participant)) {
+    return;
+  }
+
+  if (!spdp_.has_discovered_participant (guid_participant)) {
+    return;
+  }
+
+  // Clear the entityId so lower bound will work.
+  for (LocalSubscriptionMap::const_iterator sub_pos = local_subscriptions_.begin(),
+         sub_limit = local_subscriptions_.end();
+       sub_pos != sub_limit;
+       ++sub_pos) {
+    for (RepoIdSet::const_iterator pos = sub_pos->second.matched_endpoints_.lower_bound(prefix),
+           limit = sub_pos->second.matched_endpoints_.end();
+         pos != limit;
+         ++pos) {
+      if (OpenDDS::DCPS::GuidPrefixEqual() (pos->guidPrefix, prefix.guidPrefix)) {
+        sub_pos->second.subscription_->signal_liveliness(guid_participant);
+        break;
+      } else {
+        break;
+      }
+    }
+  }
+}
+
 // helper for match(), below
 struct DcpsUpcalls : ACE_Task_Base {
   DcpsUpcalls(DCPS::DataReaderCallbacks* drr,
@@ -1988,6 +2071,26 @@ Sedp::association_complete(const RepoId& localId,
   }
 }
 
+void
+Sedp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
+{
+  ParticipantMessageData pmd;
+  pmd.participantGuid = participant_id_;
+  switch (kind) {
+  case DDS::AUTOMATIC_LIVELINESS_QOS:
+    pmd.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
+    participant_writer_.write_sample(pmd, GUID_UNKNOWN, automatic_liveliness_seq_);
+    break;
+  case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS:
+    pmd.participantGuid.entityId = OpenDDS::DCPS::EntityIdConverter(PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
+    participant_writer_.write_sample(pmd, GUID_UNKNOWN, manual_liveliness_seq_);
+    break;
+  case DDS::MANUAL_BY_TOPIC_LIVELINESS_QOS:
+    // Do nothing.
+    break;
+  }
+}
+
 Sedp::Endpoint::~Endpoint()
 {
 }
@@ -2105,6 +2208,56 @@ Sedp::Writer::write_sample(const ParameterList& plist,
 }
 
 DDS::ReturnCode_t
+Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
+                           const DCPS::RepoId& reader,
+                           DCPS::SequenceNumber& sequence)
+{
+  DDS::ReturnCode_t result = DDS::RETCODE_OK;
+
+  // Determine message length
+  size_t size = 0, padding = 0;
+  DCPS::find_size_ulong(size, padding);
+  DCPS::gen_find_size(pmd, size, padding);
+
+  // Build RTPS message
+  ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
+                            ACE_Message_Block::MB_DATA,
+                            new ACE_Message_Block(size));
+  using DCPS::Serializer;
+  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // CDR_LE = 0x0001
+            (ser << ACE_OutputCDR::from_octet(1)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << ACE_OutputCDR::from_octet(0)) &&
+            (ser << pmd);
+  if (!ok) {
+    result = DDS::RETCODE_ERROR;
+  }
+
+  if (result == DDS::RETCODE_OK) {
+    // Send sample
+    DCPS::DataSampleElement* list_el =
+      new DCPS::DataSampleElement(repo_id_, this, 0, &alloc_, 0);
+    set_header_fields(list_el->get_header(), size, reader, sequence);
+
+    list_el->set_sample(new ACE_Message_Block(size));
+    *list_el->get_sample() << list_el->get_header();
+    list_el->get_sample()->cont(payload.duplicate());
+
+    if (reader != GUID_UNKNOWN) {
+      list_el->set_sub_id(0, reader);
+      list_el->set_num_subs(1);
+    }
+
+    DCPS::SendStateDataSampleList list;
+    list.enqueue_tail(list_el);
+    send(list);
+  }
+  delete payload.cont();
+  return result;
+}
+
+DDS::ReturnCode_t
 Sedp::Writer::write_unregister_dispose(const RepoId& rid)
 {
   // Build param list for message
@@ -2213,6 +2366,25 @@ Sedp::Reader::assoc(const DCPS::AssociationData& publication)
 
 // Implementing TransportReceiveListener
 
+static bool
+decode_parameter_list(const DCPS::ReceivedDataSample& sample,
+                      DCPS::Serializer& ser,
+                      const ACE_CDR::Octet& encap,
+                      ParameterList& data)
+{
+  bool ok = true;
+  if (ok && sample.header_.key_fields_only_ && encap < 2) {
+    GUID_t guid;
+    ok &= (ser >> guid);
+    data.length(1);
+    data[0].guid(guid);
+    data[0]._d(PID_ENDPOINT_GUID);
+  } else {
+    ok &= (ser >> data);
+  }
+  return ok;
+}
+
 void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
@@ -2221,6 +2393,9 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
   case DCPS::DISPOSE_INSTANCE:
   case DCPS::UNREGISTER_INSTANCE:
   case DCPS::DISPOSE_UNREGISTER_INSTANCE: {
+    const DCPS::MessageId id =
+      static_cast<DCPS::MessageId>(sample.header_.message_id_);
+
     DCPS::Serializer ser(sample.sample_,
                          sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
                          DCPS::Serializer::ALIGN_CDR);
@@ -2230,29 +2405,18 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
     ok &= (ser >> ACE_InputCDR::to_octet(dummy))
       && (ser >> ACE_InputCDR::to_octet(encap))
       && (ser >> options);
+
     // Ignore the 'encap' byte order since we use sample.header_.byte_order_
     // to determine whether or not to swap bytes.
-    ParameterList data;
-    if (ok && sample.header_.key_fields_only_ && encap < 2) {
-      GUID_t guid;
-      ok &= (ser >> guid);
-      data.length(1);
-      data[0].guid(guid);
-      data[0]._d(PID_ENDPOINT_GUID);
-    } else {
-      ok &= (ser >> data);
-    }
-    if (!ok) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
-                           ACE_TEXT("failed to deserialize data\n")));
-      return;
-    }
 
-    const DCPS::MessageId id =
-      static_cast<DCPS::MessageId>(sample.header_.message_id_);
+    if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER) {
+      ParameterList data;
+      if (!decode_parameter_list(sample, ser, encap, data)) {
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
 
-    switch (sample.header_.publication_id_.entityId.entityKey[2]) {
-    case 3: { // ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER.entityKey[2]
       ACE_Auto_Ptr<DiscoveredWriterData> wdata(new DiscoveredWriterData);
       if (ParameterListConverter::from_param_list(data, *wdata) < 0) {
         ACE_DEBUG((LM_ERROR,
@@ -2262,9 +2426,15 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
       sedp_.task_.enqueue(id, wdata.release());
-      break;
-    }
-    case 4: { // ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER.entityKey[2]
+
+    } else if (sample.header_.publication_id_.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER) {
+      ParameterList data;
+      if (!decode_parameter_list(sample, ser, encap, data)) {
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
+
       ACE_Auto_Ptr<DiscoveredReaderData> rdata(new DiscoveredReaderData);
       if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
         ACE_DEBUG((LM_ERROR,
@@ -2277,12 +2447,21 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         set_inline_qos(rdata->readerProxy.allLocators);
       }
       sedp_.task_.enqueue(id, rdata.release());
-      break;
-    }
-    default:
-      break;
+
+    } else if (sample.header_.publication_id_.entityId == ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER) {
+      ACE_Auto_Ptr<ParticipantMessageData> data(new ParticipantMessageData);
+      if (!(ser >> *data)) {
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("ERROR: Sedp::Reader::data_received - ")
+                   ACE_TEXT("failed to deserialize data\n")));
+        return;
+      }
+
+      sedp_.task_.enqueue(id, data.release());
+
     }
   }
+    break;
+
   default:
     break;
   }
@@ -2495,6 +2674,13 @@ Sedp::Task::enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata)
 }
 
 void
+Sedp::Task::enqueue(DCPS::MessageId id, const ParticipantMessageData* data)
+{
+  if (spdp_->shutting_down()) { return; }
+  putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data));
+}
+
+void
 Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
 {
   if (spdp_->shutting_down()) { return; }
@@ -2519,6 +2705,9 @@ Sedp::Task::svc()
       break;
     case Msg::MSG_READER:
       svc_i(msg->id_, static_cast<const DiscoveredReaderData*>(msg->payload_));
+      break;
+    case Msg::MSG_PARTICIPANT_DATA:
+      svc_i(msg->id_, static_cast<const ParticipantMessageData*>(msg->payload_));
       break;
     case Msg::MSG_REMOVE_FROM_PUB_BIT:
     case Msg::MSG_REMOVE_FROM_SUB_BIT:

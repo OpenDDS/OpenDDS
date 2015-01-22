@@ -542,7 +542,10 @@ Spdp::SpdpTransport::write_i()
     DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER |
     DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR |
     DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER |
-    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
+    DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR |
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER |
+    BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER
+    ;
   // The RTPS spec has no constants for the builtinTopics{Writer,Reader}
 
   // This locator list should not be empty, but we won't actually be using it.
@@ -879,6 +882,12 @@ void
 Spdp::association_complete(const RepoId& localId, const RepoId& remoteId)
 {
   sedp_.association_complete(localId, remoteId);
+}
+
+void
+Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
+{
+  sedp_.signal_liveliness(kind);
 }
 
 bool

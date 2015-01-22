@@ -175,6 +175,8 @@ public:
 
   virtual void inconsistent_topic();
 
+  virtual void signal_liveliness(const RepoId& remote_participant);
+
   /**
   * This is used to retrieve the listener for a certain status change.
   * If this datareader has a registered listener and the status kind

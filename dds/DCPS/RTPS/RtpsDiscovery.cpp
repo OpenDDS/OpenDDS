@@ -687,6 +687,14 @@ RtpsDiscovery::association_complete(DDS::DomainId_t domainId,
   get_part(domainId, participantId)->association_complete(localId, remoteId);
 }
 
+void
+RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
+                                 const OpenDDS::DCPS::RepoId& part_id,
+                                 DDS::LivelinessQosPolicyKind kind)
+{
+  get_part(domain_id, part_id)->signal_liveliness(kind);
+}
+
 DCPS::RcHandle<Spdp>
 RtpsDiscovery::get_part(const DDS::DomainId_t domain_id,
                         const OpenDDS::DCPS::RepoId& part_id) const

@@ -92,6 +92,8 @@ public:
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
   virtual void inconsistent_topic();
 
+  virtual void signal_liveliness(const RepoId& remote_participant);
+
   void remove_all_associations();
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
