@@ -7,7 +7,7 @@ OpenDDS system to be modeled diagrammatically.
 For obtaining and installing the plug-in for capturing models and
 generating C++ code, use the software site at:
 
-  http://www.opendds.org/modeling/eclipse
+  http://www.opendds.org/modeling/eclipse_44
 
 Add this site to your Eclipse installation by:
 
@@ -22,7 +22,7 @@ Add this site to your Eclipse installation by:
 
   enter the name and location:
     Name:     OpenDDS
-    Location: http://www.opendds.org/modeling/eclipse
+    Location: http://www.opendds.org/modeling/eclipse_44
 
   accept the result:
     "Ok"
@@ -33,9 +33,9 @@ Add this site to your Eclipse installation by:
 
 Make sure the core Eclipse sites are enabled.  These may be disabled in
 shared installations (for example, if Eclipse was installed by a Linux
-distribution's software repository).  Using Eclipse 3.5 (Galileo), the two
-sites to look for are http://download.eclipse.org/eclipse/updates/3.5 and
-http://download.eclipse.org/releases/galileo.
+distribution's software repository).  Using Eclipse 4.4 (Galileo), the two
+sites to look for are http://download.eclipse.org/eclipse/updates/4.4 and
+http://download.eclipse.org/releases/luna.
 With these enabled, Eclipse will be able to install features that the
 OpenDDS modeling SDK uses but might not already be available on your system.
 
