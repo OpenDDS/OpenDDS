@@ -1,3 +1,9 @@
+Thu Jan 22 23:05:05 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+
+          Changed liveliness factor back to 80 for non-timeout publishers.
+
 Thu Jan 22 20:42:48 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * README:
