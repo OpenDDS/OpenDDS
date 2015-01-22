@@ -14,7 +14,7 @@ team at Object Computing, Incorporated (http://www.ociweb.com) in
 St. Louis and Phoenix.  It is released under the same generous license
 terms as ACE, TAO and MPC.  See the LICENSE file for details.
 
-This directory structure contains OpenDDS 3.5.1
+This directory structure contains OpenDDS 3.6
 
 
 ======================================================================
@@ -92,7 +92,7 @@ compile OpenDDS:
 *** TAO 1.6a patch 14
 *** TAO 2.0a patch 7
 *** TAO 2.2.0a
-*** TAO 2.2.4 (DOC Group)
+*** TAO 2.3.1 (DOC Group)
 
 Note that the 1.6a, 2.0a, and 2.2a releases are from OCI and can be obtained
 from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
@@ -134,7 +134,6 @@ Windows family:
 
 Others:
 ** Android NDK
-** SunOS 5.9 (Solaris 9) (x86)
 ** SunOS 5.10 (Solaris 10) (SPARC)
 
 ======================================================================
@@ -152,7 +151,14 @@ This release of OpenDDS has been tested using the following compilers:
 ** gcc 4.8.2
 ** Clang 3.4
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
-** Sun C++ 5.10 SunOS_i386 2009/06/03
+
+OpenDDS 3.6 is planned to be the final version to support a number of
+older compilers.  If your project requires support for any of the
+following compilers, you will need to either stay with OpenDDS 3.6 or
+contact OCI for support.
+** Microsoft Visual C++ 7.1 with SP1 (Visual Studio .NET 2003)
+** Microsoft Visual C++ 8 with SP1 (Visual Studio 2005)
+** gcc 4.1.1
 
 * Building and Installing
 
@@ -267,22 +273,3 @@ http://download.ociweb.com/OpenDDS/OpenDDS-latest.pdf
 ----------------------------------------------------------------------
 ) The multicast transport design documentation maintains its own set of
   known issues; see: $DDS_ROOT/docs/html/multicast/multicast.html.
-
-
-======================================================================
-* Test Failures
-
-** tests/DCPS/Thrasher
-
-  The Thrasher test is designed to stress resource allocation/deallocation
-  in running systems.  These tests are expected to fail given insufficient
-  resources.
-
-** multicast
-
-  Tests using the multicast transport fail on QNX hosts due to problems with
-  IP multicast loopback.  These tests are disabled in the nightly automated
-  build/test for these hosts.
-
-Note: A list of tests that are run in the nightly automated build/test
-      can be found in $DDS_ROOT/bin/dcps_tests.lst

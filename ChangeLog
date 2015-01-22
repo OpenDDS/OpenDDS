@@ -1,3 +1,32 @@
+Thu Jan 22 20:42:48 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * README:
+
+          More release-related updates.
+
+Thu Jan 22 20:06:59 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * AUTHORS:
+
+          Add some missing authors to the list.
+
+Thu Jan 22 19:56:05 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * NEWS:
+
+          Added release notes for 3.6 release
+
+Thu Jan 22 18:13:56 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/modeling/README.user:
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          More documentation updates.
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+
+          Fix a dependency problem.
+
 Wed Jan 21 20:03:41 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tools/modeling/README.dev:

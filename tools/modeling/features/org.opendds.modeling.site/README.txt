@@ -15,6 +15,7 @@ be incremented (per-plugin) -- the "qualifier" change is not enough.
   * Version numbers are of the form X.Y.Z.qualifier, so the feature/plugin
     versions will have a "0" for the "Z" part even when OpenDDS itself does not.
   * see $DDS_ROOT/tools/modeling/update_version.pl
+  * Commit any version number changes to the OpenDDS repository.
 
 3. Open site.xml from org.opendds.modeling.site and click the "Build All" button
 inside the site.xml editor.
@@ -26,10 +27,14 @@ zip -r opendds_modeling_site . -x README.txt '*.svn/*' .project
 
 5. Update the opendds.org web site.  Run the following commands with
 $WEBSITE replaced by the root of the opendds.org subversion checkout.
-tar --exclude=README.txt --exclude='.*' -ch * | tar -C $WEBSITE/modeling/eclipse -x
+$ECLIPSE_VER replaced by version-specific directory. The eclipse subdirectory
+contains jars compatible with eclipse 3.5 and the eclipse_44 subdirectory
+those compatible with eclipse 4.4.  Create a new subdirectory when
+incompatible changes are made.
+tar --exclude=README.txt --exclude='.*' -ch * | tar -C $WEBSITE/modeling/$ECLIPSE_VER -x
 svn revert site.xml
 # revert because Eclipse replaced "qualifier" by the date stamp, don't commit
-cd $WEBSITE/modeling/eclipse
+cd $WEBSITE/modeling/$ECLIPSE_VER
 svn add features/*.jar plugins/*.jar
 # a few of those may already be added, so ignore svn's complaints about them
 svn commit
