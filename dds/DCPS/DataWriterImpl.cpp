@@ -1924,11 +1924,29 @@ DataWriterImpl::write(DataSample* data,
   SendStateDataSampleList list = this->get_unsent_data();
 
   if (this->publisher_servant_->is_suspended()) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::write - publisher servant is suspended \n"));
     this->available_data_list_.enqueue_tail(list);
 
+    //TODO: Need to determine how to do this with get_unsent_data change, how do these make it to sending list
+
   } else {
+    SendStateDataSampleList::iterator iter = list.begin();
+    while (iter != list.end()) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::write - send list (size %d) element: %@\n", list.size(), iter->get_sample()));
+      ++iter;
+    }
     guard.release();
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::write - after guard release send list (size %d) \n", list.size()));
+
     this->send(list);
+    //lock
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                      guard2,
+                      get_lock (),
+                      ::DDS::RETCODE_ERROR);
+    //add list items to sending
+    this->add_sending_data(list);
+
   }
 
   return DDS::RETCODE_OK;

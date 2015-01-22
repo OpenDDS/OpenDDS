@@ -196,6 +196,7 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
        ++itr) {
     // Attempt to add the current DataLink to this set.
     int result = OpenDDS::DCPS::bind(map_, itr->first, itr->second);
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataLinkSet::send_start being called on %@ inside loop\n", this));
 
     if (result == 0) {
       // We successfully added the current DataLink to this set,

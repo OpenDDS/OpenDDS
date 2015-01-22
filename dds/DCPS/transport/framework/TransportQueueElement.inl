@@ -8,6 +8,7 @@
 
 #include "ace/Message_Block.h"
 #include "EntryExit.h"
+#include "dds/DCPS/GuidConverter.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -59,12 +60,14 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
     // accessible. Note it can not be set after release_element
     // call.
     // this->released_ = true;
-    ACE_DEBUG((LM_INFO, "(%P|%t) TransportQueueElement::decision_made - TransportQueueElement's being released\n"));
+    GuidConverter pub(this->publication_id());
+    ACE_DEBUG((LM_INFO, "(%P|%t) TransportQueueElement::decision_made - TransportQueueElement for pub %C being released\n", std::string(pub).c_str()));
 
     this->release_element(dropped_by_transport);
     return true;
   }
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportQueueElement::decision_made - TransportQueueElement's count != 0 therefore not releasing element\n"));
+  GuidConverter pub2(this->publication_id());
+  ACE_DEBUG((LM_INFO, "(%P|%t) TransportQueueElement::decision_made - TransportQueueElement for pub %C count != 0 therefore not releasing element\n", std::string(pub2).c_str()));
 
   // ciju: The sub_loan_count_ has been observed to drop below zero.
   // Since it isn't exactly a ref count and the object is created in

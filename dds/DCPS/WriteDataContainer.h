@@ -239,6 +239,11 @@ public:
   SendStateDataSampleList get_unsent_data() ;
 
   /**
+   * TODO: add comment
+   */
+  void add_sending_data(SendStateDataSampleList list);
+
+  /**
    * Obtain a list of data for resending. This is only used when
    * TRANSIENT_LOCAL_DURABILITY_QOS is used. The data on the list
    * returned is not put on any SendStateDataSampleList.
@@ -393,6 +398,8 @@ private:
                                PublicationInstance* instance);
 
 private:
+
+  void log_send_state_lists (std::string description);
 
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;

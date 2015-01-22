@@ -286,6 +286,13 @@ public:
     return data_container_->get_unsent_data();
   }
 
+  /**
+   * Retrieve the unsent data from the WriteDataContainer.
+   */
+  void add_sending_data(SendStateDataSampleList list) {
+    return data_container_->add_sending_data(list);
+  }
+
   SendStateDataSampleList get_resend_data() {
     return data_container_->get_resend_data();
   }

@@ -538,7 +538,8 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
                   "regarding its fate - data_delivered().\n"));
 
             // Inform the element that the data has been delivered.
-
+            GuidConverter pub(element->publication_id());
+            ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::adjust_packet_after_send - add_delayed_notification for %C\n", std::string(pub).c_str()));
             this->add_delayed_notification(element);
 
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -968,7 +969,8 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
     GuardType guard(this->lock_);
 
     if (this->link_released_) {
-
+      GuidConverter pub(element->publication_id());
+      ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send - link released so add_delayed_notification for %C\n", std::string(pub).c_str()));
       this->add_delayed_notification(element);
 
     } else {
@@ -1234,11 +1236,10 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
   }
   ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send - about to call send_delayed_notifications\n"));
 
-//  send_delayed_notifications();
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send - about to call send_delayed_notifications\n"));
-
-  const TransportQueueElement::MatchOnPubId match(pub_id);
-  send_delayed_notifications(&match);
+  send_delayed_notifications();
+//
+//  const TransportQueueElement::MatchOnPubId match(pub_id);
+//  send_delayed_notifications(&match);
 }
 
 void

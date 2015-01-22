@@ -706,9 +706,17 @@ TransportClient::send_response(const RepoId& peer,
 void
 TransportClient::send(const SendStateDataSampleList& samples)
 {
-  DataSampleElement* cur = samples.head();
+//  ACE_GUARD(ACE_Thread_Mutex, guard, send_links_lock_);
+  GuidConverter tc(repo_id_);
 
+  ACE_DEBUG((LM_INFO, "(%P|%t) TransportClient::send - %C - send list (size %d) \n", std::string(tc).c_str(), samples.size()));
+
+  DataSampleElement* cur = samples.head();
+  int loop_counter = 0;
+  DataLinkSet send_links;
   while (cur) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) TransportClient::send - while(cur) loop for %C on %d iterations \n", std::string(tc).c_str(), loop_counter));
+    ++loop_counter;
     // VERY IMPORTANT NOTE:
     //
     // We have to be very careful in how we deal with the current
@@ -802,7 +810,7 @@ TransportClient::send(const SendStateDataSampleList& samples)
       // send_links set will not be told about the send_start() event
       // since they heard about it when they were inserted into the
       // send_links set.
-      send_links_.send_start(pub_links.in());
+      send_links.send_start(pub_links.in());
       pub_links->send(cur);
     }
 
@@ -819,7 +827,7 @@ TransportClient::send(const SendStateDataSampleList& samples)
   GuidConverter pub(this->repo_id_);
   ACE_DEBUG((LM_INFO, "(%P|%t) TransportClient::send - Pub(%C) about to call send_stop\n", std::string(pub).c_str()));
   RepoId pub_id(this->repo_id_);
-  send_links_.send_stop(pub_id);
+  send_links.send_stop(pub_id);
   ACE_DEBUG((LM_INFO, "(%P|%t) TransportClient::send - Pub(%C) done calling send_stop\n", std::string(pub).c_str()));
 
 }

@@ -1411,6 +1411,18 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           instance ? instance->instance_handle_ : 0,
               is_new_instance, filtered));
     }
+    if (sample.header_.message_id_ == SAMPLE_DATA) {
+      GuidConverter reader_converter(subscription_id_);
+      GuidConverter writer_converter(header.publication_id_);
+
+      ACE_DEBUG ((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
+          ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
+          std::string(reader_converter).c_str(),
+          std::string(writer_converter).c_str(),
+          instance ? instance->instance_handle_ : 0,
+              is_new_instance, filtered));
+    }
 
     if (filtered) break; // sample filtered from instance
     bool accepted = true;
