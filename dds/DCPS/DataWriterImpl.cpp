@@ -1989,6 +1989,10 @@ void
 DataWriterImpl::send_suspended_data()
 {
   this->send(this->available_data_list_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock ());
+  this->add_sending_data(this->available_data_list_);
   this->available_data_list_.reset();
 }
 

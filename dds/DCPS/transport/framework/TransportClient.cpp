@@ -706,7 +706,6 @@ TransportClient::send_response(const RepoId& peer,
 void
 TransportClient::send(const SendStateDataSampleList& samples)
 {
-//  ACE_GUARD(ACE_Thread_Mutex, guard, send_links_lock_);
   GuidConverter tc(repo_id_);
 
   ACE_DEBUG((LM_INFO, "(%P|%t) TransportClient::send - %C - send list (size %d) \n", std::string(tc).c_str(), samples.size()));

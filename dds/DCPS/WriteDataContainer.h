@@ -404,6 +404,8 @@ private:
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;
 
+  size_t loaned_to_dw_;
+
   /// List of data that is currently being sent.
   SendStateDataSampleList   sending_data_;
 

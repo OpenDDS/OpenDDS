@@ -155,7 +155,6 @@ private:
 
   /// These are the links being used during the call to send(). This is made a member of the
   /// class to minimize allocation/deallocations of the data link set.
-  ACE_Thread_Mutex send_links_lock_;
   DataLinkSet send_links_;
 
   DataLinkIndex data_link_index_;

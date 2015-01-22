@@ -465,6 +465,7 @@ WriteDataContainer::get_unsent_data()
   this->unsent_data_.reset();
   log_send_state_lists("get_unsent_data: 3");
 
+  loaned_to_dw_ += list.size();
   // Signal if there is no pending data.
   //
   // N.B. If a mutex cannot be obtained it is possible for this
@@ -497,7 +498,7 @@ WriteDataContainer::add_sending_data(SendStateDataSampleList list)
   // list.
   sending_data_.enqueue_tail(list);
   log_send_state_lists("add_sending_data: 2");
-
+  loaned_to_dw_ -= list.size();
   // Signal if there is no pending data.
   //
   // N.B. If a mutex cannot be obtained it is possible for this
@@ -536,7 +537,8 @@ bool
 WriteDataContainer::pending_data()
 {
   return this->sending_data_.size() != 0
-         || this->unsent_data_.size() != 0;
+         || this->unsent_data_.size() != 0
+         || loaned_to_dw_ != 0;
 }
 
 void
