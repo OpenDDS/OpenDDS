@@ -1,5 +1,61 @@
 Version 3.6 of OpenDDS.
 
+Notes:
+- The discovery framework of OpenDDS has been refactored to be more
+  asynchronous.  This should make discovery faster and more reliable
+  for both publishing and subscribing clients, regardless of the
+  discovery mechanism used (RTPS or InfoRepo).
+
+- Improved DDS specification compliance with regards to reliability,
+  resource limits, and history qos settings.  Specifically, reliable
+  data writers may block for max_blocking_time and potentially return
+  DDS::RETCODE_TIMEOUT in situations where they would have simply
+  written the data in older version of OpenDDS.  The new behavior
+  is required by the DDS specification, see section 7.1.2.4.2.11
+  of the version 1.2 specification for details.  This change affects
+  various operations of the data writer interface including the
+  write and register operations.
+
+Additions:
+- The wireshark dissector now supports wireshark versions 1.8.x, 1.10.x,
+  1.12.x, and 1.99.1.
+
+- The modeling framework now support Eclipse 4.4 (Luna) and GMF 3.1.x
+
+- Added a public_address option for the tcp transport.  This option
+  allows a tcp transport instance to listen on one address (local_address)
+  while advertising another address (public_address) to discovery.
+  This feature was used to allow a proxy process between the subscriber
+  and publisher in the TcpReconnect test, but may also be useful in
+  other deployment scenarios, especially using OpenDDS through a firewall.
+
+Fixes:
+- There were a number of concurrency and thread utilization improvements.
+  These changes fixed a number of threading issues as well as improving
+  the efficiency of publication.
+
+- Fixed some issues with RTPS discovery
+
+- Fixed a number of issues related to the reconnect functionality of
+  the tcp transport.
+
+- Fixed some bugs in the OpenDDS IPv6 support.
+
+Tests:
+- Many updates to make test results more complete and deterministic.
+
+- Added a TcpReconnect test that exercised the ability of the tcp
+  transport to seamlessly reconnect OpenDDS clients when the transport
+  layer drops a connection.
+
+- Added a WriteDataContainer unit test to verify data writer memory
+  management compliance with the DDS specification.
+
+- Added a PubScalability test that was used to test association and
+  publications with large numbers of subscribers.
+
+- Added a packet reassembly unit test.
+
 ========================================================================
 
 Version 3.5.1 of OpenDDS.
