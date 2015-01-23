@@ -1840,7 +1840,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
     pub_id.entityId,
     {firstSN.getHigh(), firstSN.getLow()},
     {lastSN.getHigh(), lastSN.getLow()},
-    counter
+    {counter}
   };
 
   ACE_Message_Block mb((HEARTBEAT_SZ + SMHDR_SZ) * 1); //FUTURE: allocators?
