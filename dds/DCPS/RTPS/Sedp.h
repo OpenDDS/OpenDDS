@@ -236,7 +236,7 @@ private:
                            DCPS::SequenceNumber& sequence,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
-  } publications_writer_, subscriptions_writer_, participant_writer_;
+  } publications_writer_, subscriptions_writer_, participant_message_writer_;
 
   class Reader : public DCPS::TransportReceiveListener, public Endpoint {
   public:
@@ -258,7 +258,7 @@ private:
     void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
 
-  } publications_reader_, subscriptions_reader_, participant_reader_;
+  } publications_reader_, subscriptions_reader_, participant_message_reader_;
 
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)
@@ -343,6 +343,15 @@ private:
       DiscoveredReaderData& drd,
       const DCPS::RepoId& subscription_id,
       const LocalSubscription& sub);
+
+  struct LocalParticipantMessage : LocalEndpoint {
+  };
+  typedef std::map<DCPS::RepoId, LocalParticipantMessage,
+    DCPS::GUID_tKeyLessThan> LocalParticipantMessageMap;
+  typedef LocalParticipantMessageMap::iterator LocalParticipantMessageIter;
+  typedef LocalParticipantMessageMap::const_iterator LocalParticipantMessageCIter;
+  LocalParticipantMessageMap local_participant_messages_;
+
   unsigned int publication_counter_, subscription_counter_;
 
   void data_received(DCPS::MessageId message_id,
@@ -435,6 +444,7 @@ private:
 
   void write_durable_publication_data(const DCPS::RepoId& reader);
   void write_durable_subscription_data(const DCPS::RepoId& reader);
+  void write_durable_participant_message_data(const DCPS::RepoId& reader);
 
   static bool is_opendds(const GUID_t& endpoint);
 
@@ -444,6 +454,9 @@ private:
   DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
                                             LocalSubscription& pub,
                                             const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+  DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
+                                                   LocalParticipantMessage& part,
+                                                   const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DCPS::SequenceNumber automatic_liveliness_seq_;
   DCPS::SequenceNumber manual_liveliness_seq_;

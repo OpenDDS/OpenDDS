@@ -1,3 +1,10 @@
+Fri Jan 23 15:39:21 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented history for BuiltinParticipantMessageReader/Writer.
+
 Fri Jan 23 15:37:40 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
