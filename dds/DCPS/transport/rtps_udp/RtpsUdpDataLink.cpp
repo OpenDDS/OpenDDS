@@ -60,6 +60,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
     reactor_task_(reactor_task, false),
     rtps_customized_element_allocator_(40, sizeof(RtpsCustomizedElement)),
     multi_buff_(this, config->nak_depth_),
+    best_effort_heartbeat_count_(0),
     nack_reply_(this, &RtpsUdpDataLink::send_nack_replies,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
@@ -507,6 +508,10 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
                 subm, *tsce, requires_inline_qos(pub_id));
     } else if (tsce->header().message_id_ == END_HISTORIC_SAMPLES) {
       end_historic_samples(rw, tsce->header(), msg->cont());
+      element->data_delivered();
+      return 0;
+    } else if (tsce->header().message_id_ == DATAWRITER_LIVELINESS) {
+      send_heartbeats_manual(tsce);
       element->data_delivered();
       return 0;
     } else {
@@ -1779,6 +1784,74 @@ RtpsUdpDataLink::send_heartbeats()
   g.release();
   for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
     pendingCallbacks[i]->data_dropped();
+  }
+}
+
+void
+RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
+{
+  using namespace OpenDDS::RTPS;
+
+  const RepoId pub_id = tsce->publication_id();
+
+  // Populate the recipients.
+  std::set<ACE_INET_Addr> recipients;
+  get_locators (pub_id, recipients);
+  if (recipients.empty()) {
+    return;
+  }
+
+  // Populate the sequence numbers and counter.
+
+  SequenceNumber firstSN, lastSN;
+  CORBA::Long counter;
+  RtpsWriterMap::iterator pos = writers_.find (pub_id);
+  if (pos != writers_.end ()) {
+    // Reliable.
+    const bool has_data = !pos->second.send_buff_.is_nil() && !pos->second.send_buff_->empty();
+    SequenceNumber durable_max;
+    const ACE_Time_Value now = ACE_OS::gettimeofday();
+    for (ReaderInfoMap::const_iterator ri = pos->second.remote_readers_.begin(), end = pos->second.remote_readers_.end();
+         ri != end;
+         ++ri) {
+      if (!ri->second.durable_data_.empty()) {
+        const ACE_Time_Value expiration = ri->second.durable_timestamp_ + config_->durable_data_timeout_;
+        if (now <= expiration &&
+            ri->second.durable_data_.rbegin()->first > durable_max) {
+          durable_max = ri->second.durable_data_.rbegin()->first;
+        }
+      }
+    }
+    firstSN = (pos->second.durable_ || !has_data) ? 1 : pos->second.send_buff_->low();
+    lastSN = std::max(durable_max, has_data ? pos->second.send_buff_->high() : 1);
+    counter = ++pos->second.heartbeat_count_;
+  } else {
+    // Unreliable.
+    firstSN = 1;
+    lastSN = tsce->sequence();
+    counter = ++this->best_effort_heartbeat_count_;
+  }
+
+  const HeartBeatSubmessage hb = {
+    {HEARTBEAT,
+     CORBA::Octet(1 /*FLAG_E*/ | 2 /*FLAG_F*/ | 4 /*FLAG_L*/),
+     HEARTBEAT_SZ},
+    ENTITYID_UNKNOWN, // any matched reader may be interested in this
+    pub_id.entityId,
+    {firstSN.getHigh(), firstSN.getLow()},
+    {lastSN.getHigh(), lastSN.getLow()},
+    {counter}
+  };
+
+  ACE_Message_Block mb((HEARTBEAT_SZ + SMHDR_SZ) * 1); //FUTURE: allocators?
+  // byte swapping is handled in the operator<<() implementation
+  Serializer ser(&mb, false, Serializer::ALIGN_CDR);
+  if ((ser << hb)) {
+    send_strategy_->send_rtps_control(mb, recipients);
+  }
+  else {
+    ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::send_heartbeats_manual() - "
+               "failed to serialize HEARTBEAT submessage\n"));
   }
 }
 

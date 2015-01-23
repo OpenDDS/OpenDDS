@@ -2552,7 +2552,6 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
         if (this->send_liveliness(tv) == false) {
           liveliness_lost = true;
         }
-        liveliness_asserted_ = false;
       }
       break;
 
@@ -2562,6 +2561,7 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value &tv,
     }
   }
 
+  liveliness_asserted_ = false;
   last_liveliness_check_time_ = tv;
   elapsed = tv - last_liveliness_activity_time_;
 

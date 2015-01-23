@@ -4,6 +4,7 @@
 
 DataWriterListenerImpl::DataWriterListenerImpl ()
 : num_liveliness_lost_callbacks_(0)
+, matched_(false)
 {
 }
 
@@ -39,13 +40,18 @@ void DataWriterListenerImpl::on_liveliness_lost (
       const ::DDS::LivelinessLostStatus & status
     )
 {
-  ++ num_liveliness_lost_callbacks_;
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %X %d\n"),
-    writer, num_liveliness_lost_callbacks_));
-  ACE_DEBUG((LM_DEBUG,
-    ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d \n"),
-    status.total_count, status.total_count_change));
+  if (matched_) {
+    ++ num_liveliness_lost_callbacks_;
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %X %d\n"),
+               writer, num_liveliness_lost_callbacks_));
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d \n"),
+               status.total_count, status.total_count_change));
+  } else {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost before matched\n")));
+  }
 }
 
 void DataWriterListenerImpl::on_publication_matched (
@@ -53,6 +59,7 @@ void DataWriterListenerImpl::on_publication_matched (
       const ::DDS::PublicationMatchedStatus & status
     )
 {
+  matched_ = true;
   ACE_UNUSED_ARG(writer) ;
   ACE_UNUSED_ARG(status) ;
 

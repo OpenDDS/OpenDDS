@@ -1,3 +1,109 @@
+Fri Jan 23 19:06:04 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Reverted test script to pre-TestFramework version to
+          avoid spurious WARNING messages printed during testing.
+
+Fri Jan 23 18:49:20 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+
+          Fixed compiler error for Sun.
+
+Fri Jan 23 17:14:23 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+
+          Remove obsolete keep_link options from transport configs.
+
+Fri Jan 23 16:03:34 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/pub_inforepo_rtps.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub_inforepo_tcp.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub_rtps_rtps.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub_rtps_tcp.ini:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/sub_inforepo_rtps.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub_inforepo_tcp.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub_rtps_rtps.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub_rtps_tcp.ini:
+
+          Added scenarios to cover all combinations of {InfoRepo,RTPS}
+          discovery and {tcp,rtps} transport.  Added RepoIds when logging.
+          Modified test to not count liveliness lost before association due
+          to the delay introduced by RTPS discovery.
+
+          NOTE: The RTPS tests set max_samples_per_packet to 1.  This
+          should be removed after the non-RTPS tests are fixed.
+
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+
+          Removed these files.
+
+Fri Jan 23 15:39:21 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented history for BuiltinParticipantMessageReader/Writer.
+
+Fri Jan 23 15:37:40 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fixed compiler warning.
+
+Thu Jan 22 23:15:46 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+
+          Added callback to handle liveliness from discovery.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Implemented liveliness for RTPS.
+
+Thu Jan 22 23:11:40 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Resets manually asserted liveliness.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Added comparator for GuidPrefix_t.
+
+Thu Jan 22 23:05:05 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+
+          Changed liveliness factor back to 80 for non-timeout publishers.
+
 Thu Jan 22 20:42:48 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * README:

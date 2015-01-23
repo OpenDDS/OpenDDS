@@ -68,6 +68,7 @@ public:
 protected:
 private:
   int num_liveliness_lost_callbacks_;
+  bool matched_;
 };
 
 #endif /* DATAWRITER_LISTENER_IMPL  */

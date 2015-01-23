@@ -13,36 +13,53 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$pub_conf = "-DCPSConfigFile pub.ini";
-#$pub_conf = "-DCPSConfigFile pub.ini -DCPSDebugLevel 10 -DCPSTransportDebugLevel 7";
-$sub_conf = "-DCPSConfigFile sub.ini";
-$pub_opts = "$pub_conf ";
-$sub_opts = "$sub_conf ";
+$discovery = "inforepo";
+$transport = "tcp";
 
-if ($ARGV[0] eq 'lost') {
-    $pub_opts = "$pub_conf -l -n 4 -t 10 -c 8 -DCPSDebugLevel 10";
-    $sub_opts = "$sub_conf -l -n 4 -c 16 -DCPSDebugLevel 6";
+$pub_extra = "";
+$sub_extra = "";
+
+while ($a = shift) {
+    if ($a eq 'lost') {
+        $pub_extra = "-l -n 4 -t 10 -c 8";
+        $sub_extra = "-l -n 4 -c 16";
+    }
+    elsif ($a eq 'rtps') {
+        $transport = "rtps";
+    }
+    elsif ($a eq 'rtpsdisco') {
+        $discovery = "rtps";
+    }
+    else {
+        print STDERR "ERROR: unknown option: $a\n";
+        exit 1;
+    }
 }
-elsif ($ARGV[0] ne '') {
-    print STDERR "ERROR: invalid test case\n";
-    exit 1;
-}
 
-$dcpsrepo_ior = "repo.ior";
+$pub_conf = "pub_" . $discovery . "_" . $transport . ".ini";
+$sub_conf = "sub_" . $discovery . "_" . $transport . ".ini";
 
-unlink $dcpsrepo_ior;
+$pub_opts = "-DCPSConfigFile $pub_conf $pub_extra";
+$sub_opts = "-DCPSConfigFile $sub_conf $sub_extra";
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "-o $dcpsrepo_ior ");
 $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
 $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
 
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
+if ($discovery == 'inforepo') {
+    $dcpsrepo_ior = "repo.ior";
+
+    unlink $dcpsrepo_ior;
+
+    $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
+                                         "-o $dcpsrepo_ior");
+
+    print $DCPSREPO->CommandLine() . "\n";
+    $DCPSREPO->Spawn ();
+    if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
+        print STDERR "ERROR: waiting for Info Repo IOR file\n";
+        $DCPSREPO->Kill ();
+        exit 1;
+    }
 }
 
 print $Publisher->CommandLine() . "\n";
@@ -50,7 +67,6 @@ $Publisher->Spawn ();
 
 print $Subscriber->CommandLine() . "\n";
 $Subscriber->Spawn ();
-
 
 $PublisherResult = $Publisher->WaitKill (60);
 if ($PublisherResult != 0) {
@@ -64,13 +80,15 @@ if ($SubscriberResult != 0) {
     $status = 1;
 }
 
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
+if ($discovery == 'inforepo') {
+    $ir = $DCPSREPO->TerminateWaitKill(5);
+    if ($ir != 0) {
+        print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
+        $status = 1;
+    }
 
-unlink $dcpsrepo_ior;
+    unlink $dcpsrepo_ior;
+}
 
 if ($status == 0) {
   print "test PASSED.\n";

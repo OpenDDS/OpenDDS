@@ -5,6 +5,8 @@
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
+#include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include <ace/streams.h>
 
 using namespace Messenger;
@@ -88,23 +90,27 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
 }
 
 void DataReaderListenerImpl::on_liveliness_changed (
-    DDS::DataReader_ptr,
+    DDS::DataReader_ptr reader,
     const DDS::LivelinessChangedStatus & status)
   throw (CORBA::SystemException)
 {
   ++ num_liveliness_change_callbacks_;
+
+  const OpenDDS::DCPS::RepoId id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(reader->get_subscriber()->get_participant())->get_repoid(status.last_publication_handle);
+  OpenDDS::DCPS::GuidConverter converter(id);
+
   ACE_DEBUG((LM_INFO, "%T DataReaderListenerImpl::on_liveliness_changed #%d\n"
                       "  alive_count = %d\n"
                       "  not_alive_count = %d\n"
                       "  alive_count_change = %d\n"
                       "  not_alive_count_change = %d\n"
-                      "  last_publiction_handle = %d\n",
+                      "  last_publication_handle = %d (%s)\n",
                       num_liveliness_change_callbacks_,
                       status.alive_count,
                       status.not_alive_count,
                       status.alive_count_change,
                       status.not_alive_count_change,
-                      status.last_publication_handle));
+                      status.last_publication_handle, std::string(converter).c_str()));
 }
 
 void DataReaderListenerImpl::on_subscription_matched (

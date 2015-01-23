@@ -299,8 +299,7 @@ module OpenDDS {
        This is used for the BuiltinParticipantMessage{Writer,Reader}
        to implement the Writer Liveliness Protocol (8.4.13). */
     struct ParticipantMessageData {
-      GuidPrefix_t participantGuidPrefix;
-      OctetArray4 kind;
+      GUID_t participantGuid;
       OctetSeq data;
     };
     // See PARTICIPANT_MESSAGE_DATA_KIND_* constants for the 'kind'

@@ -15,6 +15,8 @@ public:
   void end ();
 protected:
   ::DDS::DataWriter_var writer_;
+  std::string id_;
+  const char* get_id() const { return id_.c_str(); }
 };
 
 

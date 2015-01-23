@@ -99,7 +99,7 @@ for($i = 0; $i < $numPubs; ++$i)
   $thisPort = $pub_port + $i;
   $thisPubTime = $pub_time - ($i * $delay);
   $thisPubLeaseTime = $pub_lease_time;
-  $factor = 10;
+  $factor = 80;
   if($i == 0) {
       $factor = $inflation_factor * 100;
   }

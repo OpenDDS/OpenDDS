@@ -319,7 +319,10 @@ private:
 
   void send_nack_replies();
   void send_heartbeats();
+  void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
+
+  CORBA::Long best_effort_heartbeat_count_;
 
   struct TimedDelay : ACE_Event_Handler {
 
