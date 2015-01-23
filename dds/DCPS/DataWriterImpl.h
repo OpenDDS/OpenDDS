@@ -562,6 +562,9 @@ private:
 
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 
+  DDS::ReturnCode_t dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                           const DDS::Time_t& timestamp);
+
   /**
    * This method create a header message block and chain with
    * the registered sample. The header contains the information

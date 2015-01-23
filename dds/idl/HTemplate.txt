@@ -179,8 +179,7 @@ private:
   ::DDS::ReturnCode_t get_or_create_instance_handle(
     ::DDS::InstanceHandle_t& handle,
     const ::<%SCOPED%>& instance_data,
-    const ::DDS::Time_t & source_timestamp,
-    ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
+    const ::DDS::Time_t & source_timestamp);
 
    InstanceMap  instance_map_;
    size_t       marshaled_size_;
@@ -380,13 +379,8 @@ public:
                                bool & filtered,
                                OpenDDS::DCPS::MarshalingType marshaling_type);
 
-    virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                         OpenDDS::DCPS::SubscriptionInstance*& instance);
-
-    virtual void unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                            OpenDDS::DCPS::SubscriptionInstance*& instance);
-
-    //virtual OpenDDS::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
+    virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                    OpenDDS::DCPS::SubscriptionInstance*& instance);
 
     virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance* instance);
 

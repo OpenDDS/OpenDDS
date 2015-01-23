@@ -86,16 +86,10 @@ bool
 {
   ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    registered_handle);
-
   ::DDS::ReturnCode_t const ret
     = this->get_or_create_instance_handle(registered_handle,
                                           instance,
-                                          timestamp,
-                                          guard);
+                                          timestamp);
   if (ret != ::DDS::RETCODE_OK)
   {
     ACE_ERROR ((LM_ERROR,
@@ -155,11 +149,6 @@ bool
                         ::DDS::RETCODE_ERROR);
   }
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    ::DDS::RETCODE_ERROR);
-
   // DataWriterImpl::unregister_instance_i will call back to inform the
   // <%TYPE%>DataWriter.
   // That the instance handle is removed from there and hence
@@ -185,39 +174,26 @@ bool
     ::DDS::InstanceHandle_t handle,
     const ::DDS::Time_t & source_timestamp)
 {
-  //  A lock is obtained on entering this method to serialize access to
-  //  the contained data storage and interfaces.  This lock protects the
-  //  marshaled data buffers as well as the instance data containers.
-
   //  This operation assumes the provided handle is valid. The handle
   //  provided will not be verified.
-  {
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                      guard,
-                      get_lock (),
-                      ::DDS::RETCODE_ERROR);
-  
-    if (handle == ::DDS::HANDLE_NIL)
-    {
-      ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
-      ::DDS::ReturnCode_t ret
+
+  if (handle == ::DDS::HANDLE_NIL) {
+    ::DDS::InstanceHandle_t registered_handle = ::DDS::HANDLE_NIL;
+    ::DDS::ReturnCode_t ret
         = this->get_or_create_instance_handle(registered_handle,
                                               instance_data,
-                                              source_timestamp,
-                                              guard);
-      if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                           ACE_TEXT("(%P|%t) ")
-                           ACE_TEXT("<%TYPE%>DataWriterImpl::write, ")
-                           ACE_TEXT("register failed err=%d.\n"),
-                           ret),
-                          ret);
-      }
-  
-      handle = registered_handle;
+                                              source_timestamp);
+    if (ret != ::DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ")
+                        ACE_TEXT("<%TYPE%>DataWriterImpl::write, ")
+                        ACE_TEXT("register failed err=%d.\n"),
+                        ret),
+                       ret);
     }
-  } //end guard scope
+  
+    handle = registered_handle;
+  }
 
   // list of reader RepoIds that should not get data
   OpenDDS::DCPS::GUIDSeq_var filter_out;
@@ -277,11 +253,6 @@ bool
                         ::DDS::RETCODE_ERROR);
     }
   }
-
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    ::DDS::RETCODE_ERROR);
 
   return OpenDDS::DCPS::DataWriterImpl::dispose(instance_handle,
                                                 source_timestamp);
@@ -514,9 +485,13 @@ ACE_Message_Block*
 <%TYPE%>DataWriterImpl::get_or_create_instance_handle(
   ::DDS::InstanceHandle_t& handle,
   const ::<%SCOPED%>& instance_data,
-  const ::DDS::Time_t & source_timestamp,
-  ACE_Guard<ACE_Recursive_Thread_Mutex>& guard)
+  const ::DDS::Time_t & source_timestamp)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   get_lock(),
+                   ::DDS::RETCODE_ERROR);
+
   handle = ::DDS::HANDLE_NIL;
   InstanceMap::const_iterator it = instance_map_.find(instance_data);
 
@@ -1951,8 +1926,12 @@ void
     bool & just_registered,
     bool & filtered)
 {
-  bool is_dispose_msg = header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE;
-  bool is_unregister_msg = header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE;
+  const bool is_dispose_msg =
+    header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
+    header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
+  const bool is_unregister_msg =
+    header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE ||
+    header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
 
   ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
@@ -2266,22 +2245,24 @@ void
       instance_data = 0;
     }
 
-    bool event_notify = true;
-    if (is_dispose_msg)
-    {
-      event_notify = instance_ptr->instance_state_.dispose_was_received(header.publication_id_) ;
-    }
-    else if (is_unregister_msg)
-    {
-      event_notify = instance_ptr->instance_state_.unregister_was_received(header.publication_id_) ;
-    }
-    else
-    {
-      instance_ptr->instance_state_.data_was_received(header.publication_id_) ;
+    bool event_notify = false;
+
+    if (is_dispose_msg) {
+      event_notify = instance_ptr->instance_state_.dispose_was_received(header.publication_id_);
     }
 
-    if (! event_notify)
-    {
+    if (is_unregister_msg) {
+      if (instance_ptr->instance_state_.unregister_was_received(header.publication_id_)) {
+        event_notify = true;
+      }
+    }
+    
+    if (!is_dispose_msg && !is_unregister_msg) {
+      event_notify = true;
+      instance_ptr->instance_state_.data_was_received(header.publication_id_);
+    }
+
+    if (!event_notify) {
        return;
     }
 
@@ -2407,8 +2388,8 @@ void
 }
 
 void
-<%TYPE%>DataReaderImpl::dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                                OpenDDS::DCPS::SubscriptionInstance*& instance)
+<%TYPE%>DataReaderImpl::dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                           OpenDDS::DCPS::SubscriptionInstance*& instance)
 {
   //!!! caller should already have the sample_lock_
 
@@ -2416,25 +2397,6 @@ void
   // What it needs here is the key value to identify the instance to dispose.
   // The demarshal push this "sample" to received sample list so the user
   // can be notified the dispose event.
-  bool just_registered = false;
-  bool filtered = false;
-  OpenDDS::DCPS::MarshalingType marshaling = OpenDDS::DCPS::FULL_MARSHALING;
-  if (sample.header_.key_fields_only_) {
-    marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
-  }
-  this->dds_demarshal(sample, instance, just_registered, filtered, marshaling);
-}
-
-void
-<%TYPE%>DataReaderImpl::unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                                   OpenDDS::DCPS::SubscriptionInstance*& instance)
-{
-  //!!! caller should already have the sample_lock_
-
-  // The data sample in this unregister message does not contain any valid data.
-  // What it needs here is the key value to identify the instance to unregister.
-  // The demarshal push this "sample" to received sample list so the user
-  // can be notified the unregister event.
   bool just_registered = false;
   bool filtered = false;
   OpenDDS::DCPS::MarshalingType marshaling = OpenDDS::DCPS::FULL_MARSHALING;

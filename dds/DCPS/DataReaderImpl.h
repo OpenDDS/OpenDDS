@@ -346,10 +346,9 @@ public:
                              bool & is_new_instance,
                              bool & filtered,
                              MarshalingType marshaling_type)= 0;
-  virtual void dispose(const ReceivedDataSample& sample,
-                       SubscriptionInstance*& instance);
-  virtual void unregister(const ReceivedDataSample& sample,
-                          SubscriptionInstance*& instance);
+
+  virtual void dispose_unregister(const ReceivedDataSample& sample,
+                                  SubscriptionInstance*& instance);
 
   void process_latency(const ReceivedDataSample& sample);
   void notify_latency(PublicationId writer);
