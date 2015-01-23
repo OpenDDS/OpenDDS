@@ -1,3 +1,10 @@
+Fri Jan 23 17:14:23 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+
+          Remove obsolete keep_link options from transport configs.
+
 Fri Jan 23 16:03:34 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * bin/dcps_tests.lst:
