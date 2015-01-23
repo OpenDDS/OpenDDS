@@ -582,15 +582,28 @@ TransportClient::on_notification_of_connection_deletion(const RepoId& peerId)
 }
 
 void
-TransportClient::stop_associating()
+TransportClient::stop_associating(const ReaderIdSeq* readers)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  PendingMap::iterator iter = pending_.begin();
+  if (readers == 0) {
+    PendingMap::iterator iter = pending_.begin();
 
-  while (iter != pending_.end()) {
-    iter->second.removed_ = true;
-    ++iter;
+    while (iter != pending_.end()) {
+      iter->second.removed_ = true;
+      ++iter;
+    }
+  } else {
+    const ReaderIdSeq& rdrs = *readers;
+    CORBA::ULong len = rdrs.length();
+
+    for (CORBA::ULong i = 0; i < len; ++i) {
+      PendingMap::iterator iter = pending_.find(rdrs[i]);
+
+      if (iter != pending_.end()) {
+        iter->second.removed_ = true;
+      }
+    }
   }
 }
 

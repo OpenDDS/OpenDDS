@@ -569,8 +569,8 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                readers.length()));
   }
 
-  // stop pending associations
-  this->stop_associating();
+  // stop pending associations for these reader ids
+  this->stop_associating(&readers);
 
   ReaderIdSeq fully_associated_readers;
   CORBA::ULong fully_associated_len = 0;

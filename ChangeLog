@@ -1,3 +1,18 @@
+Fri Jan 23 22:08:38 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Fix issue where concurrent calls to add_association()
+          and remove_associations() could conflict and cause the
+          add to fail.  The remove was stopping all pending
+          associations instead of just those for the IDs being
+          removed.  I added a sequence of reader IDs to the
+          stop_associating() member function to solve this.
+          This was causing test failures in SetQosPartition and
+          other tests.
+
 Fri Jan 23 19:06:04 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/FooTest5/run_test.pl:

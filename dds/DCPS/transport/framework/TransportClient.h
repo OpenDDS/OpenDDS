@@ -70,7 +70,7 @@ protected:
 
   bool associate(const AssociationData& peer, bool active);
   void disassociate(const RepoId& peerId);
-  void stop_associating();
+  void stop_associating(const ReaderIdSeq* readers = 0);
 
   // Data transfer:
 
