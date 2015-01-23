@@ -1939,11 +1939,8 @@ DataWriterImpl::write(DataSample* data,
     ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::write - after guard release send list (size %d) \n", list.size()));
 
     this->send(list);
-    //lock
 
-    //add list items to sending
     this->add_sending_data(list);
-
   }
 
   return DDS::RETCODE_OK;

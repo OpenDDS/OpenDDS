@@ -34,7 +34,7 @@ my $check_data_dropped=0;
 my $publisher_running_sec=30;
 my $subscriber_running_sec=20;
 my $repo_bit_conf = "-NOBITS";
-my $app_bit_conf = "-DCPSDebugLevel 10 -DCPSTransportDebugLevel 7 -DCPSBit 0";
+my $app_bit_conf = "-DCPSBit 0";
 my $cfgfile = '';
 
 # multiple instances test
