@@ -9,6 +9,7 @@
 #include "EntryExit.h"
 
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/GuidConverter.h"
 
 ACE_INLINE
 OpenDDS::DCPS::RepoIdSet::RepoIdSet()
@@ -30,7 +31,7 @@ OpenDDS::DCPS::RepoIdSet::remove_id(RepoId id)
   int result = unbind(map_, id);
 
   if (result != 0) {
-    VDBG((LM_DEBUG, "(%P|%t) RepoId (%d) not found in map_.\n",id));
+    VDBG((LM_DEBUG, "(%P|%t) RepoId (%C) not found in map_.\n", LogGuid(id)));
   }
 
   return result;

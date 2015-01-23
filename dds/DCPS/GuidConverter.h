@@ -97,6 +97,13 @@ protected:
   const GUID_t guid_;
 };
 
+struct OpenDDS_Dcps_Export LogGuid {
+  explicit LogGuid(const GUID_t& id)
+    : conv_(GuidConverter(id)) {}
+  operator const char*() { return conv_.c_str(); }
+  std::string conv_;
+};
+
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 

@@ -232,7 +232,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%N:%l main()")
                ACE_TEXT(" INFO: Testing %d second minimum separation...\n"),
-               minimum_separation));
+               minimum_separation.sec));
 
     // We expect to receive up to one sample per
     // cycle (all others should be filtered).

@@ -100,13 +100,13 @@ CORBA::SystemException::operator= (const CORBA::SystemException &src)
 }
 
 void
-CORBA::SystemException::_tao_encode (TAO_OutputCDR &cdr) const
+CORBA::SystemException::_tao_encode(TAO_OutputCDR&) const
 {
   throw ::CORBA::MARSHAL ();
 }
 
 void
-CORBA::SystemException::_tao_decode (TAO_InputCDR &cdr)
+CORBA::SystemException::_tao_decode(TAO_InputCDR&)
 {
   throw ::CORBA::MARSHAL ();
 }

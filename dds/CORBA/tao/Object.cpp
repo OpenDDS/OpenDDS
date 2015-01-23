@@ -15,88 +15,85 @@
 # include "tao/Object.inl"
 #endif /* ! __ACE_INLINE__ */
 
-CORBA::Object::~Object (void)
+CORBA::Object::~Object()
 {
 }
 
-CORBA::Object::Object (TAO_Stub * protocol_proxy,
-                       CORBA::Boolean collocated,
-                       TAO_Abstract_ServantBase * servant,
-                       TAO_ORB_Core *orb_core)
-  : is_local_ (false)
-  , is_evaluated_ (true)
-  , ior_ (0)
-  , orb_core_ (orb_core)
-  , protocol_proxy_ (protocol_proxy)
-  , object_init_lock_ (0)
+CORBA::Object::Object(TAO_Stub* protocol_proxy,
+                      CORBA::Boolean,
+                      TAO_Abstract_ServantBase*,
+                      TAO_ORB_Core*orb_core)
+  : is_local_(false)
+  , is_evaluated_(true)
+  , ior_(0)
+  , orb_core_(orb_core)
+  , protocol_proxy_(protocol_proxy)
+  , object_init_lock_(0)
 {
 }
 
-CORBA::Object::Object (IOP::IOR *ior,
-                       TAO_ORB_Core *orb_core)
-  : is_local_ (false)
-  , is_evaluated_ (false)
-  , ior_ (ior)
-  , orb_core_ (orb_core)
-  , protocol_proxy_ (0)
-  , object_init_lock_ (0)
+CORBA::Object::Object(IOP::IOR* ior, TAO_ORB_Core* orb_core)
+  : is_local_(false)
+  , is_evaluated_(false)
+  , ior_(ior)
+  , orb_core_(orb_core)
+  , protocol_proxy_(0)
+  , object_init_lock_(0)
 {
-}
-
-void
-CORBA::Object::_add_ref (void)
-{
-  this->refcount_.increment ();
 }
 
 void
-CORBA::Object::_remove_ref (void)
+CORBA::Object::_add_ref()
 {
-  if (this->refcount_.decrement () != 0)
+  this->refcount_.increment();
+}
+
+void
+CORBA::Object::_remove_ref()
+{
+  if (this->refcount_.decrement() != 0)
     return;
 
   delete this;
 }
 
 CORBA::ULong
-CORBA::Object::_refcount_value(void) const
+CORBA::Object::_refcount_value() const
 {
-  return static_cast<CORBA::ULong> (this->refcount_.value ());
+  return static_cast<CORBA::ULong>(this->refcount_.value());
 }
 
 void
-CORBA::Object::_tao_any_destructor (void *x)
+CORBA::Object::_tao_any_destructor(void*)
 {
 }
 
-// virtual -- do not inline
 CORBA::Boolean
-CORBA::Object::marshal (TAO_OutputCDR &cdr)
+CORBA::Object::marshal(TAO_OutputCDR&)
 {
   return false;
 }
 
 /*static*/ CORBA::Boolean
-CORBA::Object::marshal (const CORBA::Object_ptr x,
-                        TAO_OutputCDR &cdr)
+CORBA::Object::marshal(const CORBA::Object_ptr, TAO_OutputCDR&)
 {
   return false;
 }
 
 bool
-CORBA::Object::can_convert_to_ior (void) const
+CORBA::Object::can_convert_to_ior() const
 {
   return false;
 }
 
 char*
-CORBA::Object::convert_to_ior (bool, const char*) const
+CORBA::Object::convert_to_ior(bool, const char*) const
 {
   return 0;
 }
 
 TAO_Abstract_ServantBase*
-CORBA::Object::_servant (void) const
+CORBA::Object::_servant() const
 {
   return 0;
 }
@@ -105,49 +102,49 @@ CORBA::Object::_servant (void) const
 // logical type ID is passed as a parameter.
 
 CORBA::Boolean
-CORBA::Object::_is_a (const char *type_id)
+CORBA::Object::_is_a(const char*)
 {
   throw ::CORBA::NO_IMPLEMENT();
 }
 
 const char*
-CORBA::Object::_interface_repository_id (void) const
+CORBA::Object::_interface_repository_id() const
 {
   return "IDL:omg.org/CORBA/Object:1.0";
 }
 
 CORBA::Boolean
-CORBA::Object::_is_collocated (void) const
+CORBA::Object::_is_collocated() const
 {
   return false;
 }
 
 void
-CORBA::Object::set_collocated_servant (TAO_Abstract_ServantBase *b)
+CORBA::Object::set_collocated_servant(TAO_Abstract_ServantBase*)
 {
 }
 
 CORBA::Boolean
-CORBA::Object::_is_local (void) const
+CORBA::Object::_is_local() const
 {
   return this->is_local_;
 }
 
 TAO_Stub *
-CORBA::Object::_stubobj (void) const
+CORBA::Object::_stubobj() const
 {
   return this->protocol_proxy_;
 }
 
 TAO_Stub *
-CORBA::Object::_stubobj (void)
+CORBA::Object::_stubobj()
 {
   
   return this->protocol_proxy_;
 }
 
 CORBA::ULong
-CORBA::Object::_hash (CORBA::ULong maximum)
+CORBA::Object::_hash(CORBA::ULong maximum)
 {
     {
       // Locality-constrained object.
@@ -157,14 +154,14 @@ CORBA::Object::_hash (CORBA::ULong maximum)
       // large enough to hold an address to avoid compile-time
       // warnings on some 64-bit platforms.
       const CORBA::ULong hash =
-        static_cast<CORBA::ULong> (reinterpret_cast<ptrdiff_t> (this));
+        static_cast<CORBA::ULong>(reinterpret_cast<ptrdiff_t>(this));
 
       return hash % maximum;
     }
 }
 
 CORBA::Boolean
-CORBA::Object::_is_equivalent (CORBA::Object_ptr other_obj)
+CORBA::Object::_is_equivalent(CORBA::Object_ptr other_obj)
 {
   if (other_obj == 0)
     {
@@ -182,18 +179,18 @@ CORBA::Object::_is_equivalent (CORBA::Object_ptr other_obj)
 // TAO's extensions
 
 TAO::ObjectKey *
-CORBA::Object::_key (void)
+CORBA::Object::_key()
 {
   return 0;
 }
 
 void
-CORBA::Object::_proxy_broker (TAO::Object_Proxy_Broker *proxy_broker)
+CORBA::Object::_proxy_broker(TAO::Object_Proxy_Broker*)
 {
 }
 
 CORBA::Boolean
-CORBA::Object::is_nil_i (CORBA::Object_ptr obj)
+CORBA::Object::is_nil_i(CORBA::Object_ptr obj)
 {
   return !obj;
 }
@@ -204,40 +201,40 @@ CORBA::Object::is_nil_i (CORBA::Object_ptr obj)
 
 #if !defined (CORBA_E_COMPACT) && !defined (CORBA_E_MICRO)
 void
-CORBA::Object::_create_request (CORBA::Context_ptr ctx,
-                                const char *operation,
-                                CORBA::NVList_ptr arg_list,
-                                CORBA::NamedValue_ptr result,
-                                CORBA::Request_ptr &request,
-                                CORBA::Flags req_flags)
+CORBA::Object::_create_request(CORBA::Context_ptr,
+                               const char*,
+                               CORBA::NVList_ptr,
+                               CORBA::NamedValue_ptr,
+                               CORBA::Request_ptr&,
+                               CORBA::Flags)
 {
 }
 #endif
 
 #if !defined (CORBA_E_COMPACT) && !defined (CORBA_E_MICRO)
 void
-CORBA::Object::_create_request (CORBA::Context_ptr ctx,
-                                const char *operation,
-                                CORBA::NVList_ptr arg_list,
-                                CORBA::NamedValue_ptr result,
-                                CORBA::ExceptionList_ptr exceptions,
-                                CORBA::ContextList_ptr,
-                                CORBA::Request_ptr &request,
-                                CORBA::Flags req_flags)
+CORBA::Object::_create_request(CORBA::Context_ptr,
+                               const char*,
+                               CORBA::NVList_ptr,
+                               CORBA::NamedValue_ptr,
+                               CORBA::ExceptionList_ptr,
+                               CORBA::ContextList_ptr,
+                               CORBA::Request_ptr&,
+                               CORBA::Flags)
 {
 }
 #endif
 
 #if !defined (CORBA_E_COMPACT) && !defined (CORBA_E_MICRO)
 CORBA::Request_ptr
-CORBA::Object::_request (const char *operation)
+CORBA::Object::_request(const char*)
 {
    return 0;
 }
 #endif
 
 CORBA::Boolean
-CORBA::Object::_non_existent (void)
+CORBA::Object::_non_existent()
 {
   return false;
 }
@@ -245,20 +242,20 @@ CORBA::Object::_non_existent (void)
 
 #if ! defined (CORBA_E_COMPACT) && ! defined (CORBA_E_MICRO)
 CORBA::InterfaceDef_ptr
-CORBA::Object::_get_interface (void)
+CORBA::Object::_get_interface()
 {
   return 0;
 }
 
 CORBA::Object_ptr
-CORBA::Object::_get_component (void)
+CORBA::Object::_get_component()
 {
   return 0;
 }
 #endif
 
 char*
-CORBA::Object::_repository_id (void)
+CORBA::Object::_repository_id()
 {
   return 0;
 }
@@ -274,34 +271,31 @@ CORBA::Object::_repository_id (void)
 #if (TAO_HAS_CORBA_MESSAGING == 1)
 
 CORBA::Policy_ptr
-CORBA::Object::_get_policy (CORBA::PolicyType type)
+CORBA::Object::_get_policy(CORBA::PolicyType)
 {
   throw ::CORBA::NO_IMPLEMENT();
 }
 
 CORBA::Policy_ptr
-CORBA::Object::_get_cached_policy (TAO_Cached_Policy_Type type)
+CORBA::Object::_get_cached_policy(TAO_Cached_Policy_Type)
 {
   throw ::CORBA::NO_IMPLEMENT();
 }
 
 CORBA::Object_ptr
-CORBA::Object::_set_policy_overrides (
-  const CORBA::PolicyList & policies,
-  CORBA::SetOverrideType set_add)
+CORBA::Object::_set_policy_overrides(const PolicyList&, SetOverrideType)
 {
   throw ::CORBA::NO_IMPLEMENT();
 }
 
 CORBA::PolicyList *
-CORBA::Object::_get_policy_overrides (const CORBA::PolicyTypeSeq & types)
+CORBA::Object::_get_policy_overrides(const PolicyTypeSeq&)
 {
   throw ::CORBA::NO_IMPLEMENT();
 }
 
 CORBA::Boolean
-CORBA::Object::_validate_connection (
-  CORBA::PolicyList_out inconsistent_policies)
+CORBA::Object::_validate_connection(PolicyList_out)
 {
   return true;
 }
@@ -310,13 +304,13 @@ CORBA::Object::_validate_connection (
 
 
 CORBA::ORB_ptr
-CORBA::Object::_get_orb (void)
+CORBA::Object::_get_orb()
 {
   throw ::CORBA::INTERNAL();
 }
 
 TAO::Object_Proxy_Broker *
-CORBA::Object::proxy_broker (void) const
+CORBA::Object::proxy_broker() const
 {
   return 0;
 }
@@ -326,19 +320,19 @@ CORBA::Object::proxy_broker (void) const
  ****************************************************************/
 
 CORBA::Boolean
-operator<< (TAO_OutputCDR& cdr, const CORBA::Object* x)
+operator<<(TAO_OutputCDR&, const CORBA::Object*)
 {
   return false;
 }
 
 /*static*/ void
-CORBA::Object::tao_object_initialize (CORBA::Object *obj)
+CORBA::Object::tao_object_initialize(CORBA::Object*)
 {
   return;
 }
 
 CORBA::Boolean
-operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
+operator>>(TAO_InputCDR&, CORBA::Object*&)
 {
   return false;
 }
@@ -346,7 +340,7 @@ operator>> (TAO_InputCDR& cdr, CORBA::Object*& x)
 #if defined (GEN_OSTREAM_OPS)
 
 std::ostream&
-operator<< (std::ostream &strm, CORBA::Object_ptr _tao_objref)
+operator<<(std::ostream &strm, CORBA::Object_ptr)
 {
   return strm;
 }
@@ -369,31 +363,30 @@ namespace TAO
   }
 
   CORBA::Object_ptr
-  Objref_Traits<CORBA::Object>::duplicate (CORBA::Object_ptr p)
+  Objref_Traits<CORBA::Object>::duplicate(CORBA::Object_ptr p)
   {
-    return CORBA::Object::_duplicate (p);
+    return CORBA::Object::_duplicate(p);
   }
 
   void
-  Objref_Traits<CORBA::Object>::release (CORBA::Object_ptr p)
+  Objref_Traits<CORBA::Object>::release(CORBA::Object_ptr p)
   {
-    ::CORBA::release (p);
+    ::CORBA::release(p);
   }
 
   CORBA::Object_ptr
-  Objref_Traits<CORBA::Object>::nil (void)
+  Objref_Traits<CORBA::Object>::nil()
   {
-    return CORBA::Object::_nil ();
+    return CORBA::Object::_nil();
   }
 
   CORBA::Boolean
-  Objref_Traits<CORBA::Object>::marshal (const CORBA::Object_ptr p,
-                                         TAO_OutputCDR & cdr)
+  Objref_Traits<CORBA::Object>::marshal(const CORBA::Object_ptr p,
+                                        TAO_OutputCDR & cdr)
   {
-    return ::CORBA::Object::marshal (p, cdr);
+    return ::CORBA::Object::marshal(p, cdr);
   }
 } // close TAO namespace
 
 
-TAO::Object_Proxy_Broker * (*_TAO_Object_Proxy_Broker_Factory_function_pointer) (void) = 0;
-
+TAO::Object_Proxy_Broker* (*_TAO_Object_Proxy_Broker_Factory_function_pointer)() = 0;
