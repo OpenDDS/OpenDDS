@@ -445,7 +445,6 @@ SendStateDataSampleList
 WriteDataContainer::get_unsent_data()
 {
   DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",6);
-  log_send_state_lists("get_unsent_data: 1");
   //
   // The samples in unsent_data are added to the local datawriter
   // list on 'loan' and will be enqueued to sending_data_ during
@@ -457,10 +456,8 @@ WriteDataContainer::get_unsent_data()
   // Clear the unsent data list.
   //
   this->unsent_data_.reset();
-  log_send_state_lists("get_unsent_data: 3 (before incrementing loaned counter");
 
   samples_loaned_to_dw_counter_ += list.size();
-  log_send_state_lists("get_unsent_data: 3 (after incrementing loaned counter");
 
   //
   // Return the moved list.
@@ -472,7 +469,6 @@ void
 WriteDataContainer::add_sending_data(SendStateDataSampleList list)
 {
   DBG_ENTRY_LVL("WriteDataContainer","add_sending_data",6);
-  log_send_state_lists("add_sending_data: 1");
   DataSampleElement* stale = 0;
   PublicationInstance* instance = 0;
 
@@ -486,10 +482,7 @@ WriteDataContainer::add_sending_data(SendStateDataSampleList list)
     // Append the unsent_data_ to current sending_data_
     // list.
     sending_data_.enqueue_tail(list);
-    log_send_state_lists("add_sending_data: 2 (before decrementing loaned counter");
     samples_loaned_to_dw_counter_ -= list.size();
-    log_send_state_lists("add_sending_data: 2 (after decrementing loaned counter");
-
 
     // Handle the case that the transport finished with the samples while still
     // on loan to the datawriter by checking if they were delivered/dropped and
@@ -505,6 +498,7 @@ WriteDataContainer::add_sending_data(SendStateDataSampleList list)
           DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, stale->get_sample());
           stale->set_delivered(false);
           sent_data_.enqueue_tail(stale);
+          this->log_send_state_lists("WriteDataContainer::add_sending_data - after moving already delivered to sent");
         }
       } else if (iter->dropped()) {
         stale = &*iter;
@@ -572,7 +566,6 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
             this->lock_);
-  log_send_state_lists("data_delivered: 1");
 
   // Delivered samples _must_ be on sending_data_ list or still on loan to the datawriter
 
@@ -637,11 +630,9 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                this->topic_name_,
                std::string(converter).c_str()));
   }
-  log_send_state_lists("data_delivered: 2");
 
   DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
   sent_data_.enqueue_tail(sample);
-  log_send_state_lists("data_delivered: 3");
 
   this->wakeup_blocking_writers (stale, instance);
 
@@ -655,7 +646,6 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
                                  bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("WriteDataContainer","data_dropped",6);
-  log_send_state_lists("data_dropped: 1");
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::data_dropped")
@@ -752,8 +742,6 @@ WriteDataContainer::remove_oldest_historical_sample(
   InstanceDataSampleList& instance_list,
   bool& released)
 {
-  log_send_state_lists("remove_oldest_historical_sample: 1");
-
   DataSampleElement* stale = 0;
 
   if (instance_list.head() != 0) {
@@ -769,7 +757,6 @@ WriteDataContainer::remove_oldest_historical_sample(
 
   std::vector<SendStateDataSampleList*> send_lists;
   send_lists.push_back(&sent_data_);
-  log_send_state_lists("remove_oldest_historical_sample: 2");
 
   const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
@@ -790,13 +777,11 @@ WriteDataContainer::remove_oldest_historical_sample(
                         ACE_TEXT("dequeue_head_next_sample failed\n")),
                        DDS::RETCODE_ERROR);
     }
-    log_send_state_lists("remove_oldest_historical_sample: 3");
 
     // Now attempt to remove the sample from the internal list and release its buffer
     result = this->sent_data_.dequeue(stale) != 0;
     release_buffer(stale);
     released = true;
-    log_send_state_lists("remove_oldest_historical_sample: 4");
 
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
@@ -832,7 +817,6 @@ WriteDataContainer::remove_oldest_sample(
   bool& released)
 {
   DataSampleElement* stale = 0;
-  log_send_state_lists("remove_oldest_sample: 1");
 
   //
   // Remove the oldest sample from the instance list.
@@ -844,7 +828,6 @@ WriteDataContainer::remove_oldest_sample(
                       ACE_TEXT("dequeue_head_next_sample failed\n")),
                      DDS::RETCODE_ERROR);
   }
-  log_send_state_lists("remove_oldest_sample: 2");
 
   //
   // Remove the stale data from the next_writer_sample_ list.  The
@@ -893,7 +876,6 @@ WriteDataContainer::remove_oldest_sample(
     this->writer_->remove_sample(stale);
     release_buffer(stale);
     released = true;
-    log_send_state_lists("remove_oldest_sample: 3");
 
   } else if (containing_list == &this->sent_data_) {
     // No one is using the data sample, so we can release it back to
@@ -902,7 +884,6 @@ WriteDataContainer::remove_oldest_sample(
     result = this->sent_data_.dequeue(stale) != 0;
     release_buffer(stale);
     released = true;
-    log_send_state_lists("remove_oldest_sample: 4");
 
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
@@ -922,7 +903,6 @@ WriteDataContainer::remove_oldest_sample(
     result = this->unsent_data_.dequeue(stale) != 0;
     release_buffer(stale);
     released = true;
-    log_send_state_lists("remove_oldest_sample: 5");
 
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
@@ -969,7 +949,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                                   DDS::InstanceHandle_t handle)
 {
   DBG_ENTRY_LVL("WriteDataContainer","obtain_buffer", 6);
-  log_send_state_lists("obtain_buffer: 1");
 
   PublicationInstance* instance = get_handle_instance(handle);
 
@@ -1012,11 +991,9 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                               ACE_TEXT(" its oldest historical sample\n"),
                               handle));
       }
-      log_send_state_lists("get_unsent_data: 2");
 
       ret = this->remove_oldest_historical_sample(instance_list, removed_historical);
 
-      log_send_state_lists("get_unsent_data: 3");
 
       //else try to remove historical samples from other instances
       if (ret == DDS::RETCODE_OK && !removed_historical) {
@@ -1031,11 +1008,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 
         while (!removed_historical && it != instances_.end() && ret == DDS::RETCODE_OK) {
           if(it->second->samples_.size() >= depth_) {
-            log_send_state_lists("get_unsent_data: 4");
-
             ret = this->remove_oldest_historical_sample(it->second->samples_, removed_historical);
-            log_send_state_lists("get_unsent_data: 5");
-
           }
           ++it;
         }
@@ -1063,10 +1036,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
           waiting_on_release_ = true;
           // lock is released while waiting and acquired before returning
           // from wait.
-          log_send_state_lists("obtain_buffer: about to wait");
-
           int const wait_result = condition_.wait(&abs_timeout);
-          log_send_state_lists("obtain_buffer: woke up");
 
           if (wait_result != 0) {
             if (errno == ETIME) {
@@ -1090,8 +1060,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 
     } else {
       //BEST EFFORT
-      log_send_state_lists("obtain_buffer: best effort begin");
-
       bool oldest_released = false;
 
       //try to remove stale samples from this instance
@@ -1382,7 +1350,6 @@ WriteDataContainer::wait_pending()
                ACE_TEXT("at %s\n"),
                (pending_timeout == ACE_Time_Value::zero ?
                   ACE_TEXT("(no timeout)") : time)));
-    this->log_send_state_lists("WriteDataContainer::wait_pending about to wait\n");
   }
   while (true) {
 

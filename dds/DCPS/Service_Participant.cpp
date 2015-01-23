@@ -215,6 +215,12 @@ Service_Participant::timer() const
   return reactor_;
 }
 
+ACE_Reactor*
+Service_Participant::reactor() const
+{
+  return reactor_;
+}
+
 void
 Service_Participant::shutdown()
 {

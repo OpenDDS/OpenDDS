@@ -84,6 +84,7 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     domain_id_(domain_id),
     dp_id_(dp_id),
     federated_(federated),
+    shutdown_condition_(shutdown_mutex_),
     monitor_(0),
     pub_id_gen_(dp_id_),
     automatic_liveliness_timer_ (*this),
@@ -879,129 +880,13 @@ DomainParticipantImpl::delete_contained_entities()
   Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
   disc->fini_bit(this);
 
-  // delete publishers
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->publishers_protector_,
-                     DDS::RETCODE_ERROR);
+  TheServiceParticipant->reactor()->notify(this);
 
-    PublisherSet::iterator pubIter = publishers_.begin();
-    DDS::Publisher_ptr pubPtr;
-    size_t pubsize = publishers_.size();
-
-    while (pubsize > 0) {
-      pubPtr = (*pubIter).obj_.in();
-      ++pubIter;
-
-      DDS::ReturnCode_t result
-      = pubPtr->delete_contained_entities();
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-
-      result = delete_publisher(pubPtr);
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-
-      pubsize--;
-    }
-
+  shutdown_mutex_.acquire();
+  while (!shutdown_complete_) {
+    shutdown_condition_.wait();
   }
-
-  // delete subscribers
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->subscribers_protector_,
-                     DDS::RETCODE_ERROR);
-
-    SubscriberSet::iterator subIter = subscribers_.begin();
-    DDS::Subscriber_ptr subPtr;
-    size_t subsize = subscribers_.size();
-
-    while (subsize > 0) {
-      subPtr = (*subIter).obj_.in();
-      ++subIter;
-
-      DDS::ReturnCode_t result = subPtr->delete_contained_entities();
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-
-      result = delete_subscriber(subPtr);
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-
-      subsize--;
-    }
-  }
-
-  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
-  // delete topics
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->topics_protector_,
-                     DDS::RETCODE_ERROR);
-
-    TopicMap::iterator topicIter = topics_.begin();
-    DDS::Topic_ptr topicPtr;
-    size_t topicsize = topics_.size();
-
-    while (topicsize > 0) {
-      topicPtr = topicIter->second.pair_.obj_.in();
-      ++topicIter;
-
-      // Delete the topic the reference count.
-      DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-      topicsize--;
-    }
-  }
-
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->recorders_protector_,
-                     DDS::RETCODE_ERROR);
-
-    RecorderSet::iterator it = recorders_.begin();
-    for (; it != recorders_.end(); ++it ){
-      RecorderImpl* impl = static_cast<RecorderImpl* >(it->in());
-      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
-      if (impl) result = impl->cleanup();
-      if (result != DDS::RETCODE_OK) ret = result;
-    }
-    recorders_.clear();
-  }
-
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->replayers_protector_,
-                     DDS::RETCODE_ERROR);
-
-    ReplayerSet::iterator it = replayers_.begin();
-    for (; it != replayers_.end(); ++it ){
-      ReplayerImpl* impl = static_cast<ReplayerImpl* >(it->in());
-      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
-      if (impl) result = impl->cleanup();
-      if (result != DDS::RETCODE_OK) ret = result;
-
-    }
-
-    replayers_.clear();
-  }
+  shutdown_mutex_.release();
 
   bit_subscriber_ = DDS::Subscriber::_nil();
 
@@ -1011,7 +896,7 @@ DomainParticipantImpl::delete_contained_entities()
 
   // the participant can now start creating new contained entities
   set_deleted(false);
-  return ret;
+  return shutdown_result_;
 }
 
 CORBA::Boolean
@@ -2217,6 +2102,142 @@ void
 DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
 {
   TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
+}
+
+int
+DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
+{
+  // delete publishers
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->publishers_protector_,
+                     DDS::RETCODE_ERROR);
+
+    PublisherSet::iterator pubIter = publishers_.begin();
+    DDS::Publisher_ptr pubPtr;
+    size_t pubsize = publishers_.size();
+
+    while (pubsize > 0) {
+      pubPtr = (*pubIter).obj_.in();
+      ++pubIter;
+
+      DDS::ReturnCode_t result
+      = pubPtr->delete_contained_entities();
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      result = delete_publisher(pubPtr);
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      pubsize--;
+    }
+
+  }
+
+  // delete subscribers
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->subscribers_protector_,
+                     DDS::RETCODE_ERROR);
+
+    SubscriberSet::iterator subIter = subscribers_.begin();
+    DDS::Subscriber_ptr subPtr;
+    size_t subsize = subscribers_.size();
+
+    while (subsize > 0) {
+      subPtr = (*subIter).obj_.in();
+      ++subIter;
+
+      DDS::ReturnCode_t result = subPtr->delete_contained_entities();
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      result = delete_subscriber(subPtr);
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      subsize--;
+    }
+  }
+
+  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+  // delete topics
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->topics_protector_,
+                     DDS::RETCODE_ERROR);
+
+    TopicMap::iterator topicIter = topics_.begin();
+    DDS::Topic_ptr topicPtr;
+    size_t topicsize = topics_.size();
+
+    while (topicsize > 0) {
+      topicPtr = topicIter->second.pair_.obj_.in();
+      ++topicIter;
+
+      // Delete the topic the reference count.
+      DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+      topicsize--;
+    }
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->recorders_protector_,
+                     DDS::RETCODE_ERROR);
+
+    RecorderSet::iterator it = recorders_.begin();
+    for (; it != recorders_.end(); ++it ){
+      RecorderImpl* impl = static_cast<RecorderImpl* >(it->in());
+      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
+      if (impl) result = impl->cleanup();
+      if (result != DDS::RETCODE_OK) ret = result;
+    }
+    recorders_.clear();
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->replayers_protector_,
+                     DDS::RETCODE_ERROR);
+
+    ReplayerSet::iterator it = replayers_.begin();
+    for (; it != replayers_.end(); ++it ){
+      ReplayerImpl* impl = static_cast<ReplayerImpl* >(it->in());
+      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
+      if (impl) result = impl->cleanup();
+      if (result != DDS::RETCODE_OK) ret = result;
+
+    }
+
+    replayers_.clear();
+  }
+
+  shutdown_mutex_.acquire();
+  shutdown_result_ = ret;
+  shutdown_complete_ = true;
+  shutdown_condition_.signal();
+  shutdown_mutex_.release();
+
+  return 0;
 }
 
 } // namespace DCPS

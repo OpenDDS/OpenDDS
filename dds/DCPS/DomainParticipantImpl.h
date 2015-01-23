@@ -73,8 +73,10 @@ class FilterEvaluator;
  * the interface this class is implementing.
  */
 class OpenDDS_Dcps_Export DomainParticipantImpl
-  : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
-  public virtual OpenDDS::DCPS::EntityImpl {
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>
+  , public virtual OpenDDS::DCPS::EntityImpl
+  , public virtual ACE_Event_Handler
+{
 public:
   typedef Objref_Servant_Pair <SubscriberImpl, DDS::Subscriber,
                                DDS::Subscriber_ptr, DDS::Subscriber_var> Subscriber_Pair;
@@ -459,6 +461,11 @@ private:
   ACE_Recursive_Thread_Mutex topics_protector_;
   /// Protect the handle collection.
   ACE_Recursive_Thread_Mutex handle_protector_;
+  /// Protect the shutdown.
+  ACE_Thread_Mutex shutdown_mutex_;
+  ACE_Condition<ACE_Thread_Mutex> shutdown_condition_;
+  DDS::ReturnCode_t shutdown_result_;
+  bool shutdown_complete_;
 
   /// The object reference activated from this servant.
   DDS::DomainParticipant_var participant_objref_;
@@ -543,7 +550,9 @@ private:
   ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
   bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
   ACE_Time_Value last_liveliness_activity_;
-  void signal_liveliness (DDS::LivelinessQosPolicyKind kind);
+  void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
+
+  virtual int handle_exception(ACE_HANDLE fd);
 };
 
 } // namespace DCPS

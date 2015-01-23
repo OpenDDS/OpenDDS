@@ -75,6 +75,8 @@ public:
   /// Intended for use by OpenDDS internals only.
   ACE_Reactor_Timer_Interface* timer() const;
 
+  ACE_Reactor* reactor() const;
+
   /**
    * Initialize the DDS client environment and get the
    * @c DomainParticipantFactory.
