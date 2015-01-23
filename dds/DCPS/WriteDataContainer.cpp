@@ -964,8 +964,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                           &transport_customized_element_allocator_),
     DDS::RETCODE_ERROR);
 
-  GuidConverter pub(element->get_pub_id());
-  ACE_DEBUG((LM_INFO, "(%P|%t) WriteDataContainer::obtain_buffer - trying to obtain buffer for sample on pub: %C\n", std::string(pub).c_str()));
   // Extract the current instance queue.
   InstanceDataSampleList& instance_list = instance->samples_;
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
@@ -993,7 +991,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
 
       ret = this->remove_oldest_historical_sample(instance_list, removed_historical);
-
 
       //else try to remove historical samples from other instances
       if (ret == DDS::RETCODE_OK && !removed_historical) {
@@ -1026,12 +1023,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                                   ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
                                   handle));
           }
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) %T WriteDataContainer::obtain_buffer about to wait()\n\tsend state lists: unsent(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
-                     this->unsent_data_.size(),
-                     this->sending_data_.size(),
-                     this->sent_data_.size(),
-                     this->num_all_samples(),
-                     this->instances_.size()));
 
           waiting_on_release_ = true;
           // lock is released while waiting and acquired before returning

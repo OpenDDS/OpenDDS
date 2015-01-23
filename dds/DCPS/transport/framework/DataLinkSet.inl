@@ -190,13 +190,11 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* link_set)
   DBG_ENTRY_LVL("DataLinkSet","send_start",6);
   GuardType guard1(this->lock_);
   GuardType guard2(link_set->lock_);
-  ACE_DEBUG((LM_INFO, "(%P|%t) DataLinkSet::send_start being called on %@\n", this));
   for (MapType::iterator itr = link_set->map_.begin();
        itr != link_set->map_.end();
        ++itr) {
     // Attempt to add the current DataLink to this set.
     int result = OpenDDS::DCPS::bind(map_, itr->first, itr->second);
-    ACE_DEBUG((LM_INFO, "(%P|%t) DataLinkSet::send_start being called on %@ inside loop\n", this));
 
     if (result == 0) {
       // We successfully added the current DataLink to this set,
@@ -220,14 +218,10 @@ OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_stop",6);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
-  ACE_DEBUG((LM_INFO, "(%P|%t) DataLinkSet::send_stop - about to iterate over map_ of datalinks of size %d\n", map_.size()));
-
   GuardType guard(this->lock_);
   for (MapType::iterator itr = map_.begin();
        itr != map_.end();
        ++itr) {
-    GuidConverter done(repoId);
-    ACE_DEBUG((LM_INFO, "(%P|%t) DataLinkSet::send_stop - Calling send_stop for %C on datalink\n", std::string(done).c_str()));
     itr->second->send_stop(repoId);
   }
 

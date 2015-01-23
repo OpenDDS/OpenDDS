@@ -646,10 +646,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
       }
 
       for (CORBA::ULong i = 0; i < fully_associated_len; ++i) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::remove_associations - erasing fully associate reader (tot: %d) from id_to_handle_map (cur size: %d)\n", fully_associated_len, id_to_handle_map_.size()));
         id_to_handle_map_.erase(fully_associated_readers[i]);
-        ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::remove_associations - after erase from id_to_handle_map (cur size: %d)\n", id_to_handle_map_.size()));
-
       }
     }
 
@@ -1975,19 +1972,14 @@ DataWriterImpl::write(DataSample* data,
   SendStateDataSampleList list = this->get_unsent_data();
 
   if (this->publisher_servant_->is_suspended()) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::write - publisher servant is suspended \n"));
     this->available_data_list_.enqueue_tail(list);
-
-    //TODO: Need to determine how to do this with get_unsent_data change, how do these make it to sending list
 
   } else {
     SendStateDataSampleList::iterator iter = list.begin();
     while (iter != list.end()) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::write - send list (size %d) element: %@\n", list.size(), iter->get_sample()));
       ++iter;
     }
     guard.release();
-    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriterImpl::write - after guard release send list (size %d) \n", list.size()));
 
     this->send(list);
 
@@ -2298,14 +2290,6 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
                std::string(writer_converter).c_str()));
     return;
   }
-  GuidConverter sample_converter(sample->get_pub_id());
-  GuidConverter writer_converter(publication_id_);
-  ACE_DEBUG((LM_INFO,
-             ACE_TEXT("(%P|%t) DataWriterImpl::data_delivered: ")
-             ACE_TEXT(" The publication id %C from delivered element ")
-             ACE_TEXT("matches the datawriter's id %C so calling data_delivered\n"),
-             std::string(sample_converter).c_str(),
-             std::string(writer_converter).c_str()));
 
   this->data_container_->data_delivered(sample);
 
@@ -2478,14 +2462,7 @@ DataWriterImpl::data_dropped(const DataSampleElement* element,
                              bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_dropped",6);
-  GuidConverter sample_converter(element->get_pub_id());
-  GuidConverter writer_converter(publication_id_);
-  ACE_DEBUG((LM_INFO,
-             ACE_TEXT("(%P|%t) DataWriterImpl::data_dropped: ")
-             ACE_TEXT(" The publication id %C from dropped element ")
-             ACE_TEXT("matches the datawriter's id %C so calling data_dropped\n"),
-             std::string(sample_converter).c_str(),
-             std::string(writer_converter).c_str()));
+
   this->data_container_->data_dropped(element, dropped_by_transport);
 
   ++data_dropped_count_;

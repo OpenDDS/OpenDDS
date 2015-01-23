@@ -256,6 +256,7 @@ DataSampleElement::delivered() const
   return delivered_;
 
 }
+
 ACE_INLINE
 void
 DataSampleElement::set_dropped(bool dropped)
@@ -270,5 +271,6 @@ DataSampleElement::dropped() const
   return dropped_;
 
 }
+
 } // namespace DCPS
 } // namespace OpenDDS

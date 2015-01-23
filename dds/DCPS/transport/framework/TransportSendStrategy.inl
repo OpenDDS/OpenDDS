@@ -35,7 +35,6 @@ OpenDDS::DCPS::TransportSendStrategy::send_start()
   GuardType guard(this->lock_);
 
   if (!this->link_released_)
-    ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_start incrementing start_counter_ up one from %d\n", this->start_counter_));
     ++this->start_counter_;
 }
 

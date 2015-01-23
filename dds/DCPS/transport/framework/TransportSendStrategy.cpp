@@ -271,8 +271,6 @@ TransportSendStrategy::perform_work()
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The outcome of the send_packet() was %d.\n", outcome), 5);
 
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::perform_work - about to call send_delayed_notifications\n"));
-
   send_delayed_notifications();
 
   // If we sent the whole packet (eg, partial_send is false), and the queue_
@@ -538,8 +536,6 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
                   "regarding its fate - data_delivered().\n"));
 
             // Inform the element that the data has been delivered.
-            GuidConverter pub(element->publication_id());
-            ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::adjust_packet_after_send - add_delayed_notification for %C\n", std::string(pub).c_str()));
             this->add_delayed_notification(element);
 
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -670,7 +666,6 @@ bool
 TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::MatchCriteria* match)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",6);
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications ENTRY\n"));
   TransportQueueElement* sample = 0;
   SendMode mode = MODE_NOT_SET;
 
@@ -683,26 +678,19 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
     GuardType guard(lock_);
 
     num_delayed_notifications = delayed_delivered_notification_queue_.size();
-    ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications CURRENTLY THERE ARE %d delayed notifications that need to be sent\n", num_delayed_notifications));
-
 
     if (num_delayed_notifications == 0) {
       return false;
 
     } else if (num_delayed_notifications == 1) {
       // Optimization for the most common case (doesn't need vectors)
-      GuidConverter sample_pub(delayed_delivered_notification_queue_[0].first->publication_id());
 
       if (!match || match->matches(*delayed_delivered_notification_queue_[0].first)) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications for (%C) is a match! (ONLY 1 delayed notification) \n", std::string(sample_pub).c_str()));
-
         found_element = true;
         sample = delayed_delivered_notification_queue_[0].first;
         mode = delayed_delivered_notification_queue_[0].second;
 
         delayed_delivered_notification_queue_.clear();
-      } else {
-        ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications delayed delivered notification for (%C) is not a match! (ONLY 1 delayed notification)\n", std::string(sample_pub).c_str()));
       }
 
     } else {
@@ -710,16 +698,11 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
       for (iter = delayed_delivered_notification_queue_.begin(); iter != delayed_delivered_notification_queue_.end(); ) {
         sample = iter->first;
         mode = iter->second;
-        GuidConverter sample_pub(iter->first->publication_id());
         if (!match || match->matches(*sample)) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications delayed delivered notifications for (%C) is a match!\n", std::string(sample_pub).c_str()));
-
           found_element = true;
           samples.push_back(*iter);
           iter = delayed_delivered_notification_queue_.erase(iter);
         } else {
-          ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications delayed delivered notification for (%C) is not a match!\n", std::string(sample_pub).c_str()));
-
           ++iter;
         }
       }
@@ -733,14 +716,10 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
     // optimization for the common case
     if (mode == MODE_TERMINATED) {
       if (!transport_shutdown_ || sample->owned_by_transport()) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications DATA DROPPED %l\n"));
-
         sample->data_dropped(true);
       }
     } else {
       if (!transport_shutdown_ || sample->owned_by_transport()) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications DATA DELIVERED %l\n"));
-
         sample->data_delivered();
       }
     }
@@ -749,14 +728,10 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
     for (size_t i = 0; i < samples.size(); ++i) {
       if (samples[i].second == MODE_TERMINATED) {
         if (!transport_shutdown_ || samples[i].first->owned_by_transport()) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications DATA DROPPED %l\n"));
-
           samples[i].first->data_dropped(true);
         }
       } else {
         if (!transport_shutdown_ || samples[i].first->owned_by_transport()) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_delayed_notifications DATA DELIVERED %l\n"));
-
           samples[i].first->data_delivered();
         }
       }
@@ -802,7 +777,6 @@ TransportSendStrategy::clear(SendMode mode)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","clear",6);
 
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::clear - about to call send_delayed_notifications\n"));
   send_delayed_notifications();
   QueueType* elems = 0;
   QueueType* queue = 0;
@@ -969,8 +943,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
     GuardType guard(this->lock_);
 
     if (this->link_released_) {
-      GuidConverter pub(element->publication_id());
-      ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send - link released so add_delayed_notification for %C\n", std::string(pub).c_str()));
       this->add_delayed_notification(element);
 
     } else {
@@ -1234,12 +1206,8 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       }
     }
   }
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send - about to call send_delayed_notifications\n"));
 
   send_delayed_notifications();
-//
-//  const TransportQueueElement::MatchOnPubId match(pub_id);
-//  send_delayed_notifications(&match);
 }
 
 void
@@ -1262,8 +1230,6 @@ TransportSendStrategy::send_stop(RepoId repoId)
     --this->start_counter_;
 
     if (this->start_counter_ != 0) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_stop start_counter after decrement != 0 (it is = %d) therefore return\n", this->start_counter_));
-
       // This wasn't the last send_stop() that we are expecting.  We only
       // really honor the first send_start() and the last send_stop().
       // We can return without doing anything else in this case.
@@ -1326,29 +1292,14 @@ TransportSendStrategy::send_stop(RepoId repoId)
                                           "stayed in MODE_DIRECT" )));
     }
   }
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_stop - about to call send_delayed_notifications\n"));
 
   send_delayed_notifications();
-//  if(repoId == GUID_UNKNOWN) {
-//    //Then this is a ThreadPerConnectionSendTask call and there will be no deadlock by
-//    //TransportSendStrategy::send_stop calling into send_delayed_notifications() with no match
-//    ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_stop - about to call send_delayed_notifications\n"));
-//
-//    send_delayed_notifications();
-//  } else {
-//    ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::send_stop - about to call send_delayed_notifications\n"));
-//
-//    const TransportQueueElement::MatchOnPubId match(repoId);
-//    send_delayed_notifications(&match);
-//  }
 }
 
 void
 TransportSendStrategy::remove_all_msgs(RepoId pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
-
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::remove_all_msgs - about to call send_delayed_notifications\n"));
 
   const TransportQueueElement::MatchOnPubId match(pub_id);
   send_delayed_notifications(&match);
@@ -1383,8 +1334,6 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 
   const char* const payload = sample->get_sample()->cont()->rd_ptr();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::remove_sample - about to call send_delayed_notifications\n"));
-
   if (send_delayed_notifications(&modp)) {
     return REMOVE_RELEASED;
   }
@@ -1930,8 +1879,6 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
                  size));
     }
   }
-  GuidConverter pub(element->publication_id());
-  ACE_DEBUG((LM_INFO, "(%P|%t) TransportSendStrategy::add_delayed_notification  Adding delayed notification for sample on pub %C\n", std::string(pub).c_str()));
 
   this->delayed_delivered_notification_queue_.push_back(std::make_pair(element, this->mode_));
 }

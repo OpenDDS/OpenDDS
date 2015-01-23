@@ -239,7 +239,10 @@ public:
   SendStateDataSampleList get_unsent_data() ;
 
   /**
-   * TODO: add comment
+   * Used to push samples lent to the datawriter during send
+   * onto the appropriate list after, typically moving from list
+   * onto the sending_data_ list, however if delivered/dropped
+   * in the interim of the loan - deal with them appropriately
    */
   void add_sending_data(SendStateDataSampleList list);
 
