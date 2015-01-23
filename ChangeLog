@@ -1,3 +1,10 @@
+Fri Jan 23 19:06:04 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Reverted test script to pre-TestFramework version to
+          avoid spurious WARNING messages printed during testing.
+
 Fri Jan 23 18:49:20 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
