@@ -1940,10 +1940,7 @@ DataWriterImpl::write(DataSample* data,
 
     this->send(list);
     //lock
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                      guard2,
-                      get_lock (),
-                      ::DDS::RETCODE_ERROR);
+
     //add list items to sending
     this->add_sending_data(list);
 
@@ -1989,9 +1986,6 @@ void
 DataWriterImpl::send_suspended_data()
 {
   this->send(this->available_data_list_);
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock ());
   this->add_sending_data(this->available_data_list_);
   this->available_data_list_.reset();
 }

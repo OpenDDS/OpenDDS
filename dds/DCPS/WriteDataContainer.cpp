@@ -83,7 +83,8 @@ WriteDataContainer::WriteDataContainer(
   std::auto_ptr<OfferedDeadlineWatchdog>& watchdog,
   CORBA::Long     max_instances,
   CORBA::Long     max_total_samples)
-  : writer_(writer),
+  : samples_loaned_to_dw_counter_(0),
+    writer_(writer),
     depth_(depth),
     max_num_instances_(max_instances),
     max_num_samples_(max_total_samples),
@@ -463,9 +464,11 @@ WriteDataContainer::get_unsent_data()
   // Clear the unsent data list.
   //
   this->unsent_data_.reset();
-  log_send_state_lists("get_unsent_data: 3");
+  log_send_state_lists("get_unsent_data: 3 (before incrementing loaned counter");
 
-  loaned_to_dw_ += list.size();
+  samples_loaned_to_dw_counter_ += list.size();
+  log_send_state_lists("get_unsent_data: 3 (after incrementing loaned counter");
+
   // Signal if there is no pending data.
   //
   // N.B. If a mutex cannot be obtained it is possible for this
@@ -490,15 +493,44 @@ WriteDataContainer::add_sending_data(SendStateDataSampleList list)
 {
   DBG_ENTRY_LVL("WriteDataContainer","add_sending_data",6);
   log_send_state_lists("add_sending_data: 1");
+  DataSampleElement* stale = 0;
 
-  //
-  // The unsent_data_ already linked with the
-  // next_send_sample during enqueue.
-  // Append the unsent_data_ to current sending_data_
-  // list.
-  sending_data_.enqueue_tail(list);
-  log_send_state_lists("add_sending_data: 2");
-  loaned_to_dw_ -= list.size();
+  {
+    ACE_GUARD (ACE_Recursive_Thread_Mutex,
+                      guard,
+                      lock_);
+    //
+    // The unsent_data_ already linked with the
+    // next_send_sample during enqueue.
+    // Append the unsent_data_ to current sending_data_
+    // list.
+    sending_data_.enqueue_tail(list);
+    log_send_state_lists("add_sending_data: 2 (before decrementing loaned counter");
+    samples_loaned_to_dw_counter_ -= list.size();
+    log_send_state_lists("add_sending_data: 2 (after decrementing loaned counter");
+
+
+    SendStateDataSampleList::iterator iter(list.begin());
+    while (iter != list.end()) {
+      if (iter->delivered()) {
+        stale = &*iter;
+        ++iter;
+        ACE_DEBUG((LM_INFO, "(%P|%t) WriteDataContainer::add_sending_data - listener was removed \n"));
+        if (sending_data_.dequeue(stale)) {
+          DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, stale->get_sample());
+          stale->set_delivered(false);
+          sent_data_.enqueue_tail(stale);
+        }
+      } else {
+        ++iter;
+      }
+    }
+  }
+
+  if (stale != 0) {
+    PublicationInstance* instance = stale->get_handle();
+    this->wakeup_blocking_writers(stale, instance);
+  }
   // Signal if there is no pending data.
   //
   // N.B. If a mutex cannot be obtained it is possible for this
@@ -508,8 +540,8 @@ WriteDataContainer::add_sending_data(SendStateDataSampleList list)
 //                   guard,
 //                   this->lock_);
 //
-//  if (!pending_data())
-//    empty_condition_.broadcast();
+  if (!pending_data())
+    empty_condition_.broadcast();
 }
 
 SendStateDataSampleList
@@ -538,7 +570,7 @@ WriteDataContainer::pending_data()
 {
   return this->sending_data_.size() != 0
          || this->unsent_data_.size() != 0
-         || loaned_to_dw_ != 0;
+         || samples_loaned_to_dw_counter_ != 0;
 }
 
 void
@@ -602,11 +634,14 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
+      //Null out the send_listener_ to indicate already being acknowledged
+      stale->set_delivered(true);
+
       ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ")
+                 ACE_TEXT("(%P|%t) ")
                  ACE_TEXT("WriteDataContainer::data_delivered, ")
-                 ACE_TEXT("The delivered sample %X is not in sending_data_ ")
-                 ACE_TEXT("and NOT IN any other send state list.\n"), sample));
+                 ACE_TEXT("The delivered sample %X is not in any send state list ")
+                 ACE_TEXT("must be loaned to dw so null out send_listener_.\n"), sample));
     }
 
     return;
@@ -1335,6 +1370,7 @@ WriteDataContainer::wait_pending()
                ACE_TEXT("at %s\n"),
                (pending_timeout == ACE_Time_Value::zero ?
                   ACE_TEXT("(no timeout)") : time)));
+    this->log_send_state_lists("WriteDataContainer::wait_pending about to wait\n");
   }
   while (true) {
 
@@ -1382,9 +1418,10 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale,
 void
 WriteDataContainer::log_send_state_lists (std::string description)
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), lent_to_dw(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
              description.c_str(),
              unsent_data_.size(),
+             samples_loaned_to_dw_counter_,
              sending_data_.size(),
              sent_data_.size(),
              num_all_samples(),
