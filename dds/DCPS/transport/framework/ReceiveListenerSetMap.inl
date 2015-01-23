@@ -9,6 +9,7 @@
 #include "ReceivedDataSample.h"
 #include "EntryExit.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/GuidConverter.h"
 
 ACE_INLINE
 OpenDDS::DCPS::ReceiveListenerSetMap::ReceiveListenerSetMap()
@@ -43,7 +44,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::find_or_create(RepoId publisher_id)
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) ERROR: Unable to insert ReceiveListenerSet into the "
                  "ReceiveListenerSetMap for publisher_id %C.\n",
-                 LogGuid(publisher_id)));
+                 LogGuid(publisher_id).c_str()));
       // Return a 'nil' ReceiveListenerSet*
       return 0;
     }
@@ -62,7 +63,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::remove_set(RepoId publisher_id)
     VDBG((LM_DEBUG,
           "(%P|%t) Unable to remove ReceiveListenerSet from the "
           "ReceiveListenerSetMap for id %d.\n",
-          LogGuid(publisher_id)));
+          LogGuid(publisher_id).c_str()));
     // Return a 'nil' ReceiveListenerSet*
     return 0;
   }

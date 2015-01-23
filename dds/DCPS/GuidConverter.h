@@ -100,7 +100,7 @@ protected:
 struct OpenDDS_Dcps_Export LogGuid {
   explicit LogGuid(const GUID_t& id)
     : conv_(GuidConverter(id)) {}
-  operator const char*() { return conv_.c_str(); }
+  const char* c_str() const { return conv_.c_str(); }
   std::string conv_;
 };
 

@@ -31,7 +31,8 @@ OpenDDS::DCPS::RepoIdSet::remove_id(RepoId id)
   int result = unbind(map_, id);
 
   if (result != 0) {
-    VDBG((LM_DEBUG, "(%P|%t) RepoId (%C) not found in map_.\n", LogGuid(id)));
+    VDBG((LM_DEBUG, "(%P|%t) RepoId (%C) not found in map_.\n",
+          LogGuid(id).c_str()));
   }
 
   return result;
