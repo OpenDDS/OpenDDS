@@ -737,7 +737,7 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
            limit = writers_.end();
          pos != limit && GuidPrefixEqual() (pos->first.guidPrefix, prefix.guidPrefix);
          ++pos) {
-      writers.push_back(*pos);
+      writers.push_back(std::make_pair(pos->first, pos->second));
     }
   }
 
