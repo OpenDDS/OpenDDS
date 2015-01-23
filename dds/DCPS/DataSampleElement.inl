@@ -18,7 +18,9 @@ DataSampleElement::DataSampleElement(
   PublicationInstance*    handle,
   TransportSendElementAllocator* tse_allocator,
   TransportCustomizedElementAllocator* tce_allocator)
-  : sample_(0),
+  : delivered_(false),
+    dropped_(false),
+    sample_(0),
     publication_id_(publication_id),
     num_subs_(0),
     send_listener_(send_listener),
@@ -39,7 +41,9 @@ DataSampleElement::DataSampleElement(
 
 ACE_INLINE
 DataSampleElement::DataSampleElement(const DataSampleElement& elem)
-  : header_(elem.header_)
+  : delivered_(elem.delivered_)
+  , dropped_(elem.dropped_)
+  , header_(elem.header_)
   , sample_(elem.sample_->duplicate())
   , publication_id_(elem.publication_id_)
   , num_subs_(elem.num_subs_)
@@ -236,6 +240,36 @@ void
 DataSampleElement::set_filter_out(GUIDSeq *filter_out)
 {
   filter_out_ = filter_out;
+}
+
+ACE_INLINE
+void
+DataSampleElement::set_delivered(bool delivered)
+{
+  delivered_ = delivered;
+}
+
+ACE_INLINE
+bool
+DataSampleElement::delivered() const
+{
+  return delivered_;
+
+}
+
+ACE_INLINE
+void
+DataSampleElement::set_dropped(bool dropped)
+{
+  dropped_ = dropped;
+}
+
+ACE_INLINE
+bool
+DataSampleElement::dropped() const
+{
+  return dropped_;
+
 }
 
 } // namespace DCPS

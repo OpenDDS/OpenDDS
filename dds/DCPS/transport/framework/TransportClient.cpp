@@ -720,7 +720,7 @@ void
 TransportClient::send(const SendStateDataSampleList& samples)
 {
   DataSampleElement* cur = samples.head();
-
+  DataLinkSet send_links;
   while (cur) {
     // VERY IMPORTANT NOTE:
     //
@@ -815,7 +815,7 @@ TransportClient::send(const SendStateDataSampleList& samples)
       // send_links set will not be told about the send_start() event
       // since they heard about it when they were inserted into the
       // send_links set.
-      send_links_.send_start(pub_links.in());
+      send_links.send_start(pub_links.in());
       pub_links->send(cur);
     }
 
@@ -830,7 +830,7 @@ TransportClient::send(const SendStateDataSampleList& samples)
   // reuse the same send_links_ object over and over for each call to this
   // send method.
   RepoId pub_id(this->repo_id_);
-  send_links_.send_stop(pub_id);
+  send_links.send_stop(pub_id);
 }
 
 TransportSendListener*

@@ -239,6 +239,14 @@ public:
   SendStateDataSampleList get_unsent_data() ;
 
   /**
+   * Used to push samples lent to the datawriter during send
+   * onto the appropriate list after, typically moving from list
+   * onto the sending_data_ list, however if delivered/dropped
+   * in the interim of the loan - deal with them appropriately
+   */
+  void add_sending_data(SendStateDataSampleList list);
+
+  /**
    * Obtain a list of data for resending. This is only used when
    * TRANSIENT_LOCAL_DURABILITY_QOS is used. The data on the list
    * returned is not put on any SendStateDataSampleList.
@@ -394,8 +402,12 @@ private:
 
 private:
 
+  void log_send_state_lists (std::string description);
+
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;
+
+  ssize_t samples_loaned_to_dw_counter_;
 
   /// List of data that is currently being sent.
   SendStateDataSampleList   sending_data_;

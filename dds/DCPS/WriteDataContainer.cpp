@@ -83,7 +83,8 @@ WriteDataContainer::WriteDataContainer(
   std::auto_ptr<OfferedDeadlineWatchdog>& watchdog,
   CORBA::Long     max_instances,
   CORBA::Long     max_total_samples)
-  : writer_(writer),
+  : samples_loaned_to_dw_counter_(0),
+    writer_(writer),
     depth_(depth),
     max_num_instances_(max_instances),
     max_num_samples_(max_total_samples),
@@ -444,42 +445,80 @@ SendStateDataSampleList
 WriteDataContainer::get_unsent_data()
 {
   DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",6);
-
   //
-  // The samples in unsent_data are added to the sending_data
-  // during enqueue.
+  // The samples in unsent_data are added to the local datawriter
+  // list on 'loan' and will be enqueued to sending_data_ during
+  // add_sending_data()
   //
   SendStateDataSampleList list = this->unsent_data_;
-
-  //
-  // The unsent_data_ already linked with the
-  // next_send_sample during enqueue.
-  // Append the unsent_data_ to current sending_data_
-  // list.
-  sending_data_.enqueue_tail(list);
 
   //
   // Clear the unsent data list.
   //
   this->unsent_data_.reset();
 
-  // Signal if there is no pending data.
-  //
-  // N.B. If a mutex cannot be obtained it is possible for this
-  //      method to return successfully without broadcasting the
-  //      condition.
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->lock_,
-                   list);
-
-  if (!pending_data())
-    empty_condition_.broadcast();
+  samples_loaned_to_dw_counter_ += list.size();
 
   //
   // Return the moved list.
   //
   return list;
+}
+
+void
+WriteDataContainer::add_sending_data(SendStateDataSampleList list)
+{
+  DBG_ENTRY_LVL("WriteDataContainer","add_sending_data",6);
+  DataSampleElement* stale = 0;
+  PublicationInstance* instance = 0;
+
+  {
+    ACE_GUARD (ACE_Recursive_Thread_Mutex,
+                      guard,
+                      lock_);
+    //
+    // The unsent_data_ already linked with the
+    // next_send_sample during enqueue.
+    // Append the unsent_data_ to current sending_data_
+    // list.
+    sending_data_.enqueue_tail(list);
+    samples_loaned_to_dw_counter_ -= list.size();
+
+    // Handle the case that the transport finished with the samples while still
+    // on loan to the datawriter by checking if they were delivered/dropped and
+    // handle accordingly
+    SendStateDataSampleList::iterator iter(list.begin());
+    while (iter != list.end()) {
+      if (iter->delivered()) {
+        stale = &*iter;
+        instance = stale->get_handle();
+        ++iter;
+        if (sending_data_.dequeue(stale)) {
+          DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, stale->get_sample());
+          stale->set_delivered(false);
+          sent_data_.enqueue_tail(stale);
+        }
+      } else if (iter->dropped()) {
+        stale = &*iter;
+        instance = stale->get_handle();
+        ++iter;
+        if (sending_data_.dequeue(stale)) {
+          stale->set_dropped(false);
+          unsent_data_.enqueue_tail(stale);
+        }
+      } else {
+        ++iter;
+      }
+    }
+  }
+
+  if (stale != 0) {
+    this->wakeup_blocking_writers(stale, instance);
+  }
+  // Signal if there is no pending data.
+  //
+  if (!pending_data())
+    empty_condition_.broadcast();
 }
 
 SendStateDataSampleList
@@ -507,7 +546,8 @@ bool
 WriteDataContainer::pending_data()
 {
   return this->sending_data_.size() != 0
-         || this->unsent_data_.size() != 0;
+         || this->unsent_data_.size() != 0
+         || samples_loaned_to_dw_counter_ != 0;
 }
 
 void
@@ -524,19 +564,14 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
             guard,
             this->lock_);
 
-  // Delivered samples _must_ be on sending_data_ list
+  // Delivered samples _must_ be on sending_data_ list or still on loan to the datawriter
 
-  //TODO: Am seeing samples that are not currently on a list?  Why?
-  //      Wondering if this is due to no longer having a 'released_data_'
-  //      to track samples that are still in use by transport but released
-  //      on this end since the implementation now tries to force transport
-  //      to release.
-
-  // If it is not found in one of the lists, an invariant
+  // If it is not found in one of the lists or on loan to the dw, an invariant
   // exception is declared.
 
   // The element now needs to be removed from the sending_data_
-  // list, and appended to the end of the sent_data_ list.
+  // list, and appended to the end of the sent_data_ list here, or
+  // when the datawriter returns the loaned sample during add_sending_data().
 
   PublicationInstance* instance = sample->get_handle();
 
@@ -545,11 +580,13 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   // If sample is on a SendStateDataSampleList it should be on the
   // sending_data_ list signifying it was given to the transport to
   // deliver and now the transport is signaling it has been delivered
+  // However, it could still be on loan to the datawriter, in which case
+  // set the sample's state to be checked when datawriter returns the sample
   if (!sending_data_.dequeue(sample)) {
 
     //
-    // Should be on sending_data_ but wasn't, so locate
-    // the head of the list that the stale data is in.
+    // Should be on sending_data_ or on loan.  If it is in sent_data_
+    // or unsent_data there was a problem.
     //
     std::vector<SendStateDataSampleList*> send_lists;
     send_lists.push_back(&sent_data_);
@@ -570,11 +607,12 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
-      ACE_ERROR((LM_WARNING,
-                 ACE_TEXT("(%P|%t) WARNING: ")
-                 ACE_TEXT("WriteDataContainer::data_delivered, ")
-                 ACE_TEXT("The delivered sample %X is not in sending_data_ ")
-                 ACE_TEXT("and NOT IN any other send state list.\n"), sample));
+      //The sample may still be on loan to the datawriter
+      //in which case set its delivered flag so that the
+      //datawriter will process as delivered when add_sending_data
+      //is eventually called
+      stale->set_delivered(true);
+
     }
 
     return;
@@ -637,9 +675,15 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
   // We are now been notified by transport, so we can
   // keep the sample from the sending_data_ list still in
   // sample list since we will send it.
+  PublicationInstance* instance = sample->get_handle();
 
-  DataSampleElement* stale = 0;
-  PublicationInstance* instance = 0;
+  DataSampleElement* stale = const_cast<DataSampleElement*>(sample);
+
+  // If sample is on a SendStateDataSampleList it should be on the
+  // sending_data_ list signifying it was given to the transport to
+  // deliver and now the transport is signaling it has been dropped
+  // However, it could still be on loan to the datawriter, in which case
+  // set the sample's state to be checked when datawriter returns the sample
 
   if (sending_data_.dequeue(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
@@ -652,11 +696,36 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     instance = sample->get_handle();
 
   } else {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("WriteDataContainer::data_dropped, ")
-               ACE_TEXT("The dropped sample is not in sending_data_ ")
-               ACE_TEXT("list.\n")));
+    //
+    // If it is in sent_data_ or unsent_data there was a problem.
+    //
+    std::vector<SendStateDataSampleList*> send_lists;
+    send_lists.push_back(&sent_data_);
+    send_lists.push_back(&unsent_data_);
+
+    const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
+
+    if (containing_list == &this->sent_data_) {
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: ")
+                 ACE_TEXT("WriteDataContainer::data_dropped, ")
+                 ACE_TEXT("The dropped sample is not in sending_data_ and ")
+                 ACE_TEXT("WAS IN sent_data_.\n")));
+    } else if (containing_list == &this->unsent_data_) {
+      ACE_ERROR((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: ")
+                 ACE_TEXT("WriteDataContainer::data_dropped, ")
+                 ACE_TEXT("The dropped sample is not in sending_data_ and ")
+                 ACE_TEXT("WAS IN unsent_data_ list.\n")));
+    } else {
+      //The sample may still be on loan to the datawriter
+      //in which case set its dropped flag so that the
+      //datawriter will process as dropped when add_sending_data
+      //is eventually called
+      stale->set_dropped(true);
+    }
+
+    return;
   }
 
   this->wakeup_blocking_writers (stale, instance);
@@ -705,6 +774,7 @@ WriteDataContainer::remove_oldest_historical_sample(
                         ACE_TEXT("dequeue_head_next_sample failed\n")),
                        DDS::RETCODE_ERROR);
     }
+
     // Now attempt to remove the sample from the internal list and release its buffer
     result = this->sent_data_.dequeue(stale) != 0;
     release_buffer(stale);
@@ -916,6 +986,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                               ACE_TEXT(" its oldest historical sample\n"),
                               handle));
       }
+
       ret = this->remove_oldest_historical_sample(instance_list, removed_historical);
 
       //else try to remove historical samples from other instances
@@ -949,10 +1020,12 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                                   ACE_TEXT(" instance %d waiting for samples to be released by transport\n"),
                                   handle));
           }
+
           waiting_on_release_ = true;
           // lock is released while waiting and acquired before returning
           // from wait.
           int const wait_result = condition_.wait(&abs_timeout);
+
           if (wait_result != 0) {
             if (errno == ETIME) {
               if (DCPS_debug_level >= 2) {
@@ -1307,6 +1380,19 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale,
 
     condition_.broadcast();
   }
+}
+
+void
+WriteDataContainer::log_send_state_lists (std::string description)
+{
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), lent_to_dw(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
+             description.c_str(),
+             unsent_data_.size(),
+             samples_loaned_to_dw_counter_,
+             sending_data_.size(),
+             sent_data_.size(),
+             num_all_samples(),
+             instances_.size()));
 }
 
 } // namespace OpenDDS

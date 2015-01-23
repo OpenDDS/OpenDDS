@@ -1701,7 +1701,9 @@ DataWriterImpl::enable()
 DDS::ReturnCode_t
 DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                                     DataSample* data,
-                                    const DDS::Time_t & source_timestamp)
+                                    const DDS::Time_t & source_timestamp,
+                                    DataSampleHeader& header,
+                                    ACE_Message_Block*& registered_sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
 
@@ -1728,19 +1730,56 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   }
 
   // Add header with the registration sample data.
-  DataSampleHeader header;
-  ACE_Message_Block* registered_sample =
-    this->create_control_message(INSTANCE_REGISTRATION,
+//  DataSampleHeader header;
+//  ACE_Message_Block* registered_sample =
+    registered_sample =
+        this->create_control_message(INSTANCE_REGISTRATION,
                                  header,
                                  data,
                                  source_timestamp);
 
+//  if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
+//    ACE_ERROR_RETURN((LM_ERROR,
+//                      ACE_TEXT("(%P|%t) ERROR: ")
+//                      ACE_TEXT("DataWriterImpl::register_instance_i: ")
+//                      ACE_TEXT("send_control failed.\n")),
+//                     DDS::RETCODE_ERROR);
+//  }
+
+  return ret;
+}
+
+DDS::ReturnCode_t
+DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handle,
+                                    DataSample* data,
+                                    const DDS::Time_t & source_timestamp)
+{
+  DBG_ENTRY_LVL("DataWriterImpl","register_instance_from_durable_data",6);
+
+  DataSampleHeader header;
+  ACE_Message_Block* registered_sample;
+
+  DDS::ReturnCode_t ret =
+      register_instance_i(handle,
+                          data,
+                          source_timestamp,
+                          header,
+                          registered_sample);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::register_instance_from_durable_data: ")
+                      ACE_TEXT("register instance with container failed.\n")),
+                      ret);
+  }
+
+
   if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DataWriterImpl::register_instance_i: ")
+                      ACE_TEXT("DataWriterImpl::register_instance_from_durable_data: ")
                       ACE_TEXT("send_control failed.\n")),
-                     DDS::RETCODE_ERROR);
+                      DDS::RETCODE_ERROR);
   }
 
   return ret;
@@ -1748,7 +1787,7 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
 
 DDS::ReturnCode_t
 DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
-                                      const DDS::Time_t & source_timestamp)
+                                      const DDS::Time_t& source_timestamp)
 {
   DBG_ENTRY_LVL("DataWriterImpl","unregister_instance_i",6);
 
@@ -1762,30 +1801,31 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
   // According to spec 1.2, autodispose_unregistered_instances true causes
   // dispose on the instance prior to calling unregister operation.
   if (this->qos_.writer_data_lifecycle.autodispose_unregistered_instances) {
-    this->dispose(handle, source_timestamp);
-  }
-
-  DataSample* unregistered_sample_data = 0;
-
-  DDS::ReturnCode_t const ret =
-    this->data_container_->unregister(handle,
-                                      unregistered_sample_data);
-
-  if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DataWriterImpl::unregister_instance_i: ")
-                      ACE_TEXT(" unregister with container failed. \n")),
-                     ret);
+    return this->dispose_and_unregister(handle, source_timestamp);
   }
 
   DataSampleHeader header;
-  ACE_Message_Block* message =
-    this->create_control_message(UNREGISTER_INSTANCE,
-                                 header,
-                                 unregistered_sample_data,
-                                 source_timestamp);
+  ACE_Message_Block* message = 0;
+  DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), ret);
+    DataSample* unregistered_sample_data = 0;
+    ret = this->data_container_->unregister(handle, unregistered_sample_data);
 
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::unregister_instance_i: ")
+                        ACE_TEXT(" unregister with container failed. \n")),
+                       ret);
+    }
+
+    message = this->create_control_message(UNREGISTER_INSTANCE,
+                                           header,
+                                           unregistered_sample_data,
+                                           source_timestamp);
+  }
+  
   if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
@@ -1793,7 +1833,57 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
                      DDS::RETCODE_ERROR);
   }
 
-  return ret;
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t
+DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                       const DDS::Time_t& source_timestamp)
+{
+  DBG_ENTRY_LVL("DataWriterImpl", "dispose_and_unregister", 6);
+
+  DataSampleHeader header;
+  ACE_Message_Block* message = 0;
+  DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), ret);
+
+    DataSample* data_sample = 0;
+    ret = this->data_container_->dispose(handle, data_sample);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
+                        ACE_TEXT("dispose on container failed. \n")),
+                       ret);
+    }
+
+    ret = this->data_container_->unregister(handle, data_sample, false);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
+                        ACE_TEXT("unregister with container failed. \n")),
+                       ret);
+    }
+
+    message = this->create_control_message(DISPOSE_UNREGISTER_INSTANCE,
+                                           header,
+                                           data_sample,
+                                           source_timestamp);
+  }
+  
+  if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
+                      ACE_TEXT("send_control failed.\n")),
+                     DDS::RETCODE_ERROR);
+  }
+
+  return DDS::RETCODE_OK;
 }
 
 void
@@ -1817,6 +1907,11 @@ DataWriterImpl::write(DataSample* data,
                       GUIDSeq* filter_out)
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    guard,
+                    get_lock (),
+                    ::DDS::RETCODE_ERROR);
 
   // take ownership of sequence allocated in FooDWImpl::write_w_timestamp()
   GUIDSeq_var filter_out_var(filter_out);
@@ -1867,19 +1962,37 @@ DataWriterImpl::write(DataSample* data,
                       ACE_TEXT("enqueue failed.\n")),
                      ret);
   }
+  this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
 
+  track_sequence_number(filter_out);
+
+  if (this->coherent_) {
+    ++this->coherent_samples_;
+  }
   SendStateDataSampleList list = this->get_unsent_data();
 
   if (this->publisher_servant_->is_suspended()) {
     this->available_data_list_.enqueue_tail(list);
 
   } else {
+    SendStateDataSampleList::iterator iter = list.begin();
+    while (iter != list.end()) {
+      ++iter;
+    }
+    guard.release();
+
     this->send(list);
+
+    this->add_sending_data(list);
   }
 
-  this->last_liveliness_activity_time_ = ACE_OS::gettimeofday();
+  return DDS::RETCODE_OK;
+}
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, DDS::RETCODE_ERROR);
+void
+DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
+{
+  ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
@@ -1907,17 +2020,13 @@ DataWriterImpl::write(DataSample* data,
 
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
 
-  if (this->coherent_) {
-    ++this->coherent_samples_;
-  }
-
-  return DDS::RETCODE_OK;
 }
 
 void
 DataWriterImpl::send_suspended_data()
 {
   this->send(this->available_data_list_);
+  this->add_sending_data(this->available_data_list_);
   this->available_data_list_.reset();
 }
 
@@ -1934,25 +2043,28 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
                      DDS::RETCODE_NOT_ENABLED);
   }
 
+  DDS::ReturnCode_t ret = ::DDS::RETCODE_ERROR;
   DataSample* registered_sample_data = 0;
-  DDS::ReturnCode_t ret =
-    this->data_container_->dispose(handle,
-                                   registered_sample_data);
-
-  if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DataWriterImpl::dispose: ")
-                      ACE_TEXT("dispose failed.\n")),
-                     ret);
-  }
-
   DataSampleHeader header;
-  ACE_Message_Block* message =
-    this->create_control_message(DISPOSE_INSTANCE,
-                                 header,
-                                 registered_sample_data,
-                                 source_timestamp);
+  ACE_Message_Block* message = 0;
+  {
+    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex, guard, get_lock(), ret);
+
+    ret = this->data_container_->dispose(handle, registered_sample_data);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::dispose: ")
+                        ACE_TEXT("dispose failed.\n")),
+                       ret);
+    }
+
+    message = this->create_control_message(DISPOSE_INSTANCE,
+                                           header,
+                                           registered_sample_data,
+                                           source_timestamp);
+  }
 
   if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1961,7 +2073,7 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
                      DDS::RETCODE_ERROR);
   }
 
-  return ret;
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t
@@ -2331,14 +2443,16 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
   ACE_Message_Block* control =
     create_control_message(END_COHERENT_CHANGES, header, data, source_timestamp);
 
+
+  this->coherent_ = false;
+  this->coherent_samples_ = 0;
+
+  guard.release();
   if (this->send_control(header, control) == SEND_CONTROL_ERROR) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::end_coherent_changes:")
                ACE_TEXT(" unable to send END_COHERENT_CHANGES control message!\n")));
   }
-
-  this->coherent_ = false;
-  this->coherent_samples_ = 0;
 }
 
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -2348,6 +2462,7 @@ DataWriterImpl::data_dropped(const DataSampleElement* element,
                              bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_dropped",6);
+
   this->data_container_->data_dropped(element, dropped_by_transport);
 
   ++data_dropped_count_;

@@ -1689,7 +1689,7 @@ this->watchdog_->cancel_timer(instance);
 #endif
     }
     instance = 0;
-    this->dispose(sample, instance);
+    this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1717,7 +1717,7 @@ this->watchdog_->cancel_timer(instance);
       }
     }
     instance = 0;
-    this->unregister(sample, instance);
+    this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1748,9 +1748,7 @@ this->watchdog_->cancel_timer(instance);
 #endif
     }
     instance = 0;
-    ReceivedDataSample dup(sample);
-    this->dispose(dup, instance);
-    this->unregister(sample, instance);
+    this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
   break;
@@ -2458,19 +2456,11 @@ DataReaderImpl::set_sample_rejected_status(
   sample_rejected_status_ = status;
 }
 
-void DataReaderImpl::dispose(const ReceivedDataSample&,
-    SubscriptionInstance*&)
+void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
+                                        SubscriptionInstance*&)
 {
   if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose()\n"));
-  }
-}
-
-void DataReaderImpl::unregister(const ReceivedDataSample&,
-    SubscriptionInstance*&)
-{
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::unregister()\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose_unregister()\n"));
   }
 }
 

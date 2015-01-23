@@ -379,13 +379,8 @@ public:
                                bool & filtered,
                                OpenDDS::DCPS::MarshalingType marshaling_type);
 
-    virtual void dispose(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                         OpenDDS::DCPS::SubscriptionInstance*& instance);
-
-    virtual void unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
-                            OpenDDS::DCPS::SubscriptionInstance*& instance);
-
-    //virtual OpenDDS::DCPS::DataReaderRemote_ptr get_datareaderremote_obj_ref ();
+    virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                    OpenDDS::DCPS::SubscriptionInstance*& instance);
 
     virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance* instance);
 

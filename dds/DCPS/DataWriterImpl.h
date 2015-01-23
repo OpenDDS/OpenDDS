@@ -215,11 +215,24 @@ public:
     DDS::DataWriter_ptr                   dw_local);
 
   /**
+   * Delegate to the WriteDataContainer to register
+   * Must tell the transport to broadcast the registered
+   * instance upon returning.
+   */
+  DDS::ReturnCode_t
+  register_instance_i(
+    DDS::InstanceHandle_t& handle,
+    DataSample* data,
+    const DDS::Time_t & source_timestamp,
+    DataSampleHeader& header,
+    ACE_Message_Block*& registered_sample);
+
+  /**
    * Delegate to the WriteDataContainer to register and tell
    * the transport to broadcast the registered instance.
    */
   DDS::ReturnCode_t
-  register_instance_i(
+  register_instance_from_durable_data(
     DDS::InstanceHandle_t& handle,
     DataSample* data,
     const DDS::Time_t & source_timestamp);
@@ -271,6 +284,13 @@ public:
    */
   SendStateDataSampleList get_unsent_data() {
     return data_container_->get_unsent_data();
+  }
+
+  /**
+   * Retrieve the unsent data from the WriteDataContainer.
+   */
+  void add_sending_data(SendStateDataSampleList list) {
+    return data_container_->add_sending_data(list);
   }
 
   SendStateDataSampleList get_resend_data() {
@@ -538,7 +558,12 @@ protected:
 
 private:
 
+  void track_sequence_number(GUIDSeq* filter_out);
+
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
+
+  DDS::ReturnCode_t dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                           const DDS::Time_t& timestamp);
 
   /**
    * This method create a header message block and chain with

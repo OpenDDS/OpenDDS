@@ -104,8 +104,18 @@ public:
 
   void set_filter_out(GUIDSeq *filter_out);
 
+  void set_delivered(bool delivered);
+
+  bool delivered() const;
+
+  void set_dropped(bool dropped);
+
+  bool dropped() const;
+
 private:
 
+  bool delivered_;
+  bool dropped_;
   /// The OpenDDS DCPS header for this sample
   DataSampleHeader       header_;
 

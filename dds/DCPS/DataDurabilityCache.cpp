@@ -784,7 +784,7 @@ OpenDDS::DCPS::DataDurabilityCache::get_data(
    *       OpenDDS supports that value?
    */
   DDS::ReturnCode_t ret =
-    data_writer->register_instance_i(handle,
+    data_writer->register_instance_from_durable_data(handle,
                                      registration_sample.get(),
                                      registration_timestamp);
 

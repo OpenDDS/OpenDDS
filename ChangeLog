@@ -1,3 +1,48 @@
+Fri Jan 23 22:54:33 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Making the DataWriterImpl no longer need to hold the
+          write data container's lock while passing sample and
+          control messages down to the transport. When transport
+          finishes with a sample delivered/dropped the sample is
+          either on the sending data list and moved to the appropriate
+          send state list or else it is currently loaned to the
+          DataWriterImpl in which case it is marked as delivered/
+          dropped and the datawriter will treat appropriately during
+          add_sending_data.  Writing, sending, sending control messages:
+          registration, unregister, dispose, et al. are now done without
+          needing to hold the lock.  These changes allow WriteDataContainer
+          to enforce QOS settings (reliability/resource limits/history)
+          and wake up from blocked writes when appropriate.
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Updated test to use add_sending_data() to move 'loaned'
+          samples from unsent to sending
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          delete_contained_entities now performed on Reactor thread
+          using notify.
+
 Fri Jan 23 22:08:38 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

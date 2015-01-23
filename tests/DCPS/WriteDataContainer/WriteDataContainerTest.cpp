@@ -408,7 +408,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 0\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           ACE_Message_Block* mb1 = test->dds_marshal(fast_dw, foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING);
 
           DataSampleElement* element_1 = 0;
@@ -435,7 +435,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           DataSampleElement* element_2 = 0;
           ret = test_data_container->obtain_buffer(element_2, handle1);
           test->log_send_state_lists("After obtain buffer which should block", test_data_container);
@@ -521,7 +521,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           Test::Simple foo2;
           foo2.key  = 2;
           foo2.count = 1;
@@ -559,7 +559,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 2\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           Test::Simple foo3;
           foo3.key  = 3;
           foo3.count = 1;
@@ -658,7 +658,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           Test::Simple foo2;
           foo2.key  = 2;
           foo2.count = 1;
@@ -696,7 +696,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 2\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           Test::Simple foo3;
           foo3.key  = 3;
           foo3.count = 1;
@@ -751,7 +751,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 3\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           TEST_ASSERT(ret == DDS::RETCODE_OK);
 
           test->log_send_state_lists("After TEST_ASSERT 4th obtain_buffer successful (block & wakeup)", test_data_container);
@@ -835,7 +835,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 0\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           DataSampleElement* element_1 = 0;
           ret = test_data_container->obtain_buffer(element_1, handle1);
           test->log_send_state_lists("After obtain buffer", test_data_container);
@@ -861,7 +861,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           if (ret != DDS::RETCODE_OK) {
             ACE_ERROR((LM_ERROR, "failed to enqueue element 1\n"));
           }
-
+          test_data_container->add_sending_data(temp);
           DataSampleElement* element_2 = 0;
           ret = test_data_container->obtain_buffer(element_2, handle1);
           test->log_send_state_lists("After obtain buffer which should block", test_data_container);
