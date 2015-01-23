@@ -494,6 +494,7 @@ WriteDataContainer::add_sending_data(SendStateDataSampleList list)
   DBG_ENTRY_LVL("WriteDataContainer","add_sending_data",6);
   log_send_state_lists("add_sending_data: 1");
   DataSampleElement* stale = 0;
+  PublicationInstance* instance = 0;
 
   {
     ACE_GUARD (ACE_Recursive_Thread_Mutex,
@@ -514,12 +515,22 @@ WriteDataContainer::add_sending_data(SendStateDataSampleList list)
     while (iter != list.end()) {
       if (iter->delivered()) {
         stale = &*iter;
+        instance = stale->get_handle();
         ++iter;
-        ACE_DEBUG((LM_INFO, "(%P|%t) WriteDataContainer::add_sending_data - listener was removed \n"));
+        ACE_DEBUG((LM_INFO, "(%P|%t) WriteDataContainer::add_sending_data - delivered already \n"));
         if (sending_data_.dequeue(stale)) {
           DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, stale->get_sample());
           stale->set_delivered(false);
           sent_data_.enqueue_tail(stale);
+        }
+      } else if (iter->dropped()) {
+        stale = &*iter;
+        instance = stale->get_handle();
+        ++iter;
+        ACE_DEBUG((LM_INFO, "(%P|%t) WriteDataContainer::add_sending_data - dropped already \n"));
+        if (sending_data_.dequeue(stale)) {
+          stale->set_dropped(false);
+          unsent_data_.enqueue_tail(stale);
         }
       } else {
         ++iter;
@@ -528,7 +539,6 @@ WriteDataContainer::add_sending_data(SendStateDataSampleList list)
   }
 
   if (stale != 0) {
-    PublicationInstance* instance = stale->get_handle();
     this->wakeup_blocking_writers(stale, instance);
   }
   // Signal if there is no pending data.
@@ -707,9 +717,9 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
   // We are now been notified by transport, so we can
   // keep the sample from the sending_data_ list still in
   // sample list since we will send it.
+  PublicationInstance* instance = sample->get_handle();
 
-  DataSampleElement* stale = 0;
-  PublicationInstance* instance = 0;
+  DataSampleElement* stale = const_cast<DataSampleElement*>(sample);
 
   if (sending_data_.dequeue(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
@@ -722,11 +732,13 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     instance = sample->get_handle();
 
   } else {
+    stale->set_dropped(true);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("WriteDataContainer::data_dropped, ")
                ACE_TEXT("The dropped sample is not in sending_data_ ")
                ACE_TEXT("list.\n")));
+    return;
   }
 
   this->wakeup_blocking_writers (stale, instance);

@@ -19,6 +19,7 @@ DataSampleElement::DataSampleElement(
   TransportSendElementAllocator* tse_allocator,
   TransportCustomizedElementAllocator* tce_allocator)
   : delivered_(false),
+    dropped_(false),
     sample_(0),
     publication_id_(publication_id),
     num_subs_(0),
@@ -41,6 +42,7 @@ DataSampleElement::DataSampleElement(
 ACE_INLINE
 DataSampleElement::DataSampleElement(const DataSampleElement& elem)
   : delivered_(elem.delivered_)
+  , dropped_(elem.dropped_)
   , header_(elem.header_)
   , sample_(elem.sample_->duplicate())
   , publication_id_(elem.publication_id_)
@@ -254,6 +256,19 @@ DataSampleElement::delivered() const
   return delivered_;
 
 }
+ACE_INLINE
+void
+DataSampleElement::set_dropped(bool dropped)
+{
+  dropped_ = dropped;
+}
 
+ACE_INLINE
+bool
+DataSampleElement::dropped() const
+{
+  return dropped_;
+
+}
 } // namespace DCPS
 } // namespace OpenDDS

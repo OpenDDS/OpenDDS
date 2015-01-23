@@ -108,9 +108,14 @@ public:
 
   bool delivered() const;
 
+  void set_dropped(bool dropped);
+
+  bool dropped() const;
+
 private:
 
   bool delivered_;
+  bool dropped_;
   /// The OpenDDS DCPS header for this sample
   DataSampleHeader       header_;
 
