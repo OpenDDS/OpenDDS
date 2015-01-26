@@ -931,6 +931,11 @@ DataWriterImpl::get_topic()
 bool
 DataWriterImpl::should_ack() const
 {
+  if (qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS) {
+    // DDS 1.2 Section 7.1.2.4.2.15 wait_for_acknowledgments
+    return false;
+  }
+
   // N.B. It may be worthwhile to investigate a more efficient
   // heuristic for determining if a writer should send SAMPLE_ACK
   // control samples. Perhaps based on a sequence number delta?
