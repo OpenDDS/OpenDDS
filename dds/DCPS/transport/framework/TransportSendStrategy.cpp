@@ -935,9 +935,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
   }
 
   DBG_ENTRY_LVL("TransportSendStrategy", "send", 6);
-  //used for send_delayed_notifications at end of send(), must create local copy of pub_id
-  //now to prevent element being destroyed prior to accessing for publication_id() for match creation
-  RepoId pub_id(element->publication_id());
 
   {
     GuardType guard(this->lock_);
