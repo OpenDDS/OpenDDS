@@ -3428,7 +3428,7 @@ void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenD
 void EndHistoricSamplesMissedSweeper::wait()
 {
   if (owner_ == ACE_Thread::self()) {
-    handle_exception(-1);
+    handle_exception(ACE_INVALID_HANDLE);
   } else {
     mutex_.acquire();
     while (!command_queue_.empty()) {

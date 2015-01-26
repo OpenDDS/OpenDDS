@@ -1,3 +1,9 @@
+Mon Jan 26 23:35:34 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Use ACE_INVALID_HANDLE as the portable not-a-handle value.
+
 Mon Jan 26 21:48:39 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
