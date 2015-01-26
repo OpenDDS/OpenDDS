@@ -205,6 +205,7 @@ Service_Participant::ReactorTask::svc()
 {
   Service_Participant* sp = instance();
   sp->reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
+  sp->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
   sp->reactor_->run_reactor_event_loop();
   return 0;
 }
@@ -219,6 +220,12 @@ ACE_Reactor*
 Service_Participant::reactor() const
 {
   return reactor_;
+}
+
+ACE_thread_t
+Service_Participant::reactor_owner() const
+{
+  return reactor_owner_;
 }
 
 void

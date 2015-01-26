@@ -65,7 +65,7 @@ DataReaderImpl::DataReaderImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     subscriber_servant_(0),
-    end_historic_sweeper_(this),
+  end_historic_sweeper_(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
@@ -130,8 +130,18 @@ DataReaderImpl::~DataReaderImpl()
 {
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
 
-  //cancel all timers for EndHistoricSamplesMissedSweeper
-  this->reactor_->cancel_timer(&end_historic_sweeper_);
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+                   read_guard,
+                   this->writers_lock_);
+    // Cancel any uncancelled sweeper timers to decrement reference count.
+    WriterMapType::iterator writer;
+    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
+      end_historic_sweeper_.cancel_timer(writer->second);
+    }
+  }
+
+  end_historic_sweeper_.wait();
 
   if (initialized_) {
     delete rd_allocator_;
@@ -194,17 +204,11 @@ DataReaderImpl::cleanup()
     // Cancel any uncancelled sweeper timers
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      if (writer->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
-        reactor_->cancel_timer(writer->second->historic_samples_timer_);
-
-        if (DCPS_debug_level) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::cleanup() - Unscheduled sweeper %d\n", writer->second->historic_samples_timer_));
-        }
-      }
-      writer->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
-      writer->second->_remove_ref();
+      end_historic_sweeper_.cancel_timer(writer->second);
     }
   }
+
+  end_historic_sweeper_.wait();
 }
 
 void DataReaderImpl::init(
@@ -329,17 +333,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       // Schedule timer if necessary
       //   - only need to check reader qos - we know the writer must be >= reader
       if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-        ACE_Time_Value ten_seconds(10);
-        //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
-        const void* arg = reinterpret_cast<const void*>(info.in());
-        info->_add_ref();
-        info->historic_samples_timer_ =
-            reactor_->schedule_timer(&end_historic_sweeper_,
-                                     arg,
-                                     ten_seconds);
-        if (DCPS_debug_level) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::add_association() - Scheduled sweeper %d\n", info->historic_samples_timer_));
-        }
+        end_historic_sweeper_.schedule_timer(info);
       }
 
       this->statistics_.insert(
@@ -3369,13 +3363,7 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
   if (writers_.end() != where) {
     // Stop filtering these
     if (where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
-      reactor_->cancel_timer(where->second->historic_samples_timer_);
-
-      if (DCPS_debug_level) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::resume_sample_processing() - Unscheduled sweeper %d\n", where->second->historic_samples_timer_));
-      }
-      where->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
-      where->second->_remove_ref();
+      end_historic_sweeper_.cancel_timer(where->second);
     }
   }
 }
@@ -3393,13 +3381,61 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   }
 }
 
-EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(
-  DataReaderImpl* reader) : reader_(reader)
+EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
+                                                                 ACE_thread_t owner,
+                                                                 DataReaderImpl* reader)
+  : owner_ (owner)
+  , reader_(reader)
+  , condition_ (mutex_)
 {
+  this->reactor(reactor);
 }
 
 EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
 {
+  ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
+
+  // Cancel all pending notifications and dump the command queue.
+  this->reactor()->purge_pending_notifications(this);
+  while (!command_queue_.empty ()) {
+    delete command_queue_.front ();
+    command_queue_.pop ();
+  }
+}
+
+void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+{
+  if (owner_ == ACE_Thread::self()) {
+    ScheduleCommand(info).execute(this);
+  } else {
+    ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
+    command_queue_.push(new ScheduleCommand(info));
+    this->reactor()->notify(this);
+  }
+}
+
+void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+{
+  if (owner_ == ACE_Thread::self()) {
+    CancelCommand(info).execute(this);
+  } else {
+    ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
+    command_queue_.push(new CancelCommand(info));
+    this->reactor()->notify(this);
+  }
+}
+
+void EndHistoricSamplesMissedSweeper::wait()
+{
+  if (owner_ == ACE_Thread::self()) {
+    handle_exception(-1);
+  } else {
+    mutex_.acquire();
+    while (!command_queue_.empty()) {
+      condition_.wait();
+    }
+    mutex_.release();
+  }
 }
 
 int EndHistoricSamplesMissedSweeper::handle_timeout(
@@ -3418,6 +3454,50 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
 
   reader_->resume_sample_processing(pub_id);
   return 0;
+}
+
+int EndHistoricSamplesMissedSweeper::handle_exception(ACE_HANDLE /*fd*/)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
+
+  while (!command_queue_.empty()) {
+    Command* command = command_queue_.front();
+    command_queue_.pop();
+    command->execute(this);
+    delete command;
+  }
+
+  condition_.signal();
+
+  return 0;
+}
+
+void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute(EndHistoricSamplesMissedSweeper* sweeper)
+{
+  static const ACE_Time_Value ten_seconds(10);
+
+  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
+  const void* arg = reinterpret_cast<const void*>(info_.in());
+  info_->_add_ref();
+
+  info_->historic_samples_timer_ = sweeper->reactor()->schedule_timer(sweeper,
+                                                                      arg,
+                                                                      ten_seconds);
+  if (DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", info_->historic_samples_timer_));
+  }
+}
+
+void EndHistoricSamplesMissedSweeper::CancelCommand::execute(EndHistoricSamplesMissedSweeper* sweeper)
+{
+  if (info_->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
+    sweeper->reactor()->cancel_timer(info_->historic_samples_timer_);
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->historic_samples_timer_));
+    }
+  }
+  info_->historic_samples_timer_ = WriterInfo::NOT_WAITING;
+  info_->_remove_ref();
 }
 
 } // namespace DCPS

@@ -44,6 +44,7 @@
 #include <list>
 #include <map>
 #include <memory>
+#include <queue>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -112,15 +113,56 @@ public:
 // Class to cleanup in case EndHistoricSamples is missed
 class EndHistoricSamplesMissedSweeper : public ACE_Event_Handler {
 public:
-  EndHistoricSamplesMissedSweeper(DataReaderImpl* reader);
+  EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
+                                  ACE_thread_t owner,
+                                  DataReaderImpl* reader);
   ~EndHistoricSamplesMissedSweeper();
+
+  void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+  void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+  void wait();
 
 protected:
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
 
+  int handle_exception(ACE_HANDLE /*fd*/);
+
 private:
+  ACE_thread_t owner_;
   DataReaderImpl* reader_;
+
+  class Command {
+  public:
+    Command(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : info_(info)
+    { }
+    virtual ~Command() { }
+    virtual void execute(EndHistoricSamplesMissedSweeper* sweeper) = 0;
+
+  protected:
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo> info_;
+  };
+
+  class ScheduleCommand : public Command {
+  public:
+    ScheduleCommand(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : Command (info)
+    { }
+    virtual void execute(EndHistoricSamplesMissedSweeper* sweeper);
+  };
+
+  class CancelCommand : public Command {
+  public:
+    CancelCommand(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : Command(info)
+    { }
+    virtual void execute(EndHistoricSamplesMissedSweeper* sweeper);
+  };
+
+  std::queue<Command*> command_queue_;
+  ACE_Thread_Mutex mutex_;
+  ACE_Condition<ACE_Thread_Mutex> condition_;
 };
 
 /**

@@ -77,6 +77,8 @@ public:
 
   ACE_Reactor* reactor() const;
 
+  ACE_thread_t reactor_owner() const;
+
   /**
    * Initialize the DDS client environment and get the
    * @c DomainParticipantFactory.
@@ -408,6 +410,7 @@ private:
   ACE_ARGV ORB_argv_;
 
   ACE_Reactor* reactor_; //TODO: integrate with threadpool
+  ACE_thread_t reactor_owner_;
   struct ReactorTask : ACE_Task_Base {
     int svc();
   } reactor_task_;
