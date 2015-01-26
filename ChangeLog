@@ -1,3 +1,10 @@
+Mon Jan 26 15:16:39 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          fix fuzz errors
+
 Mon Jan 26 15:16:28 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

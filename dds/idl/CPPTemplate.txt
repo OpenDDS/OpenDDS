@@ -191,7 +191,7 @@ bool
                         ret),
                        ret);
     }
-  
+
     handle = registered_handle;
   }
 
@@ -522,7 +522,7 @@ ACE_Message_Block*
     // Used for send_control after registration
     ACE_Message_Block* registered_sample = 0;
     OpenDDS::DCPS::DataSampleHeader header;
-    
+
     // tell DataWriterLocal and Publisher about the instance.
     ::DDS::ReturnCode_t ret = register_instance_i(handle, marshalled, source_timestamp, header, registered_sample);
     // note: the WriteDataContainer/PublicationInstance maintains ownership
@@ -551,10 +551,10 @@ ACE_Message_Block*
                           ::DDS::RETCODE_ERROR);
       }
     } // end of if (needs_creation)
-    
+
     //need to release guard to call down to transport
     guard.release();
-    
+
     if (this->send_control(header, registered_sample) == OpenDDS::DCPS::SEND_CONTROL_ERROR) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
@@ -2256,7 +2256,7 @@ void
         event_notify = true;
       }
     }
-    
+
     if (!is_dispose_msg && !is_unregister_msg) {
       event_notify = true;
       instance_ptr->instance_state_.data_was_received(header.publication_id_);

@@ -1830,7 +1830,7 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
                                            unregistered_sample_data,
                                            source_timestamp);
   }
-  
+
   if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
@@ -1879,7 +1879,7 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
                                            data_sample,
                                            source_timestamp);
   }
-  
+
   if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
