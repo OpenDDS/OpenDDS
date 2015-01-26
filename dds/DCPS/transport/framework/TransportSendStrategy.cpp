@@ -1211,7 +1211,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 }
 
 void
-TransportSendStrategy::send_stop(RepoId repoId)
+TransportSendStrategy::send_stop(RepoId /*repoId*/)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
