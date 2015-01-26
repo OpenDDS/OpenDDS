@@ -6,6 +6,7 @@
 
 #include <dds/DdsDcpsPublicationC.h>
 #include <ace/Task.h>
+#include <string>
 
 class Writer_Base : public ACE_Task_Base
 {

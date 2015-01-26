@@ -1,3 +1,9 @@
+Mon Jan 26 15:14:44 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+
+          Added missing include.
+
 Fri Jan 23 22:54:33 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataDurabilityCache.cpp:
