@@ -1,3 +1,10 @@
+Mon Jan 26 15:33:52 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/pub_rtps_tcp.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub_rtps_tcp.ini:
+
+          Removing max_samples_per_packet workaround.
+
 Mon Jan 26 15:16:39 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
