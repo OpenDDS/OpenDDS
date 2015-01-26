@@ -85,6 +85,7 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     dp_id_(dp_id),
     federated_(federated),
     shutdown_condition_(shutdown_mutex_),
+    shutdown_complete_(false),
     monitor_(0),
     pub_id_gen_(dp_id_),
     automatic_liveliness_timer_ (*this),
