@@ -2017,7 +2017,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
   }
 
 #else
-
+  ACE_UNUSED_ARG(filter_out);
   for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
        end = reader_info_.end(); iter != end; ++iter) {
     iter->second.expected_sequence_ = sequence_number_;
