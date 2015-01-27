@@ -35,10 +35,12 @@
 #include "RcHandle_T.h"
 #include "RcObject_T.h"
 #include "WriterInfo.h"
+#include "ReactorInterceptor.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
 #include "ace/Atomic_Op.h"
+#include "ace/Reactor.h"
 
 #include <vector>
 #include <list>
@@ -111,7 +113,7 @@ public:
 #endif
 
 // Class to cleanup in case EndHistoricSamples is missed
-class EndHistoricSamplesMissedSweeper : public ACE_Event_Handler {
+class EndHistoricSamplesMissedSweeper : public ReactorInterceptor {
 public:
   EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                   ACE_thread_t owner,
@@ -120,49 +122,44 @@ public:
 
   void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
   void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
-  void wait();
 
 protected:
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
 
-  int handle_exception(ACE_HANDLE /*fd*/);
-
 private:
-  ACE_thread_t owner_;
   DataReaderImpl* reader_;
 
-  class Command {
+  class CommandBase : public Command {
   public:
-    Command(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-      : info_(info)
+    CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
+                OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : sweeper_ (sweeper)
+      , info_(info)
     { }
-    virtual ~Command() { }
-    virtual void execute(EndHistoricSamplesMissedSweeper* sweeper) = 0;
 
   protected:
+    EndHistoricSamplesMissedSweeper* sweeper_;
     OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo> info_;
   };
 
-  class ScheduleCommand : public Command {
+  class ScheduleCommand : public CommandBase {
   public:
-    ScheduleCommand(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-      : Command (info)
+    ScheduleCommand(EndHistoricSamplesMissedSweeper* sweeper,
+                    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : CommandBase(sweeper, info)
     { }
-    virtual void execute(EndHistoricSamplesMissedSweeper* sweeper);
+    virtual void execute();
   };
 
-  class CancelCommand : public Command {
+  class CancelCommand : public CommandBase {
   public:
-    CancelCommand(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-      : Command(info)
+    CancelCommand(EndHistoricSamplesMissedSweeper* sweeper,
+                  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : CommandBase(sweeper, info)
     { }
-    virtual void execute(EndHistoricSamplesMissedSweeper* sweeper);
+    virtual void execute();
   };
-
-  std::queue<Command*> command_queue_;
-  ACE_Thread_Mutex mutex_;
-  ACE_Condition<ACE_Thread_Mutex> condition_;
 };
 
 /**

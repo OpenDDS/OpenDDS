@@ -31,7 +31,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : swap_bytes_(false)
+  : pending_assoc_timer_(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  , swap_bytes_(false)
   , cdr_encapsulation_(false)
   , reliable_(false)
   , durable_(false)
@@ -77,20 +78,15 @@ TransportClient::~TransportClient()
     iter->second->remove_listener(repo_id_);
   }
 
-  ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
-
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
       impls_[i]->stop_accepting_or_connecting(this, it->second.data_.remote_id_);
     }
 
-    //timer should always be instantiated by the participant factory, however
-    //in some transport test cases it isn't therefore check timer existence
-    //before use.  Future: Could resolve tests to always instantiate timer interface.
-    if (timer != 0) {
-      timer->cancel_timer(&it->second);
-    }
+    pending_assoc_timer_.cancel_timer(this, it->second);
   }
+
+  pending_assoc_timer_.wait();
 
   for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
@@ -343,8 +339,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       //pend.impls_.push_back(impls_[i]);
     }
 
-    ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
-    timer->schedule_timer(&pend, this, passive_connect_duration_);
+    pending_assoc_timer_.schedule_timer(this, pend);
   }
 
   return true;
@@ -517,11 +512,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
   }
 
-  ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
-
-  if (timer != 0) {
-    timer->cancel_timer(&pend);
-  }
+  pending_assoc_timer_.cancel_timer(this, pend);
 
   pending_.erase(iter);
 

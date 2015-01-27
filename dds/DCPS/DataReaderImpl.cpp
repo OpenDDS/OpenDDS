@@ -3384,58 +3384,23 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
 EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                                                  ACE_thread_t owner,
                                                                  DataReaderImpl* reader)
-  : owner_ (owner)
+  : ReactorInterceptor (reactor, owner)
   , reader_(reader)
-  , condition_ (mutex_)
-{
-  this->reactor(reactor);
-}
+{ }
 
 EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
-{
-  ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-
-  // Cancel all pending notifications and dump the command queue.
-  this->reactor()->purge_pending_notifications(this);
-  while (!command_queue_.empty ()) {
-    delete command_queue_.front ();
-    command_queue_.pop ();
-  }
-}
+{ }
 
 void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
-  if (owner_ == ACE_Thread::self()) {
-    ScheduleCommand(info).execute(this);
-  } else {
-    ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-    command_queue_.push(new ScheduleCommand(info));
-    this->reactor()->notify(this);
-  }
+  ScheduleCommand c(this, info);
+  execute_or_enqueue(c);
 }
 
 void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
-  if (owner_ == ACE_Thread::self()) {
-    CancelCommand(info).execute(this);
-  } else {
-    ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-    command_queue_.push(new CancelCommand(info));
-    this->reactor()->notify(this);
-  }
-}
-
-void EndHistoricSamplesMissedSweeper::wait()
-{
-  if (owner_ == ACE_Thread::self()) {
-    handle_exception(ACE_INVALID_HANDLE);
-  } else {
-    mutex_.acquire();
-    while (!command_queue_.empty()) {
-      condition_.wait();
-    }
-    mutex_.release();
-  }
+  CancelCommand c(this, info);
+  execute_or_enqueue(c);
 }
 
 int EndHistoricSamplesMissedSweeper::handle_timeout(
@@ -3456,23 +3421,7 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
   return 0;
 }
 
-int EndHistoricSamplesMissedSweeper::handle_exception(ACE_HANDLE /*fd*/)
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
-
-  while (!command_queue_.empty()) {
-    Command* command = command_queue_.front();
-    command_queue_.pop();
-    command->execute(this);
-    delete command;
-  }
-
-  condition_.signal();
-
-  return 0;
-}
-
-void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute(EndHistoricSamplesMissedSweeper* sweeper)
+void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute()
 {
   static const ACE_Time_Value ten_seconds(10);
 
@@ -3480,18 +3429,18 @@ void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute(EndHistoricSample
   const void* arg = reinterpret_cast<const void*>(info_.in());
   info_->_add_ref();
 
-  info_->historic_samples_timer_ = sweeper->reactor()->schedule_timer(sweeper,
-                                                                      arg,
-                                                                      ten_seconds);
+  info_->historic_samples_timer_ = sweeper_->reactor()->schedule_timer(sweeper_,
+                                                                       arg,
+                                                                       ten_seconds);
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", info_->historic_samples_timer_));
   }
 }
 
-void EndHistoricSamplesMissedSweeper::CancelCommand::execute(EndHistoricSamplesMissedSweeper* sweeper)
+void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
 {
   if (info_->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
-    sweeper->reactor()->cancel_timer(info_->historic_samples_timer_);
+    sweeper_->reactor()->cancel_timer(info_->historic_samples_timer_);
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->historic_samples_timer_));
     }

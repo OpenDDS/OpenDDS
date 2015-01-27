@@ -15,6 +15,7 @@
 #include "DataLinkSet.h"
 
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 
 #include "ace/Time_Value.h"
 #include "ace/Event_Handler.h"
@@ -145,6 +146,68 @@ private:
 
   typedef std::map<RepoId, PendingAssoc, GUID_tKeyLessThan> PendingMap;
 
+  class PendingAssocTimer : public ReactorInterceptor {
+  public:
+    PendingAssocTimer(ACE_Reactor* reactor,
+                      ACE_thread_t owner)
+      : ReactorInterceptor(reactor, owner)
+    { }
+
+    void schedule_timer(TransportClient* transport_client, PendingAssoc& pend)
+    {
+      ScheduleCommand c(this, transport_client, pend);
+      execute_or_enqueue(c);
+    }
+
+    void cancel_timer(TransportClient* transport_client, PendingAssoc& pend)
+    {
+      CancelCommand c(this, transport_client, pend);
+      execute_or_enqueue(c);
+    }
+
+  private:
+    class CommandBase : public Command {
+    public:
+      CommandBase(PendingAssocTimer* timer,
+                  TransportClient* transport_client,
+                  PendingAssoc& assoc)
+        : timer_ (timer)
+        , transport_client_ (transport_client)
+        , assoc_ (assoc)
+      { }
+    protected:
+      PendingAssocTimer* timer_;
+      TransportClient* transport_client_;
+      PendingAssoc& assoc_;
+    };
+    struct ScheduleCommand : public CommandBase {
+      ScheduleCommand(PendingAssocTimer* timer,
+                      TransportClient* transport_client,
+                      PendingAssoc& assoc)
+        : CommandBase (timer, transport_client, assoc)
+      { }
+      virtual void execute()
+      {
+        if (timer_->reactor()) {
+          timer_->reactor()->schedule_timer(&assoc_, transport_client_, transport_client_->passive_connect_duration_);
+        }
+      }
+    };
+    struct CancelCommand : public CommandBase {
+      CancelCommand(PendingAssocTimer* timer,
+                    TransportClient* transport_client,
+                    PendingAssoc& assoc)
+        : CommandBase (timer, transport_client, assoc)
+      { }
+      virtual void execute()
+      {
+        if (timer_->reactor()) {
+          timer_->reactor()->cancel_timer(&assoc_);
+        }
+      }
+    };
+  };
+  PendingAssocTimer pending_assoc_timer_;
 
   // Associated Impls and DataLinks:
 
