@@ -1,3 +1,17 @@
+Tue Jan 27 22:04:29 UTC 2015 Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Partition/Idl:
+        * tests/FACE/Partition/Publisher/FacePartitionPublisher.mpc:
+        * tests/FACE/Partition/Subscriber/FacePartitionSubscriber.mpc:
+        * tests/FACE/Partition/run_test.pl:
+
+          Make IDL for this project, and declare a key.
+
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+
+          Use ACE_DEBUG instead of streams.
+
 Fri Jan 23 17:19:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GuidConverter.h:

@@ -28,13 +28,13 @@ int main(int argc, const char* argv[])
 
     ACE_OS::sleep(5); // connection established with Subscriber
 
-    std::cout << "Publisher: about to send_message()" << std::endl;
+    ACE_DEBUG((LM_INFO, "(%P|%t) Publisher: about to send_message()\n"));
     for (CORBA::Long i = 0; i < part; ++i) {
       if (i) ACE_OS::sleep(1);
       
       Messenger::Message msg = {"Hello, world.", part};
       FACE::TRANSACTION_ID_TYPE txn;
-      std::cout << "  sending part " << part << std::endl;
+      ACE_DEBUG((LM_INFO, "(%P|%t) sending part: %d\n", part));
       FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
       if (status != FACE::NO_ERROR) break;
     }

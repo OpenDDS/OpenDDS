@@ -33,11 +33,12 @@ int main(int argc, const char* argv[])
     const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
     FACE::TRANSACTION_ID_TYPE txn;
     Messenger::Message msg;
-    std::cout << "Subscriber: about to receive_message()" << std::endl;
     for (long i = 0; i < part; ++i) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) Subscriber: about to receive_message()\n"));
       FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
       if (status != FACE::NO_ERROR) break;
-      std::cout << "Sub " << part << ": " << msg.text.in() << "\tpart: " << msg.count << std::endl;
+      ACE_DEBUG((LM_INFO, "(%P|%t) Subscriber%d: %s part: %d\n",
+                 part, msg.text.in(), msg.count));
       partitions_received[msg.count - 1] = true;
     }
     if (status) {
