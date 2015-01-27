@@ -1,4 +1,10 @@
-Tue Jan 27 21:24:16 UTC 2015  wilsonj  <wilsonj@ociweb.com>
+Tue Jan 27 22:37:09 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Initialized service participant reactor.
+
+Tue Jan 27 21:24:16 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
         * dds/DCPS/DataReaderImpl.cpp:
