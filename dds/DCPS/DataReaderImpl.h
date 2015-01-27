@@ -180,7 +180,6 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportReceiveListener,
-    public virtual ACE_Event_Handler,
     private WriterInfoListener {
 public:
   friend class RequestedDeadlineWatchdog;
@@ -225,10 +224,6 @@ public:
   */
   DDS::DataReaderListener_ptr listener_for(DDS::StatusKind kind);
 
-  /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg);
-
   /// tell instances when a DataWriter transitions to being alive
   /// The writer state is inout parameter, it has to be set ALIVE before
   /// handle_timeout is called since some subroutine use the state.
@@ -244,9 +239,6 @@ public:
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
   void writer_removed(WriterInfo& info);
-
-  virtual int handle_close(ACE_HANDLE,
-                           ACE_Reactor_Mask);
 
   /**
    * cleanup the DataWriter.
@@ -710,10 +702,72 @@ private:
   /// timer.
   ACE_Reactor_Timer_Interface* reactor_;
 
+  class LivelinessTimer : public ReactorInterceptor {
+  public:
+    LivelinessTimer(ACE_Reactor* reactor,
+                    ACE_thread_t owner,
+                    DataReaderImpl* data_reader)
+      : ReactorInterceptor(reactor, owner)
+      , data_reader_(data_reader)
+      , liveliness_timer_id_(-1)
+    { }
 
+    void check_liveliness()
+    {
+      CheckLivelinessCommand c(this);
+      execute_or_enqueue(c);
+    }
 
-  /// liveliness timer id; -1 if no timer is set
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> liveliness_timer_id_;
+    void cancel_timer()
+    {
+      CancelCommand c(this);
+      execute_or_enqueue(c);
+    }
+
+  private:
+    DataReaderImpl* data_reader_;
+    /// liveliness timer id; -1 if no timer is set
+    long liveliness_timer_id_;
+
+    void check_liveliness_i(bool cancel, const ACE_Time_Value& current_time);
+
+    int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
+
+    class CommandBase : public Command {
+    public:
+      CommandBase(LivelinessTimer* timer)
+        : timer_(timer)
+      { }
+
+    protected:
+      LivelinessTimer* timer_;
+    };
+
+    class CheckLivelinessCommand : public CommandBase {
+    public:
+      CheckLivelinessCommand(LivelinessTimer* timer)
+        : CommandBase(timer)
+      { }
+      virtual void execute()
+      {
+        timer_->check_liveliness_i(true, ACE_OS::gettimeofday());
+      }
+    };
+
+    class CancelCommand : public CommandBase {
+    public:
+      CancelCommand(LivelinessTimer* timer)
+        : CommandBase(timer)
+      { }
+      virtual void execute()
+      {
+        if (timer_->liveliness_timer_id_ != -1) {
+          timer_->reactor()->cancel_timer(timer_);
+        }
+      }
+    };
+  };
+  LivelinessTimer liveliness_timer_;
 
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered

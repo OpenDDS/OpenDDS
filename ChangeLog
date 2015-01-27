@@ -1,3 +1,11 @@
+Tue Jan 27 21:24:16 UTC 2015  wilsonj  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Used ReactorInterceptor to fix deadlock from writer_became_alive
+          and transport_assoc_done.
+
 Tue Jan 27 19:16:43 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/ReactorInterceptor.cpp:
