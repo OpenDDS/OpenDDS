@@ -1,3 +1,9 @@
+Tue Jan 27 19:16:43 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Added required #include for PCH.
+
 Tue Jan 27 18:15:04 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
