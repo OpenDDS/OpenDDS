@@ -138,7 +138,8 @@ struct SimpleDataWriter: SimpleTC, TransportSendListener {
     *dsle_.get_sample() << dsle_.get_header();
     dsle_.get_sample()->cont(payload_.duplicate());
     ACE_DEBUG((LM_INFO, "sending with seq#: %q\n", seq.getValue()));
-    send(list_);
+    SendStateDataSampleListIterator list_iter = list_.begin();
+    send(list_iter);
   }
 
   void data_delivered(const DataSampleElement*)

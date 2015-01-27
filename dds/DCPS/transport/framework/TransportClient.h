@@ -35,6 +35,7 @@ class AssocationInfo;
 class ReaderIdSeq;
 class WriterIdSeq;
 class SendStateDataSampleList;
+class SendStateDataSampleListIterator;
 
 /**
  * @brief Mix-in class for DDS entities which directly use the transport layer.
@@ -78,7 +79,9 @@ protected:
   bool send_response(const RepoId& peer,
                      const DataSampleHeader& header,
                      ACE_Message_Block* payload); // [DR]
-  void send(const SendStateDataSampleList& samples);
+
+  void send(SendStateDataSampleListIterator send_list_iter, ACE_UINT64 transaction_id = 0);
+
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,
                                  void* extra = 0);
@@ -222,6 +225,19 @@ private:
 
   DataLinkIndex data_link_index_;
 
+  // Used to allow sends to completed as a transaction and block
+  // multi-threaded writers from proceeding to send data
+  // on two thread simultaneously, which could cause out-of-order data.
+  ACE_Thread_Mutex send_transaction_lock_;
+  ACE_UINT64 expected_transaction_id_;
+  ACE_UINT64 max_transaction_id_seen_;
+
+  //max_transaction_tail_ will always be the tail of the
+  //max transaction that has been observed or 0 if this is
+  //the first transaction or a transaction after the expected
+  //value was met and thus reset to 0 indicating the samples were
+  //sent up to max_transaction_id_
+  DataSampleElement* max_transaction_tail_;
 
   // Configuration details:
 

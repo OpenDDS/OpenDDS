@@ -104,6 +104,10 @@ public:
 
   void set_filter_out(GUIDSeq *filter_out);
 
+  void set_transaction_id(ACE_UINT64 transaction_id);
+
+  ACE_UINT64 transaction_id() const;
+
   void set_delivered(bool delivered);
 
   bool delivered() const;
@@ -114,6 +118,7 @@ public:
 
 private:
 
+  ACE_UINT64 transaction_id_;
   bool delivered_;
   bool dropped_;
   /// The OpenDDS DCPS header for this sample

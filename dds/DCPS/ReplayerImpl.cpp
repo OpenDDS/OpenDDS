@@ -1014,8 +1014,9 @@ ReplayerImpl::write (const RawDataSample*   samples,
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, DDS::RETCODE_ERROR);
     ++pending_write_count_;
   }
+  SendStateDataSampleListIterator list_iter = list.begin();
 
-  this->send(list);
+  this->send(list_iter);
 
   for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
        end = reader_info_.end(); iter != end; ++iter) {

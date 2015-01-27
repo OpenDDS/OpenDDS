@@ -282,15 +282,8 @@ public:
   /**
    * Retrieve the unsent data from the WriteDataContainer.
    */
-  SendStateDataSampleList get_unsent_data() {
-    return data_container_->get_unsent_data();
-  }
-
-  /**
-   * Retrieve the unsent data from the WriteDataContainer.
-   */
-  void add_sending_data(SendStateDataSampleList list) {
-    return data_container_->add_sending_data(list);
+   ACE_UINT64 get_unsent_data(SendStateDataSampleList& list) {
+    return data_container_->get_unsent_data(list);
   }
 
   SendStateDataSampleList get_resend_data() {
@@ -706,7 +699,9 @@ private:
 
   IdSet                      pending_readers_, assoc_complete_readers_;
 
-  /// The cached available data while suspending.
+  /// The cached available data while suspending and associated transaction ids.
+  ACE_UINT64 min_suspended_transaction_id_;
+  ACE_UINT64 max_suspended_transaction_id_;
   SendStateDataSampleList             available_data_list_;
 
   /// Monitor object for this entity

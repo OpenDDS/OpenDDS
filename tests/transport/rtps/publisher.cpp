@@ -496,7 +496,8 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   sdw.callbacks_expected_ = list.size();
   ::DDS_TEST::force_inline_qos(true);  // Inline QoS
-  sdw.send(list);
+  SendStateDataSampleListIterator list_iter = list.begin();
+  sdw.send(list_iter);
 
   while (sdw.callbacks_expected_) {
     ACE_OS::sleep(1);

@@ -83,7 +83,7 @@ WriteDataContainer::WriteDataContainer(
   std::auto_ptr<OfferedDeadlineWatchdog>& watchdog,
   CORBA::Long     max_instances,
   CORBA::Long     max_total_samples)
-  : samples_loaned_to_dw_counter_(0),
+  : transaction_id_(0),
     writer_(writer),
     depth_(depth),
     max_num_instances_(max_instances),
@@ -203,6 +203,15 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                    DDS::RETCODE_ERROR);
 
   // Make a copy of sending_data_ and sent_data_;
+  if (sent_data_.size() > 0) {
+    this->copy_and_append(this->resend_data_,
+                          sent_data_,
+                          reader_id,
+                          lifespan
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+                          , eval, expression_params
+#endif
+                          );
 
   if (sending_data_.size() > 0) {
     this->copy_and_append(this->resend_data_,
@@ -214,16 +223,6 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 #endif
                           );
   }
-
-  if (sent_data_.size() > 0) {
-    this->copy_and_append(this->resend_data_,
-                          sent_data_,
-                          reader_id,
-                          lifespan
-#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-                          , eval, expression_params
-#endif
-                          );
 
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
@@ -441,84 +440,43 @@ WriteDataContainer::num_all_samples()
   return size;
 }
 
-SendStateDataSampleList
-WriteDataContainer::get_unsent_data()
+ACE_UINT64
+WriteDataContainer::get_unsent_data(SendStateDataSampleList& list)
 {
   DBG_ENTRY_LVL("WriteDataContainer","get_unsent_data",6);
   //
   // The samples in unsent_data are added to the local datawriter
-  // list on 'loan' and will be enqueued to sending_data_ during
-  // add_sending_data()
+  // list and enqueued to the sending_data_ signifying they have
+  // been passed to the transport to send in a transaction
   //
-  SendStateDataSampleList list = this->unsent_data_;
+  list = this->unsent_data_;
+
+  // Increment send counter for this send operation
+  ++transaction_id_;
+
+  // Mark all samples with current send counter
+  SendStateDataSampleList::iterator iter = list.begin();
+  while (iter != list.end()) {
+    iter->set_transaction_id(this->transaction_id_);
+    ++iter;
+  }
+
+  //
+  // The unsent_data_ already linked with the
+  // next_send_sample during enqueue.
+  // Append the unsent_data_ to current sending_data_
+  // list.
+  sending_data_.enqueue_tail(list);
 
   //
   // Clear the unsent data list.
   //
   this->unsent_data_.reset();
 
-  samples_loaned_to_dw_counter_ += list.size();
-
   //
   // Return the moved list.
   //
-  return list;
-}
-
-void
-WriteDataContainer::add_sending_data(SendStateDataSampleList list)
-{
-  DBG_ENTRY_LVL("WriteDataContainer","add_sending_data",6);
-  DataSampleElement* stale = 0;
-  PublicationInstance* instance = 0;
-
-  {
-    ACE_GUARD (ACE_Recursive_Thread_Mutex,
-                      guard,
-                      lock_);
-    //
-    // The unsent_data_ already linked with the
-    // next_send_sample during enqueue.
-    // Append the unsent_data_ to current sending_data_
-    // list.
-    sending_data_.enqueue_tail(list);
-    samples_loaned_to_dw_counter_ -= list.size();
-
-    // Handle the case that the transport finished with the samples while still
-    // on loan to the datawriter by checking if they were delivered/dropped and
-    // handle accordingly
-    SendStateDataSampleList::iterator iter(list.begin());
-    while (iter != list.end()) {
-      if (iter->delivered()) {
-        stale = &*iter;
-        instance = stale->get_handle();
-        ++iter;
-        if (sending_data_.dequeue(stale)) {
-          DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, stale->get_sample());
-          stale->set_delivered(false);
-          sent_data_.enqueue_tail(stale);
-        }
-      } else if (iter->dropped()) {
-        stale = &*iter;
-        instance = stale->get_handle();
-        ++iter;
-        if (sending_data_.dequeue(stale)) {
-          stale->set_dropped(false);
-          unsent_data_.enqueue_tail(stale);
-        }
-      } else {
-        ++iter;
-      }
-    }
-  }
-
-  if (stale != 0) {
-    this->wakeup_blocking_writers(stale, instance);
-  }
-  // Signal if there is no pending data.
-  //
-  if (!pending_data())
-    empty_condition_.broadcast();
+  return transaction_id_;
 }
 
 SendStateDataSampleList
@@ -546,8 +504,7 @@ bool
 WriteDataContainer::pending_data()
 {
   return this->sending_data_.size() != 0
-         || this->unsent_data_.size() != 0
-         || samples_loaned_to_dw_counter_ != 0;
+         || this->unsent_data_.size() != 0;
 }
 
 void
@@ -1246,9 +1203,6 @@ WriteDataContainer::copy_and_append(SendStateDataSampleList& list,
                         sizeof(DataSampleElement))),
                     DataSampleElement(*cur));
 
-    // TODO: Does ACE_NEW_MALLOC throw?  Where's the check for
-    //       allocation failure, i.e. element == 0?
-
     element->set_num_subs(1);
     element->set_sub_id(0, reader_id);
 
@@ -1385,10 +1339,9 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale,
 void
 WriteDataContainer::log_send_state_lists (std::string description)
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), lent_to_dw(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
              description.c_str(),
              unsent_data_.size(),
-             samples_loaned_to_dw_counter_,
              sending_data_.size(),
              sent_data_.size(),
              num_all_samples(),

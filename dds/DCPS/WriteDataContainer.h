@@ -236,15 +236,7 @@ public:
    * The entire list is linked via the
    * DataSampleElement.next_send_sample_ link as well.
    */
-  SendStateDataSampleList get_unsent_data() ;
-
-  /**
-   * Used to push samples lent to the datawriter during send
-   * onto the appropriate list after, typically moving from list
-   * onto the sending_data_ list, however if delivered/dropped
-   * in the interim of the loan - deal with them appropriately
-   */
-  void add_sending_data(SendStateDataSampleList list);
+   ACE_UINT64 get_unsent_data(SendStateDataSampleList& list);
 
   /**
    * Obtain a list of data for resending. This is only used when
@@ -407,7 +399,9 @@ private:
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;
 
-  ssize_t samples_loaned_to_dw_counter_;
+  /// Id used to keep track of which send transaction
+  /// DataWriter is currently creating
+  ACE_UINT64 transaction_id_;
 
   /// List of data that is currently being sent.
   SendStateDataSampleList   sending_data_;

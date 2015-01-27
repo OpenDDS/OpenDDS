@@ -235,7 +235,8 @@ DDS_TEST::run(int num_messages, int msg_size)
              "Send the SendStateDataSampleList (samples).\n"));
 
   ACE_Time_Value start = ACE_OS::gettimeofday();
-  this->send(samples);
+  OpenDDS::DCPS::SendStateDataSampleListIterator list_iter = samples.begin();
+  this->send(list_iter);
   ACE_Time_Value finished = ACE_OS::gettimeofday();
 
   ACE_Time_Value total = finished - start;

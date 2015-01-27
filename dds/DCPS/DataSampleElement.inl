@@ -18,7 +18,8 @@ DataSampleElement::DataSampleElement(
   PublicationInstance*    handle,
   TransportSendElementAllocator* tse_allocator,
   TransportCustomizedElementAllocator* tce_allocator)
-  : delivered_(false),
+  : transaction_id_(0),
+    delivered_(false),
     dropped_(false),
     sample_(0),
     publication_id_(publication_id),
@@ -41,7 +42,8 @@ DataSampleElement::DataSampleElement(
 
 ACE_INLINE
 DataSampleElement::DataSampleElement(const DataSampleElement& elem)
-  : delivered_(elem.delivered_)
+  : transaction_id_(elem.transaction_id_)
+  , delivered_(elem.delivered_)
   , dropped_(elem.dropped_)
   , header_(elem.header_)
   , sample_(elem.sample_->duplicate())
@@ -79,6 +81,7 @@ ACE_INLINE
 DataSampleElement&
 DataSampleElement::operator=(const DataSampleElement& rhs)
 {
+  transaction_id_ = rhs.transaction_id_;
   header_ = rhs.header_;
   sample_ = rhs.sample_->duplicate();
   publication_id_ = rhs.publication_id_;
@@ -241,6 +244,21 @@ DataSampleElement::set_filter_out(GUIDSeq *filter_out)
 {
   filter_out_ = filter_out;
 }
+
+ACE_INLINE
+void
+DataSampleElement::set_transaction_id(ACE_UINT64 transaction_id)
+{
+  transaction_id_ = transaction_id;
+}
+
+ACE_INLINE
+ACE_UINT64
+DataSampleElement::transaction_id() const
+{
+  return transaction_id_;
+}
+
 
 ACE_INLINE
 void

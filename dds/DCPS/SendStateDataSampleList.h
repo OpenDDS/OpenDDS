@@ -67,6 +67,16 @@ public:
     return !(*this == rhs);
   }
 
+  DataSampleElement*
+  head() {
+    return head_;
+  }
+
+  DataSampleElement*
+  tail () {
+    return tail_;
+  }
+
 private:
   SendStateDataSampleListIterator();
 

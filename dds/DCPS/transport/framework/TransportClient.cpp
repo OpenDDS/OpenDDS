@@ -32,6 +32,9 @@ namespace DCPS {
 
 TransportClient::TransportClient()
   : pending_assoc_timer_(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  , expected_transaction_id_(1)
+  , max_transaction_id_seen_(0)
+  , max_transaction_tail_(0)
   , swap_bytes_(false)
   , cdr_encapsulation_(false)
   , reliable_(false)
@@ -708,120 +711,159 @@ TransportClient::send_response(const RepoId& peer,
 }
 
 void
-TransportClient::send(const SendStateDataSampleList& samples)
+TransportClient::send(SendStateDataSampleListIterator send_list_iter, ACE_UINT64 transaction_id)
 {
-  DataSampleElement* cur = samples.head();
-  DataLinkSet send_links;
-  while (cur) {
-    // VERY IMPORTANT NOTE:
-    //
-    // We have to be very careful in how we deal with the current
-    // DataSampleElement.  The issue is that once we have invoked
-    // data_delivered() on the send_listener_ object, or we have invoked
-    // send() on the pub_links, we can no longer access the current
-    // DataSampleElement!Thus, we need to get the next
-    // DataSampleElement (pointer) from the current element now,
-    // while it is safe.
-    DataSampleElement* next_elem = cur->get_next_send_sample();
-    DataLinkSet_rch pub_links =
-      (cur->get_num_subs() > 0)
-      ? links_.select_links(cur->get_sub_ids(), cur->get_num_subs())
-  : DataLinkSet_rch(&links_, false);
+  if (send_list_iter.head() == 0) {
+    return;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, send_transaction_guard, send_transaction_lock_);
 
-    if (pub_links.is_nil() || pub_links->empty()) {
-      // NOTE: This is the "local publisher id is not currently
-      //       associated with any remote subscriber ids" case.
+  if (transaction_id != 0 && transaction_id != expected_transaction_id_) {
+    if (transaction_id > max_transaction_id_seen_) {
+      max_transaction_id_seen_ = transaction_id;
+      max_transaction_tail_ = send_list_iter.tail();
+    }
+    return;
+  } else /* transaction_id == expected_transaction_id */ {
 
-      if (DCPS_debug_level > 4) {
-        GuidConverter converter(cur->get_pub_id());
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) TransportClient::send: ")
-                   ACE_TEXT("no links for publication %C, ")
-                   ACE_TEXT("not sending %d samples.\n"),
-                   std::string(converter).c_str(),
-                   samples.size()));
+    DataSampleElement* cur = send_list_iter.head();
+    if (max_transaction_tail_ == 0) {
+      //Means no future transaction beat this transaction into send
+      if (transaction_id != 0)
+        max_transaction_id_seen_ = expected_transaction_id_;
+      // Only send this current transaction
+      max_transaction_tail_ = send_list_iter.tail();
+    }
+    DataLinkSet send_links;
+
+    while (true) {
+      // VERY IMPORTANT NOTE:
+      //
+      // We have to be very careful in how we deal with the current
+      // DataSampleElement.  The issue is that once we have invoked
+      // data_delivered() on the send_listener_ object, or we have invoked
+      // send() on the pub_links, we can no longer access the current
+      // DataSampleElement!Thus, we need to get the next
+      // DataSampleElement (pointer) from the current element now,
+      // while it is safe.
+      DataSampleElement* next_elem;
+      if (cur != max_transaction_tail_) {
+        next_elem = cur->get_next_send_sample();
+      } else {
+        next_elem = max_transaction_tail_;
       }
+      DataLinkSet_rch pub_links =
+        (cur->get_num_subs() > 0)
+        ? links_.select_links(cur->get_sub_ids(), cur->get_num_subs())
+        : DataLinkSet_rch(&links_, false);
 
-      // We tell the send_listener_ that all of the remote subscriber ids
-      // that wanted the data (all zero of them) have indeed received
-      // the data.
-      cur->get_send_listener()->data_delivered(cur);
+      if (pub_links.is_nil() || pub_links->empty()) {
+        // NOTE: This is the "local publisher id is not currently
+        //       associated with any remote subscriber ids" case.
 
-    } else {
-      VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
-                , cur), 5);
+        if (DCPS_debug_level > 4) {
+          GuidConverter converter(cur->get_pub_id());
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) TransportClient::send: ")
+                     ACE_TEXT("no links for publication %C, ")
+                     ACE_TEXT("not sending element %@ for transaction: %d.\n"),
+                     std::string(converter).c_str(),
+                     cur,
+                     cur->transaction_id()));
+        }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+        // We tell the send_listener_ that all of the remote subscriber ids
+        // that wanted the data (all zero of them) have indeed received
+        // the data.
+        cur->get_send_listener()->data_delivered(cur);
 
-      // Content-Filtering adjustment to the pub_links:
-      // - If the sample should be filtered out of all subscriptions on a given
-      //   DataLink, then exclude that link from the subset that we'll send to.
-      // - If the sample should be filtered out of some (or none) of the subs,
-      //   then record that information in the DataSampleElement so that the
-      //   header's content_filter_entries_ can be marshaled before it's sent.
-      if (cur->filter_out_.ptr()) {
-        DataLinkSet_rch subset;
-        DataLinkSet::GuardType guard(pub_links->lock());
-        typedef DataLinkSet::MapType MapType;
-        MapType& map = pub_links->map();
+      } else {
+        VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
+                  , cur), 5);
 
-        for (MapType::iterator itr = map.begin(); itr != map.end(); ++itr) {
-          size_t n_subs;
-          GUIDSeq_var ti =
-            itr->second->target_intersection(cur->get_pub_id(),
-                                             cur->filter_out_, n_subs);
+  #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-          if (ti.ptr() == 0 || ti->length() != n_subs) {
-            if (!subset.in()) {
-              subset = new DataLinkSet;
+        // Content-Filtering adjustment to the pub_links:
+        // - If the sample should be filtered out of all subscriptions on a given
+        //   DataLink, then exclude that link from the subset that we'll send to.
+        // - If the sample should be filtered out of some (or none) of the subs,
+        //   then record that information in the DataSampleElement so that the
+        //   header's content_filter_entries_ can be marshaled before it's sent.
+        if (cur->filter_out_.ptr()) {
+          DataLinkSet_rch subset;
+          DataLinkSet::GuardType guard(pub_links->lock());
+          typedef DataLinkSet::MapType MapType;
+          MapType& map = pub_links->map();
+
+          for (MapType::iterator itr = map.begin(); itr != map.end(); ++itr) {
+            size_t n_subs;
+            GUIDSeq_var ti =
+              itr->second->target_intersection(cur->get_pub_id(),
+                                               cur->filter_out_, n_subs);
+
+            if (ti.ptr() == 0 || ti->length() != n_subs) {
+              if (!subset.in()) {
+                subset = new DataLinkSet;
+              }
+
+              subset->insert_link(itr->second.in());
+              cur->filter_per_link_[itr->first] = ti._retn();
+
+            } else {
+              VDBG((LM_DEBUG,
+                    "(%P|%t) DBG: DataLink completely filtered-out %@.\n",
+                    itr->second.in()));
             }
-
-            subset->insert_link(itr->second.in());
-            cur->filter_per_link_[itr->first] = ti._retn();
-
-          } else {
-            VDBG((LM_DEBUG,
-                  "(%P|%t) DBG: DataLink completely filtered-out %@.\n",
-                  itr->second.in()));
           }
+
+          if (!subset.in()) {
+            VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
+            // similar to the "if (pub_links.is_nil())" case above, no links
+            cur->get_send_listener()->data_delivered(cur);
+            if (cur != max_transaction_tail_) {
+              // Move on to the next DataSampleElement to send.
+              cur = next_elem;
+              continue;
+            } else {
+              break;
+            }
+          }
+
+          pub_links = subset;
         }
 
-        if (!subset.in()) {
-          VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
-          // similar to the "if (pub_links.is_nil())" case above, no links
-          cur->get_send_listener()->data_delivered(cur);
-          cur = next_elem;
-          continue;
-        }
+  #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-        pub_links = subset;
+        // This will do several things, including adding to the membership
+        // of the send_links set.  Any DataLinks added to the send_links
+        // set will be also told about the send_start() event.  Those
+        // DataLinks (in the pub_links set) that are already in the
+        // send_links set will not be told about the send_start() event
+        // since they heard about it when they were inserted into the
+        // send_links set.
+        send_links.send_start(pub_links.in());
+        pub_links->send(cur);
       }
-
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
-      // This will do several things, including adding to the membership
-      // of the send_links set.  Any DataLinks added to the send_links
-      // set will be also told about the send_start() event.  Those
-      // DataLinks (in the pub_links set) that are already in the
-      // send_links set will not be told about the send_start() event
-      // since they heard about it when they were inserted into the
-      // send_links set.
-      send_links.send_start(pub_links.in());
-      pub_links->send(cur);
+      if (cur != max_transaction_tail_) {
+        // Move on to the next DataSampleElement to send.
+        cur = next_elem;
+      } else {
+        break;
+      }
     }
 
-    // Move on to the next DataSampleElement to send.
-    cur = next_elem;
+    // This will inform each DataLink in the set about the stop_send() event.
+    // It will then clear the send_links_ set.
+    //
+    // The reason that the send_links_ set is cleared is because we continually
+    // reuse the same send_links_ object over and over for each call to this
+    // send method.
+    RepoId pub_id(this->repo_id_);
+    send_links.send_stop(pub_id);
+    if (transaction_id != 0)
+      expected_transaction_id_ = max_transaction_id_seen_ + 1;
+    max_transaction_tail_ = 0;
   }
-
-  // This will inform each DataLink in the set about the stop_send() event.
-  // It will then clear the send_links_ set.
-  //
-  // The reason that the send_links_ set is cleared is because we continually
-  // reuse the same send_links_ object over and over for each call to this
-  // send method.
-  RepoId pub_id(this->repo_id_);
-  send_links.send_stop(pub_id);
 }
 
 TransportSendListener*

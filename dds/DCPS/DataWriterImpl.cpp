@@ -85,6 +85,8 @@ DataWriterImpl::DataWriterImpl()
     is_bit_(false),
     initialized_(false),
     wfaCondition_(this->wfaLock_),
+    min_suspended_transaction_id_(0),
+    max_suspended_transaction_id_(0),
     monitor_(0),
     periodic_monitor_(0),
     db_lock_pool_(0),
@@ -540,7 +542,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       this->available_data_list_.enqueue_tail(list);
 
     } else {
-      this->send(list);
+      SendStateDataSampleListIterator list_iter = list.begin();
+      this->send(list_iter);
     }
 
     if (qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
@@ -1974,21 +1977,28 @@ DataWriterImpl::write(DataSample* data,
   if (this->coherent_) {
     ++this->coherent_samples_;
   }
-  SendStateDataSampleList list = this->get_unsent_data();
+  SendStateDataSampleList list;
+
+  ACE_UINT64 transaction_id = this->get_unsent_data(list);
+
+  SendStateDataSampleListIterator list_iter = list.begin();
 
   if (this->publisher_servant_->is_suspended()) {
+    if (min_suspended_transaction_id_ == 0) {
+      //provides transaction id for lower bound of suspended transactions
+      //or transaction id for single suspended write transaction
+      min_suspended_transaction_id_ = transaction_id;
+    } else {
+      //when multiple write transactions have suspended, provides the upper bound
+      //for suspended transactions.
+      max_suspended_transaction_id_ = transaction_id;
+    }
     this->available_data_list_.enqueue_tail(list);
 
   } else {
-    SendStateDataSampleList::iterator iter = list.begin();
-    while (iter != list.end()) {
-      ++iter;
-    }
     guard.release();
 
-    this->send(list);
-
-    this->add_sending_data(list);
+    this->send(list_iter, transaction_id);
   }
 
   return DDS::RETCODE_OK;
@@ -2030,8 +2040,20 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 void
 DataWriterImpl::send_suspended_data()
 {
-  this->send(this->available_data_list_);
-  this->add_sending_data(this->available_data_list_);
+  SendStateDataSampleListIterator list_iter = this->available_data_list_.begin();
+  //this serves to get TransportClient's max_transaction_id_seen_
+  //to the correct value for this list of transactions
+  if (max_suspended_transaction_id_ != 0) {
+    this->send(list_iter, max_suspended_transaction_id_);
+    max_suspended_transaction_id_ = 0;
+  }
+
+  //this serves to actually have the send proceed in
+  //sending the samples to the datalinks by passing it
+  //the min_suspended_transaction_id_ which should be the
+  //TransportClient's expected_transaction_id_
+  this->send(list_iter, min_suspended_transaction_id_);
+  min_suspended_transaction_id_ = 0;
   this->available_data_list_.reset();
 }
 

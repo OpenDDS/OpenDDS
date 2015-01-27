@@ -1,3 +1,26 @@
+Tue Jan 27 23:52:45 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Let TransportClient::send resolve out of order or duplicate
+          samples from a single datawriter.  Also fixed order of data
+          used for sending historical data to enqueue sent messages
+          before currently sending messages onto the resend list.
+
 Tue Jan 27 23:08:31 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:
