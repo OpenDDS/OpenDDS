@@ -542,8 +542,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       this->available_data_list_.enqueue_tail(list);
 
     } else {
-      SendStateDataSampleListIterator list_iter = list.begin();
-      this->send(list_iter);
+      this->send(list);
     }
 
     if (qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
@@ -1981,8 +1980,6 @@ DataWriterImpl::write(DataSample* data,
 
   ACE_UINT64 transaction_id = this->get_unsent_data(list);
 
-  SendStateDataSampleListIterator list_iter = list.begin();
-
   if (this->publisher_servant_->is_suspended()) {
     if (min_suspended_transaction_id_ == 0) {
       //provides transaction id for lower bound of suspended transactions
@@ -1998,7 +1995,7 @@ DataWriterImpl::write(DataSample* data,
   } else {
     guard.release();
 
-    this->send(list_iter, transaction_id);
+    this->send(list, transaction_id);
   }
 
   return DDS::RETCODE_OK;
@@ -2040,11 +2037,10 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 void
 DataWriterImpl::send_suspended_data()
 {
-  SendStateDataSampleListIterator list_iter = this->available_data_list_.begin();
   //this serves to get TransportClient's max_transaction_id_seen_
   //to the correct value for this list of transactions
   if (max_suspended_transaction_id_ != 0) {
-    this->send(list_iter, max_suspended_transaction_id_);
+    this->send(this->available_data_list_, max_suspended_transaction_id_);
     max_suspended_transaction_id_ = 0;
   }
 
@@ -2052,7 +2048,7 @@ DataWriterImpl::send_suspended_data()
   //sending the samples to the datalinks by passing it
   //the min_suspended_transaction_id_ which should be the
   //TransportClient's expected_transaction_id_
-  this->send(list_iter, min_suspended_transaction_id_);
+  this->send(this->available_data_list_, min_suspended_transaction_id_);
   min_suspended_transaction_id_ = 0;
   this->available_data_list_.reset();
 }

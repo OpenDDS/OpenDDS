@@ -2204,9 +2204,8 @@ Sedp::Writer::write_sample(const ParameterList& plist,
 
     DCPS::SendStateDataSampleList list;
     list.enqueue_tail(list_el);
-    DCPS::SendStateDataSampleListIterator list_iter = list.begin();
 
-    send(list_iter);
+    send(list);
   }
   delete payload.cont();
   return result;
@@ -2256,9 +2255,8 @@ Sedp::Writer::write_sample(const ParticipantMessageData& pmd,
 
     DCPS::SendStateDataSampleList list;
     list.enqueue_tail(list_el);
-    DCPS::SendStateDataSampleListIterator list_iter = list.begin();
 
-    send(list_iter);
+    send(list);
   }
   delete payload.cont();
   return result;

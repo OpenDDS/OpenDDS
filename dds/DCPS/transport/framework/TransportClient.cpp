@@ -711,9 +711,9 @@ TransportClient::send_response(const RepoId& peer,
 }
 
 void
-TransportClient::send(SendStateDataSampleListIterator send_list_iter, ACE_UINT64 transaction_id)
+TransportClient::send(SendStateDataSampleList send_list, ACE_UINT64 transaction_id)
 {
-  if (send_list_iter.head() == 0) {
+  if (send_list.head() == 0) {
     return;
   }
   ACE_GUARD(ACE_Thread_Mutex, send_transaction_guard, send_transaction_lock_);
@@ -721,18 +721,18 @@ TransportClient::send(SendStateDataSampleListIterator send_list_iter, ACE_UINT64
   if (transaction_id != 0 && transaction_id != expected_transaction_id_) {
     if (transaction_id > max_transaction_id_seen_) {
       max_transaction_id_seen_ = transaction_id;
-      max_transaction_tail_ = send_list_iter.tail();
+      max_transaction_tail_ = send_list.tail();
     }
     return;
   } else /* transaction_id == expected_transaction_id */ {
 
-    DataSampleElement* cur = send_list_iter.head();
+    DataSampleElement* cur = send_list.head();
     if (max_transaction_tail_ == 0) {
       //Means no future transaction beat this transaction into send
       if (transaction_id != 0)
         max_transaction_id_seen_ = expected_transaction_id_;
       // Only send this current transaction
-      max_transaction_tail_ = send_list_iter.tail();
+      max_transaction_tail_ = send_list.tail();
     }
     DataLinkSet send_links;
 

@@ -333,5 +333,12 @@ Service_Participant::publisher_content_filter() const
   return this->publisher_content_filter_;
 }
 
+ACE_INLINE
+bool
+Service_Participant::is_shut_down() const
+{
+  return this->shut_down_;
+}
+
 } // namespace DDS
 } // namespace OpenDDS

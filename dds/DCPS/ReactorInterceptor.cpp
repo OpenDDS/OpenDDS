@@ -8,6 +8,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ReactorInterceptor.h"
+#include "Service_Participant.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -32,9 +33,16 @@ ReactorInterceptor::~ReactorInterceptor()
   }
 }
 
+bool ReactorInterceptor::should_execute_immediately()
+{
+  return owner_ == ACE_Thread::self() ||
+         (TheServiceParticipant->reactor() == this->reactor() &&
+          TheServiceParticipant->is_shut_down());
+}
+
 void ReactorInterceptor::wait()
 {
-  if (owner_ == ACE_Thread::self()) {
+  if (should_execute_immediately()) {
     handle_exception(ACE_INVALID_HANDLE);
   } else {
     mutex_.acquire();

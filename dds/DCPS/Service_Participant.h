@@ -102,6 +102,9 @@ public:
    */
   void shutdown();
 
+  ///Accessor for if the participant has been shutdown
+  bool is_shut_down() const;
+
   /// Accessor of the Discovery object for a given domain.
   Discovery_rch get_discovery(const DDS::DomainId_t domain);
 
@@ -552,6 +555,9 @@ private:
   /// Number of seconds to wait on pending samples to be sent
   /// or dropped.
   ACE_Time_Value pending_timeout_;
+
+  //used to track state of service participant
+  bool shut_down_;
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;

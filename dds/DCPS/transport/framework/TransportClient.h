@@ -80,7 +80,7 @@ protected:
                      const DataSampleHeader& header,
                      ACE_Message_Block* payload); // [DR]
 
-  void send(SendStateDataSampleListIterator send_list_iter, ACE_UINT64 transaction_id = 0);
+  void send(SendStateDataSampleList send_list, ACE_UINT64 transaction_id = 0);
 
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,

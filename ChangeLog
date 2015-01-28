@@ -1,3 +1,26 @@
+Wed Jan 28 01:42:28 UTC 2015  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Alleviate deadlock in wait() when the reactor thread has already
+          shutdown and thus the wait would never finish before.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Simply pass the list to send instead of the iterator to be more
+          semantically correct.  Then access head and tail directly.
+
 Tue Jan 27 23:52:45 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:

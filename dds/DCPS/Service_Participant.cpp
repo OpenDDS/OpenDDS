@@ -170,7 +170,8 @@ Service_Participant::Service_Participant()
     persistent_data_cache_(),
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
-    pending_timeout_(ACE_Time_Value::zero)
+    pending_timeout_(ACE_Time_Value::zero),
+    shut_down_(false)
 {
   initialize();
 }
@@ -231,6 +232,7 @@ Service_Participant::reactor_owner() const
 void
 Service_Participant::shutdown()
 {
+  shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);

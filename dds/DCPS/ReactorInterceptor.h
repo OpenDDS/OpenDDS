@@ -12,7 +12,7 @@
 #include <queue>
 #include "ace/Reactor.h"
 #include "ace/Thread.h"
-#include "ace/Condition_T.h"
+#include "ace/Condition_Thread_Mutex.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -30,10 +30,12 @@ public:
                      ACE_thread_t owner);
   ~ReactorInterceptor();
 
+  bool should_execute_immediately();
+
   template<typename T>
   void execute_or_enqueue(T& t)
   {
-    if (owner_ == ACE_Thread::self()) {
+    if (should_execute_immediately()) {
       t.execute();
     } else {
       ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
@@ -43,11 +45,12 @@ public:
   }
 
   void wait();
+
 private:
   int handle_exception(ACE_HANDLE /*fd*/);
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
-  ACE_Condition<ACE_Thread_Mutex> condition_;
+  ACE_Condition_Thread_Mutex condition_;
   std::queue<Command*> command_queue_;
 };
 
