@@ -887,6 +887,7 @@ DomainParticipantImpl::delete_contained_entities()
   while (!shutdown_complete_) {
     shutdown_condition_.wait();
   }
+  shutdown_complete_ = false;
   shutdown_mutex_.release();
 
   bit_subscriber_ = DDS::Subscriber::_nil();
