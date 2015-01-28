@@ -1,4 +1,11 @@
-Wed Jan 28 01:42:28 UTC 2015  Peter Oschwald  <oschwald_p@ociweb.com>
+Wed Jan 28 01:46:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/SendStateDataSampleList.h:
+
+          No longer need to be able to directly access head and tail
+          of the list from the iterator.
+
+Wed Jan 28 01:42:28 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/ReactorInterceptor.h:
         * dds/DCPS/ReactorInterceptor.cpp:
