@@ -214,6 +214,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       return 1;
     }
 
+    TheServiceParticipant->get_domain_participant_factory();
+
     TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
                                                                "rtps_udp");
 

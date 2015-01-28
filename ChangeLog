@@ -1,3 +1,10 @@
+Wed Jan 28 15:08:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Initialized service participant reactor.
+
 Wed Jan 28 14:59:25 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/ReactorInterceptor.cpp:
