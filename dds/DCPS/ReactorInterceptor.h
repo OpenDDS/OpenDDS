@@ -38,10 +38,16 @@ public:
     if (should_execute_immediately()) {
       t.execute();
     } else {
-      ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-      command_queue_.push(new T(t));
-      this->reactor()->notify(this);
+      enqueue(t);
     }
+  }
+
+  template<typename T>
+  void enqueue(T& t)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
+    command_queue_.push(new T(t));
+    this->reactor()->notify(this);
   }
 
   void wait();

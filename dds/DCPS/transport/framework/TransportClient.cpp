@@ -83,7 +83,7 @@ TransportClient::~TransportClient()
 
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(this, it->second.data_.remote_id_);
+      impls_[i]->stop_accepting_or_connecting(this, it->second->data_.remote_id_);
     }
 
     pending_assoc_timer_.cancel_timer(this, it->second);
@@ -254,7 +254,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc())).first;
+    iter = pending_.insert(std::make_pair(remote_copy, new PendingAssoc())).first;
 
     GuidConverter tc_assoc(this->repo_id_);
     GuidConverter remote_new(data.remote_id_);
@@ -264,8 +264,8 @@ TransportClient::associate(const AssociationData& data, bool active)
               std::string(remote_new).c_str()), 5);
 
   } else {
-    if (iter->second.removed_) {
-      iter->second.removed_ = false;
+    if (iter->second->removed_) {
+      iter->second->removed_ = false;
 
     } else {
       ACE_ERROR((LM_ERROR,
@@ -276,7 +276,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     }
   }
 
-  PendingAssoc& pend = iter->second;
+  PendingAssoc& pend = *(iter->second);
   pend.active_ = active;
   pend.impls_.clear();
   pend.blob_index_ = 0;
@@ -342,7 +342,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       //pend.impls_.push_back(impls_[i]);
     }
 
-    pending_assoc_timer_.schedule_timer(this, pend);
+    pending_assoc_timer_.schedule_timer(this, iter->second);
   }
 
   return true;
@@ -387,7 +387,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     //PendingAssoc's are only erased from pending_ in use_datalink_i after
 
   } else {
-    if (iter->second.removed_) {
+    if (iter->second->removed_) {
       //this occurs if the transport client was told to disassociate while connecting
       //disassociate cleans up everything except this local AcceptConnectResult whose destructor
       //should take care of it because link has not been shifted into links_ by use_datalink_i
@@ -483,15 +483,15 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     return;
   }
 
-  PendingAssoc& pend = iter->second;
-  const int active_flag = pend.active_ ? ASSOC_ACTIVE : 0;
+  PendingAssoc* pend = iter->second;
+  const int active_flag = pend->active_ ? ASSOC_ACTIVE : 0;
   bool ok = false;
 
-  if (pend.removed_) { // no-op
+  if (pend->removed_) { // no-op
     return;
   } else if (link.is_nil()) {
 
-    if (pend.active_ && pend.initiate_connect(this, guard)) {
+    if (pend->active_ && pend->initiate_connect(this, guard)) {
       return;
     }
 
@@ -508,19 +508,20 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 
   // either link is valid or assoc failed, clean up pending object
   // for passive side processing
-  if (!pend.active_) {
+  if (!pend->active_) {
 
-    for (size_t i = 0; i < pend.impls_.size(); ++i) {
-      pend.impls_[i]->stop_accepting_or_connecting(this, pend.data_.remote_id_);
+    for (size_t i = 0; i < pend->impls_.size(); ++i) {
+      pend->impls_[i]->stop_accepting_or_connecting(this, pend->data_.remote_id_);
     }
   }
 
-  pending_assoc_timer_.cancel_timer(this, pend);
-  pending_assoc_timer_.wait();
-
   pending_.erase(iter);
+  pend->removed_ = true;
 
   guard.release();
+
+  pending_assoc_timer_.cancel_timer(this, pend);
+  pending_assoc_timer_.delete_pending_assoc(pend);
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
 }
@@ -585,7 +586,7 @@ TransportClient::stop_associating(const ReaderIdSeq* readers)
     PendingMap::iterator iter = pending_.begin();
 
     while (iter != pending_.end()) {
-      iter->second.removed_ = true;
+      iter->second->removed_ = true;
       ++iter;
     }
   } else {
@@ -596,7 +597,7 @@ TransportClient::stop_associating(const ReaderIdSeq* readers)
       PendingMap::iterator iter = pending_.find(rdrs[i]);
 
       if (iter != pending_.end()) {
-        iter->second.removed_ = true;
+        iter->second->removed_ = true;
       }
     }
   }
@@ -616,7 +617,7 @@ TransportClient::disassociate(const RepoId& peerId)
   const PendingMap::iterator iter = pending_.find(peerId);
 
   if (iter != pending_.end()) {
-    iter->second.removed_ = true;
+    iter->second->removed_ = true;
     return;
   }
 

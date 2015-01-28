@@ -156,7 +156,7 @@ private:
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
   };
 
-  typedef std::map<RepoId, PendingAssoc, GUID_tKeyLessThan> PendingMap;
+  typedef std::map<RepoId, PendingAssoc*, GUID_tKeyLessThan> PendingMap;
 
   class PendingAssocTimer : public ReactorInterceptor {
   public:
@@ -165,16 +165,23 @@ private:
       : ReactorInterceptor(reactor, owner)
     { }
 
-    void schedule_timer(TransportClient* transport_client, PendingAssoc& pend)
+    void schedule_timer(TransportClient* transport_client, PendingAssoc* pend)
     {
       ScheduleCommand c(this, transport_client, pend);
       execute_or_enqueue(c);
     }
 
-    void cancel_timer(TransportClient* transport_client, PendingAssoc& pend)
+    void cancel_timer(TransportClient* transport_client, PendingAssoc* pend)
     {
       CancelCommand c(this, transport_client, pend);
       execute_or_enqueue(c);
+    }
+
+    void delete_pending_assoc(PendingAssoc* pend)
+    {
+      DeleteCommand c(pend);
+      // Always defer.
+      enqueue(c);
     }
 
   private:
@@ -182,7 +189,7 @@ private:
     public:
       CommandBase(PendingAssocTimer* timer,
                   TransportClient* transport_client,
-                  PendingAssoc& assoc)
+                  PendingAssoc* assoc)
         : timer_ (timer)
         , transport_client_ (transport_client)
         , assoc_ (assoc)
@@ -190,32 +197,41 @@ private:
     protected:
       PendingAssocTimer* timer_;
       TransportClient* transport_client_;
-      PendingAssoc& assoc_;
+      PendingAssoc* assoc_;
     };
     struct ScheduleCommand : public CommandBase {
       ScheduleCommand(PendingAssocTimer* timer,
                       TransportClient* transport_client,
-                      PendingAssoc& assoc)
+                      PendingAssoc* assoc)
         : CommandBase (timer, transport_client, assoc)
       { }
       virtual void execute()
       {
         if (timer_->reactor()) {
-          timer_->reactor()->schedule_timer(&assoc_, transport_client_, transport_client_->passive_connect_duration_);
+          timer_->reactor()->schedule_timer(assoc_, transport_client_, transport_client_->passive_connect_duration_);
         }
       }
     };
     struct CancelCommand : public CommandBase {
       CancelCommand(PendingAssocTimer* timer,
                     TransportClient* transport_client,
-                    PendingAssoc& assoc)
+                    PendingAssoc* assoc)
         : CommandBase (timer, transport_client, assoc)
       { }
       virtual void execute()
       {
         if (timer_->reactor()) {
-          timer_->reactor()->cancel_timer(&assoc_);
+          timer_->reactor()->cancel_timer(assoc_);
         }
+      }
+    };
+    struct DeleteCommand : public CommandBase {
+      DeleteCommand(PendingAssoc* assoc)
+        : CommandBase (0, 0, assoc)
+      { }
+      virtual void execute()
+      {
+        delete assoc_;
       }
     };
   };
