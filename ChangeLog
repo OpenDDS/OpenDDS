@@ -1,3 +1,14 @@
+Wed Jan 28 14:59:25 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Added warning if initialized with null reactor.
+
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+
+          Initialized service participant reactor.
+
 Wed Jan 28 01:58:41 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:
