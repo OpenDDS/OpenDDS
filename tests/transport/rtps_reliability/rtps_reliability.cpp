@@ -941,6 +941,7 @@ bool run_test()
 
 int ACE_TMAIN(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
+  TheServiceParticipant->get_domain_participant_factory();
   bool ok = false;
   try {
     ok = run_test();

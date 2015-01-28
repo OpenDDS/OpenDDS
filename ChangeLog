@@ -1,3 +1,9 @@
+Wed Jan 28 18:24:36 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Initialized service participant reactor.
+
 Wed Jan 28 17:02:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportClient.cpp:
