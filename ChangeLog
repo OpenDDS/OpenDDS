@@ -1,3 +1,10 @@
+Wed Jan 28 17:02:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Wait for cancel timer to happen before deleting the pending
+          assoc.
+
 Wed Jan 28 15:55:13 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DomainParticipantImpl.cpp:

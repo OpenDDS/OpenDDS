@@ -516,6 +516,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   }
 
   pending_assoc_timer_.cancel_timer(this, pend);
+  pending_assoc_timer_.wait();
 
   pending_.erase(iter);
 
