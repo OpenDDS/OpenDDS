@@ -1,3 +1,12 @@
+Wed Jan 28 21:42:15 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+
+          This test can now use RTPS, need to make the libs
+          available in static builds.
+
 Wed Jan 28 18:42:02 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/ReactorInterceptor.h:
