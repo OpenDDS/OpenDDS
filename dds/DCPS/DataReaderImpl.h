@@ -652,8 +652,15 @@ private:
     return data.publication_transport_priority_;
   }
 
-  // when done handling historic samples, resume
+  /// when done handling historic samples, resume
   void resume_sample_processing(const PublicationId& pub_id);
+
+  /// collect samples received before END_HISTORIC_SAMPLES
+  /// returns false if normal processing of this sample should be skipped
+  bool check_historic(const ReceivedDataSample& sample);
+
+  /// deliver samples that were held by check_historic()
+  void deliver_historic(std::map<SequenceNumber, ReceivedDataSample>& samples);
 
   friend class InstanceState;
   friend class EndHistoricSamplesMissedSweeper;

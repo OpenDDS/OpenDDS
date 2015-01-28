@@ -18,6 +18,7 @@
 #include "Definitions.h"
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
+#include "transport/framework/ReceivedDataSample.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -74,14 +75,11 @@ class OpenDDS_Dcps_Export WriterInfo : public RcObject<ACE_SYNCH_MUTEX> {
 
 public:
   enum WriterState { NOT_SET, ALIVE, DEAD };
-  enum HistoricSamplesState { NOT_WAITING = -1 };
-
-  WriterInfo();  // needed for maps
+  enum HistoricSamplesState { NO_TIMER = -1 };
 
   WriterInfo(WriterInfoListener*         reader,
              const PublicationId&        writer_id,
-             const ::DDS::DataWriterQos& writer_qos,
-             const ::DDS::DataReaderQos& reader_qos);
+             const ::DDS::DataWriterQos& writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
   /// @param now next time this DataWriter will become not active (not alive)
@@ -145,9 +143,17 @@ public:
 
   bool seen_data_;
 
-  // Non-negative if this a durable writer for which we are awaiting an
-  // end historic samples control message
+  // Non-negative if this a durable writer which has a timer scheduled
   long historic_samples_timer_;
+
+  /// Temporary holding place for samples received before
+  /// the END_HISTORIC_SAMPLES control message.
+  std::map<SequenceNumber, ReceivedDataSample> historic_samples_;
+
+  /// After receiving END_HISTORIC_SAMPLES, check for duplicates
+  SequenceNumber last_historic_seq_;
+
+  bool waiting_for_end_historic_samples_;
 
   /// State of the writer.
   WriterState state_;

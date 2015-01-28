@@ -1,3 +1,22 @@
+Wed Jan 28 01:58:41 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Updated durable data and END_HISTORIC_SAMPLES to
+          take advantage of the new TransportClient features,
+          guaranteeing that the control message appears directly
+          after the last historic sample (if any).
+          DataReader side has a new strategy for dealing with
+          possibly repeated and out of order data due to the
+          durability resend.
+
 Wed Jan 28 01:46:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/SendStateDataSampleList.h:

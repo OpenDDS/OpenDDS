@@ -717,7 +717,26 @@ TransportClient::send(SendStateDataSampleList send_list, ACE_UINT64 transaction_
     return;
   }
   ACE_GUARD(ACE_Thread_Mutex, send_transaction_guard, send_transaction_lock_);
+  send_i(send_list, transaction_id);
+}
 
+SendControlStatus
+TransportClient::send_w_control(SendStateDataSampleList send_list,
+                                const DataSampleHeader& header,
+                                ACE_Message_Block* msg,
+                                const RepoId& destination)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, send_transaction_guard,
+                   send_transaction_lock_, SEND_CONTROL_ERROR);
+  if (send_list.head()) {
+    send_i(send_list, 0);
+  }
+  return send_control_to(header, msg, destination);
+}
+
+void
+TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transaction_id)
+{
   if (transaction_id != 0 && transaction_id != expected_transaction_id_) {
     if (transaction_id > max_transaction_id_seen_) {
       max_transaction_id_seen_ = transaction_id;
@@ -764,7 +783,7 @@ TransportClient::send(SendStateDataSampleList send_list, ACE_UINT64 transaction_
         if (DCPS_debug_level > 4) {
           GuidConverter converter(cur->get_pub_id());
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) TransportClient::send: ")
+                     ACE_TEXT("(%P|%t) TransportClient::send_i: ")
                      ACE_TEXT("no links for publication %C, ")
                      ACE_TEXT("not sending element %@ for transaction: %d.\n"),
                      std::string(converter).c_str(),

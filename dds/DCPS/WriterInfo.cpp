@@ -53,27 +53,16 @@ WriterInfoListener::writer_removed(WriterInfo& )
 {
 }
 
-WriterInfo::WriterInfo()
-  : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
-  seen_data_(false),
-  historic_samples_timer_(NOT_WAITING),
-  state_(NOT_SET),
-  reader_(0),
-  writer_id_(GUID_UNKNOWN),
-  handle_(DDS::HANDLE_NIL)
-{
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  this->reset_coherent_info();
-#endif
-}
+
 
 WriterInfo::WriterInfo(WriterInfoListener*         reader,
                        const PublicationId&        writer_id,
-                       const ::DDS::DataWriterQos& writer_qos,
-                       const ::DDS::DataReaderQos& /*reader_qos*/)
+                       const ::DDS::DataWriterQos& writer_qos)
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
   seen_data_(false),
-  historic_samples_timer_(NOT_WAITING),
+  historic_samples_timer_(NO_TIMER),
+  last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
+  waiting_for_end_historic_samples_(false),
   state_(NOT_SET),
   reader_(reader),
   writer_id_(writer_id),

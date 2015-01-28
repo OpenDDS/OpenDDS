@@ -82,12 +82,19 @@ protected:
 
   void send(SendStateDataSampleList send_list, ACE_UINT64 transaction_id = 0);
 
+  SendControlStatus send_w_control(SendStateDataSampleList send_list,
+                                   const DataSampleHeader& header,
+                                   ACE_Message_Block* msg,
+                                   const RepoId& destination);
+
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,
                                  void* extra = 0);
+
   SendControlStatus send_control_to(const DataSampleHeader& header,
                                     ACE_Message_Block* msg,
                                     const RepoId& destination);
+
   bool remove_sample(const DataSampleElement* sample);
   bool remove_all_msgs();
 
@@ -124,6 +131,8 @@ private:
                           const TransportImpl::RemoteTransport& remote,
                           const TransportImpl::ConnectionAttribs& attribs_,
                           Guard& guard);
+
+  void send_i(SendStateDataSampleList send_list, ACE_UINT64 transaction_id);
 
   // A class, normally provided by an unit test, who needs access to a client's
   // privates.

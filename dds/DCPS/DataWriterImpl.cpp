@@ -542,11 +542,30 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       this->available_data_list_.enqueue_tail(list);
 
     } else {
-      this->send(list);
-    }
+      if (DCPS_debug_level >= 4) {
+        ACE_DEBUG((LM_INFO, "(%P|%t) Sending historic samples\n"));
+      }
 
-    if (qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-      send_end_historic_samples(remote_id);
+      size_t size = 0, padding = 0;
+      gen_find_size(remote_id, size, padding);
+      ACE_Message_Block* const data =
+        new ACE_Message_Block(size, ACE_Message_Block::MB_DATA, 0, 0, 0,
+                              get_db_lock());
+      Serializer ser(data);
+      ser << remote_id;
+
+      const DDS::Time_t timestamp = time_value_to_time(ACE_OS::gettimeofday());
+      DataSampleHeader header;
+      ACE_Message_Block* const end_historic_samples =
+        create_control_message(END_HISTORIC_SAMPLES, header, data, timestamp);
+
+      guard.release();
+      if (send_w_control(list, header, end_historic_samples, remote_id)
+          == SEND_CONTROL_ERROR) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+                             ACE_TEXT("DataWriterImpl::association_complete_i: ")
+                             ACE_TEXT("send_w_control failed.\n")));
+      }
     }
   }
 }
@@ -2865,43 +2884,6 @@ DataWriterImpl::need_sequence_repair_i() const
   }
 
   return false;
-}
-
-DDS::ReturnCode_t
-DataWriterImpl::send_end_historic_samples(const RepoId& readerId)
-{
-  if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) Sending end of historic samples\n"));
-  }
-
-  size_t size = 0, padding = 0;
-  gen_find_size(readerId, size, padding);
-  ACE_Message_Block* data = new ACE_Message_Block(size,
-                                                  ACE_Message_Block::MB_DATA,
-                                                  0, //cont
-                                                  0, //data
-                                                  0, //alloc_strategy
-                                                  get_db_lock());
-  Serializer ser(data);
-  ser << readerId;
-
-  DDS::Time_t source_timestamp = time_value_to_time(ACE_OS::gettimeofday());
-  DataSampleHeader header;
-  ACE_Message_Block* end_historic_samples =
-    this->create_control_message(END_HISTORIC_SAMPLES,
-                                 header,
-                                 data,
-                                 source_timestamp);
-
-  if (send_control_to(header, end_historic_samples, readerId) == SEND_CONTROL_ERROR) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DataWriterImpl::send_end_historic_samples: ")
-                      ACE_TEXT("send_control_to failed.\n")),
-                     DDS::RETCODE_ERROR);
-  }
-
-  return DDS::RETCODE_OK;
 }
 
 SendControlStatus

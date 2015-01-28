@@ -304,9 +304,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       const PublicationId& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info = new WriterInfo(this, writer_id,
-                                                 writer.writerQos,
-                                                 qos_);
+      RcHandle<WriterInfo> info = new WriterInfo(this, writer_id, writer.writerQos);
       /*std::pair<WriterMapType::iterator, bool> bpair =*/
       this->writers_.insert(
         // This insertion is idempotent.

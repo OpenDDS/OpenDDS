@@ -323,10 +323,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const PublicationId& writer_id = writer.writerId;
-    RcHandle<WriterInfo> info = new WriterInfo(this,
-        writer_id,
-        writer.writerQos,
-        this->qos_);
+    RcHandle<WriterInfo> info = new WriterInfo(this, writer_id, writer.writerQos);
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -1409,6 +1406,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
   case INSTANCE_REGISTRATION: {
+    if (!check_historic(sample)) break;
+
     DataSampleHeader const & header = sample.header_;
 
     this->writer_activity(header);
@@ -1662,6 +1661,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   break;
 
   case DISPOSE_INSTANCE: {
+    if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
@@ -1690,6 +1690,7 @@ this->watchdog_->cancel_timer(instance);
   break;
 
   case UNREGISTER_INSTANCE: {
+    if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
@@ -1718,6 +1719,7 @@ this->watchdog_->cancel_timer(instance);
   break;
 
   case DISPOSE_UNREGISTER_INSTANCE: {
+    if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
@@ -1737,7 +1739,7 @@ this->watchdog_->cancel_timer(instance);
                       && (instance != 0 )
                       && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
-this->watchdog_->cancel_timer(instance);
+        this->watchdog_->cancel_timer(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
@@ -1761,7 +1763,7 @@ this->watchdog_->cancel_timer(instance);
       ACE_DEBUG((LM_INFO, "(%P|%t) Received END_HISTORIC_SAMPLES control message\n"));
     }
     // Going to acquire writers lock, release samples lock
-    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+    guard.release();
     this->resume_sample_processing(sample.header_.publication_id_);
     if (DCPS_debug_level > 4) {
       GuidConverter pub_id(sample.header_.publication_id_);
@@ -2801,20 +2803,6 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
     }
   }
 
-
-  // Ignore this sample if it is NOT a historic sample, and we are
-  // waiting for historic sample from this writer
-  if (!header.historic_sample_) {
-    ACE_READ_GUARD_RETURN(
-        ACE_RW_Thread_Mutex, read_guard, this->writers_lock_, false);
-
-    WriterMapType::iterator where = writers_.find(header.publication_id_);
-    if (writers_.end() != where) {
-      // Filter this sample if we are waiting for end historic samples
-      return where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING;
-    }
-  }
-
   return false;
 }
 
@@ -3351,13 +3339,51 @@ DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)
 void
 DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
 {
+  std::map<SequenceNumber, ReceivedDataSample> to_deliver;
   ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
   WriterMapType::iterator where = writers_.find(pub_id);
   if (writers_.end() != where) {
+    WriterInfo& info = *where->second;
     // Stop filtering these
-    if (where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
+    if (info.waiting_for_end_historic_samples_) {
       end_historic_sweeper_.cancel_timer(where->second);
+      if (!info.historic_samples_.empty()) {
+        info.last_historic_seq_ = info.historic_samples_.rbegin()->first;
+      }
+      to_deliver.swap(info.historic_samples_);
+      write_guard.release();
+      deliver_historic(to_deliver);
     }
+  }
+}
+
+bool DataReaderImpl::check_historic(const ReceivedDataSample& sample)
+{
+  ACE_WRITE_GUARD_RETURN(ACE_RW_Thread_Mutex, write_guard, writers_lock_, true);
+  WriterMapType::iterator iter = writers_.find(sample.header_.publication_id_);
+  if (iter != writers_.end()) {
+    const SequenceNumber& seq = sample.header_.sequence_;
+    if (iter->second->waiting_for_end_historic_samples_) {
+      iter->second->historic_samples_.insert(std::make_pair(seq, sample));
+      return false;
+    }
+    if (iter->second->last_historic_seq_ != SequenceNumber::SEQUENCENUMBER_UNKNOWN()
+        && !sample.header_.historic_sample_
+        && seq <= iter->second->last_historic_seq_) {
+      // this sample must have been seen before the END_HISTORIC_SAMPLES control msg
+      return false;
+    }
+  }
+  return true;
+}
+
+void DataReaderImpl::deliver_historic(std::map<SequenceNumber, ReceivedDataSample>& samples)
+{
+  typedef std::map<SequenceNumber, ReceivedDataSample>::iterator iter_t;
+  const iter_t end = samples.end();
+  for (iter_t iter = samples.begin(); iter != end; ++iter) {
+    iter->second.header_.historic_sample_ = true;
+    data_received(iter->second);
   }
 }
 
@@ -3368,7 +3394,6 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   TransportImpl_rch impl = link->impl();
   std::string type = impl->transport_type();
 
-  // If this is a multicast link
   if (type == "rtps_udp" || type == "multicast") {
     resume_sample_processing(peer);
   }
@@ -3386,12 +3411,14 @@ EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
 
 void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
+  info->waiting_for_end_historic_samples_ = true;
   ScheduleCommand c(this, info);
   execute_or_enqueue(c);
 }
 
 void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
+  info->waiting_for_end_historic_samples_ = false;
   CancelCommand c(this, info);
   execute_or_enqueue(c);
 }
@@ -3432,13 +3459,13 @@ void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute()
 
 void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
 {
-  if (info_->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
+  if (info_->historic_samples_timer_ != WriterInfo::NO_TIMER) {
     sweeper_->reactor()->cancel_timer(info_->historic_samples_timer_);
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->historic_samples_timer_));
     }
   }
-  info_->historic_samples_timer_ = WriterInfo::NOT_WAITING;
+  info_->historic_samples_timer_ = WriterInfo::NO_TIMER;
   info_->_remove_ref();
 }
 
