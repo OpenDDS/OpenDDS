@@ -1,3 +1,10 @@
+Wed Jan 28 15:35:59 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Add checks and handling for interceptors which are passed
+          null reactors.
+
 Wed Jan 28 15:08:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/transport/rtps/publisher.cpp:

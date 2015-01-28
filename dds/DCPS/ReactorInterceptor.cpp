@@ -29,7 +29,8 @@ ReactorInterceptor::~ReactorInterceptor()
   ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
 
   // Cancel all pending notifications and dump the command queue.
-  this->reactor()->purge_pending_notifications(this);
+  if (this->reactor() != 0)
+    this->reactor()->purge_pending_notifications(this);
   while (!command_queue_.empty ()) {
     delete command_queue_.front ();
     command_queue_.pop ();
@@ -38,7 +39,8 @@ ReactorInterceptor::~ReactorInterceptor()
 
 bool ReactorInterceptor::should_execute_immediately()
 {
-  return owner_ == ACE_Thread::self() ||
+  return this->reactor() == 0 ||
+         owner_ == ACE_Thread::self() ||
          (TheServiceParticipant->reactor() == this->reactor() &&
           TheServiceParticipant->is_shut_down());
 }
