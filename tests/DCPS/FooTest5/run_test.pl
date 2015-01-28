@@ -130,13 +130,15 @@ my $DCPSREPO = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
                                        "-o $dcpsrepo_ior");
 print $DCPSREPO->CommandLine(), "\n";
 
-my $sub_parameters = "-DCPSConfigFile all.ini -u $use_udp -c $use_multicast"
+my $sub_parameters = "-DCPSConfigFile all.ini"
+    . " -DCPSPendingTimeout 1 "
+    . " -u $use_udp -c $use_multicast"
     . " -p $use_rtps_transport -s $use_shmem -r $num_readers -t $use_take"
     . " -m $num_instances_per_writer -i $num_samples_per_instance"
     . " -w $num_writers -z $sequence_length"
     . " -k $no_key -y $read_interval_ms -f $mixed_trans";
 
-my $pub_parameters = "-DCPSConfigFile all.ini "
+my $pub_parameters = "-DCPSConfigFile all.ini"
     . " -DCPSPendingTimeout 1 "
     . " -u $use_udp -c $use_multicast "
     . " -p $use_rtps_transport -s $use_shmem -w $num_writers "
