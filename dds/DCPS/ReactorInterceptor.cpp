@@ -9,6 +9,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ReactorInterceptor.h"
 
+#include "ace/Log_Msg.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
