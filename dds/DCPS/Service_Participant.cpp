@@ -207,6 +207,7 @@ Service_Participant::ReactorTask::svc()
   Service_Participant* sp = instance();
   sp->reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
   sp->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
+  this->wait_for_startup();
   sp->reactor_->run_reactor_event_loop();
   return 0;
 }
@@ -377,6 +378,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
                    ACE_TEXT("Failed to activate the reactor task.")));
         return DDS::DomainParticipantFactory::_nil();
       }
+
+      reactor_task_.wait_for_startup();
 
       this->monitor_factory_ =
         ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");

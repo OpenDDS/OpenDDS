@@ -415,7 +415,13 @@ private:
   ACE_Reactor* reactor_; //TODO: integrate with threadpool
   ACE_thread_t reactor_owner_;
   struct ReactorTask : ACE_Task_Base {
+    ReactorTask()
+      : barrier_(2)
+    { }
     int svc();
+    void wait_for_startup() { barrier_.wait(); }
+  private:
+    ACE_Barrier barrier_;
   } reactor_task_;
 
   DomainParticipantFactoryImpl* dp_factory_servant_;

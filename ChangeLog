@@ -1,3 +1,12 @@
+Thu Jan 29 21:25:05 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Added barrier synchronization so reactor thread owner is known.
+
 Thu Jan 29 19:28:20 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

@@ -20,8 +20,9 @@
 #include <ace/WIN32_Proactor.h>
 
 OpenDDS::DCPS::TransportReactorTask::TransportReactorTask(bool useAsyncSend)
-  : state_(STATE_NOT_RUNNING),
-    condition_(this->lock_)
+  : barrier_(2)
+  , state_(STATE_NOT_RUNNING)
+  , condition_(this->lock_)
 {
   DBG_ENTRY_LVL("TransportReactorTask","TransportReactorTask",6);
 
@@ -82,6 +83,8 @@ OpenDDS::DCPS::TransportReactorTask::open(void*)
                      -1);
   }
 
+  this->wait_for_startup();
+
   // Here we need to wait until a condition is triggered by the new thread(s)
   // that we created.  Note that this will cause us to release the lock and
   // wait until the condition_ is signal()'ed.  When it is signaled, the
@@ -120,6 +123,8 @@ OpenDDS::DCPS::TransportReactorTask::svc()
                "(%P|%t) ERROR: Failed to change the reactor's owner().\n"));
   }
   this->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
+  this->wait_for_startup();
+
 
   {
     // Obtain the lock.  This should only happen once the open() has hit
