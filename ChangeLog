@@ -1,3 +1,15 @@
+Thu Jan 29 19:28:20 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          In wait_for_acknowledgments():
+          Avoid reading readers_ without holding the mutex.
+          Reverted r6865 Mon Jan 26 15:16:28 UTC 2015  Justin Wilson
+          which checked for reliablity QoS to be reliable.
+          That change is correct but tests are incorrectly depending
+          on it not checking.  We'll hold off on this change until the
+          upcoming major changes to wait_for_acknowledgments().
+
 Thu Jan 29 16:16:38 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/ReactorInterceptor.cpp:

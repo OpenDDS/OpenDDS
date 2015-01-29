@@ -952,11 +952,6 @@ DataWriterImpl::get_topic()
 bool
 DataWriterImpl::should_ack() const
 {
-  if (qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS) {
-    // DDS 1.2 Section 7.1.2.4.2.15 wait_for_acknowledgments
-    return false;
-  }
-
   // N.B. It may be worthwhile to investigate a more efficient
   // heuristic for determining if a writer should send SAMPLE_ACK
   // control samples. Perhaps based on a sequence number delta?
@@ -1285,6 +1280,7 @@ DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
   if (!should_ack()) {
     if (DCPS_debug_level > 0) {
       GuidConverter converter(this->publication_id_);
@@ -1296,6 +1292,7 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 
     return DDS::RETCODE_OK;
   }
+  guard.release(); // only needed for should_ack(), other methods do locking
 
   AckToken token(create_ack_token(max_wait));
 
