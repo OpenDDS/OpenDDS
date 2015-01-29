@@ -1,3 +1,12 @@
+Thu Jan 29 23:22:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Use counter instead of bool for tracking registration of
+          notifications so that delete is done at the proper time.
+          Added some locking to make access to counter safe.
+
 Thu Jan 29 21:25:05 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

@@ -48,7 +48,7 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
     command_queue_.push(new T(t));
     this->reactor()->notify(this);
-    registered_ = true;
+    ++registration_counter_;
   }
 
   void wait();
@@ -62,11 +62,12 @@ protected:
 
 private:
   int handle_exception(ACE_HANDLE /*fd*/);
+  int handle_exception_i(ACE_HANDLE /*fd*/, ACE_Guard<ACE_Thread_Mutex>& guard);
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
   ACE_Condition_Thread_Mutex condition_;
   std::queue<Command*> command_queue_;
-  bool registered_;
+  ACE_UINT64 registration_counter_;
   bool destroy_;
 };
 

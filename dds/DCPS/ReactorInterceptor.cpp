@@ -18,7 +18,7 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
   : owner_(owner)
   , condition_(mutex_)
-  , registered_(false)
+  , registration_counter_(0)
   , destroy_(false)
 {
   if (reactor == 0) {
@@ -46,21 +46,22 @@ bool ReactorInterceptor::should_execute_immediately()
 
 void ReactorInterceptor::wait()
 {
+  ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
+
   if (should_execute_immediately()) {
-    handle_exception(ACE_INVALID_HANDLE);
+    ++registration_counter_;
+    handle_exception_i(ACE_INVALID_HANDLE, guard);
   } else {
-    mutex_.acquire();
     while (!command_queue_.empty()) {
       condition_.wait();
     }
-    mutex_.release();
   }
 }
 
 void ReactorInterceptor::destroy()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
-  if (registered_ && !reactor_is_shut_down()) {
+  if (!reactor_is_shut_down() && registration_counter_ > 0) {
     // Wait until we get handle exception.
     destroy_ = true;
   } else {
@@ -73,9 +74,14 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
 
-  registered_ = false;
+  return handle_exception_i(ACE_INVALID_HANDLE, guard);
+}
 
-  if (destroy_) {
+int ReactorInterceptor::handle_exception_i(ACE_HANDLE /*fd*/, ACE_Guard<ACE_Thread_Mutex>& guard)
+{
+  --registration_counter_;
+
+  if (registration_counter_ == 0 && destroy_) {
     guard.release();
     delete this;
     return 0;
