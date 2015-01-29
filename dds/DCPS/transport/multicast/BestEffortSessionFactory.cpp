@@ -19,11 +19,13 @@ BestEffortSessionFactory::requires_send_buffer() const
 }
 
 MulticastSession*
-BestEffortSessionFactory::create(MulticastDataLink* link,
+BestEffortSessionFactory::create(ACE_Reactor* reactor,
+                                 ACE_thread_t owner,
+                                 MulticastDataLink* link,
                                  MulticastPeer remote_peer)
 {
   BestEffortSession* session;
-  ACE_NEW_RETURN(session, BestEffortSession(link, remote_peer), 0);
+  ACE_NEW_RETURN(session, BestEffortSession(reactor, owner, link, remote_peer), 0);
   return session;
 }
 

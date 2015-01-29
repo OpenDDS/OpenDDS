@@ -8,7 +8,6 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ReactorInterceptor.h"
-#include "Service_Participant.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -17,6 +16,8 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
   : owner_(owner)
   , condition_(mutex_)
+  , registered_(false)
+  , destroy_(false)
 {
   if (reactor == 0) {
     ACE_DEBUG((LM_ERROR, "(%P|%t) ERROR: ReactorInterceptor initialized with null reactor\n"));
@@ -28,9 +29,7 @@ ReactorInterceptor::~ReactorInterceptor()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
 
-  // Cancel all pending notifications and dump the command queue.
-  if (this->reactor() != 0)
-    this->reactor()->purge_pending_notifications(this);
+  // Dump the command queue.
   while (!command_queue_.empty ()) {
     delete command_queue_.front ();
     command_queue_.pop ();
@@ -39,10 +38,8 @@ ReactorInterceptor::~ReactorInterceptor()
 
 bool ReactorInterceptor::should_execute_immediately()
 {
-  return this->reactor() == 0 ||
-         owner_ == ACE_Thread::self() ||
-         (TheServiceParticipant->reactor() == this->reactor() &&
-          TheServiceParticipant->is_shut_down());
+  return owner_ == ACE_Thread::self() ||
+    reactor_is_shut_down();
 }
 
 void ReactorInterceptor::wait()
@@ -58,9 +55,29 @@ void ReactorInterceptor::wait()
   }
 }
 
+void ReactorInterceptor::destroy()
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
+  if (registered_ && !reactor_is_shut_down()) {
+    // Wait until we get handle exception.
+    destroy_ = true;
+  } else {
+    guard.release();
+    delete this;
+  }
+}
+
 int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
+
+  registered_ = false;
+
+  if (destroy_) {
+    guard.release();
+    delete this;
+    return 0;
+  }
 
   while (!command_queue_.empty()) {
     Command* command = command_queue_.front();

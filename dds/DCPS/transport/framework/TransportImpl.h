@@ -78,6 +78,10 @@ public:
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;
 
+  ACE_Reactor* reactor() const;
+  ACE_thread_t reactor_owner() const;
+  bool is_shut_down() const;
+
   /// Create the reactor task using sync send or optionally async send
   /// by parameter on supported Windows platforms only.
   void create_reactor_task(bool useAsyncSend = false);
@@ -250,6 +254,7 @@ public:
 protected:
   /// Id of the last link established.
   std::size_t last_link_;
+  bool is_shut_down_;
 };
 
 } // namespace DCPS

@@ -19,11 +19,13 @@ ReliableSessionFactory::requires_send_buffer() const
 }
 
 MulticastSession*
-ReliableSessionFactory::create(MulticastDataLink* link,
+ReliableSessionFactory::create(ACE_Reactor* reactor,
+                               ACE_thread_t owner,
+                               MulticastDataLink* link,
                                MulticastPeer remote_peer)
 {
   ReliableSession* session;
-  ACE_NEW_RETURN(session, ReliableSession(link, remote_peer), 0);
+  ACE_NEW_RETURN(session, ReliableSession(reactor, owner, link, remote_peer), 0);
   return session;
 }
 

@@ -32,8 +32,20 @@ OpenDDS::DCPS::TransportImpl::reactor_task()
 ACE_INLINE ACE_Reactor_Timer_Interface*
 OpenDDS::DCPS::TransportImpl::timer() const
 {
+  return reactor();
+}
+
+ACE_Reactor*
+OpenDDS::DCPS::TransportImpl::reactor() const
+{
   TransportReactorTask_rch task = this->reactor_task_;
   return task.is_nil() ? 0 : task->get_reactor();
+}
+
+ACE_thread_t
+OpenDDS::DCPS::TransportImpl::reactor_owner() const
+{
+  return this->reactor_task_->get_reactor_owner();
 }
 
 ACE_INLINE bool

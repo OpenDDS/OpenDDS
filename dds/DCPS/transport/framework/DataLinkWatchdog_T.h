@@ -17,49 +17,29 @@
 #include "ace/Time_Value.h"
 #include "ace/OS_NS_time.h"
 #include "ace/Reverse_Lock_T.h"
-#include <queue>
+#include "dds/DCPS/ReactorInterceptor.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-template<typename ACE_LOCK>
-class DataLinkWatchdog : public ACE_Event_Handler {
+class DataLinkWatchdog : public ReactorInterceptor {
 public:
-  typedef DataLinkWatchdog<ACE_LOCK> ThisType;
 
-  virtual ~DataLinkWatchdog() {
-    ACE_GUARD(ACE_LOCK, guard, this->lock_);
-    if(this->reactor_) {
-      this->reactor_->purge_pending_notifications(this);
-    }
-    dump_command_queue();
-    cancel_i();
-  }
-
-  bool schedule(ACE_Reactor* reactor, const void* arg = 0) {
-    ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, false);
-    command_queue_.push(new ScheduleCommand(reactor, arg, false));
-    reactor->notify(this);
+  bool schedule(const void* arg = 0) {
+    ScheduleCommand c(this, arg, false);
+    execute_or_enqueue(c);
     return true;
   }
 
-  bool schedule_now(ACE_Reactor* reactor, const void* arg = 0) {
-    ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, false);
-    command_queue_.push(new ScheduleCommand (reactor, arg, true));
-    reactor->notify(this);
+  bool schedule_now(const void* arg = 0) {
+    ScheduleCommand c(this, arg, true);
+    execute_or_enqueue(c);
     return true;
   }
 
   void cancel() {
-    ACE_GUARD(ACE_LOCK, guard, this->lock_);
-    if (reactor_) {
-      dump_command_queue();
-      command_queue_.push(new CancelCommand ());
-      reactor_->notify(this);
-    }
-    else {
-      cancel_i();
-    }
+    CancelCommand c(this);
+    execute_or_enqueue(c);
   }
 
   int handle_timeout(const ACE_Time_Value& now, const void* arg) {
@@ -70,7 +50,6 @@ public:
       if (now > timeout) {
         on_timeout(arg);
         {
-          ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, 0);
           cancel_i();
         }
         return 0;
@@ -80,8 +59,7 @@ public:
     on_interval(arg);
 
     {
-      ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, 0);
-      if (!schedule_i(reactor(), arg, false)) {
+      if (!schedule_i(arg, false)) {
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("DataLinkWatchdog::handle_timeout: ")
@@ -92,25 +70,16 @@ public:
     return 0;
   }
 
-  int handle_exception(ACE_HANDLE /*fd*/) {
-    ACE_GUARD_RETURN(ACE_LOCK, guard, this->lock_, 0);
-
-    while (!command_queue_.empty()) {
-      Command* command = command_queue_.front();
-      command_queue_.pop();
-      command->execute(this);
-      delete command;
-    }
-    return 0;
-  }
-
 protected:
-  DataLinkWatchdog()
-    : reverse_lock_(lock_),
-      reactor_(0),
-      timer_id_(-1),
-      cancelled_(false)
+  DataLinkWatchdog(ACE_Reactor* reactor,
+                   ACE_thread_t owner)
+    : ReactorInterceptor(reactor, owner)
+    , timer_id_(-1)
+    , cancelled_(false)
   {}
+
+  virtual ~DataLinkWatchdog() {
+  }
 
   virtual ACE_Time_Value next_interval() = 0;
   virtual void on_interval(const void* arg) = 0;
@@ -119,50 +88,49 @@ protected:
   virtual void on_timeout(const void* /*arg*/) {}
 
 private:
-  class Command {
+  class CommandBase : public Command {
   public:
-    virtual ~Command() { }
-    virtual void execute(ThisType* watchdog) = 0;
+    CommandBase(DataLinkWatchdog* watchdog)
+      : watchdog_(watchdog)
+    { }
+  protected:
+    DataLinkWatchdog* watchdog_;
   };
 
-  class ScheduleCommand : public Command {
+  class ScheduleCommand : public CommandBase {
   public:
-    ScheduleCommand (ACE_Reactor* reactor, const void* arg, bool nodelay) :
-    reactor_ (reactor),
-      arg_ (arg),
-      nodelay_ (nodelay)
-      { }
+    ScheduleCommand (DataLinkWatchdog* watchdog, const void* arg, bool nodelay)
+      : CommandBase(watchdog)
+      , arg_ (arg)
+      , nodelay_ (nodelay)
+    { }
 
-    virtual void execute(ThisType* watchdog) {
-      watchdog->schedule_i(reactor_, arg_, nodelay_);
+    virtual void execute() {
+      watchdog_->schedule_i(arg_, nodelay_);
     }
 
   private:
-    ACE_Reactor* reactor_;
     const void* arg_;
     bool nodelay_;
   };
 
-  class CancelCommand : public Command {
+  class CancelCommand : public CommandBase {
   public:
-    virtual void execute(ThisType* watchdog) {
-      watchdog->cancel_i();
+    CancelCommand(DataLinkWatchdog* watchdog)
+      : CommandBase(watchdog)
+    { }
+
+    virtual void execute() {
+      watchdog_->cancel_i();
     }
   };
 
-  ACE_LOCK lock_;
-  typedef ACE_Reverse_Lock<ACE_LOCK> Reverse_Lock_t;
-  Reverse_Lock_t reverse_lock_;
-
-  ACE_Reactor* reactor_;
   long timer_id_;
 
   ACE_Time_Value epoch_;
   bool cancelled_;
 
-  std::queue<Command*> command_queue_;
-
-  bool schedule_i(ACE_Reactor* reactor, const void* arg, bool nodelay) {
+  bool schedule_i(const void* arg, bool nodelay) {
     if (this->cancelled_) return true;
 
     ACE_Time_Value delay;
@@ -174,10 +142,9 @@ private:
 
     long timer_id = -1;
     {
-      ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
-      timer_id = reactor->schedule_timer(this,  // event_handler
-                                         arg,
-                                         delay);
+      timer_id = reactor()->schedule_timer(this,  // event_handler
+                                           arg,
+                                           delay);
 
       if (timer_id == -1) {
         ACE_ERROR_RETURN ((LM_ERROR,
@@ -190,12 +157,11 @@ private:
 
     //after re-acquiring lock_ need to check cancelled_
     if (this->cancelled_) {
-      reactor->cancel_timer(timer_id);
+      reactor()->cancel_timer(timer_id);
       return true;
     }
     else {
       this->timer_id_ = timer_id;
-      this->reactor_ = reactor;
     }
 
     return this->timer_id_ != -1;
@@ -204,22 +170,9 @@ private:
   void cancel_i() {
     if (this->timer_id_ == -1) return;
 
-    ACE_Reactor* reactor = this->reactor_;
     this->timer_id_ = -1;
-    this->reactor_ = 0;
     this->cancelled_ = true;
-
-    {
-      ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_lock_);
-      reactor->cancel_timer(this);
-    }
-  }
-
-  void dump_command_queue() {
-    while (!command_queue_.empty ()) {
-      delete command_queue_.front ();
-      command_queue_.pop ();
-    }
+    reactor()->cancel_timer(this);
   }
 };
 

@@ -23,6 +23,13 @@ OpenDDS::DCPS::TransportReactorTask::get_reactor() const
   return this->reactor_;
 }
 
+ACE_INLINE ACE_thread_t
+OpenDDS::DCPS::TransportReactorTask::get_reactor_owner() const
+{
+  DBG_ENTRY_LVL("TransportReactorTask","get_reactor",6);
+  return this->reactor_owner_;
+}
+
 ACE_INLINE ACE_Proactor*
 OpenDDS::DCPS::TransportReactorTask::get_proactor()
 {

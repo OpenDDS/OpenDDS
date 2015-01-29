@@ -11,9 +11,11 @@
 namespace OpenDDS {
 namespace DCPS {
 
-BestEffortSession::BestEffortSession(MulticastDataLink* link,
+BestEffortSession::BestEffortSession(ACE_Reactor* reactor,
+                                     ACE_thread_t owner,
+                                     MulticastDataLink* link,
                                      MulticastPeer remote_peer)
-  : MulticastSession(link, remote_peer)
+  : MulticastSession(reactor, owner, link, remote_peer)
   , expected_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
 }
@@ -51,18 +53,9 @@ BestEffortSession::start(bool active, bool /*acked*/)
 
   if (this->started_) return true;  // already started
 
-  ACE_Reactor* reactor = this->link_->get_reactor();
-  if (reactor == 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("BestEffortSession::start: ")
-                      ACE_TEXT("NULL reactor reference!\n")),
-                     false);
-  }
-
   this->active_ = active;
 
-  if (active && !this->start_syn(reactor)) {
+  if (active && !this->start_syn()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("BestEffortSession::start: ")

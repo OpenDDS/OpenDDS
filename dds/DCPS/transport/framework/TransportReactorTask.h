@@ -38,6 +38,8 @@ public:
   ACE_Reactor* get_reactor();
   const ACE_Reactor* get_reactor() const;
 
+  ACE_thread_t get_reactor_owner() const;
+
   ACE_Proactor* get_proactor();
   const ACE_Proactor* get_proactor() const;
 
@@ -53,6 +55,7 @@ private:
   State         state_;
   ConditionType condition_;
   ACE_Reactor*  reactor_;
+  ACE_thread_t  reactor_owner_;
   ACE_Proactor* proactor_;
 };
 

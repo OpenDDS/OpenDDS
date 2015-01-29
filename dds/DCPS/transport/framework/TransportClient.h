@@ -16,6 +16,7 @@
 
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Time_Value.h"
 #include "ace/Event_Handler.h"
@@ -184,7 +185,15 @@ private:
       enqueue(c);
     }
 
+    virtual bool reactor_is_shut_down() const
+    {
+      return TheServiceParticipant->is_shut_down();
+    }
+
   private:
+    ~PendingAssocTimer()
+    { }
+
     class CommandBase : public Command {
     public:
       CommandBase(PendingAssocTimer* timer,
@@ -235,7 +244,7 @@ private:
       }
     };
   };
-  PendingAssocTimer pending_assoc_timer_;
+  PendingAssocTimer* pending_assoc_timer_;
 
   // Associated Impls and DataLinks:
 

@@ -31,7 +31,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : pending_assoc_timer_(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  : pending_assoc_timer_(new PendingAssocTimer (TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()))
   , expected_transaction_id_(1)
   , max_transaction_id_seen_(0)
   , max_transaction_tail_(0)
@@ -86,10 +86,11 @@ TransportClient::~TransportClient()
       impls_[i]->stop_accepting_or_connecting(this, it->second->data_.remote_id_);
     }
 
-    pending_assoc_timer_.cancel_timer(this, it->second);
+    pending_assoc_timer_->cancel_timer(this, it->second);
   }
 
-  pending_assoc_timer_.wait();
+  pending_assoc_timer_->wait();
+  pending_assoc_timer_->destroy();
 
   for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
@@ -342,7 +343,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       //pend.impls_.push_back(impls_[i]);
     }
 
-    pending_assoc_timer_.schedule_timer(this, iter->second);
+    pending_assoc_timer_->schedule_timer(this, iter->second);
   }
 
   return true;
@@ -520,8 +521,8 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 
   guard.release();
 
-  pending_assoc_timer_.cancel_timer(this, pend);
-  pending_assoc_timer_.delete_pending_assoc(pend);
+  pending_assoc_timer_->cancel_timer(this, pend);
+  pending_assoc_timer_->delete_pending_assoc(pend);
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
 }

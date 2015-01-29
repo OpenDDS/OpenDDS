@@ -13,11 +13,12 @@
 #include "ace/Reactor.h"
 #include "ace/Thread.h"
 #include "ace/Condition_Thread_Mutex.h"
+#include "dcps_export.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
-class ReactorInterceptor : public ACE_Event_Handler {
+class OpenDDS_Dcps_Export ReactorInterceptor : public ACE_Event_Handler {
 public:
 
   class Command {
@@ -28,7 +29,6 @@ public:
 
   ReactorInterceptor(ACE_Reactor* reactor,
                      ACE_thread_t owner);
-  ~ReactorInterceptor();
 
   bool should_execute_immediately();
 
@@ -48,9 +48,17 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
     command_queue_.push(new T(t));
     this->reactor()->notify(this);
+    registered_ = true;
   }
 
   void wait();
+
+  void destroy();
+
+  virtual bool reactor_is_shut_down() const = 0;
+
+protected:
+  virtual ~ReactorInterceptor();
 
 private:
   int handle_exception(ACE_HANDLE /*fd*/);
@@ -58,6 +66,8 @@ private:
   ACE_Thread_Mutex mutex_;
   ACE_Condition_Thread_Mutex condition_;
   std::queue<Command*> command_queue_;
+  bool registered_;
+  bool destroy_;
 };
 
 } // namespace DCPS

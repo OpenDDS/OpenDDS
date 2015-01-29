@@ -32,9 +32,13 @@ namespace DCPS {
 class MulticastSession;
 
 class OpenDDS_Multicast_Export SynWatchdog
-  : public DataLinkWatchdog<ACE_SYNCH_MUTEX> {
+  : public DataLinkWatchdog {
 public:
-  explicit SynWatchdog(MulticastSession* session);
+  explicit SynWatchdog(ACE_Reactor* reactor,
+                       ACE_thread_t owner,
+                       MulticastSession* session);
+
+  virtual bool reactor_is_shut_down() const;
 
 protected:
   virtual ACE_Time_Value next_interval();
@@ -44,6 +48,7 @@ protected:
   virtual void on_timeout(const void* arg);
 
 private:
+  ~SynWatchdog() { }
   MulticastSession* session_;
   size_t retries_;
 };
@@ -81,13 +86,15 @@ protected:
 
   MulticastPeer remote_peer_;
 
-  MulticastSession(MulticastDataLink* link,
+  MulticastSession(ACE_Reactor* reactor,
+                   ACE_thread_t owner,
+                   MulticastDataLink* link,
                    MulticastPeer remote_peer);
 
   void send_control(char submessage_id,
                     ACE_Message_Block* data);
 
-  bool start_syn(ACE_Reactor* reactor);
+  bool start_syn();
 
   virtual void syn_hook(const SequenceNumber& /*seq*/) {}
 
@@ -111,7 +118,7 @@ protected:
 
 private:
   ACE_Thread_Mutex ack_lock_;
-  SynWatchdog syn_watchdog_;
+  SynWatchdog* syn_watchdog_;
 };
 
 } // namespace DCPS

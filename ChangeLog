@@ -1,3 +1,41 @@
+Thu Jan 29 15:24:14 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          ACE_Reactor::purge_pending_notifications does not work in the
+          general case.  Consequently, derived classes must be dynamically
+          allocated.  Added a destroy method to destroy asynchronously.
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSessionFactory.h:
+        * dds/DCPS/transport/multicast/BestEffortSessionFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSessionFactory.h:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSessionFactory.h:
+        * dds/DCPS/transport/multicast/ReliableSessionFactory.cpp:
+
+          Converted DataLinkWatchdog_T to ReactorInterceptor.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.inl:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Added calls to destroy ReactorInterceptors.
+
 Wed Jan 28 22:11:10 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/FooTest5/run_test.pl:

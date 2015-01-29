@@ -65,11 +65,11 @@ DataReaderImpl::DataReaderImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     subscriber_servant_(0),
-  end_historic_sweeper_(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this),
+    end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
-    liveliness_timer_(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this),
+    liveliness_timer_(new LivelinessTimer(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
@@ -137,14 +137,16 @@ DataReaderImpl::~DataReaderImpl()
     // Cancel any uncancelled sweeper timers to decrement reference count.
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      end_historic_sweeper_.cancel_timer(writer->second);
+      end_historic_sweeper_->cancel_timer(writer->second);
     }
   }
 
-  end_historic_sweeper_.wait();
+  end_historic_sweeper_->wait();
+  end_historic_sweeper_->destroy();
 
-  liveliness_timer_.cancel_timer();
-  liveliness_timer_.wait();
+  liveliness_timer_->cancel_timer();
+  liveliness_timer_->wait();
+  liveliness_timer_->destroy();
 
   if (initialized_) {
     delete rd_allocator_;
@@ -161,9 +163,9 @@ DataReaderImpl::cleanup()
         guard,
         this->sample_lock_);
 
-    liveliness_timer_.cancel_timer();
+    liveliness_timer_->cancel_timer();
   }
-  liveliness_timer_.wait();
+  liveliness_timer_->wait();
 
   // Cancel any watchdog timers
   { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
@@ -207,11 +209,11 @@ DataReaderImpl::cleanup()
     // Cancel any uncancelled sweeper timers
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      end_historic_sweeper_.cancel_timer(writer->second);
+      end_historic_sweeper_->cancel_timer(writer->second);
     }
   }
 
-  end_historic_sweeper_.wait();
+  end_historic_sweeper_->wait();
 }
 
 void DataReaderImpl::init(
@@ -333,7 +335,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       // Schedule timer if necessary
       //   - only need to check reader qos - we know the writer must be >= reader
       if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-        end_historic_sweeper_.schedule_timer(info);
+        end_historic_sweeper_->schedule_timer(info);
       }
 
       this->statistics_.insert(
@@ -449,7 +451,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
             std::string(converter).c_str()));
       }
       // this call will start the timer if it is not already set
-      liveliness_timer_.check_liveliness();
+      liveliness_timer_->check_liveliness();
     }
   }
   // We no longer hold the publication_handle_lock_.
@@ -2338,7 +2340,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
   }
 
   // this call will start the liveliness timer if it is not already set
-  liveliness_timer_.check_liveliness();
+  liveliness_timer_->check_liveliness();
 }
 
 void
@@ -3346,7 +3348,7 @@ DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
     WriterInfo& info = *where->second;
     // Stop filtering these
     if (info.waiting_for_end_historic_samples_) {
-      end_historic_sweeper_.cancel_timer(where->second);
+      end_historic_sweeper_->cancel_timer(where->second);
       if (!info.historic_samples_.empty()) {
         info.last_historic_seq_ = info.historic_samples_.rbegin()->first;
       }

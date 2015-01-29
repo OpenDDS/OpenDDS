@@ -36,6 +36,7 @@
 #include "RcObject_T.h"
 #include "WriterInfo.h"
 #include "ReactorInterceptor.h"
+#include "Service_Participant.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -118,16 +119,21 @@ public:
   EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                   ACE_thread_t owner,
                                   DataReaderImpl* reader);
-  ~EndHistoricSamplesMissedSweeper();
 
   void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
   void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
 
-protected:
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
 
+  virtual bool reactor_is_shut_down() const
+  {
+    return TheServiceParticipant->is_shut_down();
+  }
+
 private:
+  ~EndHistoricSamplesMissedSweeper();
+
   DataReaderImpl* reader_;
 
   class CommandBase : public Command {
@@ -672,7 +678,7 @@ private:
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;
-  EndHistoricSamplesMissedSweeper end_historic_sweeper_;
+  EndHistoricSamplesMissedSweeper* end_historic_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
@@ -731,7 +737,14 @@ private:
       execute_or_enqueue(c);
     }
 
+    virtual bool reactor_is_shut_down() const
+    {
+      return TheServiceParticipant->is_shut_down();
+    }
+
   private:
+    ~LivelinessTimer() { }
+
     DataReaderImpl* data_reader_;
     /// liveliness timer id; -1 if no timer is set
     long liveliness_timer_id_;
@@ -774,7 +787,7 @@ private:
       }
     };
   };
-  LivelinessTimer liveliness_timer_;
+  LivelinessTimer* liveliness_timer_;
 
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered

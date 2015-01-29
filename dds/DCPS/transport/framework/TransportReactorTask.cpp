@@ -119,6 +119,7 @@ OpenDDS::DCPS::TransportReactorTask::svc()
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: Failed to change the reactor's owner().\n"));
   }
+  this->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
 
   {
     // Obtain the lock.  This should only happen once the open() has hit
