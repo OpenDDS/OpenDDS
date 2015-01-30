@@ -593,7 +593,9 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
       if (it != this->writers_.end()) {
         it->second->removed();
+        end_historic_sweeper_->cancel_timer(it->second);
       }
+
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 1) {
           GuidConverter converter(writer_id);
@@ -3465,9 +3467,9 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->historic_samples_timer_));
     }
+    info_->historic_samples_timer_ = WriterInfo::NO_TIMER;
+    info_->_remove_ref();
   }
-  info_->historic_samples_timer_ = WriterInfo::NO_TIMER;
-  info_->_remove_ref();
 }
 
 } // namespace DCPS

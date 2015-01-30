@@ -1,3 +1,20 @@
+Fri Jan 30 19:12:42 UTC 2015  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Cancelled the End Historic Sweeper before erasing the writer
+          from the map.  In cancel timer only decrement the reference
+          count on the info if it was actually scheduled previously.
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Fixed reference counting and locking.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          fixed comment.
+
 Fri Jan 30 19:02:26 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.h:

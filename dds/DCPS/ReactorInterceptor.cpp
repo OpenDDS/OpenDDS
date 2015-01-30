@@ -49,7 +49,6 @@ void ReactorInterceptor::wait()
   ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
 
   if (should_execute_immediately()) {
-    ++registration_counter_;
     handle_exception_i(guard);
   } else {
     while (!command_queue_.empty()) {
@@ -74,19 +73,13 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
 
+  --registration_counter_;
+
   return handle_exception_i(guard);
 }
 
 int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
 {
-  --registration_counter_;
-
-  if (registration_counter_ == 0 && destroy_) {
-    guard.release();
-    delete this;
-    return 0;
-  }
-
   while (!command_queue_.empty()) {
     Command* command = command_queue_.front();
     command_queue_.pop();
@@ -96,6 +89,10 @@ int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
 
   condition_.signal();
 
+  if (registration_counter_ == 0 && destroy_) {
+    guard.release();
+    delete this;
+  }
   return 0;
 }
 

@@ -47,8 +47,8 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
     command_queue_.push(new T(t));
-    this->reactor()->notify(this);
     ++registration_counter_;
+    this->reactor()->notify(this);
   }
 
   void wait();

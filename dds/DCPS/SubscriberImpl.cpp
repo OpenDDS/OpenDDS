@@ -326,7 +326,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   }
 
   // Call remove association before unregistering the datareader from the transport,
-  // otherwise some callbacks resulted from remove_association may lost.
+  // otherwise some callbacks resulted from remove_association may be lost.
   dr_servant->remove_all_associations();
   dr_servant->cleanup();
   // Decrease the ref count after the servant is removed
