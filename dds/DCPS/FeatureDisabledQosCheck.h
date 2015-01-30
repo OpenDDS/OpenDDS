@@ -13,11 +13,11 @@
 
 #ifdef  OPENDDS_NO_OWNERSHIP_PROFILE
 #define OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, error_rtn_value) \
-  if (qos.history.kind == ::DDS::KEEP_ALL_HISTORY_QOS || qos.history.depth > 1) { \
+  if (qos.history.depth > 1) { \
     ACE_ERROR((LM_ERROR, \
               ACE_TEXT("(%P|%t) ERROR: ") \
               ACE_TEXT("Feature ownership_profile disabled, ") \
-              ACE_TEXT("therefore history must be KEEP_LAST, depth 1.\n"))); \
+              ACE_TEXT("therefore history depth must be 1. \n"))); \
     return error_rtn_value; \
   }
 #else
