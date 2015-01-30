@@ -270,7 +270,6 @@ public:
     initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy;
   }
 
-  std::auto_ptr<OfferedDeadlineWatchdog> watchdog_;
   WriteDataContainer* delayed_deliver_container_;
   DataSampleElement* element_to_deliver_;
 };
