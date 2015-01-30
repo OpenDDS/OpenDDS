@@ -20,6 +20,7 @@
 #include "Util.h"
 #include "Qos_Helper.h"
 #include "GuidConverter.h"
+#include "OfferedDeadlineWatchdog.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
@@ -80,7 +81,6 @@ WriteDataContainer::WriteDataContainer(
   DataDurabilityCache* durability_cache,
   DDS::DurabilityServiceQosPolicy const & durability_service,
 #endif
-  std::auto_ptr<OfferedDeadlineWatchdog>& watchdog,
   CORBA::Long     max_instances,
   CORBA::Long     max_total_samples)
   : transaction_id_(0),
@@ -104,9 +104,8 @@ WriteDataContainer::WriteDataContainer(
     type_name_(type_name),
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
     durability_cache_(durability_cache),
-    durability_service_(durability_service),
+    durability_service_(durability_service)
 #endif
-    watchdog_(watchdog)
 {
 
   if (DCPS_debug_level >= 2) {
@@ -166,10 +165,10 @@ WriteDataContainer::enqueue(
   // Extract the instance queue.
   InstanceDataSampleList& instance_list = instance->samples_;
 
-  if (this->watchdog_.get()) {
+  if (this->writer_->watchdog_) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_ = ACE_OS::gettimeofday();
-    this->watchdog_->execute((void const *)instance, false);
+    this->writer_->watchdog_->execute(instance, false);
   }
 
   //
@@ -298,8 +297,8 @@ WriteDataContainer::register_instance(
   // The registered_sample is shallow copied.
   registered_sample = instance->registered_sample_->duplicate();
 
-  if (this->watchdog_.get()) {
-    this->watchdog_->schedule_timer(instance);
+  if (this->writer_->watchdog_) {
+    this->writer_->watchdog_->schedule_timer(instance);
   }
 
   safe_instance.release();  // Safe to relinquish ownership.
@@ -337,8 +336,8 @@ WriteDataContainer::unregister(
   // Unregister the instance with typed DataWriter.
   this->writer_->unregistered(instance_handle);
 
-  if (this->watchdog_.get())
-    this->watchdog_->cancel_timer(instance);
+  if (this->writer_->watchdog_)
+    this->writer_->watchdog_->cancel_timer(instance);
 
   return DDS::RETCODE_OK;
 }
@@ -393,8 +392,8 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
     }
   }
 
-  if (this->watchdog_.get())
-    this->watchdog_->cancel_timer(instance);
+  if (this->writer_->watchdog_)
+    this->writer_->watchdog_->cancel_timer(instance);
 
   return DDS::RETCODE_OK;
 }
@@ -1258,7 +1257,7 @@ void WriteDataContainer::reschedule_deadline()
        iter != instances_.end();
        ++iter) {
     if (iter->second->deadline_timer_id_ != -1) {
-      if (this->watchdog_->reset_timer_interval(iter->second->deadline_timer_id_) == -1) {
+      if (this->writer_->watchdog_->reset_timer_interval(iter->second->deadline_timer_id_) == -1) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) WriteDataContainer::reschedule_deadline %p\n")
                    ACE_TEXT("reset_timer_interval")));
       }

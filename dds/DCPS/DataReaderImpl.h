@@ -792,7 +792,7 @@ private:
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  std::auto_ptr<RequestedDeadlineWatchdog> watchdog_;
+  RequestedDeadlineWatchdog* watchdog_;
 
   /// Flag indicates that this datareader is a builtin topic
   /// datareader.

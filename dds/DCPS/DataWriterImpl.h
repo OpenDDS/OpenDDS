@@ -677,7 +677,7 @@ private:
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  std::auto_ptr<OfferedDeadlineWatchdog> watchdog_;
+  OfferedDeadlineWatchdog* watchdog_;
   /// The flag indicates whether the liveliness timer is scheduled and
   /// needs be cancelled.
   bool                       cancel_timer_;

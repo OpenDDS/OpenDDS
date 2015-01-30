@@ -15,14 +15,9 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include "dds/DdsDcpsInfrastructureC.h"
-#include "dds/DCPS/WatchdogTimer.h"
-#include <map>
-#include <vector>
+#include "dds/DCPS/ReactorInterceptor.h"
 
-ACE_BEGIN_VERSIONED_NAMESPACE_DECL
-class ACE_Time_Value;
-ACE_END_VERSIONED_NAMESPACE_DECL
+#include "ace/Time_Value.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -35,27 +30,32 @@ namespace DCPS {
  * class.  However, it is the responsibility of the @c Watchdog
  * owner, for example, to run the @c ACE_Reactor event loop.
  * The @c Watchdog timer will not fire, otherwise.
- *
- * @note This class is by design OpenDDS agnostic so that it may
- *       eventually be used outside of OpenDDS.
  */
+class Watchdog : public ReactorInterceptor {
+protected:
 
-class Watchdog {
-public:
+  explicit Watchdog(const ACE_Time_Value& interval);
 
-  /// Constructor
-  Watchdog(ACE_Reactor_Timer_Interface * reactor,
-           ACE_Time_Value const & interval);
-
-  /// Destructor
   virtual ~Watchdog();
+
+private:
+  int handle_timeout(const ACE_Time_Value&, const void* act)
+  {
+    return execute(act, true), 0;
+  }
 
   /// Operation to be executed when the associated timer expires
   /// or whenever samples are received/sent.
   /// The @c timer_called flag indicates if it's called from
   /// reator handle_timeout() or upon a sample receiving/sending.
-  virtual void execute(void const * act, bool timer_called) = 0;
+  virtual void execute(const void* act, bool timer_called) = 0;
 
+  /// Re-schedule timer with new interval.
+  virtual void reschedule_deadline() = 0;
+
+  bool reactor_is_shut_down() const;
+
+public:
   /// Reset the @c Watchdog timer interval, i.e. time between
   /// recurring timer expirations.
   /**
@@ -63,32 +63,22 @@ public:
    *       expiration.  This behavior is dictated by the
    *       @c ACE_Reactor.
    */
-  void reset_interval(ACE_Time_Value const & interval);
+  void reset_interval(const ACE_Time_Value& interval);
 
-  /// Schedure with the @c Watchdog timer interval, i.e. time between
+  /// Schedule with the @c Watchdog timer interval, i.e. time between
   /// recurring timer expirations.
-  long schedule_timer(void* const act, const ACE_Time_Value& interval);
+  long schedule_timer(const void* act, const ACE_Time_Value& interval);
 
   /// Cancel a specific timer.
-  int cancel_timer(long const & timer_id);
+  int cancel_timer(long timer_id);
 
   /// Cancel all associated timers.
   void cancel_all();
 
-  /// Re-schedule timer with new interval.
-  virtual void reschedule_deadline() = 0;
-
   /// Reset interval for a specific timer.
-  int reset_timer_interval(long const & timer_id);
+  int reset_timer_interval(long timer_id);
 
 protected:
-
-  /// Reactor with which the timer will be registered.
-  ACE_Reactor_Timer_Interface* const reactor_;
-
-  /// Event handler that handles timeout.
-  WatchdogTimer timer_;
-
   /// Current time interval.
   ACE_Time_Value interval_;
 };

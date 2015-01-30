@@ -889,20 +889,20 @@ DataWriterImpl::set_qos(const DDS::DataWriterQos & qos)
           || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
         if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
             && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-          ACE_auto_ptr_reset(this->watchdog_,
+          this->watchdog_ =
                              new OfferedDeadlineWatchdog(
-                               this->reactor_,
                                this->lock_,
                                qos.deadline,
                                this,
                                this->dw_local_objref_.in(),
                                this->offered_deadline_missed_status_,
-                               this->last_deadline_missed_total_count_));
+                               this->last_deadline_missed_total_count_);
 
         } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
                    && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
           this->watchdog_->cancel_all();
-          this->watchdog_.reset();
+          this->watchdog_->destroy();
+          this->watchdog_ = 0;
 
         } else {
           this->watchdog_->reset_interval(
@@ -1580,7 +1580,6 @@ DataWriterImpl::enable()
                                            durability_cache,
                                            qos_.durability_service,
 #endif
-                                           this->watchdog_,
                                            max_instances,
                                            max_total_samples);
 
@@ -1641,15 +1640,14 @@ DataWriterImpl::enable()
 
   if (deadline_period.sec != DDS::DURATION_INFINITE_SEC
       || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    ACE_auto_ptr_reset(this->watchdog_,
+    this->watchdog_ =
                        new OfferedDeadlineWatchdog(
-                         this->reactor_,
                          this->lock_,
                          this->qos_.deadline,
                          this,
                          this->dw_local_objref_.in(),
                          this->offered_deadline_missed_status_,
-                         this->last_deadline_missed_total_count_));
+                         this->last_deadline_missed_total_count_);
   }
 
   this->set_enabled();
@@ -2819,7 +2817,7 @@ DataWriterImpl::persist_data()
 void
 DataWriterImpl::reschedule_deadline()
 {
-  if (this->watchdog_.get() != 0) {
+  if (this->watchdog_ != 0) {
     this->data_container_->reschedule_deadline();
   }
 }

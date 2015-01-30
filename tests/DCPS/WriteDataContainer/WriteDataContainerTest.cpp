@@ -175,7 +175,6 @@ public:
                                             durability_cache,
                                             dw_qos.durability_service,
                                     #endif
-                                            watchdog_,
                                             max_instances,
                                             max_total_samples);
 
@@ -403,7 +402,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           SendStateDataSampleList temp;
-          ACE_UINT64 transaction_id_0 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {
@@ -429,7 +428,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           temp.reset();
-          ACE_UINT64 transaction_id_1 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {
@@ -515,7 +514,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           SendStateDataSampleList temp;
-          ACE_UINT64 transaction_id_0 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {
@@ -552,7 +551,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           temp.reset();
-          ACE_UINT64 transaction_id_1 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {
@@ -651,7 +650,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           SendStateDataSampleList temp;
-          ACE_UINT64 transaction_id_0 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {
@@ -688,7 +687,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           temp.reset();
-          ACE_UINT64 transaction_id_1 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {
@@ -742,7 +741,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           temp.reset();
-          ACE_UINT64 transaction_id_2 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {
@@ -826,7 +825,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           SendStateDataSampleList temp;
-          ACE_UINT64 transaction_id_0 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {
@@ -851,7 +850,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After enqueue", test_data_container);
 
           temp.reset();
-          ACE_UINT64 transaction_id_1 = test_data_container->get_unsent_data(temp);
+          test_data_container->get_unsent_data(temp);
           test->log_send_state_lists("After get_unsent_data", test_data_container);
 
           if (ret != DDS::RETCODE_OK) {

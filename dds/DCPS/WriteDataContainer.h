@@ -13,7 +13,6 @@
 #include "DataSampleElement.h"
 #include "SendStateDataSampleList.h"
 #include "WriterDataSampleList.h"
-#include "OfferedDeadlineWatchdog.h"
 
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 
@@ -143,7 +142,6 @@ public:
     /// DURABILITY_SERVICE QoS specific to the DataWriter.
     DDS::DurabilityServiceQosPolicy const & durability_service,
 #endif
-    std::auto_ptr<OfferedDeadlineWatchdog> & watchdog,
     /// maximum number of instances, 0 for unlimited
     CORBA::Long      max_instances,
     /// maximum total number of samples, 0 for unlimited
@@ -512,8 +510,6 @@ private:
   DDS::DurabilityServiceQosPolicy const & durability_service_;
 
 #endif
-
-  std::auto_ptr<OfferedDeadlineWatchdog> & watchdog_;
 };
 
 } /// namespace OpenDDS

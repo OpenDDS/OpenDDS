@@ -50,7 +50,7 @@ void ReactorInterceptor::wait()
 
   if (should_execute_immediately()) {
     ++registration_counter_;
-    handle_exception_i(ACE_INVALID_HANDLE, guard);
+    handle_exception_i(guard);
   } else {
     while (!command_queue_.empty()) {
       condition_.wait();
@@ -74,10 +74,10 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->mutex_, 0);
 
-  return handle_exception_i(ACE_INVALID_HANDLE, guard);
+  return handle_exception_i(guard);
 }
 
-int ReactorInterceptor::handle_exception_i(ACE_HANDLE /*fd*/, ACE_Guard<ACE_Thread_Mutex>& guard)
+int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
 {
   --registration_counter_;
 

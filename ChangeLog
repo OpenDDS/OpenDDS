@@ -1,3 +1,30 @@
+Fri Jan 30 19:02:26 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Use the new ReactorInterceptor helper class for
+          both Deadline QoS timers (offered and requested).
+
+        * dds/DCPS/WatchdogTimer.h:
+        * dds/DCPS/WatchdogTimer.cpp:
+
+          Removed these files.
+
 Thu Jan 29 23:22:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/ReactorInterceptor.h:
