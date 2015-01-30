@@ -48,6 +48,8 @@ public:
     return num_reads_;
   }
 
+  bool ok_;
+
 private:
   long num_reads_, last_non_durable_;
 };

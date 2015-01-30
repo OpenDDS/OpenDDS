@@ -1,3 +1,14 @@
+Fri Jan 30 20:16:07 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/rtps_disc.ini:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+
+          Return non-0 on test failure and added an rtps_disc test case.
+
 Tue Jan 27 22:04:29 UTC 2015 Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/FACE/Partition/Idl:

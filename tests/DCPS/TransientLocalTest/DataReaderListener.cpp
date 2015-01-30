@@ -13,7 +13,7 @@ using namespace std;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()
-  : num_reads_(0), last_non_durable_(0)
+  : ok_(true), num_reads_(0), last_non_durable_(0)
 {
   ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl\n"));
 }
@@ -49,16 +49,20 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
               durable ? "Durable " : "Volatile", message.count));
         if (durable && (message.count != num_reads_)) {
           ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: durable reader received out-of-order data\n"));
+          ok_ = false;
         } else if (!durable) {
           if (last_non_durable_ && message.count != last_non_durable_ + 1) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: volatile reader received out-of-order data\n"));
+            ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: volatile reader received out-of-order data\n"));
+            ok_ = false;
           }
           last_non_durable_ = message.count;
         }
       } else if (status == DDS::RETCODE_NO_DATA) {
         cerr << "ERROR: reader received DDS::RETCODE_NO_DATA!" << endl;
+        ok_ = false;
       } else {
         cerr << "ERROR: read Message: Error: " <<  status << endl;
+        ok_ = false;
       }
     }
   } catch (CORBA::Exception& e) {

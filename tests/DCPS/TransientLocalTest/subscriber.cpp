@@ -27,11 +27,12 @@ using namespace std;
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  bool ok = true;
   try {
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(411,
+      dpf->create_participant(4,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
@@ -113,6 +114,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_OS::sleep(1);
     }
 
+    ok = listener_servant->ok_;
+
     if (!CORBA::is_nil(participant)) {
       participant->delete_contained_entities();
     }
@@ -128,5 +131,5 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  return 0;
+  return ok ? 0 : 1;
 }

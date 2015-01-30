@@ -30,7 +30,7 @@ $pubTransportDebug  = $transportDebug if not $pubTransportDebug  and $transportD
 
 my $opts = $debug ? "-DCPSDebugLevel $debug -DCPSTransportDebugLevel $debug ".
                     "-ORBVerboseLogging 1 " : '';
-my $cfg = ($ARGV[0] eq 'rtps') ? 'rtps.ini' : 'tcp.ini';
+my $cfg = ($ARGV[0] eq 'rtps') ? 'rtps.ini' : ($ARGV[0] eq 'rtps_disc') ? 'rtps_disc.ini' : 'tcp.ini';
 my $pub_opts = $opts . "-DCPSConfigFile $cfg -DCPSBit 0";
 my $sub_opts = $pub_opts;
 
