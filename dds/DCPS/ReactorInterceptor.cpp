@@ -78,7 +78,7 @@ int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
   return handle_exception_i(guard);
 }
 
-int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
+void ReactorInterceptor::process_command_queue()
 {
   while (!command_queue_.empty()) {
     Command* command = command_queue_.front();
@@ -86,6 +86,11 @@ int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
     command->execute();
     delete command;
   }
+}
+
+int ReactorInterceptor::handle_exception_i(ACE_Guard<ACE_Thread_Mutex>& guard)
+{
+  process_command_queue();
 
   condition_.signal();
 

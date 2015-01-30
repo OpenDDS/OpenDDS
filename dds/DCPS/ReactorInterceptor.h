@@ -31,11 +31,14 @@ public:
                      ACE_thread_t owner);
 
   bool should_execute_immediately();
+  void process_command_queue();
 
   template<typename T>
   void execute_or_enqueue(T& t)
   {
     if (should_execute_immediately()) {
+      ACE_GUARD(ACE_Thread_Mutex, guard, this->mutex_);
+      process_command_queue();
       t.execute();
     } else {
       enqueue(t);

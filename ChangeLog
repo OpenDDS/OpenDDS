@@ -1,10 +1,18 @@
+Fri Jan 30 22:05:41 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          process command queue before executing new command in
+          the case where you can execute immediately.
+
 Fri Jan 30 21:40:14 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
 
           Removed unused deadline watchdog to avoid compiler warning.
 
-Fri Jan 30 19:12:42 UTC 2015  Peter Oschwald  <oschwald_p@ociweb.com>
+Fri Jan 30 19:12:42 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataReaderImpl.cpp:
 
