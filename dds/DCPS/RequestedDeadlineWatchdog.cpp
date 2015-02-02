@@ -132,9 +132,8 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
     }
 
   } else {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RequestedDeadlineWatchdog::execute: "
-               "the current timer should be valid for instance %X\n",
-               instance));
+    // not an error - timer is scheduled asynchronously so we can get here
+    // via DataReaderImpl::data_received() before schedule_timer() is done
   }
 }
 

@@ -1,3 +1,11 @@
+Mon Feb  2 16:50:51 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+
+          Removed error messages for timer_id == -1, now that
+          timers are scheduled asynchronously these are expected.
+
 Mon Feb  2 05:27:20 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/OwnershipManager.cpp:
