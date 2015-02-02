@@ -170,31 +170,40 @@ OwnershipManager::remove_instance(InstanceState* instance_state)
 void
 OwnershipManager::remove_writers (const ::DDS::InstanceHandle_t& instance_handle)
 {
-  ACE_GUARD(ACE_Thread_Mutex,
-            guard,
-            this->instance_lock_);
+  InstanceStateVec instances_to_reset;
+  {
+    ACE_GUARD(ACE_Thread_Mutex,
+              guard,
+              this->instance_lock_);
 
-  if (DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) OwnershipManager::remove_writers: ")
-                           ACE_TEXT("disassociate writers with instance %d\n"),
-                           instance_handle));
-  }
-
-  InstanceOwnershipWriterInfos::iterator const the_end = instance_ownership_infos_.end ();
-
-  InstanceOwnershipWriterInfos::iterator the_iter
-    = instance_ownership_infos_.find (instance_handle);
-  if (the_iter != the_end) {
-    the_iter->second.owner_ = WriterInfo();
-    the_iter->second.candidates_.clear ();
-    InstanceStateVec::iterator const end = the_iter->second.instance_states_.end();
-    for (InstanceStateVec::iterator iter = the_iter->second.instance_states_.begin ();
-      iter != end; ++iter) {
-        (*iter)->reset_ownership(instance_handle);
+    if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) OwnershipManager::remove_writers: ")
+                             ACE_TEXT("disassociate writers with instance %d\n"),
+                             instance_handle));
     }
-    the_iter->second.instance_states_.clear ();
 
-    instance_ownership_infos_.erase (the_iter);
+    InstanceOwnershipWriterInfos::iterator owner_wi
+      = instance_ownership_infos_.find (instance_handle);
+    if (owner_wi != instance_ownership_infos_.end()) {
+      owner_wi->second.owner_ = WriterInfo();
+      owner_wi->second.candidates_.clear ();
+      InstanceStateVec::iterator const end = owner_wi->second.instance_states_.end();
+      for (InstanceStateVec::iterator iter = owner_wi->second.instance_states_.begin();
+        iter != end; ++iter) {
+          // call after lock released, will call back to data reader
+          instances_to_reset.push_back(*iter);
+      }
+      owner_wi->second.instance_states_.clear ();
+
+      instance_ownership_infos_.erase(owner_wi);
+    }
+  }
+  // Lock released
+  InstanceStateVec::iterator instance;
+  for (instance  = instances_to_reset.begin();
+       instance != instances_to_reset.end(); ++instance)
+  {
+    (*instance)->reset_ownership(instance_handle);
   }
 }
 

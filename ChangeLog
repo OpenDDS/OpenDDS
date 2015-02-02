@@ -1,3 +1,9 @@
+Mon Feb  2 05:27:20 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Release lock prior to calling reset_ownership().
+
 Fri Jan 30 22:05:41 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/ReactorInterceptor.h:
