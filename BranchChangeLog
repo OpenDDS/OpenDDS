@@ -1,3 +1,9 @@
+Tue Feb  3 00:06:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated list of tests that can run with ownership profile disabled.
+
 Fri Jan 30 21:54:49 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/FeatureDisabledQosCheck.h:
