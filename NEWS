@@ -34,7 +34,7 @@ Fixes:
   These changes fixed a number of threading issues as well as improving
   the efficiency of publication.
 
-- Fixed some issues with RTPS discovery
+- Fixed some issues with RTPS discovery.
 
 - Fixed a number of issues related to the reconnect functionality of
   the tcp transport.

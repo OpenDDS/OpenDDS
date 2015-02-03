@@ -1,3 +1,13 @@
+Tue Feb  3 18:54:40 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * NEWS:
+
+         Missing period.
+
+        * tools/modeling/plugins/org.opendds.modeling.help/html/gettingstarted/maintopic.html:
+
+         Update for 3.6.0 release.
+
 Mon Feb  2 16:50:51 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/OfferedDeadlineWatchdog.cpp:
