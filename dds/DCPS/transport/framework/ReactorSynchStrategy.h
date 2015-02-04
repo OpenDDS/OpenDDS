@@ -39,8 +39,7 @@ public:
   /// Construct with strategy, reactor, and handle to configure the
   /// ReactorSynch with.
   ReactorSynchStrategy( TransportSendStrategy* strategy,
-                        ACE_Reactor* reactor,
-                        ACE_HANDLE handle);
+                        ACE_Reactor* reactor);
 
   virtual ~ReactorSynchStrategy();
 
@@ -59,10 +58,6 @@ public:
     /// the pointer on to the ReactorSynch, which is guaranteed to span
     /// the lifetime of both the strategy and the reactor.
     ACE_Reactor* reactor_;
-
-    /// Handle passed to the ReactorSynch for managing the output
-    /// handling.
-    ACE_HANDLE handle_;
 };
 
 }} // end namespace OpenDDS::DCPS

@@ -33,7 +33,8 @@ namespace DCPS {
 
 TransportImpl::TransportImpl()
   : monitor_(0),
-    last_link_(0)
+    last_link_(0),
+    is_shut_down_(true)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
   if (TheServiceParticipant->monitor_factory_) {
@@ -44,6 +45,12 @@ TransportImpl::TransportImpl()
 TransportImpl::~TransportImpl()
 {
   DBG_ENTRY_LVL("TransportImpl", "~TransportImpl", 6);
+}
+
+bool
+TransportImpl::is_shut_down() const
+{
+  return is_shut_down_;
 }
 
 void
@@ -57,6 +64,8 @@ TransportImpl::shutdown()
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();
   }
+
+  is_shut_down_ = true;
 
   this->pre_shutdown_i();
 

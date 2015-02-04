@@ -14,6 +14,7 @@
 #include "GuidConverter.h"
 #include "PublisherImpl.h"
 #include "SubscriberImpl.h"
+#include "DataWriterImpl.h"
 #include "Marked_Default_Qos.h"
 #include "Registered_Data_Types.h"
 #include "Transient_Kludge.h"
@@ -36,6 +37,7 @@
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "tao/debug.h"
+#include "ace/Reactor.h"
 
 namespace Util {
 
@@ -81,8 +83,12 @@ DomainParticipantImpl::DomainParticipantImpl(DomainParticipantFactoryImpl *     
     domain_id_(domain_id),
     dp_id_(dp_id),
     federated_(federated),
+    shutdown_condition_(shutdown_mutex_),
+    shutdown_complete_(false),
     monitor_(0),
-    pub_id_gen_(dp_id_)
+    pub_id_gen_(dp_id_),
+    automatic_liveliness_timer_ (*this),
+    participant_liveliness_timer_ (*this)
 {
   (void) this->set_listener(a_listener, mask);
   monitor_ = TheServiceParticipant->monitor_factory_->create_dp_monitor(this);
@@ -875,129 +881,14 @@ DomainParticipantImpl::delete_contained_entities()
   Discovery_rch disc = TheServiceParticipant->get_discovery(this->domain_id_);
   disc->fini_bit(this);
 
-  // delete publishers
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->publishers_protector_,
-                     DDS::RETCODE_ERROR);
+  TheServiceParticipant->reactor()->notify(this);
 
-    PublisherSet::iterator pubIter = publishers_.begin();
-    DDS::Publisher_ptr pubPtr;
-    size_t pubsize = publishers_.size();
-
-    while (pubsize > 0) {
-      pubPtr = (*pubIter).obj_.in();
-      ++pubIter;
-
-      DDS::ReturnCode_t result
-      = pubPtr->delete_contained_entities();
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-
-      result = delete_publisher(pubPtr);
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-
-      pubsize--;
-    }
-
+  shutdown_mutex_.acquire();
+  while (!shutdown_complete_) {
+    shutdown_condition_.wait();
   }
-
-  // delete subscribers
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->subscribers_protector_,
-                     DDS::RETCODE_ERROR);
-
-    SubscriberSet::iterator subIter = subscribers_.begin();
-    DDS::Subscriber_ptr subPtr;
-    size_t subsize = subscribers_.size();
-
-    while (subsize > 0) {
-      subPtr = (*subIter).obj_.in();
-      ++subIter;
-
-      DDS::ReturnCode_t result = subPtr->delete_contained_entities();
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-
-      result = delete_subscriber(subPtr);
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-
-      subsize--;
-    }
-  }
-
-  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
-  // delete topics
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->topics_protector_,
-                     DDS::RETCODE_ERROR);
-
-    TopicMap::iterator topicIter = topics_.begin();
-    DDS::Topic_ptr topicPtr;
-    size_t topicsize = topics_.size();
-
-    while (topicsize > 0) {
-      topicPtr = topicIter->second.pair_.obj_.in();
-      ++topicIter;
-
-      // Delete the topic the reference count.
-      DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
-
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
-      topicsize--;
-    }
-  }
-
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->recorders_protector_,
-                     DDS::RETCODE_ERROR);
-
-    RecorderSet::iterator it = recorders_.begin();
-    for (; it != recorders_.end(); ++it ){
-      RecorderImpl* impl = static_cast<RecorderImpl* >(it->in());
-      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
-      if (impl) result = impl->cleanup();
-      if (result != DDS::RETCODE_OK) ret = result;
-    }
-    recorders_.clear();
-  }
-
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->replayers_protector_,
-                     DDS::RETCODE_ERROR);
-
-    ReplayerSet::iterator it = replayers_.begin();
-    for (; it != replayers_.end(); ++it ){
-      ReplayerImpl* impl = static_cast<ReplayerImpl* >(it->in());
-      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
-      if (impl) result = impl->cleanup();
-      if (result != DDS::RETCODE_OK) ret = result;
-
-    }
-
-    replayers_.clear();
-  }
+  shutdown_complete_ = false;
+  shutdown_mutex_.release();
 
   bit_subscriber_ = DDS::Subscriber::_nil();
 
@@ -1007,7 +898,7 @@ DomainParticipantImpl::delete_contained_entities()
 
   // the participant can now start creating new contained entities
   set_deleted(false);
-  return ret;
+  return shutdown_result_;
 }
 
 CORBA::Boolean
@@ -1346,6 +1237,8 @@ DomainParticipantImpl::assert_liveliness()
        it != publishers_.end(); ++it) {
     it->svt_->assert_liveliness_by_participant();
   }
+
+  last_liveliness_activity_ = ACE_OS::gettimeofday();
 
   return DDS::RETCODE_OK;
 }
@@ -2049,6 +1942,304 @@ DomainParticipantImpl::delete_replayer(Replayer_rch replayer)
 {
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(replayers_protector_);
   replayers_.erase(replayer);
+}
+
+void
+DomainParticipantImpl::add_adjust_liveliness_timers(DataWriterImpl* writer)
+{
+  automatic_liveliness_timer_.add_adjust(writer);
+  participant_liveliness_timer_.add_adjust(writer);
+}
+
+void
+DomainParticipantImpl::remove_adjust_liveliness_timers()
+{
+  automatic_liveliness_timer_.remove_adjust();
+  participant_liveliness_timer_.remove_adjust();
+}
+
+DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& impl,
+                                                        DDS::LivelinessQosPolicyKind kind)
+  : impl_(impl)
+  , kind_ (kind)
+  , interval_ (ACE_Time_Value::max_time)
+  , recalculate_interval_ (false)
+  , scheduled_ (false)
+{ }
+
+DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
+{
+  if (scheduled_) {
+    TheServiceParticipant->timer()->cancel_timer(this);
+  }
+}
+
+void
+DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl* writer)
+{
+  ACE_GUARD(ACE_Thread_Mutex,
+            guard,
+            this->lock_);
+
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+
+  // Calculate the time remaining to liveliness check.
+  const ACE_Time_Value remaining = interval_ - (now - last_liveliness_check_);
+
+  // Adopt a smaller interval.
+  const ACE_Time_Value i = writer->liveliness_check_interval(kind_);
+  if (i < interval_) {
+    interval_ = i;
+  }
+
+  // Reschedule or schedule a timer if necessary.
+  if (scheduled_ && interval_ < remaining) {
+    TheServiceParticipant->timer()->cancel_timer(this);
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+  } else if (!scheduled_) {
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+    scheduled_ = true;
+    last_liveliness_check_ = now;
+  }
+}
+
+void
+DomainParticipantImpl::LivelinessTimer::remove_adjust()
+{
+  ACE_GUARD(ACE_Thread_Mutex,
+            guard,
+            this->lock_);
+
+  recalculate_interval_ = true;
+}
+
+int
+DomainParticipantImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value & tv, const void* /* arg */)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex,
+                   guard,
+                   this->lock_,
+                   0);
+
+  scheduled_ = false;
+
+  if (recalculate_interval_) {
+    interval_ = impl_.liveliness_check_interval(kind_);
+    recalculate_interval_ = false;
+  }
+
+  if (interval_ != ACE_Time_Value::max_time) {
+    dispatch(tv);
+    last_liveliness_check_ = tv;
+    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_);
+    scheduled_ = true;
+  }
+
+  return 0;
+}
+
+DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(DomainParticipantImpl& impl)
+  : LivelinessTimer (impl, DDS::AUTOMATIC_LIVELINESS_QOS)
+{ }
+
+void
+DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const ACE_Time_Value& /* tv */)
+{
+  impl_.signal_liveliness (kind_);
+}
+
+DomainParticipantImpl::ParticipantLivelinessTimer::ParticipantLivelinessTimer(DomainParticipantImpl& impl)
+  : LivelinessTimer (impl, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS)
+{ }
+
+void
+DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const ACE_Time_Value& tv)
+{
+  if (impl_.participant_liveliness_activity_after (tv - interval())) {
+    impl_.signal_liveliness (kind_);
+  }
+}
+
+ACE_Time_Value
+DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
+{
+  ACE_Time_Value tv = ACE_Time_Value::max_time;
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    tao_mon,
+                    this->publishers_protector_,
+                    tv);
+
+  for (PublisherSet::iterator it(publishers_.begin());
+       it != publishers_.end(); ++it) {
+    tv = std::min (tv, it->svt_->liveliness_check_interval(kind));
+  }
+
+  return tv;
+}
+
+bool
+DomainParticipantImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+{
+  if (last_liveliness_activity_ > tv) {
+    return true;
+  }
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    tao_mon,
+                    this->publishers_protector_,
+                    tv);
+
+  for (PublisherSet::iterator it(publishers_.begin());
+       it != publishers_.end(); ++it) {
+    if (it->svt_->participant_liveliness_activity_after(tv)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void
+DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
+{
+  TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
+}
+
+int
+DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
+{
+  // delete publishers
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->publishers_protector_,
+                     DDS::RETCODE_ERROR);
+
+    PublisherSet::iterator pubIter = publishers_.begin();
+    DDS::Publisher_ptr pubPtr;
+    size_t pubsize = publishers_.size();
+
+    while (pubsize > 0) {
+      pubPtr = (*pubIter).obj_.in();
+      ++pubIter;
+
+      DDS::ReturnCode_t result
+      = pubPtr->delete_contained_entities();
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      result = delete_publisher(pubPtr);
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      pubsize--;
+    }
+
+  }
+
+  // delete subscribers
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->subscribers_protector_,
+                     DDS::RETCODE_ERROR);
+
+    SubscriberSet::iterator subIter = subscribers_.begin();
+    DDS::Subscriber_ptr subPtr;
+    size_t subsize = subscribers_.size();
+
+    while (subsize > 0) {
+      subPtr = (*subIter).obj_.in();
+      ++subIter;
+
+      DDS::ReturnCode_t result = subPtr->delete_contained_entities();
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      result = delete_subscriber(subPtr);
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+
+      subsize--;
+    }
+  }
+
+  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+  // delete topics
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->topics_protector_,
+                     DDS::RETCODE_ERROR);
+
+    TopicMap::iterator topicIter = topics_.begin();
+    DDS::Topic_ptr topicPtr;
+    size_t topicsize = topics_.size();
+
+    while (topicsize > 0) {
+      topicPtr = topicIter->second.pair_.obj_.in();
+      ++topicIter;
+
+      // Delete the topic the reference count.
+      DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
+
+      if (result != DDS::RETCODE_OK) {
+        return result;
+      }
+      topicsize--;
+    }
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->recorders_protector_,
+                     DDS::RETCODE_ERROR);
+
+    RecorderSet::iterator it = recorders_.begin();
+    for (; it != recorders_.end(); ++it ){
+      RecorderImpl* impl = static_cast<RecorderImpl* >(it->in());
+      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
+      if (impl) result = impl->cleanup();
+      if (result != DDS::RETCODE_OK) ret = result;
+    }
+    recorders_.clear();
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->replayers_protector_,
+                     DDS::RETCODE_ERROR);
+
+    ReplayerSet::iterator it = replayers_.begin();
+    for (; it != replayers_.end(); ++it ){
+      ReplayerImpl* impl = static_cast<ReplayerImpl* >(it->in());
+      DDS::ReturnCode_t result = DDS::RETCODE_ERROR;
+      if (impl) result = impl->cleanup();
+      if (result != DDS::RETCODE_OK) ret = result;
+
+    }
+
+    replayers_.clear();
+  }
+
+  shutdown_mutex_.acquire();
+  shutdown_result_ = ret;
+  shutdown_complete_ = true;
+  shutdown_condition_.signal();
+  shutdown_mutex_.release();
+
+  return 0;
 }
 
 } // namespace DCPS

@@ -17,6 +17,12 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 #include "dds/DCPS/StaticIncludes.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
@@ -93,6 +99,15 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         return 1;
       }
 
+      OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->get_config("part1");
+      if (!cfg.is_nil()) {
+        TheTransportRegistry->bind_config(cfg, participant);
+      }
+      cfg = TheTransportRegistry->get_config("part2");
+      if (!cfg.is_nil()) {
+        TheTransportRegistry->bind_config(cfg, participant2);
+      }
+
       if (parse_args (argc, argv) == -1) {
         return -1;
       }
@@ -150,8 +165,14 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
-      DataWriterListenerImpl * dwl_servant = new DataWriterListenerImpl;
-      ::DDS::DataWriterListener_var dwl (dwl_servant);
+      DataWriterListenerImpl * dwl1_servant = new DataWriterListenerImpl;
+      ::DDS::DataWriterListener_var dwl1 (dwl1_servant);
+      DataWriterListenerImpl * dwl2_servant = new DataWriterListenerImpl;
+      ::DDS::DataWriterListener_var dwl2 (dwl2_servant);
+      DataWriterListenerImpl * dwl3_servant = new DataWriterListenerImpl;
+      ::DDS::DataWriterListener_var dwl3 (dwl3_servant);
+      DataWriterListenerImpl * dwl4_servant = new DataWriterListenerImpl;
+      ::DDS::DataWriterListener_var dwl4 (dwl4_servant);
 
       // Create the datawriters
       ::DDS::DataWriterQos dw_qos;
@@ -170,7 +191,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataWriter_var dw1 =
         pub->create_datawriter(topic.in (),
                                dw_qos,
-                               dwl.in(),
+                               dwl1.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw1.in ())) {
         cerr << "create_datawriter failed." << endl;
@@ -180,7 +201,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataWriter_var dw2 =
         pub2->create_datawriter(topic2.in (),
                                dw2_qos,
-                               dwl.in(),
+                               dwl2.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw2.in ())) {
         cerr << "create_datawriter failed." << endl;
@@ -192,7 +213,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataWriter_var dw3 =
         pub->create_datawriter(topic.in (),
                                dw_qos,
-                               dwl.in(),
+                               dwl3.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw3.in ())) {
         cerr << "create_datawriter failed." << endl;
@@ -202,7 +223,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       DDS::DataWriter_var dw4 =
         pub->create_datawriter(topic.in (),
                                dw_qos,
-                               dwl.in(),
+                               dwl4.in(),
                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (CORBA::is_nil (dw4.in ())) {
         cerr << "create_datawriter failed." << endl;
@@ -229,16 +250,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       delete writer3;
       delete writer4;
 
+      int actual = dwl1_servant->num_liveliness_lost_callbacks () +
+        dwl2_servant->num_liveliness_lost_callbacks () +
+        dwl3_servant->num_liveliness_lost_callbacks () +
+        dwl4_servant->num_liveliness_lost_callbacks ();
+
       if (liveliness_lost_test
-        && dwl_servant->num_liveliness_lost_callbacks () != num_liveliness_lost_callbacks)
+          && actual != num_liveliness_lost_callbacks)
       {
         cerr << "ERROR: did not receive expected liveliness lost callbacks. "
-          << dwl_servant->num_liveliness_lost_callbacks () << "/" <<
+          << actual << "/" <<
           num_liveliness_lost_callbacks << endl;
       }
 
       ACE_OS::sleep(1);
-      ACE_DEBUG((LM_INFO, "publisher deleteing entities\n"));
+      ACE_DEBUG((LM_INFO, "publisher deleting entities\n"));
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       participant2->delete_contained_entities();

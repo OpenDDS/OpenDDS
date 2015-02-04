@@ -31,8 +31,7 @@ class ScheduleOutputHandler : public ACE_Event_Handler {
   public:
     /// Construct with the reactor and strategy.
     ScheduleOutputHandler( TransportSendStrategy* strategy,
-                           ACE_Reactor* reactor,
-                           ACE_HANDLE handle);
+                           ACE_Reactor* reactor);
 
     /// @{ @name ACE_Event_Handler methods
 
@@ -47,9 +46,6 @@ class ScheduleOutputHandler : public ACE_Event_Handler {
   private:
     /// Strategy sending data to be scheduled (or not).
     TransportSendStrategy* strategy_;
-
-    /// Handle to manage the scheduling for.
-    ACE_HANDLE handle_;
 
     /// Cache the state that we have set the reactor into.
     enum HandlerState { Disabled, Enabled };

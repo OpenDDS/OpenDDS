@@ -104,8 +104,7 @@ tests/DCPS/Reconnect/run_test.pl bp_timeout: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !
 tests/DCPS/Reconnect/run_test.pl sub_init_crash: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/sub_init_loop/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/TimeBasedFilter/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
-# Still failing
-# tests/DCPS/TcpReconnect/run_test.pl: !DCPS_MIN
+tests/DCPS/TcpReconnect/run_test.pl: !DCPS_MIN
 
 tests/DCPS/BuiltInTopic/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
@@ -120,6 +119,8 @@ tests/DCPS/ViewState/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
 tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+
+tests/DCPS/WriteDataContainer/run_test.pl: !DCPS_MIN
 
 tests/transport/simple/run_test.pl bp: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/transport/simple/run_test.pl n: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -238,6 +239,12 @@ tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
 tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtps: !DCPS_MIN RTPS
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtps lost: !DCPS_MIN RTPS
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco : !DCPS_MIN RTPS
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco lost: !DCPS_MIN RTPS
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps: !DCPS_MIN RTPS
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps lost: !DCPS_MIN RTPS
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE

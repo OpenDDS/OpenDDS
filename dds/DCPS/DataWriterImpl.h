@@ -153,6 +153,10 @@ public:
   virtual DDS::ReturnCode_t get_publication_matched_status(
     DDS::PublicationMatchedStatus & status);
 
+  ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
+
+  bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
+
   virtual DDS::ReturnCode_t assert_liveliness();
 
   virtual DDS::ReturnCode_t assert_liveliness_by_participant();
@@ -211,11 +215,24 @@ public:
     DDS::DataWriter_ptr                   dw_local);
 
   /**
+   * Delegate to the WriteDataContainer to register
+   * Must tell the transport to broadcast the registered
+   * instance upon returning.
+   */
+  DDS::ReturnCode_t
+  register_instance_i(
+    DDS::InstanceHandle_t& handle,
+    DataSample* data,
+    const DDS::Time_t & source_timestamp,
+    DataSampleHeader& header,
+    ACE_Message_Block*& registered_sample);
+
+  /**
    * Delegate to the WriteDataContainer to register and tell
    * the transport to broadcast the registered instance.
    */
   DDS::ReturnCode_t
-  register_instance_i(
+  register_instance_from_durable_data(
     DDS::InstanceHandle_t& handle,
     DataSample* data,
     const DDS::Time_t & source_timestamp);
@@ -265,8 +282,8 @@ public:
   /**
    * Retrieve the unsent data from the WriteDataContainer.
    */
-  SendStateDataSampleList get_unsent_data() {
-    return data_container_->get_unsent_data();
+   ACE_UINT64 get_unsent_data(SendStateDataSampleList& list) {
+    return data_container_->get_unsent_data(list);
   }
 
   SendStateDataSampleList get_resend_data() {
@@ -534,7 +551,12 @@ protected:
 
 private:
 
+  void track_sequence_number(GUIDSeq* filter_out);
+
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
+
+  DDS::ReturnCode_t dispose_and_unregister(DDS::InstanceHandle_t handle,
+                                           const DDS::Time_t& timestamp);
 
   /**
    * This method create a header message block and chain with
@@ -648,12 +670,14 @@ private:
   ACE_Time_Value             liveliness_check_interval_;
   /// Timestamp of last write/dispose/assert_liveliness.
   ACE_Time_Value             last_liveliness_activity_time_;
+  /// Timestamp of the last time liveliness was checked.
+  ACE_Time_Value             last_liveliness_check_time_;
   /// Total number of offered deadlines missed during last offered
   /// deadline status check.
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  std::auto_ptr<OfferedDeadlineWatchdog> watchdog_;
+  OfferedDeadlineWatchdog* watchdog_;
   /// The flag indicates whether the liveliness timer is scheduled and
   /// needs be cancelled.
   bool                       cancel_timer_;
@@ -675,7 +699,9 @@ private:
 
   IdSet                      pending_readers_, assoc_complete_readers_;
 
-  /// The cached available data while suspending.
+  /// The cached available data while suspending and associated transaction ids.
+  ACE_UINT64 min_suspended_transaction_id_;
+  ACE_UINT64 max_suspended_transaction_id_;
   SendStateDataSampleList             available_data_list_;
 
   /// Monitor object for this entity
@@ -694,6 +720,7 @@ private:
 
   DDS::ReturnCode_t send_end_historic_samples(const RepoId& readerId);
 
+  bool liveliness_asserted_;
 };
 
 } // namespace DCPS

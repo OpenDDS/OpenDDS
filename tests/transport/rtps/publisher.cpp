@@ -538,6 +538,8 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
 
+    TheServiceParticipant->get_domain_participant_factory();
+
     return DDS_TEST::test(host, port);
 
   } catch (const CORBA::BAD_PARAM& ) {

@@ -276,6 +276,8 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   // Decrease ref count after the servant is removed from the maps.
   dw_servant->_remove_ref();
 
+  participant_->remove_adjust_liveliness_timers();
+
   return DDS::RETCODE_OK;
 }
 
@@ -840,6 +842,29 @@ PublisherImpl::assert_liveliness_by_participant()
   }
 
   return ret;
+}
+
+ACE_Time_Value
+PublisherImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
+{
+  ACE_Time_Value tv = ACE_Time_Value::max_time;
+  for (DataWriterMap::iterator it(datawriter_map_.begin());
+      it != datawriter_map_.end(); ++it) {
+    tv = std::min (tv, it->second->liveliness_check_interval(kind));
+  }
+  return tv;
+}
+
+bool
+PublisherImpl::participant_liveliness_activity_after(const ACE_Time_Value& tv)
+{
+  for (DataWriterMap::iterator it(datawriter_map_.begin());
+      it != datawriter_map_.end(); ++it) {
+    if (it->second->participant_liveliness_activity_after(tv)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 void

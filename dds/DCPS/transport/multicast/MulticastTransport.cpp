@@ -139,11 +139,32 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
   return session._retn();
 }
 
+static bool
+get_remote_reliability(const TransportImpl::RemoteTransport& remote)
+{
+  NetworkAddress network_address;
+  ACE_CDR::Boolean reliable;
+
+  size_t len = remote.blob_.length();
+  const char* buffer = reinterpret_cast<const char*>(remote.blob_.get_buffer());
+
+  ACE_InputCDR cdr(buffer, len);
+  cdr >> network_address;
+  cdr >> ACE_InputCDR::to_boolean(reliable);
+
+  return reliable;
+}
+
 TransportImpl::AcceptConnectResult
 MulticastTransport::connect_datalink(const RemoteTransport& remote,
                                      const ConnectionAttribs& attribs,
                                      TransportClient*)
 {
+  // Check that the remote reliability matches.
+  if (get_remote_reliability(remote) != this->config_i_->is_reliable()) {
+    return AcceptConnectResult();
+  }
+
   GuardThreadType guard_links(this->links_lock_);
   const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
   Links::const_iterator link_iter = this->client_links_.find(local_peer);
@@ -175,6 +196,11 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
                                     const ConnectionAttribs& attribs,
                                     TransportClient* client)
 {
+  // Check that the remote reliability matches.
+  if (get_remote_reliability(remote) != this->config_i_->is_reliable()) {
+    return AcceptConnectResult();
+  }
+
   const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
 
   GuardThreadType guard_links(this->links_lock_);
@@ -349,6 +375,7 @@ MulticastTransport::connection_info_i(TransportLocator& info) const
 
   ACE_OutputCDR cdr;
   cdr << network_address;
+  cdr << ACE_OutputCDR::from_boolean (ACE_CDR::Boolean (this->config_i_->is_reliable ()));
 
   const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
   char* buffer = const_cast<char*>(cdr.buffer()); // safe

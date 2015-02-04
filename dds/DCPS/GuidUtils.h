@@ -119,6 +119,15 @@ operator!=(const GUID_t& lhs, const GUID_t& rhs)
   return !(lhs == rhs);
 }
 
+struct GuidPrefixEqual {
+
+  bool
+  operator() (const GuidPrefix_t& lhs, const GuidPrefix_t& rhs) const
+  {
+    return memcmp(&lhs, &rhs, sizeof(GuidPrefix_t)) == 0;
+  }
+};
+
 inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)
 {
@@ -131,6 +140,17 @@ operator!=(const EntityId_t& lhs, const EntityId_t& rhs)
 {
   return !(lhs == rhs);
 }
+
+struct EntityIdConverter {
+  EntityIdConverter (const unsigned char o[4])
+  {
+    memcpy (&entityId, &o, sizeof(EntityId_t));
+  }
+
+  operator EntityId_t() const { return entityId; }
+
+  EntityId_t entityId;
+};
 
 // Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::ostream&

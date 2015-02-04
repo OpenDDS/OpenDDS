@@ -1,3 +1,985 @@
+Mon Feb  2 16:50:51 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+
+          Removed error messages for timer_id == -1, now that
+          timers are scheduled asynchronously these are expected.
+
+Mon Feb  2 05:27:20 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/OwnershipManager.cpp:
+
+          Release lock prior to calling reset_ownership().
+
+Fri Jan 30 22:05:41 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          process command queue before executing new command in
+          the case where you can execute immediately.
+
+Fri Jan 30 21:40:14 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Removed unused deadline watchdog to avoid compiler warning.
+
+Fri Jan 30 19:12:42 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Cancelled the End Historic Sweeper before erasing the writer
+          from the map.  In cancel timer only decrement the reference
+          count on the info if it was actually scheduled previously.
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Fixed reference counting and locking.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          fixed comment.
+
+Fri Jan 30 19:02:26 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Use the new ReactorInterceptor helper class for
+          both Deadline QoS timers (offered and requested).
+
+        * dds/DCPS/WatchdogTimer.h:
+        * dds/DCPS/WatchdogTimer.cpp:
+
+          Removed these files.
+
+Thu Jan 29 23:22:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Use counter instead of bool for tracking registration of
+          notifications so that delete is done at the proper time.
+          Added some locking to make access to counter safe.
+
+Thu Jan 29 21:25:05 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Added barrier synchronization so reactor thread owner is known.
+
+Thu Jan 29 19:28:20 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          In wait_for_acknowledgments():
+          Avoid reading readers_ without holding the mutex.
+          Reverted r6865 Mon Jan 26 15:16:28 UTC 2015  Justin Wilson
+          which checked for reliablity QoS to be reliable.
+          That change is correct but tests are incorrectly depending
+          on it not checking.  We'll hold off on this change until the
+          upcoming major changes to wait_for_acknowledgments().
+
+Thu Jan 29 16:16:38 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Build fixes for inline=1.
+
+Thu Jan 29 15:24:14 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          ACE_Reactor::purge_pending_notifications does not work in the
+          general case.  Consequently, derived classes must be dynamically
+          allocated.  Added a destroy method to destroy asynchronously.
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+        * dds/DCPS/transport/multicast/BestEffortSessionFactory.h:
+        * dds/DCPS/transport/multicast/BestEffortSessionFactory.cpp:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastSession.h:
+        * dds/DCPS/transport/multicast/MulticastSession.cpp:
+        * dds/DCPS/transport/multicast/MulticastSessionFactory.h:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+        * dds/DCPS/transport/multicast/ReliableSessionFactory.h:
+        * dds/DCPS/transport/multicast/ReliableSessionFactory.cpp:
+
+          Converted DataLinkWatchdog_T to ReactorInterceptor.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportReactorTask.h:
+        * dds/DCPS/transport/framework/TransportReactorTask.inl:
+        * dds/DCPS/transport/framework/TransportReactorTask.cpp:
+
+          Added calls to destroy ReactorInterceptors.
+
+Wed Jan 28 22:11:10 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Set -DCPSPendingTimeout to 1 for subscriber.  Hey, it worked for
+          the publisher!
+
+Wed Jan 28 21:56:34 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Set -DCPSPendingTimeout to 1 for publisher.
+
+Wed Jan 28 21:42:15 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+
+          This test can now use RTPS, need to make the libs
+          available in static builds.
+
+Wed Jan 28 18:42:02 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+
+          Added method for enqueue (forced notify).
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          PendingAssocs are now deleted asynchronously.
+
+Wed Jan 28 18:24:36 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+          Initialized service participant reactor.
+
+Wed Jan 28 17:02:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Wait for cancel timer to happen before deleting the pending
+          assoc.
+
+Wed Jan 28 15:55:13 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          delete_contained_entities() can occur more than once per
+          object, need to reset the shutdown flag as it completes.
+
+Wed Jan 28 15:35:59 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Add checks and handling for interceptors which are passed
+          null reactors.
+
+Wed Jan 28 15:08:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+
+          Initialized service participant reactor.
+
+Wed Jan 28 14:59:25 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Added warning if initialized with null reactor.
+
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+
+          Initialized service participant reactor.
+
+Wed Jan 28 01:58:41 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Updated durable data and END_HISTORIC_SAMPLES to
+          take advantage of the new TransportClient features,
+          guaranteeing that the control message appears directly
+          after the last historic sample (if any).
+          DataReader side has a new strategy for dealing with
+          possibly repeated and out of order data due to the
+          durability resend.
+
+Wed Jan 28 01:46:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/SendStateDataSampleList.h:
+
+          No longer need to be able to directly access head and tail
+          of the list from the iterator.
+
+Wed Jan 28 01:42:28 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Alleviate deadlock in wait() when the reactor thread has already
+          shutdown and thus the wait would never finish before.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Simply pass the list to send instead of the iterator to be more
+          semantically correct.  Then access head and tail directly.
+
+Tue Jan 27 23:52:45 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+        * tests/transport/rtps/publisher.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+
+          Let TransportClient::send resolve out of order or duplicate
+          samples from a single datawriter.  Also fixed order of data
+          used for sending historical data to enqueue sent messages
+          before currently sending messages onto the resend list.
+
+Tue Jan 27 23:08:31 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Fixed a warning in content_subscription=0 builds.
+
+Tue Jan 27 22:37:09 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Initialized service participant reactor.
+
+Tue Jan 27 21:24:16 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Used ReactorInterceptor to fix deadlock from writer_became_alive
+          and transport_assoc_done.
+
+Tue Jan 27 19:16:43 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Added required #include for PCH.
+
+Tue Jan 27 18:15:04 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/ReactorInterceptor.h:
+        * dds/DCPS/ReactorInterceptor.cpp:
+
+          Factored out class to intercept calls into a reactor thread from
+          a non-reactor thread.  The command is queued and the reactor is
+          notified to acquire the reactor thread.
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Used ReactorInterceptor to fix deadlock with pending association
+          timer.
+
+Mon Jan 26 23:35:34 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Use ACE_INVALID_HANDLE as the portable not-a-handle value.
+
+Mon Jan 26 21:48:39 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Intercept calls to reactor to avoid deadlock.
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added member for owner of reactor.
+
+Mon Jan 26 18:40:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Removed unusued variable pub_id which was used to create
+          match for send_delayed_notifications previously.
+
+Mon Jan 26 17:44:14 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Remove unusued parameter which was used to create match for
+          send_delayed_notifications previously.
+
+Mon Jan 26 17:27:37 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Initialized shutdown_complete_ in constructor.
+
+Mon Jan 26 15:33:52 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/pub_rtps_tcp.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub_rtps_tcp.ini:
+
+          Removing max_samples_per_packet workaround.
+
+Mon Jan 26 15:16:39 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          fix fuzz errors
+
+Mon Jan 26 15:16:28 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added check for reliability in should_ack().
+
+Mon Jan 26 15:14:44 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+
+          Added missing include.
+
+Fri Jan 23 22:54:33 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportQueueElement.inl:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Making the DataWriterImpl no longer need to hold the
+          write data container's lock while passing sample and
+          control messages down to the transport. When transport
+          finishes with a sample delivered/dropped the sample is
+          either on the sending data list and moved to the appropriate
+          send state list or else it is currently loaned to the
+          DataWriterImpl in which case it is marked as delivered/
+          dropped and the datawriter will treat appropriately during
+          add_sending_data.  Writing, sending, sending control messages:
+          registration, unregister, dispose, et al. are now done without
+          needing to hold the lock.  These changes allow WriteDataContainer
+          to enforce QOS settings (reliability/resource limits/history)
+          and wake up from blocked writes when appropriate.
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Updated test to use add_sending_data() to move 'loaned'
+          samples from unsent to sending
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          delete_contained_entities now performed on Reactor thread
+          using notify.
+
+Fri Jan 23 22:08:38 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Fix issue where concurrent calls to add_association()
+          and remove_associations() could conflict and cause the
+          add to fail.  The remove was stopping all pending
+          associations instead of just those for the IDs being
+          removed.  I added a sequence of reader IDs to the
+          stop_associating() member function to solve this.
+          This was causing test failures in SetQosPartition and
+          other tests.
+
+Fri Jan 23 19:06:04 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Reverted test script to pre-TestFramework version to
+          avoid spurious WARNING messages printed during testing.
+
+Fri Jan 23 18:49:20 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+
+          Fixed compiler error for Sun.
+
+Fri Jan 23 17:14:23 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/SetQosPartition/pub.ini:
+        * tests/DCPS/SetQosPartition/sub.ini:
+
+          Remove obsolete keep_link options from transport configs.
+
+Fri Jan 23 16:03:34 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/pub_inforepo_rtps.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub_inforepo_tcp.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub_rtps_rtps.ini:
+        * tests/DCPS/ManualAssertLiveliness/pub_rtps_tcp.ini:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/sub_inforepo_rtps.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub_inforepo_tcp.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub_rtps_rtps.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub_rtps_tcp.ini:
+
+          Added scenarios to cover all combinations of {InfoRepo,RTPS}
+          discovery and {tcp,rtps} transport.  Added RepoIds when logging.
+          Modified test to not count liveliness lost before association due
+          to the delay introduced by RTPS discovery.
+
+          NOTE: The RTPS tests set max_samples_per_packet to 1.  This
+          should be removed after the non-RTPS tests are fixed.
+
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+
+          Removed these files.
+
+Fri Jan 23 15:39:21 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Implemented history for BuiltinParticipantMessageReader/Writer.
+
+Fri Jan 23 15:37:40 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Fixed compiler warning.
+
+Thu Jan 22 23:15:46 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+
+          Added callback to handle liveliness from discovery.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/RtpsMessageTypes.idl:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+
+          Implemented liveliness for RTPS.
+
+Thu Jan 22 23:11:40 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Resets manually asserted liveliness.
+
+        * dds/DCPS/GuidUtils.h:
+
+          Added comparator for GuidPrefix_t.
+
+Thu Jan 22 23:05:05 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+
+          Changed liveliness factor back to 80 for non-timeout publishers.
+
+Thu Jan 22 20:42:48 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * README:
+
+          More release-related updates.
+
+Thu Jan 22 20:06:59 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * AUTHORS:
+
+          Add some missing authors to the list.
+
+Thu Jan 22 19:56:05 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * NEWS:
+
+          Added release notes for 3.6 release
+
+Thu Jan 22 18:13:56 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/modeling/README.user:
+        * tools/modeling/features/org.opendds.modeling.site/README.txt:
+
+          More documentation updates.
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+
+          Fix a dependency problem.
+
+Wed Jan 21 20:03:41 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/modeling/README.dev:
+
+          Minor documentation updates.
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+          Update version numbers to 3.6.
+
+Wed Jan 21 17:59:22 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added check for handle_timeout occurring too early which would
+          lead to not sending liveliness promptly.
+
+        * tests/DCPS/LivelinessTimeout/README:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Added comments.  Reorganized test to place tighter bound on
+          number of expected on_liveliness_changed events.
+
+Tue Jan 20 21:11:35 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed timer modulation.
+
+Tue Jan 20 19:11:12 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Changed initialization of liveliness_check_interval.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added support methods for discovery-based liveliness.
+
+Tue Jan 20 17:20:00 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Backout local modification.
+
+Tue Jan 20 15:57:36 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Checks for uninitialized liveliness_check_interval.
+
+Mon Jan 19 20:52:00 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added missing include.
+
+Mon Jan 19 19:44:06 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.h:
+
+          Added missing forward declaration.
+
+Mon Jan 19 19:02:09 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added missing include.
+
+Mon Jan 19 15:54:56 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          assert_liveliness for MANUAL_BY_PARTICIPANT_LIVELINESS_QOS now
+          processed by dispatching to participant and setting a flag that is
+          processed by liveliness timer.  assert_liveliness for
+          MANUAL_BY_TOPIC_LIVELINESS_QOS now processed by sending liveliness
+          immediately.  Liveliness activity now compared against qos
+          interval instead of check interval.  Added helper methods to get
+          check intervals and liveliness activity status.
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added timers to process AUTOMATIC_LIVELINESS_QOS and
+          MANUAL_BY_PARTICIPANT_QOS.  The timers run with the minimum period
+          necessary.  This change prepares for RTPS liveliness.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Added helper methods.
+
+Fri Jan 16 17:29:13 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Fixed test timing out due to race in logging the send state lists.
+
+Thu Jan 15 20:22:11 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+
+          Removed is_space_available and accessors/mutators.
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Added debugging in Test Case 3 to see where some tests
+          are timing out.
+
+Thu Jan 15 16:56:30 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Reintroduced reverse lock to avoid deadlock.
+
+Thu Jan 15 15:22:54 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Made delayed deliver use ACE_Task instead of Thread_Manager
+
+Thu Jan 15 04:03:38 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/idl/HTemplate.txt:
+
+          Remove trailing whitespace.
+
+Thu Jan 15 00:44:35 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Added include Service_Participant.h
+
+          Used ACE_OS::sleep function
+
+Wed Jan 14 23:47:38 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Cleaned up wakeup_blocking_writers to remove commented out
+          code and remove unsused parameter 'instance'
+
+        * dds/idl/HTemplate.txt:
+
+          Remove trailing whitespace.
+
+Wed Jan 14 22:10:07 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Enable WriteDataContainerTest
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Removed calculating 'should_block' which WriteDataContainer
+          no longer requires in the constructor.  WriteDataContainer
+          now determines if it should block directly from qos.
+
+        * dds/DCPS/PublicationInstance.h:
+
+          Removed waiting_list_ as it is no longer needed
+
+        * dds/DCPS/WriteDataContainer.h:
+
+          Updated and documented changes based on rework of WriteDataContainer
+          as detailed below.
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Reworked how obtain_buffer determines if it should block or
+          release samples when a write is occuring to be more in line
+          with the dds spec.  Now properly blocks and returns timeout
+          when space is not made available within max blocking time,
+          as well as waking up and proceeding when space becomes available.
+
+          Removed released_data_ list as it is no longer needed.
+          Lists are now unsent_data_, sending_data_, and sent_data_
+          which simplifies the states and transitions between.
+
+          Added remove_oldest_historical_sample which allows a reliable
+          writer to free up samples which are only being held for
+          history purposes.  Non-reliable writers will not block and
+          will free up space by either releasing history or forcing the
+          transport to release samples it has not signalled being done with.
+
+        * dds/idl/HTemplate.txt:
+
+          Made DDS_TEST a friend
+
+        * tests/DCPS/WriteDataContainer:
+        * tests/DCPS/WriteDataContainer/Simple.idl:
+        * tests/DCPS/WriteDataContainer/WriteDataContainer.mpc:
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+        * tests/DCPS/WriteDataContainer/run_test.pl:
+
+          Added new WriteDataContainer test as a unit test for
+          compliance with the dds specification specifically
+          with regards to reliability, resource limits, and
+          history qos settings.
+
+Wed Jan 14 17:51:05 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Don't log EndHistoricSamplesSweeper destructor.
+
+Wed Jan 14 15:48:37 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Purges notifications in destructor.
+
+Tue Jan 13 21:12:20 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Cancel dumps the command queue.  Fixed some style issues.
+
+Tue Jan 13 18:44:09 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkWatchdog_T.h:
+
+          Scheduling and cancelling timer no performed via a command queue.
+          This prevents a deadlock if schedule/cancel and invoke from a thread
+          which is not the reactor thread.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Removed reverse lock that was leading to data race.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Removed debugging statement.
+
+Mon Jan 12 21:17:53 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Removed debugging statements.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Removed unused variable.  Added comment about reverse lock.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed bug where reliable multicast would associate with
+          unreliable multicast (and vice versa) by checking that remote has
+          the same reliability setting.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Removed debugging flag.
+
+Mon Jan 12 17:53:21 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Corrected Perl platform string constant.
+
+Fri Jan  9 15:00:34 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+
+          Fix fuzz error.
+
+Fri Jan  9 02:13:04 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/dissector/README:
+
+          Fix fuzz error.
+
+Thu Jan  8 23:03:23 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReactorSynch.h:
+        * dds/DCPS/transport/framework/ReactorSynch.inl:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.h:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.inl:
+        * dds/DCPS/transport/framework/ReactorSynchStrategy.cpp:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.h:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.inl:
+        * dds/DCPS/transport/framework/ScheduleOutputHandler.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.h:
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.cpp:
+        * dds/DCPS/transport/tcp/TcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/tcp/TcpSendStrategy.cpp:
+
+          Fix a couple of reconnect-related issues that affected
+          Windows (and possibly other platforms).  First, a race
+          condition was corrected by deferring reconnect actions
+          when the receive strategy detects a disconnect until
+          the handle_close() method is called.  Second, the
+          ACE_HANDLE is no longer stored in the ReactorSynch
+          object because it changes when there is a reconnect.
+          The ReactorSynch object now fetches the handle from
+          the Send Strategy when it needs it.
+
+        * bin/dcps_tests.lst:
+
+          Re-enable the TcpReconnect test.
+
+Thu Jan  8 15:55:34 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tools/dissector/README:
+        * tools/dissector/giop_base.h:
+        * tools/dissector/giop_base.cpp:
+        * tools/dissector/packet-datawriter.h:
+        * tools/dissector/packet-datawriter.cpp:
+        * tools/dissector/packet-opendds.h:
+        * tools/dissector/packet-opendds.cpp:
+        * tools/dissector/packet-repo.h:
+        * tools/dissector/packet-repo.cpp:
+        * tools/dissector/sample_dissector.cpp:
+        * tools/dissector/ws_common.h:
+
+          Update wireshark dissector to support newer versions.
+          This should now work with versions 1.6.x, 1.8.x, 1.10.x, and
+          1.99.x.  ws_common.h contains portability related macros
+          and functions.  The main changes involved signature changes
+          to function pointer, increased const correctness, removal
+          of check_col() calls, and allocator changes.
+
+          I also added some missing DataSampleHeader message type ID
+          values.
+
+Wed Jan  7 17:46:23 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Fixed typos.
+
+Wed Jan  7 16:13:06 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Test now allows two discovered publications when two are possible.
+
+Wed Jan  7 15:14:17 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added debugging
+
+        * tests/DCPS/ConfigTransports/Factory.cpp:
+
+          Changed LM_ERROR to LM_DEBUG for test output.
+
+        * tests/DCPS/ConfigTransports/run_test.pl:
+
+          Set DCPSDebugLevel to 1.
+
 Tue Jan  6 20:58:01 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:

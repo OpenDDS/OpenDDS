@@ -43,7 +43,6 @@ public:
 
   /// Constructor
   OfferedDeadlineWatchdog(
-    ACE_Reactor_Timer_Interface* reactor,
     lock_type & lock,
     DDS::DeadlineQosPolicy qos,
     OpenDDS::DCPS::DataWriterImpl * writer_impl,

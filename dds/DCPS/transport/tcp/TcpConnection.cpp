@@ -380,8 +380,10 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
                this->remote_address_.get_port_number()));
   }
 
+  bool graceful = !this->receive_strategy_.is_nil() && this->receive_strategy_->gracefully_disconnected();
+
   if (!this->send_strategy_.is_nil()) {
-    if (!this->receive_strategy_.is_nil() && this->receive_strategy_->gracefully_disconnected()) {
+    if (graceful) {
       this->send_strategy_->terminate_send();
     } else {
       this->send_strategy_->suspend_send();
@@ -390,8 +392,11 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 
   this->disconnect();
 
-  if (!this->receive_strategy_.is_nil() && this->receive_strategy_->gracefully_disconnected()) {
+  if (graceful) {
     this->link_->notify(DataLink::DISCONNECTED);
+  } else {
+    ReconnectOpType op = DO_RECONNECT;
+    this->reconnect_task_.add(op);
   }
 
   return 0;
@@ -927,20 +932,32 @@ OpenDDS::DCPS::TcpConnection::notify_lost_on_backpressure_timeout()
 
 }
 
-/// This is called by both TcpSendStrategy and TcpReceiveStrategy
-/// when lost connection is detected. This method handles the connection
-/// to the reactor task to do the reconnecting.
+/// This is called by TcpSendStrategy when a send fails
+/// and a reconnect should be initiated. This method
+/// suspends any sends and kicks the reconnect thread into
+/// action.
 void
-OpenDDS::DCPS::TcpConnection::relink(bool do_suspend)
+OpenDDS::DCPS::TcpConnection::relink_from_send(bool do_suspend)
 {
-  DBG_ENTRY_LVL("TcpConnection","relink",6);
+  DBG_ENTRY_LVL("TcpConnection","relink_from_send",6);
 
   if (do_suspend && !this->send_strategy_.is_nil())
     this->send_strategy_->suspend_send();
 
   ReconnectOpType op = DO_RECONNECT;
   this->reconnect_task_.add(op);
+}
 
+/// This is called by TcpReceiveStrategy when a disconnect
+/// is detected.  It simply suspends any sends and lets
+/// the handle_close() handle the reconnect logic.
+void
+OpenDDS::DCPS::TcpConnection::relink_from_recv(bool do_suspend)
+{
+  DBG_ENTRY_LVL("TcpConnection","relink_from_recv",6);
+
+  if (do_suspend && !this->send_strategy_.is_nil())
+    this->send_strategy_->suspend_send();
 }
 
 bool

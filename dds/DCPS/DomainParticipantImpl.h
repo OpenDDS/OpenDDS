@@ -48,6 +48,7 @@ namespace DCPS {
 
 class PublisherImpl;
 class SubscriberImpl;
+class DataWriterImpl;
 class DomainParticipantFactoryImpl;
 class Monitor;
 
@@ -72,8 +73,10 @@ class FilterEvaluator;
  * the interface this class is implementing.
  */
 class OpenDDS_Dcps_Export DomainParticipantImpl
-  : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>,
-  public virtual OpenDDS::DCPS::EntityImpl {
+  : public virtual OpenDDS::DCPS::LocalObject<DDS::DomainParticipant>
+  , public virtual OpenDDS::DCPS::EntityImpl
+  , public virtual ACE_Event_Handler
+{
 public:
   typedef Objref_Servant_Pair <SubscriberImpl, DDS::Subscriber,
                                DDS::Subscriber_ptr, DDS::Subscriber_var> Subscriber_Pair;
@@ -369,6 +372,9 @@ private:
   void delete_recorder(Recorder_rch recorder);
   void delete_replayer(Replayer_rch replayer);
 
+  void add_adjust_liveliness_timers(DataWriterImpl* writer);
+  void remove_adjust_liveliness_timers();
+
 private:
 
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
@@ -455,6 +461,11 @@ private:
   ACE_Recursive_Thread_Mutex topics_protector_;
   /// Protect the handle collection.
   ACE_Recursive_Thread_Mutex handle_protector_;
+  /// Protect the shutdown.
+  ACE_Thread_Mutex shutdown_mutex_;
+  ACE_Condition<ACE_Thread_Mutex> shutdown_condition_;
+  DDS::ReturnCode_t shutdown_result_;
+  bool shutdown_complete_;
 
   /// The object reference activated from this servant.
   DDS::DomainParticipant_var participant_objref_;
@@ -498,6 +509,50 @@ private:
   ACE_Recursive_Thread_Mutex recorders_protector_;
   /// Protect the replayers collection.
   ACE_Recursive_Thread_Mutex replayers_protector_;
+
+  class LivelinessTimer : public ACE_Event_Handler {
+  public:
+    LivelinessTimer(DomainParticipantImpl& impl, DDS::LivelinessQosPolicyKind kind);
+    virtual ~LivelinessTimer();
+    void add_adjust(OpenDDS::DCPS::DataWriterImpl* writer);
+    void remove_adjust();
+    int handle_timeout(const ACE_Time_Value &tv, const void * /* arg */);
+    virtual void dispatch(const ACE_Time_Value& tv) = 0;
+
+  protected:
+    DomainParticipantImpl& impl_;
+    const DDS::LivelinessQosPolicyKind kind_;
+
+    ACE_Time_Value interval () const { return interval_; }
+
+  private:
+    ACE_Time_Value interval_;
+    bool recalculate_interval_;
+    ACE_Time_Value last_liveliness_check_;
+    bool scheduled_;
+    ACE_Thread_Mutex lock_;
+  };
+
+  class AutomaticLivelinessTimer : public LivelinessTimer {
+  public:
+    AutomaticLivelinessTimer(DomainParticipantImpl& impl);
+    virtual void dispatch(const ACE_Time_Value& tv);
+  };
+  AutomaticLivelinessTimer automatic_liveliness_timer_;
+
+  class ParticipantLivelinessTimer : public LivelinessTimer {
+  public:
+    ParticipantLivelinessTimer(DomainParticipantImpl& impl);
+    virtual void dispatch(const ACE_Time_Value& tv);
+  };
+  ParticipantLivelinessTimer participant_liveliness_timer_;
+
+  ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
+  bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
+  ACE_Time_Value last_liveliness_activity_;
+  void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
+
+  virtual int handle_exception(ACE_HANDLE fd);
 };
 
 } // namespace DCPS

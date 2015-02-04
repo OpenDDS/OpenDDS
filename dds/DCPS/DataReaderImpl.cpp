@@ -74,11 +74,11 @@ DataReaderImpl::DataReaderImpl()
     listener_mask_(DEFAULT_STATUS_MASK),
     domain_id_(0),
     subscriber_servant_(0),
-    end_historic_sweeper_(this),
+    end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
-    liveliness_timer_id_(-1),
+    liveliness_timer_(new LivelinessTimer(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     last_deadline_missed_total_count_(0),
     watchdog_(),
     is_bit_(false),
@@ -139,8 +139,23 @@ DataReaderImpl::~DataReaderImpl()
 {
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
 
-  //cancel all timers for EndHistoricSamplesMissedSweeper
-  this->reactor_->cancel_timer(&end_historic_sweeper_);
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+                   read_guard,
+                   this->writers_lock_);
+    // Cancel any uncancelled sweeper timers to decrement reference count.
+    WriterMapType::iterator writer;
+    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
+      end_historic_sweeper_->cancel_timer(writer->second);
+    }
+  }
+
+  end_historic_sweeper_->wait();
+  end_historic_sweeper_->destroy();
+
+  liveliness_timer_->cancel_timer();
+  liveliness_timer_->wait();
+  liveliness_timer_->destroy();
 
   if (initialized_) {
     delete rd_allocator_;
@@ -152,14 +167,14 @@ void
 DataReaderImpl::cleanup()
 {
   {
+    // Is this lock necessary?
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
         guard,
         this->sample_lock_);
 
-    if (liveliness_timer_id_ != -1) {
-      (void) reactor_->cancel_timer(this);
-    }
+    liveliness_timer_->cancel_timer();
   }
+  liveliness_timer_->wait();
 
   // Cancel any watchdog timers
   { ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
@@ -167,7 +182,7 @@ DataReaderImpl::cleanup()
       iter != instances_.end();
       ++iter) {
     SubscriptionInstance *ptr = iter->second;
-    if (this->watchdog_.get() && ptr->deadline_timer_id_ != -1) {
+    if (this->watchdog_ && ptr->deadline_timer_id_ != -1) {
       this->watchdog_->cancel_timer(ptr);
     }
   }
@@ -203,17 +218,11 @@ DataReaderImpl::cleanup()
     // Cancel any uncancelled sweeper timers
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      if (writer->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
-        reactor_->cancel_timer(writer->second->historic_samples_timer_);
-
-        if (DCPS_debug_level) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::cleanup() - Unscheduled sweeper %d\n", writer->second->historic_samples_timer_));
-        }
-      }
-      writer->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
-      writer->second->_remove_ref();
+      end_historic_sweeper_->cancel_timer(writer->second);
     }
   }
+
+  end_historic_sweeper_->wait();
 }
 
 void DataReaderImpl::init(
@@ -325,10 +334,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const PublicationId& writer_id = writer.writerId;
-    RcHandle<WriterInfo> info = new WriterInfo(this,
-        writer_id,
-        writer.writerQos,
-        this->qos_);
+    RcHandle<WriterInfo> info = new WriterInfo(this, writer_id, writer.writerQos);
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -338,17 +344,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       // Schedule timer if necessary
       //   - only need to check reader qos - we know the writer must be >= reader
       if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-        ACE_Time_Value ten_seconds(10);
-        //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
-        const void* arg = reinterpret_cast<const void*>(info.in());
-        info->_add_ref();
-        info->historic_samples_timer_ =
-            reactor_->schedule_timer(&end_historic_sweeper_,
-                                     arg,
-                                     ten_seconds);
-        if (DCPS_debug_level) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::add_association() - Scheduled sweeper %d\n", info->historic_samples_timer_));
-        }
+        end_historic_sweeper_->schedule_timer(info);
       }
 
       this->statistics_.insert(
@@ -456,9 +452,6 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     // LIVELINESS policy timers are managed here.
     if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
-      // this call will start the timer if it is not already set
-      const ACE_Time_Value now = ACE_OS::gettimeofday();
-
       if (DCPS_debug_level >= 5) {
         GuidConverter converter(subscription_id_);
         ACE_DEBUG((LM_DEBUG,
@@ -466,7 +459,8 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
             ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
             std::string(converter).c_str()));
       }
-      handle_timeout(now, this);
+      // this call will start the timer if it is not already set
+      liveliness_timer_->check_liveliness();
     }
   }
   // We no longer hold the publication_handle_lock_.
@@ -608,7 +602,9 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
 
       if (it != this->writers_.end()) {
         it->second->removed();
+        end_historic_sweeper_->cancel_timer(it->second);
       }
+
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 1) {
           GuidConverter converter(writer_id);
@@ -789,6 +785,49 @@ DataReaderImpl::inconsistent_topic()
   topic_servant_->inconsistent_topic();
 }
 
+void
+DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
+{
+  RepoId prefix = remote_participant;
+  prefix.entityId = EntityId_t();
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+
+  typedef std::vector<std::pair<RepoId, RcHandle<WriterInfo> > > WriterSet;
+  WriterSet writers;
+
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+    for (WriterMapType::iterator pos = writers_.lower_bound(prefix),
+           limit = writers_.end();
+         pos != limit && GuidPrefixEqual() (pos->first.guidPrefix, prefix.guidPrefix);
+         ++pos) {
+      writers.push_back(std::make_pair(pos->first, pos->second));
+    }
+  }
+
+  ACE_Time_Value when = ACE_OS::gettimeofday();
+  for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
+       pos != limit;
+       ++pos) {
+    pos->second->received_activity(when);
+  }
+
+  if (!writers.empty()) {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+    for (WriterSet::iterator pos = writers.begin(), limit = writers.end();
+         pos != limit;
+         ++pos) {
+      for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
+           iter != instances_.end();
+           ++iter) {
+        SubscriptionInstance *ptr = iter->second;
+        ptr->instance_state_.lively(pos->first);
+      }
+    }
+  }
+}
+
 DDS::ReadCondition_ptr DataReaderImpl::create_readcondition(
     DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states,
@@ -891,20 +930,20 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(
         || qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
       if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC
           && qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-        ACE_auto_ptr_reset(this->watchdog_,
+        this->watchdog_ =
             new RequestedDeadlineWatchdog(
-                this->reactor_,
                 this->sample_lock_,
                 qos.deadline,
                 this,
                 this->dr_local_objref_.in(),
                 this->requested_deadline_missed_status_,
-                this->last_deadline_missed_total_count_));
+                this->last_deadline_missed_total_count_);
 
       } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC
           && qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
         this->watchdog_->cancel_all();
-        this->watchdog_.reset();
+        this->watchdog_->destroy();
+        this->watchdog_ = 0;
 
       } else {
         this->watchdog_->reset_interval(
@@ -1202,18 +1241,17 @@ DataReaderImpl::enable()
   // period is not the default (infinite).
   DDS::Duration_t const deadline_period = this->qos_.deadline.period;
 
-  if (this->watchdog_.get() == 0
+  if (this->watchdog_ == 0
       && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
           || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
-    ACE_auto_ptr_reset(this->watchdog_,
+    this->watchdog_ =
         new RequestedDeadlineWatchdog(
-            this->reactor_,
             this->sample_lock_,
             this->qos_.deadline,
             this,
             this->dr_local_objref_.in(),
             this->requested_deadline_missed_status_,
-            this->last_deadline_missed_total_count_));
+            this->last_deadline_missed_total_count_);
   }
 
   this->set_enabled();
@@ -1380,6 +1418,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   switch (sample.header_.message_id_) {
   case SAMPLE_DATA:
   case INSTANCE_REGISTRATION: {
+    if (!check_historic(sample)) break;
+
     DataSampleHeader const & header = sample.header_;
 
     this->writer_activity(header);
@@ -1478,7 +1518,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
 #endif
 
-    if (this->watchdog_.get()) {
+    if (this->watchdog_) {
       instance->last_sample_tv_ = instance->cur_sample_tv_;
       instance->cur_sample_tv_ = ACE_OS::gettimeofday();
 
@@ -1488,7 +1528,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         this->watchdog_->schedule_timer(instance);
 
       } else {
-        this->watchdog_->execute((void const *)instance, false);
+        this->watchdog_->execute(instance, false);
       }
     }
 
@@ -1633,10 +1673,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   break;
 
   case DISPOSE_INSTANCE: {
+    if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
-    if (this->watchdog_.get()) {
+    if (this->watchdog_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1649,22 +1690,23 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               && (this->owner_manager_->is_owner (instance->instance_handle_,
                   sample.header_.publication_id_)))) {
 #endif
-this->watchdog_->cancel_timer(instance);
+        this->watchdog_->cancel_timer(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
     instance = 0;
-    this->dispose(sample, instance);
+    this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
   break;
 
   case UNREGISTER_INSTANCE: {
+    if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
-    if (this->watchdog_.get()) {
+    if (this->watchdog_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1683,16 +1725,17 @@ this->watchdog_->cancel_timer(instance);
       }
     }
     instance = 0;
-    this->unregister(sample, instance);
+    this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
   break;
 
   case DISPOSE_UNREGISTER_INSTANCE: {
+    if (!check_historic(sample)) break;
     this->writer_activity(sample.header_);
     SubscriptionInstance* instance = 0;
 
-    if (this->watchdog_.get()) {
+    if (this->watchdog_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1708,15 +1751,13 @@ this->watchdog_->cancel_timer(instance);
                       && (instance != 0 )
                       && instance->instance_state_.is_last (sample.header_.publication_id_))) {
 #endif
-this->watchdog_->cancel_timer(instance);
+        this->watchdog_->cancel_timer(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
     instance = 0;
-    ReceivedDataSample dup(sample);
-    this->dispose(dup, instance);
-    this->unregister(sample, instance);
+    this->dispose_unregister(sample, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1734,7 +1775,7 @@ this->watchdog_->cancel_timer(instance);
       ACE_DEBUG((LM_INFO, "(%P|%t) Received END_HISTORIC_SAMPLES control message\n"));
     }
     // Going to acquire writers lock, release samples lock
-    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+    guard.release();
     this->resume_sample_processing(sample.header_.publication_id_);
     if (DCPS_debug_level > 4) {
       GuidConverter pub_id(sample.header_.publication_id_);
@@ -2009,37 +2050,42 @@ CORBA::Long DataReaderImpl::total_samples() const
 }
 
 int
-DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
-    const void * arg)
+DataReaderImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value& tv,
+                                                const void * /*arg*/)
+{
+  check_liveliness_i(false, tv);
+  return 0;
+}
+
+void
+DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
+                                                    const ACE_Time_Value& now)
 {
   // Working copy of the active timer Id.
-  long local_timer_id = liveliness_timer_id_.value();
+  long local_timer_id = liveliness_timer_id_;
   bool timer_was_reset = false;
 
-  if (local_timer_id != -1) {
-    if (arg == this) {
-
-      if (DCPS_debug_level >= 5) {
-        GuidConverter converter(subscription_id_);
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
-            ACE_TEXT(" canceling timer for reader %C.\n"),
-            std::string(converter).c_str()));
-      }
-
-      // called from add_associations and there is already a timer
-      // so cancel the existing timer.
-      if (reactor_->cancel_timer(local_timer_id, &arg) == -1) {
-        // this could fail because the reactor's call and
-        // the add_associations' call to this could overlap
-        // so it is not a failure.
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
-            ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
-      }
-
-      timer_was_reset = true;
+  if (local_timer_id != -1 && cancel) {
+    if (DCPS_debug_level >= 5) {
+      GuidConverter converter(data_reader_->subscription_id_);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
+                 ACE_TEXT(" canceling timer for reader %C.\n"),
+                 std::string(converter).c_str()));
     }
+
+    // called from add_associations and there is already a timer
+    // so cancel the existing timer.
+    if (this->reactor()->cancel_timer(local_timer_id) == -1) {
+      // this could fail because the reactor's call and
+      // the add_associations' call to this could overlap
+      // so it is not a failure.
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
+                 ACE_TEXT(" %p. \n"), ACE_TEXT("cancel_timer")));
+    }
+
+    timer_was_reset = true;
   }
 
   // Used after the lock scope ends.
@@ -2055,7 +2101,7 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
   // 6) unless it has been rescheduled.
   // We are using a changed timer Id value as a proxy for having been
   // rescheduled.
-  if( timer_was_reset && (liveliness_timer_id_.value() == local_timer_id)) {
+  if( timer_was_reset && (liveliness_timer_id_ == local_timer_id)) {
     liveliness_timer_id_ = -1;
   }
 
@@ -2063,17 +2109,16 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
 
   // Iterate over each writer to this reader
   {
-    ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
         read_guard,
-        this->writers_lock_,
-        0);
+        data_reader_->writers_lock_);
 
-    for (WriterMapType::iterator iter = writers_.begin();
-        iter != writers_.end();
+    for (WriterMapType::iterator iter = data_reader_->writers_.begin();
+        iter != data_reader_->writers_.end();
         ++iter) {
       // deal with possibly not being alive or
       // tell when it will not be alive next (if no activity)
-      next_absolute = iter->second->check_activity(tv);
+      next_absolute = iter->second->check_activity(now);
 
       if (next_absolute != ACE_Time_Value::max_time) {
         alive_writers++;
@@ -2092,19 +2137,18 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
   }
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter converter(subscription_id_);
+    GuidConverter converter(data_reader_->subscription_id_);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
         std::string(converter).c_str(),
         alive_writers,
-        arg == this ? 0 : 1));
+        !cancel));
   }
 
   // Call into the reactor after releasing the sample lock.
   if (alive_writers) {
     ACE_Time_Value relative;
-    ACE_Time_Value now = ACE_OS::gettimeofday();
 
     // compare the time now with the earliest(smallest) deadline we found
     if (now < smallest)
@@ -2113,16 +2157,14 @@ DataReaderImpl::handle_timeout(const ACE_Time_Value &tv,
     else
       relative = ACE_Time_Value(0,1); // ASAP
 
-    liveliness_timer_id_ = reactor_->schedule_timer(this, 0, relative);
+    liveliness_timer_id_ = this->reactor()->schedule_timer(this, 0, relative);
 
-    if (liveliness_timer_id_.value() == -1) {
+    if (liveliness_timer_id_ == -1) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
           ACE_TEXT(" %p. \n"), ACE_TEXT("schedule_timer")));
     }
   }
-
-  return 0;
 }
 
 void
@@ -2308,8 +2350,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
   }
 
   // this call will start the liveliness timer if it is not already set
-  ACE_Time_Value now = ACE_OS::gettimeofday();
-  this->handle_timeout(now, this);
+  liveliness_timer_->check_liveliness();
 }
 
 void
@@ -2400,14 +2441,6 @@ DataReaderImpl::instances_liveliness_update(WriterInfo& info,
   }
 }
 
-int
-DataReaderImpl::handle_close(ACE_HANDLE,
-    ACE_Reactor_Mask)
-{
-  //this->_remove_ref ();
-  return 0;
-}
-
 void
 DataReaderImpl::set_sample_lost_status(
     const DDS::SampleLostStatus& status)
@@ -2424,19 +2457,11 @@ DataReaderImpl::set_sample_rejected_status(
   sample_rejected_status_ = status;
 }
 
-void DataReaderImpl::dispose(const ReceivedDataSample&,
-    SubscriptionInstance*&)
+void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
+                                        SubscriptionInstance*&)
 {
   if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose()\n"));
-  }
-}
-
-void DataReaderImpl::unregister(const ReceivedDataSample&,
-    SubscriptionInstance*&)
-{
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::unregister()\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::dispose_unregister()\n"));
   }
 }
 
@@ -2790,20 +2815,6 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
     }
   }
 
-
-  // Ignore this sample if it is NOT a historic sample, and we are
-  // waiting for historic sample from this writer
-  if (!header.historic_sample_) {
-    ACE_READ_GUARD_RETURN(
-        ACE_RW_Thread_Mutex, read_guard, this->writers_lock_, false);
-
-    WriterMapType::iterator where = writers_.find(header.publication_id_);
-    if (writers_.end() != where) {
-      // Filter this sample if we are waiting for end historic samples
-      return where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING;
-    }
-  }
-
   return false;
 }
 
@@ -2977,7 +2988,7 @@ void DataReaderImpl::post_read_or_take()
 
 void DataReaderImpl::reschedule_deadline()
 {
-  if (this->watchdog_.get() != 0) {
+  if (this->watchdog_) {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
     for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
         iter != this->instances_.end();
@@ -3340,19 +3351,51 @@ DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)
 void
 DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
 {
+  std::map<SequenceNumber, ReceivedDataSample> to_deliver;
   ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
   WriterMapType::iterator where = writers_.find(pub_id);
   if (writers_.end() != where) {
+    WriterInfo& info = *where->second;
     // Stop filtering these
-    if (where->second->historic_samples_timer_ != WriterInfo::NOT_WAITING) {
-      reactor_->cancel_timer(where->second->historic_samples_timer_);
-
-      if (DCPS_debug_level) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderImpl::resume_sample_processing() - Unscheduled sweeper %d\n", where->second->historic_samples_timer_));
+    if (info.waiting_for_end_historic_samples_) {
+      end_historic_sweeper_->cancel_timer(where->second);
+      if (!info.historic_samples_.empty()) {
+        info.last_historic_seq_ = info.historic_samples_.rbegin()->first;
       }
-      where->second->historic_samples_timer_ = WriterInfo::NOT_WAITING;
-      where->second->_remove_ref();
+      to_deliver.swap(info.historic_samples_);
+      write_guard.release();
+      deliver_historic(to_deliver);
     }
+  }
+}
+
+bool DataReaderImpl::check_historic(const ReceivedDataSample& sample)
+{
+  ACE_WRITE_GUARD_RETURN(ACE_RW_Thread_Mutex, write_guard, writers_lock_, true);
+  WriterMapType::iterator iter = writers_.find(sample.header_.publication_id_);
+  if (iter != writers_.end()) {
+    const SequenceNumber& seq = sample.header_.sequence_;
+    if (iter->second->waiting_for_end_historic_samples_) {
+      iter->second->historic_samples_.insert(std::make_pair(seq, sample));
+      return false;
+    }
+    if (iter->second->last_historic_seq_ != SequenceNumber::SEQUENCENUMBER_UNKNOWN()
+        && !sample.header_.historic_sample_
+        && seq <= iter->second->last_historic_seq_) {
+      // this sample must have been seen before the END_HISTORIC_SAMPLES control msg
+      return false;
+    }
+  }
+  return true;
+}
+
+void DataReaderImpl::deliver_historic(std::map<SequenceNumber, ReceivedDataSample>& samples)
+{
+  typedef std::map<SequenceNumber, ReceivedDataSample>::iterator iter_t;
+  const iter_t end = samples.end();
+  for (iter_t iter = samples.begin(); iter != end; ++iter) {
+    iter->second.header_.historic_sample_ = true;
+    data_received(iter->second);
   }
 }
 
@@ -3363,22 +3406,33 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   TransportImpl_rch impl = link->impl();
   std::string type = impl->transport_type();
 
-  // If this is a multicast link
   if (type == "rtps_udp" || type == "multicast") {
     resume_sample_processing(peer);
   }
 }
 
-EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(
-  DataReaderImpl* reader) : reader_(reader)
-{
-}
+EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
+                                                                 ACE_thread_t owner,
+                                                                 DataReaderImpl* reader)
+  : ReactorInterceptor (reactor, owner)
+  , reader_(reader)
+{ }
 
 EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
+{ }
+
+void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
-  if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper\n"));
-  }
+  info->waiting_for_end_historic_samples_ = true;
+  ScheduleCommand c(this, info);
+  execute_or_enqueue(c);
+}
+
+void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+{
+  info->waiting_for_end_historic_samples_ = false;
+  CancelCommand c(this, info);
+  execute_or_enqueue(c);
 }
 
 int EndHistoricSamplesMissedSweeper::handle_timeout(
@@ -3397,6 +3451,34 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
 
   reader_->resume_sample_processing(pub_id);
   return 0;
+}
+
+void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute()
+{
+  static const ACE_Time_Value ten_seconds(10);
+
+  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
+  const void* arg = reinterpret_cast<const void*>(info_.in());
+  info_->_add_ref();
+
+  info_->historic_samples_timer_ = sweeper_->reactor()->schedule_timer(sweeper_,
+                                                                       arg,
+                                                                       ten_seconds);
+  if (DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", info_->historic_samples_timer_));
+  }
+}
+
+void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
+{
+  if (info_->historic_samples_timer_ != WriterInfo::NO_TIMER) {
+    sweeper_->reactor()->cancel_timer(info_->historic_samples_timer_);
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->historic_samples_timer_));
+    }
+    info_->historic_samples_timer_ = WriterInfo::NO_TIMER;
+    info_->_remove_ref();
+  }
 }
 
 } // namespace DCPS

@@ -16,15 +16,13 @@
 #include "ace/Recursive_Thread_Mutex.h"
 
 OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
-  ACE_Reactor_Timer_Interface* reactor,
   lock_type & lock,
   DDS::DeadlineQosPolicy qos,
   OpenDDS::DCPS::DataReaderImpl * reader_impl,
   DDS::DataReader_ptr reader,
   DDS::RequestedDeadlineMissedStatus & status,
   CORBA::Long & last_total_count)
-  : Watchdog(reactor,
-               duration_to_time_value(qos.period))
+  : Watchdog(duration_to_time_value(qos.period))
   , status_lock_(lock)
   , reverse_status_lock_(status_lock_)
   , reader_impl_(reader_impl)
@@ -134,9 +132,8 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(void const * act, bool timer_c
     }
 
   } else {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RequestedDeadlineWatchdog::execute: "
-               "the current timer should be valid for instance %X\n",
-               instance));
+    // not an error - timer is scheduled asynchronously so we can get here
+    // via DataReaderImpl::data_received() before schedule_timer() is done
   }
 }
 

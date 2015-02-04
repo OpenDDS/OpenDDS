@@ -104,6 +104,8 @@ public:
   void association_complete(const DCPS::RepoId& localId,
                             const DCPS::RepoId& remoteId);
 
+  void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
+
   DCPS::RepoId bit_key_to_repo_id(const char* bit_topic_name,
                                   const DDS::BuiltinTopicKey_t& key);
 

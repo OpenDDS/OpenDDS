@@ -15,6 +15,8 @@
 #include "DataLinkSet.h"
 
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/ReactorInterceptor.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "ace/Time_Value.h"
 #include "ace/Event_Handler.h"
@@ -34,6 +36,7 @@ class AssocationInfo;
 class ReaderIdSeq;
 class WriterIdSeq;
 class SendStateDataSampleList;
+class SendStateDataSampleListIterator;
 
 /**
  * @brief Mix-in class for DDS entities which directly use the transport layer.
@@ -70,20 +73,29 @@ protected:
 
   bool associate(const AssociationData& peer, bool active);
   void disassociate(const RepoId& peerId);
-  void stop_associating();
+  void stop_associating(const ReaderIdSeq* readers = 0);
 
   // Data transfer:
 
   bool send_response(const RepoId& peer,
                      const DataSampleHeader& header,
                      ACE_Message_Block* payload); // [DR]
-  void send(const SendStateDataSampleList& samples);
+
+  void send(SendStateDataSampleList send_list, ACE_UINT64 transaction_id = 0);
+
+  SendControlStatus send_w_control(SendStateDataSampleList send_list,
+                                   const DataSampleHeader& header,
+                                   ACE_Message_Block* msg,
+                                   const RepoId& destination);
+
   SendControlStatus send_control(const DataSampleHeader& header,
                                  ACE_Message_Block* msg,
                                  void* extra = 0);
+
   SendControlStatus send_control_to(const DataSampleHeader& header,
                                     ACE_Message_Block* msg,
                                     const RepoId& destination);
+
   bool remove_sample(const DataSampleElement* sample);
   bool remove_all_msgs();
 
@@ -128,6 +140,8 @@ public:
 private:
 #endif
 
+  void send_i(SendStateDataSampleList send_list, ACE_UINT64 transaction_id);
+
   // A class, normally provided by an unit test, who needs access to a client's
   // privates.
   friend class ::DDS_TEST;
@@ -150,8 +164,94 @@ private:
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
   };
 
-  typedef std::map<RepoId, PendingAssoc, GUID_tKeyLessThan> PendingMap;
+  typedef std::map<RepoId, PendingAssoc*, GUID_tKeyLessThan> PendingMap;
 
+  class PendingAssocTimer : public ReactorInterceptor {
+  public:
+    PendingAssocTimer(ACE_Reactor* reactor,
+                      ACE_thread_t owner)
+      : ReactorInterceptor(reactor, owner)
+    { }
+
+    void schedule_timer(TransportClient* transport_client, PendingAssoc* pend)
+    {
+      ScheduleCommand c(this, transport_client, pend);
+      execute_or_enqueue(c);
+    }
+
+    void cancel_timer(TransportClient* transport_client, PendingAssoc* pend)
+    {
+      CancelCommand c(this, transport_client, pend);
+      execute_or_enqueue(c);
+    }
+
+    void delete_pending_assoc(PendingAssoc* pend)
+    {
+      DeleteCommand c(pend);
+      // Always defer.
+      enqueue(c);
+    }
+
+    virtual bool reactor_is_shut_down() const
+    {
+      return TheServiceParticipant->is_shut_down();
+    }
+
+  private:
+    ~PendingAssocTimer()
+    { }
+
+    class CommandBase : public Command {
+    public:
+      CommandBase(PendingAssocTimer* timer,
+                  TransportClient* transport_client,
+                  PendingAssoc* assoc)
+        : timer_ (timer)
+        , transport_client_ (transport_client)
+        , assoc_ (assoc)
+      { }
+    protected:
+      PendingAssocTimer* timer_;
+      TransportClient* transport_client_;
+      PendingAssoc* assoc_;
+    };
+    struct ScheduleCommand : public CommandBase {
+      ScheduleCommand(PendingAssocTimer* timer,
+                      TransportClient* transport_client,
+                      PendingAssoc* assoc)
+        : CommandBase (timer, transport_client, assoc)
+      { }
+      virtual void execute()
+      {
+        if (timer_->reactor()) {
+          timer_->reactor()->schedule_timer(assoc_, transport_client_, transport_client_->passive_connect_duration_);
+        }
+      }
+    };
+    struct CancelCommand : public CommandBase {
+      CancelCommand(PendingAssocTimer* timer,
+                    TransportClient* transport_client,
+                    PendingAssoc* assoc)
+        : CommandBase (timer, transport_client, assoc)
+      { }
+      virtual void execute()
+      {
+        if (timer_->reactor()) {
+          timer_->reactor()->cancel_timer(assoc_);
+        }
+      }
+    };
+    struct DeleteCommand : public CommandBase {
+      DeleteCommand(PendingAssoc* assoc)
+        : CommandBase (0, 0, assoc)
+      { }
+      virtual void execute()
+      {
+        delete assoc_;
+      }
+    };
+  };
+  PendingAssocTimer* pending_assoc_timer_;
 
   // Associated Impls and DataLinks:
 
@@ -166,6 +266,19 @@ private:
 
   DataLinkIndex data_link_index_;
 
+  // Used to allow sends to completed as a transaction and block
+  // multi-threaded writers from proceeding to send data
+  // on two thread simultaneously, which could cause out-of-order data.
+  ACE_Thread_Mutex send_transaction_lock_;
+  ACE_UINT64 expected_transaction_id_;
+  ACE_UINT64 max_transaction_id_seen_;
+
+  //max_transaction_tail_ will always be the tail of the
+  //max transaction that has been observed or 0 if this is
+  //the first transaction or a transaction after the expected
+  //value was met and thus reset to 0 indicating the samples were
+  //sent up to max_transaction_id_
+  DataSampleElement* max_transaction_tail_;
 
   // Configuration details:
 

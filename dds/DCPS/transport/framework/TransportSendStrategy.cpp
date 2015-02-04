@@ -536,7 +536,6 @@ TransportSendStrategy::adjust_packet_after_send(ssize_t num_bytes_sent)
                   "regarding its fate - data_delivered().\n"));
 
             // Inform the element that the data has been delivered.
-
             this->add_delayed_notification(element);
 
             VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -667,7 +666,6 @@ bool
 TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::MatchCriteria* match)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_delayed_notifications",6);
-
   TransportQueueElement* sample = 0;
   SendMode mode = MODE_NOT_SET;
 
@@ -937,15 +935,11 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
   }
 
   DBG_ENTRY_LVL("TransportSendStrategy", "send", 6);
-  //used for send_delayed_notifications at end of send(), must create local copy of pub_id
-  //now to prevent element being destroyed prior to accessing for publication_id() for match creation
-  RepoId pub_id(element->publication_id());
 
   {
     GuardType guard(this->lock_);
 
     if (this->link_released_) {
-
       this->add_delayed_notification(element);
 
     } else {
@@ -1209,12 +1203,12 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       }
     }
   }
-  const TransportQueueElement::MatchOnPubId match(pub_id);
-  send_delayed_notifications(&match);
+
+  send_delayed_notifications();
 }
 
 void
-TransportSendStrategy::send_stop(RepoId repoId)
+TransportSendStrategy::send_stop(RepoId /*repoId*/)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
@@ -1295,14 +1289,8 @@ TransportSendStrategy::send_stop(RepoId repoId)
                                           "stayed in MODE_DIRECT" )));
     }
   }
-  if(repoId == GUID_UNKNOWN) {
-    //Then this is a ThreadPerConnectionSendTask call and there will be no deadlock by
-    //TransportSendStrategy::send_stop calling into send_delayed_notifications() with no match
-    send_delayed_notifications();
-  } else {
-    const TransportQueueElement::MatchOnPubId match(repoId);
-    send_delayed_notifications(&match);
-  }
+
+  send_delayed_notifications();
 }
 
 void
@@ -1888,6 +1876,7 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
                  size));
     }
   }
+
   this->delayed_delivered_notification_queue_.push_back(std::make_pair(element, this->mode_));
 }
 

@@ -141,6 +141,8 @@ public:
   void association_complete(const DCPS::RepoId& localId,
                             const DCPS::RepoId& remoteId);
 
+  void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
+
   static const bool host_is_bigendian_;
 #ifndef ACE_LYNXOS_MAJOR
 private:
@@ -150,7 +152,7 @@ private:
   ACE_Thread_Mutex& lock_;
 
   struct Msg {
-    enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER,
+    enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER, MSG_PARTICIPANT_DATA,
                    MSG_REMOVE_FROM_PUB_BIT, MSG_REMOVE_FROM_SUB_BIT,
                    MSG_FINI_BIT, MSG_STOP } type_;
     DCPS::MessageId id_;
@@ -213,6 +215,9 @@ private:
     DDS::ReturnCode_t write_sample(const ParameterList& plist,
                                    const DCPS::RepoId& reader,
                                    DCPS::SequenceNumber& sequence);
+    DDS::ReturnCode_t write_sample(const ParticipantMessageData& pmd,
+                                   const DCPS::RepoId& reader,
+                                   DCPS::SequenceNumber& sequence);
     DDS::ReturnCode_t write_unregister_dispose(const DCPS::RepoId& rid);
 
     void end_historic_samples(const DCPS::RepoId& reader);
@@ -233,7 +238,7 @@ private:
                            DCPS::SequenceNumber& sequence,
                            DCPS::MessageId id = DCPS::SAMPLE_DATA);
 
-  } publications_writer_, subscriptions_writer_;
+  } publications_writer_, subscriptions_writer_, participant_message_writer_;
 
   class Reader : public DCPS::TransportReceiveListener, public Endpoint {
   public:
@@ -255,7 +260,7 @@ private:
     void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
 
-  } publications_reader_, subscriptions_reader_;
+  } publications_reader_, subscriptions_reader_, participant_message_reader_;
 
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)
@@ -270,6 +275,7 @@ private:
     void enqueue(const SPDPdiscoveredParticipantData* pdata);
     void enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata);
     void enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata);
+    void enqueue(DCPS::MessageId id, const ParticipantMessageData* data);
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
 
     void acknowledge();
@@ -282,6 +288,7 @@ private:
     void svc_i(const SPDPdiscoveredParticipantData* pdata);
     void svc_i(DCPS::MessageId id, const DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const DiscoveredReaderData* rdata);
+    void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
     void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
 
     Spdp* spdp_;
@@ -338,12 +345,23 @@ private:
       DiscoveredReaderData& drd,
       const DCPS::RepoId& subscription_id,
       const LocalSubscription& sub);
+
+  struct LocalParticipantMessage : LocalEndpoint {
+  };
+  typedef std::map<DCPS::RepoId, LocalParticipantMessage,
+    DCPS::GUID_tKeyLessThan> LocalParticipantMessageMap;
+  typedef LocalParticipantMessageMap::iterator LocalParticipantMessageIter;
+  typedef LocalParticipantMessageMap::const_iterator LocalParticipantMessageCIter;
+  LocalParticipantMessageMap local_participant_messages_;
+
   unsigned int publication_counter_, subscription_counter_;
 
   void data_received(DCPS::MessageId message_id,
                      const DiscoveredWriterData& wdata);
   void data_received(DCPS::MessageId message_id,
                      const DiscoveredReaderData& rdata);
+  void data_received(DCPS::MessageId message_id,
+                     const ParticipantMessageData& data);
 
   struct DiscoveredPublication {
     DiscoveredPublication() : bit_ih_(DDS::HANDLE_NIL) {}
@@ -428,6 +446,7 @@ private:
 
   void write_durable_publication_data(const DCPS::RepoId& reader);
   void write_durable_subscription_data(const DCPS::RepoId& reader);
+  void write_durable_participant_message_data(const DCPS::RepoId& reader);
 
   static bool is_opendds(const GUID_t& endpoint);
 
@@ -437,6 +456,12 @@ private:
   DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
                                             LocalSubscription& pub,
                                             const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+  DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
+                                                   LocalParticipantMessage& part,
+                                                   const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+
+  DCPS::SequenceNumber automatic_liveliness_seq_;
+  DCPS::SequenceNumber manual_liveliness_seq_;
 };
 
 /// A class to wait on acknowledgements from other threads

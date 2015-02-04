@@ -185,6 +185,12 @@ public:
     const OpenDDS::DCPS::RepoId& localId,
     const OpenDDS::DCPS::RepoId& remoteId);
 
+  virtual bool supports_liveliness() const { return true; }
+
+  virtual void signal_liveliness(const DDS::DomainId_t domain_id,
+                                 const OpenDDS::DCPS::RepoId& part_id,
+                                 DDS::LivelinessQosPolicyKind kind);
+
   // configuration parameters:
 
   ACE_Time_Value resend_period() const { return resend_period_; }

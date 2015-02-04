@@ -203,5 +203,5 @@ OpenDDS::DCPS::TcpReceiveStrategy::relink(bool do_suspend)
   DBG_ENTRY_LVL("TcpReceiveStrategy","relink",6);
 
   if (!this->connection_.is_nil())
-    this->connection_->relink(do_suspend);
+    this->connection_->relink_from_recv(do_suspend);
 }

@@ -41,8 +41,7 @@ public:
   /// TransportSendStrategy.
   ReactorSynch(ThreadSynchResource* synch_resource,
                TransportSendStrategy* strategy,
-               ACE_Reactor* reactor,
-               ACE_HANDLE handle);
+               ACE_Reactor* reactor);
 
   virtual ~ReactorSynch();
 

@@ -74,7 +74,9 @@ public:
       const OpenDDS::DCPS::IncompatibleQosStatus & status
     );
 
-  void inconsistent_topic() {}
+  virtual void inconsistent_topic() {}
+
+  virtual void signal_liveliness(const OpenDDS::DCPS::RepoId& /*remote_participant*/) { }
 
   DiscReceivedCalls& received()
     {

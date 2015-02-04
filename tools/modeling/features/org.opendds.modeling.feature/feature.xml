@@ -2,7 +2,7 @@
 <feature
       id="org.opendds.modeling.feature"
       label="OpenDDS Modeling SDK Feature Bundle"
-      version="3.4.0.qualifier"
+      version="3.6.0.qualifier"
       provider-name="Object Computing, Inc."
       plugin="org.opendds.modeling.common">
 
@@ -72,6 +72,7 @@ development model.
       <import plugin="org.eclipse.gmf.runtime.draw2d.ui"/>
       <import plugin="org.eclipse.gmf.runtime.diagram.ui.printing"/>
       <import plugin="org.eclipse.gmf.runtime.diagram.ui.printing.render"/>
+      <import plugin="org.eclipse.gmf.tooling.runtime"/>
       <import plugin="org.eclipse.emf.common"/>
       <import plugin="org.eclipse.emf.transaction"/>
       <import plugin="org.eclipse.gmf.runtime.common.core"/>

@@ -43,6 +43,8 @@ public:
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status) = 0;
 
   virtual void inconsistent_topic() = 0;
+
+  virtual void signal_liveliness(const RepoId& remote_participant) = 0;
 };
 
 } // namespace DCPS

@@ -48,7 +48,6 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
   DBG_ENTRY_LVL("TransportQueueElement", "decision_made", 6);
 
   const unsigned long new_count = --this->sub_loan_count_;
-
   if (new_count == 0) {
     // All interested subscriptions have been satisfied.
 

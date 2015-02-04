@@ -41,9 +41,9 @@ namespace OpenDDS
       virtual ~GIOP_Base() {}
 
       int dissect_giop (MessageHeader *header,
-                        gchar *operation,
+                        const gchar *operation,
                         gchar *idlname);
-      gboolean dissect_heur (MessageHeader *header, gchar *operation);
+      gboolean dissect_heur (MessageHeader *header, const gchar *operation);
 
       void setPacket (tvbuff_t* buf, packet_info* pi, proto_tree* pt, int *poff)
       {
@@ -83,7 +83,7 @@ namespace OpenDDS
       int *offset_;
 
       DecodeFN_Map op_functions_;
-      DecodeFN find_giop_decoder (gchar *opname);
+      DecodeFN find_giop_decoder (const gchar *opname);
       void add_giop_decoder (const char *opname, DecodeFN decoder);
       void init_proto_label (const char *proto);
       void init_repo_id (const char *repoid);

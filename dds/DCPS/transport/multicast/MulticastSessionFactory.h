@@ -17,6 +17,8 @@
 
 #include "dds/DCPS/RcObject_T.h"
 
+class ACE_Reactor;
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -30,7 +32,9 @@ public:
 
   virtual int requires_send_buffer() const = 0;
 
-  virtual MulticastSession* create(MulticastDataLink* link,
+  virtual MulticastSession* create(ACE_Reactor* reactor,
+                                   ACE_thread_t owner,
+                                   MulticastDataLink* link,
                                    MulticastPeer remote_peer) = 0;
 };
 

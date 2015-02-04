@@ -11,12 +11,10 @@
 ACE_INLINE
 OpenDDS::DCPS::ReactorSynchStrategy::ReactorSynchStrategy(
   TransportSendStrategy* strategy,
-  ACE_Reactor* reactor,
-  ACE_HANDLE handle
+  ACE_Reactor* reactor
 )
  : strategy_( strategy),
-   reactor_( reactor),
-   handle_( handle)
+   reactor_( reactor)
 {
   DBG_ENTRY_LVL("ReactorSynchStrategy","ReactorSynchStrategy",6);
 }

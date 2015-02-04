@@ -31,7 +31,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 TransportClient::TransportClient()
-  : swap_bytes_(false)
+  : pending_assoc_timer_(new PendingAssocTimer (TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()))
+  , expected_transaction_id_(1)
+  , max_transaction_id_seen_(0)
+  , max_transaction_tail_(0)
+  , swap_bytes_(false)
   , cdr_encapsulation_(false)
   , reliable_(false)
   , durable_(false)
@@ -77,20 +81,16 @@ TransportClient::~TransportClient()
     iter->second->remove_listener(repo_id_);
   }
 
-  ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
-
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      impls_[i]->stop_accepting_or_connecting(this, it->second.data_.remote_id_);
+      impls_[i]->stop_accepting_or_connecting(this, it->second->data_.remote_id_);
     }
 
-    //timer should always be instantiated by the participant factory, however
-    //in some transport test cases it isn't therefore check timer existence
-    //before use.  Future: Could resolve tests to always instantiate timer interface.
-    if (timer != 0) {
-      timer->cancel_timer(&it->second);
-    }
+    pending_assoc_timer_->cancel_timer(this, it->second);
   }
+
+  pending_assoc_timer_->wait();
+  pending_assoc_timer_->destroy();
 
   for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
@@ -255,7 +255,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, PendingAssoc())).first;
+    iter = pending_.insert(std::make_pair(remote_copy, new PendingAssoc())).first;
 
     GuidConverter tc_assoc(this->repo_id_);
     GuidConverter remote_new(data.remote_id_);
@@ -265,8 +265,8 @@ TransportClient::associate(const AssociationData& data, bool active)
               std::string(remote_new).c_str()), 5);
 
   } else {
-    if (iter->second.removed_) {
-      iter->second.removed_ = false;
+    if (iter->second->removed_) {
+      iter->second->removed_ = false;
 
     } else {
       ACE_ERROR((LM_ERROR,
@@ -277,7 +277,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     }
   }
 
-  PendingAssoc& pend = iter->second;
+  PendingAssoc& pend = *(iter->second);
   pend.active_ = active;
   pend.impls_.clear();
   pend.blob_index_ = 0;
@@ -302,8 +302,6 @@ TransportClient::associate(const AssociationData& data, bool active)
 
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
-      std::string transport_type_loop = impls_[i].in()->transport_type();
-
       pend.impls_.push_back(impls_[i]);
       const std::string type = impls_[i]->transport_type();
 
@@ -316,7 +314,10 @@ TransportClient::associate(const AssociationData& data, bool active)
 
           TransportImpl::AcceptConnectResult res;
           {
-            //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
+            // This thread acquired lock_ at the beginning of this method.  Calling accept_datalink might require getting the lock for the transport's reactor.
+            // If the current thread is not an event handler for the transport's reactor, e.g., the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
+            // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
+            // To avoid deadlock, we must reverse the lock.
             ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
             res = impls_[i]->accept_datalink(remote, pend.attribs_, this);
           }
@@ -342,8 +343,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       //pend.impls_.push_back(impls_[i]);
     }
 
-    ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
-    timer->schedule_timer(&pend, this, passive_connect_duration_);
+    pending_assoc_timer_->schedule_timer(this, iter->second);
   }
 
   return true;
@@ -388,7 +388,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     //PendingAssoc's are only erased from pending_ in use_datalink_i after
 
   } else {
-    if (iter->second.removed_) {
+    if (iter->second->removed_) {
       //this occurs if the transport client was told to disassociate while connecting
       //disassociate cleans up everything except this local AcceptConnectResult whose destructor
       //should take care of it because link has not been shifted into links_ by use_datalink_i
@@ -484,15 +484,15 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     return;
   }
 
-  PendingAssoc& pend = iter->second;
-  const int active_flag = pend.active_ ? ASSOC_ACTIVE : 0;
+  PendingAssoc* pend = iter->second;
+  const int active_flag = pend->active_ ? ASSOC_ACTIVE : 0;
   bool ok = false;
 
-  if (pend.removed_) { // no-op
+  if (pend->removed_) { // no-op
     return;
   } else if (link.is_nil()) {
 
-    if (pend.active_ && pend.initiate_connect(this, guard)) {
+    if (pend->active_ && pend->initiate_connect(this, guard)) {
       return;
     }
 
@@ -509,22 +509,20 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 
   // either link is valid or assoc failed, clean up pending object
   // for passive side processing
-  if (!pend.active_) {
+  if (!pend->active_) {
 
-    for (size_t i = 0; i < pend.impls_.size(); ++i) {
-      pend.impls_[i]->stop_accepting_or_connecting(this, pend.data_.remote_id_);
+    for (size_t i = 0; i < pend->impls_.size(); ++i) {
+      pend->impls_[i]->stop_accepting_or_connecting(this, pend->data_.remote_id_);
     }
   }
 
-  ACE_Reactor_Timer_Interface* timer = TheServiceParticipant->timer();
-
-  if (timer != 0) {
-    timer->cancel_timer(&pend);
-  }
-
   pending_.erase(iter);
+  pend->removed_ = true;
 
   guard.release();
+
+  pending_assoc_timer_->cancel_timer(this, pend);
+  pending_assoc_timer_->delete_pending_assoc(pend);
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
 }
@@ -581,15 +579,28 @@ TransportClient::on_notification_of_connection_deletion(const RepoId& peerId)
 }
 
 void
-TransportClient::stop_associating()
+TransportClient::stop_associating(const ReaderIdSeq* readers)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  PendingMap::iterator iter = pending_.begin();
+  if (readers == 0) {
+    PendingMap::iterator iter = pending_.begin();
 
-  while (iter != pending_.end()) {
-    iter->second.removed_ = true;
-    ++iter;
+    while (iter != pending_.end()) {
+      iter->second->removed_ = true;
+      ++iter;
+    }
+  } else {
+    const ReaderIdSeq& rdrs = *readers;
+    CORBA::ULong len = rdrs.length();
+
+    for (CORBA::ULong i = 0; i < len; ++i) {
+      PendingMap::iterator iter = pending_.find(rdrs[i]);
+
+      if (iter != pending_.end()) {
+        iter->second->removed_ = true;
+      }
+    }
   }
 }
 
@@ -607,7 +618,7 @@ TransportClient::disassociate(const RepoId& peerId)
   const PendingMap::iterator iter = pending_.find(peerId);
 
   if (iter != pending_.end()) {
-    iter->second.removed_ = true;
+    iter->second->removed_ = true;
     return;
   }
 
@@ -703,120 +714,178 @@ TransportClient::send_response(const RepoId& peer,
 }
 
 void
-TransportClient::send(const SendStateDataSampleList& samples)
+TransportClient::send(SendStateDataSampleList send_list, ACE_UINT64 transaction_id)
 {
-  DataSampleElement* cur = samples.head();
+  if (send_list.head() == 0) {
+    return;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, send_transaction_guard, send_transaction_lock_);
+  send_i(send_list, transaction_id);
+}
 
-  while (cur) {
-    // VERY IMPORTANT NOTE:
-    //
-    // We have to be very careful in how we deal with the current
-    // DataSampleElement.  The issue is that once we have invoked
-    // data_delivered() on the send_listener_ object, or we have invoked
-    // send() on the pub_links, we can no longer access the current
-    // DataSampleElement!Thus, we need to get the next
-    // DataSampleElement (pointer) from the current element now,
-    // while it is safe.
-    DataSampleElement* next_elem = cur->get_next_send_sample();
-    DataLinkSet_rch pub_links =
-      (cur->get_num_subs() > 0)
-      ? links_.select_links(cur->get_sub_ids(), cur->get_num_subs())
-  : DataLinkSet_rch(&links_, false);
+SendControlStatus
+TransportClient::send_w_control(SendStateDataSampleList send_list,
+                                const DataSampleHeader& header,
+                                ACE_Message_Block* msg,
+                                const RepoId& destination)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, send_transaction_guard,
+                   send_transaction_lock_, SEND_CONTROL_ERROR);
+  if (send_list.head()) {
+    send_i(send_list, 0);
+  }
+  return send_control_to(header, msg, destination);
+}
 
-    if (pub_links.is_nil() || pub_links->empty()) {
-      // NOTE: This is the "local publisher id is not currently
-      //       associated with any remote subscriber ids" case.
+void
+TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transaction_id)
+{
+  if (transaction_id != 0 && transaction_id != expected_transaction_id_) {
+    if (transaction_id > max_transaction_id_seen_) {
+      max_transaction_id_seen_ = transaction_id;
+      max_transaction_tail_ = send_list.tail();
+    }
+    return;
+  } else /* transaction_id == expected_transaction_id */ {
 
-      if (DCPS_debug_level > 4) {
-        GuidConverter converter(cur->get_pub_id());
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) TransportClient::send: ")
-                   ACE_TEXT("no links for publication %C, ")
-                   ACE_TEXT("not sending %d samples.\n"),
-                   std::string(converter).c_str(),
-                   samples.size()));
+    DataSampleElement* cur = send_list.head();
+    if (max_transaction_tail_ == 0) {
+      //Means no future transaction beat this transaction into send
+      if (transaction_id != 0)
+        max_transaction_id_seen_ = expected_transaction_id_;
+      // Only send this current transaction
+      max_transaction_tail_ = send_list.tail();
+    }
+    DataLinkSet send_links;
+
+    while (true) {
+      // VERY IMPORTANT NOTE:
+      //
+      // We have to be very careful in how we deal with the current
+      // DataSampleElement.  The issue is that once we have invoked
+      // data_delivered() on the send_listener_ object, or we have invoked
+      // send() on the pub_links, we can no longer access the current
+      // DataSampleElement!Thus, we need to get the next
+      // DataSampleElement (pointer) from the current element now,
+      // while it is safe.
+      DataSampleElement* next_elem;
+      if (cur != max_transaction_tail_) {
+        next_elem = cur->get_next_send_sample();
+      } else {
+        next_elem = max_transaction_tail_;
       }
+      DataLinkSet_rch pub_links =
+        (cur->get_num_subs() > 0)
+        ? links_.select_links(cur->get_sub_ids(), cur->get_num_subs())
+        : DataLinkSet_rch(&links_, false);
 
-      // We tell the send_listener_ that all of the remote subscriber ids
-      // that wanted the data (all zero of them) have indeed received
-      // the data.
-      cur->get_send_listener()->data_delivered(cur);
+      if (pub_links.is_nil() || pub_links->empty()) {
+        // NOTE: This is the "local publisher id is not currently
+        //       associated with any remote subscriber ids" case.
 
-    } else {
-      VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
-                , cur), 5);
+        if (DCPS_debug_level > 4) {
+          GuidConverter converter(cur->get_pub_id());
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) TransportClient::send_i: ")
+                     ACE_TEXT("no links for publication %C, ")
+                     ACE_TEXT("not sending element %@ for transaction: %d.\n"),
+                     std::string(converter).c_str(),
+                     cur,
+                     cur->transaction_id()));
+        }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+        // We tell the send_listener_ that all of the remote subscriber ids
+        // that wanted the data (all zero of them) have indeed received
+        // the data.
+        cur->get_send_listener()->data_delivered(cur);
 
-      // Content-Filtering adjustment to the pub_links:
-      // - If the sample should be filtered out of all subscriptions on a given
-      //   DataLink, then exclude that link from the subset that we'll send to.
-      // - If the sample should be filtered out of some (or none) of the subs,
-      //   then record that information in the DataSampleElement so that the
-      //   header's content_filter_entries_ can be marshaled before it's sent.
-      if (cur->filter_out_.ptr()) {
-        DataLinkSet_rch subset;
-        DataLinkSet::GuardType guard(pub_links->lock());
-        typedef DataLinkSet::MapType MapType;
-        MapType& map = pub_links->map();
+      } else {
+        VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
+                  , cur), 5);
 
-        for (MapType::iterator itr = map.begin(); itr != map.end(); ++itr) {
-          size_t n_subs;
-          GUIDSeq_var ti =
-            itr->second->target_intersection(cur->get_pub_id(),
-                                             cur->filter_out_, n_subs);
+  #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-          if (ti.ptr() == 0 || ti->length() != n_subs) {
-            if (!subset.in()) {
-              subset = new DataLinkSet;
+        // Content-Filtering adjustment to the pub_links:
+        // - If the sample should be filtered out of all subscriptions on a given
+        //   DataLink, then exclude that link from the subset that we'll send to.
+        // - If the sample should be filtered out of some (or none) of the subs,
+        //   then record that information in the DataSampleElement so that the
+        //   header's content_filter_entries_ can be marshaled before it's sent.
+        if (cur->filter_out_.ptr()) {
+          DataLinkSet_rch subset;
+          DataLinkSet::GuardType guard(pub_links->lock());
+          typedef DataLinkSet::MapType MapType;
+          MapType& map = pub_links->map();
+
+          for (MapType::iterator itr = map.begin(); itr != map.end(); ++itr) {
+            size_t n_subs;
+            GUIDSeq_var ti =
+              itr->second->target_intersection(cur->get_pub_id(),
+                                               cur->filter_out_, n_subs);
+
+            if (ti.ptr() == 0 || ti->length() != n_subs) {
+              if (!subset.in()) {
+                subset = new DataLinkSet;
+              }
+
+              subset->insert_link(itr->second.in());
+              cur->filter_per_link_[itr->first] = ti._retn();
+
+            } else {
+              VDBG((LM_DEBUG,
+                    "(%P|%t) DBG: DataLink completely filtered-out %@.\n",
+                    itr->second.in()));
             }
-
-            subset->insert_link(itr->second.in());
-            cur->filter_per_link_[itr->first] = ti._retn();
-
-          } else {
-            VDBG((LM_DEBUG,
-                  "(%P|%t) DBG: DataLink completely filtered-out %@.\n",
-                  itr->second.in()));
           }
+
+          if (!subset.in()) {
+            VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
+            // similar to the "if (pub_links.is_nil())" case above, no links
+            cur->get_send_listener()->data_delivered(cur);
+            if (cur != max_transaction_tail_) {
+              // Move on to the next DataSampleElement to send.
+              cur = next_elem;
+              continue;
+            } else {
+              break;
+            }
+          }
+
+          pub_links = subset;
         }
 
-        if (!subset.in()) {
-          VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
-          // similar to the "if (pub_links.is_nil())" case above, no links
-          cur->get_send_listener()->data_delivered(cur);
-          cur = next_elem;
-          continue;
-        }
+  #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-        pub_links = subset;
+        // This will do several things, including adding to the membership
+        // of the send_links set.  Any DataLinks added to the send_links
+        // set will be also told about the send_start() event.  Those
+        // DataLinks (in the pub_links set) that are already in the
+        // send_links set will not be told about the send_start() event
+        // since they heard about it when they were inserted into the
+        // send_links set.
+        send_links.send_start(pub_links.in());
+        pub_links->send(cur);
       }
-
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
-      // This will do several things, including adding to the membership
-      // of the send_links set.  Any DataLinks added to the send_links
-      // set will be also told about the send_start() event.  Those
-      // DataLinks (in the pub_links set) that are already in the
-      // send_links set will not be told about the send_start() event
-      // since they heard about it when they were inserted into the
-      // send_links set.
-      send_links_.send_start(pub_links.in());
-      pub_links->send(cur);
+      if (cur != max_transaction_tail_) {
+        // Move on to the next DataSampleElement to send.
+        cur = next_elem;
+      } else {
+        break;
+      }
     }
 
-    // Move on to the next DataSampleElement to send.
-    cur = next_elem;
+    // This will inform each DataLink in the set about the stop_send() event.
+    // It will then clear the send_links_ set.
+    //
+    // The reason that the send_links_ set is cleared is because we continually
+    // reuse the same send_links_ object over and over for each call to this
+    // send method.
+    RepoId pub_id(this->repo_id_);
+    send_links.send_stop(pub_id);
+    if (transaction_id != 0)
+      expected_transaction_id_ = max_transaction_id_seen_ + 1;
+    max_transaction_tail_ = 0;
   }
-
-  // This will inform each DataLink in the set about the stop_send() event.
-  // It will then clear the send_links_ set.
-  //
-  // The reason that the send_links_ set is cleared is because we continually
-  // reuse the same send_links_ object over and over for each call to this
-  // send method.
-  RepoId pub_id(this->repo_id_);
-  send_links_.send_stop(pub_id);
 }
 
 TransportSendListener*

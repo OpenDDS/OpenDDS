@@ -22,8 +22,11 @@
 namespace OpenDDS {
 namespace DCPS {
 
-NakWatchdog::NakWatchdog(ReliableSession* session)
-  : session_(session)
+NakWatchdog::NakWatchdog(ACE_Reactor* reactor,
+                         ACE_thread_t owner,
+                         ReliableSession* session)
+  : DataLinkWatchdog(reactor, owner)
+  , session_(session)
 {
 }
 
@@ -53,11 +56,26 @@ NakWatchdog::on_interval(const void* /*arg*/)
   this->session_->send_naks();
 }
 
-ReliableSession::ReliableSession(MulticastDataLink* link,
+ReliableSession::ReliableSession(ACE_Reactor* reactor,
+                                 ACE_thread_t owner,
+                                 MulticastDataLink* link,
                                  MulticastPeer remote_peer)
-  : MulticastSession(link, remote_peer),
-    nak_watchdog_(this)
+  : MulticastSession(reactor, owner, link, remote_peer),
+    nak_watchdog_(new NakWatchdog (reactor, owner, this))
 {
+}
+
+ReliableSession::~ReliableSession()
+{
+  nak_watchdog_->cancel();
+  nak_watchdog_->wait();
+  nak_watchdog_->destroy();
+}
+
+bool
+NakWatchdog::reactor_is_shut_down() const
+{
+  return session_->link()->transport()->is_shut_down();
 }
 
 bool
@@ -424,16 +442,6 @@ ReliableSession::start(bool active, bool acked)
      return true;  // already started
   }
 
-  ACE_Reactor* reactor = this->link_->get_reactor();
-
-  if (reactor == 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ReliableSession::start: ")
-                      ACE_TEXT("NULL reactor reference!\n")),
-                     false);
-  }
-
   this->active_  = active;
   {
     //can't call accept_datalink while holding lock due to possible reactor deadlock with passive_connection
@@ -447,7 +455,7 @@ ReliableSession::start(bool active, bool acked)
       if (acked) {
         this->acked_ = true;
       }
-      if (!this->nak_watchdog_.schedule(reactor)) {
+      if (!this->nak_watchdog_->schedule()) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: ")
                           ACE_TEXT("ReliableSession::start: ")
@@ -461,8 +469,8 @@ ReliableSession::start(bool active, bool acked)
     // data reliably. This process must be executed using the
     // transport reactor thread to prevent blocking.
     // Only publisher send syn so just schedule for pub role.
-    if (active && !this->start_syn(reactor)) {
-      this->nak_watchdog_.cancel();
+    if (active && !this->start_syn()) {
+      this->nak_watchdog_->cancel();
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("ReliableSession::start: ")
@@ -478,7 +486,7 @@ void
 ReliableSession::stop()
 {
   MulticastSession::stop();
-  this->nak_watchdog_.cancel();
+  this->nak_watchdog_->cancel();
 }
 
 } // namespace DCPS

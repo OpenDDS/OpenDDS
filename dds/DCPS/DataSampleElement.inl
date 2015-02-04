@@ -18,11 +18,13 @@ DataSampleElement::DataSampleElement(
   PublicationInstance*    handle,
   TransportSendElementAllocator* tse_allocator,
   TransportCustomizedElementAllocator* tce_allocator)
-  : sample_(0),
+  : transaction_id_(0),
+    delivered_(false),
+    dropped_(false),
+    sample_(0),
     publication_id_(publication_id),
     num_subs_(0),
     send_listener_(send_listener),
-    space_available_(false),
     handle_(handle),
     transport_send_element_allocator_(tse_allocator),
     transport_customized_element_allocator_(tce_allocator),
@@ -40,12 +42,14 @@ DataSampleElement::DataSampleElement(
 
 ACE_INLINE
 DataSampleElement::DataSampleElement(const DataSampleElement& elem)
-  : header_(elem.header_)
+  : transaction_id_(elem.transaction_id_)
+  , delivered_(elem.delivered_)
+  , dropped_(elem.dropped_)
+  , header_(elem.header_)
   , sample_(elem.sample_->duplicate())
   , publication_id_(elem.publication_id_)
   , num_subs_(elem.num_subs_)
   , send_listener_(elem.send_listener_)
-  , space_available_(elem.space_available_)
   , handle_(elem.handle_)
   , transport_send_element_allocator_(
       elem.transport_send_element_allocator_)
@@ -81,6 +85,7 @@ ACE_INLINE
 DataSampleElement&
 DataSampleElement::operator=(const DataSampleElement& rhs)
 {
+  transaction_id_ = rhs.transaction_id_;
   header_ = rhs.header_;
   sample_ = rhs.sample_->duplicate();
   publication_id_ = rhs.publication_id_;
@@ -100,7 +105,6 @@ DataSampleElement::operator=(const DataSampleElement& rhs)
   next_send_sample_ = rhs.next_send_sample_;
   previous_send_sample_ = rhs.previous_send_sample_;
   send_listener_ = rhs.send_listener_;
-  space_available_ = rhs.space_available_;
   handle_ = rhs.handle_;
   transport_send_element_allocator_ = rhs.transport_send_element_allocator_;
   transport_customized_element_allocator_ =
@@ -217,20 +221,6 @@ DataSampleElement::get_send_listener()
 }
 
 ACE_INLINE
-bool
-DataSampleElement::space_available() const
-{
-  return space_available_;
-}
-
-ACE_INLINE
-void
-DataSampleElement::set_space_available(bool is_space_available)
-{
-  this->space_available_ = is_space_available;
-}
-
-ACE_INLINE
 PublicationInstance*
 DataSampleElement::get_handle() const
 {
@@ -263,6 +253,51 @@ void
 DataSampleElement::set_filter_out(GUIDSeq *filter_out)
 {
   filter_out_ = filter_out;
+}
+
+ACE_INLINE
+void
+DataSampleElement::set_transaction_id(ACE_UINT64 transaction_id)
+{
+  transaction_id_ = transaction_id;
+}
+
+ACE_INLINE
+ACE_UINT64
+DataSampleElement::transaction_id() const
+{
+  return transaction_id_;
+}
+
+
+ACE_INLINE
+void
+DataSampleElement::set_delivered(bool delivered)
+{
+  delivered_ = delivered;
+}
+
+ACE_INLINE
+bool
+DataSampleElement::delivered() const
+{
+  return delivered_;
+
+}
+
+ACE_INLINE
+void
+DataSampleElement::set_dropped(bool dropped)
+{
+  dropped_ = dropped;
+}
+
+ACE_INLINE
+bool
+DataSampleElement::dropped() const
+{
+  return dropped_;
+
 }
 
 } // namespace DCPS

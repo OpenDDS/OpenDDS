@@ -19,7 +19,9 @@ namespace DCPS {
 class OpenDDS_Multicast_Export BestEffortSession
   : public MulticastSession {
 public:
-  BestEffortSession(MulticastDataLink* link,
+  BestEffortSession(ACE_Reactor* reactor,
+                    ACE_thread_t owner,
+                    MulticastDataLink* link,
                     MulticastPeer remote_peer);
 
   virtual bool check_header(const TransportHeader& header);

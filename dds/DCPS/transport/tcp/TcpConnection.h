@@ -116,7 +116,11 @@ public:
 
   ACE_INET_Addr get_remote_address();
 
-  void  relink(bool do_suspend);
+  /// Reconnect initiated by send strategy
+  void  relink_from_send(bool do_suspend);
+
+  /// Reconnect initiated by receive strategy
+  void  relink_from_recv(bool do_suspend);
 
   /// Called by the reconnect task to inform us that the
   /// link (& any associated data can be torn down.

@@ -4,7 +4,7 @@ One-time developer setup
 1. Download and install Oracle JDK 6 from http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR
 
 2. Download and install Eclipse 4.4 from
-   http://archive.eclipse.org/eclipse/downloads/drops4/R-4.4-201406061215
+   http://archive.eclipse.org/eclipse/downloads/drops4/R-4.4.1-201409250400
    (see the "Eclipse SDK" link for your platform).
 
 3. Configure Eclipse to use JDK 6 as the default JDK: In
@@ -14,7 +14,7 @@ One-time developer setup
    Compiler compliance level to 1.6.
 
 4. Install new features in Eclipse (Help -> Install New Software, work with
-   All Available Sites):
+   All Available Sites, under Modeling):
 
      EMF - Eclipse Modeling Framework SDK
      Graphical Modeling Framework (GMF) Tooling SDK

@@ -35,15 +35,19 @@
 #include "RcHandle_T.h"
 #include "RcObject_T.h"
 #include "WriterInfo.h"
+#include "ReactorInterceptor.h"
+#include "Service_Participant.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
 #include "ace/Atomic_Op.h"
+#include "ace/Reactor.h"
 
 #include <vector>
 #include <list>
 #include <map>
 #include <memory>
+#include <queue>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -110,17 +114,58 @@ public:
 #endif
 
 // Class to cleanup in case EndHistoricSamples is missed
-class EndHistoricSamplesMissedSweeper : public ACE_Event_Handler {
+class EndHistoricSamplesMissedSweeper : public ReactorInterceptor {
 public:
-  EndHistoricSamplesMissedSweeper(DataReaderImpl* reader);
-  ~EndHistoricSamplesMissedSweeper();
+  EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
+                                  ACE_thread_t owner,
+                                  DataReaderImpl* reader);
 
-protected:
+  void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+  void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
 
+  virtual bool reactor_is_shut_down() const
+  {
+    return TheServiceParticipant->is_shut_down();
+  }
+
 private:
+  ~EndHistoricSamplesMissedSweeper();
+
   DataReaderImpl* reader_;
+
+  class CommandBase : public Command {
+  public:
+    CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
+                OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : sweeper_ (sweeper)
+      , info_(info)
+    { }
+
+  protected:
+    EndHistoricSamplesMissedSweeper* sweeper_;
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo> info_;
+  };
+
+  class ScheduleCommand : public CommandBase {
+  public:
+    ScheduleCommand(EndHistoricSamplesMissedSweeper* sweeper,
+                    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : CommandBase(sweeper, info)
+    { }
+    virtual void execute();
+  };
+
+  class CancelCommand : public CommandBase {
+  public:
+    CancelCommand(EndHistoricSamplesMissedSweeper* sweeper,
+                  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : CommandBase(sweeper, info)
+    { }
+    virtual void execute();
+  };
 };
 
 /**
@@ -141,7 +186,6 @@ class OpenDDS_Dcps_Export DataReaderImpl
     public virtual EntityImpl,
     public virtual TransportClient,
     public virtual TransportReceiveListener,
-    public virtual ACE_Event_Handler,
     private WriterInfoListener {
 public:
   friend class RequestedDeadlineWatchdog;
@@ -175,6 +219,8 @@ public:
 
   virtual void inconsistent_topic();
 
+  virtual void signal_liveliness(const RepoId& remote_participant);
+
   /**
   * This is used to retrieve the listener for a certain status change.
   * If this datareader has a registered listener and the status kind
@@ -183,10 +229,6 @@ public:
   * factory/subscriber.
   */
   DDS::DataReaderListener_ptr listener_for(DDS::StatusKind kind);
-
-  /// Handle the assert liveliness timeout.
-  virtual int handle_timeout(const ACE_Time_Value &tv,
-                             const void *arg);
 
   /// tell instances when a DataWriter transitions to being alive
   /// The writer state is inout parameter, it has to be set ALIVE before
@@ -203,9 +245,6 @@ public:
   /// tell instance when a DataWriter is removed.
   /// The liveliness status need update.
   void writer_removed(WriterInfo& info);
-
-  virtual int handle_close(ACE_HANDLE,
-                           ACE_Reactor_Mask);
 
   /**
    * cleanup the DataWriter.
@@ -346,10 +385,9 @@ public:
                              bool & is_new_instance,
                              bool & filtered,
                              MarshalingType marshaling_type)= 0;
-  virtual void dispose(const ReceivedDataSample& sample,
-                       SubscriptionInstance*& instance);
-  virtual void unregister(const ReceivedDataSample& sample,
-                          SubscriptionInstance*& instance);
+
+  virtual void dispose_unregister(const ReceivedDataSample& sample,
+                                  SubscriptionInstance*& instance);
 
   void process_latency(const ReceivedDataSample& sample);
   void notify_latency(PublicationId writer);
@@ -620,8 +658,15 @@ private:
     return data.publication_transport_priority_;
   }
 
-  // when done handling historic samples, resume
+  /// when done handling historic samples, resume
   void resume_sample_processing(const PublicationId& pub_id);
+
+  /// collect samples received before END_HISTORIC_SAMPLES
+  /// returns false if normal processing of this sample should be skipped
+  bool check_historic(const ReceivedDataSample& sample);
+
+  /// deliver samples that were held by check_historic()
+  void deliver_historic(std::map<SequenceNumber, ReceivedDataSample>& samples);
 
   friend class InstanceState;
   friend class EndHistoricSamplesMissedSweeper;
@@ -633,7 +678,7 @@ private:
   DDS::DomainId_t              domain_id_;
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;
-  EndHistoricSamplesMissedSweeper end_historic_sweeper_;
+  EndHistoricSamplesMissedSweeper* end_historic_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;
@@ -670,15 +715,84 @@ private:
   /// timer.
   ACE_Reactor_Timer_Interface* reactor_;
 
+  class LivelinessTimer : public ReactorInterceptor {
+  public:
+    LivelinessTimer(ACE_Reactor* reactor,
+                    ACE_thread_t owner,
+                    DataReaderImpl* data_reader)
+      : ReactorInterceptor(reactor, owner)
+      , data_reader_(data_reader)
+      , liveliness_timer_id_(-1)
+    { }
 
+    void check_liveliness()
+    {
+      CheckLivelinessCommand c(this);
+      execute_or_enqueue(c);
+    }
 
-  /// liveliness timer id; -1 if no timer is set
-  ACE_Atomic_Op<ACE_Thread_Mutex, long> liveliness_timer_id_;
+    void cancel_timer()
+    {
+      CancelCommand c(this);
+      execute_or_enqueue(c);
+    }
+
+    virtual bool reactor_is_shut_down() const
+    {
+      return TheServiceParticipant->is_shut_down();
+    }
+
+  private:
+    ~LivelinessTimer() { }
+
+    DataReaderImpl* data_reader_;
+    /// liveliness timer id; -1 if no timer is set
+    long liveliness_timer_id_;
+
+    void check_liveliness_i(bool cancel, const ACE_Time_Value& current_time);
+
+    int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
+
+    class CommandBase : public Command {
+    public:
+      CommandBase(LivelinessTimer* timer)
+        : timer_(timer)
+      { }
+
+    protected:
+      LivelinessTimer* timer_;
+    };
+
+    class CheckLivelinessCommand : public CommandBase {
+    public:
+      CheckLivelinessCommand(LivelinessTimer* timer)
+        : CommandBase(timer)
+      { }
+      virtual void execute()
+      {
+        timer_->check_liveliness_i(true, ACE_OS::gettimeofday());
+      }
+    };
+
+    class CancelCommand : public CommandBase {
+    public:
+      CancelCommand(LivelinessTimer* timer)
+        : CommandBase(timer)
+      { }
+      virtual void execute()
+      {
+        if (timer_->liveliness_timer_id_ != -1) {
+          timer_->reactor()->cancel_timer(timer_);
+        }
+      }
+    };
+  };
+  LivelinessTimer* liveliness_timer_;
 
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  std::auto_ptr<RequestedDeadlineWatchdog> watchdog_;
+  RequestedDeadlineWatchdog* watchdog_;
 
   /// Flag indicates that this datareader is a builtin topic
   /// datareader.

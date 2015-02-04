@@ -186,6 +186,7 @@ Service_Participant::Service_Participant()
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
     pending_timeout_(ACE_Time_Value::zero),
+    shut_down_(false),
 #ifdef OPENDDS_SAFETY_PROFILE
     memory_pool_(&safety_profile_pool_)
 #else
@@ -226,6 +227,8 @@ Service_Participant::ReactorTask::svc()
 {
   Service_Participant* sp = instance();
   sp->reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
+  sp->reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
+  this->wait_for_startup();
   sp->reactor_->run_reactor_event_loop();
   return 0;
 }
@@ -236,12 +239,24 @@ Service_Participant::timer() const
   return reactor_;
 }
 
+ACE_Reactor*
+Service_Participant::reactor() const
+{
+  return reactor_;
+}
+
+ACE_thread_t
+Service_Participant::reactor_owner() const
+{
+  return reactor_owner_;
+}
+
 void
 Service_Participant::shutdown()
 {
+  shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
-
     ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
 
     domainRepoMap_.clear();
@@ -384,6 +399,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
                    ACE_TEXT("Failed to activate the reactor task.")));
         return DDS::DomainParticipantFactory::_nil();
       }
+
+      reactor_task_.wait_for_startup();
 
       this->monitor_factory_ =
         ACE_Dynamic_Service<MonitorFactory>::instance ("OpenDDS_Monitor");

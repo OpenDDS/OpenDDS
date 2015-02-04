@@ -79,6 +79,10 @@ public:
   /// Intended for use by OpenDDS internals only.
   ACE_Reactor_Timer_Interface* timer() const;
 
+  ACE_Reactor* reactor() const;
+
+  ACE_thread_t reactor_owner() const;
+
   /**
    * Initialize the DDS client environment and get the
    * @c DomainParticipantFactory.
@@ -101,6 +105,9 @@ public:
    *       deleted.
    */
   void shutdown();
+
+  ///Accessor for if the participant has been shutdown
+  bool is_shut_down() const;
 
   /// Accessor of the Discovery object for a given domain.
   Discovery_rch get_discovery(const DDS::DomainId_t domain);
@@ -426,12 +433,19 @@ private:
 public:
 #endif
   ACE_Reactor* reactor_; //TODO: integrate with threadpool
+  ACE_thread_t reactor_owner_;
 #ifdef ACE_LYNXOS_MAJOR
 private:
 #endif
 
   struct ReactorTask : ACE_Task_Base {
+    ReactorTask()
+      : barrier_(2)
+    { }
     int svc();
+    void wait_for_startup() { barrier_.wait(); }
+  private:
+    ACE_Barrier barrier_;
   } reactor_task_;
 
   DomainParticipantFactoryImpl* dp_factory_servant_;
@@ -571,6 +585,9 @@ private:
   /// Number of seconds to wait on pending samples to be sent
   /// or dropped.
   ACE_Time_Value pending_timeout_;
+
+  //used to track state of service participant
+  bool shut_down_;
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;

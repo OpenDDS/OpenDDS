@@ -326,10 +326,13 @@ public:
 #endif
   void send_nack_replies();
   void send_heartbeats();
+  void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
 #ifdef ACE_LYNXOS_MAJOR
 private:
 #endif
+
+  CORBA::Long best_effort_heartbeat_count_;
 
   struct TimedDelay : ACE_Event_Handler {
 

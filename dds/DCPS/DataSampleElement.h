@@ -93,9 +93,6 @@ public:
   TransportSendListener* get_send_listener() const;
   TransportSendListener* get_send_listener();
 
-  bool space_available() const;
-  void set_space_available(bool is_space_available);
-
   PublicationInstance* get_handle() const;
 
   TransportSendElementAllocator* get_transport_send_element_allocator() const;
@@ -107,8 +104,23 @@ public:
 
   void set_filter_out(GUIDSeq *filter_out);
 
+  void set_transaction_id(ACE_UINT64 transaction_id);
+
+  ACE_UINT64 transaction_id() const;
+
+  void set_delivered(bool delivered);
+
+  bool delivered() const;
+
+  void set_dropped(bool dropped);
+
+  bool dropped() const;
+
 private:
 
+  ACE_UINT64 transaction_id_;
+  bool delivered_;
+  bool dropped_;
   /// The OpenDDS DCPS header for this sample
   DataSampleHeader       header_;
 
@@ -127,9 +139,6 @@ private:
   /// been delivered.  This needs to be set prior to using the
   /// TransportClient to send().
   TransportSendListener* send_listener_;
-
-  /// The flag indicates space availability for this waiting DataSample.
-  bool space_available_;
 
   /// The pointer to the object that contains the instance information
   /// and data sample list.

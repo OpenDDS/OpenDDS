@@ -7,7 +7,7 @@
 #include "dds/DCPS/transport/tcp/Tcp.h"
 #include "dds/DCPS/transport/shmem/Shmem.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
-
+#include "dds/DCPS/Service_Participant.h"
 
 int
 ACE_TMAIN (int argc, ACE_TCHAR *argv[])
@@ -29,6 +29,8 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ACE_LOG_MSG->priority_mask(mask & ~LM_DEBUG, ACE_Log_Msg::PROCESS);
     }
   }
+
+  TheServiceParticipant->get_domain_participant_factory();
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
              "Create the SubDriver object.\n"));

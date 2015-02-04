@@ -629,7 +629,7 @@ namespace OpenDDS
     explicit_inforepo_callback
     (tvbuff_t *tvb, packet_info *pinfo,
      proto_tree *ptree, int *offset,
-     ::MessageHeader *header, gchar *operation,
+     ::MessageHeader *header, WS_CONST gchar *operation,
      gchar *idlname)
     {
       InfoRepo_Dissector &dissector =
@@ -649,7 +649,7 @@ namespace OpenDDS
     heuristic_inforepo_callback
     (tvbuff_t *tvb, packet_info *pinfo,
      proto_tree *ptree, int *offset,
-     ::MessageHeader *header, gchar *operation, gchar *)
+     ::MessageHeader *header, WS_CONST gchar *operation, gchar *)
     {
       InfoRepo_Dissector &dissector =
         InfoRepo_Dissector::instance();

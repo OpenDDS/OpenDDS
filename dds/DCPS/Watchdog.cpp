@@ -9,25 +9,92 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "Watchdog.h"
+#include "Service_Participant.h"
 
-#include "ace/Reactor.h"
-#include "ace/Time_Value.h"
+namespace OpenDDS {
+namespace DCPS {
 
-OpenDDS::DCPS::Watchdog::Watchdog(ACE_Reactor_Timer_Interface* reactor,
-                                  ACE_Time_Value const & interval)
-  : reactor_(reactor)
-  , timer_(this)
+namespace {
+  struct CommandBase : ReactorInterceptor::Command {
+    explicit CommandBase(ReactorInterceptor* inter)
+      : interceptor_(inter) {}
+    ReactorInterceptor* const interceptor_;
+  };
+
+  struct ScheduleCommand : CommandBase {
+    ScheduleCommand(ReactorInterceptor* inter, const void* act,
+                    const ACE_Time_Value& interval,
+                    long* timer_id)
+    : CommandBase(inter)
+    , act_(act)
+    , interval_(interval)
+    , timer_id_(timer_id)
+    {}
+
+    void execute()
+    {
+      *timer_id_ = interceptor_->reactor()->schedule_timer(interceptor_, act_,
+                                                           interval_, interval_);
+    }
+
+    const void* const act_;
+    const ACE_Time_Value interval_;
+    long* timer_id_;
+  };
+
+  struct CancelCommand : CommandBase {
+    CancelCommand(ReactorInterceptor* inter, long timer_id)
+    : CommandBase(inter)
+    , timer_id_(timer_id)
+    {}
+
+    void execute()
+    {
+      if (timer_id_ >= 0) {
+        interceptor_->reactor()->cancel_timer(timer_id_);
+      } else {
+        interceptor_->reactor()->cancel_timer(interceptor_);
+      }
+    }
+
+    const long timer_id_;
+  };
+
+  struct ResetCommand : CommandBase {
+    ResetCommand(ReactorInterceptor* inter, long timer_id,
+                 const ACE_Time_Value& interval)
+    : CommandBase(inter)
+    , timer_id_(timer_id)
+    , interval_(interval)
+    {}
+
+    void execute()
+    {
+      interceptor_->reactor()->reset_timer_interval(timer_id_, interval_);
+    }
+
+    const long timer_id_;
+    const ACE_Time_Value interval_;
+  };
+}
+
+Watchdog::Watchdog(const ACE_Time_Value& interval)
+  : ReactorInterceptor(TheServiceParticipant->reactor(),
+                       TheServiceParticipant->reactor_owner())
   , interval_(interval)
 {
 }
 
-OpenDDS::DCPS::Watchdog::~Watchdog()
+Watchdog::~Watchdog()
 {
-  this->cancel_all();
 }
 
-void
-OpenDDS::DCPS::Watchdog::reset_interval(ACE_Time_Value const & interval)
+bool Watchdog::reactor_is_shut_down() const
+{
+  return TheServiceParticipant->is_shut_down();
+}
+
+void Watchdog::reset_interval(const ACE_Time_Value& interval)
 {
   if (this->interval_ != interval) {
     this->interval_ = interval;
@@ -35,29 +102,34 @@ OpenDDS::DCPS::Watchdog::reset_interval(ACE_Time_Value const & interval)
   }
 }
 
-long
-OpenDDS::DCPS::Watchdog::schedule_timer(void* const act, const ACE_Time_Value & interval)
+long Watchdog::schedule_timer(const void* act, const ACE_Time_Value& interval)
 {
-  return this->reactor_->schedule_timer(&this->timer_,
-                                        act,
-                                        interval,
-                                        interval);
+  long timer_id = -1;
+  ScheduleCommand c(this, act, interval, &timer_id);
+  execute_or_enqueue(c);
+  wait();
+  return timer_id;
 }
 
-int
-OpenDDS::DCPS::Watchdog::cancel_timer(long const & timer_id)
+int Watchdog::cancel_timer(long timer_id)
 {
-  return this->reactor_->cancel_timer(timer_id);
+  CancelCommand c(this, timer_id);
+  execute_or_enqueue(c);
+  return 1;
 }
 
-void
-OpenDDS::DCPS::Watchdog::cancel_all()
+void Watchdog::cancel_all()
 {
-  (void) this->reactor_->cancel_timer(&this->timer_);
+  CancelCommand c(this, -1);
+  execute_or_enqueue(c);
 }
 
-int
-OpenDDS::DCPS::Watchdog::reset_timer_interval(long const & timer_id)
+int Watchdog::reset_timer_interval(long timer_id)
 {
-  return this->reactor_->reset_timer_interval(timer_id, this->interval_);
+  ResetCommand c(this, timer_id, interval_);
+  execute_or_enqueue(c);
+  return 0;
+}
+
+}
 }

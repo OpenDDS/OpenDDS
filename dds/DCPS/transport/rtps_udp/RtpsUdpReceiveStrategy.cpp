@@ -119,6 +119,13 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   case HEARTBEAT:
     link_->received(rsh.submessage_.heartbeat_sm(),
                     receiver_.source_guid_prefix_);
+    if (rsh.submessage_.heartbeat_sm().smHeader.flags & 4 /*FLAG_L*/) {
+      // Liveliness has been asserted.  Create a DATAWRITER_LIVELINESS message.
+      sample.header_.message_id_ = DATAWRITER_LIVELINESS;
+      receiver_.fill_header(sample.header_);
+      sample.header_.publication_id_.entityId = rsh.submessage_.heartbeat_sm().writerId;
+      link_->data_received(sample);
+    }
     break;
 
   case ACKNACK:

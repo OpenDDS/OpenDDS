@@ -17,10 +17,19 @@
 namespace OpenDDS {
 namespace DCPS {
 
-SynWatchdog::SynWatchdog(MulticastSession* session)
-  : session_(session)
+SynWatchdog::SynWatchdog(ACE_Reactor* reactor,
+                         ACE_thread_t owner,
+                         MulticastSession* session)
+  : DataLinkWatchdog (reactor, owner)
+  , session_(session)
   , retries_(0)
 {
+}
+
+bool
+SynWatchdog::reactor_is_shut_down() const
+{
+  return session_->link()->transport()->is_shut_down();
 }
 
 ACE_Time_Value
@@ -68,7 +77,9 @@ SynWatchdog::on_timeout(const void* /*arg*/)
 }
 
 
-MulticastSession::MulticastSession(MulticastDataLink* link,
+MulticastSession::MulticastSession(ACE_Reactor* reactor,
+                                   ACE_thread_t owner,
+                                   MulticastDataLink* link,
                                    MulticastPeer remote_peer)
   : link_(link)
   , remote_peer_(remote_peer)
@@ -76,12 +87,15 @@ MulticastSession::MulticastSession(MulticastDataLink* link,
   , started_(false)
   , active_(true)
   , acked_(false)
-  , syn_watchdog_(this)
+  , syn_watchdog_(new SynWatchdog (reactor, owner, this))
 {
 }
 
 MulticastSession::~MulticastSession()
 {
+  syn_watchdog_->cancel();
+  syn_watchdog_->wait();
+  syn_watchdog_->destroy();
 }
 
 bool
@@ -93,9 +107,9 @@ MulticastSession::acked()
 
 
 bool
-MulticastSession::start_syn(ACE_Reactor* reactor)
+MulticastSession::start_syn()
 {
-  return this->syn_watchdog_.schedule_now(reactor);
+  return this->syn_watchdog_->schedule_now();
 }
 
 void
@@ -246,7 +260,7 @@ MulticastSession::synack_received(ACE_Message_Block* control)
 
     if (this->acked_) return; // already acked
 
-    this->syn_watchdog_.cancel();
+    this->syn_watchdog_->cancel();
     this->acked_ = true;
   }
 }
@@ -284,7 +298,7 @@ MulticastSession::send_synack()
 void
 MulticastSession::stop()
 {
-  this->syn_watchdog_.cancel();
+  this->syn_watchdog_->cancel();
 }
 
 bool

@@ -214,6 +214,12 @@ public:
     const OpenDDS::DCPS::RepoId& localId,
     const OpenDDS::DCPS::RepoId& remoteId) = 0;
 
+  virtual bool supports_liveliness() const { return false; }
+
+  virtual void signal_liveliness(const DDS::DomainId_t /*domain_id*/,
+                                 const OpenDDS::DCPS::RepoId& /*part_id*/,
+                                 DDS::LivelinessQosPolicyKind /*kind*/) { }
+
 protected:
 #ifndef DDS_HAS_MINIMUM_BIT
   DDS::ReturnCode_t create_bit_topics(DomainParticipantImpl* participant);

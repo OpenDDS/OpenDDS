@@ -94,6 +94,8 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   OpenDDS::DCPS::RepoId pubId = OpenDDS::DCPS::GUID_UNKNOWN;
   TAO_DDS_DCPSDataWriter_i dwImpl;
 
+  TheServiceParticipant->get_domain_participant_factory();
+
   ::DDS::DomainParticipantQos_var partQos = new ::DDS::DomainParticipantQos;
   *partQos = TheServiceParticipant->initial_DomainParticipantQos();
   OpenDDS::DCPS::AddDomainStatus value = disc->add_domain_participant(domain, partQos.in());
