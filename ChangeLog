@@ -1,3 +1,12 @@
+Wed Feb  4 22:04:21 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Updated criterion for allowing non-SAMPLE_DATA messages
+          wrapped in DataSampleElements to be compatilbe with Sedp's
+          use case (happens to send actual data with null PublicationInstance).
+
 Wed Feb  4 21:44:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

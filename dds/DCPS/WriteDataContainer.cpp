@@ -585,7 +585,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     return;
   }
 
-  if (stale->get_handle() == 0) {
+  if (stale->get_header().message_id_ != SAMPLE_DATA) {
     //this message was a control message so release it
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
@@ -1125,7 +1125,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 void
 WriteDataContainer::release_buffer(DataSampleElement* element)
 {
-  if (element->get_handle() != 0)
+  if (element->get_header().message_id_ == SAMPLE_DATA)
     data_holder_.dequeue(element);
   // Release the memory to the allocator.
   ACE_DES_FREE(element,
