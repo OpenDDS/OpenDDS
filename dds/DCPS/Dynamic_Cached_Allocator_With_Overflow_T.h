@@ -99,28 +99,28 @@ public:
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
                      " %d heap allocs with %d outstanding\n",
-                     this, this->allocs_from_heap_,
-                     this->allocs_from_heap_ - this->frees_to_heap_));
+                     this, this->allocs_from_heap_.value(),
+                     this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
 
         if (DCPS_debug_level >= 6)
-          if (allocs_from_heap_ % 500 == 0)
+          if (allocs_from_heap_.value() % 500 == 0)
             ACE_DEBUG((LM_DEBUG,
                        "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
                        " %d heap allocs with %d outstanding\n",
-                       this, this->allocs_from_heap_,
-                       this->allocs_from_heap_ - this->frees_to_heap_));
+                       this, this->allocs_from_heap_.value(),
+                       this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
       }
 
     } else {
       allocs_from_pool_++;
 
       if (DCPS_debug_level >= 6)
-        if (allocs_from_pool_ % 500 == 0)
+        if (allocs_from_pool_.value() % 500 == 0)
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
                      " %d pool allocs %d pool free with %d available\n",
-                     this, this->allocs_from_pool_,
-                     this->frees_to_pool_,
+                     this, this->allocs_from_pool_.value(),
+                     this->frees_to_pool_.value(),
                      this->available()));
     }
 
@@ -154,22 +154,22 @@ public:
       delete []tmp;
       frees_to_heap_ ++;
 
-      if (frees_to_heap_ > allocs_from_heap_) {
+      if (frees_to_heap_.value() > allocs_from_heap_.value()) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Dynamic_Cached_Allocator_With_Overflow::free %x"
                    " more deletes %d than allocs %d to the heap\n",
                    this,
-                   this->frees_to_heap_,
-                   this->allocs_from_heap_));
+                   this->frees_to_heap_.value(),
+                   this->allocs_from_heap_.value()));
       }
 
       if (DCPS_debug_level >= 6) {
-        if (frees_to_heap_ % 500 == 0) {
+        if (frees_to_heap_.value() % 500 == 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::free %x"
                      " %d heap allocs with %d oustanding\n",
-                     this, this->allocs_from_heap_,
-                     this->allocs_from_heap_ - this->frees_to_heap_));
+                     this, this->allocs_from_heap_.value(),
+                     this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
         }
       }
 
@@ -178,13 +178,13 @@ public:
     } else if (ptr != 0) {
       this->frees_to_pool_ ++;
 
-      if (frees_to_pool_ > allocs_from_pool_) {
+      if (frees_to_pool_.value() > allocs_from_pool_.value()) {
         ACE_ERROR((LM_ERROR,
                    "(%P|%t) ERROR: Dynamic_Cached_Allocator_With_Overflow::free %x"
                    " more deletes %d than allocs %d from the pool\n",
                    this,
-                   this->frees_to_pool_,
-                   this->allocs_from_pool_));
+                   this->frees_to_pool_.value(),
+                   this->allocs_from_pool_.value()));
       }
 
       this->free_list_.add((ACE_Cached_Mem_Pool_Node<char> *) ptr) ;
@@ -194,7 +194,7 @@ public:
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) Dynamic_Cached_Allocator_With_Overflow::malloc %x"
                      " %d pool allocs %d pool frees with %d available\n",
-                     this, this->allocs_from_pool_, this->frees_to_pool_,
+                     this, this->allocs_from_pool_.value(), this->frees_to_pool_.value(),
                      this->available()));
     }
   }
@@ -213,13 +213,13 @@ public:
   };
 
   /// number of allocations from the heap.
-  u_long allocs_from_heap_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> allocs_from_heap_;
   /// number of allocations from the pool.
-  u_long allocs_from_pool_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> allocs_from_pool_;
   /// number of frees returned to the heap
-  u_long frees_to_heap_ ;
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> frees_to_heap_ ;
   /// number of frees returned to the pool
-  u_long frees_to_pool_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> frees_to_pool_;
 private:
   /// Remember how we allocate the memory in the first place so
   /// we can clear things up later.

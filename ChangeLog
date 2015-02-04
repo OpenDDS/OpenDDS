@@ -1,3 +1,15 @@
+Wed Feb  4 19:06:03 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * NEWS:
+
+          Updates for release.
+
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/idl/HTemplate.txt:
+
+          These can be accessed by multiple threads, add lock to counters
+          and free list.
+
 Wed Feb  4 19:05:33 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLinkSet.inl:
