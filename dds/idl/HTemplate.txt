@@ -68,7 +68,7 @@ public:
 
   typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
       OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
-  typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Null_Mutex>  DataAllocator;
+  typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>  DataAllocator;
 
   /// Constructor
   <%TYPE%>DataWriterImpl (void);

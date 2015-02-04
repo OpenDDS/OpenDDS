@@ -1,4 +1,4 @@
-project(DcpsFooTest5Publisher): dcpsexe, dcps_transports_for_test {
+project(DcpsFooTest5Publisher): dcpsexe, dcps_transports_for_test, dds_model {
   exename   = publisher
   libpaths += ../FooType5
   libs     +=  DcpsFooType5

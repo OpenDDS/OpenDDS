@@ -29,6 +29,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include "model/Sync.h"
 
 #include "ace/Arg_Shifter.h"
 
@@ -449,11 +450,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ACE_OS::fclose(writers_ready);
       ACE_OS::fclose(readers_ready);
 
-      // ensure the associations are fully established before writing.
-      ACE_OS::sleep(3);
-
       for (int i = 0; i < num_datawriters; i ++)
         {
+          OpenDDS::Model::WriterSync::wait_match(dw[i]);
           writers[i]->start ();
         }
 

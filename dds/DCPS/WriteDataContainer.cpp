@@ -151,6 +151,19 @@ WriteDataContainer::~WriteDataContainer()
   }
 }
 
+DDS::ReturnCode_t
+WriteDataContainer::enqueue_control(DataSampleElement* control_sample)
+{
+  // Enqueue to the next_send_sample_ thread of unsent_data_
+  // will link samples with the next_sample/previous_sample and
+  // also next_send_sample_.
+  // This would save time when we actually send the data.
+
+  unsent_data_.enqueue_tail(control_sample);
+
+  return DDS::RETCODE_OK;
+}
+
 // This method assumes that instance list has space for this sample.
 DDS::ReturnCode_t
 WriteDataContainer::enqueue(
@@ -527,8 +540,6 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   // list, and appended to the end of the sent_data_ list here, or
   // when the datawriter returns the loaned sample during add_sending_data().
 
-  PublicationInstance* instance = sample->get_handle();
-
   DataSampleElement* stale = const_cast<DataSampleElement*>(sample);
 
   // If sample is on a SendStateDataSampleList it should be on the
@@ -572,21 +583,34 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     return;
   }
 
-  if (DCPS_debug_level > 9) {
-    GuidConverter converter(publication_id_);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
-               ACE_TEXT("domain %d topic %C publication %C pushed to HISTORY.\n"),
-               this->domain_id_,
-               this->topic_name_,
-               std::string(converter).c_str()));
+  if (stale->get_header().message_id_ != SAMPLE_DATA) {
+    //this message was a control message so release it
+    if (DCPS_debug_level > 9) {
+      GuidConverter converter(publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
+                 ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
+                 this->domain_id_,
+                 this->topic_name_,
+                 std::string(converter).c_str()));
+    }
+    release_buffer(stale);
+  } else {
+    if (DCPS_debug_level > 9) {
+      GuidConverter converter(publication_id_);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
+                 ACE_TEXT("domain %d topic %C publication %C pushed to HISTORY.\n"),
+                 this->domain_id_,
+                 this->topic_name_,
+                 std::string(converter).c_str()));
+    }
+
+    DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
+    sent_data_.enqueue_tail(sample);
+
+    this->wakeup_blocking_writers (stale);
   }
-
-  DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
-  sent_data_.enqueue_tail(sample);
-
-  this->wakeup_blocking_writers (stale, instance);
-
   // Signal if there is no pending data.
   if (!pending_data())
     empty_condition_.broadcast();
@@ -629,7 +653,6 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
   // We are now been notified by transport, so we can
   // keep the sample from the sending_data_ list still in
   // sample list since we will send it.
-  PublicationInstance* instance = sample->get_handle();
 
   DataSampleElement* stale = const_cast<DataSampleElement*>(sample);
 
@@ -645,9 +668,6 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     // qos. The samples that are sending by transport are dropped from
     // transport and will be moved to the unsent list for resend.
     unsent_data_.enqueue_tail(sample);
-
-    // Get the handle
-    instance = sample->get_handle();
 
   } else {
     //
@@ -682,7 +702,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     return;
   }
 
-  this->wakeup_blocking_writers (stale, instance);
+  this->wakeup_blocking_writers (stale);
 
   if (!pending_data())
     empty_condition_.broadcast();
@@ -896,6 +916,26 @@ WriteDataContainer::remove_oldest_sample(
 }
 
 DDS::ReturnCode_t
+WriteDataContainer::obtain_buffer_for_control(DataSampleElement*& element)
+{
+  DBG_ENTRY_LVL("WriteDataContainer","obtain_buffer_for_control", 6);
+
+  ACE_NEW_MALLOC_RETURN(
+    element,
+    static_cast<DataSampleElement*>(
+      sample_list_element_allocator_.malloc(
+        sizeof(DataSampleElement))),
+    DataSampleElement(publication_id_,
+                          this->writer_,
+                          0,
+                          &transport_send_element_allocator_,
+                          &transport_customized_element_allocator_),
+    DDS::RETCODE_ERROR);
+
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t
 WriteDataContainer::obtain_buffer(DataSampleElement*& element,
                                   DDS::InstanceHandle_t handle)
 {
@@ -1083,7 +1123,8 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 void
 WriteDataContainer::release_buffer(DataSampleElement* element)
 {
-  data_holder_.dequeue(element);
+  if (element->get_header().message_id_ == SAMPLE_DATA)
+    data_holder_.dequeue(element);
   // Release the memory to the allocator.
   ACE_DES_FREE(element,
                sample_list_element_allocator_.free,
@@ -1323,8 +1364,7 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
 }
 
 void
-WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale,
-                                            PublicationInstance* )
+WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
 {
   if (stale && waiting_on_release_) {
     waiting_on_release_ = false;

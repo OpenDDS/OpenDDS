@@ -72,6 +72,25 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
   }
 }
 
+ACE_INLINE void
+OpenDDS::DCPS::DataLinkSet::send_control(DataSampleElement* sample)
+{
+  DBG_ENTRY_LVL("DataLinkSet", "send_control", 6);
+  VDBG((LM_DEBUG, "(%P|%t) DBG: DataLinkSet::send_control %@.\n", sample));
+  GuardType guard(this->lock_);
+  TransportSendControlElement* send_element =
+    TransportSendControlElement::alloc(static_cast<int>(map_.size()), sample,
+                                       &send_control_element_allocator_);
+  if (!send_element) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) DataLinkSet::send_control allocation of "
+      "TransportSendControlElement failed\n"));
+    return;
+  }
+  for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
+    itr->second->send(send_element);
+  }
+}
+
 ACE_INLINE OpenDDS::DCPS::SendControlStatus
 OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
                                          TransportSendListener*  listener,
@@ -81,7 +100,6 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
 {
   DBG_ENTRY_LVL("DataLinkSet","send_control",6);
   //Optimized - use cached allocator.
-  TransportSendControlElement* send_element = 0;
 
   MapType dup_map;
   copy_map_to(dup_map);
@@ -103,15 +121,10 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
   TransportSendControlElementAllocator& use_alloc =
     allocator ? *allocator : send_control_element_allocator_;
 
-  ACE_NEW_MALLOC_RETURN(send_element,
-    static_cast<TransportSendControlElement*>(use_alloc.malloc()),
-    TransportSendControlElement(static_cast<int>(dup_map.size()),
-                                pub_id,
-                                listener,
-                                header,
-                                msg,
-                                &use_alloc),
-    SEND_CONTROL_ERROR);
+  TransportSendControlElement* const send_element =
+    TransportSendControlElement::alloc(static_cast<int>(dup_map.size()), pub_id,
+                                       listener, header, msg, &use_alloc);
+  if (!send_element) return SEND_CONTROL_ERROR;
 
   for (MapType::iterator itr = dup_map.begin();
        itr != dup_map.end();
@@ -131,19 +144,13 @@ OpenDDS::DCPS::DataLinkSet::send_response(
   ACE_Message_Block* response)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_response",6);
-  TransportSendControlElement* send_element = 0;
-
   GuardType guard(this->lock_);
 
-  ACE_NEW_MALLOC(send_element,
-    static_cast<TransportSendControlElement*>(
-      send_control_element_allocator_.malloc()),
-    TransportSendControlElement(static_cast<int>(map_.size()),
-                                pub_id,
-                                &send_response_listener_,
-                                header,
-                                response,
-                                &send_control_element_allocator_));
+  TransportSendControlElement* const send_element =
+    TransportSendControlElement::alloc(static_cast<int>(map_.size()), pub_id,
+                                       &send_response_listener_, header,
+                                       response, &send_control_element_allocator_);
+  if (!send_element) return;
   send_response_listener_.track_message();
 
   for (MapType::iterator itr = map_.begin();
