@@ -1868,18 +1868,37 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
                        ret);
     }
 
+    DataSampleElement* element = 0;
+    ret = this->data_container_->obtain_buffer_for_control(element);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::unregister_instance_i: ")
+                        ACE_TEXT("obtain_buffer_for_control returned %d.\n"),
+                        ret),
+                       ret);
+    }
     message = this->create_control_message(UNREGISTER_INSTANCE,
-                                           header,
+                                           element->get_header(),
                                            unregistered_sample_data,
                                            source_timestamp);
-  }
 
-  if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
-                      ACE_TEXT(" send_control failed. \n")),
-                     DDS::RETCODE_ERROR);
-  }
+    element->set_sample(message);
+
+    ret = this->data_container_->enqueue_control(element);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::unregister_instance_i: ")
+                        ACE_TEXT("enqueue_control failed.\n")),
+                       ret);
+    }
+
+    send_all_to_flush_control(guard);
+
+  }  //end guard scope
 
   return DDS::RETCODE_OK;
 }
@@ -1917,19 +1936,37 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
                        ret);
     }
 
+    DataSampleElement* element = 0;
+    ret = this->data_container_->obtain_buffer_for_control(element);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
+                        ACE_TEXT("obtain_buffer_for_control returned %d.\n"),
+                        ret),
+                       ret);
+    }
     message = this->create_control_message(DISPOSE_UNREGISTER_INSTANCE,
-                                           header,
+                                           element->get_header(),
                                            data_sample,
                                            source_timestamp);
-  }
 
-  if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
-                      ACE_TEXT("send_control failed.\n")),
-                     DDS::RETCODE_ERROR);
-  }
+    element->set_sample(message);
+
+    ret = this->data_container_->enqueue_control(element);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
+                        ACE_TEXT("enqueue_control failed.\n")),
+                       ret);
+    }
+
+    send_all_to_flush_control(guard);
+
+  }  //end guard scope
 
   return DDS::RETCODE_OK;
 }
@@ -2124,18 +2161,38 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
                        ret);
     }
 
+    DataSampleElement* element = 0;
+    ret = this->data_container_->obtain_buffer_for_control(element);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::dispose: ")
+                        ACE_TEXT("obtain_buffer_for_control returned %d.\n"),
+                        ret),
+                       ret);
+    }
+
     message = this->create_control_message(DISPOSE_INSTANCE,
-                                           header,
+                                           element->get_header(),
                                            registered_sample_data,
                                            source_timestamp);
-  }
 
-  if (this->send_control(header, message) == SEND_CONTROL_ERROR) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose: ")
-                      ACE_TEXT(" send_control failed. \n")),
-                     DDS::RETCODE_ERROR);
-  }
+    element->set_sample(message);
+
+    ret = this->data_container_->enqueue_control(element);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::dispose: ")
+                        ACE_TEXT("enqueue_control failed.\n")),
+                       ret);
+    }
+
+    send_all_to_flush_control(guard);
+
+  }  //end guard scope
 
   return DDS::RETCODE_OK;
 }

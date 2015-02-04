@@ -1,3 +1,12 @@
+Wed Feb  4 21:00:14 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Updated Dispose, Unregister, and Unregister and Dispose
+          control messages to follow register instance due to also
+          being assigned sequence numbers and needing to guarantee
+          delivery order.
+
 Wed Feb  4 19:06:03 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * NEWS:
@@ -16,7 +25,7 @@ Wed Feb  4 19:05:33 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
           Added a check for the allocator if the allocation failed.
 
-Wed Feb  4 18:55:22 UTC 2015  Peter Oschwald  <oschwald_p@ociweb.com>
+Wed Feb  4 18:55:22 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
         * dds/DCPS/DataWriterImpl.cpp:
