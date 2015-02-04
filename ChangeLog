@@ -1,3 +1,9 @@
+Wed Feb  4 19:05:33 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Added a check for the allocator if the allocation failed.
+
 Wed Feb  4 18:55:22 UTC 2015  Peter Oschwald  <oschwald_p@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:

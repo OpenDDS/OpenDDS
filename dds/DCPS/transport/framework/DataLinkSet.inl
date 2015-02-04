@@ -81,6 +81,11 @@ OpenDDS::DCPS::DataLinkSet::send_control(DataSampleElement* sample)
   TransportSendControlElement* send_element =
     TransportSendControlElement::alloc(static_cast<int>(map_.size()), sample,
                                        &send_control_element_allocator_);
+  if (!send_element) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) DataLinkSet::send_control allocation of "
+      "TransportSendControlElement failed\n"));
+    return;
+  }
   for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
     itr->second->send(send_element);
   }
