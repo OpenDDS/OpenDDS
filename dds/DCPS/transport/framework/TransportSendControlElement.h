@@ -32,12 +32,27 @@ TransportSendControlElementAllocator;
 class OpenDDS_Dcps_Export TransportSendControlElement : public TransportQueueElement {
 public:
 
-  TransportSendControlElement(int                     initial_count,
-                              RepoId                  publisher_id,
-                              TransportSendListener*  listener,
+  TransportSendControlElement(int initial_count,
+                              const RepoId& publisher_id,
+                              TransportSendListener* listener,
                               const DataSampleHeader& header,
-                              ACE_Message_Block*      msg_block,
+                              ACE_Message_Block* msg_block,
                               TransportSendControlElementAllocator* allocator = 0);
+
+  TransportSendControlElement(int initial_count,
+                              const DataSampleElement* dcps_elem,
+                              TransportSendControlElementAllocator* allocator);
+
+  static TransportSendControlElement* alloc(int initial_count,
+                                            const RepoId& publisher_id,
+                                            TransportSendListener* listener,
+                                            const DataSampleHeader& header,
+                                            ACE_Message_Block* message,
+                                            TransportSendControlElementAllocator* allocator);
+
+  static TransportSendControlElement* alloc(int initial_count,
+                                            const DataSampleElement* dcps_elem,
+                                            TransportSendControlElementAllocator* allocator);
 
   virtual ~TransportSendControlElement();
 
@@ -82,6 +97,9 @@ private:
 
   /// The control message.
   ACE_Message_Block* msg_;
+
+  /// If constructed from a DataSampleElement, keep it around for release
+  const DataSampleElement* const dcps_elem_;
 
   /// Reference to the TransportSendControlElement
   /// allocator.

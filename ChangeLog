@@ -1,6 +1,19 @@
-Tue Feb  3 19:21:49 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+Wed Feb  4 14:51:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
-        * OpenDDS version 3.6 released.
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+
+          Allow some TransportSendControlElements to wrap DataSampleElements.
+          These will be used for instance state change messages which are
+          considered control (as opposed to data) but still have a sequence
+          number so they will be managed on the sending list of the
+          WriteDataContainer to maintain order.
+          The code to use this at the DCPS layer (DataWriterImpl,
+          WriteDataContainer) will be added in a future commit.
 
 Tue Feb  3 18:54:40 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 

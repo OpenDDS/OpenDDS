@@ -754,18 +754,12 @@ DataLink::send_control(const DataSampleHeader& header, ACE_Message_Block* messag
 {
   DBG_ENTRY_LVL("DataLink", "send_control", 6);
 
-  TransportSendControlElement* elem;
+  TransportSendControlElement* const elem =
+    TransportSendControlElement::alloc(1, // initial_count
+                                       GUID_UNKNOWN, &send_response_listener_,
+                                       header, message, send_control_allocator_);
+  if (!elem) return SEND_CONTROL_ERROR;
 
-  ACE_NEW_MALLOC_RETURN(elem,
-                        static_cast<TransportSendControlElement*>(
-                          this->send_control_allocator_->malloc()),
-                        TransportSendControlElement(1,  // initial_count
-                                                    GUID_UNKNOWN,
-                                                    &send_response_listener_,
-                                                    header,
-                                                    message,
-                                                    this->send_control_allocator_),
-                        SEND_CONTROL_ERROR);
   send_response_listener_.track_message();
 
   RepoId senderId(header.publication_id_);
