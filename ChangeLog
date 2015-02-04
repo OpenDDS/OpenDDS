@@ -1,3 +1,10 @@
+Wed Feb  4 21:44:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Updated register_instance_from_durable_data to properly handle
+          registration control messages.
+
 Wed Feb  4 21:00:14 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.cpp:

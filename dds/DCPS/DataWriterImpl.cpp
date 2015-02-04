@@ -1807,6 +1807,11 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
   DataSampleHeader header;
   ACE_Message_Block* registered_sample;
 
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   get_lock(),
+                   ::DDS::RETCODE_ERROR);
+
   DDS::ReturnCode_t ret =
       register_instance_i(handle,
                           data,
@@ -1821,14 +1826,7 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
                       ret);
   }
 
-
-  if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("DataWriterImpl::register_instance_from_durable_data: ")
-                      ACE_TEXT("send_control failed.\n")),
-                      DDS::RETCODE_ERROR);
-  }
+  send_all_to_flush_control(guard);
 
   return ret;
 }
