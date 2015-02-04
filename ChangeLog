@@ -1,3 +1,31 @@
+Wed Feb  4 18:55:22 UTC 2015  Peter Oschwald  <oschwald_p@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          DCPS layer to now use code added which allows
+          TransportSendControlElements to wrap DataSampleElements.  These are
+          used for instance state change messages which are considered
+          control, as opposed to data, but still have sequence numbers so they
+          should be managed by the WriteDataContainer and be placed on the
+          sending_list_ to maintain order.  Now handle sending and delivery of
+          these control messages as DataSampleElements but treated
+          differently.  Control messages can be differentiated from data
+          samples by the absence of a PublicationInstance. Currently only
+          registration control messages are handled.
+
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+
+          Modified FooTest5 to use WriterSync and added a printout for when
+          the writer actually writes a message to see the difference between
+          writing and receiving times.
+
 Wed Feb  4 14:51:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/DataLink.cpp:

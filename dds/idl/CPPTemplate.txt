@@ -552,17 +552,8 @@ ACE_Message_Block*
       }
     } // end of if (needs_creation)
 
-    //need to release guard to call down to transport
-    guard.release();
+    send_all_to_flush_control(guard);
 
-    if (this->send_control(header, registered_sample) == OpenDDS::DCPS::SEND_CONTROL_ERROR) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("<%TYPE%>DataWriterImpl::")
-                        ACE_TEXT("get_or_create_instance_handle: ")
-                        ACE_TEXT("send_control failed.\n")),
-                        ::DDS::RETCODE_ERROR);
-    }
   } // end of if (needs_registration)
 
   return ::DDS::RETCODE_OK;

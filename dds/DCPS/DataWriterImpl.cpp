@@ -1719,6 +1719,19 @@ DataWriterImpl::enable()
   return writer_enabled_result;
 }
 
+void
+DataWriterImpl::send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard)
+{
+  SendStateDataSampleList list;
+
+  ACE_UINT64 transaction_id = this->get_unsent_data(list);
+
+  //need to release guard to call down to transport
+  guard.release();
+
+  this->send(list, transaction_id);
+}
+
 DDS::ReturnCode_t
 DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                                     DataSample* data,
@@ -1736,7 +1749,7 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                      DDS::RETCODE_NOT_ENABLED);
   }
 
-  DDS::ReturnCode_t const ret =
+  DDS::ReturnCode_t ret =
     this->data_container_->register_instance(handle, data);
 
   if (ret != DDS::RETCODE_OK) {
@@ -1750,22 +1763,36 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
     this->monitor_->report();
   }
 
+  DataSampleElement* element = 0;
+  ret = this->data_container_->obtain_buffer_for_control(element);
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("DataWriterImpl::register_instance_i: ")
+                      ACE_TEXT("obtain_buffer_for_control returned %d.\n"),
+                      ret),
+                     ret);
+  }
+
   // Add header with the registration sample data.
-//  DataSampleHeader header;
-//  ACE_Message_Block* registered_sample =
     registered_sample =
         this->create_control_message(INSTANCE_REGISTRATION,
-                                 header,
+                                 element->get_header(),
                                  data,
                                  source_timestamp);
 
-//  if (this->send_control(header, registered_sample) == SEND_CONTROL_ERROR) {
-//    ACE_ERROR_RETURN((LM_ERROR,
-//                      ACE_TEXT("(%P|%t) ERROR: ")
-//                      ACE_TEXT("DataWriterImpl::register_instance_i: ")
-//                      ACE_TEXT("send_control failed.\n")),
-//                     DDS::RETCODE_ERROR);
-//  }
+    element->set_sample(registered_sample);
+
+    ret = this->data_container_->enqueue_control(element);
+
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("DataWriterImpl::register_instance_i: ")
+                        ACE_TEXT("enqueue_control failed.\n")),
+                       ret);
+    }
 
   return ret;
 }

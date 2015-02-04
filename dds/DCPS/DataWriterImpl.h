@@ -214,6 +214,8 @@ public:
     OpenDDS::DCPS::PublisherImpl*         publisher_servant,
     DDS::DataWriter_ptr                   dw_local);
 
+  void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
+
   /**
    * Delegate to the WriteDataContainer to register
    * Must tell the transport to broadcast the registered
