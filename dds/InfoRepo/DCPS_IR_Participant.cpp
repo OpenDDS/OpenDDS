@@ -249,13 +249,15 @@ int DCPS_IR_Participant::find_publication_reference(OpenDDS::DCPS::RepoId pubId,
     return 0;
 
   } else {
-    OpenDDS::DCPS::RepoIdConverter part_converter(id_);
-    OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_publication_reference: ")
-               ACE_TEXT("participant %C could not find publication %C.\n"),
-               std::string(part_converter).c_str(),
-               std::string(pub_converter).c_str()));
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      OpenDDS::DCPS::RepoIdConverter part_converter(id_);
+      OpenDDS::DCPS::RepoIdConverter pub_converter(pubId);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_publication_reference: ")
+                 ACE_TEXT("participant %C could not find publication %C.\n"),
+                 std::string(part_converter).c_str(),
+                 std::string(pub_converter).c_str()));
+    }
     pub = 0;
     return -1;
   }
@@ -373,13 +375,15 @@ int DCPS_IR_Participant::find_subscription_reference(OpenDDS::DCPS::RepoId subId
     return 0;
 
   } else {
-    OpenDDS::DCPS::RepoIdConverter part_converter(id_);
-    OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Participant::find_subscription_reference: ")
-               ACE_TEXT("participant %C could not find subscription %C.\n"),
-               std::string(part_converter).c_str(),
-               std::string(sub_converter).c_str()));
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      OpenDDS::DCPS::RepoIdConverter part_converter(id_);
+      OpenDDS::DCPS::RepoIdConverter sub_converter(subId);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DCPS_IR_Participant::find_subscription_reference: ")
+                 ACE_TEXT("participant %C could not find subscription %C.\n"),
+                 std::string(part_converter).c_str(),
+                 std::string(sub_converter).c_str()));
+    }
     sub = 0;
     return -1;
   }
