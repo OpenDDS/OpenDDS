@@ -597,6 +597,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  std::string(converter).c_str()));
     }
     release_buffer(stale);
+    writer_->controlTracker.message_delivered();
   } else {
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
