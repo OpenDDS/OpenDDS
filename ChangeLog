@@ -1,3 +1,15 @@
+Thu Feb  5 22:48:51 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Push error reporting out of find_*_reference up to caller to
+          decide if not finding the reference is indeed an error.
+
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+
+          Fix assert to accept timeout on write.
+
 Thu Feb  5 22:41:27 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/DataWriterImpl.h:
