@@ -521,10 +521,9 @@ ACE_Message_Block*
 
     // Used for send_control after registration
     ACE_Message_Block* registered_sample = 0;
-    OpenDDS::DCPS::DataSampleHeader header;
 
     // tell DataWriterLocal and Publisher about the instance.
-    ::DDS::ReturnCode_t ret = register_instance_i(handle, marshalled, source_timestamp, header, registered_sample);
+    ::DDS::ReturnCode_t ret = register_instance_i(handle, marshalled, source_timestamp, registered_sample);
     // note: the WriteDataContainer/PublicationInstance maintains ownership
     // of the marshalled sample.
 

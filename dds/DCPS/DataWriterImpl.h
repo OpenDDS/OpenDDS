@@ -226,7 +226,6 @@ public:
     DDS::InstanceHandle_t& handle,
     DataSample* data,
     const DDS::Time_t & source_timestamp,
-    DataSampleHeader& header,
     ACE_Message_Block*& registered_sample);
 
   /**

@@ -1,3 +1,11 @@
+Thu Feb  5 01:19:23 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Remove unused parameter.
+
 Wed Feb  4 22:04:21 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:

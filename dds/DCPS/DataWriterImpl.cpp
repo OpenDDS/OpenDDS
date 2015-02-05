@@ -1736,7 +1736,6 @@ DDS::ReturnCode_t
 DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
                                     DataSample* data,
                                     const DDS::Time_t & source_timestamp,
-                                    DataSampleHeader& header,
                                     ACE_Message_Block*& registered_sample)
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
@@ -1804,7 +1803,6 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_from_durable_data",6);
 
-  DataSampleHeader header;
   ACE_Message_Block* registered_sample;
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -1816,7 +1814,6 @@ DataWriterImpl::register_instance_from_durable_data(DDS::InstanceHandle_t& handl
       register_instance_i(handle,
                           data,
                           source_timestamp,
-                          header,
                           registered_sample);
 
   if (ret != DDS::RETCODE_OK) {
