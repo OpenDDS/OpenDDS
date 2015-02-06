@@ -1,0 +1,16 @@
+
+module T3 {
+
+#pragma DCPS_DATA_TYPE "T3::Foo3"
+#pragma DCPS_DATA_KEY "T3::Foo3 key"
+
+  // Example user defined "Foo" structure
+  struct Foo3 {
+    long key;  // the instance key
+    char  c;
+    short s;
+    long l;
+    string text;
+  };
+
+};

@@ -1,0 +1,19 @@
+// $Id$
+
+module Test {
+
+typedef sequence<octet> OctetSeq;
+
+#pragma DCPS_DATA_TYPE "Test::Data"
+#pragma DCPS_DATA_KEY  "Test::Data key"
+  struct Data {
+    long          priority;
+    long          key;
+    long          pid;
+    long          seq;
+    long          sec;
+    unsigned long nanosec;
+    OctetSeq      buffer;
+  };
+
+};

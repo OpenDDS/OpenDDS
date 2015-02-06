@@ -1,0 +1,171 @@
+************************************************************************
+One-time developer setup
+
+1. Download and install Oracle JDK 6 from http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javase6-419409.html#jdk-6u45-oth-JPR
+
+2. Download and install Eclipse 4.4 from
+   http://archive.eclipse.org/eclipse/downloads/drops4/R-4.4.1-201409250400
+   (see the "Eclipse SDK" link for your platform).
+
+3. Configure Eclipse to use JDK 6 as the default JDK: In
+   Window->Preferences->Java->Installed JREs choose Add, then Standard
+   VM, and add JDK 6.  Make sure to check the check box to make it the
+   default JRE.  In Window->Preferences->Java->Compiler, set the
+   Compiler compliance level to 1.6.
+
+4. Install new features in Eclipse (Help -> Install New Software, work with
+   All Available Sites, under Modeling):
+
+     EMF - Eclipse Modeling Framework SDK
+     Graphical Modeling Framework (GMF) Tooling SDK
+
+5. To run a scripted build from the command line, clone
+   https://github.com/bonitasoft/bonita-studio from GitHub, import
+   into Eclipse, close all but the
+   ca.ecliptical.gmf.ant_1.1.0.20090717033226 project.  Open the
+   plugin.xml file of this project in the editor.  In the Overview tab
+   in the editor, perform "4. Export the plug-in in a format suitable
+   for deployment using the Export Wizard" and direct the generated
+   plugin jar file to be placed in the $ECLIPSE_HOME/dropins
+   directory.  After restarting Eclipse, you should be the following
+   in the installed plugins list:
+
+     Ant Support for GMF
+
+   (After this point, the bonita-studio project is not needed further
+   and may be removed.)
+
+6. Create a new workspace located outside the DDS_ROOT checkout (this will hold
+   the developer-specific .metadata directory).  Import the OpenDDS Modeling
+   projects into this workspace using File -> Import, General, Existing 
+   Projects Into Workspace, with the root directory of 
+   $DDS_ROOT/tools/modeling.
+   Note: If you are using MPC's clone_build_tree.pl script, you will need
+   to have used the -f option to force cloning of build files (in this case 
+   we need the .project and .classpath files).
+
+************************************************************************
+Manual code generation steps
+
+I. Generate eCore/EMF code
+  a. In the package explorer, expand org.opendds.modeling.model
+  b. Expand the "model" folder
+  c. Double-click on openDDS.genmodel
+  d. In the right pane, right-click on openDDS and select Generate Model Code
+  e. In the right pane, right-click on openDDS and select Generate Edit Code
+  f. In the right pane, right-click on openDDS and select Generate Editor Code
+  g. Repeat the same steps a-f for the org.opendds.modeling.sdk.model project
+
+II. Generate GMF code
+  a. In the package explorer, expand org.opendds.modeling.gmf
+  b. Expand the "diagrams" folder
+  c. Right click on each .gmfgen file and select "Generate diagram code"
+
+************************************************************************
+Automated code generation steps
+
+1. Close Eclipse so the workspace isn't open concurrently with the scripts
+
+2. Read the note at the top of $DDS_ROOT/tools/modeling/build.pl for
+   instructions on setting the ECLIPSE_HOME and ECLIPSE_WORKSPACE variables.
+
+3. Run build.pl as follows:
+   cd $DDS_ROOT/tools/modeling       |      cd %DDS_ROOT%\tools\modeling
+   ./build.pl                        |      build.pl
+
+4. [Optional modificaiton to step 3], add "--automated" to build.pl to also
+   build the Java sources into .class files and create .jars.  This is what
+   the nightly automated build does, but it's not necessary for using the
+   Eclipse IDE interactively, since the "Build Automatically" behavior will
+   make sure the "bin" subdirectories always have up-to-date .class files.
+
+************************************************************************
+Running tests
+
+1. Ensure that ACE_ROOT and TAO_ROOT are defined and pointing to the
+   correct location.  Ensure that your PATH contains $ACE_ROOT/bin.
+   Ensure that ANT_HOME is defined and pointing to the correct
+   location.
+
+2. Run the "setup.pl" Perl script in $DDS_ROOT/tools/modeling/tests
+   Note that this script creates modeling_tests.mwc.
+
+3. Run mwc.pl on the just-generated modeling_tests.mwc, using whichever
+   mwc.pl arguments are needed for your platform and compiler.
+
+4. Build the workspace that MPC just generated using "make" or an IDE.
+
+5. Use the individual run_test.pl scripts, or run them all together using the
+   auto_run_tests.pl script from $DDS_ROOT/bin with the arguments:
+     -l $DDS_ROOT/tools/modeling/tests/modeling_tests.lst
+
+************************************************************************
+Source Projects (in repository https://svn.dre.vanderbilt.edu/DOC/DDS):
+
+  org.opendds.modeling.model    (at tools/modeling/plugins/org.opendds.modeling.model)
+    - Segregated ecore metamodels and profile.
+
+  org.opendds.modeling.gmf      (at tools/modeling/plugins/org.opendds.modeling.gmf)
+    - Graphical model capture editor generator based on the ecore profiles.
+
+  org.opendds.modeling.graphics (at tools/modeling/plugins/org.opendds.modeling.graphics)
+    - Graphical editor Figure Gallery images used by the graphical model
+        capture editor.
+
+  org.opendds.modeling.sdk      (at tools/modeling/plugins/org.opendds.modeling.sdk)
+    - OpenDDS Modeling SDK plugin.  This implements a code generation
+        editor, to specify and execute the code generation steps.  This
+        plug-in will also incorporate the following elements: actions,
+        menus, logs, key bindings, perspectives, view, editor, dialogs,
+        wizards, preferences, properties, markers, nature, branding
+
+  org.opendds.modeling.help     (at tools/modeling/plugins/org.opendds.modeling.help)
+    - Help text, tips, and cheat sheets.
+
+  org.opendds.modeling.feature  (at tools/modeling/features/org.opendds.modeling.feature)
+    - OpenDDS Modeling SDK feature defining the plugins comprising the
+        deployed feature.
+
+  org.opendds.modeling.site     (at tools/modeling/features/org.opendds.modeling.site)
+    - Eclipse update site.  See README.txt in that directory for more details.
+      That README also contains notes on the version numbering strategy for
+      plugins and its implications on automatic updates for users.
+
+************************************************************************
+Generated Projects (partially in repository):
+
+  NOTE: The source of these projects are mostly generated from the
+        org.eclipse.modeling.model/models/OpenDDS.genmodel code generation
+        specification.  The MANIFEST, XML and properties files controlling
+        the behavior of these plugins are retained in the OpenDDS subversion
+        repository.  The non-tailored (generated) source files are not
+        checked into the repository and need to be generated for use.
+
+  org.opendds.modeling.model.edit        (generated from org.opendds.modeling.model/models/OpenDDS.genmodel)
+    - edit support for the ecore metamodels and profile.
+
+  org.opendds.modeling.model.editor      (generated from org.opendds.modeling.model/models/OpenDDS.genmodel)
+    - ecore editor for the metamodels and profile.
+
+  org.opendds.modeling.diagram.main      (generated from org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen)
+    - graphical model capture for the top level packages contained in the model.
+
+  org.opendds.modeling.diagram.datalib   (generated from org.opendds.modeling.gmf/diagrams/DataLib.gmfgen)
+    - graphical model capture for the data definitions used in the model.
+
+  org.opendds.modeling.diagram.policylib (generated from org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen)
+    - graphical model capture for the QoS policy values used in the model.
+
+************************************************************************
+Using the Subversive Subversion plugin, the projects can be checked out
+directly into your workspace.
+
+If you check in from within Eclipse using the Subversive plugin, please
+extract your subversion commit comments (from your checkin) using the
+'svn2cl' command.  A typical command would use options as follows:
+
+  shell> svn2cl -a -i -r <from>:<to> --linelen=78 -o ChangeLog-temp
+
+Where <from> and <to> span the changesets that were checked in from
+eclipse.  Then add this generated entry to the top of the ChangeLog (or
+BranchChangeLog).

@@ -1,0 +1,6 @@
+project: dcps_tcp, dcps_udp, dcps_multicast, dcps_test_java {
+
+  after      += messenger_idl_test
+  javacflags += -classpath ../messenger_idl/messenger_idl_test.jar
+
+}

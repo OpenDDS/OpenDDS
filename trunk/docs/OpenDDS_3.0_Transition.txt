@@ -1,0 +1,164 @@
+
+Overview
+--------
+
+This document is intended as a quick guide to converting existing
+OpenDDS applications to work with the OpenDDS 3.0 transport
+configuration.  Because of the flexibility of the new design,
+most applications can remove all transport-related source code
+from the publisher and subscriber.  Many applications can remove
+any existing transport configuration sections from the OpenDDS
+configuration files (*.ini) as well.  Some applications may need
+to manually convert the configuration files.  Applications no
+longer need to use ACE Service Configurator files (*.conf) to
+load transport libraries.  These still may be required for TAO
+configuration.
+
+For a full discussion of the new transport configuration
+design see Section 6.3 of the OpenDDS 3.0 Developer's Guide.
+
+There are two general scenarios for conversion.  In the first,
+each process in the application only uses a single transport.
+The second has multiple transports used in each process.
+
+
+Single Transport Applications
+-----------------------------
+
+Remove all of the transport-related code from your C++ source
+code files:
+  - Any #includes under dds/DCPS/transport
+  - Any code involving TransportImpl
+  - Any code involving TransportFactory or TheTransportFactory
+  - Any code involving TransportConfiguration
+  - Any attach calls on the TransportImpl (and the AttachStatus enum type)
+  - Any attach_transport calls on the PublisherImpl or SubscriberImpl
+
+Convert (or create) an OpenDDS configuration file (*.ini) containing
+your transport details.  In the simplest case:
+
+    [common]
+    DCPSGlobalTransportConfig=myconfig
+
+    [config/myconfig]
+    transports=mytcp
+
+    [transport/mytcp]
+    transport_type=tcp
+
+If you have existing files, make the following changes to them:
+  - Change any sections of the form [transport_impl*] sections
+    to be of the form [transport/<transport_name>].
+  - Add a [config/<config_name>] section
+  - Add the property "transports=<transport_name> to your config
+    section.
+  - Add the DCPSGlobalTransportConfig=<config_name> property to
+    the [common] section.
+Configuration files are loaded as in previous OpenDDS versions,
+with the "-DCPSConfigFile <file>" command line option.
+
+For example, suppose we started with this configuration file:
+
+    # OpenDDS 2.4 config file
+    [transport_impl_1]
+    transport_type=SimpleTcp
+    swap_bytes=0
+    optimum_packet_size=8192
+
+This would convert to something like this:
+
+    # OpenDDS 3.0 config file
+    [common]
+    DCPSGlobalTransportConfig=config1
+
+    [config/config1]
+    transports=transport1
+
+    [transport/transport1]
+    transport_type=tcp
+    swap_bytes=0
+    optimum_packet_size=8192
+
+All processes loading this configuration file would use the tcp
+transport configures as shown.
+
+
+Multiple Transport Applications
+-------------------------------
+
+Modifying applications that use multiple transports per
+application is roughly the same as the Single Transport
+application approach above with a couple of important
+differences.
+
+First, when converting the configuration file, create a
+separate [config/*] section for each transport in the file.
+For example, when starting with this configuration file
+(where some parts of an application uses tcp and some
+multicast):
+
+    # OpenDDS 2.4 config file
+    [transport_impl_1]
+    transport_type=SimpleTcp
+
+    [transport_impl_2]
+    transport_type=multicast
+
+Converting this file results in something like this:
+
+    # OpenDDS 3.0 config file
+    [config/tcp_config]
+    transports=mytcp
+
+    [config/multicast_config]
+    transports=mymulticast
+
+    [transport/mytcp]
+    transport_type=tcp
+
+    [transport/mymulticast]
+    transport_type=multicast
+
+Now we just need to modify the source code to bind the
+appropriate readers and writers to the appropriate configurations.
+When modifying your source code, any calls to attach() on the
+TransportImpl or attach_transport() should be replaced with
+calls to bind() in the TransportRegistry.
+
+For example, code such as this:
+
+    // OpenDDS 2.4 code
+    // Get the transport_impl for [transport_impl_1]
+    OpenDDS::DCPS::TransportIdType transport_impl_id = 1;
+    OpenDDS::DCPS::TransportImpl_rch transport_impl =
+      TheTransportFactory->create_transport_impl(transport_impl_id,
+                                                 OpenDDS::DCPS::AUTO_CONFIG);
+
+    // Attach the current publisher "pub" to this transport
+    OpenDDS::DCPS::AttachStatus status = transport_impl->attach(pub.in());
+    if (status != OpenDDS::DCPS::ATTACH_OK) {
+      std::cerr << "Failed to attach to the transport." << std::endl;
+      return 1;
+    }
+
+should change to:
+
+    // Bind [config/tcp_config] configuration to the publisher "pub"
+    OpenDDS::DCPS::TheTransportRegistry->bind_config("tcp_config", pub);
+
+
+Other differences
+-----------------
+
+* The name of the tcp transport has been changed from "SimpleTcp"
+  to "tcp".
+* The passive_connect_duration option no longer applies to
+  individual transports.  You can now set this option on the
+  transport configuration.
+* The semantics of the multicast port_offset option have changed.
+  This option is no longer an offset, but is now simply the port
+  number to use when group_address is not set.
+* Entities setting Reliability QoS to Reliable, can no longer use
+  the UDP transport or Multicast transport in best-effort mode.
+  Either remove this QoS setting or select a transport (multicast
+  or tcp) that is reliable.

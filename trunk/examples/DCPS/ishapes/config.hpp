@@ -1,0 +1,16 @@
+#ifndef SIMD_DEMO_ISHAPES_CONFIG_HPP
+#define SIMD_DEMO_ISHAPES_CONFIG_HPP
+
+#define ISHAPES_B2_DEMO 0
+#define ISHAPES_WIDE_FORMAT 0
+
+#if  (ISHAPES_WIDE_FORMAT == 1)
+#  define IS_WIDTH 500
+#  define IS_HEIGHT 360
+#else
+#  define IS_WIDTH  321
+#  define IS_HEIGHT 361
+#endif
+
+
+#endif /* SIMD_DEMO_ISHAPES_CONFIG_HPP */

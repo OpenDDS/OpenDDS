@@ -1,0 +1,554 @@
+
+--- tailor this to your installation ---
+all hosts: export BASEDIR=/home/student01/thru
+all hosts: export BASEDIR=/projects/sbir/bench/tests
+
+on build host:
+
+ make -C $DDS_ROOT/performance-tests/Bench
+
+ cd $DDS_ROOT/performance-tests/Bench
+ $DDS_ROOT/performance-tests/Bench/tools/mkpkg thru-tests
+ tar -jcf thru-tests.tar.bz2 thru-tests
+
+ cp thru-tests.tar.bz2 $BASEDIR
+ scp thru-tests.tar.bz2 host1:$BASEDIR
+ scp thru-tests.tar.bz2 host2:$BASEDIR
+
+--- all hosts: ---
+ cd $BASEDIR
+ tar -xf thru-tests.tar.bz2
+
+--- tailor this to your installation ---
+all hosts: export REPOHOST=172.16.10.103
+all hosts: export REPOHOST=10.201.200.115
+all hosts: export REPOPORT=2809
+all hosts: export PROJECTBASE=$BASEDIR/thru-tests
+all hosts: export TESTBASE=$PROJECTBASE/tests/thru
+
+--- debug assist ---
+all hosts: ulimit -c unlimited
+
+repository host: $PROJECTBASE/bin/run_test -S -h $REPOHOST:$REPOPORT
+
+--- Test Execution patterns:
+---
+--- bidir (modified latency):
+---   host 1: run_test -P -i <transportconfig> -s p1-1sub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s p2-*.ini
+---
+--- publication bound:
+---   host 1: run_test -P -i <transportconfig> -s pub-2sub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s sub-*.ini
+---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
+---
+--- subscription bound:
+---   host 1: run_test -P -i <transportconfig> -s pub-1sub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s pub-1sub-*-*.ini
+---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
+
+--- Some test command prefixes:
+---   sudo nice -n -10 run_test ...
+---   time run_test ...
+---   sudo time nice -n -10 run_test ...
+
+--- Bidirectional (modified latency) tests, best effort ---
+
+
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-be.ini
+all hosts: mkdir -p $TESTBASE/multi-be
+all hosts: cd $TESTBASE/multi-be
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-udp.ini
+# all hosts: mkdir -p $TESTBASE/udp
+# all hosts: cd $TESTBASE/udp
+
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+
+# Steepest ascent
+
+# Test 1
+host 1: $TESTCMD -f bidir1.results -s $TESTBASE/bidir-1sub-be-80.ini -v -f bidir1.results 2>&1 | tee bidir1-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir1-remote-be.log
+
+# Test 2
+host 1: $TESTCMD -f bidir2.results -s $TESTBASE/bidir-1sub-be-320.ini -v -f bidir2.results 2>&1 | tee bidir2-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir2-remote-be.log
+
+# Test 3
+host 1: $TESTCMD -f bidir3.results -s $TESTBASE/bidir-1sub-be-720.ini -v -f bidir3.results 2>&1 | tee bidir3-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir3-remote-be.log
+
+# Test 4
+host 1: $TESTCMD -f bidir4.results -s $TESTBASE/bidir-1sub-be-1280.ini -v -f bidir4.results 2>&1 | tee bidir4-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir4-remote-be.log
+
+# Test 5
+host 1: $TESTCMD -f bidir5.results -s $TESTBASE/bidir-1sub-be-2000.ini -v -f bidir5.results 2>&1 | tee bidir5-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir5-remote-be.log
+
+# Fixed rate
+
+# Test 6
+host 1: $TESTCMD -f bidir6.results -s $TESTBASE/bidir-1sub-be-160r.ini -v -f bidir6.results 2>&1 | tee bidir6-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir6-remote-be.log
+
+# Test 7
+host 1: $TESTCMD -f bidir7.results -s $TESTBASE/bidir-1sub-be-240r.ini -v -f bidir7.results 2>&1 | tee bidir7-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir7-remote-be.log
+
+# Test 8
+host 1: $TESTCMD -f bidir8.results -s $TESTBASE/bidir-1sub-be-320r.ini -v -f bidir8.results 2>&1 | tee bidir8-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir8-remote-be.log
+
+# Test 9
+host 1: $TESTCMD -f bidir9.results -s $TESTBASE/bidir-1sub-be-400r.ini -v -f bidir9.results 2>&1 | tee bidir9-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir9-remote-be.log
+
+# Fixed size
+
+# Test 10
+host 1: $TESTCMD -f bidir10.results -s $TESTBASE/bidir-1sub-be-160s.ini -v -f bidir10.results 2>&1 | tee bidir10-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir10-remote-be.log
+
+# Test 11
+host 1: $TESTCMD -f bidir11.results -s $TESTBASE/bidir-1sub-be-240s.ini -v -f bidir11.results 2>&1 | tee bidir11-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir11-remote-be.log
+
+# Test 12
+host 1: $TESTCMD -f bidir12.results -s $TESTBASE/bidir-1sub-be-320s.ini -v -f bidir12.results 2>&1 | tee bidir12-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir12-remote-be.log
+
+# Test 13
+host 1: $TESTCMD -f bidir13.results -s $TESTBASE/bidir-1sub-be-400s.ini -v -f bidir13.results 2>&1 | tee bidir13-local-be.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-be.ini 2>&1 | tee bidir13-remote-be.log
+
+--- Bidirectional (modified latency) tests, reliable ---
+
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-rel.ini
+all hosts: mkdir -p $TESTBASE/multi-rel
+all hosts: cd $TESTBASE/multi-rel
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-tcp.ini
+# all hosts: mkdir -p $TESTBASE/tcp
+# all hosts: cd $TESTBASE/tcp
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-rtps.ini
+# all hosts: mkdir -p $TESTBASE/rtps
+# all hosts: cd $TESTBASE/rtps
+
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+
+# Steepest ascent
+
+# Test 1
+host 1: $TESTCMD -f bidir1.results -s $TESTBASE/bidir-1sub-rel-80.ini -v -f bidir1.results 2>&1 | tee bidir1-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir1-remote-rel.log
+
+# Test 2
+host 1: $TESTCMD -f bidir2.results -s $TESTBASE/bidir-1sub-rel-320.ini -v -f bidir2.results 2>&1 | tee bidir2-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir2-remote-rel.log
+
+# Test 3
+host 1: $TESTCMD -f bidir3.results -s $TESTBASE/bidir-1sub-rel-720.ini -v -f bidir3.results 2>&1 | tee bidir3-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir3-remote-rel.log
+
+# Test 4
+host 1: $TESTCMD -f bidir4.results -s $TESTBASE/bidir-1sub-rel-1280.ini -v -f bidir4.results 2>&1 | tee bidir4-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir4-remote-rel.log
+
+# Test 5
+host 1: $TESTCMD -f bidir5.results -s $TESTBASE/bidir-1sub-rel-2000.ini -v -f bidir5.results 2>&1 | tee bidir5-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir5-remote-rel.log
+
+# Fixed rate
+
+# Test 6
+host 1: $TESTCMD -f bidir6.results -s $TESTBASE/bidir-1sub-rel-160r.ini -v -f bidir6.results 2>&1 | tee bidir6-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir6-remote-rel.log
+
+# Test 7
+host 1: $TESTCMD -f bidir7.results -s $TESTBASE/bidir-1sub-rel-240r.ini -v -f bidir7.results 2>&1 | tee bidir7-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir7-remote-rel.log
+
+# Test 8
+host 1: $TESTCMD -f bidir8.results -s $TESTBASE/bidir-1sub-rel-320r.ini -v -f bidir8.results 2>&1 | tee bidir8-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir8-remote-rel.log
+
+# Test 9
+host 1: $TESTCMD -f bidir9.results -s $TESTBASE/bidir-1sub-rel-400r.ini -v -f bidir9.results 2>&1 | tee bidir9-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir9-remote-rel.log
+
+# Fixed size
+
+# Test 10
+host 1: $TESTCMD -f bidir10.results -s $TESTBASE/bidir-1sub-rel-160s.ini -v -f bidir10.results 2>&1 | tee bidir10-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir10-remote-rel.log
+
+# Test 11
+host 1: $TESTCMD -f bidir11.results -s $TESTBASE/bidir-1sub-rel-240s.ini -v -f bidir11.results 2>&1 | tee bidir11-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir11-remote-rel.log
+
+# Test 12
+host 1: $TESTCMD -f bidir12.results -s $TESTBASE/bidir-1sub-rel-320s.ini -v -f bidir12.results 2>&1 | tee bidir12-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir12-remote-rel.log
+
+# Test 13
+host 1: $TESTCMD -f bidir13.results -s $TESTBASE/bidir-1sub-rel-400s.ini -v -f bidir13.results 2>&1 | tee bidir13-local-rel.log
+host 2: $TESTCMD -s $TESTBASE/bidir-remote-rel.ini 2>&1 | tee bidir13-remote-rel.log
+
+--- publication bound:
+---   host 1: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s sub-*.ini
+---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
+
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-be.ini
+all hosts: mkdir -p $TESTBASE/multi-be
+all hosts: cd $TESTBASE/multi-be
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-udp.ini
+# all hosts: mkdir -p $TESTBASE/udp
+# all hosts: cd $TESTBASE/udp
+
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+
+# Steepest ascent
+
+# Test 1
+host 1: $TESTCMD -f test1-pub.results -s $TESTBASE/pub-2sub-be-80.ini 2>&1 | tee test1-pub-be.log
+host 2: $TESTCMD -f test1-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test1-sub1-be.log
+host 3: $TESTCMD -f test1-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test1-sub2-be.log
+
+# Test 2
+host 1: $TESTCMD -f test2-pub.results -s $TESTBASE/pub-2sub-be-320.ini 2>&1 | tee test2-pub-be.log
+host 2: $TESTCMD -f test2-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test2-sub1-be.log
+host 3: $TESTCMD -f test2-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test2-sub2-be.log
+
+# Test 3
+host 1: $TESTCMD -f test3-pub.results -s $TESTBASE/pub-2sub-be-720.ini 2>&1 | tee test3-pub-be.log
+host 2: $TESTCMD -f test3-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test3-sub1-be.log
+host 3: $TESTCMD -f test3-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test3-sub2-be.log
+
+# Test 4
+host 1: $TESTCMD -f test4-pub.results -s $TESTBASE/pub-2sub-be-1280.ini 2>&1 | tee test4-pub-be.log
+host 2: $TESTCMD -f test4-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test4-sub1-be.log
+host 3: $TESTCMD -f test4-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test4-sub2-be.log
+
+# Test 5
+host 1: $TESTCMD -f test5-pub.results -s $TESTBASE/pub-2sub-be-2000.ini 2>&1 | tee test5-pub-be.log
+host 2: $TESTCMD -f test5-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test5-sub1-be.log
+host 3: $TESTCMD -f test5-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test5-sub2-be.log
+
+# Fixed rate
+
+# Test 6
+host 1: $TESTCMD -f test6-pub.results -s $TESTBASE/pub-2sub-be-160r.ini 2>&1 | tee test6-pub-be.log
+host 2: $TESTCMD -f test6-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test6-sub1-be.log
+host 3: $TESTCMD -f test6-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test6-sub2-be.log
+
+# Test 7
+host 1: $TESTCMD -f test7-pub.results -s $TESTBASE/pub-2sub-be-240r.ini 2>&1 | tee test7-pub-be.log
+host 2: $TESTCMD -f test7-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test7-sub1-be.log
+host 3: $TESTCMD -f test7-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test7-sub2-be.log
+
+# Test 8
+host 1: $TESTCMD -f test8-pub.results -s $TESTBASE/pub-2sub-be-320r.ini 2>&1 | tee test8-pub-be.log
+host 2: $TESTCMD -f test8-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test8-sub1-be.log
+host 3: $TESTCMD -f test8-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test8-sub2-be.log
+
+# Test 9
+host 1: $TESTCMD -f test9-pub.results -s $TESTBASE/pub-2sub-be-400r.ini 2>&1 | tee test9-pub-be.log
+host 2: $TESTCMD -f test9-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test9-sub1-be.log
+host 3: $TESTCMD -f test9-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test9-sub2-be.log
+
+# Fixed size
+
+# Test 10
+host 1: $TESTCMD -f test10-pub.results -s $TESTBASE/pub-2sub-be-160s.ini 2>&1 | tee test10-pub-be.log
+host 2: $TESTCMD -f test10-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test10-sub1-be.log
+host 3: $TESTCMD -f test10-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test10-sub2-be.log
+
+# Test 11
+host 1: $TESTCMD -f test11-pub.results -s $TESTBASE/pub-2sub-be-240s.ini 2>&1 | tee test11-pub-be.log
+host 2: $TESTCMD -f test11-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test11-sub1-be.log
+host 3: $TESTCMD -f test11-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test11-sub2-be.log
+
+# Test 12
+host 1: $TESTCMD -f test12-pub.results -s $TESTBASE/pub-2sub-be-320s.ini 2>&1 | tee test12-pub-be.log
+host 2: $TESTCMD -f test12-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test12-sub1-be.log
+host 3: $TESTCMD -f test12-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test12-sub2-be.log
+
+# Test 13
+host 1: $TESTCMD -f test13-pub.results -s $TESTBASE/pub-2sub-be-400s.ini 2>&1 | tee test13-pub-be.log
+host 2: $TESTCMD -f test13-sub1.results -s $TESTBASE/sub-be.ini 2>&1 | tee test13-sub1-be.log
+host 3: $TESTCMD -f test13-sub2.results -s $TESTBASE/sub-be.ini 2>&1 | tee test13-sub2-be.log
+
+--- publication bound:
+---   host 1: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s sub-*.ini
+---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
+
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-rel.ini
+all hosts: mkdir -p $TESTBASE/multi-rel
+all hosts: cd $TESTBASE/multi-rel
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-tcp.ini
+# all hosts: mkdir -p $TESTBASE/tcp
+# all hosts: cd $TESTBASE/tcp
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-rtps.ini
+# all hosts: mkdir -p $TESTBASE/rtps
+# all hosts: cd $TESTBASE/rtps
+
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+
+# Steepest ascent
+
+# Test 1
+host 1: $TESTCMD -f test1-pub.results -s $TESTBASE/pub-2sub-rel-80.ini 2>&1 | tee test1-pub-rel.log
+host 2: $TESTCMD -f test1-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test1-sub1-rel.log
+host 3: $TESTCMD -f test1-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test1-sub2-rel.log
+
+# Test 2
+host 1: $TESTCMD -f test2-pub.results -s $TESTBASE/pub-2sub-rel-320.ini 2>&1 | tee test2-pub-rel.log
+host 2: $TESTCMD -f test2-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test2-sub1-rel.log
+host 3: $TESTCMD -f test2-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test2-sub2-rel.log
+
+# Test 3
+host 1: $TESTCMD -f test3-pub.results -s $TESTBASE/pub-2sub-rel-720.ini 2>&1 | tee test3-pub-rel.log
+host 2: $TESTCMD -f test3-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test3-sub1-rel.log
+host 3: $TESTCMD -f test3-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test3-sub2-rel.log
+
+# Test 4
+host 1: $TESTCMD -f test4-pub.results -s $TESTBASE/pub-2sub-rel-1280.ini 2>&1 | tee test4-pub-rel.log
+host 2: $TESTCMD -f test4-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test4-sub1-rel.log
+host 3: $TESTCMD -f test4-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test4-sub2-rel.log
+
+# Test 5
+host 1: $TESTCMD -f test5-pub.results -s $TESTBASE/pub-2sub-rel-2000.ini 2>&1 | tee test5-pub-rel.log
+host 2: $TESTCMD -f test5-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test5-sub1-rel.log
+host 3: $TESTCMD -f test5-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test5-sub2-rel.log
+
+# Fixed rate
+
+# Test 6
+host 1: $TESTCMD -f test6-pub.results -s $TESTBASE/pub-2sub-rel-160r.ini 2>&1 | tee test6-pub-rel.log
+host 2: $TESTCMD -f test6-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test6-sub1-rel.log
+host 3: $TESTCMD -f test6-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test6-sub2-rel.log
+
+# Test 7
+host 1: $TESTCMD -f test7-pub.results -s $TESTBASE/pub-2sub-rel-240r.ini 2>&1 | tee test7-pub-rel.log
+host 2: $TESTCMD -f test7-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test7-sub1-rel.log
+host 3: $TESTCMD -f test7-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test7-sub2-rel.log
+
+# Test 8
+host 1: $TESTCMD -f test8-pub.results -s $TESTBASE/pub-2sub-rel-320r.ini 2>&1 | tee test8-pub-rel.log
+host 2: $TESTCMD -f test8-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test8-sub1-rel.log
+host 3: $TESTCMD -f test8-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test8-sub2-rel.log
+
+# Test 9
+host 1: $TESTCMD -f test9-pub.results -s $TESTBASE/pub-2sub-rel-400r.ini 2>&1 | tee test9-pub-rel.log
+host 2: $TESTCMD -f test9-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test9-sub1-rel.log
+host 3: $TESTCMD -f test9-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test9-sub2-rel.log
+
+# Fixed size
+
+# Test 10
+host 1: $TESTCMD -f test10-pub.results -s $TESTBASE/pub-2sub-rel-160s.ini 2>&1 | tee test10-pub-rel.log
+host 2: $TESTCMD -f test10-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test10-sub1-rel.log
+host 3: $TESTCMD -f test10-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test10-sub2-rel.log
+
+# Test 11
+host 1: $TESTCMD -f test11-pub.results -s $TESTBASE/pub-2sub-rel-240s.ini 2>&1 | tee test11-pub-rel.log
+host 2: $TESTCMD -f test11-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test11-sub1-rel.log
+host 3: $TESTCMD -f test11-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test11-sub2-rel.log
+
+# Test 12
+host 1: $TESTCMD -f test12-pub.results -s $TESTBASE/pub-2sub-rel-320s.ini 2>&1 | tee test12-pub-rel.log
+host 2: $TESTCMD -f test12-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test12-sub1-rel.log
+host 3: $TESTCMD -f test12-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test12-sub2-rel.log
+
+# Test 13
+host 1: $TESTCMD -f test13-pub.results -s $TESTBASE/pub-2sub-rel-400s.ini 2>&1 | tee test13-pub-rel.log
+host 2: $TESTCMD -f test13-sub1.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test13-sub1-rel.log
+host 3: $TESTCMD -f test13-sub2.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test13-sub2-rel.log
+
+--- subscription bound:
+---   host 1: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
+
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-be.ini
+all hosts: mkdir -p $TESTBASE/multi-be
+all hosts: cd $TESTBASE/multi-be
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-udp.ini
+# all hosts: mkdir -p $TESTBASE/udp
+# all hosts: cd $TESTBASE/udp
+
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+
+# Steepest ascent
+
+# Test 14
+host 1: $TESTCMD -f test14-pub1.results -s $TESTBASE/pub-1sub-be-80.ini 2>&1 | tee test14-pub1-be.log
+host 2: $TESTCMD -f test14-pub2.results -s $TESTBASE/pub-1sub-be-80.ini 2>&1 | tee test14-pub2-be.log
+host 3: $TESTCMD -f test14-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test14-sub-be.log
+
+# Test 15
+host 1: $TESTCMD -f test15-pub1.results -s $TESTBASE/pub-1sub-be-320.ini 2>&1 | tee test15-pub1-be.log
+host 2: $TESTCMD -f test15-pub2.results -s $TESTBASE/pub-1sub-be-320.ini 2>&1 | tee test15-pub2-be.log
+host 3: $TESTCMD -f test15-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test15-sub-be.log
+
+# Test 16
+host 1: $TESTCMD -f test16-pub1.results -s $TESTBASE/pub-1sub-be-720.ini 2>&1 | tee test16-pub1-be.log
+host 2: $TESTCMD -f test16-pub2.results -s $TESTBASE/pub-1sub-be-720.ini 2>&1 | tee test16-pub2-be.log
+host 3: $TESTCMD -f test16-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test16-sub-be.log
+
+# Test 17
+host 1: $TESTCMD -f test17-pub1.results -s $TESTBASE/pub-1sub-be-1280.ini 2>&1 | tee test17-pub1-be.log
+host 2: $TESTCMD -f test17-pub2.results -s $TESTBASE/pub-1sub-be-1280.ini 2>&1 | tee test17-pub2-be.log
+host 3: $TESTCMD -f test17-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test17-sub-be.log
+
+# Test 18
+host 1: $TESTCMD -f test18-pub1.results -s $TESTBASE/pub-1sub-be-2000.ini 2>&1 | tee test18-pub1-be.log
+host 2: $TESTCMD -f test18-pub2.results -s $TESTBASE/pub-1sub-be-2000.ini 2>&1 | tee test18-pub2-be.log
+host 3: $TESTCMD -f test18-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test18-sub-be.log
+
+# Fixed rate
+
+# Test 19
+host 1: $TESTCMD -f test19-pub1.results -s $TESTBASE/pub-1sub-be-80r.ini 2>&1 | tee test19-pub1-be.log
+host 2: $TESTCMD -f test19-pub2.results -s $TESTBASE/pub-1sub-be-80r.ini 2>&1 | tee test19-pub2-be.log
+host 3: $TESTCMD -f test19-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test19-sub-be.log
+
+# Test 20
+host 1: $TESTCMD -f test20-pub1.results -s $TESTBASE/pub-1sub-be-160.ini 2>&1 | tee test20-pub1-be.log
+host 2: $TESTCMD -f test20-pub2.results -s $TESTBASE/pub-1sub-be-160.ini 2>&1 | tee test20-pub2-be.log
+host 3: $TESTCMD -f test20-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test20-sub-be.log
+
+# Test 21
+host 1: $TESTCMD -f test21-pub1.results -s $TESTBASE/pub-1sub-be-240r.ini 2>&1 | tee test21-pub1-be.log
+host 2: $TESTCMD -f test21-pub2.results -s $TESTBASE/pub-1sub-be-240r.ini 2>&1 | tee test21-pub2-be.log
+host 3: $TESTCMD -f test21-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test21-sub-be.log
+
+# Test 22
+host 1: $TESTCMD -f test22-pub1.results -s $TESTBASE/pub-1sub-be-400r.ini 2>&1 | tee test22-pub1-be.log
+host 2: $TESTCMD -f test22-pub2.results -s $TESTBASE/pub-1sub-be-400r.ini 2>&1 | tee test22-pub2-be.log
+host 3: $TESTCMD -f test22-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test22-sub-be.log
+
+# Fixed size
+
+# Test 23
+host 1: $TESTCMD -f test23-pub1.results -s $TESTBASE/pub-1sub-be-240s.ini 2>&1 | tee test23-pub1-be.log
+host 2: $TESTCMD -f test23-pub2.results -s $TESTBASE/pub-1sub-be-240s.ini 2>&1 | tee test23-pub2-be.log
+host 3: $TESTCMD -f test23-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test23-sub-be.log
+
+# Test 24
+host 1: $TESTCMD -f test24-pub1.results -s $TESTBASE/pub-1sub-be-320s.ini 2>&1 | tee test24-pub1-be.log
+host 2: $TESTCMD -f test24-pub2.results -s $TESTBASE/pub-1sub-be-320s.ini 2>&1 | tee test24-pub2-be.log
+host 3: $TESTCMD -f test24-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test24-sub-be.log
+
+# Test 25
+host 1: $TESTCMD -f test25-pub1.results -s $TESTBASE/pub-1sub-be-400s.ini 2>&1 | tee test25-pub1-be.log
+host 2: $TESTCMD -f test25-pub2.results -s $TESTBASE/pub-1sub-be-400s.ini 2>&1 | tee test25-pub2-be.log
+host 3: $TESTCMD -f test25-sub.results -s $TESTBASE/sub-be.ini 2>&1 | tee test25-sub-be.log
+
+--- subscription bound:
+---   host 1: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 2: run_test -P -i <transportconfig> -s pub-*-*.ini
+---   host 3: run_test -P -i <transportconfig> -s sub-*.ini
+
+all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-multi-rel.ini
+all hosts: mkdir -p $TESTBASE/multi-rel
+all hosts: cd $TESTBASE/multi-rel
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-tcp.ini
+# all hosts: mkdir -p $TESTBASE/tcp
+# all hosts: cd $TESTBASE/tcp
+
+# all hosts: export TRANSPORTCONFIG=$PROJECTBASE/etc/transport-rtps.ini
+# all hosts: mkdir -p $TESTBASE/rtps
+# all hosts: cd $TESTBASE/rtps
+
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+all hosts: export TESTCMD="$PROJECTBASE/bin/run_test -Call -v -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+
+# Steepest ascent
+
+# Test 14
+host 1: $TESTCMD -f test14-pub1.results -s $TESTBASE/pub-1sub-rel-80.ini 2>&1 | tee test14-pub1-rel.log
+host 2: $TESTCMD -f test14-pub2.results -s $TESTBASE/pub-1sub-rel-80.ini 2>&1 | tee test14-pub2-rel.log
+host 3: $TESTCMD -f test14-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test14-sub-rel.log
+
+# Test 15
+host 1: $TESTCMD -f test15-pub1.results -s $TESTBASE/pub-1sub-rel-320.ini 2>&1 | tee test15-pub1-rel.log
+host 2: $TESTCMD -f test15-pub2.results -s $TESTBASE/pub-1sub-rel-320.ini 2>&1 | tee test15-pub2-rel.log
+host 3: $TESTCMD -f test15-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test15-sub-rel.log
+
+# Test 16
+host 1: $TESTCMD -f test16-pub1.results -s $TESTBASE/pub-1sub-rel-720.ini 2>&1 | tee test16-pub1-rel.log
+host 2: $TESTCMD -f test16-pub2.results -s $TESTBASE/pub-1sub-rel-720.ini 2>&1 | tee test16-pub2-rel.log
+host 3: $TESTCMD -f test16-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test16-sub-rel.log
+
+# Test 17
+host 1: $TESTCMD -f test17-pub1.results -s $TESTBASE/pub-1sub-rel-1280.ini 2>&1 | tee test17-pub1-rel.log
+host 2: $TESTCMD -f test17-pub2.results -s $TESTBASE/pub-1sub-rel-1280.ini 2>&1 | tee test17-pub2-rel.log
+host 3: $TESTCMD -f test17-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test17-sub-rel.log
+
+# Test 18
+host 1: $TESTCMD -f test18-pub1.results -s $TESTBASE/pub-1sub-rel-2000.ini 2>&1 | tee test18-pub1-rel.log
+host 2: $TESTCMD -f test18-pub2.results -s $TESTBASE/pub-1sub-rel-2000.ini 2>&1 | tee test18-pub2-rel.log
+host 3: $TESTCMD -f test18-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test18-sub-rel.log
+
+# Fixed rate
+
+# Test 19
+host 1: $TESTCMD -f test19-pub1.results -s $TESTBASE/pub-1sub-rel-80r.ini 2>&1 | tee test19-pub1-rel.log
+host 2: $TESTCMD -f test19-pub2.results -s $TESTBASE/pub-1sub-rel-80r.ini 2>&1 | tee test19-pub2-rel.log
+host 3: $TESTCMD -f test19-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test19-sub-rel.log
+
+# Test 20
+host 1: $TESTCMD -f test20-pub1.results -s $TESTBASE/pub-1sub-rel-160.ini 2>&1 | tee test20-pub1-rel.log
+host 2: $TESTCMD -f test20-pub2.results -s $TESTBASE/pub-1sub-rel-160.ini 2>&1 | tee test20-pub2-rel.log
+host 3: $TESTCMD -f test20-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test20-sub-rel.log
+
+# Test 21
+host 1: $TESTCMD -f test21-pub1.results -s $TESTBASE/pub-1sub-rel-240r.ini 2>&1 | tee test21-pub1-rel.log
+host 2: $TESTCMD -f test21-pub2.results -s $TESTBASE/pub-1sub-rel-240r.ini 2>&1 | tee test21-pub2-rel.log
+host 3: $TESTCMD -f test21-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test21-sub-rel.log
+
+# Test 22
+host 1: $TESTCMD -f test22-pub1.results -s $TESTBASE/pub-1sub-rel-400r.ini 2>&1 | tee test22-pub1-rel.log
+host 2: $TESTCMD -f test22-pub2.results -s $TESTBASE/pub-1sub-rel-400r.ini 2>&1 | tee test22-pub2-rel.log
+host 3: $TESTCMD -f test22-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test22-sub-rel.log
+
+# Fixed size
+
+# Test 23
+host 1: $TESTCMD -f test23-pub1.results -s $TESTBASE/pub-1sub-rel-240s.ini 2>&1 | tee test23-pub1-rel.log
+host 2: $TESTCMD -f test23-pub2.results -s $TESTBASE/pub-1sub-rel-240s.ini 2>&1 | tee test23-pub2-rel.log
+host 3: $TESTCMD -f test23-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test23-sub-rel.log
+
+# Test 24
+host 1: $TESTCMD -f test24-pub1.results -s $TESTBASE/pub-1sub-rel-320s.ini 2>&1 | tee test24-pub1-rel.log
+host 2: $TESTCMD -f test24-pub2.results -s $TESTBASE/pub-1sub-rel-320s.ini 2>&1 | tee test24-pub2-rel.log
+host 3: $TESTCMD -f test24-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test24-sub-rel.log
+
+# Test 25
+host 1: $TESTCMD -f test25-pub1.results -s $TESTBASE/pub-1sub-rel-400s.ini 2>&1 | tee test25-pub1-rel.log
+host 2: $TESTCMD -f test25-pub2.results -s $TESTBASE/pub-1sub-rel-400s.ini 2>&1 | tee test25-pub2-rel.log
+host 3: $TESTCMD -f test25-sub.results -s $TESTBASE/sub-rel.ini 2>&1 | tee test25-sub-rel.log
+
+========================================================================
+
+export TESTCMD="$PROJECTBASE/bin/run_test -Call -P -t 120 -h $REPOHOST:$REPOPORT -i $TRANSPORTCONFIG"
+host 1: $TESTCMD -s $TESTBASE/pub-be-477-size.ini 2>&1 | tee pub1-be-477-size.log
+host 2: $TESTCMD -s $TESTBASE/pub-be-477-size.ini 2>&1 | tee pub2-be-477-size.log
+host 3: $TESTCMD -s $TESTBASE/sub-be.ini 2>&1 | tee sub-be-477-size.log
+

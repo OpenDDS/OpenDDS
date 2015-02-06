@@ -1,0 +1,52 @@
+$Id$
+
+This test verifies that a subscriber with a reader receiving samples
+can gracefully be deleted while the publisher is continuing to sending
+samples.
+
+In case there are issues such as race conditions that only surface
+under certain timing situations, this test provides a number of
+options that can be used to help reveal such issues.
+
+These options to run_test.pl are
+
+-samples_per_cycle <samples>
+
+After the data reader has processed <samples> number of samples, the
+subscriber will be deleted and a new one created. Note that depending
+on sample count delay, delay between cycles, and delay between sample
+publications, the reader may receive more than <samples> number of
+samples.
+
+-delay_between_cycles <msecs>
+
+Before cycling a new subscriber, wait <msecs>.
+
+-sub_work_sleep <msecs>
+
+The time to sleep in the main subscriber thread between computing
+if the number of samples per cycle has been received.
+
+-n_samples_per_pub <samples>
+
+The number of samples a publisher thread should write.
+
+-n_pubs
+
+The number of publisher threads used.
+
+-delay_between_pubs <msecs>
+
+Publish the samples with a period of <msecs>.
+
+-pub_deadline <msecs>
+
+Set the publication QoS deadline to <msecs>.
+
+-sub_deadline <msecs>
+
+Set the data reader QoS deadline to <msecs>.
+
+-use_cft
+
+Use a content filtered topic.

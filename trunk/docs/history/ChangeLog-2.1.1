@@ -1,0 +1,1208 @@
+Tue Mar  9 08:08:06 UTC 2010  Trevor Fields  <fields_t@ociweb.com>
+
+        * OpenDDS version 2.1.1 released.
+
+Mon Mar  8 22:29:08 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/images/bidirtest.jpg:
+        * performance-tests/Bench/doc/images/latencytest.jpg:
+        * performance-tests/Bench/doc/images/pubboundtest.jpg:
+        * performance-tests/Bench/doc/images/subboundtest.jpg:
+
+          Added more diagrams to user guide.  JPEG format is actually
+          more compact for these diagrams, so convert the existing one to
+          that format as well.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated existing test descriptions and stubbed the data
+          reduction and visualization sections.
+
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Removed this file.
+
+Mon Mar  8 19:01:09 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated documentation for next release.
+
+Sat Mar  6 19:16:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+
+          Removed ccm base project, gives a hard dependency on CIAO,
+          have to solve this differently
+
+Sat Mar  6 06:47:09 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+
+          Added needed base project for ccm lem library
+
+Fri Mar  5 23:29:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added ability to simply tailor statistics gathering commands by
+          system type.  This was necessitated after discovering that the
+          solaris environment did not support several of the command
+          options used.
+
+        * performance-tests/Bench/doc/userguide.html:
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Minor updates from review comments (Scott).
+
+Fri Mar  5 14:34:08 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Dropped unnecessary inlines; adjusted conditional behavior in
+          dissect_odds_heur.
+
+Fri Mar  5 00:31:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/images/latencytest.png:
+
+          Diagram describing existing latency test.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Ongoing documentation.  Started to describe existing tests.
+
+Thu Mar  4 22:27:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Fixed formatting.
+
+Thu Mar  4 22:22:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Updated documentation for next release.
+
+Thu Mar  4 22:14:22 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_udp.mpb:
+        * dds/DCPS/transport/udp/udp.mpc:
+
+          Renamed the project opendds_udp.  "udp" alone is too general and
+          will easily conflict (for example, TAO/performance-tests/UDP).
+
+        * bin/dcps_tests.lst:
+
+          Exclude the Priority test on QNX.  It is hanging in
+          pthread_setschedparam().
+
+Wed Mar  3 23:32:36 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added specification for which statistics to gather.
+          Updated the documentation.
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Ongoing documentation effort.  Todays installment.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Updated to use the new statistics specification argument.
+
+Wed Mar  3 00:22:48 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Updated with installation, quick start, and start of FAQ.
+
+Mon Mar  1 21:40:59 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/StatisticalValue.h:
+
+          Remove a compiler warning.
+
+Fri Feb 26 16:25:07 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * docs/html/multicast/multicast.html:
+
+          Updated documentation.
+
+        * performance-tests/Bench/tests/spray/transport.ini:
+
+          Updated transport configuration options; increased nak_interval
+          to more easily identify NACK suppression.
+
+Fri Feb 26 03:42:01 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/tests/spray:
+        * performance-tests/Bench/tests/spray/pub-1.ini:
+        * performance-tests/Bench/tests/spray/pub-2.ini:
+        * performance-tests/Bench/tests/spray/pub-3.ini:
+        * performance-tests/Bench/tests/spray/pub-4.ini:
+        * performance-tests/Bench/tests/spray/sub.ini:
+        * performance-tests/Bench/tests/spray/test-commands.txt:
+        * performance-tests/Bench/tests/spray/transport.ini:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Added test for measuring reliable multicast sample loss on a
+          lossy network.
+
+Thu Feb 25 23:45:55 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          Ensure the message rate is interpreted consistently for both
+          exponential and fixed types.
+          Initialize and manage the default instance profile value.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Fix a logfile misnaming in the reliable subscription bound
+          testing commands.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Account for moving the original scenario configurations to a
+          sub-directory.
+
+Thu Feb 25 20:35:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * etc/multicast.conf:
+        * etc/tcp.conf:
+        * etc/udp.conf:
+
+          Added default svc.conf files for supported transports.
+
+Thu Feb 25 17:26:34 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/tests.txt:
+        * performance-tests/Bench/doc/userguide.html:
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          Ensured that a default FIXED variable is available even if no
+          specification is made for MessageSizeType, MessageRateType, and
+          InstanceType.
+
+        * performance-tests/Bench/src/Test.idl:
+
+          Removed priority as instance key.
+
+        * performance-tests/Bench/tests/latency/*.ini:
+        * performance-tests/Bench/tests/scaling/*.ini:
+        * performance-tests/Bench/tests/thru/*.ini:
+
+          Updated to use new *Type specifications.
+
+        * performance-tests/Bench/tests/scenarios/*.ini:
+
+          Moved from tests directory to new tests/scenarios sub-directory.
+          Updated to use new *Type specifications.
+
+        * performance-tests/Bench/tests/scenarios/test-descriptions.txt:
+
+          Moved and renamed from tests/README for consistency.
+
+        * performance-tests/Bench/tests/README:
+        * performance-tests/Bench/tests/s1-p1.ini:
+        * performance-tests/Bench/tests/s1-p2.ini:
+        * performance-tests/Bench/tests/s2-p1.ini:
+        * performance-tests/Bench/tests/s2-p2.ini:
+        * performance-tests/Bench/tests/s2-p3.ini:
+        * performance-tests/Bench/tests/s2-p4.ini:
+        * performance-tests/Bench/tests/s2-p5.ini:
+        * performance-tests/Bench/tests/s2-p6.ini:
+        * performance-tests/Bench/tests/s3-p1.ini:
+        * performance-tests/Bench/tests/s3-p2.ini:
+        * performance-tests/Bench/tests/s3-p3.ini:
+
+          Removed these files.  They were moved into the 'scenarios'
+          sub-directory.
+
+Thu Feb 25 08:54:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomainExt.idl:
+        * dds/DdsDcpsInfo.idl:
+
+          Removed ciao leam
+
+        * dds/DdsDcps.mpc:
+
+          Removed generation of lem for OpenDDS specific interfaces
+
+Wed Feb 24 22:43:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Current state of the documentation.  This is still an ongoing
+          activity.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Extended POD description.
+          Added 'netstat -ntpc' statistics gathering to periodically grab
+          the network information.  This has not been tested yet, so
+          consider it experimental at this time.
+
+        * performance-tests/Bench/doc/datamodel.txt:
+
+          Added new Instance* test configuration parameters to allow
+          specifying a number of instances to send data on.
+
+          Modified the mechanism to select the type of message size,
+          message rate, and instance selection to be explicit using the
+          new *Type specification parameters.
+
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Implemented new instance test configuration parameters and
+          modified type specifications.
+
+        * performance-tests/Bench/src/Test.idl:
+
+          Added a key field to be used in when specifying more than one
+          instance to send data on.
+
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/Bench/src/StatisticalValue.h:
+        * performance-tests/Bench/src/StatisticalValue.cpp:
+
+          Replaced the previous statistical classes with a hierarchy that
+          includes a StatisticalValue<Type> intervace base class and
+          various implementations:
+            FixedValue<Type>
+            UniformValue<Type>
+            ExponentialValue<Type>
+            GaussianValue<Type>
+
+        * performance-tests/Bench/src/Exponential.h:
+        * performance-tests/Bench/src/Exponential.cpp:
+        * performance-tests/Bench/src/Gaussian.h:
+        * performance-tests/Bench/src/Gaussian.cpp:
+
+          Removed these files.
+
+Wed Feb 24 20:36:48 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Made DataBlockAllocator to have mutex protected. This resolved
+          cores in throughput tests.
+
+Wed Feb 24 14:50:02 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest3NoKey/InstanceDataMap.h:
+
+          Corrected an #include.
+
+Wed Feb 24 13:20:12 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+
+          Added projects to generate the lem needed for dds4ccm. When the
+          MPC feature dds4ccm_opendds is set to 1, the lem and the lem
+          stub dll will be generated.
+
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsDomainExt.idl:
+        * dds/DdsDcpsInfo.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsTopic.idl:
+          Added ciao lem pragma which we need for dds4ccm
+
+        * MPC/config/dcps_tcp.mpb:
+        * MPC/config/dds_suppress_any_support.mpb:
+        * MPC/config/dds_wrapper.mpb:
+        * MPC/config/idl2jni.mpb:
+        * MPC/config/java.mpb:
+        * MPC/config/optional_jni_check.mpb:
+          Added Id tag
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          New base project
+
+Tue Feb 23 20:57:44 UTC 2010  Phil Mesnier  <mesnier_p@ociweb.com>
+
+        * tools/odds_repoctl/odds_repoctl.mpc:
+
+          Added explicit dependency on InfoRepoLib, as it is required
+          by the Federator lib.
+
+Tue Feb 23 17:42:03 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/userguide.html:
+
+          Current state of documentation.
+
+        * performance-tests/Bench/doc/datamodel.txt:
+        * performance-tests/Bench/src/EntityProfiles.h:
+        * performance-tests/Bench/src/Options.cpp:
+
+          Added AckDelay configuration parameter to Publication profile.
+
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Use AckDelay configuration parameter to selectively call
+          wait_for_acknowledgments() at publication termination.
+
+        * performance-tests/Bench/tools/convert-all:
+
+          Removed a gratuitous change.
+
+Tue Feb 23 16:48:25 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * NEWS:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsTopic.idl:
+
+          Added IDL for ContentFilteredTopic and MultiTopic, but they are not
+          yet implemented (operations will return NULL or RETCODE_UNSUPPORTED).
+
+Mon Feb 22 20:57:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/colorfilters:
+
+          Updated syntax to match that of built-in filters.
+
+Sun Feb 21 22:09:46 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-transports-scaling.gp:
+
+          Reverted changes introduced by previous commit.
+
+Sun Feb 21 19:47:46 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-transports-scaling.gp:
+
+          Updated output image size.
+
+Sun Feb 21 05:20:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Switched from ACE_SYNCH_RW_MUTEX to ACE_SYNCH_MUTEX; there
+          is no longer any benefit to using a RW mutex here.
+
+Sun Feb 21 05:13:53 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Reduced lock scopes; reverted change made in r3050 which
+          prevented the NACK mechanism from triggering properly.
+
+Sun Feb 21 04:44:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Corrected locking behavior in start.
+
+Sun Feb 21 02:41:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Clarified language concerning color filter ordering.
+
+Sat Feb 20 16:29:31 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/bin/plot-transports-scaling.gp:
+
+          Updated output image size.
+
+Sat Feb 20 04:51:30 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/tools/convert-all:
+
+          Added missing bash interpreter directive.
+
+        * performance-tests/Bench/bin/plot-transports-scaling.gp:
+        * performance-tests/Bench/tools/convert-scaling:
+        * performance-tests/Bench/tools/plot-scaling.gp:
+
+          Added support for analyzing scaling results.
+
+Sat Feb 20 02:20:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+
+          Updated next release version; updated release notes with recent
+          changes to multicast and the transport framework.
+
+        * README:
+        * tools/odds_dissector/README:
+
+          Updated next release version.
+
+Sat Feb 20 00:15:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * performance-tests/Bench/tests/scaling:
+        * performance-tests/Bench/tests/scaling/pub-1.ini:
+        * performance-tests/Bench/tests/scaling/pub-2.ini:
+        * performance-tests/Bench/tests/scaling/pub-3.ini:
+        * performance-tests/Bench/tests/scaling/pub-4.ini:
+        * performance-tests/Bench/tests/scaling/pub-5.ini:
+        * performance-tests/Bench/tests/scaling/pub-6.ini:
+        * performance-tests/Bench/tests/scaling/pub-7.ini:
+        * performance-tests/Bench/tests/scaling/pub-8.ini:
+        * performance-tests/Bench/tests/scaling/sub.ini:
+        * performance-tests/Bench/tests/scaling/test-commands.txt:
+        * performance-tests/Bench/tools/mkpkg:
+
+          Added scaling test for measuring round-trip latency as the
+          number of subscribing endpoints increase.
+
+Sat Feb 20 00:14:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+
+          Fixed incorrect conditional introduced by previous commit.
+
+Sat Feb 20 00:07:56 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.h:
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Fixed deadlock caused by buggy ACE_Select_Reactor behavior.
+
+Fri Feb 19 19:53:34 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Dropped unnecessary lock in syn_received.
+
+Fri Feb 19 15:19:59 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/multicast.rc:
+        * dds/DCPS/transport/udp/udp.rc:
+        * dds/monitor/monitor.rc:
+
+          Added resource files to new core libraries so that their DLLs
+          will contain descriptive names and version information.
+
+Fri Feb 19 03:56:04 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Added missing whitespace.
+
+Fri Feb 19 03:44:59 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Updated path information.
+
+Fri Feb 19 03:09:30 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/doc/images:
+        * performance-tests/Bench/doc/userguide.html:
+
+          Initial outline of user guide.
+
+        * performance-tests/Bench/src/DataReaderListener.cpp:
+
+          Adjust output radix to be more useful (counts in decimal make
+          more sense).
+
+Thu Feb 18 22:37:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/HTemplate.pm:
+
+          #include the tao_idl-generated *C.h instead of *S.h.
+
+Thu Feb 18 22:08:14 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.mpc:
+        * tools/odds_dissector/odds_export.h:
+        * tools/odds_dissector/odds_packet.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Updates to support hidden visibility on GCC 4.1.x and up.
+
+Thu Feb 18 21:41:25 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/multicast/ReliableSession.cpp:
+
+          Dropped use of acked_ flag for passive sessions.
+
+Thu Feb 18 21:22:42 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+
+          Fixed bad bit twiddling for historic samples introduced by
+          submessage_id_.
+
+Wed Feb 17 19:56:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Clarified platform_macros.GNU language.
+
+Wed Feb 17 19:42:41 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+        * tools/odds_dissector/colorfilters:
+
+          Added additional instructions for UNIX builds; minor formatting
+          updates.
+
+Tue Feb 16 20:41:50 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Fixed compiler warnings/errors for GCC.
+
+Tue Feb 16 19:03:46 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/DataReaderListener.cpp:
+
+          Adding even more information to diagnostic message.
+
+Tue Feb 16 17:51:26 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Updated README with additional pointers for applying color
+          filters.
+
+Tue Feb 16 17:42:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Updated README with additional pointers for verifying the
+          plugin install and applying color filters.
+
+Tue Feb 16 17:32:24 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.rc:
+
+          Updated include Version.h include.
+
+Tue Feb 16 17:23:47 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/colorfilters:
+
+          Updated coloring rule for important DCPS packets.
+
+Tue Feb 16 17:21:12 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/DataReaderListener.cpp:
+
+          Added more information to a diagnostic message.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Corrected the command name being used.
+
+Tue Feb 16 17:01:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+        * tools/odds_dissector/colorfilters:
+
+          Added canned color filters to identify DCPS protocol packets.
+
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Minor formatting updates.
+
+Tue Feb 16 15:24:20 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/tests/simple/idl2jni_test_simple.mpc:
+        * java/idl2jni/tests/simple/simple.idl:
+
+          Enabled the test after commenting-out some unsupported IDL
+          constructs (passing arrays as parameters to operations).
+
+Tue Feb 16 06:44:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/README:
+
+          Minor formatting updates.
+
+Tue Feb 16 00:08:15 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/Process.cpp:
+
+          Updated flow control depending on the publication and
+          subscription matching status.
+
+        * performance-tests/Bench/src/Publication.h:
+        * performance-tests/Bench/src/Publication.cpp:
+
+            associations()
+            missing_associations()
+              - new accessors for state information.
+
+        * performance-tests/Bench/src/Subscription.h:
+        * performance-tests/Bench/src/Subscription.cpp:
+
+            associations() - new accessor for state information.
+
+        * performance-tests/Bench/tests/latency/*.ini
+
+          Updated publication specifications with an Associations value
+          for the updated flow control.
+
+        * performance-tests/Bench/tests/thru/bidir-*-*-*.ini:
+
+          Updated modified latency tests to current flow control and test
+          requirements.  Renamed from Mibi bps to Mbps.
+
+        * performance-tests/Bench/tests/thru/bidir-remote-be.ini:
+        * performance-tests/Bench/tests/thru/bidir-remote-rel.ini:
+
+          Renamed the remote end configuration files to better reflect
+          their semantics.
+
+        * performance-tests/Bench/tests/thru/pub-1sub-*-*.ini:
+
+          Updated subscription bound tests to current flow control and test
+          requirements.  Renamed from Mibi bps to Mbps.
+
+        * performance-tests/Bench/tests/thru/pub-2sub-*-*.ini:
+
+          Updated publication bound tests to current flow control and test
+          requirements.  Renamed from Mibi bps to Mbps.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Updated test command summary with current test configuration
+          file information.  Simplified test execution through use of
+          even more shell variables.
+
+        * performance-tests/Bench/tests/thru/test-descriptions.txt:
+
+          Segregated test descriptions from the command summary.
+
+        * performance-tests/Bench/tests/thru/p1-be-1220.ini:
+        * performance-tests/Bench/tests/thru/p1-be-1907.ini:
+        * performance-tests/Bench/tests/thru/p1-be-191r.ini:
+        * performance-tests/Bench/tests/thru/p1-be-191s.ini:
+        * performance-tests/Bench/tests/thru/p1-be-286r.ini:
+        * performance-tests/Bench/tests/thru/p1-be-286s.ini:
+        * performance-tests/Bench/tests/thru/p1-be-305.ini:
+        * performance-tests/Bench/tests/thru/p1-be-381r.ini:
+        * performance-tests/Bench/tests/thru/p1-be-381s.ini:
+        * performance-tests/Bench/tests/thru/p1-be-477r.ini:
+        * performance-tests/Bench/tests/thru/p1-be-477s.ini:
+        * performance-tests/Bench/tests/thru/p1-be-687.ini:
+        * performance-tests/Bench/tests/thru/p1-be-76.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-1220.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-1907.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-191r.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-191s.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-286r.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-286s.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-305.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-381r.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-381s.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-477r.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-477s.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-687.ini:
+        * performance-tests/Bench/tests/thru/p1-rel-76.ini:
+        * performance-tests/Bench/tests/thru/p2-be.ini:
+        * performance-tests/Bench/tests/thru/p2-rel.ini:
+        * performance-tests/Bench/tests/thru/pub-be-1220-half.ini:
+        * performance-tests/Bench/tests/thru/pub-be-1220.ini:
+        * performance-tests/Bench/tests/thru/pub-be-1907-half.ini:
+        * performance-tests/Bench/tests/thru/pub-be-1907.ini:
+        * performance-tests/Bench/tests/thru/pub-be-191r.ini:
+        * performance-tests/Bench/tests/thru/pub-be-191s.ini:
+        * performance-tests/Bench/tests/thru/pub-be-286-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-be-286-size.ini:
+        * performance-tests/Bench/tests/thru/pub-be-286r.ini:
+        * performance-tests/Bench/tests/thru/pub-be-286s.ini:
+        * performance-tests/Bench/tests/thru/pub-be-305.ini:
+        * performance-tests/Bench/tests/thru/pub-be-381-size.ini:
+        * performance-tests/Bench/tests/thru/pub-be-381r.ini:
+        * performance-tests/Bench/tests/thru/pub-be-381s.ini:
+        * performance-tests/Bench/tests/thru/pub-be-477-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-be-477-size.ini:
+        * performance-tests/Bench/tests/thru/pub-be-477r.ini:
+        * performance-tests/Bench/tests/thru/pub-be-477s.ini:
+        * performance-tests/Bench/tests/thru/pub-be-687-half.ini:
+        * performance-tests/Bench/tests/thru/pub-be-687.ini:
+        * performance-tests/Bench/tests/thru/pub-be-76-half.ini:
+        * performance-tests/Bench/tests/thru/pub-be-76-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-be-76.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-1220-half.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-1220.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-1907-half.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-1907.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-191r.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-191s.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-286-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-286-size.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-286r.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-286s.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-305.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-381-size.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-381r.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-381s.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-477-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-477-size.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-477r.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-477s.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-687-half.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-687.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-76-half.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-76-rate.ini:
+        * performance-tests/Bench/tests/thru/pub-rel-76.ini:
+
+          Removed these files.
+
+Tue Feb 16 00:04:34 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+        * tools/odds_dissector/README:
+        * tools/odds_dissector/odds_dissector.rc:
+
+          Updated documentation for odds_dissector.
+
+Mon Feb 15 21:17:42 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/README:
+
+          Added a description of what the contents of the hypothetical
+          Foo.idl file would look like.
+
+Mon Feb 15 19:35:00 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.mpc:
+        * tools/odds_dissector/odds_dissector.rc:
+
+          Added resource file for Windows builds.
+
+Mon Feb 15 05:33:44 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Updated output for sample byte_order flag.
+
+Mon Feb 15 05:07:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.mpc:
+        * tools/odds_dissector/odds_packet.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Updates for VC++ support.
+
+Sun Feb 14 07:19:10 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Added additional guard to only show sample sequence numbers
+          for SAMPLE_DATA payloads.
+
+Sun Feb 14 06:47:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.mpc:
+        * tools/odds_dissector/odds_packet.cpp:
+
+          Renamed odds_dissector.cpp to odds_packet.cpp to reflect
+          naming conventions used by other wireshark plugins.
+
+        * tools/odds_dissector/odds_dissector.cpp:
+
+          Removed this file.
+
+Sun Feb 14 06:40:43 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.cpp:
+
+          Formatting updates; added additional guard for sub-messages
+          and lifespan.
+
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Dropped use of ACE_AS_STATIC_LIBS.
+
+Sun Feb 14 06:04:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Switched to glib model of managing exports to match other
+          wireshark plugins.
+
+        * tools/odds_dissector/odds_Export.h:
+
+          Removed this file.
+
+Sun Feb 14 05:45:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.mpc:
+
+          Added verbatim clause to omit library prefix on gnuace.
+
+Sun Feb 14 04:37:22 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.cpp:
+
+          Renamed Message ID and Sub-Message ID fields to ID and Sub-ID,
+          respectively.
+
+Sun Feb 14 03:00:23 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.cpp:
+
+          Corrected overly greedy search and replace error.
+
+Sun Feb 14 02:55:16 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Corrected minor nits; updated plugin version number to
+          use DDS_VERSION.
+
+Sat Feb 13 23:18:43 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Updated stream operators to provide output compatible with
+          wireshark.
+
+        * dds/DCPS/transport/multicast/ReliableSession.h:
+
+          Moved SubMessageId enum to DataSampleHeader; we need a single
+          place to maintain Sub-Message IDs.
+
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Finalized dissector plugin for wireshark.
+
+Sat Feb 13 00:47:20 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.cpp:
+
+          Promoted init to public scope; this allows a sample header
+          to be initialized with an ACE_Message_Block without making an
+          extraneous copy.
+
+          Updated stream operators to provide output compatible with
+          wireshark.
+
+Fri Feb 12 22:30:32 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Added missing line terminator.
+
+Fri Feb 12 22:26:29 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportHeader.h:
+
+          Promoted init to public scope; this allows a transport header
+          to be initialized with an ACE_Message_Block without making an
+          extraneous copy.
+
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          DCPS packets are properly recognized and header fields are
+          exposed.
+
+Fri Feb 12 20:54:38 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Simplified, removing some less than correct syntax in the process.
+
+        * performance-tests/Bench/src/Process.cpp:
+
+          Updated startup checking to allow for no-publication
+          configurations to work.  Again.
+
+Fri Feb 12 00:15:35 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Updated keyword for version.
+
+Fri Feb 12 00:13:39 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_Export.h:
+        * tools/odds_dissector/odds_dissector.mpc:
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_plugin.cpp:
+
+          Finished bootstrap code; plugin now initializes correctly
+          in wireshark and registers itself as a proper dissector.
+
+Thu Feb 11 22:52:45 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Updated to simplify process management.  Added use of anonymous
+          closures for statistics gathering to factor common processing.
+
+        * performance-tests/Bench/doc/datamodel.txt:
+
+          Added documentation for new Publication "StartAfterDelay" and
+          existing but undocumented "Associations" test parameters.
+
+        * performance-tests/Bench/src/EntityProfiles.h:
+
+          PublicationProfile
+            - added new 'delay' member to hold the "StartAfterDelay"
+              test parameter value.
+
+        * performance-tests/Bench/src/Options.cpp:
+
+          loadPublication() - added new "StartAfterDelay" test parameter.
+
+        * performance-tests/Bench/src/Gaussian.cpp:
+
+          value() - make deviation_ comparison to floating point literal.
+
+        * performance-tests/Bench/src/Process.cpp:
+
+          run()
+            - simplified initiation processing to use new
+              Publication::ready() state information directly rather than
+              examining changed status conditions.
+            - simplified termination processing to use new
+              Subscription::active() state information directly rather than
+              examining changed status conditions.
+            - print timeout and duration information as well as message
+              count on test termination.
+
+        * performance-tests/Bench/src/Publication.h:
+        * performance-tests/Bench/src/Publication.cpp:
+
+          timeouts()
+          duration()
+          ready()
+            - new accessors for state information.
+
+          write()
+            - added behavior for cases where write() call times out.
+
+          svc()
+            - added behavior for cases where write() call times out.
+              added "StartAfterDelay" test parameter implementation.
+              simplified main loop - hoisted some asssignments out.
+              added test duration calculation.
+
+        * performance-tests/Bench/src/Subscription.h:
+        * performance-tests/Bench/src/Subscription.cpp:
+
+          active() - new accesor for state information.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Corrected some reliable loopback commands.
+          Added reliable publication and subscription bound commands.
+
+Thu Feb 11 21:51:06 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_dissector.mpc:
+
+          Corrected linkage for callbacks.
+
+Thu Feb 11 21:43:37 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/odds_dissector:
+        * tools/odds_dissector/README:
+        * tools/odds_dissector/odds_dissector.cpp:
+        * tools/odds_dissector/odds_dissector.mpc:
+
+          Initial commit of dissector for wireshark support.
+
+Wed Feb 10 22:38:46 UTC 2010  Yan Dai  <dai_y@ociweb.com>
+
+        * java/build_scripts/JavaTypeSupportImpl.pm:
+
+          Fixed a bug that generates incorrect jni class name when the
+          module name contains underscore and causes UnsatisfiedLinkError.
+          The "_1" needs be used to replace the underscore.
+
+        * java/tests/complex_idl/ComplexIDLTest.java:
+        * java/tests/complex_idl/Complex_Idl.idl:
+        * java/tests/complex_idl/QuoteSupport.java:
+        * java/tests/complex_idl/complex_idl_test.mpc:
+        * java/tests/complex_idl/Complex.idl:
+
+          Renamed Complex.idl to Complex_Idl.idl file and changed
+          module name from Complex to Complex_Idl to verify the bug fix.
+
+Wed Feb 10 21:55:26 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/idl2jni/codegen/im_java.cpp:
+
+          For IDL unions without an explicit default that need a generated
+          default (because the branches don't cover all possible discriminator
+          values), if the discriminator type is an enum we need to wrap the
+          primitive (int) value of the enum in the Java object for the enum.
+
+Wed Feb 10 00:11:21 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/tests/thru/pub-*-*-*.ini:
+        * performance-tests/Bench/tests/thru/pub-*-*.ini:
+        * performance-tests/Bench/tests/thru/sub-*.ini:
+
+          New set of tests for publication bound and subscription bound
+          throughput testing.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Added documentation of new publication bound and subscription
+          bound tests.
+
+Tue Feb  9 16:58:50 UTC 2010  Adam Mitz  <mitza@ociweb.com>
+
+        * java/build_scripts/jms_scoreboard.pl:
+
+          If ant returns non-zero and at least one test has failed,
+          don't output an additional line that will be flagged as an error
+          by the scoreboard parser.
+
+Tue Feb  9 15:24:05 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * MPC/config/dcps_monitor.mpb:
+        * tools/odds_monitor/Monitor.mpc:
+
+          Added a new base project for including the monitor library.
+          Thanks to Adam Mitz for helping me understand Johnny's original
+          suggestion.
+
+Tue Feb  9 15:02:53 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tools/odds_monitor/Monitor.mpc:
+
+          Make the project build after the OpenDDS_monitor project it
+          depends on.  Thanks to Johnny Willemsen for this correction.
+
+Tue Feb  9 13:08:49 UTC 2010  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
+          Initialise a pointer with 0
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fix invalid logging mask
+
+Tue Feb  9 04:38:49 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Debugged statistics collecting.
+
+        * performance-tests/Bench/tests/thru/test-commands.txt:
+
+          Added statistics gathering argument to p2 command lines.
+
+Mon Feb  8 18:03:34 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added script PID to system statistics output file.  This will
+          allow statistics to be gathered in a loopback test without
+          conflicts.
+          Corrected a documentation issue.
+
+        * performance-tests/Bench/tests/thru/p1-be-*.ini:
+
+          Updated Topics to be BEST_EFFORT.  This was preventing
+          associations on the return trip from being made.
+
+Mon Feb  8 16:17:24 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+
+          Updated ast_visitor interface for upcoming DOC x.7.7 release.
+
+Mon Feb  8 15:32:31 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Use correct configuration file source for package.
+
+Mon Feb  8 15:10:54 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Correct a syntax error.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Add the new througput test configuration files to the built
+          package.  Added a note about versions on the transport library
+          link establishment as well.
+
+Sat Feb  6 00:01:39 UTC 2010  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added new '-C' option to indicate that process and system
+          statistics should be collected.  System statistics are gathered
+          using a single 'vmstat' command during the test, while process
+          statistics are gathered for each sub-process using a batch
+          'top' command.  This is useful only on *nix derived platforms
+          and so is restricted to them.
+
+        * performance-tests/Bench/src/Publication.cpp:
+
+          Hoisted sample stack allocation out of sending loop.  Invariant
+          sample sizes will no longer result in byte sequence needing to
+          be extended for each sample.
+
+        * performance-tests/Bench/src/Subscription.cpp:
+
+          Added count summary output regardless of statistics collection
+          to remove a need to calculate statistics to count samples.
+
+        * performance-tests/Bench/tests/latency/test-commands.txt:
+
+          Added '.txt' extension for convenience.
+
+        * performance-tests/Bench/tests/thru:
+
+          Added new pre-configured test.  This includes 13 conditions
+          covering the message size/ message rate space to send from
+          76 Mibps (100Mbps) through 1907 Mibps (2500Mbps) of data
+          through the test path.
+
+Fri Feb  5 22:37:05 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * README:
+
+          Corrected spelling (SPARC is an initialism).
+
+Fri Feb  5 22:07:54 UTC 2010  Steven Stallion  <stallions@ociweb.com>
+
+        * NEWS:
+        * README:
+
+          Updated documentation for next release.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

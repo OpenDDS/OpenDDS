@@ -1,0 +1,7 @@
+project(*Lib): dcpslib, install {
+  sharedname = OpenDDS_Model
+  dynamicflags = OPENDDS_MODEL_BUILD_DLL
+  libout = $(DDS_ROOT)/lib
+  includes += $(DDS_ROOT)/tools/modeling/codegen
+}
+

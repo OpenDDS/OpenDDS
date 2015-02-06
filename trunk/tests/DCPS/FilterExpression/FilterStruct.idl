@@ -1,0 +1,7 @@
+#include <dds/DdsDcpsInfrastructure.idl>
+
+struct TBTD {
+  string name;
+  DDS::DurabilityQosPolicy durability;
+  DDS::DurabilityServiceQosPolicy durability_service;
+};

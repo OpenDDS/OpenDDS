@@ -1,0 +1,13 @@
+
+module Reliability
+{
+#pragma DCPS_DATA_TYPE "Reliability::Message"
+  struct Message
+  {
+    string id;
+    string name;
+    long count;
+    long expected;
+  };
+};
+

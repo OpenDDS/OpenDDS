@@ -1,0 +1,42 @@
+A test for TRANSIENT_LOCAL_DURABILITY_QOS implementation.
+The datawriter with the TRANSIENT_LOCAL_DURABILITY_QOS durability should
+resend the sending and sent samples to the newly associated datareaders.
+
+This test is also used to test the fix for a deadlock situation. The deadlock
+happens between fully_associated() thread and write()/register() thread when
+using TRANSIENT_LOCAL_DURABILITY_QOS. The fully_associated() thread calls the
+PublisherImpl::data_available() function which acquires the publisher lock and
+then the writer container lock while the write()/register() thread acquires
+writer container lock and then the publisher lock. To fix the lock reverse order
+problem, the fully_associated() was changed to acquire the writer container
+lock before calling PublisherImpl::data_available().
+
+To simulate the deadlock test scenario, the PublisherImpl::data_availabe()
+need be modified to have sleep for 2 seconds before send(list) if
+resend is true. The patch of the $DDS_ROOT/dds/DCPS/PublisherImpl.cpp is
+attached here.
+
+
+Index: dds/DCPS/PublisherImpl.cpp
+===================================================================
+--- dds/DCPS/PublisherImpl.cpp  (revision 1106)
++++ dds/DCPS/PublisherImpl.cpp  (working copy)
+@@ -915,6 +915,12 @@
+     }
+   else
+     {
++      if (resend)
++      {
++        ACE_DEBUG ((LM_DEBUG, "(%P|%t)%T PublisherImpl::data_available \n"));
++        ACE_OS::sleep (2);
++      }
++
+       // Do LATENCY_BUDGET processing here.
+       // Do coherency processing here.
+       // tell the transport to send the data sample(s).
+
+
+
+Without the fix, this test will encounter a deadlock. With the fix, the test
+should pass.
+

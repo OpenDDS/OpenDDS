@@ -1,0 +1,20 @@
+
+#pragma DCPS_DATA_TYPE "org::omg::dds::demo::ShapeType"
+#pragma DCPS_DATA_KEY "org::omg::dds::demo::ShapeType color"
+
+module org {
+  module omg {
+    module dds {
+      module demo {
+
+        struct ShapeType {
+          string color;
+          long x;
+          long y;
+          long shapesize;
+        };
+
+      };
+    };
+  };
+};

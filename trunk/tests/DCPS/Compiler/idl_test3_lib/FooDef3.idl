@@ -1,0 +1,38 @@
+
+// note the following perdefined types often have special cases:
+//    char, octet, boolean, string
+// where as all of the integer and float types are just one case.
+
+#include "SharedTypes.idl"
+
+module Xyz {
+
+
+  // needed to detect duplicate overload problems
+  typedef sequence<boolean,3> SeqOfBoolean2;
+  typedef sequence<string,3>  SeqOfString2;
+  typedef sequence<char,3>    SeqOfChar2;
+  typedef sequence<octet,3>   SeqOfOctet2;
+  typedef sequence<long,3>    SeqOfLong2;
+  typedef sequence<AnEnum,3>  SeqOfAnEnum2;
+
+  struct SimpleStruct {
+    long simple;
+    SeqOfLong ss1;
+  };
+
+
+  // needed to call size methods on arrays
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfBoolean"
+  struct StructOfArrayOfSeqOfBoolean { ArrayOfSeqOfBoolean f; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfString"
+  struct StructOfArrayOfSeqOfString { ArrayOfSeqOfString f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfChar"
+  struct StructOfArrayOfSeqOfChar { ArrayOfSeqOfChar f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfOctet"
+  struct StructOfArrayOfSeqOfOctet { ArrayOfSeqOfOctet f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfLong"
+  struct StructOfArrayOfSeqOfLong { ArrayOfSeqOfLong f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfSeqOfAnEnum"
+  struct StructOfArrayOfSeqOfAnEnum { ArrayOfSeqOfAnEnum f;};
+};

@@ -1,0 +1,27 @@
+This simple test is to test the builtin topics on the client side.
+The test application creates participant, publisher, datawriter,
+subscriber and datareader and looks for the builtin topic data via
+the builtin subsciber in participant.
+
+It also tests the ignore* interface in DomainParticipant.
+
+
+Builtin topic basic function test:
+
+  run_test.pl
+
+  - start the DCPSInfo server.
+
+    ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+
+  - start the unittest client with the orb initialized by the Service_Participant.
+
+    ./bit -DCPSInfoRepo file://$iorfile
+
+
+Ingore* interface tests are done by passing the -i option.
+
+   run_test.pl ignore_part
+   run_test.pl ignore_topic
+   run_test.pl ignore_pub
+   run_test.pl ignore_sub

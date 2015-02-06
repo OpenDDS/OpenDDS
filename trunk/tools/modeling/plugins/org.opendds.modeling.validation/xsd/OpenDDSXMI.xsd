@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:application="http://www.opendds.org/modeling/schemas/Application/1.0" xmlns:core="http://www.opendds.org/modeling/schemas/Core/1.0" xmlns:dcps="http://www.opendds.org/modeling/schemas/DCPS/1.0" xmlns:domain="http://www.opendds.org/modeling/schemas/Domain/1.0" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:qos="http://www.opendds.org/modeling/schemas/QoS/1.0" xmlns:topics="http://www.opendds.org/modeling/schemas/Topics/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmlns:xmi="http://www.omg.org/XMI" targetNamespace="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+  <xsd:import namespace="http://www.omg.org/XMI" schemaLocation="XMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Types/1.0" schemaLocation="TypesXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/QoS/1.0" schemaLocation="QoSXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Application/1.0" schemaLocation="ApplicationXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/DCPS/1.0" schemaLocation="DCPSXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Topics/1.0" schemaLocation="TopicsXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Domain/1.0" schemaLocation="DomainXMI.xsd"/>
+  <xsd:import namespace="http://www.opendds.org/modeling/schemas/Core/1.0" schemaLocation="CoreXMI.xsd"/>
+  <xsd:complexType abstract="true" name="ddsSpecification">
+    <xsd:complexContent>
+      <xsd:extension base="core:Specification"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType abstract="true" name="ddsProperty">
+    <xsd:complexContent>
+      <xsd:extension base="core:TypedEntity"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="qosProperty">
+    <xsd:complexContent>
+      <xsd:extension base="domain:QosProperty"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType abstract="true" name="qosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:ddsSpecification"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="topic">
+    <xsd:complexContent>
+      <xsd:extension base="topics:Topic"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="domainParticipant">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:DomainParticipant"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="publisher">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:Publisher"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="subscriber">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:Subscriber"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="domain">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:Domain"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="dataReader">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:DataReader"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="dataWriter">
+    <xsd:complexContent>
+      <xsd:extension base="dcps:DataWriter"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ddsAppTarget">
+    <xsd:complexContent>
+      <xsd:extension base="application:ApplicationTarget"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="deadlineQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:DeadlineQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="destinationOrderQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:DestinationOrderQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="dsQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:DurabilityServiceQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="durabilityQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:DurabilityQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="efQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:EntityFactoryQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="gdQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:GroupDataQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="historyQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:HistoryQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="lbQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:LatencyBudgetQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="lifespanQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:LifespanQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="livelinessQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:LivelinessQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="osQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:OwnershipStrengthQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ownershipQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:OwnershipQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="partitionQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:PartitionQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="presentationQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:PresentationQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="rdlQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:ReaderDataLifecycleQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="reliabilityQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:ReliabilityQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="rlQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:ResourceLimitsQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="tbfQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:TimeBasedFilterQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="tdQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:TopicDataQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="tpQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:TransportPriorityQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="udQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:UserDataQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="wdlQosPolicy">
+    <xsd:complexContent>
+      <xsd:extension base="qos:WriterDataLifecycleQosPolicy"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="OpenDDSModel">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="libs" type="opendds:OpenDDSLib"/>
+          <xsd:element name="packages" type="opendds:LibPackage"/>
+          <xsd:element name="basicTypes" type="opendds:BasicTypes"/>
+        </xsd:choice>
+        <xsd:attribute name="name" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="OpenDDSModel" type="opendds:OpenDDSModel"/>
+  <xsd:complexType name="LibPackage">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="packages" type="opendds:LibPackage"/>
+          <xsd:element name="libs" type="opendds:OpenDDSLib"/>
+        </xsd:choice>
+        <xsd:attribute name="name" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType abstract="true" name="OpenDDSLib">
+    <xsd:complexContent>
+      <xsd:extension base="core:Element">
+        <xsd:attribute name="name" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="PolicyLib">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:OpenDDSLib">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="policies" type="qos:QosPolicy"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="DcpsLib">
+    <xsd:complexContent>
+      <xsd:extension base="opendds:OpenDDSLib">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="domains" type="opendds:domain"/>
+          <xsd:element name="participants" type="opendds:domainParticipant"/>
+          <xsd:element name="topicDescriptions" type="topics:TopicDescription"/>
+          <xsd:element name="policies" type="qos:QosPolicy"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="BasicTypes">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="types" type="types:Type"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  
+</xsd:schema>

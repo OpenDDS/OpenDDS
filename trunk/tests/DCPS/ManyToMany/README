@@ -1,0 +1,31 @@
+# $Id$
+
+This test verifies that all publishers and subscribers associate.  For reliable
+transports it verifies that all samples from all publishers are received by all
+subscribers.  For un-reliable transports it verifies that at least a minimum
+percentage of samples from each publisher are received by all subscribers.
+
+Usage:
+run_test.pl [tcp|udp|multicast|multicast_async|shmem|rtps|rtps_disc|rtps_disc_tcp] XToY [large|small] [orb_csdtp]
+  - X writers sending to Y readers.  If X(/Y) is divisible by 2, then 2
+    publisher(/subscriber) processes will be created. If X(/Y) is divisible by
+    4, then 2 participants will be created on each of the 2 publisher
+    (/subscriber) processes.  Then the remaining writers(/readers) will be created on
+    each participant, so that there are X(/Y) writers(/readers) altogether.
+  - If orb_csdtp is passed after large small then TAO will be configured using the svc_csdtp.conf file.
+    (See the comments in this file for why you might want to use this configuration.)
+
+run_test.pl [tcp|udp|multicast|multicast_async|shmem|rtps|rtps_disc|rtps_disc_tcp] "<command line parameters passed>"
+  - This allows passing in parameters that are passed onto the publishers and
+    subscribers and are used by run_test.pl to create the processes that are needed.
+  - Example:
+    run_test.pl tcp "-pub_processes 2 -pub_participants 3 -writers 4 -sub_processes 1 /
+      -sub_participants 4 -readers 3 -samples 5 -delay_msec 1000 "
+
+    This will create 2 publisher processes, each publisher process will have 3 participants,
+    each participant will have 4 writers and each writer will send 5 samples. It will also
+    create 1 subscriber processes, each subscriber will have 4 participants, each participant
+    will have 3 readers. The delay_msec is the delay between every send, so if you have 3
+    writers altogether then writer #1 will send its sample #1, wait delay_msec then writer
+    #2 will send its sample #1, wait delay_msec then writer #3 will send its sample #1,
+    wait delay_msec then writer #1 will send its sample #2, etc.

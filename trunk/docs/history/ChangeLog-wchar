@@ -1,0 +1,640 @@
+Thu Jun 25 20:37:02 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Removed unreachable code that caused warnings on some compilers.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Release the ACE Message Block if there is still data in the dtor.
+          
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+        * dds/DCPS/transport/framework/TransportSendElement.cpp:
+
+          Use ACE_DES_FREE to call destructors on objects allocated by
+          custom allocators and placement new-ed.  Thanks to Mike for the fix.
+
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+
+          Move the close() of the socket to after it's been removed from
+          the reactor.
+
+Tue Jun 23 19:17:40 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          The allocator's template argument should be a char
+          array, not ACE_TCHAR -- it's just a chunk of bytes.
+
+Tue Jun 23 16:23:36 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+
+          Demoted an ERROR to a warning after checking with Mike Martinez.
+          This is an expected case where datalink establishment / teardown
+          is happening quickly, and the code is there to handle it.
+
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+
+          Fix some more stray %s's that should be %C's.
+
+Tue Jun 23 15:20:56 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+
+          If DDS discovers the local system's hostname as "localhost"
+          then fall back on using the dotted-decimal address.
+
+Mon Jun 22 22:21:44 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added a constant for the ORB name used by OpenDDS.
+
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+          Use the above constant.
+
+Mon Jun 22 18:45:04 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Only acquire lock once in remove_associations instead of releasing
+          and re-acquiring.  A race condition was observed where the state was
+          inconsistent afer re-acquiring.
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Added a check for a Win32-specific errno value.
+
+Fri Jun 19 22:14:25 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/NetworkAddress.cpp:
+        * dds/DCPS/transport/framework/ThreadPerConnectionSendTask.cpp:
+        * dds/DCPS/transport/framework/ThreadSynchResource.inl:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/framework/TransportReceiveStrategy.cpp:
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConnection.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpReceiveStrategy.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastTransport.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpTransport.cpp:
+        * dds/InfoRepo/InfoRepoMulticastResponder.cpp:
+        * performance-tests/Bench/src/Process.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * tests/DCPS/FooTest3/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/Writer.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+
+          %p in an ACE log message format string requires an ACE_TCHAR*
+          argument, not char*.
+
+Wed Jun 17 20:44:46 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/tools/opendds_ir_ctl/opendds_ir_ctl.cpp:
+        * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/Priority/Writer.cpp:
+        * performance-tests/DCPS/Priority/publisher_main.cpp:
+        * performance-tests/DCPS/Priority/subscriber_main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TcpSubscriber.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConnection.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/Federation/publisher_main.cpp:
+        * tests/DCPS/Federation/subscriber_main.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiRepoTest/TestConfig.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiRepoTest/monitor.cpp:
+        * tests/DCPS/MultiRepoTest/system.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataWriterListener.cpp:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/Priority/subscriber_main.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+          Fixed some instances of %s that should be %C (in ACE_DEBUG, etc.).
+
+Wed Jun 17 18:19:28 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/transport/dds_comparative/Pub.cpp:
+        * tests/transport/dds_comparative/Sub.cpp:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SimpleDataReader.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/simple/SimpleDataReader.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+        * tests/transport/simple_bp/SimpleDataReader.cpp:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/sub_main.cpp:
+        * tests/transport/simple_bp_rm/SimpleDataReader.cpp:
+        * tests/transport/simple_bp_rm/pub_main.cpp:
+        * tests/transport/simple_bp_rm/sub_main.cpp:
+        * tests/transport/simple_n/SimpleDataReader.cpp:
+        * tests/transport/simple_n/pub_main.cpp:
+        * tests/transport/simple_n/sub_main.cpp:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SimpleDataReader.cpp:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SimpleDataReader.cpp:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+
+          Removed ACE_Argv_Type_Converter because ORB_init now accepts either
+          narrow or wide characters in argv.  Fixed some %s that should be %C.
+
+Tue Jun 16 19:31:24 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added a char*[] version of TheParticipantFactoryWithArgs for wchar
+          builds.  The ORB can now be initialized with wchar_t*[], no need to
+          convert (this is an extension to the OMG CORBA spec).
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportConfiguration.cpp:
+        * dds/DCPS/transport/framework/TransportConfiguration.h:
+        * dds/DCPS/transport/framework/TransportConfiguration.cpp:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleMcastConfiguration.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUdpConfiguration.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+
+          Removed duplicated and fragile code that used sprintf to form
+          configuration section names.  Replaced one helper method that uses
+          C++ iostreams to avoid the %ls (Linux wchar_t) vs. %s (Win32 wchar_t)
+          problem.
+
+        * java/dds/OpenDDS_jni_helpers.h:
+        * java/idl2jni/codegen/be_extern.h:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_init.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+
+          Made the Java support code compatible with ACE_USES_WCHAR.
+
+Mon Jun 15 21:15:00 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Pass the optional "key" parameter of set_repo_ior through from the
+          wchar_t wrapper to the char implementation.
+
+Mon Jun 15 21:11:35 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          (From Steve Stallion:)
+          released_data_ is no longer checked for pending samples.  This fixes
+          an issue preventing a wait_pending from unblocking for Subscribers
+          with pathological lifetimes.
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Fixed typo in log message.
+
+Mon Jun 15 19:01:53 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          Added support for ACE_USES_WCHAR on non-Win32 systems.  These
+          systems are strange because even though ACE_USES_WCHAR,
+          ACE_DIR::d_name is still of type char*.
+
+Mon Jun 15 16:02:15 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+        * performance-tests/DCPS/dummyTCP/PerformanceTest.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+
+          Ported to Windows Mobile 6.
+
+Fri Jun 12 22:16:03 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp
+
+          Added missing pending_data checks for wait_pending.
+
+Fri Jun 12 22:04:44 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/NetworkAddress.h:
+
+          Added #include for ACE_TString.
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Aggregator.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/Priority/publisher_main.cpp:
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+
+          The name of the main() function is ACE_TMAIN.
+          ACE_LIB_TEXT is deprecated in favor of ACE_TEXT.
+          Fixed a %s -> %C in ACE logging.
+
+Fri Jun 12 21:59:57 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          Ported to WinCE.  It compiles but there will almost certainly
+          be runtime problems due to the limited file system on this
+          platform.  This has implications for PERSISTENT_DURABILITY_QOS.
+
+Fri Jun 12 21:36:18 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Translate the PendingTimeout values to what ACE expects for
+          the timed-wait on the condition variable.
+
+Fri Jun 12 18:55:57 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * many files
+
+          Merged in changes from the trunk between r2013 and r2213.  Fixed
+          compile problems with uses_wchar=1 and started addressing the runtime
+          issues, this involved some general cleanup of bad code in DDS core
+          and tests.
+
+Tue Jun  9 20:48:07 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * many files
+
+          Merged in changes from trunk between the branching-off point and
+          r2013.  Fixed compile problems with uses_wchar=1 and a few runtime
+          issues.  There are still runtime failures in a number of tests, but
+          those are being deferred until the next round of merges.
+
+Thu Jan 29 00:09:21 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * tests/DCPS/FooType/FooType.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+
+          Added the *TypeSupportImpl.cpp to Source_Files.
+
+Wed Dec 12 22:25:38 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+        * rules.dds.GNU:
+
+          Added an MPC feature "tao_orbsvcs" which can be turned off to skip
+          building examples that require TAO's ORB services.
+
+Fri Oct 26 20:23:39 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
+
+          Wchar fix, convert to narrow before passing to std::ofstream ctor.
+
+Wed Oct 10 14:27:11 UTC 2007  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/PersistenceUpdater.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.h:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/DistributedContent/ApplicationLevel.h:
+        * examples/DCPS/DistributedContent/ApplicationLevel.cpp:
+        * examples/DCPS/DistributedContent/main.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Aggregator.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/DCPS/InfoRepo_population/SyncServer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/McastListenerTest/common.h:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.h:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/main.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/Sync/SyncClient_i.cpp:
+        * performance-tests/DCPS/Sync/SyncServer.cpp:
+        * performance-tests/DCPS/Sync/SyncServer_i.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/publisher/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.h:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/TestDriver.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/raw_tcp/subscriber/main.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.inl:
+        * performance-tests/DCPS/dummyTCP/DummyTcpConfiguration.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/Compiler/idl_test1_main/main.cpp:
+        * tests/DCPS/Compiler/idl_test3_main/main.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DCPSInfoRepo/publisher.cpp:
+        * tests/DCPS/DCPSInfoRepo/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.h:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/pub_main.cpp:
+        * tests/DCPS/FooTest3_0/sub_main.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/pub_main.cpp:
+        * tests/DCPS/FooTest3_1/sub_main.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.h:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/SimpleSubscriber.cpp:
+        * tests/DCPS/FooTest3_2/SubDriver.h:
+        * tests/DCPS/FooTest3_2/SubDriver.cpp:
+        * tests/DCPS/FooTest3_2/pub_main.cpp:
+        * tests/DCPS/FooTest3_2/sub_main.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/common.h:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/Serializer/SerializerTest.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * tests/transport/dds_comparative/PubDriver.h:
+        * tests/transport/dds_comparative/PubDriver.cpp:
+        * tests/transport/dds_comparative/SubDriver.h:
+        * tests/transport/dds_comparative/SubDriver.cpp:
+        * tests/transport/dds_comparative/pub_main.cpp:
+        * tests/transport/dds_comparative/sub_main.cpp:
+        * tests/transport/mcast_simple/PubDriver.h:
+        * tests/transport/mcast_simple/PubDriver.cpp:
+        * tests/transport/mcast_simple/SimpleDataWriter.cpp:
+        * tests/transport/mcast_simple/SimplePublisher.cpp:
+        * tests/transport/mcast_simple/SimpleSubscriber.cpp:
+        * tests/transport/mcast_simple/SubDriver.h:
+        * tests/transport/mcast_simple/SubDriver.cpp:
+        * tests/transport/mcast_simple/pub_main.cpp:
+        * tests/transport/mcast_simple/sub_main.cpp:
+        * tests/transport/mcast_simple_n/PubDriver.h:
+        * tests/transport/mcast_simple_n/PubDriver.cpp:
+        * tests/transport/mcast_simple_n/SimplePublisher.cpp:
+        * tests/transport/mcast_simple_n/SimpleSubscriber.cpp:
+        * tests/transport/mcast_simple_n/SubDriver.h:
+        * tests/transport/mcast_simple_n/SubDriver.cpp:
+        * tests/transport/mcast_simple_n/pub_main.cpp:
+        * tests/transport/mcast_simple_n/sub_main.cpp:
+        * tests/transport/reliable_multicast/unittest.cpp:
+        * tests/transport/simple/PubDriver.h:
+        * tests/transport/simple/PubDriver.cpp:
+        * tests/transport/simple/SimpleDataWriter.cpp:
+        * tests/transport/simple/SimplePublisher.cpp:
+        * tests/transport/simple/SimpleSubscriber.cpp:
+        * tests/transport/simple/SubDriver.h:
+        * tests/transport/simple/SubDriver.cpp:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+        * tests/transport/simple_bp/PubDriver.h:
+        * tests/transport/simple_bp/PubDriver.cpp:
+        * tests/transport/simple_bp/SimplePublisher.cpp:
+        * tests/transport/simple_bp/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp/SubDriver.h:
+        * tests/transport/simple_bp/SubDriver.cpp:
+        * tests/transport/simple_bp/pub_main.cpp:
+        * tests/transport/simple_bp/sub_main.cpp:
+        * tests/transport/simple_bp_rm/PubDriver.h:
+        * tests/transport/simple_bp_rm/PubDriver.cpp:
+        * tests/transport/simple_bp_rm/SimplePublisher.cpp:
+        * tests/transport/simple_bp_rm/SimpleSubscriber.cpp:
+        * tests/transport/simple_bp_rm/SubDriver.h:
+        * tests/transport/simple_bp_rm/SubDriver.cpp:
+        * tests/transport/simple_bp_rm/pub_main.cpp:
+        * tests/transport/simple_bp_rm/sub_main.cpp:
+        * tests/transport/simple_n/PubDriver.h:
+        * tests/transport/simple_n/PubDriver.cpp:
+        * tests/transport/simple_n/SimplePublisher.cpp:
+        * tests/transport/simple_n/SimpleSubscriber.cpp:
+        * tests/transport/simple_n/SubDriver.h:
+        * tests/transport/simple_n/SubDriver.cpp:
+        * tests/transport/simple_n/pub_main.cpp:
+        * tests/transport/simple_n/sub_main.cpp:
+        * tests/transport/udp_simple/PubDriver.h:
+        * tests/transport/udp_simple/PubDriver.cpp:
+        * tests/transport/udp_simple/SimpleDataWriter.cpp:
+        * tests/transport/udp_simple/SimplePublisher.cpp:
+        * tests/transport/udp_simple/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple/SubDriver.h:
+        * tests/transport/udp_simple/SubDriver.cpp:
+        * tests/transport/udp_simple/pub_main.cpp:
+        * tests/transport/udp_simple/sub_main.cpp:
+        * tests/transport/udp_simple_n/PubDriver.h:
+        * tests/transport/udp_simple_n/PubDriver.cpp:
+        * tests/transport/udp_simple_n/SimplePublisher.cpp:
+        * tests/transport/udp_simple_n/SimpleSubscriber.cpp:
+        * tests/transport/udp_simple_n/SubDriver.h:
+        * tests/transport/udp_simple_n/SubDriver.cpp:
+        * tests/transport/udp_simple_n/pub_main.cpp:
+        * tests/transport/udp_simple_n/sub_main.cpp:
+
+          Changes for ACE_USES_WCHAR=1 builds.  All interaction with ACE and
+          the OS is done in terms of TCHAR, including argv parsing.  Conversion
+          back to char is done when going to CORBA, including ORB_init().
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

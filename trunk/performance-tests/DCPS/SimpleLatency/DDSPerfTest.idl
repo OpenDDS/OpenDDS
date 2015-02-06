@@ -1,0 +1,72 @@
+#ifndef DDSPERFTEST_IDL
+#define DDSPERFTEST_IDL
+
+module DDSPerfTest {
+
+#pragma DCPS_DATA_TYPE "DDSPerfTest::PubMessage"
+
+  struct PubMessage {
+    long seqnum;
+
+    long seq_00;
+    long seq_01;
+    long seq_02;
+    long seq_03;
+    long seq_04;
+    long seq_05;
+    long seq_06;
+    long seq_07;
+    long seq_08;
+    long seq_09;
+    long seq_10;
+    long seq_11;
+    long seq_12;
+    long seq_13;
+    long seq_14;
+    long seq_15;
+    long seq_16;
+    long seq_17;
+    long seq_18;
+    long seq_19;
+    long seq_20;
+    long seq_21;
+    long seq_22;
+    long seq_23;
+    long seq_24;
+    long seq_25;
+    long seq_26;
+    long seq_27;
+    long seq_28;
+    long seq_29;
+    long seq_30;
+    long seq_31;
+    long seq_32;
+    long seq_33;
+    long seq_34;
+    long seq_35;
+    long seq_36;
+    long seq_37;
+    long seq_38;
+    long seq_39;
+    long seq_40;
+    long seq_41;
+    long seq_42;
+    long seq_43;
+    long seq_44;
+    long seq_45;
+    long seq_46;
+    long seq_47;
+    long seq_48;
+    long seq_49;
+  };
+
+#pragma DCPS_DATA_TYPE "DDSPerfTest::AckMessage"
+
+  struct AckMessage {
+    long seqnum;
+  };
+
+};
+
+
+#endif /* DDSPERFTEST_IDL */

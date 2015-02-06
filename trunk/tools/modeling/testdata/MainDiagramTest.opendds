@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_X8F_gB9WEeCdmLtJE9cY9Q" name="MainDiagramTest">
+  <libs xsi:type="opendds:PolicyLib" xmi:id="_ZK7xMB9WEeCdmLtJE9cY9Q" name="PolicyLibTop"/>
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_bOgygB9WEeCdmLtJE9cY9Q" name="DcpsLibTop"/>
+  <libs xsi:type="types:DataLib" xmi:id="_coVFIB9WEeCdmLtJE9cY9Q" name="DataLibTop"/>
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_IX8L8S46EeCf8_EVUpZWnQ" name="gooddcps"/>
+  <packages xmi:id="_e-pcQB9WEeCdmLtJE9cY9Q" name="Package1">
+    <packages xmi:id="_gp6rQB9WEeCdmLtJE9cY9Q" name="Package11">
+      <libs xsi:type="opendds:PolicyLib" xmi:id="_sBOhwB9WEeCdmLtJE9cY9Q" name="PolicyLib11"/>
+      <libs xsi:type="opendds:DcpsLib" xmi:id="_uG0VQB9WEeCdmLtJE9cY9Q" name="DcpsLib11"/>
+      <libs xsi:type="types:DataLib" xmi:id="_vuWTwB9WEeCdmLtJE9cY9Q" name="DataLib11"/>
+    </packages>
+  </packages>
+</opendds:OpenDDSModel>

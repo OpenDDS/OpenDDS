@@ -1,0 +1,78 @@
+DDSWrapper example
+------------------
+
+This example is copied and modified from
+$DDS_ROOT/examples/DCPS/IntroductionToOpenDDS.
+
+The following files have been changed to use the DDSWrapper library.
+
+publisher.cpp : Reduced code base by using DDS wrapper classes in the
+                main function
+
+subscriber.cpp : Reduced code base by using DDS wrapper classes in the
+                main function
+
+ExchangeEventDataReaderListenerImpl.[h/cpp] :
+QuoteDataReaderListenerImpl.[h/cpp] :
+                Inherit from DataReader_Listener_Base now to remove
+                necessity to implement empty and unused callback methods.
+
+For how to run the example, see the following original description.
+
+// *******************************************************************
+//
+// (c) Copyright 2006, Object Computing, Inc.
+// All Rights Reserved.
+//
+// *******************************************************************
+
+Instructions for Building the Example (assuming ACE, TAO, DDS, and MPC
+are installed and configured):
+
+1) Run Make Project Creator to generate build files:
+
+Windows, VC 7.1:   perl %ACE_ROOT%\bin\mwc.pl -type vc71 StockQuoter.mwc
+Unix, GNU Make:    $ACE_ROOT/bin/mwc.pl -type gnuace StockQuoter.mwc
+
+2)  Build the application
+
+
+Instructions for running the example:
+
+For TCP pub/sub:
+
+1)  Run the DCPSInfo server
+
+       $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo -ORBSvcConf tcp.conf -ORBEndpoint iiop://localhost:12345 -d domain_ids
+
+2)  Run the Subscriber
+
+       ./subscriber -ORBSvcConf tcp.conf -DCPSConfigFile dds_tcp_conf.ini
+
+
+3)  Run the Publisher
+
+       ./publisher -ORBSvcConf tcp.conf -DCPSConfigFile dds_tcp_conf.ini
+
+
+For UDP pub/sub:
+
+1)  Run the DCPSInfo server
+
+       $DDS_ROOT/dds/InfoRepo/DCPSInfoRepo -ORBSvcConf tcp.conf -ORBEndpoint iiop://localhost:12345 -d domain_ids
+
+2)  Run the Subscriber
+
+       ./subscriber -ORBSvcConf udp.conf -ORBSvcConf tcp.conf
+                    -DCPSConfigFile sub_udp_conf.ini
+
+
+3)  Run the Publisher
+
+       ./publisher -ORBSvcConf udp.conf -ORBSvcConf tcp.conf
+                   -DCPSConfigFile pub_udp_conf.ini
+
+
+
+-Don Busch
+ busch_d@ociweb.com

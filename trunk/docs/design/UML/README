@@ -1,0 +1,9 @@
+OpenDDS_UML_sketches.asta
+consists of UML sketches (a few class diagrams and a number of
+sequence diagrams) to aid in understanding the architecture of
+OpenDDS. The modeling elements are not necessarily complete (e.g. all
+operations may not be shown for a class) or precise (e.g. the return
+type for many operations in the model is specified as void although
+DDS::ReturnCode_t is used in actual OpenDDS code for these
+operations). This file can be opened for viewing and editing using the
+community edition of Astah available from http://astah.net/.

@@ -1,0 +1,47 @@
+#include "tao/BooleanSeq.pidl"
+#include "tao/LongDoubleSeq.pidl"
+#include "tao/ShortSeq.pidl"
+#include "tao/UShortSeq.pidl"
+#include "tao/CharSeq.pidl"
+#include "tao/LongLongSeq.pidl"
+#include "tao/StringSeq.pidl"
+#include "tao/WCharSeq.pidl"
+#include "tao/DoubleSeq.pidl"
+#include "tao/LongSeq.pidl"
+#include "tao/ULongLongSeq.pidl"
+#include "tao/WStringSeq.pidl"
+#include "tao/FloatSeq.pidl"
+#include "tao/OctetSeq.pidl"
+#include "tao/ULongSeq.pidl"
+
+module Messenger2 {
+
+    typedef sequence <long> LongSeq;
+
+
+#pragma DCPS_DATA_TYPE "Messenger2::Message2"
+#pragma DCPS_DATA_KEY "Messenger2::Message2 subject_id"
+
+  struct Message2 {
+    string from;
+    string subject;
+    long subject_id;
+    string text;
+    long   count;
+    CORBA::BooleanSeq    bool_seq;
+    CORBA::LongDoubleSeq longdouble_seq;
+    CORBA::ShortSeq      short_seq;
+    CORBA::UShortSeq     ushort_seq;
+    CORBA::CharSeq       char_seq;
+    CORBA::LongLongSeq   longlong_seq;
+    CORBA::StringSeq     string_seq;
+    CORBA::WCharSeq      wchar_seq;
+    CORBA::DoubleSeq     double_seq;
+    CORBA::LongSeq       long_seq;
+    CORBA::ULongLongSeq  ulonglong_seq;
+    CORBA::WStringSeq    wstring_seq;
+    CORBA::FloatSeq      float_seq;
+    CORBA::OctetSeq      octet_seq;
+    CORBA::ULongSeq      ulong_seq;
+  };
+};

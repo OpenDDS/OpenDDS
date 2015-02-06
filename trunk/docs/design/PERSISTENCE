@@ -1,0 +1,88 @@
+Filesystem-based persistence for the DataDurabilityCache and the InfoRepo
+=========================================================================
+
+Key => {foo} is a variable replaced by an application identifier,
+    all of these represent collections of application objects
+
+Logical model: DataDurabilityCache
+
+{domain_id}/
+        {topic_name}/
+                {type_name}/
+                        {dw_id}/     => arbitrary name assigned per-writer
+                                0001 => [timestamp, data]
+                                000N
+
+Logical model: InfoRepo
+
+topics/
+        {topic_id}
+                data => [domainID, topicName, participantID, dataType, QoS]
+participants/
+        {participant_id}/
+                data => [domainID, owner, QoS]
+publications/
+        {writer_id}/
+                basic_data      => [domainID, topicID, participantID, tport]
+                pub_qos         => [serialized QoS structure]
+                writer_qos      => [serialized QoS structure]
+subscriptions/
+        {reader_id}/
+                basic_data      => [domainID, topicID, participantID, tport]
+                sub_qos         => [serialized QoS structure]
+                reader_qos      => [serialized QoS structure]
+
+
+Logical -> physical transformation
+
+1. Directory/file name encoding
+   Base32Hex (RFC 4648) the first 150 characters (240 encoded) of the name
+   For directories:
+       write a file named _fullname in the dir, contains the unencoded name
+       If the length is actually >= 150
+          append .0000N (counter) to the encoded name
+   For files:
+       If the name's length >= 155 this is an error
+       *NOTE: we don't know of a case where we need arbitrary-length file names
+
+2. Overflowing a directory
+   Define a compile-time constant for the max. entries per directory
+       Needs to leave enough headroom to create the overflow directories
+       Default to 512
+   Once this limit is reached we will create _overflow.000N directories
+   Searching must always take this into account: we will need a simple linear
+   search of the _overflow.* if the entry is not found in the normal location.
+
+
+API (pseudocode)
+
+class Directory
+{
+  Directory(const char* root_path);
+
+  FileIterator begin_files(); //files will be sorted
+  FileIterator end_files();
+
+  File get_file(const char* name);  //slash is not a separator
+  File create_next_file();
+
+  DirectoryIterator begin_dirs(); //dirs will be sorted
+  DirectoryIterator end_dirs();
+
+  Directory get_dir(vector<string> path);
+  Directory get_subdir(const char* name);  //slash is not a separator
+  Directory create_next_dir();
+
+  void remove(); //recursive
+  Directory parent();
+};
+
+// *Iterator models the STL InputIterator concept (==, !=, *, ++)
+
+class File
+{
+  bool write(ofstream& stream);
+  bool read(ifstream& stream);
+  bool remove();
+  Directory parent();
+};

@@ -1,0 +1,21 @@
+README
+-----------------------------
+   This test is a modified version of a DDS performance test written by Ming Xiong.
+
+
+What is in the directory?
+-----------------------------
+  - Source codes for test
+  - README
+
+
+What does the program do?
+----------------------------
+  The test program basically carries out synchronous hand-shake operation, with a publisher sending out 200 byte messages with a sequence number and a subscriber sending back the same sequence number as an acknowledgement. Note that you should keep in mind that the publisher process in this case is also a subscriber to the subscriber node (subscribe to AckMessage topic). As a result you will see in the codes, the initialization of subscriber and publisher is very complex. Check out the codes for details.
+
+
+  To run the program properly, you NEED to be the root or in the sudoer list. The way i run the program is to use sudo.
+
+
+
+Please send any comment to ming.xiong@vanderbilt.edu. Thanks

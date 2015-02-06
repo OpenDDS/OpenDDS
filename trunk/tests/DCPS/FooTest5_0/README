@@ -1,0 +1,29 @@
+A simple test that does both publication and subscription work
+in the main thread.
+This simplifies the coordination of writes and reads.
+
+
+
+
+Each test case needs to launch DCPSInfoRepo:
+
+  ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+
+
+Command line option:
+
+    // options:
+    //  -n max_samples_per_instance defaults to INFINITE
+    //  -d history.depth            defaults to 1
+    //  -s sub transport address    defaults to localhost:16701
+    //  -p pub transport address    defaults to localhost:29803
+    //  -z                          verbose transport debug
+
+!!! unsupported options !!!
+    //  -t use_take?1:0             defaults to 0
+    //  -m multiple_instances?1:0   defaults to 0
+
+Single datareader with single instance test:     - run_test.pl
+
+
+

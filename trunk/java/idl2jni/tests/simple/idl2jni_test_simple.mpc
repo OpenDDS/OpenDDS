@@ -1,0 +1,13 @@
+project: idl2jni {
+
+  // This is a compile-only test to make sure that the code generated from
+  // idl2jni will build (both C++ and Java code).
+
+  idlflags     += -DUSE_LOCAL
+  idl2jniflags += -DUSE_LOCAL
+  postclean    += <%rm%> simple
+
+  specific {
+    jarname     = simple
+  }
+}

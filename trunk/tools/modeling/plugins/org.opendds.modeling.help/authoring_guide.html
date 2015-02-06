@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>OpenDDS Modeling SDK Help Content Authoring Guide</title>
+</head>
+<body>
+
+<h1>OpenDDS Modeling SDK Help Content Authoring Guide</h1>
+
+<h2>Tools</h2>
+
+<h3>Editing HTML files within Eclipse</h3>
+
+<p>There is a plug-in available for editing HTML files called Web Page Editor. For Eclipse 3.5 Galileo, to install the Eclipse Web Page Editor
+Go to "Help" > "Install New Software" Choose to work with the site <br>
+</br>http://download.eclipse.org/releases/galileo<br>
+Expand "Web, XML and Java EE development", Check "Web Page Editor" and click Next to continue with the install.</p>
+
+<h4>Some notes about Web Page Editor</h4>
+<ul>
+<li>It does syntax highlighting and content assist.</li>
+<li>Its formatter seems to flattens any indentation!</li>
+<li>Image files can be dragged to end of the "src=" portion of an img tag. However, the path is relative to project root and not to the HTML file.</li>
+</ul>
+
+<h3>Screen shots</h3>
+
+<h4>Linux systems</h4>
+
+<p>If you're taking numerous screen shots under Linux consider the tool <a href="http://shutter-project.org">Shutter</a>. It has a built-in
+editor that allows for operations like cropping, highlighting, and drawing ovals and rectangles to focus on a portion of the screen shot.</p>
+
+<h3>HTML indentation</h3>
+
+<p>A tool like <a href="http://tidy.sourceforge.net/">Tidy</a> can be used to indent HTML.</p>
+
+<h3>Checking links</h3>
+
+<p>The command line tool <a href="http://linkchecker.sourceforge.net/">linkchecker</a> can be used to verify that links in the HTML files are valid.</p>
+
+<h2>Style Guide</h2>
+
+<h3>Referring to menu items</h3>
+
+<p>The style used in the official Eclipse help content is to put the menu path in bold and separate levels with a -&#62; (use HTML code &amp;#62 for &#62;).</p>
+<h3>Embedding commands in help</h3>
+
+<p>It is possible to embed Eclipse commands in your HTML pages. This can allow, for example, the user to click on a link to activate a menu item (if
+there is a command associated with it) rather than just showing the menu item as static text. More information can be found in the Eclipse
+Help contents under Platform Plug-in Developer Guide > Programmer's Guide > User assistance support > Help > Help content > Embedding commands in help.</p>
+
+<p>One way to determine what commandIds are available is to plugins.xml extensions view and select a command then click on the browse button near
+the commandId field. (Isn't there an easier way to do this?)</p>
+
+<h3>Duplicating content from the OpenDDS Developer's Guide</h3>
+
+<p>Some of the help content, such as the Policy definitions in the reference section, is based on HTML export from Framemaker. The exported stylesheet was
+used and minimal changes were made
+to the exported markup. Links that were invalid after breaking up the content into difference pages were fixed.</p>
+
+</body>
+</html>

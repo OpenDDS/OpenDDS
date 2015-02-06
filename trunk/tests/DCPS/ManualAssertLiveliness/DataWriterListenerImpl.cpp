@@ -1,0 +1,102 @@
+#include "DataWriterListenerImpl.h"
+#include "dds/DdsDcpsPublicationC.h"
+#include "dds/DCPS/Service_Participant.h"
+
+DataWriterListenerImpl::DataWriterListenerImpl ()
+: num_liveliness_lost_callbacks_(0)
+, matched_(false)
+{
+}
+
+// Implementation skeleton destructor
+DataWriterListenerImpl::~DataWriterListenerImpl ()
+{
+}
+
+void DataWriterListenerImpl::on_offered_deadline_missed (
+      ::DDS::DataWriter_ptr writer,
+      const ::DDS::OfferedDeadlineMissedStatus & status
+    )
+{
+  ACE_UNUSED_ARG(writer) ;
+  ACE_UNUSED_ARG(status) ;
+}
+
+void DataWriterListenerImpl::on_offered_incompatible_qos (
+      ::DDS::DataWriter_ptr writer,
+      const ::DDS::OfferedIncompatibleQosStatus & status
+    )
+{
+  ACE_UNUSED_ARG(writer) ;
+  ACE_UNUSED_ARG(status) ;
+
+  ACE_ERROR ((LM_DEBUG,
+         ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos ")
+         ACE_TEXT("This should appear when the test is designed to be incompatible.\n")));
+}
+
+void DataWriterListenerImpl::on_liveliness_lost (
+      ::DDS::DataWriter_ptr writer,
+      const ::DDS::LivelinessLostStatus & status
+    )
+{
+  if (matched_) {
+    ++ num_liveliness_lost_callbacks_;
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %X %d\n"),
+               writer, num_liveliness_lost_callbacks_));
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d \n"),
+               status.total_count, status.total_count_change));
+  } else {
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost before matched\n")));
+  }
+}
+
+void DataWriterListenerImpl::on_publication_matched (
+      ::DDS::DataWriter_ptr writer,
+      const ::DDS::PublicationMatchedStatus & status
+    )
+{
+  matched_ = true;
+  ACE_UNUSED_ARG(writer) ;
+  ACE_UNUSED_ARG(status) ;
+
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_matched \n")));
+}
+
+void DataWriterListenerImpl::on_publication_disconnected (
+      ::DDS::DataWriter_ptr writer,
+      const ::OpenDDS::DCPS::PublicationDisconnectedStatus & status
+    )
+{
+  ACE_UNUSED_ARG(writer) ;
+  ACE_UNUSED_ARG(status) ;
+}
+
+void DataWriterListenerImpl::on_publication_reconnected (
+      ::DDS::DataWriter_ptr writer,
+      const ::OpenDDS::DCPS::PublicationReconnectedStatus & status
+    )
+{
+  ACE_UNUSED_ARG(writer) ;
+  ACE_UNUSED_ARG(status) ;
+}
+
+void DataWriterListenerImpl::on_publication_lost (
+      ::DDS::DataWriter_ptr writer,
+      const ::OpenDDS::DCPS::PublicationLostStatus & status
+    )
+{
+  ACE_UNUSED_ARG(writer) ;
+  ACE_UNUSED_ARG(status) ;
+}
+
+void DataWriterListenerImpl::on_connection_deleted (
+      ::DDS::DataWriter_ptr writer
+    )
+{
+  ACE_UNUSED_ARG(writer) ;
+}

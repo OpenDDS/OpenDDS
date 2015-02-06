@@ -1,0 +1,265 @@
+Fri Oct  5 18:45:09 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * .:
+        * AUTHORS:
+        * ChangeLog:
+        * NEWS:
+        * PROBLEM-REPORT-FORM:
+        * README:
+        * VERSION:
+
+        * dds/DCPS/Service_Participant.cpp:
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+        * dds/Version.h:
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+        * dds/idl/IDLTemplate.txt:
+        * dds/idl/marshal_generator.cpp:
+
+        * docs/history/ChangeLog-3.3:
+
+        * java/jms/example/jbossas/opendds-ds.xml:
+        * java/jms/example/jbossas/opendds-repo-ds.xml:
+
+        * java/jms/native/opendds_jms_native.mpc:
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+        * performance-tests/Bench/src/Publication.cpp:
+
+        * tests/DCPS/Compiler/namespace_conflict:
+
+        * tests/DCPS/Compiler/namespace_conflict/Nsc.idl:
+        * tests/DCPS/Compiler/namespace_conflict/main.cpp:
+        * tests/DCPS/Compiler/namespace_conflict/namespace_conflict.mpc:
+
+        * tests/DCPS/RtpsDiscovery/rtps_disc.ini:
+        * tests/DCPS/RtpsDiscovery/rtps_disc_tcp.ini:
+
+        * tests/DCPS/RtpsMessages/RtpsMessagesTest.cpp:
+
+        * tests/DCPS/UnitTests/DisjointSequence.cpp:
+
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+
+        * tools/dcpsinfo_dump:
+
+        * tools/dissector/sample_manager.cpp:
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+        * tools/modeling/tests/MessengerWriterQos/MessengerWriterQos.opendds:
+        * tools/modeling/tests/MessengerWriterQos/publisher.cpp:
+          
+          Merge Changes from trunk.
+
+Fri Oct  5 16:54:09 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Rename tests/DCPS/Messenger_Relay to tests/DCPS/RecorderReplayer.
+
+Fri Oct  5 15:46:10 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/WriterInfo.h:
+
+          Add missing export macros to some classes.
+
+        * tests/DCPS/RecorderReplayer:
+
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+
+        * tests/DCPS/Messenger_Relay:
+
+        * tests/DCPS/Messenger_Relay/Args.h:
+        * tests/DCPS/Messenger_Relay/DataReaderListenerImpl.h:
+        * tests/DCPS/Messenger_Relay/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Messenger_Relay/Messenger.idl:
+        * tests/DCPS/Messenger_Relay/Messenger_Relay.mpc:
+        * tests/DCPS/Messenger_Relay/Publisher.cpp:
+        * tests/DCPS/Messenger_Relay/Relay.cpp:
+        * tests/DCPS/Messenger_Relay/Subscriber.cpp:
+        * tests/DCPS/Messenger_Relay/pub.ini:
+        * tests/DCPS/Messenger_Relay/pub_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/pub_multicast.ini:
+        * tests/DCPS/Messenger_Relay/pub_udp.ini:
+        * tests/DCPS/Messenger_Relay/relay.ini:
+        * tests/DCPS/Messenger_Relay/relay_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/relay_multicast.ini:
+        * tests/DCPS/Messenger_Relay/relay_udp.ini:
+        * tests/DCPS/Messenger_Relay/rtps.ini:
+        * tests/DCPS/Messenger_Relay/rtps_disc.ini:
+        * tests/DCPS/Messenger_Relay/rtps_disc_tcp.ini:
+        * tests/DCPS/Messenger_Relay/rtps_uni.ini:
+        * tests/DCPS/Messenger_Relay/run_test.pl:
+        * tests/DCPS/Messenger_Relay/shmem.ini:
+        * tests/DCPS/Messenger_Relay/sub.ini:
+        * tests/DCPS/Messenger_Relay/sub_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/sub_multicast.ini:
+        * tests/DCPS/Messenger_Relay/sub_udp.ini:
+
+        * tests/DCPS/RecorderReplayer/Messenger_Relay.mpc:
+
+          Move tests/DCPS/Messenger_Relay to tests/DCPS/RecorderReplayer.
+
+Fri Oct  5 14:34:27 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * tests/DCPS/Messenger_Relay/Args.h:
+        * tests/DCPS/Messenger_Relay/pub.ini:
+        * tests/DCPS/Messenger_Relay/pub_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/pub_multicast.ini:
+        * tests/DCPS/Messenger_Relay/pub_udp.ini:
+        * tests/DCPS/Messenger_Relay/relay.ini:
+        * tests/DCPS/Messenger_Relay/relay_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/relay_multicast.ini:
+        * tests/DCPS/Messenger_Relay/relay_udp.ini:
+        * tests/DCPS/Messenger_Relay/rtps.ini:
+        * tests/DCPS/Messenger_Relay/rtps_disc.ini:
+        * tests/DCPS/Messenger_Relay/rtps_disc_tcp.ini:
+        * tests/DCPS/Messenger_Relay/rtps_uni.ini:
+        * tests/DCPS/Messenger_Relay/shmem.ini:
+        * tests/DCPS/Messenger_Relay/sub.ini:
+        * tests/DCPS/Messenger_Relay/sub_ipv6.ini:
+        * tests/DCPS/Messenger_Relay/sub_multicast.ini:
+        * tests/DCPS/Messenger_Relay/sub_udp.ini:
+
+          Add missing files.
+
+Thu Oct  4 22:37:39 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/RawDataSample.cpp:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+          Portability fixes.
+
+Thu Oct  4 21:19:30 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+
+        * tests/DCPS/Messenger_Relay:
+
+        * tests/DCPS/Messenger_Relay/Messenger_Relay.mpc:
+        * tests/DCPS/Messenger_Relay/Publisher.cpp:
+        * tests/DCPS/Messenger_Relay/Relay.cpp:
+        * tests/DCPS/Messenger_Relay/Subscriber.cpp:
+        * tests/DCPS/Messenger_Relay/run_test.pl:
+
+        First Working commit for recorder and replayer implementation.
+
+        * DevGuideExamples/DCPS/Messenger_Relay:
+
+        * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/Messenger.idl:
+        * DevGuideExamples/DCPS/Messenger_Relay/Messenger_Relay.mpc:
+        * DevGuideExamples/DCPS/Messenger_Relay/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/run_test.pl:
+
+        * dds/DCPS/RecorderImp.cpp:
+
+          Removed these files.
+
+Mon Oct  1 21:22:32 UTC 2012  Huang-Ming Huang  <huangh@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_Relay/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/Messenger.idl:
+        * DevGuideExamples/DCPS/Messenger_Relay/Messenger_Relay.mpc:
+        * DevGuideExamples/DCPS/Messenger_Relay/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_Relay/run_test.pl:
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RawDataSample.h:
+        * dds/DCPS/RawDataSample.cpp:
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/RecorderImp.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+        * dds/DCPS/WriterInfo.h:
+        * dds/DCPS/WriterInfo.cpp:
+
+        Initial commit for recorder and replayer implementation.

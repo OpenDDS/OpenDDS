@@ -1,0 +1,6 @@
+tests/DCPS/Crossplatform/Messenger_run_test.pl tcp: !DCPS_MIN
+tests/DCPS/Crossplatform/Messenger_run_test.pl udp: !DCPS_MIN
+tests/DCPS/Crossplatform/Messenger_run_test.pl multicast: !DCPS_MIN
+tests/DCPS/Crossplatform/Messenger_run_test.pl rtps: !DCPS_MIN
+tests/DCPS/Crossplatform/Messenger_run_test.pl rtps_disc: !DCPS_MIN
+tests/DCPS/Crossplatform/Messenger_run_test.pl rtps_disc_tcp: !DCPS_MIN

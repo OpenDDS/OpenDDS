@@ -1,0 +1,24 @@
+project(*xmlPublisher) : dcpsexe, dds_model {
+  exename   = publisher
+  after    += MessengerMC
+  libs     += MessengerMC
+  libpaths += model
+
+  Source_Files {
+    publisher.cpp
+    fs_signal.cpp
+  }
+}
+
+project(*xmlSubscriber) : dcpsexe, dds_model {
+  exename   = subscriber
+  after    += MessengerMC
+  libs     += MessengerMC
+  libpaths += model
+
+  Source_Files {
+    subscriber.cpp
+    fs_signal.cpp
+  }
+}
+

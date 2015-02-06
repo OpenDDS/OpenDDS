@@ -1,0 +1,6 @@
+project(zerocopy_java_test): dcps_tcp, dcps_test_java {
+
+  after      += messenger_idl_test
+  javacflags += -classpath ../messenger/messenger_idl/messenger_idl_test.jar
+
+}

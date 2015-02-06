@@ -1,0 +1,56 @@
+
+$Id$
+
+This is a clone of the Development Guide Messenger example.  It
+demonstrates the creation and execution of an OpenDDS application using
+model defined middleware and application code.
+
+The following files are part of this example:
+  Messenger.mpc          - MPC file to create the build files for the example.
+  MessengerModel.opendds - XML file with the DCPS model definition.
+  publisher.cpp          - Publisher application code.
+  subscriber.cpp         - Subscriber application code.
+  run_test.pl            - Perl script to execute the example.
+  tcp.conf               - Service configuration directives to load the TCP
+                           transport.
+
+NOTE: The run_test.pl and tcp.conf files are simply copies of the
+      original DevGuideExamples/DCPS/Messenger example files.  The test
+      application code in publisher.cpp and subscriber.cpp is largely
+      copied directly from the original files as well, with
+      simplifications to use the generated DCPS model.
+
+----------------------------------------
+Quick Start:
+  shell> mwc.pl -type gnuace && make && mwc.pl -type gnuace && make && ./run_test.pl
+  shell> make realclean && rm -f GNU* .depend* *.log
+
+----------------------------------------
+Build and Test:
+
+1) Generate the build files:
+
+  shell> mwc.pl -type gnuace
+
+2) Generate the model source files:
+
+  shell> make
+
+3) Regenerate the build files (to include the generated model project):
+
+  shell> mwc.pl -type gnuace
+
+4) Build the model library and applications:
+
+  shell> make
+
+5) Execute the example:
+
+  shell> ./run_test.pl
+
+----------------------------------------
+Clean up:
+
+  shell> make realclean
+  shell> rm -f GNU* .depend* *.log
+

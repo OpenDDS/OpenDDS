@@ -1,0 +1,5 @@
+// -*- MPC -*-
+// $Id$
+
+project : taoexe, dcps_rtps {
+}

@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Validation
+Bundle-SymbolicName: org.opendds.modeling.validation
+Bundle-Version: 3.6.0.qualifier
+Bundle-ClassPath: .,
+ lib/commons-cli-1.2.jar,
+ xsd/
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: com.ociweb.xml.util
+Bundle-Vendor: Object Computing, Inc.

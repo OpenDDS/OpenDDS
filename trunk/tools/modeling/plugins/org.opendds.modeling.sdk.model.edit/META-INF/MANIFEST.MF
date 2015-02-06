@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.opendds.modeling.sdk.model.edit;singleton:=true
+Bundle-Version: 3.6.0.qualifier
+Bundle-ClassPath: .
+Bundle-Activator: org.opendds.modeling.sdk.model.GeneratorSpecification.Provider.GeneratorEditPlugin$Implementation
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Export-Package: org.opendds.modeling.sdk.model.GeneratorSpecification.Provider
+Require-Bundle: org.eclipse.core.runtime,
+ org.opendds.modeling.sdk.model;visibility:=reexport,
+ org.eclipse.emf.edit;visibility:=reexport
+Bundle-ActivationPolicy: lazy

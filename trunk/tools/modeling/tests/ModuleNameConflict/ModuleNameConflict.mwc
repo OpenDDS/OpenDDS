@@ -1,0 +1,3 @@
+workspace {
+  cmdline += -include ModuleNameConflict/model -include MessengerMixed/model
+}

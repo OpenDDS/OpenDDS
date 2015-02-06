@@ -1,0 +1,168 @@
+Last updated: 4/24/2006
+
+1) The test cases of lost connection.
+
+- normal DW/DR remove on active side.
+- normal DW/DR remove on passive side.
+- active side upon peer disconnect
+- passive side upon peer disconnect
+- active side has backpressure 
+
+
+
+
+Sequence for normal shutdown.
+- detect lost connection
+- remove association
+- done
+
+Sequence for abnormal shutdown
+- detect lost connection
+- wait a while to allow remove_association.
+- call on_*_ before attempting to make new connection.
+- active side attempts to make new connection N times
+- call on_*_lost if reconnect fails.
+
+
+
+2) Issues:
+
+issue1:
+
+======================================
+In current implementation (as of 04/20/2006), we use the send() and recv() return value as an 
+indication of whether the connection lost is caused by peer normal or abnormal shutdown, we do 
+reconnecting on the active side when peer shutdown abnormally. But the recv() return value
+upon the peer crashes is different on windows and linux. On linux, recv() return 0 when peer
+shutdown abnormal. On windows it returns -1.
+
+
+The relations of send/recv return value and shutdown/remove_association are listed:
+
+
+send  ->  0 this should not happen, we will not deal with this case. 
+
+          -1    normal shutdown     remove association  
+                abnormal shutdown   not remove association
+ 
+
+recv  ->  0     normal shutdown     remove association  
+                abnormal shutdown   not remove association  
+
+          -1    abnormal shutdown   not remove association 
+
+
+Solution1:
+
+
+
+In order to distinguish graceful disconnect (where the datareader or
+datawriter was properly deleted/removed) from connection failures we
+can add a new configuration value:
+
+# How many milliseconds to wait before calling
+# on_publication_disconencted and/or
+# on_subscription_disconnected after detecting a
+# connection closed or failed.
+# If the remove_associations call(s) from the RepoInfo
+# arrive(s) before this period then the
+# connection will be abandoned and the
+# callbacks will not be made.
+# A value of 0 will mean that on_*_disconnected()
+# listeners will be called for all disconnects;
+# even if they were because the other side deleted the
+# datareader/datawriter (hence it was graceful).
+# The default is 1000 milliseconds.
+Graceful_disconnected_period=
+
+
+
+Here are the steps for a graceful connection and disconnection of a
+subscription from the publication's point of view:
+1) on_publication_matched is called.
+2) the connection is established.
+3) the connection close is detected
+4) the remove_associations call is handled with in the
+graceful_disconnected_period so on_publication_disconnected is not
+called.
+
+
+Here are the steps for a crashed subscriber from the publication's
+point of view:
+1) on_publication_matched is called.
+2) the connection is established.
+3) the connection close/failure is detected
+4) after the graceful_disconnected_period call
+on_publication_disconnected()
+Note: remove_associations() will never get called because the
+subscriber crashed.
+5) try to reconnect 0 or more times
+6) > conn_retry_attempts so call on_publication_lost
+- do not attempt to reconnect any more.
+
+Here are the steps for a disconnected connection that will be
+reconnected from the publication's point of view:
+1) on_publication_matched is called.
+2) the connection is established.
+3) the connection close/failure is detected
+4) after the graceful_disconnected_period call
+on_publication_disconnected()
+5) try to reconnect 0 or more times
+6) successfully reconnect and call on_publication_reconnected
+- we are not back to a state of being between state 2 & 3.
+
+The above steps assume that the publisher is on the active connection
+side. Steps for the passive/acceptor side are similar but it is not
+failing to reconnect N times that triggers a on_*_lost call but the
+passive_reconnect_duration expiring.
+
+Steps/scenarios for the subscriber's side are similar. The difference is
+the connection passive side just wait for max_passive_duration_period and
+then check if a new connection is established.
+
+Solution:
+
+Add a new control message GRACEFUL_DISCONNECT to the peer whenever the transport
+initiates the connection closure. The Send/Receive strategy should check if a graceful
+shutdown message is received to determine if it needs try reconnect. If recv() 
+returns 0 and a graceful shutdown message is received then no reconnect notification.
+If recv return 0 and has not received the graceful shutdown message then do similar
+as recv return -1.
+
+
+================================
+
+Issue2:
+
+================================
+
+There are two scenoria a publisher reconnect to a subscriber:
+
+- The connection is lost and then reconnected by the same datawriter. 
+In this case the subscriber side needs know this publication is reconnected.
+
+- When a publisher crashes and restart again. If the publisher is from the
+  same remote address then the subscriber think it's the same datalink and 
+  will notify reconnected. In this case, the subscriber should not be 
+  notified the new publication is reconnected. 
+
+The run_test.pl restart_pub show the problem.
+
+
+Solution:
+
+
+When the DataLink::notify is called for disconnected, make a copy of
+the map in DataLink and when the DataLink::notify is called for reconnected
+notification the datareader/datawriter with the ids in the copied map and clear 
+the map. If the DataLink::notify is called for lost notification, notify the 
+the datareader/datawriter with the ids in the original map.
+
+
+
+
+
+
+
+
+

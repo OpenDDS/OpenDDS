@@ -1,0 +1,10 @@
+#
+# $Id$
+#
+
+[transport_impl_1]
+transport_type=udp
+
+# The address from which to send/receive data.
+# The default value is: none.
+local_address=

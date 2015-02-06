@@ -1,0 +1,70 @@
+General:
+A "wchar" build of ACE uses wide-character APIs (where available) to
+invoke operating system functions and also (for the most part) presents
+a wide-character API to the application using ACE.
+Enable this with "#define ACE_USES_WCHAR 1" in config.h and "uses_wchar=1" in
+default.features.  DOC group and OCI 1.6a have full support for wchar,
+OCI 1.5a supports it in the core but not the TAO tests/examples.
+One execption is that (in all versions) the TAO ImR and IfR services
+will not build with uses_wchar=1.
+
+How does it work?
+ACE introduces a typedef, ACE_TCHAR, which is the "switchable" character type.
+When the build is set in "wchar" mode, ACE_TCHAR resolves to wchar_t otherwise
+it's simply char.  The ACE_TEXT macro adds an L to the front of a
+string/character literal in wchar builds (C++ wchar_t literals are of the form
+L'x' and wide-string literals are L"foo").
+Not every string in the program needs to be switchable.  For example, CORBA,
+and therefore both TAO and OpenDDS define distinct character and string types
+for wide and narrow (in IDL: string vs. wstring).
+In general, the strings that go directly to ACE (or from ACE) should be
+switchable.  This includes argv and argument parsing in general (see below).
+If the application is storing such ACE-influenced strings like file names,
+command line parameters, and network address/port strings, it will be easier
+to keep them in switchable-string format, either with ACE_TString or
+std::basic_string<ACE_TCHAR>.
+
+
+main signature:
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+(#include "ace/OS_main.h" if ACE_TMAIN is unknown)
+(#include "ace/ace_wchar.h" if ACE_TCHAR is unknown)
+Please do not split this over multiple lines, so that grep can find it.
+
+switchable string literal:
+const ACE_TCHAR* str = ACE_TEXT("-Samples");
+
+conversions:
+(these are really macros)
+char* ACE_TEXT_ALWAYS_CHAR(const ACE_TCHAR* str)
+wchar_t* ACE_TEXT_ALWAYS_WCHAR(const ACE_TCHAR* str)
+ACE_TCHAR* ACE_TEXT_CHAR_TO_TCHAR(const char* str)
+ACE_TCHAR* ACE_TEXT_WCHAR_TO_TCHAR(const wchar_t* str)
+ACE_TCHAR* ACE_TEXT_ANTI_TO_TCHAR(const ACE_ANTI_TCHAR* str)
+
+The results are a temporary string so either pass it directly
+to a function or save the result in a std::basic_string<ACE_TCHAR>
+or an ACE_TString (ACE_CString / ACE_WString).
+
+ACE Logging:
+The log format string itself does *not* need to be switchable, but making it
+switchable means that wide systems will not pay a performance penalty to 
+convert the string at runtime.  Core library code should be switchable.  Tests
+that aren't performance sensitive can just be left with narrow format strings.
+The C++ language prohibits concatenating different types of literals by
+writing the two literals next to each-other.  For example:
+"foo" "bar"   // legal
+L"foo" "bar"  // illegal!
+L"foo" L"bar" // legal
+In ACE-land this translates to:  ACE_TEXT("foo") "bar" // illegal!
+The ACE log format specifiers must be changed to accomodate the different types
+of strings:
+%s - switchable string (ACE_TCHAR*)
+%C - narrow string (char*); %c - narrow character (char)
+%W - wide string (wchar_t*); %w - wide character (wchar_t)
+
+Be careful with calling std::[sn]printf() or ACE_OS::[sn]printf() using strings
+of ACE_TCHARs.  Windows and UNIX use different formatting characters for wide
+strings with these functions.  Instead, convert the ACE_TCHARs (or wchar_t's)
+into narrow character strings before passing them to a function from the printf
+family.

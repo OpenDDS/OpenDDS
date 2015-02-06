@@ -1,0 +1,95 @@
+# Call parameters:
+#   $0 - datafile directory
+#   $1 - output directory
+
+set datafile separator whitespace
+set timestamp
+
+set terminal push
+set terminal png size 1290,770
+
+set grid
+set autoscale
+unset label
+set key outside right
+
+# Parameters for Quantile and Kernel Density Estimation plots
+samples=5000
+bandwidth=.00001
+
+# Latency Kernel Density Estimation plots
+set autoscale
+set xlabel "Latency (microseconds)"
+set ylabel "Samples"
+set format x "%.1s%cS"
+set format y "%.0f%%"
+set xtics out nomirror rotate by 15 offset -5,-1
+
+set output '$1/tcp-density.png'
+set title "TCP - Latency Density Plot per Message Size"
+plot '$0/latency-tcp-50.gpd'    index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '50',\
+     '$0/latency-tcp-100.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '100',\
+     '$0/latency-tcp-250.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '250',\
+     '$0/latency-tcp-500.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '500',\
+     '$0/latency-tcp-1000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '1000',\
+     '$0/latency-tcp-2500.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '2500',\
+     '$0/latency-tcp-5000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '5000',\
+     '$0/latency-tcp-8000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '8000',\
+     '$0/latency-tcp-16000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '16000',\
+     '$0/latency-tcp-32000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '32000'
+
+set output '$1/udp-density.png'
+set title "UDP - Latency Density Plot per Message Size"
+plot '$0/latency-udp-50.gpd'    index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '50',\
+     '$0/latency-udp-100.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '100',\
+     '$0/latency-udp-250.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '250',\
+     '$0/latency-udp-500.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '500',\
+     '$0/latency-udp-1000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '1000',\
+     '$0/latency-udp-2500.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '2500',\
+     '$0/latency-udp-5000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '5000',\
+     '$0/latency-udp-8000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '8000',\
+     '$0/latency-udp-16000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '16000',\
+     '$0/latency-udp-32000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '32000'
+
+set output '$1/mbe-density.png'
+set title "Best Effort Multicast - Latency Density Plot per Message Size"
+plot '$0/latency-mbe-50.gpd'    index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '50',\
+     '$0/latency-mbe-100.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '100',\
+     '$0/latency-mbe-250.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '250',\
+     '$0/latency-mbe-500.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '500',\
+     '$0/latency-mbe-1000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '1000',\
+     '$0/latency-mbe-2500.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '2500',\
+     '$0/latency-mbe-5000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '5000',\
+     '$0/latency-mbe-8000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '8000',\
+     '$0/latency-mbe-16000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '16000',\
+     '$0/latency-mbe-32000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '32000'
+
+set output '$1/mrel-density.png'
+set title "Reliable Multicast - Latency Density Plot per Message Size"
+plot '$0/latency-mrel-50.gpd'    index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '50',\
+     '$0/latency-mrel-100.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '100',\
+     '$0/latency-mrel-250.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '250',\
+     '$0/latency-mrel-500.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '500',\
+     '$0/latency-mrel-1000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '1000',\
+     '$0/latency-mrel-2500.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '2500',\
+     '$0/latency-mrel-5000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '5000',\
+     '$0/latency-mrel-8000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '8000',\
+     '$0/latency-mrel-16000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '16000',\
+     '$0/latency-mrel-32000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '32000'
+
+set output '$1/rtps-density.png'
+set title "RTPS - Latency Density Plot per Message Size"
+plot '$0/latency-rtps-50.gpd'    index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '50',\
+     '$0/latency-rtps-100.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '100',\
+     '$0/latency-rtps-250.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '250',\
+     '$0/latency-rtps-500.gpd'   index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '500',\
+     '$0/latency-rtps-1000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '1000',\
+     '$0/latency-rtps-2500.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '2500',\
+     '$0/latency-rtps-5000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '5000',\
+     '$0/latency-rtps-8000.gpd'  index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '8000',\
+     '$0/latency-rtps-16000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '16000',\
+     '$0/latency-rtps-32000.gpd' index 0 using 1:(100.*bandwidth/samples):(bandwidth) smooth kdensity t '32000'
+
+set output
+set terminal pop
+

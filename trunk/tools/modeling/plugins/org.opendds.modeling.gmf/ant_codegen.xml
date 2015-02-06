@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project default="generate" name="build" xmlns:gmf="http://ecliptical.ca/gmf/ant">
+  <target name="generate">
+    <eclipse.refreshLocal resource="org.opendds.modeling.gmf" depth="infinite"/>
+    <eclipse.refreshLocal resource="org.opendds.modeling.graphics"
+                          depth="infinite"/>
+    <eclipse.refreshLocal resource="org.opendds.modeling.diagram.policylib"
+                          depth="infinite"/>
+    <eclipse.refreshLocal resource="org.opendds.modeling.diagram.main"
+                          depth="infinite"/>
+    <eclipse.refreshLocal resource="org.opendds.modeling.diagram.dcpslib"
+                          depth="infinite"/>
+    <eclipse.refreshLocal resource="org.opendds.modeling.diagram.datalib"
+                          depth="infinite"/>
+
+    <gmf:GenerateDiagramCode gmfgenPath="org.opendds.modeling.gmf/diagrams/DataLib.gmfgen" ignoreValidationErrors="true"/>
+    <gmf:GenerateDiagramCode gmfgenPath="org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen"/>
+    <gmf:GenerateDiagramCode gmfgenPath="org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen"/>
+    <gmf:GenerateDiagramCode gmfgenPath="org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen"/>
+  </target>
+</project>

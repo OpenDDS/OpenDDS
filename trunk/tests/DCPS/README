@@ -1,0 +1,4 @@
+# $Id$
+
+This directory contains tests for the OpenDDS Data-Centric
+Publish-Subscribe (DCPS) layer.

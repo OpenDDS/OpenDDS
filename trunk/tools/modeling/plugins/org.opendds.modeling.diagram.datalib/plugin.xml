@@ -1,0 +1,1132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<!--
+(c) Copyright Object Computing, Incorporated.  2005,2010.  All rights reserved.
+-->
+<plugin>
+
+   <extension point="org.eclipse.team.core.fileTypes" id="repo-ftype">
+      <?gmfgen generated="true"?>
+      <fileTypes type="text" extension="opendds_diagram_datalib"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.extension_parser" id="resource-factory">
+      <?gmfgen generated="true"?>
+      <parser
+         type="opendds_diagram_datalib"
+         class="org.eclipse.gmf.runtime.emf.core.resources.GMFResourceFactory">
+      </parser>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors" id="gmf-editor">
+      <?gmfgen generated="true"?>
+      <editor
+         id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"
+         name="%editorName"
+         icon="icons/obj16/DataLib.gif"
+         extensions="opendds_diagram_datalib"
+         default="true"
+         class="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibDiagramEditor"
+         matchingStrategy="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibMatchingStrategy"
+         contributorClass="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibDiagramActionBarContributor">
+      </editor>
+   </extension>
+   
+   <extension point="org.eclipse.ui.contexts" id="ui-context">
+      <?gmfgen generated="true"?>
+      <context
+         description="%context.description"
+         id="org.opendds.modeling.diagram.datalib.ui.diagramContext"
+         name="%context.name"
+         parentId="org.eclipse.gmf.runtime.diagram.ui.diagramContext">
+      </context>
+   </extension>
+
+   <extension point="org.eclipse.ui.newWizards" id="creation-wizard">
+      <?gmfgen generated="false"?>
+      <!-- Remove wizard so user cannot create sub-diagram without going
+      through the main diagram -->
+   </extension>
+
+   <extension point="org.eclipse.ui.popupMenus" id="init-diagram-action">
+      <?gmfgen generated="false"?>
+      <!-- Disable initialization of sub-diagram file from .opendds file -->
+   </extension>
+	
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.action.globalActionHandlerProviders" id="global-actions">
+      <?gmfgen generated="true"?>
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.providers.DiagramGlobalActionHandlerProvider"
+         id="OpenDDS DataLibPresentation">
+         <Priority name="Lowest"/>
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="delete"/>
+            </ElementType>
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.DiagramEditPart">
+               <GlobalActionId actionId="save"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.printing.render.providers.DiagramWithPrintGlobalActionHandlerProvider"
+         id="OpenDDS DataLibPresentationPrint">
+         <Priority name="Lowest"/>
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="print"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.providers.ide.providers.DiagramIDEGlobalActionHandlerProvider"
+         id="OpenDDS DataLibPresentationIDE">
+         <Priority name="Lowest"/>
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="bookmark"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+      <!-- Copy and paste disabled because of issues found in GMF 2.2.2 -->
+   </extension>
+
+
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">
+      <?gmfgen generated="true"?>
+      <MarkerNavigationProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibMarkerNavigationProvider">
+         <MarkerType name="org.opendds.modeling.diagram.datalib.diagnostic"/>
+         <Priority name="Lowest"/>
+      </MarkerNavigationProvider>
+   </extension>
+
+   <extension id="diagnostic" name="OpenDDS DataLib Plugin problems" point="org.eclipse.core.resources.markers">
+      <?gmfgen generated="true"?>
+      <super type="org.eclipse.core.resources.problemmarker"/>
+      <super type="org.eclipse.gmf.runtime.common.ui.services.marker"/>
+      <persistent value="true"/>
+   </extension>   
+
+   
+   <extension point="org.eclipse.core.runtime.preferences" id="prefs">
+      <?gmfgen generated="true"?>
+      <initializer class="org.opendds.modeling.diagram.datalib.preferences.DiagramPreferenceInitializer"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.preferencePages" id="prefpages">
+      <?gmfgen generated="true"?>
+      <page
+            id="org.opendds.modeling.diagram.datalib.general"
+            name="%prefpage.org.opendds.modeling.diagram.datalib.general"
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramGeneralPreferencePage">
+      </page>
+      <page
+            id="org.opendds.modeling.diagram.datalib.appearance"
+            name="%prefpage.org.opendds.modeling.diagram.datalib.appearance"
+            category="org.opendds.modeling.diagram.datalib.general"
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramAppearancePreferencePage">
+      </page>
+      <page
+            id="org.opendds.modeling.diagram.datalib.connections"
+            name="%prefpage.org.opendds.modeling.diagram.datalib.connections"
+            category="org.opendds.modeling.diagram.datalib.general"
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramConnectionsPreferencePage">
+      </page>
+      <page
+            id="org.opendds.modeling.diagram.datalib.printing"
+            name="%prefpage.org.opendds.modeling.diagram.datalib.printing"
+            category="org.opendds.modeling.diagram.datalib.general"
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramPrintingPreferencePage">
+      </page>
+      <page
+            id="org.opendds.modeling.diagram.datalib.rulersAndGrid"
+            name="%prefpage.org.opendds.modeling.diagram.datalib.rulersAndGrid"
+            category="org.opendds.modeling.diagram.datalib.general"
+            class="org.opendds.modeling.diagram.datalib.preferences.DiagramRulersAndGridPreferencePage">
+      </page>
+   </extension>
+
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor" id="prop-contrib">
+      <?gmfgen generated="false"?>
+      <propertyContributor
+            contributorId="org.opendds.modeling.diagram.datalib"
+            labelProvider="org.opendds.modeling.diagram.datalib.sheet.OpenDDSDataLibSheetLabelProvider">
+         <!-- Re-order so that the category associated with the Comment shows up first -->
+         <propertyCategory category="extra"/>
+         <propertyCategory category="domain"/>
+         <propertyCategory category="visual"/>
+      </propertyContributor>
+   </extension>
+
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertyTabs" id="proptabs">
+      <?gmfgen generated="true"?>   
+      <propertyTabs contributorId="org.opendds.modeling.diagram.datalib">
+         <propertyTab
+             category="visual"
+             id="property.tab.AppearancePropertySection"
+             label="%tab.appearance"/>
+          <propertyTab
+             category="visual"
+             id="property.tab.DiagramPropertySection"
+             label="%tab.diagram"/>
+          <propertyTab
+             category="domain"
+             id="property.tab.domain"
+             label="%tab.domain"/>
+          <propertyTab
+             category="extra"
+             id="property.tab.ElementComment"
+             label="%tab.ElementComment"/>
+      </propertyTabs>
+   </extension>
+
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertySections" id="propsections">
+      <?gmfgen generated="true"?>   
+      <propertySections contributorId="org.opendds.modeling.diagram.datalib">
+         <propertySection id="property.section.ConnectorAppearancePropertySection" 
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ConnectionEditPartPropertySectionFilter" 
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ConnectionAppearancePropertySection" 
+            tab="property.tab.AppearancePropertySection">
+         </propertySection>
+         <propertySection id="property.section.ShapeColorAndFontPropertySection" 
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ShapeEditPartPropertySectionFilter" 
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ShapeColorsAndFontsPropertySection" 
+            tab="property.tab.AppearancePropertySection">
+         </propertySection> 
+         <propertySection id="property.section.DiagramColorsAndFontsPropertySection" 
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.DiagramEditPartPropertySectionFilter" 
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.DiagramColorsAndFontsPropertySection" 
+            tab="property.tab.AppearancePropertySection">
+         </propertySection>     
+         <propertySection id="property.section.RulerGridPropertySection" 
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.DiagramEditPartPropertySectionFilter" 
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.grid.RulerGridPropertySection" 
+            tab="property.tab.DiagramPropertySection">
+         </propertySection>     
+         <propertySection
+            id="property.section.domain" 
+            tab="property.tab.domain"
+            class="org.opendds.modeling.diagram.datalib.sheet.OpenDDSDataLibPropertySection">
+            <input type="org.eclipse.gmf.runtime.notation.View"/>
+            <input type="org.eclipse.gef.EditPart"/>
+            <input type="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+         </propertySection>
+         <propertySection
+            id="property.section.ElementComment" 
+            tab="property.tab.ElementComment"
+            filter="org.opendds.modeling.diagram.datalib.part.ElementCommentFilter"
+            class="org.opendds.modeling.diagram.datalib.sheet.ElementCommentPropertySection">
+         </propertySection>
+      </propertySections>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.diagram.core.viewProviders" id="view-provider">
+      <?gmfgen generated="false"?>
+      <viewProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibViewProvider">
+         <Priority name="Lowest"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS DataLib"/>
+         <!-- Emptied semanticHints according to workaround for diagram reload bug 281014,
+         https://bugs.eclipse.org/bugs/show_bug.cgi?id=281014 -->
+         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints=""/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints=""/>
+      </viewProvider>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.diagram.ui.editpartProviders" id="ep-provider">
+      <?gmfgen generated="true"?>
+      <editpartProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibEditPartProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.notation.Diagram" id="generated-diagram">
+            <method name="getType()" value="OpenDDS DataLib"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
+            <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2021,2022,3002,3005,3001,3006,3003,3004"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
+            <method name="getType()" value="4001,4002,4003,4006"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-labels">
+            <method name="getType()" value="5001,5034,5002,5003,5004,5005,5006,5007,5008,5009,5010,5011,5012,5013,5014,5015,5016,5017,5018,5019,5020,5021,5022,5023,5024,5025,5029,5030,5031,5032,5033,5037,5035,5036"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
+            <method name="getType()" value="7002,7005,7006,7007,7003,7004"/>
+         </object>
+         <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
+      </editpartProvider>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
+      <?gmfgen generated="true"?>
+      <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfDataLibEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.DataLibEditPart" id="DataLib_1000"/>
+         <context elements="DataLib_1000"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfLongEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongEditPart" id="Long_2001"/>
+         <context elements="Long_2001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfLongDoubleEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongDoubleEditPart" id="LongDouble_2023"/>
+         <context elements="LongDouble_2023"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfLongLongEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.LongLongEditPart" id="LongLong_2002"/>
+         <context elements="LongLong_2002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfShortEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ShortEditPart" id="Short_2003"/>
+         <context elements="Short_2003"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfULongEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ULongEditPart" id="ULong_2004"/>
+         <context elements="ULong_2004"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfULongLongEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ULongLongEditPart" id="ULongLong_2005"/>
+         <context elements="ULongLong_2005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfUShortEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.UShortEditPart" id="UShort_2006"/>
+         <context elements="UShort_2006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfDoubleEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.DoubleEditPart" id="Double_2007"/>
+         <context elements="Double_2007"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfFloatEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.FloatEditPart" id="Float_2008"/>
+         <context elements="Float_2008"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfCharEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.CharEditPart" id="Char_2009"/>
+         <context elements="Char_2009"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfWCharEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.WCharEditPart" id="WChar_2010"/>
+         <context elements="WChar_2010"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfOctetEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.OctetEditPart" id="Octet_2011"/>
+         <context elements="Octet_2011"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfBooleanEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.BooleanEditPart" id="Boolean_2012"/>
+         <context elements="Boolean_2012"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfArrayEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.ArrayEditPart" id="Array_2013"/>
+         <context elements="Array_2013"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfEnumEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.EnumEditPart" id="Enum_2014"/>
+         <context elements="Enum_2014"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfSequenceEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.SequenceEditPart" id="Sequence_2015"/>
+         <context elements="Sequence_2015"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfStringEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.StringEditPart" id="String_2016"/>
+         <context elements="String_2016"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfWStringEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.WStringEditPart" id="WString_2017"/>
+         <context elements="WString_2017"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfTypedefEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.TypedefEditPart" id="Typedef_2018"/>
+         <context elements="Typedef_2018"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfUnionEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.UnionEditPart" id="Union_2021"/>
+         <context elements="Union_2021"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfStructEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.StructEditPart" id="Struct_2022"/>
+         <context elements="Struct_2022"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfFieldEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.FieldEditPart" id="Field_3002"/>
+         <context elements="Field_3002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfBranchEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.BranchEditPart" id="Branch_3005"/>
+         <context elements="Branch_3005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfField2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.Field2EditPart" id="Field_3001"/>
+         <context elements="Field_3001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfCaseEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.CaseEditPart" id="Case_3006"/>
+         <context elements="Case_3006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfField3EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.Field3EditPart" id="Field_3003"/>
+         <context elements="Field_3003"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.datalib.providers.assistants.OpenDDSDataLibModelingAssistantProviderOfKeyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.datalib.edit.parts.KeyEditPart" id="Key_3004"/>
+         <context elements="Key_3004"/>
+      </modelingAssistantProvider>
+      
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">
+      <?gmfgen generated="true"?>
+      <IconProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibIconProvider">
+         <Priority name="Low"/>
+      </IconProvider>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders" id="parser-provider">
+      <?gmfgen generated="true"?>
+      <ParserProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibParserProvider">
+         <Priority name="Lowest"/>
+      </ParserProvider>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypes" id="element-types">
+      <?gmfgen generated="true"?>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.DataLib_1000"
+               name="%metatype.name.DataLib_1000"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="DataLib"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.DataLibEditHelper">
+            <param name="semanticHint" value="1000"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Long_2001"
+               name="%metatype.name.Long_2001"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Long"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.LongEditHelper">
+            <param name="semanticHint" value="2001"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.LongDouble_2023"
+               name="%metatype.name.LongDouble_2023"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="LongDouble"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.LongDoubleEditHelper">
+            <param name="semanticHint" value="2023"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.LongLong_2002"
+               name="%metatype.name.LongLong_2002"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="LongLong"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.LongLongEditHelper">
+            <param name="semanticHint" value="2002"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Short_2003"
+               name="%metatype.name.Short_2003"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Short"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.ShortEditHelper">
+            <param name="semanticHint" value="2003"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.ULong_2004"
+               name="%metatype.name.ULong_2004"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="ULong"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.ULongEditHelper">
+            <param name="semanticHint" value="2004"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.ULongLong_2005"
+               name="%metatype.name.ULongLong_2005"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="ULongLong"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.ULongLongEditHelper">
+            <param name="semanticHint" value="2005"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.UShort_2006"
+               name="%metatype.name.UShort_2006"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="UShort"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.UShortEditHelper">
+            <param name="semanticHint" value="2006"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Double_2007"
+               name="%metatype.name.Double_2007"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Double"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.DoubleEditHelper">
+            <param name="semanticHint" value="2007"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Float_2008"
+               name="%metatype.name.Float_2008"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Float"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.FloatEditHelper">
+            <param name="semanticHint" value="2008"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Char_2009"
+               name="%metatype.name.Char_2009"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Char"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.CharEditHelper">
+            <param name="semanticHint" value="2009"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.WChar_2010"
+               name="%metatype.name.WChar_2010"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="WChar"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.WCharEditHelper">
+            <param name="semanticHint" value="2010"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Octet_2011"
+               name="%metatype.name.Octet_2011"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Octet"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.OctetEditHelper">
+            <param name="semanticHint" value="2011"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Boolean_2012"
+               name="%metatype.name.Boolean_2012"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Boolean"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.BooleanEditHelper">
+            <param name="semanticHint" value="2012"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Array_2013"
+               name="%metatype.name.Array_2013"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Array"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.ArrayEditHelper">
+            <param name="semanticHint" value="2013"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Enum_2014"
+               name="%metatype.name.Enum_2014"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Enum"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.EnumEditHelper">
+            <param name="semanticHint" value="2014"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Sequence_2015"
+               name="%metatype.name.Sequence_2015"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Sequence"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.SequenceEditHelper">
+            <param name="semanticHint" value="2015"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.String_2016"
+               name="%metatype.name.String_2016"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="String"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.StringEditHelper">
+            <param name="semanticHint" value="2016"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.WString_2017"
+               name="%metatype.name.WString_2017"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="WString"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.WStringEditHelper">
+            <param name="semanticHint" value="2017"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Typedef_2018"
+               name="%metatype.name.Typedef_2018"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Typedef"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.TypedefEditHelper">
+            <param name="semanticHint" value="2018"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Union_2021"
+               name="%metatype.name.Union_2021"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Union"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.UnionEditHelper">
+            <param name="semanticHint" value="2021"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Struct_2022"
+               name="%metatype.name.Struct_2022"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Struct"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.StructEditHelper">
+            <param name="semanticHint" value="2022"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Field_3002"
+               name="%metatype.name.Field_3002"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Field"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.FieldEditHelper">
+            <param name="semanticHint" value="3002"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Branch_3005"
+               name="%metatype.name.Branch_3005"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Branch"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.BranchEditHelper">
+            <param name="semanticHint" value="3005"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.datalib.Field_3001"
+               name="%metatype.name.Field_3001"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.datalib.Field_3002"/>
+            <param name="semanticHint" value="3001"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Case_3006"
+               name="%metatype.name.Case_3006"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Case"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.CaseEditHelper">
+            <param name="semanticHint" value="3006"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.datalib.Field_3003"
+               name="%metatype.name.Field_3003"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.datalib.Field_3002"/>
+            <param name="semanticHint" value="3003"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.datalib.Key_3004"
+               name="%metatype.name.Key_3004"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Key"
+               edithelper="org.opendds.modeling.diagram.datalib.edit.helpers.KeyEditHelper">
+            <param name="semanticHint" value="3004"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.datalib.ArraySubtype_4001"
+               name="%metatype.name.ArraySubtype_4001"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4001"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.datalib.SequenceSubtype_4002"
+               name="%metatype.name.SequenceSubtype_4002"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4002"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.datalib.TypedefType_4003"
+               name="%metatype.name.TypedefType_4003"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4003"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.datalib.UnionSwitch_4006"
+               name="%metatype.name.UnionSwitch_4006"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4006"/>
+         </specializationType>
+      </metamodel>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypeBindings" id="element-types-bindings">
+      <?gmfgen generated="true"?>
+      <clientContext id="org.opendds.modeling.diagram.datalib.TypeContext">
+         <enablement>
+            <test
+               property="org.eclipse.gmf.runtime.emf.core.editingDomain"
+               value="org.opendds.modeling.diagram.datalib.EditingDomain"/>
+         </enablement>
+      </clientContext> 
+      <binding context="org.opendds.modeling.diagram.datalib.TypeContext">
+         <elementType ref="org.opendds.modeling.diagram.datalib.DataLib_1000"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Long_2001"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.LongDouble_2023"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.LongLong_2002"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Short_2003"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.ULong_2004"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.ULongLong_2005"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.UShort_2006"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Double_2007"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Float_2008"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Char_2009"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.WChar_2010"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Octet_2011"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Boolean_2012"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Array_2013"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Enum_2014"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Sequence_2015"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.String_2016"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.WString_2017"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Typedef_2018"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Union_2021"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Struct_2022"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Field_3002"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Branch_3005"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Field_3001"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Case_3006"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Field_3003"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.Key_3004"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.ArraySubtype_4001"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.SequenceSubtype_4002"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.TypedefType_4003"/>
+         <elementType ref="org.opendds.modeling.diagram.datalib.UnionSwitch_4006"/>
+         <advice ref="org.eclipse.gmf.runtime.diagram.core.advice.notationDepdendents"/>
+      </binding>
+   </extension>
+	   <extension point="org.eclipse.core.expressions.propertyTesters" id="navigator-proptest.isURIEditorInput">
+      <?gmfgen generated="true"?>
+       <propertyTester
+           id="org.opendds.modeling.diagram.datalib.URIEditorInputPropertyTester"
+           type="org.eclipse.emf.common.ui.URIEditorInput"
+           namespace="org.opendds.modeling.diagram.datalib"
+           properties="isURIEditorInput"
+           class="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibUriEditorInputTester">
+       </propertyTester>
+   </extension>
+
+	   <extension point="org.eclipse.ui.navigator.viewer" id="navigator-viewbinding">
+      <?gmfgen generated="true"?>
+      <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <contentExtension pattern="org.opendds.modeling.diagram.datalib.resourceContent"/>
+            <contentExtension pattern="org.opendds.modeling.diagram.datalib.navigatorLinkHelper"/>
+         </includes>
+      </viewerContentBinding>
+      <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension pattern="org.opendds.modeling.diagram.datalib.navigatorActionProvider"/>
+         </includes>
+      </viewerActionBinding>
+   </extension>
+
+   <extension point="org.eclipse.ui.navigator.navigatorContent" id="navigator-content">
+      <?gmfgen generated="true"?>
+      <navigatorContent
+            id="org.opendds.modeling.diagram.datalib.resourceContent" 
+            name="%navigatorContentName" 
+            priority="normal" 
+            contentProvider="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorContentProvider" 
+            labelProvider="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorLabelProvider"
+            icon="icons/obj16/DataLib.gif"
+            activeByDefault="true">
+         <triggerPoints>
+            <or>
+	           <and>
+    	          <instanceof value="org.eclipse.core.resources.IFile"/>
+        	      <test property="org.eclipse.core.resources.extension" value="opendds_diagram_datalib"/>
+               </and>
+               <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
+           	   </adapt>
+            </or>
+         </triggerPoints>
+         <possibleChildren>
+            <or>
+         	   <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
+           	   </adapt>
+            </or>
+         </possibleChildren>
+         <commonSorter 
+               id="org.opendds.modeling.diagram.datalib.navigatorSorter" 
+               class="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorSorter">
+            <parentExpression>
+               <or>
+	              <and>
+    	             <instanceof value="org.eclipse.core.resources.IFile"/>
+        	         <test property="org.eclipse.core.resources.extension" value="opendds_diagram_datalib"/>
+                  </and>
+                  <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+               </or>
+            </parentExpression>
+         </commonSorter>
+      </navigatorContent>
+      <actionProvider
+            id="org.opendds.modeling.diagram.datalib.navigatorActionProvider"
+            class="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorActionProvider">
+         <enablement>
+            <or>
+               <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.datalib.isShortcut"/>
+           	   </adapt>
+            </or>
+         </enablement>
+      </actionProvider>
+   </extension>
+   
+	   <extension point="org.eclipse.ui.navigator.linkHelper" id="navigator-linkhelper">
+      <?gmfgen generated="true"?>
+      <linkHelper
+            id="org.opendds.modeling.diagram.datalib.navigatorLinkHelper"
+            class="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibNavigatorLinkHelper">
+         <editorInputEnablement>
+            <and>
+               <instanceof value="org.eclipse.emf.common.ui.URIEditorInput"/>
+               <test property="org.opendds.modeling.diagram.datalib.isURIEditorInput"/>
+            </and>
+         </editorInputEnablement>
+         <selectionEnablement>
+            <instanceof value="org.opendds.modeling.diagram.datalib.navigator.OpenDDSDataLibAbstractNavigatorItem"/>
+         </selectionEnablement>
+      </linkHelper>
+   </extension>
+   <extension point="org.eclipse.emf.validation.constraintProviders">
+      <?gmfgen generated="true"?>
+            <category id="org.opendds.modeling.model.types.validations" mandatory="false" name="DataLib Validations">
+         <![CDATA[Detects incorrect or questionable semantic constructs for elements in a DataLib diagram.]]>
+      </category>
+      <category id="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.errors" mandatory="false" name="DataLib Errors">
+         <![CDATA[Detects modeling constructs that would result in invalid generated OpenDDS code.]]>
+      </category>
+      <constraintProvider cache="true">
+         <package namespaceUri="http://www.opendds.org/modeling/schemas/Types/1.0"/>
+               <constraints categories="org.opendds.modeling.model.types.validations">
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.types.validations/org.opendds.modeling.model.types.validation.errors">
+                  <constraint id="org.opendds.modeling.model.types.validation.error.struct_name_blank"
+            lang="OCL"
+            name="Struct Name Blank"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Struct names should not be empty]]></description>
+            <message><![CDATA[Struct name is empty]]></message>
+            <target class="types.Struct"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.array_size_zero"
+            lang="OCL"
+            name="Array size not greater than zero"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.length > 0]]>
+            <description><![CDATA[Array size should be greater than zero]]></description>
+            <message><![CDATA[Array size should be greater than zero]]></message>
+            <target class="types.Array"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.array_no_type"
+            lang="OCL"
+            name="Array not connected to a Type"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not subtype.oclIsUndefined()]]>
+            <description><![CDATA[Array should connect to a Type]]></description>
+            <message><![CDATA[Array should connect to a Type]]></message>
+            <target class="types.Array"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.typedef_name_blank"
+            lang="OCL"
+            name="Typedef Name Blank"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Typedef name should not be empty]]></description>
+            <message><![CDATA[Typedef name is empty]]></message>
+            <target class="types.Typedef"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.field_name_blank"
+            lang="OCL"
+            name="Field Name Blank"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Field names should not be empty]]></description>
+            <message><![CDATA[Field name is empty]]></message>
+            <target class="types.Field"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_name_blank"
+            lang="OCL"
+            name="Union Name Blank"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Union names should not be empty]]></description>
+            <message><![CDATA[Union name is empty]]></message>
+            <target class="types.Union"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_no_branches"
+            lang="OCL"
+            name="Union without Branches"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[self.branches->notEmpty()]]>
+            <description><![CDATA[Union does not connect with any Branches]]></description>
+            <message><![CDATA[Union does not connect with any Branches]]></message>
+            <target class="types.Union"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_switch_type_not_correct"
+            lang="OCL"
+            name="Union without correct switch Type"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not switch.oclIsUndefined() and (
+switch.oclIsTypeOf(Int) or
+switch.oclIsTypeOf(Enum) or
+switch.oclIsTypeOf(Boolean) or
+switch.oclIsTypeOf(Char) or
+switch.oclIsTypeOf(WChar)
+)
+]]>
+            <description><![CDATA[Union must connect with a switch (discriminator) Type of an integral, Boolean, Char, or Enum type]]></description>
+            <message><![CDATA[Union does not connect to the correct Type for its switch]]></message>
+            <target class="types.Union"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_branches_no_cases"
+            lang="OCL"
+            name="Union Branch without Cases"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[cases->notEmpty()]]>
+            <description><![CDATA[Union Branch does not connect to any Cases]]></description>
+            <message><![CDATA[Union Branch does not connect to any Cases]]></message>
+            <target class="types.Branch"/>
+         </constraint>
+                  <constraint id="org.opendds.modeling.model.types.validation.error.union_case_no_literal"
+            lang="OCL"
+            name="Union Case without literal"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not literal.oclIsUndefined() and literal <> '']]>
+            <description><![CDATA[Union Case does not have have literal defined]]></description>
+            <message><![CDATA[Union Case does not have have literal defined]]></message>
+            <target class="types.Case"/>
+         </constraint>
+                  </constraints>
+      </constraintProvider>
+   </extension>
+
+   <extension point="org.eclipse.emf.validation.constraintBindings">
+      <?gmfgen generated="true"?>
+      <clientContext default="false" id="org.opendds.modeling.diagram.datalibDefaultCtx">
+         <selector class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibValidationProvider$DefaultCtx"/>
+      </clientContext>
+      <binding context="org.opendds.modeling.diagram.datalibDefaultCtx">
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.struct_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.array_size_zero"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.array_no_type"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.typedef_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.field_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_no_branches"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_switch_type_not_correct"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_branches_no_cases"/>
+                  <constraint ref="org.opendds.modeling.diagram.datalib.org.opendds.modeling.model.types.validation.error.union_case_no_literal"/>
+               </binding>
+
+   </extension>
+
+
+   <extension point="org.eclipse.ui.commands" id="update-cmd">
+      <?gmfgen generated="true"?>
+      <command
+         categoryId="org.eclipse.ui.category.edit"
+         defaultHandler="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibDiagramUpdateCommand"
+         description="%update.diagram.description"
+         id="org.opendds.modeling.diagram.datalib.updateDiagram"
+         name="%update.diagram.name"/>
+   </extension>
+   
+   <extension point="org.eclipse.ui.bindings" id="update-cmd-binding">
+      <?gmfgen generated="true"?>
+      <key 
+         commandId="org.opendds.modeling.diagram.datalib.updateDiagram"
+         contextId="org.opendds.modeling.diagram.datalib.ui.diagramContext"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="F5"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.menus" id="context-menus">
+      <?gmfgen generated="true"?>
+      <!-- menuContribution locationURI="menu:org.eclipse.ui.main.menu?after=">
+      </menuContribution>
+      <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar?after=">
+      </menuContribution -->
+      <menuContribution locationURI="popup:org.eclipse.gmf.runtime.diagram.ui.DiagramEditorContextMenu">
+         <command commandId="org.opendds.modeling.diagram.datalib.LoadResourceAction">
+            <visibleWhen>
+               <and>
+                  <with variable="activePartId"><equals value="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"/></with>
+                  <with variable="selection"><iterate ifEmpty="false"> 
+                     <instanceof value="org.opendds.modeling.diagram.datalib.edit.parts.DataLibEditPart"/>
+                  </iterate></with>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.ui.commands" id="menu-commands">
+      <?gmfgen generated="true"?>
+      <category id="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID" name="%cmdcategory.name" description="%cmdcategory.desc"/>
+      <command id="org.opendds.modeling.diagram.datalib.LoadResourceAction"
+         name="Load Resource"
+         categoryId="org.opendds.modeling.model.opendds.diagram.datalib.part.OpenDDSDataLibDiagramEditorID"
+         defaultHandler="org.opendds.modeling.diagram.datalib.part.LoadResourceAction"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.handlers" id="menu-handlers">
+      <?gmfgen generated="true"?>
+   </extension>
+
+   <!-- Manual edits begin -->
+	<extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders">
+     <?gmfgen generated="false"?>
+	  	<ParserProvider class="org.opendds.modeling.diagram.datalib.providers.FieldParserProvider">
+	     	<Priority name="Low"/>
+	  	</ParserProvider>
+	</extension>
+
+	<extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders">
+     <?gmfgen generated="false"?>
+	  	<ParserProvider class="org.opendds.modeling.diagram.datalib.providers.StructKeyParserProvider">
+	     	<Priority name="Low"/>
+	  	</ParserProvider>
+	</extension>
+   <!-- Manual edits end -->
+
+<extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibValidationDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
+         <context decoratorTargets="PRIMARY_VIEW"/>
+      </decoratorProvider>
+   </extension>
+<extension point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders" id="decorator-provider">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.opendds.modeling.diagram.datalib.providers.OpenDDSDataLibShortcutsDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.notation.Node(org.eclipse.gmf.runtime.notation)" id="generated-top-nodes">
+            <method name="getType()" value="2001,2023,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2021,2022"/>
+         </object>
+         <context decoratorTargets="generated-top-nodes"/>
+      </decoratorProvider>
+   </extension>
+
+<extension point="org.eclipse.core.expressions.propertyTesters" id="navigator-proptest.isShortcut">
+      <?gmfgen generated="true"?>
+       <propertyTester
+           id="org.opendds.modeling.diagram.datalib.ShortcutPropertyTester"
+           type="org.eclipse.gmf.runtime.notation.View"
+           namespace="org.opendds.modeling.diagram.datalib"
+           properties="isShortcut"
+           class="org.opendds.modeling.diagram.datalib.part.OpenDDSDataLibShortcutPropertyTester">
+       </propertyTester>
+   </extension>
+
+
+
+
+
+
+
+
+
+   <!-- optionally, specify keybindings -->
+</plugin>

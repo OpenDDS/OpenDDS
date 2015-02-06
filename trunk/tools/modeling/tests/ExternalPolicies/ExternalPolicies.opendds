@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="ExternalPolicies">
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw" name="ExternalPolicies">
+    <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
+    <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" transportConfig="trans1">
+        <entity_factory href="ExtPolicies.opendds#_TwSSUAJKEeCBAfl9GiYbGg"/>
+        <group_data href="ExtPolicies.opendds#_os3bUAKJEeCwwtlMwl8TGw"/>
+        <presentation href="ExtPolicies.opendds#_wwhIsAKJEeCwwtlMwl8TGw"/>
+        <partition href="ExtPolicies.opendds#_2V9HMAKJEeCwwtlMwl8TGw"/>
+        <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw">
+          <deadline href="ExtPolicies.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
+          <destination_order href="ExtPolicies.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
+          <durability href="ExtPolicies.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>
+          <history href="ExtPolicies.opendds#_VML9cALrEeCRmKs-7z8NWA"/>
+          <latency_budget href="ExtPolicies.opendds#_CeUPoAMYEeCrTdheTycPFA"/>
+          <liveliness href="ExtPolicies.opendds#_zAukQALrEeCRmKs-7z8NWA"/>
+          <ownership href="ExtPolicies.opendds#_M2EAAALrEeCRmKs-7z8NWA"/>
+          <reliability href="ExtPolicies.opendds#_n1lhgALrEeCRmKs-7z8NWA"/>
+          <resource_limits href="ExtPolicies.opendds#_Y8bbcAMYEeCrTdheTycPFA"/>
+          <user_data href="ExtPolicies.opendds#_X64DcAJKEeCBAfl9GiYbGg"/>
+          <durability_service href="ExtPolicies.opendds#_5tsHgAMXEeCrTdheTycPFA"/>
+          <ownership_strength href="ExtPolicies.opendds#_0lhFwAR1EeCsYqJtvYWomQ"/>
+          <transport_priority href="ExtPolicies.opendds#_qJC4cAMYEeCrTdheTycPFA"/>
+          <lifespan href="ExtPolicies.opendds#_JIkhIAMYEeCrTdheTycPFA"/>
+        </writers>
+      </publishers>
+      <entity_factory href="ExtPolicies.opendds#_TwSSUAJKEeCBAfl9GiYbGg"/>
+      <user_data href="ExtPolicies.opendds#_X64DcAJKEeCBAfl9GiYbGg"/>
+    </participants>
+    <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportConfig="trans3">
+        <entity_factory href="ExtPolicies.opendds#_TwSSUAJKEeCBAfl9GiYbGg"/>
+        <group_data href="ExtPolicies.opendds#_os3bUAKJEeCwwtlMwl8TGw"/>
+        <presentation href="ExtPolicies.opendds#_wwhIsAKJEeCwwtlMwl8TGw"/>
+        <partition href="ExtPolicies.opendds#_2V9HMAKJEeCwwtlMwl8TGw"/>
+        <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw">
+          <deadline href="ExtPolicies.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
+          <destination_order href="ExtPolicies.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
+          <durability href="ExtPolicies.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>
+          <history href="ExtPolicies.opendds#_VML9cALrEeCRmKs-7z8NWA"/>
+          <latency_budget href="ExtPolicies.opendds#_CeUPoAMYEeCrTdheTycPFA"/>
+          <liveliness href="ExtPolicies.opendds#_zAukQALrEeCRmKs-7z8NWA"/>
+          <ownership href="ExtPolicies.opendds#_M2EAAALrEeCRmKs-7z8NWA"/>
+          <reliability href="ExtPolicies.opendds#_n1lhgALrEeCRmKs-7z8NWA"/>
+          <resource_limits href="ExtPolicies.opendds#_Y8bbcAMYEeCrTdheTycPFA"/>
+          <user_data href="ExtPolicies.opendds#_X64DcAJKEeCBAfl9GiYbGg"/>
+          <reader_data_lifecycle href="ExtPolicies.opendds#_o9T74AQaEeCsYqJtvYWomQ"/>
+          <time_based_filter href="ExtPolicies.opendds#_NdzdUAQbEeCsYqJtvYWomQ"/>
+        </readers>
+      </subscribers>
+      <entity_factory href="ExtPolicies.opendds#_TwSSUAJKEeCBAfl9GiYbGg"/>
+      <user_data href="ExtPolicies.opendds#_X64DcAJKEeCBAfl9GiYbGg"/>
+    </participants>
+    <participants xmi:id="_4VZKwQMKEeCrTdheTycPFA" name="part3" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <publishers xsi:type="opendds:publisher" xmi:id="_7YHU4AMKEeCrTdheTycPFA" name="pub3" transportConfig="trans1">
+        <writers xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer3" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </publishers>
+    </participants>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw">
+      <deadline href="ExtPolicies.opendds#_uvsboALlEeCRmKs-7z8NWA"/>
+      <destination_order href="ExtPolicies.opendds#_2mVAsALlEeCRmKs-7z8NWA"/>
+      <durability href="ExtPolicies.opendds#_BoO1oALrEeCRmKs-7z8NWA"/>
+      <durability_service href="ExtPolicies.opendds#_5tsHgAMXEeCrTdheTycPFA"/>
+      <history href="ExtPolicies.opendds#_VML9cALrEeCRmKs-7z8NWA"/>
+      <latency_budget href="ExtPolicies.opendds#_CeUPoAMYEeCrTdheTycPFA"/>
+      <liveliness href="ExtPolicies.opendds#_zAukQALrEeCRmKs-7z8NWA"/>
+      <ownership href="ExtPolicies.opendds#_M2EAAALrEeCRmKs-7z8NWA"/>
+      <reliability href="ExtPolicies.opendds#_n1lhgALrEeCRmKs-7z8NWA"/>
+      <resource_limits href="ExtPolicies.opendds#_Y8bbcAMYEeCrTdheTycPFA"/>
+      <transport_priority href="ExtPolicies.opendds#_qJC4cAMYEeCrTdheTycPFA"/>
+      <lifespan href="ExtPolicies.opendds#_JIkhIAMYEeCrTdheTycPFA"/>
+    </topicDescriptions>
+  </libs>
+  <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
+    <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
+      <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
+    </types>
+    <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
+    <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
+  </libs>
+</opendds:OpenDDSModel>

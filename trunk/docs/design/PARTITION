@@ -1,0 +1,76 @@
+
+PARTITION
+(RxO == NO ; Mutable == YES)
+[ Publisher, Subscriber ]
+
+The default value is a sequence of one empty string.
+
+This policy allows the creation of logical partitions within a domain.
+This means that DataReaders and DataWriters will not be associated if
+they do not share any partition strings.  While the establishment
+of an association depends on matching partition strings on the
+publication and subscription ends, the failure to match partitions
+is not considered a failure and does not trigger any callbacks or
+set any status values.  This is why this policy is not considered
+part of the request/offer protocol establishing associations.
+
+Not having this policy set at all will cause the entity to participate
+in the default partition, which is considered to have the string "".
+The value of this policy may be changed at any time.  Changes to
+this policy may cause associations to be removed or created.
+
+Implementing this policy requires that the values for this policy be
+made available within the repository so that they can be used when
+determining whether to create or remove associations.  The repository
+will then make association changes triggered by policy value changes
+that are pushed from the individual publishers and subscribers.
+All publications and subscriptions held by a Publisher or Subscriber
+should have the policy value changed to ensure that associations
+are updated correctly.
+
+Implementation notes:
+
+  This is intended to be used as a filter in the Publisher and
+  Subscriber to allow data samples to be associated.  Implementation
+  is entirely within the repository.
+
+  DCPSInfo
+
+    Creation of associations take into account the QoS.PARTITION
+    values of the endpoints.  This is done by matching all
+    possible associations, then checking the many to many strings
+    with wildcards for a match for each potential association.
+    Only associations that pass this matching are actually
+    created.
+
+    This is currently done within the DCPS_Utils compatibleQOS method.
+    The stanza that checks this should use the standard regcmp/regex
+    facility and return a value of not compatible without incrementing
+    a mismatched Qos (incompatible_qos) counter on either side of the
+    (non) association.
+
+    Note that the fnmatch() call can be used to determine if a value
+    string is a pattern to be expanded or not (since the spec requires
+    that 2 patterns _not_ be matched):
+
+      #include "ace/os_include/os_fnmatch.h"
+
+      if( 0 == ::fnmatch( value.c_str(), "[[*?]")) {
+        // value _is_ a wildcard pattern.
+      } else {
+        // value is _not_ a wildcard pattern.
+      }
+
+    I would highly recommend that we push this entire utility file into
+    a DCPS::Utilities namespace at the time this is implemented as well.
+
+    When the value is changed, existing associations that are
+    affected are checked to ensure that they continue to match.
+    All possible connections should be checked as well, since more
+    associations may be created, as well as existing associations
+    removed when a policy value is changed.
+
+    If the effort to implement the modified value feature is too great,
+    the initial implementation does not need to deal with changed values.
+    We can declare that modification of values is not supported initially.
+

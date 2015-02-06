@@ -1,0 +1,25 @@
+This test is to test the MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
+and MANUAL_BY_TOPIC_LIVELINESS_QOS support.
+
+The test creates 4 writers and all associte with 1 reader.
+Two writers are created with MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
+and two are created with MANUAL_BY_TOPIC_LIVELINESS_QOS. They have
+same lease duration. The first M_BY_P writer asserts liveliness via
+DomainParticipant::assert_liveliness call and the second M_BY_P writer
+asserts liveliness via write(). The first M_BY_T writer asserts
+liveliness via DataWriter::assert_liveliness and the second M_BY_T
+writer asserts liveliness via write(). The operations were performed
+every lease duration.
+
+The subscriber will expect some liveliness changed calls.
+For the test never miss liveliness (run "run_test.pl"), it expect 8
+callbacks (2 for each writer when it bacomes alive upon
+add_associations and when it becomes dead upon remove_associations).
+
+For the test miss liveliness (run "run_test.pl lost"), it expect 16
+callbacks (4 for each writer when it bacomes alive upon
+add_associations, becomes dead because no liveliness message or
+sample read in, becomes active as there is liveliness message or
+sample read in, becomes dead upon remove_associations).
+
+

@@ -1,0 +1,19 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+// Struct with one key
+module XYZ {
+
+  typedef long LongArray[10];
+#pragma DCPS_DATA_TYPE "XYZ::Message"
+#pragma DCPS_DATA_KEY "XYZ::Message subject_id"
+
+  struct Message {
+    LongArray subject_id;
+  };
+};

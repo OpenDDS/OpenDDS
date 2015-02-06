@@ -1,0 +1,59 @@
+
+DEADLINE
+(RxO == YES ; Mutable == YES)
+[ Topic, DataReader, DataWriter ]
+
+Default is deadline_period == infinite.
+
+This policy means that DataReaders expect to see changes in data before
+the deadline_period expires. The client application will guarantee that
+it will write new data before the deadline_period expires.
+
+This policy is considered during the creation of associations between
+DataWriters and DataReaders.  The value of both sides of the association
+must be compatible in order for an association to be created.  This value
+of this policy may change after the associated Entity is enabled.  In the
+case where the policy of a DataReader or DataWriter is made, the change
+is successful (applied) only if the change remains consistent with the
+remote end of all associations in which the DataReader or DataWriter
+is participating.  If the policy of a Topic is changed, it will affect
+only DataReaders and DataWriters that are created after the change has
+been made.  Any existing DataReaders or DataWriters, and any existing
+associations between them, will not be affected by the Topic policy
+value change.
+
+The default value of deadline_period == infinite requires no behavior.
+When this policy is set to a finite value, then the DataWriter monitors
+the changes to data made by the application and indicates the failure
+to honor the policy by triggering the on_offered_deadline_missed()
+Listener callback or setting the corresponding status condition.
+A DataReader which detects that the data has not changed before the
+deadline_period has expired triggers the on_requested_deadline_missed()
+Listener callback or sets the corresponding status condition.
+
+Implementation_notes:
+
+  DCPSInfo
+    Compatibility processing, see spec.
+
+  Topic
+    No implementation processing required.
+
+  DataWriter
+    Sets timer using DDS orb reactor.
+
+    constructor()    - if value not default, setup timer and start it.
+    write_*()        - reset timer.
+    set_qos()        - compatibility processing on change after enable().
+                       Incompatible values fail to make change.
+    timer->timeout() - call on_offered_deadline_missed();
+
+  DataReader
+    Sets timer using DDS orb reactor.
+
+    constructor()    - if value not default, setup timer and start it.
+    data_received()  - reset timer.
+    set_qos()        - compatibility processing on change after enable().
+                       Incompatible values fail to make change.
+    timer->timeout() - call on_requested_deadline_missed();
+

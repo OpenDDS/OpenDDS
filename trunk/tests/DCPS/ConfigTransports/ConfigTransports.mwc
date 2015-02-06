@@ -1,0 +1,8 @@
+// -*- MPC -*-
+// $Id$
+
+workspace {
+  $(DDS_ROOT)/tests/DCPS/common/common.mpc
+  $(DDS_ROOT)/tests/DCPS/FooType4/DcpsFooType4.mpc
+  ConfigTransports.mpc
+}

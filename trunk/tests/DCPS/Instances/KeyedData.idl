@@ -1,0 +1,18 @@
+#include <tao/orb.idl>
+
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::KeyedData"
+#pragma DCPS_DATA_KEY "Xyz::KeyedData a_long_value"
+
+  // Example user defined "KeyedData" structure with a key field and with an
+  // unbounded sequence member
+  struct KeyedData {
+    long  a_long_value;  // the instance key
+    long  handle_value;
+    long  sample_sequence;
+    long  writer_id;
+    CORBA::FloatSeq unbounded_sequence;
+  };
+
+};

@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %pluginName
+Bundle-SymbolicName: org.opendds.modeling.gmf
+Bundle-Version: 3.6.0.qualifier
+Require-Bundle: org.eclipse.emf.ecore,
+ org.opendds.modeling.model;bundle-version="3.6.0"
+Bundle-Vendor: %providerName
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

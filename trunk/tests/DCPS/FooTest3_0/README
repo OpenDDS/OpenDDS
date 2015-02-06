@@ -1,0 +1,88 @@
+This test tests the publisher and datawriter's basic functionalities with the
+tcp transport.
+
+Author: Yan Dai
+Reference: Ciju John
+
+Manually run test:
+
+(1) Launch the DCPSInfoRepo
+
+  ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+
+(2) Launch the subscriber:
+
+    FooTest3_subscriber -DCPSInfoRepo file://repo.ior -n <num_expected_msgs>
+
+(3) Launch the publisher:
+
+    FooTest3_publisher -DCPSInfoRepo file://repo.ior -t <test number>
+                       -d <history_depth> -DCPSChunks <pre_allocate_chunks>
+
+    The basic functions are tested for DataWriter and Publisher:
+
+    DataWriter:
+      -  _dcps_is_bounded()=true - use cached allocator
+      -  register/unregister/dispose
+      -  listener at DataWriter, at Publisher, at Domain Participant
+      -  get_qos()
+      -  set_qos()
+      -  get_listener()
+      -  set_listener()
+      -  get_topic()
+      -  get_publisher()
+      -  get_liveliness_lost_status()
+      -  get_offered_deadline_missed_status()
+      -  get_offered_incompatible_qos_status()
+      -  get_publication_match_status()
+      -  get_key_value()
+
+    Publisher:
+      -  suspend/resume_publication
+      -  get_qos()
+      -  set_qos()
+      -  get_listener()
+      -  set_listener()
+      -  get_participant()
+      -  delete_contained_entities()
+      -  set_default_datawriter_qos()
+      -  get_default_datawriter_qos()
+      -  copy_from_topic_qos()
+
+    The "-t <test number>" option indicates which test to run.
+    The basic functions are tested with any kind test. e.g. set_qos/get_qos, etc.
+
+      0 - register test
+      1 - unregister test
+      2 - dispose test
+      3 - suspend/resume test
+      4 - listener and status change test
+      5 - allocator test
+      6 - liveliness test
+
+Auto run test:
+
+
+   register test:
+      run_test.pl
+
+   register test:
+      run_test.pl register
+
+   unregister test
+      run_test.pl unregister
+
+   dispose test
+      run_test.pl dispose
+
+   suspend/resume test
+      run_test.pl resume
+
+   listener and status change test
+      run_test.pl listener
+
+   allocator test
+      run_test.pl allocator
+
+   liveliness test
+      run_test.pl liveliness

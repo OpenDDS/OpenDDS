@@ -1,0 +1,101 @@
+This is the integration test that tests the publisher side with
+the TCP transport.
+
+Manually run test:
+
+(1) Launch the DCPSInfoRepo
+
+  ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+
+(2) Launch the subscirber:
+
+    subscriber -DCPSInfoRepo file://dcps.ior
+               -keyed_data <0|1>
+               -num_writes <num>
+               -receive_delay_msec <msec>
+
+(3) Launch the publisher:
+
+    publisher -DCPSInfoRepo file://repo.ior
+              -keyed_data <0|1>
+              -num_threads_to_write <num>
+              -multiple_instances <0|1>
+              -num_writes_per_thread <num>
+              -max_samples_per_instance <num>
+              -history_depth <num>
+              -write_delay_msec <msec>
+              -num_writers <num>
+
+    single datawriter with single instance test:
+
+    publisher -DCPSInfoRepo file://dcps.ior
+              -keyed_data 1
+              -num_writers 1
+              -history_depth 100
+              -num_threads_to_write 5
+              -multiple_instances 0
+              -num_writes_per_thread 2
+              -max_samples_per_instance 12345678
+              -write_delay_msec 0
+
+    single datawriter with multiple instance tests:
+
+    publisher -DCPSInfoRepo file://dcps.ior -keyed_data 1
+              -num_writers 1
+              -history_depth 100
+              -num_threads_to_write 5
+              -multiple_instances 1
+              -num_writes_per_thread 2
+              -max_samples_per_instance 12345678
+              -write_delay_msec 0
+
+    multiple datawriter with multiple instance test:
+
+    publisher -DCPSInfoRepo file://dcps.ior
+              -keyed_data 1
+              -num_writers 4
+              -history_depth 100
+              -num_threads_to_write 5
+              -multiple_instances 1
+              -num_writes_per_thread 2
+              -max_samples_per_instance 12345678
+              -write_delay_msec 0
+
+    No key type data writer:
+
+    publisher -DCPSInfoRepo file://dcps.ior
+              -keyed_data 0
+              -num_writers 1
+              -history_depth 100
+              -num_threads_to_write 5
+              -multiple_instances 0
+              -num_writes_per_thread 2
+              -max_samples_per_instance 12345678
+              -write_delay_msec 0
+
+
+Auto run test:
+
+    single datawriter with single instance test:
+
+        run_test.pl
+        run_test.pl single_instance single_datawriter keyed
+
+    single datawriter with multiple instance tests:
+
+        run_test.pl multiple_instance single_datawriter keyed
+
+    multiple datawriter with multiple instance test:
+
+        run_test.pl multiple_instance multiple_datawriter keyed
+
+    No key type data single writer:
+
+        run_test.pl single_instance single_datawriter nokey
+
+    No key type data multiple writers:
+
+        run_test.pl multiple_instance multiple_datawriter nokey
+
+
+

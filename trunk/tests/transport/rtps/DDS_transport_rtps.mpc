@@ -1,0 +1,17 @@
+project(*pub) : dcpsexe, dcps_rtps_udp {
+
+  exename = publisher
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*sub) : dcpsexe, dcps_rtps_udp {
+
+  exename = subscriber
+
+  Source_Files {
+    subscriber.cpp
+  }
+}

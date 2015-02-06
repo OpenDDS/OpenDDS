@@ -1,0 +1,47 @@
+
+// note the following perdefined types often have special cases:
+//    char, octet, boolean, string
+// where as all of the integer and float types are just one case.
+
+#include "SharedTypes.idl"
+
+module Xyz {
+
+
+  // needed to call size methods on arrays
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfBoolean"
+  struct StructOfArrayOfBoolean { ArrayOfBoolean f; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfString"
+  struct StructOfArrayOfString { ArrayOfString f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfChar"
+  struct StructOfArrayOfChar { ArrayOfChar f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfOctet"
+  struct StructOfArrayOfOctet { ArrayOfOctet f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfLong"
+  struct StructOfArrayOfLong { ArrayOfLong f;};
+#pragma DCPS_DATA_TYPE "Xyz::StructOfArrayOfAnEnum"
+  struct StructOfArrayOfAnEnum { ArrayOfAnEnum f;};
+
+  // needed to detect duplicate overload problems
+  typedef boolean    ArrayOfBoolean2[5];
+  typedef  string<7> ArrayOfString2[5];
+  typedef    char    ArrayOfChar2[5];
+  typedef   octet    ArrayOfOctet2[5];
+  typedef    long    ArrayOfLong2[5];
+  typedef  AnEnum    ArrayOfAnEnum2[5];
+
+  // Wrap the SeqOf* in a struct to test
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfBoolean"
+  struct StructOfSeqOfBoolean { SeqOfBoolean field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfString"
+  struct StructOfSeqOfString { SeqOfString field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfChar"
+  struct StructOfSeqOfChar { SeqOfChar field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfOctet"
+  struct StructOfSeqOfOctet { SeqOfOctet field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfLong"
+  struct StructOfSeqOfLong { SeqOfLong field; };
+#pragma DCPS_DATA_TYPE "Xyz::StructOfSeqOfAnEnum"
+  struct StructOfSeqOfAnEnum { SeqOfAnEnum field; };
+
+};

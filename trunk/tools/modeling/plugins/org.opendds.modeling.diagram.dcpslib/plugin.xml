@@ -1,0 +1,1782 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<!--
+(c) Copyright Object Computing, Incorporated. 2005,2010. All rights reserved.
+-->
+<plugin>
+
+   <extension point="org.eclipse.team.core.fileTypes" id="repo-ftype">
+      <?gmfgen generated="true"?>
+      <fileTypes type="text" extension="opendds_diagram_dcpslib"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.extension_parser" id="resource-factory">
+      <?gmfgen generated="true"?>
+      <parser
+         type="opendds_diagram_dcpslib"
+         class="org.eclipse.gmf.runtime.emf.core.resources.GMFResourceFactory">
+      </parser>
+   </extension>
+
+   <extension point="org.eclipse.ui.editors" id="gmf-editor">
+      <?gmfgen generated="true"?>
+      <editor
+         id="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"
+         name="%editorName"
+         icon="icons/obj16/DcpsLib.gif"
+         extensions="opendds_diagram_dcpslib"
+         default="true"
+         class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditor"
+         matchingStrategy="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibMatchingStrategy"
+         contributorClass="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramActionBarContributor">
+      </editor>
+   </extension>
+
+   <extension point="org.eclipse.ui.contexts" id="ui-context">
+      <?gmfgen generated="true"?>
+      <context
+         description="%context.description"
+         id="org.opendds.modeling.diagram.dcpslib.ui.diagramContext"
+         name="%context.name"
+         parentId="org.eclipse.gmf.runtime.diagram.ui.diagramContext">
+      </context>
+   </extension>
+
+   <extension point="org.eclipse.ui.newWizards" id="creation-wizard">
+      <?gmfgen generated="false"?>
+      <!-- Remove wizard so user cannot create sub-diagram without going
+      through the main diagram -->
+   </extension>
+
+   <extension point="org.eclipse.ui.popupMenus" id="init-diagram-action">
+      <?gmfgen generated="false"?>
+      <!-- Disable initialization of sub-diagram file from .opendds file -->
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.action.globalActionHandlerProviders" id="global-actions">
+      <?gmfgen generated="true"?>
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.providers.DiagramGlobalActionHandlerProvider"
+         id="OpenDDS DcpsLibPresentation">
+         <Priority name="Lowest"/>
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="delete"/>
+            </ElementType>
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.DiagramEditPart">
+               <GlobalActionId actionId="save"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.printing.render.providers.DiagramWithPrintGlobalActionHandlerProvider"
+         id="OpenDDS DcpsLibPresentationPrint">
+         <Priority name="Lowest"/>
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="print"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+      <GlobalActionHandlerProvider
+         class="org.eclipse.gmf.runtime.diagram.ui.providers.ide.providers.DiagramIDEGlobalActionHandlerProvider"
+         id="OpenDDS DcpsLibPresentationIDE">
+         <Priority name="Lowest"/>
+         <ViewId id="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID">
+            <ElementType class="org.eclipse.gmf.runtime.diagram.ui.editparts.IGraphicalEditPart">
+               <GlobalActionId actionId="bookmark"/>
+            </ElementType>
+         </ViewId>
+      </GlobalActionHandlerProvider>
+      <!-- Copy and paste disabled because of issues found in GMF 2.2.2 -->
+   </extension>
+
+
+   <extension point="org.eclipse.core.runtime.preferences" id="prefs">
+      <?gmfgen generated="true"?>
+      <initializer class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramPreferenceInitializer"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.preferencePages" id="prefpages">
+      <?gmfgen generated="true"?>
+      <page
+            id="org.opendds.modeling.diagram.dcpslib.general"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.general"
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramGeneralPreferencePage">
+      </page>
+      <page
+            id="org.opendds.modeling.diagram.dcpslib.appearance"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.appearance"
+            category="org.opendds.modeling.diagram.dcpslib.general"
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramAppearancePreferencePage">
+      </page>
+      <page
+            id="org.opendds.modeling.diagram.dcpslib.connections"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.connections"
+            category="org.opendds.modeling.diagram.dcpslib.general"
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramConnectionsPreferencePage">
+      </page>
+      <page
+            id="org.opendds.modeling.diagram.dcpslib.printing"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.printing"
+            category="org.opendds.modeling.diagram.dcpslib.general"
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramPrintingPreferencePage">
+      </page>
+      <page
+            id="org.opendds.modeling.diagram.dcpslib.rulersAndGrid"
+            name="%prefpage.org.opendds.modeling.diagram.dcpslib.rulersAndGrid"
+            category="org.opendds.modeling.diagram.dcpslib.general"
+            class="org.opendds.modeling.diagram.dcpslib.preferences.DiagramRulersAndGridPreferencePage">
+      </page>
+   </extension>
+
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertyContributor" id="prop-contrib">
+      <?gmfgen generated="false"?>
+      <propertyContributor
+            contributorId="org.opendds.modeling.diagram.dcpslib"
+            labelProvider="org.opendds.modeling.diagram.dcpslib.sheet.OpenDDSDcpsLibSheetLabelProvider">
+         <!-- Re-order so that the category associated with the Comment shows up first -->
+         <propertyCategory category="extra"/>
+         <propertyCategory category="domain"/>
+         <propertyCategory category="visual"/>
+      </propertyContributor>
+   </extension>
+
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertyTabs" id="proptabs">
+      <?gmfgen generated="true"?>   
+      <propertyTabs contributorId="org.opendds.modeling.diagram.dcpslib">
+         <propertyTab
+             category="visual"
+             id="property.tab.AppearancePropertySection"
+             label="%tab.appearance"/>
+          <propertyTab
+             category="visual"
+             id="property.tab.DiagramPropertySection"
+             label="%tab.diagram"/>
+          <propertyTab
+             category="domain"
+             id="property.tab.domain"
+             label="%tab.domain"/>
+          <propertyTab
+             category="extra"
+             id="property.tab.ElementComment"
+             label="%tab.ElementComment"/>
+      </propertyTabs>
+   </extension>
+
+   <extension point="org.eclipse.ui.views.properties.tabbed.propertySections" id="propsections">
+      <?gmfgen generated="true"?>   
+      <propertySections contributorId="org.opendds.modeling.diagram.dcpslib">
+         <propertySection id="property.section.ConnectorAppearancePropertySection" 
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ConnectionEditPartPropertySectionFilter" 
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ConnectionAppearancePropertySection" 
+            tab="property.tab.AppearancePropertySection">
+         </propertySection>
+         <propertySection id="property.section.ShapeColorAndFontPropertySection" 
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.ShapeEditPartPropertySectionFilter" 
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.ShapeColorsAndFontsPropertySection" 
+            tab="property.tab.AppearancePropertySection">
+         </propertySection> 
+         <propertySection id="property.section.DiagramColorsAndFontsPropertySection" 
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.DiagramEditPartPropertySectionFilter" 
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.appearance.DiagramColorsAndFontsPropertySection" 
+            tab="property.tab.AppearancePropertySection">
+         </propertySection>     
+         <propertySection id="property.section.RulerGridPropertySection" 
+            filter="org.eclipse.gmf.runtime.diagram.ui.properties.filters.DiagramEditPartPropertySectionFilter" 
+            class="org.eclipse.gmf.runtime.diagram.ui.properties.sections.grid.RulerGridPropertySection" 
+            tab="property.tab.DiagramPropertySection">
+         </propertySection>     
+         <propertySection
+            id="property.section.domain" 
+            tab="property.tab.domain"
+            class="org.opendds.modeling.diagram.dcpslib.sheet.OpenDDSDcpsLibPropertySection">
+            <input type="org.eclipse.gmf.runtime.notation.View"/>
+            <input type="org.eclipse.gef.EditPart"/>
+            <input type="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+         </propertySection>
+         <propertySection
+            id="property.section.ElementComment" 
+            tab="property.tab.ElementComment"
+            filter="org.opendds.modeling.diagram.dcpslib.part.ElementCommentFilter"
+            class="org.opendds.modeling.diagram.dcpslib.sheet.ElementCommentPropertySection">
+         </propertySection>
+      </propertySections>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.diagram.core.viewProviders" id="view-provider">
+      <?gmfgen generated="false"?>
+      <viewProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibViewProvider">
+         <Priority name="Lowest"/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Diagram" semanticHints="OpenDDS DcpsLib"/>
+         <!-- Emptied semanticHints according to workaround for diagram reload bug 281014,
+         https://bugs.eclipse.org/bugs/show_bug.cgi?id=281014 -->
+         <context viewClass="org.eclipse.gmf.runtime.notation.Node" semanticHints=""/>
+         <context viewClass="org.eclipse.gmf.runtime.notation.Edge" semanticHints=""/>
+      </viewProvider>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.diagram.ui.editpartProviders" id="ep-provider">
+      <?gmfgen generated="true"?>
+      <editpartProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibEditPartProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.notation.Diagram" id="generated-diagram">
+            <method name="getType()" value="OpenDDS DcpsLib"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-nodes">
+            <method name="getType()" value="2001,2002,2007,2005,2006,3001,3059,3022,3005,3023,3024,3006,3025,3026,3007,3027,3008,3028,3009,3029,3030,3031,3010,3032,3033,3034,3035,3013,3036,3037,3038,3039,3040,3041,3042,3043,3044,3045,3046,3047,3048,3021,3061,3012,3014,3015,3016,3017,3018,3019,3020,3002,3060,3049,3055,3056,3050,3057,3051,3052,3053,3054,3058"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Edge" id="generated-links">
+            <method name="getType()" value="4005,4006,4007,4008"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-labels">
+            <method name="getType()" value="5001,5004,5274,5002,5005,5266,5267,5268,5260,5261,5262,5263,5264,5265,5006,5007,5240,5252,5253,5254,5272,5132,5133,5013,5014,5134,5135,5136,5137,5138,5139,5140,5141,5142,5143,5020,5021,5144,5145,5146,5147,5148,5149,5042,5043,5150,5151,5046,5047,5152,5153,5154,5050,5051,5155,5156,5157,5158,5159,5160,5161,5162,5163,5071,5072,5164,5165,5166,5167,5168,5169,5170,5171,5172,5173,5174,5175,5176,5177,5102,5103,5104,5178,5179,5180,5181,5182,5183,5184,5185,5186,5187,5188,5189,5190,5191,5192,5193,5194,5195,5196,5197,5198,5199,5200,5201,5202,5203,5204,5205,5206,5207,5208,5209,5210,5211,5212,5213,5214,5215,5216,5217,5218,5219,5220,5128,5129,5130,5269,5270,5271,5099,5100,5101,5105,5106,5107,5108,5109,5110,5111,5112,5113,5114,5115,5116,5117,5118,5119,5120,5121,5122,5123,5124,5125,5126,5127,5008,5009,5241,5255,5256,5257,5273,5221,5222,5243,5244,5245,5246,5224,5225,5247,5248,5227,5228,5229,5230,5231,5233,5234,5236,5237,5238,5250,5251"/>
+         </object>
+         <object class="org.eclipse.gmf.runtime.notation.Node" id="generated-compartments">
+            <method name="getType()" value="7001,7008,7011,7009,7012,7014,7041,7042,7017,7018,7019,7020,7021,7022,7023,7024,7025,7026,7027,7028,7010,7013,7029,7043,7044,7034,7035,7036,7037,7038,7039,7050,7051,7052,7049"/>
+         </object>
+         <context views="generated-diagram,generated-nodes,generated-links,generated-labels,generated-compartments"/>
+      </editpartProvider>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.emf.ui.modelingAssistantProviders" id="modelassist-provider">
+      <?gmfgen generated="true"?>
+      <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDcpsLibEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DcpsLibEditPart" id="DcpsLib_1000"/>
+         <context elements="DcpsLib_1000"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDomainParticipantEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainParticipantEditPart" id="DomainParticipant_2001"/>
+         <context elements="DomainParticipant_2001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDomainEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainEditPart" id="Domain_2002"/>
+         <context elements="Domain_2002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTopicEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TopicEditPart" id="Topic_2007"/>
+         <context elements="Topic_2007"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfContentFilteredTopicEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart" id="ContentFilteredTopic_2005"/>
+         <context elements="ContentFilteredTopic_2005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfMultiTopicEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.MultiTopicEditPart" id="MultiTopic_2006"/>
+         <context elements="MultiTopic_2006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPublisherEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PublisherEditPart" id="Publisher_3001"/>
+         <context elements="Publisher_3001"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDataWriterEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DataWriterEditPart" id="DataWriter_3059"/>
+         <context elements="DataWriter_3059"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDeadlineQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DeadlineQosPolicyEditPart" id="DeadlineQosPolicy_3022"/>
+         <context elements="DeadlineQosPolicy_3022"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriodEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PeriodEditPart" id="Period_3005"/>
+         <context elements="Period_3005"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDestinationOrderQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DestinationOrderQosPolicyEditPart" id="DestinationOrderQosPolicy_3023"/>
+         <context elements="DestinationOrderQosPolicy_3023"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDsQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DsQosPolicyEditPart" id="DsQosPolicy_3024"/>
+         <context elements="DsQosPolicy_3024"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period2EditPart" id="Period_3006"/>
+         <context elements="Period_3006"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfHistoryQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.HistoryQosPolicyEditPart" id="HistoryQosPolicy_3025"/>
+         <context elements="HistoryQosPolicy_3025"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLbQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LbQosPolicyEditPart" id="LbQosPolicy_3026"/>
+         <context elements="LbQosPolicy_3026"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod3EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period3EditPart" id="Period_3007"/>
+         <context elements="Period_3007"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLifespanQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LifespanQosPolicyEditPart" id="LifespanQosPolicy_3027"/>
+         <context elements="LifespanQosPolicy_3027"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod4EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period4EditPart" id="Period_3008"/>
+         <context elements="Period_3008"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLivelinessQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LivelinessQosPolicyEditPart" id="LivelinessQosPolicy_3028"/>
+         <context elements="LivelinessQosPolicy_3028"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod5EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period5EditPart" id="Period_3009"/>
+         <context elements="Period_3009"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfOsQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.OsQosPolicyEditPart" id="OsQosPolicy_3029"/>
+         <context elements="OsQosPolicy_3029"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfOwnershipQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.OwnershipQosPolicyEditPart" id="OwnershipQosPolicy_3030"/>
+         <context elements="OwnershipQosPolicy_3030"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfReliabilityQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ReliabilityQosPolicyEditPart" id="ReliabilityQosPolicy_3031"/>
+         <context elements="ReliabilityQosPolicy_3031"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod6EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period6EditPart" id="Period_3010"/>
+         <context elements="Period_3010"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfRlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.RlQosPolicyEditPart" id="RlQosPolicy_3032"/>
+         <context elements="RlQosPolicy_3032"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTpQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TpQosPolicyEditPart" id="TpQosPolicy_3033"/>
+         <context elements="TpQosPolicy_3033"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfWdlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.WdlQosPolicyEditPart" id="WdlQosPolicy_3034"/>
+         <context elements="WdlQosPolicy_3034"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDurabilityQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DurabilityQosPolicyEditPart" id="DurabilityQosPolicy_3035"/>
+         <context elements="DurabilityQosPolicy_3035"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfUdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.UdQosPolicyEditPart" id="UdQosPolicy_3013"/>
+         <context elements="UdQosPolicy_3013"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDeadlineQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DeadlineQosPolicy2EditPart" id="DeadlineQosPolicy_3036"/>
+         <context elements="DeadlineQosPolicy_3036"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDestinationOrderQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DestinationOrderQosPolicy2EditPart" id="DestinationOrderQosPolicy_3037"/>
+         <context elements="DestinationOrderQosPolicy_3037"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDsQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DsQosPolicy2EditPart" id="DsQosPolicy_3038"/>
+         <context elements="DsQosPolicy_3038"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDurabilityQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DurabilityQosPolicy2EditPart" id="DurabilityQosPolicy_3039"/>
+         <context elements="DurabilityQosPolicy_3039"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfHistoryQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.HistoryQosPolicy2EditPart" id="HistoryQosPolicy_3040"/>
+         <context elements="HistoryQosPolicy_3040"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLbQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LbQosPolicy2EditPart" id="LbQosPolicy_3041"/>
+         <context elements="LbQosPolicy_3041"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLifespanQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LifespanQosPolicy2EditPart" id="LifespanQosPolicy_3042"/>
+         <context elements="LifespanQosPolicy_3042"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfLivelinessQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.LivelinessQosPolicy2EditPart" id="LivelinessQosPolicy_3043"/>
+         <context elements="LivelinessQosPolicy_3043"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfOsQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.OsQosPolicy2EditPart" id="OsQosPolicy_3044"/>
+         <context elements="OsQosPolicy_3044"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfOwnershipQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.OwnershipQosPolicy2EditPart" id="OwnershipQosPolicy_3045"/>
+         <context elements="OwnershipQosPolicy_3045"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfReliabilityQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.ReliabilityQosPolicy2EditPart" id="ReliabilityQosPolicy_3046"/>
+         <context elements="ReliabilityQosPolicy_3046"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfRlQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.RlQosPolicy2EditPart" id="RlQosPolicy_3047"/>
+         <context elements="RlQosPolicy_3047"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTpQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TpQosPolicy2EditPart" id="TpQosPolicy_3048"/>
+         <context elements="TpQosPolicy_3048"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfUdQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.UdQosPolicy2EditPart" id="UdQosPolicy_3021"/>
+         <context elements="UdQosPolicy_3021"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfWdlQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.WdlQosPolicy2EditPart" id="WdlQosPolicy_3061"/>
+         <context elements="WdlQosPolicy_3061"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfEfQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.EfQosPolicyEditPart" id="EfQosPolicy_3012"/>
+         <context elements="EfQosPolicy_3012"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfGdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.GdQosPolicyEditPart" id="GdQosPolicy_3014"/>
+         <context elements="GdQosPolicy_3014"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPartitionQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PartitionQosPolicyEditPart" id="PartitionQosPolicy_3015"/>
+         <context elements="PartitionQosPolicy_3015"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPresentationQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PresentationQosPolicyEditPart" id="PresentationQosPolicy_3016"/>
+         <context elements="PresentationQosPolicy_3016"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfEfQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.EfQosPolicy2EditPart" id="EfQosPolicy_3017"/>
+         <context elements="EfQosPolicy_3017"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfGdQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.GdQosPolicy2EditPart" id="GdQosPolicy_3018"/>
+         <context elements="GdQosPolicy_3018"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPartitionQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PartitionQosPolicy2EditPart" id="PartitionQosPolicy_3019"/>
+         <context elements="PartitionQosPolicy_3019"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPresentationQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.PresentationQosPolicy2EditPart" id="PresentationQosPolicy_3020"/>
+         <context elements="PresentationQosPolicy_3020"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfSubscriberEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.SubscriberEditPart" id="Subscriber_3002"/>
+         <context elements="Subscriber_3002"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfDataReaderEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.DataReaderEditPart" id="DataReader_3060"/>
+         <context elements="DataReader_3060"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfRdlQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.RdlQosPolicyEditPart" id="RdlQosPolicy_3049"/>
+         <context elements="RdlQosPolicy_3049"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod7EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period7EditPart" id="Period_3055"/>
+         <context elements="Period_3055"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod8EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period8EditPart" id="Period_3056"/>
+         <context elements="Period_3056"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTbfQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TbfQosPolicyEditPart" id="TbfQosPolicy_3050"/>
+         <context elements="TbfQosPolicy_3050"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfPeriod9EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.Period9EditPart" id="Period_3057"/>
+         <context elements="Period_3057"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTdQosPolicyEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TdQosPolicyEditPart" id="TdQosPolicy_3051"/>
+         <context elements="TdQosPolicy_3051"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfRdlQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.RdlQosPolicy2EditPart" id="RdlQosPolicy_3052"/>
+         <context elements="RdlQosPolicy_3052"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTbfQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TbfQosPolicy2EditPart" id="TbfQosPolicy_3053"/>
+         <context elements="TbfQosPolicy_3053"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfTdQosPolicy2EditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.TdQosPolicy2EditPart" id="TdQosPolicy_3054"/>
+         <context elements="TdQosPolicy_3054"/>
+      </modelingAssistantProvider>
+            <modelingAssistantProvider class="org.opendds.modeling.diagram.dcpslib.providers.assistants.OpenDDSDcpsLibModelingAssistantProviderOfStructEditPart">
+         <Priority name="Lowest"/>
+         <object class="org.opendds.modeling.diagram.dcpslib.edit.parts.StructEditPart" id="Struct_3058"/>
+         <context elements="Struct_3058"/>
+      </modelingAssistantProvider>
+      
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.iconProviders" id="icon-provider">
+      <?gmfgen generated="true"?>
+      <IconProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibIconProvider">
+         <Priority name="Low"/>
+      </IconProvider>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.common.ui.services.parserProviders" id="parser-provider">
+      <?gmfgen generated="true"?>
+      <ParserProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibParserProvider">
+         <Priority name="Lowest"/>
+      </ParserProvider>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypes" id="element-types">
+      <?gmfgen generated="true"?>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.DcpsLib_1000"
+               name="%metatype.name.DcpsLib_1000"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="DcpsLib"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DcpsLibEditHelper">
+            <param name="semanticHint" value="1000"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.DomainParticipant_2001"
+               name="%metatype.name.DomainParticipant_2001"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="domainParticipant"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DomainParticipantEditHelper">
+            <param name="semanticHint" value="2001"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.Domain_2002"
+               name="%metatype.name.Domain_2002"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="domain"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DomainEditHelper">
+            <param name="semanticHint" value="2002"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Topics/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.Topic_2007"
+               name="%metatype.name.Topic_2007"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Topic"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.TopicEditHelper">
+            <param name="semanticHint" value="2007"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Topics/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.ContentFilteredTopic_2005"
+               name="%metatype.name.ContentFilteredTopic_2005"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="ContentFilteredTopic"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.ContentFilteredTopicEditHelper">
+            <param name="semanticHint" value="2005"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Topics/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.MultiTopic_2006"
+               name="%metatype.name.MultiTopic_2006"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="MultiTopic"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.MultiTopicEditHelper">
+            <param name="semanticHint" value="2006"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.Publisher_3001"
+               name="%metatype.name.Publisher_3001"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="publisher"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.PublisherEditHelper">
+            <param name="semanticHint" value="3001"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.DataWriter_3059"
+               name="%metatype.name.DataWriter_3059"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="DataWriter"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DataWriterEditHelper">
+            <param name="semanticHint" value="3059"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.DeadlineQosPolicy_3022"
+               name="%metatype.name.DeadlineQosPolicy_3022"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="deadlineQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DeadlineQosPolicyEditHelper">
+            <param name="semanticHint" value="3022"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3005"
+               name="%metatype.name.Period_3005"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Period"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.PeriodEditHelper">
+            <param name="semanticHint" value="3005"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.DestinationOrderQosPolicy_3023"
+               name="%metatype.name.DestinationOrderQosPolicy_3023"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="destinationOrderQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DestinationOrderQosPolicyEditHelper">
+            <param name="semanticHint" value="3023"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.DsQosPolicy_3024"
+               name="%metatype.name.DsQosPolicy_3024"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="dsQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DsQosPolicyEditHelper">
+            <param name="semanticHint" value="3024"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3006"
+               name="%metatype.name.Period_3006"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+            <param name="semanticHint" value="3006"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.HistoryQosPolicy_3025"
+               name="%metatype.name.HistoryQosPolicy_3025"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="historyQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.HistoryQosPolicyEditHelper">
+            <param name="semanticHint" value="3025"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.LbQosPolicy_3026"
+               name="%metatype.name.LbQosPolicy_3026"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="lbQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.LbQosPolicyEditHelper">
+            <param name="semanticHint" value="3026"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3007"
+               name="%metatype.name.Period_3007"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+            <param name="semanticHint" value="3007"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.LifespanQosPolicy_3027"
+               name="%metatype.name.LifespanQosPolicy_3027"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="lifespanQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.LifespanQosPolicyEditHelper">
+            <param name="semanticHint" value="3027"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3008"
+               name="%metatype.name.Period_3008"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+            <param name="semanticHint" value="3008"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.LivelinessQosPolicy_3028"
+               name="%metatype.name.LivelinessQosPolicy_3028"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="livelinessQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.LivelinessQosPolicyEditHelper">
+            <param name="semanticHint" value="3028"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3009"
+               name="%metatype.name.Period_3009"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+            <param name="semanticHint" value="3009"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.OsQosPolicy_3029"
+               name="%metatype.name.OsQosPolicy_3029"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="osQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.OsQosPolicyEditHelper">
+            <param name="semanticHint" value="3029"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.OwnershipQosPolicy_3030"
+               name="%metatype.name.OwnershipQosPolicy_3030"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="ownershipQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.OwnershipQosPolicyEditHelper">
+            <param name="semanticHint" value="3030"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.ReliabilityQosPolicy_3031"
+               name="%metatype.name.ReliabilityQosPolicy_3031"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="reliabilityQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.ReliabilityQosPolicyEditHelper">
+            <param name="semanticHint" value="3031"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3010"
+               name="%metatype.name.Period_3010"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+            <param name="semanticHint" value="3010"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.RlQosPolicy_3032"
+               name="%metatype.name.RlQosPolicy_3032"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="rlQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.RlQosPolicyEditHelper">
+            <param name="semanticHint" value="3032"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.TpQosPolicy_3033"
+               name="%metatype.name.TpQosPolicy_3033"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="tpQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.TpQosPolicyEditHelper">
+            <param name="semanticHint" value="3033"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.WdlQosPolicy_3034"
+               name="%metatype.name.WdlQosPolicy_3034"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="wdlQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.WdlQosPolicyEditHelper">
+            <param name="semanticHint" value="3034"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.DurabilityQosPolicy_3035"
+               name="%metatype.name.DurabilityQosPolicy_3035"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="durabilityQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DurabilityQosPolicyEditHelper">
+            <param name="semanticHint" value="3035"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.UdQosPolicy_3013"
+               name="%metatype.name.UdQosPolicy_3013"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="udQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.UdQosPolicyEditHelper">
+            <param name="semanticHint" value="3013"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.DeadlineQosPolicy_3036"
+               name="%metatype.name.DeadlineQosPolicy_3036"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.DeadlineQosPolicy_3022"/>
+            <param name="semanticHint" value="3036"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.DestinationOrderQosPolicy_3037"
+               name="%metatype.name.DestinationOrderQosPolicy_3037"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.DestinationOrderQosPolicy_3023"/>
+            <param name="semanticHint" value="3037"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.DsQosPolicy_3038"
+               name="%metatype.name.DsQosPolicy_3038"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.DsQosPolicy_3024"/>
+            <param name="semanticHint" value="3038"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.DurabilityQosPolicy_3039"
+               name="%metatype.name.DurabilityQosPolicy_3039"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.DurabilityQosPolicy_3035"/>
+            <param name="semanticHint" value="3039"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.HistoryQosPolicy_3040"
+               name="%metatype.name.HistoryQosPolicy_3040"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.HistoryQosPolicy_3025"/>
+            <param name="semanticHint" value="3040"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.LbQosPolicy_3041"
+               name="%metatype.name.LbQosPolicy_3041"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.LbQosPolicy_3026"/>
+            <param name="semanticHint" value="3041"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.LifespanQosPolicy_3042"
+               name="%metatype.name.LifespanQosPolicy_3042"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.LifespanQosPolicy_3027"/>
+            <param name="semanticHint" value="3042"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.LivelinessQosPolicy_3043"
+               name="%metatype.name.LivelinessQosPolicy_3043"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.LivelinessQosPolicy_3028"/>
+            <param name="semanticHint" value="3043"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.OsQosPolicy_3044"
+               name="%metatype.name.OsQosPolicy_3044"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.OsQosPolicy_3029"/>
+            <param name="semanticHint" value="3044"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.OwnershipQosPolicy_3045"
+               name="%metatype.name.OwnershipQosPolicy_3045"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.OwnershipQosPolicy_3030"/>
+            <param name="semanticHint" value="3045"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.ReliabilityQosPolicy_3046"
+               name="%metatype.name.ReliabilityQosPolicy_3046"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.ReliabilityQosPolicy_3031"/>
+            <param name="semanticHint" value="3046"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.RlQosPolicy_3047"
+               name="%metatype.name.RlQosPolicy_3047"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.RlQosPolicy_3032"/>
+            <param name="semanticHint" value="3047"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.TpQosPolicy_3048"
+               name="%metatype.name.TpQosPolicy_3048"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.TpQosPolicy_3033"/>
+            <param name="semanticHint" value="3048"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.UdQosPolicy_3021"
+               name="%metatype.name.UdQosPolicy_3021"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.UdQosPolicy_3013"/>
+            <param name="semanticHint" value="3021"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.WdlQosPolicy_3061"
+               name="%metatype.name.WdlQosPolicy_3061"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.WdlQosPolicy_3034"/>
+            <param name="semanticHint" value="3061"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.EfQosPolicy_3012"
+               name="%metatype.name.EfQosPolicy_3012"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="efQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.EfQosPolicyEditHelper">
+            <param name="semanticHint" value="3012"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.GdQosPolicy_3014"
+               name="%metatype.name.GdQosPolicy_3014"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="gdQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.GdQosPolicyEditHelper">
+            <param name="semanticHint" value="3014"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.PartitionQosPolicy_3015"
+               name="%metatype.name.PartitionQosPolicy_3015"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="partitionQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.PartitionQosPolicyEditHelper">
+            <param name="semanticHint" value="3015"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.PresentationQosPolicy_3016"
+               name="%metatype.name.PresentationQosPolicy_3016"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="presentationQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.PresentationQosPolicyEditHelper">
+            <param name="semanticHint" value="3016"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.EfQosPolicy_3017"
+               name="%metatype.name.EfQosPolicy_3017"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.EfQosPolicy_3012"/>
+            <param name="semanticHint" value="3017"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.GdQosPolicy_3018"
+               name="%metatype.name.GdQosPolicy_3018"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.GdQosPolicy_3014"/>
+            <param name="semanticHint" value="3018"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.PartitionQosPolicy_3019"
+               name="%metatype.name.PartitionQosPolicy_3019"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.PartitionQosPolicy_3015"/>
+            <param name="semanticHint" value="3019"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.PresentationQosPolicy_3020"
+               name="%metatype.name.PresentationQosPolicy_3020"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.PresentationQosPolicy_3016"/>
+            <param name="semanticHint" value="3020"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.Subscriber_3002"
+               name="%metatype.name.Subscriber_3002"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="subscriber"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.SubscriberEditHelper">
+            <param name="semanticHint" value="3002"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.DataReader_3060"
+               name="%metatype.name.DataReader_3060"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="DataReader"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.DataReaderEditHelper">
+            <param name="semanticHint" value="3060"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.RdlQosPolicy_3049"
+               name="%metatype.name.RdlQosPolicy_3049"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="rdlQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.RdlQosPolicyEditHelper">
+            <param name="semanticHint" value="3049"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3055"
+               name="%metatype.name.Period_3055"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+            <param name="semanticHint" value="3055"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3056"
+               name="%metatype.name.Period_3056"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+            <param name="semanticHint" value="3056"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.TbfQosPolicy_3050"
+               name="%metatype.name.TbfQosPolicy_3050"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="tbfQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.TbfQosPolicyEditHelper">
+            <param name="semanticHint" value="3050"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.Period_3057"
+               name="%metatype.name.Period_3057"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+            <param name="semanticHint" value="3057"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.TdQosPolicy_3051"
+               name="%metatype.name.TdQosPolicy_3051"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="tdQosPolicy"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.TdQosPolicyEditHelper">
+            <param name="semanticHint" value="3051"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.RdlQosPolicy_3052"
+               name="%metatype.name.RdlQosPolicy_3052"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.RdlQosPolicy_3049"/>
+            <param name="semanticHint" value="3052"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.TbfQosPolicy_3053"
+               name="%metatype.name.TbfQosPolicy_3053"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.TbfQosPolicy_3050"/>
+            <param name="semanticHint" value="3053"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.TdQosPolicy_3054"
+               name="%metatype.name.TdQosPolicy_3054"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.opendds.modeling.diagram.dcpslib.TdQosPolicy_3051"/>
+            <param name="semanticHint" value="3054"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Types/1.0">
+         <metamodelType
+               id="org.opendds.modeling.diagram.dcpslib.Struct_3058"
+               name="%metatype.name.Struct_3058"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType"
+               eclass="Struct"
+               edithelper="org.opendds.modeling.diagram.dcpslib.edit.helpers.StructEditHelper">
+            <param name="semanticHint" value="3058"/>
+         </metamodelType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.DataReaderTopic_4005"
+               name="%metatype.name.DataReaderTopic_4005"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4005"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.DataWriterTopic_4006"
+               name="%metatype.name.DataWriterTopic_4006"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4006"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.DomainParticipantDomain_4007"
+               name="%metatype.name.DomainParticipantDomain_4007"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4007"/>
+         </specializationType>
+      </metamodel>
+      <metamodel nsURI="http://www.opendds.org/modeling/schemas/Topics/1.0">
+         <specializationType
+               id="org.opendds.modeling.diagram.dcpslib.ContentFilteredTopicRelated_topic_4008"
+               name="%metatype.name.ContentFilteredTopicRelated_topic_4008"
+               kind="org.eclipse.gmf.runtime.emf.type.core.IHintedType">
+            <specializes id="org.eclipse.gmf.runtime.emf.type.core.null"/>
+            <param name="semanticHint" value="4008"/>
+         </specializationType>
+      </metamodel>
+   </extension>
+
+   <extension point="org.eclipse.gmf.runtime.emf.type.core.elementTypeBindings" id="element-types-bindings">
+      <?gmfgen generated="true"?>
+      <clientContext id="org.opendds.modeling.diagram.dcpslib.TypeContext">
+         <enablement>
+            <test
+               property="org.eclipse.gmf.runtime.emf.core.editingDomain"
+               value="org.opendds.modeling.diagram.dcpslib.EditingDomain"/>
+         </enablement>
+      </clientContext> 
+      <binding context="org.opendds.modeling.diagram.dcpslib.TypeContext">
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DcpsLib_1000"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DomainParticipant_2001"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Domain_2002"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Topic_2007"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.ContentFilteredTopic_2005"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.MultiTopic_2006"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Publisher_3001"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DataWriter_3059"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DeadlineQosPolicy_3022"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3005"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DestinationOrderQosPolicy_3023"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DsQosPolicy_3024"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3006"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.HistoryQosPolicy_3025"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.LbQosPolicy_3026"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3007"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.LifespanQosPolicy_3027"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3008"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.LivelinessQosPolicy_3028"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3009"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.OsQosPolicy_3029"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.OwnershipQosPolicy_3030"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.ReliabilityQosPolicy_3031"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3010"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.RlQosPolicy_3032"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.TpQosPolicy_3033"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.WdlQosPolicy_3034"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DurabilityQosPolicy_3035"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.UdQosPolicy_3013"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DeadlineQosPolicy_3036"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DestinationOrderQosPolicy_3037"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DsQosPolicy_3038"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DurabilityQosPolicy_3039"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.HistoryQosPolicy_3040"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.LbQosPolicy_3041"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.LifespanQosPolicy_3042"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.LivelinessQosPolicy_3043"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.OsQosPolicy_3044"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.OwnershipQosPolicy_3045"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.ReliabilityQosPolicy_3046"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.RlQosPolicy_3047"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.TpQosPolicy_3048"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.UdQosPolicy_3021"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.WdlQosPolicy_3061"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.EfQosPolicy_3012"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.GdQosPolicy_3014"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.PartitionQosPolicy_3015"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.PresentationQosPolicy_3016"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.EfQosPolicy_3017"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.GdQosPolicy_3018"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.PartitionQosPolicy_3019"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.PresentationQosPolicy_3020"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Subscriber_3002"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DataReader_3060"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.RdlQosPolicy_3049"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3055"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3056"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.TbfQosPolicy_3050"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Period_3057"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.TdQosPolicy_3051"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.RdlQosPolicy_3052"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.TbfQosPolicy_3053"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.TdQosPolicy_3054"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.Struct_3058"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DataReaderTopic_4005"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DataWriterTopic_4006"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.DomainParticipantDomain_4007"/>
+         <elementType ref="org.opendds.modeling.diagram.dcpslib.ContentFilteredTopicRelated_topic_4008"/>
+         <advice ref="org.eclipse.gmf.runtime.diagram.core.advice.notationDepdendents"/>
+      </binding>
+   </extension>
+	   <extension point="org.eclipse.core.expressions.propertyTesters" id="navigator-proptest.isURIEditorInput">
+      <?gmfgen generated="true"?>
+       <propertyTester
+           id="org.opendds.modeling.diagram.dcpslib.URIEditorInputPropertyTester"
+           type="org.eclipse.emf.common.ui.URIEditorInput"
+           namespace="org.opendds.modeling.diagram.dcpslib"
+           properties="isURIEditorInput"
+           class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibUriEditorInputTester">
+       </propertyTester>
+   </extension>
+
+	   <extension point="org.eclipse.ui.navigator.viewer" id="navigator-viewbinding">
+      <?gmfgen generated="true"?>
+      <viewerContentBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <contentExtension pattern="org.opendds.modeling.diagram.dcpslib.resourceContent"/>
+            <contentExtension pattern="org.opendds.modeling.diagram.dcpslib.navigatorLinkHelper"/>
+         </includes>
+      </viewerContentBinding>
+      <viewerActionBinding viewerId="org.eclipse.ui.navigator.ProjectExplorer">
+         <includes>
+            <actionExtension pattern="org.opendds.modeling.diagram.dcpslib.navigatorActionProvider"/>
+         </includes>
+      </viewerActionBinding>
+   </extension>
+
+   <extension point="org.eclipse.ui.navigator.navigatorContent" id="navigator-content">
+      <?gmfgen generated="true"?>
+      <navigatorContent
+            id="org.opendds.modeling.diagram.dcpslib.resourceContent" 
+            name="%navigatorContentName" 
+            priority="normal" 
+            contentProvider="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorContentProvider" 
+            labelProvider="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorLabelProvider"
+            icon="icons/obj16/DcpsLib.gif"
+            activeByDefault="true">
+         <triggerPoints>
+            <or>
+	           <and>
+    	          <instanceof value="org.eclipse.core.resources.IFile"/>
+        	      <test property="org.eclipse.core.resources.extension" value="opendds_diagram_dcpslib"/>
+               </and>
+               <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.dcpslib.isShortcut"/>
+           	   </adapt>
+            </or>
+         </triggerPoints>
+         <possibleChildren>
+            <or>
+         	   <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.dcpslib.isShortcut"/>
+           	   </adapt>
+            </or>
+         </possibleChildren>
+         <commonSorter 
+               id="org.opendds.modeling.diagram.dcpslib.navigatorSorter" 
+               class="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorSorter">
+            <parentExpression>
+               <or>
+	              <and>
+    	             <instanceof value="org.eclipse.core.resources.IFile"/>
+        	         <test property="org.eclipse.core.resources.extension" value="opendds_diagram_dcpslib"/>
+                  </and>
+                  <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+               </or>
+            </parentExpression>
+         </commonSorter>
+      </navigatorContent>
+      <actionProvider
+            id="org.opendds.modeling.diagram.dcpslib.navigatorActionProvider"
+            class="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorActionProvider">
+         <enablement>
+            <or>
+               <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+           	   <adapt type="org.eclipse.gmf.runtime.notation.View">
+           	      <test property="org.opendds.modeling.diagram.dcpslib.isShortcut"/>
+           	   </adapt>
+            </or>
+         </enablement>
+      </actionProvider>
+   </extension>
+
+	   <extension point="org.eclipse.ui.navigator.linkHelper" id="navigator-linkhelper">
+      <?gmfgen generated="true"?>
+      <linkHelper
+            id="org.opendds.modeling.diagram.dcpslib.navigatorLinkHelper"
+            class="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibNavigatorLinkHelper">
+         <editorInputEnablement>
+            <and>
+               <instanceof value="org.eclipse.emf.common.ui.URIEditorInput"/>
+               <test property="org.opendds.modeling.diagram.dcpslib.isURIEditorInput"/>
+            </and>
+         </editorInputEnablement>
+         <selectionEnablement>
+            <instanceof value="org.opendds.modeling.diagram.dcpslib.navigator.OpenDDSDcpsLibAbstractNavigatorItem"/>
+         </selectionEnablement>
+      </linkHelper>
+   </extension>
+   <extension point="org.eclipse.ui.commands" id="update-cmd">
+      <?gmfgen generated="true"?>
+      <command
+         categoryId="org.eclipse.ui.category.edit"
+         defaultHandler="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibDiagramUpdateCommand"
+         description="%update.diagram.description"
+         id="org.opendds.modeling.diagram.dcpslib.updateDiagram"
+         name="%update.diagram.name"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.bindings" id="update-cmd-binding">
+      <?gmfgen generated="true"?>
+      <key 
+         commandId="org.opendds.modeling.diagram.dcpslib.updateDiagram"
+         contextId="org.opendds.modeling.diagram.dcpslib.ui.diagramContext"
+         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+         sequence="F5"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.menus" id="context-menus">
+      <?gmfgen generated="true"?>
+      <!-- menuContribution locationURI="menu:org.eclipse.ui.main.menu?after=">
+      </menuContribution>
+      <menuContribution locationURI="toolbar:org.eclipse.ui.main.toolbar?after=">
+      </menuContribution -->
+      <menuContribution locationURI="popup:org.eclipse.gmf.runtime.diagram.ui.DiagramEditorContextMenu">
+         <command commandId="org.opendds.modeling.diagram.dcpslib.LoadResourceAction">
+            <visibleWhen>
+               <and>
+                  <with variable="activePartId"><equals value="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"/></with>
+                  <with variable="selection"><iterate ifEmpty="false"> 
+                     <instanceof value="org.opendds.modeling.diagram.dcpslib.edit.parts.DcpsLibEditPart"/>
+                  </iterate></with>
+               </and>
+            </visibleWhen>
+         </command>
+      </menuContribution>
+   </extension>
+
+   <extension point="org.eclipse.ui.commands" id="menu-commands">
+      <?gmfgen generated="true"?>
+      <category id="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID" name="%cmdcategory.name" description="%cmdcategory.desc"/>
+      <command id="org.opendds.modeling.diagram.dcpslib.LoadResourceAction"
+         name="Load Resource"
+         categoryId="org.opendds.modeling.model.opendds.diagram.dcpslib.part.OpenDDSDcpsLibDiagramEditorID"
+         defaultHandler="org.opendds.modeling.diagram.dcpslib.part.LoadResourceAction"/>
+   </extension>
+
+   <extension point="org.eclipse.ui.handlers" id="menu-handlers">
+      <?gmfgen generated="true"?>
+   </extension>
+
+   <!-- Manual changes -->
+
+    <extension point="org.eclipse.ui.popupMenus">
+      <?gmfgen generated="false"?>
+
+      <!-- DomainParticipant -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.DomainParticipantEditPart"
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DomainParticipantEditPart">
+         <menu
+            id="DomainParticipantInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
+            <separator name="group1"/>
+         </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDomainParticipant"
+               enablesFor="1"
+               id="DomainParticipantRefQosPolicyAdd"
+               label="Add &amp;reference to library QoS Policy"
+               menubarPath="DomainParticipantInsert/group1">
+         </action>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDomainParticipant"
+               enablesFor="1"
+               id="DomainParticipantCreateQosPolicyAdd"
+               label="Add &amp;custom QoS Policy"
+               menubarPath="DomainParticipantInsert/group1">
+         </action>
+      </objectContribution>
+
+       <!-- Publisher -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.PublisherEditPart"
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.PublisherEditPart">
+         <menu
+            id="PublisherInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
+            <separator name="group1"/>
+         </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionPublisher"
+               enablesFor="1"
+               id="PublisherRefQosPolicyAdd"
+               label="Add &amp;reference to library QoS Policy"
+               menubarPath="PublisherInsert/group1">
+         </action>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionPublisher"
+               enablesFor="1"
+               id="org.opendds.modeling.popup.PublisherCreatePolicyActionID"
+               label="Add &amp;custom QoS Policy"
+               menubarPath="PublisherInsert/group1">
+         </action>
+      </objectContribution>
+
+       <!-- DataWriter -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.DataWriterEditPart"
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DataWriterEditPart">
+         <menu
+            id="DataWriterInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
+            <separator name="group1"/>
+         </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDataWriter"
+               enablesFor="1"
+               id="DataWriterRefQosPolicyAdd"
+               label="Add &amp;reference to library QoS Policy"
+               menubarPath="DataWriterInsert/group1">
+         </action>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDataWriter"
+               enablesFor="1"
+               id="org.opendds.modeling.popup.DataWriterCreatePolicyActionID"
+               label="Add &amp;custom QoS Policy"
+               menubarPath="DataWriterInsert/group1">
+         </action>
+      </objectContribution>
+
+       <!-- Subscriber -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.SubscriberEditPart"
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.SubscriberEditPart">
+         <menu
+            id="SubscriberInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
+            <separator name="group1"/>
+         </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionSubscriber"
+               enablesFor="1"
+               id="SubscriberRefQosPolicyAdd"
+               label="Add &amp;reference to library QoS Policy"
+               menubarPath="SubscriberInsert/group1">
+         </action>
+          <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionSubscriber"
+               enablesFor="1"
+               id="org.opendds.modeling.popup.SubscriberCreatePolicyActionID"
+               label="Add &amp;custom QoS Policy"
+               menubarPath="SubscriberInsert/group1">
+         </action>
+      </objectContribution>
+
+       <!-- DataReader -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.DataReaderEditPart"
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.DataReaderEditPart">
+         <menu
+            id="DataReaderInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
+            <separator name="group1"/>
+         </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionDataReader"
+               enablesFor="1"
+               id="DataReaderRefQosPolicyAdd"
+               label="Add &amp;reference to library QoS Policy"
+               menubarPath="DataReaderInsert/group1">
+         </action>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionDataReader"
+               enablesFor="1"
+               id="org.opendds.modeling.popup.DataReaderCreatePolicyActionID"
+               label="Add &amp;custom QoS Policy"
+               menubarPath="DataReaderInsert/group1">
+         </action>
+      </objectContribution>
+
+       <!-- Topic -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.TopicEditPart"
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.TopicEditPart">
+         <menu
+            id="TopicPolicyInsert"
+            label="&amp;Add &amp;QoS Policy"
+            path="additions">
+            <separator name="group1"/>
+         </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefQosPolicyActionTopic"
+               enablesFor="1"
+               id="TopicRefQosPolicyAdd"
+               label="Add &amp;reference to library QoS Policy"
+               menubarPath="TopicPolicyInsert/group1">
+         </action>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibCreateQosPolicyActionTopic"
+               enablesFor="1"
+               id="org.opendds.modeling.popup.TopicCreatePolicyActionID"
+               label="Add &amp;custom QoS Policy"
+               menubarPath="TopicPolicyInsert/group1">
+         </action>
+         <menu
+               id="TopicDataTypeSelect"
+               label="Select &amp;Struct">
+        </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionTopic"
+               enablesFor="1"
+               id="TopicDataTypeSelect"
+               label="Select DataType"
+               menubarPath="TopicDataTypeSelect">
+         </action>
+      </objectContribution>
+
+       <!-- ContentFilteredTopic -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.ContentFilteredTopicEditPart"
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.ContentFilteredTopicEditPart">
+         <menu
+               id="ContentFilteredTopicDataTypeSelect"
+               label="Select &amp;Struct">
+        </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionContentFilteredTopic"
+               enablesFor="1"
+               id="ContentFilteredTopicDataTypeSelect"
+               label="Select DataType"
+               menubarPath="ContentFilteredTopicDataTypeSelect">
+         </action>
+      </objectContribution>
+
+       <!-- MultiTopic -->
+      <objectContribution
+            adaptable="false"
+            id="org.opendds.modeling.diagram.ui.objectContribution.MultiTopicEditPart"
+            objectClass="org.opendds.modeling.diagram.dcpslib.edit.parts.MultiTopicEditPart">
+         <menu
+               id="MultiTopicDataTypeSelect"
+               label="Select &amp;Struct">
+        </menu>
+         <action
+               class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibRefTypeActionMultiTopic"
+               enablesFor="1"
+               id="MultiTopicDataTypeSelect"
+               label="Select DataType"
+               menubarPath="MultiTopicDataTypeSelect">
+         </action>
+      </objectContribution>
+
+    </extension>
+<extension point="org.eclipse.gmf.runtime.common.ui.services.markerNavigationProviders" id="markers-navigation">
+      <?gmfgen generated="true"?>
+      <MarkerNavigationProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibMarkerNavigationProvider">
+         <MarkerType name="org.opendds.modeling.diagram.dcpslib.diagnostic"/>
+         <Priority name="Lowest"/>
+      </MarkerNavigationProvider>
+   </extension>
+
+<extension id="diagnostic" name="OpenDDS DcpsLib Plugin problems" point="org.eclipse.core.resources.markers">
+      <?gmfgen generated="true"?>
+      <super type="org.eclipse.core.resources.problemmarker"/>
+      <super type="org.eclipse.gmf.runtime.common.ui.services.marker"/>
+      <persistent value="true"/>
+   </extension><extension id="validationDecoratorProvider" name="ValidationDecorations" point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibValidationDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.diagram.ui.editparts.IPrimaryEditPart(org.eclipse.gmf.runtime.diagram.ui)" id="PRIMARY_VIEW"/>
+         <context decoratorTargets="PRIMARY_VIEW"/>
+      </decoratorProvider>
+   </extension>
+<extension point="org.eclipse.emf.validation.constraintProviders">
+      <?gmfgen generated="true"?>
+            <category id="org.opendds.modeling.model.dcps.validations" mandatory="false" name="DcpsLib Validations">
+         <![CDATA[Detects incorrect or questionable semantic constructs for elements in a DcpsLib diagram.]]>
+      </category>
+      <category id="org.opendds.modeling.model.dcps.validations/org.opendds.modeling.model.dcps.validation.errors" mandatory="false" name="DcpsLib Errors">
+         <![CDATA[Detects modeling constructs that would result in invalid generated OpenDDS code.]]>
+      </category>
+      <category id="org.opendds.modeling.model.dcps.validations/org.opendds.modeling.model.dcps.validation.warnings" mandatory="false" name="DcpsLib Warnings">
+         <![CDATA[Detects questionable modeling constructs.]]>
+      </category>
+      <constraintProvider cache="true">
+         <package namespaceUri="http://www.opendds.org/modeling/schemas/Domain/1.0"/>
+         <package namespaceUri="http://www.opendds.org/modeling/schemas/DCPS/1.0"/>
+               <constraints categories="org.opendds.modeling.model.dcps.validations">
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.dcps.validations/org.opendds.modeling.model.dcps.validation.errors">
+                  <constraint id="org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"
+            lang="OCL"
+            name="Domain Entity Name Empty"
+            mode="Batch"
+            severity="ERROR" statusCode="200">
+            <![CDATA[not self.name.oclIsUndefined() and self.name <> '']]>
+            <description><![CDATA[Domain entity names should not be empty]]></description>
+            <message><![CDATA[Domain entity name is empty]]></message>
+            <target class="domain.DomainEntity"/>
+         </constraint>
+                  </constraints>
+         <constraints categories="org.opendds.modeling.model.dcps.validations/org.opendds.modeling.model.dcps.validation.warnings">
+                  <constraint id="org.opendds.modeling.model.dcps.validation.warning.domainparticipant_empty"
+            lang="OCL"
+            name="DomainParticipant Empty"
+            mode="Batch"
+            severity="WARNING" statusCode="200">
+            <![CDATA[self.publishers->size() + self.subscribers->size() > 0]]>
+            <description><![CDATA[DomainParticipant should have a Publisher or Subscriber]]></description>
+            <message><![CDATA[A DomainParticipant should have at least one Publisher or Subscriber]]></message>
+            <target class="dcps.DomainParticipant"/>
+         </constraint>
+                  </constraints>
+      </constraintProvider>
+   </extension>
+
+<extension point="org.eclipse.emf.validation.constraintBindings">
+      <?gmfgen generated="true"?>
+      <clientContext default="false" id="org.opendds.modeling.diagram.dcpslibDefaultCtx">
+         <selector class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibValidationProvider$DefaultCtx"/>
+      </clientContext>
+      <binding context="org.opendds.modeling.diagram.dcpslibDefaultCtx">
+                  <constraint ref="org.opendds.modeling.diagram.dcpslib.org.opendds.modeling.model.dcps.validation.error.domain_entity_name_blank"/>
+                  <constraint ref="org.opendds.modeling.diagram.dcpslib.org.opendds.modeling.model.dcps.validation.warning.domainparticipant_empty"/>
+               </binding>
+
+   </extension>
+<extension point="org.eclipse.gmf.runtime.diagram.ui.decoratorProviders" id="decorator-provider">
+      <?gmfgen generated="true"?>
+      <decoratorProvider class="org.opendds.modeling.diagram.dcpslib.providers.OpenDDSDcpsLibShortcutsDecoratorProvider">
+         <Priority name="Lowest"/>
+         <object class="org.eclipse.gmf.runtime.notation.Node(org.eclipse.gmf.runtime.notation)" id="generated-top-nodes">
+            <method name="getType()" value="2001,2002,2007,2005,2006"/>
+         </object>
+         <context decoratorTargets="generated-top-nodes"/>
+      </decoratorProvider>
+   </extension>
+
+<extension point="org.eclipse.core.expressions.propertyTesters" id="navigator-proptest.isShortcut">
+      <?gmfgen generated="true"?>
+       <propertyTester
+           id="org.opendds.modeling.diagram.dcpslib.ShortcutPropertyTester"
+           type="org.eclipse.gmf.runtime.notation.View"
+           namespace="org.opendds.modeling.diagram.dcpslib"
+           properties="isShortcut"
+           class="org.opendds.modeling.diagram.dcpslib.part.OpenDDSDcpsLibShortcutPropertyTester">
+       </propertyTester>
+   </extension>
+
+
+
+
+
+
+   <!-- optionally, specify keybindings -->
+</plugin>

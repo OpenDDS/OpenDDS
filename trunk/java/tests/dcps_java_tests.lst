@@ -1,0 +1,45 @@
+#
+# This is the list of run_test.pl's that need to be run by
+# auto_run_tests.pl.
+# Each line has its own test, and a test can be followed by a
+# list of configurations it does _not_ run on.
+#
+# Example: TAO/examples/foo/run_test.pl: !MINIMUM !ST
+#
+# Paths are relative to $DDS_ROOT
+
+java/tests/hello/run_test.pl
+java/tests/builtintopics/run_test.pl: !NO_BUILT_IN_TOPICS
+java/tests/complex_idl/run_test.pl
+java/tests/multirepo/run_test.pl
+java/tests/transport_config/run_test.pl
+
+#
+# The messenger tests are used to test each supported transport:
+#
+java/tests/messenger/publisher/run_test.pl tcp
+java/tests/messenger/publisher/run_test.pl udp
+java/tests/messenger/publisher/run_test.pl multicast: !NO_MCAST
+java/tests/messenger/publisher/run_test.pl rtps: !NO_MCAST RTPS
+java/tests/messenger/publisher/run_test.pl rtps_uni: RTPS
+java/tests/messenger/publisher/run_test.pl rtps_disc: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+java/tests/messenger/publisher/run_test.pl rtps_disc_tcp: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+
+java/tests/messenger/subscriber/run_test.pl tcp
+java/tests/messenger/subscriber/run_test.pl udp
+java/tests/messenger/subscriber/run_test.pl multicast: !NO_MCAST
+java/tests/messenger/subscriber/run_test.pl rtps: !NO_MCAST RTPS
+java/tests/messenger/subscriber/run_test.pl rtps_uni: RTPS
+java/tests/messenger/subscriber/run_test.pl rtps_disc: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+java/tests/messenger/subscriber/run_test.pl rtps_disc_tcp: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+
+java/tests/messenger/run_test.pl tcp
+java/tests/messenger/run_test.pl udp
+java/tests/messenger/run_test.pl multicast: !NO_MCAST
+java/tests/messenger/run_test.pl rtps: !NO_MCAST RTPS
+java/tests/messenger/run_test.pl rtps_uni: RTPS
+java/tests/messenger/run_test.pl rtps_disc: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+java/tests/messenger/run_test.pl rtps_disc_tcp: !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+
+java/tests/messenger/both/run_test.pl
+java/tests/zerocopy/run_test.pl

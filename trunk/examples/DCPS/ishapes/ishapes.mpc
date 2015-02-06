@@ -1,0 +1,51 @@
+project(ishapes): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, qt4_gui, boost_base {
+
+  exename = *
+  includes += .
+
+  TypeSupport_Files {
+    ShapeType.idl
+  }
+
+  MOC_Files {
+    FilterDialog.hpp
+    ReaderQosDialog.hpp
+    ShapesDialog.hpp
+    ShapesWidget.hpp
+    WriterQosDialog.hpp
+  }
+
+  QRC_Files {
+    ishape.qrc
+  }
+
+  Header_Files {
+    ui_filterForm.h
+    ui_iShapesForm.h
+    ui_readerQosForm.h
+    ui_writerQosForm.h
+    ui_qosForm.h
+  }
+
+  Source_Files {
+    BouncingShapeDynamics.cpp
+    Circle.cpp
+    DDSShapeDynamics.cpp
+    FilterDialog.cpp
+    FilterDialog_moc.cpp
+    main.cpp
+    ReaderQosDialog.cpp
+    ReaderQosDialog_moc.cpp
+    Shape.cpp
+    ShapeDynamics.cpp
+    ShapesDialog.cpp
+    ShapesDialog_moc.cpp
+    ShapesWidget.cpp
+    ShapesWidget_moc.cpp
+    Square.cpp
+    Triangle.cpp
+    WriterQosDialog.cpp
+    WriterQosDialog_moc.cpp
+  }
+}
+

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opendds:OpenDDSModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0" xmlns:types="http://www.opendds.org/modeling/schemas/Types/1.0" xmi:id="_4ju5sfDrEd-CmLmrf7-qiA" name="MessengerWriterQos">
+  <libs xsi:type="opendds:DcpsLib" xmi:id="_XmyasPDvEd-I4rwicuuPOw" name="MessengerWriterQos">
+    <domains xmi:id="_bs2RIPDvEd-I4rwicuuPOw" name="" domainId="42"/>
+    <participants xmi:id="_esFCYPDvEd-I4rwicuuPOw" name="part1" domain="_bs2RIPDvEd-I4rwicuuPOw" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" user_data="_X64DcAJKEeCBAfl9GiYbGg">
+      <publishers xsi:type="opendds:publisher" xmi:id="_sht8gPDvEd-I4rwicuuPOw" name="pub" entity_factory="_TwSSUAJKEeCBAfl9GiYbGg" group_data="_os3bUAKJEeCwwtlMwl8TGw" presentation="_wwhIsAKJEeCwwtlMwl8TGw" transportConfig="trans1">
+        <writers xmi:id="_41y9QPDvEd-I4rwicuuPOw" name="writer" deadline="_uvsboALlEeCRmKs-7z8NWA" destination_order="_2mVAsALlEeCRmKs-7z8NWA" durability="_D9GgACfyEeCySrIVS40zlQ" history="_VML9cALrEeCRmKs-7z8NWA" latency_budget="_CeUPoAMYEeCrTdheTycPFA" liveliness="_zAukQALrEeCRmKs-7z8NWA" ownership="_M2EAAALrEeCRmKs-7z8NWA" reliability="_n1lhgALrEeCRmKs-7z8NWA" resource_limits="_Y8bbcAMYEeCrTdheTycPFA" user_data="_X64DcAJKEeCBAfl9GiYbGg" copyFromTopicQos="false" durability_service="_5HPvYAMTEeCrTdheTycPFA" ownership_strength="_IJFDICfwEeCySrIVS40zlQ" transport_priority="_qJC4cAMYEeCrTdheTycPFA" lifespan="_JIkhIAMYEeCrTdheTycPFA" topic="_mcVnwPDxEd-I4rwicuuPOw" writer_data_lifecycle="_7VgMgCf7EeCySrIVS40zlQ">
+        </writers>
+      </publishers>
+    </participants>
+    <participants xmi:id="_herF0PDvEd-I4rwicuuPOw" name="part2" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <subscribers xsi:type="opendds:subscriber" xmi:id="_gp8AwPDwEd-I4rwicuuPOw" name="sub" transportConfig="trans3">
+        <readers xmi:id="_rUKHwPDwEd-I4rwicuuPOw" name="reader" deadline="_uvsboALlEeCRmKs-7z8NWA" durability="_D9GgACfyEeCySrIVS40zlQ" latency_budget="_WCHsACfvEeCySrIVS40zlQ" ownership="_M2EAAALrEeCRmKs-7z8NWA" copyFromTopicQos="false" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </subscribers>
+    </participants>
+    <participants xmi:id="_4VZKwQMKEeCrTdheTycPFA" name="part3" domain="_bs2RIPDvEd-I4rwicuuPOw">
+      <publishers xsi:type="opendds:publisher" xmi:id="_7YHU4AMKEeCrTdheTycPFA" name="pub3" transportConfig="trans-1">
+        <writers xmi:id="_9_r0EAMKEeCrTdheTycPFA" name="writer3" copyFromTopicQos="true" topic="_mcVnwPDxEd-I4rwicuuPOw"/>
+      </publishers>
+    </participants>
+    <topicDescriptions xsi:type="opendds:topic" xmi:id="_mcVnwPDxEd-I4rwicuuPOw" name="Movie Discussion List" datatype="_5STIgPDuEd-I4rwicuuPOw"/>
+    <policies xsi:type="opendds:efQosPolicy" xmi:id="_TwSSUAJKEeCBAfl9GiYbGg" name="auto" autoenable_created_entities="true"/>
+    <policies xsi:type="opendds:udQosPolicy" xmi:id="_X64DcAJKEeCBAfl9GiYbGg" name="seven" value="seven is 7"/>
+    <policies xsi:type="opendds:gdQosPolicy" xmi:id="_os3bUAKJEeCwwtlMwl8TGw" name="group8" datavalue="eight is 8"/>
+    <policies xsi:type="opendds:presentationQosPolicy" xmi:id="_wwhIsAKJEeCwwtlMwl8TGw" name="present" access_scope="TOPIC" coherent_access="true" ordered_access="true"/>
+    <policies xsi:type="opendds:partitionQosPolicy" xmi:id="_2V9HMAKJEeCwwtlMwl8TGw" name="part">
+      <names>left</names>
+      <names>right</names>
+    </policies>
+    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_uvsboALlEeCRmKs-7z8NWA" name="doa">
+      <period xmi:id="_cHd80CfzEeCySrIVS40zlQ" nanosecond="1" second="2"/>
+    </policies>
+    <policies xsi:type="opendds:destinationOrderQosPolicy" xmi:id="_2mVAsALlEeCRmKs-7z8NWA" name="source" kind="BY_SOURCE_TIMESTAMP"/>
+    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_BoO1oALrEeCRmKs-7z8NWA" name="localtrans" kind="TRANSIENT_LOCAL"/>
+    <policies xsi:type="opendds:ownershipQosPolicy" xmi:id="_M2EAAALrEeCRmKs-7z8NWA" name="exclusive" kind="EXCLUSIVE"/>
+    <policies xsi:type="opendds:historyQosPolicy" xmi:id="_VML9cALrEeCRmKs-7z8NWA" name="keep_last_fourteen" depth="14" kind="KEEP_LAST"/>
+    <policies xsi:type="opendds:reliabilityQosPolicy" xmi:id="_n1lhgALrEeCRmKs-7z8NWA" name="old_reliable" kind="RELIABLE"/>
+    <policies xsi:type="opendds:livelinessQosPolicy" xmi:id="_zAukQALrEeCRmKs-7z8NWA" name="mbt" kind="MANUAL_BY_TOPIC"/>
+    <policies xsi:type="opendds:deadlineQosPolicy" xmi:id="_COBjIAMTEeCrTdheTycPFA" name="now_for_crying_out_loud"/>
+    <policies xsi:type="opendds:dsQosPolicy" xmi:id="_5HPvYAMTEeCrTdheTycPFA" name="durable" history_depth="5" history_kind="KEEP_LAST" max_instances="20" max_samples="500" max_samples_per_instance="100"/>
+    <policies xsi:type="opendds:dsQosPolicy" xmi:id="_5tsHgAMXEeCrTdheTycPFA" name="default" history_depth="1" history_kind="KEEP_LAST" max_instances="-1" max_samples="-1" max_samples_per_instance="-1"/>
+    <policies xsi:type="opendds:lbQosPolicy" xmi:id="_CeUPoAMYEeCrTdheTycPFA" name="latent">
+      <duration xmi:id="_nU0n4AMZEeCrTdheTycPFA" nanosecond="10" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:lifespanQosPolicy" xmi:id="_JIkhIAMYEeCrTdheTycPFA" name="ls">
+      <duration xmi:id="_rLUkQCf4EeCySrIVS40zlQ" nanosecond="7" second="8"/>
+    </policies>
+    <policies xsi:type="opendds:rlQosPolicy" xmi:id="_Y8bbcAMYEeCrTdheTycPFA" name="limited" max_instances="10" max_samples="1000" max_samples_per_instance="100"/>
+    <policies xsi:type="opendds:tpQosPolicy" xmi:id="_qJC4cAMYEeCrTdheTycPFA" name="high" value="3"/>
+    <policies xsi:type="opendds:lbQosPolicy" xmi:id="_WCHsACfvEeCySrIVS40zlQ" name="very_latent">
+      <duration xmi:id="_Xtm9cCfvEeCySrIVS40zlQ" nanosecond="11" second="1"/>
+    </policies>
+    <policies xsi:type="opendds:osQosPolicy" xmi:id="_IJFDICfwEeCySrIVS40zlQ" name="strong" value="9"/>
+    <policies xsi:type="opendds:durabilityQosPolicy" xmi:id="_D9GgACfyEeCySrIVS40zlQ" name="persist" kind="TRANSIENT_LOCAL"/>
+    <policies xsi:type="opendds:wdlQosPolicy" xmi:id="_7VgMgCf7EeCySrIVS40zlQ" name="manual" autodispose_unregistered_instances="false"/>
+  </libs>
+  <libs xsi:type="types:DataLib" xmi:id="_2JQwcfDtEd-I4rwicuuPOw" name="data1">
+    <types xsi:type="types:Struct" xmi:id="_5STIgPDuEd-I4rwicuuPOw" name="Message" isDcpsDataType="true">
+      <fields xmi:id="_AbpJwPDvEd-I4rwicuuPOw" name="from" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_JUMe0PDvEd-I4rwicuuPOw" name="subject" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_M8mv8PDvEd-I4rwicuuPOw" name="subject_id" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_TTahAPDvEd-I4rwicuuPOw" name="text" type="_E8F2IPDvEd-I4rwicuuPOw"/>
+      <fields xmi:id="_VLcZoPDvEd-I4rwicuuPOw" name="count" type="_PXgFEPDvEd-I4rwicuuPOw"/>
+      <keys xmi:id="_RL5a4PDvEd-I4rwicuuPOw" field="_VLcZoPDvEd-I4rwicuuPOw"/>
+    </types>
+    <types xsi:type="types:String" xmi:id="_E8F2IPDvEd-I4rwicuuPOw"/>
+    <types xsi:type="types:Long" xmi:id="_PXgFEPDvEd-I4rwicuuPOw"/>
+  </libs>
+</opendds:OpenDDSModel>

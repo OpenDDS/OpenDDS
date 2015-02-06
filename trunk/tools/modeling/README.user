@@ -1,0 +1,57 @@
+
+************************************************************************
+The directory containing this README is only needed to develop the
+OpenDDS SDK, an Eclipse plug-in that allows the elements used in an
+OpenDDS system to be modeled diagrammatically.
+
+For obtaining and installing the plug-in for capturing models and
+generating C++ code, use the software site at:
+
+  http://www.opendds.org/modeling/eclipse_44
+
+Add this site to your Eclipse installation by:
+
+  select the preferences dialog from the main menu:
+    Window->Preferences
+
+  select the software site page:
+    "Install/Update"->"Available Software Sites"
+
+  open the "Add Site" dialog:
+    "Add..."
+
+  enter the name and location:
+    Name:     OpenDDS
+    Location: http://www.opendds.org/modeling/eclipse_44
+
+  accept the result:
+    "Ok"
+
+  check the site:
+    "Test Connection"
+
+
+Make sure the core Eclipse sites are enabled.  These may be disabled in
+shared installations (for example, if Eclipse was installed by a Linux
+distribution's software repository).  Using Eclipse 4.4 (Galileo), the two
+sites to look for are http://download.eclipse.org/eclipse/updates/4.4 and
+http://download.eclipse.org/releases/luna.
+With these enabled, Eclipse will be able to install features that the
+OpenDDS modeling SDK uses but might not already be available on your system.
+
+
+Install the OpenDDS SDK Modeling feature by:
+
+  select the software installation dialog:
+    Help->"Install New Software..."
+
+  select the new software site:
+    "Work with:" - select the "OpenDDS" site from the pull-down list.
+    Then hit the <Enter> key.
+
+  select the feature for installation:
+    [x] OpenDDS Modeling SDK Feature Bundle
+
+  complete the installation:
+    "Next" and follow the remaining installation wizard steps.
+

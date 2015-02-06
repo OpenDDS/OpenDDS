@@ -1,0 +1,199 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<link rel="stylesheet" type="text/css" href="../styles.css" />
+	<title>Introduction to the OpenDDS Modeling SDK</title>
+</head>
+
+<body>
+
+<h1>OpenDDS Modeling SDK</h1>
+
+<h2>Introduction</h2>
+
+<p>
+<img src="../images/opendds.png" align="left" alt="OpenDDS Logo"><a href="http://www.opendds.org/">OpenDDS</a> is an open source C++ 
+implementation of the Object Management Group (OMG)
+<a href="http://www.omg.org/technology/documents/dds_spec_catalog.htm">
+Data Distribution Service (DDS)</a>.
+</p>
+
+<p>The OpenDDS Modeling SDK allows graphical modeling of the OpenDDS components
+and automatic conversion of the resulting model to C++ code that can be
+accessed by your application.</p>
+
+<h2>Release Notes</h2>
+
+This section lists enhancements and fixes of OpenDDS Modeling SDK, as well as the version
+of OpenDDS and the Modeling SDK they correspond to.
+NOTE: The OpenDDS Modeling SDK Version went from 1.1.0 to 3.0.0, so that its version will
+be consistent with the OpenDDS Version.
+
+<h3>
+  OpenDDS Modeling SDK Version 3.6.0 (OpenDDS Version 3.6.0)
+</h3>
+    <ul>
+        <li>
+      Updated plugin to support Eclipse 4.4 (Luna) and GMF 3.1.x
+        </li>
+    </ul>
+
+<h3>
+  OpenDDS Modeling SDK Version 3.0.1 (OpenDDS Version 3.0.1)
+</h3>
+    <ul>
+        <li>
+      Fixed support for transitive external topic references in the same
+      directory.  Previously was erroneously converting the directory name
+      to a full path.
+        </li>
+    </ul>
+
+<h3>
+  OpenDDS Modeling SDK Version 3.0.0 (OpenDDS Version 3.0)
+</h3>
+    <ul>
+        <li>
+      Support for the OpenDDS transport configuration changes in this
+      release (see the OpenDDS NEWS file).  In the .opendds file,
+      DcpsLib entities now have an TransportConfig attribute.
+      In the .codegen file, the schmea for describing transport
+      configuration (on the Model Customization tab) is all new.
+        </li>
+        <li>
+      Added the ability to validate .opendds and .codegen files against
+      their corresponding XML schemas.  Use the context menu on those
+      files to invoke schema validation.
+        </li>
+    </ul>
+
+<h3>
+  OpenDDS Modeling SDK Version 1.1.0 (OpenDDS Version 2.4)
+</h3>
+    <ul>
+        <li>
+      Topic types from a DcpsLib shown in Project Explorer can be
+      dragged to diagram for another DcpsLib. This allows the same
+      Topic to be used in multiple DcpsLibs.
+      NOTE: External multitopics may need types to be registered manually.
+        </li>
+        <li>
+      For QoS policy Periods, symbol "Infinity" can be used for the
+      second and nanosecond fields.
+        </li>
+        <li>
+      In the main diagram, when a lib (or package) on the canvas is
+      dragged inside a parent package, visual feedback will occur that
+      the parent package has a new child. Previously, unless dragging
+      to the top portion of the parent, the child was merely moved to
+      a new location on the canvas.
+        </li>
+        <li>
+      Added validation warning if Pub/Sub's transportID not explicitly
+      set.
+        </li>
+        <li>
+      Fixed so that when removing a Topic or MultiTopic's data type
+      reference the Struct referred to by the data type is not also
+      removed.
+        </li>
+        <li>
+      Generated IDL now protected from multiple inclusion.
+        </li>
+        <li>
+      Modeling SDK executables no longer require -ORBSvcConfig command line
+      arguments to load transport shared libraries.
+        </li>
+        <li>
+      Fixed support for generation of IDL with cycles in its definitions.
+        </li>
+        <li>
+      Fixed "Decorator refresh failure" that occurred when doing
+      validation in one sub-diagram that is the same type as another
+      another opened sub-diagram (e.g. two PolicyLib diagrams). This
+      problem was causing subsequent attempts to validate to fail in
+      either sub-diagram.
+        </li>
+        <li>
+      Disabled cut, copy, and paste menu items to prevent model
+      corruption that could occur in some cases.
+        </li>
+        <li>
+      Added QoS policy validation checks consistent with checks done
+      in OpenDDS C++ code.
+        </li>
+        <li>
+      Fixed so that Ecore packages do no show up multiple times when
+      navigating model contents in Project Explorer.
+        </li>
+    </ul>
+
+<h3>
+  OpenDDS Modeling SDK Version 1.0.1 (OpenDDS Version 2.3)
+</h3>
+
+    <ul>
+        <li>
+      The property sheet now includes a tab for viewing and editing
+      comments related to the selected figure. These comments are
+      included in the generated C++ code.
+       </li>
+        <li>
+      In some cases, when attempting to add a figure to a Package
+      on the main diagram, the figure would unknowingly be placed as a
+      peer of the Package on the canvas. A fix was made so the figure
+      could be added to any portion of the Package to be treated as a
+      child of the Package.
+       </li>
+        <li>
+      When creating a new figure, the cursor will now be set on a
+      label within the figure to edit. Previously, in some cases
+      the cursor would not be placed on any label, increasing the
+      chance to overlook defining required properties.
+       </li>
+        <li>
+      Fixed so that when a Topic or MultiTopic's data type is
+      changed a refresh of the data type is properly done. Previously
+      both the original and new data type may have been displayed.
+       </li>
+        <li>
+      Previously, when deleting a figure that included an association
+      with a shared policy, the shared policy would also be deleted.
+      Now shared policies will be retained in this case.
+       </li>
+        <li>
+      In the DcpsLib diagram, the special connector tools in
+      the palette for linking DataReaders and DataWriters to
+      topic related figures are no longer needed and have been
+      removed. These links can now be done using connection
+      handles as is done for other figures.
+       </li>
+        <li>
+      Fixed diagram preferences all showing up under the DataLib
+      preferences, making it hard to set preferences for the
+      different diagram types.
+       </li>
+        <li>
+      Policy definitions from the OpenDDS Developer's Guide were
+      included in the Eclipse help content to make it easier to
+      get to these definitions during modeling.
+       </li>
+        <li>
+      The modeling help content was broken out into subsections to
+      make it easier to navigate.
+       </li>
+        <li>
+      On the code generation portion of the OpenDDS Modeling SDK, a
+      fix was made so that when creating a new element value in the
+      Model Customization tab property sheet, the value shown for the
+      element is the actual value and not the value from the previous
+      element displayed.
+       </li>
+    </ul>
+
+
+
+</body>
+</html>

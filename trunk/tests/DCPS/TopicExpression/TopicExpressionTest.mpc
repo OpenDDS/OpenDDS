@@ -1,0 +1,4 @@
+project: dcps, content_subscription_core {
+  exename = *
+  requires += multi_topic
+}

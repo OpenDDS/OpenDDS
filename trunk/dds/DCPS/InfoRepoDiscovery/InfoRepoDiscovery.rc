@@ -1,0 +1,30 @@
+#include "dds/Version.h"
+
+1 VERSIONINFO
+ FILEVERSION DDS_MAJOR_VERSION,DDS_MINOR_VERSION,DDS_MICRO_VERSION,0
+ PRODUCTVERSION DDS_MAJOR_VERSION,DDS_MINOR_VERSION,DDS_MICRO_VERSION,0
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0x0L
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "FileDescription", "OpenDDS InfoRepo Discovery library (opendds.org)\0"
+            VALUE "FileVersion", DDS_VERSION "\0"
+            VALUE "InternalName", "OpenDDS_InfoRepoDiscovery\0"
+            VALUE "LegalCopyright", "See the LICENSE file\0"
+            VALUE "LegalTrademarks", "See the LICENSE file\0"
+            VALUE "OriginalFilename", "OpenDDS_InfoRepoDiscovery.DLL\0"
+            VALUE "ProductName", "OpenDDS\0"
+            VALUE "ProductVersion", DDS_VERSION "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

@@ -1,0 +1,42 @@
+struct A {
+  string s;
+  long l;
+};
+
+typedef short ShortArray[3];
+typedef ShortArray ArrayOfShortArray[4];
+typedef sequence<A> StructSeq;
+enum MyEnum {b, d, as, sa, ss, other1, other2};
+
+union MyUnion switch (MyEnum) {
+case b: boolean u_b;
+case d: double u_d;
+case as: A u_as;
+case sa: ShortArray u_sa;
+case ss: StructSeq u_ss;
+default: float u_f;
+};
+
+// The complex types above appear as fields in the two structs below.
+// Each field should be able to be assigned from Source to the corresponding
+// field in Target using the MetaStruct infrastructure from the opendds_idl
+// compiler.  This is what the MultiTopic implementation uses to construct
+// samples of the resulting topic's type (i.e. Target).
+
+struct Source {
+  A rhs_a;
+  ShortArray rhs_sa;
+  ArrayOfShortArray rhs_asa;
+  StructSeq rhs_ss;
+  MyEnum rhs_e;
+  MyUnion rhs_u;
+};
+
+struct Target {
+  A lhs_a;
+  ShortArray lhs_sa;
+  ArrayOfShortArray lhs_asa;
+  StructSeq lhs_ss;
+  MyEnum lhs_e;
+  MyUnion lhs_u;
+};

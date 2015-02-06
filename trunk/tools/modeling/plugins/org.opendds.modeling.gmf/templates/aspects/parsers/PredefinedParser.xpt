@@ -1,0 +1,140 @@
+«REM»Add support for display and input of infinity for Integers«ENDREM»
+
+«EXTENSION impl::parsers::i18n»
+
+
+«AROUND parser_getEditStringMethod FOR gmfgen::PredefinedParser-»
+	«EXPAND xpt::Common::generatedMemberComment»
+	public String getEditString(org.eclipse.core.runtime.IAdaptable adapter, int flags) {
+«IF viewMethod = gmfgen::LabelTextAccessMethod::MESSAGE_FORMAT-»
+		org.eclipse.emf.ecore.EObject element =	(org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+«REM»Custom modifications begin«ENDREM-»
+		Object[] values = getEditableValues(element);
+		numbersToSymbols(values);
+		return getEditorProcessor().format(values, new StringBuffer(), new java.text.FieldPosition(0)).toString();
+«REM»Custom modifications end«ENDREM-»
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::PRINTF-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+		String pattern = getEditorPattern() == null ? getDefaultEditablePattern() : getEditorPattern();
+		return String.format(pattern, getEditableValues(element));
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::REGEXP-»
+		return "";«EXPAND xpt::Common::nonNLS»
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::NATIVE-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+		String s = org.eclipse.emf.ecore.util.EcoreUtil.convertToString(editableFeatures[0].getEAttributeType(), element.eGet(editableFeatures[0]));
+		return s != null ? s : "";«EXPAND xpt::Common::nonNLS»
+«ENDIF-»
+	}
+«ENDAROUND»
+
+«AROUND parser_getPrintStringMethod FOR gmfgen::PredefinedParser-»
+	«EXPAND xpt::Common::generatedMemberComment»
+	public String getPrintString(org.eclipse.core.runtime.IAdaptable adapter, int flags) {
+«IF viewMethod = gmfgen::LabelTextAccessMethod::MESSAGE_FORMAT-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+«REM»Custom modifications begin«ENDREM-»
+		Object[] values = getValues(element);
+		numbersToSymbols(values);
+		return getViewProcessor().format(values, new StringBuffer(), new java.text.FieldPosition(0)).toString();
+«REM»Custom modifications end«ENDREM-»
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::PRINTF-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+		return String.format(getViewPattern() == null ? getDefaultPattern() : getViewPattern(), getValues(element));
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::REGEXP-»
+		return "";«EXPAND xpt::Common::nonNLS»
+«ELSEIF viewMethod = gmfgen::LabelTextAccessMethod::NATIVE-»
+		org.eclipse.emf.ecore.EObject element = (org.eclipse.emf.ecore.EObject) adapter.getAdapter(org.eclipse.emf.ecore.EObject.class);
+		String s = org.eclipse.emf.ecore.util.EcoreUtil.convertToString(features[0].getEAttributeType(), element.eGet(features[0]));
+		return s != null ? s : "";«EXPAND xpt::Common::nonNLS»
+«ENDIF-»
+	}
+«ENDAROUND»
+
+«AROUND parser_getParseCommandMethod FOR gmfgen::PredefinedParser-»
+	«EXPAND xpt::Common::generatedMemberComment»
+	public org.eclipse.gmf.runtime.common.core.command.ICommand getParseCommand(org.eclipse.core.runtime.IAdaptable adapter, String newString, int flags) {
+«IF editMethod = gmfgen::LabelTextAccessMethod::MESSAGE_FORMAT-»
+		Object[] values = getEditProcessor().parse(newString, new java.text.ParsePosition(0));
+«REM»Custom modifications begin«ENDREM-»
+		symbolsToNumbers(values);
+«REM»Custom modifications end«ENDREM-»
+		return getParseCommand(adapter, values, flags);
+«ELSEIF editMethod = gmfgen::LabelTextAccessMethod::PRINTF-»
+		return org.eclipse.gmf.runtime.common.core.command.UnexecutableCommand.INSTANCE;
+«ELSEIF editMethod = gmfgen::LabelTextAccessMethod::REGEXP-»
+		if (newString == null) {
+			return org.eclipse.gmf.runtime.common.core.command.UnexecutableCommand.INSTANCE;
+		}
+		Object[] values = newString.split(getEditPattern());
+		return super.getParseCommand(adapter, values, flags);
+«ELSEIF editMethod = gmfgen::LabelTextAccessMethod::NATIVE-»
+		Object value = org.eclipse.emf.ecore.util.EcoreUtil.createFromString(editableFeatures[0].getEAttributeType(), newString);
+		return getParseCommand(adapter, new Object[] { value }, flags);
+«ENDIF-»
+	}
+«ENDAROUND»
+
+«AROUND parser_isValidEditStringMethod FOR gmfgen::PredefinedParser-»
+	«EXPAND xpt::Common::generatedMemberComment»
+	public org.eclipse.gmf.runtime.common.ui.services.parser.IParserEditStatus isValidEditString(org.eclipse.core.runtime.IAdaptable adapter, String editString) {
+«IF editMethod = gmfgen::LabelTextAccessMethod::MESSAGE_FORMAT-»
+		java.text.ParsePosition pos = new java.text.ParsePosition(0);
+		Object[] values = getEditProcessor().parse(editString, pos);
+		if (values == null) {
+			return new org.eclipse.gmf.runtime.common.ui.services.parser.ParserEditStatus(
+					«holder.editorGen.plugin.getActivatorQualifiedClassName()».ID,
+					org.eclipse.gmf.runtime.common.ui.services.parser.IParserEditStatus.UNEDITABLE,
+					org.eclipse.osgi.util.NLS.bind(
+							«EXPAND xpt::Externalizer::accessorCall(i18nKeyForMessageFormatParserInvalidInputError()) FOR holder.editorGen»,
+							new Integer(pos.getErrorIndex())));
+		}
+«REM»Custom modifications begin«ENDREM-»
+		symbolsToNumbers(values);
+«REM»Custom modifications end«ENDREM-»
+		return validateNewValues(values);
+«ELSEIF editMethod = gmfgen::LabelTextAccessMethod::PRINTF-»
+		return org.eclipse.gmf.runtime.common.ui.services.parser.ParserEditStatus.UNEDITABLE_STATUS;
+«ELSEIF editMethod = gmfgen::LabelTextAccessMethod::REGEXP-»
+		if (editString == null) {
+			return org.eclipse.gmf.runtime.common.ui.services.parser.ParserEditStatus.UNEDITABLE_STATUS;
+		}
+		Object[] values = editString.split(getEditPattern());
+		return validateNewValues(values);
+«ELSEIF editMethod = gmfgen::LabelTextAccessMethod::NATIVE-»
+		return org.eclipse.gmf.runtime.common.ui.services.parser.ParserEditStatus.EDITABLE_STATUS;
+«ENDIF-»
+	}
+«ENDAROUND»
+«AROUND additions FOR gmfgen::PredefinedParser-»
+	«EXPAND xpt::Common::generatedMemberComment»
+	private void numbersToSymbols(Object[] values) {
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] instanceof Integer) {
+				int val = (Integer) values[i];
+				if (val == Integer.MAX_VALUE) {
+					values[i] = "Infinity";
+				}
+			} else if (values[i] instanceof Long) {
+				long val = (Long) values[i];
+				if (val == Integer.MAX_VALUE) {
+					values[i] = "Infinity";
+				}
+			}
+		}
+	}
+
+	«EXPAND xpt::Common::generatedMemberComment»
+	private void symbolsToNumbers(Object[] values) {
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] instanceof String) {
+				String s = (String) values[i];
+				if (s.length() > 2 && s.substring(0, 3).equalsIgnoreCase("inf")) {
+					values[i] = Integer.MAX_VALUE;
+				}
+			}
+		}
+	}
+	
+
+«ENDAROUND»
+

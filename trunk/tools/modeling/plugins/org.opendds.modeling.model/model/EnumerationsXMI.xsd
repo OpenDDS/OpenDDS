@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:enumerations="http://www.opendds.org/modeling/schemas/Enumerations/1.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.opendds.org/modeling/schemas/Enumerations/1.0">
+  <xsd:import namespace="http://www.omg.org/XMI" schemaLocation="platform:/plugin/org.eclipse.emf.ecore/model/XMI.xsd"/>
+  <xsd:simpleType name="ReliabilityQosPolicyKind">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="BEST_EFFORT"/>
+      <xsd:enumeration value="RELIABLE"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="PresentationQosPolicyAccessScopeKind">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="INSTANCE"/>
+      <xsd:enumeration value="TOPIC"/>
+      <xsd:enumeration value="GROUP"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="OwnershipQosPolicyKind">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="SHARED"/>
+      <xsd:enumeration value="EXCLUSIVE"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="LivelinessQosPolicyKind">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="AUTOMATIC"/>
+      <xsd:enumeration value="MANUAL_BY_PARTICIPANT"/>
+      <xsd:enumeration value="MANUAL_BY_TOPIC"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="DurabilityQosPolicyKind">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="TRANSIENT"/>
+      <xsd:enumeration value="TRANSIENT_LOCAL"/>
+      <xsd:enumeration value="VOLATILE"/>
+      <xsd:enumeration value="PERSISTENT"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="DestinationOrderQosPolicyKind">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="BY_RECEPTION_TIMESTAMP"/>
+      <xsd:enumeration value="BY_SOURCE_TIMESTAMP"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:simpleType name="HistoryQosPolicyKind">
+    <xsd:restriction base="xsd:NCName">
+      <xsd:enumeration value="KEEP_LAST"/>
+      <xsd:enumeration value="KEEP_ALL"/>
+    </xsd:restriction>
+  </xsd:simpleType>
+  <xsd:complexType name="Period">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="nanosecond" type="xsd:long"/>
+    <xsd:attribute name="second" type="xsd:int"/>
+  </xsd:complexType>
+  <xsd:element name="Period" type="enumerations:Period"/>
+</xsd:schema>

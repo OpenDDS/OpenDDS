@@ -1,0 +1,9 @@
+run_test.pl
+
+  - start the DCPSInfo server.
+
+    ../../../../DDS/DCPSInfoRepo -o repo.ior -d domain_ids
+
+  - start the unittest client with the orb initialized by the Service_Participant.
+
+    DdsDcps_UnitTest -DCPSInfoRepo file://$iorfile

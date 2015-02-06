@@ -1,0 +1,464 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:generator="http://www.opendds.org/modeling/schemas/Generator/1.0" xmlns:xmi="http://www.omg.org/XMI" targetNamespace="http://www.opendds.org/modeling/schemas/Generator/1.0">
+  <xsd:import namespace="http://www.omg.org/XMI" schemaLocation="XMI.xsd"/>
+  <xsd:complexType name="CodeGen">
+    <xsd:complexContent>
+      <xsd:extension base="generator:genspec"/>
+    </xsd:complexContent>
+  </xsd:complexType>
+  <xsd:element name="CodeGen" type="generator:CodeGen"/>
+  <xsd:complexType name="genspec">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="source" type="generator:ModelFile"/>
+      <xsd:element name="target" type="generator:TargetDir"/>
+      <xsd:element name="instances" type="generator:Instances"/>
+      <xsd:element name="searchPaths" type="generator:SearchPaths"/>
+      <xsd:element name="transports" type="generator:Transports"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ModelFile">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TargetDir">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="SearchPaths">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="searchLocation" type="generator:SearchLocation"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="SearchLocation">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="variable" type="generator:LocationVariable"/>
+      <xsd:element name="path" type="generator:LocationPath"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="LocationVariable">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:string"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="LocationPath">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:string"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="Instances">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="instance" type="generator:Instance"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="Instance">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="config" type="generator:TransportConfig"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="name" type="xsd:string" use="required"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="SwapBytes">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:boolean"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="QueueMessagesPerPool">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="QueueInitialPool">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="MaxPacketSize">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="MaxSamplesPerPacket">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="OptimumPacketSize">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ThreadPerConnection">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:boolean"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="DatalinkReleaseDelay">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="DatalinkControlChunks">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="LocalAddressString">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:string"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="EnableNagleAlgorithm">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:boolean"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ConnRetryInitialDelay">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ConnRetryBackoffMultiplier">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:float"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="ConnRetryAttempts">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="MaxOutputPausePeriod">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="PassiveReconnectDuration">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="PassiveConnectDuration">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="DefaultToIPv6">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:boolean"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="PortOffset">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="GroupAddress">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:string"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="Reliable">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:boolean"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="SynBackoff">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:float"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="SynInterval">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="SynTimeout">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="NakDepth">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="NakInterval">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="NakMax">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="NakTimeout">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TTL">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="RcvBufferSIze">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="value" type="xsd:int"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TransportConfig">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="transportRef" type="generator:TransportRef"/>
+      <xsd:element name="passive_connect_duration" type="generator:PassiveConnectDuration"/>
+      <xsd:element name="swap_bytes" type="generator:SwapBytes"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="name" type="xsd:string"/>
+  </xsd:complexType>
+  
+  <xsd:complexType abstract="true" name="TransportInst">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="queue_messages_per_pool" type="generator:QueueMessagesPerPool"/>
+      <xsd:element name="queue_initial_pools" type="generator:QueueInitialPool"/>
+      <xsd:element name="max_packet_size" type="generator:MaxPacketSize"/>
+      <xsd:element name="max_samples_per_packet" type="generator:MaxSamplesPerPacket"/>
+      <xsd:element name="optimum_packet_size" type="generator:OptimumPacketSize"/>
+      <xsd:element name="thread_per_connection" type="generator:ThreadPerConnection"/>
+      <xsd:element name="datalink_release_delay" type="generator:DatalinkReleaseDelay"/>
+      <xsd:element name="datalink_control_chunks" type="generator:DatalinkControlChunks"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="name" type="xsd:string"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="UdpTransport">
+    <xsd:complexContent>
+      <xsd:extension base="generator:TransportInst">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="local_address_str" type="generator:LocalAddressString"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TcpTransport">
+    <xsd:complexContent>
+      <xsd:extension base="generator:TransportInst">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="local_address_str" type="generator:LocalAddressString"/>
+          <xsd:element name="enable_nagle_algorithm" type="generator:EnableNagleAlgorithm"/>
+          <xsd:element name="conn_retry_initial_delay" type="generator:ConnRetryInitialDelay"/>
+          <xsd:element name="conn_retry_backoff_multiplier" type="generator:ConnRetryBackoffMultiplier"/>
+          <xsd:element name="conn_retry_attempts" type="generator:ConnRetryAttempts"/>
+          <xsd:element name="max_output_pause_period" type="generator:MaxOutputPausePeriod"/>
+          <xsd:element name="passive_reconnect_duration" type="generator:PassiveReconnectDuration"/>
+        </xsd:choice>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="MulticastTransport">
+    <xsd:complexContent>
+      <xsd:extension base="generator:TransportInst">
+        <xsd:choice maxOccurs="unbounded" minOccurs="0">
+          <xsd:element name="default_to_ipv6" type="generator:DefaultToIPv6"/>
+          <xsd:element name="port_offset" type="generator:PortOffset"/>
+          <xsd:element name="group_address" type="generator:GroupAddress"/>
+          <xsd:element name="reliable" type="generator:Reliable"/>
+          <xsd:element name="syn_backoff" type="generator:SynBackoff"/>
+          <xsd:element name="syn_interval" type="generator:SynInterval"/>
+          <xsd:element name="syn_timeout" type="generator:SynTimeout"/>
+          <xsd:element name="nak_depth" type="generator:NakDepth"/>
+          <xsd:element name="nak_interval" type="generator:NakInterval"/>
+          <xsd:element name="nak_max" type="generator:NakMax"/>
+          <xsd:element name="nak_timeout" type="generator:NakTimeout"/>
+          <xsd:element name="ttl" type="generator:TTL"/>
+          <xsd:element name="rcv_buffer_size" type="generator:RcvBufferSIze"/>
+        </xsd:choice>
+        <xsd:attribute name="nak_max" type="xsd:string"/>
+      </xsd:extension>
+    </xsd:complexContent>
+  </xsd:complexType>
+  
+  <xsd:complexType name="Transports">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="transport" type="generator:TransportInst"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+  </xsd:complexType>
+  
+  <xsd:complexType name="TransportRef">
+    <xsd:choice maxOccurs="unbounded" minOccurs="0">
+      <xsd:element name="transport" type="generator:TransportInst"/>
+      <xsd:element ref="xmi:Extension"/>
+    </xsd:choice>
+    <xsd:attribute ref="xmi:id"/>
+    <xsd:attributeGroup ref="xmi:ObjectAttribs"/>
+    <xsd:attribute name="transport" type="xsd:string"/>
+  </xsd:complexType>
+  
+</xsd:schema>

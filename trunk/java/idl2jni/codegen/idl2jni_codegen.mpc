@@ -1,0 +1,24 @@
+project: aceexe, crosscompile, dds_macros {
+
+  exename   = idl2jni
+  exeout    = $(DDS_ROOT)/bin
+
+  requires += java
+  after    += TAO_IDL_FE
+  libs     += TAO_IDL_FE
+  includes += . $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)/TAO_IDL/fe $(TAO_ROOT)
+
+  verbatim(gnuace, local) {
+    ifeq ($(TAO_IDL_PREPROCESSOR),)
+      ifeq ($(ACE_CC_PREPROCESSOR),)
+        CPPFLAGS += -DTAO_IDL_PREPROCESSOR=\\\"$(strip $(CXX))\\\"
+      else
+        CPPFLAGS += -DACE_CC_PREPROCESSOR=\\\"$(ACE_CC_PREPROCESSOR)\\\"
+      endif
+    else
+      CPPFLAGS += -DTAO_IDL_PREPROCESSOR=\\\"$(TAO_IDL_PREPROCESSOR)\\\"
+    endif
+    idl_stubs: all
+  }
+
+}

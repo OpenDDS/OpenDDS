@@ -1,0 +1,10 @@
+#pragma DCPS_DATA_TYPE "N::DDS::G::S"
+module N {
+  module DDS {
+    module G {
+      struct S {
+        long num;
+      };
+    };
+  };
+};

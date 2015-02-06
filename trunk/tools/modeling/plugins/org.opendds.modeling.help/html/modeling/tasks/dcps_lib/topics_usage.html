@@ -1,0 +1,57 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=us-ascii">
+
+  <title>Working with Topics</title>
+  <link rel="stylesheet" type="text/css" href=
+  "../../../styles.css">
+</head>
+
+<body>
+  <h2>Working with Topics</h2>
+
+  <p>A Dcpslib should define at least one Topic or reference a Topic
+  defined in another DcpsLib.</p>
+  
+  <p>A Topic
+  can be created by selecting topic from the palette. Alternative, a Topic defined
+  in another DcpsLib can be referenced. This avoids needing to duplicate a Topic in
+  multiple DcpsLibs. To place a Topic from another
+  DcpsLib onto the current diagram:</p>
+  <ol>
+  	<li>In the Project Explorer view, expand the .opendds
+  	file associated with the .opendds_diagram file and select the Topic to share.</li>
+  	<li>Drag the Topic onto the canvas.</li>
+  </ol>
+  <p>These steps are illustrated below:</p>
+  <img src="../../images/dcpslib_topic_shared.png">
+  
+  <p>You can now link to this Topic as if it were defined within the original DcpsLib.</p>
+
+  <p>A Struct needs to be specified for the Topic's DataType. To
+  pick from the allowed Structs, right click on the Topic to bring
+  up the context menu. Pick "Select DataType" to bring up a dialog
+  showing all the allowable Structs that you can pick from.</p>
+
+  <p>See
+  <a href="datareaderwriter_topic_connection.html">Connecting DataReader/DataWriter to Topics</a>
+  for the steps on connecting a DataReader/DataWriter to your Topic/ContentFilteredTopic/MultiTopic.</p>
+
+  <h3>ContentFilteredTopic</h3>
+
+  <p>A DataReader can optionally connect to a ContentFilteredTopic.
+  Each ContentFilteredTopic must be connected to a Topic. Similar
+  to a Topic, a ContentFilteredTopic must have a Struct specified
+  for its DataType.</p>
+
+  <h3>MultiTopic</h3>
+
+  <p>A DataReader can optionally connect to a MultiTopic. Similar
+  to a Topic, a ContentFilteredTopic must have a Struct specified
+  for its DataType.</p>
+</body>
+</html>

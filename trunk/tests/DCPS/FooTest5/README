@@ -1,0 +1,49 @@
+A basic system feature test:
+
+
+
+1) Single datawriter and single datareader test cases:
+
+  run_test.pl          - single instance, TCP
+
+  run_test.pl udp      - single instance, UDP
+
+  run_test.pl mi       - multiple instances, TCP
+
+  run_test.pl udp mi   - multiple instances, UDP
+
+  run_test.pl nokey mi - no key, TCP
+
+    Note: No key tests just have one instance.
+          We pass "mi" for using the same parameters as in multiple
+          instances test.
+
+  run_test.pl nokey udp mi  - no key, UDP
+
+
+  run_test.pl blocking          - long timeout of writes, TCP
+
+  run_test.pl blocking_timeout  - short timeout of writes, TCP
+
+
+2) Multiple datawriter and multiple datareader test cases:
+
+
+  run_test.pl mwmr  - two datawriters and two datareaders, TCP
+
+  run_test.pl mwmr_long_seq   - Foo type contain a 256 float sequence,
+                                two datawriters, two datareaders, TCP
+
+  run_test.pl mixed_trans      - Two datawriters - one using TCP,
+                                                  one using UDP.
+                                Two datareaders - one using TCP,
+                                                  one using UDP.
+
+
+Note: This test can optionally use the MCast transport.
+
+  run_test.pl mcast
+
+ The test is statically linked with the MCast transport library and static
+ initialization happens at process initialization (as opposed to run-time
+ dynamic linking & initialization).

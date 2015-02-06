@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="types"
+    nsURI="http://www.opendds.org/modeling/schemas/Types/1.0" nsPrefix="types">
+  <eClassifiers xsi:type="ecore:EClass" name="Array" eSuperTypes="#//Collection">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subtype" lowerBound="1"
+        eType="#//Type"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Boolean" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Branch" eSuperTypes="Core.ecore#//Element">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="field" lowerBound="1" eType="#//Field"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cases" lowerBound="1" upperBound="-1"
+        eType="#//Case" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Case" eSuperTypes="Core.ecore#//Element">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="literal" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Char" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Collection" abstract="true" eSuperTypes="#//Type">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="length" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Double" eSuperTypes="#//FloatingPoint"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Enum" eSuperTypes="#//Simple">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="literals" upperBound="-1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Field" eSuperTypes="Core.ecore#//Element">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//Type"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Float" eSuperTypes="#//FloatingPoint"/>
+  <eClassifiers xsi:type="ecore:EClass" name="FloatingPoint" abstract="true" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Int" abstract="true" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Key" eSuperTypes="Core.ecore#//Element">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="field" lowerBound="1" eType="#//Field"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Long" eSuperTypes="#//SignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="LongDouble" eSuperTypes="#//FloatingPoint"/>
+  <eClassifiers xsi:type="ecore:EClass" name="LongLong" eSuperTypes="#//SignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Octet" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Sequence" eSuperTypes="#//Collection">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subtype" lowerBound="1"
+        eType="#//Type"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Short" eSuperTypes="#//SignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="SignedInt" abstract="true" eSuperTypes="#//Int"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Simple" abstract="true" eSuperTypes="#//Type"/>
+  <eClassifiers xsi:type="ecore:EClass" name="String" eSuperTypes="#//Collection"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Struct" eSuperTypes="#//Type">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="fields" lowerBound="1"
+        upperBound="-1" eType="#//Field" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="keys" ordered="false" upperBound="-1"
+        eType="#//Key" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="isDcpsDataType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Type" abstract="true" eSuperTypes="Core.ecore#//Element"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Typedef" eSuperTypes="#//Type">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" lowerBound="1" eType="#//Type"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ULong" eSuperTypes="#//UnsignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ULongLong" eSuperTypes="#//UnsignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="UShort" eSuperTypes="#//UnsignedInt"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Union" eSuperTypes="#//Type">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="branches" lowerBound="1"
+        upperBound="-1" eType="#//Branch" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="switch" lowerBound="1"
+        eType="#//Type"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="default" eType="#//Field"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="UnsignedInt" abstract="true" eSuperTypes="#//Int"/>
+  <eClassifiers xsi:type="ecore:EClass" name="WChar" eSuperTypes="#//Simple"/>
+  <eClassifiers xsi:type="ecore:EClass" name="WString" eSuperTypes="#//Collection"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DataLib" eSuperTypes="OpenDDS.ecore#//OpenDDSLib">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
+        eType="#//Type" containment="true"/>
+  </eClassifiers>
+</ecore:EPackage>

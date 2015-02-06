@@ -1,0 +1,200 @@
+
+Instance handles:
+
+  "local identifiers for objects that live within the global data space."
+
+This is a good working definition and covers all of the cases which
+need to be handled by the opaque handle values.  The global data space
+in this case consists of the entire reachable DDS service; both local
+and remote service entities.
+
+The following methods and data structures use the InstanceHandle_t
+opaque value:
+
+  DDS::Entity
+    Returns handle value:
+      InstanceHandle_t = get_instance_handle()
+
+  DDS::DomainParticipant
+    Returns handle value:
+      get_discovered_participants(inout: InstanceHandle_t)
+      get_discovered_topics(inout: InstanceHandle_t)
+
+    Requires handle value:
+      ignore_participant(InstanceHandle_t)
+      ignore_topic(InstanceHandle_t)
+      ignore_publication(InstanceHandle_t)
+      ignore_subscription(InstanceHandle_t)
+      get_discovered_participant_data(..., InstanceHandle_t)
+      get_discovered_topic_data(..., InstanceHandle_t)
+      contains_entity(InstanceHandle_t)
+
+  DDS::DataWriter
+    Returns handle value:
+      InstanceHandle_t = register_instance(...)
+      InstanceHandle_t = register_instance_w_timestamp(...)
+      InstanceHandle_t = lookup_instance(...)
+      get_matched_subscriptions(inout: InstanceHandle_t)
+
+    Requires handle value:
+      unregister_instance(..., InstanceHandle_t)
+      unregister_instance_w_timestamp(..., InstanceHandle_t, ...)
+      get_key_value(..., InstanceHandle_t)
+      write(..., InstanceHandle_t)
+      write_w_timestamp(..., InstanceHandle_t, ...)
+      dispose(..., InstanceHandle_t)
+      dispose_w_timestamp(..., InstanceHandle_t, ...)
+      get_matched_subscription_data(..., InstanceHandle_t)
+
+  DDS::DataReader
+    Returns handle value:
+      InstanceHandle_t = lookup_instance(...)
+      get_matched_publications(inout: InstanceHandle_t)
+
+    Requires handle value:
+      read_instance(..., InstanceHandle_t, ...)
+      take_instance(..., InstanceHandle_t, ...)
+      read_next_instance(..., InstanceHandle_t, ...)
+      take_next_instance(..., InstanceHandle_t, ...)
+      read_next_instance_w_condition(..., InstanceHandle_t, ...)
+      take_next_instance_w_condition(..., InstanceHandle_t, ...)
+      get_key_value(..., InstanceHandle_t)
+      get_matched_publication_data(..., InstanceHandle_t)
+
+  DDS::SampleInfo
+    instance_handle publication_handle
+
+  DDS::LivelinessChangedStatus
+    last_publication_handle
+
+  DDS::OfferedDeadlineMissedStatus
+    last_instance_handle
+
+  DDS::RequestedDeadlineMissedStatus
+    last_instance_handle
+
+  DDS::SampleRejectedStatus
+    last_instance_handle
+
+  DDS::PublicationMatchedStatus
+    last_subscription_handle
+
+  DDS::SubscriptionMatchedStatus
+    last_publication_handle
+
+For the DataWriter and DataReader, InstanceHandle_t values
+represent a specific key value for that writer or reader.  For the
+Entity::get_instance_handle() and DomainParticipant::contains_entity()
+methods, the InstanceHandle_t value represents a local Entity within
+the scope of the DomainParticipant.
+
+NOTE: Even though there is no inheritance from Entity shown for DataReader
+      and DataWriter in the specification, the IDL included there for
+      the PSM clearly shows this relationship, so these are considered
+      Entities.
+
+For the SampleInfo and various Status variable fields, the
+InstanceHandle_t values represent either a DataReader key value
+(instance_handle, last_instance_handle) or an Entity within the entire
+reachable DDS service (publication_handle, last_publication_handle,
+last_subscription_handle).
+
+The DDS specification, formal/07-01-01 version 1.2, clearly links the
+two different uses of these handles:
+
+  7.1.2.2.1.31 contains_entity
+  ...
+  The instance handle for an Entity may be obtained from built-in
+  topic data, from various statuses, or from the Entity operation
+  get_instance_handle.
+
+This means that an application should be able to read a Builtin Topic
+sample, determine its SampleInfo::instance_handle, and use that in a
+call to any of the API methods that require an instance handle.  If that
+handle is not suitable for that call, the method implementation should
+reject its use by returning the RETCODE_BAD_PARAMETER status code.
+
+Synthesizing the above information we see that the scope of any individual
+InstanceHandle_t value is within at least a single DomainParticipant
+and that values obtained via get_instance_handle() or from SampleInfo
+or reader or writer methods need to be consistent and match where they
+refer to the same Entity or data key value.
+
+The handle values for a unique data key value used to identify instances
+in readers and writers are usable only in the reader or writer from which
+the handle was obtained.  For example, if a writer is used to register a
+sample with a key value and returns an instance handle representing that
+instance, that handle is only valid within the scope of that writer.
+To access the same unique data key value from a reader, or any other
+writer, a lookup_instance() call can be made to find the handle value
+valid within that reader or writer.
+
+OpenDDS generates all InstanceHandle_t values within the scope of a
+containing DomainParticipant Entity.  Each contained Entity and unique
+data key value instance in each writer and reader will have a unique
+value within the participant.
+
+Values representing Entities obtained from the data sample key values,
+a DataWriter or DataReader lookup_instance() call, from a DataReader
+SampleInfo value, or from a Communication Status variable field value,
+must correspond to the Entity get_instance_handle() value obtained from
+the corresponding Entity where it is available in the same scope (that is,
+the Entity referred to is contained within the same DomainParticipant).
+
+The specification suggests, but does not require, that the type of the
+opaque handle values be a CORBA::Long.  OpenDDS follows this suggestion.
+
+A consequence of maintaining the handle values as unique within a
+participant is that the total number of Entities plus data instances in
+all readers and writers may not exceed the maximum allowed value of the
+handle type.  For OpenDDS this is a 32 bit value.  Note that this
+includes all values generated, even if they are no longer actively
+participating in the operation of the middleware (disposed instances,
+destroyed Entities).  OpenDDS does not currently implement a value reuse
+mechanism once the handle value type saturates.
+
+The following methods are part of the instance handle management
+implementation of OpenDDS:
+
+  InstanceHandleGenerator
+    - Class provides the Sequence implementation used to generate
+      unique handle values.
+
+  DomainParticipantImpl::participant_handles_
+    - Object of InstanceHandleGenerator used as the generating Sequence
+      for handles.
+
+  DomainParticipantImpl::handles_,handles_protector_
+    - Mapping of GUID_t values to instance handles and lock for guarding
+      access to the container.
+
+  InstanceHandle_t = DomainParticipant::get_handle(GUID_t)
+    - If the GUID_t value represents and Entity, an index is searched for
+      that Entity and any existing handle value returned.  Otherwise a
+      unique new handle value is generated.  The new value is stored in
+      the index if it represents an Entity.
+
+  InstanceHandle_t = DataWriterImpl::get_next_instance()
+    - Obtains a handle value for unique data key value instances as they
+      are created.
+
+  InstanceHandle_t = DataReaderImpl::get_next_handle(BuiltinTopicKey_t)
+    - If the reader is for a BuiltinTopic Topic, then a handle is
+      obtained representing the Entity described in the sample with the
+      given key value.  Otherwise a unique new handle value is generated.
+
+  BuiltinTopicKey_t = keyFromSample<T>(T* sample)
+    - Template function to extract BuiltinTopicKey_t values from
+      BuiltinTopic data samples.
+
+Instance handles, BIT Keys, and GUIDs (aka RepoIds) are all related:
+- Starting from an Instance Handle:
+  - Convert to a GUID using DomainParticipantImpl::get_repoid()
+  - Convert to a BIT Key using BIT_Helper_1 or the BIT Data Reader
+- Starting from a GUID (aka RepoId):
+  - Convert to an Instance Handle using DomainParticipantImpl::get_handle()
+  - Direct conversion to a BIT Key is not supported (first get the handle)
+- Starting from a BIT Key:
+  - Convert to a GUID using Discovery::bit_key_to_repo_id()
+    - The relevant Discovery object can be obtained from TheServiceParticipant
+  - Convert to an Instance Handle using the BIT Data Reader

@@ -1,0 +1,17 @@
+
+#include "FooDef.idl"
+
+module Xyz {
+
+#pragma DCPS_DATA_TYPE "Xyz::Baz"
+
+  // Example user defined "Baz" structure
+  // This struct will result in a type support implementation that has no
+  // references to basic types so the only place to include the <cstring>
+  // header is the CL_STRUCTURE metaclass generator branch.
+  struct Baz {
+    Bar    a_struct_value;
+  };
+
+};
+

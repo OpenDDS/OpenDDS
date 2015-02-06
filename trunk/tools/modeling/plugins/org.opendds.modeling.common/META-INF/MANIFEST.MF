@@ -1,0 +1,22 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OpenDDS Modeling SDK
+Bundle-SymbolicName: org.opendds.modeling.common;singleton:=true
+Bundle-Version: 3.6.0.qualifier
+Bundle-Vendor: Object Computing, Inc.
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.emf.common;visibility:=reexport,
+ org.eclipse.ui,
+ org.eclipse.emf.ecore,
+ org.eclipse.emf.edit,
+ org.eclipse.gef,
+ org.eclipse.gmf.runtime.common.core,
+ org.eclipse.gmf.runtime.common.ui,
+ org.eclipse.gmf.runtime.diagram.ui.properties,
+ org.opendds.modeling.model,
+ com.ociweb.emf.util
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Export-Package: org.opendds.modeling.common,
+ org.opendds.modeling.common.gmf
+Bundle-Activator: org.opendds.modeling.common.Plugin$Implementation

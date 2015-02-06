@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+"http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+<head>
+  <meta http-equiv="Content-Type" content=
+  "text/html; charset=UTF-8">
+
+  <title>LIVELINESS</title>
+  <link rel="stylesheet" type="text/css" href="QoS.css">
+  <link rel="stylesheet" type="text/css" href="../../styles.css">
+</head>
+
+<body>
+
+<H2 CLASS="Head3">
+<A NAME="pgfId-261810"></A>LIVELINESS</H2>
+<UL>
+<LI CLASS="BodyNoLead">
+<A NAME="pgfId-193030"></A>The <A NAME="marker-193026"></A>LIVELINESS policy applies to the <A NAME="marker-193027"></A>topic, <A NAME="marker-193028"></A>data reader, and <A NAME="marker-193029"></A>data writer entities via the <EM CLASS="Code">
+liveliness</EM>
+ member of their respective QoS structures. Setting this policy on a topic means it is in effect for all data readers and data writers on that topic. Below is the IDL related to the liveliness QoS policy:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-107868"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-112490"></A>enum LivelinessQosPolicyKind {</P>
+<P CLASS="Code">
+<A NAME="pgfId-107809"></A>  AUTOMATIC_LIVELINESS_QOS,</P>
+<P CLASS="Code">
+<A NAME="pgfId-107810"></A>  MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,</P>
+<P CLASS="Code">
+<A NAME="pgfId-107939"></A>  MANUAL_BY_TOPIC_LIVELINESS_QOS</P>
+<P CLASS="Code">
+<A NAME="pgfId-107812"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-107813"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-107814"></A>struct LivelinessQosPolicy {</P>
+<P CLASS="Code">
+<A NAME="pgfId-107815"></A>  LivelinessQosPolicyKind kind;</P>
+<P CLASS="Code">
+<A NAME="pgfId-107816"></A>  Duration_t lease_duration;</P>
+<P CLASS="Code">
+<A NAME="pgfId-107817"></A>};</P>
+<P CLASS="Code">
+<A NAME="pgfId-107889"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-149030"></A>The LIVELINESS policy controls when and how the service determines whether participants are alive, meaning they are still reachable and active. The <EM CLASS="Code">
+kind</EM>
+ member setting indicates whether liveliness is asserted automatically by the service or manually by the specified entity. A setting of <EM CLASS="Code">
+AUTOMATIC_LIVELINESS_QOS</EM>
+ means that the service will send a liveliness indication if the participant has not sent any network traffic for the <EM CLASS="Code">
+lease_duration</EM>
+. The <EM CLASS="Code">
+MANUAL_BY_PARTICIPANT_LIVELINESS_QOS</EM>
+ or <EM CLASS="Code">
+MANUAL_BY_TOPIC_LIVELINESS_QOS</EM>
+ setting means the specified entity (data writer for the “by topic” setting or domain participant for the “by participant” setting) must either write a sample or manually assert its liveliness within a specified heartbeat interval. The desired heartbeat interval is specified by the <EM CLASS="Code">
+lease_duration</EM>
+ member. The default lease duration is a pre-defined infinite value, which disables any liveliness testing.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-256517"></A>To manually assert liveliness without publishing a sample, the application must call the <EM CLASS="Code">
+assert_liveliness()</EM>
+ operation on the data writer (for the “by topic” setting) or on the domain participant (for the “by participant” setting) within the specified heartbeat interval.</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-256179"></A><A NAME="marker-190132"></A>Data writers specify (<EM CLASS="Emphasis">
+offer</EM>
+) their own liveliness criteria and <A NAME="marker-190133"></A>data readers specify (<EM CLASS="Emphasis">
+request</EM>
+) the desired liveliness of their writers. Writers that are not heard from within the lease duration (either by writing a sample or by asserting liveliness) cause a change in the <EM CLASS="Code">
+LIVELINESS_CHANGED_STATUS</EM>
+ communication status and notification to the application (e.g., by calling the data reader <A NAME="marker-190135"></A>listener’s <EM CLASS="Code">
+on_liveliness_changed()</EM>
+<A NAME="marker-190136"></A> callback operation or by signaling any related wait sets).</LI>
+<LI CLASS="Body">
+<A NAME="pgfId-192525"></A>This policy is considered during the establishment of associations between data writers and data readers. The value of both sides of the association must be compatible in order for an association to be established. Compatibility is determined by comparing the data reader’s requested liveliness with the data writer’s offered liveliness. Both the kind of liveliness (automatic, manual by topic, manual by participant) and the value of the lease duration are considered in determining compatibility. The writer’s offered kind of liveliness must be greater than or equal to the reader’s requested kind of liveliness. The liveliness kind values are ordered as follows:</LI>
+</UL>
+<P CLASS="Code">
+<A NAME="pgfId-256640"></A>&nbsp;</P>
+<P CLASS="Code">
+<A NAME="pgfId-256680"></A><EM CLASS="Code">
+MANUAL_BY_TOPIC_LIVELINESS_QOS &gt; MANUAL_BY_PARTICIPANT_LIVELINESS_QOS &gt; AUTOMATIC_LIVELINESS_QOS</EM>
+</P>
+<P CLASS="Code">
+<A NAME="pgfId-256687"></A>&nbsp;</P>
+<UL>
+<LI CLASS="Body">
+<A NAME="pgfId-256673"></A>In addition, the writer’s offered lease duration must be less than or equal to the reader’s requested lease duration. Both of these conditions must be met for the offered and requested liveliness policy settings to be considered compatible and the association established.</LI>
+</UL>

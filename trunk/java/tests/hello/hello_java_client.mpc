@@ -1,0 +1,26 @@
+project: idl2jni, conditional_idlflags {
+
+  idl2jniflags += -SS
+
+  IDL_Files {
+    gendir = .
+    $(TAO_ROOT)/tests/Hello/Test.idl
+  }
+
+  Idl2Jni_Files {
+    $(TAO_ROOT)/tests/Hello/Test.idl
+  }
+
+  specific {
+    jarname  = hello_java_client
+  }
+
+  // Older versions of Visual Studio will create the intermediate directories
+  // in all-lowercase, so we have to create them first to get the correct case.
+  specific(vc71, vc8) {
+    prebuild   += <%mkdir%> Test 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+    prebuild   += <%mkdir%> classes<%slash%>Test 2<%gt%> <%nul%> <%or%> <%cat%> <%nul%> <%gt%> <%nul%>
+  }
+
+  postclean += <%rm%> Test
+}

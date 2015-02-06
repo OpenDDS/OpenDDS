@@ -1,0 +1,16 @@
+
+#include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsTopic.idl"
+#include "dds/DdsDcpsTypeSupportExt.idl"
+
+
+// Implied IDL for type "Foo"
+// Example user defined structure
+#pragma DCPS_DATA_TYPE "Foo"
+#pragma DCPS_DATA_KEY "Foo key"
+struct Foo {
+  long key;  // the instance key
+  float x;
+  float y;
+  octet o77;
+};

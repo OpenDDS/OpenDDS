@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="dcps"
+    nsURI="http://www.opendds.org/modeling/schemas/DCPS/1.0" nsPrefix="dcps">
+  <eClassifiers xsi:type="ecore:EClass" name="Domain" eSuperTypes="Core.ecore#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="domainId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELong"
+        defaultValueLiteral="0">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="This is an extension to the DDS profile spec (ptc/2008-07-02) to allow a numeric ID to be associated with a domain as required by OpenDDS."/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DomainParticipant" eSuperTypes="Domain.ecore#//DomainEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="domain" lowerBound="1"
+        eType="#//Domain"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="publishers" upperBound="-1"
+        eType="#//Publisher" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subscribers" upperBound="-1"
+        eType="#//Subscriber" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="entity_factory" eType="ecore:EClass QoS.ecore#//EntityFactoryQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="user_data" eType="ecore:EClass QoS.ecore#//UserDataQosPolicy"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PublisherSubscriber" abstract="true"
+      eSuperTypes="Domain.ecore#//DomainEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="entity_factory" eType="ecore:EClass QoS.ecore#//EntityFactoryQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="group_data" eType="ecore:EClass QoS.ecore#//GroupDataQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="presentation" eType="ecore:EClass QoS.ecore#//PresentationQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="partition" eType="ecore:EClass QoS.ecore#//PartitionQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="transportId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        defaultValueLiteral="-1">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="An OpenDDS extension used to bind a publisher and subscriber with a particular OpenDDS transport implementation. "/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Subscriber" eSuperTypes="#//PublisherSubscriber">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="readers" lowerBound="1"
+        upperBound="-1" eType="#//DataReader" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Publisher" eSuperTypes="#//PublisherSubscriber">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="writers" lowerBound="1"
+        upperBound="-1" eType="#//DataWriter" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataReaderWriter" abstract="true" eSuperTypes="Domain.ecore#//DomainEntity">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="deadline" eType="ecore:EClass QoS.ecore#//DeadlineQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="destination_order" eType="ecore:EClass QoS.ecore#//DestinationOrderQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="durability" eType="ecore:EClass QoS.ecore#//DurabilityQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="history" eType="ecore:EClass QoS.ecore#//HistoryQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="latency_budget" eType="ecore:EClass QoS.ecore#//LatencyBudgetQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="liveliness" eType="ecore:EClass QoS.ecore#//LivelinessQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ownership" eType="ecore:EClass QoS.ecore#//OwnershipQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reliability" eType="ecore:EClass QoS.ecore#//ReliabilityQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="resource_limits" eType="ecore:EClass QoS.ecore#//ResourceLimitsQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="user_data" eType="ecore:EClass QoS.ecore#//UserDataQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="copyFromTopicQos" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataReader" eSuperTypes="#//DataReaderWriter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="reader_data_lifecycle"
+        eType="ecore:EClass QoS.ecore#//ReaderDataLifecycleQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="time_based_filter" eType="ecore:EClass QoS.ecore#//TimeBasedFilterQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topic" lowerBound="1" eType="ecore:EClass Topics.ecore#//TopicDescription"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataWriter" eSuperTypes="#//DataReaderWriter">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="durability_service" eType="ecore:EClass QoS.ecore#//DurabilityServiceQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="ownership_strength" eType="ecore:EClass QoS.ecore#//OwnershipStrengthQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="transport_priority" eType="ecore:EClass QoS.ecore#//TransportPriorityQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="writer_data_lifecycle"
+        eType="ecore:EClass QoS.ecore#//WriterDataLifecycleQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="lifespan" eType="ecore:EClass QoS.ecore#//LifespanQosPolicy"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="topic" lowerBound="1" eType="ecore:EClass Topics.ecore#//Topic"/>
+  </eClassifiers>
+</ecore:EPackage>

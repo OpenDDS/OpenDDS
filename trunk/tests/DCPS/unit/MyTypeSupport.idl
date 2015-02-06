@@ -1,0 +1,8 @@
+
+#include "dds/DdsDcpsTypeSupportExt.idl"
+
+
+local interface MyTypeSupport : OpenDDS::DCPS::TypeSupport {
+};
+
+

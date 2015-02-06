@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmi:XMI xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:notation="http://www.eclipse.org/gmf/runtime/1.0.2/notation" xmlns:opendds="http://www.opendds.org/modeling/schemas/OpenDDS/1.0">
+  <notation:Diagram xmi:id="_U3ieIBHIEeCmp_ILxDaakg" type="OpenDDS" measurementUnit="Pixel">
+    <children xmi:type="notation:Shape" xmi:id="_U4I7EBHIEeCmp_ILxDaakg" type="2008" fontName="Sans">
+      <children xmi:type="notation:DecorationNode" xmi:id="_U4JiIBHIEeCmp_ILxDaakg" type="5014"/>
+      <children xmi:type="notation:DecorationNode" xmi:id="_U4JiIRHIEeCmp_ILxDaakg" type="5015"/>
+      <styles xmi:type="notation:HintedDiagramLinkStyle" xmi:id="_U4I7ERHIEeCmp_ILxDaakg" diagramLink="_WAPLkBHIEeCmp_ILxDaakg" hint="OpenDDS PolicyLib"/>
+      <element xmi:type="opendds:PolicyLib" href="NonDefaultPolicyLibTest.opendds#_U54321GNEd-D-nAsONlpcwOw"/>
+      <layoutConstraint xmi:type="notation:Bounds" xmi:id="_U4I7EhHIEeCmp_ILxDaakg"/>
+    </children>
+    <styles xmi:type="notation:DiagramStyle" xmi:id="_U3ieIRHIEeCmp_ILxDaakg"/>
+    <element xmi:type="opendds:OpenDDSModel" href="NonDefaultPolicyLibTest.opendds#_BD-5cKGNEd-D-tWBUFz8zw"/>
+  </notation:Diagram>
+  <notation:Diagram xmi:id="_WAPLkBHIEeCmp_ILxDaakg" type="OpenDDS PolicyLib" measurementUnit="Pixel">
+    <styles xmi:type="notation:DiagramStyle" xmi:id="_WAPyoBHIEeCmp_ILxDaakg"/>
+    <element xmi:type="opendds:PolicyLib" href="NonDefaultPolicyLibTest.opendds#_U54321GNEd-D-nAsONlpcwOw"/>
+  </notation:Diagram>
+</xmi:XMI>

@@ -1,0 +1,19 @@
+module Messenger {
+
+#pragma DCPS_DATA_TYPE "Messenger::Message"
+#pragma DCPS_DATA_KEY "Messenger::Message key"
+
+  enum X {
+    A, B, C
+  };
+
+  struct Nested {
+    X value;
+  };
+
+  struct Message {
+    long key;
+    string name;
+    Nested nest;
+  };
+};

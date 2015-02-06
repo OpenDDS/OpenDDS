@@ -1,0 +1,1966 @@
+Tue Jul  3 17:57:50 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * OpenDDS version 3.2 released.
+
+Tue Jul  3 16:40:32 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+
+          ACE::init() is now required since we don't call ORB_init() until
+          later (and only if it's needed).  Java programs don't have ACE_TMAIN
+          to provide the automatic ACE::init() for us.
+
+        * java/tests/builtintopics/run_test.pl:
+        * java/tests/complex_idl/run_test.pl:
+
+          Removed fixed port numbers in -ORBListenEndpoints.
+
+Tue Jul  3 14:24:35 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tools/modeling/features/org.opendds.modeling.feature/feature.xml:
+        * tools/modeling/features/org.opendds.modeling.site/site.xml:
+        * tools/modeling/plugins/com.ociweb.emf.util/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/com.ociweb.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.common/about.properties:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.datalib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.dcpslib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.main/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.diagram.policylib/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DataLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/DcpsLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/MainDiagram.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.gmf/diagrams/PolicyLib.gmfgen:
+        * tools/modeling/plugins/org.opendds.modeling.graphics/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.help/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.edit/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model.editor/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.sdk.model/META-INF/MANIFEST.MF:
+        * tools/modeling/plugins/org.opendds.modeling.validation/META-INF/MANIFEST.MF:
+
+          Replaced occurrences of "3.1" with "3.2" in preparation of OpenDDS 3.2 release.
+
+Tue Jul  3 13:50:53 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * AUTHORS:
+        * README:
+
+          Update for OpenDDS 3.2 release.
+
+Tue Jul  3 13:45:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * NEWS:
+
+          Updated to account for recent changes to OpenDDS.
+
+Mon Jul  2 11:42:14 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Removed trailing whitespace.
+
+Sun Jul  1 13:28:26 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/Messenger/rtps_disc.ini:
+
+          Change the ResendPeriod back to two seconds.  This should
+          increase the reliability of this test.
+
+Fri Jun 29 21:24:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+
+          In delete_participant(), don't log an ERROR when the participant is
+          non-empty.  User code (including tests) could call this intentionally.
+
+Fri Jun 29 21:02:12 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+
+          Set RTPS discovery's resend period to 2 seconds to
+          avoid the test occasionally running up to 2.5
+          minutes when using the default period of 30 seconds.
+
+Fri Jun 29 20:11:26 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed logic for handling ORBVerboseLogging in config file.
+
+Fri Jun 29 19:47:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+
+          Fixed memory management of a string value in the test.
+
+Fri Jun 29 17:04:21 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Modify the Spdp implementation to send participant announcements whenever
+          a new participant is discovered.  This should reduce discovery time
+          with RTPS, especially when the default value of ResendPeriod=30 is used.
+
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Clean up the perl script and change the subscriber to use a status
+          condition instead of a sleep.  The sleep period was not long enough
+          for RTPS discovery.
+
+        * tests/DCPS/Messenger/rtps_disc.ini:
+
+          Remove ResendPeriod=30 from this test as it is no longer needed.
+
+Fri Jun 29 16:14:55 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          In remove_domain_participant() don't delete
+          participant until lock has been released.
+
+Thu Jun 28 20:08:57 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          Added back server-side header files for local IDL
+          interfaces so that "make install" will still work.
+
+Thu Jun 28 16:37:53 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          When compiling OpenDDS_Dcps library's local IDL interfaces,
+          suppress generation of server-side source.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListenerImpl.h:
+        * dds/DCPS/BitPubListenerImpl.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DdsDcps.mpc:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * examples/DCPS/IntroductionToOpenDDS/ExchangeEventDataReaderListenerImpl.h:
+        * examples/DCPS/IntroductionToOpenDDS/QuoteDataReaderListenerImpl.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * performance-tests/Bench/src/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/MulticastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/Priority/DataReaderListener.h:
+        * performance-tests/DCPS/SimpleLatency/PubListener.h:
+        * performance-tests/DCPS/SimpleLatency/SubListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * tests/DCPS/BidirMessenger/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.h:
+        * tests/DCPS/ConfigTransports/DataReaderListener.h:
+        * tests/DCPS/ConfigTransports/DataWriterListenerImpl.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.h:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.h:
+        * tests/DCPS/DcpsIntegration/TopicListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.h:
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/Federation/DataWriterListenerImpl.h:
+        * tests/DCPS/FooTest3_0/DataReaderListener.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.h:
+        * tests/DCPS/FooTest3_0/PublisherListener.h:
+        * tests/DCPS/FooTest3_1/DataReaderListener.h:
+        * tests/DCPS/FooTest3_2/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/GroupPresentation/DataReaderListener.h:
+        * tests/DCPS/GroupPresentation/SubscriberListener.h:
+        * tests/DCPS/LargeSample/DataReaderListener.h:
+        * tests/DCPS/LatencyBudget/DataReaderListener.h:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.h:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataWriterListenerImpl.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManyTopicTest/DataReaderListener.h:
+        * tests/DCPS/Messenger/DataReaderListener.h:
+        * tests/DCPS/Monitor/DPMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRMDataReaderListener.h:
+        * tests/DCPS/Monitor/DRPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWMDataReaderListener.h:
+        * tests/DCPS/Monitor/DWPerMDataReaderListener.h:
+        * tests/DCPS/Monitor/DataReaderListener.h:
+        * tests/DCPS/Monitor/PublisherMDataReaderListener.h:
+        * tests/DCPS/Monitor/SPMDataReaderListener.h:
+        * tests/DCPS/Monitor/SubscriberMDataReaderListener.h:
+        * tests/DCPS/Monitor/TopicMDataReaderListener.h:
+        * tests/DCPS/Monitor/TransportMDataReaderListener.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.h:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/Ownership/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataWriterListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Rejects/DataReaderListener.h:
+        * tests/DCPS/Serializer_wstring/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.h:
+        * tests/DCPS/unit/Main.cpp:
+        * tools/modeling/codegen/model/NullListener.h:
+        * tools/modeling/codegen/model/NullParticipantListener.h:
+        * tools/modeling/codegen/model/NullPublisherListener.h:
+        * tools/modeling/codegen/model/NullReaderListener.h:
+        * tools/modeling/codegen/model/NullSubscriberListener.h:
+        * tools/modeling/codegen/model/NullTopicListener.h:
+        * tools/modeling/codegen/model/NullWriterListener.h:
+
+          #include client-side IDL generate code instead of
+          server-side code for local IDL interfaces.
+
+Wed Jun 27 17:42:36 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+          Fix some deadlocking issues with discovery and transport
+          handshaking.  These were specifically noticed using RTPS
+          discovery and transport, but may be present in other cases
+          as well.  This patch definitely improves things, but I see
+          indications of other handshaking issues that need to be
+          addressed.
+
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+
+          Encapsulate the reservation_lock_ contained in the
+          TransportImpl class.  Allow multiple releases on
+          individual TransportImpl objects so that we can
+          release this lock while waiting for the handshake.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+
+          Release the TransportImpl lock while waiting for the handshake
+          to complete.
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Move initialization of the passive (reader) side of the
+          association to the calling thread (from the Task thread).
+          This helps avoid some handshaking deadlocking during
+          discovery.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+
+          Clean up a debug message
+
+        * dds/DCPS/transport/tcp/TcpTransport.h:
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Remove an unused lock.
+
+Tue Jun 26 23:30:43 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          When setting up discovery for DEFAULT_RTPS we need to create a
+          section in the ACE_Configuration_Heap, or else the
+          load_discovery_configuration() call ends up being a no-op.
+
+Tue Jun 26 21:49:22 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Added a comment in Writer::write_control_msg().
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Delete the Discovery::Config objects when overwriting them
+          or during shutdown.
+
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/Transient_Kludge.cpp:
+
+          Use ACE_Singleton instead of TAO_Singleton.
+
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          In send_control(), shortcut the actual send in
+          the case where the data link set is empty.
+
+Tue Jun 26 14:28:37 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Don't attempt to call set_handle_instance() on the built-in topic
+          data reader if the handle value is HANDLE_NIL.
+          This remove spurious errors when the handle lookup fails.
+
+Tue Jun 26 09:29:53 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * tests/DCPS/Inconsistent_Qos/inconsistent_qos.cpp:
+          Always retrieve the default qos first before retrieving
+          the actual QOS from file.
+
+        * tests/DCPS/Inconsistent_Qos/deadline.xml:
+        * tests/DCPS/Inconsistent_Qos/sample_rejected.xml:
+          Fixed inconsistencies. history depth should be
+          less than resources_limits.max_samples_per_instance.
+
+Mon Jun 25 20:56:38 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dds_suppress_any_support.mpb:
+        * dds/DdsDcps.mpc:
+
+          For dds_suppress_anys=0 only, need to link against TAO_AnyTypeCode.
+
+Mon Jun 25 20:52:21 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+
+          Added required "after" for TAO's Svc_Utils.
+
+        * examples/DCPS/ishapes/README:
+
+          Removed invalid reference to HTML documentation.
+
+Mon Jun 25 18:50:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+          Inconsistent_Qos test is dependent on DDS4CCM_OPENDDS
+
+        * dds/DCPS/ContentFilteredTopicImpl.h:
+          Doxygen fix
+
+Mon Jun 25 09:30:06 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/QOS_XML_Handler/XML_File_Intf.h:
+        * tests/DCPS/Inconsistent_Qos:
+        * tests/DCPS/Inconsistent_Qos/Inconsistent_Qos.mpc:
+        * tests/DCPS/Inconsistent_Qos/Messenger.idl:
+        * tests/DCPS/Inconsistent_Qos/Messenger_export.h:
+        * tests/DCPS/Inconsistent_Qos/deadline.xml:
+        * tests/DCPS/Inconsistent_Qos/inconsistent_qos.cpp:
+        * tests/DCPS/Inconsistent_Qos/rtps_disc.ini:
+        * tests/DCPS/Inconsistent_Qos/run_test.pl:
+        * tests/DCPS/Inconsistent_Qos/sample_rejected.xml:
+          Added test/reproducer which reprocudes an issue in parsing
+          the datawriter QOS. It returns an invalid QOS error without
+          mentioning the error itself.
+
+Fri Jun 22 22:55:29 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          Corrected setting max_instances restriction.
+
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/RegisterInstance/run_test.pl:
+          Corrected test to expect correct output and put error messags into
+          a separate output file.
+
+Fri Jun 22 08:02:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+          Removed fast_listener_, not used anymore
+
+Fri Jun 22 07:49:53 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DCPS_Utils.h:
+          Doxygen improvements
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          Initialise pointer with 0, const improvements
+
+Fri Jun 22 07:26:09 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/GroupRakeData.cpp:
+          Use this-> to make clear it is a member we are using
+
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/WriteDataContainer.h:
+          Doxygen fixes
+
+        * dds/DCPS/InstanceState.inl:
+          Use prefix increment, improves performance
+
+        * dds/DCPS/SubscriptionInstance.h:
+          No need to check a pointer for 0 before calling delete on it
+
+Thu Jun 21 19:01:10 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/BitPubListenerImpl.cpp:
+          Added missing return, const changes, make exclude scoped block larger
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+          Initialize pointer to 0 and use _nil for object ptr
+
+        * dds/DCPS/Serializer.h:
+          Doxygen fixes
+
+Thu Jun 21 17:57:25 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+
+          Whitespace changes to fix fuzz warnings.
+
+Thu Jun 21 17:30:26 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DomainParticipantId:
+        * tests/DCPS/RegisterInstance:
+        * tests/DCPS/Rejects:
+        * tests/DCPS/TopicReuse:
+
+          Have subversion ignore generated files.
+
+Thu Jun 21 17:23:47 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/unit/Main.cpp:
+
+          Explicitly include PortableServer.h which was
+          being implicitly included from Service_Participant.h
+          before include of PortableServer.h was removed
+          from it.
+Thu Jun 21 15:46:25 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Avoid compiler warnings about ctor initialization order.
+
+Thu Jun 21 15:17:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+
+          Removed unneeded include of PortableServer.h.
+
+Wed Jun 20 18:03:04 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DdsDcps_pch.h:
+        * dds/DdsDcps.mpc:
+
+          With the ORB moved from service participant to the
+          info repo, removed dependency on TAO_PortableServer
+          lib and (implicitly) on TAO_AnyTypeCode lib.
+
+Wed Jun 20 16:47:49 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * NEWS:
+        * tests/DCPS/Rejects/DataReaderListener.cpp:
+        * tests/DCPS/Rejects/DataReaderListener.h:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/run_test.pl:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/Rejects/Writer.cpp:
+        * tests/DCPS/Rejects/Writer.h:
+
+          Added publication side checks for max_instances and
+          max_samples in reliable qos.
+
+Tue Jun 19 16:02:10 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+
+          Each domain participant now has its own transport instance
+          as required when using RTPS transports.
+
+Mon Jun 18 21:33:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fixed logic for when to set log file name from config file value.
+
+Mon Jun 18 18:08:44 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Bypass the topic entity refs check when the remove flag is true,
+          in which case the entire participant is being removed anyway.
+
+Thu Jun 14 11:21:08 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+          Improved this test
+
+Thu Jun 14 11:02:17 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+          Fixed compile error
+
+Wed Jun 13 21:41:24 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Changed a few missed listener pointer references.
+
+Wed Jun 13 18:46:23 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/Rejects/DataReaderListener.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+
+          Fixes for warnings.
+
+Wed Jun 13 17:06:22 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/Rejects/README:
+        * tests/DCPS/Rejects/subscriber.cpp:
+
+          Fixed fuzz errors.
+
+Wed Jun 13 16:11:58 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          In delete_topic(), check if a topic is used by any
+          reader or writer before allowing it to be deleted.
+          Fixes bugzilla bug #4045.
+
+Wed Jun 13 15:49:14 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixing fuzz errors.
+
+Wed Jun 13 14:38:48 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Fix for log file name handling when ACE_TCHAR is
+          a wchar_t.
+
+Wed Jun 13 07:51:57 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
+          Fixed valgrind errors
+
+        * tests/DCPS/QoS_XML/dump/run_test.pl:
+          Simplified this script
+
+Wed Jun 13 06:55:46 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Fixed warning
+
+Tue Jun 12 21:32:52 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterCallbacks.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DdsDcpsInfoUtils.idl:
+
+          Allow a status change for InconsistentTopicStatus.  This will only
+          occur with RTPS Discovery because the InfoRepo can enforce that topics
+          use the same type name at the time when the topics are created.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Implement checking for consistent topic types and also enforcing
+          RTPS string length limits on topic and type names.  See bugzilla
+          bugs #4023 and #4036.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscoveryTest.cpp:
+
+          Adjusted tests for the above changes.
+
+Tue Jun 12 20:57:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixing coverage script.
+
+Tue Jun 12 20:20:59 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          In Service_Participant::shutdown(), handle reactor_
+          being null.
+
+Tue Jun 12 18:48:15 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+          Fixed compile errors when DDS_HAS_MINIMUM_BIT has been defined
+
+Tue Jun 12 18:41:28 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
+        * dds/DCPS/QOS_XML_Handler/XML_File_Intf.cpp:
+          Make all error output dependent on log level
+
+        * tests/DCPS/DomainParticipantId/DomainParticipantId.mpc:
+          Shortened project name
+
+Tue Jun 12 18:28:21 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+          Replaced tabs with spaces.
+
+Tue Jun 12 17:41:48 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Added rejection checking and notification for data readers.
+
+        * tests/DCPS/Rejects:
+        * tests/DCPS/Rejects/DataReaderListener.cpp:
+        * tests/DCPS/Rejects/DataReaderListener.h:
+        * tests/DCPS/Rejects/Messenger.idl:
+        * tests/DCPS/Rejects/pub.ini:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/README:
+        * tests/DCPS/Rejects/Rejects.mpc:
+        * tests/DCPS/Rejects/Rejects_export.h:
+        * tests/DCPS/Rejects/rtps_disc.ini:
+        * tests/DCPS/Rejects/run_test.pl:
+        * tests/DCPS/Rejects/sub.ini:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/Rejects/Writer.cpp:
+        * tests/DCPS/Rejects/Writer.h:
+
+          Added test that checks for rejections due to exceeding max_samples
+          max_instances, and max_samples_per_instance.
+
+Tue Jun 12 15:21:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Move reactor initialization from ctor to
+          get_domain_participant_factory() to avoid
+          static initialization ordering issues
+          for DCPSInfoRepo under Windows.
+
+Mon Jun 11 15:16:59 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * docs/design/INSTANCE_HANDLES:
+
+          Formatting change only.
+
+Mon Jun 11 13:37:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * Merged from branch "temp_orb_refactor" which moves the ORB management
+          from the Service_Participant to the InfoRepoDiscovery. For client code
+          that does not use the InfoRepoDiscovery for discovery,
+          this can remove an unneeded dependency on ORB code.
+          For details see the branch-specific change log at
+          docs/history/ChangeLog-ORB_refactor.
+
+Sun Jun 10 17:42:36 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+          Added new test
+
+        * tests/DCPS/DpShutdown:
+        * tests/DCPS/DpShutdown/DpShutdown.mpc:
+        * tests/DCPS/DpShutdown/Messenger.idl:
+        * tests/DCPS/DpShutdown/Messenger_export.h:
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+        * tests/DCPS/DpShutdown/run_test.pl:
+          New test that tests the fact that we can't remove a domain participant
+          when it still contains entities. Also shutdown the service participant
+          when it still has a domain participant registered, this triggers
+          frequently an assert.
+
+Fri Jun  8 17:03:06 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+          Added missing duplicate for internal listener usage.
+
+Fri Jun  8 09:29:05 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+          Added find_topic, this would require us to call delete_topic
+          twice
+
+Fri Jun  8 09:15:16 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/TopicReuse/Messenger.idl:
+        * tests/DCPS/TopicReuse/Messenger_export.h:
+        * tests/DCPS/TopicReuse/TopicReuse.mpc:
+        * tests/DCPS/TopicReuse/rtps_disc.ini:
+        * tests/DCPS/TopicReuse/run_test.pl:
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+          New test that deletes the topic while still being used by the
+          datawriter
+
+        * tests/DCPS/DomainParticipantId/dp.cpp:
+          Updated test to allow same handles for domain id's
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/Messenger/Messenger.mpc:
+          Layout changes
+
+Thu Jun  7 19:21:57 UTC 2012  Trevor Fields  <fields_t@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/idl/CPPTemplate.txt:
+          Converted internal listener usage to use refernce counted var.
+
+Thu Jun  7 06:57:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DomainParticipantId:
+        * tests/DCPS/DomainParticipantId/DomainParticipantId.mpc:
+        * tests/DCPS/DomainParticipantId/dp.cpp:
+        * tests/DCPS/DomainParticipantId/rtps_disc.ini:
+        * tests/DCPS/DomainParticipantId/run_test.pl:
+          Added new test, domain participant id's should be unique to our
+          idea
+
+Wed Jun  6 19:23:47 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Added additional idl flags to disable some files to be generated
+
+        * dds/DCPS/Service_Participant.cpp:
+          Removed noop return
+
+        * dds/DdsDcps.mpc:
+          Removed files that aren't generated anymore
+
+Wed Jun  6 17:06:39 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Restored requires dds4ccm
+
+Wed Jun  6 08:09:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+        * dds/DdsDcps.mpc:
+          More install fixes for dds4ccm
+
+Wed Jun  6 05:44:31 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Add DdsDcps_lem_stub_export.h as header file
+
+Tue Jun  5 18:18:21 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          More install fixes
+
+Tue Jun  5 11:48:13 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          List inline files
+
+Tue Jun  5 10:38:04 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+          Fixed final link issues.
+
+Tue Jun  5 09:49:08 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+          Fixed header filename
+
+Mon Jun  4 20:26:18 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * tests/DCPS/Ownership/Ownership.mpc:
+
+          Removed inheritance of ownership_profile and
+          replaced with a requires.
+
+        * MPC/config/ownership_profile.mpb:
+
+          Removed this file.
+
+Mon Jun  4 15:16:52 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Replaced tab with spaces.
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+          Removed trailing whitespace.
+
+Mon Jun  4 14:42:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_qos_xml_handler.mpb:
+        * MPC/config/dcps_qos_xml_handler_base.mpb:
+        * dds/DCPS/QOS_XML_Handler/optional_ace_xml_utils.mpb:
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+
+          New ACE base project "ace_xml_utils" can't be included when
+          dds4ccm_opendds=0 because we may be building with an older ACE.
+
+Mon Jun  4 11:43:04 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Added missing after of ciao session
+
+Mon Jun  4 07:29:47 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+          Fixed link issues.
+
+Sun Jun  3 19:21:33 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * NEWS:
+          Document new qos xml library
+
+Sun Jun  3 19:11:15 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+          Added QoS_XML/dump
+
+Sun Jun  3 19:01:36 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
+          Fixed search path
+
+Sun Jun  3 18:37:26 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dcps_qos_xml_handler.mpb:
+        * MPC/config/dcps_qos_xml_handler_base.mpb:
+        * dds/DCPS/QOS_XML_Handler:
+        * dds/DCPS/QOS_XML_Handler/DataReaderQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/DataReaderQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/DataWriterQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/DataWriterQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/ParticipantQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/ParticipantQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/PublisherQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/PublisherQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_Common.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_Common.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_DataReader_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_DataReader_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_DataWriter_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_DataWriter_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_DwDrTp_Base_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_DwDrTp_Base_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_DwTp_Base_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_DwTp_Base_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_PubSub_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_PubSub_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_Topic_T.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_Topic_T.cpp:
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h:
+        * dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.cpp:
+        * dds/DCPS/QOS_XML_Handler/SubscriberQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/SubscriberQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/TopicQos_Handler.h:
+        * dds/DCPS/QOS_XML_Handler/TopicQos_Handler.cpp:
+        * dds/DCPS/QOS_XML_Handler/XML_File_Intf.h:
+        * dds/DCPS/QOS_XML_Handler/XML_File_Intf.cpp:
+        * dds/DCPS/QOS_XML_Handler/XML_QOS_Handler_Export.h:
+        * dds/DCPS/QOS_XML_Handler/dds_qos.hpp:
+        * dds/DCPS/QOS_XML_Handler/dds_qos.cpp:
+        * dds/DCPS/QOS_XML_Handler/qos_xml_handler.mpc:
+        * docs/schema:
+        * docs/schema/dds_qos.xsd:
+        * docs/schema/xsc-banner.h:
+        * docs/schema/xsc-banner.cpp:
+        * tests/DCPS/QoS_XML:
+        * tests/DCPS/QoS_XML/dump:
+        * tests/DCPS/QoS_XML/dump/qos.xml:
+        * tests/DCPS/QoS_XML/dump/qos_dump.cpp:
+        * tests/DCPS/QoS_XML/dump/qos_dump.mpc:
+        * tests/DCPS/QoS_XML/dump/run_test.pl:
+          Added new library coming from CIAO DDS4CCM. It parses the dds4ccm
+          specification defined QoS XML files and makes these available
+          as IDL defined types. It currently only is enabled when
+          dds4ccm_opendds has been enabled.
+
+Fri Jun  1 19:24:29 UTC 2012  Byron Harris  <harrisb@ociweb.com>
+
+        * Merged from branch "compliance_profile_feature_guards",
+          which allows features described in the Compliance
+          section of the DDS spec to be excluded from compiler
+          output. For details see the branch-specific change
+          log at docs/history/ChangeLog-compliance_profile_feature_guards
+
+Fri Jun  1 06:57:08 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+          Cleaned up includes.
+
+Thu May 31 12:46:29 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Fixed compile issues on windows.
+          DdsDcps_lem_stub depends on ccm_lem_stub when
+          dds4ccm_opendds is enabled.
+
+Wed May 30 12:52:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/Service_Participant.h:
+          Doxygen fixes
+
+Wed May 30 07:01:54 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Added needed after for dds4ccm
+
+Tue May 29 13:56:46 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Use proper ACE Logging formatting characters (%C vs %s).
+
+Tue May 29 11:57:12 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Qos_Helper.h:
+          Fixed typo
+
+Tue May 29 09:25:29 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+          Added missing after
+
+Tue May 29 09:20:58 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * bin/dcps_tests.lst:
+
+        * tests/DCPS/RegisterInstance:
+
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/RegisterInstance/rtps_disc.ini:
+        * tests/DCPS/RegisterInstance/run_test.pl:
+          Added new test. This explicitly test the register_instance
+          method on the DataWriter. It also tests whether an instance
+          is implicitly created when a sample with an unknown instance
+          is written to DDS.
+
+Fri May 25 09:47:52 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Use gen_ostream as base project. With this feature the tao_idl
+          generates ostream insertion operators which can be used to stream
+          any idl defined type into an ostream. Going to use this in dds4ccm
+          to log the full qos we set to OpenDDS
+
+Fri May 25 07:11:11 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+          Added another set of incompatible QoS settings to test
+
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+          Fixed typo
+
+Thu May 24 18:29:43 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * bin/dcps_tests.lst:
+          Added Deadline test with rtps_disc
+
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+          Updated domain id in order to run with rtps
+
+Thu May 24 18:19:45 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/Deadline/rtps_disc.ini:
+          Added ini file which I forgot
+
+Thu May 24 18:05:37 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/Deadline/subscriber.cpp:
+          Trying to get this test running with rtps, committing my changes
+          until now
+
+Thu May 24 12:39:03 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * examples/DCPS/ishapes/main.cpp:
+          Fixed typos
+
+Fri May 18 21:10:33 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          List the *TypeSupportImpl.cpp files as needed for the 'idl_stubs'
+          target.  This is used by the script that measures static footprint.
+
+Fri May 18 17:38:27 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/idl/dds_generator.h:
+        * dds/idl/marshal_generator.cpp:
+
+          Leave out the name of the parameter for gen_is_bounded_size().
+          This removes the necessity for ACE_UNUSED_ARG, which may be seen as
+          a read of uninitialized data by Coverity.
+
+Fri May 18 15:50:29 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemReceiveStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed compiler and coverity warnings.
+
+Thu May 17 16:02:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LargeSample/LargeSample.mpc:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/subscriber.cpp:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+        * tests/transport/simple/DDS_transport_simple.mpc:
+        * tests/transport/simple/pub_main.cpp:
+        * tests/transport/simple/sub_main.cpp:
+
+          Allow tests that used shared memory to link to static lib.
+
+Thu May 17 15:41:01 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed compile errors on WinCE.
+
+Thu May 17 15:13:56 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemDataLink.h:
+
+          Allow for non-Win32 platforms that are ACE_LACKS_SYSV_SHMEM
+          and ACE_HAS_POSIX_SEM (VxWorks).
+
+Thu May 17 15:02:31 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/shmem/ShmemSendStrategy.cpp:
+        * dds/DCPS/transport/shmem/ShmemTransport.cpp:
+
+          Fixed compile errors on non-Win32 platforms that do not have
+          support for POSIX semaphores (tested with Android, may also
+          fix VxWorks).
+
+Thu May 17 07:57:52 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * NEWS:
+          Add DDS4CCM with OpenDDS
+
+Thu May 17 07:45:24 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits_source.mpb:
+          Fixed problem when built_in_topics feature is disabled
+
+Wed May 16 23:26:15 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5_0/run_test.pl:
+
+          Fixed typo.
+
+Wed May 16 23:17:09 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged the branch "SharedMemory", which includes a new shared-memory
+          transport type.  See the NEWS file for an overview.
+          For details of changes introduced on the branch,
+          see docs/history/ChangeLog-SharedMemory.
+
+Wed May 16 22:18:19 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DdsDcps.mpc:
+
+          Tabs are significant in the portion of the mpc file that's copied
+          verbatim into the generated GNU makefile.
+
+Wed May 16 18:56:06 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DdsDcps.mpc:
+          Fixed compile issues when CIAO is not available
+
+Wed May 16 17:27:58 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * MPC/config/dds4ccm_opendds.mpb:
+        * dds/DdsDcps.mpc:
+          Fixed mpc problems when CIAO is not available
+
+Wed May 16 09:17:43 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Changed the default recovery method back to REPO.
+
+Wed May 16 06:38:56 UTC 2012  Marcel Smit  <msmit@remedy.nl>
+
+        * dds/DCPS/Service_Participant.cpp:
+          Default to RTPS and fixed some minor
+          logging issues.
+
+        * dds/DdsDcps.mpc:
+          Created lem generation. Devided idl files
+          into the ones that need the lem-generation and
+          the ones that don't.
+
+        * dds/idl/IDLTemplate.txt:
+          Generating sequences as typedef instead of
+          native, taking the TAO (ACE) version into
+          account.
+
+        * dds/idl/be_produce.cpp:
+          Generating include guards for IDL as well.
+
+        * dds/idl/be_util.cpp:
+          Removed opendds_sequence_suffix since it isn't
+          used anymore.
+
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+          Due to changes in ddsdcps.mpc.
+
+Sun May 13 18:37:35 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/GuidUtils.h:
+          Inline methods shouldn't be exported, resolves MinGW warnings on
+          windows
+
+        * dds/DCPS/Service_Participant.cpp:
+          Fixed windows MinGW warning
+
+Wed May  9 20:16:05 UTC 2012  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * dds/DCPS/transport/udp/UdpDataLink.h:
+        * dds/DCPS/transport/udp/UdpDataLink.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.h:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Add support for setting the diffserv codepoint when
+          Transport Priority QoS is used with the udp transport.
+
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/run_test.pl:
+
+          Modify this test so that the UDP configuration actually works.
+
+Tue Apr 24 02:31:09 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Removed unused parameter.
+
+Mon Apr 23 21:23:34 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataWriterCallbacks.h:
+
+          Added interface for Discovery callbacks into the DataWriter, to
+          refactor out dependencies on DataWriterRemote.
+
+        * dds/DdsDcps.mpc:
+
+          Removed dds/DdsDcpsDataWriterRemote.idl.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl:
+
+          Moved dds/DdsDcpsDataWriterRemote.idl into InfoRepoDiscovery.
+
+        * dds/DdsDcpsInfoUtils.idl:
+
+          Moved non-InfoRepoDiscovery dependencies from dds/DdsDcpsDataWriterRemote.idl.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added inheritance from DataWriterCallbacks and removed all associations to
+          DataWriterRemote.
+
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataWriterRemoteImpl.cpp:
+
+          Changed parent from DataWriterImpl to DataWriterCallbacks and moved
+          files into InfoRepoDiscovery.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Changed add_publication to take a DataWriterCallbacks*.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Changed add_publication to take a DataWriterCallbacks* and
+          storing the DataWriterCallbacks to communicate with local
+          publications.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Changed add_publication to take a DataWriterCallbacks* and creating
+          and storing the DataWriterRemote and breaking the DataWriterRemote's
+          association with the DataWriterCallbacks when remove_publication is
+          called.
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Removed creation of the DataWriterRemote.
+
+        * dds/DCPS/DataReaderCallbacks.h:
+        * dds/DCPS/DataReaderImpl.h:
+
+          Cleaned up DataReaderRemote changes.
+
+        * dds/idl/CPPTemplate.txt:
+        * dds/idl/HTemplate.txt:
+
+          Changed templated SupportImpl::init to not have
+          DataReaderRemote.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Refactored test for DataWriterRemote changes.
+
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+
+          Changes from refactored location for
+          DataWriterRemote.
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.h:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/monitor/monitor.idl:
+        * tests/DCPS/ConfigTransports/Factory.h:
+        * tests/DCPS/ConfigTransports/Options.h:
+        * tests/DCPS/ConfigTransports/Pusher.h:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooType/FooType.idl:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Changes from refactoring DataWriterRemote.
+
+        * dds/DCPS/DataWriterRemoteImpl.h:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * tests/DCPS/FooTest3_1/test_helper.h:
+        * tests/DCPS/FooTest3_1/test_helper.cpp:
+        * tests/DCPS/FooTest3_2/test_helper.h:
+        * tests/DCPS/FooTest3_2/test_helper.cpp:
+
+          Removed these files.
+
+Thu Apr 19 18:54:16 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Fixed call to map::erase with const_iterator.
+
+Thu Apr 19 14:49:43 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/DataReaderCallbacks.h:
+
+          Added interface for Discovery callbacks into the DataReader, to
+          refactor out dependencies on DataReaderRemote.  (Similar refactoring
+          for DataWriterRemote will be coming soon.)
+
+        * dds/DdsDcps.mpc:
+
+          Removed dds/DdsDcpsDataReaderRemote.idl.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl:
+
+          Moved dds/DdsDcpsDataReaderRemote.idl into InfoRepoDiscovery.
+
+        * dds/DdsDcpsInfoUtils.idl:
+
+          Moved non-InfoRepoDiscovery dependencies from dds/DdsDcpsDataReaderRemote.idl.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Added inheritance from DataReaderCallbacks and removed all associations to
+          DataReaderRemote.
+
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/DataReaderRemoteImpl.cpp:
+
+          Changed parent from DataReaderImpl to DataReaderCallbacks and moved
+          files into InfoRepoDiscovery.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Changed add_subscription to take a DataReaderCallbacks*.
+
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Changed add_subscription to take a DataReaderCallbacks* and
+          storing the DataReaderCallbacks to communicate with local
+          subscriptions.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Changed add_subscription to take a DataReaderCallbacks* and creating
+          and storing the DataReaderRemote and breaking the DataReaderRemote's
+          association with the DataReaderCallbacks when remove_subscription is
+          called.
+
+        * dds/DCPS/MultiTopicDataReaderBase.cpp:
+
+          Change from DataReaderImpl no longer having an association to
+          DataReaderRemote.
+
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Removed creation of the DataReaderRemote.
+
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+
+          Changed includes and comments to new location for DataReaderRemote.idl.
+
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Refactored test for DataReaderRemote changes.
+
+        * tests/DCPS/ConfigTransports/Puller.h:
+        * tests/DCPS/FooTest3_1/test_helper.h:
+        * tests/DCPS/FooTest3_1/test_helper.cpp:
+        * tests/DCPS/FooTest3_2/test_helper.h:
+        * tests/DCPS/FooTest3_2/test_helper.cpp:
+        * tests/DCPS/FooType/FooType.idl:
+        * tests/DCPS/unit/MyTypeSupport.idl:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Moved includes to new include path, or cleaned up unneeded
+          DataReaderRemote references.
+
+        * dds/DCPS/DataReaderRemoteImpl.h:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DdsDcpsDataReaderRemote.idl:
+
+          Removed these files.
+
+Tue Apr 17 16:21:15 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Fixed warning.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Fixed fuzz error.
+
+Tue Apr 17 16:15:22 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Fixing non-standard enum use.
+
+Mon Apr 16 16:13:07 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/transport/tcp/TcpConnection.h:
+        * dds/DCPS/transport/tcp/TcpConnection.inl:
+
+          Made functions const.
+
+        * dds/DCPS/transport/tcp/TcpTransport.cpp:
+
+          Removed useless if and changed comment.
+
+        * dds/DCPS/FilterEvaluator.cpp:
+
+          Added default initialization value (coverity error).
+
+Mon Apr 16 15:52:13 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Removed dissociate_*** and shutdown functions from the Discovery
+          interface and changed some void functions to return a bool
+          indicating if it was successful.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Caught all CORBA::Exceptions thrown by DCPSInfo and returned
+          appropriate indications.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Removed try/catch surrounding Discovery interface calls
+          and changed to handle new status indications.
+
+Fri Apr 13 15:27:13 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Fixed crash on exit caused by when global vars were going out of scope.
+
+Fri Apr 13 15:15:25 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tools/excelRTD/ExcelRTD.mpc:
+        * tools/monitor/MonitorTask.cpp:
+
+          Compile fixes for monitoring tools.
+
+Fri Apr 13 11:55:16 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Needed to change to call get_stringified_dcps_info_ior on irDisco.
+
+Fri Apr 13 11:49:12 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Needed to include InfoRepoDiscovery.h.
+
+Fri Apr 13 11:43:45 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/dissector/giop_base.h:
+
+          Missed changing include to DdsDcpsInfoUtilsC.h.
+
+Fri Apr 13 11:16:20 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+
+          Fixing error for !DDS_HAS_MINIMUM_BIT.
+
+Thu Apr 12 20:51:39 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DdsDcpsInfoUtils.idl:
+        * dds/DdsDcps.mpc:
+
+          Moved remaining contents in DdsDcpsInfo.idl.
+
+        * dds/DCPS/DCPS_Utils.h:
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/TopicImpl.h:
+        * examples/DCPS/DistributedContent/AbstractionLayer.h:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+
+          Changed include to DdsDcpsInfoUtils.
+
+        * tools/monitor/MonitorTask.cpp:
+
+          Fixed monitor to only store ior for InfoRepoDiscovery.
+
+        * dds/DdsDcpsInfo.idl:
+
+          Removed this file.
+
+Thu Apr 12 16:17:39 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DdsDcpsInfo.idl:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/InfoRepoDiscovery/Info.idl:
+
+          Moved DCPSInfo into InfoRepoDiscovery.
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+
+          Refactored DCPSInfo pure virtual interface into Discovery interface.
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          Added forwarding functions from discovery interface to DCPSInfo.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Refactored RtpsInfo interface into RtpsDiscovery.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/InfoRepo/DCPSInfo_i.h:
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.h:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.h:
+        * dds/InfoRepo/DCPS_IR_Publication.h:
+        * dds/InfoRepo/DCPS_IR_Subscription.h:
+        * dds/InfoRepo/DCPS_IR_Topic.h:
+        * dds/InfoRepo/Federator.idl:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+
+          Changes do to Discovery refactoring.
+
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Added dependency on InfoRepoDiscovery.
+
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/Transient_Kludge.h:
+
+          Comment cleanup.
+
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/ConfigFile/ConfigFile.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.h:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataReaderI.cpp:
+        * tests/DCPS/DCPSInfoRepo/DCPSDataWriterI.cpp:
+        * tests/DCPS/DCPSInfoRepo/pubsub.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+
+          Changes do to Discovery refactoring.
+
+        * DevGuideExamples/DCPS/Messenger.minimal/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger/run_test.pl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/run_test.pl:
+        * performance-tests/DCPS/InfoRepo_population/run_test.pl:
+        * performance-tests/DCPS/MulticastListenerTest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_long.pl:
+        * performance-tests/DCPS/SimpleE2ETest/run_test_rejected.pl:
+        * performance-tests/DCPS/SimpleLatency/run_test.pl:
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p1s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-1p4s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-2p3s.pl:
+        * performance-tests/DCPS/TCPProfilingTest/run_test-4p1s.pl:
+        * performance-tests/DCPS/UDPListenerTest/run_test.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test-2pubs.pl:
+        * performance-tests/DCPS/UDPNoKeyTest/run_test.pl:
+        * tests/DCPS/BidirMessenger/run_test.pl:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/ConfigFile/run_test.pl:
+        * tests/DCPS/ConfigTransports/run_test.pl:
+        * tests/DCPS/ContentFilteredTopic/run_test.pl:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+        * tests/DCPS/Deadline/run_test.pl:
+        * tests/DCPS/DestinationOrder/run_test.pl:
+        * tests/DCPS/Dispose/run_test.pl:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+        * tests/DCPS/FooTest4/run_test.pl:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/GroupPresentation/run_test.pl:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/LatencyBudget/run_test.pl:
+        * tests/DCPS/Lifespan/run_test.pl:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/ManyTopicTest/run_test.pl:
+        * tests/DCPS/ManyTopicTest/run_test1.pl:
+        * tests/DCPS/ManyTopicTest/run_test2.pl:
+        * tests/DCPS/ManyTopicTest/run_test3.pl:
+        * tests/DCPS/Messenger/run_test.pl:
+        * tests/DCPS/Monitor/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/MultiRepoTest/run_test.pl:
+        * tests/DCPS/MultiTopic/run_test.pl:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/Ownership/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/PersistentDurability/run_test.pl:
+        * tests/DCPS/Presentation/run_test.pl:
+        * tests/DCPS/Prst_delayed_subscriber/run_test.pl:
+        * tests/DCPS/QueryCondition/run_test.pl:
+        * tests/DCPS/ReadCondition/run_test.pl:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+        * tests/DCPS/Reconnect/run_test.pl:
+        * tests/DCPS/Serializer_wstring/run_test.pl:
+        * tests/DCPS/SetQosDeadline/run_test.pl:
+        * tests/DCPS/SetQosPartition/run_test.pl:
+        * tests/DCPS/SharedTransport/run_test.pl:
+        * tests/DCPS/StatusCondition/run_test.pl:
+        * tests/DCPS/StringKey/run_test.pl:
+        * tests/DCPS/Thrasher/run_test.pl:
+        * tests/DCPS/TimeBasedFilter/run_test.pl:
+        * tests/DCPS/TransientDurability/run_test.pl:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+        * tests/DCPS/ZeroCopyRead/run_test_coverage.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+
+          Logged message cleanup.
+
+        * dds/DCPS/InfoRepoUtils.h:
+        * dds/DCPS/InfoRepoUtils.cpp:
+        * dds/DCPS/RTPS/RtpsInfo.h:
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+
+          Refactored this code into InfoRepoDiscovery and RtpsDiscovery and
+          removed these files.
+
+Wed Apr 11 17:44:42 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/OfferedDeadlineWatchdog.h:
+        * dds/DCPS/OfferedDeadlineWatchdog.cpp:
+        * dds/DCPS/RequestedDeadlineWatchdog.h:
+        * dds/DCPS/RequestedDeadlineWatchdog.cpp:
+        * dds/DCPS/Watchdog.h:
+        * dds/DCPS/Watchdog.cpp:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+
+          Use ACE_Reactor_Timer_Interface instead of ACE_Reactor,
+          where applicable.  This identifies areas where only the
+          timer functionality (not I/O) from the Reactor is used.
+
+Wed Apr 11 15:07:53 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Corrected method names in log messages.
+
+Tue Apr 10 19:51:19 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Cleaning up lcov errors in info file.
+
+Tue Apr 10 17:13:37 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Missed changing info file name.
+
+Tue Apr 10 16:08:21 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixing script for nightly build.
+
+Mon Apr  9 17:59:43 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+
+          Corrected #includes needed for static builds.  These were not picked
+          up by the script that changed all of the others last week.
+
+        * tests/DCPS/Monitor/Messenger.mpc:
+
+          Fixed broken references to the monitoring library, caused by
+          this mpc file directly listing the project in 'libs' and 'after'
+          instead of using the provided mpb file.
+
+Fri Apr  6 13:11:11 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Cleanup of script.
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Replaced DataLinkSetMap with the std::map that it used to
+          contain.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.h:
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+
+          Removed unused check_header(const DataSampleHeader&).
+
+        * dds/DCPS/transport/framework/DataLinkSetMap.h:
+        * dds/DCPS/transport/framework/DataLinkSetMap.cpp:
+
+          Removed these files.
+
+Thu Apr  5 15:25:59 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Fixed variable name.
+
+Thu Apr  5 13:54:18 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+
+          Added needed dependencies for InfoRepoDiscovery.
+
+Thu Apr  5 09:33:18 UTC 2012  Johnny Willemsen  <jwillemsen@remedy.nl>
+
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+          Fixed argument not used warnings
+
+Wed Apr  4 21:45:43 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Discovery.h:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticIncludes.h:
+
+          Allow dynamic loading of InfoRepoDiscovery in its own library.
+
+        * dds/DCPS/InfoRepoDiscovery:
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.cpp:
+
+          New library for InfoRepoDiscovery.
+
+        * MPC/config/dcpsexe.mpb:
+
+          Link the InfoRepoDiscovery library as well.  Needed for static builds.
+
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/rtps.mpc:
+
+          Use a more general mechanism for loading new discovery libraries.
+
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+
+          Re-use the code for dynamic transport library loading for
+          discovery libraries as well.
+
+        * dds/InfoRepo/DCPSInfoRepo.cpp:
+        * dds/InfoRepo/DCPSInfoRepoServ.cpp:
+
+          Use the new InfoRepoDiscovery library.
+
+        * dds/DdsDcps.mpc:
+        * dds/dcps_bits.mpb:
+        * dds/monitor/monitor.mpc:
+        * MPC/config/dcps.mpb:
+        * MPC/config/dcps_inforepodiscovery.mpb:
+        * MPC/config/dcps_lem_stub.mpb:
+        * MPC/config/dcps_monitor.mpb:
+        * MPC/config/dcps_rtps.mpb:
+
+          Use a consistent project naming convention for all core libraries.
+
+        * DevGuideExamples/DCPS/*/Publisher.cpp:
+        * DevGuideExamples/DCPS/*/Subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * examples/DCPS/ishapes/main.cpp:
+        * performance-tests/Bench/src/testprocess.cpp:
+        * performance-tests/DCPS/*/publisher.cpp:
+        * performance-tests/DCPS/*/subscriber.cpp:
+        * tests/DCPS/*:
+
+          Replaced the #include of Tcp.h that was conditional on
+          ACE_AS_STATIC_LIBS with an #include of a new header, StaticIncludes.h,
+          where we can centrally manage what needs to get #included for a static
+          build.
+
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/InfoRepoDiscovery.h:
+        * dds/DCPS/InfoRepoDiscovery.cpp:
+
+          Removed these files.  They have been moved to InfoRepoDiscovery.
+
+Wed Apr  4 18:27:14 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.h:
+        * dds/DCPS/transport/multicast/MulticastSendStrategy.cpp:
+
+          For the new async_send option, only create one ACE_Asynch_Write_Dgram
+          object and make it a member of the MulticastSendStrategy class so
+          it can attempt to cancel I/O during transport shutdown.
+
+Wed Apr  4 15:42:57 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Cleanup of script.
+
+Wed Apr  4 15:28:48 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tools/scripts/lcov.pl:
+
+          Changes for running lcov with no .shobj directories.
+
+Wed Apr  4 13:37:30 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsInfo.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          Moved forwarding of dissassociate_* functions to Sedp where
+          they were a no-op, to just be a no-op in RtpsInfo where
+          the DiscoveryInfo interface requires it.
+
+Mon Apr  2 18:00:18 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+
+          The method for re-setting rd_ptr() when there are multiple
+          listeners needs to account for the fact that continuation
+          blocks also have their rd_ptr()s modified during demarshaling.
+
+Mon Apr  2 14:51:40 UTC 2012  Brian Johnson  <johnsonb@ociweb.com>
+
+        * dds/DCPS/RTPS/Sedp.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+
+          Storing associated_participants_ prior to writing the
+          publication/subscription data. Changed add publication/
+          subscription to have an invalid sequence number, so new
+          sequence number can be used in set_header_fields.
+
+Fri Mar 30 22:14:30 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportReassembly.cpp:
+
+          Manage the ACE_Message_Block inside the ReceivedDataSample
+          consistently for all cases of reassembling fragments.
+
+        * dds/DCPS/transport/multicast/BestEffortSession.cpp:
+
+          Don't call data_unavailable() with an invalid range.
+
+        * tests/DCPS/UnitTests/Fragmentation.cpp:
+
+          Update test for TransportReassembly change above.
+
+Thu Mar 29 20:42:00 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/multicast/MulticastDataLink.cpp:
+
+          Improved debug logging for joining the multicast group.
+
+        * dds/DCPS/transport/multicast/MulticastTransport.cpp:
+        * dds/DCPS/transport/udp/UdpTransport.cpp:
+
+          Fixed a bug in reference counting the TransportReactorTask.
+
+Wed Mar 28 18:52:34 UTC 2012  Adam Mitz  <mitza@ociweb.com>
+
+        * ChangeLog:
+        * docs/history/ChangeLog-3.1:
+
+          Moved version 3.1 ChangeLog entries to a separate file.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

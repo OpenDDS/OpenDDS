@@ -1,0 +1,17 @@
+
+ExcelRTD - Excel Real Time Data (RTD) server and Add-in for viewing
+OpenDDS instrumentation.
+
+Documentation describing how to build and execute the application is
+included at ../monitor/doc/userguide.html.  That includes establishing the build and
+execution environments as well.
+
+FILES:
+
+OpenDDS.xlam
+  -- Excel XLA Add-in.  VBA code and ribbon menus.  To modify the VBA code open
+     this file in Excel.  Ribbon can be modified using RibbonXVisualDesigner.
+
+*.{h,cpp,inl}
+  -- source code for application.
+

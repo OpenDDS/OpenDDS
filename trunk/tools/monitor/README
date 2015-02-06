@@ -1,0 +1,52 @@
+
+monitor - instrumentation viewer application for OpenDDS.
+
+This application provides a GUI view into instrumentation of the OpenDDS
+service.
+
+Documentation describing how to build and execute the application is
+included at doc/userguide.html.  That includes establishing the build and
+execution environments as well.
+
+------------------------------------------------------------------------
+DIRECTORIES:
+
+doc/
+  -- Contains documentation related to this application.
+
+images/
+  -- Contains image resources used by this application.
+
+------------------------------------------------------------------------
+FILES:
+
+*.ui
+  -- Qt4 designer files specifying the UI for the application.
+
+Monitor.qrc
+  -- Resource specification file, managed by Qt4 designer.
+
+Monitor.mpc
+  -- MPC project file for the application.
+
+*.{h,cpp}
+  -- source code for application.
+
+------------------------------------------------------------------------
+Code notes:
+
+The GUI source code files are compiled by the Qt meta-object compiler and
+have certain macros and other non-standard language constructs that are
+parsed by that system.
+
+This means that it is not recommended to run a style utility on the GUI
+files, as the Qt specific elements may no longer be recognizable by the
+Qt tools.
+
+Currently the GUI files that should not be reformatted include:
+  all generated files
+  Monitor_main.cpp
+  MonitorDataModel.{h,cpp}
+  TreeNode.h
+  Viewer.{h,cpp}
+

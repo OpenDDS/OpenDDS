@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="domain"
+    nsURI="http://www.opendds.org/modeling/schemas/Domain/1.0" nsPrefix="domain">
+  <eClassifiers xsi:type="ecore:EClass" name="QosProperty" eSuperTypes="Core.ecore#//TypedEntity"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DomainEntity" eSuperTypes="Core.ecore#//Entity">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="transportConfig" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString">
+      <eAnnotations source="GenModel">
+        <details key="documentation" value="Indicate the identifier of the transport configuration to use. Note that it is currently not intended for Topics to have this attribute used. "/>
+      </eAnnotations>
+    </eStructuralFeatures>
+  </eClassifiers>
+</ecore:EPackage>

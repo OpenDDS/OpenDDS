@@ -1,0 +1,2279 @@
+Wed Sep 23 15:56:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * OpenDDS version 2.0 released.
+
+Tue Sep 22 22:54:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * bin/cross_tests.lst:
+
+          Dropped default_ Messenger tests; these have not been verified
+          to be correct.
+
+Tue Sep 22 22:34:07 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/dcps_java_optional.mpb:
+
+          Fixes to MPC dependencies on Windows hosts.
+
+Tue Sep 22 21:51:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/Subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Subscriber.cpp:
+        * tests/DCPS/Messenger/DataReaderListener.cpp:
+
+          DevGuideExamples updates; fixes for Windows CE builds.
+
+Mon Sep 21 22:38:35 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Messenger:
+
+          Introduced new Messenger test under tests to take on
+          responsibilities of old DevGuideExample tests.
+
+Mon Sep 21 22:01:47 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Process.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+
+          Trevor's updates to the framework - fixed problem with
+          transport creation; allow operation without publications or
+          subscriptions (both are no longer required).
+
+Fri Sep 18 19:29:46 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples
+
+          DevGuideExamples updates.
+
+Fri Sep 18 16:20:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListenerImpl.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListenerImpl.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListenerImpl.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+
+          Various scoreboard fixes.
+
+Thu Sep 17 22:42:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed warning on VC9 builds. Apparently Windows does not think parens
+          provide sufficient security when assigning within conditionals.
+
+Thu Sep 17 22:20:54 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+
+          Fixes for WinCE builds.
+
+Thu Sep 17 20:30:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy:
+
+          DevGuideExamples updates.
+
+Thu Sep 17 19:55:16 UTC 2009  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/doc/tests:
+
+          Updated config path info for running test.
+
+        * performance-tests/Bench/tools/mkpkg:
+
+          Changed to use version of ACE TAO besides 1.5a.
+
+Thu Sep 17 15:48:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/idl2jni/codegen/im_java.cpp:
+
+          Added guard around use of long long and unsigned long long as
+          a union discriminator.
+
+Wed Sep 16 17:49:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated nightly Messenger and Messenger_ZeroCopy tests.
+
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy:
+
+          Messenger_ZeroCopy redux.
+
+Wed Sep 16 05:05:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added missing initialization code for OWNERSHIP on DataReader and
+          DataWriter entities.
+
+        * java/idl2jni/codegen/be_init.cpp:
+
+          Added missing tao/Version.h include.
+
+Wed Sep 16 04:57:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/Messenger.idl:
+        * DevGuideExamples/DCPS/Messenger/Writer.h:
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger.idl:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Writer.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+
+          DevGuideExamples updates.
+
+Tue Sep 15 17:53:38 UTC 2009  Trevor Fields  <fields_t@ociweb.com>
+
+       * performance-tests/Bench/src/TestProcess.mpc:
+       * performance-tests/Bench/src/Process.cpp:
+       * performance-tests/Bench/src/Process.h:
+       * performance-tests/Bench/src/EntityProfiles.h:
+       * performance-tests/Bench/src/Options.cpp:
+
+         Added ability to specify the number of associations a pupblicationi
+         will receive.
+
+Fri Sep 11 23:04:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/
+
+          Updated copyrights in Java source.
+
+Fri Sep 11 22:07:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/dds/DDS_QoS_jni.cpp:
+        * java/dds/OpenDDS_DCPS_jni.cpp:
+        * java/dds/OpenDDS_jni_helpers.h:
+        * java/dds/dcps_java_export.h:
+        * java/idl2jni/codegen/be_extern.h:
+        * java/idl2jni/codegen/be_global.h:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_init.cpp:
+        * java/idl2jni/codegen/be_produce.cpp:
+        * java/idl2jni/codegen/drv_args.cpp:
+        * java/idl2jni/codegen/drv_preproc.cpp:
+        * java/idl2jni/codegen/idl2jni.cpp:
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/idl_mapping.h:
+        * java/idl2jni/codegen/idl_mapping.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/idl2jni/runtime/15a_compat.h:
+        * java/idl2jni/runtime/i2jrt_ORB.cpp:
+        * java/idl2jni/runtime/i2jrt_TAOObject.cpp:
+        * java/idl2jni/runtime/idl2jni_BaseJavaPeer.h:
+        * java/idl2jni/runtime/idl2jni_jni.h:
+        * java/idl2jni/runtime/idl2jni_runtime.h:
+        * java/idl2jni/runtime/idl2jni_runtime.cpp:
+        * java/idl2jni/runtime/idl2jni_runtime_Export.h:
+        * java/idl2jni/tests/simple/simple.idl:
+        * java/jms/native/Message.idl:
+        * java/jms/native/opendds_jms_native_Export.h:
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+        * java/tao/tao_java_export.h:
+        * java/tests/complex_idl/Complex.idl:
+        * java/tests/complex_idl/complex_idl_test_Export.h:
+        * java/tests/messenger/messenger_idl/Messenger.idl:
+        * java/tests/messenger/messenger_idl/messenger_idl_test_Export.h:
+        * java/tests/multirepo/MultiRepo.idl:
+        * java/tests/multirepo/multirepo_test_Export.h:
+
+          Reformatted native Java with updated style.
+
+Fri Sep 11 20:21:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/example/jbossas/opendds-ds.xml:
+        * java/jms/example/jbossas/opendds-repo-ds.xml:
+        * java/jms/example/jbossesb/helloworld/build.xml:
+        * java/jms/example/jbossesb/helloworld/src/opendds-ds.xml:
+        * java/jms/example/jbossesb/helloworld2/build.xml:
+        * java/jms/example/jbossesb/helloworld2/src/opendds-ds.xml:
+
+          Updated java examples to collect version at runtime if possible;
+          java/jms/example/jbossas/* still requires release support.
+
+Fri Sep 11 18:47:14 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FileSystemStorage.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * java/idl2jni/codegen/be_extern.h:
+        * java/idl2jni/codegen/be_global.h:
+        * java/idl2jni/codegen/be_global.cpp:
+        * java/idl2jni/codegen/be_init.cpp:
+        * java/idl2jni/codegen/idl2jni_visitor.h:
+        * java/idl2jni/codegen/idl2jni_visitor.cpp:
+        * java/idl2jni/codegen/im_java.cpp:
+        * java/idl2jni/codegen/im_jni.cpp:
+        * java/jms/native/org_opendds_jms_DCPSInfoRepo.cpp:
+
+          Removed support for obsolete ACE+TAO releases.
+
+        * java/idl2jni/codegen/14a_compat.h:
+
+          Removed this file.
+
+Fri Sep 11 18:30:53 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Fixed a bug in listener_for() that should check if listener
+          is nil before return. This bug would prevent to traverse up
+          to find listener if current listener is nil and the status
+          is enabled.
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Added NO_STATUS_MASK and ALL_STATUS_MASK constants and made
+          default listen to all.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Added test case for listen_for() bug fix.
+
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+
+          Used old C-style cast to avoid wchar* cast compilation errors
+          on some platforms.
+
+Fri Sep 11 17:10:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes.
+
+Fri Sep 11 16:15:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/Cached_Allocator_With_Overflow_T.h:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DurabilityArray.h:
+        * dds/DCPS/GuardCondition.h:
+        * dds/DCPS/PublicationInstance.h:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/RcObject_T.h:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/Stats_T.h:
+        * dds/DCPS/TopicImpl.h:
+
+          Minor formatting updates.
+
+Thu Sep 10 22:45:43 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Updated documentation for upcoming 2.0 release.
+
+Thu Sep 10 17:59:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/copyright/add_copyright.sh:
+        * tools/copyright/update_copyright.sh:
+        * tools/style/style.sh:
+
+          Added additional quotes; clarified usage output.
+
+Thu Sep 10 17:12:18 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+
+          Corrected a compiler warning with const_cast<>.
+
+          verify_message()
+            - added additional diagnostics.  Added additional check to
+              avoid core dump with missing data.
+
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+
+          Corrected a compiler warning with const_cast<>.
+
+Thu Sep 10 16:37:36 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/style/style.d/02_obsolete.sed:
+
+          Updated filters to accept certain globally specified symbols.
+
+Thu Sep 10 05:49:39 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/Serializer.inl:
+        * dds/DCPS/Serializer.cpp:
+
+          Fixed a bug that incorrectly serialize and de-serialize
+          wstring.
+
+        * tests/DCPS/Serializer_wstring/DataReaderListener.h:
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+        * tests/DCPS/Serializer_wstring/Messenger.idl:
+        * tests/DCPS/Serializer_wstring/README:
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
+        * tests/DCPS/Serializer_wstring/Writer.h:
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/run_test.pl:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+
+          Added a test for the bug fix.
+
+        * bin/dcps_tests.lst:
+
+          Added Serializer_wstring test.
+
+Thu Sep 10 01:16:24 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/
+
+          Applied new style and copyrights to all source.
+
+Tue Sep  8 19:05:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/FileSystemStorage.cpp:
+
+          Fixed issue with astyle conversion; // comments after assignment
+          causes astyle to incorrectly join the next line.
+
+Tue Sep  8 18:45:26 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderRemoteImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DataWriterRemoteImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Dropped Emacs alignment hacks.
+
+Tue Sep  8 17:05:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/style/style.d/01_whitespaces.sed:
+        * tools/style/style.d/02_obsolete.sed:
+        * tools/style/style.d/03_ACE_THROW_SPEC.sed:
+        * tools/style/style.d/04_rparens.sed:
+
+          style.d script updates.
+
+Tue Sep  8 15:47:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/ZeroCopySeq_T.h:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+
+          Refactored DDS_Vector to ZeroCopyVector; better reflects intention
+          and eliminates use of a DDS prefix (causes conflicts when run against
+          style.sh)
+
+Fri Sep  4 20:03:59 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tools/copyright:
+
+          Added new scripts for managing project copyrights.
+
+Fri Sep  4 18:59:47 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tools:
+        * tools/setenv.csh:
+        * tools/setenv.sh:
+
+          Added boilerplate environment scripts for new users.
+
+        * tools/style:
+
+          Added new scripts for applying project style changes.
+
+Fri Sep  4 18:00:20 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DdsDcpsDomain.idl:
+
+          Fixed compilation failure on DDS_HAS_MINIMUM_BIT builds.
+
+        * dds/DCPS/transport/framework/TransportDefs.h:
+
+          Removed unused variable to fix warnings.
+
+Fri Sep  4 16:49:04 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+
+          Fixed a few compilation errors and warnings on linux.
+
+Thu Sep  3 16:39:21 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Removed obsolete next_handle_ member.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          get_next_handle()
+            - new method to obtain an instance handle.
+
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          register_instance()
+            - replaced call to local get_next_handle() with call to
+              writer get_next_handle().
+
+          Removed obsolete next_handle_ member.
+
+          get_next_handle()
+            - obsolete / removed
+
+        * docs/design/instance_handles.txt:
+
+          Description of current InstanceHandle_t implementation.
+
+Thu Sep  3 16:22:45 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DdsDcpsDomain.idl:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Supported following methods.
+
+                        get_discovered_participants
+                        get_discovered_participant_data
+                        get_discovered_topics
+                        get_discovered_topic_data implementations
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/ReceivedDataElementList.h:
+
+          Supported publication_handle setup in SampleInfo
+
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Added missing qos setup in built-in-topic data.
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Added get_discovered_participants and get_discovered_topics test cases
+          and verify SampleInfo publication_handle is set and consistent with
+          on_subscription_matched returned handle.
+
+Wed Sep  2 20:30:43 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Attempt to extract the BuiltinTopicKey_t value from Builtin
+          Topic samples and pass it into DataReaderImpl::get_next_handle().
+
+        * dds/DCPS/BuiltInTopicUtils.h:
+
+          keyFromSample<T>( T* sample)
+            - new template function to extract BuiltinTopicKey_t values
+              from samples, with specializations for the actual Builtin
+              Topic data types.  Other data types return an empty key.
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          get_instance_handle()
+            - lookup the instance handle in the DomainParticipant handle
+              mapping from RepoId values.
+
+          get_next_handle( const DDS::BuiltinTopicKey_t& key)
+            - added 'key' parameter to be used in generating handle
+              values for Builtin Topic data readers.  Implemented
+              obtaining handle values from the DomainParticipant handle
+              sequence.
+
+          lookup_instance_handles()
+            - implement RepoId to handle lookup using the
+              DomainParticipant mapping cache.
+
+          bit_lookup_instance_handles()
+          cache_lookup_instance_handles()
+            - obsolete / removed / replaced with calls to new
+              lookup_instance_handles() method.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          get_instance_handle()
+            - lookup the instance handle in the DomainParticipant handle
+              mapping from RepoId values.
+
+          lookup_instance_handles()
+            - implement RepoId to handle lookup using the
+              DomainParticipant mapping cache.
+
+          bit_lookup_instance_handles()
+          cache_lookup_instance_handles()
+            - obsolete / removed / replaced with calls to new
+              lookup_instance_handles() method.
+
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+
+          Added new HandleMap type and handles_ map member.  New
+          handle_protector_ mutex is used for a guard in the pattern of
+          other containers in this class.
+
+          Replaced subscriber_handles_ and publisher_handles_ handle
+          sequences with the single participant_handles_ sequence that is
+          used to generate all handle values within the DomainParticipant
+          and contained Entities.
+
+          get_instance_handle()
+            - lookup the instance handle in the mapping from RepoId
+              values.
+
+          contains_entity()
+            - modified to use direct comparisons.  Added guards to
+              protect container accesses.
+
+          get_handle()
+            - new method to obtain a new handle value or an existing
+              handle value for a given RepoId value.
+
+        * dds/DCPS/InstanceHandle.h:
+        * dds/DCPS/InstanceHandle.cpp:
+
+          InstanceHandleGenerator
+            - retained as a handle Sequence for generating all handle
+              values within the scope of a DomainParticipant.  The actual
+              values were simplified to be a monotonically increasing
+              numerical sequence with no embedded meta-information about
+              type.
+
+          InstanceHandleHelper
+            - removed
+
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          contains_writer()
+            - modified to use direct handle comparisons.  Protect
+              container access using the pi_lock_ member.
+
+        * dds/DCPS/RepoIdBuilder.h:
+        * dds/DCPS/RepoIdBuilder.inl:
+
+          from_BuiltinTopicKey()
+            - changed argument type to const reference.
+
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          contains_reader()
+            - modified to use direct handle comparisons.  Protect
+              container access using the si_lock_ member.
+
+        * dds/DCPS/TopicDescriptionImpl.h:
+        * dds/DCPS/TopicDescriptionImpl.cpp:
+
+          Construct and store a DomainParticipantImpl pointer instead of
+          the more generic DDS::DomainParticipant_ptr.
+
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Pass DomainParticipantImpl pointer to base class constructor
+          instead of the more generic DDS::DomainParticipant_ptr.
+
+          get_instance_handle()
+            - lookup the instance handle in the DomainParticipant handle
+              mapping from RepoId values.
+
+        * tests/DCPS/DestinationOrder/main.cpp:
+
+          Extract the actual reader instance value before taking the
+          instance data.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+
+          Change handle value extraction to match new handle extraction
+          idiom.
+
+Tue Sep  1 20:35:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/main.cpp:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          Fixed various GCC warnings.
+
+Mon Aug 31 20:45:26 UTC 2009  Trevor Fields  <fields_t@ociweb.com>
+
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Publication.h:
+
+          Remove the publications from the system after they finish
+          publishing.
+
+        * performance-tests/Bench/bin/run_test:
+
+          Added ability to hit Enter to shutdown tests with no duration specified.
+
+Fri Aug 28 23:15:06 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/InstanceState.cpp:
+
+          Fixed minor issue where timer task was not properly being
+          tracked.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ReaderDataLifecycle:
+        * tests/DCPS/ReaderDataLifecycle/ReaderDataLifecycle.mpc:
+        * tests/DCPS/ReaderDataLifecycle/main.cpp:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+        * tests/DCPS/ReaderDataLifecycle/tcp.conf:
+
+          Added new test for READER_DATA_LIFECYCLE QoS policy implementation.
+
+Fri Aug 28 21:55:12 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Presentation:
+        * tests/DCPS/Presentation/Presentation.mpc:
+        * tests/DCPS/Presentation/main.cpp:
+        * tests/DCPS/Presentation/run_test.pl:
+        * tests/DCPS/Presentation/tcp.conf:
+
+          Added new tests for PRESENTATION QoS policy implementation.
+
+Fri Aug 28 19:30:37 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          Final round of updates to TIME_BASED_FILTER implementation and
+          testing.
+
+Fri Aug 28 16:56:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          Fixes to GCC warnings.
+
+Thu Aug 27 22:31:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed minor bug in TIME_BASED_FILTER implementation; instance_ptr
+          assignment should occur prior to filter_instance call.
+
+        * bin/dcps_tests.lst:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * tests/DCPS/TimeBasedFilter:
+        * tests/DCPS/TimeBasedFilter/TimeBasedFilter.mpc:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+        * tests/DCPS/TimeBasedFilter/run_test.pl:
+        * tests/DCPS/TimeBasedFilter/tcp.conf:
+
+          Added new test for TIME_BASED_FILTER QoS policies.
+
+Thu Aug 27 19:02:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Fixed annoying GCC 4.3.x warning; apparently GCC doesn't expect
+          anyone to have a proper grasp of order of operations.
+
+Thu Aug 27 17:56:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+
+          Updated coherent_samples to use a known integer size (ACE_UINT32);
+          this fixes problems on hosts (i.e. Mac OS X) which define differing
+          std::size_t sizes.
+
+Wed Aug 26 23:05:28 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Updated ordered_access support to make better use of existing
+          primitives offered by QueryCondition.
+
+Wed Aug 26 21:16:21 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Updates to RakeResults to better handle PRESENTATION
+          access_scope.
+
+Wed Aug 26 18:09:52 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Fixed various GCC warnings.
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Fixed compiler failure resulting from bad test harness.
+
+Wed Aug 26 00:02:48 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+
+          Fixed inconsistent qos issue from set_default_publisher_qos()
+          and set_default_subscriber_qos() calls.
+
+Tue Aug 25 23:14:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Added support for TIME_BASED_FILTER.
+          - Refactored data filtering. data_expired has been renamed
+            to filter_sample and a new filter_instance method has been
+            added.
+
+Tue Aug 25 21:38:02 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          - According to spec 1.2, Samples that contain no data do not
+            count towards the limits imposed by the RESOURCE_LIMITS QoS policy
+            so the oldest sample is not removed to impose the resource limit
+            requirement when unregister/dispose message arrives.
+          - This fixed access violation when trying to add dispose sample
+            to instance after instance is released during removing last
+            sample.
+          - Made DataReader ignore the unregister/dispose message when it does
+            not cause state change. This resolved the issue of duplicate
+            notifications for unregister or dispose event.
+
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.h:
+
+          Made dispose_was_received, unregister_was_received  return a bool value
+          to indicate whether it causes instance state change. If it does, the
+          unregister or dispose notification sample is added and the listener
+          on_data_avaiable is called.
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Moved dispose() call before unregister operation in
+          unregister_instance_i() to follow spec 1.2.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          - Turn on unregister_instance() call in delete_datawriter().
+          - Moved persist_data() call before unregister_instance()
+            call in delete_datawriter() since unregister_instance()
+            causes instance dispose if autodispose_unregistered_instances is
+            enabled.
+
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Passed the DataReaderImpl reference to constructor. This solved
+          problem that access reader servant via instance crashes after taking
+          last sample which probably causes instance release.
+
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+
+          Added unregister/dispose notification sample checking and not forward
+          unregister/dispose samples.
+
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.cpp:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+
+          - Made the test just count dispose/unregister notification before
+            delete_datawriter() call as now the delete_datawriter() will send
+            dispose and unregister message to reader.
+          - Changed expected unregister event notification to 0 since dispose
+            arrives before unregister notification and taking dispose sample
+            cause instance dispose so unregister message is ignored.
+
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+
+          Added unregister/dispose notification sample checking to avoid errors.
+
+Tue Aug 25 18:04:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+
+          Added support for PRESENTATION ordered_access.
+
+Mon Aug 24 22:06:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Added additional checks to ensure FooDataReaderImpl does not
+          read/take coherent change samples.
+
+Mon Aug 24 21:43:38 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+
+          Updates to remove some compiler errors using gcc.
+
+Mon Aug 24 20:44:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/ReceivedDataElementList.h:
+        * dds/DCPS/ReceivedDataElementList.cpp:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          Added support for non-default PRESENTATION QoS policies (read).
+
+Mon Aug 24 15:55:16 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/Qos_Helper.inl:
+          Enabled DEADLINE/TIME_BASED_FILTER consistency checking.
+          Changed valid PRESENTATION policies to check for valid
+          access_scope members.
+
+        * dds/InfoRepo/DCPS_IR_Publication.cpp:
+        * dds/InfoRepo/DCPS_IR_Subscription.cpp:
+        * dds/InfoRepo/DCPS_Utils.h:
+
+          compatibleQos( PublisherQos, SubscriberQos)
+            - modified added reader and writer status to signature.
+
+        * dds/InfoRepo/DCPS_Utils.cpp:
+
+          compatibleQos( DCPS_IR_Publication, DCPS_IR_Subscription)
+            - added call to qos compatibilty checking method.
+          compatibleQos( PublisherQos, SubscriberQos, ...)
+            - implemented compatibility checking.
+
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+
+          Modified tests to accommodate new compatibility and validity
+          implementations.
+
+Fri Aug 21 18:39:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Updated persistent behavior. We no longer persist any samples that
+          belonged to a coherent change group; instead, a new follow-on task
+          to persistence profile conformance will be added.
+
+Fri Aug 21 16:42:33 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.cpp:
+
+          Implicitly inlined == and != operators and applied missing
+          const qualifier; this fixes build failures on hosts using
+          GCC.
+
+Fri Aug 21 00:19:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/main.cpp:
+
+          Added missing ACE_TEXT around cur_arg_strncasecmp argument.
+
+Thu Aug 20 23:57:23 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataSampleList.h:
+        * dds/DCPS/DataSampleList.inl:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Added support for non-default PRESENTATION QoS policies (write).
+
+Thu Aug 20 16:59:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Removed obsolete comments for release with specific transport method.
+
+Thu Aug 20 15:10:48 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+
+          Changed final test condition check to reflect new (correct)
+          instance state behavior.
+
+Wed Aug 19 23:10:11 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleHeader.h:
+        * dds/DCPS/DataSampleHeader.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Initial changes to support non-default PRESENTATION QoS policies:
+          - Updated DataSampleHeader to support coherent groups
+          - Fixed byte ordering assignment issues (referenced wrong flag)
+          - Updated flag operations; refactored update_flag method to
+            inlined clear_flag and set_flag methods.
+
+Wed Aug 19 16:24:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Disabled unregister on delete in delete_datawriter; this issue
+          needs to be investigated further when there is more time.
+
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+        * dds/DCPS/transport/framework/TransportInterface.h:
+
+          Reverted transport interface changes.
+
+Tue Aug 18 23:56:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+
+          Changed store_instance_data return type to void; unregister
+          and dispose on a non-registered instance no longer emits a
+          warning.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Re-enabled autodispose for scoreboard testing.
+
+        * dds/DCPS/transport/framework/TransportFactory.h:
+        * dds/DCPS/transport/framework/TransportFactory.cpp:
+
+          Removed single argument variant of release; no code uses
+          this method and its use can cause dangerous consequences
+          (i.e. reactor task referencing invalid data).
+
+        * dds/DCPS/transport/framework/TransportInterface.h:
+
+          Promoted detach_transport to public scope to match
+          attach_transport.
+
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+
+          Updated test to better configure transports; dropped use
+          of single argument version of TransportFactory::release.
+
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:
+
+          Updated test to only track valid data samples (fixes
+          spurious scoreboard errors).
+
+Sun Aug 16 19:17:56 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.inl:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.h:
+        * dds/DCPS/transport/simpleTCP/SimpleTcpTransport.cpp:
+
+          Fixed a problem in transport that possibly creates multiple links
+          to same remote. The problem occurs when new association comes while
+          the previous link is declared to be released but is in pending release.
+          The fix is to keep track the pending released datalinks and reuse the
+          datalink if the datalink release is still pending when a new association
+          comes.
+
+          This problem is observered in thrash high test with following errors
+          on publisher.
+
+          "ERROR: SimpleTcpTransport::passive_connection() - connection with
+          oci1176.ociweb.com:39384 at priority 0 already exists, overwriting
+          previously established connection."
+
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.h:
+        * dds/DCPS/transport/ReliableMulticast/ReliableMulticastTransportImpl.cpp:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.h:
+        * dds/DCPS/transport/simpleUnreliableDgram/SimpleUnreliableDgramTransport.cpp:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.h:
+        * performance-tests/DCPS/dummyTCP/DummyTcpTransport.cpp:
+
+          Updated for the release_datalink_i() signature changes.
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed a bug that use an invalid iterator after erasing to continue
+          iterating.
+
+Sun Aug 16 06:36:51 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/InstanceState.cpp:
+
+          Dropped unused argument.
+
+Fri Aug 14 22:54:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/ReceivedDataElementList.cpp:
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Bugfixes to READER_DATA_LIFECYCLE support.
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Commented out unregister on delete; causes stack corruption on
+          associated readers when data is received (requires further
+          research).
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Updated QoS defaults; stripped trailing spaces.
+
+Thu Aug 13 22:58:29 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/unit/MyTypeSupportImpl.h:
+
+          Added missing implementation for MyDataReaderImpl::release_data.
+
+Thu Aug 13 22:43:00 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/README:
+        * java/jms/src/org/opendds/jms/qos/ParticipantQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/PublisherQosPolicy.java:
+        * java/jms/src/org/opendds/jms/qos/SubscriberQosPolicy.java:
+
+          Enabled support for ENTITY_FACTORY QoS.
+
+Thu Aug 13 22:17:02 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/SubscriptionInstance.h:
+
+          Added support for READER_DATA_LIFECYCLE.
+
+Thu Aug 13 19:01:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Re-enabled unregister on delete for scoreboard testing.
+
+        * dds/DCPS/Qos_Helper.inl:
+
+          Added missing validation checks for WRITER_DATA_LIFECYCLE.
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SimpleDataReader.cpp:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Fixed failing scoreboard test; merged with previous commit.
+          autodispose_unregistered_instances must be set to false for
+          meaningful results in this test.
+
+Thu Aug 13 17:09:18 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/SimpleDataReader.cpp:
+
+          Added message_id_ debug info.
+
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Added one more expected message as the writer_data_lifecycle
+          qos was supported now. The default
+          autodispose_unregistered_instances is 1 which add dispose
+          message upon unregister_instance() call.
+
+Thu Aug 13 04:41:21 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.inl:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Made last_publication_handle in liveliness_changed_status
+          updated when count is changed. The handle is added to
+          WriterInfo and the methods(e.g. writer_become_active,
+          writer_become_dead, etc) that changes the status are
+          passed with WriterInfo so it can access the handle.
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Supported liveliness lost callback. The liveliness timer
+          for AUTOMATIC_LIVELINESS_QOS is also used for liveliness
+          lost status update.
+
+        * dds/DCPS/RakeResults_T.h:
+
+          Fixed a warning.
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.h:
+        * tests/DCPS/ManualAssertLiveliness/DataWriterListenerImpl.cpp:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+
+          Added DataWriter liveliness lost callback test case.
+
+Wed Aug 12 19:11:05 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Temporarily remove a change to allow isolated debugging.
+
+Wed Aug 12 16:31:41 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+          Fixed a bug in handle_input() that did not completely process
+          the received data during handle_input in some cases. It returned
+          from handle_input whenever there is a message with no data (e.g.
+          liveliness message) even there are more data in receiving buffer.
+          Since 'amount' is the min value of length of sample data not read
+          and the length of left data in receiving buffer, when there is a
+          message with no data (e.g.liveliness), the amount is always 0
+          so it returns from handle_input. The fix would be return when no
+          sample data left and also no data in receiving buffer instead of
+          just no sample data left.
+
+          This problem was observed in ManualAssertLiveliness test.
+
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+
+          Updated number of liveliness changed callbacks.
+
+        * tests/DCPS/ManualAssertLiveliness/README:
+
+          Added description.
+
+        * bin/dcps_tests.lst:
+
+          Added ManualAssertLiveliness tests.
+
+Tue Aug 11 22:26:53 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          - Added support for WRITER_DATA_LIFECYCLE
+          - PublisherImpl::delete_datawriter causes a DataWriter to
+            properly unregister all registered instances prior to deletion.
+
+Tue Aug 11 17:29:31 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed the deadlock situation that the deliver sample thread
+          (reactor thread) recursively acquires writers_lock_ read
+          lock while there is a waiting writer from add_associations
+          thread(orb thread) that acquires write lock. This was achieved
+          by allocating WriterInfo on heap and writers_ map maintains
+          the WriterInfo pointer so the received_activity() can be moved
+          out of the writers_lock_ scope in writer_activity() and the
+          WriterInfo internal state can be updated on single copy.
+
+Tue Aug 11 15:30:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/main.cpp:
+
+          Dropped unused local (caused scoreboard warnings).
+
+Tue Aug 11 04:42:34 UTC 2009  Yan Dai  <dai_y@yahoo.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+
+          Added support of MANUAL_BY_PARTICIPANT_LIVELINESS_QOS
+          and MANUAL_BY_TOPIC_LIVELINESS_QOS.
+
+          - Disabled automatic liveliness assertion for new
+            supported liveliness kind.
+          - Implemented assert_liveliness() for DomainParticipantImpl
+            and DataWriterImpl.
+          - Made DataWriterImpl::send_liveliness return status
+            code.
+          - Fixed the bugs in DataReader and DataWriter that non-zero
+            lease duration should be calculated when nanosec is not
+            infite as well.
+
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.h:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManualAssertLiveliness/Messenger.idl:
+        * tests/DCPS/ManualAssertLiveliness/Writer.h:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/pub.ini:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/sub.ini:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/tcp.conf:
+
+          Added new test for manual liveliness qos.
+
+Mon Aug 10 23:50:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RakeResults_T.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+
+          Fixed bug causing non-valid samples to be filtered out
+          unconditionally.
+
+Mon Aug 10 22:41:13 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Reverted back last commit as the changes showed some problem.
+          The deadlock situation needs other solutions.
+
+Mon Aug 10 19:55:50 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+
+          Fixed a deadlock situation that the deliver sample thread
+          (reactor thread) recursively acquires writers_lock_ read
+          lock while there is a waiting writer from add_associations
+          thread(orb thread) that acquires write lock. The WriterInfo
+          received_activity() was moved out of the writers_lock
+          read lock scope in writer_activity.
+
+Fri Aug  7 22:20:45 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+
+          Added missing include for ACE_OS::gettimeofday.
+
+Fri Aug  7 16:03:10 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/GuidBuilder.h:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/RakeResults_T.cpp:
+        * dds/DCPS/ReceivedDataStrategy.h:
+        * dds/DCPS/ReceivedDataStrategy.cpp:
+        * dds/DCPS/SubscriptionInstance.h:
+
+          Added SOURCE_TIMESTAMP support for DESTINATION_ORDER.
+
+        * tests/DCPS/DestinationOrder:
+        * tests/DCPS/DestinationOrder/DestinationOrder.mpc:
+        * tests/DCPS/DestinationOrder/main.cpp:
+        * tests/DCPS/DestinationOrder/run_test.pl:
+        * tests/DCPS/DestinationOrder/tcp.conf:
+
+          Added new test for DESTINATION_ORDER implementation.
+
+        * bin/dcps_tests.lst:
+
+          Added nightly tests for SOURCE_TIMESTAMP and RECEPTION_TIMESTAMP
+          DESTINATION_ORDER.
+
+Thu Aug  6 20:32:51 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * docs/design/presentation.txt:
+
+          Added discussion about implementing the minimum profile portion
+          of the PRESENTATION Qos policy.  Included all relevant
+          specification sections and verbiage.
+
+Wed Aug  5 17:15:08 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Implemented Publisher::wait_for_acknowledgments.
+
+        * bin/dcps_tests.lst:
+
+          Added WaitForAck publisher test to nightly builds.
+
+        * tests/DCPS/WaitForAck/Options.h:
+        * tests/DCPS/WaitForAck/Options.inl:
+        * tests/DCPS/WaitForAck/Options.cpp:
+        * tests/DCPS/WaitForAck/Publisher.h:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/run_test.pl:
+
+          Updated WaitForAck test to cover publisher implementation.
+
+Tue Aug  4 22:10:49 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          - Fixed a bug in register_instance() that ACE_GUARD_RETURN
+            return nil handle instead of RETCODE_ERROR.
+          - Reset the instance handle to nil as return of register_instance()
+            if there are any errors encountered during registering.
+
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+
+          Modified datawriter and datareader enable test case. They can
+          not associate before enabled and are able to associate after
+          enable.
+
+Tue Aug  4 18:02:22 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+
+          Added DataWriter and DataReader lookup_instance() test cases.
+
+Tue Aug  4 17:16:55 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes regarding changes in QueryCondition.
+
+        * dds/DCPS/RakeResults_T.h:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+
+          Fixed issues preventing JMS tests from running correctly.
+
+Tue Aug  4 17:10:00 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Fixed unused variable warnings.
+
+Tue Aug  4 02:46:26 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+
+          Added lookup_instance() to DataWriter and DataReader
+          idl and implementations according to spec and removed
+          find_instance_handle() which is similar to the
+          lookup_instance() function.
+
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+
+          Added is_enabled() to access enabled_ flag.
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          Code updates according to spec:
+          - Calling enable on an already enabled Entity returns OK
+            and has no effect.
+          - Calling enable on an Entity whose factory is not enabled
+            will fail and return PRECONDITION_NOT_MET.
+          - Non-changeable qos can be changed prior to calling
+            the enable operation on the Entity.
+          - Removed enabled_ flag checking in factory delete_*
+            operations based on entity enable description that the
+            factory operations are allowed when entity is not enabled.
+
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+
+          Updated test as the entity factory autoenable qos are supported
+          now and is changeable.
+
+        * tests/DCPS/Deadline/subscriber.cpp:
+
+          Replaced find_instance_handle() call with lookup_instance().
+
+Mon Aug  3 19:18:22 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+
+          Dropped OpenDDS::DCPS::DEFAULT_STATUS_KIND_MASK in favor of
+          new IDL constant (OpenDDS::DCPS::DEFAULT_STATUS_MASK).
+
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/Bench/src/Process.cpp:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+        * wrapper/Topic_Manager_T.cpp:
+
+          Refactored C++ code to make use of new DEFAULT_STATUS_MASK
+          constant.
+
+Fri Jul 31 22:17:13 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+
+          Promoted OpenDDS::DCPS::DEFAULT_STATUS_MASK to IDL from
+          Definitions.h (cxx refactoring forthcoming).
+
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/tests/builtintopics/BuiltinTopicsTest.java:
+        * java/tests/complex_idl/ComplexIDLTest.java:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * java/tests/multirepo/MultiRepoBase.java:
+        * java/tests/multirepo/MultiRepoWorker.java:
+
+          Updated Java bindings to support DEFAULT_STATUS_MASK.
+
+Fri Jul 31 21:46:28 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * tests/DCPS/Priority/Subscriber.cpp:
+
+          Corrected a naming issue from the recent signature changes.
+
+Fri Jul 31 19:39:52 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+
+          - Moved subscription/publication registering with transport to
+            writer_enabled() and reader_enabled(). If the reader/writer
+            is not enabled, the repo id is invalid so it can not be used
+            to register with transport.
+          - Made reader_enabled() return status.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Reverted to previous version to not add test cases for
+          DomainParticipantFactory set_qos and get_qos and entity enable().
+
+        * tests/DCPS/DPFactoryQos/DPFactoryQos.mpc:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.h:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/Messenger.idl:
+        * tests/DCPS/DPFactoryQos/Writer.h:
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/tcp.conf:
+
+          Added new test for DomainParticipantFactory set_qos and
+          get_qos and entity enable() functions.
+
+        * bin/dcps_tests.lst:
+
+          Added DPFactoryQos test.
+
+Fri Jul 31 18:23:32 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/ConsumerDataReaderListener.java:
+        * java/jms/src/org/opendds/jms/DataWriterPair.java:
+        * java/jms/src/org/opendds/jms/MessageConsumerImpl.java:
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+        * java/jms/src/org/opendds/jms/PublisherManager.java:
+        * java/jms/src/org/opendds/jms/SubscriberManager.java:
+        * java/jms/src/org/opendds/jms/TopicImpl.java:
+        * java/jms/src/org/opendds/jms/qos/QosPolicies.java:
+        * java/jms/src/org/opendds/jms/resource/ManagedConnectionImpl.java:
+        * java/jms/test/org/opendds/jms/AbstractMessageImplTest.java:
+        * java/tests/builtintopics/BuiltinTopicsTest.java:
+        * java/tests/complex_idl/ComplexIDLTest.java:
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/messenger/subscriber/DataReaderListenerImpl.java:
+        * java/tests/messenger/subscriber/TestSubscriber.java:
+        * java/tests/multirepo/MultiRepoBase.java:
+        * java/tests/multirepo/MultiRepoWorker.java:
+
+          Refactored Java language support to accommdoate changes introduced
+          in r2314.
+
+Fri Jul 31 15:40:15 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * java/dds/dcps_java.mpc:
+
+          Reverted UserDataQosPolicy, GroupDataQosPolicy, and
+          TopicQosPolicy definitions to old values; use of CORBA::OctetSeq
+          caused issues when used from DdsDcpsInfrastructure.idl.
+
+Fri Jul 31 02:40:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DdsDcpsInfrastructure.idl:
+        * java/dds/dcps_java.mpc:
+
+          Fixes to java support; anonymous structs/arrays are not
+          supported by idl2jni.
+
+Thu Jul 30 23:24:42 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.h:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.inl:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.cpp:
+
+          - Fixed a bug in last commit that did not pass listener mask parameter
+            to PublisherImpl constructor.
+          - Implemented DomainParticipantFactoryImpl set_qos and get_qos.
+          - Made DomainParticipant auto enabled if DomainParticipantFactoryQos
+            autoenable_created_entities is 1.
+          - Updated DomainParticipant, Publisher, Subscriber, DataWriter,
+            DataReader enable() method according to spec:
+             "Calling enable on an Entity whose factory is not enabled will fail
+              and return PRECONDITION_NOT_MET."
+          - Removed code checking enabled_ flag for lookup_* methods. According
+            to spec, the lookup can be invoked when an Entity has not yet been
+            enabled.
+
+        * tests/DCPS/BuiltInTopic/main.cpp:
+
+          Added unit tests for DomainParticipantFactory set_qos and get_qos
+          and entity enable().
+
+Thu Jul 30 18:30:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/PublisherImpl.cpp:
+
+          Fixed warnings for unused arguments.
+
+Thu Jul 30 14:01:01 UTC 2009  Mike Martinez  <martinez_m@ociweb.com>
+
+        * wrapper/OpenDDS/OpenDDS_Publication_Manager.cpp:
+        * wrapper/OpenDDS/OpenDDS_Subscription_Manager.cpp:
+        * wrapper/Topic_Manager_T.cpp:
+
+          Added new StatusMask argument to create_*() calls.
+
+Thu Jul 30 02:08:33 UTC 2009  Yan Dai  <dai_y@ociweb.com>
+
+        These changes are part of minor API Modifications to
+        compliant with DDS 1.2 specification.
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantFactoryImpl.h:
+        * dds/DCPS/DomainParticipantFactoryImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/EntityImpl.h:
+        * dds/DCPS/EntityImpl.cpp:
+        * dds/DCPS/FailoverListener.h:
+        * dds/DCPS/FailoverListener.cpp:
+        * dds/DCPS/PublisherImpl.h:
+        * dds/DCPS/PublisherImpl.cpp:
+        * dds/DCPS/Qos_Helper.inl:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/RepoIdBuilder.inl:
+        * dds/DCPS/RepoIdConverter.cpp:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StatusConditionImpl.h:
+        * dds/DCPS/StatusConditionImpl.cpp:
+        * dds/DCPS/SubscriberImpl.h:
+        * dds/DCPS/SubscriberImpl.cpp:
+        * dds/DCPS/TopicImpl.h:
+        * dds/DCPS/TopicImpl.cpp:
+        * dds/DCPS/WaitSet.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DdsDcpsDataReaderRemote.idl:
+        * dds/DdsDcpsDataWriterRemote.idl:
+        * dds/DdsDcpsDomain.idl:
+        * dds/DdsDcpsInfrastructure.idl:
+        * dds/DdsDcpsPublication.idl:
+        * dds/DdsDcpsSubscription.idl:
+        * dds/DdsDcpsSubscriptionExt.idl:
+        * dds/DdsDcpsTopic.idl:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+        * dds/InfoRepo/DomainParticipantListener_i.h:
+        * dds/InfoRepo/DomainParticipantListener_i.cpp:
+        * dds/InfoRepo/FederatorManagerImpl.cpp:
+        * dds/InfoRepo/UpdateListener_T.h:
+        * dds/InfoRepo/UpdateListener_T.cpp:
+
+          Main changes:
+
+          1) Constant names changes
+             - renamed PUBLICATION_MATCH_STATUS to PUBLICATION_MATCHED_STATUS
+             - renamed DURATION_INFINITY_SEC to DURATION_INFINITE_SEC
+             - renamed DURATION_INFINITY_NSEC to DURATION_INFINITE_NSEC
+             - renamed TIMESTAMP_INVALID_SEC to TIME_INVALID_SEC
+             - renamed TIMESTAMP_INVALID_NSEC to TIME_INVALID_NSEC
+             - removed TRANSPORTPRIORITY_QOS_POLICY_NAME
+             - removed SampleStateSeq
+             - removed ViewStateSeq
+             - removed OctetSeq
+
+          2) Structure and type names changes
+             - Changed BuiltinTopicKey_t from an array to structure of
+               an array.
+             - Renamed StatusKindMask to StatusMask
+             - Renamed SubscriptionMatchStatus to SubscriptionMatchedStatus
+             - Renamed PublicationMatchStatus to PublicationMatchedStatus
+             - Removed service_cleanup_delay from DurabilityQosPolicy
+             - Added autopurge_disposed_samples_delay to
+               ReaderDataLifecycleQosPolicy
+             - Added ownership to DataReaderQos DataWriterQos,
+               PublicationBuiltinTopicData and SubscriptionBuiltinTopicData
+
+          3) Method names changes
+             - Renamed on_subscription_match to on_subscription_matched
+             - Renamed on_publication_match to on_publication_matched
+
+          4) Method signatures changes
+             - Added StatusMask parameter to create entity methods.
+               (e.g. create_topic)
+             - Changed set_qos, get_qos, get_*_status and assert_liveliness
+               to return error code.
+             - Uncommented out get_type_name from TypeSupport to be consistent
+               with spec. Aded get_type_name() to concrete TypeSupport idl. Used
+               _interface_repository_id instead of get_type_name to identify same
+               TypeSupport in Registered_Data_Types singleton so get_type_name()
+               is not be required to be defined in TypeSupport.
+             - Changed subsriber get_datareaders() reader parameter from out to
+               inout.
+
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger/stack_subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger/subscriber.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.h:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/DataReaderListener.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/publisher.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/subscriber.cpp:
+        * examples/DCPS/DistributedContent/AbstractionLayer.cpp:
+        * examples/DCPS/DistributedContent/FileInfoListener.h:
+        * examples/DCPS/DistributedContent/FileInfoListener.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/ExchangeEventDataReaderListenerImpl.h:
+        * examples/DCPS/IntroductionToOpenDDS/ExchangeEventDataReaderListenerImpl.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/QuoteDataReaderListenerImpl.h:
+        * examples/DCPS/IntroductionToOpenDDS/QuoteDataReaderListenerImpl.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/subscriber.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_IOGR_Imr/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/subscriber.cpp:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.h:
+        * examples/DCPS/Messenger_Imr/DataReaderListener.cpp:
+        * examples/DCPS/Messenger_Imr/publisher.cpp:
+        * examples/DCPS/Messenger_Imr/subscriber.cpp:
+        * performance-tests/Bench/src/DataReaderListener.h:
+        * performance-tests/Bench/src/DataReaderListener.cpp:
+        * performance-tests/Bench/src/EntityProfiles.cpp:
+        * performance-tests/Bench/src/Options.cpp:
+        * performance-tests/Bench/src/Process.cpp:
+        * performance-tests/Bench/src/Publication.h:
+        * performance-tests/Bench/src/Publication.cpp:
+        * performance-tests/Bench/src/Subscription.cpp:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.h:
+        * performance-tests/DCPS/InfoRepo_population/DataReaderListener.cpp:
+        * performance-tests/DCPS/InfoRepo_population/publisher.cpp:
+        * performance-tests/DCPS/InfoRepo_population/subscriber.cpp:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/McastListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/McastListenerTest/common.h:
+        * performance-tests/DCPS/McastListenerTest/publisher.cpp:
+        * performance-tests/DCPS/McastListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/Priority/DataReaderListener.h:
+        * performance-tests/DCPS/Priority/DataReaderListener.cpp:
+        * performance-tests/DCPS/Priority/Publisher.cpp:
+        * performance-tests/DCPS/Priority/Subscriber.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Reader.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/common.h:
+        * performance-tests/DCPS/SimpleE2ETest/publisher.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/subscriber.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.h:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.h:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPListenerTest/common.h:
+        * performance-tests/DCPS/TCPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/TCPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.h:
+        * performance-tests/DCPS/TCPProfilingTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/common.h:
+        * performance-tests/DCPS/TCPProfilingTest/publisher.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/subscriber.cpp:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.h:
+        * performance-tests/DCPS/TransportLatency/DataReaderListener.cpp:
+        * performance-tests/DCPS/TransportLatency/publisher.cpp:
+        * performance-tests/DCPS/TransportLatency/subscriber.cpp:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.h:
+        * performance-tests/DCPS/UDPListenerTest/DataReaderListener.cpp:
+        * performance-tests/DCPS/UDPListenerTest/common.h:
+        * performance-tests/DCPS/UDPListenerTest/publisher.cpp:
+        * performance-tests/DCPS/UDPListenerTest/subscriber.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Reader.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/common.h:
+        * performance-tests/DCPS/UDPNoKeyTest/publisher.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/subscriber.cpp:
+        * tests/DCPS/BuiltInTopic/main.cpp:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.h:
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.h:
+        * tests/DCPS/CompatibilityTest/DataReaderListener.cpp:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.h:
+        * tests/DCPS/CompatibilityTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/CompatibilityTest/common.cpp:
+        * tests/DCPS/CompatibilityTest/publisher.cpp:
+        * tests/DCPS/CompatibilityTest/subscriber.cpp:
+        * tests/DCPS/CorbaSeq/DataReaderListener.h:
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.h:
+        * tests/DCPS/DcpsIntegration/DomainParticipantListener.cpp:
+        * tests/DCPS/DcpsIntegration/infrastructure.cpp:
+        * tests/DCPS/DcpsIntegration/topic.cpp:
+        * tests/DCPS/Deadline/DataReaderListener.h:
+        * tests/DCPS/Deadline/DataReaderListener.cpp:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.h:
+        * tests/DCPS/Deadline/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/Dispose/main.cpp:
+        * tests/DCPS/Federation/DataReaderListener.h:
+        * tests/DCPS/Federation/DataReaderListener.cpp:
+        * tests/DCPS/Federation/DataWriterListenerImpl.h:
+        * tests/DCPS/Federation/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Federation/Publisher.cpp:
+        * tests/DCPS/Federation/Subscriber.cpp:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest3/main.cpp:
+        * tests/DCPS/FooTest3NoKey/main.cpp:
+        * tests/DCPS/FooTest3_0/DataWriterListener.h:
+        * tests/DCPS/FooTest3_0/DataWriterListener.cpp:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.h:
+        * tests/DCPS/FooTest3_0/DomainParticipantListener.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/PublisherListener.h:
+        * tests/DCPS/FooTest3_0/PublisherListener.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_2/PubDriver.cpp:
+        * tests/DCPS/FooTest4/main.cpp:
+        * tests/DCPS/FooTest4_0/DataReaderListener.h:
+        * tests/DCPS/FooTest4_0/DataReaderListener.cpp:
+        * tests/DCPS/FooTest4_0/Reader.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest4_0/main.cpp:
+        * tests/DCPS/FooTest5/DataReaderListener.h:
+        * tests/DCPS/FooTest5/DataReaderListener.cpp:
+        * tests/DCPS/FooTest5/common.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/GuardCondition/GuardConditionTest.cpp:
+        * tests/DCPS/LatencyBudget/DataReaderListener.h:
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.h:
+        * tests/DCPS/LatencyBudget/DataWriterListenerImpl.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/Lifespan/DataReaderListener.h:
+        * tests/DCPS/Lifespan/DataReaderListener.cpp:
+        * tests/DCPS/Lifespan/DataWriterListenerImpl.h:
+        * tests/DCPS/Lifespan/DataWriterListenerImpl.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+        * tests/DCPS/LivelinessTest/DataReaderListener.h:
+        * tests/DCPS/LivelinessTest/DataReaderListener.cpp:
+        * tests/DCPS/LivelinessTest/publisher.cpp:
+        * tests/DCPS/LivelinessTest/subscriber.cpp:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataReaderListenerImpl.cpp:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.h:
+        * tests/DCPS/LivelinessTimeout/DataWriterListenerImpl.cpp:
+        * tests/DCPS/LivelinessTimeout/publisher.cpp:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+        * tests/DCPS/MultiDPTest/DataReaderListener.h:
+        * tests/DCPS/MultiDPTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiDPTest/publisher.cpp:
+        * tests/DCPS/MultiDPTest/subscriber.cpp:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.h:
+        * tests/DCPS/MultiRepoTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.h:
+        * tests/DCPS/MultiRepoTest/ForwardingListener.cpp:
+        * tests/DCPS/MultiRepoTest/TestMonitor.cpp:
+        * tests/DCPS/MultiRepoTest/TestSystem.cpp:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.h:
+        * tests/DCPS/MultiTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/MultiTopicTest/common.h:
+        * tests/DCPS/MultiTopicTest/publisher.cpp:
+        * tests/DCPS/MultiTopicTest/subscriber.cpp:
+        * tests/DCPS/NotifyTest/DataReaderListener.h:
+        * tests/DCPS/NotifyTest/DataReaderListener.cpp:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/Partition/DataReaderListener.h:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/DataWriterListener.h:
+        * tests/DCPS/Partition/DataWriterListener.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/PersistentDurability/DataReaderListener.h:
+        * tests/DCPS/PersistentDurability/DataReaderListener.cpp:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/PersistentDurability/DataWriterListenerImpl.cpp:
+        * tests/DCPS/PersistentDurability/publisher.cpp:
+        * tests/DCPS/PersistentDurability/subscriber.cpp:
+        * tests/DCPS/Priority/DataReaderListener.h:
+        * tests/DCPS/Priority/DataReaderListener.cpp:
+        * tests/DCPS/Priority/Publisher.cpp:
+        * tests/DCPS/Priority/Subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.h:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/QueryCondition/QueryConditionTest.cpp:
+        * tests/DCPS/ReadCondition/ReadConditionTest.cpp:
+        * tests/DCPS/Reconnect/DataReaderListener.h:
+        * tests/DCPS/Reconnect/DataReaderListener.cpp:
+        * tests/DCPS/Reconnect/DataWriterListener.h:
+        * tests/DCPS/Reconnect/DataWriterListener.cpp:
+        * tests/DCPS/Reconnect/publisher.cpp:
+        * tests/DCPS/Reconnect/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.h:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.h:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+        * tests/DCPS/SimpleFooTest/main.cpp:
+        * tests/DCPS/StatusCondition/StatusConditionTest.cpp:
+        * tests/DCPS/StringKey/DataReaderListener.h:
+        * tests/DCPS/StringKey/DataReaderListener.cpp:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.h:
+        * tests/DCPS/Thrasher/DataReaderListenerImpl.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+        * tests/DCPS/TransientDurability/DataReaderListener.h:
+        * tests/DCPS/TransientDurability/DataReaderListener.cpp:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.h:
+        * tests/DCPS/TransientDurability/DataWriterListenerImpl.cpp:
+        * tests/DCPS/TransientDurability/publisher.cpp:
+        * tests/DCPS/TransientDurability/subscriber.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.h:
+        * tests/DCPS/TransientLocalTest/DataWriterListenerImpl.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/UnitTests/LivelinessCompatibility.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/WaitForAck/Publisher.cpp:
+        * tests/DCPS/WaitForAck/Subscriber.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+        * tests/DCPS/sub_init_loop/subscriber.cpp:
+        * tests/DCPS/unit/Main.cpp:
+        * wrapper/DataReader_Listener_Base.h:
+        * wrapper/DataReader_Listener_Base.inl:
+        * wrapper/OpenDDS/OpenDDS_Domain_Manager.cpp:
+
+          Updated to accommodate changes in idl.
+
+Wed Jul 29 22:31:19 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/compat/build.xml:
+        * java/jms/example/jbossesb/helloworld/src/opendds-ds.xml:
+        * java/jms/example/jbossesb/helloworld2/src/opendds-ds.xml:
+
+          Updated OpenDDS release version to 1.3.
+
+Wed Jul 29 22:07:58 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Dispose:
+
+          Renamed Instance test to Dispose.
+
+Wed Jul 29 21:22:18 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+        * dds/DCPS/InstanceState.cpp:
+
+          Adjusted callback ordering by forcing dispose and unregister
+          transitions to always pend releases based on non-valid sample
+          insertions.
+
+Tue Jul 28 20:07:03 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * dds/DdsDcps.mpc:
+        * rules.dds.GNU:
+
+          Refactored the way DDS interacts with gnuace.
+
+Tue Jul 28 18:59:34 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/jms/src/org/opendds/jms/MessageProducerImpl.java:
+
+          Updated JMS producer to dispose of instances after sending
+          messages.
+
+Tue Jul 28 18:43:30 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * java/tests/messenger/publisher/TestPublisher.java:
+        * java/tests/multirepo/MultiRepoWorker.java:
+
+          Updated missed java tests to make use of refactored instance
+          operations.
+
+Tue Jul 28 17:50:42 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * bin/DCPS/CPPTemplate.pm:
+
+          Fixed an incorrect ordering of callbacks for dispose/unregister;
+          this was causing non-valid data samples to be dropped.
+
+Tue Jul 28 14:17:05 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * 14a_README:
+
+          Removed this file.  TAO 1.4a is no longer supported.
+
+Mon Jul 27 23:20:44 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+
+          Updated release notes with instance operation changes.
+
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/DCPS/HTemplate.pm:
+        * bin/DCPS/IDLTemplate.pm:
+        * dds/DCPS/DataDurabilityCache.cpp:
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DdsDcpsPublication.idl:
+        * dds/InfoRepo/DCPS_IR_Domain.cpp:
+
+          Updated instance operations to comply with formal/07-01-01.
+
+        * DevGuideExamples/DCPS/Messenger/Writer.cpp:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Writer.cpp:
+        * examples/DCPS/IntroductionToOpenDDS/publisher.cpp:
+        * examples/DCPS/Messenger_IOGR_Imr/Writer.cpp:
+        * examples/DCPS/Messenger_Imr/Writer.cpp:
+        * performance-tests/DCPS/InfoRepo_population/Writer.cpp:
+        * performance-tests/DCPS/McastListenerTest/Writer.cpp:
+        * performance-tests/DCPS/SimpleE2ETest/Writer.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/SubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_pub.cpp:
+        * performance-tests/DCPS/TCPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/TCPProfilingTest/Writer.cpp:
+        * performance-tests/DCPS/TransportLatency/Writer.cpp:
+        * performance-tests/DCPS/UDPListenerTest/Writer.cpp:
+        * performance-tests/DCPS/UDPNoKeyTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopic/common.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/CompatibilityTest/Writer.cpp:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/FooTest2/main.cpp:
+        * tests/DCPS/FooTest3/Writer.cpp:
+        * tests/DCPS/FooTest3NoKey/Writer.cpp:
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+        * tests/DCPS/FooTest4_0/Writer.cpp:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5_0/main.cpp:
+        * tests/DCPS/FooType2/FooDataWriterImpl.h:
+        * tests/DCPS/FooType2/FooDataWriterImpl.cpp:
+        * tests/DCPS/Instance/main.cpp:
+        * tests/DCPS/LatencyBudget/Writer.cpp:
+        * tests/DCPS/Lifespan/Writer.cpp:
+        * tests/DCPS/LivelinessTest/Writer.cpp:
+        * tests/DCPS/LivelinessTimeout/Writer.cpp:
+        * tests/DCPS/MultiDPTest/Writer.cpp:
+        * tests/DCPS/MultiTopicTest/Writer.cpp:
+        * tests/DCPS/NotifyTest/Writer.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/PersistentDurability/Writer.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.cpp:
+        * tests/DCPS/Reconnect/Writer.cpp:
+        * tests/DCPS/SetQosDeadline/Writer.cpp:
+        * tests/DCPS/SetQosPartition/Writer.cpp:
+        * tests/DCPS/StringKey/Writer.cpp:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/TransientDurability/Writer.cpp:
+        * tests/DCPS/TransientLocalTest/Writer.cpp:
+        * tests/DCPS/ViewState/main.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/DCPS/sub_init_loop/Writer.cpp:
+        * wrapper/example/publisher.cpp:
+
+          Updated examples, tests, and DevGuideExamples to make use
+          of refactored instance operations.
+
+Mon Jul 27 19:28:40 UTC 2009  Steven Stallion  <stallions@ociweb.com>
+
+        * DDS_release_notes.txt:
+        * bin/DCPS/CPPTemplate.pm:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/InstanceState.h:
+        * dds/DCPS/InstanceState.inl:
+        * dds/DCPS/InstanceState.cpp:
+        * tests/DCPS/Instance/main.cpp:
+
+          Re-applied instance changes (r2279, r2286) to trunk with
+          additional changes to correct invalid container modifications.
+
+Mon Jul 27 19:17:48 UTC 2009  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/modules/IDLBase.pm:
+
+          Resolved a Perl warning.
+
+        * DDS_release_notes.txt:
+        * README:
+
+          Updated with placeholders for the 1.4 release.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

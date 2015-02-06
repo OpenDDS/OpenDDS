@@ -1,0 +1,4 @@
+A basic liveliness timeout test of DDS.  Multiple publishers are created and one subscriber.  One of the publishers has an inflated liveliness factor so it will miss its deadline.  This test is to verify RT#12036.
+
+run_test.pl
+  Run a separate publisher and subscriber process.

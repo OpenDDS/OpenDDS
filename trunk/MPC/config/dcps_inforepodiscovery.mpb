@@ -1,0 +1,4 @@
+project: dcps {
+  after += OpenDDS_InfoRepoDiscovery
+  libs  += OpenDDS_InfoRepoDiscovery
+}

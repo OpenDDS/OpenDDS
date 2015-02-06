@@ -1,0 +1,9 @@
+project(DDS*Node) : dcpsexe {
+  exename   = node
+  requires += built_in_topics
+
+  TypeSupport_Files {
+    FileInfo.idl
+  }
+
+}
