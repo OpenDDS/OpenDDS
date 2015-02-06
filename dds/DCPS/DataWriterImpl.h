@@ -214,6 +214,8 @@ public:
     OpenDDS::DCPS::PublisherImpl*         publisher_servant,
     DDS::DataWriter_ptr                   dw_local);
 
+  void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
+
   /**
    * Delegate to the WriteDataContainer to register
    * Must tell the transport to broadcast the registered
@@ -223,9 +225,7 @@ public:
   register_instance_i(
     DDS::InstanceHandle_t& handle,
     DataSample* data,
-    const DDS::Time_t & source_timestamp,
-    DataSampleHeader& header,
-    ACE_Message_Block*& registered_sample);
+    const DDS::Time_t& source_timestamp);
 
   /**
    * Delegate to the WriteDataContainer to register and tell

@@ -152,6 +152,9 @@ public:
    */
   ~WriteDataContainer();
 
+  DDS::ReturnCode_t
+  enqueue_control(DataSampleElement* control_sample);
+
   /**
    * Enqueue the data sample in its instance thread. This method
    * assumes there is an available space for the sample in the
@@ -274,6 +277,8 @@ public:
   void data_dropped(const DataSampleElement* element,
                     bool dropped_by_transport);
 
+  DDS::ReturnCode_t obtain_buffer_for_control(DataSampleElement*& element);
+
   /**
    * Allocate a DataSampleElement object and check the space
    * availability for newly allocated element according to qos settings.
@@ -387,8 +392,7 @@ private:
    * Called when data has been dropped or delivered and any
    * blocked writers should be notified
    */
-  void wakeup_blocking_writers (DataSampleElement* stale,
-                               PublicationInstance* instance);
+  void wakeup_blocking_writers (DataSampleElement* stale);
 
 private:
 

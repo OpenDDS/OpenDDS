@@ -1,6 +1,125 @@
-Tue Feb  3 19:21:49 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+Fri Feb  6 17:53:16 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * OpenDDS version 3.6 released.
+
+Thu Feb  5 22:48:51 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/InfoRepo/DCPSInfo_i.cpp:
+        * dds/InfoRepo/DCPS_IR_Participant.cpp:
+
+          Push error reporting out of find_*_reference up to caller to
+          decide if not finding the reference is indeed an error.
+
+        * tests/DCPS/FooTest3_2/Writer.cpp:
+
+          Fix assert to accept timeout on write.
+
+Thu Feb  5 22:41:27 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Updated new mechanism for sending control messages to
+          account for the control message tracker.
+          Removed unused parameter to register_instance_i().
+
+Thu Feb  5 01:19:23 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          Remove unused parameter.
+
+Wed Feb  4 22:04:21 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+
+          Updated criterion for allowing non-SAMPLE_DATA messages
+          wrapped in DataSampleElements to be compatilbe with Sedp's
+          use case (happens to send actual data with null PublicationInstance).
+
+Wed Feb  4 21:44:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Updated register_instance_from_durable_data to properly handle
+          registration control messages.
+
+Wed Feb  4 21:00:14 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Updated Dispose, Unregister, and Unregister and Dispose
+          control messages to follow register instance due to also
+          being assigned sequence numbers and needing to guarantee
+          delivery order.
+
+Wed Feb  4 19:06:03 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * NEWS:
+
+          Updates for release.
+
+        * dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h:
+        * dds/idl/HTemplate.txt:
+
+          These can be accessed by multiple threads, add lock to counters
+          and free list.
+
+Wed Feb  4 19:05:33 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+
+          Added a check for the allocator if the allocation failed.
+
+Wed Feb  4 18:55:22 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/transport/framework/TransportClient.cpp:
+        * dds/idl/CPPTemplate.txt:
+
+          DCPS layer to now use code added which allows
+          TransportSendControlElements to wrap DataSampleElements.  These are
+          used for instance state change messages which are considered
+          control, as opposed to data, but still have sequence numbers so they
+          should be managed by the WriteDataContainer and be placed on the
+          sending_list_ to maintain order.  Now handle sending and delivery of
+          these control messages as DataSampleElements but treated
+          differently.  Control messages can be differentiated from data
+          samples by the absence of a PublicationInstance. Currently only
+          registration control messages are handled.
+
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/Writer.cpp:
+        * tests/DCPS/FooTest5/publisher.cpp:
+
+          Modified FooTest5 to use WriterSync and added a printout for when
+          the writer actually writes a message to see the difference between
+          writing and receiving times.
+
+Wed Feb  4 14:51:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/DataLinkSet.h:
+        * dds/DCPS/transport/framework/DataLinkSet.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.h:
+        * dds/DCPS/transport/framework/TransportSendControlElement.inl:
+        * dds/DCPS/transport/framework/TransportSendControlElement.cpp:
+
+          Allow some TransportSendControlElements to wrap DataSampleElements.
+          These will be used for instance state change messages which are
+          considered control (as opposed to data) but still have a sequence
+          number so they will be managed on the sending list of the
+          WriteDataContainer to maintain order.
+          The code to use this at the DCPS layer (DataWriterImpl,
+          WriteDataContainer) will be added in a future commit.
 
 Tue Feb  3 18:54:40 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 

@@ -1348,6 +1348,13 @@ TAO_DDS_DCPSInfo_i::disassociate_subscription(
   DCPS_IR_Subscription* subscription;
   if (participant->find_subscription_reference(local_id, subscription)
       != 0 || subscription == 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(participantId);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(local_id);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::disassociate_subscription: ")
+               ACE_TEXT("participant %C could not find subscription %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(sub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
 
@@ -1383,6 +1390,13 @@ TAO_DDS_DCPSInfo_i::disassociate_publication(
   DCPS_IR_Publication* publication;
   if (participant->find_publication_reference(local_id, publication)
       != 0 || publication == 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(participantId);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(local_id);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::disassociate_publication: ")
+               ACE_TEXT("participant %C could not find publication %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(pub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Publication();
   }
 
@@ -1477,6 +1491,19 @@ void TAO_DDS_DCPSInfo_i::association_complete(DDS::DomainId_t domainId,
     sub->association_complete(remoteId);
   } else if (0 == partPtr->find_publication_reference(localId, pub)) {
     pub->association_complete(remoteId);
+  } else {
+    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+      OpenDDS::DCPS::RepoIdConverter part_converter(participantId);
+      OpenDDS::DCPS::RepoIdConverter local_converter(localId);
+      OpenDDS::DCPS::RepoIdConverter remote_converter(remoteId);
+      ACE_DEBUG((LM_WARNING,
+                 ACE_TEXT("(%P|%t) WARNING: TAO_DDS_DCPSInfo_i::association_complete: ")
+                 ACE_TEXT("participant %C could not find subscription or publication %C ")
+                 ACE_TEXT("to complete association with remote %C.\n"),
+                 std::string(part_converter).c_str(),
+                 std::string(local_converter).c_str(),
+                 std::string(remote_converter).c_str()));
+    }
   }
 }
 
@@ -1619,6 +1646,13 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_publication_qos(
   DCPS_IR_Publication* pub;
 
   if (partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(partId);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(dwId);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::update_publication_qos: ")
+               ACE_TEXT("participant %C could not find publication %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(pub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Publication();
   }
 
@@ -1688,6 +1722,13 @@ TAO_DDS_DCPSInfo_i::update_publication_qos(
   DCPS_IR_Publication* pub;
 
   if (partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(partId);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(dwId);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::update_publication_qos: ")
+               ACE_TEXT("participant %C could not find publication %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(pub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Publication();
   }
 
@@ -1725,6 +1766,13 @@ TAO_DDS_DCPSInfo_i::update_publication_qos(
   DCPS_IR_Publication* pub;
 
   if (partPtr->find_publication_reference(dwId, pub) != 0 || pub == 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(partId);
+    OpenDDS::DCPS::RepoIdConverter pub_converter(dwId);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::update_publication_qos: ")
+               ACE_TEXT("participant %C could not find publication %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(pub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Publication();
   }
 
@@ -1762,6 +1810,13 @@ CORBA::Boolean TAO_DDS_DCPSInfo_i::update_subscription_qos(
   }
 
   if (partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(partId);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(drId);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::update_subscription_qos: ")
+               ACE_TEXT("participant %C could not find subscription %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(sub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
 
@@ -1831,6 +1886,13 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos(
   }
 
   if (partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(partId);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(drId);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::update_subscription_qos: ")
+               ACE_TEXT("participant %C could not find subscription %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(sub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
 
@@ -1868,6 +1930,13 @@ TAO_DDS_DCPSInfo_i::update_subscription_qos(
   }
 
   if (partPtr->find_subscription_reference(drId, sub) != 0 || sub == 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(partId);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(drId);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::update_subscription_qos: ")
+               ACE_TEXT("participant %C could not find subscription %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(sub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
 
@@ -1899,6 +1968,13 @@ TAO_DDS_DCPSInfo_i::update_subscription_params(
 
   DCPS_IR_Subscription* sub;
   if (partPtr->find_subscription_reference(subscriptionId, sub) != 0) {
+    OpenDDS::DCPS::RepoIdConverter part_converter(participantId);
+    OpenDDS::DCPS::RepoIdConverter sub_converter(subscriptionId);
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: TAO_DDS_DCPSInfo_i::update_subscription_params: ")
+               ACE_TEXT("participant %C could not find subscription %C.\n"),
+               std::string(part_converter).c_str(),
+               std::string(sub_converter).c_str()));
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
 

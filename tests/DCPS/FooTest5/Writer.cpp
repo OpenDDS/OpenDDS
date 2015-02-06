@@ -41,6 +41,7 @@ template<class DT, class DW, class DW_var>
 
     for (int i = 0; i< num_samples_per_instance; i ++)
     {
+      ACE_DEBUG ((LM_INFO, ACE_TEXT("(%P|%t) write (%d).\n"), i));
       foo.x = (float)i;
 
       foo.values.length (sequence_length);

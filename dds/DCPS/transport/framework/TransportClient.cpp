@@ -864,7 +864,11 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
         // since they heard about it when they were inserted into the
         // send_links set.
         send_links.send_start(pub_links.in());
-        pub_links->send(cur);
+        if (cur->get_header().message_id_ != SAMPLE_DATA) {
+          pub_links->send_control(cur);
+        } else {
+          pub_links->send(cur);
+        }
       }
       if (cur != max_transaction_tail_) {
         // Move on to the next DataSampleElement to send.

@@ -6,6 +6,9 @@ Notes:
   for both publishing and subscribing clients, regardless of the
   discovery mechanism used (RTPS or InfoRepo).
 
+- DataWriters now release locks more quickly than before. This allows the
+  transport to be available to more threads when compared to 3.5.1.
+
 - Improved DDS specification compliance with regards to reliability,
   resource limits, and history qos settings.  Specifically, reliable
   data writers may block for max_blocking_time and potentially return
@@ -40,6 +43,10 @@ Fixes:
   the tcp transport.
 
 - Fixed some bugs in the OpenDDS IPv6 support.
+
+- Eliminate duplicate samples received during durable resend.
+
+- Fixed memory leak at shutdown time in modeling library.
 
 Tests:
 - Many updates to make test results more complete and deterministic.

@@ -41,6 +41,9 @@ public:
   /// Send to each DataLink in the set.
   void send(DataSampleElement* sample);
 
+  /// Send a control message that is wrapped in a DataSampleElement
+  void send_control(DataSampleElement* sample);
+
   /// Send control message to each DataLink in the set.
   SendControlStatus send_control(RepoId                  pub_id,
                                  TransportSendListener*  listener,

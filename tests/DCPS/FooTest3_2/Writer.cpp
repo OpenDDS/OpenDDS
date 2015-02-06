@@ -134,7 +134,8 @@ Writer::svc ()
 
       ret = foo_dw->write(foo,
                           handle);
-      TEST_CHECK (ret == ::DDS::RETCODE_OK);
+
+      TEST_CHECK ((ret == ::DDS::RETCODE_OK) || (ret == ::DDS::RETCODE_TIMEOUT));
 
       if (write_delay_msec_ > 0)
       {
