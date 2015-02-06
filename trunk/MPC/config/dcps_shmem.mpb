@@ -1,4 +1,0 @@
-project {
-  libs  += OpenDDS_Shmem
-  after += OpenDDS_Shmem
-}

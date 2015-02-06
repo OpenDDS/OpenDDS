@@ -1,6 +1,0 @@
-//
-// $Id$
-//
-
-project : dcpsexe, dcps_udp {
-}

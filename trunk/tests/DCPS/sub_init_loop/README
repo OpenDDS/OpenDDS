@@ -1,9 +1,0 @@
-$Id$
-
-Author: Ciju John (johnc at ociweb dot com)
-
-This test iterates repeatedly in the subscriber initialization loop.
-This is a stress test that emerged in scenarios seen in rt 9123.
-
-The test loop repeatedly initializes the subscriber, waits random
-time for connection establishment, then deletes everything.

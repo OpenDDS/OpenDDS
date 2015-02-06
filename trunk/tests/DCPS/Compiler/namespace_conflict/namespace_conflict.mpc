@@ -1,5 +1,0 @@
-project(DDS*): dcpsexe {
-  TypeSupport_Files {
-    Nsc.idl
-  }
-}

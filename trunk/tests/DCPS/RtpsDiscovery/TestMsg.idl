@@ -1,6 +1,0 @@
-
-#pragma DCPS_DATA_TYPE "TestMsg"
-
-struct TestMsg {
-  long value;
-};
