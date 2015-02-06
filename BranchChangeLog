@@ -1,3 +1,9 @@
+Fri Feb  6 19:47:30 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          TcpReconnect test can't run in safety profile.
+
 Fri Feb  6 18:51:05 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/GuidUtils.h:
