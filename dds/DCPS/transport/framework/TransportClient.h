@@ -283,8 +283,14 @@ private:
   // Configuration details:
 
   bool swap_bytes_, cdr_encapsulation_, reliable_, durable_;
-  ACE_Time_Value passive_connect_duration_;
 
+#ifdef ACE_LYNXOS_MAJOR
+public:
+#endif
+  ACE_Time_Value passive_connect_duration_;
+#ifdef ACE_LYNXOS_MAJOR
+private:
+#endif
 
   TransportLocatorSeq conn_info_;
 

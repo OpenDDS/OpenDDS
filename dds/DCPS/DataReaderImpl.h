@@ -746,10 +746,16 @@ private:
     ~LivelinessTimer() { }
 
     DataReaderImpl* data_reader_;
+
+#ifdef ACE_LYNXOS_MAJOR
+  public:
+#endif
     /// liveliness timer id; -1 if no timer is set
     long liveliness_timer_id_;
-
     void check_liveliness_i(bool cancel, const ACE_Time_Value& current_time);
+#ifdef ACE_LYNXOS_MAJOR
+  private:
+#endif
 
     int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
 
@@ -808,10 +814,17 @@ private:
   /// publications writing to this reader.
   typedef std::map<PublicationId, RcHandle<WriterInfo>,
                    GUID_tKeyLessThan> WriterMapType;
+
+#ifdef ACE_LYNXOS_MAJOR
+public:
+#endif
   WriterMapType writers_;
 
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
+#ifdef ACE_LYNXOS_MAJOR
+private:
+#endif
 
   /// Statistics for this reader, collected for each writer.
   StatsMapType statistics_;

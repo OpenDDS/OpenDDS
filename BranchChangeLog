@@ -1,3 +1,14 @@
+Fri Feb  6 21:12:24 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Work-arounds to compile under LynxOS-178's version of GCC with broken
+          nested classes (they don't have access to the private members of the
+          enclosing class).
+
 Fri Feb  6 19:47:30 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
