@@ -1,3 +1,13 @@
+Fri Feb  6 15:56:58 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated profile-based exclusions for new test cases merged from trunk.
+
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+
+          Updated to use PerlDDS::TestFramework after merge.
+
 Thu Feb  5 23:22:18 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r6920 through r6923
