@@ -1,3 +1,31 @@
+Mon Feb  9 21:16:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added transport debug logging.
+
+        * tests/DCPS/TcpReconnect/Args.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.cpp:
+        * tests/DCPS/TcpReconnect/Messenger.idl:
+        * tests/DCPS/TcpReconnect/TcpReconnect.mpc:
+        * tests/DCPS/TcpReconnect/Writer.h:
+        * tests/DCPS/TcpReconnect/Writer.cpp:
+        * tests/DCPS/TcpReconnect/publisher.cpp:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+        * tests/DCPS/TcpReconnect/subscriber.cpp:
+
+          Refactored TcpReconnect test to allow publisher to spawn and
+          kill the stub process instead of the perl script.  This allows
+          more deterministic timing for the disconnect and reconnect testing.
+          Also changed test validation logic to no longer validate that all
+          messages were received, but rather that during each phase of the
+          test messages were received -- suggesting that the reconnect was
+          successful.  Test phases were added to the messages being sent and
+          the phase is incremented each time the disconnect/reconnect occurs.
+          Validation on receiving all messages does not work due to forced
+          killing of the connection in which in flight messages might be lost.
+
 Mon Feb  9 16:20:28 UTC 2015  Jeff Schmitz  <jeffrey.j.schmitz@gmail.com>
 
         * OpenDDS version 3.6 released.

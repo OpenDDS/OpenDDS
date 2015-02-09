@@ -69,10 +69,13 @@ throw(CORBA::SystemException)
           valid_ = false;
         }
 
+        phases_.insert(message.phase_number).second;
+
         std::cout << "Message: subject    = " << message.subject.in() << std::endl
                   << "         subject_id = " << message.subject_id   << std::endl
                   << "         from       = " << message.from.in()    << std::endl
                   << "         count      = " << message.count        << std::endl
+                  << "         phase      = " << message.phase_number << std::endl
                   << "         text       = " << message.text.in()    << std::endl;
 
         if (std::string("Comic Book Guy") != message.from.in() &&
@@ -171,52 +174,33 @@ throw(CORBA::SystemException)
 bool DataReaderListenerImpl::is_valid() const
 {
   CORBA::Long expected = 0;
-  Counts::const_iterator count = counts_.begin();
-  bool valid_count = true;
-  while (count != counts_.end() && expected < num_messages) {
-    if (expected != *count) {
-      if (expected < *count) {
-        if (reliable_) {
-          // if missing multiple
-          const bool multi = (expected + 1 < *count);
-          std::cout << "ERROR: missing message" << (multi ? "s" : "")
-                    << " with count=" << expected;
-          if (multi) {
-            std::cout << " to count=" << (*count - 1);
-          }
-          std::cout << std::endl;
-          expected = *count;
-          // don't increment count;
-          valid_count = false;
-          continue;
-        }
-      }
-      else {
-        bool multi = false;
-        while (++count != counts_.end() && *count < expected) {
-          multi = true;
-        }
-        std::cout << "ERROR: received message" << (multi ? "s" : "")
-                  << " with a negative count" << std::endl;
-        valid_count = false;
+  Phases::const_iterator phases_itr = phases_.begin();
+  bool valid_phases = true;
+
+  while (phases_itr != phases_.end() && expected < (stub_kills + 1)) {
+    if (expected != *phases_itr) {
+      if (expected < *phases_itr) {
+        std::cout << "ERROR: did not receive message for phase: " << expected << std::endl;
+        expected = *phases_itr;
+        valid_phases = false;
         continue;
+      } else {
+        //This shouldn't happen ever.  Phase can't be less than expected.
+        std::cout << "ERROR: received message for phase " << *phases_itr
+                  << "when expecting for phase " << expected << std::endl;
+        valid_phases = false;
+        ++phases_itr;
       }
     }
-
     ++expected;
-    ++count;
+    ++phases_itr;
   }
 
-  if (count != counts_.end()) {
-    std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
-    valid_count = false;
-  }
-  // if didn't receive all the messages (for reliable transport) or didn't receive even get 1/4, then report error
-  else if ((int)counts_.size() < num_messages &&
-           (reliable_ || (int)(counts_.size() * 4) < num_messages)) {
-    std::cout << "ERROR: received " << counts_.size() << " messages, but expected " << num_messages << std::endl;
-    valid_count = false;
+  if (phases_itr != phases_.end()) {
+    std::cout << "ERROR: received messages with phase higher than expected values"
+              << "(current phases_iter is " << *phases_itr << ")" << std::endl;
+    valid_phases = false;
   }
 
-  return valid_ && valid_count;
+  return valid_ && valid_phases;
 }

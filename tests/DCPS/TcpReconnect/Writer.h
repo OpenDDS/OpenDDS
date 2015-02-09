@@ -26,9 +26,12 @@ public:
 
   bool is_finished() const;
 
+  void increment_phase();
+
 private:
   DDS::DataWriter_var writer_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> finished_instances_;
+  ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> writer_phase_;
 };
 
 #endif /* WRITER_H */

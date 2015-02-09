@@ -1722,6 +1722,8 @@ DataWriterImpl::enable()
 void
 DataWriterImpl::send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard)
 {
+  DBG_ENTRY_LVL("DataWriterImpl","send_all_to_flush_control",6);
+
   SendStateDataSampleList list;
 
   ACE_UINT64 transaction_id = this->get_unsent_data(list);

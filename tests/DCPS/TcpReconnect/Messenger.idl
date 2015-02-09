@@ -15,6 +15,7 @@ module Messenger {
     string from;
     string subject;
     long subject_id;
+    long phase_number;
     string text;
     long   count;
   };

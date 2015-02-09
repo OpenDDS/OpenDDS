@@ -24,8 +24,9 @@ bool reliable = false;
 bool wait_for_acks = false;
 
 Writer::Writer(DDS::DataWriter_ptr writer)
-  : writer_(DDS::DataWriter::_duplicate(writer)),
-    finished_instances_(0)
+  : writer_(DDS::DataWriter::_duplicate(writer))
+  , finished_instances_(0)
+  , writer_phase_(0)
 {
 }
 
@@ -43,6 +44,12 @@ Writer::start()
 }
 
 void
+Writer::increment_phase()
+{
+  ++writer_phase_;
+}
+
+void
 Writer::end()
 {
   wait();
@@ -54,38 +61,6 @@ Writer::svc()
   DDS::InstanceHandleSeq handles;
 
   try {
-    // Block until Subscriber is available
-    DDS::StatusCondition_var condition = writer_->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: wait failed!\n")));
-        ACE_OS::exit(-1);
-      }
-
-      if (writer_->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(-1);
-      }
-
-    } while (matches.current_count < 1);
-
-    ws->detach_condition(condition);
-
     // Write samples
     Messenger::MessageDataWriter_var message_dw
       = Messenger::MessageDataWriter::_narrow(writer_.in());
@@ -106,9 +81,15 @@ Writer::svc()
     message.subject      = "Review";
     message.text         = "Worst. Movie. Ever.";
     message.count        = 0;
+    message.phase_number = 0;
 
+    int sleep_between_writes_ms = 250000;
+    int writes_per_second = 1000000 / sleep_between_writes_ms;
+    int num_messages = (stub_kills + 1) * stub_duration * writes_per_second;
     for (int i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
+
+      message.phase_number = writer_phase_.value();
       do {
         error = message_dw->write(message, handle);
       } while (error == DDS::RETCODE_TIMEOUT);
@@ -120,7 +101,7 @@ Writer::svc()
       }
 
       message.count++;
-      ACE_OS::sleep(ACE_Time_Value(0, 250000));
+      ACE_OS::sleep(ACE_Time_Value(0, sleep_between_writes_ms));
     }
 
   } catch (const CORBA::Exception& e) {
