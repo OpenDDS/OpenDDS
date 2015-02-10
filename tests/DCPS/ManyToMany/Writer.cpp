@@ -47,7 +47,7 @@ namespace {
         ACE_OS::exit(-1);
       }
 
-      if (matches.current_count < (int)count) {
+      if (matches.current_count != (int)count) {
         if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("%N:%l: wait_for_match()")

@@ -1,3 +1,10 @@
+Tue Feb 10 21:25:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Fixed issue when using wait_for_match to wait for matches to
+          go down to zero, which previously didn't wait.
+
 Tue Feb 10 20:10:54 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/TcpReconnect/stub.cpp:
