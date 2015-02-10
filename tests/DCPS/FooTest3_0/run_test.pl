@@ -114,4 +114,7 @@ if ($status == 0) {
   print STDERR "test FAILED.\n";
 }
 
+unlink $dcpsrepo_ior;
+unlink $sub_ready_file;
+
 exit $status;

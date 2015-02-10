@@ -150,7 +150,7 @@ void usage(const std::string& msg) {
 
 struct Shutdown_Event_Handler : ACE_Event_Handler
 {
-  int handle_signal(int sig, siginfo_t*, ucontext_t*)
+  int handle_signal(int, siginfo_t*, ucontext_t*)
   {
     ACE_Reactor::instance()->end_reactor_event_loop();
     return 0;
@@ -159,7 +159,7 @@ struct Shutdown_Event_Handler : ACE_Event_Handler
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  ACE_TString stub_ready_filename = ACE_TEXT("");
+  std::string stub_ready_filename;
 
   int i = 1;
   while (i < argc) {
@@ -171,7 +171,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     } else if (arg.substr(0, 3) == "-p:") {
       pub_addr_str = arg.substr(3);
     } else if (arg.substr(0, 17) == "-stub_ready_file:") {
-      stub_ready_filename += arg.substr(17).c_str();
+      stub_ready_filename = arg.substr(17).c_str();
     } else {
       usage(std::string("Invalid argument: ") + arg);
     }
