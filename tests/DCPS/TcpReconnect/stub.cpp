@@ -159,7 +159,7 @@ struct Shutdown_Event_Handler : ACE_Event_Handler
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  ACE_TString stub_ready_filename = ACE_TEXT((""));
+  ACE_TString stub_ready_filename = ACE_TEXT("");
 
   int i = 1;
   while (i < argc) {
@@ -178,7 +178,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     i++;
   }
   if ((sub_addr_str == "") || (pub_addr_str == "")) {
-    usage("Must specify publisher-side and suscriber-side addresses");
+    usage("Must specify publisher-side and subscriber-side addresses");
   }
 
   ACE_Select_Reactor reactor;
