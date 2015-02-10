@@ -148,6 +148,15 @@ void usage(const std::string& msg) {
   exit(1);
 }
 
+struct Shutdown_Event_Handler : ACE_Event_Handler
+{
+  int handle_signal(int sig, siginfo_t*, ucontext_t*)
+  {
+    ACE_Reactor::instance()->end_reactor_event_loop();
+    return 0;
+  }
+};
+
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   ACE_TString stub_ready_filename = ACE_TEXT((""));
@@ -183,15 +192,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   // Indicate that the publisher is ready
-  FILE* stub_ready = ACE_OS::fopen (stub_ready_filename.c_str (), ACE_TEXT("w"));
-  if (stub_ready == 0)
-    {
-      ACE_ERROR ((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: Unable to create stub ready file\n")));
-    }
-
+  FILE* stub_ready = ACE_OS::fopen(stub_ready_filename.c_str(), ACE_TEXT("w"));
+  if (stub_ready == 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Unable to create stub ready file\n")));
+  }
   ACE_OS::fclose(stub_ready);
 
-  int result = ACE_Reactor::instance ()->run_reactor_event_loop ();
+  Shutdown_Event_Handler shutdown_eh;
+  ACE_Sig_Handler shutdown_handler;
+  shutdown_handler.register_handler(SIGINT, &shutdown_eh);
+#ifdef ACE_WIN32
+  shutdown_handler.register_handler(SIGBREAK, &shutdown_eh);
+#endif
+
+  const int result = ACE_Reactor::instance()->run_reactor_event_loop();
+  ACE_DEBUG((LM_DEBUG, "stub(%P): exiting %d\n", result));
   return result;
 }

@@ -104,5 +104,5 @@ $test->ignore_error("Unrecoverable problem with data link detected");
 my $fin = $test->finish(60);
 
 unlink $stub_ready;
-
+unlink 'resub.ini';
 exit $fin;

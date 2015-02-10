@@ -92,6 +92,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (options.command_line(command_line.c_str()) != 0)
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT("set options")) ,-1);
 
+#ifdef ACE_WIN32
+      options.creation_flags(CREATE_NEW_PROCESS_GROUP);
+#endif
+
       pid_t pid = process.spawn(options);
 
       if (pid == ACE_INVALID_PID)
@@ -207,7 +211,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         std::cout << "Kill stub (connection) for the " << stub_kills - stubKillCount + 1 << " time" << std::endl;
 
 # ifdef ACE_WIN32
-        GenerateConsoleCtrlEvent(CTRL_C_EVENT, process.getpid());
+        GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, process.getpid());
 # else
         process.kill();
 # endif
@@ -248,7 +252,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     TheServiceParticipant->shutdown();
 
 # ifdef ACE_WIN32
-    GenerateConsoleCtrlEvent(CTRL_C_EVENT, process.getpid());
+    GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, process.getpid());
 # else
     process.kill();
 # endif

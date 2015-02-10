@@ -1,3 +1,11 @@
+Tue Feb 10 18:14:34 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/TcpReconnect/publisher.cpp:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          Adapted to allow publisher to send a "signal" to stub on Win32.
+
 Tue Feb 10 17:45:44 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/TcpReconnect/publisher.cpp:
