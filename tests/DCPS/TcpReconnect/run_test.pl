@@ -50,7 +50,12 @@ my $stubKillCount = 2;
 # my $socatCmd = "/usr/bin/socat";
 # my $socatArgs = " -d -d TCP-LISTEN:$socatPubSidePort,reuseaddr " .
 #                 "TCP:stubSubSideHost:$stubSubSidePort";
-my $stubCmd = "stub";
+my $subdir = $PerlACE::Process::ExeSubDir;
+my $stubCmd = "";
+if ($subdir) {
+    $stubCmd = $subdir;
+}
+$stubCmd .= "stub";
 my $stubArgs = " -stubp:$stubPubSideHost:$stubPubSidePort -stubs:$stubSubSideHost:$stubSubSidePort";
 # $stubArgs .= " -stubv ";
 
@@ -72,9 +77,12 @@ $pub_opts .= ' -DCPSConfigFile repub.ini';
 $sub_opts .= ' -DCPSConfigFile resub.ini';
 $sub_opts .= " -k $stubKillCount -d $stubKillDelay";
 
+#clean up files left from previous run
+my $stub_ready = 'stub_ready.txt';
+unlink $stub_ready;
 
 $pub_opts .= $thread_per_connection;
-$pub_opts .= " -stubCmd $stubCmd $stubArgs -k $stubKillCount -d $stubKillDelay"; 
+$pub_opts .= " -stubCmd $stubCmd $stubArgs -stub_ready_file $stub_ready -k $stubKillCount -d $stubKillDelay";
 
 $test->setup_discovery("-NOBITS -ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
                        "$repo_bit_opt");
@@ -94,4 +102,7 @@ $test->ignore_error("Unrecoverable problem with data link detected");
 
 # start killing processes in 60 seconds
 my $fin = $test->finish(60);
+
+unlink $stub_ready;
+
 exit $fin;

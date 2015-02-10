@@ -133,13 +133,15 @@ int Sub_Handler::handle_input (ACE_HANDLE fd) {
 void usage(const std::string& msg) {
   std::cerr << msg;
   std::cerr << "\n\nUsage:\n"
-               "stub [-v] -s:<sub_addr> -p:<pub_addr>\n"
+               "stub [-v] -s:<sub_addr> -p:<pub_addr> -stub_ready_file:<file_name>\n"
                "\n"
                "  -v             Verbose.  Enables debug output.\n"
-               "  -p<pub_addr>   Publisher address. Stub will accept connections\n"
+               "  -p:<pub_addr>  Publisher address. Stub will accept connections\n"
                "                 on this address.\n"
-               "  -s<sub_addr>   Subscriber address. Stub will connect to this address\n"
+               "  -s:<sub_addr>  Subscriber address. Stub will connect to this address\n"
                "                 whenever a connection is accepted on the pub_addr.\n"
+               "  -stub_ready_file:<file_name>   File name stub will write to when ready\n"
+               "                 to accept connections from publisher.\n"
                "\n"
                "  Once connections have been established, stub will pass through all\n"
                "  data between the publisher and subscriber addresses.\n" << std::endl;
@@ -148,6 +150,8 @@ void usage(const std::string& msg) {
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  ACE_TString stub_ready_filename = ACE_TEXT((""));
+
   int i = 1;
   while (i < argc) {
     std::string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
@@ -157,6 +161,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       sub_addr_str = arg.substr(3);
     } else if (arg.substr(0, 3) == "-p:") {
       pub_addr_str = arg.substr(3);
+    } else if (arg.substr(0, 17) == "-stub_ready_file:") {
+      stub_ready_filename += arg.substr(17).c_str();
     } else {
       usage(std::string("Invalid argument: ") + arg);
     }
@@ -175,6 +181,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   if (acceptor.open (pub_addr) == -1) {
     ACE_ERROR_RETURN ((LM_ERROR, ACE_TEXT ("%p open")), 1);
   }
+
+  // Indicate that the publisher is ready
+  FILE* stub_ready = ACE_OS::fopen (stub_ready_filename.c_str (), ACE_TEXT("w"));
+  if (stub_ready == 0)
+    {
+      ACE_ERROR ((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: Unable to create stub ready file\n")));
+    }
+
+  ACE_OS::fclose(stub_ready);
 
   int result = ACE_Reactor::instance ()->run_reactor_event_loop ();
   return result;

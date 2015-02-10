@@ -48,8 +48,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     std::cout << "Starting publisher" << std::endl;
     {
-      ACE_TString stubCmd(ACE_TEXT("./"));
+      ACE_TString stubCmd(ACE_TEXT(""));
       ACE_TString stubArgs(ACE_TEXT(""));
+      ACE_TString stub_ready_filename(ACE_TEXT(""));
 
       ACE_Arg_Shifter_T<ACE_TCHAR> shifter(argc, argv);
       while (shifter.is_anything_left()) {
@@ -72,6 +73,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           stubArgs += ACE_TEXT(" -v");
           ACE_DEBUG((LM_INFO, ACE_TEXT("stubArgs: %s\n"), stubArgs.c_str()));
           shifter.consume_arg();
+        } else if ((currentArg = shifter.get_the_parameter(ACE_TEXT("-stub_ready_file"))) != 0) {
+          stubArgs += ACE_TEXT(" -stub_ready_file:");
+          stubArgs += currentArg;
+          stub_ready_filename = currentArg;
+          ACE_DEBUG((LM_INFO, ACE_TEXT("stubArgs: %s\n"), stubArgs.c_str()));
+          shifter.consume_arg();
         } else {
           shifter.ignore_arg();
         }
@@ -89,6 +96,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (pid == ACE_INVALID_PID)
         ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT("spawn")) ,-1);
+
+      // Wait for the stub to be ready.
+      FILE* stub_ready = 0;
+      do
+        {
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
+          stub_ready = ACE_OS::fopen (stub_ready_filename.c_str (), ACE_TEXT("r"));
+        } while (0 == stub_ready);
+
+      ACE_OS::fclose(stub_ready);
 
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
