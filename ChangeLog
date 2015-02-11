@@ -1,3 +1,9 @@
+Wed Feb 11 19:22:54 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Added lock to prevent corruption of allocator.
+
 Wed Feb 11 20:47:02 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/SharedTransport/TestCase.cpp:

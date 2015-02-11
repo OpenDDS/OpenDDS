@@ -1526,6 +1526,10 @@ void
   {
     if (item->registered_data_ != 0)
     {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex,
+                guard,
+                this->sample_lock_);
+
       ::<%SCOPED%>* const ptr
         = static_cast< ::<%SCOPED%>* >(item->registered_data_);
       ACE_DES_FREE (ptr,
@@ -2533,5 +2537,3 @@ void
   InstanceMap* instances = reinterpret_cast <InstanceMap* > (map);
   delete instances;
 }
-
-
