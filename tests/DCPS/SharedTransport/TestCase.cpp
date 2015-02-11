@@ -62,8 +62,6 @@ TestCase::test()
   // As there are no fully association establishment between pub and sub for UDP
   // transport, a delay is required for the test to receive all messages.
   ACE_OS::sleep (2);
-  DDS::DataWriterQos writer_qos;
-  this->writer_i_->get_qos(writer_qos);
 
   // Write test data to exercise the data paths:
   for (int i = 0; i < num_messages; ++i) {
@@ -82,9 +80,6 @@ TestCase::test()
   // which needs to be verified other than the association is formed
   // without crashing the DCPS subsystem.
 #if 1
-  DDS::DataReaderQos reader_qos;
-  this->reader_i_->get_qos(reader_qos);
-
   for (int i = 0; i < num_messages; ++i) {
     TestMessage message;
     DDS::SampleInfo si;
@@ -112,13 +107,6 @@ TestCase::test()
                     ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                     si.instance_state), -1);
       }
-
-    } else if (status == DDS::RETCODE_NO_DATA &&
-               reader_qos.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS &&
-               writer_qos.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: take_next_sample()")
-                           ACE_TEXT(" WARNING: (DATA LOSS on NON-RELIABLE) Reader only received %d out of %d samples\n"), i, num_messages));
-      return 0;
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                   ACE_TEXT("%N:%l: take_next_sample()")
