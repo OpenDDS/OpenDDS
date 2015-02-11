@@ -1,3 +1,10 @@
+Wed Feb 11 19:54:43 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Modified test to report data loss for non reliable dw/dr
+          combinations, but not return an error as data loss is possible.
+
 Tue Feb 10 22:17:34 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * tests/DCPS/FooTest3_0/PubDriver.cpp:
