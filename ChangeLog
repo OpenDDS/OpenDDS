@@ -1,0 +1,149 @@
+Fri Feb 13 21:31:16 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * ChangeLog:
+
+          Reset for post 3.7
+        * NEWS:
+
+          Add 3.7 section.
+
+Fri Feb 13 21:09:37 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveListener.h:
+
+          Avoid holding the ReceiveListenerSet's lock during the data_received()
+          call to the listener.  This allows listeners more flexibility in what
+          they can do, for example writing data to the same DataLink.
+          This change requires reference counting in the TRL interface.
+
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          The above change brought to light the fact that Recorder and Replayer
+          end up with two reference counts, one from RcObject and one from IDL
+          local object (via EntityImpl).  Resolved this in favor of IDL local
+          object's reference count which required a minor API change (going from
+          _rch to _var as the handle type).
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Updated to account for the changes above.
+          Sedp's Reader objects are now heap allocated and refcounted.
+
+        * tests/DCPS/RecorderReplayer/Relay.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+
+          Updated tests with the new required methods and _rch to _var.
+
+Wed Feb 11 19:22:54 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
+
+        * dds/idl/CPPTemplate.txt:
+
+          Added lock to prevent corruption of allocator.
+
+Wed Feb 11 20:47:02 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Rolling back changes to test.
+
+Wed Feb 11 19:54:43 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/SharedTransport/TestCase.cpp:
+
+          Modified test to report data loss for non reliable dw/dr
+          combinations, but not return an error as data loss is possible.
+
+Tue Feb 10 22:17:34 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/FooTest3_0/PubDriver.cpp:
+        * tests/DCPS/FooTest3_0/SubDriver.cpp:
+        * tests/DCPS/FooTest3_0/run_test.pl:
+
+          Synchronize on sub_ready.txt from the PubDriver side.
+          Unlink files at the end of test.
+
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          Removed unused arg.  Fixed stub filename for w_char builds.
+
+Tue Feb 10 21:25:58 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/ManyToMany/Writer.cpp:
+
+          Fixed issue when using wait_for_match to wait for matches to
+          go down to zero, which previously didn't wait.
+
+Tue Feb 10 20:10:54 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          Fixed error in w_char build.
+
+Tue Feb 10 18:14:34 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/TcpReconnect/publisher.cpp:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          Adapted to allow publisher to send a "signal" to stub on Win32.
+
+Tue Feb 10 17:45:44 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * tests/DCPS/TcpReconnect/publisher.cpp:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+        * tests/DCPS/TcpReconnect/stub.cpp:
+
+          Add synchronization of waiting until the stub process is ready
+          before starting the writer.
+
+          Add support for builds using subdirectories for their executables.
+
+Mon Feb  9 21:16:48 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataWriterImpl.cpp:
+
+          Added transport debug logging.
+
+        * tests/DCPS/TcpReconnect/Args.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.h:
+        * tests/DCPS/TcpReconnect/DataReaderListener.cpp:
+        * tests/DCPS/TcpReconnect/Messenger.idl:
+        * tests/DCPS/TcpReconnect/TcpReconnect.mpc:
+        * tests/DCPS/TcpReconnect/Writer.h:
+        * tests/DCPS/TcpReconnect/Writer.cpp:
+        * tests/DCPS/TcpReconnect/publisher.cpp:
+        * tests/DCPS/TcpReconnect/run_test.pl:
+        * tests/DCPS/TcpReconnect/subscriber.cpp:
+
+          Refactored TcpReconnect test to allow publisher to spawn and
+          kill the stub process instead of the perl script.  This allows
+          more deterministic timing for the disconnect and reconnect testing.
+          Also changed test validation logic to no longer validate that all
+          messages were received, but rather that during each phase of the
+          test messages were received -- suggesting that the reconnect was
+          successful.  Test phases were added to the messages being sent and
+          the phase is incremented each time the disconnect/reconnect occurs.
+          Validation on receiving all messages does not work due to forced
+          killing of the connection in which in flight messages might be lost.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
