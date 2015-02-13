@@ -75,7 +75,7 @@ private:
 class MessengerRecorderListener : public OpenDDS::DCPS::RecorderListener
 {
 public:
-  MessengerRecorderListener(OpenDDS::DCPS::Replayer_rch& replayer)
+  explicit MessengerRecorderListener(const OpenDDS::DCPS::Replayer_var& replayer)
     : sem_(0)
     , replayer_(replayer)
   {
@@ -122,7 +122,7 @@ public:
   }
 private:
   ACE_Thread_Semaphore sem_;
-  OpenDDS::DCPS::Replayer_rch replayer_;
+  OpenDDS::DCPS::Replayer_var replayer_;
 };
 
 
@@ -200,7 +200,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       ACE_DEBUG((LM_DEBUG, "Creating replayer\n"));
 
       // Create Replayer
-      OpenDDS::DCPS::Replayer_rch replayer =
+      OpenDDS::DCPS::Replayer_var replayer =
         service->create_replayer(participant,
                                  topic.in(),
                                  pub_qos,
@@ -252,7 +252,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
       }
 
       // Create Recorder
-      OpenDDS::DCPS::Recorder_rch recorder =
+      OpenDDS::DCPS::Recorder_var recorder =
         service->create_recorder(participant,
                                  topic.in(),
                                  sub_qos,

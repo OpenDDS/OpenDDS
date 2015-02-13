@@ -668,6 +668,9 @@ private:
   /// deliver samples that were held by check_historic()
   void deliver_historic(std::map<SequenceNumber, ReceivedDataSample>& samples);
 
+  void listener_add_ref() { EntityImpl::_add_ref(); }
+  void listener_remove_ref() { EntityImpl::_remove_ref(); }
+
   friend class InstanceState;
   friend class EndHistoricSamplesMissedSweeper;
   friend class ::DDS_TEST; //allows tests to get at private data

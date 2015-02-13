@@ -19,7 +19,6 @@ namespace OpenDDS {
 namespace DCPS {
 
 class Replayer;
-typedef RcHandle<Replayer> Replayer_rch;
 
 /**
  * @class ReplayerListener
@@ -42,6 +41,10 @@ public:
 typedef RcHandle<ReplayerListener> ReplayerListener_rch;
 
 typedef std::vector<RawDataSample> RawDataSampleList;
+
+typedef Replayer* Replayer_ptr;
+typedef TAO_Objref_Var_T<Replayer> Replayer_var;
+
 /**
  * @class Replayer
  *
@@ -50,9 +53,18 @@ typedef std::vector<RawDataSample> RawDataSampleList;
  * This class is for sending raw sample data.  Combined with data saved from
  * a recorder, this allows the data to be replayed to DataReaders.
  */
-class OpenDDS_Dcps_Export Replayer : public RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Dcps_Export Replayer {
 public:
+  typedef Replayer_ptr _ptr_type;
+  typedef Replayer_var _var_type;
+
   virtual ~Replayer();
+
+  static Replayer_ptr _duplicate(Replayer_ptr obj);
+
+  virtual void _add_ref() = 0;
+  virtual void _remove_ref() = 0;
+
   /**
    * Send the sample to all associated DataReaders.
    *
@@ -101,10 +113,28 @@ public:
    * Get the listener for this Replayer.
    *
    */
-  virtual ReplayerListener_rch get_listener ()=0;
+  virtual ReplayerListener_rch get_listener() = 0;
 };
 
-} // namespace DCPS
-} // namespace
+}
+}
+
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace TAO {
+
+template<>
+struct OpenDDS_Dcps_Export Objref_Traits<OpenDDS::DCPS::Replayer> {
+  static OpenDDS::DCPS::Replayer_ptr duplicate(OpenDDS::DCPS::Replayer_ptr p);
+  static void release(OpenDDS::DCPS::Replayer_ptr p);
+  static OpenDDS::DCPS::Replayer_ptr nil();
+  static CORBA::Boolean marshal(const OpenDDS::DCPS::Replayer_ptr p,
+                                TAO_OutputCDR& cdr);
+};
+
+} // namespace TAO
+
+TAO_END_VERSIONED_NAMESPACE_DECL
+
 
 #endif /* end of include guard: OPENDDS_DCPS_REPLAYER_H */

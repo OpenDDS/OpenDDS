@@ -93,46 +93,6 @@ ReceiveListenerSet::size() const
   return map_.size();
 }
 
-ACE_INLINE void
-ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
-                                  const std::set<RepoId, GUID_tKeyLessThan>& exclude)
-{
-  DBG_ENTRY_LVL("ReceiveListenerSet", "data_received", 6);
-
-  GuardType guard(this->lock_);
-
-  for (MapType::iterator itr = map_.begin();
-       itr != map_.end();
-       ++itr) {
-
-    if (itr->second == 0) continue; // invalid listener
-
-    if (exclude.count(itr->first)) continue;
-
-    if (map_.size() > 1 && sample.sample_) {
-      // demarshal (in data_received()) updates the rd_ptr() of any of
-      // the message blocks in the chain, so give it a duplicated chain.
-      ReceivedDataSample rds(sample);
-      itr->second->data_received(rds);
-
-    } else {
-      itr->second->data_received(sample);
-    }
-  }
-}
-
-ACE_INLINE void
-ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
-                                  const RepoId& readerId)
-{
-  DBG_ENTRY_LVL("ReceiveListenerSet", "data_received(sample, readerId)", 6);
-  GuardType guard(this->lock_);
-  MapType::iterator itr = map_.find(readerId);
-  if (itr != map_.end() && itr->second) {
-    itr->second->data_received(sample);
-  }
-}
-
 ACE_INLINE ReceiveListenerSet::MapType&
 ReceiveListenerSet::map()
 {

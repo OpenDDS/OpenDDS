@@ -238,10 +238,15 @@ private:
 
   } publications_writer_, subscriptions_writer_, participant_message_writer_;
 
-  class Reader : public DCPS::TransportReceiveListener, public Endpoint {
+  class Reader
+    : public DCPS::TransportReceiveListener
+    , public Endpoint
+    , public DCPS::RcObject<ACE_SYNCH_MUTEX>
+  {
   public:
     Reader(const DCPS::RepoId& sub_id, Sedp& sedp)
       : Endpoint(sub_id, sedp)
+      , shutting_down_(0)
     {}
 
     virtual ~Reader();
@@ -258,7 +263,15 @@ private:
     void notify_connection_deleted(const DCPS::RepoId&) {}
     void remove_associations(const DCPS::WriterIdSeq&, bool) {}
 
-  } publications_reader_, subscriptions_reader_, participant_message_reader_;
+    void listener_add_ref() { _add_ref(); }
+    void listener_remove_ref() { _remove_ref(); }
+
+    ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> shutting_down_;
+  };
+
+  typedef DCPS::RcHandle<Reader> Reader_rch;
+
+  Reader_rch publications_reader_, subscriptions_reader_, participant_message_reader_;
 
   struct Task : ACE_Task_Ex<ACE_MT_SYNCH, Msg> {
     explicit Task(Sedp* sedp)

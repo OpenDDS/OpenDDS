@@ -311,11 +311,10 @@ public:
 
   ACE_ARGV* ORB_argv() { return &ORB_argv_; }
 
- /**
-  *  Create a Recorder object.
-  */
-
- Recorder_rch create_recorder (DDS::DomainParticipant_ptr participant,
+  /**
+   *  Create a Recorder object.
+   */
+  Recorder_ptr create_recorder(DDS::DomainParticipant_ptr participant,
                                DDS::Topic_ptr a_topic,
                                const DDS::SubscriberQos & subscriber_qos,
                                const DDS::DataReaderQos & datareader_qos,
@@ -323,39 +322,29 @@ public:
 
 
 
- /**
-  *  Delete an existing Recorder from its DomainParticipant.
-  */
+  /**
+   *  Delete an existing Recorder from its DomainParticipant.
+   */
+  DDS::ReturnCode_t delete_recorder(Recorder_ptr recorder);
 
- DDS::ReturnCode_t delete_recorder (Recorder_rch & recorder );
-
-
-
- /**
-  *  Create a Replayer object
-  */
-
- Replayer_rch create_replayer (DDS::DomainParticipant_ptr participant,
+  /**
+   *  Create a Replayer object
+   */
+  Replayer_ptr create_replayer(DDS::DomainParticipant_ptr participant,
                                DDS::Topic_ptr a_topic,
                                const DDS::PublisherQos & publisher_qos,
                                const DDS::DataWriterQos & datawriter_qos,
                                const ReplayerListener_rch & a_listener );
 
+  /**
+   *  Delete an existing Replayer from its DomainParticipant.
+   */
+  DDS::ReturnCode_t delete_replayer(Replayer_ptr replayer);
 
-
- /**
-  *  Delete an existing Replayer from its DomainParticipant.
-  */
-
- DDS::ReturnCode_t delete_replayer (Replayer_rch & replayer );
-
-
-
- /**
-  *  Create a topic that does not have the data type registered.
-  */
-
- DDS::Topic_ptr create_typeless_topic(DDS::DomainParticipant_ptr participant,
+  /**
+   *  Create a topic that does not have the data type registered.
+   */
+  DDS::Topic_ptr create_typeless_topic(DDS::DomainParticipant_ptr participant,
                                       const char * topic_name,
                                       const char * type_name,
                                       bool type_has_keys,

@@ -159,6 +159,9 @@ public:
 
 private:
 
+  void _add_ref() { EntityImpl::_add_ref(); }
+  void _remove_ref() { EntityImpl::_remove_ref(); }
+
   void notify_publication_lost(const DDS::InstanceHandleSeq& handles);
 
   DDS::ReturnCode_t write (const RawDataSample* sample_array, int array_size, DDS::InstanceHandle_t* reader);

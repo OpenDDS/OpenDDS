@@ -1766,25 +1766,24 @@ Service_Participant::domainRepoMap() const
   return this->domainRepoMap_;
 }
 
-Recorder_rch
-Service_Participant::create_recorder (DDS::DomainParticipant_ptr participant,
-                              DDS::Topic_ptr a_topic,
-                              const DDS::SubscriberQos & subscriber_qos,
-                              const DDS::DataReaderQos & datareader_qos,
-                              const RecorderListener_rch & a_listener )
+Recorder_ptr
+Service_Participant::create_recorder(DDS::DomainParticipant_ptr participant,
+                                     DDS::Topic_ptr a_topic,
+                                     const DDS::SubscriberQos& subscriber_qos,
+                                     const DDS::DataReaderQos& datareader_qos,
+                                     const RecorderListener_rch& a_listener)
 {
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
   if (participant_servant)
     return participant_servant->create_recorder(a_topic, subscriber_qos, datareader_qos, a_listener, 0);
-  return Recorder_rch();
+  return 0;
 }
 
-
 DDS::ReturnCode_t
-Service_Participant::delete_recorder (Recorder_rch & recorder )
+Service_Participant::delete_recorder(Recorder_ptr recorder)
 {
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
-  RecorderImpl* impl = static_cast<RecorderImpl*>(recorder.in());
+  RecorderImpl* impl = static_cast<RecorderImpl*>(recorder);
   if (impl){
     ret = impl->cleanup();
     impl->participant()->delete_recorder(recorder);
@@ -1792,36 +1791,31 @@ Service_Participant::delete_recorder (Recorder_rch & recorder )
   return ret;
 }
 
-
-
-Replayer_rch
-Service_Participant::create_replayer (DDS::DomainParticipant_ptr participant,
-                              DDS::Topic_ptr a_topic,
-                              const DDS::PublisherQos & publisher_qos,
-                              const DDS::DataWriterQos & datawriter_qos,
-                              const ReplayerListener_rch & a_listener )
+Replayer_ptr
+Service_Participant::create_replayer(DDS::DomainParticipant_ptr participant,
+                                     DDS::Topic_ptr a_topic,
+                                     const DDS::PublisherQos& publisher_qos,
+                                     const DDS::DataWriterQos& datawriter_qos,
+                                     const ReplayerListener_rch& a_listener)
 {
   ACE_DEBUG((LM_DEBUG, "Service_Participant::create_replayer\n"));
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
   if (participant_servant)
     return participant_servant->create_replayer(a_topic, publisher_qos, datawriter_qos, a_listener, 0);
-  return Replayer_rch();
+  return 0;
 }
 
-
 DDS::ReturnCode_t
-Service_Participant::delete_replayer (Replayer_rch & replayer )
+Service_Participant::delete_replayer(Replayer_ptr replayer)
 {
   DDS::ReturnCode_t ret = DDS::RETCODE_ERROR;
-  ReplayerImpl* impl = static_cast<ReplayerImpl*>(replayer.in());
+  ReplayerImpl* impl = static_cast<ReplayerImpl*>(replayer);
   if (impl) {
     ret = impl->cleanup();
     impl->participant()->delete_replayer(replayer);
   }
   return ret;
 }
-
-
 
 DDS::Topic_ptr
 Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participant,

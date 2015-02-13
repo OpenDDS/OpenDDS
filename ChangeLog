@@ -1,3 +1,46 @@
+Fri Feb 13 21:09:37 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.cpp:
+        * dds/DCPS/transport/framework/TransportReceiveListener.h:
+
+          Avoid holding the ReceiveListenerSet's lock during the data_received()
+          call to the listener.  This allows listeners more flexibility in what
+          they can do, for example writing data to the same DataLink.
+          This change requires reference counting in the TRL interface.
+
+        * dds/DCPS/Recorder.h:
+        * dds/DCPS/Recorder.cpp:
+        * dds/DCPS/RecorderImpl.h:
+        * dds/DCPS/Replayer.h:
+        * dds/DCPS/Replayer.cpp:
+        * dds/DCPS/ReplayerImpl.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          The above change brought to light the fact that Recorder and Replayer
+          end up with two reference counts, one from RcObject and one from IDL
+          local object (via EntityImpl).  Resolved this in favor of IDL local
+          object's reference count which required a minor API change (going from
+          _rch to _var as the handle type).
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Sedp.cpp:
+
+          Updated to account for the changes above.
+          Sedp's Reader objects are now heap allocated and refcounted.
+
+        * tests/DCPS/RecorderReplayer/Relay.cpp:
+        * tests/transport/rtps/subscriber.cpp:
+        * tests/transport/rtps_reliability/rtps_reliability.cpp:
+        * tests/transport/simple/SimpleDataReader.h:
+
+          Updated tests with the new required methods and _rch to _var.
+
 Wed Feb 11 19:22:54 UTC 2015  Justin Wilson  <wilsonj@ociweb.com>
 
         * dds/idl/CPPTemplate.txt:

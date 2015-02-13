@@ -17,10 +17,8 @@
 
 namespace OpenDDS {
 namespace DCPS {
-class Recorder;
 
 class Recorder;
-typedef RcHandle<Recorder> Recorder_rch;
 
 /**
  * @class RecorderListener
@@ -53,9 +51,20 @@ public:
 
 typedef RcHandle<RecorderListener> RecorderListener_rch;
 
-class OpenDDS_Dcps_Export Recorder : public RcObject<ACE_SYNCH_MUTEX> {
+typedef Recorder* Recorder_ptr;
+typedef TAO_Objref_Var_T<Recorder> Recorder_var;
+
+class OpenDDS_Dcps_Export Recorder {
 public:
+  typedef Recorder_ptr _ptr_type;
+  typedef Recorder_var _var_type;
+
   virtual ~Recorder();
+
+  static Recorder_ptr _duplicate(Recorder_ptr obj);
+
+  virtual void _add_ref() = 0;
+  virtual void _remove_ref() = 0;
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   /**
@@ -90,10 +99,28 @@ public:
    * Get the listener for this Recorder.
    *
    */
-  virtual RecorderListener_rch get_listener ()=0;
+  virtual RecorderListener_rch get_listener() = 0;
 };
 
-} // namespace DCPS
-} // namespace
+}
+}
+
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace TAO {
+
+template<>
+struct OpenDDS_Dcps_Export Objref_Traits<OpenDDS::DCPS::Recorder> {
+  static OpenDDS::DCPS::Recorder_ptr duplicate(OpenDDS::DCPS::Recorder_ptr p);
+  static void release(OpenDDS::DCPS::Recorder_ptr p);
+  static OpenDDS::DCPS::Recorder_ptr nil();
+  static CORBA::Boolean marshal(const OpenDDS::DCPS::Recorder_ptr p,
+                                TAO_OutputCDR& cdr);
+};
+
+} // namespace TAO
+
+TAO_END_VERSIONED_NAMESPACE_DECL
+
 
 #endif /* end of include guard: OPENDDS_DCPS_RECORDER_H */
