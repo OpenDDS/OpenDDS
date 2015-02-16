@@ -1,3 +1,9 @@
+Mon Feb 16 16:52:53 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Messenger/face_config.ini:
+
+          Added transient local durability to handle late subscribers.
+
 Mon Feb 16 16:15:07 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * Merged from trunk r6924 through r6949
