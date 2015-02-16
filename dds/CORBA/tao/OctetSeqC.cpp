@@ -33,7 +33,7 @@ TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
 
 
-// TAO_IDL - Generated from 
+// TAO_IDL - Generated from
 // be/be_visitor_sequence/sequence_cs.cpp:65
 
 #if !defined (_CORBA_OCTETSEQ_CS_)

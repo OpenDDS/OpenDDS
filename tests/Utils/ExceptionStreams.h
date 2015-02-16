@@ -3,7 +3,7 @@
 
 #ifdef ACE_LACKS_IOSTREAM_TOTALLY
 
-// In case we are lacking iostreams, we will want to be able to stream to 
+// In case we are lacking iostreams, we will want to be able to stream to
 // standard iostreams in tests
 namespace CORBA {
 

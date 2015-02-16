@@ -32,7 +32,7 @@ private:
 
 using namespace OpenDDS::FaceTSS::config;
 
-/////// Publisher tests 
+/////// Publisher tests
 void test_set_publisher_single_partition() {
   QosSettings settings;
 
@@ -128,7 +128,7 @@ void test_set_publisher_presentation_ordered_access_false() {
   TEST_CHECK(!qos.presentation.ordered_access);
 }
 
-/////// Subscriber tests 
+/////// Subscriber tests
 void test_set_subscriber_single_partition() {
   QosSettings settings;
 
@@ -224,7 +224,7 @@ void test_set_subscriber_presentation_ordered_access_false() {
   TEST_CHECK(!qos.presentation.ordered_access);
 }
 
-/////// DataWriter tests 
+/////// DataWriter tests
 void test_set_datawriter_durability_volatile()
 {
   QosSettings settings;
@@ -646,7 +646,7 @@ void test_set_datawriter_ownership_strength_value()
   TEST_CHECK(32 == qos.ownership_strength.value);
 }
 
-/////// DataReader tests 
+/////// DataReader tests
 void test_set_datareader_durability_volatile()
 {
   QosSettings settings;

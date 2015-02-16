@@ -1,3 +1,21 @@
+Mon Feb 16 21:21:28 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * dds/CORBA/tao/Object.cpp:
+        * dds/CORBA/tao/OctetSeqC.cpp:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+        * dds/FACE/config/TopicSettings.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+        * tests/Utils/ExceptionStreams.h:
+
+          Fixed fuzz errors.
+
 Mon Feb 16 19:34:23 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * tests/FACE/Messenger/Publisher/Publisher.cpp:

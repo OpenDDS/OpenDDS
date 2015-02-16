@@ -473,7 +473,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       bool pubWasIgnored = false;
       if (len != num_pubs)
       {
-        if (!ignoredEntitiesAreInBIT && len == num_pubs - 1) 
+        if (!ignoredEntitiesAreInBIT && len == num_pubs - 1)
         {
           pubWasIgnored = true;
           ACE_DEBUG((LM_INFO, "(%P|%t) monitor: pub assumed to be ignored\n"));
@@ -561,7 +561,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       if (len != num_subs)
       {
-        if (!pubWasIgnored && !ignoredEntitiesAreInBIT && len == num_subs - 1) 
+        if (!pubWasIgnored && !ignoredEntitiesAreInBIT && len == num_subs - 1)
         {
           ACE_DEBUG((LM_INFO, "(%P|%t) monitor: sub assumed to be ignored\n"));
         }

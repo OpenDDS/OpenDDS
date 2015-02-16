@@ -12,7 +12,7 @@ ConnectionSettings::ConnectionSettings()
   strcpy(qos_name_, "");
 }
 
-int 
+int
 ConnectionSettings::set(const char* name, const char* value)
 {
   int status = 0;

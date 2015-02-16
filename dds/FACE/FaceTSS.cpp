@@ -89,7 +89,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     connection_id = connection.connection_id_;
     connection_direction = connection.direction_;
     max_message_size = topic.max_message_size_;
-    
+
     return_code = create_opendds_entities(connection_id,
                                           connection.domain_id_,
                                           connection.topic_name_,
@@ -190,7 +190,7 @@ namespace {
     if (dir == SOURCE) {
       ::DDS::PublisherQos publisher_qos;
       qos_settings.apply_to(publisher_qos);
-      
+
       const ::DDS::Publisher_var pub =
         dp->create_publisher(publisher_qos, 0, 0);
       if (!pub) return INVALID_PARAM;
@@ -207,7 +207,7 @@ namespace {
     } else { // dir == DESTINATION
       ::DDS::SubscriberQos subscriber_qos;
       qos_settings.apply_to(subscriber_qos);
-      
+
       const ::DDS::Subscriber_var sub =
         dp->create_subscriber(subscriber_qos, 0, 0);
       if (!sub) return INVALID_PARAM;

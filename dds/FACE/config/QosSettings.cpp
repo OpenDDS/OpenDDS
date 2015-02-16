@@ -99,9 +99,9 @@ set_bool_qos_value(bool& target, const char* value)
 
 // Set duration on the target and return true if it was a valid value
 bool
-set_duration_qos_value(DDS::Duration_t& target, 
+set_duration_qos_value(DDS::Duration_t& target,
                        const char* prefix_match, // prefix to match
-                       const char* name,         // config name provided 
+                       const char* name,         // config name provided
                        const char* value)        // config value provided
 {
   char buffer[64];
@@ -397,7 +397,7 @@ bool set_reader_data_lifecycle_autopurge_nowriter_samples_delay(
   DDS::ReaderDataLifecycleQosPolicy& target, const char* name, const char* value)
 {
   return set_duration_qos_value(
-    target.autopurge_nowriter_samples_delay, 
+    target.autopurge_nowriter_samples_delay,
     "reader_data_lifecycle.autopurge_nowriter_samples_delay", name, value);
 }
 
@@ -405,7 +405,7 @@ bool set_reader_data_lifecycle_autopurge_disposed_samples_delay(
   DDS::ReaderDataLifecycleQosPolicy& target, const char* name, const char* value)
 {
   return set_duration_qos_value(
-    target.autopurge_disposed_samples_delay, 
+    target.autopurge_disposed_samples_delay,
     "reader_data_lifecycle.autopurge_disposed_samples_delay", name, value);
 }
 
@@ -419,7 +419,7 @@ log_parser_error(const char* section, const char* name, const char* value)
 int QosSettings::set_qos(
   DDS::PublisherQos& target, const char* name, const char* value)
 {
-  bool matched = 
+  bool matched =
     set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
     set_presentation_coherent_access_qos(target.presentation, name, value) ||
     set_presentation_ordered_access_qos(target.presentation, name, value) ||
@@ -436,7 +436,7 @@ int QosSettings::set_qos(
 int QosSettings::set_qos(
   DDS::SubscriberQos& target, const char* name, const char* value)
 {
-  bool matched = 
+  bool matched =
     set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
     set_presentation_coherent_access_qos(target.presentation, name, value) ||
     set_presentation_ordered_access_qos(target.presentation, name, value) ||
@@ -452,7 +452,7 @@ int QosSettings::set_qos(
 int QosSettings::set_qos(
   DDS::DataWriterQos& target, const char* name, const char* value)
 {
-  bool matched = 
+  bool matched =
     set_durability_kind_qos(target.durability, name, value) ||
     // durability service not settable - not supporting those durabilities
     set_deadline_period_qos(target.deadline, name, value) ||
@@ -483,10 +483,10 @@ int QosSettings::set_qos(
 int QosSettings::set_qos(
   DDS::DataReaderQos& target, const char* name, const char* value)
 {
-  bool matched = 
+  bool matched =
     set_durability_kind_qos(target.durability, name, value) ||
     // durability service not settable
-    set_deadline_period_qos(target.deadline, name, value) || 
+    set_deadline_period_qos(target.deadline, name, value) ||
     set_latency_budget_duration_qos(target.latency_budget, name, value) ||
     set_liveliness_kind_qos(target.liveliness, name, value) ||
     set_liveliness_lease_duration_qos(target.liveliness, name, value) ||

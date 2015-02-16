@@ -139,7 +139,7 @@ CORBA::Object::_stubobj() const
 TAO_Stub *
 CORBA::Object::_stubobj()
 {
-  
+
   return this->protocol_proxy_;
 }
 

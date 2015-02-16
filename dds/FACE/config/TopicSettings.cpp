@@ -4,7 +4,7 @@
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
-int 
+int
 TopicSettings::set(const char* name, const char* value)
 {
   int status = 0;

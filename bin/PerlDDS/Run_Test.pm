@@ -435,7 +435,7 @@ sub flag {
   $self->_info("TestFramework::flag $flag_passed present=$present\n");
   if ($present) {
     if ($self->{flags}->{$flag_passed} ne "<FLAG>") {
-      print STDERR "WARNING: you are treating a name-value pair as a flag, should call value_flag. \"$flag_passed=" . 
+      print STDERR "WARNING: you are treating a name-value pair as a flag, should call value_flag. \"$flag_passed=" .
         $self->{flags}->{$flag_passed} . "\"\n";
     }
     delete($self->{flags}->{unused}->{$flag_passed});

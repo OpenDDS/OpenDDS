@@ -25,7 +25,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       if (status != FACE::NO_ERROR) break;
       std::cout << msg.text.in() << '\t' << msg.count << std::endl;
       if (msg.count != i) {
-        std::cerr << "ERROR: Expected count " << i << ", got " 
+        std::cerr << "ERROR: Expected count " << i << ", got "
                   << msg.count << std::endl;
         status = FACE::INVALID_PARAM;
         break;
