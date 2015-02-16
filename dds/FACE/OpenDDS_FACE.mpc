@@ -6,4 +6,8 @@ project: dcpslib {
     .
     ./config
   }
+
+  Header_Files {
+    ../../FACE
+  }
 }

@@ -1,3 +1,15 @@
+Mon Feb 16 23:44:00 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_default_discovery.mpb:
+
+          Need a dependency on the tcp lib here for static builds (non-safety).
+
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/OpenDDS_FACE.mpc:
+
+          Fixed warnings due to 32bit/64bit int mismatch.
+
 Mon Feb 16 23:19:42 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * FACE/common.hpp:
