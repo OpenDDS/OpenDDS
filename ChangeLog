@@ -1,8 +1,21 @@
+Mon Feb 16 17:50:20 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged branch FACE to trunk, adding initial support for the
+          Future Airborne Capability Environment (v2.1) in the top-level
+          FACE directory (public headers) and the dds/FACE directory
+          (implementation).  OpenDDS can be built to work on the restricted
+          platform of FACE's safety base profile by setting the MPC feature
+          no_opendds_safety_profile=0 and building with a corresponding
+          FACE-enabled version of ACE.
+          For details for the changes made on this branch see the change log
+          archived at docs/history/ChangeLog-FACE.
+
 Fri Feb 13 21:31:16 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * ChangeLog:
 
           Reset for post 3.7
+
         * NEWS:
 
           Add 3.7 section.

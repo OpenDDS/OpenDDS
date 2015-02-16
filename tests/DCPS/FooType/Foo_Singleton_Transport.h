@@ -14,7 +14,7 @@
 #include "footype_export.h"
 #include "FooTypeC.h"
 
-#include "tao/TAO_Singleton.h"
+#include "ace/Singleton.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -28,7 +28,7 @@
  */
 class FooType_Export Singleton_Transport
 {
-  friend class TAO_Singleton<Singleton_Transport, TAO_SYNCH_MUTEX>;
+  friend class ACE_Singleton<Singleton_Transport, ACE_SYNCH_MUTEX>;
 
 public:
 
@@ -47,9 +47,9 @@ private:
 
 };
 
-typedef TAO_Singleton<Singleton_Transport, TAO_SYNCH_MUTEX> FOO_SINGLETON_TRANSPORT;
+typedef ACE_Singleton<Singleton_Transport, ACE_SYNCH_MUTEX> FOO_SINGLETON_TRANSPORT;
 
-FOOTYPE_SINGLETON_DECLARE (TAO_Singleton, Singleton_Transport, TAO_SYNCH_MUTEX);
+FOOTYPE_SINGLETON_DECLARE(ACE_Singleton, Singleton_Transport, ACE_SYNCH_MUTEX);
 
 #define Foo_Singleton_Transport FOO_SINGLETON_TRANSPORT::instance()
 

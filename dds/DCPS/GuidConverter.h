@@ -9,7 +9,7 @@
 #ifndef DCPS_GUIDCONVERTER_H
 #define DCPS_GUIDCONVERTER_H
 
-#include <ostream>
+#include <iostream>
 #include <string>
 
 #include "tao/Basic_Types.h"
@@ -95,6 +95,13 @@ public:
 
 protected:
   const GUID_t guid_;
+};
+
+struct OpenDDS_Dcps_Export LogGuid {
+  explicit LogGuid(const GUID_t& id)
+    : conv_(GuidConverter(id)) {}
+  const char* c_str() const { return conv_.c_str(); }
+  std::string conv_;
 };
 
 OpenDDS_Dcps_Export std::ostream&

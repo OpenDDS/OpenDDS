@@ -5,6 +5,7 @@
 project: dcpslib, install {
   sharedname    = OpenDDS_Udp
   dynamicflags  = OPENDDS_UDP_BUILD_DLL
+  requires += no_opendds_safety_profile
 
   specific {
     install_dir = dds/DCPS/transport/udp

@@ -36,7 +36,12 @@
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 
+#ifdef ACE_LYNXOS_MAJOR
+#include <strstream>
+#else
 #include <sstream>
+#endif
+
 #include <stdexcept>
 
 
@@ -193,14 +198,20 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
   if (DCPS_debug_level > 9) {
+#ifdef ACE_LYNXOS_MAJOR
+    std::strstream buffer;
+# define DOT_CSTR
+#else
     std::stringstream buffer;
+# define DOT_CSTR .c_str()
+#endif
     buffer << sample.header_ << std::ends;
     GuidConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::data_received: ")
                ACE_TEXT("%C received sample: %C.\n"),
                std::string(converter).c_str(),
-               buffer.str().c_str()));
+               buffer.str() DOT_CSTR));
   }
 
   // we only support SAMPLE_DATA messages
@@ -838,18 +849,18 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
 {
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
-    const char* separator = "";
-    std::stringstream buffer;
+    std::string separator = "";
+    std::string buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer << separator << GuidConverter(ids[i]);
+      buffer += separator + std::string(GuidConverter(ids[i]));
       separator = ", ";
     }
 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::lookup_instance_handles: ")
                ACE_TEXT("searching for handles for writer Ids: %C.\n"),
-               buffer.str().c_str()));
+               buffer.c_str()));
   }
 
   CORBA::ULong const num_wrts = ids.length();

@@ -15,6 +15,10 @@
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
 
+#ifdef OPENDDS_SAFETY_PROFILE
+#include "SafetyProfilePool.h"
+#endif
+
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/ORB_Core.h"
@@ -28,13 +32,18 @@
 #include "ace/Argv_Type_Converter.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/Sched_Params.h"
+#include "ace/Malloc_Allocator.h"
 
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 
 #include <vector>
-#include <sstream>
+
+#ifdef OPENDDS_SAFETY_PROFILE
+#include <cstdio>
+#else
 #include <fstream>
+#endif
 
 #if !defined (__ACE_INLINE__)
 #include "Service_Participant.inl"
@@ -44,18 +53,20 @@ namespace {
 
 void set_log_file_name(const char* fname)
 {
-  std::ofstream* output_stream = new std::ofstream();
-
-  output_stream->open (fname,
-                       ios::out | ios::app);
-
-  if (!output_stream->bad ()) {
-    ACE_LOG_MSG->msg_ostream (output_stream, 1);
+#ifdef OPENDDS_SAFETY_PROFILE
+  ACE_LOG_MSG->msg_ostream(std::fopen(fname, "a"), true);
+#else
+  std::ofstream* output_stream = new std::ofstream(fname, ios::app);
+  if (output_stream->bad()) {
+    delete output_stream;
+  } else {
+    ACE_LOG_MSG->msg_ostream(output_stream, true);
   }
-
-  ACE_LOG_MSG->clr_flags (ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
-  ACE_LOG_MSG->set_flags (ACE_Log_Msg::OSTREAM);
+#endif
+  ACE_LOG_MSG->clr_flags(ACE_Log_Msg::STDERR | ACE_Log_Msg::LOGGER);
+  ACE_LOG_MSG->set_flags(ACE_Log_Msg::OSTREAM);
 }
+
 
 void set_log_verbose(unsigned long verbose_logging)
 {
@@ -130,8 +141,12 @@ static bool got_pending_timeout = false;
 static bool got_persistent_data_dir = false;
 #endif
 static bool got_default_discovery = false;
-#if !defined (DDS_DEFAULT_DISCOVERY_METHOD)
-# define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_REPO
+#ifndef DDS_DEFAULT_DISCOVERY_METHOD
+# ifdef OPENDDS_SAFETY_PROFILE
+#  define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_RTPS
+# else
+#  define DDS_DEFAULT_DISCOVERY_METHOD Discovery::DEFAULT_REPO
+# endif
 #endif
 static bool got_log_fname = false;
 static bool got_log_verbose = false;
@@ -171,13 +186,19 @@ Service_Participant::Service_Participant()
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
     pending_timeout_(ACE_Time_Value::zero),
-    shut_down_(false)
+    shut_down_(false),
+#ifdef OPENDDS_SAFETY_PROFILE
+    memory_pool_(&safety_profile_pool_)
+#else
+    memory_pool_(ACE_Allocator::instance())
+#endif
 {
   initialize();
 }
 
 Service_Participant::~Service_Participant()
 {
+  shutdown();
   ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
   typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
   for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
@@ -1246,9 +1267,20 @@ Service_Participant::load_configuration()
                       ACE_TEXT("import_config () returned %d\n"),
                       status),
                      -1);
+  } else {
+    status = this->load_configuration(this->cf_, config_fname.c_str());
   }
+  return status;
+}
 
-  status = this->load_common_configuration(this->cf_);
+int
+Service_Participant::load_configuration(
+  ACE_Configuration_Heap& config,
+  const char* filename)
+{
+  int status = 0;
+
+  status = this->load_common_configuration(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1258,7 +1290,7 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  status = this->load_discovery_configuration(this->cf_, RTPS_SECTION_NAME);
+  status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1268,7 +1300,7 @@ Service_Participant::load_configuration()
                      -1);
   }
 
-  status = this->load_discovery_configuration(this->cf_, REPO_SECTION_NAME);
+  status = this->load_discovery_configuration(config, REPO_SECTION_NAME);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1279,7 +1311,7 @@ Service_Participant::load_configuration()
   }
 
   status = TransportRegistry::instance()->load_transport_configuration(
-             ACE_TEXT_ALWAYS_CHAR(config_fname.c_str()), this->cf_);
+             ACE_TEXT_ALWAYS_CHAR(filename), config);
   if (this->global_transport_config_ != ACE_TEXT("")) {
     TransportConfig_rch config = TransportRegistry::instance()->get_config(
       ACE_TEXT_ALWAYS_CHAR(this->global_transport_config_.c_str()));
@@ -1305,7 +1337,7 @@ Service_Participant::load_configuration()
   // sections to allow error reporting on bad discovery config names.
   // Also loaded after the transport configuration so that
   // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
-  status = this->load_domain_configuration(this->cf_);
+  status = this->load_domain_configuration(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1832,6 +1864,17 @@ Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participan
   }
   return participant_servant->create_typeless_topic(topic_name, type_name, type_has_keys, qos, a_listener, mask);
 }
+
+void* Service_Participant::pool_malloc(std::size_t bytes)
+{
+  return memory_pool_->malloc(bytes);
+}
+
+void Service_Participant::pool_free(void* ptr)
+{
+  memory_pool_->free(ptr);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

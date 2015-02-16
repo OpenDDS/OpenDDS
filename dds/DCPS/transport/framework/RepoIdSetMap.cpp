@@ -11,7 +11,10 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
+
+#ifndef ACE_LYNXOS_MAJOR
 #include <sstream>
+#endif
 
 #if !defined (__ACE_INLINE__)
 #include "RepoIdSetMap.inl"
@@ -230,6 +233,7 @@ OpenDDS::DCPS::RepoIdSetMap::clear()
 void
 OpenDDS::DCPS::RepoIdSetMap::dump()
 {
+#ifndef ACE_LYNXOS_MAJOR
   DBG_ENTRY_LVL("RepoIdSetMap","dump",6);
 
   for (MapType::iterator itr = map_.begin();
@@ -246,4 +250,5 @@ OpenDDS::DCPS::RepoIdSetMap::dump()
                  buffer.str().c_str()));
     }
   }
+#endif
 }

@@ -43,7 +43,6 @@
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 
-#include <sstream>
 #include <stdexcept>
 
 #include "ReplayerImpl.h"
@@ -436,7 +435,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
-                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
+                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -1091,18 +1090,18 @@ ReplayerImpl::lookup_instance_handles(const ReaderIdSeq&       ids,
 {
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
-    const char* separator = "";
-    std::stringstream buffer;
+    std::string separator;
+    std::string buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer << separator << GuidConverter(ids[i]);
+      buffer += separator + std::string(GuidConverter(ids[i]));
       separator = ", ";
     }
 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::lookup_instance_handles: ")
                ACE_TEXT("searching for handles for reader Ids: %C.\n"),
-               buffer.str().c_str()));
+               buffer.c_str()));
   }
 
   CORBA::ULong const num_rds = ids.length();

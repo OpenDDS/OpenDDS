@@ -21,6 +21,9 @@
 
 #include <ace/streams.h>
 #include "ace/Get_Opt.h"
+#include "tests/Utils/ExceptionStreams.h"
+
+using namespace std;
 
 char PART_USER_DATA[] = "Initial DomainParticipant UserData";
 char DR_USER_DATA[] = "Initial DataReader UserData";

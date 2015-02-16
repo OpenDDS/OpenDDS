@@ -367,8 +367,10 @@ private:
   typedef ACE_SYNCH_MUTEX     LockType;
 
   /// Convenience function for diagnostic information.
+#ifndef OPENDDS_SAFETY_PROFILE
   friend OpenDDS_Dcps_Export
   std::ostream& operator<<(std::ostream& str, const DataLink& value);
+#endif
 
   /// A boolean indicating if the DataLink has been stopped. This
   /// value is protected by the strategy_lock_.

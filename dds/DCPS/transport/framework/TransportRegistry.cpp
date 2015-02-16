@@ -25,7 +25,11 @@
 #include "TransportRegistry.inl"
 #endif /* __ACE_INLINE__ */
 
+#ifdef ACE_LYNXOS_MAJOR
+#include <strstream>
+#else
 #include <sstream>
+#endif
 
 namespace {
   const ACE_TString OLD_TRANSPORT_PREFIX = ACE_TEXT("transport_");
@@ -38,7 +42,11 @@ namespace {
   }
 
   // transport type to try loading if none are loaded when DCPS attempts to use
+#ifdef OPENDDS_SAFETY_PROFILE
+  const char FALLBACK_TYPE[] = "rtps_udp";
+#else
   const char FALLBACK_TYPE[] = "tcp";
+#endif
 }
 
 namespace OpenDDS {
@@ -215,7 +223,11 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
             std::string name = (*it).first;
             if (name == "transports") {
               std::string value = (*it).second;
+#ifdef ACE_LYNXOS_MAJOR
+              std::istrstream ss(value.c_str());
+#else
               std::stringstream ss(value);
+#endif
               std::string item;
               while(std::getline(ss, item, ',')) {
                 configInfo.second.push_back(item);

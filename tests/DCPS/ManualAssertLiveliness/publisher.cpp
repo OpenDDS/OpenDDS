@@ -25,9 +25,11 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 
 using namespace Messenger;
+using namespace std;
 
 int LEASE_DURATION_SEC = 2;
 int assert_liveliness_period = LEASE_DURATION_SEC;

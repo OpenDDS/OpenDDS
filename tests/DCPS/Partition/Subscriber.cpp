@@ -24,6 +24,7 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include "tests/Utils/ExceptionStreams.h"
 
 using std::cerr;
 using std::endl;

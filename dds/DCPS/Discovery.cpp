@@ -24,7 +24,7 @@ const char Discovery::DEFAULT_RTPS[] = "DEFAULT_RTPS";
 DDS::ReturnCode_t
 Discovery::create_bit_topics(DomainParticipantImpl* participant)
 {
-  TypeSupport_ptr type_support =
+  TypeSupport_var type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_TOPIC_TYPE);
 
   if (0 == type_support) {

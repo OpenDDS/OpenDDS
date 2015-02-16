@@ -45,3 +45,10 @@ feature (!persistence_profile) : taoidldefaults, dcps_ts_defaults {
   idlflags += -DOPENDDS_NO_PERSISTENCE_PROFILE
   dcps_ts_flags += -DOPENDDS_NO_PERSISTENCE_PROFILE
 }
+
+// Safety profile defined by OpenDDS (not the OMG DDS spec)
+feature (!no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
+  macros   += OPENDDS_SAFETY_PROFILE
+  idlflags += -DOPENDDS_SAFETY_PROFILE
+  dcps_ts_flags += -DOPENDDS_SAFETY_PROFILE
+}

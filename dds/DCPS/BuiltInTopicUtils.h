@@ -16,8 +16,6 @@
 #include "Service_Participant.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 
-#include <sstream>
-
 namespace OpenDDS {
 namespace DCPS {
 

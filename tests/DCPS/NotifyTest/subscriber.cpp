@@ -19,9 +19,11 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 
 using namespace Messenger;
+using namespace std;
 
 long num_expected_dispose = 0;
 long num_expected_unregister = 0;

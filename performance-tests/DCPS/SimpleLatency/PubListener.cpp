@@ -11,8 +11,10 @@
 
 #include <time.h>
 #include <math.h>
+#include <string.h>
 
 using namespace DDSPerfTest;
+using namespace std;
 
 typedef struct
 {

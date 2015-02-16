@@ -15,6 +15,7 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_stdlib.h"
 #include "ace/OS_NS_netdb.h"
+#include "ace/OS_NS_sys_time.h"
 
 namespace OpenDDS {
   namespace RTPS {
@@ -23,6 +24,16 @@ GuidGenerator::GuidGenerator()
   : pid_(ACE_OS::getpid()),
     counter_(0)
 {
+
+  if (pid_ == -1) {
+    unsigned seed = static_cast<unsigned>(ACE_OS::gettimeofday().usec());
+#if ACE_MAJOR_VERSION >= 6
+    pid_ = static_cast<pid_t>(ACE_OS::rand_r(&seed));
+#else
+    pid_ = static_cast<pid_t>(ACE_OS::rand_r(seed));
+#endif
+  }
+
   ACE_OS::macaddr_node_t macaddress;
   const int result = ACE_OS::getmacaddress(&macaddress);
 

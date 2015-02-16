@@ -25,9 +25,11 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include <ace/Time_Value.h>
 
 #include <cassert>
+using namespace std;
 
 const char PARTITION_A[] = "ZiggieStardust";
 const char PARTITION_B[] = "Amadeus";

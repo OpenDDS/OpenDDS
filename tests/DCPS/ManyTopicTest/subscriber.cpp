@@ -37,7 +37,10 @@ static int topics = 0;
 
 static int num_ops_per_thread = 10;
 static int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
+
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
 static int history_depth = 100;
+#endif
 
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
@@ -199,7 +202,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ::DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
 
-    dr_qos.history.depth = history_depth ;
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+    dr_qos.history.depth = history_depth;
+#endif
     dr_qos.resource_limits.max_samples_per_instance =
       max_samples_per_instance;
 

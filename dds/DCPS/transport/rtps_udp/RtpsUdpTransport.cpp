@@ -212,9 +212,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
   // multicast first so it's preferred by remote peers
   if (config_i_->use_multicast_) {
     locators.length(2);
-    locators[0].kind =
-      (config_i_->multicast_group_address_.get_type() == AF_INET6)
-      ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+    locators[0].kind = address_to_kind(config_i_->multicast_group_address_);
     locators[0].port = config_i_->multicast_group_address_.get_port_number();
     RTPS::address_to_bytes(locators[0].address,
                            config_i_->multicast_group_address_);
@@ -224,8 +222,7 @@ RtpsUdpTransport::connection_info_i(TransportLocator& info) const
     locators.length(1);
   }
 
-  locators[idx].kind = (config_i_->local_address_.get_type() == AF_INET6)
-                       ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  locators[idx].kind = address_to_kind(config_i_->local_address_);
   locators[idx].port = config_i_->local_address_.get_port_number();
   RTPS::address_to_bytes(locators[idx].address,
                          config_i_->local_address_);

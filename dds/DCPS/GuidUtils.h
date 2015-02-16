@@ -9,13 +9,14 @@
 #ifndef GUIDUTILS_H
 #define GUIDUTILS_H
 
-#include <iosfwd>
-
-#include "tao/Basic_Types.h"
-
 #include "dds/DdsDcpsGuidC.h"
 
 #include "dcps_export.h"
+
+#include "tao/Basic_Types.h"
+
+#include <iosfwd>
+#include <cstring>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -124,7 +125,7 @@ struct GuidPrefixEqual {
   bool
   operator() (const GuidPrefix_t& lhs, const GuidPrefix_t& rhs) const
   {
-    return memcmp(&lhs, &rhs, sizeof(GuidPrefix_t)) == 0;
+    return std::memcmp(&lhs, &rhs, sizeof(GuidPrefix_t)) == 0;
   }
 };
 
@@ -144,7 +145,7 @@ operator!=(const EntityId_t& lhs, const EntityId_t& rhs)
 struct EntityIdConverter {
   EntityIdConverter (const unsigned char o[4])
   {
-    memcpy (&entityId, &o, sizeof(EntityId_t));
+    std::memcpy(&entityId, &o, sizeof(EntityId_t));
   }
 
   operator EntityId_t() const { return entityId; }

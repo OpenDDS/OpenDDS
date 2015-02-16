@@ -22,6 +22,8 @@ namespace DCPS {
 
 class MetaStruct;
 
+template <typename Message> struct DDSTraits;
+
 class OpenDDS_Dcps_Export TypeSupportImpl
   : public virtual LocalObject<TypeSupport> {
 public:

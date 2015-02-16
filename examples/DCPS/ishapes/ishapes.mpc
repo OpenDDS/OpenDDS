@@ -1,4 +1,4 @@
-project(ishapes): dcpsexe_with_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, qt4_gui, boost_base {
+project(ishapes): dcpsexe, dcps_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, qt4_gui, boost_base {
 
   exename = *
   includes += .

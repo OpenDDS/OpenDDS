@@ -1,0 +1,9 @@
+project {
+  avoids      += no_opendds_safety_profile
+  // TODO: does this project need $(ACE_ROOT)/lib
+  libout       = $(DDS_ROOT)/lib
+  libpaths    += $(DDS_ROOT)/lib
+  // TODO: should this project have mpb dependencies
+  includes    += $(DDS_ROOT)/dds/CORBA $(TAO_ROOT) $(ACE_ROOT)
+  dynamicflags = TAO_BUILD_DLL
+}

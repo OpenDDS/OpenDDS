@@ -18,10 +18,12 @@
 #include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <ace/OS_main.h>
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 
 using namespace Messenger;
+using namespace std;
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])

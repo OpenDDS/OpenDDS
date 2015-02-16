@@ -17,8 +17,6 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
-#include "tao/ORB_Core.h"
-#include "tao/PortableServer/PortableServer.h"
 #include "ace/High_Res_Timer.h"
 #include "ace/Arg_Shifter.h"
 #include "ace/Reactor.h"
@@ -30,70 +28,10 @@ const char* OTHER_TOPIC = "other";
 const char* MY_TYPE     = "foo";
 
 const ACE_Time_Value find_topic_timeout(5, 0);
-CORBA::ORB_var orb;
-PortableServer::POA_var poa;
 ::DDS::DomainParticipantFactory_var dpf;
-class ORB_Task;
-ORB_Task* orb_task = 0;
 
 using namespace ::DDS;
 using namespace ::OpenDDS::DCPS;
-
-class ORB_Task : public ACE_Task_Base
-{
-public:
-  ORB_Task (CORBA::ORB_ptr orb)
-    : orb_(CORBA::ORB::_duplicate (orb))
-  {
-  };
-
-  /** Lanch a thread to run the orb. **/
-  virtual int svc ()
-  {
-    {
-      bool done = false;
-      while (! done)
-        {
-          try
-            {
-              if (orb_->orb_core()->has_shutdown () == false)
-                {
-                  orb_->run ();
-                }
-              done = true;
-            }
-          catch (const CORBA::SystemException& sysex)
-            {
-              sysex._tao_print_exception (
-                "OPENDDS_DCPS_Service_Participant::svc");
-            }
-          catch (const CORBA::UserException& userex)
-            {
-              userex._tao_print_exception (
-                "OPENDDS_DCPS_Service_Participant::svc");
-            }
-          catch (const CORBA::Exception& ex)
-            {
-              ex._tao_print_exception (
-                "OPENDDS_DCPS_Service_Participant::svc");
-            }
-          if (orb_->orb_core()->has_shutdown ())
-            {
-              done = true;
-            }
-          else
-            {
-              orb_->orb_core()->reactor()->reset_reactor_event_loop ();
-            }
-        }
-    }
-
-    return 0;
-  };
-
-private:
-  CORBA::ORB_var orb_;
-};
 
 int run_domain_test ()
 {

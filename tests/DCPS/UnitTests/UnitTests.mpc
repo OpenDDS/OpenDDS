@@ -90,7 +90,7 @@ project(*RepoIdSequence) : dcps_rtpsexe {
   }
 }
 
-project(*BIT_DataReader) : dcps_rtps_udp, dcps_inforepodiscovery, dcps_tcp {
+project(*BIT_DataReader): dcps_rtps_udp, dcps_default_discovery {
   exename   = *
   requires += built_in_topics
 

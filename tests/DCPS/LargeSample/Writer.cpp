@@ -19,10 +19,12 @@
 #include <sstream>
 #include <iomanip>
 
-Writer::Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2)
+Writer::Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2,
+               int my_pid)
   : writer1_(DDS::DataWriter::_duplicate(writer1)),
     writer2_(DDS::DataWriter::_duplicate(writer2)),
-    timeout_writes_(0)
+    timeout_writes_(0),
+    my_pid_(my_pid)
 {
 }
 
@@ -106,7 +108,7 @@ Writer::write(bool reliable, int num_messages)
     }
 
     std::ostringstream pid;
-    pid << std::setw(5) << ACE_OS::getpid();
+    pid << std::setw(5) << my_pid_;
 
     Messenger::Message message1;
     message1.writer_id  = 1;

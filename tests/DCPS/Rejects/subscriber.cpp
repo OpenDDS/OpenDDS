@@ -25,9 +25,11 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include <ace/Time_Value.h>
 
 #include <cassert>
+using namespace std;
 
 static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);
@@ -112,8 +114,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dr_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCES;
       dr_qos.resource_limits.max_samples = MAX_SAMPLES;
       dr_qos.resource_limits.max_instances = MAX_INSTANCES;
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       dr_qos.history.kind = ::DDS::KEEP_ALL_HISTORY_QOS;
       dr_qos.history.depth = MAX_SAMPLES_PER_INSTANCES;
+#endif
 
       DDS::DataReader_var dr1 =
         sub->create_datareader (topic.in (),
@@ -197,18 +201,22 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       // expect 6 rejected for max_instances (register_instance + 5 messages)
       // expect 1 rejected for max_samples_per_instance
 
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       if (rej_max_samples != 2) {
         cerr << "ERROR: Failed to reject expected for max_samples" << endl;
         return_result = 1;
       }
+#endif
       if (rej_max_instances != 6) {
         cerr << "ERROR: Failed to reject expected for max_instances" << endl;
         return_result = 1;
       }
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       if (rej_max_samp_instance != 1) {
         cerr << "ERROR: Failed to reject expected for max_samples_per_instance" << endl;
         return_result = 1;
       }
+#endif
 
       Messenger::MessageDataReader_var message_dr1 =
         Messenger::MessageDataReader::_narrow(dr1.in());

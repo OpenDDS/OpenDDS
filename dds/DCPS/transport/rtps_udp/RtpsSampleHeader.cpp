@@ -23,7 +23,10 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 
+#ifdef OPENDDS_TEST_INLINE_QOS
 #include <sstream>
+#endif
+
 #include <cstring>
 
 #ifndef __ACE_INLINE__

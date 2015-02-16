@@ -88,7 +88,9 @@ public:
 
   /// Diagnostic aid.
   void dump();
+#ifndef OPENDDS_SAFETY_PROFILE
   void dump(ostream& os);
+#endif
 
   void report();
 

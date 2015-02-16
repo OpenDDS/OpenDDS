@@ -29,14 +29,17 @@ namespace {
 
 void parse_args(int argc, ACE_TCHAR* argv[],
                 bool& reliable,
-                int& num_msgs)
+                int& num_msgs,
+                int& my_pid)
 {
-  ACE_Get_Opt getopt(argc, argv, "r:n:");
+  ACE_Get_Opt getopt(argc, argv, "r:n:p:");
   for (int opt = 0; (opt = getopt()) != EOF;) {
     if (opt == 'r') {
       reliable = ACE_OS::atoi(getopt.opt_arg());
     } else if (opt == 'n') {
       num_msgs = ACE_OS::atoi(getopt.opt_arg());
+    } else if (opt == 'p') {
+      my_pid = ACE_OS::atoi(getopt.opt_arg());
     }
   }
 }
@@ -54,8 +57,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     bool reliable = true;
     int num_msgs = 10;
+    int my_pid = ACE_OS::getpid();
 
-    parse_args(argc, argv, reliable, num_msgs);
+    parse_args(argc, argv, reliable, num_msgs, my_pid);
 
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
@@ -147,7 +151,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     {
-      Writer writer(dw, dw2);
+      Writer writer(dw, dw2, my_pid);
       writer.write(reliable, num_msgs);
     }
 

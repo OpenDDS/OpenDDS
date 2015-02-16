@@ -7,6 +7,9 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include "FileSystemStorage.h"
 
 #include "ace/Dirent.h"
@@ -924,3 +927,5 @@ ACE_TString b32h_decode(const ACE_TCHAR* encoded)
 
 } // namespace FileSystemStorage
 } // namespace OpenDDS
+
+#endif

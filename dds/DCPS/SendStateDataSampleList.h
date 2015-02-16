@@ -36,7 +36,10 @@ const int MAX_READERS_TO_RESEND = 5;
  * @c over the "send samples" in a @c SendStateDataSampleList.
  */
 class OpenDDS_Dcps_Export SendStateDataSampleListIterator
-  : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement> {
+#ifndef ACE_LYNXOS_MAJOR
+  : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement>
+#endif
+{
 public:
 
   /// Default constructor.
@@ -52,6 +55,12 @@ public:
   SendStateDataSampleListIterator  operator++(int);
   SendStateDataSampleListIterator& operator--();
   SendStateDataSampleListIterator  operator--(int);
+
+#ifdef ACE_LYNXOS_MAJOR
+  typedef DataSampleElement& reference;
+  typedef DataSampleElement* pointer;
+#endif
+
   reference operator*();
   pointer operator->();
 

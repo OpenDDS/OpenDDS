@@ -1,4 +1,5 @@
 project(*idl) : taoidldefaults, dds_macros {
+  requires += no_opendds_safety_profile
   idlflags    += -Wb,export_macro=Sync_Export -Wb,export_include=Sync_export.h
 
   IDL_Files {
@@ -9,6 +10,7 @@ project(*idl) : taoidldefaults, dds_macros {
 }
 
 project(*ServerLib) : taolib_with_idl, portableserver, iortable, dds_macros {
+  requires += no_opendds_safety_profile
   sharedname   = SyncServer
   libout       = $(DDS_ROOT)/lib
   after       += *idl
@@ -26,6 +28,7 @@ project(*ServerLib) : taolib_with_idl, portableserver, iortable, dds_macros {
 }
 
 project(*ClientLib) : taolib_with_idl, portableserver, dds_macros {
+  requires += no_opendds_safety_profile
   sharedname   = SyncClient
   libout       = $(DDS_ROOT)/lib
   after       += *idl
@@ -42,6 +45,7 @@ project(*ClientLib) : taolib_with_idl, portableserver, dds_macros {
 }
 
 project(*Server) : taoexe, taoidldefaults, portableserver, iortable, dds_macros {
+  requires += no_opendds_safety_profile
   exename = syncServer
   libs   += SyncServer
   libpaths += $(DDS_ROOT)/lib

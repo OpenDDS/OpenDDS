@@ -74,7 +74,12 @@ private:
       if (!cmp_.in()) {
         // The following assumes that if no comparator is set
         // then PRESENTATION ordered access applies (TOPIC).
+#ifdef ACE_LYNXOS_MAJOR
+        return OpenDDS::DCPS::operator<(lhs.rde_->source_timestamp_,
+                                        rhs.rde_->source_timestamp_);
+#else
         return lhs.rde_->source_timestamp_ < rhs.rde_->source_timestamp_;
+#endif
       }
 
       return cmp_->compare(lhs.rde_->registered_data_,

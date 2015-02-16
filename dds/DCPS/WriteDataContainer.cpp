@@ -27,8 +27,6 @@
 
 #include "tao/debug.h"
 
-#include <sstream>
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -101,10 +99,10 @@ WriteDataContainer::WriteDataContainer(
     shutdown_(false),
     domain_id_(domain_id),
     topic_name_(topic_name),
-    type_name_(type_name),
+    type_name_(type_name)
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    durability_cache_(durability_cache),
-    durability_service_(durability_service)
+  , durability_cache_(durability_cache)
+  , durability_service_(durability_service)
 #endif
 {
 

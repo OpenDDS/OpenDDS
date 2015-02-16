@@ -8,8 +8,10 @@
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 
 using namespace Messenger;
+using namespace std;
 
 namespace
 {

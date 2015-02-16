@@ -26,10 +26,12 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include <ace/Time_Value.h>
 
 #include <cassert>
 
+using namespace std;
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {

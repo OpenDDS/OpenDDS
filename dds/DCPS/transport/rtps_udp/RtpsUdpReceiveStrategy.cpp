@@ -44,7 +44,21 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   const ACE_SOCK_Dgram& socket =
     (fd == link_->unicast_socket().get_handle())
     ? link_->unicast_socket() : link_->multicast_socket();
+#ifdef ACE_LACKS_SENDMSG
+  char buffer[0x10000];
+  ssize_t scatter = socket.recv(buffer, sizeof buffer, remote_address);
+  char* iter = buffer;
+  for (int i = 0; scatter > 0 && i < n; ++i) {
+    const size_t chunk = std::min(static_cast<size_t>(iov[i].iov_len), // int on LynxOS
+                                  static_cast<size_t>(scatter));
+    std::memcpy(iov[i].iov_base, iter, chunk);
+    scatter -= chunk;
+    iter += chunk;
+  }
+  const ssize_t ret = (scatter < 0) ? scatter : (iter - buffer);
+#else
   const ssize_t ret = socket.recv(iov, n, remote_address);
+#endif
   remote_address_ = remote_address;
   return ret;
 }
@@ -351,14 +365,12 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
   assign(dest_guid_prefix_, local_);
 
   unicast_reply_locator_list_.length(1);
-  unicast_reply_locator_list_[0].kind =
-    addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  unicast_reply_locator_list_[0].kind = address_to_kind(addr);
   unicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
   RTPS::address_to_bytes(unicast_reply_locator_list_[0].address, addr);
 
   multicast_reply_locator_list_.length(1);
-  multicast_reply_locator_list_[0].kind =
-    addr.get_type() == AF_INET6 ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  multicast_reply_locator_list_[0].kind = address_to_kind(addr);
   multicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
   assign(multicast_reply_locator_list_[0].address, LOCATOR_ADDRESS_INVALID);
 

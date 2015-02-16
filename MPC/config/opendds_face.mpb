@@ -1,0 +1,5 @@
+project: dcps, dcps_ts_defaults {
+  libs  += OpenDDS_FACE
+  after += OpenDDS_FACE
+  dcps_ts_flags += -Gface
+}

@@ -10,54 +10,14 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
-
-$testoutputfilename = "test.log";
-$status = 0;
-
-$dcpsrepo_ior = "dcps_ir.ior";
-
-unlink $dcpsrepo_ior;
-unlink $testoutputfilename;
+use strict;
 
 PerlDDS::add_lib_path('../FooType');
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                              "-o $dcpsrepo_ior "
-                              # . "-ORBDebugLevel 1 "
-                              . "-ORBLogFile $testoutputfilename ");
+my $test = new PerlDDS::TestFramework();
 
-
-$Test = PerlDDS::create_process ("infrastructure_test",
-                                "-DCPSInfoRepo file://$dcpsrepo_ior " .
-                                "-ORBLogFile $testoutputfilename");
-
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: cannot find file <$dcpsrepo_ior>\n";
-    $DCPSREPO->Kill (); $DCPSREPO->TimedWait (1);
-    exit 1;
-}
-
-$TestResult = $Test->SpawnWaitKill (60);
-
-if ($TestResult != 0) {
-    print STDERR "ERROR: test returned $TestResult\n";
-    $status = 1;
-}
-
-
-$ir = $DCPSREPO->TerminateWaitKill(30);
-
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-exit $status;
+$test->process('test', 'infrastructure_test');
+$test->setup_discovery();
+$test->start_process('test');
+$test->ignore_error('DomainParticipantFactoryImpl::delete_participant, Nil participant');
+exit $test->finish(60);

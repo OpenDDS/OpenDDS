@@ -37,7 +37,10 @@ static int topics = 0;
 
 static int num_ops_per_thread = 10;
 static int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
+
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
 static int history_depth = 100;
+#endif
 
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
@@ -148,7 +151,7 @@ void t2_init(T2::Foo2& foo, int)
 void t2_next(T2::Foo2& foo, int i)
 {
   static char buff[20];
-  ACE_OS::sprintf(buff, "message %d", i + 1);
+  ACE_OS::snprintf(buff, sizeof buff, "message %d", i + 1);
   foo.text = (const char*) buff;
 }
 
@@ -160,7 +163,7 @@ void t3_init(T3::Foo3& foo, int)
 void t3_next(T3::Foo3& foo, int i)
 {
   static char buff[20];
-  ACE_OS::sprintf(buff, "message %d", i + 1);
+  ACE_OS::snprintf(buff, sizeof buff, "message %d", i + 1);
   foo.c = 'A' + (i % 26);
   foo.text = (const char*) buff;
   foo.s = i + 1;
@@ -216,7 +219,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos(dw_qos);
 
-      dw_qos.history.depth = history_depth ;
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+      dw_qos.history.depth = history_depth;
+#endif
       dw_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance;
 

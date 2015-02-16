@@ -16,7 +16,7 @@
 class Writer {
 public:
 
-  Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2);
+  Writer(DDS::DataWriter_ptr writer1, DDS::DataWriter_ptr writer2, int my_pid);
 
   void write(bool reliable, int num_msgs);
 
@@ -34,6 +34,7 @@ private:
   DDS::DataWriter_var writer1_;
   DDS::DataWriter_var writer2_;
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> timeout_writes_;
+  const int my_pid_;
 };
 
 #endif /* WRITER_H */

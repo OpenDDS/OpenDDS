@@ -1,0 +1,1713 @@
+Mon Feb 16 16:52:53 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Messenger/face_config.ini:
+
+          Added transient local durability to handle late subscribers.
+
+Mon Feb 16 16:15:07 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6924 through r6949
+
+Mon Feb  9 16:44:28 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:
+
+          Need to release lock before destroying WDC.
+          Failed on ACE safety-enabled due to emulated recursive mutexes.
+
+Fri Feb  6 21:12:24 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.h:
+        * dds/DCPS/transport/framework/TransportClient.h:
+
+          Work-arounds to compile under LynxOS-178's version of GCC with broken
+          nested classes (they don't have access to the private members of the
+          enclosing class).
+
+Fri Feb  6 19:47:30 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          TcpReconnect test can't run in safety profile.
+
+Fri Feb  6 18:51:05 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidUtils.h:
+
+          Fixed safety-enabled, inline=0 build.
+
+Fri Feb  6 15:56:58 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated profile-based exclusions for new test cases merged from trunk.
+
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+
+          Updated to use PerlDDS::TestFramework after merge.
+
+Thu Feb  5 23:22:18 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6920 through r6923
+
+Wed Feb  4 23:13:32 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6908 through r6919
+
+Wed Feb  4 18:44:38 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6749 through r6907
+
+Tue Feb  3 00:06:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated list of tests that can run with ownership profile disabled.
+
+Fri Jan 30 21:54:49 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FeatureDisabledQosCheck.h:
+
+          With ownership profile disabled, history kind may not be KEEP_ALL.
+
+        * bin/dcps_tests.lst:
+
+          Updated list of tests that can run with ownership profile disabled.
+
+Fri Jan 30 20:16:07 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/TransientLocalTest/DataReaderListener.h:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/rtps_disc.ini:
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+
+          Return non-0 on test failure and added an rtps_disc test case.
+
+Tue Jan 27 22:04:29 UTC 2015 Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Partition/Idl:
+        * tests/FACE/Partition/Publisher/FacePartitionPublisher.mpc:
+        * tests/FACE/Partition/Subscriber/FacePartitionSubscriber.mpc:
+        * tests/FACE/Partition/run_test.pl:
+
+          Make IDL for this project, and declare a key.
+
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+
+          Use ACE_DEBUG instead of streams.
+
+Fri Jan 23 17:19:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+
+          Corrected the previous commit to work with the non-safety build.
+
+Fri Jan 23 15:10:56 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/transport/framework/ReceiveListenerSet.inl:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.inl:
+        * dds/DCPS/transport/framework/RepoIdSet.inl:
+        * tests/DCPS/TimeBasedFilter/main.cpp:
+
+          Fixed invalid log parameters (detected by the new
+          safety-enabled logging in ACE).
+
+        * dds/CORBA/tao/Object.cpp:
+        * dds/CORBA/tao/SystemException.cpp:
+
+          Fixed warnings.
+
+Wed Jan 21 17:41:32 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Changed MutliRepoTest to have !OPENDDS_SAFETY_PROFILE flag, since it is a InfoRepo specific test.
+
+Tue Jan 20 18:18:11 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/FACE/config/Parser.cpp:
+        * tests/FACE/Partition/face_config.ini:
+
+          Accept filename into load_configuration, and pass to transport
+          configuration, so that Global default transports may be loaded.
+
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+
+          Whitespace.
+
+Mon Jan 19 18:43:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/FACE/Unit/FaceUnitTests.mpc:
+
+          Use the base project to get the 'after' setting.
+
+Mon Jan 19 18:12:06 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Don't try to set durability kind to those not supported by build.
+
+Mon Jan 19 17:34:33 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/FACE/FaceTSS.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+
+          Fixed compile errors on LynxOS-178.
+
+Mon Jan 19 16:47:04 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Added back in support for passing mi and mw.
+
+Fri Jan 16 23:07:46 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Partition/face_config.ini:
+
+          Explicitly set DCPSGlobalTransportConfig, was running with TCP.
+
+Fri Jan 16 22:11:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+
+          Sleep between sends, as we don't have reliability.
+
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+
+          Log which subscriber got message.
+
+Fri Jan 16 20:53:39 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Set liveliness kind from file.
+
+Fri Jan 16 17:35:20 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/common/SampleInfo.cpp:
+        * tests/Utils/Options.cpp:
+
+          sprintf -> snprintf
+
+Fri Jan 16 15:43:07 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated for tests that won't run under safety profile.
+
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+
+          Cleaned up unused or unneeded cruft in the script.
+
+Thu Jan 15 22:53:01 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+
+          Only use ACE_OS::snprintf when NOT using safety profile build.
+
+Thu Jan 15 22:11:39 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Add QosSettings test and Partition test.
+
+Thu Jan 15 22:09:27 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Added #include of <iostream>
+
+Thu Jan 15 20:36:27 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/Parser.cpp:
+
+          Parse and set publisher and subscriber qos.
+
+        * dds/FACE/config/QosSettings.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Allow comma-separated list for partition.name
+
+        * tests/FACE/Partition:
+
+          Test setting partititon name.
+
+Thu Jan 15 20:30:23 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+
+          Set readcondition to filter ALIVE_INSTANCE_STATE
+
+Thu Jan 15 18:11:02 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Fixed tests to work with safety profile.
+
+Wed Jan 14 23:25:08 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Fixed compile on inline=0 safety profile builds.
+
+Wed Jan 14 23:18:18 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+
+          Started impelementation of callback-based FACE TS reads.
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Messenger/face_config.ini:
+        * tests/FACE/Messenger/run_test.pl:
+
+          Testing callbacks.
+
+Wed Jan 14 21:26:32 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+
+          Preserve failed status when closing connection.
+
+Wed Jan 14 21:11:32 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+        * tests/FACE/Reliability/face_config.ini:
+
+          If Connection qos name not specified, default to topic name.
+
+Wed Jan 14 20:28:03 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/ConnectionSettings.h:
+        * dds/FACE/config/ConnectionSettings.cpp:
+
+          Add default constructor.
+
+        * tests/FACE/Reliability/face_config.ini:
+
+          Specify writer's qos settings name.
+
+Wed Jan 14 19:14:11 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/rtps.ini:
+        * tests/DCPS/FooTest5/run_test.pl:
+        * tests/DCPS/TransientLocalTest/rtps.ini:
+
+          Fixed tests to work with safety profile.
+
+Wed Jan 14 19:08:12 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.h:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Fix test failures, remove accessor.
+
+Wed Jan 14 18:59:22 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Fix build error.
+
+Wed Jan 14 18:49:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Reliability:
+
+          New test that sets qos policy on datawriter and datareader.
+
+Wed Jan 14 18:46:06 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/ConnectionSettings.h:
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/Parser.h:
+        * dds/FACE/config/Parser.cpp:
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+
+          Parse in Qos Settings also, and use them when creating datareaders,
+          datawriters, publishers, and subscribers.
+
+Wed Jan 14 16:52:35 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+
+          Fixed expected result when running with DCPSInfoRepo.
+
+Wed Jan 14 16:34:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Corrected date/time formatting, month number was off by one
+          and we shoudln't be reinventing the wheel of strftime.
+
+        * bin/dcps_tests.lst:
+
+          Disabled ConfigTransports test under safety profile.
+
+Tue Jan 13 22:11:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/LargeSample/Writer.h:
+        * tests/DCPS/LargeSample/Writer.cpp:
+        * tests/DCPS/LargeSample/publisher.cpp:
+        * tests/DCPS/LargeSample/run_test.pl:
+        * tests/DCPS/ManyToMany/publisher.cpp:
+        * tests/DCPS/ManyToMany/run_test.pl:
+        * tests/DCPS/ManyToMany/subscriber.cpp:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+
+          Fixed tests to work with safety profile.
+
+Tue Jan 13 17:46:19 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/rtps_disc.ini:
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+        * tests/DCPS/ZeroCopyDataReaderListener/run_test.pl:
+
+          Fixed tests to work with safety profile.
+
+        * tests/DCPS/BuiltInTopicTest/tcp.ini:
+
+          Removed this file.
+
+Mon Jan 12 20:40:50 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Messenger/face_config.ini:
+
+          DCPSDebugLevel 10
+
+Mon Jan 12 17:41:47 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DcpsIntegration/run_test-integration.pl:
+        * tests/DCPS/ManyTopicMultiProcess/run_test.pl:
+        * tests/DCPS/MultiDPTest/run_test.pl:
+        * tests/DCPS/RtpsDiscovery/run_test.pl:
+        * tests/DCPS/Thrasher/run_test.pl:
+        * tests/DCPS/WaitForAck/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
+Mon Jan 12 17:32:13 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Messenger/run_test.pl:
+
+          Undo last change.
+
+Mon Jan 12 16:49:18 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/FACE/config/Parser.cpp:
+
+          Use ini file provided to TS::Initialize() as config for
+          Service Participant.
+
+        * tests/FACE/Messenger/run_test.pl:
+
+          Don't start info repo.
+
+Fri Jan  9 22:47:48 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LatencyBudget/run_test.pl:
+        * tests/DCPS/Lifespan/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
+        * tests/DCPS/LatencyBudget/pub.ini:
+        * tests/DCPS/LatencyBudget/sub.ini:
+        * tests/DCPS/Lifespan/pub.ini:
+        * tests/DCPS/Lifespan/sub.ini:
+
+          Removed these files.
+
+Fri Jan  9 21:53:23 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          Updated previous change to account for different
+          parameter types in different versions of ACE.
+
+Fri Jan  9 21:36:18 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/GuidGenerator.cpp:
+
+          Safety profile doesn't have getpid(), need to use a
+          random number for that part of the GUID.
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpSendStrategy.cpp:
+
+          Safety profile doesn't have sendmsg/recvmsg, work-arounds here.
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Cleaned up code for configuring the ACE logger to output to a file.
+
+        * dds/DCPS/FileLogger.h:
+        * dds/DCPS/FileLogger.cpp:
+
+          Removed these files.
+
+Fri Jan  9 17:26:51 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/FACE/FaceTSS.cpp:
+
+          Fixes for LynxOS build.
+
+Fri Jan  9 17:05:49 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
+
+          Added MPC base project for safety profile settings.
+
+Fri Jan  9 16:27:34 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/CORBA/tao/Inlines.cpp:
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * tests/DCPS/UnitTests/ut_Reassembly.cpp:
+        * tests/DCPS/UnitTests/ut_RepoIdSequence.cpp:
+        * tests/DCPS/ZeroCopyRead/main.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Updates to compile on Linux inline=0 safety-enabled.
+
+Fri Jan  9 16:16:41 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Pass in domain ID to create_opendds_entities.
+
+Fri Jan  9 15:27:06 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Updates to build on LynxOS.
+
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/Parser.cpp:
+        * dds/FACE/config/QosSettings.cpp:
+        * dds/FACE/config/TopicSettings.cpp:
+
+          Build fixes for inline=0.
+
+        * tests/FACE/Messenger/run_test.pl:
+
+          Removed unused variable.
+
+        * tools/scripts/set_svnignore.pl:
+
+          Keep the svn:ignore list sorted.
+
+Thu Jan  8 22:58:53 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/MultiTopicDataReader_T.cpp:
+
+          Missing include.
+
+Thu Jan  8 22:37:55 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/ConnectionSettings.h:
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/Parser.h:
+        * dds/FACE/config/Parser.cpp:
+        * dds/FACE/config/TopicSettings.h:
+        * dds/FACE/config/TopicSettings.cpp:
+
+          Parse topic and connection settings.
+
+        * dds/FACE/FaceTSS.cpp:
+
+          Use the parsed connection and topic settings to configure
+          entites, instead of hard-coded values.
+
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Messenger/face_config.ini:
+
+          Supply proper config file name to Initialize().
+
+Thu Jan  8 16:50:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/Parser.h:
+        * dds/FACE/config/Parser.cpp:
+
+          Change namespace to config.
+
+Wed Jan  7 22:51:47 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/Parser.h:
+        * dds/FACE/config/Parser.cpp:
+        * tests/FACE/Messenger/face_config.ini:
+
+          Begin to use parser for connection settings.
+
+Wed Jan  7 22:06:54 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/FileLogger.h:
+
+          #include required stdlib header.
+
+Wed Jan  7 22:02:06 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/NotifyTest/run_test.pl:
+        * tests/DCPS/Partition/run_test.pl:
+        * tests/DCPS/ReaderDataLifecycle/run_test.pl:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
+        * tests/DCPS/NotifyTest/pub.ini:
+        * tests/DCPS/NotifyTest/sub.ini:
+        * tests/DCPS/Partition/pub.ini:
+        * tests/DCPS/Partition/sub.ini:
+
+          Removed these files.
+
+Wed Jan  7 16:41:05 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6696 through r6748.
+
+Wed Jan  7 16:20:28 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated for conversion
+
+Wed Jan  7 15:54:48 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Support all remaining QOS policies and test them.
+
+Tue Jan  6 22:17:58 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Support additional QOS policies and test them.
+
+Tue Jan  6 16:16:12 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/TransientLocalTest/run_test.pl:
+
+          Updated this test to use PerlDDS::TestFramework.
+
+Tue Jan  6 15:55:59 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/StringKey/run_test.pl:
+
+          Updated this test to use PerlDDS::TestFramework.
+
+        * tests/DCPS/StringKey/pub.ini:
+        * tests/DCPS/StringKey/sub.ini:
+
+          Removed these files.
+
+Tue Jan  6 15:51:27 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DPFactoryQos/run_test.pl:
+
+          Updated this test to use PerlDDS::TestFramework.
+
+        * tests/DCPS/DPFactoryQos/pub.ini:
+        * tests/DCPS/DPFactoryQos/sub.ini:
+
+          Removed these files.
+
+Mon Jan  5 23:29:10 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Serializer_wstring/run_test.pl:
+
+          Updated this test to use PerlDDS::TestFramework.
+
+        * tests/DCPS/Serializer_wstring/pub.ini:
+        * tests/DCPS/Serializer_wstring/sub.ini:
+
+          Removed these files.
+
+Mon Jan  5 23:20:39 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/CorbaSeq/run_test.pl:
+
+          Updated this test to use PerlDDS::TestFramework.
+
+        * tests/DCPS/CorbaSeq/pub.ini:
+        * tests/DCPS/CorbaSeq/sub.ini:
+
+          Removed these files.
+
+Mon Jan  5 20:45:00 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added unlinking repo ior file and added more test debug output.
+
+        * bin/dcps_tests.lst:
+
+          Removed !SAFETY_TODO_CONVERT flags for converted test.
+
+        * tests/DCPS/BuiltInTopicTest/run_test.pl:
+
+          Converted to use TestFramework.
+
+        * tests/DCPS/BuiltInTopicTest/tcp.ini:
+
+          Replaced duplicate pub.ini and sub.ini with tcp.ini.
+
+        * tests/DCPS/BuiltInTopicTest/pub.ini:
+        * tests/DCPS/BuiltInTopicTest/sub.ini:
+
+          Removed these files.
+
+Mon Jan  5 19:46:30 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ZeroCopyDataReaderListener/run_test.pl:
+        * tests/DCPS/ZeroCopyDataReaderListener/tcp.ini:
+        * tests/DCPS/sub_init_loop/run_test.pl:
+        * tests/DCPS/unit/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
+        * tests/DCPS/ZeroCopyDataReaderListener/pub.ini:
+        * tests/DCPS/ZeroCopyDataReaderListener/sub.ini:
+
+          Removed these files.
+
+Mon Jan  5 18:41:00 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Fixed passed parameters.
+
+Mon Jan  5 15:30:54 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Removed command_lines subroutine.
+
+        * bin/dcps_tests.lst:
+
+          Added back !SAFETY_TODO_CONVERT to tests that were not yet converted.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+
+          Removed noaction flag and command_lines call.
+
+Mon Jan  5 14:30:03 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Removed !SAFETY_TODO_CONVERT flags for converted test.
+
+        * tests/DCPS/BuiltInTopic/run_test.pl:
+
+          Converted to use TestFramework.
+
+Sat Jan  3 14:11:35 UTC 2015  Brian Johnson  <johnsonb@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+
+          Added debugging, added feature to support just reporting command lines, and
+          added support for flags with values.
+
+        * bin/dcps_tests.lst:
+
+          Removed !SAFETY_TODO_CONVERT flags for converted tests and removed unneeded
+          FooTest3_1 tests.
+
+        * dds/CORBA/tao/OpenDDS_Corba.mpc:
+
+          Added needed include path for ACE.
+
+        * performance-tests/DCPS/TCPListenerTest/run_test.pl:
+        * tests/DCPS/FooTest3_2/run_test.pl:
+
+          Converted tests to use TestFramework.
+
+        * tests/DCPS/FooTest5/run_test.pl:
+
+          Cleanup.
+
+        * tests/DCPS/FooTest3_1:
+        * tests/DCPS/FooTest3_1/DataReaderListener.h:
+        * tests/DCPS/FooTest3_1/DataReaderListener.cpp:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_1/InstanceDataMap.h:
+        * tests/DCPS/FooTest3_1/InstanceDataMap.cpp:
+        * tests/DCPS/FooTest3_1/PubDriver.h:
+        * tests/DCPS/FooTest3_1/PubDriver.cpp:
+        * tests/DCPS/FooTest3_1/README:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.cpp:
+        * tests/DCPS/FooTest3_1/TestException.h:
+        * tests/DCPS/FooTest3_1/Writer.h:
+        * tests/DCPS/FooTest3_1/Writer.cpp:
+        * tests/DCPS/FooTest3_1/pub_main.cpp:
+        * tests/DCPS/FooTest3_1/rtps.ini:
+        * tests/DCPS/FooTest3_1/run_test.pl:
+        * tests/DCPS/FooTest3_1/run_test_nokey.pl:
+        * tests/DCPS/FooTest3_1/sub_main.cpp:
+
+          Removed these files.
+
+Wed Dec 31 19:26:47 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/raw_tcp_latency_publisher.mpc:
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/subscriber/raw_tcp_latency_subscriber.mpc:
+
+          Don't build with safety profile.
+
+Wed Dec 31 19:05:02 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/FileLogger.cpp:
+
+          Open and close file.
+
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+
+          Build errors.
+
+Tue Dec 30 23:27:52 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/DestinationOrder/run_test.pl:
+        * tests/DCPS/Dispose/run_test.pl:
+        * tests/DCPS/ReadCondition/run_test.pl:
+        * tests/DCPS/TimeBasedFilter/run_test.pl:
+
+          Updated these tests to use PerlDDS::TestFramework.
+
+Tue Dec 30 21:55:50 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * bin/dcps_tests.lst:
+        * tests/DCPS/LivelinessTimeout/run_test.pl:
+        * tests/DCPS/LivelinessTimeout/subscriber.cpp:
+
+          Updated LivelinessTimeout to use PerlDDS::TestFramework.
+
+Tue Dec 30 20:59:46 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * performance-tests/DCPS/SimpleLatency/PubListener.cpp:
+        * performance-tests/DCPS/SimpleLatency/raw_tcp/publisher/TcpPublisher.cpp:
+        * performance-tests/DCPS/SimpleLatency/sample_sub.cpp:
+
+          Fourth round of using namespace std and including ExceptionStreams.
+
+Tue Dec 30 19:34:35 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+
+          Fixed build errors.
+
+Tue Dec 30 19:16:05 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/StringKey/DataReaderListener.cpp:
+        * tests/DCPS/StringKey/Writer.cpp:
+        * tests/DCPS/StringKey/publisher.cpp:
+        * tests/DCPS/StringKey/subscriber.cpp:
+        * tests/DCPS/TopicReuse/tpreuse.cpp:
+        * tests/DCPS/TransientLocalTest/DataReaderListener.cpp:
+        * tests/DCPS/TransientLocalTest/publisher.cpp:
+        * tests/DCPS/TransientLocalTest/subscriber.cpp:
+        * tests/DCPS/sub_init_loop/publisher.cpp:
+
+          Third round of using namespace std and including ExceptionStreams.
+
+Tue Dec 30 18:50:16 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+
+          Missed includes.
+
+Tue Dec 30 18:46:12 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/ManualAssertLiveliness/DataReaderListener.cpp:
+        * tests/DCPS/ManualAssertLiveliness/Writer.cpp:
+        * tests/DCPS/ManualAssertLiveliness/publisher.cpp:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+        * tests/DCPS/NotifyTest/DataReaderListener.cpp:
+        * tests/DCPS/NotifyTest/Writer.cpp:
+        * tests/DCPS/NotifyTest/publisher.cpp:
+        * tests/DCPS/NotifyTest/subscriber.cpp:
+        * tests/DCPS/Partition/DataReaderListener.cpp:
+        * tests/DCPS/Partition/Publisher.cpp:
+        * tests/DCPS/Partition/Subscriber.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/DataReaderListener.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/Writer.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/publisher.cpp:
+        * tests/DCPS/Prst_delayed_subscriber/subscriber.cpp:
+        * tests/DCPS/Rejects/DataReaderListener.cpp:
+        * tests/DCPS/Rejects/Writer.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/Serializer_wstring/DataReaderListener.cpp:
+        * tests/DCPS/Serializer_wstring/Writer.cpp:
+        * tests/DCPS/Serializer_wstring/publisher.cpp:
+        * tests/DCPS/Serializer_wstring/subscriber.cpp:
+        * tests/DCPS/SetQosDeadline/DataReaderListener.cpp:
+        * tests/DCPS/SetQosDeadline/Writer.cpp:
+        * tests/DCPS/SetQosDeadline/publisher.cpp:
+        * tests/DCPS/SetQosDeadline/subscriber.cpp:
+        * tests/DCPS/SetQosPartition/DataReaderListener.cpp:
+        * tests/DCPS/SetQosPartition/Writer.cpp:
+        * tests/DCPS/SetQosPartition/publisher.cpp:
+        * tests/DCPS/SetQosPartition/subscriber.cpp:
+
+          Second round of using namespace std and including ExceptionStreams.
+
+Tue Dec 30 18:10:53 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/CorbaSeq/DataReaderListener.cpp:
+        * tests/DCPS/CorbaSeq/Writer.cpp:
+        * tests/DCPS/CorbaSeq/publisher.cpp:
+        * tests/DCPS/CorbaSeq/subscriber.cpp:
+        * tests/DCPS/DPFactoryQos/DataReaderListener.cpp:
+        * tests/DCPS/DPFactoryQos/Writer.cpp:
+        * tests/DCPS/DPFactoryQos/publisher.cpp:
+        * tests/DCPS/DPFactoryQos/subscriber.cpp:
+        * tests/DCPS/Deadline/Writer.cpp:
+        * tests/DCPS/Deadline/publisher.cpp:
+        * tests/DCPS/Deadline/subscriber.cpp:
+        * tests/DCPS/DpShutdown/dpshutdown.cpp:
+        * tests/DCPS/LatencyBudget/DataReaderListener.cpp:
+        * tests/DCPS/LatencyBudget/Writer.cpp:
+        * tests/DCPS/LatencyBudget/publisher.cpp:
+        * tests/DCPS/LatencyBudget/subscriber.cpp:
+        * tests/DCPS/Lifespan/DataReaderListener.cpp:
+        * tests/DCPS/Lifespan/Writer.cpp:
+        * tests/DCPS/Lifespan/publisher.cpp:
+        * tests/DCPS/Lifespan/subscriber.cpp:
+
+          First round of using namespace std and including ExceptionStreams.
+
+Tue Dec 30 17:20:39 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/Instances/SubDriver.h:
+        * tests/DCPS/PersistentInfoRepo/Publisher.cpp:
+        * tests/DCPS/PersistentInfoRepo/Subscriber.cpp:
+        * tests/Utils/TestUtils.mpc:
+
+          Updated TestUtils to not depend on the model library.
+          These two tests can use the model library directly.
+
+        * tests/Utils/Sync.h:
+        * tests/Utils/Sync.cpp:
+
+          Removed these files.
+
+Tue Dec 30 15:47:29 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/FACE/Messenger/run_test.pl:
+
+          Updated to use PerlDDS::TestFramework.
+
+Tue Dec 30 15:25:50 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * bin/dcps_tests.lst:
+        * tests/FACE/Messenger/run_test.pl:
+
+          Updated tests for safety profile.
+          Those marked with SAFETY_TODO_CONVERT in the lst file need have their
+          Perl scripts converted to use the TestFramework so they don't try to
+          start the DCPSInfoRepo when safety profile is enabled.
+
+Mon Dec 29 21:58:30 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/Utils/ExceptionStreams.h:
+
+          Fix build errors.
+
+Mon Dec 29 21:43:34 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ZeroCopyRead/run_test.pl:
+
+          Adapt tests for safety profile.
+
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpLoader.cpp:
+
+          Fixed default transport & discovery for safety profile.
+
+        * examples/DCPS/DistributedContent/DistributedContent.mpc:
+        * examples/DCPS/Messenger_IOGR_Imr/Messenger_IOGR_Imr.mpc:
+
+          Exclusions for safety profile
+
+Mon Dec 29 21:02:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+        * tests/DCPS/BuiltInTopicTest/Writer.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/DCPS/BuiltInTopicTest/publisher.cpp:
+        * tests/DCPS/BuiltInTopicTest/subscriber.cpp:
+        * tests/Utils/ExceptionStreams.h:
+
+          Handle cout, cerr and endl in tests.
+
+Mon Dec 29 19:46:28 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Updated test list for safety profile.
+
+Mon Dec 29 19:33:15 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+        * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/TCPListenerTest/TCPListener.mpc:
+        * tests/DCPS/BidirMessenger/BidirMessenger.mpc:
+        * tests/DCPS/BuiltInTopic/BuiltInTopic.mpc:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+        * tests/DCPS/DPFactoryQos/DPFactoryQos.mpc:
+        * tests/DCPS/DcpsIntegration/dcps_integration.mpc:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Dispose/Dispose.mpc:
+        * tests/DCPS/DpShutdown/DpShutdown.mpc:
+        * tests/DCPS/Federation/Federation.mpc:
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest4/FooTest4.mpc:
+        * tests/DCPS/FooTest4_0/FooTest4_0.mpc:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/FooTest5/publisher.cpp:
+        * tests/DCPS/FooTest5/subscriber.cpp:
+        * tests/DCPS/Footprint/Footprint.mpc:
+        * tests/DCPS/Inconsistent_Qos/Inconsistent_Qos.mpc:
+        * tests/DCPS/Instances/Instances.mpc:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/LargeSample/LargeSample.mpc:
+        * tests/DCPS/LatencyBudget/LatencyBudget.mpc:
+        * tests/DCPS/Lifespan/Lifespan.mpc:
+        * tests/DCPS/LivelinessTest/LivelinessTest.mpc:
+        * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManyToMany/ManyToMany.mpc:
+        * tests/DCPS/ManyTopicMultiProcess/ManyTopicMultiProcess.mpc:
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/MultiDPTest/MultiDPTest.mpc:
+        * tests/DCPS/MultiRepoTest/MultiRepoTest.mpc:
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/Partition/Partition.mpc:
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+        * tests/DCPS/PubScalability/SubDriver.h:
+        * tests/DCPS/ReadCondition/ReadCondition.mpc:
+        * tests/DCPS/ReaderDataLifecycle/ReaderDataLifecycle.mpc:
+        * tests/DCPS/Reconnect/Reconnect.mpc:
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+        * tests/DCPS/Rejects/Rejects.mpc:
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+        * tests/DCPS/RtpsDiscovery/RtpsDiscovery.mpc:
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline.mpc:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/StatusCondition/StatusCondition.mpc:
+        * tests/DCPS/StringKey/StringKey.mpc:
+        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
+        * tests/DCPS/TcpReconnect/TcpReconnect.mpc:
+        * tests/DCPS/Thrasher/Thrasher.mpc:
+        * tests/DCPS/TimeBasedFilter/TimeBasedFilter.mpc:
+        * tests/DCPS/TopicReuse/TopicReuse.mpc:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/WaitForAck/WaitForAck.mpc:
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+        * tests/DCPS/unit/UnitTest.mpc:
+        * tests/transport/error_handling/error_handling.mpc:
+        * tests/transport/simple/DDS_transport_simple.mpc:
+
+          Updated test & example mpc files for safety profile.
+
+Mon Dec 29 19:23:21 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/DestinationOrder/DestinationOrder.mpc:
+        * tests/DCPS/SharedTransport/SharedTransport.mpc:
+
+          Use more maintainable project bases.
+
+        * MPC/config/dcps_test_tcp.mpb:
+
+          Removed this file.
+
+Mon Dec 29 17:47:11 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * DevGuideExamples/DCPS/Messenger.minimal/MessengerMinimal.mpc:
+        * DevGuideExamples/DCPS/Messenger/Messenger.mpc:
+        * DevGuideExamples/DCPS/Messenger_ZeroCopy/Messenger_ZeroCopy.mpc:
+        * contrib/wrapper/DDSWrapper_OpenDDS.mpc:
+        * examples/DCPS/IntroductionToOpenDDS/StockQuoter.mpc:
+        * examples/DCPS/Messenger_Imr/Messenger_Imr.mpc:
+        * examples/DCPS/ishapes/ishapes.mpc:
+        * performance-tests/Bench/src/TestProcess.mpc:
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/Priority/Priority.mpc:
+        * performance-tests/DCPS/TCPListenerTest/TCPListener.mpc:
+        * tests/DCPS/BidirMessenger/BidirMessenger.mpc:
+        * tests/DCPS/BuiltInTopic/BuiltInTopic.mpc:
+        * tests/DCPS/BuiltInTopicTest/BuiltInTopicTest.mpc:
+        * tests/DCPS/CompatibilityTest/CompatibilityTest.mpc:
+        * tests/DCPS/ConfigFile/ConfigFile.mpc:
+        * tests/DCPS/ConfigTransports/ConfigTransports.mpc:
+        * tests/DCPS/ContentFilteredTopic/ContentFilteredTopic.mpc:
+        * tests/DCPS/CorbaSeq/CorbaSeq.mpc:
+        * tests/DCPS/DPFactoryQos/DPFactoryQos.mpc:
+        * tests/DCPS/DcpsIntegration/dcps_integration.mpc:
+        * tests/DCPS/Deadline/Deadline.mpc:
+        * tests/DCPS/Dispose/Dispose.mpc:
+        * tests/DCPS/DpShutdown/DpShutdown.mpc:
+        * tests/DCPS/Federation/Federation.mpc:
+        * tests/DCPS/FooTest3_0/FooTest3_0.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1.mpc:
+        * tests/DCPS/FooTest3_1/FooTest3_1NoKey.mpc:
+        * tests/DCPS/FooTest3_2/FooTest3_2.mpc:
+        * tests/DCPS/FooTest4/FooTest4.mpc:
+        * tests/DCPS/FooTest4_0/FooTest4_0.mpc:
+        * tests/DCPS/FooTest5/FooTest5.mpc:
+        * tests/DCPS/Footprint/Footprint.mpc:
+        * tests/DCPS/GroupPresentation/GroupPresentation.mpc:
+        * tests/DCPS/Inconsistent_Qos/Inconsistent_Qos.mpc:
+        * tests/DCPS/Instances/Instances.mpc:
+        * tests/DCPS/KeyTest/KeyTest.mpc:
+        * tests/DCPS/LargeSample/LargeSample.mpc:
+        * tests/DCPS/LatencyBudget/LatencyBudget.mpc:
+        * tests/DCPS/Lifespan/Lifespan.mpc:
+        * tests/DCPS/LivelinessTest/LivelinessTest.mpc:
+        * tests/DCPS/LivelinessTimeout/LivelinessTimeout.mpc:
+        * tests/DCPS/ManualAssertLiveliness/ManualAssertLiveliness.mpc:
+        * tests/DCPS/ManyToMany/ManyToMany.mpc:
+        * tests/DCPS/ManyTopicMultiProcess/ManyTopicMultiProcess.mpc:
+        * tests/DCPS/ManyTopicTest/ManyTopicTest.mpc:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tests/DCPS/MultiDPTest/MultiDPTest.mpc:
+        * tests/DCPS/MultiRepoTest/MultiRepoTest.mpc:
+        * tests/DCPS/NotifyTest/NotifyTest.mpc:
+        * tests/DCPS/Ownership/Ownership.mpc:
+        * tests/DCPS/Partition/Partition.mpc:
+        * tests/DCPS/PersistentDurability/PersistentDurability.mpc:
+        * tests/DCPS/PersistentInfoRepo/PersistentInfoRepo.mpc:
+        * tests/DCPS/Presentation/Presentation.mpc:
+        * tests/DCPS/Priority/Priority.mpc:
+        * tests/DCPS/Prst_delayed_subscriber/Prst_delayed_subscriber.mpc:
+        * tests/DCPS/PubScalability/PubScalability.mpc:
+        * tests/DCPS/QueryCondition/QueryCondition.mpc:
+        * tests/DCPS/ReadCondition/ReadCondition.mpc:
+        * tests/DCPS/ReaderDataLifecycle/ReaderDataLifecycle.mpc:
+        * tests/DCPS/Reconnect/Reconnect.mpc:
+        * tests/DCPS/RecorderReplayer/RecorderReplayer.mpc:
+        * tests/DCPS/RegisterInstance/register_instance.mpc:
+        * tests/DCPS/Rejects/Rejects.mpc:
+        * tests/DCPS/Reliability/pub/Publisher.mpc:
+        * tests/DCPS/Reliability/sub/Subscriber.mpc:
+        * tests/DCPS/Serializer_wstring/Serializer_wstring.mpc:
+        * tests/DCPS/SetQosDeadline/SetQosDeadline.mpc:
+        * tests/DCPS/SetQosPartition/SetQosPartition.mpc:
+        * tests/DCPS/StatusCondition/StatusCondition.mpc:
+        * tests/DCPS/StringKey/StringKey.mpc:
+        * tests/DCPS/SubscriberCycle/SubscriberCycle.mpc:
+        * tests/DCPS/TcpReconnect/TcpReconnect.mpc:
+        * tests/DCPS/Thrasher/Thrasher.mpc:
+        * tests/DCPS/TimeBasedFilter/TimeBasedFilter.mpc:
+        * tests/DCPS/TopicReuse/TopicReuse.mpc:
+        * tests/DCPS/TransientDurability/TransientDurability.mpc:
+        * tests/DCPS/TransientLocalTest/TransientLocalTest.mpc:
+        * tests/DCPS/ViewState/ViewState.mpc:
+        * tests/DCPS/ZeroCopyDataReaderListener/ZeroCopyDataReaderListener.mpc:
+        * tests/DCPS/ZeroCopyRead/ZeroCopyRead.mpc:
+        * tests/DCPS/sub_init_loop/sub_init_loop.mpc:
+        * tests/DCPS/unit/UnitTest.mpc:
+        * tests/transport/error_handling/error_handling.mpc:
+        * tests/transport/simple/DDS_transport_simple.mpc:
+        * tools/monitor/Monitor.mpc:
+        * tools/repoctl/repoctl.mpc:
+
+          Removed uses of MPC base projects "dcpsexe_with_*" and replaced them
+          with the equivalent projects for easier maintenance.  In MPC
+          projects the "with" operator is "," -- don't create more files.
+          Left the base projects in place so that user apps can continue to use
+          them.
+
+Mon Dec 29 16:56:39 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6637 through r6695.
+
+Mon Dec 29 16:53:05 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/FileLogger.cpp:
+
+          Include missing methods.
+
+        * tests/DCPS/BuiltInTopicTest/DataReaderListener.cpp:
+
+          Explicitly use namespace std.
+
+Tue Dec 23 21:38:10 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Unit/FaceUnitTests.mpc:
+
+          Use base dcps.
+
+        * dds/FACE/config/QosSettings.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Don't require full enumeration identifier in config file.
+          Test data writer/reader durability.
+
+
+Tue Dec 23 20:53:13 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+
+          Don't use streams in dump() when building for safety.
+
+Tue Dec 23 20:42:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/shmem/OpenDDS_Shmem.mpc:
+        * dds/DCPS/transport/udp/OpenDDS_Udp.mpc:
+
+          Don't build when building safety profile.
+
+Tue Dec 23 20:13:45 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/multicast/OpenDDS_Multicast.mpc:
+        * dds/DCPS/transport/tcp/OpenDDS_Tcp.mpc:
+
+          Don't build when building safety profile.
+
+        * tests/FACE/Unit/FaceUnitTests.mpc:
+
+          Don't use dcps_tests base.
+
+Tue Dec 23 19:25:18 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.h:
+
+          Include PoolAllocator.h
+
+Tue Dec 23 19:08:27 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Test subscriber presentation QOS.
+
+Tue Dec 23 18:13:33 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          Guard with OPENDDS_SAFETY_PROFILE, rather than ACE_LYNXOS_MAJOR
+
+Tue Dec 23 17:56:50 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/FileLogger.h:
+        * dds/DCPS/FileLogger.cpp:
+        * dds/DCPS/Service_Participant.cpp:
+
+          When building safety profile, don't use stream logger.
+
+Tue Dec 23 17:15:59 UTC 2014  Jeff Schmitz  <schmitz_j@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          Guard with OPENDDS_SAFETY_PROFILE, rather than ACE_FACE_SAFETY_BASE
+
+Mon Dec 22 22:36:09 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+
+          Export settings, make testable.
+
+        * tests/FACE/Unit:
+        * tests/FACE/Unit/FaceUnitTests.mpc:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Unit test for QosSettings.
+
+Mon Dec 22 19:39:56 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/DCPS/transport/framework/DataLink.h:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/TransportImpl.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.h:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+
+          #ifdef away use of std::ostream for diagnostics.
+
+Mon Dec 22 16:18:59 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+
+          Implement publisher and subscriber qos parsing.
+
+Fri Dec 19 20:30:14 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/OpenDDS_FACE.mpc:
+        * dds/FACE/config:
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+
+          Container for settings for QOS policies, defined in an ini file.
+
+Wed Dec 17 21:10:21 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        Safety profile build (Linux)
+
+        * dds/CORBA/tao/BasicSequences.cpp:
+        * dds/CORBA/tao/Exception.cpp:
+        * dds/CORBA/tao/LocalObject.cpp:
+        * dds/CORBA/tao/ORB_Misc.cpp:
+        * dds/CORBA/tao/Object.cpp:
+        * dds/CORBA/tao/OctetSeqC.cpp:
+        * dds/CORBA/tao/PolicyS.h:
+        * dds/CORBA/tao/String_Alloc.cpp:
+        * dds/CORBA/tao/SystemException.cpp:
+
+          Added fundamental types normally found in libTAO.
+
+        * dds/monitor/monitor.mpc:
+        * performance-tests/DCPS/InfoRepo_population/InfoRepo_population.mpc:
+        * performance-tests/DCPS/Sync/Sync.mpc:
+        * tests/DCPS/Compiler/idl_test1_main/idl_test1_main.mpc:
+        * tests/DCPS/Compiler/idl_test3_main/idl_test3_main.mpc:
+        * tests/DCPS/ConfigFile/ConfigFile.mpc:
+        * tests/DCPS/DCPSInfoRepo/dcpsinfo_test.mpc:
+        * tests/DCPS/FileSystemStorage/FileSystemStorage.mpc:
+        * tests/DCPS/Monitor/Messenger.mpc:
+        * tools/dcpsinfo_dump/dcpsinfo_dump.mpc:
+        * tools/repoctl/repoctl.mpc:
+
+          Removed from safety profile build.
+
+        * tests/DCPS/FooTest3_0/SubDriver.h:
+        * tests/DCPS/FooTest3_1/SubDriver.h:
+        * tests/DCPS/FooTest3_2/SubDriver.h:
+        * tests/DCPS/FooType/Foo_Singleton_Transport.h:
+        * tests/DCPS/UnitTests/UnitTests.mpc:
+        * tests/DCPS/unit/Main.cpp:
+
+          Fixed false dependency on TAO.
+
+Wed Dec 17 15:35:59 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+
+          Fixed IPv6-enabled build.
+
+Tue Dec 16 23:28:15 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+
+          Fixed issues with previous commit.
+
+Tue Dec 16 21:22:05 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_transports_for_test.mpb:
+        * dds/DCPS/DataCollector_T.cpp:
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/DataSampleHeader.cpp:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/GuidConverter.cpp:
+        * dds/DCPS/PoolAllocator.h:
+        * dds/DCPS/RTPS/BaseMessageUtils.h:
+        * dds/DCPS/RTPS/RtpsDiscovery.h:
+        * dds/DCPS/RTPS/Sedp.h:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+        * dds/DCPS/RakeResults_T.h:
+        * dds/DCPS/RecorderImpl.cpp:
+        * dds/DCPS/ReplayerImpl.cpp:
+        * dds/DCPS/RepoIdConverter.h:
+        * dds/DCPS/SendStateDataSampleList.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/StaticIncludes.h:
+        * dds/DCPS/WriteDataContainer.cpp:
+        * dds/DCPS/WriterInfo.cpp:
+        * dds/DCPS/ZeroCopySeq_T.inl:
+        * dds/DCPS/transport/framework/DataLink.inl:
+        * dds/DCPS/transport/framework/DataLink.cpp:
+        * dds/DCPS/transport/framework/ReceiveListenerSetMap.cpp:
+        * dds/DCPS/transport/framework/RepoIdSetMap.cpp:
+        * dds/DCPS/transport/framework/TransportClient.h:
+        * dds/DCPS/transport/framework/TransportImpl.cpp:
+        * dds/DCPS/transport/framework/TransportInst.cpp:
+        * dds/DCPS/transport/framework/TransportRegistry.cpp:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/rtps_udp/RtpsSampleHeader.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpInst.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpReceiveStrategy.cpp:
+        * dds/DCPS/transport/rtps_udp/RtpsUdpTransport.cpp:
+        * dds/idl/CPPTemplate.txt:
+        * tests/DCPS/Messenger/Messenger.mpc:
+        * tests/DCPS/Messenger/Writer.cpp:
+        * tests/DCPS/Messenger/publisher.cpp:
+        * tests/DCPS/Messenger/subscriber.cpp:
+
+          Changes for LynxOS build with safety profile.
+          Can now build static libs for OpenDDS_Dcps, OpenDDS_Rtps,
+          and OpenDDS_Rtps_Udp.  The tests/DCPS/Messenger test can
+          compile but doesn't link yet.
+          Lots of compiler/stdlib workarounds under ACE_LYNXOS_MAJOR,
+          these can be removed once a GCC 4.x compiler is available.
+
+Tue Dec 16 15:11:28 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/CORBA/tao/OpenDDS_Corba.mpc:
+
+          Only build this project when safety profile is enabled.
+
+Mon Dec 15 23:02:05 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+        * rules.dds.GNU:
+
+          Allow the location of opendds_idl to be specified in
+          user_macros.GNU instead of always using $DDS_ROOT/bin.
+          Useful for cross-compiles and safety profile.
+
+        * dds/CORBA/tao/LocalObject.cpp:
+        * dds/CORBA/tao/Object.cpp:
+        * dds/DCPS/BuiltInTopicUtils.h:
+        * dds/DCPS/ConfigUtils.h:
+        * dds/DCPS/DataWriterImpl.cpp:
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/FileSystemStorage.h:
+        * dds/DCPS/FileSystemStorage.cpp:
+        * dds/DCPS/GuidConverter.h:
+        * dds/DCPS/RcObject_T.h:
+        * dds/DCPS/StaticIncludes.h:
+        * dds/DCPS/transport/framework/TransportSendListener.h:
+        * dds/DCPS/transport/framework/TransportSendListener.cpp:
+
+          Safety profile build and trying to compile
+          with the ancient LynxOS compiler.
+
+Fri Dec 12 22:15:43 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_corba.mpb:
+
+          Build after OpenDDS_Corba
+
+        * dds/CORBA/tao/LocalObject.cpp:
+        * dds/CORBA/tao/Object.cpp:
+
+          Overwrite with 1.6a versions.
+
+Fri Dec 12 19:56:34 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_corba.mpb:
+        * MPC/config/dds_taolib.mpb:
+
+          Update to link in OpenDDS_Corba lib when NOT linking TAO
+
+        * dds/CORBA/tao:
+        * dds/CORBA/tao/LocalObject.cpp:
+        * dds/CORBA/tao/Object.cpp:
+        * dds/CORBA/tao/OpenDDS_Corba.mpc:
+
+          New files for start of OpenDDS_Corba lib.
+
+Fri Dec 12 14:51:33 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Registered_Data_Types.h:
+
+          Needed an extra #include for the non-safety-profile build.
+
+Thu Dec 11 22:33:07 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Definitions.h:
+        * dds/DCPS/PoolAllocator.h:
+        * dds/DCPS/SafetyProfilePool.h:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+
+          Added a memory pool for the Safety Profile.
+          This version doesn't attempt to reuse the free()'d memory.
+
+        * dds/DCPS/Registered_Data_Types.h:
+        * dds/DCPS/Registered_Data_Types.cpp:
+        * dds/DCPS/WriteDataContainer.h:
+
+          Adapted a few C++ STL containers for use with the memory pool.
+          Completely overhauled the Registered_Data_Types, but its interface
+          stayed the same except for one detail:
+          - the object returned from lookup() obeys normal refcounting rules
+
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/MultiTopicImpl.cpp:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+
+          Adjust to the fact that Registered_Data_Types->lookup()
+          now deals with the reference count correctly.
+
+Thu Dec 11 18:48:35 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dcps_default_discovery.mpb:
+
+          New base to include dcps_inforepodiscovery or dcps_rtps optionally,
+          according to no_opendds_safety_profile feature.
+
+        * MPC/config/dcpsexe.mpb:
+
+          Use dcps_default_discovery as a base.
+
+Thu Dec 11 18:17:50 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dcps_rtpsexe.mpb:
+        * MPC/config/dcpsexe.mpb:
+
+          Remove reliance on taoexe.
+
+        * MPC/config/dds_taolib.mpb:
+
+          Add acelib as a base when building safety profile.
+
+Wed Dec 10 21:56:51 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_taolib.mpb:
+
+          Crud, two revisions ago was correct.
+
+Wed Dec 10 20:22:42 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_taolib.mpb:
+
+          Reversed logic of pervious feature.  Also, when not using taolib
+          as a base, we still need to make $TAO_ROOT part of includes.
+
+Wed Dec 10 18:43:40 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * rules.dds.GNU:
+
+          This file needs to set the safety profile feature for gnuace builds.
+
+        * FACE/README.txt:
+        * FACE/TS.hpp:
+        * FACE/TS_common.hpp:
+        * FACE/common.hpp:
+        * FACE/tss.hpp:
+        * MPC/modules/TYPESUPPORTHelper.pm:
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/idl/be_global.cpp:
+        * dds/idl/opendds_idl.mpc:
+        * dds/idl/ts_generator.cpp:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+
+          Updated FACE support to match spec 2.1 (conformance test 2.1.2).
+
+        * face:
+
+          Removed these files (renamed to FACE).
+
+Wed Dec 10 18:40:52 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dcps.mpb:
+        * MPC/config/dds_taolib.mpb:
+
+          portableserver should also be excluded when building
+          opendds_safety_profile.
+
+Wed Dec 10 17:46:40 UTC 2014  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * MPC/config/dds_taolib.mpb:
+
+          New feature, to optionally inherit taolib
+
+        * MPC/config/dcps.mpb:
+        * dds/DdsDcps.mpc:
+
+          Inherit from dds_taolib, so that taolib is skipped for
+          safety profile builds.
+
+Tue Dec  9 16:51:52 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.mpc:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/InfoRepo/DCPSInfoRepo.mpc:
+
+          Safety Profile excludes DCPSInfoRepo.
+
+Tue Dec  9 16:26:03 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_optional_features.mpb:
+        * dds/idl/opendds_idl.mpc:
+
+          MPC feature for Safety Profile.  Set no_opendds_safety_profile=0.
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+
+          Revert prior change to Reliabilty and disable the test on this
+          branch.  Other problems with default History and non-default
+          Resource Limits need to be resolved in trunk first before we can
+          adapt this test to DDS minimum profile (only default History).
+
+Fri Dec  5 21:02:11 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/CompatibilityTest/run_test.pl:
+        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+        * tests/DCPS/ManyTopicTest/publisher.cpp:
+        * tests/DCPS/ManyTopicTest/subscriber.cpp:
+        * tests/DCPS/RegisterInstance/register_instance.cpp:
+        * tests/DCPS/Rejects/publisher.cpp:
+        * tests/DCPS/Rejects/subscriber.cpp:
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Thrasher/ParticipantTask.cpp:
+        * tests/DCPS/Thrasher/Subscriber.cpp:
+
+          Adapted tests to the Minimum Profile build (in particular, removing
+          history depth either all the time or when the profile is disabled).
+          The following tests need more work: Reliability, Rejects,
+          ManualAssertLiveliness.
+
+Thu Dec  4 20:33:58 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6617 through r6636.
+
+Thu Dec  4 15:39:28 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_ts_defaults.mpb:
+        * MPC/config/opendds_face.mpb:
+        * MPC/modules/TYPESUPPORTHelper.pm:
+        * bin/dcps_tests.lst:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/DCPS/TypeSupportImpl.h:
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/OpenDDS_FACE.mpc:
+        * dds/idl/be_global.h:
+        * dds/idl/be_global.cpp:
+        * dds/idl/be_produce.cpp:
+        * dds/idl/be_util.cpp:
+        * dds/idl/ts_generator.h:
+        * dds/idl/ts_generator.cpp:
+        * face/OpenDDS_FACE_Export.h:
+        * face/README.txt:
+        * face/common.hpp:
+        * face/tss.hpp:
+        * tests/FACE/Messenger/Idl/FaceMessage.idl:
+        * tests/FACE/Messenger/Idl/FaceMessengerIdl.mpc:
+        * tests/FACE/Messenger/Idl/FaceMessenger_Export.h:
+        * tests/FACE/Messenger/Publisher/FaceMessengerPublisher.mpc:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/FaceMessengerSubscriber.mpc:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Messenger/run_test.pl:
+
+          Initial support for the Future Airborne Capability Environment,
+          specifically the Transport Services Segment API.  See face/README.txt
+          for details.  Since there is no support for a config file in this
+          version, the library is hard-coded to use the types in the Messenger
+          test and the configurations for that test.
+
+Mon Nov 24 22:28:30 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * performance-tests/Bench/src/Options.cpp:
+        * tools/modeling/codegen/model/Config.cpp:
+
+          Resolved compiler warnings when building with --no-ownership-profile.
+
+Mon Nov 24 22:01:52 UTC 2014  Adam Mitz  <mitza@ociweb.com>
+
+        * BranchChangeLog:
+
+          New branch, new BranchChangeLog.
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:

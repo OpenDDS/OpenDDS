@@ -2,6 +2,7 @@ project(*Lib): dcpslib, iortable, dcps_inforepodiscovery, DCPSInfoRepo_bits, imr
   sharedname = OpenDDS_InfoRepoLib
   dynamicflags = OPENDDS_INFOREPOLIB_BUILD_DLL
   includes  += $(DDS_ROOT)
+  requires += no_opendds_safety_profile
 
   IDL_Files {
   }
@@ -40,6 +41,7 @@ project(*Serv): dcpslib, dcps_inforepodiscovery, iortable, DCPSInfoRepo_bits, im
   includes  += $(DDS_ROOT)
   libs      += OpenDDS_InfoRepoLib OpenDDS_Federator
   after     += *Lib *Federator
+  requires += no_opendds_safety_profile
 
   Source_Files {
     DCPSInfoRepoServ.cpp
@@ -70,6 +72,7 @@ project(*Federator): dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, instal
   includes  += $(DDS_ROOT)
   libs     += OpenDDS_InfoRepoLib
   after    += *Lib
+  requires += no_opendds_safety_profile
 
   idlflags    += -Wb,export_macro=OpenDDS_Federator_Export -Wb,export_include=federator_export.h -Wb,pch_include=DcpsInfo_pch.h
   dynamicflags = OPENDDS_FEDERATOR_BUILD_DLL
@@ -121,6 +124,7 @@ project(*Federator): dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, instal
 project(*Main): dcpsexe, iortable, DCPSInfoRepo_bits, imr_client, svc_utils, install {
   exename = DCPSInfoRepo
   exeout  = $(DDS_ROOT)/bin
+  requires += no_opendds_safety_profile
 
   libpaths += $(DDS_ROOT)/lib
   libs     += OpenDDS_InfoRepoServ OpenDDS_InfoRepoLib OpenDDS_Federator

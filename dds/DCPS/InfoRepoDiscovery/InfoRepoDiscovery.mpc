@@ -1,4 +1,5 @@
 project(OpenDDS*): dcpslib, install {
+  requires += no_opendds_safety_profile
   dynamicflags = OPENDDS_INFOREPODISCOVERY_BUILD_DLL
 
   idlflags += -Wb,export_macro=OpenDDS_InfoRepoDiscovery_Export -Wb,export_include=InfoRepoDiscovery_Export.h

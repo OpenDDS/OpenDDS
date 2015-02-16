@@ -5,10 +5,12 @@
 #include "MessengerTypeSupportC.h"
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 
 using namespace Messenger;
+using namespace std;
 
 extern int num_messages;
 extern int assert_liveliness_period;

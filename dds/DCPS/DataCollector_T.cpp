@@ -63,11 +63,13 @@ template<typename DatumType>
 std::ostream&
 DataCollector<DatumType>::insert(std::ostream& str) const
 {
+#ifndef ACE_LYNXOS_MAJOR
   std::ofstream initStrState;
   initStrState.copyfmt(str);
 
   str.precision(5);
   str << std::scientific;
+#endif
 
   // Oldest data first.
   if (this->full_) {
@@ -89,7 +91,10 @@ DataCollector<DatumType>::insert(std::ostream& str) const
     str << this->buffer_[ index] << std::endl;
   }
 
+#ifndef ACE_LYNXOS_MAJOR
   str.copyfmt(initStrState);
+#endif
+
   return str;
 }
 
