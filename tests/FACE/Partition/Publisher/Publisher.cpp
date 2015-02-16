@@ -5,7 +5,7 @@
 
 #include <iostream>
 
-int main(int argc, const char* argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   FACE::RETURN_CODE_TYPE status;
   FACE::CONNECTION_ID_TYPE connId;

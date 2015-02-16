@@ -1,3 +1,19 @@
+Mon Feb 16 19:34:23 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Use ACE_TMAIN for portability.
+
+        * bin/dcps_tests.lst:
+
+          Exclude TcpReconnect test when ownership profile is disabled.
+
 Mon Feb 16 19:05:23 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * FACE/common.hpp:

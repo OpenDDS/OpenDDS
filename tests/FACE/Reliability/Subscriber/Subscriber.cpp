@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-int main()
+int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   FACE::RETURN_CODE_TYPE status = FACE::NO_ERROR;
   FACE::TS::Initialize("face_config.ini", status);

@@ -17,7 +17,7 @@ void callback(FACE::TRANSACTION_ID_TYPE transaction_id,
   callbackHappened = true;
 }
 
-int main(int argc, char* argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   const bool useCallback = argc > 1 && 0 == std::strcmp(argv[1], "callback");
 

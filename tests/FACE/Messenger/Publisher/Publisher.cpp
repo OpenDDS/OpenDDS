@@ -3,7 +3,7 @@
 #include "ace/OS_NS_unistd.h"
 #include <iostream>
 
-int main()
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   FACE::RETURN_CODE_TYPE status;
   FACE::TS::Initialize("face_config.ini", status);

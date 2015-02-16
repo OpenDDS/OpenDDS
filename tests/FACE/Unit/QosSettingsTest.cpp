@@ -1,5 +1,7 @@
 #include "dds/FACE/config/QosSettings.h"
 
+#include "ace/OS_main.h"
+
 #include <string.h>
 #include <iostream>
 
@@ -1091,7 +1093,7 @@ void test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_
   TEST_CHECK(1000 == qos.reader_data_lifecycle.autopurge_disposed_samples_delay.nanosec);
 }
 
-int main(int, const char** )
+int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   // Publisher QOS
   test_set_publisher_single_partition();
