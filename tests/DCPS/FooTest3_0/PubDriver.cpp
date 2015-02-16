@@ -366,6 +366,17 @@ PubDriver::run()
               ACE_TEXT("(%P|%t) PubDriver::run, ")
               ACE_TEXT(" Wait for subscriber start. \n")));
 
+  // Wait for the sub to be ready.
+  FILE* sub_ready = 0;
+  do
+    {
+      ACE_Time_Value small_time(0,250000);
+      ACE_OS::sleep (small_time);
+      sub_ready = ACE_OS::fopen (sub_ready_filename_.c_str (), ACE_TEXT("r"));
+    } while (0 == sub_ready);
+
+  ACE_OS::fclose(sub_ready);
+
   // Let the subscriber catch up before we broadcast.
   ::DDS::InstanceHandleSeq handles;
   while (1)

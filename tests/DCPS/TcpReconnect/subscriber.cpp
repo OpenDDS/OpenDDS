@@ -32,6 +32,8 @@
 
 bool reliable = false;
 bool wait_for_acks = false;
+int stub_kills = 1;
+int stub_duration = 4;
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])

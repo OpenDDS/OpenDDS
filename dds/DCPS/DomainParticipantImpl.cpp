@@ -1818,18 +1818,19 @@ DomainParticipantImpl::validate_subscriber_qos(DDS::SubscriberQos & subscriber_q
   return true;
 }
 
-Recorder_rch DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
-                             const DDS::SubscriberQos & subscriber_qos,
-                             const DDS::DataReaderQos & datareader_qos,
-                             const RecorderListener_rch & a_listener,
-                             DDS::StatusMask mask)
+Recorder_ptr
+DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
+                                       const DDS::SubscriberQos& subscriber_qos,
+                                       const DDS::DataReaderQos& datareader_qos,
+                                       const RecorderListener_rch& a_listener,
+                                       DDS::StatusMask mask)
 {
   if (CORBA::is_nil(a_topic)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("SubscriberImpl::create_datareader, ")
                ACE_TEXT("topic desc is nil.\n")));
-    return Recorder_rch();
+    return 0;
   }
 
   DDS::SubscriberQos sub_qos = subscriber_qos;
@@ -1840,16 +1841,11 @@ Recorder_rch DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
                                                 TheServiceParticipant->initial_DataReaderQos(),
                                                 a_topic,
                                                 dr_qos, false) ) {
-    return Recorder_rch();
+    return 0;
   }
 
-
-  RecorderImpl* recorder = 0 ;
-  ACE_NEW_RETURN(recorder,
-                 RecorderImpl,
-                 Recorder_rch());
-
-  Recorder_rch result(recorder);
+  RecorderImpl* recorder(new RecorderImpl);
+  Recorder_var result(recorder);
 
   recorder->init(dynamic_cast<TopicDescriptionImpl*>(a_topic),
     dr_qos, a_listener,
@@ -1862,25 +1858,22 @@ Recorder_rch DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(recorders_protector_);
   recorders_.insert(result);
 
-  return result;
+  return result._retn();
 }
 
-
-
-Replayer_rch
+Replayer_ptr
 DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
-                             const DDS::PublisherQos & publisher_qos,
-                             const DDS::DataWriterQos & datawriter_qos,
-                             const ReplayerListener_rch & a_listener,
-                             DDS::StatusMask mask)
+                                       const DDS::PublisherQos& publisher_qos,
+                                       const DDS::DataWriterQos& datawriter_qos,
+                                       const ReplayerListener_rch& a_listener,
+                                       DDS::StatusMask mask)
 {
-
   if (CORBA::is_nil(a_topic)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("SubscriberImpl::create_datareader, ")
                ACE_TEXT("topic desc is nil.\n")));
-    return Replayer_rch();
+    return 0;
   }
 
   DDS::PublisherQos pub_qos = publisher_qos;
@@ -1891,25 +1884,15 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
                                                TheServiceParticipant->initial_DataWriterQos(),
                                                a_topic,
                                                dw_qos)) {
-    return Replayer_rch();
+    return 0;
   }
 
   TopicImpl* topic_servant = dynamic_cast<TopicImpl*>(a_topic);
 
+  ReplayerImpl* replayer(new ReplayerImpl);
+  Replayer_var result(replayer);
 
-  ReplayerImpl* replayer = 0;
-  ACE_NEW_RETURN(replayer,
-                 ReplayerImpl,
-                 Replayer_rch());
-
-  Replayer_rch result(replayer);
-  replayer->init(a_topic,
-                   topic_servant,
-                   dw_qos,
-                   a_listener,
-                   mask,
-                   this,
-                   pub_qos);
+  replayer->init(a_topic, topic_servant, dw_qos, a_listener, mask, this, pub_qos);
 
   if (this->enabled_ == true
       && qos_.entity_factory.autoenable_created_entities == 1) {
@@ -1921,27 +1904,29 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
                  ACE_TEXT("(%P|%t) ERROR: ")
                  ACE_TEXT("DomainParticipantImpl::create_replayer, ")
                  ACE_TEXT("enable failed.\n")));
-      return Replayer_rch();
+      return 0;
     }
   }
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(replayers_protector_);
   replayers_.insert(result);
-  return result;
+  return result._retn();
 }
 
 void
-DomainParticipantImpl::delete_recorder(Recorder_rch recorder)
+DomainParticipantImpl::delete_recorder(Recorder_ptr recorder)
 {
+  const Recorder_var recvar(Recorder::_duplicate(recorder));
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(recorders_protector_);
-  recorders_.erase(recorder);
+  recorders_.erase(recvar);
 }
 
 void
-DomainParticipantImpl::delete_replayer(Replayer_rch replayer)
+DomainParticipantImpl::delete_replayer(Replayer_ptr replayer)
 {
+  const Replayer_var repvar(Replayer::_duplicate(replayer));
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(replayers_protector_);
-  replayers_.erase(replayer);
+  replayers_.erase(repvar);
 }
 
 void

@@ -32,6 +32,9 @@ public:
 
   virtual void remove_associations(const WriterIdSeq& pubids, bool notify) = 0;
 
+  virtual void listener_add_ref() = 0;
+  virtual void listener_remove_ref() = 0;
+
 protected:
 
   TransportReceiveListener();

@@ -96,6 +96,9 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const WriterIdSeq&, bool) {}
 
+  void listener_add_ref() {}
+  void listener_remove_ref() {}
+
   DisjointSequence recvd_;
   bool have_frag_;
 };

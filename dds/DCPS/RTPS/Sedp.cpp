@@ -244,15 +244,15 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , participant_message_writer_(make_id(participant_id,
                                         ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER),
                         *this)
-  , publications_reader_(make_id(participant_id,
-                                 ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
-                         *this)
-  , subscriptions_reader_(make_id(participant_id,
-                                  ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
-                          *this)
-  , participant_message_reader_(make_id(participant_id,
-                                        ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
-                        *this)
+  , publications_reader_(new Reader(make_id(participant_id,
+                                            ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER),
+                                    *this))
+  , subscriptions_reader_(new Reader(make_id(participant_id,
+                                             ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER),
+                                     *this))
+  , participant_message_reader_(new Reader(make_id(participant_id,
+                                                   ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
+                                           *this))
   , task_(this)
   , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
   , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
@@ -323,21 +323,21 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   transport_cfg->instances_.push_back(transport_inst_);
 
   // Configure and enable each reader/writer
-  rtps_inst->opendds_discovery_default_listener_ = &publications_reader_;
+  rtps_inst->opendds_discovery_default_listener_ = publications_reader_.in();
   rtps_inst->opendds_discovery_guid_ = guid;
   const bool reliability = true, durability = true;
   publications_writer_.enable_transport_using_config(reliability, durability,
                                                      transport_cfg);
-  publications_reader_.enable_transport_using_config(reliability, durability,
-                                                     transport_cfg);
+  publications_reader_->enable_transport_using_config(reliability, durability,
+                                                      transport_cfg);
   subscriptions_writer_.enable_transport_using_config(reliability, durability,
                                                       transport_cfg);
-  subscriptions_reader_.enable_transport_using_config(reliability, durability,
-                                                      transport_cfg);
+  subscriptions_reader_->enable_transport_using_config(reliability, durability,
+                                                       transport_cfg);
   participant_message_writer_.enable_transport_using_config(reliability, durability,
                                                             transport_cfg);
-  participant_message_reader_.enable_transport_using_config(reliability, durability,
-                                                            transport_cfg);
+  participant_message_reader_->enable_transport_using_config(reliability, durability,
+                                                             transport_cfg);
   return DDS::RETCODE_OK;
 }
 
@@ -514,17 +514,17 @@ Sedp::associate(const SPDPdiscoveredParticipantData& pdata)
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-    publications_reader_.assoc(peer);
+    publications_reader_->assoc(peer);
   }
   if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-    subscriptions_reader_.assoc(peer);
+    subscriptions_reader_->assoc(peer);
   }
   if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
     DCPS::AssociationData peer = proto;
     peer.remote_id_.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
-    participant_message_reader_.assoc(peer);
+    participant_message_reader_->assoc(peer);
   }
 
   SPDPdiscoveredParticipantData* dpd =
@@ -668,7 +668,7 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
     if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) {
       RepoId id = part;
       id.entityId = ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER;
-      publications_reader_.disassociate(id);
+      publications_reader_->disassociate(id);
     }
     if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) {
       RepoId id = part;
@@ -678,7 +678,7 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
     if (avail & DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) {
       RepoId id = part;
       id.entityId = ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
-      subscriptions_reader_.disassociate(id);
+      subscriptions_reader_->disassociate(id);
     }
     if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) {
       RepoId id = part;
@@ -688,7 +688,7 @@ Sedp::disassociate(const SPDPdiscoveredParticipantData& pdata)
     if (avail & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) {
       RepoId id = part;
       id.entityId = ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_WRITER;
-      participant_message_reader_.disassociate(id);
+      participant_message_reader_->disassociate(id);
     }
     //FUTURE: if/when topic propagation is supported, add it here
   }
@@ -1169,6 +1169,9 @@ void
 Sedp::shutdown()
 {
   task_.shutdown();
+  publications_reader_->shutting_down_ = 1;
+  subscriptions_reader_->shutting_down_ = 1;
+  participant_message_reader_->shutting_down_ = 1;
 }
 
 void
@@ -2393,6 +2396,8 @@ decode_parameter_list(const DCPS::ReceivedDataSample& sample,
 void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
+  if (shutting_down_.value()) return;
+
   switch (sample.header_.message_id_) {
   case DCPS::SAMPLE_DATA:
   case DCPS::DISPOSE_INSTANCE:

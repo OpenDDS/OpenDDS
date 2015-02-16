@@ -134,6 +134,11 @@ private:
   bool lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
+  void listener_add_ref() { EntityImpl::_add_ref(); }
+  void listener_remove_ref() { EntityImpl::_remove_ref(); }
+  void _add_ref() { EntityImpl::_add_ref(); }
+  void _remove_ref() { EntityImpl::_remove_ref(); }
+
   DDS::DataReaderQos qos_;
 
   /// lock protecting sample container as well as statuses.

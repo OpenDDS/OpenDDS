@@ -69,10 +69,12 @@ public:
 
 private:
   typedef std::set<CORBA::Long> Counts;
+  typedef std::set<CORBA::Long> Phases;
 
   DDS::DataReader_var reader_;
   long                num_reads_;
   Counts              counts_;
+  Phases              phases_;
   bool                valid_;
   const bool          reliable_;
 };

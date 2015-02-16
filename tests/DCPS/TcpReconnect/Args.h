@@ -20,14 +20,15 @@
 #include <ace/OS_NS_stdlib.h>
 #include <iostream>
 
-const int num_messages = 60;
 extern bool reliable;
 extern bool wait_for_acks;
+extern int stub_kills;
+extern int stub_duration;
 
 inline int
 parse_args(int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:prw"));
+  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:prwk:d:"));
 
   std::string transport_type;
   int c;
@@ -55,6 +56,12 @@ parse_args(int argc, ACE_TCHAR *argv[])
       break;
     case 'w':
       wait_for_acks = true;
+      break;
+    case 'k':
+      stub_kills = ACE_OS::atoi(get_opts.opt_arg());
+      break;
+    case 'd':
+      stub_duration = ACE_OS::atoi(get_opts.opt_arg());
       break;
     case '?':
     default:

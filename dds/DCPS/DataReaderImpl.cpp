@@ -1404,6 +1404,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   // or statuses related to samples.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
+  if (get_deleted()) return;
+
   if (DCPS_debug_level > 9) {
     STRINGSTREAM buffer;
     buffer << sample.header_ << std::ends;

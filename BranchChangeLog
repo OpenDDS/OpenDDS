@@ -1,3 +1,7 @@
+Mon Feb 16 16:15:07 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged from trunk r6924 through r6949
+
 Mon Feb  9 16:44:28 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * tests/DCPS/WriteDataContainer/WriteDataContainerTest.cpp:

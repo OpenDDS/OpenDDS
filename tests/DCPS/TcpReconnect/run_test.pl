@@ -50,9 +50,14 @@ my $stubKillCount = 2;
 # my $socatCmd = "/usr/bin/socat";
 # my $socatArgs = " -d -d TCP-LISTEN:$socatPubSidePort,reuseaddr " .
 #                 "TCP:stubSubSideHost:$stubSubSidePort";
-my $stubCmd = "stub";
-my $stubArgs = " -p:$stubPubSideHost:$stubPubSidePort -s:$stubSubSideHost:$stubSubSidePort";
-# $stubArgs .= " -v ";
+my $subdir = $PerlACE::Process::ExeSubDir;
+my $stubCmd = "";
+if ($subdir) {
+    $stubCmd = $subdir;
+}
+$stubCmd .= "stub";
+my $stubArgs = " -stubp:$stubPubSideHost:$stubPubSidePort -stubs:$stubSubSideHost:$stubSubSidePort";
+# $stubArgs .= " -stubv ";
 
 #
 # generate ini file for subscriber
@@ -70,28 +75,23 @@ close $fh;
 
 $pub_opts .= ' -DCPSConfigFile repub.ini';
 $sub_opts .= ' -DCPSConfigFile resub.ini';
+$sub_opts .= " -k $stubKillCount -d $stubKillDelay";
 
+#clean up files left from previous run
+my $stub_ready = 'stub_ready.txt';
+unlink $stub_ready;
 
 $pub_opts .= $thread_per_connection;
+$pub_opts .= " -stubCmd $stubCmd $stubArgs -stub_ready_file $stub_ready -k $stubKillCount -d $stubKillDelay";
 
 $test->setup_discovery("-NOBITS -ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
                        "$repo_bit_opt");
 
 $test->process("publisher", "publisher", $pub_opts);
 $test->process("subscriber", "subscriber", $sub_opts);
-my $stub = PerlDDS::create_process($stubCmd, $stubArgs);
 
 $test->start_process("subscriber");
-print $stub->CommandLine() . "\n";
-$stub->Spawn();
 $test->start_process("publisher");
-
-while ($stubKillCount > 0) {
-  sleep($stubKillDelay);
-  $stub->Kill();
-  $stub->Spawn();
-  $stubKillCount--;
-}
 
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
@@ -102,5 +102,7 @@ $test->ignore_error("Unrecoverable problem with data link detected");
 
 # start killing processes in 60 seconds
 my $fin = $test->finish(60);
-$stub->Kill();
+
+unlink $stub_ready;
+unlink 'resub.ini';
 exit $fin;

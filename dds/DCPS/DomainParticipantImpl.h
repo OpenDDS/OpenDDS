@@ -349,13 +349,13 @@ private:
   }
 
 
-  Recorder_rch create_recorder(DDS::Topic_ptr               a_topic,
+  Recorder_ptr create_recorder(DDS::Topic_ptr               a_topic,
                                const DDS::SubscriberQos &   subscriber_qos,
                                const DDS::DataReaderQos &   datareader_qos,
                                const RecorderListener_rch & a_listener,
                                DDS::StatusMask              mask);
 
-  Replayer_rch create_replayer(DDS::Topic_ptr               a_topic,
+  Replayer_ptr create_replayer(DDS::Topic_ptr               a_topic,
                                const DDS::PublisherQos &    publisher_qos,
                                const DDS::DataWriterQos &   datawriter_qos,
                                const ReplayerListener_rch & a_listener,
@@ -369,8 +369,8 @@ private:
     DDS::TopicListener_ptr a_listener,
     DDS::StatusMask        mask);
 
-  void delete_recorder(Recorder_rch recorder);
-  void delete_replayer(Replayer_rch replayer);
+  void delete_recorder(Recorder_ptr recorder);
+  void delete_replayer(Replayer_ptr replayer);
 
   void add_adjust_liveliness_timers(DataWriterImpl* writer);
   void remove_adjust_liveliness_timers();
@@ -492,15 +492,8 @@ private:
   std::map<std::string, RcHandle<FilterEvaluator> > filter_cache_;
 #endif
 
-
-  struct RcHandleComparer {
-    template <typename T>
-    bool operator() (const RcHandle<T>& lhs, const RcHandle<T>& rhs) const {
-      return lhs.in() < rhs.in();
-    }
-  };
-  typedef std::set<Recorder_rch, RcHandleComparer> RecorderSet;
-  typedef std::set<Replayer_rch, RcHandleComparer> ReplayerSet;
+  typedef std::set<Recorder_var, VarLess<Recorder> > RecorderSet;
+  typedef std::set<Replayer_var, VarLess<Replayer> > ReplayerSet;
 
   RecorderSet recorders_;
   ReplayerSet replayers_;

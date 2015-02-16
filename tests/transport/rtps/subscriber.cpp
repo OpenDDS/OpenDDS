@@ -166,6 +166,9 @@ public:
   void notify_connection_deleted(const RepoId&) {}
   void remove_associations(const WriterIdSeq&, bool) {}
 
+  void listener_add_ref() {}
+  void listener_remove_ref() {}
+
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&)
     { return true; }

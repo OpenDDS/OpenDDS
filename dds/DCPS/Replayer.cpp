@@ -25,5 +25,37 @@ Replayer::~Replayer()
 {
 }
 
-} // namespace DCPS
-} // namespace
+Replayer_ptr Replayer::_duplicate(Replayer_ptr obj)
+{
+  if (obj) obj->_add_ref();
+  return obj;
+}
+
+}
+}
+
+OpenDDS::DCPS::Replayer_ptr
+TAO::Objref_Traits<OpenDDS::DCPS::Replayer>::duplicate(OpenDDS::DCPS::Replayer_ptr p)
+{
+  return OpenDDS::DCPS::Replayer::_duplicate(p);
+}
+
+void
+TAO::Objref_Traits<OpenDDS::DCPS::Replayer>::release(OpenDDS::DCPS::Replayer_ptr p)
+{
+  if (p) p->_remove_ref();
+}
+
+OpenDDS::DCPS::Replayer_ptr
+TAO::Objref_Traits<OpenDDS::DCPS::Replayer>::nil()
+{
+  return static_cast<OpenDDS::DCPS::Replayer_ptr>(0);
+}
+
+CORBA::Boolean
+TAO::Objref_Traits<OpenDDS::DCPS::Replayer>::marshal(const OpenDDS::DCPS::Replayer_ptr,
+                                                     TAO_OutputCDR&)
+{
+  return false;
+}
+

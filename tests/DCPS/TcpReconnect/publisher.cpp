@@ -9,10 +9,13 @@
 #include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+#include "ace/Arg_Shifter.h"
+#include "ace/Process.h"
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include "model/Sync.h"
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -27,6 +30,9 @@
 #include "Writer.h"
 #include "Args.h"
 
+int stub_kills = 1;
+int stub_duration = 4;
+
 bool dw_reliable() {
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
   return !(gc->instances_[0]->transport_type_ == "udp");
@@ -38,9 +44,74 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   DDS::DomainParticipant_var participant;
 
   try {
+    ACE_Process process;
 
     std::cout << "Starting publisher" << std::endl;
     {
+      ACE_TString stubCmd(ACE_TEXT(""));
+      ACE_TString stubArgs(ACE_TEXT(""));
+      ACE_TString stub_ready_filename(ACE_TEXT(""));
+
+      ACE_Arg_Shifter_T<ACE_TCHAR> shifter(argc, argv);
+      while (shifter.is_anything_left()) {
+        const ACE_TCHAR* currentArg = 0;
+        if ((currentArg = shifter.get_the_parameter(ACE_TEXT("-stubCmd"))) != 0) {
+          stubCmd += currentArg;
+          ACE_DEBUG((LM_INFO, ACE_TEXT("stubCmd: %s\n"), stubCmd.c_str()));
+          shifter.consume_arg();
+        } else if ((currentArg = shifter.get_the_parameter(ACE_TEXT("-stubp"))) != 0) {
+          stubArgs += ACE_TEXT("-p");
+          stubArgs += currentArg;
+          ACE_DEBUG((LM_INFO, ACE_TEXT("stubArgs: %s\n"), stubArgs.c_str()));
+          shifter.consume_arg();
+        } else if ((currentArg = shifter.get_the_parameter(ACE_TEXT("-stubs"))) != 0) {
+          stubArgs += ACE_TEXT(" -s");
+          stubArgs += currentArg;
+          ACE_DEBUG((LM_INFO, ACE_TEXT("stubArgs: %s\n"), stubArgs.c_str()));
+          shifter.consume_arg();
+        } else if ((currentArg = shifter.get_the_parameter(ACE_TEXT("-stubv"))) != 0) {
+          stubArgs += ACE_TEXT(" -v");
+          ACE_DEBUG((LM_INFO, ACE_TEXT("stubArgs: %s\n"), stubArgs.c_str()));
+          shifter.consume_arg();
+        } else if ((currentArg = shifter.get_the_parameter(ACE_TEXT("-stub_ready_file"))) != 0) {
+          stubArgs += ACE_TEXT(" -stub_ready_file:");
+          stubArgs += currentArg;
+          stub_ready_filename = currentArg;
+          ACE_DEBUG((LM_INFO, ACE_TEXT("stubArgs: %s\n"), stubArgs.c_str()));
+          shifter.consume_arg();
+        } else {
+          shifter.ignore_arg();
+        }
+
+      }
+
+      ACE_Process_Options options;
+      ACE_TString command_line = stubCmd + ACE_TEXT(" ") + stubArgs;
+      ACE_DEBUG((LM_INFO, ACE_TEXT("stub command line: %s\n"), command_line.c_str()));
+
+      if (options.command_line(command_line.c_str()) != 0)
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT("set options")) ,-1);
+
+#ifdef ACE_WIN32
+      options.creation_flags(CREATE_NEW_PROCESS_GROUP);
+#endif
+
+      pid_t pid = process.spawn(options);
+
+      if (pid == ACE_INVALID_PID)
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT ("%p\n"), ACE_TEXT("spawn")) ,-1);
+
+      // Wait for the stub to be ready.
+      FILE* stub_ready = 0;
+      do
+        {
+          ACE_Time_Value small_time(0,250000);
+          ACE_OS::sleep (small_time);
+          stub_ready = ACE_OS::fopen (stub_ready_filename.c_str (), ACE_TEXT("r"));
+        } while (0 == stub_ready);
+
+      ACE_OS::fclose(stub_ready);
+
       // Initialize DomainParticipantFactory
       dpf = TheParticipantFactoryWithArgs(argc, argv);
 
@@ -124,12 +195,33 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT(" ERROR: create_datawriter failed!\n")),
                          -1);
       }
+      // Block until Subscriber is available
+      OpenDDS::Model::WriterSync::wait_match(dw, 1);
 
       // Start writing threads
       std::cout << "Creating Writer" << std::endl;
       Writer* writer = new Writer(dw.in());
       std::cout << "Starting Writer" << std::endl;
       writer->start();
+
+      int stubKillCount = stub_kills;
+      while (stubKillCount > 0) {
+        ACE_OS::sleep(stub_duration);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) publisher killing connection for the %d time\n", stub_kills - stubKillCount + 1));
+        std::cout << "Kill stub (connection) for the " << stub_kills - stubKillCount + 1 << " time" << std::endl;
+
+# ifdef ACE_WIN32
+        GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, process.getpid());
+# else
+        process.kill();
+# endif
+        process.wait();
+        writer->increment_phase();
+        pid = process.spawn(options);
+        std::cout << "stub (connection) reconnected after killing " << stub_kills - stubKillCount + 1 << " time" << std::endl;
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) publisher reconnected after killing connection for the %d time\n", stub_kills - stubKillCount + 1));
+        stubKillCount--;
+      }
 
       while (!writer->is_finished()) {
         ACE_Time_Value small_time(0, 250000);
@@ -158,6 +250,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
     TheServiceParticipant->shutdown();
+
+# ifdef ACE_WIN32
+    GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, process.getpid());
+# else
+    process.kill();
+# endif
+    process.wait();
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");

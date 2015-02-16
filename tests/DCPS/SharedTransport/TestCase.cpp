@@ -107,7 +107,6 @@ TestCase::test()
                     ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                     si.instance_state), -1);
       }
-
     } else {
       ACE_ERROR_RETURN((LM_ERROR,
                   ACE_TEXT("%N:%l: take_next_sample()")
