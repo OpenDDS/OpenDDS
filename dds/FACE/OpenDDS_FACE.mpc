@@ -1,4 +1,5 @@
 project: dcpslib {
+  avoids += uses_wchar
   dynamicflags = OPENDDS_FACE_BUILD_DLL
 
   Source_Files {

@@ -1276,7 +1276,7 @@ Service_Participant::load_configuration()
 int
 Service_Participant::load_configuration(
   ACE_Configuration_Heap& config,
-  const char* filename)
+  const ACE_TCHAR* filename)
 {
   int status = 0;
 

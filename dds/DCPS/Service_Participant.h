@@ -367,7 +367,7 @@ public:
    * singleton.
    */
   int load_configuration(ACE_Configuration_Heap& cf,
-                         const char* filename);
+                         const ACE_TCHAR* filename);
 
 private:
 
