@@ -1,3 +1,22 @@
+Mon Feb 16 23:19:42 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * FACE/common.hpp:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+
+          More post-merge build fixes.  Changed FACE's enumerator NO_ERROR
+          to RC_NO_ERROR (RC is for Return Code).  NO_ERROR is too common of
+          a term and all-caps tend to be used for macros, this happens to
+          collide with macros defined in system headers.
+
 Mon Feb 16 22:08:04 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
 
         * tests/DCPS/ConfigTransports/common.h:

@@ -15,15 +15,11 @@ static const ACE_INT64 INF_TIME_VALUE = -1;
 
 typedef char CONFIGURATION_RESOURCE[256];
 
-#ifdef NO_ERROR
-#undef NO_ERROR
-#endif
-
 // This enumeration defines the possible set of status codes which may be
 // returned by a method defined in the FACE API.
 enum RETURN_CODE_TYPE {
   // request valid and operation performed
-  NO_ERROR,
+  RC_NO_ERROR,
   // status of system unaffected by request
   NO_ACTION,
   // no message was available

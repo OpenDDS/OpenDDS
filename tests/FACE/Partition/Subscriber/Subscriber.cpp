@@ -6,7 +6,7 @@
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  FACE::RETURN_CODE_TYPE status = FACE::NO_ERROR;
+  FACE::RETURN_CODE_TYPE status = FACE::RC_NO_ERROR;
   FACE::CONNECTION_ID_TYPE connId;
   FACE::MESSAGE_SIZE_TYPE size;
   int part = atoi(argv[1]);
@@ -17,7 +17,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     status = FACE::INVALID_PARAM;
   } else {
     FACE::TS::Initialize("face_config.ini", status);
-    if (status != FACE::NO_ERROR) return static_cast<int>(status);
+    if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
   }
 
   if (!status) {
@@ -36,7 +36,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     for (long i = 0; i < part; ++i) {
       ACE_DEBUG((LM_INFO, "(%P|%t) Subscriber: about to receive_message()\n"));
       FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
-      if (status != FACE::NO_ERROR) break;
+      if (status != FACE::RC_NO_ERROR) break;
       ACE_DEBUG((LM_INFO, "(%P|%t) Subscriber%d: %s part: %d\n",
                  part, msg.text.in(), msg.count));
       partitions_received[msg.count - 1] = true;
@@ -65,9 +65,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   // Always destroy connection, but don't overwrite bad status
-  FACE::RETURN_CODE_TYPE destroy_status = FACE::NO_ERROR;
+  FACE::RETURN_CODE_TYPE destroy_status = FACE::RC_NO_ERROR;
   FACE::TS::Destroy_Connection(connId, destroy_status);
-  if ((destroy_status != FACE::NO_ERROR) && (!status)) {
+  if ((destroy_status != FACE::RC_NO_ERROR) && (!status)) {
     std::cerr << "ERROR: destroying connection" << std::endl;
     status = destroy_status;
   }

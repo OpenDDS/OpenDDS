@@ -4,7 +4,7 @@
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  FACE::RETURN_CODE_TYPE status = FACE::NO_ERROR;
+  FACE::RETURN_CODE_TYPE status = FACE::RC_NO_ERROR;
   FACE::TS::Initialize("face_config.ini", status);
   FACE::CONNECTION_ID_TYPE connId;
   FACE::MESSAGE_SIZE_TYPE size;
@@ -22,7 +22,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     std::cout << "Subscriber: about to receive_message()" << std::endl;
     for (long i = 0; i < 100; ++i) {
       FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
-      if (status != FACE::NO_ERROR) break;
+      if (status != FACE::RC_NO_ERROR) break;
       std::cout << msg.text.in() << '\t' << msg.count << std::endl;
       if (msg.count != i) {
         std::cerr << "ERROR: Expected count " << i << ", got "
@@ -41,9 +41,9 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   // Always destroy connection, but don't overwrite bad status
-  FACE::RETURN_CODE_TYPE destroy_status = FACE::NO_ERROR;
+  FACE::RETURN_CODE_TYPE destroy_status = FACE::RC_NO_ERROR;
   FACE::TS::Destroy_Connection(connId, destroy_status);
-  if ((destroy_status != FACE::NO_ERROR) && (!status)) {
+  if ((destroy_status != FACE::RC_NO_ERROR) && (!status)) {
     status = destroy_status;
   }
 

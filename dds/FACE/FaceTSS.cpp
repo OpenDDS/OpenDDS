@@ -40,7 +40,7 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
                status));
     return_code = INVALID_PARAM;
   } else {
-    return_code = NO_ERROR;
+    return_code = RC_NO_ERROR;
   }
 }
 
@@ -51,7 +51,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
                        MESSAGE_SIZE_TYPE& max_message_size,
                        RETURN_CODE_TYPE& return_code)
 {
-  return_code = NO_ERROR;
+  return_code = RC_NO_ERROR;
 
   if (pattern != PUB_SUB) {
     return_code = INVALID_CONFIG;
@@ -84,7 +84,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     return_code = INVALID_CONFIG;
   }
 
-  if (return_code == NO_ERROR) {
+  if (return_code == RC_NO_ERROR) {
     // Copy out parameters
     connection_id = connection.connection_id_;
     connection_direction = connection.direction_;
@@ -108,7 +108,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
                                RETURN_CODE_TYPE& return_code)
 {
   //TODO: implement
-  return_code = NO_ERROR;
+  return_code = RC_NO_ERROR;
 }
 
 void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
@@ -118,7 +118,7 @@ void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
   std::map<int, ::DDS::DataReader_var>& readers = entities.readers_;
   if (readers.count(connection_id)) {
     readers[connection_id]->set_listener(NULL, 0);
-    return_code = NO_ERROR;
+    return_code = RC_NO_ERROR;
     return;
   }
   return_code = INVALID_PARAM;
@@ -151,7 +151,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
   dp->delete_contained_entities();
   const ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(dp);
-  return_code = NO_ERROR;
+  return_code = RC_NO_ERROR;
 }
 
 namespace {
@@ -222,7 +222,7 @@ namespace {
       Entities::instance()->readers_[connectionId] = dr;
     }
 
-    return NO_ERROR;
+    return RC_NO_ERROR;
   }
 }
 

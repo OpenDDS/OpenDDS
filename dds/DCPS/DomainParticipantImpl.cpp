@@ -605,7 +605,7 @@ DomainParticipantImpl::find_topic(
     if (status == FOUND) {
       OpenDDS::DCPS::TypeSupport_var type_support =
         Registered_Data_Types->lookup(this, type_name.in());
-      if (0 == type_support) {
+      if (CORBA::is_nil(type_support)) {
         if (DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                        ACE_TEXT("DomainParticipantImpl::find_topic, ")

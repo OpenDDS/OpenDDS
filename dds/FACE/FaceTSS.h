@@ -71,7 +71,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
 
   if (ret == DDS::RETCODE_OK && sinfo[0].valid_data) {
     message = seq[0];
-    return_code = FACE::NO_ERROR;
+    return_code = FACE::RC_NO_ERROR;
     return;
   }
   return_code = FACE::NOT_AVAILABLE;
@@ -101,7 +101,7 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
 
   const DDS::ReturnCode_t ret = typedWriter->write(message, DDS::HANDLE_NIL);
   return_code =
-    (ret == DDS::RETCODE_OK) ? FACE::NO_ERROR : FACE::CONNECTION_CLOSED;
+    (ret == DDS::RETCODE_OK) ? FACE::RC_NO_ERROR : FACE::CONNECTION_CLOSED;
   //TODO: convert errors
 }
 
@@ -177,7 +177,7 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
 
   DDS::DataReaderListener_var listener = new Listener<Msg>(callback);
   readers[connection_id]->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);
-  return_code = FACE::NO_ERROR;
+  return_code = FACE::RC_NO_ERROR;
 
   //TODO: finish implementing?
 }

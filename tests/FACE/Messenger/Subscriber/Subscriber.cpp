@@ -23,26 +23,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   FACE::RETURN_CODE_TYPE status;
   FACE::TS::Initialize("face_config.ini", status);
-  if (status != FACE::NO_ERROR) return static_cast<int>(status);
+  if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
   FACE::MESSAGE_SIZE_TYPE size;
   FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size, status);
-  if (status != FACE::NO_ERROR) return static_cast<int>(status);
+  if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   bool testPassed = true;
   if (useCallback) {
     std::cout << "Subscriber: about to Register_Callback()" << std::endl;
     FACE::TS::Register_Callback(connId, 0, callback, 0, status);
-    if (status != FACE::NO_ERROR) return static_cast<int>(status);
+    if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_OS::sleep(15);
     if (!callbackHappened) {
       std::cout << "ERROR: no callback seen" << std::endl;
       testPassed = false;
     }
     FACE::TS::Unregister_Callback(connId, status);
-    if (status != FACE::NO_ERROR) return static_cast<int>(status);
+    if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   } else {
     const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
@@ -50,12 +50,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     Messenger::Message msg;
     std::cout << "Subscriber: about to Receive_Message()" << std::endl;
     FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
-    if (status != FACE::NO_ERROR) return static_cast<int>(status);
+    if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     std::cout << msg.text.in() << '\t' << msg.count << std::endl;
   }
 
   FACE::TS::Destroy_Connection(connId, status);
-  if (status != FACE::NO_ERROR) return static_cast<int>(status);
+  if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   return testPassed ? EXIT_SUCCESS : EXIT_FAILURE;
 }
