@@ -1,0 +1,6 @@
+/bin
+/text
+/javaCompiler...args
+/build.xml
+/@dot
+/org.opendds.modeling.model_*.jar

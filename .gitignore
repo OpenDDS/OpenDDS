@@ -1,0 +1,14 @@
+.depend.*
+GNUmakefile*
+*.log
+*.ior
+.obj/
+.shobj/
+lib*.a
+lib*.so*
+*~
+
+/setenv.sh
+/setenv.cmd
+/user_macros.GNU
+/build

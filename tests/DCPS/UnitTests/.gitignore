@@ -1,0 +1,12 @@
+/UnitTests_BIT_DataReader
+/UnitTests_LivelinessCompatibility
+/UnitTests_DisjointSequence
+/UnitTests_SequenceNumber
+/UnitTests_DurationToTimeValue
+/UnitTests_Fragmentation
+/UnitTests_GuidGenerator
+/UnitTests_ParameterListConverter
+/UnitTests_Reassembly
+/UnitTests_RepoIdSequence
+/UnitTests_RtpsFragmentation
+/UnitTests_TimeTSubtraction

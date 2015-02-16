@@ -1,0 +1,11 @@
+/bin
+/META-INF
+/plugin.xml
+/messages.properties
+/javaCompiler...args
+/plugin.properties
+/.options
+/build.xml
+/@dot
+/org.opendds.modeling.diagram.policylib_*.jar
+/platform:

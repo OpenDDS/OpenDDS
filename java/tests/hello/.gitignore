@@ -1,0 +1,13 @@
+/Test
+/*.vcproj
+/*.user
+/*.ilk
+/classes
+/hello_java_client.jar
+/TestJC.h
+/TestS.h
+/TestS.cpp
+/TestC.cpp
+/TestC.inl
+/TestC.h
+/TestJC.cpp

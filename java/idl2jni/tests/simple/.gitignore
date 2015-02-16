@@ -1,0 +1,16 @@
+/simple
+/*.vcproj
+/*.user
+/*.ilk
+/classes
+/simple.jar
+/simpleC.h
+/simpleJC.cpp
+/simpleJC.h
+/simpleS.cpp
+/simpleS.inl
+/simpleS.h
+/simpleJS.cpp
+/simpleJS.h
+/simpleC.cpp
+/simpleC.inl
