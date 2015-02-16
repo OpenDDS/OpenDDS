@@ -1,3 +1,14 @@
+Mon Feb 16 22:08:04 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Add some locking to avoid some shutdown problems where other
+          threads can interfere when shutting down.  This appears to
+          fix the majority of the problems observed with this test.
+
 Mon Feb 16 21:30:05 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/opendds_face.mpb:

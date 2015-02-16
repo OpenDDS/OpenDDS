@@ -26,6 +26,9 @@ namespace OpenDDS
   }
 }
 
+extern ACE_Thread_Mutex shutdown_lock;
+extern bool shutdown_flag;
+
 class Options;
 
 bool wait_subscription_matched_status(const Options& opts, const DDS::DataReader_ptr r);

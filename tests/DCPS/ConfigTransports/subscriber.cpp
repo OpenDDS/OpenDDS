@@ -138,6 +138,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Shutting subscriber down ...\n")));
 
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, shutdown_lock, 1);
+        shutdown_flag = true;
+      }
+
       // only want to clean up participant2 if it isn't just pointing to
       // participant1
       if (participant1.in() == participant2.in())

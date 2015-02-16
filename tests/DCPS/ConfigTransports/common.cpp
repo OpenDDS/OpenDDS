@@ -26,6 +26,9 @@
 #include "dds/DCPS/transport/multicast/Multicast.h"
 #endif
 
+ACE_Thread_Mutex shutdown_lock;
+bool shutdown_flag = false;
+
 bool
 assert_subscription_matched(const Options& opts, const DDS::DataReaderListener_var& drl)
 {
@@ -110,6 +113,11 @@ assert_supported(const Options& opts, const DDS::Entity_ptr e)
 bool
 assert_negotiated(const Options& opts, const DDS::Entity_ptr e)
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, shutdown_lock, false);
+  if (shutdown_flag) {
+    return true;
+  }
+
   TEST_ASSERT(e != 0);
   OpenDDS::DCPS::TransportClient* tc = dynamic_cast<OpenDDS::DCPS::TransportClient*> (e);
   TEST_ASSERT(tc != 0);
