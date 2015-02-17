@@ -1,3 +1,9 @@
+Tue Feb 17 21:13:58 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/FACE/config/Parser.cpp:
+
+          Updated use of std::map for compatibility with SunCC.
+
 Tue Feb 17 19:45:35 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
