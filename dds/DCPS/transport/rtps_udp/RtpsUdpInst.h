@@ -40,7 +40,9 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
+#ifndef OPENDDS_SAFETY_PROFILE
   virtual void dump(std::ostream& os);
+#endif
 
   bool is_reliable() const { return true; }
   bool requires_cdr() const { return true; }

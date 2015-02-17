@@ -1,8 +1,112 @@
+Mon Feb 16 23:44:00 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/dcps_default_discovery.mpb:
+
+          Need a dependency on the tcp lib here for static builds (non-safety).
+
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/OpenDDS_FACE.mpc:
+
+          Fixed warnings due to 32bit/64bit int mismatch.
+
+Mon Feb 16 23:19:42 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * FACE/common.hpp:
+        * dds/DCPS/Discovery.cpp:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+
+          More post-merge build fixes.  Changed FACE's enumerator NO_ERROR
+          to RC_NO_ERROR (RC is for Return Code).  NO_ERROR is too common of
+          a term and all-caps tend to be used for macros, this happens to
+          collide with macros defined in system headers.
+
+Mon Feb 16 22:08:04 UTC 2015  Paul Calabrese  <calabrese_p@ociweb.com>
+
+        * tests/DCPS/ConfigTransports/common.h:
+        * tests/DCPS/ConfigTransports/common.cpp:
+        * tests/DCPS/ConfigTransports/publisher.cpp:
+        * tests/DCPS/ConfigTransports/subscriber.cpp:
+
+          Add some locking to avoid some shutdown problems where other
+          threads can interfere when shutting down.  This appears to
+          fix the majority of the problems observed with this test.
+
+Mon Feb 16 21:30:05 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * MPC/config/opendds_face.mpb:
+        * dds/DCPS/Service_Participant.h:
+        * dds/DCPS/Service_Participant.cpp:
+        * dds/FACE/OpenDDS_FACE.mpc:
+
+          Fixes for wchar builds.
+
+Mon Feb 16 21:21:28 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/PerlDDS/Run_Test.pm:
+        * dds/CORBA/tao/Object.cpp:
+        * dds/CORBA/tao/OctetSeqC.cpp:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/ConnectionSettings.cpp:
+        * dds/FACE/config/QosSettings.h:
+        * dds/FACE/config/QosSettings.cpp:
+        * dds/FACE/config/TopicSettings.cpp:
+        * tests/DCPS/BuiltInTopicTest/monitor.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+        * tests/Utils/ExceptionStreams.h:
+
+          Fixed fuzz errors.
+
+Mon Feb 16 19:34:23 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+        * tests/FACE/Unit/QosSettingsTest.cpp:
+
+          Use ACE_TMAIN for portability.
+
+        * bin/dcps_tests.lst:
+
+          Exclude TcpReconnect test when ownership profile is disabled.
+
+Mon Feb 16 19:05:23 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * FACE/common.hpp:
+
+          Fixed build error.
+
+Mon Feb 16 17:50:20 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * Merged branch FACE to trunk, adding initial support for the
+          Future Airborne Capability Environment (v2.1) in the top-level
+          FACE directory (public headers) and the dds/FACE directory
+          (implementation).  OpenDDS can be built to work on the restricted
+          platform of FACE's safety base profile by setting the MPC feature
+          no_opendds_safety_profile=0 and building with a corresponding
+          FACE-enabled version of ACE.
+          For details for the changes made on this branch see the change log
+          archived at docs/history/ChangeLog-FACE.
+
 Fri Feb 13 21:31:16 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * ChangeLog:
 
           Reset for post 3.7
+
         * NEWS:
 
           Add 3.7 section.

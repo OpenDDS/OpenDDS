@@ -33,65 +33,57 @@ my $writer_blocking_ms = 0;
 my $read_interval_ms = 0;
 my $mixed_trans = 0;
 
-my $arg_idx = 0;
+my $test = new PerlDDS::TestFramework();
 
-if ($ARGV[$arg_idx] eq 'nokey') {
+if ($test->flag('nokey')) {
   $no_key = 1;
-  ++$arg_idx;
 }
 
-if ($ARGV[$arg_idx] eq 'udp') {
+if ($test->flag('udp')) {
   $use_udp = 1;
-  ++$arg_idx;
   $write_interval_ms = 50;
 }
-
-if ($ARGV[$arg_idx] eq 'multicast') {
+elsif ($test->flag('multicast')) {
   $use_multicast = 1;
-  ++$arg_idx;
   $write_interval_ms = 50;
 }
-
-if ($ARGV[$arg_idx] eq 'rtps') {
+elsif ($test->flag('rtps') || $PerlDDS::SafetyProfile) {
   $use_rtps_transport = 1;
-  ++$arg_idx;
   $write_interval_ms = 50;
 }
-
-if ($ARGV[$arg_idx] eq 'shmem') {
+elsif ($test->flag('shmem')) {
   $use_shmem = 1;
-  ++$arg_idx;
   $write_interval_ms = 50;
 }
 
 # multiple instances, single datawriter, single datareader
-if ($ARGV[$arg_idx] eq 'mi') {
+if ($test->flag('mi')) {
   $num_instances_per_writer = 2;
 }
-elsif ($ARGV[$arg_idx] eq 'mwmr') {
+elsif ($test->flag('mwmr')) {
   $num_samples_per_instance = 50;
   $num_writers = 2;
   $num_readers = 2;
 }
-elsif ($ARGV[$arg_idx] eq 'mr') {
+elsif ($test->flag('mr')) {
   $num_samples_per_instance = 50;
   $num_writers = 1;
   $num_readers = 2;
 }
-elsif ($ARGV[$arg_idx] eq 'mwmr_long_seq') {
+elsif ($test->flag('mwmr_long_seq')) {
   $sequence_length = 256;
   $num_samples_per_instance = 50;
   $num_writers = 2;
   $num_readers = 2;
 }
-elsif ($ARGV[$arg_idx] eq 'blocking') {
+elsif ($test->flag('blocking')) {
   $writer_blocking_ms = 1000000; # 1000 seconds
   $num_instances_per_writer = 5;
   $num_samples_per_instance = 20;
   $max_samples_per_instance = 1;
   $read_interval_ms = 1000;
 }
-elsif ($ARGV[$arg_idx] eq 'blocking_timeout') {
+elsif ($test->flag('blocking_timeout')) {
   $writer_blocking_ms = 5; # milliseconds
   $num_instances_per_writer = 5;
   $num_samples_per_instance = 50;
@@ -99,59 +91,26 @@ elsif ($ARGV[$arg_idx] eq 'blocking_timeout') {
   $sequence_length = 1000;
   $read_interval_ms = 1000;
 }
-elsif ($ARGV[$arg_idx] eq 'mixed_trans') {
+elsif ($test->flag('mixed_trans')) {
   $num_samples_per_instance = 50;
   $num_writers = 2;
   $num_readers = 2;
   $mixed_trans = 1;
 }
-elsif ($ARGV[$arg_idx] eq '') {
-  #default test - single datareader single instance.
-}
-else {
-  print STDERR "ERROR: invalid parameter $ARGV[$arg_idx]\n";
-  exit 1;
-}
-
-my $dcpsrepo_ior = 'repo.ior';
 
 my $subscriber_completed = 'subscriber_finished.txt';
 my $subscriber_ready = 'subscriber_ready.txt';
 my $publisher_completed = 'publisher_finished.txt';
 my $publisher_ready = 'publisher_ready.txt';
 
-unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
 unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
 
-my $DCPSREPO = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
-                                       "-o $dcpsrepo_ior");
-print $DCPSREPO->CommandLine(), "\n";
+$test->enable_console_logging();
 
-my $sub_parameters = "-DCPSConfigFile all.ini"
-    . " -DCPSPendingTimeout 1 "
-    . " -u $use_udp -c $use_multicast"
-    . " -p $use_rtps_transport -s $use_shmem -r $num_readers -t $use_take"
-    . " -m $num_instances_per_writer -i $num_samples_per_instance"
-    . " -w $num_writers -z $sequence_length"
-    . " -k $no_key -y $read_interval_ms -f $mixed_trans";
-
-my $pub_parameters = "-DCPSConfigFile all.ini"
-    . " -DCPSPendingTimeout 1 "
-    . " -u $use_udp -c $use_multicast "
-    . " -p $use_rtps_transport -s $use_shmem -w $num_writers "
-    . " -m $num_instances_per_writer -i $num_samples_per_instance "
-    . " -n $max_samples_per_instance -z $sequence_length"
-    . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"
-    . " -f $mixed_trans";
-
-my $Subscriber = PerlDDS::create_process('subscriber', $sub_parameters);
-print $Subscriber->CommandLine(), "\n";
-
-my $Publisher = PerlDDS::create_process('publisher', $pub_parameters);
-print $Publisher->CommandLine(), "\n";
+$test->report_unused_flags(1);
 
 my $orig_ACE_LOG_TIMESTAMP = $ENV{ACE_LOG_TIMESTAMP};
 $ENV{ACE_LOG_TIMESTAMP} = "TIME";
@@ -160,37 +119,35 @@ sub cleanup
   $ENV{ACE_LOG_TIMESTAMP} = $orig_ACE_LOG_TIMESTAMP;
 }
 
-$DCPSREPO->Spawn();
+$test->setup_discovery();
 
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-  print STDERR "ERROR: waiting for Info Repo IOR file\n";
-  $DCPSREPO->Kill();
-  exit 1;
-}
+my $cfg = $PerlDDS::SafetyProfile ? 'rtps.ini' : 'all.ini';
 
+my $sub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast"
+    . " -p $use_rtps_transport -s $use_shmem -r $num_readers -t $use_take"
+    . " -m $num_instances_per_writer -i $num_samples_per_instance"
+    . " -w $num_writers -z $sequence_length"
+    . " -k $no_key -y $read_interval_ms -f $mixed_trans";
 
-$Publisher->Spawn();
+my $pub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast "
+    . " -p $use_rtps_transport -s $use_shmem -w $num_writers "
+    . " -m $num_instances_per_writer -i $num_samples_per_instance "
+    . " -n $max_samples_per_instance -z $sequence_length"
+    . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"
+    . " -f $mixed_trans";
 
-$Subscriber->Spawn();
+$test->process("subscriber", "subscriber", $sub_parameters);
+$test->process("publisher", "publisher", $pub_parameters);
 
-my $status = 0;
-$status |= PerlDDS::wait_kill($Publisher, 300, "publisher");
+$test->start_process("publisher");
+$test->start_process("subscriber");
 
-$status |= PerlDDS::wait_kill($Subscriber, 15, "subscriber");
-$status |= PerlDDS::terminate_wait_kill($DCPSREPO);
+my $status = $test->finish(300, "publisher");
 
-unlink $dcpsrepo_ior;
 unlink $subscriber_completed;
 unlink $subscriber_ready;
 unlink $publisher_completed;
 unlink $publisher_ready;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-}
-else {
-  print STDERR "test FAILED.\n";
-}
 
 cleanup();
 exit $status;

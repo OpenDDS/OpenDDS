@@ -144,7 +144,7 @@ template <class Sample_T, size_t DEF_MAX> ACE_INLINE
 CORBA::ULong
 ZeroCopyDataSeq<Sample_T, DEF_MAX>::length() const
 {
-  return is_zero_copy() ? ACE_Utils::truncate_cast<CORBA::ULong>(ptrs_.size()) : sc_length_;
+  return is_zero_copy() ? static_cast<CORBA::ULong>(ptrs_.size()) : sc_length_;
 }
 
 template <class Sample_T, size_t DEF_MAX> ACE_INLINE

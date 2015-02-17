@@ -186,21 +186,25 @@ void postprocess(const char* fn, ostringstream& content,
       << ") running on input file "
       << idl_global->main_filename()->get_string();
   if (which != BE_GlobalData::STREAM_WS)
-    out << "*/";
+    out << " */";
   out << "\n";
 
   //  if .h add #ifndef...#define
   string macrofied;
 
-  if (which == BE_GlobalData::STREAM_H) {
+  switch (which) {
+  case BE_GlobalData::STREAM_H:
+  case BE_GlobalData::STREAM_FACE_H: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
+    if (which == BE_GlobalData::STREAM_FACE_H) break;
     out << "#include \"dds/DCPS/Definitions.h\"\n";
     string taoheader = be_global->header_name_.c_str();
     taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
     out << "#include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
-
-  } else if (which == BE_GlobalData::STREAM_CPP) {
+  }
+  break;
+  case BE_GlobalData::STREAM_CPP: {
     ACE_CString pch = be_global->pch_include();
     if (pch.length()) {
       out << "#include \"" << pch << "\"\n";
@@ -211,20 +215,44 @@ void postprocess(const char* fn, ostringstream& content,
     } else {
       out << "#include \"" << be_global->header_name_.c_str() << "\"\n\n";
     }
-
-  } else if (which == BE_GlobalData::STREAM_IDL) {
+  }
+  break;
+  case BE_GlobalData::STREAM_FACE_CPP: {
+    ACE_CString pch = be_global->pch_include();
+    if (pch.length()) {
+      out << "#include \"" << pch << "\"\n";
+    }
+    out << "#include \"" << be_global->face_header_name_.c_str() << "\"\n"
+      "#include \"" << be_global->header_name_.c_str() << "\"\n"
+      "#include \"dds/FACE/FaceTSS.h\"\n\n"
+      "namespace FACE { namespace TS {\n\n";
+    break;
+  }
+  case BE_GlobalData::STREAM_IDL: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
     out << "#include \"" << be_global->filename() << "\"\n\n";
+  }
+  break;
+  default:
+    ;
   }
 
   out << be_global->get_include_block(which);
 
   out << content.str();
 
-  //  if .h add #endif
-  if (which == BE_GlobalData::STREAM_H || which == BE_GlobalData::STREAM_IDL) {
+  switch (which) {
+  case BE_GlobalData::STREAM_H:
+  case BE_GlobalData::STREAM_IDL:
+  case BE_GlobalData::STREAM_FACE_H:
     out << "#endif /* " << macrofied << " */\n";
+    break;
+  case BE_GlobalData::STREAM_FACE_CPP:
+    out << "}}\n";
+    break;
+  default:
+    ;
   }
 
   if (!BE_GlobalData::writeFile(fn, out.str())) {
@@ -326,11 +354,17 @@ BE_produce()
   postprocess(be_global->impl_name_.c_str(),
               be_global->impl_, BE_GlobalData::STREAM_CPP);
 
-  if (be_global->generate_wireshark())
-    {
-      postprocess (be_global->ws_config_name_.c_str(),
-                   be_global->ws_config_, BE_GlobalData::STREAM_WS);
-    }
+  if (be_global->generate_wireshark()) {
+    postprocess(be_global->ws_config_name_.c_str(),
+                be_global->ws_config_, BE_GlobalData::STREAM_WS);
+  }
+
+  if (be_global->face()) {
+    postprocess(be_global->face_header_name_.c_str(), be_global->face_header_,
+                BE_GlobalData::STREAM_FACE_H);
+    postprocess(be_global->face_impl_name_.c_str(), be_global->face_impl_,
+                BE_GlobalData::STREAM_FACE_CPP);
+  }
 
   BE_cleanup();
 }

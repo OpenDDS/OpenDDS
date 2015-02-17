@@ -14,8 +14,13 @@
 
 #include <map>
 #include <list>
-#include <sstream>
 
+#ifdef ACE_LYNXOS_MAJOR
+# include <strstream>
+# include <string>
+#else
+# include <sstream>
+#endif
 
 namespace OpenDDS {
 namespace DCPS {
@@ -28,7 +33,11 @@ namespace DCPS {
   template <typename T> bool convertToInteger( const std::string& s,
                                                T& value )
   {
+#ifdef ACE_LYNXOS_MAJOR
+    std::istrstream istr(s.c_str());
+#else
     std::stringstream istr(s);
+#endif
     if (!(istr >> value) || (istr.peek() != EOF)) return false;
     return true;
   }

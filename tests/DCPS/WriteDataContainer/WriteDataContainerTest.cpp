@@ -244,6 +244,8 @@ public:
     DDS::OwnershipStrengthQosPolicy initial_OwnershipStrengthQosPolicy;
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
     initial_OwnershipStrengthQosPolicy.value = 0;
+#else
+    ACE_UNUSED_ARG(initial_OwnershipStrengthQosPolicy);
 #endif
     DDS::WriterDataLifecycleQosPolicy   initial_WriterDataLifecycleQosPolicy;
     initial_WriterDataLifecycleQosPolicy.autodispose_unregistered_instances = true;
@@ -442,6 +444,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
 
           test_data_container->unregister_all();
+          guard.release();
           delete test_data_container;
           delete fast_dw;
         } //End Test Case 1 scope
@@ -576,6 +579,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
 
           test_data_container->unregister_all();
+          guard.release();
           delete test_data_container;
           delete fast_dw;
         } //End Test Case 2 scope
@@ -754,6 +758,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
           test_data_container->unregister_all();
 
+          guard.release();
           delete test_data_container;
           delete fast_dw;
         } //End Test Case 3 scope
@@ -864,6 +869,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
           test->log_send_state_lists("After TEST_ASSERT timeout", test_data_container);
 
           test_data_container->unregister_all();
+          guard.release();
           delete test_data_container;
           delete fast_dw;
         } //End Test Case 4 scope

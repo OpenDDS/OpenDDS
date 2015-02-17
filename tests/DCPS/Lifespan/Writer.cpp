@@ -8,8 +8,10 @@
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 
 using namespace Messenger;
+using namespace std;
 
 static int const num_instances_per_writer = 1;
 static int const num_messages = 5;

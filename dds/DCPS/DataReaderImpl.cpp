@@ -37,7 +37,16 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/OS_NS_sys_time.h"
 
+#ifdef ACE_LYNXOS_MAJOR
+#include <strstream>
+#define STRINGSTREAM std::strstream
+#define STRINGSTREAM_CSTR
+#else
 #include <sstream>
+#define STRINGSTREAM std::stringstream
+#define STRINGSTREAM_CSTR .c_str()
+#endif
+
 #include <stdexcept>
 
 #if !defined (__ACE_INLINE__)
@@ -1398,14 +1407,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   if (get_deleted()) return;
 
   if (DCPS_debug_level > 9) {
-    std::stringstream buffer;
+    STRINGSTREAM buffer;
     buffer << sample.header_ << std::ends;
     GuidConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
         ACE_TEXT("%C received sample: %C.\n"),
         std::string(converter).c_str(),
-        buffer.str().c_str()));
+        buffer.str() STRINGSTREAM_CSTR));
   }
 
   switch (sample.header_.message_id_) {
@@ -2060,7 +2069,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
   if (local_timer_id != -1 && cancel) {
     if (DCPS_debug_level >= 5) {
-      GuidConverter converter(data_reader_->subscription_id_);
+      GuidConverter converter(data_reader_->get_subscription_id());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
@@ -2130,7 +2139,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   }
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter converter(data_reader_->subscription_id_);
+    GuidConverter converter(data_reader_->get_subscription_id());
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
@@ -2739,7 +2748,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
     const char* separator = "";
-    std::stringstream buffer;
+    STRINGSTREAM buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
       buffer << separator << GuidConverter(ids[i]);
@@ -2749,7 +2758,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::lookup_instance_handles: ")
         ACE_TEXT("searching for handles for writer Ids: %C.\n"),
-        buffer.str().c_str()));
+        buffer.str() STRINGSTREAM_CSTR));
   }
 
   CORBA::ULong const num_wrts = ids.length();
@@ -2949,7 +2958,7 @@ void DataReaderImpl::notify_liveliness_change()
   notify_status_condition();
 
   if (DCPS_debug_level > 9) {
-    std::stringstream buffer;
+    STRINGSTREAM buffer;
     buffer << "subscription " << GuidConverter(subscription_id_);
     buffer << ", listener at: 0x" << std::hex << this->listener_.in ();
 
@@ -2968,7 +2977,7 @@ void DataReaderImpl::notify_liveliness_change()
         ACE_TEXT("\tNOTIFY: %C\n"),
         listener.in (),
         listener_mask_,
-        buffer.str().c_str()));
+        buffer.str() STRINGSTREAM_CSTR));
   }
 }
 

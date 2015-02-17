@@ -17,8 +17,6 @@
 #include "MessengerTypeSupportC.h"
 #include "Writer.h"
 
-#include <sstream>
-
 const int num_instances_per_writer = 1;
 bool reliable = false;
 bool wait_for_acks = false;

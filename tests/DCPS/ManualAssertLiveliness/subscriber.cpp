@@ -24,9 +24,11 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 
 using namespace Messenger;
+using namespace std;
 
 const int LEASE_DURATION_SEC = 5;
 int total_num_messages = 20;

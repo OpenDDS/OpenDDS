@@ -8,8 +8,10 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/DomainParticipantImpl.h"
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 
 using namespace Messenger;
+using namespace std;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()

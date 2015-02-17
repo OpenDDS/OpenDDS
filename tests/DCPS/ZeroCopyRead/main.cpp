@@ -26,7 +26,7 @@
 
 #include "ace/Arg_Shifter.h"
 
-#include <string>
+#include <string.h>
 
 class TestException
 {

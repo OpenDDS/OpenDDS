@@ -12,77 +12,47 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $status = 0;
-my $debug  = 0;
+my $debug ;# = 10;
+my $subDebug;
+my $pubDebug;
+my $debugFile;
+$subDebug  = $debug if not $subDebug  and $debug;
+$pubDebug  = $debug if not $pubDebug  and $debug;
+
+my $transportDebug;
+my $repoTransportDebug;
+my $subTransportDebug ;# = 10;
+my $pubTransportDebug;
+$repoTransportDebug = $transportDebug if not $repoTransportDebug and $transportDebug;
+$subTransportDebug  = $transportDebug if not $subTransportDebug  and $transportDebug;
+$pubTransportDebug  = $transportDebug if not $pubTransportDebug  and $transportDebug;
+
 
 my $opts = $debug ? "-DCPSDebugLevel $debug -DCPSTransportDebugLevel $debug ".
                     "-ORBVerboseLogging 1 " : '';
-my $cfg = ($ARGV[0] eq 'rtps') ? 'rtps.ini' : 'tcp.ini';
+my $cfg = ($ARGV[0] eq 'rtps') ? 'rtps.ini' : ($ARGV[0] eq 'rtps_disc') ? 'rtps_disc.ini' : 'tcp.ini';
 my $pub_opts = $opts . "-DCPSConfigFile $cfg -DCPSBit 0";
 my $sub_opts = $pub_opts;
 
-my $dcpsrepo_ior = "repo.ior";
+my $test = new PerlDDS::TestFramework();
+$test->{'wait_after_first_proc'} = 50;
+$test->enable_console_logging();
 
-unlink $dcpsrepo_ior;
+$test->setup_discovery();
 
-my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "$opts -o $dcpsrepo_ior -NOBITS");
-my $Subscriber1 = PerlDDS::create_process("subscriber", $sub_opts);
-my $Subscriber2 = PerlDDS::create_process("subscriber", $sub_opts);
-my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
+$test->process('pub', 'publisher', $pub_opts);
+$test->process('sub1', 'subscriber', $sub_opts);
+$test->process('sub2', 'subscriber', $sub_opts);
 
-print $DCPSREPO->CommandLine() . "\n";
-
-$DCPSREPO->Spawn();
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill();
-    exit 1;
-}
-
-print $Subscriber1->CommandLine() . "\n";
-$Subscriber1->Spawn();
+$test->start_process('sub1');
 
 sleep(2);
 
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn();
+$test->start_process('pub');
 
 # Sleep for 2 seconds for publisher to write durable data.
 sleep(2);
 
-print $Subscriber2->CommandLine() . "\n";
-$Subscriber2->Spawn();
+$test->start_process('sub2');
 
-my $PublisherResult = $Publisher->WaitKill(300);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
-my $Subscriber1Result = $Subscriber1->WaitKill(15);
-if ($Subscriber1Result != 0) {
-    print STDERR "ERROR: subscriber1 returned $Subscriber1Result \n";
-    $status = 1;
-}
-my $Subscriber2Result = $Subscriber2->WaitKill(15);
-if ($Subscriber2Result != 0) {
-    print STDERR "ERROR: subscriber2 returned $Subscriber2Result \n";
-    $status = 2;
-}
-
-my $ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish(90, 'pub');

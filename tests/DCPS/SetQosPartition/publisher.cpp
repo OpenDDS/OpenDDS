@@ -25,11 +25,13 @@
 #endif
 
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 
 #include <memory>
 
 using namespace Messenger;
+using namespace std;
 
 const char PARTITION_A[] = "ZiggieStardust";
 const char PARTITION_B[] = "Amadeus";

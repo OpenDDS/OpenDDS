@@ -1,0 +1,10 @@
+project: dcps_rtps_udp, opendds_face {
+  exename = subscriber
+  after += FaceMessengerIdl
+  libs  += FaceMessengerIdl
+  libpaths += ../Idl
+
+  Source_Files {
+    Subscriber.cpp
+  }
+}

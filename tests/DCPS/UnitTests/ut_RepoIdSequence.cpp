@@ -5,6 +5,8 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
 
+#include <string.h>
+
 typedef OpenDDS::DCPS::DomainParticipantImpl::RepoIdSequence RepoIdSequence;
 typedef OpenDDS::DCPS::RepoId RepoId;
 

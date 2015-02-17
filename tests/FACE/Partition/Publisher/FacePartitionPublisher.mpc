@@ -1,0 +1,11 @@
+project: dcps_rtps_udp, opendds_face {
+  exename = publisher
+  after += FacePartitionIdl
+  libs  += FacePartitionIdl
+  libpaths += ../Idl
+  includes += ..
+
+  Source_Files {
+    Publisher.cpp
+  }
+}

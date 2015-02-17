@@ -176,7 +176,22 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 #else
 #define USE_SOCKET link_->unicast_socket()
 #endif
+#ifdef ACE_LACKS_SENDMSG
+  char buffer[UDP_MAX_MESSAGE_SIZE];
+  char *iter = buffer;
+  for (int i = 0; i < n; ++i) {
+    if (iter - buffer + iov[i].iov_len > UDP_MAX_MESSAGE_SIZE) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
+                 "message too large at index %d size %d\n", i, iov[i].iov_len));
+      return -1;
+    }
+    std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
+    iter += iov[i].iov_len;
+  }
+  const ssize_t result = USE_SOCKET.send(buffer, iter - buffer, addr);
+#else
   const ssize_t result = USE_SOCKET.send(iov, n, addr);
+#endif
   if (result < 0) {
     ACE_TCHAR addr_buff[256] = {};
     addr.addr_to_string(addr_buff, 256, 0);

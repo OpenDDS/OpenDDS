@@ -6,9 +6,11 @@
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 #include "ace/High_Res_Timer.h"
 
 using namespace Messenger;
+using namespace std;
 
 const int num_instances_per_writer = 1;
 

@@ -151,6 +151,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                     && assert_publication_matched(configopt, dwl2));
       }
     }
+
+    {
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, shutdown_lock, 1);
+      shutdown_flag = true;
+    }
+
     // only want to clean up participant2 if it isn't just pointing to
     // participant1
     if (participant1.in() == participant2.in()) {

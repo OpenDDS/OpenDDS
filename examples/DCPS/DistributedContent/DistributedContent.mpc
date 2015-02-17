@@ -1,6 +1,7 @@
 project(DDS*Node) : dcpsexe {
   exename   = node
   requires += built_in_topics
+  requires += no_opendds_safety_profile
 
   TypeSupport_Files {
     FileInfo.idl

@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_tcp, dcps_rtps_udp, dds_model {
+project: dcpsexe, dcps_transports_for_test, dds_model {
   exename = RtpsDiscoveryTest
   requires += built_in_topics
 

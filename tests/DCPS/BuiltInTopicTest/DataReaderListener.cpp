@@ -7,6 +7,10 @@
 #include <dds/DCPS/Service_Participant.h>
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include <ace/streams.h>
+#include <iostream>
+#include "tests/Utils/ExceptionStreams.h"
+
+using namespace std;
 
 
 // Implementation skeleton constructor

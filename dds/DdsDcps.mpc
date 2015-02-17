@@ -59,7 +59,7 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
   }
 }
 
-project(OpenDDS_Dcps): taolib, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source, dds_suppress_any_support {
+project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source, dds_suppress_any_support {
   after       += OpenDDS_Dcps_idl_gen
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL

@@ -12,8 +12,6 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $status = 0;
-
 my $pub_opts = "";
 my $sub_opts = "";
 my $reliable = 1;
@@ -33,6 +31,9 @@ elsif ($test->flag('multicast_async')) {
     $sub_opts .= "-DCPSConfigFile multicast.ini ";
 }
 
+my($pub1opts, $pub2opts) =
+    $PerlDDS::SafetyProfile ? ('-p 1', '-p 2') : ('' , '');
+
 $pub_opts .= " -r $reliable -n $num_msgs";
 $sub_opts .= " -r $reliable -n " . ($num_msgs * 4);
 
@@ -42,8 +43,8 @@ $test->default_transport("tcp");
 $test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log -DCPSDebugLevel 1");
 
 $test->process("subscriber", "subscriber", $sub_opts);
-$test->process("publisher #1", "publisher", $pub_opts);
-$test->process("publisher #2", "publisher", $pub_opts);
+$test->process("publisher #1", "publisher", "$pub_opts $pub1opts");
+$test->process("publisher #2", "publisher", "$pub_opts $pub2opts");
 
 $test->start_process("publisher #1");
 $test->start_process("publisher #2");

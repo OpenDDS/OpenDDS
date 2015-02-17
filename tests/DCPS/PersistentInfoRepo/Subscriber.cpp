@@ -8,7 +8,7 @@
 
 #include "tests/Utils/DDSApp.h"
 #include "tests/Utils/Options.h"
-#include "tests/Utils/Sync.h"
+#include "model/Sync.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "tests/Utils/ListenerRecorder.h"
 #include <dds/DCPS/Service_Participant.h>
@@ -154,7 +154,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     {
       std::cerr << pid << "Sub Stage " << stage
                 << " waiting for 2 writer to come and go" << std::endl;
-      TestUtils::ReaderSync rs(dr, 2);
+      OpenDDS::Model::ReaderSync rs(dr, 2);
     }
     std::cerr << pid << "Sub Stage " << stage << " done waiting\n";
 

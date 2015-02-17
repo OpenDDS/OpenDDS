@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project : dcps_test_tcp, dcps_udp, dcps_multicast, dcps_rtps_udp, dcps_shmem {
+project : dcps_test, dcps_transports_for_test {
   exename = test
 
   Source_Files {

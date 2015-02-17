@@ -15,18 +15,21 @@
 #include "TransportSendListener.inl"
 #endif /* __ACE_INLINE__ */
 
-OpenDDS::DCPS::TransportSendListener::TransportSendListener()
+namespace OpenDDS {
+namespace DCPS {
+
+TransportSendListener::TransportSendListener()
 {
   DBG_ENTRY_LVL("TransportSendListener","TransportSendListener",6);
 }
 
-OpenDDS::DCPS::TransportSendListener::~TransportSendListener()
+TransportSendListener::~TransportSendListener()
 {
   DBG_ENTRY_LVL("TransportSendListener","~TransportSendListener",6);
 }
 
 void
-OpenDDS::DCPS::TransportSendListener::data_delivered(const DataSampleElement* sample)
+TransportSendListener::data_delivered(const DataSampleElement* sample)
 {
   ACE_UNUSED_ARG(sample);
   ACE_ERROR((LM_ERROR,
@@ -34,7 +37,7 @@ OpenDDS::DCPS::TransportSendListener::data_delivered(const DataSampleElement* sa
 }
 
 void
-OpenDDS::DCPS::TransportSendListener::data_dropped(const DataSampleElement* sample,
+TransportSendListener::data_dropped(const DataSampleElement* sample,
                                                    bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);
@@ -44,7 +47,7 @@ OpenDDS::DCPS::TransportSendListener::data_dropped(const DataSampleElement* samp
 }
 
 void
-OpenDDS::DCPS::TransportSendListener::control_delivered(ACE_Message_Block* sample)
+TransportSendListener::control_delivered(ACE_Message_Block* sample)
 {
   ACE_UNUSED_ARG(sample);
   ACE_ERROR((LM_ERROR,
@@ -52,7 +55,7 @@ OpenDDS::DCPS::TransportSendListener::control_delivered(ACE_Message_Block* sampl
 }
 
 void
-OpenDDS::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample,
+TransportSendListener::control_dropped(ACE_Message_Block* sample,
                                                       bool dropped_by_transport)
 {
   ACE_UNUSED_ARG(sample);
@@ -61,10 +64,20 @@ OpenDDS::DCPS::TransportSendListener::control_dropped(ACE_Message_Block* sample,
              "(%P|%t) ERROR: Subclass should override if sending control samples.\n"));
 }
 
+SendControlStatus
+TransportSendListener::send_control_customized(const DataLinkSet_rch&,
+                                               const DataSampleHeader&,
+                                               ACE_Message_Block*, void*)
+{
+  return SEND_CONTROL_OK;
+}
+
 void
-OpenDDS::DCPS::TransportSendListener::retrieve_inline_qos_data(InlineQosData& qos_data) const
+TransportSendListener::retrieve_inline_qos_data(InlineQosData& qos_data) const
 {
   qos_data.dw_qos     = TheServiceParticipant->initial_DataWriterQos();
   qos_data.pub_qos    = TheServiceParticipant->initial_PublisherQos();
   qos_data.topic_name = "";
 }
+
+} }

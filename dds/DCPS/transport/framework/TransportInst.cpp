@@ -15,7 +15,10 @@
 #include "ace/Configuration.h"
 
 #include <iomanip>
+
+#ifndef ACE_LYNXOS_MAJOR
 #include <sstream>
+#endif
 
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
@@ -58,12 +61,14 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
 void
 OpenDDS::DCPS::TransportInst::dump()
 {
+#ifndef OPENDDS_SAFETY_PROFILE
   std::stringstream os;
   dump(os);
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
              os.str().c_str()));
+#endif
 }
 
 namespace {
@@ -74,12 +79,17 @@ namespace {
 std::string
 OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 {
+#ifndef OPENDDS_SAFETY_PROFILE
   std::ostringstream oss;
   oss << std::setw(NAME_INDENT) << "" << std::setw(NAME_WIDTH) << std::left
       << name << ": ";
   return oss.str();
+#else
+  return "not implemented";
+#endif
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 void
 OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
 {
@@ -94,6 +104,7 @@ OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
   os << formatNameForDump("datalink_release_delay")  << this->datalink_release_delay_ << std::endl;
   os << formatNameForDump("datalink_control_chunks") << this->datalink_control_chunks_ << std::endl;
 }
+#endif
 
 void
 OpenDDS::DCPS::TransportInst::shutdown()

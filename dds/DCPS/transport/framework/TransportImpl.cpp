@@ -19,7 +19,10 @@
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "tao/debug.h"
+
+#ifndef ACE_LYNXOS_MAJOR
 #include <sstream>
+#endif
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
@@ -154,6 +157,7 @@ TransportImpl::configure(TransportInst* config)
     this->monitor_->report();
   }
 
+#ifndef OPENDDS_SAFETY_PROFILE
   if (Transport_debug_level > 0) {
     std::stringstream os;
     dump(os);
@@ -162,6 +166,7 @@ TransportImpl::configure(TransportInst* config)
                ACE_TEXT("(%P|%t) TransportImpl::configure()\n%C"),
                os.str().c_str()));
   }
+#endif
 
   return true;
 }
@@ -236,14 +241,17 @@ TransportImpl::report()
 void
 TransportImpl::dump()
 {
+#ifndef OPENDDS_SAFETY_PROFILE
   std::stringstream os;
   dump(os);
 
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportImpl::dump() -\n%C"),
              os.str().c_str()));
+#endif
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 void
 TransportImpl::dump(ostream& os)
 {
@@ -253,6 +261,7 @@ TransportImpl::dump(ostream& os)
     this->config_->dump(os);
   }
 }
+#endif
 
 }
 }

@@ -3,6 +3,7 @@
 //
 
 project(*idl): dcps_test_lib {
+  requires += no_opendds_safety_profile
   idlflags      += -Wb,stub_export_include=Messenger_ZeroCopy_export.h \
                    -Wb,stub_export_macro=Messenger_ZeroCopy_Export
   dcps_ts_flags += -Wb,export_macro=Messenger_ZeroCopy_Export
@@ -13,7 +14,8 @@ project(*idl): dcps_test_lib {
   }
 }
 
-project(*publisher) : dcpsexe_with_tcp {
+project(*publisher) : dcpsexe, dcps_tcp {
+  requires += no_opendds_safety_profile
   exename   = publisher
   after    += *idl
   libs     += *idl
@@ -26,7 +28,8 @@ project(*publisher) : dcpsexe_with_tcp {
   }
 }
 
-project(*subscriber) : dcpsexe_with_tcp {
+project(*subscriber) : dcpsexe, dcps_tcp {
+  requires += no_opendds_safety_profile
   exename   = subscriber
   after    += *idl
   libs     += *idl

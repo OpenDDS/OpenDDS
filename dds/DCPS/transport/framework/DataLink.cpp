@@ -31,7 +31,10 @@
 #include "ace/SOCK.h"
 
 #include <iostream>
+
+#ifndef ACE_LYNXOS_MAJOR
 #include <sstream>
+#endif
 
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"
@@ -802,6 +805,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
   // from the remote publisher_id.
   ReceiveListenerSet_rch listener_set;
 
+#ifndef ACE_LYNXOS_MAJOR
   if (Transport_debug_level > 9) {
     std::stringstream buffer;
     buffer << sample.header_;
@@ -812,6 +816,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
                std::string(converter).c_str(),
                buffer.str().c_str()));
   }
+#endif
 
   {
     GuardType guard(this->pub_sub_maps_lock_);
@@ -1555,6 +1560,7 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
   }
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
 {
@@ -1577,6 +1583,7 @@ operator<<(std::ostream& str, const DataLink& value)
 
   return str;
 }
+#endif
 
 }
 }

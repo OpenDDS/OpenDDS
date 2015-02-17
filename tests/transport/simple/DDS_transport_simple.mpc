@@ -2,7 +2,8 @@
 //
 // $Id$
 
-project(*Publisher): dcpsexe_with_tcp, dcps_shmem {
+project(*Publisher): dcpsexe, dcps_tcp, dcps_shmem {
+  requires += no_opendds_safety_profile
   exename = simple_publisher
 
   Source_Files {
@@ -12,7 +13,8 @@ project(*Publisher): dcpsexe_with_tcp, dcps_shmem {
   }
 }
 
-project(*Subscriber): dcpsexe_with_tcp, dcps_shmem {
+project(*Subscriber): dcpsexe, dcps_tcp, dcps_shmem {
+  requires += no_opendds_safety_profile
   exename = simple_subscriber
 
   Source_Files {

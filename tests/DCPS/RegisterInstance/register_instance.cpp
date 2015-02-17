@@ -66,10 +66,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       dw_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
       dw_qos.reliability.max_blocking_time.sec = 10;
       dw_qos.reliability.max_blocking_time.nanosec = 0;
-      dw_qos.durability.kind = ::DDS::TRANSIENT_DURABILITY_QOS;
       dw_qos.resource_limits.max_instances = 1;
-      dw_qos.history.kind  = ::DDS::KEEP_LAST_HISTORY_QOS;
-      dw_qos.history.depth = 20;
 
       ::DDS::DataWriter_var dw = pub->create_datawriter(topic.in (),
                                  dw_qos,

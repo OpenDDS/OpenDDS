@@ -19,9 +19,11 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include "ace/streams.h"
+#include "tests/Utils/ExceptionStreams.h"
 #include "ace/Get_Opt.h"
 
 using namespace Messenger;
+using namespace std;
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
@@ -29,7 +31,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(411,
+      dpf->create_participant(4,
                               PARTICIPANT_QOS_DEFAULT,
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);

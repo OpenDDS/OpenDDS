@@ -1,5 +1,6 @@
 
 project(DDS*idl): dcps_test_lib {
+  requires += no_opendds_safety_profile
   idlflags      += -Wb,stub_export_include=Messenger_Imr_export.h \
                    -Wb,stub_export_macro=Messenger_Imr_Export
   dcps_ts_flags += -Wb,export_macro=Messenger_Imr_Export
@@ -11,8 +12,8 @@ project(DDS*idl): dcps_test_lib {
 }
 
 
-project(DDS*Publisher): dcpsexe_with_tcp {
-  
+project(DDS*Publisher): dcpsexe, dcps_tcp {
+  requires += no_opendds_safety_profile  
   exename   = publisher
   after    += DDS*idl
   libs     += DDS*idl
@@ -26,8 +27,8 @@ project(DDS*Publisher): dcpsexe_with_tcp {
   }
 }
 
-project(DDS*Subscriber): dcpsexe_with_tcp {
-  
+project(DDS*Subscriber): dcpsexe, dcps_tcp {
+  requires += no_opendds_safety_profile
   exename   = subscriber
   after    += DDS*Publisher
   libs     += DDS*idl

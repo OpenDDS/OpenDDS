@@ -14,10 +14,12 @@
 #include "TestException.h"
 // Include the Udp.h to make sure Initializer is created before the Service
 // Configurator open service configure file.
+#ifndef OPENDDS_SAFETY_PROFILE
 #include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #include "dds/DCPS/transport/shmem/Shmem.h"
+#endif
+#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"

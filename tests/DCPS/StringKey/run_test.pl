@@ -10,63 +10,16 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
+my $test = new PerlDDS::TestFramework();
 
+$test->process('sub', 'subscriber');
+$test->process('pub', 'publisher');
 
-$pub_conf = "-DCPSConfigFile pub.ini";
-$sub_conf = "-DCPSConfigFile sub.ini";
-$pub_opts = "$pub_conf ";
-$sub_opts = "$sub_conf ";
+$test->setup_discovery();
 
-$dcpsrepo_ior = "repo.ior";
+$test->start_process('pub');
+$test->start_process('sub');
 
-unlink $dcpsrepo_ior;
-
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                  "-o $dcpsrepo_ior ");
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
-
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
-}
-
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn ();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn ();
-
-
-$PublisherResult = $Publisher->WaitKill (300);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
-$SubscriberResult = $Subscriber->WaitKill (15);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-}
-
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish(300);

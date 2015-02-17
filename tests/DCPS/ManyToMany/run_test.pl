@@ -266,10 +266,13 @@ print "sub_opts=$sub_opts\n";
 $test->setup_discovery();
 
 for ($index = 0; $index < $sub_processes; ++$index) {
-    $test->process("subscriber #$index", "subscriber", $sub_opts);
+    $test->process("subscriber #$index", "subscriber", $sub_opts .
+                   ($PerlDDS::SafetyProfile ? "-p $index" : ''));
 }
 for ($index = 0; $index < $pub_processes; ++$index) {
-    $test->process("publisher #$index", "publisher", $pub_opts);
+    $test->process("publisher #$index", "publisher", $pub_opts .
+                   ($PerlDDS::SafetyProfile ? '-p '.
+                    ($sub_processes + $index) : ''));
 }
 
 for ($index = 0; $index < $pub_processes; ++$index) {

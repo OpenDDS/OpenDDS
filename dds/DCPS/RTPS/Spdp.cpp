@@ -66,8 +66,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
   { // Append metatraffic unicast locator
     const ACE_INET_Addr& local_addr = sedp_.local_address();
     Locator_t uc_locator;
-    uc_locator.kind = (local_addr.get_type() == AF_INET6) ?
-                       LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+    uc_locator.kind = address_to_kind(local_addr);
     uc_locator.port = local_addr.get_port_number();
     address_to_bytes(uc_locator.address, local_addr);
     sedp_unicast_.length(1);
@@ -77,8 +76,7 @@ Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
   if (disco->sedp_multicast()) { // Append metatraffic multicast locator
     const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
     Locator_t mc_locator;
-    mc_locator.kind = (mc_addr.get_type() == AF_INET6) ?
-                       LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+    mc_locator.kind = address_to_kind(mc_addr);
     mc_locator.port = mc_addr.get_port_number();
     address_to_bytes(mc_locator.address, mc_addr);
     sedp_multicast_.length(1);

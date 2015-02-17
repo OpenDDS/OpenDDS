@@ -24,10 +24,10 @@ const char Discovery::DEFAULT_RTPS[] = "DEFAULT_RTPS";
 DDS::ReturnCode_t
 Discovery::create_bit_topics(DomainParticipantImpl* participant)
 {
-  TypeSupport_ptr type_support =
+  TypeSupport_var type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_TOPIC_TYPE);
 
-  if (0 == type_support) {
+  if (CORBA::is_nil(type_support)) {
     // Participant topic
     DDS::ParticipantBuiltinTopicDataTypeSupport_var ts =
       new DDS::ParticipantBuiltinTopicDataTypeSupportImpl;
@@ -65,7 +65,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
   type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_TOPIC_TOPIC_TYPE);
 
-  if (0 == type_support) {
+  if (CORBA::is_nil(type_support)) {
     DDS::TopicBuiltinTopicDataTypeSupport_var ts =
       new DDS::TopicBuiltinTopicDataTypeSupportImpl;
 
@@ -102,7 +102,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
   type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE);
 
-  if (0 == type_support) {
+  if (CORBA::is_nil(type_support)) {
     DDS::SubscriptionBuiltinTopicDataTypeSupport_var ts =
       new DDS::SubscriptionBuiltinTopicDataTypeSupportImpl;
 
@@ -139,7 +139,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
   type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_PUBLICATION_TOPIC_TYPE);
 
-  if (0 == type_support) {
+  if (CORBA::is_nil(type_support)) {
     DDS::PublicationBuiltinTopicDataTypeSupport_var ts =
       new DDS::PublicationBuiltinTopicDataTypeSupportImpl;
 

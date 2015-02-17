@@ -188,7 +188,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         return 1;
 
       } else {
-        ACE_ERROR((LM_ERROR,
+        ACE_DEBUG((LM_INFO,
           ACE_TEXT("(%P|%t) subscriber: ")
           ACE_TEXT("liviness deadline violated enough for test. ")
           ACE_TEXT("Got %d, expected at least %d.\n"),

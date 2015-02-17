@@ -40,7 +40,6 @@ static int subscribe_topic = 0;
 
 static int num_ops_per_thread = 10;
 static int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
-static int history_depth = 100;
 
 /// parse the command line arguments
 int parse_args(int argc, ACE_TCHAR *argv[])
@@ -190,8 +189,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       topic_qos.resource_limits.max_samples_per_instance =
             max_samples_per_instance;
 
-      topic_qos.history.depth = history_depth;
-
       ::DDS::Topic_var topic1;
       ::DDS::Topic_var topic2;
       ::DDS::Topic_var topic3;
@@ -316,7 +313,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos(dr_qos);
 
-      dr_qos.history.depth = history_depth ;
       dr_qos.resource_limits.max_samples_per_instance =
         max_samples_per_instance;
 
@@ -360,7 +356,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ::DDS::DataWriterQos dw_qos;
       pub->get_default_datawriter_qos(dw_qos);
 
-      dw_qos.history.depth = history_depth ;
       dw_qos.resource_limits.max_samples_per_instance = max_samples_per_instance;
 
       dw_qos.liveliness.lease_duration.sec = LEASE_DURATION_SEC;

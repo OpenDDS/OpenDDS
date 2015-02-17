@@ -9,6 +9,8 @@
 #ifndef OPENDDS_FILESYSTEMSTORAGE_H
 #define OPENDDS_FILESYSTEMSTORAGE_H
 
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RcObject_T.h"
@@ -247,4 +249,5 @@ ACE_TString b32h_decode(const ACE_TCHAR* encoded);
 } // namespace FileSystemStorage
 } // namespace OpenDDS
 
+#endif
 #endif

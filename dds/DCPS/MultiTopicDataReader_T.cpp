@@ -12,6 +12,8 @@
 #ifndef OPENDDS_NO_MULTI_TOPIC
 
 #include <stdexcept>
+#include <sstream>
+
 
 namespace OpenDDS {
 namespace DCPS {

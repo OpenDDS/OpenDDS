@@ -1,4 +1,4 @@
-project: dcpsexe_with_tcp {
+project: dcpsexe, dcps_transports_for_test {
   exename = main
 
   TypeSupport_Files {

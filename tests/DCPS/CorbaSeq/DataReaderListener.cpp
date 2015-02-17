@@ -6,8 +6,10 @@
 #include "MessengerTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <ace/streams.h>
+#include "tests/Utils/ExceptionStreams.h"
 
 using namespace Messenger;
+using namespace std;
 
 // Implementation skeleton constructor
 DataReaderListenerImpl::DataReaderListenerImpl()

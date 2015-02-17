@@ -84,7 +84,7 @@ namespace {
     DomainParticipantImpl* participant_i =
       dynamic_cast<DomainParticipantImpl*>(participant.in());
 
-    TypeSupport_ptr type_support =
+    TypeSupport_var type_support =
       Registered_Data_Types->lookup(participant, type);
 
     DDS::DataReader_var dr = type_support->create_datareader();

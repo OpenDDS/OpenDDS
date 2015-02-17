@@ -30,8 +30,6 @@ class SubDriver
     void init(int& argc, ACE_TCHAR* argv[]);
     void run();
 
-    CORBA::ORB_var    orb_;
-
     int               num_writes_;
     int               receive_delay_msec_;
 

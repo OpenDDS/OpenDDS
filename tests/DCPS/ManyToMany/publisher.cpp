@@ -36,12 +36,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   bool status = false;
   bool generated_config = false;
+  int mypid = ACE_OS::getpid();
   try {
     //Look to see if the config file (.ini) was generated
     //for rtps participant processing
     for(int i = 0; i < argc; ++i) {
       if(ACE_OS::strstr(argv[i], ACE_TEXT("generated"))) {
         generated_config = true;
+      } else if (0 == ACE_OS::strcmp(ACE_TEXT("-p"), argv[i]) && i < argc - 1) {
+        mypid = ACE_OS::atoi(argv[i + 1]);
       }
     }
     // Initialize DomainParticipantFactory
@@ -58,7 +61,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     CORBA::String_var type_name = mts->get_type_name();
     std::vector<WriterSample> writers;
     std::ostringstream pid;
-    pid << ACE_OS::getpid();
+    pid << mypid;
     WriterSample ws;
     ws.message.process_id = pid.str().c_str();
     ws.message.from       = "Comic Book Guy";

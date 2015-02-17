@@ -7,6 +7,7 @@ use PerlACE::Run_Test;
 use PerlDDS::Process;
 use PerlDDS::ProcessFactory;
 use Cwd;
+use POSIX qw(strftime);
 
 package PerlDDS;
 
@@ -27,23 +28,8 @@ sub orbsvcs {
 
 sub formatted_time {
   my $seconds = shift;
-
-  my $sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst;
-  if (defined($seconds)) {
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-      localtime($seconds);
-  } else {
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-      localtime;
-  }
-  $year += 1900;
-  my $mon2 = sprintf("%02d", $mon);
-  my $mday2 = sprintf("%02d", $mday);
-  my $hour2 = sprintf("%02d", $hour);
-  my $min2 = sprintf("%02d", $min);
-  my $sec2 = sprintf("%02d", $sec);
-  my $time_str = "$year-$mon2-$mday2 $hour2:$min2:$sec2";
-  return $time_str;
+  return strftime('%Y-%m-%d %H:%M:%S',
+                  $seconds ? localtime($seconds) : localtime());
 }
 
 sub wait_kill {
@@ -54,13 +40,13 @@ sub wait_kill {
   $verbose = 0 if !defined($verbose);
 
   my $ret_status = 0;
-  my $start_time = formatted_time;
+  my $start_time = formatted_time();
   if ($verbose) {
     print STDERR "$start_time: waiting $wait_time seconds for $desc before "
       . "calling kill\n";
   }
   my $result = $process->WaitKill($wait_time);
-  my $time_str = formatted_time;
+  my $time_str = formatted_time();
   if ($result != 0) {
       my $ext = ($verbose ? "" : "(started at $start_time)");
       print STDERR "$time_str: ERROR: $desc returned $result $ext\n";
@@ -80,7 +66,7 @@ sub terminate_wait_kill {
 
   my $result = $process->TerminateWaitKill($wait_time);
   my $ret_status = 0;
-  my $time_str = formatted_time;
+  my $time_str = formatted_time();
   if ($result != 0) {
       print STDERR "$time_str: ERROR: $desc returned $result\n";
       $ret_status = 1;
@@ -142,6 +128,7 @@ sub report_errors_in_file {
 # load gcov helpers in case this is a coverage build
 my $config = new PerlACE::ConfigList;
 $PerlDDS::Coverage_Test = $config->check_config("Coverage");
+$PerlDDS::SafetyProfile = $config->check_config("OPENDDS_SAFETY_PROFILE");
 
 # used to prevent multiple special processes from running remotely
 $PerlDDS::Special_Process_Created = 0;
@@ -336,11 +323,28 @@ sub new {
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
   $self->{add_orb_log_file} = 1;
+  $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;
 
   my $index = 0;
   foreach my $arg (@ARGV) {
-    $self->{flags}->{$arg} = $index;
+    $arg =~ /^([^=]*)(:?=(.*))?$/;
+    $self->_info("TestFramework parsing \"$arg\"\n");
+    my $flag_name = $1;
+    if ($flag_name eq "") {
+      print STDERR "ERROR: TestFramework got \"$arg\", which is a name value" .
+        " pair with an empty name.\n";
+      $flag_name = "<No Name Provided>";
+    }
+    my $flag_value;
+    if (defined($2)) {
+      $flag_value = $2;
+    }
+    else {
+      $flag_value = "<FLAG>";
+    }
+    $self->_info("TestFramework storing \"$flag_name\"=\"$flag_value\"\n");
+    $self->{flags}->{$flag_name} = $flag_value;
     my $transport = _is_transport($arg);
     if ($transport && $self->{transport} eq "") {
       $self->{transport} = $arg;
@@ -354,13 +358,14 @@ sub new {
       $self->{discovery} = "rtps";
     } elsif ($arg eq "--test_verbose") {
       $self->{test_verbose} = 1;
-      $self->_time_info("Test starting\n");
+      my $left = $#ARGV - $index;
+      $self->_time_info("Test starting ($left arguments remaining)\n");
     } elsif (lc($arg) eq "nobits") {
       $self->{nobits} = 1;
     } elsif (!$transport) {
       # also keep a copy to delete so we can see which parameters
       # are unused (above args are already "used")
-      $self->{flags}->{unused}->{$arg} = $index;
+      $self->{flags}->{unused}->{$flag_name} = $flag_value;
     }
     ++$index;
   }
@@ -419,8 +424,6 @@ sub finish {
     print STDERR _prefix() . "test FAILED.\n";
   }
 
-  unlink $self->{info_repo}->{file};
-
   return $self->{status};
 }
 
@@ -429,8 +432,51 @@ sub flag {
   my $flag_passed = shift;
 
   my $present = defined($self->{flags}->{$flag_passed});
+  $self->_info("TestFramework::flag $flag_passed present=$present\n");
   if ($present) {
+    if ($self->{flags}->{$flag_passed} ne "<FLAG>") {
+      print STDERR "WARNING: you are treating a name-value pair as a flag, should call value_flag. \"$flag_passed=" .
+        $self->{flags}->{$flag_passed} . "\"\n";
+    }
     delete($self->{flags}->{unused}->{$flag_passed});
+  }
+  return $present;
+}
+
+sub value_flag {
+  my $self = shift;
+  my $flag_passed = shift;
+
+  my $present = defined($self->{flags}->{$flag_passed});
+  $self->_info("TestFramework::value_flag $flag_passed present=$present\n");
+  if ($present) {
+    if ($self->{flags}->{$flag_passed} eq "<FLAG>") {
+      # this is indicating if a flag with a value is present, but this is just a flag
+      return 0;
+    }
+    delete($self->{flags}->{unused}->{$flag_passed});
+  }
+  return $present;
+}
+
+sub get_value_flag {
+  my $self = shift;
+  my $flag_passed = shift;
+
+  my $present = defined($self->{flags}->{$flag_passed});
+  $self->_info("TestFramework::get_value_flag $flag_passed present=$present\n");
+  if ($present) {
+    if ($self->{flags}->{$flag_passed} eq "<FLAG>") {
+      print STDERR "ERROR: $flag_passed does not have a value, should not call get_value_flag\n";
+    }
+    if (defined($self->{flags}->{unused}->{$flag_passed})) {
+      print STDERR "WARNING: calling get_value_flag($flag_passed) without first verifying that "
+        . "it is present with value_flag($flag_passed)\n";
+      delete($self->{flags}->{unused}->{$flag_passed});
+    }
+  }
+  else {
+    print STDERR "ERROR: $flag_passed is not present, should have called value_flag before calling get_value_flag\n";
   }
   return $present;
 }
@@ -512,7 +558,7 @@ sub process {
     $self->_info("TestFramework::process appending "
       . "\"-DCPSConfigFile <transport>.ini\" to process's parameters. Set "
       . "<TestFramework>->{add_transport_config} = 0 to prevent this.\n");
-    my $ini_file = $self->_ini_file();
+    my $ini_file = $self->_ini_file($name);
     $params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
   }
 
@@ -542,7 +588,7 @@ sub setup_discovery {
   my $executable = shift;
   $params = "" if !defined($params);
   $executable = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo" if !defined($executable);
-  if ($self->{discovery} ne "info_repo") {
+  if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
     $self->_info("TestFramework::setup_discovery not creating DCPSInfoRepo "
       . "since discovery=" . $self->{discovery} . "\n");
     return;
@@ -567,6 +613,7 @@ sub setup_discovery {
       . "file, adding \"$ior_str\" to InfoRepo's parameters.\n");
     $params .= $ior_str;
   }
+  $self->_info("TestFramework::setup_discovery unlink $self->{info_repo}->{file}\n");
   unlink $self->{info_repo}->{file};
 
   if ($self->{nobits}) {
@@ -584,6 +631,7 @@ sub setup_discovery {
   $self->{info_repo}->{process}->Spawn();
   print "InfoRepo PID: " . _getpid ($self->{info_repo}->{process}) . "\n";
 
+  $self->_info("TestFramework::setup_discovery waiting for $self->{info_repo}->{file}\n");
   if (PerlACE::waitforfile_timed($self->{info_repo}->{file}, 30) == -1) {
     print STDERR "ERROR: waiting for $executable IOR file\n";
     $self->{status} = -1;
@@ -616,7 +664,7 @@ sub stop_process {
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
     $self->{status} = -1;
-    return;
+    return 0;
   }
 
   # remove $name from the order list
@@ -628,12 +676,14 @@ sub stop_process {
     }
   }
 
-  $self->{status} |=
+  my $kill_status =
     PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
                        $timed_wait,
                        $name,
                        $self->{test_verbose});
+  $self->{status} |= $kill_status;
   delete($self->{processes}->{process}->{$name});
+  return !$kill_status;
 }
 
 sub stop_processes {
@@ -661,7 +711,7 @@ sub stop_processes {
     $self->stop_process($timed_wait, $name);
     # make next loop
     $name = undef;
-    $timed_wait = 25;
+    $timed_wait = $self->{wait_after_first_proc};
   }
 
   $self->stop_discovery($timed_wait);
@@ -674,7 +724,7 @@ sub stop_discovery {
 
   $self->_info("TestFramework::stop_discovery in $timed_wait seconds\n");
 
-  if ($self->{discovery} ne "info_repo") {
+  if ($self->{discovery} ne "info_repo" || $PerlDDS::SafetyProfile) {
     $self->_info("TestFramework::stop_discovery no discovery to stop " .
         "since discovery=" . $self->{discovery} . "\n");
     return;
@@ -689,11 +739,18 @@ sub stop_discovery {
     return;
   }
 
-  $self->{status} |=
-    PerlDDS::terminate_wait_kill($self->{info_repo}->{process},
-                                 $timed_wait,
-                                 $name,
-                                 $self->{test_verbose});
+  my $term_status =
+      $self->{info_repo}->{process} ?
+      PerlDDS::terminate_wait_kill($self->{info_repo}->{process},
+                                   $timed_wait,
+                                   $name,
+                                   $self->{test_verbose}) : 0;
+  $self->{status} |= $term_status;
+
+  $self->_info("TestFramework::stop_discovery unlink $self->{info_repo}->{file}\n");
+  unlink $self->{info_repo}->{file};
+
+  $self->{info_repo}->{state} = "shutdown" if $term_status == 0;
 }
 
 sub ignore_error {
@@ -715,7 +772,7 @@ sub _prefix {
   my $self = shift;
   my $str = "";
   if ($self->{test_verbose}) {
-    my $time_str = PerlDDS::formatted_time();
+    my $time_str = formatted_time();
     $str = "$time_str: ";
   }
   return $str;
@@ -767,6 +824,7 @@ sub _alternate_transport {
 
 sub _ini_file {
   my $self = shift;
+  my $name = shift;
   if ($self->{transport} eq "") {
     print STDERR "ERROR: TestFramework::_ini_file should not be called if no "
       . "transport has been identified.\n";
@@ -778,6 +836,8 @@ sub _ini_file {
     my $alternate = _alternate_transport($transport);
     if ($alternate ne "" && -e "$alternate.ini") {
       $transport = $alternate;
+    } elsif (-e "${name}_${transport}.ini") {
+      $transport = $name . '_' . $transport;
     } else {
       my $transports = "$transport.ini";
       if ($alternate ne "") {
