@@ -10,6 +10,7 @@ lib*.so*
 *.opensdf
 *.sdf
 *.sln
+*.suo
 
 /setenv.sh
 /setenv.cmd
