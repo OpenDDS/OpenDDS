@@ -1,4 +1,10 @@
 #include "../Idl/FaceMessage_TS.hpp"
+
+#ifdef ACE_AS_STATIC_LIBS
+# include "dds/DCPS/RTPS/RtpsDiscovery.h"
+# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
+
 #include "ace/OS_NS_unistd.h"
 #include <iostream>
 #include <cstring>

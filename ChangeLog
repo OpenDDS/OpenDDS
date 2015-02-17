@@ -1,3 +1,14 @@
+Tue Feb 17 19:44:39 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+
+          Added #includes for static build compatibility.
+
 Mon Feb 16 23:44:00 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_default_discovery.mpb:
