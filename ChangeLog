@@ -1,3 +1,12 @@
+Tue Feb 17 19:45:35 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Messenger/face_config.ini:
+        * tests/FACE/Partition/face_config.ini:
+        * tests/FACE/Reliability/face_config.ini:
+
+          Updated test configs for the new FACE tests.
+
 Tue Feb 17 19:44:39 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * tests/FACE/Messenger/Publisher/Publisher.cpp:
