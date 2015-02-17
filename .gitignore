@@ -7,6 +7,9 @@ GNUmakefile*
 lib*.a
 lib*.so*
 *~
+*.opensdf
+*.sdf
+*.sln
 
 /setenv.sh
 /setenv.cmd
