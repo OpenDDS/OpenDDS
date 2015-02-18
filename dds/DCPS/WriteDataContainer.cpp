@@ -980,7 +980,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 
       //else try to remove historical samples from other instances
       if (ret == DDS::RETCODE_OK && !removed_historical) {
-        //TODO: DO WE NEED A LOCK HERE?
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d attempting to remove")
@@ -1030,7 +1029,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         } else {
           //either shutdown has been signaled or max_blocking_time
           //has surpassed so treat as timeout
-          //TODO: Should this be OUT_OF_RESOURCES?
           ret = DDS::RETCODE_TIMEOUT;
         }
       }
@@ -1053,7 +1051,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
       //else try to remove stale samples from other instances which are full
       if (ret == DDS::RETCODE_OK && !oldest_released) {
-        //TODO: DO WE NEED A LOCK HERE?
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d attempting to remove")
@@ -1071,7 +1068,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
       //else try to remove stale samples from other non-full instances
       if (ret == DDS::RETCODE_OK && !oldest_released) {
-        //TODO: DO WE NEED A LOCK HERE?
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d attempting to remove")

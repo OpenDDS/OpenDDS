@@ -1,3 +1,12 @@
+Wed Feb 18 21:36:44 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removing TODO's to check whether locking was necessary in
+          WriteDataContainer::obtain_buffer after determining locking
+          is correct as is, lock_ is held outside obtain_buffer call
+          which seems to also protect instances_.
+
 Wed Feb 18 21:31:48 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * tests/DCPS/Reliability/Boilerplate.h:
