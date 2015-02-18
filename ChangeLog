@@ -1,3 +1,16 @@
+Wed Feb 18 21:12:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+
+          Parenthesize, fix fuzz.
+
+
+Wed Feb 18 21:11:33 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+
+
 Wed Feb 18 17:16:00 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/FaceTSS.h:

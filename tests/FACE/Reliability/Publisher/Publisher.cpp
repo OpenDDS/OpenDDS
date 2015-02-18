@@ -33,7 +33,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       }
       FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
     } while (status == FACE::TIMED_OUT);
-    
+
     if (status != FACE::RC_NO_ERROR) break;
   }
 

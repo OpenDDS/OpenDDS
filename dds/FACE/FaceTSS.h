@@ -102,11 +102,8 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
 
   const DDS::ReturnCode_t ret = typedWriter->write(message, DDS::HANDLE_NIL);
   return_code =
-    (ret == DDS::RETCODE_OK) ? FACE::RC_NO_ERROR : 
-    (ret == DDS::RETCODE_TIMEOUT) ? FACE::TIMED_OUT : FACE::CONNECTION_CLOSED;
-  if (ret != DDS::RETCODE_OK) {
-std::cout << "write() returned " << ret << ", mapped to " << return_code << std::endl;
-  }
+    (ret == DDS::RETCODE_OK) ? FACE::RC_NO_ERROR :
+    ((ret == DDS::RETCODE_TIMEOUT) ? FACE::TIMED_OUT : FACE::CONNECTION_CLOSED);
   //TODO: convert errors
 }
 
