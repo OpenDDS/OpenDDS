@@ -1,3 +1,14 @@
+Wed Feb 18 21:24:32 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Cleaned up some members no longer used in DataSampleElement
+          as well as where they were set in WriteDataContainer.
+          Samples are no longer 'loaned' to the DataWriter therefore
+          ability to set samples to delivered or dropped is unnecessary.
+
 Wed Feb 18 21:12:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/FACE/FaceTSS.h:
