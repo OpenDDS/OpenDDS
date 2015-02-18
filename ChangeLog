@@ -1,3 +1,17 @@
+Wed Feb 18 17:16:00 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+
+          Convert timeout retcode to face.
+
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+
+          Resend on timeout.
+
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+
+          Don't require 0 to be the first message.
+
 Tue Feb 17 21:13:58 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/FACE/config/Parser.cpp:

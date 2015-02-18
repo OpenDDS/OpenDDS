@@ -27,11 +27,17 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger::Message msg = {"Hello, world.", i};
     FACE::TRANSACTION_ID_TYPE txn;
     std::cout << "  sending " << i << std::endl;
-    FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
+    do {
+      if (status == FACE::TIMED_OUT) {
+        std::cout << "Send_Message timed out, resending" << std::endl;
+      }
+      FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
+    } while (status == FACE::TIMED_OUT);
+    
     if (status != FACE::RC_NO_ERROR) break;
   }
 
-  ACE_OS::sleep(15); // Subscriber receives message
+  ACE_OS::sleep(15); // Subscriber receives messages
 
   // Always destroy connection, but don't overwrite bad status
   FACE::RETURN_CODE_TYPE destroy_status = FACE::RC_NO_ERROR;
