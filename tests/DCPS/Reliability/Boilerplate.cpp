@@ -94,7 +94,8 @@ createSubscriber(DDS::DomainParticipant_var participant)
 DDS::DataWriter_var
 createDataWriter(
   DDS::Publisher_var publisher,
-  DDS::Topic_var topic)
+  DDS::Topic_var topic,
+  bool keep_last_one)
 {
   // Set qos
   DDS::DataWriterQos dw_qos;
@@ -104,9 +105,17 @@ createDataWriter(
   dw_qos.reliability.max_blocking_time.sec = 1;
   dw_qos.reliability.max_blocking_time.nanosec = 0;
 
-  dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-  dw_qos.resource_limits.max_samples = 10;
-  dw_qos.resource_limits.max_samples_per_instance = 10;
+  if (keep_last_one) {
+    dw_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+    dw_qos.history.depth = 1;
+    dw_qos.resource_limits.max_samples = 1;
+    dw_qos.resource_limits.max_samples_per_instance = 1;
+    std::cout << "Datawriter QOS keep last one" << std::endl;
+  } else {
+    dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    dw_qos.resource_limits.max_samples = 10;
+    dw_qos.resource_limits.max_samples_per_instance = 10;
+  }
   // Create DataWriter
   DDS::DataWriter_var writer =
     publisher->create_datawriter(topic,
@@ -126,15 +135,22 @@ DDS::DataReader_var
 createDataReader(
   DDS::Subscriber_var subscriber,
   DDS::Topic_var topic,
-  DDS::DataReaderListener_var listener)
+  DDS::DataReaderListener_var listener,
+  bool keep_last_one)
 {
   // Set qos
   DDS::DataReaderQos dr_qos;
   // RELIABLE/KEEP_LAST/10 works
   subscriber->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
-  dr_qos.history.depth = 10;
+  if (keep_last_one) {
+    dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+    dr_qos.history.depth = 1;
+    std::cout << "Datareader QOS keep last one" << std::endl;
+  } else {
+    dr_qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+    dr_qos.history.depth = 10;
+  }
   // Create DataReader
   DDS::DataReader_var reader =
     subscriber->create_datareader(topic,

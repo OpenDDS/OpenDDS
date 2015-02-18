@@ -1,3 +1,13 @@
+Wed Feb 18 21:31:48 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reliability/Boilerplate.h:
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Set history QOS kind and depth based on command-line arg.
+
 Wed Feb 18 21:24:32 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/DataSampleElement.h:

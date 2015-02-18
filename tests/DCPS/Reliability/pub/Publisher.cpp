@@ -18,6 +18,24 @@ using namespace examples::boilerplate;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  bool keep_last_one = false;
+
+  // Override message count
+  long msg_count = 5000;
+  if (argc > 1) {
+    if (!ACE_OS::strcmp(argv[1], "-keep-last-one")) {
+      keep_last_one = true;
+    } else {
+      msg_count = ACE_OS::atoi(argv[1]);
+    }
+  }
+
+  if (argc > 2) {
+    if (!ACE_OS::strcmp(argv[2], "-keep-last-one")) {
+      keep_last_one = true;
+    }
+  }
+
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
@@ -35,7 +53,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::Publisher_var publisher = createPublisher(participant);
 
     // Create data writer for the topic
-    DDS::DataWriter_var writer = createDataWriter(publisher, topic);
+    DDS::DataWriter_var writer = createDataWriter(publisher, topic, keep_last_one);
 
     // Safely downcast data writer to type-specific data writer
     Reliability::MessageDataWriter_var msg_writer = narrow(writer);
@@ -46,12 +64,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Initialize samples
       Reliability::Message message;
-
-      // Override message count
-      long msg_count = 5000;
-      if (argc > 1) {
-        msg_count = ACE_OS::atoi(argv[1]);
-      }
 
       char number[20];
 

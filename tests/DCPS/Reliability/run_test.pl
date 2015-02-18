@@ -18,29 +18,33 @@ $status = 0;
 $pub_opts = "";
 $sub_opts = "";
 
-if (($ARGV[0] eq 'shmem') || ($ARGV[1] eq 'shmem')) {
+if (($ARGV[0] eq 'shmem') || ($ARGV[1] eq 'shmem') || ($ARGV[2] eq 'shmem')) {
   $pub_opts .= " -DCPSConfigFile shmem.ini ";
   $sub_opts .= " -DCPSConfigFile shmem.ini ";
 }
-elsif (($ARGV[0] eq 'rtps') || ($ARGV[1] eq 'rtps')) {
+elsif (($ARGV[0] eq 'rtps') || ($ARGV[1] eq 'rtps') || ($ARGV[2] eq 'rtps')) {
   $pub_opts .= " -DCPSConfigFile rtps.ini ";
   $sub_opts .= " -DCPSConfigFile rtps.ini ";
 }
-elsif (($ARGV[0] eq 'mcast') || ($ARGV[1] eq 'mcast')) {
+elsif (($ARGV[0] eq 'mcast') || ($ARGV[1] eq 'mcast') || ($ARGV[2] eq 'mcast')) {
   $pub_opts .= " -DCPSConfigFile multicast.ini ";
   $sub_opts .= " -DCPSConfigFile multicast.ini ";
 }
 
-if (($ARGV[0] eq 'take-next') || ($ARGV[1] eq 'take-next')) {
+if (($ARGV[0] eq 'take-next') || ($ARGV[1] eq 'take-next') || ($ARGV[2] eq 'take-next')) {
   $sub_opts .= " -take-next ";
 }
-elsif (($ARGV[0] eq 'take') || ($ARGV[1] eq 'take')) {
+elsif (($ARGV[0] eq 'take') || ($ARGV[1] eq 'take') || ($ARGV[2] eq 'take')) {
   $sub_opts .= " -take ";
 }
-elsif (($ARGV[0] eq 'zero-copy') || ($ARGV[1] eq 'zero-copy')) {
+elsif (($ARGV[0] eq 'zero-copy') || ($ARGV[1] eq 'zero-copy') || ($ARGV[2] eq 'zero-copy')) {
   $sub_opts .= " -zero-copy ";
 }
 
+if (($ARGV[0] eq 'keep-last-one') || ($ARGV[1] eq 'keep-last-one') || ($ARGV[2] eq 'keep-last-one')) {
+  $pub_opts .= " -keep-last-one";
+  $sub_opts .= " -keep-last-one";
+}
 $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
