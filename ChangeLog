@@ -1,3 +1,9 @@
+Wed Feb 18 21:57:40 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Changed error message to warning and only if debugging enabled.
+
 Wed Feb 18 21:36:44 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:

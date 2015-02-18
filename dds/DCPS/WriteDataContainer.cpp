@@ -569,11 +569,13 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("WriteDataContainer::data_delivered, ")
-                 ACE_TEXT("The delivered sample is not in sending_data_ ")
-                 ACE_TEXT("nor any other list.\n")));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("WriteDataContainer::data_delivered, ")
+                   ACE_TEXT("The delivered sample (message_id: %C) is not in sending_data_ ")
+                   ACE_TEXT("nor any other list.\n"), stale->get_header().message_id_));
+      }
     }
 
     return;
