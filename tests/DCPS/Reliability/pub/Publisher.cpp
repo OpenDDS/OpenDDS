@@ -23,7 +23,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   // Override message count
   long msg_count = 5000;
   if (argc > 1) {
-    if (!ACE_OS::strcmp(argv[1], "-keep-last-one")) {
+    if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[1])) {
       keep_last_one = true;
     } else {
       msg_count = ACE_OS::atoi(argv[1]);
@@ -31,7 +31,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   if (argc > 2) {
-    if (!ACE_OS::strcmp(argv[2], "-keep-last-one")) {
+    if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[2])) {
       keep_last_one = true;
     }
   }

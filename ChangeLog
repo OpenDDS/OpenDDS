@@ -1,3 +1,15 @@
+Thu Feb 19 15:32:45 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * FACE/TS_FACE.mpc:
+        * dds/FACE/OpenDDS_FACE.mpc:
+
+          Install dir specification.
+
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Compile error in strcmp.
+
 Wed Feb 18 21:57:40 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/WriteDataContainer.cpp:

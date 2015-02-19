@@ -33,7 +33,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       listener_impl = new SeqReaderListenerImpl;
     } else if (!ACE_OS::strcmp(ACE_TEXT("-zero-copy"), argv[1])) {
       listener_impl = new ZeroCopyReaderListenerImpl;
-    } else if (!ACE_OS::strcmp(argv[1], "-keep-last-one")) {
+    } else if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[1])) {
       keep_last_one = true;
     }
   }
@@ -43,7 +43,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   if (argc > 2) {
-    if (!ACE_OS::strcmp(argv[2], "-keep-last-one")) {
+    if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[2])) {
       keep_last_one = true;
     }
   }
