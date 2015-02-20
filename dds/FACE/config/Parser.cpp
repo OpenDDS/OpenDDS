@@ -112,7 +112,7 @@ Parser::parse_topic(ACE_Configuration_Heap& config,
     }
   }
   if (!status) {
-    topic_map_.insert(std::make_pair(topic_name, topic));
+    topic_map_[topic_name] = topic;
   }
   return status;
 }
@@ -146,7 +146,7 @@ Parser::parse_connection(ACE_Configuration_Heap& config,
     }
   }
   if (!status) {
-    connection_map_.insert(std::make_pair(connection_name, connection));
+    connection_map_[connection_name] = connection;
   }
   return status;
 }

@@ -1,3 +1,110 @@
+Fri Feb 20 15:06:50 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * FACE/TS_FACE.mpc:
+
+          Removed this file.  Fixes an MPC warning.
+
+Thu Feb 19 15:32:45 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * FACE/TS_FACE.mpc:
+        * dds/FACE/OpenDDS_FACE.mpc:
+
+          Install dir specification.
+
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Compile error in strcmp.
+
+Wed Feb 18 21:57:40 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Changed error message to warning and only if debugging enabled.
+
+Wed Feb 18 21:36:44 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Removing TODO's to check whether locking was necessary in
+          WriteDataContainer::obtain_buffer after determining locking
+          is correct as is, lock_ is held outside obtain_buffer call
+          which seems to also protect instances_.
+
+Wed Feb 18 21:31:48 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * tests/DCPS/Reliability/Boilerplate.h:
+        * tests/DCPS/Reliability/Boilerplate.cpp:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/Reliability/sub/Subscriber.cpp:
+
+          Set history QOS kind and depth based on command-line arg.
+
+Wed Feb 18 21:24:32 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/DataSampleElement.h:
+        * dds/DCPS/DataSampleElement.inl:
+        * dds/DCPS/WriteDataContainer.cpp:
+
+          Cleaned up some members no longer used in DataSampleElement
+          as well as where they were set in WriteDataContainer.
+          Samples are no longer 'loaned' to the DataWriter therefore
+          ability to set samples to delivered or dropped is unnecessary.
+
+Wed Feb 18 21:12:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+        * tests/DCPS/Reliability/pub/Publisher.cpp:
+
+          Parenthesize, fix fuzz.
+
+
+Wed Feb 18 21:11:33 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+
+
+Wed Feb 18 17:16:00 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+
+          Convert timeout retcode to face.
+
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+
+          Resend on timeout.
+
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+
+          Don't require 0 to be the first message.
+
+Tue Feb 17 21:13:58 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/FACE/config/Parser.cpp:
+
+          Updated use of std::map for compatibility with SunCC.
+
+Tue Feb 17 19:45:35 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/FACE/Messenger/face_config.ini:
+        * tests/FACE/Partition/face_config.ini:
+        * tests/FACE/Reliability/face_config.ini:
+
+          Updated test configs for the new FACE tests.
+
+Tue Feb 17 19:44:39 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+        * tests/FACE/Partition/Publisher/Publisher.cpp:
+        * tests/FACE/Partition/Subscriber/Subscriber.cpp:
+        * tests/FACE/Reliability/Publisher/Publisher.cpp:
+        * tests/FACE/Reliability/Subscriber/Subscriber.cpp:
+
+          Added #includes for static build compatibility.
+
 Mon Feb 16 23:44:00 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * MPC/config/dcps_default_discovery.mpb:

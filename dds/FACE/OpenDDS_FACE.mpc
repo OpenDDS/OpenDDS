@@ -1,4 +1,4 @@
-project: dcpslib {
+project: dcpslib, install {
   avoids += uses_wchar
   dynamicflags = OPENDDS_FACE_BUILD_DLL
 
@@ -9,5 +9,9 @@ project: dcpslib {
 
   Header_Files {
     ../../FACE
+  }
+
+  specific {
+    install_dir = dds/FACE
   }
 }

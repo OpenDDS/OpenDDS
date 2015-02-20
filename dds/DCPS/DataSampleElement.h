@@ -108,19 +108,10 @@ public:
 
   ACE_UINT64 transaction_id() const;
 
-  void set_delivered(bool delivered);
-
-  bool delivered() const;
-
-  void set_dropped(bool dropped);
-
-  bool dropped() const;
-
 private:
 
   ACE_UINT64 transaction_id_;
-  bool delivered_;
-  bool dropped_;
+
   /// The OpenDDS DCPS header for this sample
   DataSampleHeader       header_;
 

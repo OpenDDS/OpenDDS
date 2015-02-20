@@ -531,26 +531,23 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
             guard,
             this->lock_);
 
-  // Delivered samples _must_ be on sending_data_ list or still on loan to the datawriter
+  // Delivered samples _must_ be on sending_data_ list
 
-  // If it is not found in one of the lists or on loan to the dw, an invariant
+  // If it is not found in one of the lists, an invariant
   // exception is declared.
 
   // The element now needs to be removed from the sending_data_
-  // list, and appended to the end of the sent_data_ list here, or
-  // when the datawriter returns the loaned sample during add_sending_data().
+  // list, and appended to the end of the sent_data_ list here
 
   DataSampleElement* stale = const_cast<DataSampleElement*>(sample);
 
   // If sample is on a SendStateDataSampleList it should be on the
   // sending_data_ list signifying it was given to the transport to
   // deliver and now the transport is signaling it has been delivered
-  // However, it could still be on loan to the datawriter, in which case
-  // set the sample's state to be checked when datawriter returns the sample
   if (!sending_data_.dequeue(sample)) {
 
     //
-    // Should be on sending_data_ or on loan.  If it is in sent_data_
+    // Should be on sending_data_.  If it is in sent_data_
     // or unsent_data there was a problem.
     //
     std::vector<SendStateDataSampleList*> send_lists;
@@ -572,12 +569,13 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
-      //The sample may still be on loan to the datawriter
-      //in which case set its delivered flag so that the
-      //datawriter will process as delivered when add_sending_data
-      //is eventually called
-      stale->set_delivered(true);
-
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_WARNING,
+                   ACE_TEXT("(%P|%t) WARNING: ")
+                   ACE_TEXT("WriteDataContainer::data_delivered, ")
+                   ACE_TEXT("The delivered sample (message_id: %C) is not in sending_data_ ")
+                   ACE_TEXT("nor any other list.\n"), stale->get_header().message_id_));
+      }
     }
 
     return;
@@ -660,8 +658,6 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
   // If sample is on a SendStateDataSampleList it should be on the
   // sending_data_ list signifying it was given to the transport to
   // deliver and now the transport is signaling it has been dropped
-  // However, it could still be on loan to the datawriter, in which case
-  // set the sample's state to be checked when datawriter returns the sample
 
   if (sending_data_.dequeue(sample)) {
     // else: The data_dropped is called as a result of remove_sample()
@@ -693,11 +689,11 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
                  ACE_TEXT("The dropped sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
-      //The sample may still be on loan to the datawriter
-      //in which case set its dropped flag so that the
-      //datawriter will process as dropped when add_sending_data
-      //is eventually called
-      stale->set_dropped(true);
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("WriteDataContainer::data_dropped, ")
+                 ACE_TEXT("The dropped sample is not in sending_data_ ")
+                 ACE_TEXT("nor in any other list.\n")));
     }
 
     return;
@@ -986,7 +982,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 
       //else try to remove historical samples from other instances
       if (ret == DDS::RETCODE_OK && !removed_historical) {
-        //TODO: DO WE NEED A LOCK HERE?
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d attempting to remove")
@@ -1036,7 +1031,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         } else {
           //either shutdown has been signaled or max_blocking_time
           //has surpassed so treat as timeout
-          //TODO: Should this be OUT_OF_RESOURCES?
           ret = DDS::RETCODE_TIMEOUT;
         }
       }
@@ -1059,7 +1053,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
       //else try to remove stale samples from other instances which are full
       if (ret == DDS::RETCODE_OK && !oldest_released) {
-        //TODO: DO WE NEED A LOCK HERE?
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d attempting to remove")
@@ -1077,7 +1070,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
       //else try to remove stale samples from other non-full instances
       if (ret == DDS::RETCODE_OK && !oldest_released) {
-        //TODO: DO WE NEED A LOCK HERE?
         if (DCPS_debug_level >= 2) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer")
                                 ACE_TEXT(" instance %d attempting to remove")

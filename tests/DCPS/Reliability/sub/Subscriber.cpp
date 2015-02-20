@@ -22,6 +22,32 @@ using namespace examples::boilerplate;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  bool keep_last_one = false;
+
+  // Create Listener
+  DataReaderListenerImpl* listener_impl = NULL;
+  if (argc > 1) {
+    if (!ACE_OS::strcmp(ACE_TEXT("-take-next"), argv[1])) {
+      listener_impl = new TakeNextReaderListenerImpl;
+    } else if (!ACE_OS::strcmp(ACE_TEXT("-take"), argv[1])) {
+      listener_impl = new SeqReaderListenerImpl;
+    } else if (!ACE_OS::strcmp(ACE_TEXT("-zero-copy"), argv[1])) {
+      listener_impl = new ZeroCopyReaderListenerImpl;
+    } else if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[1])) {
+      keep_last_one = true;
+    }
+  }
+
+  if (!listener_impl) {
+    listener_impl = new TakeNextReaderListenerImpl;
+  }
+
+  if (argc > 2) {
+    if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[2])) {
+      keep_last_one = true;
+    }
+  }
+
   int status = -1;
   try {
     // Initialize DomainParticipantFactory, handling command line args
@@ -37,27 +63,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     // Create subscriber
     DDS::Subscriber_var subscriber = createSubscriber(participant);
 
-    // Create Listener
-    DataReaderListenerImpl* listener_impl = NULL;
-    if (argc > 1) {
-      if (!ACE_OS::strcmp(ACE_TEXT("-take-next"), argv[1])) {
-        listener_impl = new TakeNextReaderListenerImpl;
-      } else if (!ACE_OS::strcmp(ACE_TEXT("-take"), argv[1])) {
-        listener_impl = new SeqReaderListenerImpl;
-      } else if (!ACE_OS::strcmp(ACE_TEXT("-zero-copy"), argv[1])) {
-        listener_impl = new ZeroCopyReaderListenerImpl;
-      }
-    }
-    if (!listener_impl) {
-      listener_impl = new TakeNextReaderListenerImpl;
-    }
-
     DDS::DataReaderListener_var listener(listener_impl);
 
     // Create DataReader with the listener attached
     DDS::DataReader_var reader = createDataReader(subscriber,
                                                   topic,
-                                                  listener);
+                                                  listener,
+                                                  keep_last_one);
 
     std::cout << "Waiting for connection" << std::endl;
     {

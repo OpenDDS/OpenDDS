@@ -1,9 +1,14 @@
 #include "../Idl/FaceMessage_TS.hpp"
 
+#ifdef ACE_AS_STATIC_LIBS
+# include "dds/DCPS/RTPS/RtpsDiscovery.h"
+# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
+
 #include "ace/OS_NS_unistd.h"
 #include <iostream>
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   FACE::RETURN_CODE_TYPE status;
   FACE::TS::Initialize("face_config.ini", status);

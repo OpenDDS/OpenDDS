@@ -1,5 +1,10 @@
 #include "Idl/FaceMessage_TS.hpp"
 
+#ifdef ACE_AS_STATIC_LIBS
+# include "dds/DCPS/RTPS/RtpsDiscovery.h"
+# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
+
 #include <iostream>
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
@@ -8,7 +13,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::TS::Initialize("face_config.ini", status);
   FACE::CONNECTION_ID_TYPE connId;
   FACE::MESSAGE_SIZE_TYPE size;
-  long received = 0;
 
   if (!status) {
     FACE::CONNECTION_DIRECTION_TYPE dir;
@@ -19,25 +23,21 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
     FACE::TRANSACTION_ID_TYPE txn;
     Messenger::Message msg;
+    long expected = 0;
     std::cout << "Subscriber: about to receive_message()" << std::endl;
-    for (long i = 0; i < 100; ++i) {
+    while (expected <= 99) {
       FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
       if (status != FACE::RC_NO_ERROR) break;
       std::cout << msg.text.in() << '\t' << msg.count << std::endl;
-      if (msg.count != i) {
-        std::cerr << "ERROR: Expected count " << i << ", got "
+      if ((msg.count != expected) && expected > 0) {
+        std::cerr << "ERROR: Expected count " << expected << ", got "
                   << msg.count << std::endl;
         status = FACE::INVALID_PARAM;
         break;
       } else {
-        ++received;
+        expected = msg.count + 1;
       }
     }
-  }
-
-  if ((!status) && (received != 100)) {
-    std::cerr << "ERROR: Expected 100 messages, got " << received << std::endl;
-    status = FACE::INVALID_PARAM;
   }
 
   // Always destroy connection, but don't overwrite bad status
