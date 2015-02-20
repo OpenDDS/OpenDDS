@@ -18,30 +18,30 @@ using namespace examples::boilerplate;
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
-  bool keep_last_one = false;
-
-  // Override message count
-  long msg_count = 5000;
-  if (argc > 1) {
-    if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[1])) {
-      keep_last_one = true;
-    } else {
-      msg_count = ACE_OS::atoi(argv[1]);
-    }
-  }
-
-  if (argc > 2) {
-    if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[2])) {
-      keep_last_one = true;
-    }
-  }
-
   DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var participant;
 
   try {
     // Initialize DomainParticipantFactory, handling command line args
     dpf = TheParticipantFactoryWithArgs(argc, argv);
+
+    bool keep_last_one = false;
+
+    // Override message count
+    long msg_count = 5000;
+    if (argc > 1) {
+      if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[1])) {
+        keep_last_one = true;
+      } else {
+        msg_count = ACE_OS::atoi(argv[1]);
+      }
+    }
+
+    if (argc > 2) {
+      if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[2])) {
+        keep_last_one = true;
+      }
+    }
 
     // Create domain participant
     participant = createParticipant(dpf);
