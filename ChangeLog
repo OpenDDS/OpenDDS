@@ -1,3 +1,9 @@
+Fri Feb 20 15:06:50 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * FACE/TS_FACE.mpc:
+
+          Removed this file.  Fixes an MPC warning.
+
 Thu Feb 19 15:32:45 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * FACE/TS_FACE.mpc:
