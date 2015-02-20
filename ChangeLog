@@ -1,3 +1,10 @@
+Fri Feb 20 21:33:34 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportSendStrategy.cpp:
+
+          Notify the Synch thread of work available when send_stop
+          only does a partial send and flips into MODE_QUEUE
+
 Fri Feb 20 15:06:50 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * FACE/TS_FACE.mpc:

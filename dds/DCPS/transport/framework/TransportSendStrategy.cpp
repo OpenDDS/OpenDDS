@@ -316,7 +316,7 @@ TransportSendStrategy::perform_work()
     } else {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Reconnect succeeded, Notify synch thread of work "
-                "availablity.\n"), 5);
+                "availability.\n"), 5);
       // If the datalink is re-established then notify the synch
       // thread to perform work.  We do not hold the object lock at
       // this point.
@@ -1287,6 +1287,11 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
             "But we %C as a result.\n",
             ((this->mode_ == MODE_QUEUE)? "flipped into MODE_QUEUE":
                                           "stayed in MODE_DIRECT" )));
+      if (this->mode_ == MODE_QUEUE  && this->mode_ != MODE_SUSPEND) {
+        VDBG((LM_DEBUG, "(%P|%t) DBG:   "
+              "Notify Synch thread of work availability\n"));
+        this->synch_->work_available();
+      }
     }
   }
 
