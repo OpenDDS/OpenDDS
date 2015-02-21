@@ -399,13 +399,15 @@ private:
    * @note The values from command line can overwrite the values
    *       in configuration file.
    */
-  int load_common_configuration(ACE_Configuration_Heap& cf);
+  int load_common_configuration(ACE_Configuration_Heap& cf,
+                                const ACE_TCHAR* filename);
 
   /**
    * Load the domain configuration to the Service_Participant
    * singleton.
    */
-  int load_domain_configuration(ACE_Configuration_Heap& cf);
+  int load_domain_configuration(ACE_Configuration_Heap& cf,
+                                const ACE_TCHAR* filename);
 
   /**
    * Load the discovery configuration to the Service_Participant

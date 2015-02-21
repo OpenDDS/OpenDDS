@@ -1280,7 +1280,7 @@ Service_Participant::load_configuration(
 {
   int status = 0;
 
-  status = this->load_common_configuration(config);
+  status = this->load_common_configuration(config, filename);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1337,7 +1337,7 @@ Service_Participant::load_configuration(
   // sections to allow error reporting on bad discovery config names.
   // Also loaded after the transport configuration so that
   // DefaultTransportConfig within [domain/*] can use TransportConfig objects.
-  status = this->load_domain_configuration(config);
+  status = this->load_domain_configuration(config, filename);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1351,7 +1351,8 @@ Service_Participant::load_configuration(
 }
 
 int
-Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
+Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
+                                               const ACE_TCHAR* filename)
 {
   const ACE_Configuration_Section_Key &root = cf.root_section();
   ACE_Configuration_Section_Key sect;
@@ -1436,7 +1437,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSGlobalTransportConfig"), this->global_transport_config_);
       if (this->global_transport_config_ == ACE_TEXT("$file")) {
         // When the special string of "$file" is used, substitute the file name
-        this->global_transport_config_ = config_fname;
+        this->global_transport_config_ = filename;
       }
     }
 
@@ -1546,7 +1547,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf)
 }
 
 int
-Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
+Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
+                                               const ACE_TCHAR* filename)
 {
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key domain_sect;
@@ -1626,7 +1628,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf)
         } else if (name == "DefaultTransportConfig") {
           if (it->second == "$file") {
             // When the special string of "$file" is used, substitute the file name
-            perDomainDefaultTportConfig = ACE_TEXT_ALWAYS_CHAR(config_fname.c_str());
+            perDomainDefaultTportConfig = ACE_TEXT_ALWAYS_CHAR(filename);
 
           } else {
             perDomainDefaultTportConfig = it->second;
