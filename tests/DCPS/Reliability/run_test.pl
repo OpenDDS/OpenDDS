@@ -10,88 +10,37 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
 PerlDDS::add_lib_path('./IDL');
 
-$status = 0;
+my $pub_opts = '';
+my $sub_opts = '';
 
-$pub_opts = "";
-$sub_opts = "";
+my $test = new PerlDDS::TestFramework();
 
-if (($ARGV[0] eq 'shmem') || ($ARGV[1] eq 'shmem') || ($ARGV[2] eq 'shmem')) {
-  $pub_opts .= " -DCPSConfigFile shmem.ini ";
-  $sub_opts .= " -DCPSConfigFile shmem.ini ";
+if ($test->flag('take-next')) {
+  $sub_opts .= ' -take-next';
 }
-elsif (($ARGV[0] eq 'rtps') || ($ARGV[1] eq 'rtps') || ($ARGV[2] eq 'rtps')) {
-  $pub_opts .= " -DCPSConfigFile rtps.ini ";
-  $sub_opts .= " -DCPSConfigFile rtps.ini ";
+elsif ($test->flag('take')) {
+  $sub_opts .= ' -take';
 }
-elsif (($ARGV[0] eq 'mcast') || ($ARGV[1] eq 'mcast') || ($ARGV[2] eq 'mcast')) {
-  $pub_opts .= " -DCPSConfigFile multicast.ini ";
-  $sub_opts .= " -DCPSConfigFile multicast.ini ";
+elsif ($test->flag('zero-copy')) {
+  $sub_opts .= ' -zero-copy';
 }
 
-if (($ARGV[0] eq 'take-next') || ($ARGV[1] eq 'take-next') || ($ARGV[2] eq 'take-next')) {
-  $sub_opts .= " -take-next ";
-}
-elsif (($ARGV[0] eq 'take') || ($ARGV[1] eq 'take') || ($ARGV[2] eq 'take')) {
-  $sub_opts .= " -take ";
-}
-elsif (($ARGV[0] eq 'zero-copy') || ($ARGV[1] eq 'zero-copy') || ($ARGV[2] eq 'zero-copy')) {
-  $sub_opts .= " -zero-copy ";
+if ($test->flag('keep-last-one')) {
+  $pub_opts .= ' -keep-last-one';
+  $sub_opts .= ' -keep-last-one';
 }
 
-if (($ARGV[0] eq 'keep-last-one') || ($ARGV[1] eq 'keep-last-one') || ($ARGV[2] eq 'keep-last-one')) {
-  $pub_opts .= " -keep-last-one";
-  $sub_opts .= " -keep-last-one";
-}
-$dcpsrepo_ior = "repo.ior";
+$test->setup_discovery();
+$test->enable_console_logging();
 
-unlink $dcpsrepo_ior;
+$test->process('sub', 'sub/subscriber', $sub_opts);
+$test->process('pub', 'pub/publisher', $pub_opts);
 
-$DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo");
-$Subscriber = PerlDDS::create_process("sub/subscriber", $sub_opts);
-$Publisher = PerlDDS::create_process("pub/publisher", $pub_opts);
+$test->start_process('sub');
+$test->start_process('pub');
 
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
-}
-
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn ();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn ();
-
-
-$PublisherResult = $Publisher->WaitKill (300);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
-$SubscriberResult = $Subscriber->WaitKill (15);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-}
-
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish(300);

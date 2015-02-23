@@ -1,3 +1,20 @@
+Mon Feb 23 21:38:14 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest4_0/run_test.pl:
+        * tests/DCPS/FooTest5_0/rtps_disc.ini:
+        * tests/DCPS/FooTest5_0/run_test.pl:
+        * tests/DCPS/Instances/run_test.pl:
+        * tests/DCPS/LivelinessTest/rtps_disc.ini:
+        * tests/DCPS/LivelinessTest/run_test.pl:
+        * tests/DCPS/ManualAssertLiveliness/run_test.pl:
+        * tests/DCPS/Reliability/run_test.pl:
+        * tests/DCPS/ViewState/run_test.pl:
+
+          Updated tests to run with safety profile now that we allow
+          ownership_profile=1 with ownership_kind_exclusive=0 in the
+          safety profile builds.
+
 Sat Feb 21 00:09:24 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/Service_Participant.h:

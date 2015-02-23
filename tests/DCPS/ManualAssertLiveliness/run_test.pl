@@ -10,14 +10,13 @@ use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
+use strict;
 
-$status = 0;
+my $discovery = "inforepo";
+my $transport = "tcp";
 
-$discovery = "inforepo";
-$transport = "tcp";
-
-$pub_extra = "";
-$sub_extra = "";
+my $pub_extra = "";
+my $sub_extra = "";
 
 while ($a = shift) {
     if ($a eq 'lost') {
@@ -36,64 +35,20 @@ while ($a = shift) {
     }
 }
 
-$pub_conf = "pub_" . $discovery . "_" . $transport . ".ini";
-$sub_conf = "sub_" . $discovery . "_" . $transport . ".ini";
+my $pub_conf = "pub_" . $discovery . "_" . $transport . ".ini";
+my $sub_conf = "sub_" . $discovery . "_" . $transport . ".ini";
 
-$pub_opts = "-DCPSConfigFile $pub_conf $pub_extra";
-$sub_opts = "-DCPSConfigFile $sub_conf $sub_extra";
+my $pub_opts = "-DCPSConfigFile $pub_conf $pub_extra";
+my $sub_opts = "-DCPSConfigFile $sub_conf $sub_extra";
 
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+my $test = new PerlDDS::TestFramework();
+$test->enable_console_logging();
+$test->process('sub', 'subscriber', $sub_opts);
+$test->process('pub', 'publisher', $pub_opts);
 
-if ($discovery == 'inforepo') {
-    $dcpsrepo_ior = "repo.ior";
+$test->setup_discovery() if $discovery eq 'inforepo';
 
-    unlink $dcpsrepo_ior;
+$test->start_process('pub');
+$test->start_process('sub');
 
-    $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                         "-o $dcpsrepo_ior");
-
-    print $DCPSREPO->CommandLine() . "\n";
-    $DCPSREPO->Spawn ();
-    if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-        print STDERR "ERROR: waiting for Info Repo IOR file\n";
-        $DCPSREPO->Kill ();
-        exit 1;
-    }
-}
-
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn ();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn ();
-
-$PublisherResult = $Publisher->WaitKill (60);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
-    $status = 1;
-}
-
-$SubscriberResult = $Subscriber->WaitKill (15);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-}
-
-if ($discovery == 'inforepo') {
-    $ir = $DCPSREPO->TerminateWaitKill(5);
-    if ($ir != 0) {
-        print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-        $status = 1;
-    }
-
-    unlink $dcpsrepo_ior;
-}
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish(60);

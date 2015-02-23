@@ -14,69 +14,36 @@ use strict;
 
 PerlDDS::add_lib_path('../FooType4');
 
-# single reader with single instances test
 my $multiple_instance = 0;
 my $num_samples_per_reader = 3;
 my $num_readers = 1;
 my $use_take = 0;
 
-my $dcpsrepo_ior = 'repo.ior';
+my $parameters = $PerlDDS::SafetyProfile ? '-DCPSConfigFile rtps_disc.ini'
+    : '-DCPSConfigFile all.ini';
 
-unlink $dcpsrepo_ior;
+$parameters .= " -r $num_readers -t $use_take"
+    . " -m $multiple_instance -i $num_samples_per_reader";
 
-my $DCPSREPO = PerlDDS::create_process("$DDS_ROOT/bin/DCPSInfoRepo",
-                                       "-o $dcpsrepo_ior");
+my $test = new PerlDDS::TestFramework();
 
-my $parameters = "-DCPSConfigFile all.ini -r $num_readers -t $use_take"
-               . " -m $multiple_instance -i $num_samples_per_reader";
-
-if ($ARGV[0] eq 'udp') {
+if ($test->flag('udp')) {
   $parameters .= ' -us -up';
 }
-elsif ($ARGV[0] eq 'diff_trans') {
+elsif ($test->flag('diff_trans')) {
   $parameters .= ' -up';
 }
-elsif ($ARGV[0] eq 'rtps') {
+elsif ($test->flag('rtps')) {
   $parameters .= ' -rs -rp';
 }
-elsif ($ARGV[0] eq 'shmem') {
+elsif ($test->flag('shmem')) {
   $parameters .= ' -ss -sp';
 }
 
-my $FooTest5 = PerlDDS::create_process('main', $parameters);
+$test->enable_console_logging();
+$test->process('main', 'main', $parameters);
 
-print $DCPSREPO->CommandLine(), "\n";
-$DCPSREPO->Spawn();
+$test->setup_discovery();
+$test->start_process('main');
 
-if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-  print STDERR "ERROR: waiting for Info Repo IOR file\n";
-  $DCPSREPO->Kill();
-  exit 1;
-}
-
-print $FooTest5->CommandLine(), "\n";
-$FooTest5->Spawn();
-
-my $result = $FooTest5->WaitKill(60);
-
-my $status = 0;
-if ($result != 0) {
-  print STDERR "ERROR: main returned $result\n";
-  $status = 1;
-}
-
-
-my $ir = $DCPSREPO->TerminateWaitKill(5);
-
-if ($ir != 0) {
-  print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-  $status = 1;
-}
-
-if ($status == 0) {
-  print "test PASSED.\n";
-}
-else {
-  print STDERR "test FAILED.\n";
-}
-exit $status;
+exit $test->finish(60);
