@@ -140,6 +140,8 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult(link._retn());
   }
 
+  GuardType connections_guard(connections_lock_);
+
   add_pending_connection(client, link.in());
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink pending.\n"), 2);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
