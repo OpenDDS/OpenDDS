@@ -1,3 +1,10 @@
+Tue Feb 24 21:45:31 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/FooTest5/rtps.ini:
+
+          Updated test configs for safety profile.
+
 Tue Feb 24 16:52:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * bin/dcps_tests.lst:
