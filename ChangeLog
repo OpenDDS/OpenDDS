@@ -1,3 +1,9 @@
+Tue Feb 24 16:52:25 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
+
+        * bin/dcps_tests.lst:
+
+          Test DCPS reliability with history KEEP_LAST 1
+
 Tue Feb 24 15:22:55 UTC 2015  Peter Oschwald  <oschwaldp@ociweb.com>
 
         * dds/DCPS/transport/tcp/TcpTransport.cpp:

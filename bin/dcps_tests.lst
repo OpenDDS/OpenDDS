@@ -121,6 +121,7 @@ tests/DCPS/ViewState/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
 tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Reliability/run_test.pl: keep-last-one !DCPS_MIN
 
 tests/DCPS/WriteDataContainer/run_test.pl: !DCPS_MIN
 
