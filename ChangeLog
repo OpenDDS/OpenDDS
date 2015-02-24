@@ -1,3 +1,9 @@
+Tue Feb 24 15:05:39 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LivelinessTest/rtps_disc.ini:
+
+          Fixed typo in test ini file.
+
 Mon Feb 23 21:38:14 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
