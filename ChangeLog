@@ -1,3 +1,14 @@
+Wed Feb 25 23:20:10 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/RTPS/RtpsDiscovery.cpp:
+        * dds/DCPS/RTPS/Spdp.h:
+        * dds/DCPS/RTPS/Spdp.cpp:
+
+          With safety profile enabled, getpid() may always return
+          -1, which is not good for the GUID generation algorithm.
+          Assist it in generating GUIDs based on which port we find
+          available for use by SPDP.
+
 Wed Feb 25 22:07:10 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:

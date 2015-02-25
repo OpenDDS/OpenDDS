@@ -46,7 +46,7 @@ class RtpsDiscovery;
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class Spdp : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
 public:
-  Spdp(DDS::DomainId_t domain, const DCPS::RepoId& guid,
+  Spdp(DDS::DomainId_t domain, DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco);
   ~Spdp();
 
@@ -128,7 +128,7 @@ private:
 
   // Participant:
   const DDS::DomainId_t domain_;
-  const DCPS::RepoId guid_;
+  DCPS::RepoId guid_;
   DDS::DomainParticipantQos qos_;
   DDS::Subscriber_var bit_subscriber_;
   LocatorSeq sedp_unicast_, sedp_multicast_;

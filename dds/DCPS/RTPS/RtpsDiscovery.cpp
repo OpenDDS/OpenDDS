@@ -401,7 +401,9 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
-    participants_[domain][ads.id] = new Spdp(domain, ads.id, qos, this);
+    const DCPS::RcHandle<Spdp> spdp = new Spdp(domain, ads.id, qos, this);
+    // ads.id may change during Spdp constructor
+    participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
     ACE_ERROR((LM_ERROR, "(%P|%t) RtpsDiscovery::add_domain_participant() - "

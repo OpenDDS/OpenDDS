@@ -53,13 +53,14 @@ namespace {
 }
 
 
-Spdp::Spdp(DDS::DomainId_t domain, const RepoId& guid,
+Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
            const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
   : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
-  , shutdown_cond_(lock_), shutdown_flag_(0), sedp_(guid, *this, lock_)
+  , shutdown_cond_(lock_), shutdown_flag_(0), sedp_(guid_, *this, lock_)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  guid = guid_; // may have changed in SpdpTransport constructor
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
 
@@ -385,10 +386,24 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
                               (outer_->disco_->dg() * outer_->domain_),
     mc_port = port_common + outer_->disco_->d0();
 
-  for (u_short participantId = (hdr_.guidPrefix[10] << 8) | hdr_.guidPrefix[11];
-       !open_unicast_socket(port_common, participantId); ++participantId) {
-    // empty for-loop body, run until open_unicast_socket() works
+  u_short participantId = (hdr_.guidPrefix[10] << 8) | hdr_.guidPrefix[11];
+  const u_short startingParticipantId = participantId;
+  while (!open_unicast_socket(port_common, participantId)) {
+    ++participantId;
   }
+
+#ifdef OPENDDS_SAFETY_PROFILE
+  if (participantId > startingParticipantId && ACE_OS::getpid() == -1) {
+    // Since pids are not available, use the fact that we had to increment
+    // participantId to modify the GUID's pid bytes.  This avoids GUID conflicts
+    // between processes on the same host which start at the same time
+    // (resulting in the same seed value for the random number generator).
+    hdr_.guidPrefix[8] = static_cast<CORBA::Octet>(participantId >> 8);
+    hdr_.guidPrefix[9] = static_cast<CORBA::Octet>(participantId & 0xFF);
+    outer_->guid_.guidPrefix[8] = hdr_.guidPrefix[8];
+    outer_->guid_.guidPrefix[9] = hdr_.guidPrefix[9];
+  }
+#endif
 
   std::string mc_addr = outer_->disco_->default_multicast_group();
   ACE_INET_Addr default_multicast;
