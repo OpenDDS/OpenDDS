@@ -655,9 +655,7 @@ Service_Participant::initialize()
   initial_DataWriterQos_.lifespan = initial_LifespanQosPolicy_;
   initial_DataWriterQos_.user_data = initial_UserDataQosPolicy_;
   initial_DataWriterQos_.ownership = initial_OwnershipQosPolicy_;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   initial_DataWriterQos_.ownership_strength = initial_OwnershipStrengthQosPolicy_;
-#endif
   initial_DataWriterQos_.writer_data_lifecycle = initial_WriterDataLifecycleQosPolicy_;
 
   initial_PublisherQos_.presentation = initial_PresentationQosPolicy_;
