@@ -1,8 +1,15 @@
+Wed Feb 25 22:07:10 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/Service_Participant.cpp:
+
+          Need to set initial ownership strength to 0 when
+          OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE is defined.
+
 Wed Feb 25 20:41:41 UTC 2015  Jeff Schmitz  <schmitzj@ociweb.com>
 
         * dds/DCPS/Service_Participant.cpp:
 
-          Set initial_DataWriterQos_.ownership_strength even when 
+          Set initial_DataWriterQos_.ownership_strength even when
           OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE is defined
 
 Wed Feb 25 15:27:09 UTC 2015  Adam Mitz  <mitza@ociweb.com>
