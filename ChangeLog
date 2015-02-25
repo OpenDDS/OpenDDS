@@ -1,3 +1,9 @@
+Wed Feb 25 15:27:09 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * tests/DCPS/LivelinessTest/common.h:
+
+          Include RTPS libs in static build.
+
 Tue Feb 24 21:45:31 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:
