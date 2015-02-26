@@ -1,3 +1,11 @@
+Thu Feb 26 23:02:28 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/transport/framework/TransportRegistry.inl:
+
+          Clear out TransportRegistry during destruction for
+          the case where Service_Participant::shutdown() is
+          not called first.
+
 Wed Feb 25 23:20:10 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/RTPS/RtpsDiscovery.cpp:
