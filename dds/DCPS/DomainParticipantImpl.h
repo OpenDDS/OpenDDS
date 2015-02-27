@@ -30,6 +30,7 @@
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
+#include "ace/Condition_T.h"
 
 #include <map>
 #include <set>
