@@ -23,9 +23,15 @@ public:
   OpenDDS_FACE_Export static Entities* instance();
   std::map<FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var> writers_;
   std::map<FACE::CONNECTION_ID_TYPE, DDS::DataReader_var> readers_;
+  std::map<FACE::CONNECTION_ID_TYPE,
+    std::pair<std::string, FACE::TRANSPORT_CONNECTION_STATUS_TYPE> > connections_;
 };
 
 OpenDDS_FACE_Export DDS::Duration_t convertTimeout(FACE::TIMEOUT_TYPE timeout);
+OpenDDS_FACE_Export FACE::SYSTEM_TIME_TYPE convertDuration(const DDS::Duration_t& duration);
+
+OpenDDS_FACE_Export FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
+    DDS::ReturnCode_t retcode);
 
 template <typename Msg>
 void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
@@ -45,7 +51,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
   const typename DataReader::_var_type typedReader =
     DataReader::_narrow(readers[connection_id]);
   if (!typedReader) {
-    return_code = FACE::INVALID_PARAM;
+    return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     return;
   }
 
@@ -62,7 +68,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
   ws->detach_condition(rc);
 
   if (ret == DDS::RETCODE_TIMEOUT) {
-    return_code = FACE::TIMED_OUT;
+    return_code = update_status(connection_id, ret);
     return;
   }
 
@@ -72,10 +78,11 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
 
   if (ret == DDS::RETCODE_OK && sinfo[0].valid_data) {
     message = seq[0];
-    return_code = FACE::RC_NO_ERROR;
+    return_code = update_status(connection_id, ret);
     return;
   }
-  return_code = FACE::NOT_AVAILABLE;
+
+  return_code = update_status(connection_id, DDS::RETCODE_NO_DATA);
 }
 
 template <typename Msg>
@@ -96,15 +103,11 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
   const typename DataWriter::_var_type typedWriter =
     DataWriter::_narrow(writers[connection_id]);
   if (!typedWriter) {
-    return_code = FACE::INVALID_PARAM;
+    return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     return;
   }
 
-  const DDS::ReturnCode_t ret = typedWriter->write(message, DDS::HANDLE_NIL);
-  return_code =
-    (ret == DDS::RETCODE_OK) ? FACE::RC_NO_ERROR :
-    ((ret == DDS::RETCODE_TIMEOUT) ? FACE::TIMED_OUT : FACE::CONNECTION_CLOSED);
-  //TODO: convert errors
+  return_code = update_status(connection_id, typedWriter->write(message, DDS::HANDLE_NIL));
 }
 
 template <typename Msg>
@@ -116,8 +119,9 @@ public:
                            const FACE::WAITSET_TYPE,
                            FACE::RETURN_CODE_TYPE&);
 
-  explicit Listener(Callback callback)
+  Listener(Callback callback, FACE::CONNECTION_ID_TYPE connection_id)
     : callback_(callback)
+    , connection_id_(connection_id)
   {}
 
 private:
@@ -151,13 +155,15 @@ private:
     DDS::SampleInfo sinfo;
     while (typedReader->take_next_sample(sample, sinfo) == DDS::RETCODE_OK) {
       if (sinfo.valid_data) {
+        update_status(connection_id_, DDS::RETCODE_OK);
         FACE::RETURN_CODE_TYPE retcode;
         callback_(0, sample, 0, 0, 0, retcode); //TODO
       }
     }
   }
 
-  Callback callback_;
+  const Callback callback_;
+  const FACE::CONNECTION_ID_TYPE connection_id_;
 };
 
 template <typename Msg>
@@ -177,11 +183,9 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
     return;
   }
 
-  DDS::DataReaderListener_var listener = new Listener<Msg>(callback);
+  DDS::DataReaderListener_var listener = new Listener<Msg>(callback, connection_id);
   readers[connection_id]->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);
   return_code = FACE::RC_NO_ERROR;
-
-  //TODO: finish implementing?
 }
 
 } }

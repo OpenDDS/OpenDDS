@@ -84,22 +84,39 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     return_code = INVALID_CONFIG;
   }
 
-  if (return_code == RC_NO_ERROR) {
-    // Copy out parameters
-    connection_id = connection.connection_id_;
-    connection_direction = connection.direction_;
-    max_message_size = topic.max_message_size_;
-
-    return_code = create_opendds_entities(connection_id,
-                                          connection.domain_id_,
-                                          connection.topic_name_,
-                                          topic.type_name_,
-                                          connection_direction,
-                                          qos);
+  if (return_code != RC_NO_ERROR) {
     return;
   }
 
-  return_code = INVALID_PARAM;
+  connection_id = connection.connection_id_;
+  connection_direction = connection.direction_;
+  max_message_size = topic.max_message_size_;
+
+  return_code = create_opendds_entities(connection_id,
+                                        connection.domain_id_,
+                                        connection.topic_name_,
+                                        topic.type_name_,
+                                        connection_direction,
+                                        qos);
+  if (return_code != RC_NO_ERROR) {
+    return;
+  }
+
+  const FACE::SYSTEM_TIME_TYPE refresh_period =
+    (connection_direction == SOURCE) ?
+    OpenDDS::FaceTSS::convertDuration(qos.data_writer_qos().lifespan.duration) : 0;
+
+  const TRANSPORT_CONNECTION_STATUS_TYPE status = {
+    0, // MESSAGE
+    ACE_INT32_MAX, // MAX_MESSAGE
+    max_message_size,
+    connection_direction,
+    0, // WAITING_PROCESSES_OR_MESSAGES
+    refresh_period,
+    INVALID,
+  };
+  Entities::instance()->connections_[connection_id] =
+    std::make_pair(connection_name, status);
 }
 
 void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
@@ -107,8 +124,25 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
                                TRANSPORT_CONNECTION_STATUS_TYPE& status,
                                RETURN_CODE_TYPE& return_code)
 {
-  //TODO: implement
-  return_code = RC_NO_ERROR;
+  Entities& entities = *Entities::instance();
+  ConnectionSettings settings;
+  // connection_name is optional, if present use it to lookup the connection_id
+  // connection_id is also optional, if absent the connection_name must be used
+  if (connection_name[0] &&
+      0 == parser.find_connection(connection_name, settings)) {
+    connection_id = settings.connection_id_;
+  }
+  if (entities.connections_.count(connection_id)) {
+    status = entities.connections_[connection_id].second;
+    if (!connection_name[0]) {
+      entities.connections_[connection_id].first.copy(connection_name,
+        sizeof CONNECTION_NAME_TYPE);
+      connection_name[sizeof CONNECTION_NAME_TYPE - 1] = 0;
+    }
+    return_code = RC_NO_ERROR;
+  } else {
+    return_code = INVALID_PARAM;
+  }
 }
 
 void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
@@ -151,6 +185,8 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
   dp->delete_contained_entities();
   const ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(dp);
+
+  entities.connections_.erase(connection_id);
   return_code = RC_NO_ERROR;
 }
 
@@ -160,7 +196,8 @@ namespace {
                                            const char* topicName,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir,
-                                           QosSettings& qos_settings) {
+                                           QosSettings& qos_settings)
+  {
 #ifdef DEBUG_OPENDDS_FACETSS
     OpenDDS::DCPS::set_DCPS_debug_level(8);
     OpenDDS::DCPS::Transport_debug_level = 5;
@@ -239,6 +276,54 @@ Entities* Entities::instance()
   return ACE_Singleton<Entities, ACE_Thread_Mutex>::instance();
 }
 
+FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
+  DDS::ReturnCode_t retcode)
+{
+  FACE::TRANSPORT_CONNECTION_STATUS_TYPE& status =
+    Entities::instance()->connections_[connection_id].second;
+  FACE::RETURN_CODE_TYPE rc;
+
+  switch (retcode) {
+  case DDS::RETCODE_OK:
+    status.LAST_MSG_VALIDITY = FACE::VALID;
+    ++status.MESSAGE;
+    return FACE::RC_NO_ERROR;
+
+  case DDS::RETCODE_ERROR:
+    rc = FACE::CONNECTION_CLOSED; break;
+
+  case DDS::RETCODE_BAD_PARAMETER:
+    rc = FACE::INVALID_PARAM; break;
+
+  case DDS::RETCODE_OUT_OF_RESOURCES:
+    rc = FACE::DATA_BUFFER_TOO_SMALL; break;
+
+  case DDS::RETCODE_PRECONDITION_NOT_MET:
+  case DDS::RETCODE_NOT_ENABLED:
+    rc = FACE::INVALID_MODE; break;
+
+  case DDS::RETCODE_IMMUTABLE_POLICY:
+  case DDS::RETCODE_INCONSISTENT_POLICY:
+    rc = FACE::INVALID_CONFIG; break;
+
+  case DDS::RETCODE_ALREADY_DELETED:
+    rc = FACE::CONNECTION_CLOSED; break;
+
+  case DDS::RETCODE_TIMEOUT:
+    rc = FACE::TIMED_OUT; break;
+
+  case DDS::RETCODE_UNSUPPORTED:
+  case DDS::RETCODE_NO_DATA:
+    rc = FACE::NOT_AVAILABLE; break;
+
+  case DDS::RETCODE_ILLEGAL_OPERATION:
+    rc = FACE::PERMISSION_DENIED; break;
+  }
+
+  status.LAST_MSG_VALIDITY = FACE::INVALID;
+  return rc;
+}
+
 enum { NSEC_PER_SEC = 1000000000 };
 
 DDS::Duration_t convertTimeout(FACE::TIMEOUT_TYPE timeout)
@@ -254,6 +339,15 @@ DDS::Duration_t convertTimeout(FACE::TIMEOUT_TYPE timeout)
   return dur;
 }
 
+FACE::SYSTEM_TIME_TYPE convertDuration(const DDS::Duration_t& duration)
+{
+  if (duration.sec == DDS::DURATION_INFINITE_SEC
+      && duration.nanosec == DDS::DURATION_INFINITE_NSEC) {
+    return FACE::INF_TIME_VALUE;
+  }
+  return duration.nanosec +
+    duration.sec * static_cast<FACE::SYSTEM_TIME_TYPE>(NSEC_PER_SEC);
+}
 
 }}
 

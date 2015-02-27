@@ -1,3 +1,13 @@
+Fri Feb 27 22:55:08 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * FACE/common.hpp:
+        * dds/FACE/FaceTSS.h:
+        * dds/FACE/FaceTSS.cpp:
+        * dds/FACE/config/QosSettings.h:
+        * tests/FACE/Messenger/Publisher/Publisher.cpp:
+
+          Implemented FACE::TS::Get_Connection_Parameters().
+
 Thu Feb 26 23:02:28 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/transport/framework/TransportRegistry.inl:

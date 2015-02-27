@@ -27,6 +27,11 @@ class OpenDDS_FACE_Export QosSettings {
     void apply_to(DDS::DataWriterQos& target) const;
     void apply_to(DDS::DataReaderQos& target) const;
 
+    const DDS::PublisherQos& publisher_qos() const { return publisher_qos_; }
+    const DDS::SubscriberQos& subscriber_qos() const { return subscriber_qos_; }
+    const DDS::DataWriterQos& data_writer_qos() const { return data_writer_qos_; }
+    const DDS::DataReaderQos& data_reader_qos() const { return data_reader_qos_; }
+
   private:
     // DomainPartipantFactory, DomainParticipant, and Topic qos
     // are not usable in FACE

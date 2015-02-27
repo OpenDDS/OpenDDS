@@ -15,6 +15,12 @@ static const ACE_INT64 INF_TIME_VALUE = -1;
 
 typedef char CONFIGURATION_RESOURCE[256];
 
+// FACE TS uses 'NO_ERROR' as the enumerator but this is pretty generic
+// and happens to be defined as a macro on some platforms.
+#if defined OPENDDS_FACE_STRICT
+#define RC_NO_ERROR NO_ERROR
+#endif
+
 // This enumeration defines the possible set of status codes which may be
 // returned by a method defined in the FACE API.
 enum RETURN_CODE_TYPE {
