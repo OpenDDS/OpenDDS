@@ -136,8 +136,8 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
     status = entities.connections_[connection_id].second;
     if (!connection_name[0]) {
       entities.connections_[connection_id].first.copy(connection_name,
-        sizeof CONNECTION_NAME_TYPE);
-      connection_name[sizeof CONNECTION_NAME_TYPE - 1] = 0;
+                                                      sizeof(CONNECTION_NAME_TYPE));
+      connection_name[sizeof(CONNECTION_NAME_TYPE) - 1] = 0;
     }
     return_code = RC_NO_ERROR;
   } else {
