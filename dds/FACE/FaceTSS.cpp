@@ -102,7 +102,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     return;
   }
 
-  const FACE::SYSTEM_TIME_TYPE refresh_period =
+  const SYSTEM_TIME_TYPE refresh_period =
     (connection_direction == SOURCE) ?
     OpenDDS::FaceTSS::convertDuration(qos.data_writer_qos().lifespan.duration) : 0;
 
@@ -116,7 +116,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     INVALID,
   };
   Entities::instance()->connections_[connection_id] =
-    std::make_pair(connection_name, status);
+    std::pair<std::string, TRANSPORT_CONNECTION_STATUS_TYPE>(connection_name, status);
 }
 
 void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,

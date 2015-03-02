@@ -11,6 +11,7 @@
 
 #include <map>
 #include <iostream>
+#include <string>
 
 namespace OpenDDS {
 namespace FaceTSS {
