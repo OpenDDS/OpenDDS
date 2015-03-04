@@ -427,28 +427,28 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   {
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
-    // Check if any publications have already sent a REQUEST_ACK message.
-    {
-      //locking order should be sample_lock_ before writers_lock_
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
-
-      WriterMapType::iterator where = writers_.find(remote_id);
-      if (where != writers_.end()) {
-
-        const ACE_Time_Value now = ACE_OS::gettimeofday();
-        if (where->second->should_ack(now)) {
-
-          const SequenceNumber sequence = where->second->ack_sequence();
-          const DDS::Time_t timenow = time_value_to_time(now);
-          if (send_sample_ack(remote_id, sequence, timenow)) {
-
-            where->second->clear_acks(sequence);
-          }
-        }
-      }
-    }
+//TODO: REMOVE
+//    // Check if any publications have already sent a REQUEST_ACK message.
+//    {
+//      //locking order should be sample_lock_ before writers_lock_
+//      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+//      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
+//
+//      WriterMapType::iterator where = writers_.find(remote_id);
+//      if (where != writers_.end()) {
+//
+//        const ACE_Time_Value now = ACE_OS::gettimeofday();
+//        if (where->second->should_ack(now)) {
+//
+//          const SequenceNumber sequence = where->second->ack_sequence();
+//          const DDS::Time_t timenow = time_value_to_time(now);
+//          if (send_sample_ack(remote_id, sequence, timenow)) {
+//
+//            where->second->clear_acks(sequence);
+//          }
+//        }
+//      }
+//    }
 
     // LIVELINESS policy timers are managed here.
     if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
@@ -550,6 +550,27 @@ DataReaderImpl::association_complete(const RepoId& /*remote_id*/)
   // always be passive, so association_complete() will not be called.
 }
 
+bool
+DataReaderImpl::writers_still_active(const WriterIdSeq& writers) {
+  ACE_WRITE_GUARD_RETURN(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_, true);
+  CORBA::ULong wr_len;
+
+  wr_len = writers.length();
+
+  for (CORBA::ULong i = 0; i < wr_len; i++) {
+    PublicationId writer_id = writers[i];
+
+    WriterMapType::iterator it = this->writers_.find(writer_id);
+
+    if (it != this->writers_.end() && it->second->active()) {
+      GuidConverter writer(it->second->writer_id_);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::writers_still_active - Writer (%C) still active, return true\n", std::string(writer).c_str()));
+      return true;
+    }
+  }
+  return false;
+}
+
 void
 DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     bool notify_lost)
@@ -571,6 +592,19 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         std::string(writer_converter).c_str(),
         writers.length()));
   }
+
+  //  ACE_OS::sleep(10);
+  ACE_Time_Value max_wait = ACE_OS::gettimeofday() + ACE_Time_Value(10);
+
+  while (ACE_OS::gettimeofday() < max_wait && writers_still_active(writers)) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::remove_associations - about to sleep 3 sec waiting for writers to become inactive\n"));
+    ACE_OS::sleep(3);
+  }
+  if (ACE_OS::gettimeofday() >= max_wait) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::remove_associations - max wait eclipsed proceed with removal\n"));
+  }
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::remove_associations - done waiting for writers to become inactive, proceed with removal\n"));
+
   // stop pending associations
   this->stop_associating();
 
@@ -1489,19 +1523,19 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif
           writer = where->second;
         }
-
-        ACE_Time_Value now = ACE_OS::gettimeofday();
-        if (where->second->should_ack(now)) {
-          DDS::Time_t timenow = time_value_to_time(now);
-          bool result = this->send_sample_ack(
-              header.publication_id_,
-              header.sequence_,
-              timenow);
-
-          if (result) {
-            where->second->clear_acks(header.sequence_);
-          }
-        }
+//TODO: REMOVE
+//        ACE_Time_Value now = ACE_OS::gettimeofday();
+//        if (where->second->should_ack(now)) {
+//          DDS::Time_t timenow = time_value_to_time(now);
+//          bool result = this->send_sample_ack(
+//              header.publication_id_,
+//              header.sequence_,
+//              timenow);
+//
+//          if (result) {
+//            where->second->clear_acks(header.sequence_);
+//          }
+//        }
       } else {
         GuidConverter subscriptionBuffer(this->subscription_id_);
         GuidConverter publicationBuffer(header.publication_id_);
@@ -1539,67 +1573,67 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
   }
   break;
-
-  case REQUEST_ACK: {
-    this->writer_activity(sample.header_);
-
-    DDS::Duration_t delay;
-    Serializer serializer(
-        sample.sample_,
-        sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
-    SequenceNumber ack;
-    serializer >> ack;
-    serializer >> delay;
-
-    if (DCPS_debug_level > 9) {
-      GuidConverter debugConverter(sample.header_.publication_id_);
-      ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
-          ACE_TEXT("publication %C received REQUEST_ACK for sequence %q ")
-          ACE_TEXT("valid for the next %d seconds.\n"),
-          std::string(debugConverter).c_str(),
-          ack.getValue(),
-          delay.sec));
-    }
-
-    {
-      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-
-      WriterMapType::iterator where
-      = this->writers_.find(sample.header_.publication_id_);
-
-      if (where != this->writers_.end()) {
-        ACE_Time_Value now = ACE_OS::gettimeofday();
-        ACE_Time_Value deadline = duration_to_absolute_time_value(delay, now);
-
-        where->second->ack_deadline(ack, deadline);
-
-        if (where->second->should_ack(now)) {
-          DDS::Time_t timenow = time_value_to_time(now);
-          bool result = this->send_sample_ack(
-              sample.header_.publication_id_,
-              ack,
-              timenow);
-
-          if (result) {
-            where->second->clear_acks(ack);
-          }
-        }
-
-      } else {
-        GuidConverter subscriptionBuffer(this->subscription_id_);
-        GuidConverter publicationBuffer(sample.header_.publication_id_);
-        ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
-            ACE_TEXT("subscription %C failed to find ")
-            ACE_TEXT("publication data for %C.\n"),
-            std::string(subscriptionBuffer).c_str(),
-            std::string(publicationBuffer).c_str()));
-      }
-    }
-
-  }
-  break;
+//TODO: REMOVE
+//  case REQUEST_ACK: {
+//    this->writer_activity(sample.header_);
+//
+//    DDS::Duration_t delay;
+//    Serializer serializer(
+//        sample.sample_,
+//        sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
+//    SequenceNumber ack;
+//    serializer >> ack;
+//    serializer >> delay;
+//
+//    if (DCPS_debug_level > 9) {
+//      GuidConverter debugConverter(sample.header_.publication_id_);
+//      ACE_DEBUG((LM_DEBUG,
+//          ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
+//          ACE_TEXT("publication %C received REQUEST_ACK for sequence %q ")
+//          ACE_TEXT("valid for the next %d seconds.\n"),
+//          std::string(debugConverter).c_str(),
+//          ack.getValue(),
+//          delay.sec));
+//    }
+//
+//    {
+//      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
+//
+//      WriterMapType::iterator where
+//      = this->writers_.find(sample.header_.publication_id_);
+//
+//      if (where != this->writers_.end()) {
+//        ACE_Time_Value now = ACE_OS::gettimeofday();
+//        ACE_Time_Value deadline = duration_to_absolute_time_value(delay, now);
+//
+//        where->second->ack_deadline(ack, deadline);
+//
+//        if (where->second->should_ack(now)) {
+//          DDS::Time_t timenow = time_value_to_time(now);
+//          bool result = this->send_sample_ack(
+//              sample.header_.publication_id_,
+//              ack,
+//              timenow);
+//
+//          if (result) {
+//            where->second->clear_acks(ack);
+//          }
+//        }
+//
+//      } else {
+//        GuidConverter subscriptionBuffer(this->subscription_id_);
+//        GuidConverter publicationBuffer(sample.header_.publication_id_);
+//        ACE_DEBUG((LM_WARNING,
+//            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
+//            ACE_TEXT("subscription %C failed to find ")
+//            ACE_TEXT("publication data for %C.\n"),
+//            std::string(subscriptionBuffer).c_str(),
+//            std::string(publicationBuffer).c_str()));
+//      }
+//    }
+//
+//  }
+//  break;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   case END_COHERENT_CHANGES: {
@@ -1813,61 +1847,62 @@ DataReaderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-bool
-DataReaderImpl::send_sample_ack(
-    const RepoId& publication,
-    SequenceNumber sequence,
-    DDS::Time_t when)
-{
-  size_t dataSize = 0, padding = 0;
-  gen_find_size(sequence, dataSize, padding);
-  gen_find_size(publication, dataSize, padding);
-
-  ACE_Message_Block* data;
-  ACE_NEW_RETURN(data, ACE_Message_Block(dataSize), false);
-
-  bool doSwap    = this->swap_bytes();
-  bool byteOrder = doSwap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
-
-  Serializer serializer(data, doSwap);
-  serializer << publication;
-  serializer << sequence;
-
-  DataSampleHeader outbound_header;
-  outbound_header.message_id_               = SAMPLE_ACK;
-  outbound_header.byte_order_               = byteOrder,
-      outbound_header.coherent_change_          = 0;
-  outbound_header.message_length_           = static_cast<ACE_UINT32>(data->total_length());
-  outbound_header.sequence_                 = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-  outbound_header.source_timestamp_sec_     = when.sec;
-  outbound_header.source_timestamp_nanosec_ = when.nanosec;
-  outbound_header.publication_id_           = this->subscription_id_;
-
-  ACE_Message_Block* sample_ack;
-  ACE_NEW_RETURN(
-      sample_ack,
-      ACE_Message_Block(
-          outbound_header.max_marshaled_size(),
-          ACE_Message_Block::MB_DATA,
-          data // cont
-      ), false);
-  *sample_ack << outbound_header;
-
-  if (DCPS_debug_level > 0) {
-    GuidConverter subscriptionBuffer(this->subscription_id_);
-    GuidConverter publicationBuffer(publication);
-    ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl[%@]::send_sample_ack() - ")
-        ACE_TEXT("%C sending SAMPLE_ACK message with sequence %q ")
-        ACE_TEXT("to publication %C.\n"),
-        this,
-        std::string(subscriptionBuffer).c_str(),
-        sequence.getValue(),
-        std::string(publicationBuffer).c_str()));
-  }
-
-  return this->send_response(publication, outbound_header, sample_ack);
-}
+//TODO: REMOVE
+//bool
+//DataReaderImpl::send_sample_ack(
+//    const RepoId& publication,
+//    SequenceNumber sequence,
+//    DDS::Time_t when)
+//{
+//  size_t dataSize = 0, padding = 0;
+//  gen_find_size(sequence, dataSize, padding);
+//  gen_find_size(publication, dataSize, padding);
+//
+//  ACE_Message_Block* data;
+//  ACE_NEW_RETURN(data, ACE_Message_Block(dataSize), false);
+//
+//  bool doSwap    = this->swap_bytes();
+//  bool byteOrder = doSwap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
+//
+//  Serializer serializer(data, doSwap);
+//  serializer << publication;
+//  serializer << sequence;
+//
+//  DataSampleHeader outbound_header;
+//  outbound_header.message_id_               = SAMPLE_ACK;
+//  outbound_header.byte_order_               = byteOrder,
+//      outbound_header.coherent_change_          = 0;
+//  outbound_header.message_length_           = static_cast<ACE_UINT32>(data->total_length());
+//  outbound_header.sequence_                 = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+//  outbound_header.source_timestamp_sec_     = when.sec;
+//  outbound_header.source_timestamp_nanosec_ = when.nanosec;
+//  outbound_header.publication_id_           = this->subscription_id_;
+//
+//  ACE_Message_Block* sample_ack;
+//  ACE_NEW_RETURN(
+//      sample_ack,
+//      ACE_Message_Block(
+//          outbound_header.max_marshaled_size(),
+//          ACE_Message_Block::MB_DATA,
+//          data // cont
+//      ), false);
+//  *sample_ack << outbound_header;
+//
+//  if (DCPS_debug_level > 0) {
+//    GuidConverter subscriptionBuffer(this->subscription_id_);
+//    GuidConverter publicationBuffer(publication);
+//    ACE_DEBUG((LM_DEBUG,
+//        ACE_TEXT("(%P|%t) DataReaderImpl[%@]::send_sample_ack() - ")
+//        ACE_TEXT("%C sending SAMPLE_ACK message with sequence %q ")
+//        ACE_TEXT("to publication %C.\n"),
+//        this,
+//        std::string(subscriptionBuffer).c_str(),
+//        sequence.getValue(),
+//        std::string(publicationBuffer).c_str()));
+//  }
+//
+//  return this->send_response(publication, outbound_header, sample_ack);
+//}
 
 void DataReaderImpl::notify_read_conditions()
 {

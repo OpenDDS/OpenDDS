@@ -182,7 +182,7 @@ Publisher::Publisher( const Options& options)
 
     // Create a publication and store it.
     this->publications_.push_back(
-      new Writer( writer.in(), this->options_.verbose())
+      new Writer( writer.in(), index, this->options_.verbose())
     );
 
     //
@@ -209,6 +209,7 @@ Publisher::run()
   DDS::Duration_t   timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   DDS::ConditionSeq conditions;
   DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0};
+  const int readers_per_publication = 2;
   unsigned int cummulative_count = 0;
   do {
     if( this->options_.verbose()) {
@@ -216,7 +217,7 @@ Publisher::run()
         ACE_TEXT("(%P|%t) Publisher::run() - ")
         ACE_TEXT("%d of %d subscriptions attached, waiting for more.\n"),
         cummulative_count,
-        this->publications_.size()
+        this->publications_.size()*readers_per_publication
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -247,7 +248,7 @@ Publisher::run()
     }
 
   // We know that there are 2 subscriptions matched with each publication.
-  } while( cummulative_count < (2*this->publications_.size()));
+  } while( cummulative_count < (readers_per_publication*this->publications_.size()));
 
   // Kluge to bias the race between BuiltinTopic samples and application
   // samples towards the BuiltinTopics during association establishment.

@@ -184,6 +184,8 @@ protected:
   /// Set graceful disconnecting flag.
   void set_graceful_disconnecting(bool flag);
 
+  virtual void add_delayed_notification(TransportQueueElement* element);
+
 private:
 
   enum SendPacketOutcome {
@@ -193,8 +195,6 @@ private:
     OUTCOME_PEER_LOST,
     OUTCOME_SEND_ERROR
   };
-
-  void add_delayed_notification(TransportQueueElement* element);
 
   /// Called from send() when it is time to attempt to send our
   /// current packet to the socket while in MODE_DIRECT mode_.

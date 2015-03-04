@@ -123,6 +123,7 @@ OpenDDS::DCPS::TransportSendStrategy::send_bytes(const iovec iov[],
                                                  int n,
                                                  int& /*bp*/)
 {
+//  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send_bytes \n"));
   return send_bytes_i(iov, n);
 }
 

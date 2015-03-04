@@ -101,24 +101,29 @@ public:
   /// update liveliness when remove_association is called.
   void removed();
 
-  /// Remove ack requests prior to the given sequence.
-  /// NOTE: This removes *all* ack requests for this publication
-  ///       satisfied by this sequence.
-  void clear_acks(SequenceNumber sequence);
+//TODO: REMOVE
+//  /// Remove ack requests prior to the given sequence.
+//  /// NOTE: This removes *all* ack requests for this publication
+//  ///       satisfied by this sequence.
+//  void clear_acks(SequenceNumber sequence);
 
-  /// Determine if a SAMPLE_ACK message should be sent to this
-  /// publication.
-  bool should_ack(ACE_Time_Value now);
+//TODO: REMOVE
+//  /// Determine if a SAMPLE_ACK message should be sent to this
+//  /// publication.
+//  bool should_ack(ACE_Time_Value now);
 
-  /// Set the time after which we no longer need to generate a
-  /// SAMPLE_ACK for this sequence value.
-  void ack_deadline(SequenceNumber sequence, ACE_Time_Value when);
+//TODO: REMOVE
+//  /// Set the time after which we no longer need to generate a
+//  /// SAMPLE_ACK for this sequence value.
+//  void ack_deadline(SequenceNumber sequence, ACE_Time_Value when);
 
   /// Update the last observed sequence number.
   void ack_sequence(SequenceNumber value);
 
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
+
+  bool active() const;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received ();

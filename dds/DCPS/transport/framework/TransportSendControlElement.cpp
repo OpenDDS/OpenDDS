@@ -52,6 +52,8 @@ namespace
     if (dropped) {
       listener->data_dropped(elem, dropped_by_transport);
     } else {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) handle_message - calling data_delivered for sample with seq: %q\n", elem->get_header().sequence_.getValue()));
+
       listener->data_delivered(elem);
     }
   }

@@ -52,6 +52,7 @@ public:
 
   void send_strategy(RtpsUdpSendStrategy* send_strategy);
   void receive_strategy(RtpsUdpReceiveStrategy* recv_strategy);
+  bool add_delayed_notification(TransportQueueElement* element);
 
   RtpsUdpInst* config();
 
@@ -174,6 +175,7 @@ public:
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     std::vector<RTPS::SequenceNumberSet> requested_changes_;
     std::map<SequenceNumber, RTPS::FragmentNumberSet> requested_frags_;
+    SequenceNumber cur_cumulative_ack_;
     bool handshake_done_, durable_;
     std::map<SequenceNumber, TransportQueueElement*> durable_data_;
     ACE_Time_Value durable_timestamp_;
@@ -195,11 +197,13 @@ public:
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
+    std::map<SequenceNumber, TransportQueueElement*> elems_not_acked_;
     CORBA::Long heartbeat_count_;
     bool durable_;
 
     RtpsWriter() : heartbeat_count_(0), durable_(false) {}
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
+    void add_elem_awaiting_ack(TransportQueueElement* element);
   };
 
   typedef std::map<RepoId, RtpsWriter, GUID_tKeyLessThan> RtpsWriterMap;
@@ -325,6 +329,7 @@ public:
 public:
 #endif
   void send_nack_replies();
+  void process_acked_by_all();
   void send_heartbeats();
   void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
@@ -358,7 +363,7 @@ private:
     ACE_Time_Value timeout_;
     bool scheduled_;
 
-  } nack_reply_, heartbeat_reply_;
+  } nack_reply_, heartbeat_reply_, acked_by_all_check_;
 
 
   struct HeartBeat : ACE_Event_Handler {

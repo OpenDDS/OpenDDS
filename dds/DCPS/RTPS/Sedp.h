@@ -477,7 +477,7 @@ private:
   DCPS::SequenceNumber manual_liveliness_seq_;
 };
 
-/// A class to wait on acknowledgements from other threads
+/// A class to wait on acknowledgments from other threads
 class WaitForAcks {
 public:
   WaitForAcks();

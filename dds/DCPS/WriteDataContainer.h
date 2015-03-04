@@ -13,6 +13,7 @@
 #include "DataSampleElement.h"
 #include "SendStateDataSampleList.h"
 #include "WriterDataSampleList.h"
+#include "DisjointSequence.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "PoolAllocator.h"
@@ -337,6 +338,10 @@ public:
   typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
+  DDS::ReturnCode_t wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const SequenceNumber& sequence);
+
+  bool sequence_acknowledged(const SequenceNumber sequence);
+
 private:
 
   // A class, normally provided by an unit test, that needs access to
@@ -397,6 +402,8 @@ private:
 private:
 
   void log_send_state_lists (std::string description);
+
+  DisjointSequence acked_sequences_;
 
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;
@@ -471,6 +478,12 @@ private:
   ACE_Recursive_Thread_Mutex                lock_;
   ACE_Condition<ACE_Recursive_Thread_Mutex> condition_;
   ACE_Condition<ACE_Recursive_Thread_Mutex> empty_condition_;
+
+  /// Lock used for wait_for_acks() processing.
+  ACE_SYNCH_MUTEX wfa_lock_;
+
+  /// Used to block in wait_for_acks().
+  ACE_Condition<ACE_SYNCH_MUTEX> wfa_condition_;
 
   /// The number of chunks that sample_list_element_allocator_
   /// needs initialize.

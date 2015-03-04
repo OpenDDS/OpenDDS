@@ -57,6 +57,10 @@ void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
   if (expected_seq_ != msg.count) {
     std::cout << "Expected: " << expected_seq_
               << " Received: " << msg.count << std::endl;
+  } else {
+    std::cout << "Received sample: " << msg.count << std::endl;
+    // Next message
+    expected_seq_ = msg.count + 1;
   }
   ++sample_count_;
   if (((sample_count_ + 1) % 1000) == 0) {
@@ -64,6 +68,4 @@ void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
     ACE_OS::sleep(2);
   }
 
-  // Next message
-  expected_seq_ = msg.count + 1;
 }

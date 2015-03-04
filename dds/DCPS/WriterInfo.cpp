@@ -167,80 +167,82 @@ WriterInfo::removed()
   reader_->writer_removed(*this);
 }
 
-void
-WriterInfo::clear_acks(
-  SequenceNumber sequence)
-{
-  // sample_lock_ is held by the caller.
+//TODO: REMOVE
+//void
+//WriterInfo::clear_acks(
+//  SequenceNumber sequence)
+//{
+//  // sample_lock_ is held by the caller.
+//
+//  DeadlineList::iterator current
+//    = this->ack_deadlines_.begin();
+//
+//  while (current != this->ack_deadlines_.end()) {
+//    if (current->first <= sequence) {
+//      current = this->ack_deadlines_.erase(current);
+//
+//    } else {
+//      break;
+//    }
+//  }
+//}
 
-  DeadlineList::iterator current
-    = this->ack_deadlines_.begin();
-
-  while (current != this->ack_deadlines_.end()) {
-    if (current->first <= sequence) {
-      current = this->ack_deadlines_.erase(current);
-
-    } else {
-      break;
-    }
-  }
-}
-
-bool
-WriterInfo::should_ack(
-  ACE_Time_Value now)
-{
-  // sample_lock_ is held by the caller.
-
-  if (this->ack_deadlines_.size() == 0) {
-    return false;
-  }
-
-  DeadlineList::iterator current = this->ack_deadlines_.begin();
-
-  while (current != this->ack_deadlines_.end()) {
-    if (current->second < now) {
-      // Remove any expired response deadlines.
-      current = this->ack_deadlines_.erase(current);
-
-    } else {
-      if (!this->ack_sequence_.empty() &&
-          current->first <= this->ack_sequence_.cumulative_ack()) {
-        return true;
-      }
-
-      ++current;
-    }
-  }
-
-  return false;
-}
-
-void
-WriterInfo::ack_deadline(SequenceNumber sequence, ACE_Time_Value when)
-{
-  // sample_lock_ is held by the caller.
-
-  if (this->ack_deadlines_.size() == 0) {
-    this->ack_deadlines_.push_back(std::make_pair(sequence, when));
-    return;
-  }
-
-  DeadlineList::iterator current = this->ack_deadlines_.begin();
-  if (current != this->ack_deadlines_.end()) {
-    // Insertion sort.
-    if (sequence < current->first) {
-      this->ack_deadlines_.insert(
-        current,
-        std::make_pair(sequence, when));
-    } else if (sequence == current->first) {
-      // Only update the deadline to be *later* than any existing one.
-      if (current->second < when) {
-        current->second = when;
-      }
-    }
-  }
-}
+//TODO: REMOVE
+//bool
+//WriterInfo::should_ack(
+//  ACE_Time_Value now)
+//{
+//  // sample_lock_ is held by the caller.
+//
+//  if (this->ack_deadlines_.size() == 0) {
+//    return false;
+//  }
+//
+//  DeadlineList::iterator current = this->ack_deadlines_.begin();
+//
+//  while (current != this->ack_deadlines_.end()) {
+//    if (current->second < now) {
+//      // Remove any expired response deadlines.
+//      current = this->ack_deadlines_.erase(current);
+//
+//    } else {
+//      if (!this->ack_sequence_.empty() &&
+//          current->first <= this->ack_sequence_.cumulative_ack()) {
+//        return true;
+//      }
+//
+//      ++current;
+//    }
+//  }
+//
+//  return false;
+//}
+//TODO: REMOVE
+//void
+//WriterInfo::ack_deadline(SequenceNumber sequence, ACE_Time_Value when)
+//{
+//  // sample_lock_ is held by the caller.
+//
+//  if (this->ack_deadlines_.size() == 0) {
+//    this->ack_deadlines_.push_back(std::make_pair(sequence, when));
+//    return;
+//  }
+//
+//  DeadlineList::iterator current = this->ack_deadlines_.begin();
+//  if (current != this->ack_deadlines_.end()) {
+//    // Insertion sort.
+//    if (sequence < current->first) {
+//      this->ack_deadlines_.insert(
+//        current,
+//        std::make_pair(sequence, when));
+//    } else if (sequence == current->first) {
+//      // Only update the deadline to be *later* than any existing one.
+//      if (current->second < when) {
+//        current->second = when;
+//      }
+//    }
+//  }
+//}
 
 void
 WriterInfo::ack_sequence(SequenceNumber value)
@@ -254,6 +256,13 @@ WriterInfo::ack_sequence() const
 {
   // sample_lock_ is held by the caller.
   return this->ack_sequence_.cumulative_ack();
+}
+
+bool
+WriterInfo::active() const
+{
+  ACE_Time_Value activity_wait_period(3);
+  return (ACE_OS::gettimeofday() - last_liveliness_activity_time_) <= activity_wait_period;
 }
 
 

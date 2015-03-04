@@ -59,11 +59,12 @@ public:
     ACE_Message_Block* msg,
     void* extra);
 
-  /// Handle reception of SAMPLE_ACK message.
-  virtual void deliver_ack(
-    const DataSampleHeader& /* header */,
-    DataSample* /* data */)
-  {}
+//TODO: REMOVE
+//  /// Handle reception of SAMPLE_ACK message.
+//  virtual void deliver_ack(
+//    const DataSampleHeader& /* header */,
+//    DataSample* /* data */)
+//  {}
 
   struct InlineQosData {
     DDS::PublisherQos  pub_qos;

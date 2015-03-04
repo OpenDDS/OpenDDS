@@ -122,10 +122,10 @@ OpenDDS::Model::ReaderSync::wait_unmatch(const DDS::DataReader_var& reader,
                   ACE_TEXT(" get_subscription_matched_status failed!\n")),
                  -1);
     } else if (ms.current_count == 0 && (unsigned int)ms.total_count >= num_writers) {
-      if (DCPS_debug_level > 4) {
+//      if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_NOTICE, ACE_TEXT("ReaderSync: sub match count %d total count %d\n"),
                                        ms.current_count, ms.total_count));
-      }
+//      }
       break;  // unmatched
     }
     if (DCPS_debug_level > 4) {

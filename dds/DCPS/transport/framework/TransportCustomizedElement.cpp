@@ -32,6 +32,8 @@ TransportCustomizedElement::release_element(bool dropped_by_transport)
   DBG_ENTRY_LVL("TransportCustomizedElement", "release_element", 6);
 
   if (orig_) {
+//    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportCustomizedElement::release_element - calling decision_made for sample with seq: %q\n", this->sequence().getValue()));
+
     orig_->decision_made(dropped_by_transport);
   }
 

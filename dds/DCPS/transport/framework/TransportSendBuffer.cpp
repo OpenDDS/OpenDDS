@@ -70,10 +70,31 @@ SingleSendBuffer::release_all()
 }
 
 void
+SingleSendBuffer::release_acked(SequenceNumber seq) {
+  BufferMap::iterator buffer_iter = buffers_.begin();
+  BufferType& buffer(buffer_iter->second);
+
+  if (Transport_debug_level >= 0) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SingleSendBuffer::release_acked() - ")
+      ACE_TEXT("releasing buffer at: (0x%@,0x%@)\n"),
+      buffer.first, buffer.second
+    ));
+  }
+  while (buffer_iter != buffers_.end()) {
+    if (buffer_iter->first == seq) {
+      release(buffer_iter);
+      return;
+    }
+    ++buffer_iter;
+  }
+}
+
+void
 SingleSendBuffer::release(BufferMap::iterator buffer_iter)
 {
   BufferType& buffer(buffer_iter->second);
-  if (Transport_debug_level >= 10) {
+  if (Transport_debug_level >= 0) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::release() - ")
       ACE_TEXT("releasing buffer at: (0x%@,0x%@)\n"),
@@ -250,6 +271,9 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
 void
 SingleSendBuffer::check_capacity()
 {
+  if (this->capacity_ == SingleSendBuffer::UNLIMITED) {
+    return;
+  }
   // Age off oldest sample if we are at capacity:
   if (this->buffers_.size() == this->capacity_) {
     BufferMap::iterator it(this->buffers_.begin());

@@ -47,6 +47,8 @@ QueueRemoveVisitor::visit_element_remove(TransportQueueElement* element,
     // This visitor is used in TransportSendStrategy::do_remove_sample
     // The dropped_by_transport flag should be false(default) as the
     // data_dropped is resulted from writer's remove_sample call.
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) QueueRemoveVisitor::visit_element_remove - calling data_dropped \n"));
+
     const bool released = element->data_dropped();
 
     // Adjust our status_ to indicate that we actually found (and removed)

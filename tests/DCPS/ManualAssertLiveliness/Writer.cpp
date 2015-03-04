@@ -93,7 +93,10 @@ Manual_By_Participant_Writer_1::svc ()
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_1::svc writing msg. %s\n"), get_id()));
-      ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
+      ::DDS::ReturnCode_t ret;
+      do {
+        ret = message_dw->write(message, handle);
+      } while (ret == ::DDS::RETCODE_TIMEOUT);
 
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR ((LM_ERROR,
@@ -244,7 +247,10 @@ Manual_By_Topic_Writer_1::svc ()
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_1::svc writing msg. %s\n"), get_id()));
-      ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
+      ::DDS::ReturnCode_t ret;
+      do {
+        ret = message_dw->write(message, handle);
+      } while (ret == ::DDS::RETCODE_TIMEOUT);
 
       if (ret != ::DDS::RETCODE_OK) {
         ACE_ERROR ((LM_ERROR,

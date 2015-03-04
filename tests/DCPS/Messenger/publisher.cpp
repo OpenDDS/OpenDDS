@@ -152,8 +152,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         // let any missed multicast/rtps messages get re-delivered
         ACE_Time_Value small_time(0, 250000);
         ACE_OS::sleep(small_time);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) publisher.cpp - done waiting small time since no wait for acks\n"));
       }
-
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) publisher.cpp - about to delete DW \n"));
       std::cout << "deleting DW" << std::endl;
       delete writer;
     }

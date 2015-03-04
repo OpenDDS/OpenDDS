@@ -631,11 +631,13 @@ protected:
     virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
-  /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
-  bool send_sample_ack(
-    const RepoId& publication,
-    SequenceNumber sequence,
-    DDS::Time_t when);
+//TODO: REMOVE
+//  /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
+//  bool send_sample_ack(
+//    const RepoId& publication,
+//    SequenceNumber sequence,
+//    DDS::Time_t when);
+  bool writers_still_active(const WriterIdSeq& writers);
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
 

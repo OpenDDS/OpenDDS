@@ -2321,14 +2321,27 @@ Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
 }
 
 void
-Sedp::Writer::write_control_msg(ACE_Message_Block& payload, size_t size,
+Sedp::Writer::write_control_msg(ACE_Message_Block& payload,
+                                size_t size,
                                 DCPS::MessageId id,
                                 DCPS::SequenceNumber seq)
 {
-  DCPS::DataSampleHeader header;
-  set_header_fields(header, size, GUID_UNKNOWN, seq, id);
+//  DCPS::DataSampleHeader header;
+  DCPS::DataSampleElement* list_el = new DCPS::DataSampleElement(repo_id_, this, 0, &alloc_, 0);
+
+  set_header_fields(list_el->get_header(), size, GUID_UNKNOWN, seq, id);
+
+  list_el->set_sample(new ACE_Message_Block(size));
+  *list_el->get_sample() << list_el->get_header();
+  list_el->get_sample()->cont(payload.duplicate());
+
+  DCPS::SendStateDataSampleList list;
+  list.enqueue_tail(list_el);
+  send(list);
+
+  delete payload.cont();
   // no need to serialize header since rtps_udp transport ignores it
-  send_control(header, &payload);
+//  send_control(header, &payload);
 }
 
 void

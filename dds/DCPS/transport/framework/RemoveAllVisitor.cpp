@@ -43,6 +43,8 @@ OpenDDS::DCPS::RemoveAllVisitor::visit_element_remove(TransportQueueElement* ele
   // is dropped by transport. In the later case, the
   // dropped_by_transport is not used as the sample is cloned
   // and no callback is made to writer.
+//  ACE_DEBUG((LM_DEBUG, "(%P|%t) RemoveAllVisitor::visit_element_remove - calling data_dropped \n"));
+
   element->data_dropped(true);
 
   // Adjust our status_ to indicate that we actually found (and removed)
