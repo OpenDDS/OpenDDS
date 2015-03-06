@@ -387,7 +387,11 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     mc_port = port_common + outer_->disco_->d0();
 
   u_short participantId = (hdr_.guidPrefix[10] << 8) | hdr_.guidPrefix[11];
+
+#ifdef OPENDDS_SAFETY_PROFILE
   const u_short startingParticipantId = participantId;
+#endif
+
   while (!open_unicast_socket(port_common, participantId)) {
     ++participantId;
   }
