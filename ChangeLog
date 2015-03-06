@@ -1,3 +1,11 @@
+Fri Mar  6 16:37:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * bin/dcps_tests.lst:
+        * tests/DCPS/ManualAssertLiveliness/subscriber.cpp:
+
+          No need to set non-default history QoS, allows this test
+          to run on the minimum profile build.
+
 Fri Mar  6 15:21:50 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/DCPS/SafetyProfilePool.h:

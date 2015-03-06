@@ -240,14 +240,14 @@ tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !RTPS_NO_WFA
 tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN !RTPS_NO_WFA
 tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN !RTPS_NO_WFA
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
-tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtps lost: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco lost: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps lost: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtps: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtps lost: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco lost: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps: !DCPS_MIN RTPS
+tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps lost: !DCPS_MIN RTPS
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
