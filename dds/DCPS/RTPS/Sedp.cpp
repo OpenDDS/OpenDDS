@@ -2281,12 +2281,19 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
   DCPS::find_size_ulong(size, padding);
   DCPS::gen_find_size(plist, size, padding);
 
-  ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
+  ACE_Message_Block* payload = new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
 
+  if (!payload) {
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Sedp::Writer::write_unregister_dispose")
+               ACE_TEXT(" - Failed to allocate message block message\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
   using DCPS::Serializer;
-  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  Serializer ser(payload->cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // PL_CDR_LE = 0x0003
             (ser << ACE_OutputCDR::from_octet(3)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
@@ -2295,7 +2302,7 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
 
   if (ok) {
     // Send
-    write_control_msg(payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
+    write_control_msg(*payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
     return DDS::RETCODE_OK;
   } else {
     // Error
@@ -2326,22 +2333,10 @@ Sedp::Writer::write_control_msg(ACE_Message_Block& payload,
                                 DCPS::MessageId id,
                                 DCPS::SequenceNumber seq)
 {
-//  DCPS::DataSampleHeader header;
-  DCPS::DataSampleElement* list_el = new DCPS::DataSampleElement(repo_id_, this, 0, &alloc_, 0);
-
-  set_header_fields(list_el->get_header(), size, GUID_UNKNOWN, seq, id);
-
-  list_el->set_sample(new ACE_Message_Block(size));
-  *list_el->get_sample() << list_el->get_header();
-  list_el->get_sample()->cont(payload.duplicate());
-
-  DCPS::SendStateDataSampleList list;
-  list.enqueue_tail(list_el);
-  send(list);
-
-  delete payload.cont();
+  DCPS::DataSampleHeader header;
+  set_header_fields(header, size, GUID_UNKNOWN, seq, id);
   // no need to serialize header since rtps_udp transport ignores it
-//  send_control(header, &payload);
+  send_control(header, &payload);
 }
 
 void
