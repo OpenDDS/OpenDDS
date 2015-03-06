@@ -1,0 +1,16 @@
+/publisher
+/subscriber
+/libDDS_Instances_Idl.*
+/*TypeSupport*
+/KeyedDataC.cpp
+/KeyedDataC.h
+/KeyedDataC.inl
+/KeyedDataS.inl
+/KeyedDataS.cpp
+/KeyedDataS.h
+/NoKeyDataC.cpp
+/NoKeyDataC.h
+/NoKeyDataC.inl
+/NoKeyDataS.inl
+/NoKeyDataS.cpp
+/NoKeyDataS.h
