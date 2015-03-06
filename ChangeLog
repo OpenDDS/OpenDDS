@@ -1,3 +1,11 @@
+Fri Mar  6 19:26:43 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/FACE/FaceTSS.h:
+        * tests/FACE/Messenger/Subscriber/Subscriber.cpp:
+
+          Update FACE connection status in case of errors in the listener.
+          Test FACE::TS::Get_Connection_Parameters() on the receive side.
+
 Fri Mar  6 16:37:46 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * bin/dcps_tests.lst:

@@ -149,6 +149,7 @@ private:
     const typename DataReader::_var_type typedReader =
       DataReader::_narrow(reader);
     if (!typedReader) {
+      update_status(connection_id_, DDS::RETCODE_BAD_PARAMETER);
       return;
     }
 
@@ -158,7 +159,7 @@ private:
       if (sinfo.valid_data) {
         update_status(connection_id_, DDS::RETCODE_OK);
         FACE::RETURN_CODE_TYPE retcode;
-        callback_(0, sample, 0, 0, 0, retcode); //TODO
+        callback_(0, sample, 0, 0, 0, retcode);
       }
     }
   }

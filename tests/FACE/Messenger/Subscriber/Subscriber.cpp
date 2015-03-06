@@ -60,6 +60,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cout << msg.text.in() << '\t' << msg.count << std::endl;
   }
 
+  FACE::CONNECTION_NAME_TYPE name = {};
+  FACE::TRANSPORT_CONNECTION_STATUS_TYPE connectionStatus;
+  FACE::TS::Get_Connection_Parameters(name, connId, connectionStatus, status);
+  if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+
+  if (connectionStatus.MESSAGE != 1
+      || connectionStatus.LAST_MSG_VALIDITY != FACE::VALID) {
+    std::cout << "ERROR: unexpected value in connection parameters after receiving\n";
+    return EXIT_FAILURE;
+  }
+
   FACE::TS::Destroy_Connection(connId, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
