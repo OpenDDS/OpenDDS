@@ -1,3 +1,26 @@
+Fri Mar  6 15:21:50 UTC 2015  Adam Mitz  <mitza@ociweb.com>
+
+        * dds/DCPS/SafetyProfilePool.h:
+
+          Use ACE_Atomic_Op to make it thread-safe.
+
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener.h:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener1.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/DataReaderListener4.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/Writer.h:
+        * tests/DCPS/ManyTopicMultiProcess/Writer.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/common.h:
+        * tests/DCPS/ManyTopicMultiProcess/publisher.cpp:
+        * tests/DCPS/ManyTopicMultiProcess/run_test.pl:
+        * tests/DCPS/ManyTopicMultiProcess/subscriber.cpp:
+
+          Overhauled this test:
+          - adhere to coding standards
+          - avoid random sleeps (no rand() on safety profile)
+          - put common code in common.h instead of repeating it
+          - don't write *subscriber_finished.txt until it's actually done
+
 Mon Mar  2 15:13:24 UTC 2015  Adam Mitz  <mitza@ociweb.com>
 
         * dds/FACE/FaceTSS.h:
