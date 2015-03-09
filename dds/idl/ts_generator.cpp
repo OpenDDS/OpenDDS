@@ -229,12 +229,10 @@ namespace face_ts_generator {
   void generate(UTL_ScopedName* name, std::string typeSuppHeader) {
     const std::string name_cxx = scoped(name),
       name_underscores = dds_generator::scoped_helper(name, "_"),
-      dataTypeHeader = typeSuppHeader.erase(typeSuppHeader.size() - 14, 11),
       exportMacro = be_global->export_macro().c_str(),
       exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
     be_global->add_include("FACE/TS.hpp", BE_GlobalData::STREAM_FACE_H);
     be_global->face_header_ <<
-      "#include \"" << dataTypeHeader << "\"\n\n"
       "namespace FACE\n"
       "{\n"
       "  namespace Read_Callback\n"
