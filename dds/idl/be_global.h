@@ -118,11 +118,19 @@ public:
   bool v8() const;
   void v8(bool b);
 
-  bool face() const;
-  void face(bool b);
+  bool face_ts() const;
+  void face_ts(bool b);
 
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
+
+  enum LanguageMapping {
+    LANGMAP_NONE, ///< Don't generate, let tao_idl handle it
+    LANGMAP_FACE_CXX, ///< Generate C++ language mapping from FACE spec
+  };
+
+  LanguageMapping language_mapping() const;
+  void language_mapping(LanguageMapping lm);
 
   ACE_CString sequence_suffix() const;
   void sequence_suffix(const ACE_CString& str);
@@ -137,9 +145,11 @@ private:
   const char* filename_;
   // Name of the IDL file we are processing.
 
-  bool java_, suppress_idl_, generate_wireshark_, v8_, face_;
+  bool java_, suppress_idl_, generate_wireshark_, v8_, face_ts_;
 
   ACE_CString export_macro_, export_include_, pch_include_, java_arg_, seq_;
+
+  LanguageMapping language_mapping_;
 };
 
 class BE_Comment_Guard {

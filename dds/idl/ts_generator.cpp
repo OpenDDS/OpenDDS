@@ -141,7 +141,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
   replaceAll(cpp, replacements);
   be_global->impl_ << cpp;
 
-  if (be_global->face()) {
+  if (be_global->face_ts()) {
     face_ts_generator::generate(name, dc.c_str());
   }
 

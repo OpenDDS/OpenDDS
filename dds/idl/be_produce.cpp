@@ -359,7 +359,7 @@ BE_produce()
                 be_global->ws_config_, BE_GlobalData::STREAM_WS);
   }
 
-  if (be_global->face()) {
+  if (be_global->face_ts()) {
     postprocess(be_global->face_header_name_.c_str(), be_global->face_header_,
                 BE_GlobalData::STREAM_FACE_H);
     postprocess(be_global->face_impl_name_.c_str(), be_global->face_impl_,

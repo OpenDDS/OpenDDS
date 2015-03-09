@@ -30,13 +30,14 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0),
-    java_(false),
-    suppress_idl_(false),
-    generate_wireshark_(false),
-    v8_(false),
-    face_(false),
-    seq_("Seq")
+  : filename_(0)
+  , java_(false)
+  , suppress_idl_(false)
+  , generate_wireshark_(false)
+  , v8_(false)
+  , face_ts_(false)
+  , seq_("Seq")
+  , language_mapping_(LANGMAP_NONE)
 {
 }
 
@@ -101,6 +102,16 @@ ACE_CString BE_GlobalData::java_arg() const
   return this->java_arg_;
 }
 
+void BE_GlobalData::language_mapping(LanguageMapping lm)
+{
+  this->language_mapping_ = lm;
+}
+
+BE_GlobalData::LanguageMapping BE_GlobalData::language_mapping() const
+{
+  return this->language_mapping_;
+}
+
 void BE_GlobalData::sequence_suffix(const ACE_CString& str)
 {
   this->seq_ = str;
@@ -131,14 +142,14 @@ bool BE_GlobalData::v8() const
   return this->v8_;
 }
 
-void BE_GlobalData::face(bool b)
+void BE_GlobalData::face_ts(bool b)
 {
-  this->face_ = b;
+  this->face_ts_ = b;
 }
 
-bool BE_GlobalData::face() const
+bool BE_GlobalData::face_ts() const
 {
-  return this->face_;
+  return this->face_ts_;
 }
 
 bool
@@ -234,8 +245,8 @@ BE_GlobalData::parse_args(long& i, char** av)
   case 'G':
     if (0 == ACE_OS::strcmp(av[i], "-Gws"))
       generate_wireshark_ = true;
-    else if (0 == ACE_OS::strcmp(av[i], "-Gface"))
-      face(true);
+    else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
+      face_ts(true);
     else
       {
         ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
@@ -243,6 +254,16 @@ BE_GlobalData::parse_args(long& i, char** av)
         idl_global->set_compile_flags(idl_global->compile_flags()
                                       | IDL_CF_ONLY_USAGE);
       }
+    break;
+  case 'L':
+    if (0 == ACE_OS::strcasecmp(av[i], "-Lface"))
+      language_mapping(LANGMAP_FACE_CXX);
+    else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
+                  ACE_TEXT(" option\n"), av[i]));
+      idl_global->set_compile_flags(idl_global->compile_flags()
+                                    | IDL_CF_ONLY_USAGE);
+    }
     break;
   case 'S':
     switch (av[i][2]) {
