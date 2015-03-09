@@ -14,7 +14,6 @@ use strict;
 
 my $status = 0;
 
-PerlDDS::add_lib_path('../ManyTopicTypes');
 PerlDDS::add_lib_path('../common');
 
 my @txtfiles;

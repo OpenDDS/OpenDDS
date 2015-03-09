@@ -2,6 +2,7 @@
 #define OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 
 #include "ace/Malloc_Base.h"
+#include "ace/Atomic_Op.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -21,7 +22,7 @@ public:
   explicit SafetyProfilePool(size_t size = 10*1024*1024)
     : size_(size)
     , pool_(new char[size])
-    , iter_(pool_)
+    , idx_(0)
   {
   }
 
@@ -34,12 +35,11 @@ public:
 
   void* malloc(std::size_t n)
   {
-    if (iter_ + n > pool_ + size_) {
+    const unsigned long end = idx_ += n;
+    if (end > size_) {
       return 0;
     }
-    void* alloc = iter_;
-    iter_ += n;
-    return alloc;
+    return pool_ + end - n;
   }
 
   void free(void*)
@@ -67,7 +67,7 @@ private:
 
   const size_t size_;
   char* const pool_;
-  char* iter_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> idx_;
 };
 
 }}

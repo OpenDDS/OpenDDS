@@ -9,13 +9,9 @@
  */
 // ============================================================================
 
+#include "DataReaderListener.h"
 
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-
-#include "dds/DCPS/transport/udp/UdpInst.h"
-
-#include "dds/DdsDcpsInfrastructureC.h"
-
+#include "ace/OS_NS_unistd.h"
 #include "ace/SString.h"
 
 #define MY_DOMAIN 4
@@ -39,14 +35,55 @@
 #define TOPIC_T6 32
 #define TOPIC_T7 64
 
-static const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
+static const ACE_Time_Value small_time(0, 250000);
 
 static const int LEASE_DURATION_SEC = 5; // seconds
 
 // These files need to be unlinked in the run test script before and
 // after running.
-//static ACE_TString pub_ready_filename = ACE_TEXT("publisher_ready.txt");
 static ACE_TString pub_finished_filename = ACE_TEXT("_publisher_finished.txt");
-//static ACE_TString sub_ready_filename = ACE_TEXT("subscriber_ready.txt");
 static ACE_TString sub_finished_filename = ACE_TEXT("_subscriber_finished.txt");
 
+inline bool check_listener(const DataReaderListenerImpl* drl, int expected,
+                           const ACE_TCHAR* topic)
+{
+  if (drl == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Unable to dynamic cast data ")
+               ACE_TEXT("reader listener\n")));
+    return false;
+  }
+
+  while (drl->num_samples() < expected) {
+    ACE_OS::sleep(small_time);
+  }
+
+  ACE_OS::printf("\n*** %s received %d samples.\n", ACE_TEXT_ALWAYS_CHAR(topic),
+                 drl->num_samples());
+
+  const ACE_TString t1_fn = topic + sub_finished_filename;
+  FILE* const readers_completed = ACE_OS::fopen(t1_fn.c_str(), ACE_TEXT("w"));
+
+  if (readers_completed == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ")
+               ACE_TEXT("completed file\n")));
+    return false;
+  }
+
+  ACE_OS::fclose(readers_completed);
+  return true;
+}
+
+inline void wait_for_file(const ACE_TCHAR* topic, const ACE_TString& suffix)
+{
+  FILE* file = 0;
+  const ACE_TString filename = topic + suffix;
+
+  while (!file) {
+    ACE_OS::sleep(small_time);
+    file = ACE_OS::fopen(filename.c_str(), ACE_TEXT("r"));
+  }
+
+  ACE_OS::fclose(file);
+}
