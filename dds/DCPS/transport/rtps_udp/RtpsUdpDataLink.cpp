@@ -1977,6 +1977,19 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
      || !durable_data_.empty());                // DW resent, not sent to reader
 }
 
+RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
+{
+  if (!elems_not_acked_.empty()) {
+    std::map<SequenceNumber, TransportQueueElement*>::iterator iter = elems_not_acked_.begin();
+    while (iter != elems_not_acked_.end()) {
+      iter->second->data_delivered();
+      send_buff_->release_acked(iter->first);
+      elems_not_acked_.erase(iter);
+      iter = elems_not_acked_.begin();
+    }
+  }
+}
+
 SequenceNumber
 RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo& ri) const
 {

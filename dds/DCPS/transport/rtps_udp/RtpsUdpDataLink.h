@@ -202,6 +202,7 @@ public:
     bool durable_;
 
     RtpsWriter() : heartbeat_count_(0), durable_(false) {}
+    ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
   };
