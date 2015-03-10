@@ -552,7 +552,6 @@ DataReaderImpl::association_complete(const RepoId& /*remote_id*/)
 
 bool
 DataReaderImpl::writers_still_active(const WriterIdSeq& writers) {
-  ACE_WRITE_GUARD_RETURN(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_, true);
   CORBA::ULong wr_len;
 
   wr_len = writers.length();
@@ -593,6 +592,9 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         writers.length()));
   }
 
+  // stop pending associations
+  this->stop_associating();
+
   //  ACE_OS::sleep(10);
   ACE_Time_Value max_wait = ACE_OS::gettimeofday() + ACE_Time_Value(10);
 
@@ -604,10 +606,6 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::remove_associations - max wait eclipsed proceed with removal\n"));
   }
   ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::remove_associations - done waiting for writers to become inactive, proceed with removal\n"));
-
-  // stop pending associations
-  this->stop_associating();
-
 
   DDS::InstanceHandleSeq handles;
 
