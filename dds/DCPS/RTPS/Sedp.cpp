@@ -2167,7 +2167,7 @@ Sedp::Writer::control_dropped(ACE_Message_Block* mb, bool)
     // We allocated mb on stack, its continuation block on heap
     delete mb->cont();
   } else {
-	mb->release();
+    mb->release();
   }
 }
 
