@@ -32,7 +32,11 @@ before_script:
   - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
 
 script:
+  - tar czf modeling_plugins.tar.gz tools/modeling/plugins
+  - rm -rf tools/modeling/plugins
   - perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
+  - tar xzf modeling_plugins.tar.gz
+  - rm modeling_plugins.tar.gz
   - perl $ACE_ROOT/bin/mwc.pl -type gnuace -workers 2 DDS_TAOv2_all.mwc
   - make -j2
   - cd tests/DCPS/Messenger && ./run_test.pl all
