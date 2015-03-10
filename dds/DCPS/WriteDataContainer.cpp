@@ -396,7 +396,6 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
 
   while (instance_list.size() > 0) {
     bool released = false;
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::dispose - about to remove_oldest_sample \n"));
     DDS::ReturnCode_t ret
     = remove_oldest_sample(instance_list, released);
 
