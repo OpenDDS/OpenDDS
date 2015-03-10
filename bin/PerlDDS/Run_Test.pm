@@ -328,6 +328,7 @@ sub new {
 
   my $index = 0;
   foreach my $arg (@ARGV) {
+    next if $arg eq '';
     $arg =~ /^([^=]*)(:?=(.*))?$/;
     $self->_info("TestFramework parsing \"$arg\"\n");
     my $flag_name = $1;
