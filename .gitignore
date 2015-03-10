@@ -11,10 +11,10 @@ lib*.so*
 *.sdf
 *.sln
 *.suo
-.cproject
-.project
-.settings/
 
+/.cproject
+/.project
+/.settings/
 /setenv.sh
 /setenv.cmd
 /user_macros.GNU
