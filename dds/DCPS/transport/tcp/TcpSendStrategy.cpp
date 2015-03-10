@@ -119,7 +119,6 @@ ssize_t
 OpenDDS::DCPS::TcpSendStrategy::send_bytes(const iovec iov[], int n, int& bp)
 {
   DBG_ENTRY_LVL("TcpSendStrategy","send_bytes",6);
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpSendStrategy::send_bytes - \n"));
   return this->non_blocking_send(iov, n, bp);
 }
 
@@ -142,7 +141,8 @@ OpenDDS::DCPS::TcpSendStrategy::send_bytes_i(const iovec iov[], int n)
   if (connection.is_nil())
     return -1;
   ssize_t result = connection->peer().sendv(iov, n);
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpSendStrategy::send_bytes_i sent %d bytes \n", result));
+  if (DCPS_debug_level > 4)
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpSendStrategy::send_bytes_i sent %d bytes \n", result));
 
   return result;
 }
