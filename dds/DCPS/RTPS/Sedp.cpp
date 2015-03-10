@@ -2152,15 +2152,23 @@ Sedp::Writer::data_dropped(const DCPS::DataSampleElement* dsle, bool)
 void
 Sedp::Writer::control_delivered(ACE_Message_Block* mb)
 {
-  // We allocated mb on stack, its continuation block on heap
-  delete mb->cont();
+  if (mb->flags() == ACE_Message_Block::DONT_DELETE) {
+    // We allocated mb on stack, its continuation block on heap
+    delete mb->cont();
+  } else {
+    mb->release();
+  }
 }
 
 void
 Sedp::Writer::control_dropped(ACE_Message_Block* mb, bool)
 {
-  // We allocated mb on stack, its continuation block on heap
-  delete mb->cont();
+  if (mb->flags() == ACE_Message_Block::DONT_DELETE) {
+    // We allocated mb on stack, its continuation block on heap
+    delete mb->cont();
+  } else {
+	mb->release();
+  }
 }
 
 DDS::ReturnCode_t
@@ -2321,6 +2329,7 @@ Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
                        ACE_Message_Block::MB_DATA,
                        new ACE_Message_Block(static_cast<const char*>(pReader),
                                              sizeof(reader)));
+  mb.set_flags(ACE_Message_Block::DONT_DELETE);
   mb.cont()->wr_ptr(sizeof(reader));
   // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
   write_control_msg(mb, sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
