@@ -1846,8 +1846,6 @@ TransportSendStrategy::send_packet()
 ssize_t
 TransportSendStrategy::non_blocking_send(const iovec iov[], int n, int& bp)
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::non_blocking_send \n"));
-
   int val = 0;
   ACE_HANDLE handle = this->get_handle();
 
