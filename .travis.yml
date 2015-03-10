@@ -15,7 +15,8 @@ env:
 before_install:
   - mkdir ext
   - cd ext && git clone --depth 1 git://github.com/DOCGroup/MPC.git
-  - cd ext && git clone -b Latest_Beta --depth 1 git://github.com/DOCGroup/ATCD.git
+  - git clone -b Latest_Beta --depth 1 git://github.com/DOCGroup/ATCD.git
+  - cd ..
 
 branches:
   only:
