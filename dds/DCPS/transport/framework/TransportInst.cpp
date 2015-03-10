@@ -85,6 +85,7 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
       << name << ": ";
   return oss.str();
 #else
+  ACE_UNUSED_ARG(name);
   return "not implemented";
 #endif
 }

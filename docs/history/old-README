@@ -1,0 +1,100 @@
+======================================================================
+* Known Limitations (WARNING: some of these may be out of date)
+
+----------------------------------------------------------------------
+) An instance key must be a base type (not a complex type like array or
+  struct).
+
+  This limitation exists because the generated lessThan operator does
+  not currently handle complex types.
+
+  This limitation can be worked around by specifying multiple keys such
+  that all of the base types in the complex type are specified.
+
+----------------------------------------------------------------------
+) Users must ensure that TopicDescriptions are not used after the
+  associated Topic is deleted.
+
+----------------------------------------------------------------------
+) create_datawriter() does not wait for full association establishment;
+  a write shortly after creating the datawriter may be dropped on
+  the publisher side because add_associations() has not yet completed.
+
+  The sample may also be dropped on the subscriber side even though
+  the connection exists between the publisher and subscriber when
+  the associations have not yet been mapped.
+
+  If the publisher expects existing DataReaders to receive the
+  messages it sends after creating the DataWriter, it must wait for
+  full association before writing messages.
+
+  You may perform the following to avoid message loss during association
+  for an expected quantity of associated DataReaders:
+
+    DDS::StatusCondition_var cond = writer->get_statuscondition();
+    cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    ws->attach_condition(cond);
+
+    DDS::Duration_t timeout =
+      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+    DDS::ConditionSeq conditions;
+    DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
+
+    do {
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        // failure
+      }
+
+      if (writer->get_publication_matched_status(matches) !=
+          DDS::RETCODE_OK) {
+        // failure
+      }
+
+    } while (matches.current_count < 1);
+
+    ws->detach_condition(cond);
+
+
+  Note: DDS by its nature is not connection oriented.  That is, publication
+        and subscription lifecycles are decoupled.  A number of QoS policies
+        exist which help manage late joining readers and writers
+        (i.e. DURABILITY).  For more information, please review the various
+        QoS policies documented in the OpenDDS Developer's Guide.
+
+----------------------------------------------------------------------
+) Samples are only rejected for having more than
+  qos.resource_limits.max_samples_per_instance NOT_READ samples in an
+  instance.
+
+  The implementation should also reject for too many total NOT_READ
+  samples or too many instances.
+
+  Since the OpenDDS implementation does not have hard limits with
+  respect to these values this limitation is considered acceptable.
+
+  Note: When more than resource_limits.max_samples are queued
+  in the DataReader the heap will be used instead of pre-allocated
+  memory.
+
+----------------------------------------------------------------------
+) The DURABILITY_SERVICE service_cleanup_delay support is currently
+  experimental.  The corresponding DURABILITY service_cleanup_delay
+  support is not available.
+
+----------------------------------------------------------------------
+) There is unspecified behavior when a non-volatile DataWriter persists
+  samples belonging to an outstanding coherent change group.  The coherent
+  samples are not persisted, however their presence may prematurely evict
+  valid data samples from the durability cache due to resource limits.
+
+  Coherent change groups are not maintained when their constituent data
+  is persisted.  When a non-volatile DataWriter comes online, samples
+  previously sent as a part of a change group will no longer maintain
+  their atomicity.
+
+----------------------------------------------------------------------
+) The multicast transport design documentation maintains its own set of
+  known issues; see: $DDS_ROOT/docs/html/multicast/multicast.html.

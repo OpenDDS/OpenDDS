@@ -281,7 +281,7 @@ FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
 {
   FACE::TRANSPORT_CONNECTION_STATUS_TYPE& status =
     Entities::instance()->connections_[connection_id].second;
-  FACE::RETURN_CODE_TYPE rc;
+  FACE::RETURN_CODE_TYPE rc = FACE::INVALID_PARAM;
 
   switch (retcode) {
   case DDS::RETCODE_OK:

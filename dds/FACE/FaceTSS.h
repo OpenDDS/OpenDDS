@@ -37,9 +37,9 @@ OpenDDS_FACE_Export FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYP
 template <typename Msg>
 void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
                      FACE::TIMEOUT_TYPE timeout,
-                     FACE::TRANSACTION_ID_TYPE& transaction_id,
+                     FACE::TRANSACTION_ID_TYPE& /*transaction_id*/,
                      Msg& message,
-                     FACE::MESSAGE_SIZE_TYPE message_size,
+                     FACE::MESSAGE_SIZE_TYPE /*message_size*/,
                      FACE::RETURN_CODE_TYPE& return_code)
 {
   std::map<FACE::CONNECTION_ID_TYPE, DDS::DataReader_var>& readers = Entities::instance()->readers_;
@@ -88,10 +88,10 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
 
 template <typename Msg>
 void send_message(FACE::CONNECTION_ID_TYPE connection_id,
-                  FACE::TIMEOUT_TYPE timeout,
-                  FACE::TRANSACTION_ID_TYPE& transaction_id,
+                  FACE::TIMEOUT_TYPE /*timeout*/,
+                  FACE::TRANSACTION_ID_TYPE& /*transaction_id*/,
                   const Msg& message,
-                  FACE::MESSAGE_SIZE_TYPE message_size,
+                  FACE::MESSAGE_SIZE_TYPE /*message_size*/,
                   FACE::RETURN_CODE_TYPE& return_code)
 {
   std::map<FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var>& writers = Entities::instance()->writers_;
@@ -170,13 +170,13 @@ private:
 
 template <typename Msg>
 void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
-                       const FACE::WAITSET_TYPE waitset,
+                       const FACE::WAITSET_TYPE /*waitset*/,
                        void (*callback)(FACE::TRANSACTION_ID_TYPE, Msg&,
                                         FACE::MESSAGE_TYPE_GUID,
                                         FACE::MESSAGE_SIZE_TYPE,
                                         const FACE::WAITSET_TYPE,
                                         FACE::RETURN_CODE_TYPE&),
-                       FACE::MESSAGE_SIZE_TYPE max_message_size,
+                       FACE::MESSAGE_SIZE_TYPE /*max_message_size*/,
                        FACE::RETURN_CODE_TYPE& return_code)
 {
   std::map<FACE::CONNECTION_ID_TYPE, DDS::DataReader_var>& readers = Entities::instance()->readers_;

@@ -1,0 +1,7 @@
+/bin
+/messages.properties
+/javaCompiler...args
+/.options
+/build.xml
+/@dot
+/org.opendds.modeling.diagram.main_*.jar

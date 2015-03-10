@@ -11,16 +11,17 @@
 
 bool callbackHappened = false;
 
-void callback(FACE::TRANSACTION_ID_TYPE transaction_id,
+void callback(FACE::TRANSACTION_ID_TYPE,
               Messenger::Message& msg,
-              FACE::MESSAGE_TYPE_GUID message_type_id,
-              FACE::MESSAGE_SIZE_TYPE message_size,
-              const FACE::WAITSET_TYPE waitset,
+              FACE::MESSAGE_TYPE_GUID,
+              FACE::MESSAGE_SIZE_TYPE,
+              const FACE::WAITSET_TYPE,
               FACE::RETURN_CODE_TYPE& return_code)
 {
   std::cout << "In callback(): "
             << msg.text.in() << '\t' << msg.count << std::endl;
   callbackHappened = true;
+  return_code = FACE::RC_NO_ERROR;
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
