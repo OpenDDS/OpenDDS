@@ -33,6 +33,7 @@ BE_GlobalData::BE_GlobalData()
   : filename_(0)
   , java_(false)
   , suppress_idl_(false)
+  , suppress_typecode_(false)
   , generate_wireshark_(false)
   , v8_(false)
   , face_ts_(false)
@@ -270,6 +271,12 @@ BE_GlobalData::parse_args(long& i, char** av)
     switch (av[i][2]) {
     case 'I':
       suppress_idl_ = true;
+      break;
+    case 't':
+      suppress_typecode_ = true;
+      break;
+    case 'a':
+      // ignore, accepted for tao_idl compatibility
       break;
     default:
       ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")

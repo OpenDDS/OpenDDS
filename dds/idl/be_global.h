@@ -148,7 +148,8 @@ private:
   const char* filename_;
   // Name of the IDL file we are processing.
 
-  bool java_, suppress_idl_, generate_wireshark_, v8_, face_ts_;
+  bool java_, suppress_idl_, suppress_typecode_,
+    generate_wireshark_, v8_, face_ts_;
 
   ACE_CString export_macro_, export_include_, pch_include_, java_arg_, seq_;
 
