@@ -11,6 +11,9 @@ lib*.so*
 *.sdf
 *.sln
 *.suo
+.cproject
+.project
+.settings/
 
 /setenv.sh
 /setenv.cmd
