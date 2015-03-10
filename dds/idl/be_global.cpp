@@ -185,8 +185,9 @@ BE_GlobalData::open_streams(const char* filename)
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
   ws_config_name_ = (filebase + "_ws.ini").c_str();
-  face_header_name_ = (filebase + "_TS.hpp").c_str();
-  face_impl_name_ = (filebase + "_TS.cpp").c_str();
+  facets_header_name_ = (filebase + "_TS.hpp").c_str();
+  facets_impl_name_ = (filebase + "_TS.cpp").c_str();
+  lang_header_name_ = (filebase + "C.h").c_str();
 }
 
 void
@@ -339,7 +340,8 @@ BE_GlobalData::writeFile(const char* fileName, const string& content)
 
 namespace {
   typedef set<string> Includes_t;
-  Includes_t inc_h_, inc_c_, inc_idl_, referenced_idl_, inc_path_, inc_face_h_;
+  Includes_t inc_h_, inc_c_, inc_idl_, referenced_idl_, inc_path_, inc_facets_h_,
+    inc_lang_h_;
 }
 
 void
@@ -348,7 +350,8 @@ BE_GlobalData::reset_includes()
   inc_h_.clear();
   inc_c_.clear();
   inc_idl_.clear();
-  inc_face_h_.clear();
+  inc_facets_h_.clear();
+  inc_lang_h_.clear();
   referenced_idl_.clear();
 }
 
@@ -388,8 +391,11 @@ BE_GlobalData::add_include(const char* file,
   case STREAM_IDL:
     inc = &inc_idl_;
     break;
-  case STREAM_FACE_H:
-    inc = &inc_face_h_;
+  case STREAM_FACETS_H:
+    inc = &inc_facets_h_;
+    break;
+  case STREAM_LANG_H:
+    inc = &inc_lang_h_;
     break;
   default:
     return;
@@ -445,7 +451,7 @@ namespace {
 ACE_CString
 BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 {
-  Includes_t* inc = 0;
+  const Includes_t* inc = 0;
 
   switch (which) {
   case STREAM_H:
@@ -457,8 +463,11 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   case STREAM_IDL:
     inc = &inc_idl_;
     break;
-  case STREAM_FACE_H:
-    inc = &inc_face_h_;
+  case STREAM_FACETS_H:
+    inc = &inc_facets_h_;
+    break;
+  case STREAM_LANG_H:
+    inc = &inc_lang_h_;
     break;
   default:
     return "";
@@ -472,7 +481,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     ret += "#include " + quote + it->c_str() + quote + "\n";
   }
 
-  if (which == STREAM_H) {
+  if (which == STREAM_H || which == STREAM_LANG_H) {
     ACE_CString exports = this->export_include();
 
     if (exports != "")

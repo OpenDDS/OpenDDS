@@ -75,16 +75,19 @@ public:
 
   void open_streams(const char* filename);
 
-  std::ostringstream header_, impl_, idl_, ws_config_, face_header_, face_impl_;
+  std::ostringstream header_, impl_, idl_, ws_config_, facets_header_, facets_impl_,
+    lang_header_;
   ACE_CString header_name_, impl_name_, idl_name_, ws_config_name_,
-    face_header_name_, face_impl_name_,
+    facets_header_name_, facets_impl_name_, lang_header_name_,
     output_dir_, tao_inc_pre_;
 
   ///print message to all open streams
   void multicast(const char* message);
 
   enum stream_enum_t {
-    STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_WS, STREAM_FACE_H, STREAM_FACE_CPP,
+    STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_WS,
+    STREAM_FACETS_H, STREAM_FACETS_CPP,
+    STREAM_LANG_H
   };
 
   void reset_includes();

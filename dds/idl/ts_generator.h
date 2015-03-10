@@ -18,7 +18,7 @@ namespace java_ts_generator {
 }
 
 namespace face_ts_generator {
-  void generate(UTL_ScopedName* name, std::string typeSupportHeader);
+  void generate(UTL_ScopedName* name);
 }
 
 class ts_generator : public dds_generator {

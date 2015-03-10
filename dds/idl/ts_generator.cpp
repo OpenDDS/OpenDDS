@@ -142,7 +142,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
   be_global->impl_ << cpp;
 
   if (be_global->face_ts()) {
-    face_ts_generator::generate(name, dc.c_str());
+    face_ts_generator::generate(name);
   }
 
   return true;
@@ -226,13 +226,13 @@ namespace java_ts_generator {
 
 namespace face_ts_generator {
 
-  void generate(UTL_ScopedName* name, std::string typeSuppHeader) {
+  void generate(UTL_ScopedName* name) {
     const std::string name_cxx = scoped(name),
       name_underscores = dds_generator::scoped_helper(name, "_"),
       exportMacro = be_global->export_macro().c_str(),
       exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
-    be_global->add_include("FACE/TS.hpp", BE_GlobalData::STREAM_FACE_H);
-    be_global->face_header_ <<
+    be_global->add_include("FACE/TS.hpp", BE_GlobalData::STREAM_FACETS_H);
+    be_global->facets_header_ <<
       "namespace FACE\n"
       "{\n"
       "  namespace Read_Callback\n"
@@ -270,7 +270,7 @@ namespace face_ts_generator {
       "      /* out */ RETURN_CODE_TYPE& return_code);\n\n"
       "  }\n"
       "}\n\n";
-    be_global->face_impl_ <<
+    be_global->facets_impl_ <<
       "void Receive_Message(CONNECTION_ID_TYPE connection_id,\n"
       "                     TIMEOUT_TYPE timeout,\n"
       "                     TRANSACTION_ID_TYPE& transaction_id,\n"
