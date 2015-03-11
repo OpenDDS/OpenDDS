@@ -592,8 +592,8 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         writers.length()));
   }
 
-  // stop pending associations
-  this->stop_associating();
+  // stop pending associations for these writer ids
+  this->stop_associating(writers.get_buffer(), writers.length());
 
   //  ACE_OS::sleep(10);
   ACE_Time_Value max_wait = ACE_OS::gettimeofday() + ACE_Time_Value(10);
@@ -732,6 +732,8 @@ void
 DataReaderImpl::remove_all_associations()
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",6);
+  // stop pending associations
+  this->stop_associating();
 
   OpenDDS::DCPS::WriterIdSeq writers;
   int size;
