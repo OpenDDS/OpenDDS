@@ -139,6 +139,7 @@ public:
   void sequence_suffix(const ACE_CString& str);
 
   bool suppress_idl() const { return suppress_idl_; }
+  bool suppress_typecode() const { return suppress_typecode_; }
 
   bool generate_wireshark() const { return generate_wireshark_; }
 

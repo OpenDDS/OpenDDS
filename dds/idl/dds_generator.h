@@ -117,9 +117,9 @@ struct NamespaceGuard {
   }
 };
 
-struct TS_NamespaceGuard  {
-  TS_NamespaceGuard(UTL_ScopedName* name, std::ostream& os,
-                    const char* keyword = "namespace")
+struct ScopedNamespaceGuard  {
+  ScopedNamespaceGuard(UTL_ScopedName* name, std::ostream& os,
+                       const char* keyword = "namespace")
     : os_(os)
   {
     for (n_ = 0; name->tail();
@@ -134,7 +134,7 @@ struct TS_NamespaceGuard  {
     if (std::strcmp(keyword, "module") == 0) semi_ = ";";
   }
 
-  ~TS_NamespaceGuard()
+  ~ScopedNamespaceGuard()
   {
     for (int i = 0; i < n_; ++i) os_ << '}' << semi_ << '\n';
   }

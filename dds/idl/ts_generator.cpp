@@ -113,13 +113,13 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
   replacements["EXPORT"] = be_global->export_macro().c_str();
   replacements["SEQ"] = be_global->sequence_suffix().c_str();
 
-  TS_NamespaceGuard idlGuard(name, be_global->idl_, "module");
+  ScopedNamespaceGuard idlGuard(name, be_global->idl_, "module");
   std::string idl = idl_template_;
   replaceAll(idl, replacements);
   be_global->idl_ << idl;
 
   {
-    TS_NamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard hGuard(name, be_global->header_);
     std::string h = h_template_;
     replaceAll(h, replacements);
     be_global->header_ << h;
@@ -136,7 +136,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
     "  typedef " << cxxName << "Seq Sequence;\n"
     "};\n}  }\n\n";
 
-  TS_NamespaceGuard cppGuard(name, be_global->impl_);
+  ScopedNamespaceGuard cppGuard(name, be_global->impl_);
   std::string cpp = cpp_template_;
   replaceAll(cpp, replacements);
   be_global->impl_ << cpp;
