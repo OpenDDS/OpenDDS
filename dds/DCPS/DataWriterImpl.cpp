@@ -1319,7 +1319,8 @@ DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
 {
-
+  if (this->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
+    return DDS::RETCODE_OK;
   DataWriterImpl::AckToken token = create_ack_token(max_wait);
   ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments")
                         ACE_TEXT(" waiting for acknowledgment of sequence %q at %T\n"),

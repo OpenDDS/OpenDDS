@@ -658,7 +658,8 @@ PublisherImpl::wait_for_acknowledgments(
     for (DataWriterMap::iterator it(this->datawriter_map_.begin());
         it != this->datawriter_map_.end(); ++it) {
       DataWriterImpl* writer = it->second;
-
+      if (writer->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
+        continue;
       if (writer->should_ack()) {
         DataWriterImpl::AckToken token = writer->create_ack_token(max_wait);
 
