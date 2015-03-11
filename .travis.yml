@@ -25,7 +25,7 @@ branches:
 before_script:
   - export
   - echo -e "#include \"ace/config-linux.h\"" > $ACE_ROOT/ace/config.h
-  - if [ "$CXX" == "g++" ]; echo -e "optimize=0" > $ACE_ROOT/include/makeinclude/platform_macros.GNU; fi
+  - if [ "$CXX" == "g++" ]; then echo -e "optimize=0" > $ACE_ROOT/include/makeinclude/platform_macros.GNU; fi
   - if [ "$CXX" == "g++" ]; then echo -e "include \$(ACE_ROOT)/include/makeinclude/platform_linux.GNU" >> $ACE_ROOT/include/makeinclude/platform_macros.GNU; fi
   - if [ "$CXX" == "clang++" ]; then echo -e "include \$(ACE_ROOT)/include/makeinclude/platform_linux_clang.GNU" > $ACE_ROOT/include/makeinclude/platform_macros.GNU; fi
 #  - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
