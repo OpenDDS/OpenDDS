@@ -148,7 +148,7 @@ namespace {
 
 bool wireshark_generator::gen_struct(UTL_ScopedName* name,
                                      const std::vector<AST_Field*>& fields,
-                                     const char*repoid)
+                                     AST_Type::SIZE_TYPE, const char* repoid)
 {
   if (!be_global->generate_wireshark())
     return true;

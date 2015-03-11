@@ -56,11 +56,12 @@ bool composite_generator::gen_enum(UTL_ScopedName* name,
 }
 
 bool composite_generator::gen_struct(UTL_ScopedName* name,
-  const vector<AST_Field*>& fields, const char* repoid)
+  const vector<AST_Field*>& fields, AST_Type::SIZE_TYPE size,
+  const char* repoid)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
-    if (!(*it)->gen_struct(name, fields, repoid))
+    if (!(*it)->gen_struct(name, fields, size, repoid))
       return false;
   }
 

@@ -1051,7 +1051,7 @@ namespace {
 }
 
 bool marshal_generator::gen_struct(UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, const char*)
+  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");

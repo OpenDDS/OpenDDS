@@ -2,11 +2,13 @@
 #define FACE_TYPES_HPP_HEADER_FILE
 
 #include <ace/CDR_Base.h>
+#include "OpenDDS_FACE_Export.h"
 
 namespace OpenDDS {
   namespace FaceTypes {
     template<typename CharT> class String_var;
     template<typename CharT> class String_out;
+    template<typename CharT> class String_Manager;
   }
 }
 
@@ -43,6 +45,21 @@ namespace FACE {
   typedef OpenDDS::FaceTypes::String_out<Char> String_out;
   typedef OpenDDS::FaceTypes::String_var<WChar> WString_var;
   typedef OpenDDS::FaceTypes::String_out<WChar> WString_out;
+
+  OpenDDS_FACE_Export Char* string_alloc(UnsignedLong len);
+  OpenDDS_FACE_Export Char* string_dup(const Char* str);
+  OpenDDS_FACE_Export void string_free(Char* str);
+
+  OpenDDS_FACE_Export WChar* wstring_alloc(UnsignedLong len);
+  OpenDDS_FACE_Export WChar* wstring_dup(const WChar* str);
+  OpenDDS_FACE_Export void wstring_free(WChar* str);
+}
+
+namespace OpenDDS {
+  namespace FaceTypes {
+    typedef String_Manager<FACE::Char> String_mgr;
+    typedef String_Manager<FACE::WChar> WString_mgr;
+  }
 }
 
 #endif /* FACE_TYPES_HPP_HEADER_FILE */

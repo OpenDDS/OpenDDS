@@ -39,6 +39,7 @@ public:
 
   virtual bool gen_struct(UTL_ScopedName* name,
                           const std::vector<AST_Field*>& fields,
+                          AST_Type::SIZE_TYPE size,
                           const char* repoid) = 0;
 
   virtual bool gen_typedef(UTL_ScopedName* name, AST_Type* base,
@@ -73,7 +74,8 @@ public:
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
 
   bool gen_struct(UTL_ScopedName* name,
-                  const std::vector<AST_Field*>& fields, const char* repoid);
+                  const std::vector<AST_Field*>& fields,
+                  AST_Type::SIZE_TYPE size, const char* repoid);
 
   bool gen_typedef(UTL_ScopedName* name, AST_Type* base, const char* repoid);
 

@@ -170,7 +170,7 @@ namespace {
 
 bool v8_generator::gen_struct(UTL_ScopedName* name,
                               const std::vector<AST_Field*>& fields,
-                              const char* /*repoid*/)
+                              AST_Type::SIZE_TYPE, const char*)
 {
   fwd_decl();
   {

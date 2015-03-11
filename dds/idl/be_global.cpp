@@ -197,6 +197,7 @@ BE_GlobalData::multicast(const char* str)
   header_ << str;
   impl_ << str;
   idl_ << str;
+  if (language_mapping_ != LANGMAP_NONE) lang_header_ << str;
 }
 
 BE_Comment_Guard::BE_Comment_Guard(const char* type, const char* name)

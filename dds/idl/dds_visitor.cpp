@@ -250,7 +250,8 @@ dds_visitor::visit_structure(AST_Structure* node)
   }
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_struct(node->name(), fields, node->repoID());
+    error_ |= !gen_target_.gen_struct(node->name(), fields,
+                                      node->size_type(), node->repoID());
   }
 
   if (be_global->java()) {
