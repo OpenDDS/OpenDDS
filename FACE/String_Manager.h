@@ -76,21 +76,25 @@ protected:
 template <typename CharT>
 class String_Manager : public String_Base<CharT>
 {
+  typedef String_Base<CharT> Base;
+  using typename Base::Traits;
+  using Base::str_;
+
 public:
   String_Manager()
-    : String_Base(Traits::empty())
+    : Base(Traits::empty())
   {}
 
   String_Manager(const String_Manager& copied)
-    : String_Base(copied)
+    : Base(copied)
   {}
 
   String_Manager(CharT* moved)
-    : String_Base(moved)
+    : Base(moved)
   {}
 
   String_Manager(const CharT* copied)
-    : String_Base(copied)
+    : Base(copied)
   {}
 
   String_Manager& operator=(const String_Manager& copied)
@@ -125,21 +129,25 @@ public:
 template <typename CharT>
 class String_var : public String_Base<CharT>
 {
+  typedef String_Base<CharT> Base;
+  using typename Base::Traits;
+  using Base::str_;
+
 public:
   String_var()
-    : String_Base(0)
+    : Base(0)
   {}
 
   String_var(const String_var& copied)
-    : String_Base(copied)
+    : Base(copied)
   {}
 
   String_var(CharT* moved)
-    : String_Base(moved)
+    : Base(moved)
   {}
 
   String_var(const CharT* copied)
-    : String_Base(copied)
+    : Base(copied)
   {}
 
   String_var& operator=(const String_var& copied)
@@ -192,7 +200,7 @@ public:
     : str_(s.str_)
   {}
 
-  String_out(String_var& p)
+  String_out(String_var<CharT>& p)
     : str_(p.out())
   {}
 
@@ -222,7 +230,7 @@ public:
 
 private:
   // assignment from String_var disallowed
-  void operator=(const String_var&);
+  void operator=(const String_var<CharT>&);
 
   CharT*& str_;
 };
