@@ -104,7 +104,7 @@ public:
   void set_inc_paths(const char* cmdline);
   void add_inc_path(const char* path);
 
-  ACE_CString get_include_block(stream_enum_t which);
+  std::string get_include_block(stream_enum_t which);
 
   ACE_CString export_macro() const;
   void export_macro(const ACE_CString& str);

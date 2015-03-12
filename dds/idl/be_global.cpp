@@ -18,6 +18,7 @@
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/ARGV.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -419,7 +420,7 @@ BE_GlobalData::add_referenced(const char* file)
 }
 
 namespace {
-  std::string transform_referenced(const std::string& idl)
+  std::string transform_referenced(const std::string& idl, const char* suffix)
   {
     const size_t len = idl.size();
     string base_name;
@@ -437,7 +438,7 @@ namespace {
       }
     }
 
-    return base_name + "TypeSupportImpl.h";
+    return base_name + suffix;
   }
 
   std::string make_relative(const std::string& absolute)
@@ -454,9 +455,34 @@ namespace {
     }
     return absolute;
   }
+
+  struct InsertIncludes {
+    std::ostream& ret_;
+    explicit InsertIncludes(std::ostream& ret) : ret_(ret) {}
+
+    void operator()(const std::string& str) const
+    {
+       const char* const quote = (!str.empty() && str[0] != '<') ? "\"" : "";
+       ret_ << "#include " << quote << str << quote << '\n';
+    }
+  };
+
+  struct InsertRefIncludes : InsertIncludes {
+    const char* const suffix_;
+
+    InsertRefIncludes(std::ostream& ret, const char* suffix)
+      : InsertIncludes(ret)
+      , suffix_(suffix)
+    {}
+
+    void operator()(const std::string& str) const
+    {
+      InsertIncludes::operator()(transform_referenced(make_relative(str), suffix_));
+    }
+  };
 }
 
-ACE_CString
+std::string
 BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 {
   const Includes_t* inc = 0;
@@ -481,27 +507,25 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     return "";
   }
 
-  ACE_CString ret;
-  Includes_t::const_iterator it = inc->begin(), end = inc->end();
+  std::ostringstream ret;
 
-  for (; it != end; ++it) {
-    ACE_CString quote = (it->size() > 0 && (*it)[0] != '<') ? "\"" : "";
-    ret += "#include " + quote + it->c_str() + quote + "\n";
+  std::for_each(inc->begin(), inc->end(), InsertIncludes(ret));
+
+  switch (which) {
+  case STREAM_LANG_H:
+    std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
+                  InsertRefIncludes(ret, "C.h"));
+    // fall through
+  case STREAM_H:
+    if (!export_include().empty())
+      ret << "#include \"" << export_include() << "\"\n";
+    break;
+
+  case STREAM_CPP:
+    std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
+                  InsertRefIncludes(ret, "TypeSupportImpl.h"));
+    break;
   }
 
-  if (which == STREAM_H || which == STREAM_LANG_H) {
-    ACE_CString exports = this->export_include();
-
-    if (exports != "")
-      ret += "#include \"" + exports + "\"\n";
-
-  } else if (which == STREAM_CPP) {
-    for (it = referenced_idl_.begin(), end = referenced_idl_.end(); it != end;
-        ++it) {
-      ret += ACE_CString("#include \"")
-        + transform_referenced(make_relative(*it)).c_str() + "\"\n";
-    }
-  }
-
-  return ret;
+  return ret.str();
 }

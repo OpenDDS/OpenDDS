@@ -1,22 +1,11 @@
-project : dcpslib {
-  sharedname = idl_test3_lib
-  libout       = .
-
-  idlflags    += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
-  dcps_ts_flags += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
-  dynamicflags = FOOLIB_BUILD_DLL
-  pch_header   =
-  pch_source   =
+project: dcps {
+  macros        += TEST_UNIONS
+  idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -DTEST_UNIONS
+  dcps_ts_flags += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -DTEST_UNIONS
+  dynamicflags   = FOOLIB_BUILD_DLL
 
   specific (vc9, vc10) {
     compile_flags += /bigobj
-  }
-
-  IDL_Files {
-    FooDef.idl
-    FooDef2.idl
-    FooDef3.idl
-    SharedTypes.idl
   }
 
   TypeSupport_Files {

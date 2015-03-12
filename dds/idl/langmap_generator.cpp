@@ -36,7 +36,7 @@ namespace {
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
       return primtype_[chartype] + '*';
     }
-    if (cls & CL_STRUCTURE) {
+    if (cls & (CL_STRUCTURE | CL_SEQUENCE | CL_ARRAY)) {
       return scoped(type->name());
     }
     return "<<unknown>>";
@@ -128,7 +128,6 @@ bool langmap_generator::gen_struct(UTL_ScopedName* name,
 
   for (size_t i = 0; i < fields.size(); ++i) {
     AST_Type* field_type = fields[i]->field_type();
-    resolveActualType(field_type);
     const std::string field_name = fields[i]->local_name()->get_string();
     std::string type_name = map_type(field_type);
     const Classification cls = classify(field_type);

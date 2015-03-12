@@ -243,7 +243,13 @@ void postprocess(const char* fn, ostringstream& content,
   case BE_GlobalData::STREAM_IDL: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
-    out << "#include \"" << be_global->filename() << "\"\n\n";
+
+    string filebase(be_global->filename());
+    const size_t idx = filebase.find_last_of("/\\"); // allow either slash
+    if (idx != string::npos) {
+      filebase = filebase.substr(idx + 1);
+    }
+    out << "#include \"" << filebase << "\"\n\n";
   }
   break;
   default:
