@@ -2,6 +2,7 @@
 #define OPENDDS_FACE_TSS_H
 
 #include "FACE/TS.hpp"
+#include "dds/DCPS/PoolAllocator.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/TypeSupportImpl.h"
@@ -25,7 +26,7 @@ public:
   std::map<FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var> writers_;
   std::map<FACE::CONNECTION_ID_TYPE, DDS::DataReader_var> readers_;
   std::map<FACE::CONNECTION_ID_TYPE,
-    std::pair<std::string, FACE::TRANSPORT_CONNECTION_STATUS_TYPE> > connections_;
+    std::pair<OPENDDS_STRING, FACE::TRANSPORT_CONNECTION_STATUS_TYPE> > connections_;
 };
 
 OpenDDS_FACE_Export DDS::Duration_t convertTimeout(FACE::TIMEOUT_TYPE timeout);
