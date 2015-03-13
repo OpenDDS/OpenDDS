@@ -12,8 +12,7 @@ lib*.so*
 *.sln
 *.suo
 
-/setenv.sh
-/setenv.cmd
+/setenv.*
 /user_macros.GNU
 /build
 /ipch
