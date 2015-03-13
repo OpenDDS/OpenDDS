@@ -69,7 +69,7 @@ throw(CORBA::SystemException)
           valid_ = false;
         }
 
-        phases_.insert(message.phase_number).second;
+        phases_.insert(message.phase_number);
 
         std::cout << "Message: subject    = " << message.subject.in() << std::endl
                   << "         subject_id = " << message.subject_id   << std::endl
