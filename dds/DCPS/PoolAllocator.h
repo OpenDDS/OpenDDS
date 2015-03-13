@@ -1,6 +1,8 @@
 #ifndef OPENDDS_DCPS_POOL_ALLOCATOR_H
 #define OPENDDS_DCPS_POOL_ALLOCATOR_H
 
+#ifdef OPENDDS_SAFETY_PROFILE
+
 #include "Service_Participant.h"
 
 namespace OpenDDS {
@@ -73,4 +75,22 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 }
 
 }}
+
+#ifdef ACE_LYNXOS_MAJOR
+#define OPENDDS_STRING std::basic_string<char, std::string_char_traits<char>, \
+          OpenDDS::DCPS::PoolAllocator<char> >
+#else
+#define OPENDDS_STRING std::basic_string<char, std::char_traits<char>, \
+          OpenDDS::DCPS::PoolAllocator<char> >
+#endif // ACE_LYNXOS_MAJOR
+#define OPENDDS_MAP(K, V) std::map<K, V, std::less<K>, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<const K, V> > >
+#define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<const K, V> > >
+#else
+#define OPENDDS_STRING std::string
+#define OPENDDS_MAP(K, V) std::map<K, V>
+#define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C>
+#endif // OPENDDS_SAFETY_PROFILE
+
 #endif // OPENDDS_DCPS_POOL_ALLOCATOR_H
