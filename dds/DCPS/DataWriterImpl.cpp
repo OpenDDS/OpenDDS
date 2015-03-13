@@ -2559,10 +2559,9 @@ DataWriterImpl::need_sequence_repair_i() const
 
 SendControlStatus
 DataWriterImpl::send_control(const DataSampleHeader& header,
-                             ACE_Message_Block* msg/*,
-                             void* extra /* = 0*/)
+                             ACE_Message_Block* msg)
 {
-  SendControlStatus status = TransportClient::send_control(header, msg/*, extra*/);
+  SendControlStatus status = TransportClient::send_control(header, msg);
 
   if (status == SEND_CONTROL_OK) {
     controlTracker.message_sent();
