@@ -52,6 +52,17 @@ protected:
     : str_(Traits::dup(copied))
   {}
 
+  String_Base(const String_Base& copied)
+    : str_(Traits::dup(copied))
+  {}
+
+  String_Base& operator=(const String_Base& copied)
+  {
+    String_Base tmp(copied);
+    std::swap(str_, tmp.str_);
+    return *this;
+  }
+
   ~String_Base()
   {
     Traits::free(str_);
