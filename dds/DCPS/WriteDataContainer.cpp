@@ -1449,8 +1449,6 @@ bool
 WriteDataContainer::sequence_acknowledged(const SequenceNumber sequence)
 {
   if (sequence == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::sequence_acknowledged ")
-                          ACE_TEXT("- Requested sequence to ack is SEQUENCENUMBER_UNKNOWN\n")));
     //return true here so that wait_for_acknowledgements doesn't block
     return true;
   }
@@ -1459,10 +1457,6 @@ WriteDataContainer::sequence_acknowledged(const SequenceNumber sequence)
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::sequence_acknowledged ")
                         ACE_TEXT("- cumulative ack is currently: %q\n"), acked.getValue()));
   if (acked == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || acked < sequence){
-    if (acked == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-      ACE_ERROR ((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::sequence_acknowledged ")
-                            ACE_TEXT("- cumulative_ack is SEQUENCENUMBER_UNKNOWN (i.e. empty)\n")));
-    }
     //if acked_sequences_ is empty or its cumulative_ack is lower than
     //the requests sequence, return false
     return false;
