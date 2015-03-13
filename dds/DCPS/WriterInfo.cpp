@@ -189,6 +189,18 @@ WriterInfo::ack_sequence() const
 bool
 WriterInfo::active(ACE_Time_Value default_participant_timeout) const
 {
+  // Need some period of time by which to decide if a writer the
+  // DataReaderImpl knows about has gone 'inactive'.  Used to determine
+  // if a remove_associations should remove immediately or wait to let
+  // reader process more information that may have queued up from the writer
+  // Over-arching max wait time for removal is controlled in the
+  // RemoveAssociationSweeper (10 seconds), but on a per writer basis set
+  // activity_wait_period based on:
+  //     1) Reader's liveliness_lease_duration
+  //     2) DCPSPendingTimeout value (if not zero)
+  //     3) Writer's max blocking time (could be infinite, in which case
+  //        RemoveAssociationSweeper will remove after its max wait)
+  //     4) Zero - don't wait, simply remove association
   ACE_Time_Value activity_wait_period(default_participant_timeout);
   if (reader_->liveliness_lease_duration_ != ACE_Time_Value::zero) {
     activity_wait_period = reader_->liveliness_lease_duration_;
