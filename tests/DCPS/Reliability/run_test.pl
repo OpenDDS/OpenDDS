@@ -14,28 +14,34 @@ use strict;
 
 PerlDDS::add_lib_path('./IDL');
 
-my $pub_opts = '';
-my $sub_opts = '';
+my $num_sleeps = 5;
+my $sleep_secs = 2;
+
+my $pub_opts = ""; 
+#my $sub_opts = "";
+
+my $sub_opts = " -num_sleeps $num_sleeps -sleep_secs $sleep_secs -DCPSPendingTimeout $sleep_secs";
 
 my $test = new PerlDDS::TestFramework();
 
 if ($test->flag('take-next')) {
-  $sub_opts .= ' -take-next';
+  $sub_opts .= " -take-next";
 }
 elsif ($test->flag('take')) {
-  $sub_opts .= ' -take';
+  $sub_opts .= " -take";
 }
 elsif ($test->flag('zero-copy')) {
-  $sub_opts .= ' -zero-copy';
+  $sub_opts .= " -zero-copy";
 }
 if ($test->flag('rtps')) {
-  $pub_opts .= ' 50';
+  $pub_opts .= " 50";
 }
 if ($test->flag('keep-last-one')) {
-  $pub_opts .= ' -keep-last-one';
-  $sub_opts .= ' -keep-last-one';
+  $pub_opts .= " -keep-last-one";
+  $sub_opts .= " -keep-last-one";
 }
 
+#$sub_opts .= " -num_sleeps $num_sleeps -sleep_secs $sleep_secs -DCPSPendingTimeout $sleep_secs";
 
 $test->setup_discovery();
 $test->enable_console_logging();
