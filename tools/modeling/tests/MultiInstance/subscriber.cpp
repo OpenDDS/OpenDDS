@@ -95,8 +95,6 @@ int run_instance(ModelType& model) {
                        -1);
     }
 
-    OpenDDS::Model::ReaderSync rs(reader);
-
     // END OF EXISTING MESSENGER EXAMPLE CODE
 
   return 0;

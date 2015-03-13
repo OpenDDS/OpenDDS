@@ -13,6 +13,9 @@ namespace OpenDDS {
       ~WriterSync();
       static int wait_match(const DDS::DataWriter_var& writer, unsigned int num_readers = 1);
       static int wait_ack(const DDS::DataWriter_var& writer);
+
+      //helper method to force writer to wait for publication_matched to go to 0
+      static int wait_unmatch(const DDS::DataWriter_var& writer, unsigned int num_readers = 1);
     private:
       DDS::DataWriter_var writer_;
     };

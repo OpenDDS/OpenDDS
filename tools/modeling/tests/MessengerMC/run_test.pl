@@ -67,5 +67,7 @@ if ($ir != 0) {
 }
 
 unlink $dcpsrepo_ior;
+unlink "fs_signal_1";
+unlink "fs_signal_2";
 
 exit $status;

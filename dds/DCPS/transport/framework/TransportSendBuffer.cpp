@@ -70,10 +70,31 @@ SingleSendBuffer::release_all()
 }
 
 void
+SingleSendBuffer::release_acked(SequenceNumber seq) {
+  BufferMap::iterator buffer_iter = buffers_.begin();
+  BufferType& buffer(buffer_iter->second);
+
+  if (Transport_debug_level > 5) {
+    ACE_DEBUG((LM_DEBUG,
+      ACE_TEXT("(%P|%t) SingleSendBuffer::release_acked() - ")
+      ACE_TEXT("releasing buffer at: (0x%@,0x%@)\n"),
+      buffer.first, buffer.second
+    ));
+  }
+  while (buffer_iter != buffers_.end()) {
+    if (buffer_iter->first == seq) {
+      release(buffer_iter);
+      return;
+    }
+    ++buffer_iter;
+  }
+}
+
+void
 SingleSendBuffer::release(BufferMap::iterator buffer_iter)
 {
   BufferType& buffer(buffer_iter->second);
-  if (Transport_debug_level >= 10) {
+  if (Transport_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::release() - ")
       ACE_TEXT("releasing buffer at: (0x%@,0x%@)\n"),
@@ -113,7 +134,7 @@ SingleSendBuffer::release(BufferMap::iterator buffer_iter)
 void
 SingleSendBuffer::retain_all(RepoId pub_id)
 {
-  if (Transport_debug_level >= 4) {
+  if (Transport_debug_level > 5) {
     GuidConverter converter(pub_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::retain_all() - ")
@@ -184,7 +205,7 @@ SingleSendBuffer::insert(SequenceNumber sequence,
   BufferType& buffer = this->buffers_[sequence];
   insert_buffer(buffer, queue, chain);
 
-  if (Transport_debug_level >= 10) {
+  if (Transport_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::insert() - ")
       ACE_TEXT("saved PDU: %q as buffer(0x%@,0x%@)\n"),
@@ -237,7 +258,7 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
   BufferType& buffer = (*fragments_)[sequence][fragment];
   insert_buffer(buffer, queue, chain);
 
-  if (Transport_debug_level >= 10) {
+  if (Transport_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::insert_fragment() - ")
       ACE_TEXT("saved PDU: %q,%q as buffer(0x%@,0x%@)\n"),
@@ -250,12 +271,15 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
 void
 SingleSendBuffer::check_capacity()
 {
+  if (this->capacity_ == SingleSendBuffer::UNLIMITED) {
+    return;
+  }
   // Age off oldest sample if we are at capacity:
   if (this->buffers_.size() == this->capacity_) {
     BufferMap::iterator it(this->buffers_.begin());
     if (it == this->buffers_.end()) return;
 
-    if (Transport_debug_level >= 10) {
+    if (Transport_debug_level > 5) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) SingleSendBuffer::check_capacity() - ")
         ACE_TEXT("aging off PDU: %q as buffer(0x%@,0x%@)\n"),
@@ -288,7 +312,7 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
         gaps->insert(sequence);
       }
     } else {
-      if (Transport_debug_level >= 4) {
+      if (Transport_debug_level > 5) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) SingleSendBuffer::resend() - ")
                    ACE_TEXT("resending PDU: %q, (0x%@,0x%@)\n"),

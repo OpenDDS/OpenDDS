@@ -2152,15 +2152,23 @@ Sedp::Writer::data_dropped(const DCPS::DataSampleElement* dsle, bool)
 void
 Sedp::Writer::control_delivered(ACE_Message_Block* mb)
 {
-  // We allocated mb on stack, its continuation block on heap
-  delete mb->cont();
+  if (mb->flags() == ACE_Message_Block::DONT_DELETE) {
+    // We allocated mb on stack, its continuation block on heap
+    delete mb->cont();
+  } else {
+    mb->release();
+  }
 }
 
 void
 Sedp::Writer::control_dropped(ACE_Message_Block* mb, bool)
 {
-  // We allocated mb on stack, its continuation block on heap
-  delete mb->cont();
+  if (mb->flags() == ACE_Message_Block::DONT_DELETE) {
+    // We allocated mb on stack, its continuation block on heap
+    delete mb->cont();
+  } else {
+    mb->release();
+  }
 }
 
 DDS::ReturnCode_t
@@ -2281,12 +2289,19 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
   DCPS::find_size_ulong(size, padding);
   DCPS::gen_find_size(plist, size, padding);
 
-  ACE_Message_Block payload(DCPS::DataSampleHeader::max_marshaled_size(),
+  ACE_Message_Block* payload = new ACE_Message_Block(DCPS::DataSampleHeader::max_marshaled_size(),
                             ACE_Message_Block::MB_DATA,
                             new ACE_Message_Block(size));
 
+  if (!payload) {
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Sedp::Writer::write_unregister_dispose")
+               ACE_TEXT(" - Failed to allocate message block message\n")));
+    return DDS::RETCODE_ERROR;
+  }
+
   using DCPS::Serializer;
-  Serializer ser(payload.cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
+  Serializer ser(payload->cont(), host_is_bigendian_, Serializer::ALIGN_CDR);
   bool ok = (ser << ACE_OutputCDR::from_octet(0)) &&  // PL_CDR_LE = 0x0003
             (ser << ACE_OutputCDR::from_octet(3)) &&
             (ser << ACE_OutputCDR::from_octet(0)) &&
@@ -2295,7 +2310,7 @@ Sedp::Writer::write_unregister_dispose(const RepoId& rid)
 
   if (ok) {
     // Send
-    write_control_msg(payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
+    write_control_msg(*payload, size, DCPS::DISPOSE_UNREGISTER_INSTANCE);
     return DDS::RETCODE_OK;
   } else {
     // Error
@@ -2314,6 +2329,7 @@ Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
                        ACE_Message_Block::MB_DATA,
                        new ACE_Message_Block(static_cast<const char*>(pReader),
                                              sizeof(reader)));
+  mb.set_flags(ACE_Message_Block::DONT_DELETE);
   mb.cont()->wr_ptr(sizeof(reader));
   // 'mb' would contain the DSHeader, but we skip it. mb.cont() has the data
   write_control_msg(mb, sizeof(reader), DCPS::END_HISTORIC_SAMPLES,
@@ -2321,7 +2337,8 @@ Sedp::Writer::end_historic_samples(const DCPS::RepoId& reader)
 }
 
 void
-Sedp::Writer::write_control_msg(ACE_Message_Block& payload, size_t size,
+Sedp::Writer::write_control_msg(ACE_Message_Block& payload,
+                                size_t size,
                                 DCPS::MessageId id,
                                 DCPS::SequenceNumber seq)
 {

@@ -101,24 +101,16 @@ public:
   /// update liveliness when remove_association is called.
   void removed();
 
-  /// Remove ack requests prior to the given sequence.
-  /// NOTE: This removes *all* ack requests for this publication
-  ///       satisfied by this sequence.
-  void clear_acks(SequenceNumber sequence);
-
-  /// Determine if a SAMPLE_ACK message should be sent to this
-  /// publication.
-  bool should_ack(ACE_Time_Value now);
-
-  /// Set the time after which we no longer need to generate a
-  /// SAMPLE_ACK for this sequence value.
-  void ack_deadline(SequenceNumber sequence, ACE_Time_Value when);
-
   /// Update the last observed sequence number.
   void ack_sequence(SequenceNumber value);
 
   /// Return the most recently observed contiguous sequence number.
   SequenceNumber ack_sequence() const;
+
+  /// Checks to see if writer has registered activity in either
+  /// liveliness_lease_duration or DCPSPendingTimeout duration
+  /// to allow it to finish before reader removes it
+  bool active(ACE_Time_Value default_participant_timeout) const;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received ();
@@ -145,6 +137,8 @@ public:
 
   // Non-negative if this a durable writer which has a timer scheduled
   long historic_samples_timer_;
+  long remove_association_timer_;
+  ACE_Time_Value removal_deadline_;
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.
@@ -154,6 +148,9 @@ public:
   SequenceNumber last_historic_seq_;
 
   bool waiting_for_end_historic_samples_;
+
+  bool scheduled_for_removal_;
+  bool notify_lost_;
 
   /// State of the writer.
   WriterState state_;

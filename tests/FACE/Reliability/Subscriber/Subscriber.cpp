@@ -25,7 +25,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger::Message msg;
     long expected = 0;
     std::cout << "Subscriber: about to receive_message()" << std::endl;
-    while (expected <= 99) {
+    while (expected <= 19) {
       FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
       if (status != FACE::RC_NO_ERROR) break;
       std::cout << msg.text.in() << '\t' << msg.count << std::endl;

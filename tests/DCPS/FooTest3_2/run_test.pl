@@ -57,7 +57,8 @@ elsif ($test->flag('bp_remove')) {
 elsif ($test->flag('b')) {
   # test of blocking write
   $blocking_write=1;
-  $max_samples_per_instance=1;
+  #Make write block potentially every 100 sends
+  $max_samples_per_instance=25;
 }
 
 $test->report_unused_flags(1);

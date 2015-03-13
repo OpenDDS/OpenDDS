@@ -186,12 +186,13 @@ Subscriber::run()
   DDS::ConditionSeq conditions;
   DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0};
   int current_count = 0;
+  int total_count = 0;
   do {
     if( this->options_.verbose()) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Subscriber::run() - ")
         ACE_TEXT("%d publications attached.\n"),
-        matches.current_count
+        current_count
       ));
     }
     if( DDS::RETCODE_OK != this->waiter_->wait( conditions, timeout)) {
@@ -209,6 +210,7 @@ Subscriber::run()
     }
 
     current_count = matches.current_count;
+    total_count = matches.total_count;
 
     if (this->reader_[ 1]->get_subscription_matched_status(matches) != ::DDS::RETCODE_OK)
     {
@@ -218,8 +220,9 @@ Subscriber::run()
     }
 
     current_count += matches.current_count;
+    total_count += matches.total_count;
 
-  } while( current_count > 0);
+  } while(total_count == 0 || current_count > 0);
 
   if( this->options_.verbose()) {
     ACE_DEBUG((LM_DEBUG,

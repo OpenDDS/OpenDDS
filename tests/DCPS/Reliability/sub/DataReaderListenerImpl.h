@@ -42,6 +42,9 @@ public:
   unsigned long long sample_count() { return sample_count_; }
   unsigned long long expected_count() { return expected_count_; }
 
+  void set_sleep_length(int sleep_length) { sleep_length_ = sleep_length;};
+  void set_num_sleeps(int num_sleeps) { num_sleeps_ = num_sleeps;};
+
   protected:
   virtual void take_samples(
     Reliability::MessageDataReader_var reader_i
@@ -52,6 +55,8 @@ public:
   long sample_count_;
   long expected_count_;
   long expected_seq_;
+  int sleep_length_;
+  int num_sleeps_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL_H */

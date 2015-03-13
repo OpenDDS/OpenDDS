@@ -23,7 +23,10 @@ MessageTracker::MessageTracker(const std::string& msg_src)
 bool
 MessageTracker::pending_messages()
 {
-  return sent_count_ > delivered_count_ + dropped_count_;
+  if (sent_count_ > delivered_count_ + dropped_count_) {
+    return true;
+  }
+  return false;
 }
 
 void
@@ -76,7 +79,7 @@ MessageTracker::wait_messages_pending()
                                 50);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("%T (%P|%t) MessageTracker::wait_messages_pending ")
-               ACE_TEXT("from source=%C timeout at %s.\n"),
+               ACE_TEXT("from source=%C will wait until %s.\n"),
                msg_src_.c_str(),
                (pTimeout == 0 ? ACE_TEXT("(no timeout)") : time)));
   }
@@ -86,9 +89,9 @@ MessageTracker::wait_messages_pending()
 
     if (done_condition_.wait(pTimeout) == -1 && pending_messages()) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: MessageTracker::")
+                 ACE_TEXT("(%P|%t) %T ERROR: MessageTracker::")
                  ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p\n"),
-                 ACE_TEXT("Timed out waiting for messages to be transported")));
+                 ACE_TEXT("Timed out at waiting for messages to be transported")));
       break;
     }
   }

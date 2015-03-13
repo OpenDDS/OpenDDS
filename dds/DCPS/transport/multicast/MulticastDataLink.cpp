@@ -307,10 +307,6 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
     }
   } break;
 
-  case SAMPLE_ACK:
-    ack_received(sample);
-    break;
-
   default:
     if (!duplicate_data_sample(sample.header_)) {
       data_received(sample);

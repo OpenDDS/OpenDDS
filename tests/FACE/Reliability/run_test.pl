@@ -21,4 +21,4 @@ sleep 5;
 
 $test->process('Publisher', 'Publisher/publisher');
 $test->start_process('Publisher');
-exit $test->finish(30);
+exit $test->finish(120);

@@ -190,7 +190,7 @@ private:
   void get_discovered_participant_ids(RepoIdSet& results) const;
 
   Sedp sedp_;
-  // wait for acknoledgements from SpdpTransport and Sedp::Task
+  // wait for acknowledgments from SpdpTransport and Sedp::Task
   // when BIT is being removed (fini_bit)
   WaitForAcks wait_for_acks_;
 };
