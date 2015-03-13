@@ -11,6 +11,7 @@ lib*.so*
 *.sdf
 *.sln
 *.suo
+.*.swp
 
 /setenv.*
 /user_macros.GNU
