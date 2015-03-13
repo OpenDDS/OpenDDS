@@ -337,6 +337,19 @@ dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 }
 
 int
+dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
+{
+  const char* name = node->local_name()->get_string();
+  BE_Comment_Guard g("STRUCT-FWD", name);
+  
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_struct_fwd(node->name(), node->size_type());
+  }
+
+  return 0;
+}
+
+int
 dds_visitor::visit_constant(AST_Constant* node)
 {
   if (node->imported() && !be_global->do_included_files()) {
@@ -549,11 +562,6 @@ int dds_visitor::visit_enum_val(AST_EnumVal*)
 }
 
 int dds_visitor::visit_expression(AST_Expression*)
-{
-  return 0;
-}
-
-int dds_visitor::visit_structure_fwd(AST_StructureFwd*)
 {
   return 0;
 }

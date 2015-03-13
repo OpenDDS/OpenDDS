@@ -1,5 +1,5 @@
-#ifndef OPENDDS_FACE_STRING_MANAGER_HEADER
-#define OPENDDS_FACE_STRING_MANAGER_HEADER
+#ifndef OPENDDS_FACE_STRINGMANAGER_HEADER
+#define OPENDDS_FACE_STRINGMANAGER_HEADER
 
 #include "FACE/types.hpp"
 
@@ -7,13 +7,17 @@
 #include <algorithm>
 
 namespace OpenDDS {
+namespace DCPS {
+  class Serializer;
+}  
+
 namespace FaceTypes {
 
 template <typename CharT>
-struct String_Traits {};
+struct StringTraits {};
 
 template <>
-struct String_Traits<FACE::Char>
+struct StringTraits<FACE::Char>
 {
   static FACE::Char* empty() { return dup(""); }
   static FACE::Char* dup(const FACE::Char* s) { return FACE::string_dup(s); }
@@ -26,7 +30,7 @@ struct String_Traits<FACE::Char>
 };
 
 template <>
-struct String_Traits<FACE::WChar>
+struct StringTraits<FACE::WChar>
 {
   static FACE::WChar* empty() { return dup(L""); }
   static FACE::WChar* dup(const FACE::WChar* s) { return FACE::wstring_dup(s); }
@@ -39,31 +43,31 @@ struct String_Traits<FACE::WChar>
 };
 
 template <typename CharT>
-class String_Base
+class StringBase
 {
 protected:
-  typedef String_Traits<CharT> Traits;
+  typedef StringTraits<CharT> Traits;
 
-  explicit String_Base(CharT* moved)
+  explicit StringBase(CharT* moved)
     : str_(moved)
   {}
 
-  explicit String_Base(const CharT* copied)
+  explicit StringBase(const CharT* copied)
     : str_(Traits::dup(copied))
   {}
 
-  String_Base(const String_Base& copied)
+  StringBase(const StringBase& copied)
     : str_(Traits::dup(copied))
   {}
 
-  String_Base& operator=(const String_Base& copied)
+  StringBase& operator=(const StringBase& copied)
   {
-    String_Base tmp(copied);
+    StringBase tmp(copied);
     std::swap(str_, tmp.str_);
     return *this;
   }
 
-  ~String_Base()
+  ~StringBase()
   {
     Traits::free(str_);
   }
@@ -85,46 +89,46 @@ protected:
 };
 
 template <typename CharT>
-class String_Manager : public String_Base<CharT>
+class StringManager : public StringBase<CharT>
 {
-  typedef String_Base<CharT> Base;
+  typedef StringBase<CharT> Base;
   using typename Base::Traits;
   using Base::str_;
 
 public:
-  String_Manager()
+  StringManager()
     : Base(Traits::empty())
   {}
 
-  String_Manager(const String_Manager& copied)
+  StringManager(const StringManager& copied)
     : Base(copied)
   {}
 
-  String_Manager(CharT* moved)
+  StringManager(CharT* moved)
     : Base(moved)
   {}
 
-  String_Manager(const CharT* copied)
+  StringManager(const CharT* copied)
     : Base(copied)
   {}
 
-  String_Manager& operator=(const String_Manager& copied)
+  StringManager& operator=(const StringManager& copied)
   {
-    String_Manager tmp(copied);
+    StringManager tmp(copied);
     std::swap(str_, tmp.str_);
     return *this;
   }
 
-  String_Manager& operator=(CharT* moved)
+  StringManager& operator=(CharT* moved)
   {
-    String_Manager tmp(moved);
+    StringManager tmp(moved);
     std::swap(str_, tmp.str_);
     return *this;
   }
 
-  String_Manager& operator=(const CharT* copied)
+  StringManager& operator=(const CharT* copied)
   {
-    String_Manager tmp(copied);
+    StringManager tmp(copied);
     std::swap(str_, tmp.str_);
     return *this;
   }
@@ -135,12 +139,14 @@ public:
     str_ = Traits::empty();
     return tmp;
   }
+
+  using Base::operator const CharT*;
 };
 
 template <typename CharT>
-class String_var : public String_Base<CharT>
+class String_var : public StringBase<CharT>
 {
-  typedef String_Base<CharT> Base;
+  typedef StringBase<CharT> Base;
   using typename Base::Traits;
   using Base::str_;
 
@@ -193,12 +199,14 @@ public:
 
   CharT& operator[](FACE::UnsignedLong index) { return str_[index]; }
   CharT operator[](FACE::UnsignedLong index) const { return str_[index]; }
+
+  using Base::operator const CharT*;
 };
 
 template <typename CharT>
 class String_out
 {
-  typedef String_Traits<CharT> Traits;
+  typedef StringTraits<CharT> Traits;
 
 public:
   String_out(CharT*& p)
@@ -247,14 +255,20 @@ private:
 };
 
 template <typename CharT>
-inline bool operator<(const String_Base<CharT>& lhs,
-                      const String_Base<CharT>& rhs)
+inline bool operator<(const StringBase<CharT>& lhs,
+                      const StringBase<CharT>& rhs)
 {
   if (!lhs.in()) {
     return rhs.in();
   }
-  return String_Traits<CharT>::cmp(lhs, rhs) < 0;
+  return StringTraits<CharT>::cmp(lhs, rhs) < 0;
 }
+
+OpenDDS_FACE_Export
+bool operator>>(DCPS::Serializer& ser, StringBase<FACE::Char>& str);
+
+OpenDDS_FACE_Export
+bool operator>>(DCPS::Serializer& ser, StringBase<FACE::WChar>& str);
 
 }
 }

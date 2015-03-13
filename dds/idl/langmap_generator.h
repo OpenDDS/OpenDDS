@@ -29,24 +29,14 @@ private:
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
 
+  bool gen_struct_fwd(UTL_ScopedName* name,
+                      AST_Type::SIZE_TYPE size);
+
   bool gen_typedef(UTL_ScopedName* name, AST_Type* type, const char* repoid);
 
   bool gen_union(UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* type, const char* repoid);
-
-  bool gen_interf(UTL_ScopedName*, bool,
-                  const std::vector<AST_Interface*>&,
-                  const std::vector<AST_Interface*>&,
-                  const std::vector<AST_Attribute*>&,
-                  const std::vector<AST_Operation*>&, const char*)
-  { return true; }
-
-  bool gen_interf_fwd(UTL_ScopedName*)
-  { return true; }
-
-  bool gen_native(UTL_ScopedName*, const char*)
-  { return true; }
 };
 
 #endif

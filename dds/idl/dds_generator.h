@@ -29,32 +29,42 @@ class dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
-  virtual bool gen_const(UTL_ScopedName* name, bool nestedInInteface,
-                         AST_Expression::ExprType type,
-                         AST_Expression::AST_ExprValue* value) = 0;
+  virtual bool gen_const(UTL_ScopedName* /*name*/,
+                         bool /*nestedInInteface*/,
+                         AST_Expression::ExprType /*type*/,
+                         AST_Expression::AST_ExprValue* /*value*/)
+  { return true; }
 
-  virtual bool gen_enum(UTL_ScopedName* name,
-                        const std::vector<AST_EnumVal*>& contents,
-                        const char* repoid) = 0;
+  virtual bool gen_enum(UTL_ScopedName* /*name*/,
+                        const std::vector<AST_EnumVal*>& /*contents*/,
+                        const char* /*repoid*/)
+  { return true; }
 
   virtual bool gen_struct(UTL_ScopedName* name,
                           const std::vector<AST_Field*>& fields,
                           AST_Type::SIZE_TYPE size,
                           const char* repoid) = 0;
 
+  virtual bool gen_struct_fwd(UTL_ScopedName* /*name*/,
+                              AST_Type::SIZE_TYPE /*size*/)
+  { return true; }
+
   virtual bool gen_typedef(UTL_ScopedName* name, AST_Type* base,
                            const char* repoid) = 0;
 
-  virtual bool gen_interf(UTL_ScopedName* name, bool local,
-                          const std::vector<AST_Interface*>& inherits,
-                          const std::vector<AST_Interface*>& inherits_flat,
-                          const std::vector<AST_Attribute*>& attrs,
-                          const std::vector<AST_Operation*>& ops,
-                          const char* repoid) = 0;
+  virtual bool gen_interf(UTL_ScopedName* /*name*/, bool /*local*/,
+                          const std::vector<AST_Interface*>& /*inherits*/,
+                          const std::vector<AST_Interface*>& /*inherits_flat*/,
+                          const std::vector<AST_Attribute*>& /*attrs*/,
+                          const std::vector<AST_Operation*>& /*ops*/,
+                          const char* /*repoid*/)
+  { return true; }
 
-  virtual bool gen_interf_fwd(UTL_ScopedName* name) = 0;
+  virtual bool gen_interf_fwd(UTL_ScopedName* /*name*/)
+  { return true; }
 
-  virtual bool gen_native(UTL_ScopedName* name, const char* repoid) = 0;
+  virtual bool gen_native(UTL_ScopedName* /*name*/, const char* /*repoid*/)
+  { return true; }
 
   virtual bool gen_union(UTL_ScopedName* name,
                          const std::vector<AST_UnionBranch*>& branches,
@@ -76,6 +86,8 @@ public:
   bool gen_struct(UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
+
+  bool gen_struct_fwd(UTL_ScopedName* name, AST_Type::SIZE_TYPE size);
 
   bool gen_typedef(UTL_ScopedName* name, AST_Type* base, const char* repoid);
 
@@ -299,7 +311,7 @@ struct NestedForLoops {
         prefix << i << " < " << arr->dims()[i]->ev()->u.ulval << "; ++" <<
         prefix << i << ") {\n";
       indent += "  ";
-      index_oss << "[i" << i << "]";
+      index_oss << "[" << prefix << i << "]";
     }
     index_ = index_oss.str();
   }

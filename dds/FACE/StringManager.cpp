@@ -1,5 +1,6 @@
-#include "FACE/String_Manager.h"
+#include "FACE/StringManager.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/Serializer.h"
 #include <cstring>
 
 namespace FACE {
@@ -57,4 +58,22 @@ void wstring_free(WChar* str)
   if (str != &s_wempty) TheServiceParticipant->pool_free(str);
 }
 
+}
+
+namespace OpenDDS {
+namespace FaceTypes {
+
+bool operator>>(DCPS::Serializer& ser, StringBase<FACE::Char>& str)
+{
+  ser.read_string(str.out(), FACE::string_alloc, FACE::string_free);
+  return ser.good_bit();
+}
+
+bool operator>>(DCPS::Serializer& ser, StringBase<FACE::WChar>& str)
+{
+  ser.read_string(str.out(), FACE::wstring_alloc, FACE::wstring_free);
+  return ser.good_bit();
+}
+
+}
 }

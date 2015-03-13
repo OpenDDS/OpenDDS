@@ -8,7 +8,7 @@ namespace OpenDDS {
   namespace FaceTypes {
     template<typename CharT> class String_var;
     template<typename CharT> class String_out;
-    template<typename CharT> class String_Manager;
+    template<typename CharT> class StringManager;
   }
 }
 
@@ -57,8 +57,8 @@ namespace FACE {
 
 namespace OpenDDS {
   namespace FaceTypes {
-    typedef String_Manager<FACE::Char> String_mgr;
-    typedef String_Manager<FACE::WChar> WString_mgr;
+    typedef StringManager<FACE::Char> String_mgr;
+    typedef StringManager<FACE::WChar> WString_mgr;
   }
 }
 

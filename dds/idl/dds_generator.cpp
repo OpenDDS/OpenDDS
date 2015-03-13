@@ -68,6 +68,18 @@ bool composite_generator::gen_struct(UTL_ScopedName* name,
   return true;
 }
 
+bool composite_generator::gen_struct_fwd(UTL_ScopedName* name,
+  AST_Type::SIZE_TYPE size)
+{
+  for (vector<dds_generator*>::iterator it(components_.begin());
+       it != components_.end(); ++it) {
+    if (!(*it)->gen_struct_fwd(name, size))
+      return false;
+  }
+
+  return true;
+}
+
 bool composite_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
                                       const char* repoid)
 {
