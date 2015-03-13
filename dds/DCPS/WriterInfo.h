@@ -101,22 +101,6 @@ public:
   /// update liveliness when remove_association is called.
   void removed();
 
-//TODO: REMOVE
-//  /// Remove ack requests prior to the given sequence.
-//  /// NOTE: This removes *all* ack requests for this publication
-//  ///       satisfied by this sequence.
-//  void clear_acks(SequenceNumber sequence);
-
-//TODO: REMOVE
-//  /// Determine if a SAMPLE_ACK message should be sent to this
-//  /// publication.
-//  bool should_ack(ACE_Time_Value now);
-
-//TODO: REMOVE
-//  /// Set the time after which we no longer need to generate a
-//  /// SAMPLE_ACK for this sequence value.
-//  void ack_deadline(SequenceNumber sequence, ACE_Time_Value when);
-
   /// Update the last observed sequence number.
   void ack_sequence(SequenceNumber value);
 
@@ -126,7 +110,7 @@ public:
   /// Checks to see if writer has registered activity in either
   /// liveliness_lease_duration or DCPSPendingTimeout duration
   /// to allow it to finish before reader removes it
-  bool active(ACE_Time_Value default_participant_timeout = 0) const;
+  bool active(ACE_Time_Value default_participant_timeout) const;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received ();

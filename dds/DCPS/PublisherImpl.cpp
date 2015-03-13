@@ -686,26 +686,12 @@ PublisherImpl::wait_for_acknowledgments(
     return DDS::RETCODE_OK;
   }
 
-//  // Send ack requests to all associated readers
-//  for (DataWriterAckMap::iterator it(ack_writers.begin());
-//      it != ack_writers.end(); ++it) {
-//    it->first->send_ack_requests(it->second);
-//  }
-
   // Wait for ack responses from all associated readers
   for (DataWriterAckMap::iterator it(ack_writers.begin());
       it != ack_writers.end(); ++it) {
     DataWriterImpl::AckToken token = it->second;
 
     it->first->wait_for_specific_ack(token);
-//    if (token.deadline() <= ACE_OS::gettimeofday()) {
-//      ACE_ERROR_RETURN((LM_ERROR,
-//          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
-//          ACE_TEXT("Timed out waiting for acknowledgments!\n")),
-//          DDS::RETCODE_TIMEOUT);
-//    }
-//
-//    it->first->wait_for_ack_responses(token);
   }
 
   return DDS::RETCODE_OK;

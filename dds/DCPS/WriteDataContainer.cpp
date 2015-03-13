@@ -623,21 +623,24 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
     this->wakeup_blocking_writers (stale);
   }
+  if (DCPS_debug_level > 9) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
+                         ACE_TEXT("Inserting acked_sequence: %q\n"),
+                         acked_seq.getValue()));
+  }
 
   acked_sequences_.insert(acked_seq);
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::data_delivered: Inserting acked_sequence: %q\n", acked_seq.getValue()));
 
   if (prev_max == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ||
       prev_max < acked_sequences_.cumulative_ack()) {
 
-    if (DCPS_debug_level > 0) {
+    if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered - ")
                  ACE_TEXT("broadcasting wait_for_acknowledgments update.\n")));
     }
 
     wfa_condition_.broadcast();
-//    writer_->sequence_acknowledged();
   }
 
   // Signal if there is no pending data.
@@ -1007,14 +1010,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
   while ((instance_list.size() >= depth_) ||
          ((this->max_num_samples_ > 0) &&
          ((CORBA::Long) this->num_all_samples () >= this->max_num_samples_))) {
-    if (DCPS_debug_level >= 10) {
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::obtain_buffer - RELIABLE")
-                            ACE_TEXT(" instance %d info on qos/resource limits bounds: \n")
-                            ACE_TEXT(" instance_list.size = %d, depth_ = %d \n")
-                            ACE_TEXT(" max_num_samples_ = %d (0 == UNLIMITED) \n")
-                            ACE_TEXT(" num_all_samples = %d\n"),
-                            handle, instance_list.size(), depth_, this->max_num_samples_, this->num_all_samples()));
-    }
 
     //Need to either remove stale samples or wait for space to become available
     if (this->writer_->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS) {
@@ -1085,7 +1080,6 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
       }
 
     } else {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::obtain_buffer: BEST EFFORT\n"));
       //BEST EFFORT
       bool oldest_released = false;
 
@@ -1412,14 +1406,10 @@ WriteDataContainer::wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const Se
   ACE_Time_Value deadline(abs_deadline);
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_ack_of_seq ")
-                        ACE_TEXT("- check if sequence has been acknowledged\n")));
 
   while (ACE_OS::gettimeofday() < deadline) {
 
     if (!sequence_acknowledged(sequence)) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_ack_of_seq ")
-                            ACE_TEXT("- sequence was not acknowledged\n")));
       // lock is released while waiting and acquired before returning
       // from wait.
       int const wait_result = wfa_condition_.wait(&deadline);
@@ -1454,8 +1444,10 @@ WriteDataContainer::sequence_acknowledged(const SequenceNumber sequence)
   }
 
   SequenceNumber acked = acked_sequences_.cumulative_ack();
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::sequence_acknowledged ")
-                        ACE_TEXT("- cumulative ack is currently: %q\n"), acked.getValue()));
+  if (DCPS_debug_level >= 10) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::sequence_acknowledged ")
+                          ACE_TEXT("- cumulative ack is currently: %q\n"), acked.getValue()));
+  }
   if (acked == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || acked < sequence){
     //if acked_sequences_ is empty or its cumulative_ack is lower than
     //the requests sequence, return false

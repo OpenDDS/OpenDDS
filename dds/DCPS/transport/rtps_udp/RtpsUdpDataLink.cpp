@@ -405,7 +405,6 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   RcHandle<SingleSendBuffer>& send_buff = wi->second.send_buff_;
 
   if (send_buff.is_nil()) {
-//    send_buff = new SingleSendBuffer(outer_->config_->nak_depth_, 1 /*mspp*/);
     send_buff = new SingleSendBuffer(SingleSendBuffer::UNLIMITED, 1 /*mspp*/);
 
     send_buff->bind(outer_->send_strategy_.in());
@@ -529,7 +528,6 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
       element->data_delivered();
       return 0;
     } else {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::customize_queue_element - about to drop\n"));
       element->data_dropped(true /*dropped_by_transport*/);
       return 0;
     }
@@ -893,7 +891,6 @@ RtpsUdpDataLink::WriterInfo::should_nack() const
 void
 RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 {
-//  ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::send_heartbeat_replies\n"));
   using namespace OpenDDS::RTPS;
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   for (RtpsReaderMap::iterator rr = readers_.begin(); rr != readers_.end();
@@ -1007,7 +1004,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
             }
           }
         }
-ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::send_heartbeat_replies:  acking up to seq: %q\n", ack.getValue()));
+
         AckNackSubmessage acknack = {
           {ACKNACK,
            CORBA::Octet(1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0)),
@@ -1374,7 +1371,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
                acknack.readerSNState.bitmapBase.low);
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()
       && ack != SequenceNumber::ZERO()) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received - ACKNACK acking receipt of msgs up to seq: %q\n", ack.getValue()));
     ri->second.cur_cumulative_ack_ = ack;
   }
   // If this ACKNACK was final, the DR doesn't expect a reply, and therefore
@@ -1452,7 +1448,6 @@ RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
 void
 RtpsUdpDataLink::send_nack_replies()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::send_nack_replies\n"));
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   // Reply from local DW to remote DR: GAP or DATA
   using namespace OpenDDS::RTPS;
@@ -1509,7 +1504,6 @@ RtpsUdpDataLink::send_nack_replies()
 
     DisjointSequence gaps;
     if (!requests.empty()) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::send_nack_replies - Start gap processing for requested\n"));
       if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
         gaps = requests;
       } else {
@@ -1519,7 +1513,7 @@ RtpsUdpDataLink::send_nack_replies()
         const RtpsUdpSendStrategy::OverrideToken ot =
           send_strategy_->override_destinations(recipients);
         for (size_t i = 0; i < ranges.size(); ++i) {
-          if (Transport_debug_level >= 0) {
+          if (Transport_debug_level > 5) {
             ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
                        "resend data %d-%d\n", int(ranges[i].first.getValue()),
                        int(ranges[i].second.getValue())));
@@ -1551,7 +1545,6 @@ RtpsUdpDataLink::send_nack_replies()
     typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
     iter_t it = writer.elems_not_acked_.begin();
     while (it != writer.elems_not_acked_.end() && it->first < all_readers_ack) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::send_nack_replies - data_delivered for sequence: %q\n", it->first.getValue()));
       it->second->data_delivered();
       writer.send_buff_->release_acked(it->first);
       writer.elems_not_acked_.erase(it);
@@ -1638,12 +1631,10 @@ RtpsUdpDataLink::process_acked_by_all()
       if (all_readers_ack == SequenceNumber::MAX_VALUE) {
         continue;
       }
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::process_acked_by_all current low msg stored: %q and acked up to: %q\n", writer.elems_not_acked_.begin()->first.getValue(), all_readers_ack.getValue()));
       //if any messages fully acked, call data delivered and remove from map
       typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
       iter_t it = writer.elems_not_acked_.begin();
       while (it != writer.elems_not_acked_.end()) {
-//        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::process_acked_by_all - data_delivered for sequence: %q\n", it->first.getValue()));
         if (it->first < all_readers_ack) {
           it->second->data_delivered();
           iter_t last = it;
@@ -1847,7 +1838,7 @@ RtpsUdpDataLink::send_heartbeats()
                                    ? 1 : rw->second.send_buff_->low(),
         lastSN = std::max(durable_max,
                           has_data ? rw->second.send_buff_->high() : 1);
-ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::send_heartbeats - firstSN: %q  lastSN: %q\n", firstSN.getValue(), lastSN.getValue()));
+
     const HeartBeatSubmessage hb = {
       {HEARTBEAT,
        CORBA::Octet(1 /*FLAG_E*/ | (final ? 2 /*FLAG_F*/ : 0)),
@@ -1880,8 +1871,6 @@ ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::send_heartbeats - firstSN: %q  la
   }
   g.release();
   for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::send_heartbeats() - calling data_dropped \n"));
-
     pendingCallbacks[i]->data_dropped();
   }
 }
@@ -1964,7 +1953,6 @@ RtpsUdpDataLink::ReaderInfo::expire_durable_data()
 {
   typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
   for (iter_t it = durable_data_.begin(); it != durable_data_.end(); ++it) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::ReaderInfo::expire_durable_data - calling data_dropped \n"));
     it->second->data_dropped();
   }
 }

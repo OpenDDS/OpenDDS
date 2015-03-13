@@ -947,16 +947,9 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
               "graceful disconnecting, so discard message.\n"));
-//        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send() - calling data_dropped due to MODE_TERMINATED and NOT graceful disconnecting\n"));
-
         element->data_dropped(true);
         return;
       }
-//      if (element->sequence() == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-//        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send() - send sample with seq: SEQUENCENUMBER_UNKNOWN\n"));
-//      } else {
-//        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send() - send sample with seq: %q\n", element->sequence().getValue()));
-//      }
 
       size_t element_length = element->msg()->total_length();
 
@@ -986,10 +979,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
                    "- won't fit into packet.\n", ACE_UINT64(element_length)));
         return;
       }
-//      if (this->mode_ == MODE_QUEUE)
-//        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send() - MODE_QUEUE so only queue sample with seq: %q\n", element->sequence().getValue()));
-//      if (this->mode_ == MODE_SUSPEND)
-//        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send() - MODE_SUSPEND queue and tell sync work avail sample with seq: %q\n", element->sequence().getValue()));
 
       // Check the mode_ to see if we simply put the element on the queue.
       if (this->mode_ == MODE_QUEUE || this->mode_ == MODE_SUSPEND) {
@@ -1165,7 +1154,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
             || exclusive) {
           VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                 "Now the current packet looks full - send it (directly).\n"));
-//          ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send() - direct_send sample with seq: %q\n", element->sequence().getValue()));
 
           this->direct_send(relink);
 
@@ -1175,8 +1163,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
               this->synch_->work_available();
 
             } else {
-//              ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send() - calling data_dropped due to not in MODE_DIRECT or MODE_QUEUE\n"));
-
               next_fragment->data_dropped(true /* dropped by transport */);
             }
           } else if (mode_ == MODE_QUEUE) {
@@ -1217,7 +1203,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       }
     }
   }
-//  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::send() - calling send_delayed_notifications\n"));
 
   send_delayed_notifications();
 }
@@ -1466,7 +1451,6 @@ void
 TransportSendStrategy::direct_send(bool relink)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "direct_send", 6);
-//  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::direct_send() - direct_send \n"));
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   "
         "Prepare the current packet for a direct send attempt.\n"));
@@ -1482,7 +1466,6 @@ TransportSendStrategy::direct_send(bool relink)
   while (true) {
     // Attempt to send the packet
     const SendPacketOutcome outcome = this->send_packet();
-//    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::direct_send() - The outcome of the send_packet() was %d.\n", outcome));
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "The outcome of the send_packet() was %d.\n", outcome));
@@ -1761,9 +1744,6 @@ TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 
   const ssize_t num_bytes_sent = this->send_bytes(iov, num_blocks, bp);
 
-  if (bp != 0) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendStrategy::do_send_packet - send_bytes encountered BACKPRESSURE\n"));
-  }
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
             "The send_bytes() said that num_bytes_sent == [%d].\n",
             num_bytes_sent), 5);

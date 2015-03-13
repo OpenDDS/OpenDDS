@@ -467,8 +467,6 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
     // is dropped as a result of writer's remove_sample call. In the
     // later case, the dropped_by_transport is not used as the sample
     // is retained sample and no callback is made to writer.
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) PacketRemoveVisitor::visit_element_ref - calling data_dropped \n"));
-
     this->status_ = orig_elem->data_dropped() ? REMOVE_RELEASED : REMOVE_FOUND;
 
     if (this->status_ == REMOVE_RELEASED || this->match_.unique()) {

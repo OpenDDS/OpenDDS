@@ -27,8 +27,6 @@ TransportQueueElement::data_dropped(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement", "data_dropped", 6);
   this->dropped_ = true;
-//  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportQueueElement::data_dropped() - calling decision_made for sample with seq: %q\n", this->sequence().getValue()));
-
   return this->decision_made(dropped_by_transport);
 }
 
@@ -40,8 +38,6 @@ TransportQueueElement::data_delivered()
   // Decision made depend on dropped_ flag. If any link drops
   // the sample even other links deliver successfully, the
   // data dropped by transport will called back to writer.
-//  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportQueueElement::data_delivered() - calling decision_made for sample with seq: %q\n", this->sequence().getValue()));
-
   return this->decision_made(this->dropped_);
 }
 
@@ -62,10 +58,6 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
     // accessible. Note it can not be set after release_element
     // call.
     // this->released_ = true;
-//    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportQueueElement::decision_made - calling release_element for sample with seq: %q\n", this->sequence().getValue()));
-//    if(dropped_by_transport)
-//      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportQueueElement::decision_made - sample with seq: %q dropped_by_transport\n", this->sequence().getValue()));
-
     this->release_element(dropped_by_transport);
     return true;
   }

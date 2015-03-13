@@ -90,8 +90,7 @@ protected:
                                    const RepoId& destination);
 
   SendControlStatus send_control(const DataSampleHeader& header,
-                                 ACE_Message_Block* msg/*,
-                                 void* extra = 0*/);
+                                 ACE_Message_Block* msg);
 
   SendControlStatus send_control_to(const DataSampleHeader& header,
                                     ACE_Message_Block* msg,

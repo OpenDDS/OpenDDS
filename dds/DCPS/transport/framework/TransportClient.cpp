@@ -802,8 +802,6 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
         // We tell the send_listener_ that all of the remote subscriber ids
         // that wanted the data (all zero of them) have indeed received
         // the data.
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::send_i - calling data_delivered for sample with seq: %q\n", cur->get_header().sequence_.getValue()));
-
         cur->get_send_listener()->data_delivered(cur);
 
       } else {
@@ -913,18 +911,11 @@ TransportClient::get_receive_listener()
 
 SendControlStatus
 TransportClient::send_control(const DataSampleHeader& header,
-                              ACE_Message_Block* msg/*,
-                              void* extra /* = 0 */)
+                              ACE_Message_Block* msg)
 {
   TransportSendListener* listener = get_send_listener();
-//TODO: REMOVE
-//  if (extra) {
-//    DataLinkSet_rch pub_links(&links_, false);
-//    return listener->send_control_customized(pub_links, header, msg, extra);
-//
-//  } else {
-    return links_.send_control(repo_id_, listener, header, msg);
-//  }
+
+  return links_.send_control(repo_id_, listener, header, msg);
 }
 
 SendControlStatus

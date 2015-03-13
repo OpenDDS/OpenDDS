@@ -29,8 +29,6 @@ OpenDDS::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
                                                  dropped_by_transport);
 
   } else {
-//    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportSendElement::release_element - calling data_delivered for sample with seq: %q\n", this->element_->get_header().sequence_.getValue()));
-
     this->element_->get_send_listener()->data_delivered(this->element_);
   }
 

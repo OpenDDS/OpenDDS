@@ -24,7 +24,6 @@ bool
 MessageTracker::pending_messages()
 {
   if (sent_count_ > delivered_count_ + dropped_count_) {
-//    ACE_DEBUG((LM_DEBUG, "(%P|%t) MessageTracker::pending_messages: sent_count_(%d) >? delivered_count_(%d) + dropped_count_(%d)\n", sent_count_, delivered_count_, dropped_count_));
     return true;
   }
   return false;

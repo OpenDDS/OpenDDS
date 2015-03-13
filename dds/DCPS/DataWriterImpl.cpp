@@ -83,8 +83,6 @@ DataWriterImpl::DataWriterImpl()
     cancel_timer_(false),
     is_bit_(false),
     initialized_(false),
-//TODO: REMOVE
-//    wfaCondition_(this->wfaLock_),
     min_suspended_transaction_id_(0),
     max_suspended_transaction_id_(0),
     monitor_(0),
@@ -601,8 +599,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
 
   {
     // Ensure the same acquisition order as in wait_for_acknowledgments().
-//TODO: REMOVE
-//    ACE_GUARD(ACE_SYNCH_MUTEX, wfaGuard, this->wfaLock_);
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     //Remove the readers from fully associated reader list.
     //If the supplied reader is not in the cached reader list then it is
@@ -620,20 +616,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         ++ fully_associated_len;
         fully_associated_readers.length(fully_associated_len);
         fully_associated_readers [fully_associated_len - 1] = readers[i];
-//TODO: REMOVE
-//        // Remove this reader from the ACK sequence map if its there.
-//        // This is where we need to be holding the wfaLock_ obtained
-//        // above.
-//        RepoIdToSequenceMap::iterator where
-//          = this->idToSequence_.find(readers[i]);
-//
-//        if (where != this->idToSequence_.end()) {
-//          this->idToSequence_.erase(where);
-//
-//          // It is possible that this subscription was causing the wait
-//          // to continue, so give the opportunity to find out.
-//          this->wfaCondition_.broadcast();
-//        }
 
         ++ rds_len;
         rds.length(rds_len);
@@ -671,8 +653,6 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         id_to_handle_map_.erase(fully_associated_readers[i]);
       }
     }
-//TODO: REMOVE
-//    wfaGuard.release();
 
     // Mirror the PUBLICATION_MATCHED_STATUS processing from
     // association_complete() here.
@@ -962,359 +942,14 @@ DataWriterImpl::should_ack() const
 DataWriterImpl::AckToken
 DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
 {
-//  if (DCPS_debug_level > 0) {
+  if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::create_ack_token() - ")
                ACE_TEXT("for sequence %q \n"),
                this->sequence_number_.getValue()));
-//  }
+  }
   return AckToken(max_wait, this->sequence_number_);
 }
-//TODO: REMOVE
-//SequenceNumber
-//DataWriterImpl::AckToken::expected(const RepoId& subscriber) const
-//{
-//  RepoIdToSequenceMap::const_iterator found = this->custom_.find(subscriber);
-//  return (found == this->custom_.end()) ? this->sequence_ : found->second;
-//}
-
-//TODO: REMOVE
-//bool
-//DataWriterImpl::AckToken::marshal(ACE_Message_Block*& mblock, bool swap, DataBlockLockPool::DataBlockLock* lock) const
-//{
-//  size_t dataSize = 0, padding = 0;
-//  gen_find_size(sequence_, dataSize, padding);
-//  gen_find_size(max_wait_, dataSize, padding);
-//
-//  ACE_NEW_RETURN(mblock, ACE_Message_Block(dataSize,
-//                                           ACE_Message_Block::MB_DATA,
-//                                           0, //cont
-//                                           0, //data
-//                                           0, //alloc_strategy
-//                                           lock),
-//                 false);
-//
-//  Serializer ser(mblock, swap);
-//  ser << sequence_;
-//  ser << max_wait_;
-//  return ser.good_bit();
-//}
-
-//TODO: REMOVE
-//DDS::ReturnCode_t
-//DataWriterImpl::send_ack_requests(DataWriterImpl::AckToken& token)
-//{
-//  AckCustomization ac(token);
-//  {
-//    ACE_GUARD_RETURN(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_, DDS::RETCODE_ERROR);
-//
-//    for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
-//         end = reader_info_.end(); iter != end; ++iter) {
-//      if (iter->second.expected_sequence_ != token.sequence_) {
-//        push_back(ac.customized_, iter->first);
-//        token.custom_[iter->first] = iter->second.expected_sequence_;
-//      }
-//    }
-//  }
-//
-//  ACE_Message_Block* data = 0;
-//
-//  if (!token.marshal(data, this->swap_bytes(), get_db_lock())) {
-//    delete data;
-//    return DDS::RETCODE_OUT_OF_RESOURCES;
-//  }
-//
-//  if (DCPS_debug_level > 0) {
-//    GuidConverter converter(this->publication_id_);
-//    ACE_DEBUG((LM_DEBUG,
-//               ACE_TEXT("(%P|%t) DataWriterImpl::send_ack_requests() - ")
-//               ACE_TEXT("%C sending REQUEST_ACK message for sequence %q ")
-//               ACE_TEXT("to %d subscriptions.\n"),
-//               std::string(converter).c_str(),
-//               token.sequence_.getValue(),
-//               this->readers_.size()));
-//  }
-//
-//  DataSampleHeader header;
-//  ACE_Message_Block* ack_request =
-//    this->create_control_message(REQUEST_ACK, header, data, token.timestamp());
-//
-//  const SendControlStatus status =
-//    this->send_control(header, ack_request, ac.customized_.length() ? &ac : 0);
-//
-//  if (status == SEND_CONTROL_ERROR) {
-//    ACE_ERROR((LM_ERROR,
-//               ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::send_ack_requests() - ")
-//               ACE_TEXT("failed to send REQUEST_ACK message. \n")));
-//    return DDS::RETCODE_ERROR;
-//  }
-//
-//  return DDS::RETCODE_OK;
-//}
-//TODO: REMOVE
-//SendControlStatus
-//DataWriterImpl::send_control_customized(const DataLinkSet_rch&  links,
-//                                        const DataSampleHeader& header,
-//                                        ACE_Message_Block*      msg,
-//                                        void*                   extra)
-//{
-//  AckCustomization& ac = *static_cast<AckCustomization*>(extra);
-//  const bool swap = this->swap_bytes();
-//
-//  // set of DataLinks that have no targets that need custom control messages
-//  DataLinkSet notCustomized;
-//  bool ok = true;
-//
-//  typedef std::map<SequenceNumber, GUIDSeq> GUIDSeqMap;
-//
-//  DataLinkSet::GuardType guard(links->lock());
-//
-//  // For each data link in "links"...
-//  for (DataLinkSet::MapType::iterator iter = links->map().begin(),
-//       end = links->map().end(); iter != end; ++iter) {
-//
-//    const DataLink_rch& datalink = iter->second;
-//    size_t n_subs;
-//    GUIDSeq_var intersect =
-//      datalink->target_intersection(header.publication_id_, ac.customized_,
-//                                    n_subs);
-//    // "intersect" is the list of GUIDs for the subs on this link that will
-//    // need to get a customized REQUEST_ACK message.
-//
-//    if (intersect.ptr() == 0 || intersect->length() == 0) {
-//      // This link requires no customization, add to the notCustomized list
-//      // so we can handle it after the big for loop.
-//      notCustomized.insert_link(datalink.in());
-//
-//    } else {
-//      DataLinkSet thisLink; // need a "set" with only the current link in it
-//      thisLink.insert_link(datalink.in());
-//      RepoIdSet_rch allTargets = datalink->get_targets();
-//      RepoIdSet::MapType noCustTargets = allTargets->map(); // copied
-//
-//      // Each sequence number may go to > 1 target on this link, build the
-//      // STL map "gsm" keyed on the sequence number.
-//      GUIDSeqMap gsm;
-//      const CORBA::ULong len = intersect->length();
-//
-//      for (CORBA::ULong i = 0; i < len; ++i) {
-//        const GUID_t& target = intersect[i];
-//        push_back(gsm[ac.token_.custom_[target]], target);
-//        noCustTargets.erase(target);
-//      }
-//
-//      // Some targets don't require customization, but do need to see the
-//      // original sequence number from the AckToken
-//      for (RepoIdSet::MapType::iterator nct_iter(noCustTargets.begin()),
-//           nct_end(noCustTargets.end()); nct_iter != nct_end; ++nct_iter) {
-//        push_back(gsm[ac.token_.sequence_], nct_iter->first);
-//      }
-//
-//      // For each sequence number that needs to go to this link:
-//      for (GUIDSeqMap::iterator it2 = gsm.begin(), it2_end = gsm.end();
-//           it2 != it2_end; ++it2) {
-//
-//        const SequenceNumber& seq = it2->first;
-//        const GUIDSeq& targets = it2->second;
-//
-//        // Deep copy the payload and chain it to a shallow-copied header
-//        ACE_Message_Block* data_orig = msg->cont();
-//        msg->cont(0); // temporarily unlink so we don't duplicate the data
-//        ACE_Message_Block* header_mb = msg->duplicate();
-//        ACE_Message_Block* data_modified = data_orig->clone();
-//        header_mb->cont(data_modified);
-//        msg->cont(data_orig);                 // undo the temporary unlink
-//
-//        // Modify the payload to contain the customized sequence #
-//        char* wr = data_modified->wr_ptr();
-//        data_modified->wr_ptr(data_modified->base());   // rewind
-//        Serializer ser(data_modified, swap);
-//        ser << seq;                                     // overwrite Seq#
-//        data_modified->wr_ptr(wr);                      // wind
-//
-//        // If other targets are listening on the DataLink, filter those out
-//        // using the CONTENT_FILTER_FLAG and its optional header.
-//        if (allTargets->size() != targets.length()) {
-//          RepoIdSet::MapType filterTargets = allTargets->map(); // copied
-//
-//          for (CORBA::ULong i = 0, leng = targets.length(); i < leng; ++i) {
-//            filterTargets.erase(targets[i]);
-//          }
-//
-//          GUIDSeq ftseq(static_cast<CORBA::ULong>(filterTargets.size()));
-//
-//          for (RepoIdSet::MapType::iterator ris_iter(filterTargets.begin()),
-//               ris_end(filterTargets.end()); ris_iter != ris_end; ++ris_iter) {
-//            push_back(ftseq, ris_iter->first);
-//          }
-//
-//          // Now changing the header, need to copy its data contents
-//          size_t len = header_mb->length();
-//          header_mb->data_block(header_mb->data_block()->clone());
-//          header_mb->wr_ptr(len);
-//          DataSampleHeader::set_flag(CONTENT_FILTER_FLAG, header_mb);
-//          DataSampleHeader::add_cfentries(&ftseq, header_mb);
-//        }
-//
-//        if (DCPS_debug_level > 4) {
-//          ACE_DEBUG((LM_DEBUG,
-//                     ACE_TEXT("(%P|%t) DataWriterImpl::send_control_customized() - ")
-//                     ACE_TEXT("sending REQUEST_ACK %q to single data link with%C ")
-//                     ACE_TEXT("content filtering.\n"), seq.getValue(),
-//                     (allTargets->size() == targets.length()) ? "out" : ""));
-//        }
-//
-//        ok &= (thisLink.send_control(this->publication_id_, this, header, header_mb)
-//               == SEND_CONTROL_OK);
-//      }
-//    }
-//  }
-//
-//  if (notCustomized.empty()) {
-//    msg->release();
-//
-//  } else {
-//    if (DCPS_debug_level > 4) {
-//      ACE_DEBUG((LM_DEBUG,
-//                 ACE_TEXT("(%P|%t) DataWriterImpl::send_control_customized() - ")
-//                 ACE_TEXT("sending REQUEST_ACK to %d non-customized data links.\n"),
-//                 notCustomized.map().size()));
-//    }
-//
-//    ok &= (notCustomized.send_control(this->publication_id_, this, header, msg)
-//           == SEND_CONTROL_OK);
-//  }
-//
-//  return ok ? SEND_CONTROL_OK : SEND_CONTROL_ERROR;
-//}
-
-//TODO: REMOVE
-//DDS::ReturnCode_t
-//DataWriterImpl::wait_for_ack_responses(const DataWriterImpl::AckToken& token)
-//{
-//  ACE_Time_Value deadline(token.deadline());
-//
-//  // Protect the wait-fer-acks blocking.
-//  ACE_GUARD_RETURN(
-//    ACE_SYNCH_MUTEX,
-//    wfaGuard,
-//    this->wfaLock_,
-//    DDS::RETCODE_ERROR);
-//
-//  do {
-//    // We use the values from the set of readers to index into the sequence
-//    // map.  Any readers_ that have not responded will have the default,
-//    // smallest, value which will cause the wait to continue.
-//    bool done = true;
-//
-//    // Protect the readers_ set.
-//    {
-//      ACE_GUARD_RETURN(
-//        ACE_Recursive_Thread_Mutex,
-//        readersGuard,
-//        this->lock_,
-//        DDS::RETCODE_ERROR);
-//
-//      for (IdSet::const_iterator current = this->readers_.begin();
-//           current != this->readers_.end();
-//           ++current) {
-//        if (this->idToSequence_[*current] < token.expected(*current)) {
-//          done = false;
-//
-//          if (DCPS_debug_level > 0) {
-//            GuidConverter conv(*current);
-//            ACE_DEBUG((LM_DEBUG,
-//                       ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
-//                       ACE_TEXT("waiting for seq %q from sub %C, got %q\n"),
-//                       token.expected(*current).getValue(), std::string(conv).c_str(),
-//                       this->idToSequence_[*current].getValue()));
-//          }
-//
-//          break;
-//        }
-//      }
-//    }
-//
-//    if (done) {
-//      if (DCPS_debug_level > 0) {
-//        GuidConverter converter(this->publication_id_);
-//        ACE_DEBUG((LM_DEBUG,
-//                   ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_ack_responses() - ")
-//                   ACE_TEXT("%C unblocking for sequence %q.\n"),
-//                   std::string(converter).c_str(),
-//                   token.sequence_.getValue()));
-//      }
-//
-//      return DDS::RETCODE_OK;
-//    }
-//
-//  } while (0 == this->wfaCondition_.wait(&deadline));
-//
-//  GuidConverter converter(this->publication_id_);
-//  ACE_DEBUG((LM_WARNING,
-//             ACE_TEXT("(%P|%t) WARNING: DataWriterImpl[%@]::wait_for_ack_responses() - ")
-//             ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
-//             ACE_TEXT("from %d subscriptions.\n"),
-//             this,
-//             std::string(converter).c_str(),
-//             token.sequence_.getValue(),
-//             this->readers_.size()));
-//
-//  if (DCPS_debug_level > 0) {
-//    {
-//      ACE_GUARD_RETURN(
-//        ACE_Recursive_Thread_Mutex,
-//        readersGuard,
-//        this->lock_,
-//        DDS::RETCODE_ERROR);
-//
-//      for (IdSet::const_iterator current = this->readers_.begin();
-//           current != this->readers_.end();
-//           ++current) {
-//        GuidConverter converter2(*current);
-//        ACE_DEBUG((LM_WARNING,
-//                   ACE_TEXT("(%P|%t) WARNING: DataWriterImpl[%@]::wait_for_ack_responses() - ")
-//                   ACE_TEXT("%C timed out waiting for sequence %q to be acknowledged ")
-//                   ACE_TEXT("from subscription %C.\n"),
-//                   this,
-//                   std::string(converter).c_str(),
-//                   token.sequence_.getValue(),
-//                   std::string(converter2).c_str()));
-//      }
-//    }
-//  }
-//
-//  return DDS::RETCODE_TIMEOUT;
-//}
-
-//TODO: REMOVE
-//DDS::ReturnCode_t
-//DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
-//{
-//  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
-//  if (!should_ack()) {
-//    if (DCPS_debug_level > 0) {
-//      GuidConverter converter(this->publication_id_);
-//      ACE_DEBUG((LM_DEBUG,
-//                 ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments() - ")
-//                 ACE_TEXT("%C not blocking due to no associated subscriptions.\n"),
-//                 std::string(converter).c_str()));
-//    }
-//
-//    return DDS::RETCODE_OK;
-//  }
-//  guard.release(); // only needed for should_ack(), other methods do locking
-//
-//  AckToken token(create_ack_token(max_wait));
-//
-//  DDS::ReturnCode_t error;
-//
-//  if ((error = send_ack_requests(token)) != DDS::RETCODE_OK) return error;
-//
-//  if ((error = wait_for_ack_responses(token)) != DDS::RETCODE_OK) return error;
-//
-//  return DDS::RETCODE_OK;
-//}
 
 DDS::ReturnCode_t
 DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
@@ -1322,15 +957,12 @@ DataWriterImpl::wait_for_acknowledgments(const DDS::Duration_t& max_wait)
   if (this->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
     return DDS::RETCODE_OK;
   DataWriterImpl::AckToken token = create_ack_token(max_wait);
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments")
-                        ACE_TEXT(" waiting for acknowledgment of sequence %q at %T\n"),
-                        token.sequence_.getValue()));
-  DDS::ReturnCode_t ret = wait_for_specific_ack(token);
-
-  ACE_DEBUG ((LM_DEBUG, ACE_TEXT("\n\n(%P|%t) DataWriterImpl::wait_for_acknowledgments")
-                        ACE_TEXT(" returning %d at %T\n\n\n"), ret));
-  return ret;
-//  return wait_for_specific_ack(token);
+  if (DCPS_debug_level) {
+    ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::wait_for_acknowledgments")
+                          ACE_TEXT(" waiting for acknowledgment of sequence %q at %T\n"),
+                          token.sequence_.getValue()));
+  }
+  return wait_for_specific_ack(token);
 }
 
 DDS::ReturnCode_t
@@ -2358,7 +1990,6 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
 
   } else {
     ++this->sequence_number_;
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::create_sample_data_message with seq number: %q\n", this->sequence_number_.getValue()));
   }
 
   header_data.sequence_ = this->sequence_number_;
@@ -2412,7 +2043,6 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
                std::string(writer_converter).c_str()));
     return;
   }
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter::data_delivered - calling data_delivered for sample with seq: %q\n", sample->get_header().sequence_.getValue()));
   this->data_container_->data_delivered(sample);
 
   ++data_delivered_count_;
@@ -2425,45 +2055,6 @@ DataWriterImpl::control_delivered(ACE_Message_Block* sample)
   sample->release();
   controlTracker.message_delivered();
 }
-//TODO: REMOVE
-//void
-//DataWriterImpl::deliver_ack(
-//  const DataSampleHeader& header,
-//  DataSample*             data)
-//{
-//  Serializer serializer(
-//    data,
-//    header.byte_order_ != ACE_CDR_BYTE_ORDER);
-//  SequenceNumber ack;
-//  serializer >> ack;
-//
-//  if (DCPS_debug_level > 0) {
-//    GuidConverter debugConverter(this->publication_id_);
-//    GuidConverter debugConverter2(header.publication_id_);
-//    ACE_DEBUG((LM_DEBUG,
-//               ACE_TEXT("(%P|%t) DataWriterImpl::deliver_ack() - ")
-//               ACE_TEXT("publication %C received update for ")
-//               ACE_TEXT("sample %q from subscription %C.\n"),
-//               std::string(debugConverter).c_str(),
-//               ack.getValue(),
-//               std::string(debugConverter2).c_str()));
-//  }
-//
-//  ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->wfaLock_);
-//
-//  if (this->idToSequence_[ header.publication_id_] < ack) {
-//    this->idToSequence_[ header.publication_id_] = ack;
-//
-//    if (DCPS_debug_level > 0) {
-//      GuidConverter debugConverter(header.publication_id_);
-//      ACE_DEBUG((LM_DEBUG,
-//                 ACE_TEXT("(%P|%t) DataWriterImpl::deliver_ack() - ")
-//                 ACE_TEXT("broadcasting update.\n")));
-//    }
-//
-//    this->wfaCondition_.broadcast();
-//  }
-//}
 
 EntityImpl*
 DataWriterImpl::parent() const

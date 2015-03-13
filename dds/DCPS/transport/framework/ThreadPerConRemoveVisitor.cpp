@@ -42,8 +42,6 @@ ThreadPerConRemoveVisitor::visit_element_remove(SendRequest* req,
 
     // Inform the element that we've made a decision - and it is
     // data_dropped()
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadPerConRemoveVisitor::visit_element_remove - calling data_dropped \n"));
-
     const bool released = req->element_->data_dropped();
 
     // Adjust our status_ to indicate that we actually found (and removed)

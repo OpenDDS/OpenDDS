@@ -165,9 +165,6 @@ public:
   /// Any reader ID that appears in the exclude set will be skipped.
   void data_received_excluding(ReceivedDataSample& sample,
                                const std::set<RepoId, GUID_tKeyLessThan>& excl);
-//TODO: REMOVE
-//  /// SAMPLE_ACK message received on this link.
-//  void ack_received(ReceivedDataSample& sample);
 
   /// Obtain a unique identifier for this DataLink object.
   DataLinkIdType id() const;

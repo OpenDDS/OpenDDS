@@ -204,7 +204,6 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 void
 RtpsUdpSendStrategy::add_delayed_notification(TransportQueueElement* element)
 {
-//  ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpSendStrategy::add_delayed_notification\n"));
   if (!link_->add_delayed_notification(element)) {
     TransportSendStrategy::add_delayed_notification(element);
   }
