@@ -75,6 +75,7 @@ DataReaderImpl::DataReaderImpl()
     domain_id_(0),
     subscriber_servant_(0),
     end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    remove_association_sweeper_(new RemoveAssociationSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
@@ -147,11 +148,15 @@ DataReaderImpl::~DataReaderImpl()
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
       end_historic_sweeper_->cancel_timer(writer->second);
+      remove_association_sweeper_->cancel_timer(writer->second);
     }
   }
 
   end_historic_sweeper_->wait();
   end_historic_sweeper_->destroy();
+
+  remove_association_sweeper_->wait();
+  remove_association_sweeper_->destroy();
 
   liveliness_timer_->cancel_timer();
   liveliness_timer_->wait();
@@ -219,10 +224,12 @@ DataReaderImpl::cleanup()
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
       end_historic_sweeper_->cancel_timer(writer->second);
+      remove_association_sweeper_->cancel_timer(writer->second);
     }
   }
 
   end_historic_sweeper_->wait();
+  remove_association_sweeper_->wait();
 }
 
 void DataReaderImpl::init(
@@ -550,26 +557,6 @@ DataReaderImpl::association_complete(const RepoId& /*remote_id*/)
   // always be passive, so association_complete() will not be called.
 }
 
-bool
-DataReaderImpl::writers_still_active(const WriterIdSeq& writers) {
-  CORBA::ULong wr_len;
-
-  wr_len = writers.length();
-
-  for (CORBA::ULong i = 0; i < wr_len; i++) {
-    PublicationId writer_id = writers[i];
-
-    WriterMapType::iterator it = this->writers_.find(writer_id);
-
-    if (it != this->writers_.end() && it->second->active()) {
-      GuidConverter writer(it->second->writer_id_);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::writers_still_active - Writer (%C) still active, return true\n", std::string(writer).c_str()));
-      return true;
-    }
-  }
-  return false;
-}
-
 void
 DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     bool notify_lost)
@@ -591,22 +578,76 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         std::string(writer_converter).c_str(),
         writers.length()));
   }
+  if (!this->entity_deleted_.value()) {
+    // stop pending associations for these writer ids
+    this->stop_associating(writers.get_buffer(), writers.length());
 
-  // stop pending associations for these writer ids
-  this->stop_associating(writers.get_buffer(), writers.length());
+    // writers which are considered non-active and can
+    // be removed immediately
+    WriterIdSeq non_active_writers;
+    {
+      CORBA::ULong wr_len = writers.length();
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
-  //  ACE_OS::sleep(10);
-  ACE_Time_Value max_wait = ACE_OS::gettimeofday() + ACE_Time_Value(10);
+      for (CORBA::ULong i = 0; i < wr_len; i++) {
+        PublicationId writer_id = writers[i];
 
-  while (ACE_OS::gettimeofday() < max_wait && writers_still_active(writers)) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::remove_associations - about to sleep 3 sec waiting for writers to become inactive\n"));
-    ACE_OS::sleep(3);
+        WriterMapType::iterator it = this->writers_.find(writer_id);
+        if (it != this->writers_.end() &&
+            it->second->active(TheServiceParticipant->pending_timeout())) {
+          remove_association_sweeper_->schedule_timer(it->second, notify_lost);
+        } else {
+          push_back(non_active_writers, writer_id);
+        }
+      }
+    }
+    remove_associations_i(non_active_writers, notify_lost);
+  } else {
+    remove_associations_i(writers, notify_lost);
   }
-  if (ACE_OS::gettimeofday() >= max_wait) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::remove_associations - max wait eclipsed proceed with removal\n"));
-  }
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::remove_associations - done waiting for writers to become inactive, proceed with removal\n"));
+}
 
+void
+DataReaderImpl::remove_or_reschedule(const PublicationId& pub_id)
+{
+  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+  WriterMapType::iterator where = writers_.find(pub_id);
+  if (writers_.end() != where) {
+    WriterInfo& info = *where->second;
+    WriterIdSeq writers;
+    push_back(writers, pub_id);
+    bool notify = info.notify_lost_;
+    if (info.removal_deadline_ < ACE_OS::gettimeofday()) {
+      write_guard.release();
+      remove_associations_i(writers, notify);
+    } else {
+      write_guard.release();
+      remove_associations(writers, notify);
+    }
+  }
+}
+
+void
+DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
+    bool notify_lost)
+{
+  DBG_ENTRY_LVL("DataReaderImpl", "remove_associations_i", 6);
+
+  if (writers.length() == 0) {
+    return;
+  }
+
+  if (DCPS_debug_level >= 1) {
+    GuidConverter reader_converter(subscription_id_);
+    GuidConverter writer_converter(writers[0]);
+    ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
+        ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+        is_bit_,
+        std::string(reader_converter).c_str(),
+        std::string(writer_converter).c_str(),
+        writers.length()));
+  }
   DDS::InstanceHandleSeq handles;
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
@@ -635,13 +676,14 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
       if (it != this->writers_.end()) {
         it->second->removed();
         end_historic_sweeper_->cancel_timer(it->second);
+        remove_association_sweeper_->cancel_timer(it->second);
       }
 
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 1) {
           GuidConverter converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
+              ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
               ACE_TEXT("the writer local %C was already removed.\n"),
               std::string(converter).c_str()));
         }
@@ -665,7 +707,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     if (this->lookup_instance_handles(updated_writers, handles) == false) {
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
+            ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
             ACE_TEXT("lookup_instance_handles failed.\n")));
       }
     }
@@ -3517,6 +3559,81 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
     info_->_remove_ref();
   }
 }
+//Starting RemoveAssociationSweeper
+RemoveAssociationSweeper::RemoveAssociationSweeper(ACE_Reactor* reactor,
+                                                   ACE_thread_t owner,
+                                                   DataReaderImpl* reader)
+  : ReactorInterceptor (reactor, owner)
+  , reader_(reader)
+{ }
+
+RemoveAssociationSweeper::~RemoveAssociationSweeper()
+{ }
+
+void RemoveAssociationSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback)
+{
+  info->scheduled_for_removal_ = true;
+  info->notify_lost_ = callback;
+  ACE_Time_Value ten_seconds(10);
+  info->removal_deadline_ = ACE_OS::gettimeofday() + ten_seconds;
+  ScheduleCommand c(this, info);
+  execute_or_enqueue(c);
+}
+
+void RemoveAssociationSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+{
+  info->scheduled_for_removal_ = false;
+  info->removal_deadline_ = ACE_Time_Value::zero;
+  CancelCommand c(this, info);
+  execute_or_enqueue(c);
+}
+
+int RemoveAssociationSweeper::handle_timeout(
+    const ACE_Time_Value& ,
+    const void* arg)
+{
+  PublicationId pub_id = reinterpret_cast<const WriterInfo*>(arg)->writer_id_;
+
+  if (DCPS_debug_level >= 1) {
+    GuidConverter sub_repo(reader_->get_repo_id());
+    GuidConverter pub_repo(pub_id);
+    ACE_DEBUG((LM_INFO, "((%P|%t)) RemoveAssociationSweeper::handle_timeout reader: %C waiting on writer: %C\n",
+               std::string(sub_repo).c_str(),
+               std::string(pub_repo).c_str()));
+  }
+
+  reader_->remove_or_reschedule(pub_id);
+  return 0;
+}
+
+void RemoveAssociationSweeper::ScheduleCommand::execute()
+{
+  static const ACE_Time_Value two_seconds(2);
+
+  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
+  const void* arg = reinterpret_cast<const void*>(info_.in());
+  info_->_add_ref();
+
+  info_->remove_association_timer_ = sweeper_->reactor()->schedule_timer(sweeper_,
+                                                                       arg,
+                                                                       two_seconds);
+  if (DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", info_->remove_association_timer_));
+  }
+}
+
+void RemoveAssociationSweeper::CancelCommand::execute()
+{
+  if (info_->remove_association_timer_ != WriterInfo::NO_TIMER) {
+    sweeper_->reactor()->cancel_timer(info_->remove_association_timer_);
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->remove_association_timer_));
+    }
+    info_->remove_association_timer_ = WriterInfo::NO_TIMER;
+    info_->_remove_ref();
+  }
+}
+//End RemoveAssociationSweeper
 
 } // namespace DCPS
 } // namespace OpenDDS

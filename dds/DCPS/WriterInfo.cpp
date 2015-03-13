@@ -10,6 +10,7 @@
 
 #include "GuidConverter.h"
 #include "WriterInfo.h"
+#include "Qos_Helper.h"
 
 #include "ace/OS_NS_sys_time.h"
 
@@ -65,8 +66,12 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
   seen_data_(false),
   historic_samples_timer_(NO_TIMER),
+  remove_association_timer_(NO_TIMER),
+  removal_deadline_(ACE_Time_Value::zero),
   last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
   waiting_for_end_historic_samples_(false),
+  scheduled_for_removal_(false),
+  notify_lost_(false),
   state_(NOT_SET),
   reader_(reader),
   writer_id_(writer_id),
@@ -259,9 +264,19 @@ WriterInfo::ack_sequence() const
 }
 
 bool
-WriterInfo::active() const
+WriterInfo::active(ACE_Time_Value default_participant_timeout) const
 {
-  ACE_Time_Value activity_wait_period(3);
+  ACE_Time_Value activity_wait_period(default_participant_timeout);
+  if (reader_->liveliness_lease_duration_ != ACE_Time_Value::zero) {
+    activity_wait_period = reader_->liveliness_lease_duration_;
+  }
+  if (activity_wait_period == ACE_Time_Value::zero) {
+      activity_wait_period = duration_to_time_value(writer_qos_.reliability.max_blocking_time);
+  }
+  if (activity_wait_period == ACE_Time_Value::zero) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) WriterInfo::active - activity wait period was ZERO\n"));
+    return false;
+  }
   return (ACE_OS::gettimeofday() - last_liveliness_activity_time_) <= activity_wait_period;
 }
 
