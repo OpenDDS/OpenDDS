@@ -1,6 +1,9 @@
 #ifndef OPENDDS_DCPS_POOL_ALLOCATOR_H
 #define OPENDDS_DCPS_POOL_ALLOCATOR_H
 
+#include <string>
+#include <map>
+
 #ifdef OPENDDS_SAFETY_PROFILE
 
 #include "Service_Participant.h"

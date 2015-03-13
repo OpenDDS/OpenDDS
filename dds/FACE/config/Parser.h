@@ -6,6 +6,9 @@
 #include "QosSettings.h"
 #include "TopicSettings.h"
 
+class ACE_Configuration_Heap;
+class ACE_Configuration_Section_Key;
+
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class OpenDDS_FACE_Export Parser {
