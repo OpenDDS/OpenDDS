@@ -11,6 +11,9 @@
 
 #include "ace/CDR_Base.h"
 #include "ace/CDR_Stream.h"
+
+#include "tao/String_Alloc.h"
+
 #include "dcps_export.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
