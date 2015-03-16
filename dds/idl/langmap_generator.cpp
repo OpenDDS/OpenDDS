@@ -298,6 +298,7 @@ namespace {
       << nm << "_tag> " << nm << "_forany;\n\n" <<
       exporter() << nm << "_slice* " << nm << "_alloc();\n" <<
       exporter() << "void " << nm << "_init_i(" << elem_type << "* begin);\n" <<
+      exporter() << "void " << nm << "_fini_i(" << elem_type << "* begin);\n" <<
       exporter() << "void " << nm << "_free(" << nm << "_slice* slice);\n" <<
       exporter() << nm << "_slice* " << nm << "_dup(const " << nm
       << "_slice* slice);\n" <<
@@ -317,7 +318,9 @@ namespace {
       "void " << nm << "_init_i(" << elem_type << "* begin)\n"
       "{\n";
 
-    if (elem_cls & CL_ARRAY) {
+    if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
+      be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
+    } else if (elem_cls & CL_ARRAY) {
       std::string indent = "  ";
       const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
       be_global->impl_ <<
@@ -330,16 +333,59 @@ namespace {
 
     be_global->impl_ <<
       "}\n\n"
+      "void " << nm << "_fini_i(" << elem_type << "* begin)\n"
+      "{\n";
+      
+    if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
+      be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
+    } else if (elem_cls & CL_ARRAY) {
+      std::string indent = "  ";
+      const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
+      be_global->impl_ <<
+        indent << elem_type << "_fini_i(begin" << nfl.index_ << ");\n";
+    } else {
+      const std::string::size_type idx_last = elem_type.rfind("::");
+      const std::string elem_last = (idx_last == std::string::npos) ? elem_type
+        : elem_type.substr(idx_last + 2);
+      be_global->impl_ <<
+        "  for (int i = 0; i < " << total.str() << "; ++i) {\n"
+        "    begin[i]." << elem_type << "::~" << elem_last << "();\n"
+        "  }\n";
+    }
+
+    be_global->impl_ <<
+      "}\n\n"
       "void " << nm << "_free(" << nm << "_slice* slice)\n"
       "{\n"
+      "  if (!slice) return;\n"
+      "  " << nm << "_fini_i(slice" << zeros << ");\n"
+      "  TheServiceParticipant->pool_free(slice);\n"
       "}\n\n" <<
       nm << "_slice* " << nm << "_dup(const " << nm << "_slice* slice)\n"
       "{\n"
-      "  return 0;\n"
+      "  " << nm << "_slice* const arr = " << nm << "_alloc();\n"
+      "  if (arr) " << nm << "_copy(arr, slice);\n"
+      "  return arr;\n"
       "}\n\n"
       "void " << nm << "_copy(" << nm << "_slice* dst, const " << nm
       << "_slice* src)\n"
       "{\n"
+      "  if (!src || !dst) return;\n";
+
+    {
+      std::string indent = "  ";
+      const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
+      if (elem_cls & CL_ARRAY) {
+        be_global->impl_ <<
+          indent << elem_type << "_copy(dst" << nfl.index_ << ", src"
+          << nfl.index_ << ");\n";
+      } else {
+        be_global->impl_ <<
+          indent << "dst" << nfl.index_ << " = src" << nfl.index_ << ";\n";
+      }
+    }
+
+    be_global->impl_ <<
       "}\n\n";
   }
 

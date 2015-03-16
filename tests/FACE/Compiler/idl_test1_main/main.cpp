@@ -311,7 +311,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   const bool expected_bounded = false;
-  const size_t expected_find_size = 79;
+  const size_t expected_find_size = 73;
   const size_t expected_padding = 7;
 
   size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(my_foo, false /*align*/);

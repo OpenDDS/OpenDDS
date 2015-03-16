@@ -122,7 +122,7 @@ int try_marshaling(const FOO& in_foo, FOO& out_foo,
   return true;
 }
 
-// this test tests the -Gdcps generated code for type XyZ::Foo from foo_test1_lib.
+// this test tests the -Lface generated code for type Xyz::Foo from FACE_idl_test3_lib.
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
 
@@ -526,22 +526,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   //    ** see breakdown in comment at the end of this file
   //  AStructSeq theStructSeq; //+4 = 911
   //  ArrayOfAStruct structArray; //+(3*885) = 3566 {padding +4+3*123 = 506}
-
-  Xyz::SeqOfLong asol;
-  asol.length(2);
-  asol[0] = 77;
-  asol[1] = 88;
-  Xyz::AStruct as;
-  as.f2 = 3.14F;
-  as.f5 = 42;
-
-  //  BigUnion theBigUnion;        //+4 = 4495
-  //  BigUnionSeq theSeqOfBitUnion;//+4 = 4499
-  my_foo.x = 0.99f;                //+4 = 4503
-  my_foo.y = 0.11f;                //+4 = 4507
-  my_foo.theWChar = L'a';          //+3 = 4510
-  //  wstring theWString;          //+4 = 4514    {padding +1 = 630}
-  //  long double theLongDouble;  //+16 = 4530
+  my_foo.x = 0.99f;                //+4 = 3570
+  my_foo.y = 0.11f;                //+4 = 3574
+  my_foo.theWChar = L'a';          //+3 = 3577
+  //  wstring theWString;          //+4 = 3581    {padding +1 = 507}
+  //  long double theLongDouble;  //+16 = 3597
 
   Xyz::Foo foo2;
   foo2.key = 99;
@@ -597,7 +586,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   Xyz::Foo ss_foo;
 
-  const size_t sz = 4530, pad = 630; // see running totals above
+  const size_t sz = 3597, pad = 507; // see running totals above
 
   try {
     if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
