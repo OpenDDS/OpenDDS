@@ -65,6 +65,7 @@ namespace {
     case AST_Expression::EV_bool: pt = AST_PredefinedType::PT_boolean; break;
     case AST_Expression::EV_string: pt = AST_PredefinedType::PT_char; break;
     case AST_Expression::EV_wstring: pt = AST_PredefinedType::PT_wchar; break;
+    default: break;
     }
     if (type == AST_Expression::EV_string || type == AST_Expression::EV_wstring)
       return primtype_[pt] + "* const";
@@ -117,6 +118,7 @@ void langmap_generator::init()
     helpers_[HLP_ARR_OUT] = "::TAO_Array_Out_T";
     helpers_[HLP_ARR_FORANY] = "::TAO_Array_Forany_T";
     break;
+  default: break;
   }
 }
 
@@ -504,9 +506,9 @@ bool langmap_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
   return true;
 }
 
-bool langmap_generator::gen_union(UTL_ScopedName* name,
-                                  const std::vector<AST_UnionBranch*>& branches,
-                                  AST_Type* type, const char*)
+bool langmap_generator::gen_union(UTL_ScopedName*,
+                                  const std::vector<AST_UnionBranch*>&,
+                                  AST_Type*, const char*)
 {
   std::cerr << "ERROR: unions are not supported with -L*\n";
   return false;
