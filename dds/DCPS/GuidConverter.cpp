@@ -98,7 +98,7 @@ GuidConverter::entityKind() const
   }
 }
 
-GuidConverter::operator std::string() const
+GuidConverter::operator OPENDDS_STRING() const
 {
 #ifdef ACE_LYNXOS_MAJOR
   std::ostrstream os;
@@ -108,7 +108,8 @@ GuidConverter::operator std::string() const
 
   os << guid_ << "(" << std::hex << checksum() << ")";
 
-  return os.str();
+  // TODO remove streams
+  return OPENDDS_STRING(os.str().c_str());
 }
 
 #ifdef DDS_HAS_WCHAR
@@ -125,7 +126,7 @@ GuidConverter::operator std::wstring() const
 std::ostream&
 operator<<(std::ostream& os, const GuidConverter& rhs)
 {
-  return os << std::string(rhs);
+  return os << OPENDDS_STRING(rhs);
 }
 
 #ifdef DDS_HAS_WCHAR
@@ -136,7 +137,7 @@ operator<<(std::wostream& os, const GuidConverter& rhs)
 }
 #endif
 
-std::string
+OPENDDS_STRING
 GuidConverter::uniqueId() const
 {
   char id[64];

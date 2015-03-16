@@ -187,7 +187,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
       DCPS::GuidConverter local(guid_), remote(guid);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Spdp::data_received - %C discovered %C lease %ds\n"),
-        std::string(local).c_str(), std::string(remote).c_str(),
+        OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str(),
         pdata.leaseDuration.seconds));
     }
 
@@ -264,7 +264,7 @@ Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
     if (DCPS::DCPS_debug_level > 3) {
       DCPS::GuidConverter conv(iter->first);
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Spdp::remove_discovered_participant")
-                 ACE_TEXT(" - erasing %C\n"), std::string(conv).c_str()));
+                 ACE_TEXT(" - erasing %C\n"), OPENDDS_STRING(conv).c_str()));
     }
     participants_.erase(iter);
   }
@@ -293,7 +293,7 @@ Spdp::remove_expired_participants()
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) Spdp::remove_expired_participants() - ")
             ACE_TEXT("participant %C exceeded lease duration, removing\n"),
-            std::string(conv).c_str()));
+            OPENDDS_STRING(conv).c_str()));
         }
         remove_discovered_participant(part);
       }

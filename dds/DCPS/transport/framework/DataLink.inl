@@ -350,7 +350,7 @@ DataLink::remove_listener(const RepoId& local_id)
         GuidConverter converter(local_id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::remove_listener: removed %C from send_listeners\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
       return;
     }
@@ -358,7 +358,7 @@ DataLink::remove_listener(const RepoId& local_id)
       GuidConverter converter(local_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::remove_listener: removed %C from recv_listeners\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
   this->recv_listeners_.erase(local_id);
 }

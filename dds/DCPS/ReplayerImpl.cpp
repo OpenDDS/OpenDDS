@@ -415,8 +415,8 @@ ReplayerImpl::add_association(const RepoId&            yourId,
                ACE_TEXT("(%P|%t) ReplayerImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str()));
   }
 
   // if (entity_deleted_ == true) {
@@ -445,7 +445,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ReplayerImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
-               std::string(converter).c_str(),
+               OPENDDS_STRING(converter).c_str(),
                qos_.transport_priority.value));
   }
 
@@ -482,7 +482,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::add_association: ")
                  ACE_TEXT("failed to mark %C as pending.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
 
     } else {
       if (DCPS_debug_level > 0) {
@@ -490,7 +490,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) ReplayerImpl::add_association: ")
                    ACE_TEXT("marked %C as pending.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
     }
   } else {
@@ -534,8 +534,8 @@ ReplayerImpl::association_complete(const RepoId& remote_id)
                ACE_TEXT("(%P|%t) ReplayerImpl::association_complete - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str()));
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -560,7 +560,7 @@ ReplayerImpl::association_complete_i(const RepoId& remote_id)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::association_complete_i: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
     // RepoIdToReaderInfoMap::const_iterator it = reader_info_.find(remote_id);
     // if (it != reader_info_.end()) {
@@ -588,7 +588,7 @@ ReplayerImpl::association_complete_i(const RepoId& remote_id)
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    handle));
         return;
 
@@ -597,7 +597,7 @@ ReplayerImpl::association_complete_i(const RepoId& remote_id)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) ReplayerImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    handle));
       }
 
@@ -631,8 +631,8 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
                ACE_TEXT("(%P|%t) ReplayerImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str(),
                readers.length()));
   }
 
@@ -691,7 +691,7 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: ReplayerImpl::remove_associations: ")
                    ACE_TEXT("removing reader %C before association_complete() call.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
       reader_info_.erase(readers[i]);
       //else reader is already removed which indicates remove_association()
@@ -864,8 +864,8 @@ ReplayerImpl::data_delivered(const DataSampleElement* sample)
                ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::data_delivered: ")
                ACE_TEXT(" The publication id %C from delivered element ")
                ACE_TEXT("does not match the datawriter's id %C\n"),
-               std::string(sample_converter).c_str(),
-               std::string(writer_converter).c_str()));
+               OPENDDS_STRING(sample_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str()));
     return;
   }
   DataSampleElement* elem = const_cast<DataSampleElement*>(sample);
@@ -1090,11 +1090,11 @@ ReplayerImpl::lookup_instance_handles(const ReaderIdSeq&       ids,
 {
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
-    std::string separator;
-    std::string buffer;
+    OPENDDS_STRING separator;
+    OPENDDS_STRING buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer += separator + std::string(GuidConverter(ids[i]));
+      buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
     }
 

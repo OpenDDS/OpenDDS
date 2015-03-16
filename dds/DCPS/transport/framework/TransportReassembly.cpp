@@ -240,7 +240,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble() "
       "tseq %q-%q first %d dseq %q pub %C\n", seqRange.first.getValue(),
       seqRange.second.getValue(), firstFrag ? 1 : 0,
-      data.header_.sequence_.getValue(), std::string(conv).c_str()));
+      data.header_.sequence_.getValue(), OPENDDS_STRING(conv).c_str()));
   }
 
   const FragKey key(data.header_.publication_id_, data.header_.sequence_);

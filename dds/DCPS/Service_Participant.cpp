@@ -926,7 +926,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                 ACE_DEBUG((LM_DEBUG,
                            ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                            ACE_TEXT("participant %C attached to Repo[ %C].\n"),
-                           std::string(converter).c_str(),
+                           OPENDDS_STRING(converter).c_str(),
                            key.c_str()));
               }
 
@@ -949,7 +949,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                  ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                  ACE_TEXT("(%d of %d) attaching domain %d participant %C to Repo[ %C].\n"),
                  (1+index), repoList.size(), domain,
-                 std::string(converter).c_str(),
+                 OPENDDS_STRING(converter).c_str(),
                  key.c_str()));
     }
 

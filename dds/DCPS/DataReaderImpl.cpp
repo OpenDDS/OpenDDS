@@ -302,8 +302,8 @@ DataReaderImpl::add_association(const RepoId& yourId,
     GuidConverter writer_converter(writer.writerId);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::add_association - ")
         ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
-        std::string(reader_converter).c_str(),
-        std::string(writer_converter).c_str()));
+        OPENDDS_STRING(reader_converter).c_str(),
+        OPENDDS_STRING(writer_converter).c_str()));
   }
 
   if (entity_deleted_.value()) {
@@ -362,7 +362,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       ACE_DEBUG((LM_DEBUG,
           "(%P|%t) DataReaderImpl::add_association: "
           "inserted writer %C.return %d \n",
-          std::string(converter).c_str(), bpair.second));
+          OPENDDS_STRING(converter).c_str(), bpair.second));
 
       WriterMapType::iterator iter = writers_.find(writer_id);
       if (iter != writers_.end()) {
@@ -374,8 +374,8 @@ DataReaderImpl::add_association(const RepoId& yourId,
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
             ACE_TEXT("reader %C is associated with writer %C.\n"),
-            std::string(reader_converter).c_str(),
-            std::string(writer_converter).c_str()));
+            OPENDDS_STRING(reader_converter).c_str(),
+            OPENDDS_STRING(writer_converter).c_str()));
       }
     }
   }
@@ -418,7 +418,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       ACE_DEBUG((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
           ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
-          std::string(conv).c_str()));
+          OPENDDS_STRING(conv).c_str()));
     }
     return;
   }
@@ -457,7 +457,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
             ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
-            std::string(converter).c_str()));
+            OPENDDS_STRING(converter).c_str()));
       }
       // this call will start the timer if it is not already set
       liveliness_timer_->check_liveliness();
@@ -483,7 +483,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
             ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-            std::string(converter).c_str(),
+            OPENDDS_STRING(converter).c_str(),
             handle));
       }
 
@@ -567,8 +567,8 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
         ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
         is_bit_,
-        std::string(reader_converter).c_str(),
-        std::string(writer_converter).c_str(),
+        OPENDDS_STRING(reader_converter).c_str(),
+        OPENDDS_STRING(writer_converter).c_str(),
         writers.length()));
   }
   // stop pending associations
@@ -611,7 +611,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
           ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
               ACE_TEXT("the writer local %C was already removed.\n"),
-              std::string(converter).c_str()));
+              OPENDDS_STRING(converter).c_str()));
         }
 
       } else {
@@ -1347,8 +1347,8 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
       ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
           ACE_TEXT("reader %C is not associated with writer %C.\n"),
-          std::string(reader_converter).c_str(),
-          std::string(writer_converter).c_str()));
+          OPENDDS_STRING(reader_converter).c_str(),
+          OPENDDS_STRING(writer_converter).c_str()));
     }
   }
 
@@ -1413,7 +1413,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
         ACE_TEXT("%C received sample: %C.\n"),
-        std::string(converter).c_str(),
+        OPENDDS_STRING(converter).c_str(),
         buffer.str() STRINGSTREAM_CSTR));
   }
 
@@ -1457,8 +1457,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       ACE_DEBUG ((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
           ACE_TEXT("instance %d is_new_instance %d filtered %d \n"),
-          std::string(reader_converter).c_str(),
-          std::string(writer_converter).c_str(),
+          OPENDDS_STRING(reader_converter).c_str(),
+          OPENDDS_STRING(writer_converter).c_str(),
           instance ? instance->instance_handle_ : 0,
               is_new_instance, filtered));
     }
@@ -1509,8 +1509,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
             ACE_TEXT("subscription %C failed to find ")
             ACE_TEXT("publication data for %C.\n"),
-            std::string(subscriptionBuffer).c_str(),
-            std::string(publicationBuffer).c_str()));
+            OPENDDS_STRING(subscriptionBuffer).c_str(),
+            OPENDDS_STRING(publicationBuffer).c_str()));
       }
     }
 
@@ -1557,7 +1557,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
           ACE_TEXT("publication %C received REQUEST_ACK for sequence %q ")
           ACE_TEXT("valid for the next %d seconds.\n"),
-          std::string(debugConverter).c_str(),
+          OPENDDS_STRING(debugConverter).c_str(),
           ack.getValue(),
           delay.sec));
     }
@@ -1593,8 +1593,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
             ACE_TEXT("subscription %C failed to find ")
             ACE_TEXT("publication data for %C.\n"),
-            std::string(subscriptionBuffer).c_str(),
-            std::string(publicationBuffer).c_str()));
+            OPENDDS_STRING(subscriptionBuffer).c_str(),
+            OPENDDS_STRING(publicationBuffer).c_str()));
       }
     }
 
@@ -1635,8 +1635,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
             ACE_TEXT(" subscription %C failed to find ")
             ACE_TEXT(" publication data for %C!\n"),
-            std::string(sub_id).c_str(),
-            std::string(pub_id).c_str()));
+            OPENDDS_STRING(sub_id).c_str(),
+            OPENDDS_STRING(pub_id).c_str()));
         return;
       }
       else {
@@ -1784,7 +1784,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       ACE_DEBUG((
           LM_INFO,
           "(%P|%t) Resumed sample processing for durable writer %C\n",
-          std::string(pub_id).c_str()));
+          OPENDDS_STRING(pub_id).c_str()));
     }
     break;
   }
@@ -1861,9 +1861,9 @@ DataReaderImpl::send_sample_ack(
         ACE_TEXT("%C sending SAMPLE_ACK message with sequence %q ")
         ACE_TEXT("to publication %C.\n"),
         this,
-        std::string(subscriptionBuffer).c_str(),
+        OPENDDS_STRING(subscriptionBuffer).c_str(),
         sequence.getValue(),
-        std::string(publicationBuffer).c_str()));
+        OPENDDS_STRING(publicationBuffer).c_str()));
   }
 
   return this->send_response(publication, outbound_header, sample_ack);
@@ -2073,7 +2073,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
     // called from add_associations and there is already a timer
@@ -2143,7 +2143,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
-        std::string(converter).c_str(),
+        OPENDDS_STRING(converter).c_str(),
         alive_writers,
         !cancel));
   }
@@ -2247,8 +2247,8 @@ DataReaderImpl::writer_removed(WriterInfo& info)
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::writer_removed: ")
         ACE_TEXT("reader %C from writer %C.\n"),
-        std::string(reader_converter).c_str(),
-        std::string(writer_converter).c_str()));
+        OPENDDS_STRING(reader_converter).c_str(),
+        OPENDDS_STRING(writer_converter).c_str()));
   }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -2291,8 +2291,8 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
         ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-        std::string(reader_converter).c_str(),
-        std::string(writer_converter).c_str(),
+        OPENDDS_STRING(reader_converter).c_str(),
+        OPENDDS_STRING(writer_converter).c_str(),
         info.get_state_str().c_str()));
   }
 
@@ -2366,8 +2366,8 @@ DataReaderImpl::writer_became_dead(WriterInfo & info,
         ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
         ACE_TEXT("reader %C from writer %C previous state %C.\n"),
 
-        std::string(reader_converter).c_str(),
-        std::string(writer_converter).c_str(),
+        OPENDDS_STRING(reader_converter).c_str(),
+        OPENDDS_STRING(writer_converter).c_str(),
         info.get_state_str().c_str()));
   }
 
@@ -2517,8 +2517,8 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
         ACE_TEXT("reader %C is not associated with writer %C (late sample?).\n"),
-        std::string(reader_converter).c_str(),
-        std::string(writer_converter).c_str()));
+        OPENDDS_STRING(reader_converter).c_str(),
+        OPENDDS_STRING(writer_converter).c_str()));
   }
 }
 
@@ -2839,8 +2839,8 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
             ACE_TEXT("reader %C is not associated with writer %C.\n"),
-            std::string(reader_converter).c_str(),
-            std::string(writer_converter).c_str()));
+            OPENDDS_STRING(reader_converter).c_str(),
+            OPENDDS_STRING(writer_converter).c_str()));
       }
       return true;
     }
@@ -2865,9 +2865,9 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
           ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
               ACE_TEXT("reader %C writer %C is not elected as owner %C\n"),
-              std::string(reader_converter).c_str(),
-              std::string(writer_converter).c_str(),
-              std::string(owner_converter).c_str()));
+              OPENDDS_STRING(reader_converter).c_str(),
+              OPENDDS_STRING(writer_converter).c_str(),
+              OPENDDS_STRING(owner_converter).c_str()));
         }
         return true;
       }
@@ -2880,9 +2880,9 @@ DataReaderImpl::filter_instance(SubscriptionInstance* instance,
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::filter_instance: ")
             ACE_TEXT("reader %C writer %C is not owner %C\n"),
-            std::string(reader_converter).c_str(),
-            std::string(writer_converter).c_str(),
-            std::string(owner_converter).c_str()));
+            OPENDDS_STRING(reader_converter).c_str(),
+            OPENDDS_STRING(writer_converter).c_str(),
+            OPENDDS_STRING(owner_converter).c_str()));
       }
       return true;
     }
@@ -3068,8 +3068,8 @@ DataReaderImpl::update_ownership_strength (const PublicationId& pub_id,
           ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataReaderImpl::update_ownership_strength - ")
               ACE_TEXT("local %C update remote %C strength from %d to %d \n"),
-              std::string(reader_converter).c_str(),
-              std::string(writer_converter).c_str(),
+              OPENDDS_STRING(reader_converter).c_str(),
+              OPENDDS_STRING(writer_converter).c_str(),
               iter->second->writer_qos_.ownership_strength, ownership_strength));
         }
         iter->second->writer_qos_.ownership_strength.value = ownership_strength;
@@ -3129,9 +3129,9 @@ void DataReaderImpl::accept_coherent (PublicationId& writer_id,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::accept_coherent()")
         ACE_TEXT(" reader %C writer %C publisher %C \n"),
-        std::string(reader).c_str(),
-        std::string(writer).c_str(),
-        std::string(publisher).c_str()));
+        OPENDDS_STRING(reader).c_str(),
+        OPENDDS_STRING(writer).c_str(),
+        OPENDDS_STRING(publisher).c_str()));
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -3155,9 +3155,9 @@ void DataReaderImpl::reject_coherent (PublicationId& writer_id,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::reject_coherent()")
         ACE_TEXT(" reader %C writer %C publisher %C \n"),
-        std::string(reader).c_str(),
-        std::string(writer).c_str(),
-        std::string(publisher).c_str()));
+        OPENDDS_STRING(reader).c_str(),
+        OPENDDS_STRING(writer).c_str(),
+        OPENDDS_STRING(publisher).c_str()));
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -3447,8 +3447,8 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
     GuidConverter sub_repo(reader_->get_repo_id());
     GuidConverter pub_repo(pub_id);
     ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout reader: %C waiting on writer: %C\n",
-               std::string(sub_repo).c_str(),
-               std::string(pub_repo).c_str()));
+               OPENDDS_STRING(sub_repo).c_str(),
+               OPENDDS_STRING(pub_repo).c_str()));
   }
 
   reader_->resume_sample_processing(pub_id);

@@ -291,7 +291,7 @@ private:
   /**
    * Return a unique string based on repo ID.
    */
-  std::string get_unique_id();
+  OPENDDS_STRING get_unique_id();
 
   /**
    * Obtain a local handle representing a GUID.

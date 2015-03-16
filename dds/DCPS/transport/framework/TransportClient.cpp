@@ -50,7 +50,7 @@ TransportClient::~TransportClient()
     GuidConverter converter(repo_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
-               std::string(converter).c_str()));
+               OPENDDS_STRING(converter).c_str()));
   }
 
   this->stop_associating();
@@ -64,7 +64,7 @@ TransportClient::~TransportClient()
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C from link waiting for callback\n"),
                  this,
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
     iter->second->remove_listener(repo_id_);
   }
@@ -76,7 +76,7 @@ TransportClient::~TransportClient()
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient[%@]::~TransportClient: about to remove_listener %C\n"),
                  this,
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
     iter->second->remove_listener(repo_id_);
   }
@@ -213,7 +213,7 @@ TransportClient::transport_detached(TransportImpl* which)
         GuidConverter converter(repo_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) TransportClient::transport_detached: calling remove_listener %C on link[%@]\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    iter->second.in()));
       }
       iter->second->remove_listener(repo_id_);
@@ -261,8 +261,8 @@ TransportClient::associate(const AssociationData& data, bool active)
     GuidConverter remote_new(data.remote_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::associate added PendingAssoc "
               "between %C and remote %C\n",
-              std::string(tc_assoc).c_str(),
-              std::string(remote_new).c_str()), 5);
+              OPENDDS_STRING(tc_assoc).c_str(),
+              OPENDDS_STRING(remote_new).c_str()), 5);
 
   } else {
     if (iter->second->removed_) {
@@ -476,7 +476,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
             "TransportClient(%@) using datalink[%@] from %C\n",
             this,
             link.in(),
-            std::string(peerId_conv).c_str()), 5);
+            OPENDDS_STRING(peerId_conv).c_str()), 5);
 
   PendingMap::iterator iter = pending_.find(remote_id);
 
@@ -501,7 +501,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
               "TransportClient(%@) about to add_link[%@] to remote: %C\n",
               this,
               link.in(),
-              std::string(peerId_conv).c_str()), 5);
+              OPENDDS_STRING(peerId_conv).c_str()), 5);
 
     add_link(link, remote_id);
     ok = true;
@@ -552,7 +552,7 @@ TransportClient::on_notification_of_connection_deletion(const RepoId& peerId)
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::on_notification_of_connection_deletion "
             "TransportClient(%@) connection to %C deleted\n",
             this,
-            std::string(peerId_conv).c_str()), 5);
+            OPENDDS_STRING(peerId_conv).c_str()), 5);
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -564,7 +564,7 @@ TransportClient::on_notification_of_connection_deletion(const RepoId& peerId)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::on_notification_of_connection_deletion: ")
                  ACE_TEXT("no link for remote peer %C\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
     return;
@@ -611,7 +611,7 @@ TransportClient::disassociate(const RepoId& peerId)
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::disassociate "
             "TransportClient(%@) disassociating from %C\n",
             this,
-            std::string(peerId_conv).c_str()), 5);
+            OPENDDS_STRING(peerId_conv).c_str()), 5);
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
@@ -630,7 +630,7 @@ TransportClient::disassociate(const RepoId& peerId)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
                  ACE_TEXT("no link for remote peer %C\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
     return;
@@ -667,7 +667,7 @@ TransportClient::disassociate(const RepoId& peerId)
         GuidConverter converter(repo_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) TransportClient::disassociate: wait for connection deleted callback for %C on link[%@]\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    link.in()));
       }
       links_waiting_for_on_deleted_callback_[peerId] = link;
@@ -676,7 +676,7 @@ TransportClient::disassociate(const RepoId& peerId)
         GuidConverter converter(repo_id_);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) TransportClient::disassociate: calling remove_listener %C on link[%@]\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    link.in()));
       }
       // Datalink is no longer used for any remote peer by this TransportClient
@@ -701,7 +701,7 @@ TransportClient::send_response(const RepoId& peer,
                  ACE_TEXT("(%P|%t) TransportClient::send_response: ")
                  ACE_TEXT("no link for publication %C, ")
                  ACE_TEXT("not sending response.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
     return false;
@@ -789,7 +789,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
                      ACE_TEXT("(%P|%t) TransportClient::send_i: ")
                      ACE_TEXT("no links for publication %C, ")
                      ACE_TEXT("not sending element %@ for transaction: %d.\n"),
-                     std::string(converter).c_str(),
+                     OPENDDS_STRING(converter).c_str(),
                      cur,
                      cur->transaction_id()));
         }
