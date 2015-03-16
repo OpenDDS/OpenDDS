@@ -202,7 +202,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       DCPS::pullValues(cf, it->second, values);
       for (DCPS::ValueMap::const_iterator it = values.begin();
            it != values.end(); ++it) {
-        const std::string& name = it->first;
+        const OPENDDS_STRING& name = it->first;
         if (name == "ResendPeriod") {
           const std::string& value = it->second;
           has_resend = DCPS::convertToInteger(value, resend);

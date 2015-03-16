@@ -1596,7 +1596,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
       Discovery::RepoKey repoKey;
       std::string perDomainDefaultTportConfig;
       for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-        std::string name = it->first;
+        OPENDDS_STRING name = it->first;
         if (name == "DomainId") {
           std::string value = it->second;
           if (!convertToInteger(value, domainId)) {

@@ -220,7 +220,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
           configInfo.first = config;
           for (ValueMap::const_iterator it=values.begin();
                it != values.end(); ++it) {
-            std::string name = (*it).first;
+            OPENDDS_STRING name = (*it).first;
             if (name == "transports") {
               std::string value = (*it).second;
 #ifdef ACE_LYNXOS_MAJOR
