@@ -3,13 +3,16 @@
 
 #include <string>
 #include <map>
+#include "dcps_export.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 
-#include "Service_Participant.h"
-
 namespace OpenDDS {
 namespace DCPS {
+  
+OpenDDS_Dcps_Export void* pool_alloc_memory(size_t size);
+
+OpenDDS_Dcps_Export void pool_free_memory(void* ptr);
 
 /// Adapt the Service Participant's memory pool for use with STL containers.
 ///
@@ -37,20 +40,20 @@ public:
 
   static T* allocate(std::size_t n)
   {
-    void* raw_mem = TheServiceParticipant->pool_malloc(n * sizeof(T));
+    void* raw_mem = pool_alloc_memory(n * sizeof(T));
     if (!raw_mem) throw std::bad_alloc();
     return static_cast<T*>(raw_mem);
   }
 
   static void deallocate(T* ptr, std::size_t)
   {
-    TheServiceParticipant->pool_free(ptr);
+    pool_free_memory(ptr);
   }
 
 #ifdef ACE_LYNXOS_MAJOR
   static void deallocate(void* ptr, std::size_t)
   {
-    TheServiceParticipant->pool_free(ptr);
+    pool_free_memory(ptr);
   }
 #endif
 
