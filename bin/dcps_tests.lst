@@ -312,3 +312,5 @@ tests/FACE/Unit/QosSettingsTest: !DCPS_MIN !WCHAR
 tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS
 tests/FACE/Reliability/run_test.pl: !DCPS_MIN !WCHAR RTPS
 tests/FACE/Partition/run_test.pl: !DCPS_MIN !WCHAR RTPS
+tests/FACE/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !WCHAR
+tests/FACE/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !WCHAR

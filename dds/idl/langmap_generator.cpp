@@ -263,13 +263,17 @@ namespace {
       out = HLP_ARR_OUT,
       forany = HLP_ARR_FORANY;
 
-    std::ostringstream bound, nofirst, total, zeroes;
+    std::ostringstream bound, nofirst, total;
+    std::string zeros;
     for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
       const ACE_CDR::ULong extent = arr->dims()[dim]->ev()->u.ulval;
       bound << '[' << extent << ']';
-      zeroes << "[0]";
-      if (dim) nofirst << '[' << extent << ']';
-      total << (dim ? " * " : "") << extent;
+      if (dim) {
+        nofirst << '[' << extent << ']';
+        zeros += "[0]";
+        total << " * ";
+      }
+      total << extent;
     }
 
     std::string elem_type = map_type(elem);
@@ -307,7 +311,7 @@ namespace {
       << "));\n"
       "  " << nm << "_slice* const slice = static_cast<" << nm << "_slice*"
       << ">(raw);\n"
-      "  " << nm << "_init_i(&slice" << zeroes.str() << ");\n"
+      "  " << nm << "_init_i(slice" << zeros << ");\n"
       "  return slice;\n"
       "}\n\n"
       "void " << nm << "_init_i(" << elem_type << "* begin)\n"
@@ -344,17 +348,34 @@ namespace {
   void gen_array_traits(UTL_ScopedName* tdname, AST_Array* arr)
   {
     const std::string nm = scoped(tdname);
+    std::string zeros;
+    for (ACE_CDR::ULong i = 1; i < arr->n_dims(); ++i) zeros += "[0]";
     be_global->lang_header_ <<
       "namespace TAO {\n"
       "template <>\n"
       "struct " << exporter() << "Array_Traits<" << nm << "_forany>\n"
       "{\n"
-      "  static void free(" << nm << "_slice* slice);\n"
-      "  static " << nm << "_slice* dup(const " << nm << "_slice* slice);\n"
+      "  static void free(" << nm << "_slice* slice)\n"
+      "  {\n"
+      "    " << nm << "_free(slice);\n"
+      "  }\n\n"
+      "  static " << nm << "_slice* dup(const " << nm << "_slice* slice)\n"
+      "  {\n"
+      "    return " << nm << "_dup(slice);\n"
+      "  }\n\n"
       "  static void copy(" << nm << "_slice* dst, const " << nm
-      << "_slice* src);\n"
-      "  static " << nm << "_slice* alloc();\n"
-      "  static void zero(" << nm << "_slice* slice);\n"
+      << "_slice* src)\n"
+      "  {\n"
+      "    " << nm << "_copy(dst, src);\n"
+      "  }\n\n"
+      "  static " << nm << "_slice* alloc()\n"
+      "  {\n"
+      "    return " << nm << "_alloc();\n"
+      "  }\n\n"
+      "  static void zero(" << nm << "_slice* slice)\n"
+      "  {\n"
+      "    " << nm << "_init_i(slice" << zeros << ");\n"
+      "  }\n"
       "};\n}\n\n";
   }
 }
