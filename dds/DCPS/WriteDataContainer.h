@@ -18,8 +18,12 @@
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "PoolAllocator.h"
 #endif
-#include "ace/Condition_Thread_Mutex.h"
-#include "ace/Condition_Recursive_Thread_Mutex.h"
+#include "ace/Condition_T.h"
+#include "Service_Participant.h"
+
+#include "ace/Null_Mutex.h"
+#include "ace/Thread_Mutex.h"
+#include "ace/Recursive_Thread_Mutex.h"
 
 #include <map>
 #include <set>
