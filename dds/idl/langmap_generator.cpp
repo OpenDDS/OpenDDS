@@ -45,6 +45,32 @@ namespace {
     return "<<unknown>>";
   }
 
+  std::string map_type(AST_Expression::ExprType type)
+  {
+    AST_PredefinedType::PredefinedType pt = AST_PredefinedType::PT_void;
+    switch (type)
+    {
+    case AST_Expression::EV_short: pt = AST_PredefinedType::PT_short; break;
+    case AST_Expression::EV_ushort: pt = AST_PredefinedType::PT_ushort; break;
+    case AST_Expression::EV_long: pt = AST_PredefinedType::PT_long; break;
+    case AST_Expression::EV_ulong: pt = AST_PredefinedType::PT_ulong; break;
+    case AST_Expression::EV_longlong: pt = AST_PredefinedType::PT_longlong; break;
+    case AST_Expression::EV_ulonglong: pt = AST_PredefinedType::PT_ulonglong; break;
+    case AST_Expression::EV_float: pt = AST_PredefinedType::PT_float; break;
+    case AST_Expression::EV_double: pt = AST_PredefinedType::PT_double; break;
+    case AST_Expression::EV_longdouble: pt = AST_PredefinedType::PT_longdouble; break;
+    case AST_Expression::EV_char: pt = AST_PredefinedType::PT_char; break;
+    case AST_Expression::EV_wchar: pt = AST_PredefinedType::PT_wchar; break;
+    case AST_Expression::EV_octet: pt = AST_PredefinedType::PT_octet; break;
+    case AST_Expression::EV_bool: pt = AST_PredefinedType::PT_boolean; break;
+    case AST_Expression::EV_string: pt = AST_PredefinedType::PT_char; break;
+    case AST_Expression::EV_wstring: pt = AST_PredefinedType::PT_wchar; break;
+    }
+    if (type == AST_Expression::EV_string || type == AST_Expression::EV_wstring)
+      return primtype_[pt] + "* const";
+    return primtype_[pt];
+  }
+
   std::string exporter() {
     return be_global->export_macro().empty() ? ""
       : be_global->export_macro().c_str() + std::string(" ");
@@ -94,10 +120,24 @@ void langmap_generator::init()
   }
 }
 
-bool langmap_generator::gen_const(UTL_ScopedName* name, bool nestedInInterface,
-                                  AST_Expression::ExprType type,
-                                  AST_Expression::AST_ExprValue* value)
+bool langmap_generator::gen_const(UTL_ScopedName* name, bool /*nestedInInterface*/,
+                                  AST_Constant* constant)
 {
+  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+  const char* const nm = name->last_component()->get_string();
+
+  const AST_Expression::ExprType type = constant->et();
+  const bool is_enum = (type == AST_Expression::EV_enum);
+  const std::string type_name = is_enum
+    ? scoped(constant->enum_full_name()) : map_type(type);
+  be_global->lang_header_ <<
+    "const " << type_name << ' ' << nm << " = ";
+
+  if (is_enum) {
+    be_global->lang_header_ << scoped(constant->constant_value()->n()) << ";\n";
+  } else {
+    be_global->lang_header_ << *constant->constant_value()->ev() << ";\n";
+  }
   return true;
 }
 

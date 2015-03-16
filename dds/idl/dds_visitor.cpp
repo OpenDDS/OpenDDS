@@ -367,8 +367,7 @@ dds_visitor::visit_constant(AST_Constant* node)
   bool nested = d && (d->node_type() == AST_Decl::NT_interface);
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_const(node->name(), nested, node->et(),
-                                     node->constant_value()->ev());
+    error_ |= !gen_target_.gen_const(node->name(), nested, node);
   }
 
   return 0;

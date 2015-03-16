@@ -1,8 +1,10 @@
 #include "../idl_test1_lib/FooDefTypeSupportImpl.h"
+
+#include "dds/Version.h"
+
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
 #include <map>
-#include "tao/CDR.h"
 
 namespace {
   template <typename T>
@@ -20,6 +22,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int failed = false;
   bool dump_buffer = false;
+
+  const unsigned int vers = (DDS_MAJOR_VERSION << 16) | (DDS_MINOR_VERSION << 8)
+    | DDS_MICRO_VERSION;
+  if (vers != dds_version) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("Expected dds_version 0x%06x, actual 0x%06x\n"),
+      dds_version, vers));
+    failed = true;
+  }
 
   if (argc > 1) dump_buffer = true;
   size_t padding;

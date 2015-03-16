@@ -32,11 +32,11 @@ string dds_generator::scoped_helper(UTL_ScopedName* sn, const char* sep)
 }
 
 bool composite_generator::gen_const(UTL_ScopedName* name, bool nestedInInteface,
-  AST_Expression::ExprType type, AST_Expression::AST_ExprValue* value)
+  AST_Constant* constant)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
-    if (!(*it)->gen_const(name, nestedInInteface, type, value))
+    if (!(*it)->gen_const(name, nestedInInteface, constant))
       return false;
   }
 

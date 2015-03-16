@@ -19,8 +19,7 @@ public:
 
 private:
   bool gen_const(UTL_ScopedName* name, bool nestedInInteface,
-                 AST_Expression::ExprType type,
-                 AST_Expression::AST_ExprValue* value);
+                 AST_Constant* constant);
 
   bool gen_enum(UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
