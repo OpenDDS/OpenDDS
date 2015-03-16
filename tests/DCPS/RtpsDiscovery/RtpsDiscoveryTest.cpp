@@ -169,7 +169,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("%P ")
                  ACE_TEXT("Read Participant BIT GUID=%C handle=%d\n"),
-                 std::string(converter).c_str(), infos[i].instance_handle));
+                 OPENDDS_STRING(converter).c_str(), infos[i].instance_handle));
 
       if (repo_id == other_dp_repo_id) {
         if (data[i].user_data.value.length() != 1) {
@@ -429,7 +429,7 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
                  data[i].key.value[0], data[i].key.value[1],
                  data[i].key.value[2], infos[i].instance_handle,
-                 std::string(converter).c_str (), data[i].topic_name.in(),
+                 OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
 
       if (repo_id == publisher_repo_id) {
@@ -553,7 +553,7 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
                  data[i].key.value[0], data[i].key.value[1],
                  data[i].key.value[2], infos[i].instance_handle,
-                 std::string(converter).c_str (), data[i].topic_name.in(),
+                 OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
       if (repo_id == subscriber_repo_id) {
         found_subscriber = true;
@@ -662,8 +662,8 @@ bool check_discovered_participants(DomainParticipant_var& dp,
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT("%P ")
                     ACE_TEXT("%C discovered %C\n"),
-                    std::string(converter1).c_str(),
-                    std::string(converter2).c_str()));
+                    OPENDDS_STRING(converter1).c_str(),
+                    OPENDDS_STRING(converter2).c_str()));
       }
     }
   }
@@ -683,7 +683,7 @@ bool run_test(DomainParticipant_var& dp_sub,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("%P ")
                 ACE_TEXT("Sub Domain Participant GUID=%C\n"),
-                std::string(converter).c_str()));
+                OPENDDS_STRING(converter).c_str()));
   }
 
   {
@@ -694,7 +694,7 @@ bool run_test(DomainParticipant_var& dp_sub,
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("%P ")
                 ACE_TEXT("Pub Domain Participant GUID=%C\n"),
-                std::string(converter).c_str()));
+                OPENDDS_STRING(converter).c_str()));
   }
 
   // If we are running with an rtps_udp transport, it can't be shared between
