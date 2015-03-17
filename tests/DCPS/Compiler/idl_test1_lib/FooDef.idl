@@ -83,12 +83,17 @@ module Xyz {
 #endif // TEST_UNIONS
 
   typedef sequence<char, 2> AcharSeq;
-  typedef sequence<string, 4> AStringSeq;
+  typedef sequence<string, 4> AStringSeq; // BoundedSeqOfUnboundedString
 
   typedef sequence<AcharSeq> AcharSeqSeq;
 
   typedef char MyChar;
   typedef sequence<MyChar, 5> AMyCharSeq;
+
+  typedef string<100> BoundedString;
+  typedef sequence<BoundedString> UnboundedSeqOfBoundedString;
+  typedef sequence<BoundedString, 10> BoundedSeqOfBoundedString;
+  typedef sequence<string> UnboundedSeqOfUnboundedString;
 
   // +4+(3*12)
   typedef sequence<AStruct,3> AStructSeqX;
