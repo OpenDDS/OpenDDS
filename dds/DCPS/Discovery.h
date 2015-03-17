@@ -17,7 +17,7 @@
 #include "dds/DCPS/DataWriterCallbacks.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -45,7 +45,7 @@ class OpenDDS_Dcps_Export Discovery : public RcObject<ACE_SYNCH_MUTEX> {
 public:
   /// Key type for storing discovery objects.
   /// Probably should just be Discovery::Key
-  typedef std::string RepoKey;
+  typedef OPENDDS_STRING RepoKey;
 
   explicit Discovery(const RepoKey& key) : key_(key) { }
 

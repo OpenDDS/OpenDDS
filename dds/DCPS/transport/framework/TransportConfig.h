@@ -32,7 +32,7 @@ public:
 
   static const unsigned long DEFAULT_PASSIVE_CONNECT_DURATION = 60000;
 
-  std::string name() const { return name_; }
+  OPENDDS_STRING name() const { return name_; }
 
   std::vector<TransportInst_rch> instances_;
 
@@ -50,10 +50,10 @@ public:
 
 private:
   friend class TransportRegistry;
-  explicit TransportConfig(const std::string& name);
+  explicit TransportConfig(const OPENDDS_STRING& name);
   ~TransportConfig();
 
-  const std::string name_;
+  const OPENDDS_STRING name_;
 };
 
 }

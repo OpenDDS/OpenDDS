@@ -98,7 +98,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     ));
     std::ostringstream oss;
     oss << index;
-    std::string key_string = oss.str();
+    OPENDDS_STRING key_string = oss.str().c_str();
     TheServiceParticipant->set_repo_ior(
       this->config_.infoRepoIor( index).c_str(),
       key_string
@@ -117,7 +117,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       ));
       std::ostringstream oss;
       oss << this->config_.domainToRepo( this->config_.subscriberDomain( index));
-      std::string key_string = oss.str();
+      OPENDDS_STRING key_string = oss.str().c_str();
       TheServiceParticipant->set_repo_domain(
         this->config_.subscriberDomain( index),
         key_string
@@ -132,7 +132,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       ));
       std::ostringstream oss;
       oss << this->config_.domainToRepo( this->config_.publisherDomain( index));
-      std::string key_string = oss.str();
+      OPENDDS_STRING key_string = oss.str().c_str();
       TheServiceParticipant->set_repo_domain(
         this->config_.publisherDomain( index),
         key_string

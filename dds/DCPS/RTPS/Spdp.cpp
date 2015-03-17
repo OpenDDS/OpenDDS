@@ -409,7 +409,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   }
 #endif
 
-  std::string mc_addr = outer_->disco_->default_multicast_group();
+  OPENDDS_STRING mc_addr = outer_->disco_->default_multicast_group();
   ACE_INET_Addr default_multicast;
   if (0 != default_multicast.set(mc_port, mc_addr.c_str())) {
     ACE_DEBUG((
@@ -420,7 +420,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     throw std::runtime_error("failed to set default_multicast address");
   }
 
-  const std::string& net_if = outer_->disco_->multicast_interface();
+  const OPENDDS_STRING& net_if = outer_->disco_->multicast_interface();
 
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO,

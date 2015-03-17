@@ -79,14 +79,14 @@ OpenDDS::DCPS::TransportRegistry::TransportRegistry()
 }
 
 int
-TransportRegistry::load_transport_configuration(const std::string& file_name,
+TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                                                 ACE_Configuration_Heap& cf)
 {
   const ACE_Configuration_Section_Key &root = cf.root_section();
 
   // Create a vector to hold configuration information so we can populate
   // them after the transports instances are created.
-  typedef std::pair<TransportConfig_rch, std::vector<std::string> > ConfigInfo;
+  typedef std::pair<TransportConfig_rch, std::vector<OPENDDS_STRING> > ConfigInfo;
   std::vector<ConfigInfo> configInfoVec;
 
   // Record the transport instances created, so we can place them
@@ -129,13 +129,13 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                            -1);
         }
         for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-          std::string transport_id = (*it).first;
+          OPENDDS_STRING transport_id = (*it).first;
           ACE_Configuration_Section_Key inst_sect = (*it).second;
 
           ValueMap values;
           if (pullValues( cf, (*it).second, values ) != 0) {
             // Get the factory_id for the transport.
-            std::string transport_type;
+            OPENDDS_STRING transport_type;
             ValueMap::const_iterator vm_it = values.find("transport_type");
             if (vm_it != values.end()) {
               transport_type = (*vm_it).second;
@@ -201,7 +201,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                            -1);
         }
         for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-          std::string config_id = (*it).first;
+          OPENDDS_STRING config_id = (*it).first;
 
           // Create a TransportConfig object.
           TransportConfig_rch config = this->create_config(config_id);
@@ -222,19 +222,19 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                it != values.end(); ++it) {
             OPENDDS_STRING name = (*it).first;
             if (name == "transports") {
-              std::string value = (*it).second;
+              OPENDDS_STRING value = (*it).second;
 #ifdef ACE_LYNXOS_MAJOR
               std::istrstream ss(value.c_str());
 #else
-              std::stringstream ss(value);
+              std::stringstream ss(value.c_str());
 #endif
-              std::string item;
+              OPENDDS_STRING item;
               while(std::getline(ss, item, ',')) {
                 configInfo.second.push_back(item);
               }
               configInfoVec.push_back(configInfo);
             } else if (name == "swap_bytes") {
-              std::string value = (*it).second;
+              OPENDDS_STRING value = (*it).second;
               if ((value == "1") || (value == "true")) {
                 config->swap_bytes_ = true;
               } else if ((value != "0") && (value != "false")) {
@@ -245,7 +245,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
                                  -1);
               }
             } else if (name == "passive_connect_duration") {
-              std::string value = (*it).second;
+              OPENDDS_STRING value = (*it).second;
               if (!convertToInteger(value,
                                     config->passive_connect_duration_)) {
                 ACE_ERROR_RETURN((LM_ERROR,
@@ -284,7 +284,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
   // Populate the configurations with instances
   for (unsigned int i = 0; i < configInfoVec.size(); ++i) {
     TransportConfig_rch config = configInfoVec[i].first;
-    std::vector<std::string>& insts = configInfoVec[i].second;
+    std::vector<OPENDDS_STRING>& insts = configInfoVec[i].second;
     for (unsigned int j = 0; j < insts.size(); ++j) {
       TransportInst_rch inst = this->get_inst(insts[j]);
       if (inst == 0) {
@@ -320,7 +320,7 @@ TransportRegistry::load_transport_configuration(const std::string& file_name,
 }
 
 void
-TransportRegistry::load_transport_lib(const std::string& transport_type)
+TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type)
 {
   ACE_UNUSED_ARG(transport_type);
 #if !defined(ACE_AS_STATIC_LIBS)
@@ -338,8 +338,8 @@ TransportRegistry::load_transport_lib(const std::string& transport_type)
 }
 
 TransportInst_rch
-TransportRegistry::create_inst(const std::string& name,
-                               const std::string& transport_type)
+TransportRegistry::create_inst(const OPENDDS_STRING& name,
+                               const OPENDDS_STRING& transport_type)
 {
   GuardType guard(this->lock_);
   TransportType_rch type;
@@ -378,7 +378,7 @@ TransportRegistry::create_inst(const std::string& name,
 
 
 TransportInst_rch
-TransportRegistry::get_inst(const std::string& name) const
+TransportRegistry::get_inst(const OPENDDS_STRING& name) const
 {
   GuardType guard(this->lock_);
   InstMap::const_iterator found = this->inst_map_.find(name);
@@ -390,7 +390,7 @@ TransportRegistry::get_inst(const std::string& name) const
 
 
 TransportConfig_rch
-TransportRegistry::create_config(const std::string& name)
+TransportRegistry::create_config(const OPENDDS_STRING& name)
 {
   GuardType guard(this->lock_);
 
@@ -409,7 +409,7 @@ TransportRegistry::create_config(const std::string& name)
 
 
 TransportConfig_rch
-TransportRegistry::get_config(const std::string& name) const
+TransportRegistry::get_config(const OPENDDS_STRING& name) const
 {
   GuardType guard(this->lock_);
   ConfigMap::const_iterator found = this->config_map_.find(name);
@@ -459,7 +459,7 @@ TransportRegistry::register_type(const TransportType_rch& type)
 {
   DBG_ENTRY_LVL("TransportRegistry", "register_type", 6);
   int result;
-  const std::string name = type->name();
+  const OPENDDS_STRING name = type->name();
 
   {
     GuardType guard(this->lock_);

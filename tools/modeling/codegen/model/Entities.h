@@ -76,18 +76,18 @@ class OpenDDS_Model_Export Entities  {
     /// @name DDS API Entity accessors.
     /// @{
     DDS::DomainParticipant_var participant( const std::string& name,
-                                            const std::string& transportConfig);
+                                            const OPENDDS_STRING& transportConfig);
     DDS::Topic_var             topic(       const std::string& name,
                                             const std::string& participant,
-                                            const std::string& transportConfig);
+                                            const OPENDDS_STRING& transportConfig);
     DDS::Publisher_var         publisher(   const std::string& name,
-                                            const std::string& transportConfig);
+                                            const OPENDDS_STRING& transportConfig);
     DDS::Subscriber_var        subscriber(  const std::string& name,
-                                            const std::string& transportConfig);
+                                            const OPENDDS_STRING& transportConfig);
     DDS::DataWriter_var        writer(      const std::string& name,
-                                            const std::string& transportConfig);
+                                            const OPENDDS_STRING& transportConfig);
     DDS::DataReader_var        reader(      const std::string& name,
-                                            const std::string& transportConfig);
+                                            const OPENDDS_STRING& transportConfig);
     /// @}
 
     /// @name Add user created Entities to the storage.
@@ -117,7 +117,7 @@ class OpenDDS_Model_Export Entities  {
 
     /// Deferred registration of type support for a participant.
     void registerTypes(const std::string& participant,
-                       const std::string& transportConfig);
+                       const OPENDDS_STRING& transportConfig);
 
     /// The command line and file configuration information.
     Config config_;

@@ -22,7 +22,7 @@
 
 #include "ace/Synch.h"
 
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
@@ -51,7 +51,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export TransportInst : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
-  std::string name() const { return name_; }
+  OPENDDS_STRING name() const { return name_; }
 
   /// Overwrite the default configurations with the configuration from the
   /// given section in the ACE_Configuration_Heap object.
@@ -108,7 +108,7 @@ public:
 protected:
 
   TransportInst(const char* type,
-                const std::string& name);
+                const OPENDDS_STRING& name);
 
   virtual ~TransportInst();
 
@@ -125,7 +125,7 @@ private:
   TransportImpl_rch impl();
   virtual TransportImpl* new_impl(const RcHandle<TransportInst>& inst) = 0;
 
-  const std::string name_;
+  const OPENDDS_STRING name_;
 
   TransportImpl_rch impl_;
   ACE_SYNCH_MUTEX lock_;

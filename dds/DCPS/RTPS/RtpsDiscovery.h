@@ -238,17 +238,17 @@ public:
     sedp_multicast_ = sm;
   }
 
-  std::string multicast_interface() const { return multicast_interface_; }
-  void multicast_interface(const std::string& mi) {
+  OPENDDS_STRING multicast_interface() const { return multicast_interface_; }
+  void multicast_interface(const OPENDDS_STRING& mi) {
     multicast_interface_ = mi;
   }
 
-  std::string default_multicast_group() const { return default_multicast_group_; }
-  void default_multicast_group(const std::string& group) {
+  OPENDDS_STRING default_multicast_group() const { return default_multicast_group_; }
+  void default_multicast_group(const OPENDDS_STRING& group) {
     default_multicast_group_ = group;
   }
 
-  typedef std::vector<std::string> AddrVec;
+  typedef std::vector<OPENDDS_STRING> AddrVec;
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
 
@@ -262,8 +262,8 @@ private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_, ttl_;
   bool sedp_multicast_;
-  std::string multicast_interface_;
-  std::string default_multicast_group_;  /// FUTURE: handle > 1 group.
+  OPENDDS_STRING multicast_interface_;
+  OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
   AddrVec spdp_send_addrs_;
 
   struct ReactorRunner : ACE_Task_Base {

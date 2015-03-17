@@ -7,7 +7,7 @@
 #include "dds/DdsDcpsTypeSupportExtC.h"
 
 #include <vector>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 class Options
 {
@@ -48,9 +48,9 @@ public:
   std::string entity_str;
   std::string source_str;
   std::string collocation_str;
-  std::string configuration_str;
-  std::vector<std::string> protocol_str;
-  std::vector<std::string> negotiated_str;
+  OPENDDS_STRING configuration_str;
+  std::vector<OPENDDS_STRING> protocol_str;
+  std::vector<OPENDDS_STRING> negotiated_str;
 
 };
 #endif

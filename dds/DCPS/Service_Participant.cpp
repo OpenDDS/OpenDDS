@@ -200,7 +200,7 @@ Service_Participant::~Service_Participant()
 {
   shutdown();
   ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
-  typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
+  typedef std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter_t;
   for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
     delete it->second;
   }
@@ -274,7 +274,7 @@ Service_Participant::shutdown()
     persistent_data_cache_.reset();
 #endif
 
-    typedef std::map<std::string, Discovery::Config*>::iterator iter;
+    typedef std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter;
     for (iter i = discovery_types_.begin(); i != discovery_types_.end(); ++i) {
       delete i->second;
     }
@@ -801,7 +801,7 @@ Service_Participant::set_repo_ior(const char* ior,
     key = Discovery::DEFAULT_REPO;
   }
 
-  const std::string repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
+  const OPENDDS_STRING repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
   if (!discovery_types_.count(repo_type)) {
     // Re-use a transport registry function to attempt a dynamic load of the
     // library that implements the 'repo_type' (InfoRepoDiscovery)
@@ -1588,17 +1588,17 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
 
     // Loop through the [domain/*] sections
     for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-      std::string domain_name = it->first;
+      OPENDDS_STRING domain_name = it->first;
 
       ValueMap values;
       pullValues(cf, it->second, values);
       DDS::DomainId_t domainId = -1;
       Discovery::RepoKey repoKey;
-      std::string perDomainDefaultTportConfig;
+      OPENDDS_STRING perDomainDefaultTportConfig;
       for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
         OPENDDS_STRING name = it->first;
         if (name == "DomainId") {
-          std::string value = it->second;
+          OPENDDS_STRING value = it->second;
           if (!convertToInteger(value, domainId)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
@@ -1696,8 +1696,8 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   ACE_Configuration_Section_Key sect;
   if (cf.open_section(root, section_name, 0, sect) == 0) {
 
-    const std::string sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
-    std::map<std::string, Discovery::Config*>::iterator iter =
+    const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
+    std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter =
       this->discovery_types_.find(sect_name);
 
     if (iter == this->discovery_types_.end()) {

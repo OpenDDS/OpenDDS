@@ -76,8 +76,8 @@ TransportRegistry::remove_config(const TransportConfig_rch& cfg)
 
 ACE_INLINE
 void
-TransportRegistry::bind_config(const std::string& name,
-                                              DDS::Entity_ptr entity)
+TransportRegistry::bind_config(const OPENDDS_STRING& name,
+                               DDS::Entity_ptr entity)
 {
   this->bind_config(this->get_config(name), entity);
 }

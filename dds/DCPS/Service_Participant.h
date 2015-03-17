@@ -415,7 +415,7 @@ private:
   int load_discovery_configuration(ACE_Configuration_Heap& cf,
                                    const ACE_TCHAR* section_name);
 
-  std::map<std::string, Discovery::Config*> discovery_types_;
+  std::map<OPENDDS_STRING, Discovery::Config*> discovery_types_;
 
   ACE_ARGV ORB_argv_;
 

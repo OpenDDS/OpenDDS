@@ -92,11 +92,11 @@ assert_supported(const Options& opts, const DDS::Entity_ptr e)
   OpenDDS::DCPS::TransportClient* tc = dynamic_cast<OpenDDS::DCPS::TransportClient*> (e);
   TEST_ASSERT(tc != 0);
 
-  const std::vector<std::string>& transporti = opts.protocol_str;
+  const std::vector<OPENDDS_STRING>& transporti = opts.protocol_str;
 
   // Assert effective transport protocols
   size_t left = transporti.size();
-  for (std::vector < std::string>::const_iterator proto = transporti.begin();
+  for (std::vector < OPENDDS_STRING>::const_iterator proto = transporti.begin();
           proto < transporti.end(); proto++)
     {
 //      ACE_DEBUG((LM_INFO,
@@ -128,7 +128,7 @@ assert_negotiated(const Options& opts, const DDS::Entity_ptr e)
       return true;
     }
 
-  for (std::vector < std::string>::const_iterator proto = opts.negotiated_str.begin();
+  for (std::vector < OPENDDS_STRING>::const_iterator proto = opts.negotiated_str.begin();
           proto < opts.negotiated_str.end(); proto++)
     {
 //      ACE_DEBUG((LM_INFO,

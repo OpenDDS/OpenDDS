@@ -24,7 +24,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
 {
   ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:p"));
 
-  std::string transport_type;
+  OPENDDS_STRING transport_type;
   int c;
   bool thread_per_connection = false;
   while ((c = get_opts()) != -1) {

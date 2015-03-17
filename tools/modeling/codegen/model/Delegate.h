@@ -12,6 +12,7 @@
 #include "model_export.h"
 #include "CopyQos.h"
 #include "dds/DCPS/transport/framework/TransportDefs.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace DDS {
   class DomainParticipant;
@@ -39,7 +40,7 @@ namespace OpenDDS { namespace Model {
         unsigned long             domain,
         const DDS::DomainParticipantQos& participantQos,
         DDS::StatusMask           mask,
-        const std::string&        transportConfig
+        const OPENDDS_STRING&     transportConfig
       );
 
       DDS::Topic*
@@ -56,7 +57,7 @@ namespace OpenDDS { namespace Model {
         DDS::DomainParticipant*       participant,
         const DDS::PublisherQos&      publisherQos,
         DDS::StatusMask               mask,
-        const std::string&            transportConfig
+        const OPENDDS_STRING&         transportConfig
       );
 
       DDS::Subscriber*
@@ -64,17 +65,17 @@ namespace OpenDDS { namespace Model {
         DDS::DomainParticipant*       participant,
         const DDS::SubscriberQos&     subscriberQos,
         DDS::StatusMask               mask,
-        const std::string&            transportConfig
+        const OPENDDS_STRING&         transportConfig
       );
 
       DDS::DataWriter*
       createPublication(
-        unsigned int       which,
-        DDS::Publisher*    publisher,
-        DDS::Topic*        topic,
+        unsigned int              which,
+        DDS::Publisher*           publisher,
+        DDS::Topic*               topic,
         const DDS::DataWriterQos& writerQos,
-        DDS::StatusMask    mask,
-        const std::string& transportConfig,
+        DDS::StatusMask           mask,
+        const OPENDDS_STRING&     transportConfig,
         bool               copyQosFromTopic
       );
 
@@ -84,7 +85,7 @@ namespace OpenDDS { namespace Model {
         DDS::Topic*            topic,
         const DDS::DataWriterQos& writerQos,
         DDS::StatusMask        mask,
-        const std::string&     transportConfig
+        const OPENDDS_STRING&  transportConfig
       );
 
       DDS::DataReader*
@@ -94,7 +95,7 @@ namespace OpenDDS { namespace Model {
         DDS::TopicDescription* topic,
         const DDS::DataReaderQos& readerQos,
         DDS::StatusMask        mask,
-        const std::string&     transportConfig,
+        const OPENDDS_STRING&  transportConfig,
         bool                   copyQosFromTopic
       );
 
@@ -104,7 +105,7 @@ namespace OpenDDS { namespace Model {
         DDS::TopicDescription* topic,
         const DDS::DataReaderQos& readerQos,
         DDS::StatusMask        mask,
-        const std::string&     transportConfig
+        const OPENDDS_STRING&  transportConfig
       );
 
       CopyQos*& service();

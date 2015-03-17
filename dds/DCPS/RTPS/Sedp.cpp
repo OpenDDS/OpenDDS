@@ -283,7 +283,7 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   // configure one transport
   transport_inst_ = TheTransportRegistry->create_inst(
                        DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                       std::string("_SEDPTransportInst_") + key.c_str() + domainStr,
+                       OPENDDS_STRING("_SEDPTransportInst_") + key.c_str() + domainStr,
                        "rtps_udp");
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
@@ -299,7 +299,7 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
     // Bind to a specific multicast group
     const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
-    std::string mc_addr = disco.default_multicast_group();
+    OPENDDS_STRING mc_addr = disco.default_multicast_group();
     if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr.c_str())) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
