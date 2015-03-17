@@ -16,9 +16,13 @@ PerlDDS::add_lib_path('./IDL');
 
 my $num_sleeps = 5;
 my $sleep_secs = 2;
+# Use double the sleep time to ensure reader waits long
+# enough to see activity after a forced sleep to register
+# still active and continue reading
+my $max_timeout = 2*$sleep_secs;
 
 my $pub_opts = "";
-my $sub_opts = " -num_sleeps $num_sleeps -sleep_secs $sleep_secs -DCPSPendingTimeout $sleep_secs";
+my $sub_opts = " -num_sleeps $num_sleeps -sleep_secs $sleep_secs -DCPSPendingTimeout $max_timeout";
 
 my $test = new PerlDDS::TestFramework();
 
