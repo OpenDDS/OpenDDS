@@ -150,6 +150,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         dw->wait_for_acknowledgments(timeout);
       } else {
         // let any missed multicast/rtps messages get re-delivered
+        std::cout << "Writer wait small time" << std::endl;
         ACE_Time_Value small_time(0, 250000);
         ACE_OS::sleep(small_time);
       }
