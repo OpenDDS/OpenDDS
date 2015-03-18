@@ -964,9 +964,12 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
 
 
   if (qos == DATAREADER_QOS_DEFAULT) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) SubscriberImpl::validate_datareader_qos - thinks qos is DATAREADER_QOS_DEFAULT\n"));
     dr_qos = default_qos;
 
   } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) SubscriberImpl::validate_datareader_qos - thinks qos is DATAREADER_QOS_USE_TOPIC_QOS\n"));
+
 #ifndef OPENDDS_NO_MULTI_TOPIC
     if (mt) {
       if (DCPS_debug_level) {
@@ -989,12 +992,13 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
                                     topic_qos);
 
   } else {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) SubscriberImpl::validate_datareader_qos - thinks qos is DATAREADER_QOS_DEFAULT\n"));
     dr_qos = qos;
   }
 
-  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, false);
-  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, false);
-  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, false);
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(dr_qos, false);
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(dr_qos, false);
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(dr_qos, false);
 
   if (!Qos_Helper::valid(dr_qos)) {
     ACE_ERROR((LM_ERROR,
