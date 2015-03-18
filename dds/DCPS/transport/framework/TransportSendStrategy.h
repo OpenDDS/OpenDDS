@@ -284,11 +284,12 @@ public:
 
   /// Access the current sending mode.
   SendMode mode() const;
+protected:
+  /// Implement framework chain visitations to remove a sample.
+  virtual RemoveResult do_remove_sample(const RepoId& pub_id,
+    const TransportQueueElement::MatchCriteria& criteria);
 
 private:
-  /// Implement framework chain visitations to remove a sample.
-  RemoveResult do_remove_sample(
-    const TransportQueueElement::MatchCriteria& criteria);
 
   virtual void marshal_transport_header(ACE_Message_Block* mb);
 

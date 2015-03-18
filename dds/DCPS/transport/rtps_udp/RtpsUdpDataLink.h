@@ -53,7 +53,7 @@ public:
   void send_strategy(RtpsUdpSendStrategy* send_strategy);
   void receive_strategy(RtpsUdpReceiveStrategy* recv_strategy);
   bool add_delayed_notification(TransportQueueElement* element);
-
+  void do_remove_sample(const RepoId& pub_id, const TransportQueueElement::MatchCriteria& criteria);
   RtpsUdpInst* config();
 
   ACE_Reactor* get_reactor();

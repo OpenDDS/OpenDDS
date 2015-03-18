@@ -1314,7 +1314,7 @@ TransportSendStrategy::remove_all_msgs(RepoId pub_id)
     this->send_buffer_->retain_all(pub_id);
   }
 
-  do_remove_sample(match);
+  do_remove_sample(pub_id, match);
 }
 
 RemoveResult
@@ -1335,17 +1335,18 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
   // can stop calling rest datalinks to remove this sample if it's already released..
 
   const char* const payload = sample->get_sample()->cont()->rd_ptr();
+  RepoId pub_id = sample->get_pub_id();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
   if (send_delayed_notifications(&modp)) {
     return REMOVE_RELEASED;
   }
 
   GuardType guard(this->lock_);
-  return do_remove_sample(modp);
+  return do_remove_sample(pub_id, modp);
 }
 
 RemoveResult
-TransportSendStrategy::do_remove_sample(
+TransportSendStrategy::do_remove_sample(const RepoId&,
   const TransportQueueElement::MatchCriteria& criteria)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
