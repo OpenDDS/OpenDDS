@@ -350,7 +350,8 @@ namespace {
     be_global->impl_ <<
       nm << "_slice* " << nm << "_alloc()\n"
       "{\n"
-      "  void* const raw = TheServiceParticipant->pool_malloc(sizeof(" << nm
+      "  void* const raw = OpenDDS::DCPS::SafetyProfilePool::instance->malloc("
+      "sizeof(" << nm
       << "));\n"
       "  " << nm << "_slice* const slice = static_cast<" << nm << "_slice*"
       << ">(raw);\n"
@@ -401,7 +402,7 @@ namespace {
       "{\n"
       "  if (!slice) return;\n"
       "  " << nm << "_fini_i(slice" << zeros << ");\n"
-      "  TheServiceParticipant->pool_free(slice);\n"
+      "  OpenDDS::DCPS::SafetyProfilePool::instance()->free(slice);\n"
       "}\n\n" <<
       nm << "_slice* " << nm << "_dup(const " << nm << "_slice* slice)\n"
       "{\n"

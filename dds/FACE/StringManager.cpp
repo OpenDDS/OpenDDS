@@ -1,5 +1,5 @@
 #include "FACE/StringManager.h"
-#include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/SafetyProfilePool.h"
 #include "dds/DCPS/Serializer.h"
 #include <cstring>
 
@@ -13,7 +13,8 @@ namespace {
 Char* string_alloc(UnsignedLong len)
 {
   if (len == 0) return &s_empty;
-  void* const raw = TheServiceParticipant->pool_malloc(len + 1);
+  void* const raw =
+    OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(len + 1);
   Char* const str = static_cast<Char*>(raw);
   if (str) str[0] = static_cast<Char>(0);
   return str;
@@ -31,13 +32,14 @@ Char* string_dup(const Char* str)
 
 void string_free(Char* str)
 {
-  if (str != &s_empty) TheServiceParticipant->pool_free(str);
+  if (str != &s_empty) OpenDDS::DCPS::SafetyProfilePool::instance()->free(str);
 }
 
 WChar* wstring_alloc(UnsignedLong len)
 {
   if (len == 0) return &s_wempty;
-  void* const raw = TheServiceParticipant->pool_malloc((len + 1) * sizeof(WChar));
+  const size_t n = (len + 1) * sizeof(WChar);
+  void* const raw = OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(n);
   WChar* const str = static_cast<WChar*>(raw);
   if (str) str[0] = static_cast<WChar>(0);
   return str;
@@ -55,7 +57,7 @@ WChar* wstring_dup(const WChar* str)
 
 void wstring_free(WChar* str)
 {
-  if (str != &s_wempty) TheServiceParticipant->pool_free(str);
+  if (str != &s_wempty) OpenDDS::DCPS::SafetyProfilePool::instance()->free(str);
 }
 
 }
