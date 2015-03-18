@@ -176,9 +176,6 @@ ShmemReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                                      const ACE_INET_Addr& /*remote_address*/)
 {
   switch (sample.header_.message_id_) {
-  case SAMPLE_ACK:
-    link_->ack_received(sample);
-    break;
 
   case TRANSPORT_CONTROL:
     link_->control_received(sample);

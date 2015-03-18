@@ -78,6 +78,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         // Publish the message
         DDS::ReturnCode_t error = DDS::RETCODE_TIMEOUT;
         while (error == DDS::RETCODE_TIMEOUT) {
+          ACE_ERROR((LM_ERROR, "Trying to send: %d\n", i));
           error = msg_writer->write(message, DDS::HANDLE_NIL);
           if (error == DDS::RETCODE_TIMEOUT) {
             ACE_ERROR((LM_ERROR, "Timeout, resending %d\n", i));

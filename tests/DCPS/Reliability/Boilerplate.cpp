@@ -113,8 +113,8 @@ createDataWriter(
     std::cout << "Datawriter QOS keep last one" << std::endl;
   } else {
     dw_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-    dw_qos.resource_limits.max_samples = 10;
-    dw_qos.resource_limits.max_samples_per_instance = 10;
+    dw_qos.resource_limits.max_samples = 1000;
+    dw_qos.resource_limits.max_samples_per_instance = 1000;
   }
   // Create DataWriter
   DDS::DataWriter_var writer =

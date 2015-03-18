@@ -10,6 +10,7 @@
 
 #include "GuidConverter.h"
 #include "WriterInfo.h"
+#include "Qos_Helper.h"
 
 #include "ace/OS_NS_sys_time.h"
 
@@ -65,8 +66,12 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
   : last_liveliness_activity_time_(ACE_OS::gettimeofday()),
   seen_data_(false),
   historic_samples_timer_(NO_TIMER),
+  remove_association_timer_(NO_TIMER),
+  removal_deadline_(ACE_Time_Value::zero),
   last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
   waiting_for_end_historic_samples_(false),
+  scheduled_for_removal_(false),
+  notify_lost_(false),
   state_(NOT_SET),
   reader_(reader),
   writer_id_(writer_id),
@@ -168,81 +173,6 @@ WriterInfo::removed()
 }
 
 void
-WriterInfo::clear_acks(
-  SequenceNumber sequence)
-{
-  // sample_lock_ is held by the caller.
-
-  DeadlineList::iterator current
-    = this->ack_deadlines_.begin();
-
-  while (current != this->ack_deadlines_.end()) {
-    if (current->first <= sequence) {
-      current = this->ack_deadlines_.erase(current);
-
-    } else {
-      break;
-    }
-  }
-}
-
-bool
-WriterInfo::should_ack(
-  ACE_Time_Value now)
-{
-  // sample_lock_ is held by the caller.
-
-  if (this->ack_deadlines_.size() == 0) {
-    return false;
-  }
-
-  DeadlineList::iterator current = this->ack_deadlines_.begin();
-
-  while (current != this->ack_deadlines_.end()) {
-    if (current->second < now) {
-      // Remove any expired response deadlines.
-      current = this->ack_deadlines_.erase(current);
-
-    } else {
-      if (!this->ack_sequence_.empty() &&
-          current->first <= this->ack_sequence_.cumulative_ack()) {
-        return true;
-      }
-
-      ++current;
-    }
-  }
-
-  return false;
-}
-
-void
-WriterInfo::ack_deadline(SequenceNumber sequence, ACE_Time_Value when)
-{
-  // sample_lock_ is held by the caller.
-
-  if (this->ack_deadlines_.size() == 0) {
-    this->ack_deadlines_.push_back(std::make_pair(sequence, when));
-    return;
-  }
-
-  DeadlineList::iterator current = this->ack_deadlines_.begin();
-  if (current != this->ack_deadlines_.end()) {
-    // Insertion sort.
-    if (sequence < current->first) {
-      this->ack_deadlines_.insert(
-        current,
-        std::make_pair(sequence, when));
-    } else if (sequence == current->first) {
-      // Only update the deadline to be *later* than any existing one.
-      if (current->second < when) {
-        current->second = when;
-      }
-    }
-  }
-}
-
-void
 WriterInfo::ack_sequence(SequenceNumber value)
 {
   // sample_lock_ is held by the caller.
@@ -254,6 +184,34 @@ WriterInfo::ack_sequence() const
 {
   // sample_lock_ is held by the caller.
   return this->ack_sequence_.cumulative_ack();
+}
+
+bool
+WriterInfo::active(ACE_Time_Value default_participant_timeout) const
+{
+  // Need some period of time by which to decide if a writer the
+  // DataReaderImpl knows about has gone 'inactive'.  Used to determine
+  // if a remove_associations should remove immediately or wait to let
+  // reader process more information that may have queued up from the writer
+  // Over-arching max wait time for removal is controlled in the
+  // RemoveAssociationSweeper (10 seconds), but on a per writer basis set
+  // activity_wait_period based on:
+  //     1) Reader's liveliness_lease_duration
+  //     2) DCPSPendingTimeout value (if not zero)
+  //     3) Writer's max blocking time (could be infinite, in which case
+  //        RemoveAssociationSweeper will remove after its max wait)
+  //     4) Zero - don't wait, simply remove association
+  ACE_Time_Value activity_wait_period(default_participant_timeout);
+  if (reader_->liveliness_lease_duration_ != ACE_Time_Value::zero) {
+    activity_wait_period = reader_->liveliness_lease_duration_;
+  }
+  if (activity_wait_period == ACE_Time_Value::zero) {
+      activity_wait_period = duration_to_time_value(writer_qos_.reliability.max_blocking_time);
+  }
+  if (activity_wait_period == ACE_Time_Value::zero) {
+    return false;
+  }
+  return (ACE_OS::gettimeofday() - last_liveliness_activity_time_) <= activity_wait_period;
 }
 
 

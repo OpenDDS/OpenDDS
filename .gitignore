@@ -13,7 +13,12 @@ lib*.so*
 *.suo
 .*.swp
 
+/setenv.sh
+/setenv.cmd
 /setenv.*
+/.cproject
+/.project
+/.settings/
 /user_macros.GNU
 /build
 /ipch

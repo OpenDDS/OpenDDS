@@ -113,6 +113,61 @@ public:
 
 #endif
 
+// Class to cleanup associations scheduled for removal
+class RemoveAssociationSweeper : public ReactorInterceptor {
+public:
+  RemoveAssociationSweeper(ACE_Reactor* reactor,
+                                  ACE_thread_t owner,
+                                  DataReaderImpl* reader);
+
+  void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback);
+  void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+
+  // Arg will be PublicationId
+  int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
+
+  virtual bool reactor_is_shut_down() const
+  {
+    return TheServiceParticipant->is_shut_down();
+  }
+
+private:
+  ~RemoveAssociationSweeper();
+
+  DataReaderImpl* reader_;
+
+  class CommandBase : public Command {
+  public:
+    CommandBase(RemoveAssociationSweeper* sweeper,
+                OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : sweeper_ (sweeper)
+      , info_(info)
+    { }
+
+  protected:
+    RemoveAssociationSweeper* sweeper_;
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo> info_;
+  };
+
+  class ScheduleCommand : public CommandBase {
+  public:
+    ScheduleCommand(RemoveAssociationSweeper* sweeper,
+                    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : CommandBase(sweeper, info)
+    { }
+    virtual void execute();
+  };
+
+  class CancelCommand : public CommandBase {
+  public:
+    CancelCommand(RemoveAssociationSweeper* sweeper,
+                  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : CommandBase(sweeper, info)
+    { }
+    virtual void execute();
+  };
+};
+
 // Class to cleanup in case EndHistoricSamples is missed
 class EndHistoricSamplesMissedSweeper : public ReactorInterceptor {
 public:
@@ -536,6 +591,8 @@ public:
   void disable_transport();
 
 protected:
+  virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
+  void remove_or_reschedule(const PublicationId& pub_id);
 
   void prepare_to_delete();
 
@@ -631,11 +688,6 @@ protected:
     virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
-  /// Send a SAMPLE_ACK message in response to a REQUEST_ACK message.
-  bool send_sample_ack(
-    const RepoId& publication,
-    SequenceNumber sequence,
-    DDS::Time_t when);
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
 
@@ -673,6 +725,8 @@ private:
 
   friend class InstanceState;
   friend class EndHistoricSamplesMissedSweeper;
+  friend class RemoveAssociationSweeper;
+
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var    topic_desc_;
@@ -682,6 +736,7 @@ private:
   SubscriberImpl*              subscriber_servant_;
   DDS::DataReader_var          dr_local_objref_;
   EndHistoricSamplesMissedSweeper* end_historic_sweeper_;
+  RemoveAssociationSweeper*        remove_association_sweeper_;
 
   CORBA::Long                  depth_;
   size_t                       n_chunks_;

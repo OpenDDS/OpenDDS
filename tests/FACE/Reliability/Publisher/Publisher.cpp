@@ -23,13 +23,13 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   ACE_OS::sleep(5); // connection established with Subscriber
 
   std::cout << "Publisher: about to send_message()" << std::endl;
-  for (CORBA::Long i = 0; i < 100; ++i) {
+  for (CORBA::Long i = 0; i < 20; ++i) {
     Messenger::Message msg = {"Hello, world.", i};
     FACE::TRANSACTION_ID_TYPE txn;
     std::cout << "  sending " << i << std::endl;
     do {
       if (status == FACE::TIMED_OUT) {
-        std::cout << "Send_Message timed out, resending" << std::endl;
+        std::cout << "Send_Message timed out, resending " << i << std::endl;
       }
       FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
     } while (status == FACE::TIMED_OUT);

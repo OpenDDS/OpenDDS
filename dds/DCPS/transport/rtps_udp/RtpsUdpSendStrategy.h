@@ -54,6 +54,7 @@ protected:
   {
     return UDP_MAX_MESSAGE_SIZE;
   }
+  virtual void add_delayed_notification(TransportQueueElement* element);
 
 private:
   void marshal_transport_header(ACE_Message_Block* mb);

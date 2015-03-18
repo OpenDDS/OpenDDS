@@ -7,8 +7,8 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "WriteDataContainer.h"
-#include "Service_Participant.h"
 #include "DataSampleHeader.h"
 #include "InstanceDataSampleList.h"
 #include "DataWriterImpl.h"
@@ -90,6 +90,7 @@ WriteDataContainer::WriteDataContainer(
     waiting_on_release_(false),
     condition_(lock_),
     empty_condition_(lock_),
+    wfa_condition_(this->wfa_lock_),
     n_chunks_(n_chunks),
     sample_list_element_allocator_(2 * n_chunks_),
     transport_send_element_allocator_(2 * n_chunks_,
@@ -569,17 +570,29 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
-      if (DCPS_debug_level > 0) {
-        ACE_ERROR((LM_WARNING,
-                   ACE_TEXT("(%P|%t) WARNING: ")
-                   ACE_TEXT("WriteDataContainer::data_delivered, ")
-                   ACE_TEXT("The delivered sample (message_id: %C) is not in sending_data_ ")
-                   ACE_TEXT("nor any other list.\n"), stale->get_header().message_id_));
+      //No-op: elements may be removed from all WriteDataContainer lists during shutdown
+      //and inform transport of their release.  Transport will call data-delivered on the
+      //elements as it processes the removal but they will already be gone from the send lists.
+      if (stale->get_header().message_id_ != SAMPLE_DATA) {
+        //this message was a control message so release it
+        if (DCPS_debug_level > 9) {
+          GuidConverter converter(publication_id_);
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
+                     ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
+                     this->domain_id_,
+                     this->topic_name_,
+                     OPENDDS_STRING(converter).c_str()));
+        }
+        writer_->controlTracker.message_delivered();
       }
     }
 
     return;
   }
+  ACE_GUARD(ACE_SYNCH_MUTEX, wfa_guard, this->wfa_lock_);
+  SequenceNumber acked_seq = stale->get_header().sequence_;
+  SequenceNumber prev_max = acked_sequences_.cumulative_ack();
 
   if (stale->get_header().message_id_ != SAMPLE_DATA) {
     //this message was a control message so release it
@@ -610,6 +623,26 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
     this->wakeup_blocking_writers (stale);
   }
+  if (DCPS_debug_level > 9) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
+                         ACE_TEXT("Inserting acked_sequence: %q\n"),
+                         acked_seq.getValue()));
+  }
+
+  acked_sequences_.insert(acked_seq);
+
+  if (prev_max == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ||
+      prev_max < acked_sequences_.cumulative_ack()) {
+
+    if (DCPS_debug_level > 9) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered - ")
+                 ACE_TEXT("broadcasting wait_for_acknowledgments update.\n")));
+    }
+
+    wfa_condition_.broadcast();
+  }
+
   // Signal if there is no pending data.
   if (!pending_data())
     empty_condition_.broadcast();
@@ -689,11 +722,22 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
                  ACE_TEXT("The dropped sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("WriteDataContainer::data_dropped, ")
-                 ACE_TEXT("The dropped sample is not in sending_data_ ")
-                 ACE_TEXT("nor in any other list.\n")));
+      //No-op: elements may be removed from all WriteDataContainer lists during shutdown
+      //and inform transport of their release.  Transport will call data-dropped on the
+      //elements as it processes the removal but they will already be gone from the send lists.
+      if (stale->get_header().message_id_ != SAMPLE_DATA) {
+        //this message was a control message so release it
+        if (DCPS_debug_level > 9) {
+          GuidConverter converter(publication_id_);
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) WriteDataContainer::data_dropped: ")
+                     ACE_TEXT("domain %d topic %C publication %C control message dropped.\n"),
+                     this->domain_id_,
+                     this->topic_name_,
+                     OPENDDS_STRING(converter).c_str()));
+        }
+        writer_->controlTracker.message_dropped();
+      }
     }
 
     return;
@@ -1354,6 +1398,62 @@ WriteDataContainer::get_instance_handles(InstanceHandleVec& instance_handles)
     instance_handles.push_back(it->second->instance_handle_);
     ++it;
   }
+}
+
+DDS::ReturnCode_t
+WriteDataContainer::wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const SequenceNumber& sequence)
+{
+  ACE_Time_Value deadline(abs_deadline);
+  DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, guard, this->wfa_lock_, DDS::RETCODE_ERROR);
+
+  while (ACE_OS::gettimeofday() < deadline) {
+
+    if (!sequence_acknowledged(sequence)) {
+      // lock is released while waiting and acquired before returning
+      // from wait.
+      int const wait_result = wfa_condition_.wait(&deadline);
+
+      if (wait_result != 0) {
+        if (errno == ETIME) {
+          if (DCPS_debug_level >= 2) {
+            ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::wait_ack_of_seq")
+                                  ACE_TEXT(" timed out waiting for sequence %q to be acked\n"),
+                                  sequence.getValue()));
+          }
+          ret = DDS::RETCODE_TIMEOUT;
+        } else {
+          ret = DDS::RETCODE_ERROR;
+        }
+      }
+    } else {
+      ret = DDS::RETCODE_OK;
+      break;
+    }
+  }
+
+  return ret;
+}
+
+bool
+WriteDataContainer::sequence_acknowledged(const SequenceNumber sequence)
+{
+  if (sequence == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    //return true here so that wait_for_acknowledgements doesn't block
+    return true;
+  }
+
+  SequenceNumber acked = acked_sequences_.cumulative_ack();
+  if (DCPS_debug_level >= 10) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::sequence_acknowledged ")
+                          ACE_TEXT("- cumulative ack is currently: %q\n"), acked.getValue()));
+  }
+  if (acked == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || acked < sequence){
+    //if acked_sequences_ is empty or its cumulative_ack is lower than
+    //the requests sequence, return false
+    return false;
+  }
+  return true;
 }
 
 void
