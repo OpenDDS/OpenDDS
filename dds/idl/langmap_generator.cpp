@@ -296,7 +296,7 @@ namespace {
   void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
   {
     be_global->add_include("<tao/Array_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("dds/DCPS/Service_Participant.h", BE_GlobalData::STREAM_LANG_H);
+    be_global->add_include("dds/DCPS/SafetyProfilePool.h", BE_GlobalData::STREAM_LANG_H);
     const char* const nm = tdname->last_component()->get_string();
     AST_Type* elem = arr->base_type();
     const Classification elem_cls = classify(elem);
@@ -350,9 +350,8 @@ namespace {
     be_global->impl_ <<
       nm << "_slice* " << nm << "_alloc()\n"
       "{\n"
-      "  void* const raw = OpenDDS::DCPS::SafetyProfilePool::instance->malloc("
-      "sizeof(" << nm
-      << "));\n"
+      "  void* const raw = OpenDDS::DCPS::SafetyProfilePool::instance()->malloc"
+      "(sizeof(" << nm << "));\n"
       "  " << nm << "_slice* const slice = static_cast<" << nm << "_slice*"
       << ">(raw);\n"
       "  " << nm << "_init_i(slice" << zeros << ");\n"

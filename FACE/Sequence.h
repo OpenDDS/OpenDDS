@@ -67,6 +67,8 @@ namespace FaceTypes {
     static T& make_element(T& elt, seq_flag_type) { return elt; }
     static void init(T*, seq_size_type, seq_flag_type) {}
     static void copy_n(const T* input, seq_size_type n, T* output);
+    static void move_n(T* in, seq_size_type n, T* out) { copy_n(in, n, out); }
+    static void reset_n(T*, seq_size_type) {}
     static T* destroy(T* buffer, seq_size_type) { return buffer; }
   };
 
@@ -147,6 +149,8 @@ namespace FaceTypes {
     static const seq_size_type extra = 1;
     static void init(CharT** buffer, seq_size_type n, seq_flag_type use_cookie);
     static void copy_n(const CharT* const* in, seq_size_type n, CharT** out);
+    static void move_n(CharT** in, seq_size_type n, CharT** out);
+    static void reset_n(CharT**, seq_size_type) {}
     static CharT** destroy(CharT** buffer, seq_size_type n);
   };
 
@@ -203,7 +207,13 @@ namespace FaceTypes {
     static void freebuf(T* data);
 
 
-    // C++ standard library container compatibility:
+    // The public members below here provide C++ standard library container
+    // compatibility for convenience:
+    // Iterators are always T* so be careful with string sequences,
+    // the caller needs to use FACE::string_free() and FACE::string_alloc()
+    // or FACE::string_dup() to replace a string in the sequence.
+    // These are the same semantics as get_buffer(bool) in the IDL-to-C++
+    // mapping.
 
     typedef T value_type;
     typedef T& reference;
@@ -271,7 +281,7 @@ namespace FaceTypes {
       buffer[i] = StringTraits<CharT>::empty();
     }
     if (use_cookie) {
-      *reinterpret_cast<seq_size_type*>(buffer[0]) = n;
+      *reinterpret_cast<seq_size_type*>(buffer) = n;
     }
   }
 
@@ -286,6 +296,24 @@ namespace FaceTypes {
   }
 
   template <typename CharT>
+  inline void StringEltPolicy<CharT>::move_n(CharT** in, seq_size_type n,
+                                             CharT** out)
+  {
+    for (seq_size_type i = 0; i < n; ++i) {
+      std::swap(in[i], out[i]);
+    }
+  }
+
+  template <typename CharT>
+  inline void reset_n(CharT** buffer, seq_size_type n)
+  {
+    for (seq_size_type i = 0; i < n; ++i) {
+      StringTraits<CharT>::free(buffer[i]);
+      buffer[i] = StringTraits<CharT>::empty();
+    }
+  }
+
+  template <typename CharT>
   inline CharT** StringEltPolicy<CharT>::destroy(CharT** buffer,
                                                  seq_size_type n_or_int_max)
   {
@@ -294,7 +322,7 @@ namespace FaceTypes {
 
     if (n_or_int_max == INT_MAX) {
       allocated = buffer - 1;
-      n = *reinterpret_cast<seq_size_type*>(*allocated);
+      n = *reinterpret_cast<seq_size_type*>(allocated);
     }
 
     for (seq_size_type i = 0; i < n; ++i) {
@@ -318,11 +346,14 @@ namespace FaceTypes {
   template <typename T, typename Bounds, typename Elts>
   inline Sequence<T, Bounds, Elts>::Sequence(const Sequence& seq)
     : AllocPolicy<T, Bounds, Elts>(seq.maximum())
-    , length_(seq.length())
-    , release_(true)
-    , buffer_(this->allocate())
+    , length_(seq.length_)
+    , release_(false)
+    , buffer_((seq.maximum() && seq.buffer_) ? allocate() : 0)
   {
-    Elts::copy_n(seq.buffer_, length_, buffer_);
+    if (buffer_) {
+      release_ = true;
+      Elts::copy_n(seq.buffer_, length_, buffer_);
+    }
   }
 
   template <typename T, typename Bounds, typename Elts>
@@ -377,15 +408,14 @@ namespace FaceTypes {
         lazy_alloc();
       }
       else if (release_ && len < length_) {
-        //TODO
+        Elts::reset_n(buffer_ + len, length_ - len);
       }
       length_ = len;
       return;
     }
 
     Sequence tmp(len, len, allocate(len), true);
-    //TODO: opt?
-    Elts::copy_n(buffer_, length_, tmp.buffer_);
+    Elts::move_n(buffer_, length_, tmp.buffer_);
     swap(tmp);
   }
 
@@ -458,27 +488,7 @@ namespace FaceTypes {
   {
     return !(*this == rhs);
   }
-
-
-  // -----
-
-  void testing()
-  {
-    struct S1 : Sequence<int, Unbounded> {} s1;
-    struct S2 : Sequence<int, Bounded<5> > {} s2;
-    s1.maximum();
-    s2.maximum();
-    s1.allocbuf(3);
-    s2.allocbuf();
-
-    struct SS : Sequence<char*, Unbounded, StringEltPolicy<char> > {} ss;
-    ss.length(2);
-    ss[0] = "foo";
-    ss[1] = "bar";
-    ss[0] = "baz"; // frees "foo" before copying "baz"
-  }
 }
 }
 
-int main() { OpenDDS::FaceTypes::testing(); return 0; }
 #endif
