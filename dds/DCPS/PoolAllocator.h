@@ -3,9 +3,9 @@
 
 #include <string>
 #include <map>
-#include "dcps_export.h"
-
 #ifdef OPENDDS_SAFETY_PROFILE
+#include "dcps_export.h"
+#include "SafetyProfilePool.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -40,20 +40,20 @@ public:
 
   static T* allocate(std::size_t n)
   {
-    void* raw_mem = pool_alloc_memory(n * sizeof(T));
+    void* raw_mem = SafetyProfilePool::instance()->malloc(n * sizeof(T));
     if (!raw_mem) throw std::bad_alloc();
     return static_cast<T*>(raw_mem);
   }
 
   static void deallocate(T* ptr, std::size_t)
   {
-    pool_free_memory(ptr);
+    SafetyProfilePool::instance()->free(ptr);
   }
 
 #ifdef ACE_LYNXOS_MAJOR
   static void deallocate(void* ptr, std::size_t)
   {
-    pool_free_memory(ptr);
+    SafetyProfilePool::instance()->free(ptr);
   }
 #endif
 

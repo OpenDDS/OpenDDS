@@ -1,8 +1,10 @@
 #ifndef OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 #define OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 
+#ifdef OPENDDS_SAFETY_PROFILE
 #include "ace/Malloc_Base.h"
 #include "ace/Atomic_Op.h"
+#include "ace/Singleton.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -61,6 +63,11 @@ public:
   int protect(void*, size_t, int = PROT_RDWR) { return -1; }
   void dump() const {}
 
+  /// Return a singleton instance of this class.
+  static SafetyProfilePool* instance() {
+    return ACE_Singleton<SafetyProfilePool, ACE_SYNCH_MUTEX>::instance();
+  }
+
 private:
   SafetyProfilePool(const SafetyProfilePool&);
   SafetyProfilePool& operator=(const SafetyProfilePool&);
@@ -71,4 +78,5 @@ private:
 };
 
 }}
+#endif // OPENDDS_SAFETY_PROFILE
 #endif // OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
