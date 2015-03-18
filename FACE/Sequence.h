@@ -2,6 +2,8 @@
 #define OPENDDS_FACE_SEQUENCE_HEADER
 
 #include "FACE/types.hpp"
+#include "FACE/StringManager.h"
+
 #include <limits>
 #include <cstddef>
 
@@ -9,26 +11,28 @@ namespace OpenDDS {
 namespace FaceTypes {
 
   typedef FACE::UnsignedLong seq_size_type;
+  typedef FACE::Boolean seq_flag_type;
 
   template <seq_size_type N>
   struct Bounded {};
 
   struct Unbounded {};
 
-  template <typename T, typename Bounds>
+  template <typename T, typename Bounds, typename EltPolicy>
   struct AllocPolicy;
 
-  template <typename T, seq_size_type N>
-  struct AllocPolicy<T, Bounded<N> > {
+  template <typename T, seq_size_type N, typename EltPolicy>
+  struct AllocPolicy<T, Bounded<N>, EltPolicy> {
     static T* allocbuf();
     seq_size_type maximum() const { return N; }
     seq_size_type max_size() const { return N; }
   protected:
     explicit AllocPolicy(seq_size_type = 0) {}
+    T* allocate() { return allocbuf(); }
   };
 
-  template <typename T>
-  struct AllocPolicy<T, Unbounded> {
+  template <typename T, typename EltPolicy>
+  struct AllocPolicy<T, Unbounded, EltPolicy> {
     static T* allocbuf(seq_size_type n);
     seq_size_type maximum() const { return maximum_; }
     seq_size_type max_size() const {
@@ -36,7 +40,89 @@ namespace FaceTypes {
     }
   protected:
     explicit AllocPolicy(seq_size_type n = 0) : maximum_(n) {}
+    T* allocate() { return allocbuf(maximum_); }
     seq_size_type maximum_;
+  };
+
+  template <typename T>
+  struct DefaultEltPolicy {
+    typedef T& Element;
+    typedef const T& ConstElement;
+    typedef T ConstRawElement;
+    static const seq_size_type extra = 0;
+    static T& make_element(T& elt, seq_flag_type) { return elt; }
+    static void init(T*, seq_size_type) {}
+    static void copy_n(const T* input, seq_size_type n, T* output);
+    static T* destroy(T* buffer) { return buffer; }
+  };
+
+  template <typename CharT>
+  struct StringEltPolicy {
+    struct Element {
+      Element(CharT*& element, seq_flag_type release)
+        : element_(element), release_(release) {}
+
+      Element(const Element& elt)
+        : element_(elt.element_), release_(elt.release_) {}
+
+      Element& operator=(const CharT* rhs) {
+        String_var<CharT> tmp(rhs);
+        return moveFrom(tmp);
+      }
+
+      Element& operator=(CharT* rhs) {
+        String_var<CharT> tmp(rhs);
+        return moveFrom(tmp);
+      }
+
+      Element& operator=(const String_var<CharT>& rhs) {
+        String_var<CharT> tmp(rhs);
+        return moveFrom(tmp);
+      }
+
+      Element& operator=(const StringManager<CharT>& rhs) {
+        String_var<CharT> tmp(rhs.in());
+        return moveFrom(tmp);
+      }
+
+      operator const CharT*() const { return element_; }
+      const CharT* in() const { return element_; }
+      CharT*& inout() const { return element_; }
+
+      String_out<CharT> out() const {
+        if (release_) StringTraits<CharT>::free(element_);
+        return element_;
+      }
+
+      CharT* _retn() {
+        CharT* const tmp = element_;
+        element_ = StringTraits<CharT>::empty();
+        return tmp;
+      }
+
+    private:
+      Element(); // not default constructible
+
+      Element& moveFrom(String_var<CharT>& rhs) {
+        if (release_) StringTraits<CharT>::free(element_);
+        element_ = rhs._retn();
+        return *this;
+      }
+
+      CharT*& element_;
+      seq_flag_type release_;
+    };
+
+    static Element make_element(CharT*& elt, seq_flag_type release) {
+      return Element(elt, release);
+    }
+
+    typedef const CharT* ConstElement;
+    typedef const CharT* ConstRawElement;
+    static const seq_size_type extra = 1;
+    static void init(CharT**, seq_size_type);
+    static void copy_n(const CharT* const* in, seq_size_type n, CharT** out);
+    static CharT** destroy(CharT** buffer);
   };
 
   /// Generic base class for all IDL-defined sequences accepted by opendds_idl.
@@ -46,23 +132,23 @@ namespace FaceTypes {
   /// - Constructors: default, copy, 3-arg
   /// - 3-arg replace() that calls this class's replace_i()
   /// If unbounded:
-  /// - Constructors: default, copy, 4-arg
+  /// - Constructors: default, copy, 1-arg (maximum), 4-arg
   /// - 4-arg replace() that calls this class's replace_i()
   /// Both bounded and unbounded:
   /// - Copy assignment
   /// - non-member swap(), while not in spec this is useful for copy assignment
   /// @tparam T element type of the sequence
   /// @tparam Bounds either Bounded<N> or Unbounded
-  template <typename T, typename Bounds>//, typename ElementPolicy>
-  class Sequence : public AllocPolicy<T, Bounds> {
+  /// @tparam Elts element handling policy
+  template <typename T, typename Bounds, typename Elts = DefaultEltPolicy<T> >
+  class Sequence : public AllocPolicy<T, Bounds, Elts> {
   public:
-    typedef seq_size_type size_type;
+    typedef seq_size_type size_type;  // from std C++ Container concept
     typedef seq_size_type _size_type; // from IDL-to-C++ specification
-    typedef FACE::Boolean flag_type;
 
   protected:
     explicit Sequence(size_type maximum = 0, size_type length = 0,
-                      T* data = 0, flag_type release = false);
+                      T* data = 0, seq_flag_type release = false);
     Sequence(const Sequence& seq);
     ~Sequence();
     Sequence& operator=(const Sequence& seq);
@@ -70,26 +156,25 @@ namespace FaceTypes {
     void swap(Sequence& rhs);
 
     void replace_i(size_type maximum, size_type length,
-                   T* data, flag_type release);
+                   T* data, seq_flag_type release);
   public:
     // maximum() inherited from AllocPolicy
-
     void length(size_type len);
     size_type length() const { return length_; }
 
-    //TODO:
-    typedef T Element;
+    typedef typename Elts::Element Element;
+    typedef typename Elts::ConstElement ConstElement;
+    typedef typename Elts::ConstRawElement ConstRawElement;
 
-    const Element& operator[](size_type idx) const;
-    Element& operator[](size_type idx);
+    ConstElement operator[](size_type idx) const;
+    Element operator[](size_type idx);
 
-    flag_type release() const { return release_; }
+    seq_flag_type release() const { return release_; }
 
-    T* get_buffer(flag_type orphan = false);
-    const T* get_buffer() const;
+    T* get_buffer(seq_flag_type orphan = false);
+    const ConstRawElement* get_buffer() const;
 
     // allocbuf() inherited from AllocPolicy
-
     static void freebuf(T* data);
 
 
@@ -117,109 +202,148 @@ namespace FaceTypes {
 
   private:
     size_type length_;
-    flag_type release_;
+    seq_flag_type release_;
     T* buffer_;
   };
 
 
-  template <typename T, seq_size_type N>
-  inline T* AllocPolicy<T, Bounded<N> >::allocbuf()
+  template <typename T, seq_size_type N, typename EltPolicy>
+  inline T* AllocPolicy<T, Bounded<N>, EltPolicy>::allocbuf()
   {
-    return new T[N];  //TODO: allocators, initialize strings
+    T* const mem = new T[N + EltPolicy::extra];
+    EltPolicy::init(mem, N);
+    return mem + EltPolicy::extra;
+  }
+
+  template <typename T, typename EltPolicy>
+  inline T* AllocPolicy<T, Unbounded, EltPolicy>::allocbuf(seq_size_type n)
+  {
+    T* const mem = new T[n + EltPolicy::extra];
+    EltPolicy::init(mem, n);
+    return mem + EltPolicy::extra;
   }
 
   template <typename T>
-  inline T* AllocPolicy<T, Unbounded>::allocbuf(seq_size_type n)
+  inline void DefaultEltPolicy<T>::copy_n(const T* in, seq_size_type n, T* out)
   {
-    return new T[n];  //TODO: allocators, initialize strings
+    for (seq_size_type i = 0; i < n; ++i) {
+      out[i] = in[i];
+    }
   }
 
-  template <typename T, typename Bounds>
-  inline Sequence<T, Bounds>::Sequence(size_type maximum, size_type length,
-                                       T* data, flag_type release)
-    : AllocPolicy<T, Bounds>(maximum)
+  template <typename CharT>
+  inline void StringEltPolicy<CharT>::init(CharT**, seq_size_type)
+  {
+  }
+
+  template <typename CharT>
+  inline void StringEltPolicy<CharT>::copy_n(const CharT* const* in,
+                                             seq_size_type n, CharT** out)
+  {
+  }
+
+  template <typename CharT>
+  inline CharT** StringEltPolicy<CharT>::destroy(CharT** buffer)
+  {
+  }
+
+  template <typename T, typename Bounds, typename Elts>
+  inline Sequence<T, Bounds, Elts>::Sequence(size_type maximum,
+                                             size_type length,
+                                             T* data, seq_flag_type release)
+    : AllocPolicy<T, Bounds, Elts>(maximum)
     , length_(length)
     , release_(release)
     , buffer_(data)
-  { //TODO: init
+  {
   }
 
-  template <typename T, typename Bounds>
-  inline Sequence<T, Bounds>::Sequence(const Sequence& seq)
-    : AllocPolicy<T, Bounds>(seq.maximum())
+  template <typename T, typename Bounds, typename Elts>
+  inline Sequence<T, Bounds, Elts>::Sequence(const Sequence& seq)
+    : AllocPolicy<T, Bounds, Elts>(seq.maximum())
     , length_(seq.length())
     , release_(true)
-    , buffer_(0)
-  { //TODO: init
+    , buffer_(this->allocate())
+  {
+    Elts::copy_n(seq.buffer_, length_, buffer_);
   }
 
-  template <typename T, typename Bounds>
-  inline Sequence<T, Bounds>::~Sequence()
-  { //TODO
+  template <typename T, typename Bounds, typename Elts>
+  inline Sequence<T, Bounds, Elts>::~Sequence()
+  {
+    if (release_) {
+      freebuf(buffer_);
+    }
   }
 
-  template <typename T, typename Bounds> inline
-  Sequence<T, Bounds>& Sequence<T, Bounds>::operator=(const Sequence& seq)
+  template <typename T, typename Bounds, typename Elts>
+  inline Sequence<T, Bounds, Elts>&
+  Sequence<T, Bounds, Elts>::operator=(const Sequence& seq)
   {
     Sequence cpy(seq);
     swap(cpy);
     return *this;
   }
 
-  template <typename T, typename Bounds>
-  inline void Sequence<T, Bounds>::swap(Sequence& rhs)
+  template <typename T, typename Bounds, typename Elts>
+  inline void Sequence<T, Bounds, Elts>::swap(Sequence& rhs)
   { //TODO
   }
 
-  template <typename T, typename Bounds>
-  inline void Sequence<T, Bounds>::replace_i(size_type maximum,
-                                             size_type length, T* data,
-                                             flag_type release)
+  template <typename T, typename Bounds, typename Elts>
+  inline void Sequence<T, Bounds, Elts>::replace_i(size_type maximum,
+                                                   size_type length, T* data,
+                                                   seq_flag_type release)
   { // TODO
   }
 
-  template <typename T, typename Bounds>
-  inline void Sequence<T, Bounds>::length(size_type len)
+  template <typename T, typename Bounds, typename Elts>
+  inline void Sequence<T, Bounds, Elts>::length(size_type len)
   { //TODO
   }
 
-  template <typename T, typename Bounds>
-  inline const T& Sequence<T, Bounds>::operator[](size_type idx) const
+  template <typename T, typename Bounds, typename Elts>
+  inline typename Sequence<T, Bounds, Elts>::ConstElement
+  Sequence<T, Bounds, Elts>::operator[](size_type idx) const
   {
     return buffer_[idx];
   }
 
-  template <typename T, typename Bounds>
-  inline T& Sequence<T, Bounds>::operator[](size_type idx)
+  template <typename T, typename Bounds, typename Elts>
+  inline typename Sequence<T, Bounds, Elts>::Element
+  Sequence<T, Bounds, Elts>::operator[](size_type idx)
   {
-    return buffer_[idx];
+    return Elts::make_element(buffer_[idx], release_);
   }
 
-  template <typename T, typename Bounds>
-  inline T* Sequence<T, Bounds>::get_buffer(flag_type orphan)
+  template <typename T, typename Bounds, typename Elts>
+  inline T* Sequence<T, Bounds, Elts>::get_buffer(seq_flag_type orphan)
   { //TODO
     return buffer_;
   }
 
-  template <typename T, typename Bounds>
-  inline const T* Sequence<T, Bounds>::get_buffer() const
+  template <typename T, typename Bounds, typename Elts>
+  inline const typename Sequence<T, Bounds, Elts>::ConstRawElement*
+  Sequence<T, Bounds, Elts>::get_buffer() const
   {
     return buffer_;
   }
 
-  template <typename T, typename Bounds>
-  inline void Sequence<T, Bounds>::freebuf(T* data)
-  { //TODO
+  template <typename T, typename Bounds, typename Elts>
+  inline void Sequence<T, Bounds, Elts>::freebuf(T* data)
+  {
+    T* const allocated = Elts::destroy(data);
+    delete[] allocated; //TODO: allocators
   }
 
-  template <typename T, typename Bounds>
-  inline bool Sequence<T, Bounds>::operator==(const Sequence& rhs) const
+  template <typename T, typename Bounds, typename Elts>
+  inline bool Sequence<T, Bounds, Elts>::operator==(const Sequence& rhs) const
   { //TODO
     return false;
   }
 
-  template <typename T, typename Bounds>
-  inline bool Sequence<T, Bounds>::operator!=(const Sequence& rhs) const
+  template <typename T, typename Bounds, typename Elts>
+  inline bool Sequence<T, Bounds, Elts>::operator!=(const Sequence& rhs) const
   {
     return !(*this == rhs); //TODO: opt?
   }
@@ -231,11 +355,16 @@ namespace FaceTypes {
   {
     struct S1 : Sequence<int, Unbounded> {} s1;
     struct S2 : Sequence<int, Bounded<5> > {} s2;
-
     s1.maximum();
     s2.maximum();
     s1.allocbuf(3);
     s2.allocbuf();
+
+    struct SS : Sequence<char*, Unbounded, StringEltPolicy<char> > {} ss;
+    ss.length(2);
+    ss[0] = "foo";
+    ss[1] = "bar";
+    ss[0] = "baz"; // frees "foo" before copying "baz"
   }
 }
 }
