@@ -19,7 +19,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpInst::RtpsUdpInst(const std::string& name)
+RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   : TransportInst("rtps_udp", name)
   , use_multicast_(true)
   , ttl_(1)

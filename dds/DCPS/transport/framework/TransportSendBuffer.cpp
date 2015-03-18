@@ -118,7 +118,7 @@ SingleSendBuffer::retain_all(RepoId pub_id)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::retain_all() - ")
       ACE_TEXT("copying out blocks for publication: %C\n"),
-      std::string(converter).c_str()
+      OPENDDS_STRING(converter).c_str()
     ));
   }
   for (BufferMap::iterator it(this->buffers_.begin());
@@ -130,7 +130,7 @@ SingleSendBuffer::retain_all(RepoId pub_id)
                    ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("SingleSendBuffer::retain_all: ")
                    ACE_TEXT("failed to retain data from publication: %C!\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
         release(it++);
       } else {
         ++it;
@@ -147,7 +147,7 @@ SingleSendBuffer::retain_all(RepoId pub_id)
                        ACE_TEXT("(%P|%t) WARNING: ")
                        ACE_TEXT("SingleSendBuffer::retain_all: failed to ")
                        ACE_TEXT("retain fragment data from publication: %C!\n"),
-                       std::string(converter).c_str()));
+                       OPENDDS_STRING(converter).c_str()));
             release(bm_it++);
           } else {
             ++bm_it;

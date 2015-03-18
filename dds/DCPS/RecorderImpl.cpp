@@ -210,7 +210,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::data_received: ")
                ACE_TEXT("%C received sample: %C.\n"),
-               std::string(converter).c_str(),
+               OPENDDS_STRING(converter).c_str(),
                buffer.str() DOT_CSTR));
   }
 
@@ -273,8 +273,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
                ACE_TEXT("(%P|%t) RecorderImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               std::string(reader_converter).c_str(),
-               std::string(writer_converter).c_str()));
+               OPENDDS_STRING(reader_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str()));
   }
 
   //
@@ -448,7 +448,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
                    ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    handle));
       }
 
@@ -523,8 +523,8 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
                is_bit_,
-               std::string(reader_converter).c_str(),
-               std::string(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str(),
                writers.length()));
   }
 
@@ -563,7 +563,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
                      ACE_TEXT("the writer local %C was already removed.\n"),
-                     std::string(converter).c_str()));
+                     OPENDDS_STRING(converter).c_str()));
         }
 
       } else {
@@ -849,11 +849,11 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
 {
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
-    std::string separator = "";
-    std::string buffer;
+    OPENDDS_STRING separator = "";
+    OPENDDS_STRING buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer += separator + std::string(GuidConverter(ids[i]));
+      buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
     }
 

@@ -53,16 +53,16 @@ public:
   /// framework.
   void release();
 
-  TransportInst_rch create_inst(const std::string& name,
-                                const std::string& transport_type);
-  TransportInst_rch get_inst(const std::string& name) const;
+  TransportInst_rch create_inst(const OPENDDS_STRING& name,
+                                const OPENDDS_STRING& transport_type);
+  TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
   void remove_inst(const TransportInst_rch& inst);
 
   static const char DEFAULT_CONFIG_NAME[];
   static const char DEFAULT_INST_PREFIX[];
 
-  TransportConfig_rch create_config(const std::string& name);
-  TransportConfig_rch get_config(const std::string& name) const;
+  TransportConfig_rch create_config(const OPENDDS_STRING& name);
+  TransportConfig_rch get_config(const OPENDDS_STRING& name) const;
   void remove_config(const TransportConfig_rch& cfg);
 
   TransportConfig_rch global_config() const;
@@ -72,7 +72,7 @@ public:
                              const TransportConfig_rch& cfg);
   TransportConfig_rch domain_default_config(DDS::DomainId_t domain) const;
 
-  void bind_config(const std::string& name, DDS::Entity_ptr entity);
+  void bind_config(const OPENDDS_STRING& name, DDS::Entity_ptr entity);
   void bind_config(const TransportConfig_rch& cfg, DDS::Entity_ptr entity);
 
   /// SPI (Service Provider Interface) for specific transport types:
@@ -87,7 +87,7 @@ public:
   /// at initialization time. This function iterates each section in
   /// the configuration file, and creates TransportInst and
   /// TransportConfig objects and adds them to the registry.
-  int load_transport_configuration(const std::string& file_name,
+  int load_transport_configuration(const OPENDDS_STRING& file_name,
                                    ACE_Configuration_Heap& cf);
 
   /// For internal use by OpenDDS DCPS layer:
@@ -97,7 +97,7 @@ public:
 
   /// For internal use by OpenDDS DCPS layer:
   /// Dynamically load the library for the supplied transport type.
-  void load_transport_lib(const std::string& transport_type);
+  void load_transport_lib(const OPENDDS_STRING& transport_type);
 
 private:
   friend class ACE_Singleton<TransportRegistry, ACE_Recursive_Thread_Mutex>;
@@ -105,10 +105,10 @@ private:
   TransportRegistry();
   ~TransportRegistry();
 
-  typedef std::map<std::string, TransportType_rch> TypeMap;
-  typedef std::map<std::string, TransportConfig_rch> ConfigMap;
-  typedef std::map<std::string, TransportInst_rch> InstMap;
-  typedef std::map<std::string, std::string> LibDirectiveMap;
+  typedef std::map<OPENDDS_STRING, TransportType_rch> TypeMap;
+  typedef std::map<OPENDDS_STRING, TransportConfig_rch> ConfigMap;
+  typedef std::map<OPENDDS_STRING, TransportInst_rch> InstMap;
+  typedef std::map<OPENDDS_STRING, std::string> LibDirectiveMap;
   typedef std::map<DDS::DomainId_t, TransportConfig_rch> DomainConfigMap;
 
   typedef ACE_SYNCH_MUTEX LockType;

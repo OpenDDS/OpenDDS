@@ -59,14 +59,14 @@ Test::Options::transportType()
 }
 
 ACE_INLINE
-std::string
+OPENDDS_STRING
 Test::Options::transportKey() const
 {
   return this->transportKey_;
 }
 
 ACE_INLINE
-std::string&
+OPENDDS_STRING&
 Test::Options::transportKey()
 {
   return this->transportKey_;

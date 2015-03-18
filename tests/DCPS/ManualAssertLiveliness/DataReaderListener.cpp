@@ -112,7 +112,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
                       status.not_alive_count,
                       status.alive_count_change,
                       status.not_alive_count_change,
-                      status.last_publication_handle, std::string(converter).c_str()));
+                      status.last_publication_handle, OPENDDS_STRING(converter).c_str()));
 }
 
 void DataReaderListenerImpl::on_subscription_matched (

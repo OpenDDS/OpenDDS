@@ -23,7 +23,7 @@ class RtpsUdpType : public TransportType {
 public:
   const char* name() { return RTPS_UDP_NAME; }
 
-  TransportInst* new_inst(const std::string& name)
+  TransportInst* new_inst(const OPENDDS_STRING& name)
   {
     return new RtpsUdpInst(name);
   }
@@ -44,7 +44,7 @@ RtpsUdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   // ...except for Safety Profile where RTPS is the only option.
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
-                          std::string("0600_RTPS_UDP"),
+                          OPENDDS_STRING("0600_RTPS_UDP"),
                           RTPS_UDP_NAME);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);

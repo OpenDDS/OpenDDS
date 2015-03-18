@@ -12,9 +12,9 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/transport/framework/TransportInst.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Synch.h"
-#include <string>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -36,7 +36,7 @@ public:
 
   virtual const char* name() = 0;
 
-  virtual TransportInst* new_inst(const std::string& name) = 0;
+  virtual TransportInst* new_inst(const OPENDDS_STRING& name) = 0;
 
 protected:
 

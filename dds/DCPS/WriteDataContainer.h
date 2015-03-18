@@ -14,9 +14,7 @@
 #include "SendStateDataSampleList.h"
 #include "WriterDataSampleList.h"
 
-#ifdef OPENDDS_SAFETY_PROFILE
 #include "PoolAllocator.h"
-#endif
 
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 

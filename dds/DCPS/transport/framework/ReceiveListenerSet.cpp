@@ -94,7 +94,7 @@ ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
                ACE_TEXT("could not find local %C.\n"),
-               std::string(converter).c_str()));
+               OPENDDS_STRING(converter).c_str()));
 
     return false;
   }
@@ -104,7 +104,7 @@ ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
                ACE_TEXT("listener for local %C is nil.\n"),
-               std::string(converter).c_str()));
+               OPENDDS_STRING(converter).c_str()));
 
     return false;
   }

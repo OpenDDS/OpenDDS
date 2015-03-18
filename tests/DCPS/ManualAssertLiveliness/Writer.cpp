@@ -24,7 +24,7 @@ Writer_Base::Writer_Base(::DDS::DataWriter_ptr writer)
 void
 Writer_Base::start ()
 {
-  id_ = std::string (OpenDDS::DCPS::GuidConverter (dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(writer_->get_publisher()->get_participant())->get_repoid(writer_->get_instance_handle())));
+  id_ = OPENDDS_STRING (OpenDDS::DCPS::GuidConverter (dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(writer_->get_publisher()->get_participant())->get_repoid(writer_->get_instance_handle())));
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer_Base::start %s\n"), get_id()));
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) {

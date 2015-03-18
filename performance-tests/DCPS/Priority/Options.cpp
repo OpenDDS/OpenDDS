@@ -73,13 +73,13 @@ namespace { // anonymous namespace for file scope.
   // Map command line arguments to transport types and keys.
   const struct TransportTypeArgMappings {
     ACE_TString optionName;
-    std::pair< Test::Options::TransportType, std::string>
+    std::pair< Test::Options::TransportType, OPENDDS_STRING>
                 transportInfo;
 
   } transportTypeArgMappings[] = {
-    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, std::string("tcp1")) },
-    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, std::string("udp1")) },
-    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  std::string("mcast1")) }
+    { ACE_TEXT("tcp"), std::make_pair( Test::Options::TCP, OPENDDS_STRING("tcp1")) },
+    { ACE_TEXT("udp"), std::make_pair( Test::Options::UDP, OPENDDS_STRING("udp1")) },
+    { ACE_TEXT("mc"),  std::make_pair( Test::Options::MC,  OPENDDS_STRING("mcast1")) }
   };
 
 } // end of anonymous namespace.

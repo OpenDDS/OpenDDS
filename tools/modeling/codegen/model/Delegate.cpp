@@ -25,7 +25,7 @@ OpenDDS::Model::Delegate::createParticipant(
   unsigned long             domain,
   const DDS::DomainParticipantQos& participantQos,
   DDS::StatusMask           mask,
-  const std::string&        transportConfig
+  const OPENDDS_STRING&     transportConfig
 )
 {
   DDS::DomainParticipantFactory_var pfact = TheParticipantFactory;
@@ -73,7 +73,7 @@ OpenDDS::Model::Delegate::createPublisher(
   DDS::DomainParticipant*       participant,
   const DDS::PublisherQos&      publisherQos,
   DDS::StatusMask               mask,
-  const std::string&            transportConfig
+  const OPENDDS_STRING&         transportConfig
 )
 {
   DDS::Publisher* publisher
@@ -104,7 +104,7 @@ OpenDDS::Model::Delegate::createSubscriber(
   DDS::DomainParticipant*       participant,
   const DDS::SubscriberQos&     subscriberQos,
   DDS::StatusMask               mask,
-  const std::string&            transportConfig
+  const OPENDDS_STRING&         transportConfig
 )
 {
   DDS::Subscriber* subscriber
@@ -132,13 +132,13 @@ OpenDDS::Model::Delegate::createSubscriber(
 
 DDS::DataWriter*
 OpenDDS::Model::Delegate::createPublication(
-  unsigned int       which,
-  DDS::Publisher*    publisher,
-  DDS::Topic*        topic,
+  unsigned int              which,
+  DDS::Publisher*           publisher,
+  DDS::Topic*               topic,
   const DDS::DataWriterQos& writerQos,
-  DDS::StatusMask    mask,
-  const std::string& transportConfig,
-  bool               copyQosFromTopic
+  DDS::StatusMask           mask,
+  const OPENDDS_STRING&     transportConfig,
+  bool                      copyQosFromTopic
 )
 {
   if( !this->service_) {
@@ -164,11 +164,11 @@ OpenDDS::Model::Delegate::createPublication(
 
 DDS::DataWriter*
 OpenDDS::Model::Delegate::createWriter(
-  DDS::Publisher*    publisher,
-  DDS::Topic*        topic,
+  DDS::Publisher*           publisher,
+  DDS::Topic*               topic,
   const DDS::DataWriterQos& writerQos,
-  DDS::StatusMask    mask,
-  const std::string& transportConfig
+  DDS::StatusMask           mask,
+  const OPENDDS_STRING&     transportConfig
 )
 {
   // If we specify a transport and have autoenable modeled,
@@ -207,7 +207,7 @@ OpenDDS::Model::Delegate::createSubscription(
   DDS::TopicDescription* topic,
   const DDS::DataReaderQos& readerQos,
   DDS::StatusMask        mask,
-  const std::string&     transportConfig,
+  const OPENDDS_STRING&  transportConfig,
   bool                   copyQosFromTopic
 )
 {
@@ -251,7 +251,7 @@ OpenDDS::Model::Delegate::createReader(
   DDS::TopicDescription* topic,
   const DDS::DataReaderQos& readerQos,
   DDS::StatusMask        mask,
-  const std::string&     transportConfig
+  const OPENDDS_STRING&  transportConfig
 )
 {
   // If we specify a transport and have autoenable modeled,

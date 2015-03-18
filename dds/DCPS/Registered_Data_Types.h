@@ -14,9 +14,7 @@
 #include "dds/DdsDcpsTypeSupportExtC.h"
 #include "Definitions.h"
 
-#ifdef OPENDDS_SAFETY_PROFILE
 #include "PoolAllocator.h"
-#endif
 
 #include "ace/Singleton.h"
 

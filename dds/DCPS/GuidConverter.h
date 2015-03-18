@@ -20,6 +20,7 @@
 
 #include "dcps_export.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -86,12 +87,12 @@ public:
   EntityKind entityKind() const;
 
   /// Convert to diagnostic string.
-  operator std::string() const;
+  operator OPENDDS_STRING() const;
 #ifdef DDS_HAS_WCHAR
   operator std::wstring() const;
 #endif
 
-  std::string uniqueId() const;
+  OPENDDS_STRING uniqueId() const;
 
 protected:
   const GUID_t guid_;
@@ -101,7 +102,7 @@ struct OpenDDS_Dcps_Export LogGuid {
   explicit LogGuid(const GUID_t& id)
     : conv_(GuidConverter(id)) {}
   const char* c_str() const { return conv_.c_str(); }
-  std::string conv_;
+  OPENDDS_STRING conv_;
 };
 
 OpenDDS_Dcps_Export std::ostream&

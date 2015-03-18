@@ -281,8 +281,8 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
                ACE_TEXT("creating association local publication  %C ")
                ACE_TEXT("<--> with remote subscription %C.\n"),
-               std::string(local).c_str(),
-               std::string(remote).c_str()));
+               OPENDDS_STRING(local).c_str(),
+               OPENDDS_STRING(remote).c_str()));
   }
 
   {
@@ -336,7 +336,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to insert remote subscription %C ")
                  ACE_TEXT("to local publication %C reservation into sub_map_.\n"),
-                 std::string(remote).c_str(), std::string(local).c_str()));
+                 OPENDDS_STRING(remote).c_str(), OPENDDS_STRING(local).c_str()));
     }
 
     if (pub_undo_result != 0) {
@@ -345,7 +345,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to remove (undo) local publication %C ")
                  ACE_TEXT("to remote subscription %C reservation from pub_map_.\n"),
-                 std::string(local).c_str(), std::string(remote).c_str()));
+                 OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
     }
 
     if (sub_undo_result != 0) {
@@ -354,7 +354,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to remove (undo) remote subscription %C ")
                  ACE_TEXT("to local publication %C reservation from sub_map_.\n"),
-                 std::string(remote).c_str(), std::string(local).c_str()));
+                 OPENDDS_STRING(remote).c_str(), OPENDDS_STRING(local).c_str()));
     }
 
   } else {
@@ -363,7 +363,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
                ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                ACE_TEXT("failed to insert local publication %C to remote ")
                ACE_TEXT("subscription %C reservation into pub_map_.\n"),
-               std::string(local).c_str(), std::string(remote).c_str()));
+               OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
   }
 
   return -1;
@@ -388,7 +388,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
                ACE_TEXT("creating association local subscription %C ")
                ACE_TEXT("<--> with remote publication  %C.\n"),
-               std::string(local).c_str(), std::string(remote).c_str()));
+               OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
   }
 
   {
@@ -446,7 +446,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("Failed to insert remote publication %C to local ")
                  ACE_TEXT("subcription %C reservation into pub_map_.\n"),
-                 std::string(remote).c_str(), std::string(local).c_str()));
+                 OPENDDS_STRING(remote).c_str(), OPENDDS_STRING(local).c_str()));
     }
 
     if (sub_undo_result != 0) {
@@ -455,7 +455,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to remove (undo) local subcription %C to ")
                  ACE_TEXT("remote publication %C reservation from sub_map_.\n"),
-                 std::string(local).c_str(), std::string(remote).c_str()));
+                 OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
     }
 
     if (pub_undo_result != 0) {
@@ -464,7 +464,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                  ACE_TEXT("failed to remove (undo) remote publication %C to ")
                  ACE_TEXT("local subcription %C reservation from pub_map_.\n"),
-                 std::string(remote).c_str(), std::string(local).c_str()));
+                 OPENDDS_STRING(remote).c_str(), OPENDDS_STRING(local).c_str()));
     }
 
   } else {
@@ -473,7 +473,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
                ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
                ACE_TEXT("failed to insert local subcription %C to remote ")
                ACE_TEXT("publication %C reservation into sub_map_.\n"),
-               std::string(local).c_str(), std::string(remote).c_str()));
+               OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
   }
 
   return -1;
@@ -546,8 +546,8 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
                ACE_TEXT("(%P|%t) DataLink::release_reservations() - ")
                ACE_TEXT("releasing association local: %C ")
                ACE_TEXT("<--> with remote %C.\n"),
-               std::string(local).c_str(),
-               std::string(remote).c_str()));
+               OPENDDS_STRING(local).c_str(),
+               OPENDDS_STRING(remote).c_str()));
   }
 
   //let the specific class release its reservations
@@ -605,7 +605,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataLink::release_reservations: ")
                  ACE_TEXT("unable to locate remote %C in pub_map_ or sub_map_.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
 
     } else {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::release_reservations: the remote_id is a sub id.\n"), 5);
@@ -813,7 +813,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
                ACE_TEXT("from publication %C received sample: %C.\n"),
-               std::string(converter).c_str(),
+               OPENDDS_STRING(converter).c_str(),
                buffer.str().c_str()));
   }
 #endif
@@ -835,7 +835,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
                  ACE_TEXT(" discarding sample from publication %C due to no listeners.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
     return;
@@ -891,14 +891,14 @@ DataLink::ack_received(ReceivedDataSample& sample)
           ACE_ERROR((LM_WARNING,
                      ACE_TEXT("(%P|%t) DataLink::ack_received: ")
                      ACE_TEXT("publication %C not found.\n"),
-                     std::string(converter).c_str()));
+                     OPENDDS_STRING(converter).c_str()));
         }
 
       } else {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) DataLink::ack_received: ")
                    ACE_TEXT("listener for publication %C not found.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
 
       return;
@@ -958,7 +958,7 @@ DataLink::release_remote_subscriber(RepoId subscriber_id, RepoId publisher_id,
     ACE_ERROR((LM_INFO,
                ACE_TEXT("(%P|%t) DataLink::release_remote_subscriber: ")
                ACE_TEXT(" pub %C not in PubSet when trying to remove.\n"),
-               std::string(converter).c_str()));
+               OPENDDS_STRING(converter).c_str()));
   }
 
   // remove the publisher_id from the pubset that associate with the remote sub.
@@ -968,7 +968,7 @@ DataLink::release_remote_subscriber(RepoId subscriber_id, RepoId publisher_id,
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_subscriber: ")
                ACE_TEXT(" failed to remove pub %C from PubSet.\n"),
-               std::string(converter).c_str()));
+               OPENDDS_STRING(converter).c_str()));
   }
 }
 
@@ -1008,7 +1008,7 @@ DataLink::release_remote_publisher(RepoId publisher_id, RepoId subscriber_id,
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_publisher: ")
                ACE_TEXT(" failed to remove sub %C from ListenerSet.\n"),
-               std::string(converter).c_str()));
+               OPENDDS_STRING(converter).c_str()));
   }
 }
 
@@ -1083,7 +1083,7 @@ DataLink::notify(ConnectionNotice notice)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
                    ACE_TEXT("notify pub %C %C.\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    connection_notice_as_str(notice)));
       }
 
@@ -1118,7 +1118,7 @@ DataLink::notify(ConnectionNotice notice)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
                    ACE_TEXT("not notify pub %C %C \n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    connection_notice_as_str(notice)));
       }
     }
@@ -1141,7 +1141,7 @@ DataLink::notify(ConnectionNotice notice)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
                    ACE_TEXT("notify sub %C %C.\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    connection_notice_as_str(notice)));
       }
 
@@ -1184,7 +1184,7 @@ DataLink::notify(ConnectionNotice notice)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
                    ACE_TEXT("not notify sub %C subscription lost.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
 
     }
@@ -1219,7 +1219,7 @@ DataLink::notify_connection_deleted()
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
                    ACE_TEXT("notify pub %C connection deleted.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
 
       tsl->notify_connection_deleted(itr->second);
@@ -1229,7 +1229,7 @@ DataLink::notify_connection_deleted()
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
                    ACE_TEXT("could not find tsl for pub %C.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
     }
   }
@@ -1248,7 +1248,7 @@ DataLink::notify_connection_deleted()
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
                    ACE_TEXT("notify sub %C connection deleted.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
 
       trl->notify_connection_deleted(itr2->second);
@@ -1258,7 +1258,7 @@ DataLink::notify_connection_deleted()
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
                    ACE_TEXT("could not find tsl for pub %C.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
     }
   }

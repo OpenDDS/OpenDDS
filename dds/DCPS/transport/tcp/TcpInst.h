@@ -94,7 +94,7 @@ public:
 
 private:
   friend class TcpType;
-  explicit TcpInst(const std::string& name);
+  explicit TcpInst(const OPENDDS_STRING& name);
   virtual ~TcpInst();
 
   TcpTransport* new_impl(const TransportInst_rch& inst);

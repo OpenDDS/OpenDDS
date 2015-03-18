@@ -1,5 +1,6 @@
 #include "Parser.h"
 #include "ace/Configuration_Import_Export.h"
+#include "dds/DCPS/Service_Participant.h"
 #include <cstring>
 
 namespace OpenDDS { namespace FaceTSS { namespace config {

@@ -9,7 +9,7 @@
 #ifndef OPENDDS_DCPS_DDS_TEST_IMPL_H
 #define OPENDDS_DCPS_DDS_TEST_IMPL_H
 
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
     namespace DCPS {
@@ -26,8 +26,8 @@ namespace OpenDDS {
 class DDS_TEST {
 public:
 
-    static bool supports(const OpenDDS::DCPS::TransportClient* tc, const std::string& name);
-    static bool negotiated(const OpenDDS::DCPS::TransportClient* tc, const std::string& name);
+    static bool supports(const OpenDDS::DCPS::TransportClient* tc, const OPENDDS_STRING& name);
+    static bool negotiated(const OpenDDS::DCPS::TransportClient* tc, const OPENDDS_STRING& name);
 
 protected:
 
