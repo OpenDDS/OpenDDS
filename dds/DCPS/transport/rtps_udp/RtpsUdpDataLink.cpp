@@ -84,6 +84,28 @@ RtpsUdpDataLink::add_delayed_notification(TransportQueueElement* element)
   return false;
 }
 
+void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
+  const TransportQueueElement::MatchCriteria& criteria)
+{
+  RtpsWriterMap::iterator iter = writers_.find(pub_id);
+  if (iter != writers_.end() && !iter->second.elems_not_acked_.empty()) {
+    std::map<SequenceNumber, TransportQueueElement*>::iterator it = iter->second.elems_not_acked_.begin();
+    TransportQueueElement* sample = 0;
+    bool found_element = false;
+    while (it != iter->second.elems_not_acked_.end()) {
+      if (criteria.matches(*it->second)) {
+        found_element = true;
+        it->second->data_dropped(true);
+        iter->second.send_buff_->release_acked(it->first);
+        iter->second.elems_not_acked_.erase(it);
+        break;
+      } else {
+        ++it;
+      }
+    }
+  }
+}
+
 bool
 RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 {

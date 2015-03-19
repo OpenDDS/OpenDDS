@@ -71,7 +71,7 @@ class OpenDDS_Dcps_Export SingleSendBuffer
   : public TransportSendBuffer, public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
-  static const ACE_INT64 UNLIMITED = 0;
+  static const size_t UNLIMITED = 0;
 
   void release_all();
   typedef std::map<SequenceNumber, BufferType> BufferMap;

@@ -48,24 +48,24 @@ namespace
         sleep_time = ACE_OS::atoi(arg);
         shifter.consume_arg();
       }
-      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-take-next")))
+      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-take-next")) == 0)
       {
         take_next = true;
         shifter.consume_arg();
       }
-      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-take")))
+      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-take")) == 0)
       {
         take_next = false;
         take = true;
         shifter.consume_arg();
       }
-      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-zero-copy")))
+      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-zero-copy")) == 0)
       {
         take_next = false;
         zero_copy = true;
         shifter.consume_arg();
       }
-      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-keep-last-one")))
+      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-keep-last-one")) == 0)
       {
         keep_last_one = true;
         shifter.consume_arg();

@@ -209,6 +209,14 @@ RtpsUdpSendStrategy::add_delayed_notification(TransportQueueElement* element)
   }
 }
 
+RemoveResult
+RtpsUdpSendStrategy::do_remove_sample(const RepoId& pub_id,
+  const TransportQueueElement::MatchCriteria& criteria)
+{
+  link_->do_remove_sample(pub_id, criteria);
+  return TransportSendStrategy::do_remove_sample(pub_id, criteria);
+}
+
 void
 RtpsUdpSendStrategy::stop_i()
 {

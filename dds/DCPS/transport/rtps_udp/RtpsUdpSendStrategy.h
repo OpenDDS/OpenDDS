@@ -55,6 +55,8 @@ protected:
     return UDP_MAX_MESSAGE_SIZE;
   }
   virtual void add_delayed_notification(TransportQueueElement* element);
+  virtual RemoveResult do_remove_sample(const RepoId& pub_id,
+    const TransportQueueElement::MatchCriteria& criteria);
 
 private:
   void marshal_transport_header(ACE_Message_Block* mb);

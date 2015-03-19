@@ -1569,7 +1569,7 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
                      ret);
   }
 
-  ret = this->data_container_->unregister(handle, data_sample);
+  ret = this->data_container_->unregister(handle, data_sample, false);
 
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
