@@ -303,7 +303,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
       pend.impls_.push_back(impls_[i]);
-      const std::string type = impls_[i]->transport_type();
+      const OPENDDS_STRING type = impls_[i]->transport_type();
 
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
         if (data.remote_data_[j].transport_type.in() == type) {
@@ -408,7 +408,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
     const TransportImpl_rch& impl = impls_.back();
-    const std::string type = impl->transport_type();
+    const OPENDDS_STRING type = impl->transport_type();
 
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {

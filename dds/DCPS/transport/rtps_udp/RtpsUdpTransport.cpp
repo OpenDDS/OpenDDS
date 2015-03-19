@@ -105,25 +105,6 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
   add_pending_connection(client, link.in());
   VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink pending.\n"), 2);
   return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
-/*
-  const GuidConverter local_conv(attribs.local_id_), remote_conv(remote.repo_id_);
-  VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
-    "waiting for handshake local %C remote %C\n", std::string(local_conv).c_str(),
-    std::string(remote_conv).c_str()), 2);
-
-  //TODO: fix waiting
-
-  if (!link->wait_for_handshake(attribs.local_id_, remote.repo_id_)) {
-    VDBG_LVL((LM_ERROR, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
-      "ERROR: wait for handshake failed\n"), 2);
-    return AcceptConnectResult();
-  }
-  VDBG_LVL((LM_DEBUG, "(%P|%t) RtpsUdpTransport::connect_datalink_i "
-    "wait for handshake completed\n"), 2);
-
-
-  return AcceptConnectResult(link._retn());
-*/
 }
 
 TransportImpl::AcceptConnectResult

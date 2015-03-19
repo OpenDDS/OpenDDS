@@ -222,7 +222,7 @@ public:
   int release();
   int remove();
 
-  virtual std::string transport_type() const = 0;
+  virtual OPENDDS_STRING transport_type() const = 0;
 
   /// Called by our friend, the TransportClient.
   /// Accessor for the TransportInterfaceInfo.  Accepts a reference

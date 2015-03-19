@@ -3330,7 +3330,7 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
 {
   TransportClient::add_link(link, peer);
   TransportImpl_rch impl = link->impl();
-  std::string type = impl->transport_type();
+  OPENDDS_STRING type = impl->transport_type();
 
   if (type == "rtps_udp" || type == "multicast") {
     resume_sample_processing(peer);
