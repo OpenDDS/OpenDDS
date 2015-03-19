@@ -1,1 +1,1 @@
-rgrep string | egrep -v '(^InfoRepo|^monitor|^idl)' | grep -v 'GNUmakefile' | grep -v '\.depend\.' | grep -v ':#include' | sed 's/\/\/.*//' | grep string
+rgrep string | egrep -v '(^tests|^tools/dissector|^performance-tests|^java|^dds/InfoRepo|^tools/monitor|^dds/idl|^dds/DCPS/QOS_XML_Handler)' | grep -v 'GNUmakefile' | grep -v '\.depend\.' | grep -v ':#include' | sed 's/\/\/.*//' | grep string
