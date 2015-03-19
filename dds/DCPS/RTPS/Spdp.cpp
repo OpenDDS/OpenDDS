@@ -800,7 +800,7 @@ Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
 // start of methods that just forward to sedp_
 
 DCPS::TopicStatus
-Spdp::remove_topic(const RepoId& topicId, std::string& name)
+Spdp::remove_topic(const RepoId& topicId, OPENDDS_STRING& name)
 {
   return sedp_.remove_topic(topicId, name);
 }
@@ -814,7 +814,7 @@ Spdp::ignore_topic(const RepoId& ignoreId)
 
 bool
 Spdp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
-                       std::string& name)
+                       OPENDDS_STRING& name)
 {
   return sedp_.update_topic_qos(topicId, qos, name);
 }
