@@ -93,7 +93,7 @@ public:
 private:
 
   struct SampleWithInfo {
-    SampleWithInfo(const std::string& topic, const DDS::SampleInfo& sampinfo)
+    SampleWithInfo(const OPENDDS_STRING& topic, const DDS::SampleInfo& sampinfo)
       : sample_(),
         view_(sampinfo.view_state) {
       info_[topic] = sampinfo.instance_handle;
@@ -104,11 +104,11 @@ private:
     }
     Sample sample_;
     DDS::ViewStateKind view_;
-    std::map<std::string/*topicName*/, DDS::InstanceHandle_t> info_;
+    std::map<OPENDDS_STRING/*topicName*/, DDS::InstanceHandle_t> info_;
   };
 
   typedef std::vector<SampleWithInfo> SampleVec;
-  typedef std::set<std::string> TopicSet;
+  typedef std::set<OPENDDS_STRING> TopicSet;
 
   // Given a QueryPlan that describes how to treat 'incoming' data from a
   // certain topic (with MetaStruct 'meta'), assign its relevant fields to
@@ -126,7 +126,7 @@ private:
   // fields named in 'key_names' match the values in 'key_data'.  The struct
   // pointed-to by 'key_data' is of the type used by the 'other_dr'.
   void join(SampleVec& resulting, const SampleWithInfo& prototype,
-            const std::vector<std::string>& key_names, const void* key_data,
+            const std::vector<OPENDDS_STRING>& key_names, const void* key_data,
             DDS::DataReader_ptr other_dr, const MetaStruct& other_meta);
 
   // When no common keys are found, natural join devolves to a cross-join where
@@ -140,7 +140,7 @@ private:
   // determine which elements to combine, and the topic names in 'other_topics'
   // to determine which fields from 'other' should be assigned to 'resulting'.
   void combine(SampleVec& resulting, const SampleVec& other,
-               const std::vector<std::string>& key_names,
+               const std::vector<OPENDDS_STRING>& key_names,
                const TopicSet& other_topics);
 
   // Helper for combine(), similar to assign_fields but instead of coming from
@@ -159,9 +159,9 @@ private:
   };
 
   struct Contains { // predicate for std::find_if()
-    const std::string& look_for_;
-    explicit Contains(const std::string& s) : look_for_(s) {}
-    bool operator()(const std::pair<const std::set<std::string>, SampleVec>& e)
+    const OPENDDS_STRING& look_for_;
+    explicit Contains(const OPENDDS_STRING& s) : look_for_(s) {}
+    bool operator()(const std::pair<const std::set<OPENDDS_STRING>, SampleVec>& e)
       const {
       return e.first.count(look_for_);
     }

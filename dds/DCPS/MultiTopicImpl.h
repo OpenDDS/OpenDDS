@@ -14,7 +14,7 @@
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/FilterEvaluator.h"
 
-#include <string>
+#include "PoolAllocator.h"
 #include <vector>
 #include <utility>
 
@@ -43,11 +43,11 @@ public:
   DDS::ReturnCode_t set_expression_parameters(const DDS::StringSeq& parameters);
 
   struct SubjectFieldSpec {
-    std::string incoming_name_;
-    std::string resulting_name_;
+    OPENDDS_STRING incoming_name_;
+    OPENDDS_STRING resulting_name_;
 
-    explicit SubjectFieldSpec(const std::string& inc,
-                              const std::string& res = "")
+    explicit SubjectFieldSpec(const OPENDDS_STRING& inc,
+                              const OPENDDS_STRING& res = "")
       : incoming_name_(inc)
       , resulting_name_(res == "" ? inc : res)
     {}
@@ -58,7 +58,7 @@ public:
     return aggregation_;
   }
 
-  const std::vector<std::string>& get_selection() const
+  const std::vector<OPENDDS_STRING>& get_selection() const
   {
     return selection_;
   }
@@ -72,12 +72,12 @@ public:
   }
 
 private:
-  std::string subscription_expression_;
+  OPENDDS_STRING subscription_expression_;
   DDS::StringSeq expression_parameters_;
   FilterEvaluator* filter_eval_;
 
   std::vector<SubjectFieldSpec> aggregation_;
-  std::vector<std::string> selection_;
+  std::vector<OPENDDS_STRING> selection_;
 
   ///concurrent access to expression_parameters_
   mutable ACE_Recursive_Thread_Mutex lock_;

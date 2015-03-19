@@ -1159,7 +1159,7 @@ Service_Participant::get_discovery(const DDS::DomainId_t domain)
   return location->second;
 }
 
-std::string
+OPENDDS_STRING
 Service_Participant::bit_transport_ip() const
 {
   return ACE_TEXT_ALWAYS_CHAR(this->bit_transport_ip_.c_str());
@@ -1498,7 +1498,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
                    ACE_TEXT("from command option, overriding config file\n")));
       }
     } else {
-      std::string log_fname;
+      OPENDDS_STRING log_fname;
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("ORBLogFile"), log_fname);
       if (!log_fname.empty()) {
         set_log_file_name(log_fname.c_str());

@@ -104,7 +104,7 @@ namespace {
 Value
 FilterEvaluator::SerializedForEval::lookup(const char* field) const
 {
-  const std::map<std::string, Value>::const_iterator iter = cache_.find(field);
+  const std::map<OPENDDS_STRING, Value>::const_iterator iter = cache_.find(field);
   if (iter != cache_.end()) {
     return iter->second;
   }
@@ -116,7 +116,7 @@ FilterEvaluator::SerializedForEval::lookup(const char* field) const
     ser.skip(4); // CDR encapsulation header
   }
   const Value v = meta_.getValue(ser, field);
-  cache_.insert(std::make_pair(std::string(field), v));
+  cache_.insert(std::make_pair(OPENDDS_STRING(field), v));
   return v;
 }
 
@@ -141,14 +141,14 @@ namespace {
       return data.lookup(fieldName_.c_str());
     }
 
-    std::string fieldName_;
+    OPENDDS_STRING fieldName_;
   };
 
   class LiteralInt : public Operand {
   public:
     explicit LiteralInt(AstNode* fnNode)
     {
-      std::string strVal = toString(fnNode);
+      OPENDDS_STRING strVal = toString(fnNode);
       if (strVal.length() > 2 && strVal[0] == '0'
           && (strVal[1] == 'x' || strVal[1] == 'X')) {
         std::istringstream is(strVal.c_str() + 2);
@@ -207,7 +207,7 @@ namespace {
       return Value(value_.c_str(), true);
     }
 
-    std::string value_;
+    OPENDDS_STRING value_;
   };
 
   class Parameter : public Operand {
@@ -420,7 +420,7 @@ FilterEvaluator::eval_i(DataForEval& data) const
   return filter_root_->eval(data).b_;
 }
 
-std::vector<std::string>
+std::vector<OPENDDS_STRING>
 FilterEvaluator::getOrderBys() const
 {
   return order_bys_;
@@ -678,7 +678,7 @@ Value::like(const Value& v) const
   if (type_ != VAL_STRING || v.type_ != VAL_STRING) {
     throw std::runtime_error("'like' operator called on non-string arguments.");
   }
-  std::string pattern(v.s_);
+  OPENDDS_STRING pattern(v.s_);
   // escape ? or * in the pattern string so they are not wildcards
   for (size_t i = pattern.find_first_of("?*"); i < pattern.length();
       i = pattern.find_first_of("?*", i + 1)) {
@@ -733,7 +733,7 @@ namespace {
 bool
 Value::convert(Value::Type t)
 {
-  std::string asString;
+  OPENDDS_STRING asString;
   if (type_ == VAL_STRING) {
     asString = s_;
   } else {

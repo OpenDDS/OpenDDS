@@ -80,7 +80,7 @@ template<typename Sample, typename TypedDataReader>
 void
 MultiTopicDataReader_T<Sample, TypedDataReader>::join(
   SampleVec& resulting, const SampleWithInfo& prototype,
-  const std::vector<std::string>& key_names, const void* key_data,
+  const std::vector<OPENDDS_STRING>& key_names, const void* key_data,
   DDS::DataReader_ptr other_dr, const MetaStruct& other_meta)
 {
   using namespace DDS;
@@ -101,7 +101,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
         std::ostringstream rc_ss;
         rc_ss << ret;
         throw std::runtime_error("In join(), incoming DataReader for " +
-          std::string(other_topic) + " read_instance_generic, error #" +
+          OPENDDS_STRING(other_topic) + " read_instance_generic, error #" +
           rc_ss.str());
       } else if (ret == DDS::RETCODE_OK) {
         resulting.push_back(prototype);
@@ -122,7 +122,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
         std::ostringstream rc_ss;
         rc_ss << ret;
         throw std::runtime_error("In join(), incoming DataReader for " +
-          std::string(other_topic) + " read_next_instance_generic, error #" +
+          OPENDDS_STRING(other_topic) + " read_next_instance_generic, error #" +
           rc_ss.str());
       } else if (ret == RETCODE_NO_DATA) {
         break;
@@ -151,7 +151,7 @@ template<typename Sample, typename TypedDataReader>
 void
 MultiTopicDataReader_T<Sample, TypedDataReader>::combine(
   SampleVec& resulting, const SampleVec& other,
-  const std::vector<std::string>& key_names, const TopicSet& other_topics)
+  const std::vector<OPENDDS_STRING>& key_names, const TopicSet& other_topics)
 {
   const MetaStruct& meta = getResultingMeta();
   SampleVec newData;

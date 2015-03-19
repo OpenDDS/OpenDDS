@@ -119,9 +119,9 @@ private:
     CORBA::Long client_refs_;
   };
 
-  typedef std::map<std::string, RefCounted_Topic> TopicMap;
+  typedef std::map<OPENDDS_STRING, RefCounted_Topic> TopicMap;
 
-  typedef std::map<std::string, DDS::TopicDescription_var> TopicDescriptionMap;
+  typedef std::map<OPENDDS_STRING, DDS::TopicDescription_var> TopicDescriptionMap;
 
   typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> HandleMap;
   typedef std::map<DDS::InstanceHandle_t, RepoId> RepoIdMap;
@@ -490,7 +490,7 @@ private:
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ACE_Thread_Mutex filter_cache_lock_;
-  std::map<std::string, RcHandle<FilterEvaluator> > filter_cache_;
+  std::map<OPENDDS_STRING, RcHandle<FilterEvaluator> > filter_cache_;
 #endif
 
   typedef std::set<Recorder_var, VarLess<Recorder> > RecorderSet;

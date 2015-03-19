@@ -1467,7 +1467,7 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
 }
 
 void
-WriteDataContainer::log_send_state_lists (std::string description)
+WriteDataContainer::log_send_state_lists (OPENDDS_STRING description)
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
              description.c_str(),

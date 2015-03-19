@@ -286,7 +286,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       DDS::TopicDescription_var td = a_datareader->get_topicdescription();
       CORBA::String_var topic_name = td->get_name();
 #ifndef OPENDDS_NO_MULTI_TOPIC
-      std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+      std::map<OPENDDS_STRING, DDS::DataReader_var>::iterator mt_iter =
         multitopic_reader_map_.find(topic_name.in());
       if (mt_iter != multitopic_reader_map_.end()) {
         DDS::DataReader_ptr ptr = mt_iter->second;
@@ -349,7 +349,7 @@ SubscriberImpl::delete_contained_entities()
                      guard,
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
-    for (std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+    for (std::map<OPENDDS_STRING, DDS::DataReader_var>::iterator mt_iter =
            multitopic_reader_map_.begin();
          mt_iter != multitopic_reader_map_.end(); ++mt_iter) {
       drs.push_back(mt_iter->second);
@@ -417,7 +417,7 @@ SubscriberImpl::lookup_datareader(
 
   if (it == datareader_map_.end()) {
 #ifndef OPENDDS_NO_MULTI_TOPIC
-    std::map<std::string, DDS::DataReader_var>::iterator mt_iter =
+    std::map<OPENDDS_STRING, DDS::DataReader_var>::iterator mt_iter =
       multitopic_reader_map_.find(topic_name);
     if (mt_iter != multitopic_reader_map_.end()) {
       return DDS::DataReader::_duplicate(mt_iter->second);
@@ -516,7 +516,7 @@ SubscriberImpl::notify_datareaders()
   }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  for (std::map<std::string, DDS::DataReader_var>::iterator it =
+  for (std::map<OPENDDS_STRING, DDS::DataReader_var>::iterator it =
          multitopic_reader_map_.begin(); it != multitopic_reader_map_.end();
        ++it) {
     MultiTopicDataReaderBase* dri =

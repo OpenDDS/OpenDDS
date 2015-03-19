@@ -846,7 +846,7 @@ DomainParticipantImpl::get_filter_eval(const char* filter)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, filter_cache_lock_,
                    RcHandle<FilterEvaluator>());
-  typedef std::map<std::string, RcHandle<FilterEvaluator> > Map;
+  typedef std::map<OPENDDS_STRING, RcHandle<FilterEvaluator> > Map;
   Map::iterator iter = filter_cache_.find(filter);
   if (iter == filter_cache_.end()) {
     return filter_cache_[filter] = new FilterEvaluator(filter, false);
@@ -858,7 +858,7 @@ void
 DomainParticipantImpl::deref_filter_eval(const char* filter)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, filter_cache_lock_);
-  typedef std::map<std::string, RcHandle<FilterEvaluator> > Map;
+  typedef std::map<OPENDDS_STRING, RcHandle<FilterEvaluator> > Map;
   Map::iterator iter = filter_cache_.find(filter);
   if (iter != filter_cache_.end()) {
     if (iter->second->ref_count() == 1) {

@@ -51,7 +51,7 @@ namespace DCPS {
   ///     cf     ACE_Configuration_Heap object being processed
   ///     key    ACE_Configuration_Section_Key object that specifies
   ///            the section of the .ini file to process
-  ///     values Map of field names to values (both std::strings)
+  ///     values Map of field names to values (both OPENDDS_STRING)
   ///            that this function will add to.
   ///
   OpenDDS_Dcps_Export int pullValues( ACE_Configuration_Heap& cf,

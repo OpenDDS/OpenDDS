@@ -17,6 +17,7 @@
 #include "DataCollector_T.h"
 #include "DataReaderImpl.h"
 #include "ace/Synch.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -167,7 +168,7 @@ private:
 
   /// Keep track of all the DataReaders attached to this
   /// Subscriber: key is the topic_name
-  typedef std::multimap<std::string, DataReaderImpl*> DataReaderMap;
+  typedef std::multimap<OPENDDS_STRING, DataReaderImpl*> DataReaderMap;
 
   /// Keep track of DataReaders with data
   /// std::set for now, want to encapsulate
@@ -190,7 +191,7 @@ private:
   DataReaderSet                datareader_set_;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  std::map<std::string, DDS::DataReader_var> multitopic_reader_map_;
+  std::map<OPENDDS_STRING, DDS::DataReader_var> multitopic_reader_map_;
 #endif
 
   DomainParticipantImpl*       participant_;

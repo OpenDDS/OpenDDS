@@ -17,6 +17,7 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/MessageTracker.h"
 #include "dds/DCPS/DataBlockLockPool.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleHeader.h"
@@ -504,7 +505,7 @@ protected:
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     DomainParticipantImpl* participant_;
     DDS::StringSeq expression_params_;
-    std::string filter_;
+    OPENDDS_STRING filter_;
     RcHandle<FilterEvaluator> eval_;
 #endif
     SequenceNumber expected_sequence_;
