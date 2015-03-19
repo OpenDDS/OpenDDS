@@ -2,6 +2,7 @@ project(DDSWrapper_OpenDDS) : dcpslib, dcpsexe, dcps_tcp, dcps_udp, dcps_multica
   sharedname = DDSWrapper
   dynamicflags += DDSWRAPPER_BUILD_DLL
   includes += .
+  requires += opendds_no_safety_profile
 
   Source_Files {  
     Domain_Manager.cpp

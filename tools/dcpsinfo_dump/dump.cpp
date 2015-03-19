@@ -7,11 +7,11 @@
  */
 
 #include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Arg_Shifter.h"
 #include "ace/Argv_Type_Converter.h"
 
-#include <string>
 #include <iostream>
 
 
@@ -76,7 +76,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                             1);
         }
 
-      std::string state = info->dump_to_string();
+      OPENDDS_STRING state = info->dump_to_string();
 
       std::cout << state.c_str() << std::endl;
 

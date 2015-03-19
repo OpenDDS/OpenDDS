@@ -14,7 +14,7 @@
 
 #include "model_export.h"
 
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -60,22 +60,22 @@ struct ReaderProfile;
 class OpenDDS_Model_Export Config  {
   public:
     /// Container type for participant profiles.
-    typedef std::map< std::string, ParticipantProfile*> ParticipantProfileMap;
+    typedef std::map< OPENDDS_STRING, ParticipantProfile*> ParticipantProfileMap;
 
     /// Container type for topic profiles.
-    typedef std::map< std::string, TopicProfile*> TopicProfileMap;
+    typedef std::map< OPENDDS_STRING, TopicProfile*> TopicProfileMap;
 
     /// Container type for publisher profiles.
-    typedef std::map< std::string, PublisherProfile*> PublisherProfileMap;
+    typedef std::map< OPENDDS_STRING, PublisherProfile*> PublisherProfileMap;
 
     /// Container type for writer profiles.
-    typedef std::map< std::string, WriterProfile*> WriterProfileMap;
+    typedef std::map< OPENDDS_STRING, WriterProfile*> WriterProfileMap;
 
     /// Container type for subscriber profiles.
-    typedef std::map< std::string, SubscriberProfile*> SubscriberProfileMap;
+    typedef std::map< OPENDDS_STRING, SubscriberProfile*> SubscriberProfileMap;
 
     /// Container type for reader profiles.
-    typedef std::map< std::string, ReaderProfile*> ReaderProfileMap;
+    typedef std::map< OPENDDS_STRING, ReaderProfile*> ReaderProfileMap;
 
     Config(int& argc, ACE_TCHAR** argv);
 
