@@ -20,7 +20,7 @@
 #include "TransportConfig.h"
 #include "ace/Synch.h"
 
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -108,7 +108,7 @@ private:
   typedef std::map<OPENDDS_STRING, TransportType_rch> TypeMap;
   typedef std::map<OPENDDS_STRING, TransportConfig_rch> ConfigMap;
   typedef std::map<OPENDDS_STRING, TransportInst_rch> InstMap;
-  typedef std::map<OPENDDS_STRING, std::string> LibDirectiveMap;
+  typedef std::map<OPENDDS_STRING, OPENDDS_STRING> LibDirectiveMap;
   typedef std::map<DDS::DomainId_t, TransportConfig_rch> DomainConfigMap;
 
   typedef ACE_SYNCH_MUTEX LockType;

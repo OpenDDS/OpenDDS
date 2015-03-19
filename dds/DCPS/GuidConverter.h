@@ -10,7 +10,6 @@
 #define DCPS_GUIDCONVERTER_H
 
 #include <iostream>
-#include <string>
 
 #include "tao/Basic_Types.h"
 

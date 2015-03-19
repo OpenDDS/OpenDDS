@@ -20,7 +20,6 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include <vector>
-#include <string>
 
 namespace OpenDDS {
 namespace DCPS {

@@ -16,13 +16,13 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "TransportInst.h"
 #include "TransportInst_rch.h"
 
 #include <ace/Synch_Traits.h>
 
 #include <vector>
-#include <string>
 
 namespace OpenDDS {
 namespace DCPS {
