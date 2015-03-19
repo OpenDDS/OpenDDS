@@ -223,8 +223,8 @@ DataWriterImpl::add_association(const RepoId& yourId,
     GuidConverter reader_converter(reader.readerId);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str()));
   }
 
   if (entity_deleted_.value()) {
@@ -252,7 +252,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
-               std::string(converter).c_str(),
+               OPENDDS_STRING(converter).c_str(),
                qos_.transport_priority.value));
   }
 
@@ -285,7 +285,7 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                  ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
-                 std::string(conv).c_str()));
+                 OPENDDS_STRING(conv).c_str()));
     }
 
     return;
@@ -309,7 +309,7 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::transport_assoc_done: ")
                  ACE_TEXT("failed to mark %C as pending.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
 
     } else {
       if (DCPS_debug_level) {
@@ -317,7 +317,7 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
                    ACE_TEXT("marked %C as pending.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
     }
 
@@ -376,8 +376,8 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
                ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str()));
   }
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -405,8 +405,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
                ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
                is_bit_,
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str()));
   }
 
   bool reader_durable = false;
@@ -422,7 +422,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
   }
   {
@@ -462,7 +462,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    handle));
         return;
 
@@ -471,7 +471,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
-                   std::string(converter).c_str(),
+                   OPENDDS_STRING(converter).c_str(),
                    handle));
       }
 
@@ -583,8 +583,8 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
                ACE_TEXT("(%P|%t) DataWriterImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str(),
                readers.length()));
   }
 
@@ -630,7 +630,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::remove_associations: ")
                    ACE_TEXT("removing reader %C before association_complete() call.\n"),
-                   std::string(converter).c_str()));
+                   OPENDDS_STRING(converter).c_str()));
       }
 
       ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
@@ -816,7 +816,7 @@ DataWriterImpl::update_subscription_params(const RepoId& readerId,
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::update_subscription_params()")
                ACE_TEXT(" - writer: %C has no info about reader: %C\n"),
-               std::string(pubConv).c_str(), std::string(subConv).c_str()));
+               OPENDDS_STRING(pubConv).c_str(), OPENDDS_STRING(subConv).c_str()));
   }
 
 #endif
@@ -2039,8 +2039,8 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
                ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::data_delivered: ")
                ACE_TEXT(" The publication id %C from delivered element ")
                ACE_TEXT("does not match the datawriter's id %C\n"),
-               std::string(sample_converter).c_str(),
-               std::string(writer_converter).c_str()));
+               OPENDDS_STRING(sample_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str()));
     return;
   }
   this->data_container_->data_delivered(sample);
@@ -2458,11 +2458,11 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
 {
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
-    std::string separator;
-    std::string buffer;
+    OPENDDS_STRING separator;
+    OPENDDS_STRING buffer;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer += separator + std::string(GuidConverter(ids[i]));
+      buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
     }
 

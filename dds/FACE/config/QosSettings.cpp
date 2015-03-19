@@ -1,4 +1,5 @@
 #include "QosSettings.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <cstring>
 

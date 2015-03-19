@@ -12,7 +12,7 @@
 
 ACE_INLINE
 OpenDDS::DCPS::TransportInst::TransportInst(const char* type,
-                                            const std::string& name)
+                                            const OPENDDS_STRING& name)
   : transport_type_(type),
     queue_messages_per_pool_(DEFAULT_CONFIG_QUEUE_MESSAGES_PER_POOL),
     queue_initial_pools_(DEFAULT_CONFIG_QUEUE_INITIAL_POOLS),

@@ -1,3 +1,4 @@
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/WriteDataContainer.h"
 #include "dds/DCPS/Qos_Helper.h"

@@ -25,7 +25,7 @@ OpenDDS::Model::Entities::~Entities()
 
 void
 OpenDDS::Model::Entities::registerTypes( const std::string& participant,
-                                         const std::string& transportConfig)
+                                         const OPENDDS_STRING& transportConfig)
 {
   std::queue<DDS::TypeSupport_ptr>& queue = this->typeSupport_[ participant];
   if( queue.empty()) {
@@ -59,7 +59,7 @@ OpenDDS::Model::Entities::registerTypes( const std::string& participant,
 DDS::DomainParticipant_var
 OpenDDS::Model::Entities::participant(
   const std::string& name,
-  const std::string& transportConfig
+  const OPENDDS_STRING& transportConfig
 )
 {
   // See if its already here.
@@ -106,7 +106,7 @@ DDS::Topic_var
 OpenDDS::Model::Entities::topic(
   const std::string& name,
   const std::string& participant,
-  const std::string& transportConfig
+  const OPENDDS_STRING& transportConfig
 )
 {
   // See if its already here.
@@ -172,7 +172,7 @@ OpenDDS::Model::Entities::topic(
 DDS::Publisher_var
 OpenDDS::Model::Entities::publisher(
   const std::string& name,
-  const std::string& transportConfig)
+  const OPENDDS_STRING& transportConfig)
 {
   StringToPublisherMap::const_iterator which
     = this->publisherByString_.find( name);
@@ -228,7 +228,7 @@ OpenDDS::Model::Entities::publisher(
 DDS::Subscriber_var
 OpenDDS::Model::Entities::subscriber(
   const std::string& name,
-  const std::string& transportConfig)
+  const OPENDDS_STRING& transportConfig)
 {
   StringToSubscriberMap::const_iterator which
     = this->subscriberByString_.find( name);
@@ -284,7 +284,7 @@ OpenDDS::Model::Entities::subscriber(
 DDS::DataWriter_var
 OpenDDS::Model::Entities::writer(
   const std::string& name,
-  const std::string& transportConfig)
+  const OPENDDS_STRING& transportConfig)
 {
   StringToDataWriterMap::const_iterator which
     = this->writerByString_.find( name);
@@ -383,7 +383,7 @@ OpenDDS::Model::Entities::writer(
 DDS::DataReader_var
 OpenDDS::Model::Entities::reader(
   const std::string& name,
-  const std::string& transportConfig)
+  const OPENDDS_STRING& transportConfig)
 {
   StringToDataReaderMap::const_iterator which
     = this->readerByString_.find( name);

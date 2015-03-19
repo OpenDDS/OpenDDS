@@ -139,7 +139,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 #endif
 
   if (config_->use_multicast_) {
-    const std::string& net_if = config_->multicast_interface_;
+    const OPENDDS_STRING& net_if = config_->multicast_interface_;
     if (multicast_socket_.join(config_->multicast_group_address_, 1,
                                net_if.empty() ? 0 :
                                ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str())) != 0) {
@@ -263,7 +263,7 @@ RtpsUdpDataLink::get_locator(const RepoId& remote_id) const
   if (iter == locators_.end()) {
     const GuidConverter conv(remote_id);
     ACE_DEBUG((LM_ERROR, "(%P|%t) RtpsUdpDataLink::get_locator_i() - "
-      "no locator found for peer %C\n", std::string(conv).c_str()));
+      "no locator found for peer %C\n", OPENDDS_STRING(conv).c_str()));
     return ACE_INET_Addr();
   }
   return iter->second.addr_;
@@ -435,7 +435,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   if (Transport_debug_level > 5) {
     const GuidConverter pub(pub_id);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::MultiSendBuffer::insert() - "
-      "pub_id %C seq %q frag %d\n", std::string(pub).c_str(), seq.getValue(),
+      "pub_id %C seq %q frag %d\n", OPENDDS_STRING(pub).c_str(), seq.getValue(),
       (int)tqe->is_fragment()));
   }
 
@@ -448,7 +448,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
       const GuidConverter pub(pub_id);
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::MultiSendBuffer::insert()"
         " - ERROR: couldn't get fragment number for pub_id %C seq %q\n",
-        std::string(pub).c_str(), seq.getValue()));
+        OPENDDS_STRING(pub).c_str(), seq.getValue()));
     }
   } else {
     send_buff->insert(seq, q, chain);
@@ -595,7 +595,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
           ACE_DEBUG((LM_DEBUG,
             "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
             "storing durable data for local %C remote %C\n",
-            std::string(conv).c_str(), std::string(sub_conv).c_str()));
+            OPENDDS_STRING(conv).c_str(), OPENDDS_STRING(sub_conv).c_str()));
         }
         return 0;
       }
@@ -605,7 +605,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     ACE_DEBUG((LM_ERROR,
       "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
       "WARNING: no RtpsWriter to store durable data for local %C\n",
-      std::string(conv).c_str()));
+      OPENDDS_STRING(conv).c_str()));
   }
 
   return rtps;
@@ -629,7 +629,7 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
       if (Transport_debug_level > 3) {
         const GuidConverter conv(writer->first);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::end_historic_samples "
-                   "local %C all readers\n", std::string(conv).c_str()));
+                   "local %C all readers\n", OPENDDS_STRING(conv).c_str()));
       }
       for (iter_t iter = writer->second.remote_readers_.begin();
            iter != writer->second.remote_readers_.end(); ++iter) {
@@ -645,8 +645,8 @@ RtpsUdpDataLink::end_historic_samples(RtpsWriterMap::iterator writer,
           if (Transport_debug_level > 3) {
             const GuidConverter conv(writer->first), sub_conv(sub);
             ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::end_historic_samples"
-                       " local %C remote %C\n", std::string(conv).c_str(),
-                       std::string(sub_conv).c_str()));
+                       " local %C remote %C\n", OPENDDS_STRING(conv).c_str(),
+                       OPENDDS_STRING(sub_conv).c_str()));
           }
         }
       }
@@ -814,7 +814,7 @@ RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
       VDBG_LVL((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_gap_i "
                 "received GAP with invalid range [%q, %q] from %C\n",
                 sr.first.getValue(), sr.second.getValue(),
-                std::string(conv).c_str()), 2);
+                OPENDDS_STRING(conv).c_str()), 2);
     }
     wi->second.recvd_.insert(base, gap.gapList.numBits,
                              gap.gapList.bitmap.get_buffer());
@@ -1073,7 +1073,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
             const GuidConverter conv(wi->first);
             ACE_DEBUG((LM_ERROR,
               "(%P|%t) RtpsUdpDataLink::send_heartbeat_replies() - "
-              "no locator for remote %C\n", std::string(conv).c_str()));
+              "no locator for remote %C\n", OPENDDS_STRING(conv).c_str()));
           }
         } else {
           send_strategy_->send_rtps_control(mb_acknack,
@@ -1248,7 +1248,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     if (Transport_debug_level > 5) {
       GuidConverter local_conv(local);
       ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
-        "WARNING local %C no RtpsWriter\n", std::string(local_conv).c_str()));
+        "WARNING local %C no RtpsWriter\n", OPENDDS_STRING(local_conv).c_str()));
     }
     return;
   }
@@ -1260,8 +1260,8 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(local), remote_conv(remote);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
-      "local %C remote %C\n", std::string(local_conv).c_str(),
-      std::string(remote_conv).c_str()));
+      "local %C remote %C\n", OPENDDS_STRING(local_conv).c_str(),
+      OPENDDS_STRING(remote_conv).c_str()));
   }
 
   const ReaderInfoMap::iterator ri = rw->second.remote_readers_.find(remote);
@@ -1292,8 +1292,8 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       const GuidConverter local_conv(local), remote_conv(remote);
       ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::received(ACKNACK) "
                  "local %C has durable for remote %C\n",
-                 std::string(local_conv).c_str(),
-                 std::string(remote_conv).c_str()));
+                 OPENDDS_STRING(local_conv).c_str(),
+                 OPENDDS_STRING(remote_conv).c_str()));
     }
     SequenceNumber ack;
     ack.setValue(acknack.readerSNState.bitmapBase.high,
@@ -1429,7 +1429,7 @@ RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
     if (Transport_debug_level > 5) {
       GuidConverter local_conv(local);
       ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::received(NACK_FRAG) "
-        "WARNING local %C no RtpsWriter\n", std::string(local_conv).c_str()));
+        "WARNING local %C no RtpsWriter\n", OPENDDS_STRING(local_conv).c_str()));
     }
     return;
   }
@@ -1441,8 +1441,8 @@ RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(local), remote_conv(remote);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(NACK_FRAG) "
-      "local %C remote %C\n", std::string(local_conv).c_str(),
-      std::string(remote_conv).c_str()));
+      "local %C remote %C\n", OPENDDS_STRING(local_conv).c_str(),
+      OPENDDS_STRING(remote_conv).c_str()));
   }
 
   const ReaderInfoMap::iterator ri = rw->second.remote_readers_.find(remote);
@@ -1516,8 +1516,8 @@ RtpsUdpDataLink::send_nack_replies()
             const GuidConverter local_conv(rw->first), remote_conv(ri->first);
             ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::send_nack_replies "
                        "local %C remote %C requested resend\n",
-                       std::string(local_conv).c_str(),
-                       std::string(remote_conv).c_str()));
+                       OPENDDS_STRING(local_conv).c_str(),
+                       OPENDDS_STRING(remote_conv).c_str()));
           }
         }
         ri->second.requested_changes_.clear();
@@ -1715,7 +1715,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     if (Transport_debug_level > 5) {
       const GuidConverter local_conv(writer);
       ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::marshal_gaps local %C "
-                 "durable writer\n", std::string(local_conv).c_str()));
+                 "durable writer\n", OPENDDS_STRING(local_conv).c_str()));
     }
     const RtpsWriterMap::iterator iter = writers_.find(writer);
     RtpsWriter& rw = iter->second;
@@ -1727,7 +1727,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
         const GuidConverter remote_conv(ri->first);
         ACE_DEBUG((LM_DEBUG, "RtpsUdpDataLink::marshal_gaps reader "
                    "%C is expecting durable data, no GAP sent\n",
-                   std::string(remote_conv).c_str()));
+                   OPENDDS_STRING(remote_conv).c_str()));
       }
     }
     if (readers.empty()) return 0;
@@ -1834,7 +1834,7 @@ RtpsUdpDataLink::send_heartbeats()
             const GuidConverter gw(rw->first), gr(ri->first);
             VDBG_LVL((LM_INFO, "(%P|%t) RtpsUdpDataLink::send_heartbeats - "
               "removed expired durable data for %C -> %C\n",
-              std::string(gw).c_str(), std::string(gr).c_str()), 3);
+              OPENDDS_STRING(gw).c_str(), OPENDDS_STRING(gr).c_str()), 3);
           }
         } else {
           has_durable_data = true;

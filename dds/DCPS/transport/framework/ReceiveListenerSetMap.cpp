@@ -36,7 +36,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
                       ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
                       ACE_TEXT("failed to find_or_create entry for ")
                       ACE_TEXT("publisher %C.\n"),
-                      std::string(converter).c_str()), -1);
+                      OPENDDS_STRING(converter).c_str()), -1);
   }
 
   int result = listener_set->insert(subscriber_id, receive_listener);
@@ -51,8 +51,8 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
              ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
              ACE_TEXT("failed to insert subscriber %C for ")
              ACE_TEXT("publisher %C.\n"),
-             std::string(sub_converter).c_str(),
-             std::string(pub_converter).c_str()));
+             OPENDDS_STRING(sub_converter).c_str(),
+             OPENDDS_STRING(pub_converter).c_str()));
 
   // Deal with possibility that the listener_set just got
   // created - and just for us.  This is to make sure we don't leave any
@@ -65,7 +65,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
                  ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
                  ACE_TEXT("failed to remove (undo create) ReceiveListenerSet ")
                  ACE_TEXT("for publisher %C.\n"),
-                 std::string(pub_converter).c_str()));
+                 OPENDDS_STRING(pub_converter).c_str()));
     }
   }
 
@@ -95,7 +95,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
                         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::remove: ")
                         ACE_TEXT("failed to remove empty ReceiveListenerSet for ")
                         ACE_TEXT("publisher %C.\n"),
-                        std::string(converter).c_str()), -1);
+                        OPENDDS_STRING(converter).c_str()), -1);
     }
   }
 
@@ -128,7 +128,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReciveListenerSetMap::release_subscriber: ")
                ACE_TEXT("publisher %C not found in map_.\n"),
-               std::string(converter).c_str()));
+               OPENDDS_STRING(converter).c_str()));
     // Return 1 to indicate that the publisher_id is no longer associated
     // with any subscribers at all.
     return 1;
@@ -146,7 +146,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
                  ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::release_subscriber: ")
                  ACE_TEXT("failed to remove empty ReceiveListenerSet for ")
                  ACE_TEXT("publisher %C.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
     // We always return 1 if we know the publisher_id is no longer

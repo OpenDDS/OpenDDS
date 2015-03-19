@@ -15,10 +15,6 @@
 #include "MonitorFactory.h"
 #include "ConfigUtils.h"
 
-#ifdef OPENDDS_SAFETY_PROFILE
-#include "SafetyProfilePool.h"
-#endif
-
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "tao/ORB_Core.h"
@@ -186,12 +182,7 @@ Service_Participant::Service_Participant()
     persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
 #endif
     pending_timeout_(ACE_Time_Value::zero),
-    shut_down_(false),
-#ifdef OPENDDS_SAFETY_PROFILE
-    memory_pool_(&safety_profile_pool_)
-#else
-    memory_pool_(ACE_Allocator::instance())
-#endif
+    shut_down_(false)
 {
   initialize();
 }
@@ -200,7 +191,7 @@ Service_Participant::~Service_Participant()
 {
   shutdown();
   ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
-  typedef std::map<std::string, Discovery::Config*>::iterator iter_t;
+  typedef std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter_t;
   for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
     delete it->second;
   }
@@ -274,7 +265,7 @@ Service_Participant::shutdown()
     persistent_data_cache_.reset();
 #endif
 
-    typedef std::map<std::string, Discovery::Config*>::iterator iter;
+    typedef std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter;
     for (iter i = discovery_types_.begin(); i != discovery_types_.end(); ++i) {
       delete i->second;
     }
@@ -801,7 +792,7 @@ Service_Participant::set_repo_ior(const char* ior,
     key = Discovery::DEFAULT_REPO;
   }
 
-  const std::string repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
+  const OPENDDS_STRING repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
   if (!discovery_types_.count(repo_type)) {
     // Re-use a transport registry function to attempt a dynamic load of the
     // library that implements the 'repo_type' (InfoRepoDiscovery)
@@ -926,7 +917,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                 ACE_DEBUG((LM_DEBUG,
                            ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                            ACE_TEXT("participant %C attached to Repo[ %C].\n"),
-                           std::string(converter).c_str(),
+                           OPENDDS_STRING(converter).c_str(),
                            key.c_str()));
               }
 
@@ -949,7 +940,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                  ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                  ACE_TEXT("(%d of %d) attaching domain %d participant %C to Repo[ %C].\n"),
                  (1+index), repoList.size(), domain,
-                 std::string(converter).c_str(),
+                 OPENDDS_STRING(converter).c_str(),
                  key.c_str()));
     }
 
@@ -1588,17 +1579,17 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
 
     // Loop through the [domain/*] sections
     for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
-      std::string domain_name = it->first;
+      OPENDDS_STRING domain_name = it->first;
 
       ValueMap values;
       pullValues(cf, it->second, values);
       DDS::DomainId_t domainId = -1;
       Discovery::RepoKey repoKey;
-      std::string perDomainDefaultTportConfig;
+      OPENDDS_STRING perDomainDefaultTportConfig;
       for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
-        std::string name = it->first;
+        OPENDDS_STRING name = it->first;
         if (name == "DomainId") {
-          std::string value = it->second;
+          OPENDDS_STRING value = it->second;
           if (!convertToInteger(value, domainId)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")
@@ -1696,8 +1687,8 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   ACE_Configuration_Section_Key sect;
   if (cf.open_section(root, section_name, 0, sect) == 0) {
 
-    const std::string sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
-    std::map<std::string, Discovery::Config*>::iterator iter =
+    const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
+    std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter =
       this->discovery_types_.find(sect_name);
 
     if (iter == this->discovery_types_.end()) {
@@ -1867,16 +1858,6 @@ Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participan
     return 0;
   }
   return participant_servant->create_typeless_topic(topic_name, type_name, type_has_keys, qos, a_listener, mask);
-}
-
-void* Service_Participant::pool_malloc(std::size_t bytes)
-{
-  return memory_pool_->malloc(bytes);
-}
-
-void Service_Participant::pool_free(void* ptr)
-{
-  memory_pool_->free(ptr);
 }
 
 } // namespace DCPS

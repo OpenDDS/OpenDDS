@@ -251,7 +251,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) SubscriberImpl::delete_datareader: ")
                  ACE_TEXT("data reader %C doesn't belong to this subscriber.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
 
@@ -302,7 +302,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                         ACE_TEXT("SubscriberImpl::delete_datareader: ")
                         ACE_TEXT("datareader(topic_name=%C) %C not found.\n"),
                         topic_name.in(),
-                        std::string(converter).c_str()),::DDS::RETCODE_ERROR);
+                        OPENDDS_STRING(converter).c_str()),::DDS::RETCODE_ERROR);
     }
 
     datareader_map_.erase(it);
@@ -575,7 +575,7 @@ SubscriberImpl::set_qos(
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
                               ACE_TEXT("insert %C to DrIdToQosMap failed.\n"),
-                              std::string(converter).c_str()),::DDS::RETCODE_ERROR);
+                              OPENDDS_STRING(converter).c_str()),::DDS::RETCODE_ERROR);
           }
         }
       }

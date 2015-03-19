@@ -7,6 +7,7 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "WriteDataContainer.h"
 #include "DataSampleHeader.h"
 #include "InstanceDataSampleList.h"
@@ -241,7 +242,7 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                  ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
   }
 
@@ -581,7 +582,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                      ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
                      this->domain_id_,
                      this->topic_name_,
-                     std::string(converter).c_str()));
+                     OPENDDS_STRING(converter).c_str()));
         }
         writer_->controlTracker.message_delivered();
       }
@@ -602,7 +603,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
     release_buffer(stale);
     writer_->controlTracker.message_delivered();
@@ -614,7 +615,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("domain %d topic %C publication %C pushed to HISTORY.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
     DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
@@ -733,7 +734,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
                      ACE_TEXT("domain %d topic %C publication %C control message dropped.\n"),
                      this->domain_id_,
                      this->topic_name_,
-                     std::string(converter).c_str()));
+                     OPENDDS_STRING(converter).c_str()));
         }
         writer_->controlTracker.message_dropped();
       }
@@ -801,7 +802,7 @@ WriteDataContainer::remove_oldest_historical_sample(
                  ACE_TEXT("domain %d topic %C publication %C sample removed from HISTORY.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
   } else {
@@ -903,7 +904,7 @@ WriteDataContainer::remove_oldest_sample(
                  ACE_TEXT("domain %d topic %C publication %C sample removed from HISTORY.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
 
   } else if (containing_list == &this->unsent_data_) {
@@ -922,7 +923,7 @@ WriteDataContainer::remove_oldest_sample(
                  ACE_TEXT("domain %d topic %C publication %C sample removed from unsent.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
   } else {
     ACE_ERROR_RETURN((LM_ERROR,

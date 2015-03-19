@@ -9,7 +9,7 @@
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 ACE_INLINE
-OpenDDS::DCPS::TcpInst::TcpInst(const std::string& name)
+OpenDDS::DCPS::TcpInst::TcpInst(const OPENDDS_STRING& name)
   : TransportInst("tcp", name),
     enable_nagle_algorithm_(false),
     conn_retry_initial_delay_(500),

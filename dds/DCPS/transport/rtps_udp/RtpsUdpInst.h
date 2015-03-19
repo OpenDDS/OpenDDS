@@ -30,7 +30,7 @@ public:
   bool use_multicast_;
   short ttl_;
   ACE_INET_Addr multicast_group_address_;
-  std::string multicast_interface_;
+  OPENDDS_STRING multicast_interface_;
 
   size_t nak_depth_;
   ACE_Time_Value nak_response_delay_, heartbeat_period_,
@@ -49,7 +49,7 @@ public:
 
 private:
   friend class RtpsUdpType;
-  explicit RtpsUdpInst(const std::string& name);
+  explicit RtpsUdpInst(const OPENDDS_STRING& name);
 
   TransportImpl* new_impl(const TransportInst_rch& inst);
 

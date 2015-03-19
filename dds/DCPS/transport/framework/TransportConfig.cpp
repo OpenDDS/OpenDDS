@@ -17,7 +17,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-TransportConfig::TransportConfig(const std::string& name)
+TransportConfig::TransportConfig(const OPENDDS_STRING& name)
   : swap_bytes_(false)
   , passive_connect_duration_(DEFAULT_PASSIVE_CONNECT_DURATION)
   , name_(name)
@@ -29,7 +29,7 @@ TransportConfig::~TransportConfig()
 void
 TransportConfig::sorted_insert(const TransportInst_rch& inst)
 {
-  const std::string name = inst->name();
+  const OPENDDS_STRING name = inst->name();
   std::vector<TransportInst_rch>::iterator it = instances_.begin();
   while (it != instances_.end() && (*it)->name() < name) {
     ++it;

@@ -187,7 +187,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
       DCPS::GuidConverter local(guid_), remote(guid);
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) Spdp::data_received - %C discovered %C lease %ds\n"),
-        std::string(local).c_str(), std::string(remote).c_str(),
+        OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str(),
         pdata.leaseDuration.seconds));
     }
 
@@ -264,7 +264,7 @@ Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
     if (DCPS::DCPS_debug_level > 3) {
       DCPS::GuidConverter conv(iter->first);
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Spdp::remove_discovered_participant")
-                 ACE_TEXT(" - erasing %C\n"), std::string(conv).c_str()));
+                 ACE_TEXT(" - erasing %C\n"), OPENDDS_STRING(conv).c_str()));
     }
     participants_.erase(iter);
   }
@@ -293,7 +293,7 @@ Spdp::remove_expired_participants()
           ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) Spdp::remove_expired_participants() - ")
             ACE_TEXT("participant %C exceeded lease duration, removing\n"),
-            std::string(conv).c_str()));
+            OPENDDS_STRING(conv).c_str()));
         }
         remove_discovered_participant(part);
       }
@@ -409,7 +409,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
   }
 #endif
 
-  std::string mc_addr = outer_->disco_->default_multicast_group();
+  OPENDDS_STRING mc_addr = outer_->disco_->default_multicast_group();
   ACE_INET_Addr default_multicast;
   if (0 != default_multicast.set(mc_port, mc_addr.c_str())) {
     ACE_DEBUG((
@@ -420,7 +420,7 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
     throw std::runtime_error("failed to set default_multicast address");
   }
 
-  const std::string& net_if = outer_->disco_->multicast_interface();
+  const OPENDDS_STRING& net_if = outer_->disco_->multicast_interface();
 
   if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO,

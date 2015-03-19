@@ -1051,7 +1051,7 @@ DomainParticipantImpl::ignore_participant(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
                ACE_TEXT("%C ignoring handle %x.\n"),
-               std::string(converter).c_str(),
+               OPENDDS_STRING(converter).c_str(),
                handle));
   }
 
@@ -1072,7 +1072,7 @@ DomainParticipantImpl::ignore_participant(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
                ACE_TEXT("%C repo call returned.\n"),
-               std::string(converter).c_str()));
+               OPENDDS_STRING(converter).c_str()));
   }
 
   return DDS::RETCODE_OK;
@@ -1110,7 +1110,7 @@ DomainParticipantImpl::ignore_topic(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_topic: ")
                ACE_TEXT("%C ignoring handle %x.\n"),
-               std::string(converter).c_str(),
+               OPENDDS_STRING(converter).c_str(),
                handle));
   }
 
@@ -1148,7 +1148,7 @@ DomainParticipantImpl::ignore_publication(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_publication: ")
                ACE_TEXT("%C ignoring handle %x.\n"),
-               std::string(converter).c_str(),
+               OPENDDS_STRING(converter).c_str(),
                handle));
   }
 
@@ -1188,7 +1188,7 @@ DomainParticipantImpl::ignore_subscription(
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_subscription: ")
                ACE_TEXT("%C ignoring handle %d.\n"),
-               std::string(converter).c_str(),
+               OPENDDS_STRING(converter).c_str(),
                handle));
   }
 
@@ -1539,7 +1539,7 @@ DomainParticipantImpl::get_id()
   return dp_id_;
 }
 
-std::string
+OPENDDS_STRING
 DomainParticipantImpl::get_unique_id()
 {
   return GuidConverter(dp_id_).uniqueId();

@@ -22,7 +22,7 @@
 #include <vector>
 
 bool
-::DDS_TEST::supports(const OpenDDS::DCPS::TransportClient* tc, const std::string& name)
+::DDS_TEST::supports(const OpenDDS::DCPS::TransportClient* tc, const OPENDDS_STRING& name)
 {
   if (tc == 0)
     {
@@ -31,7 +31,7 @@ bool
                        0);
     }
 
-  std::string supported;
+  OPENDDS_STRING supported;
   for (std::vector<OpenDDS::DCPS::TransportImpl_rch>::const_iterator it = tc->impls_.begin(),
           end = tc->impls_.end();
           it != end;)
@@ -70,7 +70,7 @@ bool
 }
 
 bool
-::DDS_TEST::negotiated(const OpenDDS::DCPS::TransportClient* ctc, const std::string& name)
+::DDS_TEST::negotiated(const OpenDDS::DCPS::TransportClient* ctc, const OPENDDS_STRING& name)
 {
   if (ctc == 0)
     {
@@ -95,7 +95,7 @@ bool
     }
 
 
-  std::string negotiated;
+  OPENDDS_STRING negotiated;
   for (OpenDDS::DCPS::DataLinkSet::MapType::iterator iter = tc->links_.map().begin(),
           end = tc->links_.map().end(); iter != end;)
     {

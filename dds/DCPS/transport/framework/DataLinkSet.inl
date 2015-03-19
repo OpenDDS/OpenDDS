@@ -112,7 +112,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                  pub_id,
                  ACE_TEXT("(%P|%t) DataLinkSet::send_control: ")
                  ACE_TEXT("no links for publication %C, ")
                  ACE_TEXT("not sending control message.\n"),
-                 std::string(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str()));
     }
     listener->control_delivered(msg);
     return SEND_CONTROL_OK;

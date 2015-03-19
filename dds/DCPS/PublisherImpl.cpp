@@ -176,7 +176,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
           ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
           ACE_TEXT("the data writer %C doesn't ")
           ACE_TEXT("belong to this subscriber \n"),
-          std::string(converter).c_str()));
+          OPENDDS_STRING(converter).c_str()));
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
@@ -219,7 +219,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
           ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("PublisherImpl::delete_datawriter, ")
           ACE_TEXT("datawriter %C not found.\n"),
-          std::string(converter).c_str()), DDS::RETCODE_ERROR);
+          OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
     }
 
     // We can not erase the datawriter from datawriter map by the topic name
@@ -343,7 +343,7 @@ PublisherImpl::delete_contained_entities()
           ACE_TEXT("delete_contained_entities: ")
           ACE_TEXT("failed to delete ")
           ACE_TEXT("datawriter %C.\n"),
-          std::string(converter).c_str()),ret);
+          OPENDDS_STRING(converter).c_str()),ret);
     }
   }
 
@@ -393,7 +393,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
                 ACE_TEXT("PublisherImpl::set_qos: ")
                 ACE_TEXT("insert id %d to DwIdToQosMap ")
                 ACE_TEXT("failed.\n"),
-                std::string(converter).c_str()), DDS::RETCODE_ERROR);
+                OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
           }
         }
       }
@@ -790,7 +790,7 @@ PublisherImpl::writer_enabled(const char*     topic_name,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("PublisherImpl::writer_enabled: ")
         ACE_TEXT("insert publication %C failed.\n"),
-        std::string(converter).c_str()), DDS::RETCODE_ERROR);
+        OPENDDS_STRING(converter).c_str()), DDS::RETCODE_ERROR);
   }
 
   // Increase ref count when the servant is added to the

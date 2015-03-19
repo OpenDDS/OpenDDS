@@ -277,12 +277,13 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   char domainStr[16];
   ACE_OS::snprintf(domainStr, 16, "%d", domainId);
 
-  std::string key = OpenDDS::DCPS::GuidConverter(guid).uniqueId();
+  OPENDDS_STRING key = OpenDDS::DCPS::GuidConverter(guid).uniqueId();
 
+  // TODO remove std::string
   // configure one transport
   transport_inst_ = TheTransportRegistry->create_inst(
                        DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                       std::string("_SEDPTransportInst_") + key + domainStr,
+                       OPENDDS_STRING("_SEDPTransportInst_") + key.c_str() + domainStr,
                        "rtps_udp");
   // Use a static cast to avoid dependency on the RtpsUdp library
   DCPS::RtpsUdpInst_rch rtps_inst =
@@ -298,7 +299,7 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
     // Bind to a specific multicast group
     const u_short mc_port = disco.pb() + disco.dg() * domainId + disco.dx();
 
-    std::string mc_addr = disco.default_multicast_group();
+    OPENDDS_STRING mc_addr = disco.default_multicast_group();
     if (rtps_inst->multicast_group_address_.set(mc_port, mc_addr.c_str())) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::init - ")
@@ -315,11 +316,12 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   }
 
   // Crete a config
-  std::string config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
-                            std::string("_SEDP_TransportCfg_") + key +
+  OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
+                            OPENDDS_STRING("_SEDP_TransportCfg_") + key +
                             domainStr;
   DCPS::TransportConfig_rch transport_cfg =
-    TheTransportRegistry->create_config(config_name);
+  // TODO remove std::string
+    TheTransportRegistry->create_config(config_name.c_str());
   transport_cfg->instances_.push_back(transport_inst_);
 
   // Configure and enable each reader/writer
@@ -631,7 +633,7 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
             DCPS::GuidConverter conv(*it);
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::AssociateTask::svc - ")
               ACE_TEXT("calling match_endpoints %C\n"),
-              std::string(conv).c_str()));
+              OPENDDS_STRING(conv).c_str()));
           }
           sedp_->match_endpoints(*it, ti->second);
           if (spdp_->shutting_down()) { return; }
@@ -2558,7 +2560,7 @@ Sedp::populate_discovered_reader_msg(
   // Ignore drd.readerProxy.multicastLocatorList;
   drd.readerProxy.allLocators = sub.trans_info_;
   drd.contentFilterProperty.contentFilteredTopicName =
-    std::string(DCPS::GuidConverter(subscription_id)).c_str();
+    OPENDDS_STRING(DCPS::GuidConverter(subscription_id)).c_str();
   drd.contentFilterProperty.relatedTopicName = topic_name.c_str();
   drd.contentFilterProperty.filterClassName = ""; // PLConverter adds default
   drd.contentFilterProperty.filterExpression = sub.filter_.c_str();

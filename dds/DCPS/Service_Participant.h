@@ -14,15 +14,10 @@
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "DomainParticipantFactoryImpl.h"
-#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
-#include "dds/DCPS/transport/framework/TransportConfig.h"
+#include "ace/Barrier.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Discovery.h"
-
-#ifdef OPENDDS_SAFETY_PROFILE
-#include "SafetyProfilePool.h"
-#endif
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
@@ -356,9 +351,6 @@ public:
                                       DDS::TopicListener_ptr a_listener = 0,
                                       DDS::StatusMask mask = 0);
 
- void* pool_malloc(std::size_t bytes);
- void pool_free(void* ptr);
-
   /**
    * Import the configuration file to the ACE_Configuration_Heap
    * object and load common section configuration to the
@@ -416,7 +408,7 @@ private:
   int load_discovery_configuration(ACE_Configuration_Heap& cf,
                                    const ACE_TCHAR* section_name);
 
-  std::map<std::string, Discovery::Config*> discovery_types_;
+  std::map<OPENDDS_STRING, Discovery::Config*> discovery_types_;
 
   ACE_ARGV ORB_argv_;
 
@@ -582,12 +574,6 @@ private:
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;
-
-#ifdef OPENDDS_SAFETY_PROFILE
-  SafetyProfilePool safety_profile_pool_;
-#endif
-
-  ACE_Allocator* memory_pool_;
 
   static int zero_argc;
 };

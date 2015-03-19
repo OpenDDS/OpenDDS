@@ -15,7 +15,7 @@
 #include "dds/DCPS/DataCollector_T.h"
 
 #include <iosfwd>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 #include <vector>
 
 namespace Test {
@@ -133,8 +133,8 @@ class Options  {
     public:    TransportType  transportType() const;
 
     /// Transport Key value, translated from the type.
-    protected: std::string& transportKey();
-    public:    std::string  transportKey() const;
+    protected: OPENDDS_STRING& transportKey();
+    public:    OPENDDS_STRING  transportKey() const;
 
     /// Test topic name.
     protected: std::string& topicName();
@@ -175,7 +175,7 @@ class Options  {
     TransportType transportType_;
 
     /// Transport Key value.
-    std::string transportKey_;
+    OPENDDS_STRING transportKey_;
 
     /// Topic name for test.
     std::string topicName_;

@@ -88,8 +88,8 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) WriterInfo::WriterInfo: ")
                ACE_TEXT("writer %C added to reader %C.\n"),
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               OPENDDS_STRING(writer_converter).c_str(),
+               OPENDDS_STRING(reader_converter).c_str()));
   }
 }
 
@@ -259,8 +259,8 @@ WriterInfo::set_group_info(const CoherentChangeControl& info)
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: WriterInfo::set_group_info()")
                ACE_TEXT(" reader %C writer %C incorrect coherent info !\n"),
-               std::string(sub_id).c_str(),
-               std::string(pub_id).c_str()));
+               OPENDDS_STRING(sub_id).c_str(),
+               OPENDDS_STRING(pub_id).c_str()));
   }
 
   this->writer_coherent_samples_ = info.coherent_samples_;

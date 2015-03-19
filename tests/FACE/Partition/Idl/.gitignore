@@ -4,6 +4,7 @@
 /FaceMessageC.h
 /FaceMessageC.inl
 /FaceMessageS.cpp
+/FaceMessageS.inl
 /FaceMessageS.h
 /FaceMessageTypeSupport.idl
 /FaceMessageTypeSupportC.cpp
@@ -12,4 +13,5 @@
 /FaceMessageTypeSupportImpl.cpp
 /FaceMessageTypeSupportImpl.h
 /FaceMessageTypeSupportS.cpp
+/FaceMessageTypeSupportS.inl
 /FaceMessageTypeSupportS.h

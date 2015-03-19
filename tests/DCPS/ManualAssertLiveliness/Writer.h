@@ -6,7 +6,7 @@
 
 #include <dds/DdsDcpsPublicationC.h>
 #include <ace/Task.h>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 class Writer_Base : public ACE_Task_Base
 {
@@ -16,7 +16,7 @@ public:
   void end ();
 protected:
   ::DDS::DataWriter_var writer_;
-  std::string id_;
+  OPENDDS_STRING id_;
   const char* get_id() const { return id_.c_str(); }
 };
 

@@ -187,13 +187,13 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
     // Loop through the [rtps_discovery/*] sections
     for (DCPS::KeyList::const_iterator it = keys.begin();
          it != keys.end(); ++it) {
-      const std::string& rtps_name = it->first;
+      const OPENDDS_STRING& rtps_name = it->first;
 
       int resend;
       u_short pb, dg, pg, d0, d1, dx, ttl;
       AddrVec spdp_send_addrs;
-      std::string default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
-      std::string mi;
+      OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
+      OPENDDS_STRING mi;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
         has_ttl = false, sm = false;
@@ -202,9 +202,9 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       DCPS::pullValues(cf, it->second, values);
       for (DCPS::ValueMap::const_iterator it = values.begin();
            it != values.end(); ++it) {
-        const std::string& name = it->first;
+        const OPENDDS_STRING& name = it->first;
         if (name == "ResendPeriod") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           has_resend = DCPS::convertToInteger(value, resend);
           if (!has_resend) {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -214,7 +214,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "PB") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           has_pb = DCPS::convertToInteger(value, pb);
           if (!has_pb) {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -224,7 +224,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "DG") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           has_dg = DCPS::convertToInteger(value, dg);
           if (!has_dg) {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -234,7 +234,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "PG") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           has_pg = DCPS::convertToInteger(value, pg);
           if (!has_pg) {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -244,7 +244,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "D0") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           has_d0 = DCPS::convertToInteger(value, d0);
           if (!has_d0) {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -254,7 +254,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "D1") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           has_d1 = DCPS::convertToInteger(value, d1);
           if (!has_d1) {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -264,7 +264,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "DX") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           has_dx = DCPS::convertToInteger(value, dx);
           if (!has_dx) {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -274,7 +274,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "TTL") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           has_ttl = DCPS::convertToInteger(value, ttl);
           if (!has_ttl) {
             ACE_ERROR_RETURN((LM_ERROR,
@@ -284,7 +284,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                value.c_str(), rtps_name.c_str()), -1);
           }
         } else if (name == "SedpMulticast") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           int smInt;
           has_sm = DCPS::convertToInteger(value, smInt);
           if (!has_sm) {
@@ -301,7 +301,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           /// FUTURE: handle > 1 group.
           default_multicast_group = it->second;
         } else if (name == "SpdpSendAddrs") {
-          const std::string& value = it->second;
+          const OPENDDS_STRING& value = it->second;
           size_t i = 0;
           do {
             i = value.find_first_not_of(' ', i); // skip spaces

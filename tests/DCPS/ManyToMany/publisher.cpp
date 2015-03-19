@@ -95,8 +95,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         std::stringstream domain_config_stream;
         std::string config_name = "domain_part_";
         domain_config_stream << config_name << part_num;
-        std::string config;
-        config = domain_config_stream.str();
+        OPENDDS_STRING config;
+        config = domain_config_stream.str().c_str();
         TheTransportRegistry->bind_config(config, *part);
       }
 

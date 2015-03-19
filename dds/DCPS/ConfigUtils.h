@@ -11,6 +11,7 @@
 
 #include "ace/Configuration.h"
 #include "dcps_export.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include <map>
 #include <list>
@@ -26,17 +27,17 @@ namespace OpenDDS {
 namespace DCPS {
 
   /// Helper types and functions for config file parsing
-  typedef std::map<std::string, std::string> ValueMap;
-  typedef std::pair<std::string, ACE_Configuration_Section_Key> SubsectionPair;
+  typedef std::map<OPENDDS_STRING, OPENDDS_STRING> ValueMap;
+  typedef std::pair<OPENDDS_STRING, ACE_Configuration_Section_Key> SubsectionPair;
   typedef std::list<SubsectionPair> KeyList;
 
-  template <typename T> bool convertToInteger( const std::string& s,
+  template <typename T> bool convertToInteger( const OPENDDS_STRING& s,
                                                T& value )
   {
 #ifdef ACE_LYNXOS_MAJOR
     std::istrstream istr(s.c_str());
 #else
-    std::stringstream istr(s);
+    std::stringstream istr(s.c_str());
 #endif
     if (!(istr >> value) || (istr.peek() != EOF)) return false;
     return true;

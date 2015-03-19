@@ -15,9 +15,7 @@
 #include "WriterDataSampleList.h"
 #include "DisjointSequence.h"
 
-#ifdef OPENDDS_SAFETY_PROFILE
 #include "PoolAllocator.h"
-#endif
 #include "ace/Condition_T.h"
 #include "Service_Participant.h"
 
