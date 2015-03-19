@@ -67,10 +67,10 @@ public:
                                  const DDS::TopicQos& qos,
                                  bool hasDcpsKey);
   DCPS::TopicStatus remove_topic(const DCPS::RepoId& topicId,
-                                 std::string& name);
+                                 OPENDDS_STRING& name);
   void ignore_topic(const DCPS::RepoId& ignoreId);
   bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
-                        std::string& name);
+                        OPENDDS_STRING& name);
 
   // Publication
   DCPS::RepoId add_publication(const DCPS::RepoId& topicId,

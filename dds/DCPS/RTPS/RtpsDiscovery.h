@@ -281,8 +281,8 @@ private:
 
   DomainParticipantMap participants_;
 
-  std::map<DDS::DomainId_t, std::map<std::string, Sedp::TopicDetails> > topics_;
-  std::map<DDS::DomainId_t, std::map<std::string, unsigned int> > topic_use_;
+  std::map<DDS::DomainId_t, std::map<OPENDDS_STRING, Sedp::TopicDetails> > topics_;
+  std::map<DDS::DomainId_t, std::map<OPENDDS_STRING, unsigned int> > topic_use_;
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;

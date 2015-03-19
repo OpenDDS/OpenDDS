@@ -9,7 +9,7 @@
 
 namespace OpenDDS {
 namespace DCPS {
-  
+
 OpenDDS_Dcps_Export void* pool_alloc_memory(size_t size);
 
 OpenDDS_Dcps_Export void pool_free_memory(void* ptr);

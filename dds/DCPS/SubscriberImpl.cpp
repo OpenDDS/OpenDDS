@@ -964,11 +964,9 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
 
 
   if (qos == DATAREADER_QOS_DEFAULT) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) SubscriberImpl::validate_datareader_qos - thinks qos is DATAREADER_QOS_DEFAULT\n"));
     dr_qos = default_qos;
 
   } else if (qos == DATAREADER_QOS_USE_TOPIC_QOS) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) SubscriberImpl::validate_datareader_qos - thinks qos is DATAREADER_QOS_USE_TOPIC_QOS\n"));
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
     if (mt) {
@@ -992,7 +990,6 @@ SubscriberImpl::validate_datareader_qos(const DDS::DataReaderQos & qos,
                                     topic_qos);
 
   } else {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) SubscriberImpl::validate_datareader_qos - thinks qos is DATAREADER_QOS_DEFAULT\n"));
     dr_qos = qos;
   }
 
