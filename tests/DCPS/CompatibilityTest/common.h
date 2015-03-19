@@ -10,8 +10,6 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-
 #include "ace/SString.h"
 
 #define MY_DOMAIN 211
