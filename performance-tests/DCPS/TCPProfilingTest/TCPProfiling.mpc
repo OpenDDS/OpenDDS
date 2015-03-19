@@ -1,5 +1,6 @@
 project(DCPS_Perf*Pub): dcpsexe {
   exename = publisher
+  requires += no_opendds_safety_profile
 
   TypeSupport_Files {
     testMessage.idl
@@ -19,6 +20,7 @@ project(DCPS_Perf*Pub): dcpsexe {
 project(DCPS_Perf*Sub): dcpsexe {
   exename = subscriber
   after  += DCPS_Perf*Pub
+  requires += no_opendds_safety_profile
 
   TypeSupport_Files {
     testMessage.idl
