@@ -186,7 +186,7 @@ namespace TAO {
 struct SA4 : Sequence<SmallArry, Unbounded, ArrayEltPolicy<SmallArry_forany> >
 {};
 
-int ACE_TMAIN()
+int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   S1 s1;
   S2 s2;
