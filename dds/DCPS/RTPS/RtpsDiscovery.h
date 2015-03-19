@@ -19,7 +19,7 @@
 
 #include "ace/Configuration.h"
 
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 #include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

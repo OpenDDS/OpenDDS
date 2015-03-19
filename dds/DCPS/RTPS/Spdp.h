@@ -27,7 +27,7 @@
 
 #include <map>
 #include <set>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
