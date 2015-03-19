@@ -1,7 +1,6 @@
 #include "PubDriver.h"
 #include "TestException.h"
 #include "tests/DCPS/FooType3/FooDefC.h"
-#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/PublisherImpl.h"

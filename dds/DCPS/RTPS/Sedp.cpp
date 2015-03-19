@@ -279,7 +279,6 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
 
   OPENDDS_STRING key = OpenDDS::DCPS::GuidConverter(guid).uniqueId();
 
-  // TODO remove std::string
   // configure one transport
   transport_inst_ = TheTransportRegistry->create_inst(
                        DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
@@ -320,7 +319,6 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
                             OPENDDS_STRING("_SEDP_TransportCfg_") + key +
                             domainStr;
   DCPS::TransportConfig_rch transport_cfg =
-  // TODO remove std::string
     TheTransportRegistry->create_config(config_name.c_str());
   transport_cfg->instances_.push_back(transport_inst_);
 
@@ -371,10 +369,10 @@ Sedp::ignore(const RepoId& to_ignore)
       // clean up tracking info
       topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
       remove_from_bit(iter->second);
-      std::string topic_name = get_topic_name(iter->second);
+      OPENDDS_STRING topic_name = get_topic_name(iter->second);
       discovered_publications_.erase(iter);
       // break associations
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
+      std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         match_endpoints(to_ignore, top_it->second, true /*remove*/);
@@ -389,10 +387,10 @@ Sedp::ignore(const RepoId& to_ignore)
       // clean up tracking info
       topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
       remove_from_bit(iter->second);
-      std::string topic_name = get_topic_name(iter->second);
+      OPENDDS_STRING topic_name = get_topic_name(iter->second);
       discovered_subscriptions_.erase(iter);
       // break associations
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
+      std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         match_endpoints(to_ignore, top_it->second, true /*remove*/);
@@ -401,12 +399,12 @@ Sedp::ignore(const RepoId& to_ignore)
     }
   }
   {
-    const std::map<RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator
+    const std::map<RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan>::iterator
       iter = topic_names_.find(to_ignore);
     if (iter != topic_names_.end()) {
       ignored_topics_.insert(iter->second);
       // Remove all publications and subscriptions on this topic
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
+      std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(iter->second);
       if (top_it != topics_.end()) {
         TopicDetailsEx& td = top_it->second;
@@ -606,7 +604,7 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
        it != sedp_->defer_match_endpoints_.end(); /*incremented in body*/) {
     if (0 == std::memcmp(it->guidPrefix, proto.remote_id_.guidPrefix,
                          sizeof(GuidPrefix_t))) {
-      std::string topic;
+      OPENDDS_STRING topic;
       if (it->entityId.entityKind & 4) {
         DiscoveredSubscriptionIter dsi =
           sedp_->discovered_subscriptions_.find(*it);
@@ -626,7 +624,7 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
           topic.c_str()));
       }
       if (!topic.empty()) {
-        std::map<std::string, TopicDetailsEx>::iterator ti =
+        std::map<OPENDDS_STRING, TopicDetailsEx>::iterator ti =
           sedp_->topics_.find(topic);
         if (ti != sedp_->topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
@@ -715,8 +713,8 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
        i != m.end() && 0 == std::memcmp(i->first.guidPrefix,
                                         participant.guidPrefix,
                                         sizeof(GuidPrefix_t));) {
-    std::string topic_name = get_topic_name(i->second);
-    std::map<std::string, TopicDetailsEx>::iterator top_it =
+    OPENDDS_STRING topic_name = get_topic_name(i->second);
+    std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
       topics_.find(topic_name);
     if (top_it != topics_.end()) {
       top_it->second.endpoints_.erase(i->first);
@@ -819,7 +817,7 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
                    bool hasDcpsKey)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-  std::map<std::string, TopicDetailsEx>::iterator iter =
+  std::map<OPENDDS_STRING, TopicDetailsEx>::iterator iter =
     topics_.find(topicName);
   if (iter != topics_.end()) { // types must match, RtpsDiscovery checked for us
     iter->second.qos_ = qos;
@@ -841,11 +839,11 @@ Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
 }
 
 DCPS::TopicStatus
-Sedp::remove_topic(const RepoId& topicId, std::string& name)
+Sedp::remove_topic(const RepoId& topicId, OPENDDS_STRING& name)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   name = topic_names_[topicId];
-  std::map<std::string, TopicDetailsEx>::iterator top_it =
+  std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
       topics_.find(name);
   if (top_it != topics_.end()) {
     TopicDetailsEx& td = top_it->second;
@@ -860,10 +858,10 @@ Sedp::remove_topic(const RepoId& topicId, std::string& name)
 
 bool
 Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
-                       std::string& name)
+                       OPENDDS_STRING& name)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  std::map<RepoId, std::string, DCPS::GUID_tKeyLessThan>::iterator iter =
+  std::map<RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan>::iterator iter =
     topic_names_.find(topicId);
   if (iter == topic_names_.end()) {
     return false;
@@ -930,11 +928,11 @@ Sedp::inconsistent_topic(const RepoIdSet& eps) const
 bool
 Sedp::has_dcps_key(const RepoId& topicId) const
 {
-  typedef std::map<RepoId, std::string, DCPS::GUID_tKeyLessThan> TNMap;
+  typedef std::map<RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan> TNMap;
   TNMap::const_iterator tn = topic_names_.find(topicId);
   if (tn == topic_names_.end()) return false;
 
-  typedef std::map<std::string, TopicDetailsEx> TDMap;
+  typedef std::map<OPENDDS_STRING, TopicDetailsEx> TDMap;
   TDMap::const_iterator td = topics_.find(tn->second);
   if (td == topics_.end()) return false;
 
@@ -986,9 +984,9 @@ Sedp::remove_publication(const RepoId& publicationId)
     if (DDS::RETCODE_OK ==
           publications_writer_.write_unregister_dispose(publicationId))
     {
-      std::string topic_name = topic_names_[iter->second.topic_id_];
+      OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
       local_publications_.erase(publicationId);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
+      std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
       if (top_it != topics_.end()) {
         match_endpoints(publicationId, top_it->second, true /*remove*/);
@@ -1018,8 +1016,8 @@ Sedp::update_publication_qos(const RepoId& publicationId,
       return false;
     }
     // Match/unmatch with subscriptions
-    std::string topic_name = topic_names_[pb.topic_id_];
-    std::map<std::string, TopicDetailsEx>::iterator top_it =
+    OPENDDS_STRING topic_name = topic_names_[pb.topic_id_];
+    std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
     if (top_it != topics_.end()) {
       match_endpoints(publicationId, top_it->second);
@@ -1078,9 +1076,9 @@ Sedp::remove_subscription(const RepoId& subscriptionId)
   if (iter != local_subscriptions_.end()) {
     if (DDS::RETCODE_OK ==
           subscriptions_writer_.write_unregister_dispose(subscriptionId)) {
-      std::string topic_name = topic_names_[iter->second.topic_id_];
+      OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
       local_subscriptions_.erase(subscriptionId);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
+      std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
       if (top_it != topics_.end()) {
         match_endpoints(subscriptionId, top_it->second, true /*remove*/);
@@ -1110,8 +1108,8 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
       return false;
     }
     // Match/unmatch with subscriptions
-    std::string topic_name = topic_names_[sb.topic_id_];
-    std::map<std::string, TopicDetailsEx>::iterator top_it =
+    OPENDDS_STRING topic_name = topic_names_[sb.topic_id_];
+    std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
     if (top_it != topics_.end()) {
       match_endpoints(subscriptionId, top_it->second);
@@ -1223,7 +1221,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  std::string topic_name;
+  OPENDDS_STRING topic_name;
   // Find the publication  - iterator valid only as long as we hold the lock
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
 
@@ -1239,7 +1237,7 @@ Sedp::data_received(DCPS::MessageId message_id,
             discovered_publications_[guid] = DiscoveredPublication(wdata);
 
         topic_name = get_topic_name(pub);
-        std::map<std::string, TopicDetailsEx>::iterator top_it =
+        std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
         if (top_it == topics_.end()) {
           top_it =
@@ -1294,7 +1292,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       iter = discovered_publications_.find(guid);
       if (iter != discovered_publications_.end()) {
         iter->second.bit_ih_ = instance_handle;
-        std::map<std::string, TopicDetailsEx>::iterator top_it =
+        std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
@@ -1315,7 +1313,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
       // Match/unmatch local subscription(s)
       topic_name = get_topic_name(iter->second);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
+      std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         if (DCPS::DCPS_debug_level > 3) {
@@ -1332,7 +1330,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     if (iter != discovered_publications_.end()) {
       // Unmatch local subscription(s)
       topic_name = get_topic_name(iter->second);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
+      std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
@@ -1380,7 +1378,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     return;
   }
 
-  std::string topic_name;
+  OPENDDS_STRING topic_name;
   // Find the publication  - iterator valid only as long as we hold the lock
   DiscoveredSubscriptionIter iter = discovered_subscriptions_.find(guid);
 
@@ -1396,7 +1394,7 @@ Sedp::data_received(DCPS::MessageId message_id,
           discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
 
         topic_name = get_topic_name(sub);
-        std::map<std::string, TopicDetailsEx>::iterator top_it =
+        std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
         if (top_it == topics_.end()) {
           top_it =
@@ -1451,7 +1449,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       iter = discovered_subscriptions_.find(guid);
       if (iter != discovered_subscriptions_.end()) {
         iter->second.bit_ih_ = instance_handle;
-        std::map<std::string, TopicDetailsEx>::iterator top_it =
+        std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
@@ -1474,7 +1472,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
         // Match/unmatch local publication(s)
         topic_name = get_topic_name(iter->second);
-        std::map<std::string, TopicDetailsEx>::iterator top_it =
+        std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
@@ -1489,7 +1487,7 @@ Sedp::data_received(DCPS::MessageId message_id,
                         rdata.contentFilterProperty)) {
         // Let any associated local publications know about the change
         topic_name = get_topic_name(iter->second);
-        std::map<std::string, TopicDetailsEx>::iterator top_it =
+        std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
             topics_.find(topic_name);
         const RepoIdSet& assoc =
           (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints_;
@@ -1526,7 +1524,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     if (iter != discovered_subscriptions_.end()) {
       // Unmatch local publication(s)
       topic_name = get_topic_name(iter->second);
-      std::map<std::string, TopicDetailsEx>::iterator top_it =
+      std::map<OPENDDS_STRING, TopicDetailsEx>::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
@@ -2504,7 +2502,7 @@ Sedp::populate_discovered_writer_msg(
 {
   // Ignored on the wire dwd.ddsPublicationData.key
   // Ignored on the wire dwd.ddsPublicationData.participant_key
-  std::string topic_name = topic_names_[pub.topic_id_];
+  OPENDDS_STRING topic_name = topic_names_[pub.topic_id_];
   dwd.ddsPublicationData.topic_name = topic_name.c_str();
   TopicDetails& topic_details = topics_[topic_name];
   dwd.ddsPublicationData.type_name = topic_details.data_type_.c_str();
@@ -2537,7 +2535,7 @@ Sedp::populate_discovered_reader_msg(
 {
   // Ignored on the wire drd.ddsSubscription.key
   // Ignored on the wire drd.ddsSubscription.participant_key
-  std::string topic_name = topic_names_[sub.topic_id_];
+  OPENDDS_STRING topic_name = topic_names_[sub.topic_id_];
   drd.ddsSubscriptionData.topic_name = topic_name.c_str();
   TopicDetails& topic_details = topics_[topic_name];
   drd.ddsSubscriptionData.type_name = topic_details.data_type_.c_str();
@@ -2687,7 +2685,7 @@ Sedp::write_participant_message_data(
 void
 Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
 {
-  const std::string rtps_udp = "rtps_udp";
+  const OPENDDS_STRING rtps_udp = "rtps_udp";
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     if (locators[i].transport_type.in() == rtps_udp) {
       const CORBA::ULong len = locators[i].data.length();

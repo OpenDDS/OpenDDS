@@ -3,10 +3,6 @@
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/udp/UdpInst.h"
-#include "dds/DCPS/transport/multicast/MulticastInst.h"
-
 #include "dds/DCPS/Service_Participant.h"
 
 OpenDDS::Model::Delegate::Delegate()

@@ -15,7 +15,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
-#include <dds/DCPS/transport/tcp/TcpInst.h>
 #include "dds/DCPS/StaticIncludes.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 

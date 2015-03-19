@@ -84,7 +84,7 @@ public:
 
   ~FilterEvaluator();
 
-  std::vector<std::string> getOrderBys() const;
+  std::vector<OPENDDS_STRING> getOrderBys() const;
 
   bool hasFilter() const;
 
@@ -140,13 +140,13 @@ private:
     Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
     bool swap_, cdr_;
-    mutable std::map<std::string, Value> cache_;
+    mutable std::map<OPENDDS_STRING, Value> cache_;
   };
 
   bool eval_i(DataForEval& data) const;
 
   EvalNode* filter_root_;
-  std::vector<std::string> order_bys_;
+  std::vector<OPENDDS_STRING> order_bys_;
 };
 
 class OpenDDS_Dcps_Export MetaStruct {

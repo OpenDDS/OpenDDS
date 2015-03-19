@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_ASTNODEWRAPPER_H
 
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
@@ -32,14 +33,14 @@ inline void reportErrors(yard::SimpleTextParser& parser, const char* input)
   ptrdiff_t pos = prev ? prev->GetLastToken() - parser.Begin() : 0;
   std::ostringstream oss;
   oss << pos;
-  throw std::runtime_error("Invalid expression [" + std::string(input)
+  throw std::runtime_error("Invalid expression [" + OPENDDS_STRING(input)
     + "] at character " + oss.str());
 }
 
 
-inline std::string toString(yard::TreeBuildingParser<char>::Node* iter)
+inline OPENDDS_STRING toString(yard::TreeBuildingParser<char>::Node* iter)
 {
-  return iter ? std::string(iter->GetFirstToken(), iter->GetLastToken()) : "";
+  return iter ? OPENDDS_STRING(iter->GetFirstToken(), iter->GetLastToken()) : "";
 }
 
 

@@ -16,7 +16,6 @@
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/transport/tcp/TcpInst.h>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS

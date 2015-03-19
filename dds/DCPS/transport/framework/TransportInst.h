@@ -66,9 +66,9 @@ public:
 
   /// Format name of transport configuration parameter for use in
   /// conjunction with dump(std::ostream& os).
-  static std::string formatNameForDump(const char* name);
+  static OPENDDS_STRING formatNameForDump(const char* name);
 
-  const std::string transport_type_;
+  const OPENDDS_STRING transport_type_;
 
   /// Number of pre-created link (list) objects per pool for the
   /// "send queue" of each DataLink.

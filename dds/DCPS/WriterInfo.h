@@ -96,7 +96,7 @@ public:
     return state_;
   };
 
-  std::string get_state_str() const;
+  OPENDDS_STRING get_state_str() const;
 
   /// update liveliness when remove_association is called.
   void removed();

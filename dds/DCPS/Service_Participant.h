@@ -18,6 +18,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Discovery.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Task.h"
 #include "ace/Configuration.h"
@@ -271,7 +272,7 @@ public:
   void bit_transport_port(int port);
   //@}
 
-  std::string bit_transport_ip() const;
+  OPENDDS_STRING bit_transport_ip() const;
 
   /**
    * Accessor for bit_lookup_duration_msec_.

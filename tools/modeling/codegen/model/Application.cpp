@@ -1,10 +1,5 @@
 
 #include "Application.h"
-
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/udp/UdpInst.h"
-#include "dds/DCPS/transport/multicast/MulticastInst.h"
-
 #include "dds/DCPS/Service_Participant.h"
 
 OpenDDS::Model::Application::Application(int& argc, ACE_TCHAR *argv[])

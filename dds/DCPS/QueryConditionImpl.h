@@ -50,7 +50,7 @@ public:
 
   CORBA::Boolean get_trigger_value();
 
-  std::vector<std::string> getOrderBys() const;
+  std::vector<OPENDDS_STRING> getOrderBys() const;
 
   bool hasFilter() const;
 

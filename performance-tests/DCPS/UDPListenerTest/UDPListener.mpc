@@ -3,6 +3,7 @@ project(DCPS_Perf*Pub): dcpsexe {
   libpaths += ../TypeNoKeyBounded
   libs     += DCPS_Perf_TypeNoKeyBounded
   after    += DCPS_Perf_TypeNoKeyBounded
+  requires += no_opendds_safety_profile
 
   Header_Files {
     common.h
@@ -20,6 +21,7 @@ project(DCPS_Perf*Sub): dcpsexe {
   libpaths += ../TypeNoKeyBounded
   libs     += DCPS_Perf_TypeNoKeyBounded
   after    += DCPS_Perf_TypeNoKeyBounded
+  requires += no_opendds_safety_profile
 
   Header_Files {
     common.h

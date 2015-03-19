@@ -13,7 +13,7 @@
 #include <ace/Thread_Mutex.h>
 #include <ace/Condition_Thread_Mutex.h>
 
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -24,7 +24,7 @@ namespace DCPS {
    */
   class OpenDDS_Dcps_Export MessageTracker {
   public:
-    MessageTracker(const std::string& msg_src);
+    MessageTracker(const OPENDDS_STRING& msg_src);
 
     /**
      * Indicate that a message has been to the transport layer.
@@ -68,10 +68,10 @@ namespace DCPS {
 
   private:
 
-    const std::string msg_src_;         // Source of tracked messages
-    int               dropped_count_;
-    int               delivered_count_; // Messages transmitted by transport layer
-    int               sent_count_;      // Messages sent to transport layer
+    const OPENDDS_STRING msg_src_;         // Source of tracked messages
+    int                  dropped_count_;
+    int                  delivered_count_; // Messages transmitted by transport layer
+    int                  sent_count_;      // Messages sent to transport layer
 
     ACE_Thread_Mutex lock_;
 

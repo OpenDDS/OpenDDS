@@ -506,7 +506,7 @@ bool File::remove()
   return false;
 }
 
-std::string File::name() const
+OPENDDS_STRING File::name() const
 {
   return ACE_TEXT_ALWAYS_CHAR(logical_relative_.c_str());
 }
@@ -599,10 +599,10 @@ Directory::DirectoryIterator Directory::end_dirs()
   return DirectoryIterator(dirs_.end(), this);
 }
 
-Directory::Ptr Directory::get_dir(const std::vector<std::string>& path)
+Directory::Ptr Directory::get_dir(const std::vector<OPENDDS_STRING>& path)
 {
   Directory::Ptr dir(this, false);
-  typedef std::vector<std::string>::const_iterator iterator;
+  typedef std::vector<OPENDDS_STRING>::const_iterator iterator;
 
   for (iterator iter = path.begin(), end = path.end(); iter != end; ++iter) {
     dir = dir->get_subdir(iter->c_str());
@@ -750,7 +750,7 @@ void Directory::remove()
   long_names_.clear();
 }
 
-std::string Directory::name() const
+OPENDDS_STRING Directory::name() const
 {
   return ACE_TEXT_ALWAYS_CHAR(logical_dirname_.c_str());
 }
@@ -811,7 +811,7 @@ void Directory::scan_dir(const ACE_TString& relative, DDS_Dirent& dir,
       } else {
         CwdGuard cg(file);
         std::ifstream fn("_fullname");
-        std::string fullname;
+        OPENDDS_STRING fullname;
 
         if (!std::getline(fn, fullname)) {
           throw std::runtime_error("Can't read .../_fullname");

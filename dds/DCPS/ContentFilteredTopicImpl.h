@@ -13,8 +13,8 @@
 
 #include "dds/DCPS/TopicDescriptionImpl.h"
 #include "dds/DCPS/FilterEvaluator.h"
+#include "dds/DCPS/PoolAllocator.h"
 
-#include <string>
 #include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -55,7 +55,7 @@ public:
   void remove_reader(DataReaderImpl& reader);
 
 private:
-  std::string filter_expression_;
+  OPENDDS_STRING filter_expression_;
   FilterEvaluator filter_eval_;
   DDS::StringSeq expression_parameters_;
   DDS::Topic_var related_topic_;

@@ -19,7 +19,6 @@
 #include "dds/DCPS/PublisherImpl.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/tcp/TcpInst.h"
 
 #include "ace/Arg_Shifter.h"
 

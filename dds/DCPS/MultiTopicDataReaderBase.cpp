@@ -19,8 +19,8 @@
 
 namespace {
   struct MatchesIncomingName { // predicate for std::find_if()
-    const std::string& look_for_;
-    explicit MatchesIncomingName(const std::string& s) : look_for_(s) {}
+    const OPENDDS_STRING& look_for_;
+    explicit MatchesIncomingName(const OPENDDS_STRING& s) : look_for_(s) {}
     bool operator()(const OpenDDS::DCPS::MultiTopicImpl::SubjectFieldSpec& sfs)
       const {
       return sfs.incoming_name_ == look_for_;
@@ -144,7 +144,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   }
 }
 
-std::string MultiTopicDataReaderBase::topicNameFor(DDS::DataReader_ptr reader)
+OPENDDS_STRING MultiTopicDataReaderBase::topicNameFor(DDS::DataReader_ptr reader)
 {
   DDS::TopicDescription_var td = reader->get_topicdescription();
   CORBA::String_var topic = td->get_name();
@@ -260,7 +260,7 @@ bool MultiTopicDataReaderBase::have_sample_states(
 void MultiTopicDataReaderBase::cleanup()
 {
   DDS::Subscriber_var sub = resulting_reader_->get_subscriber();
-  for (std::map<std::string, QueryPlan>::iterator it = query_plans_.begin();
+  for (std::map<OPENDDS_STRING, QueryPlan>::iterator it = query_plans_.begin();
        it != query_plans_.end(); ++it) {
     sub->delete_datareader(it->second.data_reader_);
   }
