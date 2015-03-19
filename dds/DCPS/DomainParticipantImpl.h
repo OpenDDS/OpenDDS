@@ -34,7 +34,7 @@
 
 #include <map>
 #include <set>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 #include <vector>
 
 #include "Recorder.h"
