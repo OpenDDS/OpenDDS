@@ -10,6 +10,7 @@
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 
+#include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "DataDurabilityCache.h"
 #include "Service_Participant.h"
 #include "SendStateDataSampleList.h"
