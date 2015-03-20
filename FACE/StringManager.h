@@ -283,6 +283,40 @@ inline bool operator!=(const StringBase<CharT>& lhs,
   return !(lhs == rhs);
 }
 
+template <typename CharT>
+inline bool operator==(const StringBase<CharT>& lhs,
+                       const CharT* rhs)
+{
+  if (!lhs.in()) {
+    return !rhs;
+  }
+  return StringTraits<CharT>::cmp(lhs, rhs) == 0;
+}
+
+template <typename CharT>
+inline bool operator!=(const StringBase<CharT>& lhs,
+                       const CharT* rhs)
+{
+  return !(lhs == rhs);
+}
+
+template <typename CharT>
+inline bool operator==(const CharT* lhs,
+                       const StringBase<CharT>& rhs)
+{
+  if (!lhs) {
+    return !rhs.in();
+  }
+  return StringTraits<CharT>::cmp(lhs, rhs) == 0;
+}
+
+template <typename CharT>
+inline bool operator!=(const CharT* lhs,
+                       const StringBase<CharT>& rhs)
+{
+  return !(lhs == rhs);
+}
+
 OpenDDS_FACE_Export
 bool operator>>(DCPS::Serializer& ser, StringBase<FACE::Char>& str);
 

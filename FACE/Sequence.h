@@ -249,6 +249,9 @@ namespace FaceTypes {
     typedef typename Elts::ConstElement ConstElement;
     typedef typename Elts::ConstRawElement ConstRawElement;
 
+    typedef ConstElement const_subscript_type; // sequence _var compatibility
+    typedef Element subscript_type; // sequence _var compatibility
+
     ConstElement operator[](size_type idx) const;
     Element operator[](size_type idx);
 

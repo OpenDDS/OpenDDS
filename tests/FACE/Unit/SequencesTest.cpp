@@ -1,6 +1,8 @@
 #include "FACE/Sequence.h"
 
 #include <tao/Array_VarOut_T.h>
+#include <tao/Seq_Var_T.h>
+#include <tao/Seq_Out_T.h>
 
 #include "ace/OS_main.h"
 #include "ace/Log_Msg.h"
@@ -94,6 +96,12 @@ struct S2 : Sequence<int, Bounded<5> > {};
 struct S3 : Sequence<MyStru, Bounded<3> > {};
 struct S4 : Sequence<MyStru2, Unbounded, VariEltPolicy<MyStru2> > {};
 struct S5 : Sequence<S4, Unbounded, VariEltPolicy<S4> > {};
+
+typedef TAO_FixedSeq_Var_T<S1> S1_var;
+typedef TAO_Seq_Out_T<S1> S1_out;
+
+typedef TAO_VarSeq_Var_T<S4> S4_var;
+typedef TAO_Seq_Out_T<S4> S4_out;
 
 struct SS : Sequence<char*, Unbounded, StringEltPolicy<char> > {};
 struct SB : Sequence<char*, Bounded<2>, StringEltPolicy<char> > {
@@ -264,6 +272,21 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   SA4 sa4;
   SmallArry arr4 = {217, 150};
   testSeq(sa4, arr4);
+
+  S1_var s1v = new S1;
+  s1v->length(2);
+  s1v[0] = 1;
+  s1v[1] = s1v[0];
+  const S1_var& s1vc = s1v;
+  TEST_CHECK(s1vc[1] == 1);
+
+  S4_var s4v = new S4;
+  s4v->length(2);
+  s4v[0].i1_ = 3;
+  s4v[0].s1_ = "testing";
+  s4v[1] = s4v[0];
+  const S4_var& s4vc = s4v;
+  TEST_CHECK(s4vc[1].s1_ == "testing");
 
   printf("%d assertions passed\n", assertions);
   return 0;
