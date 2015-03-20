@@ -115,7 +115,7 @@ WriterInfo::get_state_str() const
   default:
     oss << "UNSPECIFIED(" << int(this->state_) << ")";
   }
-  return oss.str().c_str();
+  return oss.str();
 }
 
 void

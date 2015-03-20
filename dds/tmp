@@ -1,0 +1,74 @@
+h1. ACE_NEW, ACE_NEW_RETURN, ACE_NEW_NORETURN
+
+h2. CORBA/tao/String_Alloc.cpp
+
+* CORBA::string_alloc (CORBA::ULong len) - buffer
+* CORBA::wstring_alloc (CORBA::ULong len) - buffer
+
+h2. CORBA/tao/SystemException.cpp
+
+* #define TAO_SYSTEM_EXCEPTION(name)
+** where called
+
+h2. InfoRepo - not used in FACE
+
+h2. idl - not runtime
+
+h2. DdsDcpsInfrastructureTypeSupportImpl.cpp
+
+* ParticipantBuiltinTopicDataTypeSupportImpl::create_datawriter() - ParticipantBuiltinTopicDataDataWriterImpl(),
+* ParticipantBuiltinTopicDataTypeSupportImpl::create_datareader() - ParticipantBuiltinTopicDataDataReaderImpl(),
+* ParticipantBuiltinTopicDataDataWriterImpl::dds_marshal() - ACE_MESSAGE_BLOCK
+* ParticipantBuiltinTopicDataDataReaderImpl::store_instance_data() - SubscriptionInstance, 
+* TopicBuiltinTopicDataTypeSupportImpl::create_datawriter () - TopicBuiltinTopicDataDataWriterImpl(),
+* TopicBuiltinTopicDataTypeSupportImpl::create_datareader () - TopicBuiltinTopicDataDataReaderImpl(),
+* TopicBuiltinTopicDataDataWriterImpl::dds_marshal() - ACE_Message_Block
+* TopicBuiltinTopicDataDataReaderImpl::store_instance_data() - SubscriptionInstance(this,
+* PublicationBuiltinTopicDataTypeSupportImpl::create_datawriter() - PublicationBuiltinTopicDataDataWriterImpl()
+* PublicationBuiltinTopicDataTypeSupportImpl::create_datareader() - PublicationBuiltinTopicDataDataReaderImpl()
+* PublicationBuiltinTopicDataDataWriterImpl::dds_marshal() - ACE_Message_Block
+* PublicationBuiltinTopicDataDataReaderImpl::dds_demarshal() - PublicationBuiltinTopicData
+* PublicationBuiltinTopicDataDataReaderImpl::store_instance_data() - SubscriptionInstance
+* SubscriptionBuiltinTopicDataTypeSupportImpl::create_datawriter() - SubscriptionBuiltinTopicDataDataWriterImpl()
+* SubscriptionBuiltinTopicDataTypeSupportImpl::create_datareader() - SubscriptionBuiltinTopicDataDataReaderImpl()
+* SubscriptionBuiltinTopicDataDataWriterImpl::dds_marshal() - ACE_Message_Block
+* SubscriptionBuiltinTopicDataDataReaderImpl::dds_demarshal() - SubscriptionBuiltinTopicData
+* SubscriptionBuiltinTopicDataDataReaderImpl::store_instance_data() - SubscriptionInstance
+
+h2. monitor - not used by FACE
+
+h2. DdsDcpsGuidC.cpp
+
+* OpenDDS::DCPS::GuidVendorId_t_alloc (void) - CORBA::Octet[2]
+** returned object
+* OpenDDS::DCPS::GuidPrefix_t_alloc (void) - CORBA::Octet[12]
+** returned object
+* OpenDDS::DCPS::EntityKey_t_alloc (void) - CORBA::Octet[3]
+** returned object
+
+h2. DdsDcpsInfrastructureC.cpp
+
+* DDS::BuiltinTopicKeyValue_alloc (void) - CORBA::Long[3]
+
+
+h2. DCPSDomainParticipantImpl.cpp
+
+* DomainParticipantImpl::create_publisher() - PublisherImpl
+* DomainParticipantImpl::create_subscriber() - SubscriberImpl
+* DomainParticipantImpl::create_new_topic() - TopicImpl
+
+h2. DCPS/RTPS/RtpsBaseMessageTypesC.cpp
+
+* OpenDDS::RTPS::OctetArray2_alloc (void) - CORBA::Octet[2]
+** returned object
+* OpenDDS::RTPS::OctetArray16_alloc (void) - CORBA::Octet[16]
+** returned object
+* OpenDDS::RTPS::OctetArray4_alloc (void) - CORBA::Octet[4]
+** returned object
+* OpenDDS::RTPS::FilterSignature_t_alloc (void) - CORBA::Long[4]
+** returned object
+* OpenDDS::RTPS::Parameter::Parameter (const ::OpenDDS::RTPS::Parameter &u) - DDS::UserDataQosPolicy, DDS::GroupDataQosPolicy, DDS::TopicDataQosPolicy, DDS::PartitionQosPolicy, ContentFilterProperty_t, PropertySeq, EntityName_t, ContentFilterInfo_t, GUIDSeq, OriginalWriterInfo_t, TransportLocator, OctetSeq
+              DDS::UserDataQosPolicy (*u.u_.user_data_),
+** copy constructor
+* OpenDDS::RTPS::Parameter::operator= (const ::OpenDDS::RTPS::Parameter &u) - DDS::UserDataQosPolicy, DDS::GroupDataQosPolicy, DDS::TopicDataQosPolicy, DDS::PartitionQosPolicy, ContentFilterProperty_t, PropertySeq, EntityName_t, ContentFilterInfo_t, GUIDSeq, OriginalWriterInfo_t, TransportLocator, OctetSeq
+** assignment operator

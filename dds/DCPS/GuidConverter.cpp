@@ -109,7 +109,7 @@ GuidConverter::operator OPENDDS_STRING() const
   os << guid_ << "(" << std::hex << checksum() << ")";
 
   // TODO remove streams
-  return OPENDDS_STRING(os.str().c_str());
+  return OPENDDS_STRING(os.str());
 }
 
 #ifdef DDS_HAS_WCHAR
