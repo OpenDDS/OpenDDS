@@ -14,6 +14,7 @@
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "Comparator_T.h"
 #include "RcObject_T.h"
 
