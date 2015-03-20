@@ -227,7 +227,7 @@ bool langmap_generator::gen_struct(UTL_ScopedName* name,
 
   if (size == AST_Type::VARIABLE) {
     be_global->lang_header_ <<
-      "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
+      exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
   }
 
   {

@@ -168,7 +168,7 @@ namespace FaceTypes {
       CharT*& element_;
       seq_flag_type release_;
 
-      inline friend bool operator>>(DCPS::Serializer& ser, Element& elt)
+      inline friend bool operator>>(DCPS::Serializer& ser, Element elt)
       {
         ser.read_string(elt.out(), StringTraits<CharT>::alloc,
           StringTraits<CharT>::free);
