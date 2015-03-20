@@ -367,7 +367,10 @@ namespace {
             be_global->impl_ <<
               streamAndCheck(">> " + getWrapper(args.str(), elem, WD_INPUT), 4);
           } else { // unbounded string
-            be_global->impl_ << streamAndCheck(">> seq.get_buffer()[i]", 4);
+            const string getbuffer =
+              (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
+              ? ".get_buffer()" : "";
+            be_global->impl_ << streamAndCheck(">> seq" + getbuffer + "[i]", 4);
           }
         } else { // Enum, Struct, Sequence, Union
           be_global->impl_ << streamAndCheck(">> seq[i]", 4);

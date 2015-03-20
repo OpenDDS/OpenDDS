@@ -19,6 +19,7 @@ struct StringTraits {};
 template <>
 struct StringTraits<FACE::Char>
 {
+  static FACE::Char* alloc(FACE::UnsignedLong len) { return FACE::string_alloc(len); }
   static FACE::Char* empty() { return dup(""); }
   static FACE::Char* dup(const FACE::Char* s) { return FACE::string_dup(s); }
   static void free(FACE::Char* s) { if (s) FACE::string_free(s); }
@@ -32,6 +33,7 @@ struct StringTraits<FACE::Char>
 template <>
 struct StringTraits<FACE::WChar>
 {
+  static FACE::WChar* alloc(FACE::UnsignedLong len) { return FACE::wstring_alloc(len); }
   static FACE::WChar* empty() { return dup(L""); }
   static FACE::WChar* dup(const FACE::WChar* s) { return FACE::wstring_dup(s); }
   static void free(FACE::WChar* s) { if (s) FACE::wstring_free(s); }

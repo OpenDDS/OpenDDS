@@ -5,6 +5,7 @@
 #include "FACE/StringManager.h"
 
 #include "dds/DCPS/SafetyProfilePool.h"
+#include "dds/DCPS/Serializer.h"
 
 #include <tao/Array_VarOut_T.h> // Array_Traits
 
@@ -166,6 +167,13 @@ namespace FaceTypes {
 
       CharT*& element_;
       seq_flag_type release_;
+
+      inline friend bool operator>>(DCPS::Serializer& ser, Element& elt)
+      {
+        ser.read_string(elt.out(), StringTraits<CharT>::alloc,
+          StringTraits<CharT>::free);
+        return ser.good_bit();
+      }
     };
 
     static Element make_element(CharT*& elt, seq_flag_type release)

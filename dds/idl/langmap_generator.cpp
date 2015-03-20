@@ -20,8 +20,7 @@ namespace {
     HLP_STR_VAR, HLP_STR_OUT, HLP_WSTR_VAR, HLP_WSTR_OUT,
     HLP_STR_MGR, HLP_WSTR_MGR,
     HLP_FIX_VAR, HLP_VAR_VAR, HLP_OUT,
-    HLP_SEQ_VAR_VAR, HLP_SEQ_FIX_VAR, HLP_SEQ_OUT,
-    HLP_SEQ_BOUND, HLP_SEQ_UNBOUND, HLP_SEQ_ARR_BOUND, HLP_SEQ_ARR_UNBOUND,
+    HLP_SEQ, HLP_SEQ_NS, HLP_SEQ_VAR_VAR, HLP_SEQ_FIX_VAR, HLP_SEQ_OUT,
     HLP_ARR_VAR_VAR, HLP_ARR_FIX_VAR, HLP_ARR_OUT, HLP_ARR_FORANY,
   };
   std::map<Helper, std::string> helpers_;
@@ -106,13 +105,11 @@ void langmap_generator::init()
     helpers_[HLP_FIX_VAR] = "::TAO_Fixed_Var_T";
     helpers_[HLP_VAR_VAR] = "::TAO_Var_Var_T";
     helpers_[HLP_OUT] = "::TAO_Out_T";
+    helpers_[HLP_SEQ] = "::OpenDDS::FaceTypes::Sequence";
+    helpers_[HLP_SEQ_NS] = "::OpenDDS::FaceTypes";
     helpers_[HLP_SEQ_VAR_VAR] = "::TAO_VarSeq_Var_T"; //TODO: use FACE-enabled replacements
     helpers_[HLP_SEQ_FIX_VAR] = "::TAO_FixedSeq_Var_T";
     helpers_[HLP_SEQ_OUT] = "::TAO_Seq_Out_T";
-    helpers_[HLP_SEQ_BOUND] = "::TAO::bounded_value_sequence"; //TODO: not always "value"
-    helpers_[HLP_SEQ_UNBOUND] = "::TAO::unbounded_value_sequence";
-    helpers_[HLP_SEQ_ARR_BOUND] = "::TAO::bounded_array_sequence";
-    helpers_[HLP_SEQ_ARR_UNBOUND] = "::TAO::unbounded_array_sequence";
     helpers_[HLP_ARR_VAR_VAR] = "::TAO_VarArray_Var_T";
     helpers_[HLP_ARR_FIX_VAR] = "::TAO_FixedArray_Var_T";
     helpers_[HLP_ARR_OUT] = "::TAO_Array_Out_T";
@@ -224,8 +221,45 @@ bool langmap_generator::gen_struct(UTL_ScopedName* name,
       "  " << type_name << ' ' << field_name << ";\n";
   }
 
-  be_global->lang_header_ <<
+  be_global->lang_header_ << "\n"
+    "  bool operator==(const " << nm << "& rhs) const;\n"
     "};\n\n";
+
+  if (size == AST_Type::VARIABLE) {
+    be_global->lang_header_ <<
+      "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
+  }
+
+  {
+    const ScopedNamespaceGuard guard(name, be_global->impl_);
+    be_global->impl_ <<
+      "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
+      "{\n"
+      "  return ";
+
+    for (size_t i = 0; i < fields.size(); ++i) {
+      const std::string field_name = fields[i]->local_name()->get_string();
+      be_global->impl_ << field_name << " == rhs." << field_name;
+      if (i < fields.size() - 1) {
+        be_global->impl_ << "\n    && ";
+      }
+    }
+    be_global->impl_ << ";\n}\n\n";
+
+    if (size == AST_Type::VARIABLE) {
+      be_global->impl_ <<
+        "void swap(" << nm << "& lhs, " << nm << "& rhs)\n"
+        "{\n"
+        "  using std::swap;\n";
+      for (size_t i = 0; i < fields.size(); ++i) {
+        const std::string field_name = fields[i]->local_name()->get_string();
+        be_global->impl_ <<
+          "  swap(lhs." << field_name << ", rhs." << field_name << ");\n";
+      }
+      be_global->impl_ << "}\n\n";
+    }
+  }
+
   gen_typecode(name);
   return true;
 }
@@ -235,59 +269,72 @@ namespace {
   {
     be_global->add_include("<tao/Seq_Var_T.h>", BE_GlobalData::STREAM_LANG_H); //TODO
     be_global->add_include("<tao/Seq_Out_T.h>", BE_GlobalData::STREAM_LANG_H); //TODO
-    be_global->add_include("<tao/Sequence_T.h>", BE_GlobalData::STREAM_LANG_H); //TODO
+    be_global->add_include("FACE/Sequence.h", BE_GlobalData::STREAM_LANG_H);
     const char* const nm = tdname->last_component()->get_string();
     AST_Type* elem = seq->base_type();
     const Classification elem_cls = classify(elem);
     const bool bounded = !seq->unbounded();
     const Helper var = (elem->size_type() == AST_Type::VARIABLE)
                         ? HLP_SEQ_VAR_VAR : HLP_SEQ_FIX_VAR,
-      out = HLP_SEQ_OUT,
-      base = (elem_cls & CL_ARRAY)
-             ? (bounded ? HLP_SEQ_ARR_BOUND : HLP_SEQ_ARR_UNBOUND)
-             : (bounded ? HLP_SEQ_BOUND : HLP_SEQ_UNBOUND);
+      out = HLP_SEQ_OUT;
 
     std::string elem_type = map_type(elem), extra_tmp_args;
     if (elem_cls & CL_STRING) {
-      elem_type = helpers_[(elem_cls & CL_WIDE) ? HLP_WSTR_MGR : HLP_STR_MGR];
+      const AST_Expression::ExprType char_type = (elem_cls & CL_WIDE)
+        ? AST_Expression::EV_wchar : AST_Expression::EV_char;
+      extra_tmp_args = ", " + helpers_[HLP_SEQ_NS] + "::StringEltPolicy< "
+        + map_type(char_type) + ">";
     } else if (elem_cls & CL_ARRAY) {
-      extra_tmp_args = ", " + elem_type + "_slice, " + elem_type + "_tag";
+      extra_tmp_args = ", " + helpers_[HLP_SEQ_NS] + "::ArrayEltPolicy<"
+        + elem_type + "_forany>";
+    } else if (elem->size_type() == AST_Type::VARIABLE) {
+      extra_tmp_args = ", " +  helpers_[HLP_SEQ_NS] + "::VariEltPolicy<"
+        + elem_type + ">";
     }
 
-    std::ostringstream bound;
+    std::string bound = helpers_[HLP_SEQ_NS] + "::Unbounded";
     if (bounded) {
-      bound << ", " << seq->max_size()->ev()->u.ulval;
+      std::ostringstream oss;
+      oss << helpers_[HLP_SEQ_NS] << "::Bounded<"
+        << seq->max_size()->ev()->u.ulval << '>';
+      bound = oss.str();
     }
 
-    const std::string len_type = primtype_[AST_PredefinedType::PT_ulong],
+    const std::string base = helpers_[HLP_SEQ] + "< " + elem_type + ", " + bound
+                           + extra_tmp_args + " >",
+      len_type = primtype_[AST_PredefinedType::PT_ulong],
       flag_type = primtype_[AST_PredefinedType::PT_boolean];
 
     be_global->lang_header_ <<
       "class " << nm << ";\n"
       "typedef " << helpers_[var] << '<' << nm << "> " << nm << "_var;\n"
       "typedef " << helpers_[out] << '<' << nm << "> " << nm << "_out;\n\n"
-      "class " << exporter() << nm << " : public " << helpers_[base] << "< "
-      << elem_type << extra_tmp_args << bound.str() << "> {\n"
+      "class " << exporter() << nm << " : public " << base << " {\n"
       "public:\n"
       "  typedef " << nm << "_var _var_type;\n"
       "  typedef " << nm << "_out _out_type;\n\n"
-      "  " << nm << "() {}\n";
+      "  " << nm << "() {}\n"
+      "  " << nm << "(const " << nm << "& seq) : " << base << "(seq) {}\n"
+      "  friend void swap(" << nm << "& a, " << nm << "& b) { a.swap(b); }\n"
+      "  " << nm << "& operator=(const " << nm << "& rhs)\n"
+      "  {\n"
+      "    " << nm << " tmp(rhs);\n"
+      "    swap(tmp);\n"
+      "    return *this;\n"
+      "  }\n";
 
     if (bounded) {
       be_global->lang_header_ <<
         "  " << nm << "(" << len_type << " length, " << elem_type << "* data, "
         << flag_type << " release = false)\n"
-        "    : " << helpers_[base] << "< " << elem_type << extra_tmp_args
-        << bound.str() << ">(length, data, release) {}\n";
+        "    : " << base << "(0u, length, data, release) {}\n";
     } else {
       be_global->lang_header_ <<
         "  " << nm << "(" << len_type << " maximum)\n"
-        "    : " << helpers_[base] << "< " << elem_type << extra_tmp_args
-        << ">(maximum) {}\n"
+        "    : " << base << "(maximum, 0u, 0, true) {}\n"
         "  " << nm << "(" << len_type << " maximum, " << len_type << " length, "
         << elem_type << "* data, " << flag_type << " release = false)\n"
-        "    : " << helpers_[base] << "< " << elem_type << extra_tmp_args
-        << ">(maximum, length, data, release) {}\n";
+        "    : " << base << "(maximum, length, data, release) {}\n";
     }
     be_global->lang_header_ <<
       "};\n\n";
@@ -432,7 +479,7 @@ namespace {
   }
 
   // Outside of user's namespace: add Traits for arrays so that they can be
-  // used in TAO Sequences.  Remove/adjust if TAO Sequences aren't used anymore.
+  // used in Sequences and Array_var/_out/_forany.
   void gen_array_traits(UTL_ScopedName* tdname, AST_Array* arr)
   {
     const std::string nm = scoped(tdname);
@@ -462,7 +509,16 @@ namespace {
       "  }\n\n"
       "  static void zero(" << nm << "_slice* slice)\n"
       "  {\n"
+      "    " << nm << "_fini_i(slice" << zeros << ");\n"
       "    " << nm << "_init_i(slice" << zeros << ");\n"
+      "  }\n"
+      "  static void construct(" << nm << "_slice* slice)\n"
+      "  {\n"
+      "    " << nm << "_init_i(slice" << zeros << ");\n"
+      "  }\n"
+      "  static void destroy(" << nm << "_slice* slice)\n"
+      "  {\n"
+      "    " << nm << "_fini_i(slice" << zeros << ");\n"
       "  }\n"
       "};\n}\n\n";
   }
