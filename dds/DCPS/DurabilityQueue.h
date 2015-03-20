@@ -13,7 +13,7 @@
 
 #include <algorithm>
 #include <vector>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -77,7 +77,7 @@ public:
   }
 
   //filesystem path
-  typedef std::vector<std::string> fs_path_t;
+  typedef std::vector<OPENDDS_STRING> fs_path_t;
   fs_path_t fs_path_;
 };
 

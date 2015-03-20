@@ -11,7 +11,7 @@
 
 using namespace OpenDDS::DCPS;
 
-MessageTracker::MessageTracker(const std::string& msg_src)
+MessageTracker::MessageTracker(const OPENDDS_STRING& msg_src)
 : msg_src_(msg_src)
 , dropped_count_(0)
 , delivered_count_(0)

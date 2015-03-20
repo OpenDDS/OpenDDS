@@ -19,9 +19,6 @@
 #include "SimpleTypeSupportImpl.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/udp/UdpInst.h"
-
 #include "dds/DCPS/StaticIncludes.h"
 
 #include "ace/Arg_Shifter.h"

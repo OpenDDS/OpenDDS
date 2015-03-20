@@ -23,7 +23,6 @@
 // resolve the build problem that the class is not defined when
 // RcHandle<T> template is instantiated.
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "ace/Arg_Shifter.h"
 
 #include "common.h"

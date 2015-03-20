@@ -63,7 +63,7 @@ void BitPubListenerImpl::on_data_available(DDS::DataReader_ptr reader)
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available: %X ")
               ACE_TEXT("reset ownership strength %d for writer %C.\n"),
-              this, ownership_strength, std::string(writer_converter).c_str()));
+              this, ownership_strength, OPENDDS_STRING(writer_converter).c_str()));
           }
 #endif
         }

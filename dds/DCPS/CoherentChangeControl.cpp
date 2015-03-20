@@ -14,6 +14,7 @@
 #include "Serializer.h"
 #include "GuidConverter.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include <iomanip>
 #include <iostream>
@@ -103,7 +104,7 @@ std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
       << ", ";
   if (value.group_coherent_) {
     GuidConverter converter(value.publisher_id_);
-    str << "publisher: " << std::dec << std::string(converter).c_str() << ", ";
+    str << "publisher: " << std::dec << OPENDDS_STRING(converter).c_str() << ", ";
     str << "group size: " << std::dec << value.group_coherent_samples_.size()
         << ", ";
     GroupCoherentSamples::const_iterator itEnd =
@@ -111,7 +112,7 @@ std::ostream& operator<<(std::ostream& str, const CoherentChangeControl& value)
     for (GroupCoherentSamples::const_iterator it =
            value.group_coherent_samples_.begin(); it != itEnd; ++it) {
       GuidConverter converter(it->first);
-      str << "writer: " << std::string(converter).c_str() << ", "
+      str << "writer: " << OPENDDS_STRING(converter).c_str() << ", "
           << "num_samples: " << it->second.num_samples_ << ", "
           << "last_sample: " << it->second.last_sample_.getValue()  << std::endl;
     }

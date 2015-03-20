@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "TransportSendListener.h"
 #include "dds/DCPS/MessageTracker.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -28,7 +29,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export SendResponseListener
   : public TransportSendListener {
 public:
-  SendResponseListener(const std::string& msg_src);
+  SendResponseListener(const OPENDDS_STRING& msg_src);
   virtual ~SendResponseListener();
 
   virtual void data_delivered(const DataSampleElement* sample);

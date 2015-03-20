@@ -10,9 +10,8 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-
 #include "ace/SString.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #define MY_DOMAIN 211
 #define MY_TOPIC  "foo"

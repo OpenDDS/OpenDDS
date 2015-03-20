@@ -12,6 +12,7 @@
 #include "dds/DCPS/SubscriptionInstance.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/QueryConditionImpl.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -42,7 +43,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
   if (cond_) {
     const QueryConditionImpl* qci = dynamic_cast<QueryConditionImpl*>(cond_);
     do_filter_ = qci->hasFilter();
-    std::vector<std::string> order_bys = qci->getOrderBys();
+    std::vector<OPENDDS_STRING> order_bys = qci->getOrderBys();
     do_sort_ = order_bys.size() > 0;
 
     if (do_sort_) {
@@ -51,7 +52,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
       // Iterate in reverse over the comma-separated fields so that the
       // top-level comparison is the leftmost.  The others will be chained.
       for (size_t i = order_bys.size(); i > 0; --i) {
-        const std::string& fieldspec = order_bys[i - 1];
+        const OPENDDS_STRING& fieldspec = order_bys[i - 1];
         //FUTURE: handle ASC / DESC as an extension to the DDS spec?
         cmp = getMetaStruct<typename SampleSeq::value_type>()
           .create_qc_comparator(fieldspec.c_str(), cmp);

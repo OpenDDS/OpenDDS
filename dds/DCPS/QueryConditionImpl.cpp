@@ -36,7 +36,7 @@ QueryConditionImpl::set_query_parameters(const DDS::StringSeq& query_parameters)
   return DDS::RETCODE_OK;
 }
 
-std::vector<std::string>
+std::vector<OPENDDS_STRING>
 QueryConditionImpl::getOrderBys() const
 {
   return evaluator_.getOrderBys();

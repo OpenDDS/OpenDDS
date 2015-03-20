@@ -93,7 +93,7 @@ RtpsUdpInst::dump(std::ostream& os)
   // directly call it on both local_address_ and multicast_group_address_,
   // since the second call could overwrite the result of the first before the
   // ostream gets a chance to see it.
-  const std::string local = local_address_.get_host_addr(),
+  const OPENDDS_STRING local = local_address_.get_host_addr(),
     multi = multicast_group_address_.get_host_addr();
   TransportInst::dump(os);
 #ifndef ACE_LYNXOS_MAJOR

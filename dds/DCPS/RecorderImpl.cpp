@@ -32,6 +32,7 @@
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 #include "RecorderImpl.h"
+#include "PoolAllocator.h"
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
@@ -334,7 +335,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
       //   ACE_DEBUG((LM_DEBUG,
       //              "(%P|%t) RecorderImpl::add_association: "
       //              "inserted writer %C.return %d \n",
-      //              std::string(converter).c_str(), bpair.second));
+      //              OPENDDS_STRING(converter).c_str(), bpair.second));
       //
       //   WriterMapType::iterator iter = writers_.find(writer_id);
       //   if (iter != writers_.end()) {
@@ -346,8 +347,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
       //     ACE_DEBUG((LM_DEBUG,
       //               ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
       //               ACE_TEXT("reader %C is associated with writer %C.\n"),
-      //               std::string(reader_converter).c_str(),
-      //               std::string(writer_converter).c_str()));
+      //               OPENDDS_STRING(reader_converter).c_str(),
+      //               OPENDDS_STRING(writer_converter).c_str()));
       //   }
       // }
     }
@@ -410,7 +411,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     //     ACE_DEBUG((LM_DEBUG,
     //                ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
     //                ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
-    //                std::string(converter).c_str()));
+    //                OPENDDS_STRING(converter).c_str()));
     //   }
     //
     //   this->handle_timeout(now, this);

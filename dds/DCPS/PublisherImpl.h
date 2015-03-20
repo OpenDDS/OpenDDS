@@ -154,7 +154,7 @@ public:
                                          DDS::Topic_ptr a_topic,
                                          DDS::DataWriterQos& dw_qos);
 private:
-  typedef std::multimap<std::string, DataWriterImpl*> DataWriterMap;
+  typedef std::multimap<OPENDDS_STRING, DataWriterImpl*> DataWriterMap;
 
   typedef std::map<PublicationId, DataWriterImpl*, GUID_tKeyLessThan>
     PublicationMap;

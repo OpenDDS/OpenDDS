@@ -403,7 +403,7 @@ private:
 
 private:
 
-  void log_send_state_lists (std::string description);
+  void log_send_state_lists (OPENDDS_STRING description);
 
   DisjointSequence acked_sequences_;
 

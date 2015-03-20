@@ -333,6 +333,8 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
 {
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;
+  be_global->add_include("dds/DCPS/PoolAllocator.h",
+    BE_GlobalData::STREAM_CPP);
   be_global->add_include("dds/DCPS/FilterEvaluator.h",
     BE_GlobalData::STREAM_CPP);
   if (first_struct_) {
@@ -368,7 +370,7 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     << "*>(stru);\n";
   std::for_each(fields.begin(), fields.end(), gen_field_getValue);
   const std::string exception =
-    "    throw std::runtime_error(\"Field \" + std::string(field) + \" not "
+    "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
     "found or its type is not supported (in struct " + clazz + ")\");\n";
   be_global->impl_ <<
     "    ACE_UNUSED_ARG(typed);\n" <<
@@ -381,7 +383,7 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
     "    if (!field[0]) {\n"   // if 'field' is the empty string...
     "      return 0;\n"        // ...we've skipped the entire struct
     "    }\n"                  //    and the return value is ignored
-    "    throw std::runtime_error(\"Field \" + std::string(field) + \" not "
+    "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
     "valid for struct " << clazz << "\");\n"
     "  }\n\n"
     "  ComparatorBase::Ptr create_qc_comparator(const char* field, "

@@ -16,7 +16,6 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/transport/tcp/TcpInst.h>
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 

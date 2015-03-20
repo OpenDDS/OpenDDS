@@ -26,7 +26,8 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 #include <iosfwd>
 #include <vector>
 #include <map>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
+
 #include <iterator>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -181,7 +182,7 @@ public:
   DirectoryIterator begin_dirs(); // dirs will be sorted
   DirectoryIterator end_dirs();
 
-  Directory::Ptr get_dir(const std::vector<std::string>& path);
+  Directory::Ptr get_dir(const std::vector<OPENDDS_STRING>& path);
   Directory::Ptr get_subdir(const char* name);  // slash is not a separator
 
   /// assumes all subdirectories in this dir are created with this API
@@ -189,7 +190,7 @@ public:
 
   void remove(); // recursive
 
-  std::string name() const;
+  OPENDDS_STRING name() const;
   Directory::Ptr parent() const {
     return parent_;
   }
@@ -223,7 +224,7 @@ public:
   bool write(std::ofstream& stream);
   bool read(std::ifstream& stream);
   bool remove();
-  std::string name() const;
+  OPENDDS_STRING name() const;
   Directory::Ptr parent() const {
     return parent_;
   }

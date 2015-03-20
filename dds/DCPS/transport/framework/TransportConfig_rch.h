@@ -15,6 +15,7 @@
 #endif
 
 #include "dds/DCPS/RcHandle_T.h"
+#include "dds/DCPS/transport/framework/TransportConfig.h"
 
 namespace OpenDDS {
 namespace DCPS {

@@ -76,7 +76,7 @@ namespace {
   static const int NAME_WIDTH(30); // Includes ":"
 }
 
-std::string
+OPENDDS_STRING
 OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 {
 #ifndef OPENDDS_SAFETY_PROFILE

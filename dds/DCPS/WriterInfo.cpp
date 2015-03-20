@@ -93,7 +93,7 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
   }
 }
 
-std::string
+OPENDDS_STRING
 WriterInfo::get_state_str() const
 {
 #ifdef ACE_LYNXOS_MAJOR
@@ -115,7 +115,7 @@ WriterInfo::get_state_str() const
   default:
     oss << "UNSPECIFIED(" << int(this->state_) << ")";
   }
-  return oss.str();
+  return oss.str().c_str();
 }
 
 void
