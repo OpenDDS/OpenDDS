@@ -21,7 +21,7 @@ struct StringTraits<FACE::Char>
 {
   static FACE::Char* empty() { return dup(""); }
   static FACE::Char* dup(const FACE::Char* s) { return FACE::string_dup(s); }
-  static void free(FACE::Char* s) { FACE::string_free(s); }
+  static void free(FACE::Char* s) { if (s) FACE::string_free(s); }
 
   static int cmp(const FACE::Char* lhs, const FACE::Char* rhs)
   {
@@ -34,7 +34,7 @@ struct StringTraits<FACE::WChar>
 {
   static FACE::WChar* empty() { return dup(L""); }
   static FACE::WChar* dup(const FACE::WChar* s) { return FACE::wstring_dup(s); }
-  static void free(FACE::WChar* s) { FACE::wstring_free(s); }
+  static void free(FACE::WChar* s) { if (s) FACE::wstring_free(s); }
 
   static int cmp(const FACE::WChar* lhs, const FACE::WChar* rhs)
   {
@@ -262,6 +262,23 @@ inline bool operator<(const StringBase<CharT>& lhs,
     return rhs.in();
   }
   return StringTraits<CharT>::cmp(lhs, rhs) < 0;
+}
+
+template <typename CharT>
+inline bool operator==(const StringBase<CharT>& lhs,
+                       const StringBase<CharT>& rhs)
+{
+  if (!lhs.in()) {
+    return !rhs.in();
+  }
+  return StringTraits<CharT>::cmp(lhs, rhs) == 0;
+}
+
+template <typename CharT>
+inline bool operator!=(const StringBase<CharT>& lhs,
+                       const StringBase<CharT>& rhs)
+{
+  return !(lhs == rhs);
 }
 
 OpenDDS_FACE_Export
