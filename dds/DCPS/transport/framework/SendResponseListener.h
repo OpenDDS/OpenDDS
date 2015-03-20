@@ -23,7 +23,7 @@ namespace DCPS {
  *
  * This is a simple listener implementation used to release response
  * samples once they have been either delivered or dropped.  No
- * special actions are taken to distiguish between the two results.
+ * special actions are taken to distinguish between the two results.
  */
 class OpenDDS_Dcps_Export SendResponseListener
   : public TransportSendListener {
