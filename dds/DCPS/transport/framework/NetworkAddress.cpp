@@ -58,11 +58,11 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-std::string get_fully_qualified_hostname(ACE_INET_Addr* addr)
+OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
 {
   // cache the determined fully qualified hostname and its
   // address to be used on subsequent calls
-  static std::string fullname;
+  static OPENDDS_STRING fullname;
   static ACE_INET_Addr selected_address;
 
   if (fullname.length() == 0) {

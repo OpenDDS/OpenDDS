@@ -15,14 +15,14 @@
 #include "ace/CDR_Stream.h"
 #include "ace/SString.h"
 #include <vector>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
 struct HostnameInfo {
   size_t index_;
-  std::string hostname_;
+  OPENDDS_STRING hostname_;
 };
 
 typedef std::vector<HostnameInfo> HostnameInfoVector;
@@ -38,7 +38,7 @@ typedef std::vector<HostnameInfo> HostnameInfoVector;
 struct OpenDDS_Dcps_Export NetworkAddress {
   NetworkAddress();
   explicit NetworkAddress(const ACE_INET_Addr& addr, bool use_hostname = false);
-  explicit NetworkAddress(const std::string& addr);
+  explicit NetworkAddress(const OPENDDS_STRING& addr);
 
   ~NetworkAddress();
 
@@ -53,7 +53,7 @@ struct OpenDDS_Dcps_Export NetworkAddress {
   CORBA::Octet reserved_;
 
   /// The address in string format. e.g. ip:port, hostname:port
-  std::string addr_;
+  OPENDDS_STRING addr_;
 };
 
 /// Helper function to get the fully qualified hostname.
@@ -64,7 +64,7 @@ struct OpenDDS_Dcps_Export NetworkAddress {
 /// warning is logged. If there is no any name discovered from network interfaces,
 /// an error is logged.
 extern OpenDDS_Dcps_Export
-std::string get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
+OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
 
 } // namespace DCPS
 } // namespace OpenDDS

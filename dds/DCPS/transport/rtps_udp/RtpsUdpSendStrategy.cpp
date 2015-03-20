@@ -202,6 +202,22 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 }
 
 void
+RtpsUdpSendStrategy::add_delayed_notification(TransportQueueElement* element)
+{
+  if (!link_->add_delayed_notification(element)) {
+    TransportSendStrategy::add_delayed_notification(element);
+  }
+}
+
+RemoveResult
+RtpsUdpSendStrategy::do_remove_sample(const RepoId& pub_id,
+  const TransportQueueElement::MatchCriteria& criteria)
+{
+  link_->do_remove_sample(pub_id, criteria);
+  return TransportSendStrategy::do_remove_sample(pub_id, criteria);
+}
+
+void
 RtpsUdpSendStrategy::stop_i()
 {
 }

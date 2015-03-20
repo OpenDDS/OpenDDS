@@ -64,13 +64,9 @@ OpenDDS::DCPS::TcpReceiveStrategy::deliver_sample
     VDBG((LM_DEBUG, "(%P|%t) DBG:  received GRACEFUL_DISCONNECT \n"));
     this->gracefully_disconnected_ = true;
 
-  } else if (sample.header_.message_id_ == SAMPLE_ACK) {
-    VDBG((LM_DEBUG, "(%P|%t) DBG:  received SAMPLE_ACK \n"));
-
-    this->link_->ack_received(sample);
-
-  } else
+  } else {
     this->link_->data_received(sample);
+  }
 }
 
 int

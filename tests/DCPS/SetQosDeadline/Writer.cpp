@@ -76,7 +76,10 @@ Writer::svc ()
     {
       ++message.count;
 
-      ::DDS::ReturnCode_t const ret = message_dw->write (message, handle);
+      ::DDS::ReturnCode_t ret;
+      do {
+        ret = message_dw->write(message, handle);
+      } while (ret == ::DDS::RETCODE_TIMEOUT);
 
       if (ret != ::DDS::RETCODE_OK)
       {

@@ -75,6 +75,7 @@ DataReaderImpl::DataReaderImpl()
     domain_id_(0),
     subscriber_servant_(0),
     end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    remove_association_sweeper_(new RemoveAssociationSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
@@ -147,11 +148,15 @@ DataReaderImpl::~DataReaderImpl()
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
       end_historic_sweeper_->cancel_timer(writer->second);
+      remove_association_sweeper_->cancel_timer(writer->second);
     }
   }
 
   end_historic_sweeper_->wait();
   end_historic_sweeper_->destroy();
+
+  remove_association_sweeper_->wait();
+  remove_association_sweeper_->destroy();
 
   liveliness_timer_->cancel_timer();
   liveliness_timer_->wait();
@@ -219,10 +224,12 @@ DataReaderImpl::cleanup()
     WriterMapType::iterator writer;
     for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
       end_historic_sweeper_->cancel_timer(writer->second);
+      remove_association_sweeper_->cancel_timer(writer->second);
     }
   }
 
   end_historic_sweeper_->wait();
+  remove_association_sweeper_->wait();
 }
 
 void DataReaderImpl::init(
@@ -428,28 +435,6 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
-    // Check if any publications have already sent a REQUEST_ACK message.
-    {
-      //locking order should be sample_lock_ before writers_lock_
-      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
-
-      WriterMapType::iterator where = writers_.find(remote_id);
-      if (where != writers_.end()) {
-
-        const ACE_Time_Value now = ACE_OS::gettimeofday();
-        if (where->second->should_ack(now)) {
-
-          const SequenceNumber sequence = where->second->ack_sequence();
-          const DDS::Time_t timenow = time_value_to_time(now);
-          if (send_sample_ack(remote_id, sequence, timenow)) {
-
-            where->second->clear_acks(sequence);
-          }
-        }
-      }
-    }
-
     // LIVELINESS policy timers are managed here.
     if (liveliness_lease_duration_ != ACE_Time_Value::zero) {
       if (DCPS_debug_level >= 5) {
@@ -571,10 +556,76 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         OPENDDS_STRING(writer_converter).c_str(),
         writers.length()));
   }
-  // stop pending associations
-  this->stop_associating();
+  if (!this->entity_deleted_.value()) {
+    // stop pending associations for these writer ids
+    this->stop_associating(writers.get_buffer(), writers.length());
 
+    // writers which are considered non-active and can
+    // be removed immediately
+    WriterIdSeq non_active_writers;
+    {
+      CORBA::ULong wr_len = writers.length();
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
+      for (CORBA::ULong i = 0; i < wr_len; i++) {
+        PublicationId writer_id = writers[i];
+
+        WriterMapType::iterator it = this->writers_.find(writer_id);
+        if (it != this->writers_.end() &&
+            it->second->active(TheServiceParticipant->pending_timeout())) {
+          remove_association_sweeper_->schedule_timer(it->second, notify_lost);
+        } else {
+          push_back(non_active_writers, writer_id);
+        }
+      }
+    }
+    remove_associations_i(non_active_writers, notify_lost);
+  } else {
+    remove_associations_i(writers, notify_lost);
+  }
+}
+
+void
+DataReaderImpl::remove_or_reschedule(const PublicationId& pub_id)
+{
+  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+  WriterMapType::iterator where = writers_.find(pub_id);
+  if (writers_.end() != where) {
+    WriterInfo& info = *where->second;
+    WriterIdSeq writers;
+    push_back(writers, pub_id);
+    bool notify = info.notify_lost_;
+    if (info.removal_deadline_ < ACE_OS::gettimeofday()) {
+      write_guard.release();
+      remove_associations_i(writers, notify);
+    } else {
+      write_guard.release();
+      remove_associations(writers, notify);
+    }
+  }
+}
+
+void
+DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
+    bool notify_lost)
+{
+  DBG_ENTRY_LVL("DataReaderImpl", "remove_associations_i", 6);
+
+  if (writers.length() == 0) {
+    return;
+  }
+
+  if (DCPS_debug_level >= 1) {
+    GuidConverter reader_converter(subscription_id_);
+    GuidConverter writer_converter(writers[0]);
+    ACE_DEBUG((LM_DEBUG,
+        ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
+        ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+        is_bit_,
+        OPENDDS_STRING(reader_converter).c_str(),
+        OPENDDS_STRING(writer_converter).c_str(),
+        writers.length()));
+  }
   DDS::InstanceHandleSeq handles;
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
@@ -603,13 +654,14 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
       if (it != this->writers_.end()) {
         it->second->removed();
         end_historic_sweeper_->cancel_timer(it->second);
+        remove_association_sweeper_->cancel_timer(it->second);
       }
 
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 1) {
           GuidConverter converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
+              ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
               ACE_TEXT("the writer local %C was already removed.\n"),
               OPENDDS_STRING(converter).c_str()));
         }
@@ -633,7 +685,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     if (this->lookup_instance_handles(updated_writers, handles) == false) {
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
+            ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
             ACE_TEXT("lookup_instance_handles failed.\n")));
       }
     }
@@ -700,6 +752,8 @@ void
 DataReaderImpl::remove_all_associations()
 {
   DBG_ENTRY_LVL("DataReaderImpl","remove_all_associations",6);
+  // stop pending associations
+  this->stop_associating();
 
   OpenDDS::DCPS::WriterIdSeq writers;
   int size;
@@ -1489,19 +1543,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif
           writer = where->second;
         }
-
-        ACE_Time_Value now = ACE_OS::gettimeofday();
-        if (where->second->should_ack(now)) {
-          DDS::Time_t timenow = time_value_to_time(now);
-          bool result = this->send_sample_ack(
-              header.publication_id_,
-              header.sequence_,
-              timenow);
-
-          if (result) {
-            where->second->clear_acks(header.sequence_);
-          }
-        }
       } else {
         GuidConverter subscriptionBuffer(this->subscription_id_);
         GuidConverter publicationBuffer(header.publication_id_);
@@ -1537,67 +1578,6 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     if (accepted) {
       this->notify_read_conditions();
     }
-  }
-  break;
-
-  case REQUEST_ACK: {
-    this->writer_activity(sample.header_);
-
-    DDS::Duration_t delay;
-    Serializer serializer(
-        sample.sample_,
-        sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
-    SequenceNumber ack;
-    serializer >> ack;
-    serializer >> delay;
-
-    if (DCPS_debug_level > 9) {
-      GuidConverter debugConverter(sample.header_.publication_id_);
-      ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) DataReaderImpl::data_received() - ")
-          ACE_TEXT("publication %C received REQUEST_ACK for sequence %q ")
-          ACE_TEXT("valid for the next %d seconds.\n"),
-          OPENDDS_STRING(debugConverter).c_str(),
-          ack.getValue(),
-          delay.sec));
-    }
-
-    {
-      ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
-
-      WriterMapType::iterator where
-      = this->writers_.find(sample.header_.publication_id_);
-
-      if (where != this->writers_.end()) {
-        ACE_Time_Value now = ACE_OS::gettimeofday();
-        ACE_Time_Value deadline = duration_to_absolute_time_value(delay, now);
-
-        where->second->ack_deadline(ack, deadline);
-
-        if (where->second->should_ack(now)) {
-          DDS::Time_t timenow = time_value_to_time(now);
-          bool result = this->send_sample_ack(
-              sample.header_.publication_id_,
-              ack,
-              timenow);
-
-          if (result) {
-            where->second->clear_acks(ack);
-          }
-        }
-
-      } else {
-        GuidConverter subscriptionBuffer(this->subscription_id_);
-        GuidConverter publicationBuffer(sample.header_.publication_id_);
-        ACE_DEBUG((LM_WARNING,
-            ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
-            ACE_TEXT("subscription %C failed to find ")
-            ACE_TEXT("publication data for %C.\n"),
-            OPENDDS_STRING(subscriptionBuffer).c_str(),
-            OPENDDS_STRING(publicationBuffer).c_str()));
-      }
-    }
-
   }
   break;
 
@@ -1811,62 +1791,6 @@ DataReaderImpl::check_transport_qos(const TransportInst& ti)
     return ti.is_reliable();
   }
   return true;
-}
-
-bool
-DataReaderImpl::send_sample_ack(
-    const RepoId& publication,
-    SequenceNumber sequence,
-    DDS::Time_t when)
-{
-  size_t dataSize = 0, padding = 0;
-  gen_find_size(sequence, dataSize, padding);
-  gen_find_size(publication, dataSize, padding);
-
-  ACE_Message_Block* data;
-  ACE_NEW_RETURN(data, ACE_Message_Block(dataSize), false);
-
-  bool doSwap    = this->swap_bytes();
-  bool byteOrder = doSwap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER;
-
-  Serializer serializer(data, doSwap);
-  serializer << publication;
-  serializer << sequence;
-
-  DataSampleHeader outbound_header;
-  outbound_header.message_id_               = SAMPLE_ACK;
-  outbound_header.byte_order_               = byteOrder,
-      outbound_header.coherent_change_          = 0;
-  outbound_header.message_length_           = static_cast<ACE_UINT32>(data->total_length());
-  outbound_header.sequence_                 = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
-  outbound_header.source_timestamp_sec_     = when.sec;
-  outbound_header.source_timestamp_nanosec_ = when.nanosec;
-  outbound_header.publication_id_           = this->subscription_id_;
-
-  ACE_Message_Block* sample_ack;
-  ACE_NEW_RETURN(
-      sample_ack,
-      ACE_Message_Block(
-          outbound_header.max_marshaled_size(),
-          ACE_Message_Block::MB_DATA,
-          data // cont
-      ), false);
-  *sample_ack << outbound_header;
-
-  if (DCPS_debug_level > 0) {
-    GuidConverter subscriptionBuffer(this->subscription_id_);
-    GuidConverter publicationBuffer(publication);
-    ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl[%@]::send_sample_ack() - ")
-        ACE_TEXT("%C sending SAMPLE_ACK message with sequence %q ")
-        ACE_TEXT("to publication %C.\n"),
-        this,
-        OPENDDS_STRING(subscriptionBuffer).c_str(),
-        sequence.getValue(),
-        OPENDDS_STRING(publicationBuffer).c_str()));
-  }
-
-  return this->send_response(publication, outbound_header, sample_ack);
 }
 
 void DataReaderImpl::notify_read_conditions()
@@ -3406,7 +3330,7 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
 {
   TransportClient::add_link(link, peer);
   TransportImpl_rch impl = link->impl();
-  std::string type = impl->transport_type();
+  OPENDDS_STRING type = impl->transport_type();
 
   if (type == "rtps_udp" || type == "multicast") {
     resume_sample_processing(peer);
@@ -3482,6 +3406,81 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
     info_->_remove_ref();
   }
 }
+//Starting RemoveAssociationSweeper
+RemoveAssociationSweeper::RemoveAssociationSweeper(ACE_Reactor* reactor,
+                                                   ACE_thread_t owner,
+                                                   DataReaderImpl* reader)
+  : ReactorInterceptor (reactor, owner)
+  , reader_(reader)
+{ }
+
+RemoveAssociationSweeper::~RemoveAssociationSweeper()
+{ }
+
+void RemoveAssociationSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback)
+{
+  info->scheduled_for_removal_ = true;
+  info->notify_lost_ = callback;
+  ACE_Time_Value ten_seconds(10);
+  info->removal_deadline_ = ACE_OS::gettimeofday() + ten_seconds;
+  ScheduleCommand c(this, info);
+  execute_or_enqueue(c);
+}
+
+void RemoveAssociationSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+{
+  info->scheduled_for_removal_ = false;
+  info->removal_deadline_ = ACE_Time_Value::zero;
+  CancelCommand c(this, info);
+  execute_or_enqueue(c);
+}
+
+int RemoveAssociationSweeper::handle_timeout(
+    const ACE_Time_Value& ,
+    const void* arg)
+{
+  PublicationId pub_id = reinterpret_cast<const WriterInfo*>(arg)->writer_id_;
+
+  if (DCPS_debug_level >= 1) {
+    GuidConverter sub_repo(reader_->get_repo_id());
+    GuidConverter pub_repo(pub_id);
+    ACE_DEBUG((LM_INFO, "((%P|%t)) RemoveAssociationSweeper::handle_timeout reader: %C waiting on writer: %C\n",
+               OPENDDS_STRING(sub_repo).c_str(),
+               OPENDDS_STRING(pub_repo).c_str()));
+  }
+
+  reader_->remove_or_reschedule(pub_id);
+  return 0;
+}
+
+void RemoveAssociationSweeper::ScheduleCommand::execute()
+{
+  static const ACE_Time_Value two_seconds(2);
+
+  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
+  const void* arg = reinterpret_cast<const void*>(info_.in());
+  info_->_add_ref();
+
+  info_->remove_association_timer_ = sweeper_->reactor()->schedule_timer(sweeper_,
+                                                                       arg,
+                                                                       two_seconds);
+  if (DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", info_->remove_association_timer_));
+  }
+}
+
+void RemoveAssociationSweeper::CancelCommand::execute()
+{
+  if (info_->remove_association_timer_ != WriterInfo::NO_TIMER) {
+    sweeper_->reactor()->cancel_timer(info_->remove_association_timer_);
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->remove_association_timer_));
+    }
+    info_->remove_association_timer_ = WriterInfo::NO_TIMER;
+    info_->_remove_ref();
+  }
+}
+//End RemoveAssociationSweeper
 
 } // namespace DCPS
 } // namespace OpenDDS

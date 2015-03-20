@@ -303,7 +303,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
       pend.impls_.push_back(impls_[i]);
-      const std::string type = impls_[i]->transport_type();
+      const OPENDDS_STRING type = impls_[i]->transport_type();
 
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
         if (data.remote_data_[j].transport_type.in() == type) {
@@ -408,7 +408,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
     const TransportImpl_rch& impl = impls_.back();
-    const std::string type = impl->transport_type();
+    const OPENDDS_STRING type = impl->transport_type();
 
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {
@@ -579,23 +579,28 @@ TransportClient::on_notification_of_connection_deletion(const RepoId& peerId)
 }
 
 void
-TransportClient::stop_associating(const ReaderIdSeq* readers)
+TransportClient::stop_associating()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  if (readers == 0) {
-    PendingMap::iterator iter = pending_.begin();
+  PendingMap::iterator iter = pending_.begin();
 
-    while (iter != pending_.end()) {
-      iter->second->removed_ = true;
-      ++iter;
-    }
+  while (iter != pending_.end()) {
+    iter->second->removed_ = true;
+    ++iter;
+  }
+}
+
+void
+TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+
+  if (repos == 0 || length == 0) {
+    return;
   } else {
-    const ReaderIdSeq& rdrs = *readers;
-    CORBA::ULong len = rdrs.length();
-
-    for (CORBA::ULong i = 0; i < len; ++i) {
-      PendingMap::iterator iter = pending_.find(rdrs[i]);
+    for (CORBA::ULong i = 0; i < length; ++i) {
+      PendingMap::iterator iter = pending_.find(repos[i]);
 
       if (iter != pending_.end()) {
         iter->second->removed_ = true;
@@ -906,18 +911,11 @@ TransportClient::get_receive_listener()
 
 SendControlStatus
 TransportClient::send_control(const DataSampleHeader& header,
-                              ACE_Message_Block* msg,
-                              void* extra /* = 0 */)
+                              ACE_Message_Block* msg)
 {
   TransportSendListener* listener = get_send_listener();
 
-  if (extra) {
-    DataLinkSet_rch pub_links(&links_, false);
-    return listener->send_control_customized(pub_links, header, msg, extra);
-
-  } else {
-    return links_.send_control(repo_id_, listener, header, msg);
-  }
+  return links_.send_control(repo_id_, listener, header, msg);
 }
 
 SendControlStatus

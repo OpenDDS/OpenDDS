@@ -16,7 +16,7 @@
 #include "GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include <map>
-#include <string>
+#include "PoolAllocator.h"
 #include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -43,7 +43,7 @@ public:
     ReaderVec readers_;
   };
 
-  typedef std::map<std::string, InstanceMap> TypeInstanceMap;
+  typedef std::map<OPENDDS_STRING, InstanceMap> TypeInstanceMap;
 
   struct WriterInfo {
     WriterInfo (const PublicationId& pub_id,

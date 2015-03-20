@@ -17,6 +17,7 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/MessageTracker.h"
 #include "dds/DCPS/DataBlockLockPool.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "WriteDataContainer.h"
 #include "Definitions.h"
 #include "DataSampleHeader.h"
@@ -93,7 +94,6 @@ public:
     ACE_Time_Value tstamp_;
     DDS::Duration_t max_wait_;
     SequenceNumber sequence_;
-    RepoIdToSequenceMap custom_;
 
     AckToken(const DDS::Duration_t& max_wait,
              const SequenceNumber& sequence)
@@ -110,10 +110,6 @@ public:
     DDS::Time_t timestamp() const {
       return time_value_to_time(this->tstamp_);
     }
-
-    SequenceNumber expected(const RepoId& subscriber) const;
-
-    bool marshal(ACE_Message_Block*& mblock, bool swap_bytes, DataBlockLockPool::DataBlockLock* lock) const;
   };
 
   ///Constructor
@@ -318,25 +314,11 @@ public:
    */
   void control_delivered(ACE_Message_Block* sample);
 
-  SendControlStatus send_control_customized(const DataLinkSet_rch& links,
-                                            const DataSampleHeader& header,
-                                            ACE_Message_Block* msg,
-                                            void* extra);
-
   /// Does this writer have samples to be acknowledged?
   bool should_ack() const;
 
   /// Create an AckToken for ack operations.
   AckToken create_ack_token(DDS::Duration_t max_wait) const;
-
-  /// Send SAMPLE_ACK messages to associated readers.
-  DDS::ReturnCode_t send_ack_requests(AckToken& token);
-
-  /// Wait for SAMPLE_ACK responses from associated readers.
-  DDS::ReturnCode_t wait_for_ack_responses(const AckToken& token);
-
-  /// Deliver a requested SAMPLE_ACK message to this writer.
-  virtual void deliver_ack(const DataSampleHeader& header, DataSample* data);
 
   virtual void retrieve_inline_qos_data(TransportSendListener::InlineQosData& qos_data) const;
 
@@ -487,6 +469,8 @@ public:
 
 protected:
 
+  DDS::ReturnCode_t wait_for_specific_ack(const AckToken& token);
+
   void prepare_to_delete();
 
   // type specific DataWriter's part of enable.
@@ -521,7 +505,7 @@ protected:
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     DomainParticipantImpl* participant_;
     DDS::StringSeq expression_params_;
-    std::string filter_;
+    OPENDDS_STRING filter_;
     RcHandle<FilterEvaluator> eval_;
 #endif
     SequenceNumber expected_sequence_;
@@ -541,8 +525,8 @@ protected:
   };
 
   virtual SendControlStatus send_control(const DataSampleHeader& header,
-                                         ACE_Message_Block* msg,
-                                         void* extra = 0);
+                                         ACE_Message_Block* msg/*,
+                                         void* extra = 0*/);
 
   /**
    * Answer if transport of all control messages is pending.
@@ -688,14 +672,6 @@ private:
 
   /// Flag indicates that the init() is called.
   bool                       initialized_;
-
-  /// Lock used for wait_for_acks() processing.
-  ACE_SYNCH_MUTEX wfaLock_;
-
-  /// Used to block in wait_for_acks().
-  ACE_Condition<ACE_SYNCH_MUTEX> wfaCondition_;
-
-  RepoIdToSequenceMap idToSequence_;
 
   IdSet                      pending_readers_, assoc_complete_readers_;
 

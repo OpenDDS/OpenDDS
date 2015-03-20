@@ -658,7 +658,8 @@ PublisherImpl::wait_for_acknowledgments(
     for (DataWriterMap::iterator it(this->datawriter_map_.begin());
         it != this->datawriter_map_.end(); ++it) {
       DataWriterImpl* writer = it->second;
-
+      if (writer->qos_.reliability.kind != DDS::RELIABLE_RELIABILITY_QOS)
+        continue;
       if (writer->should_ack()) {
         DataWriterImpl::AckToken token = writer->create_ack_token(max_wait);
 
@@ -685,25 +686,12 @@ PublisherImpl::wait_for_acknowledgments(
     return DDS::RETCODE_OK;
   }
 
-  // Send ack requests to all associated readers
-  for (DataWriterAckMap::iterator it(ack_writers.begin());
-      it != ack_writers.end(); ++it) {
-    it->first->send_ack_requests(it->second);
-  }
-
   // Wait for ack responses from all associated readers
   for (DataWriterAckMap::iterator it(ack_writers.begin());
       it != ack_writers.end(); ++it) {
     DataWriterImpl::AckToken token = it->second;
 
-    if (token.deadline() <= ACE_OS::gettimeofday()) {
-      ACE_ERROR_RETURN((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")
-          ACE_TEXT("Timed out waiting for acknowledgments!\n")),
-          DDS::RETCODE_TIMEOUT);
-    }
-
-    it->first->wait_for_ack_responses(token);
+    it->first->wait_for_specific_ack(token);
   }
 
   return DDS::RETCODE_OK;
@@ -917,11 +905,11 @@ PublisherImpl::validate_datawriter_qos(const DDS::DataWriterQos& qos,
     dw_qos = qos;
   }
 
-  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
-  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE_COMPATIBILITY_CHECK(dw_qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_STRENGTH_COMPATIBILITY_CHECK(dw_qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(dw_qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_DURABILITY_SERVICE_COMPATIBILITY_CHECK(dw_qos, DDS::DataWriter::_nil());
+  OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(dw_qos, DDS::DataWriter::_nil());
 
   if (!Qos_Helper::valid(dw_qos)) {
     ACE_ERROR((LM_ERROR,

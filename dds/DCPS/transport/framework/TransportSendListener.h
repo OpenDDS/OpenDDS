@@ -13,7 +13,7 @@
 #include "dds/DCPS/RcHandle_T.h"
 #include "TransportDefs.h"
 
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -59,16 +59,10 @@ public:
     ACE_Message_Block* msg,
     void* extra);
 
-  /// Handle reception of SAMPLE_ACK message.
-  virtual void deliver_ack(
-    const DataSampleHeader& /* header */,
-    DataSample* /* data */)
-  {}
-
   struct InlineQosData {
     DDS::PublisherQos  pub_qos;
     DDS::DataWriterQos dw_qos;
-    std::string        topic_name;
+    OPENDDS_STRING     topic_name;
   };
 
   virtual void retrieve_inline_qos_data(InlineQosData& qos_data) const;

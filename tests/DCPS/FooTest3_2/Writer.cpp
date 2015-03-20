@@ -131,9 +131,10 @@ Writer::svc ()
         // check for equality
         TEST_CHECK (foo.a_long_value == key_holder.a_long_value); // It is the instance key.
       }
-
-      ret = foo_dw->write(foo,
-                          handle);
+      do {
+        ret = foo_dw->write(foo,
+                            handle);
+      } while (ret == ::DDS::RETCODE_TIMEOUT);
 
       TEST_CHECK ((ret == ::DDS::RETCODE_OK) || (ret == ::DDS::RETCODE_TIMEOUT));
 

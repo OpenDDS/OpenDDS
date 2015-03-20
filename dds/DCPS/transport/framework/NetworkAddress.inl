@@ -32,7 +32,7 @@ OpenDDS::DCPS::NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr,
 }
 
 ACE_INLINE
-OpenDDS::DCPS::NetworkAddress::NetworkAddress(const std::string& addr)
+OpenDDS::DCPS::NetworkAddress::NetworkAddress(const OPENDDS_STRING& addr)
   : reserved_(0)
 {
   DBG_ENTRY_LVL("NetworkAddress","NetworkAddress",6);

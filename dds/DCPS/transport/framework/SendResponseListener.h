@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "TransportSendListener.h"
 #include "dds/DCPS/MessageTracker.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -23,12 +24,12 @@ namespace DCPS {
  *
  * This is a simple listener implementation used to release response
  * samples once they have been either delivered or dropped.  No
- * special actions are taken to distiguish between the two results.
+ * special actions are taken to distinguish between the two results.
  */
 class OpenDDS_Dcps_Export SendResponseListener
   : public TransportSendListener {
 public:
-  SendResponseListener(const std::string& msg_src);
+  SendResponseListener(const OPENDDS_STRING& msg_src);
   virtual ~SendResponseListener();
 
   virtual void data_delivered(const DataSampleElement* sample);

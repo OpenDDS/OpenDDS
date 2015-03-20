@@ -73,7 +73,8 @@ protected:
 
   bool associate(const AssociationData& peer, bool active);
   void disassociate(const RepoId& peerId);
-  void stop_associating(const ReaderIdSeq* readers = 0);
+  void stop_associating();
+  void stop_associating(const GUID_t* repos, CORBA::ULong length);
 
   // Data transfer:
 
@@ -89,8 +90,7 @@ protected:
                                    const RepoId& destination);
 
   SendControlStatus send_control(const DataSampleHeader& header,
-                                 ACE_Message_Block* msg,
-                                 void* extra = 0);
+                                 ACE_Message_Block* msg);
 
   SendControlStatus send_control_to(const DataSampleHeader& header,
                                     ACE_Message_Block* msg,

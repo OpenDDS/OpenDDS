@@ -11,8 +11,12 @@
 
 using namespace examples::boilerplate;
 
-DataReaderListenerImpl::DataReaderListenerImpl() :
-  sample_count_(0), expected_count_(0), expected_seq_(0)
+DataReaderListenerImpl::DataReaderListenerImpl()
+  : sample_count_(0)
+  , expected_count_(0)
+  , expected_seq_(0)
+  , sleep_length_(0)
+  , num_sleeps_(0)
 {
 }
 
@@ -57,13 +61,15 @@ void DataReaderListenerImpl::on_sample(Reliability::Message& msg)
   if (expected_seq_ != msg.count) {
     std::cout << "Expected: " << expected_seq_
               << " Received: " << msg.count << std::endl;
+  } else {
+    std::cout << "Received sample: " << msg.count << std::endl;
+    // Next message
+    expected_seq_ = msg.count + 1;
   }
   ++sample_count_;
-  if (((sample_count_ + 1) % 1000) == 0) {
+  if (num_sleeps_ && (((sample_count_ + 1) % (expected_count_/num_sleeps_)) == 0)) {
     std::cout << "Got sample " << sample_count_ + 1 << " sleeping" << std::endl;
-    ACE_OS::sleep(2);
+    ACE_OS::sleep(sleep_length_);
   }
 
-  // Next message
-  expected_seq_ = msg.count + 1;
 }

@@ -867,49 +867,6 @@ DataLink::data_received_i(ReceivedDataSample& sample,
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 }
 
-void
-DataLink::ack_received(ReceivedDataSample& sample)
-{
-  RepoId publication = GUID_UNKNOWN;
-  Serializer serializer(
-    sample.sample_,
-    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER);
-  serializer >> publication;
-
-  TransportSendListener* listener;
-  {
-    GuardType guard(this->pub_sub_maps_lock_);
-    IdToSendListenerMap::const_iterator where
-      = this->send_listeners_.find(publication);
-
-    if (where == this->send_listeners_.end()) {
-      GuidConverter converter(publication);
-
-      // Ack could be for a different publisher.
-      if (this->pub_map_.find(publication) == 0) {
-        if (DCPS_debug_level > 0) {
-          ACE_ERROR((LM_WARNING,
-                     ACE_TEXT("(%P|%t) DataLink::ack_received: ")
-                     ACE_TEXT("publication %C not found.\n"),
-                     OPENDDS_STRING(converter).c_str()));
-        }
-
-      } else {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) DataLink::ack_received: ")
-                   ACE_TEXT("listener for publication %C not found.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-
-      return;
-    }
-
-    listener = where->second;
-  }
-
-  listener->deliver_ack(sample.header_, sample.sample_);
-}
-
 /// No locking needed because the only caller release_reservations()
 /// obtains pub_sub_maps_lock prior to calling
 void

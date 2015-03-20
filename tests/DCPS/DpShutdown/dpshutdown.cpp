@@ -11,7 +11,6 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Qos_Helper.h>
-#include <dds/DCPS/transport/tcp/TcpInst.h>
 #include <dds/DCPS/transport/framework/TransportType_rch.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>

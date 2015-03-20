@@ -4,7 +4,6 @@
 #include "SampleTypeTypeSupportC.h"
 #include "SampleTypeTypeSupportImpl.h"
 #include "SampleTypeC.h"
-#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/Marked_Default_Qos.h"

@@ -120,8 +120,10 @@ tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN
 tests/DCPS/ViewState/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/NotifyTest/run_test.pl: !DCPS_MIN
-tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !RTPS_NO_WFA
-tests/DCPS/Reliability/run_test.pl keep-last-one: !DCPS_MIN !RTPS_NO_WFA
+tests/DCPS/Reliability/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Reliability/run_test.pl: rtps !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Reliability/run_test.pl keep-last-one: !DCPS_MIN
+tests/DCPS/Reliability/run_test.pl rtps keep-last-one: !DCPS_MIN
 
 tests/DCPS/WriteDataContainer/run_test.pl: !DCPS_MIN
 
@@ -232,13 +234,15 @@ tests/DCPS/Priority/run_test.pl: !DCPS_MIN !QNX !OPENDDS_SAFETY_PROFILE !DDS_NO_
 tests/DCPS/Priority/run_test.pl --instances: !DCPS_MIN !QNX !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/LatencyBudget/run_test.pl: !DCPS_MIN
 tests/DCPS/LatencyBudget/run_test.pl late: !DCPS_MIN
-tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !RTPS_NO_WFA
-tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !RTPS_NO_WFA
-tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN !RTPS_NO_WFA
-tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !RTPS_NO_WFA
-tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !RTPS_NO_WFA
-tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN !RTPS_NO_WFA
-tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN !RTPS_NO_WFA
+tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/WaitForAck/run_test.pl: rtps !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/WaitForAck/run_test.pl rtps --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
 tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !OPENDDS_SAFETY_PROFILE

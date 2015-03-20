@@ -306,9 +306,9 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           do {
             i = value.find_first_not_of(' ', i); // skip spaces
             const size_t n = value.find_first_of(", ", i);
-            spdp_send_addrs.push_back(value.substr(i, (n == std::string::npos) ? n : n - i));
+            spdp_send_addrs.push_back(value.substr(i, (n == OPENDDS_STRING::npos) ? n : n - i));
             i = value.find(',', i);
-          } while (i++ != std::string::npos); // skip past comma if there is one
+          } while (i++ != OPENDDS_STRING::npos); // skip past comma if there is one
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -468,10 +468,10 @@ RtpsDiscovery::assert_topic(OpenDDS::DCPS::RepoId_out topicId,
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   std::map<DDS::DomainId_t,
-           std::map<std::string, Sedp::TopicDetails> >::iterator topic_it =
+           std::map<OPENDDS_STRING, Sedp::TopicDetails> >::iterator topic_it =
     topics_.find(domainId);
   if (topic_it != topics_.end()) {
-    const std::map<std::string, Sedp::TopicDetails>::iterator it =
+    const std::map<OPENDDS_STRING, Sedp::TopicDetails>::iterator it =
       topic_it->second.find(topicName);
     if (it != topic_it->second.end()
         && it->second.data_type_ != dataTypeName) {
@@ -502,12 +502,12 @@ RtpsDiscovery::find_topic(DDS::DomainId_t domainId, const char* topicName,
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   std::map<DDS::DomainId_t,
-           std::map<std::string, Sedp::TopicDetails> >::iterator topic_it =
+           std::map<OPENDDS_STRING, Sedp::TopicDetails> >::iterator topic_it =
     topics_.find(domainId);
   if (topic_it == topics_.end()) {
     return DCPS::NOT_FOUND;
   }
-  std::map<std::string, Sedp::TopicDetails>::iterator iter =
+  std::map<OPENDDS_STRING, Sedp::TopicDetails>::iterator iter =
     topic_it->second.find(topicName);
   if (iter == topic_it->second.end()) {
     return DCPS::NOT_FOUND;
@@ -527,13 +527,13 @@ RtpsDiscovery::remove_topic(DDS::DomainId_t domainId,
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
   std::map<DDS::DomainId_t,
-           std::map<std::string, Sedp::TopicDetails> >::iterator topic_it =
+           std::map<OPENDDS_STRING, Sedp::TopicDetails> >::iterator topic_it =
     topics_.find(domainId);
   if (topic_it == topics_.end()) {
     return DCPS::NOT_FOUND;
   }
 
-  std::string name;
+  OPENDDS_STRING name;
   // Safe to hold lock while calling remove topic
   const DCPS::TopicStatus stat =
     participants_[domainId][participantId]->remove_topic(topicId, name);
@@ -566,7 +566,7 @@ RtpsDiscovery::update_topic_qos(const OpenDDS::DCPS::RepoId& topicId, DDS::Domai
                                 const OpenDDS::DCPS::RepoId& participantId, const DDS::TopicQos& qos)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  std::string name;
+  OPENDDS_STRING name;
   // Safe to hold lock while calling update_topic_qos
   if (participants_[domainId][participantId]->update_topic_qos(topicId,
                                                                qos, name)) {

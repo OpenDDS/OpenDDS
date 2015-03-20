@@ -35,7 +35,7 @@
 #include "ace/Thread_Mutex.h"
 #include <map>
 #include <set>
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -102,11 +102,11 @@ public:
                                  const DDS::TopicQos& qos,
                                  bool hasDcpsKey);
   DCPS::TopicStatus remove_topic(const DCPS::RepoId& topicId,
-                                 std::string& name);
+                                 OPENDDS_STRING& name);
   bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
-                        std::string& name);
+                        OPENDDS_STRING& name);
   struct TopicDetails {
-    std::string data_type_;
+    OPENDDS_STRING data_type_;
     DDS::TopicQos qos_;
     DCPS::RepoId repo_id_;
   };
@@ -345,7 +345,7 @@ private:
     DCPS::DataReaderCallbacks* subscription_;
     DDS::DataReaderQos qos_;
     DDS::SubscriberQos subscriber_qos_;
-    std::string filter_;
+    OPENDDS_STRING filter_;
     DDS::StringSeq params_;
   };
   typedef std::map<DCPS::RepoId, LocalSubscription,
@@ -429,15 +429,15 @@ private:
   }
 
   RepoIdSet ignored_guids_;
-  std::set<std::string> ignored_topics_;
+  std::set<OPENDDS_STRING> ignored_topics_;
 
   // Topic:
   struct TopicDetailsEx : TopicDetails {
     bool has_dcps_key_;
     RepoIdSet endpoints_;
   };
-  std::map<std::string, TopicDetailsEx> topics_;
-  std::map<DCPS::RepoId, std::string, DCPS::GUID_tKeyLessThan> topic_names_;
+  std::map<OPENDDS_STRING, TopicDetailsEx> topics_;
+  std::map<DCPS::RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan> topic_names_;
   unsigned int topic_counter_;
 
   RepoIdSet defer_match_endpoints_, associated_participants_;
@@ -477,7 +477,7 @@ private:
   DCPS::SequenceNumber manual_liveliness_seq_;
 };
 
-/// A class to wait on acknowledgements from other threads
+/// A class to wait on acknowledgments from other threads
 class WaitForAcks {
 public:
   WaitForAcks();

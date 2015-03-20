@@ -12,7 +12,6 @@
 // ============================================================================
 
 
-#include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #include <map>

@@ -14,10 +14,72 @@
 #include <model/Sync.h>
 #include <stdexcept>
 #include <ctime>
+#include <ace/Arg_Shifter.h>
 
 #include "dds/DCPS/StaticIncludes.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
 
 using namespace examples::boilerplate;
+
+namespace
+{
+  bool take_next = true;
+  bool take = false;
+  bool zero_copy = false;
+  bool keep_last_one = false;
+  int sleep_time = 0;
+  int num_sleeps = 0;
+
+  void
+  parse_args(int& argc, ACE_TCHAR** argv)
+  {
+    ACE_Arg_Shifter shifter(argc, argv);
+
+    while (shifter.is_anything_left())
+    {
+      const ACE_TCHAR* arg;
+
+      if ((arg = shifter.get_the_parameter(ACE_TEXT("-num_sleeps"))))
+      {
+        num_sleeps = ACE_OS::atoi(arg);
+        shifter.consume_arg();
+      }
+      else if ((arg = shifter.get_the_parameter(ACE_TEXT("-sleep_secs"))))
+      {
+        sleep_time = ACE_OS::atoi(arg);
+        shifter.consume_arg();
+      }
+      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-take-next")) == 0)
+      {
+        take_next = true;
+        shifter.consume_arg();
+      }
+      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-take")) == 0)
+      {
+        take_next = false;
+        take = true;
+        shifter.consume_arg();
+      }
+      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-zero-copy")) == 0)
+      {
+        take_next = false;
+        zero_copy = true;
+        shifter.consume_arg();
+      }
+      else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-keep-last-one")) == 0)
+      {
+        keep_last_one = true;
+        shifter.consume_arg();
+      }
+      else
+      {
+        shifter.ignore_arg();
+      }
+    }
+  }
+} // namespace
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
@@ -28,31 +90,22 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
 
-    bool keep_last_one = false;
+    parse_args(argc, argv);
 
     // Create Listener
     DataReaderListenerImpl* listener_impl = NULL;
-    if (argc > 1) {
-      if (!ACE_OS::strcmp(ACE_TEXT("-take-next"), argv[1])) {
-        listener_impl = new TakeNextReaderListenerImpl;
-      } else if (!ACE_OS::strcmp(ACE_TEXT("-take"), argv[1])) {
-        listener_impl = new SeqReaderListenerImpl;
-      } else if (!ACE_OS::strcmp(ACE_TEXT("-zero-copy"), argv[1])) {
-        listener_impl = new ZeroCopyReaderListenerImpl;
-      } else if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[1])) {
-        keep_last_one = true;
-      }
-    }
-
-    if (!listener_impl) {
+    if (take_next) {
+      listener_impl = new TakeNextReaderListenerImpl;
+    } else if (take) {
+      listener_impl = new SeqReaderListenerImpl;
+    } else if (zero_copy) {
+      listener_impl = new ZeroCopyReaderListenerImpl;
+    } else {
       listener_impl = new TakeNextReaderListenerImpl;
     }
 
-    if (argc > 2) {
-      if (!ACE_OS::strcmp(ACE_TEXT("-keep-last-one"), argv[2])) {
-        keep_last_one = true;
-      }
-    }
+    listener_impl->set_num_sleeps(num_sleeps);
+    listener_impl->set_sleep_length(sleep_time);
 
     // Create domain participant
     DDS::DomainParticipant_var participant = createParticipant(dpf);

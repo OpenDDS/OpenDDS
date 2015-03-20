@@ -14,6 +14,7 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/ZeroCopySeq_T.h"
 #include "dds/DCPS/MultiTopicImpl.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -158,7 +159,7 @@ private:
 
 protected:
 
-  std::string topicNameFor(DDS::DataReader_ptr dr);
+  OPENDDS_STRING topicNameFor(DDS::DataReader_ptr dr);
   const MetaStruct& metaStructFor(DDS::DataReader_ptr dr);
 
   typedef MultiTopicImpl::SubjectFieldSpec SubjectFieldSpec;
@@ -166,14 +167,14 @@ protected:
   struct QueryPlan {
     DDS::DataReader_var data_reader_;
     std::vector<SubjectFieldSpec> projection_;
-    std::vector<std::string> keys_projected_out_;
-    std::multimap<std::string, std::string> adjacent_joins_; // topic -> key
+    std::vector<OPENDDS_STRING> keys_projected_out_;
+    std::multimap<OPENDDS_STRING, OPENDDS_STRING> adjacent_joins_; // topic -> key
     std::set<std::pair<DDS::InstanceHandle_t /*of this data_reader_*/,
       DDS::InstanceHandle_t /*of the resulting DR*/> > instances_;
   };
 
   // key: topicName for this reader
-  std::map<std::string, QueryPlan> query_plans_;
+  std::map<OPENDDS_STRING, QueryPlan> query_plans_;
 };
 
 }

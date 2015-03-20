@@ -438,7 +438,7 @@ OwnershipManager::broadcast_new_owner ( const ::DDS::InstanceHandle_t& instance_
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) OwnershipManager::broadcast_new_owner: ")
       ACE_TEXT("owner writer %C, instance handle %d strength %d num of candidates %d\n"),
-      std::string(writer_converter).c_str(),
+      OPENDDS_STRING(writer_converter).c_str(),
       instance_handle, infos.owner_.ownership_strength_, infos.candidates_.size()));
   }
 
