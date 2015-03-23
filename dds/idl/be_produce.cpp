@@ -201,10 +201,8 @@ void postprocess(const char* fn, ostringstream& content,
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
     if (which == BE_GlobalData::STREAM_LANG_H) {
       if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
-        out << "#include <tao/orbconf.h>\n";
-        if (!be_global->suppress_typecode()) {
-          out << "#include <tao/Basic_Types.h>\n";
-        }
+        out << "#include <tao/orbconf.h>\n"
+               "#include <tao/Basic_Types.h>\n";
       }
     } else {
       string taoheader = be_global->header_name_.c_str();
