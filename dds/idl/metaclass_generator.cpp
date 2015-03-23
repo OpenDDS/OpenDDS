@@ -329,7 +329,7 @@ namespace {
 }
 
 bool metaclass_generator::gen_struct(UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, const char*)
+  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;

@@ -110,6 +110,7 @@ module Xyz {
     ArrayOfAStruct f1;
   };
 
+#ifdef TEST_UNIONS
   union AUnion switch (AnEnum) {
     case redx:
       string rv;
@@ -236,6 +237,8 @@ module Xyz {
 
   typedef sequence<AUnion,3> SeqOfAUnion;
 
+#endif // TEST_UNIONS
+
   typedef sequence<AStruct,3> AStructSeq;
 
   typedef AStructSeq ArrayOfAStructSeq[3];
@@ -248,7 +251,10 @@ module Xyz {
   // not currently supported by the TAO IDL compiler; even without -Gdcps
   //typedef fixed<10,4> AFixed;
 
+#ifdef TEST_UNIONS
   typedef sequence<BigUnion> BigUnionSeq;
+#endif
+
   typedef octet OctetArray[3];
 
 #pragma DCPS_DATA_TYPE "Xyz::Foo"
@@ -264,10 +270,12 @@ module Xyz {
     AStruct thestruct;
     AStructSeq theStructSeq;
     ArrayOfAStruct structArray;
+#ifdef TEST_UNIONS
     AUnion theUnion;
     SeqOfAUnion theSeqOfUnion;
     BigUnion theBigUnion;
     BigUnionSeq theSeqOfBitUnion;
+#endif
     float x;
     float y;
     wchar theWChar;

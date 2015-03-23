@@ -1,4 +1,5 @@
 #include "tao/ShortSeq.pidl"
+#include "tao/StringSeq.pidl"
 
 const long tao_version = __TAO_IDL;
 
@@ -8,6 +9,21 @@ const long dds_version = __OPENDDS_IDL;
 
 module Xyz {
 
+  const octet c0 = 42;
+  const char c1 = 'a';
+  const wchar c2 = L'b';
+  const short c3 = -1000;
+  const unsigned short c4 = 1000;
+  const long c5 = -200000;
+  const unsigned long c6 = 200000;
+  const long long c7 = -8 * 1000 * 1000 * 1000;
+  const unsigned long long c8 = 8 * 1000 * 1000 * 1000;
+  const boolean c9 = TRUE;
+  const float c10 = 3.1416;
+  const double c11 = 2.17;
+// TAO_IDL_FE doesn't allow =>  const long double c12 = 1.0;
+  const string c13 = "Hello, \"world\".";
+  const wstring c14 = L"Hello, wide world.";
 
 //  typedef long TheKeyType;
 
@@ -24,6 +40,8 @@ module Xyz {
 
   // +4
   enum ColorX { redx, greenx, bluex };
+
+  const ColorX c15 = greenx;
 
   // +4+6
   typedef sequence<unsigned short,3> UShortSeq;
@@ -44,6 +62,8 @@ module Xyz {
     ArrayOfAStruct f1;
   };
 
+#ifdef TEST_UNIONS
+
   union AUnion switch (ColorX) {
     case redx:
       //long rlv;
@@ -61,13 +81,20 @@ module Xyz {
 
   typedef sequence<AUnion,3> AUnionSeq;
 
+#endif // TEST_UNIONS
+
   typedef sequence<char, 2> AcharSeq;
-  typedef sequence<string, 4> AStringSeq;
+  typedef sequence<string, 4> AStringSeq; // BoundedSeqOfUnboundedString
 
   typedef sequence<AcharSeq> AcharSeqSeq;
 
   typedef char MyChar;
   typedef sequence<MyChar, 5> AMyCharSeq;
+
+  typedef string<100> BoundedString;
+  typedef sequence<BoundedString> UnboundedSeqOfBoundedString;
+  typedef sequence<BoundedString, 10> BoundedSeqOfBoundedString;
+  typedef sequence<string> UnboundedSeqOfUnboundedString;
 
   // +4+(3*12)
   typedef sequence<AStruct,3> AStructSeqX;
@@ -104,7 +131,9 @@ module Xyz {
     ArrayOfAStruct structArray; //+36 > 119
     float x; //+4 > 123
     float y; //+4 = 127
+#ifdef TEST_UNIONS
     AUnion theUnion; //+4+4 =135
+#endif
   };
 
   // regression test for typedef'ed enum (metaclass_generator.cpp)
@@ -114,6 +143,7 @@ module Xyz {
     TypedefTestEnum tte;
   };
 
+#ifdef TEST_UNIONS
   // regression test for boolean-discriminated union (marshal_generator.cpp)
   union TestUnion switch (boolean) {
   case FALSE:
@@ -121,6 +151,7 @@ module Xyz {
   case TRUE:
     StructWithTypedefedEnum swte;
   };
+#endif
 };
 
 module N1 {

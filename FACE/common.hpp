@@ -1,19 +1,19 @@
 #ifndef FACE_COMMON_HPP_HEADER_FILE
 #define FACE_COMMON_HPP_HEADER_FILE
-#include "ace/Basic_Types.h"
+#include "types.hpp"
 
 namespace FACE {
 
 // This type is used to represent 64-bit signed integer with a
 // 1 nanosecond resolution.
-typedef ACE_INT64 SYSTEM_TIME_TYPE;
+typedef LongLong SYSTEM_TIME_TYPE;
 
 // This type is used to represent an infinitely long time value.
 // It is often used to specify that the caller is willing to wait
 // forever for an operation to complete and does not wish to timeout.
-static const ACE_INT64 INF_TIME_VALUE = -1;
+static const LongLong INF_TIME_VALUE = -1;
 
-typedef char CONFIGURATION_RESOURCE[256];
+typedef Char CONFIGURATION_RESOURCE[256];
 
 // FACE TS uses 'NO_ERROR' as the enumerator but this is pretty generic
 // and happens to be defined as a macro on some platforms.
@@ -62,7 +62,7 @@ typedef SYSTEM_TIME_TYPE TIMEOUT_TYPE;
 
 // This type is used to represent the message range, number of messages,
 // and message type in the I/O and Transport APIs.
-typedef ACE_INT32 MESSAGE_RANGE_TYPE;
+typedef Long MESSAGE_RANGE_TYPE;
 
 }
 

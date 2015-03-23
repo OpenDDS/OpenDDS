@@ -19,7 +19,7 @@ void callback(FACE::TRANSACTION_ID_TYPE,
               FACE::RETURN_CODE_TYPE& return_code)
 {
   std::cout << "In callback(): "
-            << msg.text.in() << '\t' << msg.count << std::endl;
+            << msg.text << '\t' << msg.count << std::endl;
   callbackHappened = true;
   return_code = FACE::RC_NO_ERROR;
 }
@@ -58,7 +58,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cout << "Subscriber: about to Receive_Message()" << std::endl;
     FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
-    std::cout << msg.text.in() << '\t' << msg.count << std::endl;
+    std::cout << msg.text << '\t' << msg.count << std::endl;
   }
 
   FACE::CONNECTION_NAME_TYPE name = {};

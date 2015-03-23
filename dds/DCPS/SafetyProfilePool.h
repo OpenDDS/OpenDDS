@@ -1,8 +1,9 @@
 #ifndef OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 #define OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 
-#ifdef OPENDDS_SAFETY_PROFILE
 #include "ace/Malloc_Base.h"
+
+#ifdef OPENDDS_SAFETY_PROFILE
 #include "ace/Atomic_Op.h"
 #include "ace/Singleton.h"
 
@@ -78,5 +79,15 @@ private:
 };
 
 }}
+
+#else // ! OPENDDS_SAFETY_PROFILE
+
+namespace OpenDDS {
+namespace DCPS {
+typedef ACE_Allocator SafetyProfilePool;
+}
+}
+
 #endif // OPENDDS_SAFETY_PROFILE
+
 #endif // OPENDDS_DCPS_SAFETY_PROFILE_POOL_H

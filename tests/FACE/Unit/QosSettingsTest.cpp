@@ -5,13 +5,9 @@
 #include <string.h>
 #include <iostream>
 
-unsigned int assertions = 0;
+#include "test_check.h"
 
-#define TEST_CHECK(COND) \
-  ++assertions; \
-  if (!( COND )) \
-      ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l %a\n",\
-        #COND , -1));
+unsigned int assertions = 0;
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
