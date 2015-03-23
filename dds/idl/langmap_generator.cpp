@@ -143,6 +143,9 @@ bool langmap_generator::gen_const(UTL_ScopedName* name, bool /*nestedInInterface
 namespace {
   void gen_typecode(UTL_ScopedName* name)
   {
+    if (be_global->suppress_typecode()) {
+      return;
+    }
     const char* const nm = name->last_component()->get_string();
     be_global->lang_header_ <<
       "extern " << exporter() << "const ::CORBA::TypeCode_ptr _tc_" << nm
@@ -555,9 +558,7 @@ bool langmap_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
         "typedef " << helpers_[out] << ' ' << nm << "_out;\n";
     }
 
-    if (!be_global->suppress_typecode()) {
-      gen_typecode(name);
-    }
+    gen_typecode(name);
   }
   if (arr) gen_array_traits(name, arr);
   return true;
