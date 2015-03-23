@@ -7,7 +7,9 @@ namespace FACE {
 
 namespace {
   static Char s_empty = 0;
+#ifdef ACE_HAS_WCHAR
   static WChar s_wempty = 0;
+#endif
 }
 
 Char* string_alloc(UnsignedLong len)
@@ -35,6 +37,7 @@ void string_free(Char* str)
   if (str != &s_empty) OpenDDS::DCPS::SafetyProfilePool::instance()->free(str);
 }
 
+#ifdef ACE_HAS_WCHAR
 WChar* wstring_alloc(UnsignedLong len)
 {
   if (len == 0) return &s_wempty;
@@ -59,7 +62,7 @@ void wstring_free(WChar* str)
 {
   if (str != &s_wempty) OpenDDS::DCPS::SafetyProfilePool::instance()->free(str);
 }
-
+#endif // ACE_HAS_WCHAR
 }
 
 namespace OpenDDS {
@@ -71,11 +74,13 @@ bool operator>>(DCPS::Serializer& ser, StringBase<FACE::Char>& str)
   return ser.good_bit();
 }
 
+#ifdef ACE_HAS_WCHAR
 bool operator>>(DCPS::Serializer& ser, StringBase<FACE::WChar>& str)
 {
   ser.read_string(str.out(), FACE::wstring_alloc, FACE::wstring_free);
   return ser.good_bit();
 }
+#endif
 
 }
 }

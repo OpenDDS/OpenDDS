@@ -30,6 +30,7 @@ struct StringTraits<FACE::Char>
   }
 };
 
+#ifdef ACE_HAS_WCHAR
 template <>
 struct StringTraits<FACE::WChar>
 {
@@ -43,6 +44,7 @@ struct StringTraits<FACE::WChar>
     return std::wcscmp(lhs, rhs);
   }
 };
+#endif
 
 template <typename CharT>
 class StringBase
@@ -320,8 +322,10 @@ inline bool operator!=(const CharT* lhs,
 OpenDDS_FACE_Export
 bool operator>>(DCPS::Serializer& ser, StringBase<FACE::Char>& str);
 
+#ifdef ACE_HAS_WCHAR
 OpenDDS_FACE_Export
 bool operator>>(DCPS::Serializer& ser, StringBase<FACE::WChar>& str);
+#endif
 
 }
 }

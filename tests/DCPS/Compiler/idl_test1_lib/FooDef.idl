@@ -23,7 +23,8 @@ module Xyz {
   const double c11 = 2.17;
 // TAO_IDL_FE doesn't allow =>  const long double c12 = 1.0;
   const string c13 = "Hello, \"world\".";
-  const wstring c14 = L"Hello, wide world.";
+// Generated code won't compile with !ACE_HAS_WCHAR =>
+//   const wstring c14 = L"Hello, wide world.";
 
 //  typedef long TheKeyType;
 
