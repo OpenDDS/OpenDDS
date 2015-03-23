@@ -341,7 +341,7 @@ dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
 {
   const char* name = node->local_name()->get_string();
   BE_Comment_Guard g("STRUCT-FWD", name);
-  
+
   if (!java_ts_only_) {
     error_ |= !gen_target_.gen_struct_fwd(node->name(), node->size_type());
   }

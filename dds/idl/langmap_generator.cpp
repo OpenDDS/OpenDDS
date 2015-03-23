@@ -424,7 +424,7 @@ namespace {
       "}\n\n"
       "void " << nm << "_fini_i(" << elem_type << "* begin)\n"
       "{\n";
-      
+
     if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
       be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
     } else if (elem_cls & CL_ARRAY) {
@@ -434,8 +434,9 @@ namespace {
         indent << elem_type << "_fini_i(begin" << nfl.index_ << ");\n";
     } else {
       const std::string::size_type idx_last = elem_type.rfind("::");
-      const std::string elem_last = (idx_last == std::string::npos) ? elem_type
-        : elem_type.substr(idx_last + 2);
+      const std::string elem_last = (elem_cls & CL_STRING) ? "StringManager"
+        : ((idx_last == std::string::npos) ? elem_type
+           : elem_type.substr(idx_last + 2));
       be_global->impl_ <<
         "  for (int i = 0; i < " << total.str() << "; ++i) {\n"
         "    begin[i]." << elem_type << "::~" << elem_last << "();\n"
@@ -531,7 +532,7 @@ bool langmap_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
-  
+
     switch (base->node_type()) {
     case AST_Decl::NT_sequence:
       gen_sequence(name, AST_Sequence::narrow_from_decl(base));

@@ -9,7 +9,7 @@
 namespace OpenDDS {
 namespace DCPS {
   class Serializer;
-}  
+}
 
 namespace FaceTypes {
 
@@ -94,7 +94,7 @@ template <typename CharT>
 class StringManager : public StringBase<CharT>
 {
   typedef StringBase<CharT> Base;
-  using typename Base::Traits;
+  typedef StringTraits<CharT> Traits;
   using Base::str_;
 
 public:
@@ -149,7 +149,7 @@ template <typename CharT>
 class String_var : public StringBase<CharT>
 {
   typedef StringBase<CharT> Base;
-  using typename Base::Traits;
+  typedef StringTraits<CharT> Traits;
   using Base::str_;
 
 public:

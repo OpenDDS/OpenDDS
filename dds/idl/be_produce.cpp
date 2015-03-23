@@ -195,7 +195,7 @@ void postprocess(const char* fn, ostringstream& content,
 
   switch (which) {
   case BE_GlobalData::STREAM_H:
-  case BE_GlobalData::STREAM_FACETS_H: 
+  case BE_GlobalData::STREAM_FACETS_H:
   case BE_GlobalData::STREAM_LANG_H: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';

@@ -525,6 +525,8 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
     std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
                   InsertRefIncludes(ret, "TypeSupportImpl.h"));
     break;
+  default:
+    break;
   }
 
   return ret.str();
