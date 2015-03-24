@@ -187,6 +187,21 @@ namespace {
       "typedef " << helpers_[var] << '<' << nm << "> " << nm << "_var;\n"
       "typedef " << helpers_[HLP_OUT] << '<' << nm << "> " << nm << "_out;\n";
   }
+
+  std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems) {
+    AST_Array* const arr = AST_Array::narrow_from_decl(type);
+    std::string ret;
+    for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
+      elems *= arr->dims()[dim]->ev()->u.ulval;
+      if (dim) ret += "[0]";
+    }
+    AST_Type* base = arr->base_type();
+    resolveActualType(base);
+    if (AST_Array::narrow_from_decl(base)) {
+      ret += "[0]" + array_dims(base, elems);
+    }
+    return ret;
+  }
 }
 
 bool langmap_generator::gen_struct_fwd(UTL_ScopedName* name,
@@ -260,13 +275,8 @@ bool langmap_generator::gen_struct(UTL_ScopedName* name,
         resolveActualType(field_type);
         const Classification cls = classify(field_type);
         if (cls & CL_ARRAY) {
-          std::string flat_fn = fn;
           ACE_CDR::ULong elems = 1;
-          AST_Array* arr = AST_Array::narrow_from_decl(field_type);
-          for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
-            elems *= arr->dims()[dim]->ev()->u.ulval;
-            if (dim) flat_fn += "[0]";
-          }
+          const std::string flat_fn = fn + array_dims(field_type, elems);
           be_global->add_include("<algorithm>", BE_GlobalData::STREAM_CPP);
           be_global->impl_ <<
             "  std::swap_ranges(lhs." << flat_fn << ", lhs." << flat_fn
