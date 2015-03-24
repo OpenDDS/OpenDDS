@@ -34,6 +34,10 @@ module Xyz {
 
   typedef string MultiDimArray[2][3][4][5];
 
+  struct StructOfMultiDimArray {
+    MultiDimArray mda;
+  };
+
   typedef ArrayOfShorts2 ArrayOfArrayOfShorts2[3];
   struct StructOfArrayOfArrayOfShorts2 {
     ArrayOfArrayOfShorts2 f1;

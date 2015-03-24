@@ -255,9 +255,26 @@ bool langmap_generator::gen_struct(UTL_ScopedName* name,
         "{\n"
         "  using std::swap;\n";
       for (size_t i = 0; i < fields.size(); ++i) {
-        const std::string field_name = fields[i]->local_name()->get_string();
-        be_global->impl_ <<
-          "  swap(lhs." << field_name << ", rhs." << field_name << ");\n";
+        const std::string fn = fields[i]->local_name()->get_string();
+        AST_Type* field_type = fields[i]->field_type();
+        resolveActualType(field_type);
+        const Classification cls = classify(field_type);
+        if (cls & CL_ARRAY) {
+          std::string flat_fn = fn;
+          ACE_CDR::ULong elems = 1;
+          AST_Array* arr = AST_Array::narrow_from_decl(field_type);
+          for (ACE_CDR::ULong dim = 0; dim < arr->n_dims(); ++dim) {
+            elems *= arr->dims()[dim]->ev()->u.ulval;
+            if (dim) flat_fn += "[0]";
+          }
+          be_global->add_include("<algorithm>", BE_GlobalData::STREAM_CPP);
+          be_global->impl_ <<
+            "  std::swap_ranges(lhs." << flat_fn << ", lhs." << flat_fn
+            << " + " << elems << ", rhs." << flat_fn << ");\n";
+        } else {
+          be_global->impl_ <<
+            "  swap(lhs." << fn << ", rhs." << fn << ");\n";
+        }
       }
       be_global->impl_ << "}\n\n";
     }

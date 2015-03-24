@@ -453,7 +453,7 @@ namespace {
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
             indent << "find_size_ulong(size, padding);\n" <<
-            indent << "size += ACE_OS::strlen(arr" << nfl.index_ << ")"
+            indent << "size += ACE_OS::strlen(arr" << nfl.index_ << ".in())"
             << ((elem_cls & CL_WIDE)
                 ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
                 : " + 1;\n");
@@ -490,8 +490,9 @@ namespace {
               indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
               streamAndCheck("<< tmp", indent.size());
           } else {
+            string suffix = (elem_cls & CL_STRING) ? ".in()" : "";
             be_global->impl_ <<
-              streamAndCheck("<< arr" + nfl.index_, indent.size());
+              streamAndCheck("<< arr" + nfl.index_ + suffix , indent.size());
           }
         }
         be_global->impl_ << "  return true;\n";
@@ -860,8 +861,9 @@ namespace {
     if (fld_cls & CL_ENUM) {
       return indent + "find_size_ulong(size, padding);\n";
     } else if (fld_cls & CL_STRING) {
+      const string suffix = (prefix == "uni") ? "" : ".in()";
       return indent + "find_size_ulong(size, padding);\n" +
-        indent + "size += ACE_OS::strlen(" + qual + ")"
+        indent + "size += ACE_OS::strlen(" + qual + suffix + ")"
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
                                : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
@@ -919,12 +921,14 @@ namespace {
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
       string fieldref = prefix, local = name;
+      const bool accessor =
+        local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (fld_cls & CL_ARRAY) {
         string pre = prefix;
         if (shift == ">>" || shift == "<<") {
           pre.erase(0, 3);
         }
-        if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
+        if (accessor) {
           local.erase(local.size() - 2);
         }
         intro += "  " + getArrayForany(pre.c_str(), name.c_str(),
@@ -933,6 +937,7 @@ namespace {
       } else {
         fieldref += '.';
       }
+      if ((fld_cls & CL_STRING) && !accessor) local += ".in()";
       return "(strm " + fieldref + local + ')';
     }
   }
