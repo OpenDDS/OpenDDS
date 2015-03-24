@@ -317,8 +317,9 @@ namespace {
     be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     if (cls & CL_STRING) {
       be_global->impl_ << // ACE_OS::strcmp has overloads for narrow & wide
-        "      " << "return 0 == ACE_OS::strcmp(static_cast<const T*>(lhs)->" <<
-        fieldName << ", static_cast<const T*>(rhs)->" << fieldName << ");\n";
+        "      return 0 == ACE_OS::strcmp(static_cast<const T*>(lhs)->"
+        << fieldName << ".in(), static_cast<const T*>(rhs)->" << fieldName
+        << ".in());\n";
     } else {
       be_global->impl_ <<
         "      return static_cast<const T*>(lhs)->" << fieldName <<
@@ -329,7 +330,7 @@ namespace {
 }
 
 bool metaclass_generator::gen_struct(UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, const char*)
+  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   ContentSubscriptionGuard csg;
   NamespaceGuard ng;

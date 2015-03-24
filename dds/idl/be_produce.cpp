@@ -173,7 +173,8 @@ void postprocess(const char* fn, ostringstream& content,
 {
   ostringstream out;
 
-  if (which == BE_GlobalData::STREAM_H) {
+  if (which == BE_GlobalData::STREAM_H ||
+      which == BE_GlobalData::STREAM_LANG_H) {
     out << "/* -*- C++ -*- */\n";
   }
 
@@ -194,14 +195,23 @@ void postprocess(const char* fn, ostringstream& content,
 
   switch (which) {
   case BE_GlobalData::STREAM_H:
-  case BE_GlobalData::STREAM_FACE_H: {
+  case BE_GlobalData::STREAM_FACETS_H:
+  case BE_GlobalData::STREAM_LANG_H: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
-    if (which == BE_GlobalData::STREAM_FACE_H) break;
-    out << "#include \"dds/DCPS/Definitions.h\"\n";
-    string taoheader = be_global->header_name_.c_str();
-    taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
-    out << "#include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
+    if (which == BE_GlobalData::STREAM_LANG_H) {
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+        out << "#include <tao/orbconf.h>\n"
+               "#include <tao/Basic_Types.h>\n";
+      }
+    } else {
+      string taoheader = be_global->header_name_.c_str();
+      taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
+      out << "#include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
+    }
+    if (which == BE_GlobalData::STREAM_H) {
+      out << "#include \"dds/DCPS/Definitions.h\"\n";
+    }
   }
   break;
   case BE_GlobalData::STREAM_CPP: {
@@ -217,21 +227,27 @@ void postprocess(const char* fn, ostringstream& content,
     }
   }
   break;
-  case BE_GlobalData::STREAM_FACE_CPP: {
+  case BE_GlobalData::STREAM_FACETS_CPP: {
     ACE_CString pch = be_global->pch_include();
     if (pch.length()) {
       out << "#include \"" << pch << "\"\n";
     }
-    out << "#include \"" << be_global->face_header_name_.c_str() << "\"\n"
+    out << "#include \"" << be_global->facets_header_name_.c_str() << "\"\n"
       "#include \"" << be_global->header_name_.c_str() << "\"\n"
       "#include \"dds/FACE/FaceTSS.h\"\n\n"
       "namespace FACE { namespace TS {\n\n";
-    break;
   }
+  break;
   case BE_GlobalData::STREAM_IDL: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
-    out << "#include \"" << be_global->filename() << "\"\n\n";
+
+    string filebase(be_global->filename());
+    const size_t idx = filebase.find_last_of("/\\"); // allow either slash
+    if (idx != string::npos) {
+      filebase = filebase.substr(idx + 1);
+    }
+    out << "#include \"" << filebase << "\"\n\n";
   }
   break;
   default:
@@ -245,10 +261,11 @@ void postprocess(const char* fn, ostringstream& content,
   switch (which) {
   case BE_GlobalData::STREAM_H:
   case BE_GlobalData::STREAM_IDL:
-  case BE_GlobalData::STREAM_FACE_H:
+  case BE_GlobalData::STREAM_FACETS_H:
+  case BE_GlobalData::STREAM_LANG_H:
     out << "#endif /* " << macrofied << " */\n";
     break;
-  case BE_GlobalData::STREAM_FACE_CPP:
+  case BE_GlobalData::STREAM_FACETS_CPP:
     out << "}}\n";
     break;
   default:
@@ -359,11 +376,16 @@ BE_produce()
                 be_global->ws_config_, BE_GlobalData::STREAM_WS);
   }
 
-  if (be_global->face()) {
-    postprocess(be_global->face_header_name_.c_str(), be_global->face_header_,
-                BE_GlobalData::STREAM_FACE_H);
-    postprocess(be_global->face_impl_name_.c_str(), be_global->face_impl_,
-                BE_GlobalData::STREAM_FACE_CPP);
+  if (be_global->face_ts()) {
+    postprocess(be_global->facets_header_name_.c_str(), be_global->facets_header_,
+                BE_GlobalData::STREAM_FACETS_H);
+    postprocess(be_global->facets_impl_name_.c_str(), be_global->facets_impl_,
+                BE_GlobalData::STREAM_FACETS_CPP);
+  }
+
+  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+    postprocess(be_global->lang_header_name_.c_str(), be_global->lang_header_,
+                BE_GlobalData::STREAM_LANG_H);
   }
 
   BE_cleanup();

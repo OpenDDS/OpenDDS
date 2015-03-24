@@ -40,6 +40,7 @@
 #include "keys_generator.h"
 #include "wireshark_generator.h"
 #include "v8_generator.h"
+#include "langmap_generator.h"
 
 #include <iostream>
 #include <vector>
@@ -55,6 +56,7 @@ namespace {
   metaclass_generator mc_gen_;
   wireshark_generator ws_gen_;
   v8_generator v8_gen_;
+  langmap_generator lm_gen_;
 
   dds_generator* generators_[] = {&mar_gen_, &key_gen_, &ts_gen_, &mc_gen_, &ws_gen_};
   const size_t N_MAP = sizeof(generators_) / sizeof(generators_[0]);
@@ -92,6 +94,10 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
 {
   if (be_global->v8()) {
     gen_target_.add_generator(&v8_gen_);
+  }
+  if (be_global->language_mapping() != BE_GlobalData::LANGMAP_NONE) {
+    gen_target_.add_generator(&lm_gen_);
+    lm_gen_.init();
   }
 }
 
@@ -244,7 +250,8 @@ dds_visitor::visit_structure(AST_Structure* node)
   }
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_struct(node->name(), fields, node->repoID());
+    error_ |= !gen_target_.gen_struct(node->name(), fields,
+                                      node->size_type(), node->repoID());
   }
 
   if (be_global->java()) {
@@ -330,6 +337,19 @@ dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
 }
 
 int
+dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
+{
+  const char* name = node->local_name()->get_string();
+  BE_Comment_Guard g("STRUCT-FWD", name);
+
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_struct_fwd(node->name(), node->size_type());
+  }
+
+  return 0;
+}
+
+int
 dds_visitor::visit_constant(AST_Constant* node)
 {
   if (node->imported() && !be_global->do_included_files()) {
@@ -347,8 +367,7 @@ dds_visitor::visit_constant(AST_Constant* node)
   bool nested = d && (d->node_type() == AST_Decl::NT_interface);
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_const(node->name(), nested, node->et(),
-                                     node->constant_value()->ev());
+    error_ |= !gen_target_.gen_const(node->name(), nested, node);
   }
 
   return 0;
@@ -542,11 +561,6 @@ int dds_visitor::visit_enum_val(AST_EnumVal*)
 }
 
 int dds_visitor::visit_expression(AST_Expression*)
-{
-  return 0;
-}
-
-int dds_visitor::visit_structure_fwd(AST_StructureFwd*)
 {
   return 0;
 }

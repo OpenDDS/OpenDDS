@@ -7,6 +7,7 @@
 
 #include "ace/OS_NS_unistd.h"
 #include "ace/OS_NS_stdio.h"
+#include "ace/Log_Msg.h"
 
 #include <iostream>
 
@@ -34,7 +35,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_OS::sleep(5); // connection established with Subscriber
 
     ACE_DEBUG((LM_INFO, "(%P|%t) Publisher: about to send_message()\n"));
-    for (CORBA::Long i = 0; i < part; ++i) {
+    for (FACE::Long i = 0; i < part; ++i) {
       if (i) ACE_OS::sleep(1);
 
       Messenger::Message msg = {"Hello, world.", part};

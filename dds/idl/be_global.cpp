@@ -18,6 +18,7 @@
 #include "ace/OS_NS_sys_stat.h"
 #include "ace/ARGV.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -30,13 +31,15 @@ using namespace std;
 BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
-  : filename_(0),
-    java_(false),
-    suppress_idl_(false),
-    generate_wireshark_(false),
-    v8_(false),
-    face_(false),
-    seq_("Seq")
+  : filename_(0)
+  , java_(false)
+  , suppress_idl_(false)
+  , suppress_typecode_(false)
+  , generate_wireshark_(false)
+  , v8_(false)
+  , face_ts_(false)
+  , seq_("Seq")
+  , language_mapping_(LANGMAP_NONE)
 {
 }
 
@@ -101,6 +104,16 @@ ACE_CString BE_GlobalData::java_arg() const
   return this->java_arg_;
 }
 
+void BE_GlobalData::language_mapping(LanguageMapping lm)
+{
+  this->language_mapping_ = lm;
+}
+
+BE_GlobalData::LanguageMapping BE_GlobalData::language_mapping() const
+{
+  return this->language_mapping_;
+}
+
 void BE_GlobalData::sequence_suffix(const ACE_CString& str)
 {
   this->seq_ = str;
@@ -131,14 +144,14 @@ bool BE_GlobalData::v8() const
   return this->v8_;
 }
 
-void BE_GlobalData::face(bool b)
+void BE_GlobalData::face_ts(bool b)
 {
-  this->face_ = b;
+  this->face_ts_ = b;
 }
 
-bool BE_GlobalData::face() const
+bool BE_GlobalData::face_ts() const
 {
-  return this->face_;
+  return this->face_ts_;
 }
 
 bool
@@ -174,8 +187,9 @@ BE_GlobalData::open_streams(const char* filename)
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
   ws_config_name_ = (filebase + "_ws.ini").c_str();
-  face_header_name_ = (filebase + "_TS.hpp").c_str();
-  face_impl_name_ = (filebase + "_TS.cpp").c_str();
+  facets_header_name_ = (filebase + "_TS.hpp").c_str();
+  facets_impl_name_ = (filebase + "_TS.cpp").c_str();
+  lang_header_name_ = (filebase + "C.h").c_str();
 }
 
 void
@@ -184,6 +198,7 @@ BE_GlobalData::multicast(const char* str)
   header_ << str;
   impl_ << str;
   idl_ << str;
+  if (language_mapping_ != LANGMAP_NONE) lang_header_ << str;
 }
 
 BE_Comment_Guard::BE_Comment_Guard(const char* type, const char* name)
@@ -234,8 +249,8 @@ BE_GlobalData::parse_args(long& i, char** av)
   case 'G':
     if (0 == ACE_OS::strcmp(av[i], "-Gws"))
       generate_wireshark_ = true;
-    else if (0 == ACE_OS::strcmp(av[i], "-Gface"))
-      face(true);
+    else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
+      face_ts(true);
     else
       {
         ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
@@ -244,10 +259,26 @@ BE_GlobalData::parse_args(long& i, char** av)
                                       | IDL_CF_ONLY_USAGE);
       }
     break;
+  case 'L':
+    if (0 == ACE_OS::strcasecmp(av[i], "-Lface"))
+      language_mapping(LANGMAP_FACE_CXX);
+    else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
+                  ACE_TEXT(" option\n"), av[i]));
+      idl_global->set_compile_flags(idl_global->compile_flags()
+                                    | IDL_CF_ONLY_USAGE);
+    }
+    break;
   case 'S':
     switch (av[i][2]) {
     case 'I':
       suppress_idl_ = true;
+      break;
+    case 't':
+      suppress_typecode_ = true;
+      break;
+    case 'a':
+      // ignore, accepted for tao_idl compatibility
       break;
     default:
       ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
@@ -318,7 +349,8 @@ BE_GlobalData::writeFile(const char* fileName, const string& content)
 
 namespace {
   typedef set<string> Includes_t;
-  Includes_t inc_h_, inc_c_, inc_idl_, referenced_idl_, inc_path_, inc_face_h_;
+  Includes_t inc_h_, inc_c_, inc_idl_, referenced_idl_, inc_path_, inc_facets_h_,
+    inc_lang_h_;
 }
 
 void
@@ -327,7 +359,8 @@ BE_GlobalData::reset_includes()
   inc_h_.clear();
   inc_c_.clear();
   inc_idl_.clear();
-  inc_face_h_.clear();
+  inc_facets_h_.clear();
+  inc_lang_h_.clear();
   referenced_idl_.clear();
 }
 
@@ -367,8 +400,11 @@ BE_GlobalData::add_include(const char* file,
   case STREAM_IDL:
     inc = &inc_idl_;
     break;
-  case STREAM_FACE_H:
-    inc = &inc_face_h_;
+  case STREAM_FACETS_H:
+    inc = &inc_facets_h_;
+    break;
+  case STREAM_LANG_H:
+    inc = &inc_lang_h_;
     break;
   default:
     return;
@@ -384,7 +420,7 @@ BE_GlobalData::add_referenced(const char* file)
 }
 
 namespace {
-  std::string transform_referenced(const std::string& idl)
+  std::string transform_referenced(const std::string& idl, const char* suffix)
   {
     const size_t len = idl.size();
     string base_name;
@@ -402,7 +438,7 @@ namespace {
       }
     }
 
-    return base_name + "TypeSupportImpl.h";
+    return base_name + suffix;
   }
 
   std::string make_relative(const std::string& absolute)
@@ -419,12 +455,37 @@ namespace {
     }
     return absolute;
   }
+
+  struct InsertIncludes {
+    std::ostream& ret_;
+    explicit InsertIncludes(std::ostream& ret) : ret_(ret) {}
+
+    void operator()(const std::string& str) const
+    {
+       const char* const quote = (!str.empty() && str[0] != '<') ? "\"" : "";
+       ret_ << "#include " << quote << str << quote << '\n';
+    }
+  };
+
+  struct InsertRefIncludes : InsertIncludes {
+    const char* const suffix_;
+
+    InsertRefIncludes(std::ostream& ret, const char* suffix)
+      : InsertIncludes(ret)
+      , suffix_(suffix)
+    {}
+
+    void operator()(const std::string& str) const
+    {
+      InsertIncludes::operator()(transform_referenced(make_relative(str), suffix_));
+    }
+  };
 }
 
-ACE_CString
+std::string
 BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
 {
-  Includes_t* inc = 0;
+  const Includes_t* inc = 0;
 
   switch (which) {
   case STREAM_H:
@@ -436,34 +497,37 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   case STREAM_IDL:
     inc = &inc_idl_;
     break;
-  case STREAM_FACE_H:
-    inc = &inc_face_h_;
+  case STREAM_FACETS_H:
+    inc = &inc_facets_h_;
+    break;
+  case STREAM_LANG_H:
+    inc = &inc_lang_h_;
     break;
   default:
     return "";
   }
 
-  ACE_CString ret;
-  Includes_t::const_iterator it = inc->begin(), end = inc->end();
+  std::ostringstream ret;
 
-  for (; it != end; ++it) {
-    ACE_CString quote = (it->size() > 0 && (*it)[0] != '<') ? "\"" : "";
-    ret += "#include " + quote + it->c_str() + quote + "\n";
+  std::for_each(inc->begin(), inc->end(), InsertIncludes(ret));
+
+  switch (which) {
+  case STREAM_LANG_H:
+    std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
+                  InsertRefIncludes(ret, "C.h"));
+    // fall through
+  case STREAM_H:
+    if (!export_include().empty())
+      ret << "#include \"" << export_include() << "\"\n";
+    break;
+
+  case STREAM_CPP:
+    std::for_each(referenced_idl_.begin(), referenced_idl_.end(),
+                  InsertRefIncludes(ret, "TypeSupportImpl.h"));
+    break;
+  default:
+    break;
   }
 
-  if (which == STREAM_H) {
-    ACE_CString exports = this->export_include();
-
-    if (exports != "")
-      ret += "#include \"" + exports + "\"\n";
-
-  } else if (which == STREAM_CPP) {
-    for (it = referenced_idl_.begin(), end = referenced_idl_.end(); it != end;
-        ++it) {
-      ret += ACE_CString("#include \"")
-        + transform_referenced(make_relative(*it)).c_str() + "\"\n";
-    }
-  }
-
-  return ret;
+  return ret.str();
 }
