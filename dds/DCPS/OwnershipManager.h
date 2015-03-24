@@ -69,7 +69,7 @@ public:
     InstanceStateVec instance_states_;
   };
 
-  typedef OPENDDS_MAP_CMP( ::DDS::InstanceHandle_t, OwnershipWriterInfos) InstanceOwnershipWriterInfos;
+  typedef OPENDDS_MAP( ::DDS::InstanceHandle_t, OwnershipWriterInfos) InstanceOwnershipWriterInfos;
 
   OwnershipManager ();
   ~OwnershipManager ();
