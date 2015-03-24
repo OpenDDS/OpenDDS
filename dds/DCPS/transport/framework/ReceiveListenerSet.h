@@ -15,6 +15,7 @@
 
 #include "ace/Synch.h"
 
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 #include <set>
 
@@ -28,7 +29,7 @@ class OpenDDS_Dcps_Export ReceiveListenerSet :
       public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
-  typedef std::map<RepoId, TransportReceiveListener*, GUID_tKeyLessThan> MapType;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener*, GUID_tKeyLessThan) MapType;
 
   ReceiveListenerSet();
   ReceiveListenerSet(const ReceiveListenerSet&);

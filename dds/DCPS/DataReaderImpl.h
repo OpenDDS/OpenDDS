@@ -45,6 +45,7 @@
 
 #include <vector>
 #include <list>
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 #include <memory>
 #include <queue>
@@ -247,10 +248,10 @@ public:
   friend class QueryConditionImpl;
   friend class SubscriberImpl;
 
-  typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance*) SubscriptionInstanceMapType;
 
   /// Type of collection of statistics for writers to this reader.
-  typedef std::map<PublicationId, WriterStats, GUID_tKeyLessThan> StatsMapType;
+  typedef OPENDDS_MAP_CMP(PublicationId, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
   //Constructor
   DataReaderImpl();
@@ -718,7 +719,7 @@ private:
   bool check_historic(const ReceivedDataSample& sample);
 
   /// deliver samples that were held by check_historic()
-  void deliver_historic(std::map<SequenceNumber, ReceivedDataSample>& samples);
+  void deliver_historic(OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& samples);
 
   void listener_add_ref() { EntityImpl::_add_ref(); }
   void listener_remove_ref() { EntityImpl::_remove_ref(); }
@@ -745,7 +746,7 @@ private:
   ACE_Recursive_Thread_Mutex   publication_handle_lock_;
   Reverse_Lock_t reverse_pub_handle_lock_;
 
-  typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
   RepoIdToHandleMap            id_to_handle_map_;
 
   // Status conditions.
@@ -870,8 +871,8 @@ private:
   bool statistics_enabled_;
 
   /// publications writing to this reader.
-  typedef std::map<PublicationId, RcHandle<WriterInfo>,
-                   GUID_tKeyLessThan> WriterMapType;
+  typedef OPENDDS_MAP_CMP(PublicationId, RcHandle<WriterInfo>,
+                   GUID_tKeyLessThan) WriterMapType;
 
 #ifdef ACE_LYNXOS_MAJOR
 public:

@@ -3277,7 +3277,7 @@ DataReaderImpl::reset_ownership (::DDS::InstanceHandle_t instance)
 void
 DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
 {
-  std::map<SequenceNumber, ReceivedDataSample> to_deliver;
+  OPENDDS_MAP(SequenceNumber, ReceivedDataSample) to_deliver;
   ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
   WriterMapType::iterator where = writers_.find(pub_id);
   if (writers_.end() != where) {
@@ -3315,9 +3315,9 @@ bool DataReaderImpl::check_historic(const ReceivedDataSample& sample)
   return true;
 }
 
-void DataReaderImpl::deliver_historic(std::map<SequenceNumber, ReceivedDataSample>& samples)
+void DataReaderImpl::deliver_historic(OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& samples)
 {
-  typedef std::map<SequenceNumber, ReceivedDataSample>::iterator iter_t;
+  typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter_t;
   const iter_t end = samples.end();
   for (iter_t iter = samples.begin(); iter != end; ++iter) {
     iter->second.header_.historic_sample_ = true;

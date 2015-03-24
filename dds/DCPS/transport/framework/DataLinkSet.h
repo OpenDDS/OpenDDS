@@ -75,7 +75,7 @@ public:
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 
-  typedef std::map<DataLinkIdType, DataLink_rch> MapType;
+  typedef OPENDDS_MAP(DataLinkIdType, DataLink_rch) MapType;
 
   //{@
   /// Accessors for external iteration

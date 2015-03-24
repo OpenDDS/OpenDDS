@@ -141,7 +141,7 @@ public:
     ACE_INET_Addr addr_;
     bool requires_inline_qos_;
   };
-  std::map<RepoId, RemoteInfo, GUID_tKeyLessThan> locators_;
+  OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan) locators_;
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
@@ -174,10 +174,10 @@ public:
   struct ReaderInfo {
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     std::vector<RTPS::SequenceNumberSet> requested_changes_;
-    std::map<SequenceNumber, RTPS::FragmentNumberSet> requested_frags_;
+    OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
     SequenceNumber cur_cumulative_ack_;
     bool handshake_done_, durable_;
-    std::map<SequenceNumber, TransportQueueElement*> durable_data_;
+    OPENDDS_MAP(SequenceNumber, TransportQueueElement*) durable_data_;
     ACE_Time_Value durable_timestamp_;
 
     ReaderInfo()
@@ -191,13 +191,13 @@ public:
     bool expecting_durable_data() const;
   };
 
-  typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> ReaderInfoMap;
+  typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) ReaderInfoMap;
 
   struct RtpsWriter {
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
-    std::map<SequenceNumber, TransportQueueElement*> elems_not_acked_;
+    OPENDDS_MAP(SequenceNumber, TransportQueueElement*) elems_not_acked_;
     CORBA::Long heartbeat_count_;
     bool durable_;
 
@@ -207,7 +207,7 @@ public:
     void add_elem_awaiting_ack(TransportQueueElement* element);
   };
 
-  typedef std::map<RepoId, RtpsWriter, GUID_tKeyLessThan> RtpsWriterMap;
+  typedef OPENDDS_MAP_CMP(RepoId, RtpsWriter, GUID_tKeyLessThan) RtpsWriterMap;
   RtpsWriterMap writers_;
 
   void end_historic_samples(RtpsWriterMap::iterator writer,
@@ -219,9 +219,9 @@ public:
 
   struct WriterInfo {
     DisjointSequence recvd_;
-    std::map<SequenceNumber, ReceivedDataSample> held_;
+    OPENDDS_MAP(SequenceNumber, ReceivedDataSample) held_;
     SequenceRange hb_range_;
-    std::map<SequenceNumber, RTPS::FragmentNumber_t> frags_;
+    OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t) frags_;
     bool ack_pending_, initial_hb_;
     CORBA::Long heartbeat_recvd_count_, hb_frag_recvd_count_,
       acknack_count_, nackfrag_count_;
@@ -233,14 +233,14 @@ public:
     bool should_nack() const;
   };
 
-  typedef std::map<RepoId, WriterInfo, GUID_tKeyLessThan> WriterInfoMap;
+  typedef OPENDDS_MAP_CMP(RepoId, WriterInfo, GUID_tKeyLessThan) WriterInfoMap;
 
   struct RtpsReader {
     WriterInfoMap remote_writers_;
     bool durable_;
   };
 
-  typedef std::map<RepoId, RtpsReader, GUID_tKeyLessThan> RtpsReaderMap;
+  typedef OPENDDS_MAP_CMP(RepoId, RtpsReader, GUID_tKeyLessThan) RtpsReaderMap;
   RtpsReaderMap readers_;
 
   typedef std::multimap<RepoId, RtpsReaderMap::iterator, GUID_tKeyLessThan>

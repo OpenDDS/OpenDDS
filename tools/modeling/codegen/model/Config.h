@@ -60,22 +60,22 @@ struct ReaderProfile;
 class OpenDDS_Model_Export Config  {
   public:
     /// Container type for participant profiles.
-    typedef std::map< std::string, ParticipantProfile*> ParticipantProfileMap;
+    typedef OPENDDS_MAP( std::string, ParticipantProfile*) ParticipantProfileMap;
 
     /// Container type for topic profiles.
-    typedef std::map< std::string, TopicProfile*> TopicProfileMap;
+    typedef OPENDDS_MAP( std::string, TopicProfile*) TopicProfileMap;
 
     /// Container type for publisher profiles.
-    typedef std::map< std::string, PublisherProfile*> PublisherProfileMap;
+    typedef OPENDDS_MAP( std::string, PublisherProfile*) PublisherProfileMap;
 
     /// Container type for writer profiles.
-    typedef std::map< std::string, WriterProfile*> WriterProfileMap;
+    typedef OPENDDS_MAP( std::string, WriterProfile*) WriterProfileMap;
 
     /// Container type for subscriber profiles.
-    typedef std::map< std::string, SubscriberProfile*> SubscriberProfileMap;
+    typedef OPENDDS_MAP( std::string, SubscriberProfile*) SubscriberProfileMap;
 
     /// Container type for reader profiles.
-    typedef std::map< std::string, ReaderProfile*> ReaderProfileMap;
+    typedef OPENDDS_MAP( std::string, ReaderProfile*) ReaderProfileMap;
 
     Config(int& argc, ACE_TCHAR** argv);
 

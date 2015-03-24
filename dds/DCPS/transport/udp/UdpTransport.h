@@ -72,7 +72,7 @@ private:
 
   /// Map of fully associated DataLinks for this transport.  Protected
   // by client_links_lock_.
-  typedef std::map<PriorityKey, UdpDataLink_rch> UdpDataLinkMap;
+  typedef OPENDDS_MAP(PriorityKey, UdpDataLink_rch) UdpDataLinkMap;
   UdpDataLinkMap client_links_;
 
   /// The single datalink for the passive side.  No locking required.
@@ -90,7 +90,7 @@ private:
   std::set<PriorityKey> server_link_keys_;
 
   typedef std::vector<DataLink::OnStartCallback> Callbacks;
-  typedef std::map<PriorityKey, Callbacks> PendConnMap;
+  typedef OPENDDS_MAP(PriorityKey, Callbacks) PendConnMap;
   /// Locked by connections_lock_.  Tracks expected connections
   /// that we have learned about in accept_datalink() but have
   /// not yet performed the handshake.

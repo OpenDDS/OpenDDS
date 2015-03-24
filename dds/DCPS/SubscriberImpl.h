@@ -177,7 +177,7 @@ private:
   typedef std::set<DataReaderImpl*> DataReaderSet;
 
   /// DataReader id to qos map.
-  typedef std::map<RepoId, DDS::DataReaderQos, GUID_tKeyLessThan> DrIdToQosMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::DataReaderQos, GUID_tKeyLessThan) DrIdToQosMap;
 
   DDS::InstanceHandle_t        handle_;
 
@@ -191,7 +191,7 @@ private:
   DataReaderSet                datareader_set_;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  std::map<OPENDDS_STRING, DDS::DataReader_var> multitopic_reader_map_;
+  OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var) multitopic_reader_map_;
 #endif
 
   DomainParticipantImpl*       participant_;

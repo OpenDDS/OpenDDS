@@ -119,12 +119,12 @@ private:
     CORBA::Long client_refs_;
   };
 
-  typedef std::map<OPENDDS_STRING, RefCounted_Topic> TopicMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, RefCounted_Topic) TopicMap;
 
-  typedef std::map<OPENDDS_STRING, DDS::TopicDescription_var> TopicDescriptionMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, DDS::TopicDescription_var) TopicDescriptionMap;
 
-  typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> HandleMap;
-  typedef std::map<DDS::InstanceHandle_t, RepoId> RepoIdMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
   ///Constructor
   DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
@@ -490,7 +490,7 @@ private:
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ACE_Thread_Mutex filter_cache_lock_;
-  std::map<OPENDDS_STRING, RcHandle<FilterEvaluator> > filter_cache_;
+  OPENDDS_MAP(OPENDDS_STRING, RcHandle<FilterEvaluator> ) filter_cache_;
 #endif
 
   typedef std::set<Recorder_var, VarLess<Recorder> > RecorderSet;

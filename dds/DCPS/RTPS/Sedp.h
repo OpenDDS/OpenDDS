@@ -33,9 +33,9 @@
 #include "ace/Task_Ex_T.h"
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Thread_Mutex.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 #include <set>
-#include "dds/DCPS/PoolAllocator.h"
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -330,8 +330,8 @@ private:
     DDS::DataWriterQos qos_;
     DDS::PublisherQos publisher_qos_;
   };
-  typedef std::map<DCPS::RepoId, LocalPublication,
-                   DCPS::GUID_tKeyLessThan> LocalPublicationMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, LocalPublication,
+                   DCPS::GUID_tKeyLessThan) LocalPublicationMap;
   typedef LocalPublicationMap::iterator LocalPublicationIter;
   typedef LocalPublicationMap::const_iterator LocalPublicationCIter;
   LocalPublicationMap local_publications_;
@@ -348,8 +348,8 @@ private:
     OPENDDS_STRING filter_;
     DDS::StringSeq params_;
   };
-  typedef std::map<DCPS::RepoId, LocalSubscription,
-                   DCPS::GUID_tKeyLessThan> LocalSubscriptionMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, LocalSubscription,
+                   DCPS::GUID_tKeyLessThan) LocalSubscriptionMap;
   typedef LocalSubscriptionMap::iterator LocalSubscriptionIter;
   typedef LocalSubscriptionMap::const_iterator LocalSubscriptionCIter;
   LocalSubscriptionMap local_subscriptions_;
@@ -361,8 +361,8 @@ private:
 
   struct LocalParticipantMessage : LocalEndpoint {
   };
-  typedef std::map<DCPS::RepoId, LocalParticipantMessage,
-    DCPS::GUID_tKeyLessThan> LocalParticipantMessageMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, LocalParticipantMessage,
+    DCPS::GUID_tKeyLessThan) LocalParticipantMessageMap;
   typedef LocalParticipantMessageMap::iterator LocalParticipantMessageIter;
   typedef LocalParticipantMessageMap::const_iterator LocalParticipantMessageCIter;
   LocalParticipantMessageMap local_participant_messages_;
@@ -383,12 +383,13 @@ private:
     DiscoveredWriterData writer_data_;
     DDS::InstanceHandle_t bit_ih_;
   };
-  typedef std::map<DCPS::RepoId, DiscoveredPublication,
-                   DCPS::GUID_tKeyLessThan> DiscoveredPublicationMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredPublication,
+                   DCPS::GUID_tKeyLessThan) DiscoveredPublicationMap;
   typedef DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
   DiscoveredPublicationMap discovered_publications_;
-  typedef std::map<DCPS::RepoId, std::pair<DCPS::MessageId, DiscoveredWriterData>,
-                   DCPS::GUID_tKeyLessThan> DeferredPublicationMap;
+  typedef std::pair<DCPS::MessageId, DiscoveredWriterData> MsgIdWtrDataPair;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, MsgIdWtrDataPair,
+                   DCPS::GUID_tKeyLessThan) DeferredPublicationMap;
   DeferredPublicationMap deferred_publications_;  // Publications that Spdp has not discovered.
 
   struct DiscoveredSubscription {
@@ -398,12 +399,13 @@ private:
     DiscoveredReaderData reader_data_;
     DDS::InstanceHandle_t bit_ih_;
   };
-  typedef std::map<DCPS::RepoId, DiscoveredSubscription,
-                   DCPS::GUID_tKeyLessThan> DiscoveredSubscriptionMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredSubscription,
+                   DCPS::GUID_tKeyLessThan) DiscoveredSubscriptionMap;
   typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
   DiscoveredSubscriptionMap discovered_subscriptions_;
-  typedef std::map<DCPS::RepoId, std::pair<DCPS::MessageId, DiscoveredReaderData>,
-                   DCPS::GUID_tKeyLessThan> DeferredSubscriptionMap;
+  typedef std::pair<DCPS::MessageId, DiscoveredReaderData> MsgIdRdrDataPair;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, MsgIdRdrDataPair,
+                   DCPS::GUID_tKeyLessThan) DeferredSubscriptionMap;
   DeferredSubscriptionMap deferred_subscriptions_; // Subscriptions that Sedp has not discovered.
 
   void assign_bit_key(DiscoveredPublication& pub);
@@ -411,8 +413,8 @@ private:
   void increment_key(DDS::BuiltinTopicKey_t& key);
 
   DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
-  typedef std::map<DDS::BuiltinTopicKey_t, DCPS::RepoId,
-                   DCPS::BuiltinTopicKeyLess> BitKeyMap;
+  typedef OPENDDS_MAP_CMP(DDS::BuiltinTopicKey_t, DCPS::RepoId,
+                   DCPS::BuiltinTopicKeyLess) BitKeyMap;
   BitKeyMap pub_key_to_id_, sub_key_to_id_;
 
   template<typename Map>
@@ -436,8 +438,8 @@ private:
     bool has_dcps_key_;
     RepoIdSet endpoints_;
   };
-  std::map<OPENDDS_STRING, TopicDetailsEx> topics_;
-  std::map<DCPS::RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan> topic_names_;
+  OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx) topics_;
+  OPENDDS_MAP_CMP(DCPS::RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan) topic_names_;
   unsigned int topic_counter_;
 
   RepoIdSet defer_match_endpoints_, associated_participants_;

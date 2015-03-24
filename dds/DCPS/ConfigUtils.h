@@ -27,7 +27,7 @@ namespace OpenDDS {
 namespace DCPS {
 
   /// Helper types and functions for config file parsing
-  typedef std::map<OPENDDS_STRING, OPENDDS_STRING> ValueMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) ValueMap;
   typedef std::pair<OPENDDS_STRING, ACE_Configuration_Section_Key> SubsectionPair;
   typedef std::list<SubsectionPair> KeyList;
 

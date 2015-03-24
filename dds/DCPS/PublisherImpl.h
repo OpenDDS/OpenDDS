@@ -156,11 +156,11 @@ public:
 private:
   typedef std::multimap<OPENDDS_STRING, DataWriterImpl*> DataWriterMap;
 
-  typedef std::map<PublicationId, DataWriterImpl*, GUID_tKeyLessThan>
+  typedef OPENDDS_MAP_CMP(PublicationId, DataWriterImpl*, GUID_tKeyLessThan)
     PublicationMap;
 
   // DataWriter id to qos map.
-  typedef std::map<RepoId, DDS::DataWriterQos, GUID_tKeyLessThan> DwIdToQosMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::DataWriterQos, GUID_tKeyLessThan) DwIdToQosMap;
 
   DDS::InstanceHandle_t        handle_;
 

@@ -105,11 +105,11 @@ private:
   TransportRegistry();
   ~TransportRegistry();
 
-  typedef std::map<OPENDDS_STRING, TransportType_rch> TypeMap;
-  typedef std::map<OPENDDS_STRING, TransportConfig_rch> ConfigMap;
-  typedef std::map<OPENDDS_STRING, TransportInst_rch> InstMap;
-  typedef std::map<OPENDDS_STRING, std::string> LibDirectiveMap;
-  typedef std::map<DDS::DomainId_t, TransportConfig_rch> DomainConfigMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, TransportType_rch) TypeMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, TransportConfig_rch) ConfigMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, TransportInst_rch) InstMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, std::string) LibDirectiveMap;
+  typedef OPENDDS_MAP(DDS::DomainId_t, TransportConfig_rch) DomainConfigMap;
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;

@@ -35,7 +35,7 @@ struct WriterCoherentSample {
   SequenceNumber last_sample_;
 };
 
-typedef std::map<PublicationId, WriterCoherentSample, GUID_tKeyLessThan> GroupCoherentSamples;
+typedef OPENDDS_MAP_CMP(PublicationId, WriterCoherentSample, GUID_tKeyLessThan) GroupCoherentSamples;
 
 /// End Coherent Change message.
 struct OpenDDS_Dcps_Export CoherentChangeControl {
