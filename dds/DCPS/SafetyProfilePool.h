@@ -23,9 +23,13 @@ public:
   char* ptr() { return ptr_; }
   size_t size() { return size_; }
 
+  // Set the size and pointer
   void set(void* ptr, size_t size);
+  void set(void* ptr, size_t size, bool free);
   // Allocate some of my bytes into target, leaving remainder
   void* allocate(size_t size, PoolAllocation* target);
+  // Join this freed alloc with the one next to it.  Return true if joined
+  bool join_freed(PoolAllocation* next);
 
   char* ptr_;
   size_t size_;
@@ -55,10 +59,18 @@ private:
                        PoolAllocation* prev_block,
                        size_t alloc_size);
 
-  // Slide array members down
-  PoolAllocation* make_room_for_allocation(int index);
+  // Slide array members down at index
+  PoolAllocation* make_room_for_allocation(unsigned int index);
+  // Slide array members up to index, count number of slots
+  void recover_unused_allocation(unsigned int index, unsigned int count);
 
   void reorder_block(PoolAllocation* resized_block, PoolAllocation* prev_block);
+
+  // Find an allocation for freeing
+  PoolAllocation* find_alloc(void* ptr);
+
+  // Join this alloc with either contiguous free block
+  void join_free_allocs(PoolAllocation* alloc);
 };
 
 /// Memory pool for use when the Safety Profeile is enabled.

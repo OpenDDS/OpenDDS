@@ -11,14 +11,16 @@ unsigned int failed = 0;
   ++assertions; \
   if (!( COND )) {\
     ++failed; \
-    ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l %a\n",\
-        #COND , -1)); \
+    ACE_DEBUG((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
+        #COND )); \
+    return; \
   }
 
 using namespace OpenDDS::DCPS;
 
 class PoolTest {
 public:
+  // Allocate a block
   void test_pool_alloc() {
     Pool pool(1024, 64);
     char* ptr = pool.pool_alloc(128);
@@ -27,6 +29,7 @@ public:
     validate_pool(pool, 128);
   }
 
+  // Allocate a several blocks
   void test_pool_allocs() {
     Pool pool(1024, 64);
     char* ptr0 = pool.pool_alloc(128);
@@ -43,6 +46,7 @@ public:
     TEST_CHECK(ptr1 > ptr2);
   }
 
+  // Allocate a several blocks until all gone
   void test_pool_alloc_last() {
     Pool pool(1024, 64);
     char* ptr0 = pool.pool_alloc(128);
@@ -62,6 +66,64 @@ public:
     TEST_CHECK(ptr1 > ptr2);
     TEST_CHECK(ptr2 > ptr3);
   }
+
+  // Allocate a block and free it
+  void test_pool_alloc_free() {
+    Pool pool(1024, 64);
+    char* ptr = pool.pool_alloc(128);
+    pool.pool_free(ptr);
+
+    validate_pool(pool, 0);
+  }
+
+  // Allocate a block and free it
+  void test_pool_realloc() {
+    Pool pool(1024, 64);
+    char* ptr0 = pool.pool_alloc(128);
+    pool.pool_free(ptr0);
+    char* ptr1 = pool.pool_alloc(128);
+    validate_pool(pool, 128);
+    TEST_CHECK(ptr0 == ptr1);
+
+    pool.pool_free(ptr1);
+    validate_pool(pool, 0);
+  }
+
+  // Allocate blocks and free in alloc order
+  void test_pool_free_in_order() {
+    Pool pool(1024, 64);
+    char* ptr0 = pool.pool_alloc(128);
+    char* ptr1 = pool.pool_alloc(128);
+    char* ptr2 = pool.pool_alloc(128);
+    char* ptr3 = pool.pool_alloc(128);
+    validate_pool(pool, 512);
+    pool.pool_free(ptr0);
+    validate_pool(pool, 384);
+    pool.pool_free(ptr1);
+    validate_pool(pool, 256);
+    pool.pool_free(ptr2);
+    validate_pool(pool, 128);
+    pool.pool_free(ptr3);
+    validate_pool(pool, 0);
+  }
+
+  // Allocate blocks and free in reverse order
+  void test_pool_free_in_reverse_order() {
+    Pool pool(1024, 64);
+    char* ptr0 = pool.pool_alloc(128);
+    char* ptr1 = pool.pool_alloc(128);
+    char* ptr2 = pool.pool_alloc(128);
+    char* ptr3 = pool.pool_alloc(128);
+    validate_pool(pool, 512);
+    pool.pool_free(ptr3);
+    validate_pool(pool, 384);
+    pool.pool_free(ptr2);
+    validate_pool(pool, 256);
+    pool.pool_free(ptr1);
+    validate_pool(pool, 128);
+    pool.pool_free(ptr0);
+    validate_pool(pool, 0);
+  }
 private:
   void validate_pool(Pool& pool, size_t expected_allocated_bytes) {
     char* prev = 0;
@@ -76,8 +138,10 @@ private:
       TEST_CHECK(prev < alloc->ptr());
       if (prev_end) {
         TEST_CHECK(prev_end == alloc->ptr());
-        // Validate not consecutive free blocks
-        TEST_CHECK(!(prev_free && alloc->free_));
+        if (alloc->size()) {
+          // Validate  these are not consecutive free blocks
+          TEST_CHECK(!(prev_free && alloc->free_));
+        }
       }
       prev_end = alloc->ptr() + alloc->size();
       prev_free = alloc->free_;
@@ -114,6 +178,10 @@ int main(int, const char** )
   test.test_pool_alloc();
   test.test_pool_allocs();
   test.test_pool_alloc_last();
+  test.test_pool_alloc_free();
+  test.test_pool_realloc();
+  test.test_pool_free_in_order();
+  test.test_pool_free_in_reverse_order();
 
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
 

@@ -11,8 +11,9 @@ unsigned int failed = 0;
   ++assertions; \
   if (!( COND )) {\
     ++failed; \
-    ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l %a\n",\
-        #COND , -1)); \
+    ACE_DEBUG((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
+        #COND )); \
+    return; \
   }
 
 using namespace OpenDDS::DCPS;
@@ -49,6 +50,20 @@ public:
     TEST_CHECK(target.ptr() == buffer + from.size());
   }
 
+  void test_join_next() {
+    char buffer[1024];
+    PoolAllocation from;
+    PoolAllocation to;
+    from.set(buffer, 128, true);
+    to.set(buffer + 128, 64, true);
+
+    TEST_CHECK(from.join_freed(&to));
+    TEST_CHECK(from.ptr() == buffer);
+    TEST_CHECK(from.size() == 128 + 64);
+    TEST_CHECK(to.ptr() == NULL);
+    TEST_CHECK(to.size() == 0);
+    TEST_CHECK(to.free_ = true);
+  }
 };
 
 int main(int, const char** )
@@ -58,6 +73,7 @@ int main(int, const char** )
   test.test_set();
   test.test_allocate_partial();
   // full allocation should not be done
+  test.test_join_next();
 
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
   if (failed) {

@@ -11,17 +11,12 @@ unsigned int failed = 0;
   ++assertions; \
   if (!( COND )) {\
     ++failed; \
-    ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l %a\n",\
-        #COND , -1)); \
+    ACE_DEBUG((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
+        #COND )); \
+    return; \
   }
 
 using namespace OpenDDS::DCPS;
-
-void test_pool_alloc_null() {
-  PoolAllocation alloc;
-  TEST_CHECK(alloc.ptr() == 0);
-  TEST_CHECK(alloc.size() == 0);
-}
 
 // Malloc should return pointer
 void test_malloc() {
@@ -44,13 +39,10 @@ void test_mallocs() {
   TEST_CHECK(p3 = pool.malloc(24));
   TEST_CHECK(p4 = pool.malloc(64));
   TEST_CHECK(p5 = pool.malloc(32));
-  TEST_CHECK(p1 < p3); // 32 byte pool
-  TEST_CHECK(p3 < p5);
-  //TEST_CHECK(p5 < p2); // 64 byte pool
-  TEST_CHECK(p2 < p4);
-  //TEST_CHECK(pool.pools_used() == 2);
-  //TEST_CHECK(pool.pool(0)->chunk_size() == 32);
-  //TEST_CHECK(pool.pool(1)->chunk_size() == 64);
+  TEST_CHECK(p1 > p2);
+  TEST_CHECK(p2 > p3);
+  TEST_CHECK(p3 > p4);
+  TEST_CHECK(p4 > p5);
 }
 
 /*

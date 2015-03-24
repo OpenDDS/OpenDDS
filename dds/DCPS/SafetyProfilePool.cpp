@@ -17,14 +17,38 @@ PoolAllocation::set(void* ptr, size_t size)
   size_ = size;
 }
 
+void
+PoolAllocation::set(void* ptr, size_t size, bool free)
+{
+  set(ptr, size);
+  free_ = free;
+}
+
+bool
+PoolAllocation::join_freed(PoolAllocation* next_alloc)
+{
+  bool joined = false;
+  // If both are free
+  if (free_ && next_alloc->free_) {
+    // If they are contiguous
+    if ((ptr_ + size_) == next_alloc->ptr_) {
+      size_ += next_alloc->size_;
+      joined = true;
+
+      // Clean up next_alloc
+      next_alloc->set(NULL, 0);
+    }
+  }
+  return joined;
+}
+
 void*
 PoolAllocation::allocate(size_t alloc_size, PoolAllocation* target)
 {
   // Divide my alloc into remainder and target
   size_t remainder = size_ - alloc_size;
   char* next_buff = ptr_ + remainder;
-  target->set(next_buff, alloc_size);
-  target->free_ = false;
+  target->set(next_buff, alloc_size, false);
   target->next_free_ = NULL;
   this->free_ = true;
   size_ = remainder;
@@ -40,7 +64,7 @@ Pool::Pool(size_t size, size_t max_allocs)
 , allocs_(new PoolAllocation[max_allocs_])
 {
   first_free_ = allocs_;
-  first_free_->set(pool_ptr_, pool_size_);
+  first_free_->set(pool_ptr_, pool_size_, true);
   allocs_in_use_ = 1;
 }
 
@@ -88,9 +112,13 @@ Pool::pool_alloc(size_t size)
 void
 Pool::pool_free(void* ptr)
 {
+  PoolAllocation* alloc = find_alloc(ptr);
+  if (alloc) {
+    alloc->free_ = true;
+    // Check next and prev for combining
+    join_free_allocs(alloc);
+  }
 }
-
-// Can prev_block be null?
 
 char* 
 Pool::allocate_block(PoolAllocation* from_block,
@@ -112,7 +140,7 @@ Pool::allocate_block(PoolAllocation* from_block,
     from_block->next_free_ = NULL;
     from_block->free_ = false;
   } else if (from_block->size() > alloc_size) {
-    int index = from_block - allocs_;
+    unsigned int index = from_block - allocs_;
     // Second clause should always be true, 
     // was written to show it has been considered
     if ((allocs_in_use_ < max_allocs_) && (index < max_allocs_ - 1)) {
@@ -141,11 +169,12 @@ Pool::allocate_block(PoolAllocation* from_block,
 }
 
 PoolAllocation* 
-Pool::make_room_for_allocation(int index)
+Pool::make_room_for_allocation(unsigned int index)
 {
   PoolAllocation* src = allocs_ + index;
   PoolAllocation* dest = src + 1;
 
+  // If this not the last alloc
   if (index < allocs_in_use_ - 1) {
     // After the move, free list pointers will be off by one PoolAllocation.
     // Fix that now
@@ -165,6 +194,45 @@ Pool::make_room_for_allocation(int index)
   }
 
   return dest;
+}
+
+void
+Pool::recover_unused_allocation(unsigned int index, unsigned int count)
+{
+  PoolAllocation* dest = allocs_ + index;
+  PoolAllocation* src = dest + count;
+
+  // If this not the last alloc
+  if (index < allocs_in_use_ - count) {
+    // After the move, free list pointers will be off by one PoolAllocation.
+    // Fix that now
+    for (PoolAllocation* iter = first_free_;
+         iter != NULL;
+         iter = iter->next_free_)
+    {
+      if (iter->next_free_ >= src) {
+        // Impacted by move
+        iter->next_free_ = iter->next_free_ - count;
+      }
+    }
+
+    // Move the memory
+    memmove(dest, src,
+            sizeof(PoolAllocation) * (allocs_in_use_ - index - count));
+  }
+}
+
+PoolAllocation*
+Pool::find_alloc(void* ptr)
+{
+  // Linear search, can be changed to binary search
+  for (unsigned int i = 0; i < allocs_in_use_; ++i) {
+    PoolAllocation* alloc = allocs_ + i;
+    if (alloc->ptr() == ptr) {
+      return alloc;
+    }
+  }
+  return NULL;
 }
 
 void
@@ -188,6 +256,43 @@ Pool::reorder_block(PoolAllocation* resized_block, PoolAllocation* prev_block)
   
   // next_block is smaller than resized block, or null if none smaller
   resized_block = next_block;
+}
+
+void
+Pool::join_free_allocs(PoolAllocation* freed)
+{
+  int joined_count = 0;
+  PoolAllocation* first = NULL;
+  // If this is not the last alloc
+  if (freed != (allocs_ + (allocs_in_use_ - 1))) {
+    PoolAllocation* next_alloc = freed + 1;
+    if (freed->join_freed(next_alloc)) {
+      first = next_alloc;
+      ++joined_count;
+    }
+  }
+
+  // If this is not the first alloc
+  if (freed != allocs_) {
+    PoolAllocation* prev_alloc = freed - 1;
+    if (prev_alloc->free_) {
+      // join freed and prev_alloc
+      if (prev_alloc->join_freed(freed)) {
+        first = freed;
+        ++joined_count;
+      }
+    }
+  }
+
+  if (joined_count) {
+    // Slice up and manipulate free list pointers
+    unsigned int index = first - allocs_;
+    recover_unused_allocation(index, joined_count);
+    // Some less in use
+    allocs_in_use_ -= joined_count;
+  }
+
+  // Adjust by joined count
 }
 
 }}
