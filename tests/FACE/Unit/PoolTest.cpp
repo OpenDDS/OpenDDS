@@ -39,8 +39,8 @@ public:
     TEST_CHECK(ptr0);
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
-    TEST_CHECK(ptr0 < ptr1);
-    TEST_CHECK(ptr1 < ptr2);
+    TEST_CHECK(ptr0 > ptr1);
+    TEST_CHECK(ptr1 > ptr2);
   }
 
   void test_pool_alloc_last() {
@@ -58,9 +58,9 @@ public:
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
     TEST_CHECK(ptr3);
-    TEST_CHECK(ptr0 < ptr1);
-    TEST_CHECK(ptr1 < ptr2);
-    TEST_CHECK(ptr2 < ptr3);
+    TEST_CHECK(ptr0 > ptr1);
+    TEST_CHECK(ptr1 > ptr2);
+    TEST_CHECK(ptr2 > ptr3);
   }
 private:
   void validate_pool(Pool& pool, size_t expected_allocated_bytes) {

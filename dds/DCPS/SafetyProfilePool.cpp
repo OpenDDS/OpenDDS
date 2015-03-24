@@ -25,6 +25,7 @@ PoolAllocation::allocate(size_t alloc_size, PoolAllocation* target)
   char* next_buff = ptr_ + remainder;
   target->set(next_buff, alloc_size);
   target->free_ = false;
+  target->next_free_ = NULL;
   this->free_ = true;
   size_ = remainder;
   return next_buff;
@@ -102,9 +103,14 @@ Pool::allocate_block(PoolAllocation* from_block,
     // Going to use all of free block, keep size same 
     buffer = from_block->ptr();
     // Take out of free list
-// will crash if prev_block is null
-    prev_block->next_free_ = from_block->next_free_;
+    if (prev_block) {
+      prev_block->next_free_ = from_block->next_free_;
+    } else {
+      // head of list
+      first_free_ = from_block->next_free_;
+    }
     from_block->next_free_ = NULL;
+    from_block->free_ = false;
   } else if (from_block->size() > alloc_size) {
     int index = from_block - allocs_;
     // Second clause should always be true, 
