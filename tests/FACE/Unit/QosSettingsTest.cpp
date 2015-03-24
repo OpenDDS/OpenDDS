@@ -6,12 +6,15 @@
 #include <iostream>
 
 unsigned int assertions = 0;
+unsigned int failed = 0;
 
 #define TEST_CHECK(COND) \
   ++assertions; \
-  if (!( COND )) \
-      ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l %a\n",\
-        #COND , -1));
+  if (!( COND )) {\
+    ++failed; \
+    ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l %a\n",\
+        #COND , -1)); \
+  }
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
@@ -1198,7 +1201,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec();
   test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both();
 
-  printf("%d assertions passed\n", assertions);
-  return 0;
+  printf("%d assertions failed, %d passed\n", failed, assertions - failed);
+  if (failed) {
+    printf("test FAILED\n");
+  } else {
+    printf("test PASSED\n");
+  }
+  return failed;
 }
 
