@@ -141,7 +141,7 @@ public:
   ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
   bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
 
-  typedef std::vector<PublicationId> PublicationIdVec;
+  typedef OPENDDS_VECTOR(PublicationId) PublicationIdVec;
   /// Populates a std::vector with the PublicationIds (GUIDs)
   /// of this Publisher's Data Writers
   void get_publication_ids(PublicationIdVec& pubs);

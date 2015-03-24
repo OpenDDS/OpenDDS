@@ -151,7 +151,7 @@ private:
 
   struct PendingAssoc : ACE_Event_Handler {
     bool active_, removed_;
-    std::vector<TransportImpl_rch> impls_;
+    OPENDDS_VECTOR(TransportImpl_rch) impls_;
     CORBA::ULong blob_index_;
     AssociationData data_;
     TransportImpl::ConnectionAttribs attribs_;
@@ -255,7 +255,7 @@ private:
 
   // Associated Impls and DataLinks:
 
-  std::vector<TransportImpl_rch> impls_;
+  OPENDDS_VECTOR(TransportImpl_rch) impls_;
   PendingMap pending_;
   DataLinkSet links_;
   DataLinkIndex links_waiting_for_on_deleted_callback_;

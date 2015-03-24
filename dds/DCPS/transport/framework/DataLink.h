@@ -438,7 +438,7 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
-  std::vector<OnStartCallback> on_start_callbacks_;
+  OPENDDS_VECTOR(OnStartCallback) on_start_callbacks_;
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.

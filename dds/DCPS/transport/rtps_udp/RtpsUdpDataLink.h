@@ -173,7 +173,7 @@ public:
 
   struct ReaderInfo {
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
-    std::vector<RTPS::SequenceNumberSet> requested_changes_;
+    OPENDDS_VECTOR(RTPS::SequenceNumberSet) requested_changes_;
     std::map<SequenceNumber, RTPS::FragmentNumberSet> requested_frags_;
     SequenceNumber cur_cumulative_ack_;
     bool handshake_done_, durable_;
@@ -254,7 +254,7 @@ public:
   /// for adding/removing associations from the DataLink.
   mutable ACE_Thread_Mutex lock_;
 
-  size_t generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nack_frags,
+  size_t generate_nack_frags(OPENDDS_VECTOR(RTPS::NackFragSubmessage)& nack_frags,
                              WriterInfo& wi, const RepoId& pub_id);
 
   /// Extend the FragmentNumberSet to cover the fragments that are

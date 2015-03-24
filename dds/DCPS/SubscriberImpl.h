@@ -141,7 +141,7 @@ public:
 
   /// @}
 
-  typedef std::vector<RepoId> SubscriptionIdVec;
+  typedef OPENDDS_VECTOR(RepoId) SubscriptionIdVec;
   /// Populates a std::vector with the SubscriptionIds (GUIDs)
   /// of this Subscriber's Data Readers
   void get_subscription_ids(SubscriptionIdVec& subs);

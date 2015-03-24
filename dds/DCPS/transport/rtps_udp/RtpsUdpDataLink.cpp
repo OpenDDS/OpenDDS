@@ -1047,7 +1047,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         };
         gen_find_size(info_dst, size, padding);
 
-        std::vector<NackFragSubmessage> nack_frags;
+        OPENDDS_VECTOR(NackFragSubmessage) nack_frags;
         size += generate_nack_frags(nack_frags, wi->second, wi->first);
 
         ACE_Message_Block mb_acknack(size + padding); //FUTURE: allocators?
@@ -1082,7 +1082,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 }
 
 size_t
-RtpsUdpDataLink::generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nf,
+RtpsUdpDataLink::generate_nack_frags(OPENDDS_VECTOR(RTPS::NackFragSubmessage)& nf,
                                      WriterInfo& wi, const RepoId& pub_id)
 {
   typedef std::map<SequenceNumber, RTPS::FragmentNumber_t>::iterator iter_t;
@@ -1091,7 +1091,7 @@ RtpsUdpDataLink::generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nf,
 
   // Populate frag_info with two possible sources of NackFrags:
   // 1. sequence #s in the reception gaps that we have partially received
-  std::vector<SequenceRange> missing = wi.recvd_.missing_sequence_ranges();
+  OPENDDS_VECTOR(SequenceRange) missing = wi.recvd_.missing_sequence_ranges();
   for (size_t i = 0; i < missing.size(); ++i) {
     recv_strategy_->has_fragments(missing[i], pub_id, &frag_info);
   }
@@ -1317,7 +1317,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       bool sent_some = false;
       typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
       iter_t it = ri->second.durable_data_.begin();
-      const std::vector<SequenceRange> psr = requests.present_sequence_ranges();
+      const OPENDDS_VECTOR(SequenceRange) psr = requests.present_sequence_ranges();
       SequenceNumber lastSent = SequenceNumber::ZERO();
       if (!requests.empty()) {
         lastSent = requests.low().previous();
@@ -1526,7 +1526,7 @@ RtpsUdpDataLink::send_nack_replies()
       if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
         gaps = requests;
       } else {
-        std::vector<SequenceRange> ranges = requests.present_sequence_ranges();
+        OPENDDS_VECTOR(SequenceRange) ranges = requests.present_sequence_ranges();
         SingleSendBuffer& sb = *writer.send_buff_;
         ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
         const RtpsUdpSendStrategy::OverrideToken ot =
@@ -1707,7 +1707,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     static_cast<CORBA::UShort>(gap_size + padding) - SMHDR_SZ;
 
   // For durable writers, change a non-directed Gap into multiple directed gaps.
-  std::vector<RepoId> readers;
+  OPENDDS_VECTOR(RepoId) readers;
   if (durable && reader.entityId == ENTITYID_UNKNOWN) {
     if (Transport_debug_level > 5) {
       const GuidConverter local_conv(writer);
@@ -1793,9 +1793,9 @@ RtpsUdpDataLink::send_heartbeats()
   }
 
   using namespace OpenDDS::RTPS;
-  std::vector<HeartBeatSubmessage> subm;
+  OPENDDS_VECTOR(HeartBeatSubmessage) subm;
   std::set<ACE_INET_Addr> recipients;
-  std::vector<TransportQueueElement*> pendingCallbacks;
+  OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
   const ACE_Time_Value now = ACE_OS::gettimeofday();
 
   typedef RtpsWriterMap::iterator rw_iter;

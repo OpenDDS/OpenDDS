@@ -11,6 +11,7 @@
 #define OPENDDS_DCPS_REPLAYER_H
 
 #include <vector>
+#include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/RcHandle_T.h"
 #include "dds/DCPS/RawDataSample.h"
@@ -40,7 +41,7 @@ public:
 
 typedef RcHandle<ReplayerListener> ReplayerListener_rch;
 
-typedef std::vector<RawDataSample> RawDataSampleList;
+typedef OPENDDS_VECTOR(RawDataSample) RawDataSampleList;
 
 typedef Replayer* Replayer_ptr;
 typedef TAO_Objref_Var_T<Replayer> Replayer_var;

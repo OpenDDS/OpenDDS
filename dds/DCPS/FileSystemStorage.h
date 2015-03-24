@@ -182,7 +182,7 @@ public:
   DirectoryIterator begin_dirs(); // dirs will be sorted
   DirectoryIterator end_dirs();
 
-  Directory::Ptr get_dir(const std::vector<OPENDDS_STRING>& path);
+  Directory::Ptr get_dir(const OPENDDS_VECTOR(OPENDDS_STRING)& path);
   Directory::Ptr get_subdir(const char* name);  // slash is not a separator
 
   /// assumes all subdirectories in this dir are created with this API

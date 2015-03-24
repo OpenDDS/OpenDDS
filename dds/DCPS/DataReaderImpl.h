@@ -37,6 +37,7 @@
 #include "WriterInfo.h"
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"
+#include "PoolAllocator.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -498,11 +499,11 @@ public:
   RepoId get_topic_id();
   RepoId get_dp_id();
 
-  typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
+  typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
   typedef std::pair<PublicationId, WriterInfo::WriterState> WriterStatePair;
-  typedef std::vector<WriterStatePair> WriterStatePairVec;
+  typedef OPENDDS_VECTOR(WriterStatePair) WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -527,7 +528,7 @@ public:
 
   void update_subscription_params(const DDS::StringSeq& params) const;
 
-  typedef std::vector<void*> GenericSeq;
+  typedef OPENDDS_VECTOR(void*) GenericSeq;
 
   struct GenericBundle {
     GenericSeq samples_;

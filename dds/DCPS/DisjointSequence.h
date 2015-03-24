@@ -12,6 +12,7 @@
 #include "dcps_export.h"
 #include "Definitions.h"
 
+#include "PoolAllocator.h"
 #include <set>
 #include <vector>
 
@@ -63,7 +64,7 @@ public:
   /// For example, given a DisjointSequence 'seq' containing (1, 2, 5, 9),
   /// calling seq.insert(SequenceRange(4, 12), v) returns true
   /// and yields v = [(4, 4), (6, 8), (10, 12)] and seq = (1, 2, 4, ..., 12).
-  bool insert(const SequenceRange& range, std::vector<SequenceRange>& added);
+  bool insert(const SequenceRange& range, OPENDDS_VECTOR(SequenceRange)& added);
 
   /// Insert all numbers between range.first and range.second (both inclusive).
   bool insert(const SequenceRange& range);
@@ -97,11 +98,11 @@ public:
                  bool invert = false) const;
 
   /// Returns missing ranges of SequenceNumbers (internal gaps in the sequence)
-  std::vector<SequenceRange> missing_sequence_ranges() const;
+  OPENDDS_VECTOR(SequenceRange) missing_sequence_ranges() const;
 
   /// Returns a representation of the members of the sequence as a list of
   /// contiguous ranges (each Range is inclusive on both sides).
-  std::vector<SequenceRange> present_sequence_ranges() const;
+  OPENDDS_VECTOR(SequenceRange) present_sequence_ranges() const;
 
   void dump() const;
 
@@ -122,7 +123,7 @@ private:
   // helper methods:
 
   bool insert_i(const SequenceRange& range,
-                std::vector<SequenceRange>* gaps = 0);
+                OPENDDS_VECTOR(SequenceRange)* gaps = 0);
 
   bool insert_bitmap_range(RangeSet::iterator& iter, const SequenceRange& sr);
 

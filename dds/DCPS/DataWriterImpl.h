@@ -157,7 +157,7 @@ public:
 
   virtual DDS::ReturnCode_t assert_liveliness_by_participant();
 
-  typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
+  typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
   typedef std::set<RepoId, GUID_tKeyLessThan> IdSet;

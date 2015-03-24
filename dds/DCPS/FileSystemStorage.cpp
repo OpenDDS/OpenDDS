@@ -599,10 +599,10 @@ Directory::DirectoryIterator Directory::end_dirs()
   return DirectoryIterator(dirs_.end(), this);
 }
 
-Directory::Ptr Directory::get_dir(const std::vector<OPENDDS_STRING>& path)
+Directory::Ptr Directory::get_dir(const OPENDDS_VECTOR(OPENDDS_STRING)& path)
 {
   Directory::Ptr dir(this, false);
-  typedef std::vector<OPENDDS_STRING>::const_iterator iterator;
+  typedef OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator iterator;
 
   for (iterator iter = path.begin(), end = path.end(); iter != end; ++iter) {
     dir = dir->get_subdir(iter->c_str());

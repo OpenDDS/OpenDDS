@@ -145,7 +145,7 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
                                   const std::set<RepoId, GUID_tKeyLessThan>& exclude)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received", 6);
-  std::vector<ReceiveListenerHandle> handles;
+  OPENDDS_VECTOR(ReceiveListenerHandle) handles;
   {
     GuardType guard(this->lock_);
     for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {

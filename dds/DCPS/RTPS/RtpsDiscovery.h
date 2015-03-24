@@ -248,7 +248,7 @@ public:
     default_multicast_group_ = group;
   }
 
-  typedef std::vector<OPENDDS_STRING> AddrVec;
+  typedef OPENDDS_VECTOR(OPENDDS_STRING) AddrVec;
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
 

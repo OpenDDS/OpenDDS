@@ -86,8 +86,8 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
 
   // Create a vector to hold configuration information so we can populate
   // them after the transports instances are created.
-  typedef std::pair<TransportConfig_rch, std::vector<OPENDDS_STRING> > ConfigInfo;
-  std::vector<ConfigInfo> configInfoVec;
+  typedef std::pair<TransportConfig_rch, OPENDDS_VECTOR(OPENDDS_STRING) > ConfigInfo;
+  OPENDDS_VECTOR(ConfigInfo) configInfoVec;
 
   // Record the transport instances created, so we can place them
   // in the implicit transport configuration for this file.
@@ -284,7 +284,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
   // Populate the configurations with instances
   for (unsigned int i = 0; i < configInfoVec.size(); ++i) {
     TransportConfig_rch config = configInfoVec[i].first;
-    std::vector<OPENDDS_STRING>& insts = configInfoVec[i].second;
+    OPENDDS_VECTOR(OPENDDS_STRING)& insts = configInfoVec[i].second;
     for (unsigned int j = 0; j < insts.size(); ++j) {
       TransportInst_rch inst = this->get_inst(insts[j]);
       if (inst == 0) {

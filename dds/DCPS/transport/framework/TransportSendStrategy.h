@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
 #include "BasicQueue_T.h"
@@ -353,7 +354,8 @@ private:
   SendMode mode_before_suspend_;
 
   /// Used for delayed notifications when performing work.
-  std::vector<std::pair<TransportQueueElement*, SendMode> > delayed_delivered_notification_queue_;
+  typedef std::pair<TransportQueueElement*, SendMode> TQESendModePair;
+  OPENDDS_VECTOR(TQESendModePair) delayed_delivered_notification_queue_;
 
   /// Allocator for header data block.
   TransportMessageBlockAllocator* header_mb_allocator_;

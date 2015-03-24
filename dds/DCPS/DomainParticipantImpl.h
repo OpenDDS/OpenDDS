@@ -322,7 +322,7 @@ private:
    */
   DDS::DomainParticipantListener_ptr listener_for(DDS::StatusKind kind);
 
-  typedef std::vector<RepoId> TopicIdVec;
+  typedef OPENDDS_VECTOR(RepoId) TopicIdVec;
   /**
    * Populates an std::vector with the RepoId of the topics this
    * participant has created/found.

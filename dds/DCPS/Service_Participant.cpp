@@ -829,7 +829,7 @@ Service_Participant::remap_domains(Discovery::RepoKey oldKey,
                                    bool attach_participant)
 {
   // Search the mappings for any domains mapped to this repository.
-  std::vector<DDS::DomainId_t> domainList;
+  OPENDDS_VECTOR(DDS::DomainId_t) domainList;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
 
