@@ -4,3 +4,20 @@ project(*QosSettings) : dcps, opendds_face {
   }
 }
 
+project(*PoolAllocation) : dcps, opendds_face {
+  Source_Files {
+    PoolAllocationTest.cpp
+  }
+}
+
+project(*Pool) : dcps, opendds_face {
+  Source_Files {
+    PoolTest.cpp
+  }
+}
+
+project(*SafetyProfilePool) : dcps, opendds_face {
+  Source_Files {
+    SafetyProfilePoolTest.cpp
+  }
+}

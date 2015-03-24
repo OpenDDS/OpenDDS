@@ -5,11 +5,63 @@
 #include "ace/Malloc_Base.h"
 #include "ace/Atomic_Op.h"
 #include "ace/Singleton.h"
+#include "dcps_export.h"
+
+class PoolAllocationTest;
+class PoolTest;
+class SafetyProfilePoolTest;
 
 namespace OpenDDS {
 namespace DCPS {
 
-/// Memory pool for use when the Safety Profile is enabled.
+// An Allocated segment of the pool
+class OpenDDS_Dcps_Export PoolAllocation {
+  friend class PoolAllocationTest;
+public:
+  
+  PoolAllocation();
+  char* ptr() { return ptr_; }
+  size_t size() { return size_; }
+
+  void set(void* ptr, size_t size);
+  // Allocate some of my bytes into target, leaving remainder
+  void* allocate(size_t size, PoolAllocation* target);
+
+  char* ptr_;
+  size_t size_;
+  PoolAllocation* next_free_;  // Next smallest free block
+  bool free_;
+};
+
+class OpenDDS_Dcps_Export Pool {
+  friend class ::PoolTest;
+public:
+  Pool(size_t size, size_t max_allocs);
+  ~Pool();
+  bool include(void* ptr) { return (pool_ptr_ <= ptr) && (ptr < pool_end_); }
+  char* pool_alloc(size_t size);
+  void pool_free(void* ptr);
+
+private:
+  size_t pool_size_;
+  char* pool_ptr_;
+  char* pool_end_;          // Past the end of pool
+  size_t max_allocs_;
+  size_t allocs_in_use_;
+  PoolAllocation* allocs_;
+  PoolAllocation* first_free_;  // Largest free block
+
+  char* allocate_block(PoolAllocation* from_block,
+                       PoolAllocation* prev_block,
+                       size_t alloc_size);
+
+  // Slide array members down
+  PoolAllocation* make_room_for_allocation(int index);
+
+  void reorder_block(PoolAllocation* resized_block, PoolAllocation* prev_block);
+};
+
+/// Memory pool for use when the Safety Profeile is enabled.
 ///
 /// Saftey Profile disallows std::free() and the delete operators
 /// See PoolAllocator.h for a class that allows STL containers to use an
@@ -20,32 +72,35 @@ namespace DCPS {
 /// work is completed and becomes ready for production use.
 class SafetyProfilePool : public ACE_Allocator
 {
+  friend class SafetyProfilePoolTest;
 public:
-  explicit SafetyProfilePool(size_t size = 10*1024*1024)
-    : size_(size)
-    , pool_(new char[size])
-    , idx_(0)
+  SafetyProfilePool()
+  : init_pool_(new Pool(1024, 128))
+  , main_pool_(0)
   {
   }
 
   ~SafetyProfilePool()
   {
 #ifndef OPENDDS_SAFETY_PROFILE
-    delete[] pool_;
+    delete init_pool_;
+    delete main_pool_;
 #endif
   }
 
-  void* malloc(std::size_t n)
+  void* malloc(std::size_t size)
   {
-    const unsigned long end = idx_ += n;
-    if (end > size_) {
-      return 0;
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, lock, lock_, 0);
+    if (main_pool_) {
+      return main_pool_->pool_alloc(size);
+    } else {
+      return init_pool_->pool_alloc(size);
     }
-    return pool_ + end - n;
   }
 
   void free(void*)
   {
+    ACE_GUARD(ACE_Thread_Mutex, lock, lock_);
   }
 
   void* calloc(std::size_t, char = '\0') { return 0; }
@@ -72,9 +127,10 @@ private:
   SafetyProfilePool(const SafetyProfilePool&);
   SafetyProfilePool& operator=(const SafetyProfilePool&);
 
-  const size_t size_;
-  char* const pool_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> idx_;
+  Pool* init_pool_;
+  Pool* main_pool_;
+  ACE_Thread_Mutex lock_;
+  //ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> idx_;
 };
 
 }}
