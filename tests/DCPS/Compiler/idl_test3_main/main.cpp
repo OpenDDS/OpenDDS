@@ -631,7 +631,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   Xyz::Foo ss_foo;
 
-  const size_t sz = 4530, pad = 630; // see running totals above
+  const size_t sz = 4530 // see running totals above
+#ifdef OPENDDS_SAFETY_PROFILE
+    - 4 // theWString is gone
+#endif
+    , pad = 630;
 
   try {
     if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
