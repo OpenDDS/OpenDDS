@@ -132,7 +132,7 @@ RtpsUdpTransport::stop_accepting_or_connecting(TransportClient* client,
                                                const RepoId& remote_id)
 {
   GuardType guard(connections_lock_);
-  typedef std::multimap<TransportClient*, DataLink_rch>::iterator iter_t;
+  typedef OPENDDS_MULTIMAP(TransportClient*, DataLink_rch)::iterator iter_t;
   const std::pair<iter_t, iter_t> range =
         pending_connections_.equal_range(client);
   for (iter_t iter = range.first; iter != range.second; ++iter) {

@@ -243,7 +243,7 @@ public:
   typedef std::map<RepoId, RtpsReader, GUID_tKeyLessThan> RtpsReaderMap;
   RtpsReaderMap readers_;
 
-  typedef std::multimap<RepoId, RtpsReaderMap::iterator, GUID_tKeyLessThan>
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, RtpsReaderMap::iterator, GUID_tKeyLessThan)
     RtpsReaderIndex;
   RtpsReaderIndex reader_index_; // keys are remote data writer GUIDs
 

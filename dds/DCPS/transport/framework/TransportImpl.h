@@ -176,7 +176,7 @@ protected:
   /// returned.
   TransportReactorTask* reactor_task();
 
-  std::multimap<TransportClient*, DataLink_rch> pending_connections_;
+  OPENDDS_MULTIMAP(TransportClient*, DataLink_rch) pending_connections_;
   void add_pending_connection(TransportClient* client, DataLink* link);
 
 private:

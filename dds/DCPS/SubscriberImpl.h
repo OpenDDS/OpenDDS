@@ -168,7 +168,7 @@ private:
 
   /// Keep track of all the DataReaders attached to this
   /// Subscriber: key is the topic_name
-  typedef std::multimap<OPENDDS_STRING, DataReaderImpl*> DataReaderMap;
+  typedef OPENDDS_MULTIMAP(OPENDDS_STRING, DataReaderImpl*) DataReaderMap;
 
   /// Keep track of DataReaders with data
   /// std::set for now, want to encapsulate
