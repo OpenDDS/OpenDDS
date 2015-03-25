@@ -252,11 +252,11 @@ private:
   static OrbRunner* orb_runner_;
   static ACE_Thread_Mutex mtx_orb_runner_;
 
-  typedef std::map<RepoId, DataReaderRemote_var, DCPS::GUID_tKeyLessThan> DataReaderMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DataReaderRemote_var, DCPS::GUID_tKeyLessThan) DataReaderMap;
 
   DataReaderMap dataReaderMap_;
 
-  typedef std::map<RepoId, DataWriterRemote_var, DCPS::GUID_tKeyLessThan> DataWriterMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DataWriterRemote_var, DCPS::GUID_tKeyLessThan) DataWriterMap;
 
   DataWriterMap dataWriterMap_;
 

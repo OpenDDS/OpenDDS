@@ -110,7 +110,7 @@ public:
 
 private:
   ACE_TString full_path(const ACE_TString& relative) const;
-  typedef std::map<ACE_TString, ACE_TString> Map;
+  typedef OPENDDS_MAP(ACE_TString, ACE_TString) Map;
 
   template <typename Item>
   class Iterator
@@ -210,10 +210,10 @@ private:
   ACE_TString physical_dirname_, logical_dirname_;
 
   // overflow bucket (0==immediate) -> #entries
-  std::map<unsigned int, unsigned int> overflow_;
+  OPENDDS_MAP(unsigned int, unsigned int) overflow_;
 
   Map files_, dirs_; // logical -> physical
-  std::map<ACE_TString, unsigned int> long_names_;
+  OPENDDS_MAP(ACE_TString, unsigned int) long_names_;
   // phys. prefix (before '.') -> next available counter #
 };
 

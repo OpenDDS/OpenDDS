@@ -124,7 +124,7 @@ class OpenDDS_Model_Export Entities  {
 
   private:
     /// Map of queues.
-    typedef std::map< std::string, std::queue<DDS::TypeSupport_ptr> >
+    typedef OPENDDS_MAP( std::string, std::queue<DDS::TypeSupport_ptr> )
             TypeSupportByParticipantQueues;
 
     /// Store type support until it can be registered.
@@ -132,29 +132,29 @@ class OpenDDS_Model_Export Entities  {
 
     // Maps for access via string key names.
 
-    typedef std::map< std::string, DDS::DomainParticipant_var>
+    typedef OPENDDS_MAP( std::string, DDS::DomainParticipant_var)
             StringToParticipantMap;
 
-    typedef std::map< std::string, std::string>
+    typedef OPENDDS_MAP( std::string, std::string)
             StringToTypeNameMap;
 
-    typedef std::map< std::string, DDS::Topic_ptr> StringToTopicMap;
-    typedef std::map< std::string, StringToTopicMap>
+    typedef OPENDDS_MAP( std::string, DDS::Topic_ptr) StringToTopicMap;
+    typedef OPENDDS_MAP( std::string, StringToTopicMap)
             ParticipantToTopicMap;
 
-    typedef std::map< std::string, DDS::Publisher_ptr>
+    typedef OPENDDS_MAP( std::string, DDS::Publisher_ptr)
             StringToPublisherMap;
 
-    typedef std::map< std::string, DDS::Subscriber_ptr>
+    typedef OPENDDS_MAP( std::string, DDS::Subscriber_ptr)
             StringToSubscriberMap;
 
-    typedef std::map< std::string, DDS::DataWriter_ptr>
+    typedef OPENDDS_MAP( std::string, DDS::DataWriter_ptr)
             StringToDataWriterMap;
 
-    typedef std::map< std::string, DDS::DataReader_ptr>
+    typedef OPENDDS_MAP( std::string, DDS::DataReader_ptr)
             StringToDataReaderMap;
 
-    typedef std::map< std::string, OpenDDS::DCPS::TransportImpl*>
+    typedef OPENDDS_MAP( std::string, OpenDDS::DCPS::TransportImpl*)
             StringToTransportImplMap;
 
     StringToParticipantMap   participantByString_;

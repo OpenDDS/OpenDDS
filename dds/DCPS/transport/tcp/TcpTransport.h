@@ -115,8 +115,8 @@ private:
             ACE_Equal_To<PriorityKey>,
             ACE_Null_Mutex>              AddrLinkMap;
 
-  typedef std::map<PriorityKey, TcpDataLink_rch>   LinkMap;
-  typedef std::map<PriorityKey, TcpConnection_rch> ConnectionMap;
+  typedef OPENDDS_MAP(PriorityKey, TcpDataLink_rch)   LinkMap;
+  typedef OPENDDS_MAP(PriorityKey, TcpConnection_rch) ConnectionMap;
 
   typedef ACE_SYNCH_MUTEX         LockType;
   typedef ACE_Guard<LockType>     GuardType;

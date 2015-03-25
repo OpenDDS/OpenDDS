@@ -91,7 +91,7 @@ private:
   // (one DataSampleHeader before fragmentation).  The list must have at
   // least one value in it.  If a FragRange in the list has a sample_ with
   // a null ACE_Message_Block*, it's one that was data_unavailable().
-  typedef std::map<FragKey, OPENDDS_LIST(FragRange) > FragMap;
+  typedef OPENDDS_MAP(FragKey, OPENDDS_LIST(FragRange) ) FragMap;
   FragMap fragments_;
 
   OPENDDS_SET(FragKey) have_first_;

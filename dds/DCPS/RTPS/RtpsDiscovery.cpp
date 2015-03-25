@@ -467,11 +467,11 @@ RtpsDiscovery::assert_topic(OpenDDS::DCPS::RepoId_out topicId,
                             bool hasDcpsKey)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-  std::map<DDS::DomainId_t,
-           std::map<OPENDDS_STRING, Sedp::TopicDetails> >::iterator topic_it =
+  OPENDDS_MAP(DDS::DomainId_t,
+           OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails) )::iterator topic_it =
     topics_.find(domainId);
   if (topic_it != topics_.end()) {
-    const std::map<OPENDDS_STRING, Sedp::TopicDetails>::iterator it =
+    const OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails)::iterator it =
       topic_it->second.find(topicName);
     if (it != topic_it->second.end()
         && it->second.data_type_ != dataTypeName) {
@@ -501,13 +501,13 @@ RtpsDiscovery::find_topic(DDS::DomainId_t domainId, const char* topicName,
                           OpenDDS::DCPS::RepoId_out topicId)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-  std::map<DDS::DomainId_t,
-           std::map<OPENDDS_STRING, Sedp::TopicDetails> >::iterator topic_it =
+  OPENDDS_MAP(DDS::DomainId_t,
+           OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails) )::iterator topic_it =
     topics_.find(domainId);
   if (topic_it == topics_.end()) {
     return DCPS::NOT_FOUND;
   }
-  std::map<OPENDDS_STRING, Sedp::TopicDetails>::iterator iter =
+  OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails)::iterator iter =
     topic_it->second.find(topicName);
   if (iter == topic_it->second.end()) {
     return DCPS::NOT_FOUND;
@@ -526,8 +526,8 @@ RtpsDiscovery::remove_topic(DDS::DomainId_t domainId,
                             const OpenDDS::DCPS::RepoId& topicId)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-  std::map<DDS::DomainId_t,
-           std::map<OPENDDS_STRING, Sedp::TopicDetails> >::iterator topic_it =
+  OPENDDS_MAP(DDS::DomainId_t,
+           OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails) )::iterator topic_it =
     topics_.find(domainId);
   if (topic_it == topics_.end()) {
     return DCPS::NOT_FOUND;

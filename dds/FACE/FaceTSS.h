@@ -23,10 +23,10 @@ class Entities {
   ~Entities();
 public:
   OpenDDS_FACE_Export static Entities* instance();
-  std::map<FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var> writers_;
-  std::map<FACE::CONNECTION_ID_TYPE, DDS::DataReader_var> readers_;
-  std::map<FACE::CONNECTION_ID_TYPE,
-    std::pair<OPENDDS_STRING, FACE::TRANSPORT_CONNECTION_STATUS_TYPE> > connections_;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var) writers_;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var) readers_;
+  typedef std::pair<OPENDDS_STRING, FACE::TRANSPORT_CONNECTION_STATUS_TYPE> StrConStatPair;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, StrConStatPair ) connections_;
 };
 
 OpenDDS_FACE_Export DDS::Duration_t convertTimeout(FACE::TIMEOUT_TYPE timeout);
@@ -43,7 +43,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
                      FACE::MESSAGE_SIZE_TYPE /*message_size*/,
                      FACE::RETURN_CODE_TYPE& return_code)
 {
-  std::map<FACE::CONNECTION_ID_TYPE, DDS::DataReader_var>& readers = Entities::instance()->readers_;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = Entities::instance()->readers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
@@ -95,7 +95,7 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
                   FACE::MESSAGE_SIZE_TYPE /*message_size*/,
                   FACE::RETURN_CODE_TYPE& return_code)
 {
-  std::map<FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var>& writers = Entities::instance()->writers_;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var)& writers = Entities::instance()->writers_;
   if (!writers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
@@ -180,7 +180,7 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
                        FACE::MESSAGE_SIZE_TYPE /*max_message_size*/,
                        FACE::RETURN_CODE_TYPE& return_code)
 {
-  std::map<FACE::CONNECTION_ID_TYPE, DDS::DataReader_var>& readers = Entities::instance()->readers_;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = Entities::instance()->readers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;

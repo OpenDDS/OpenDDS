@@ -143,7 +143,7 @@ public:
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.
-  std::map<SequenceNumber, ReceivedDataSample> historic_samples_;
+  OPENDDS_MAP(SequenceNumber, ReceivedDataSample) historic_samples_;
 
   /// After receiving END_HISTORIC_SAMPLES, check for duplicates
   SequenceNumber last_historic_seq_;
@@ -172,7 +172,7 @@ public:
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
-  typedef std::map < ::DDS::InstanceHandle_t, bool> OwnerEvaluateFlags;
+  typedef OPENDDS_MAP( ::DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;
   OwnerEvaluateFlags owner_evaluated_;
 
   /// Data to support GROUP access scope.

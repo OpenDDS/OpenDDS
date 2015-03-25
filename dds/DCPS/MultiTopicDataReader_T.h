@@ -104,7 +104,7 @@ private:
     }
     Sample sample_;
     DDS::ViewStateKind view_;
-    std::map<OPENDDS_STRING/*topicName*/, DDS::InstanceHandle_t> info_;
+    OPENDDS_MAP(OPENDDS_STRING/*topicName*/, DDS::InstanceHandle_t) info_;
   };
 
   typedef std::vector<SampleWithInfo> SampleVec;
@@ -117,7 +117,7 @@ private:
                      const MetaStruct& meta);
 
   // Process all joins (recursively) in the QueryPlan 'qp'.
-  void process_joins(std::map<TopicSet, SampleVec>& partialResults,
+  void process_joins(OPENDDS_MAP(TopicSet, SampleVec)& partialResults,
                      SampleVec starting, const TopicSet& seen,
                      const QueryPlan& qp);
 
@@ -132,7 +132,7 @@ private:
   // When no common keys are found, natural join devolves to a cross-join where
   // each instance in the joined-to-topic (qp) is combined with the results so
   // far (partialResults).
-  void cross_join(std::map<TopicSet, SampleVec>& partialResults,
+  void cross_join(OPENDDS_MAP(TopicSet, SampleVec)& partialResults,
                   const TopicSet& seen, const QueryPlan& qp);
 
   // Combine two vectors of data, 'resulting' and 'other', with the results of

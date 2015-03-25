@@ -696,7 +696,7 @@ ACE_TString Directory::add_entry()
     return ACE_TEXT("");
   }
 
-  typedef std::map<unsigned int, unsigned int>::iterator iterator;
+  typedef OPENDDS_MAP(unsigned int, unsigned int)::iterator iterator;
   // find existing overflow bucket with capacity
   bool found_gap(false);
   unsigned int last_seen(0), unused_bucket(0);

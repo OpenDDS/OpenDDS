@@ -201,7 +201,7 @@ private:
     ~ReaderInfo();
   };
 
-  typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> RepoIdToReaderInfoMap;
+  typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
   RepoIdToReaderInfoMap reader_info_;
 
   void association_complete_i(const RepoId& remote_id);
@@ -239,7 +239,7 @@ private:
   /// and status changes.
   ACE_Recursive_Thread_Mutex lock_;
 
-  typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
 
   RepoIdToHandleMap id_to_handle_map_;
 
@@ -312,7 +312,7 @@ private:
   /// Flag indicates that the init() is called.
   // bool                       initialized_;
 
-  typedef std::map<RepoId, SequenceNumber, GUID_tKeyLessThan>
+  typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan)
   RepoIdToSequenceMap;
 
   RepoIdToSequenceMap idToSequence_;

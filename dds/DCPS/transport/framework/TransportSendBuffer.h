@@ -17,6 +17,7 @@
 
 #include "dds/DCPS/Definitions.h"
 
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 #include <utility>
 
@@ -74,7 +75,7 @@ public:
   static const size_t UNLIMITED = 0;
 
   void release_all();
-  typedef std::map<SequenceNumber, BufferType> BufferMap;
+  typedef OPENDDS_MAP(SequenceNumber, BufferType) BufferMap;
   void release_acked(SequenceNumber seq);
   void release(BufferMap::iterator buffer_iter);
 
@@ -123,7 +124,7 @@ private:
 
   BufferMap buffers_;
 
-  typedef std::map<SequenceNumber, BufferMap> FragmentMap;
+  typedef OPENDDS_MAP(SequenceNumber, BufferMap) FragmentMap;
   FragmentMap* fragments_;
 };
 
