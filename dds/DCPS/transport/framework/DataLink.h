@@ -51,7 +51,7 @@ class  DataSampleElement;
 class  ThreadPerConnectionSendTask;
 class  TransportClient;
 
-typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan> DataLinkSetMap;
+typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetMap;
 
 /**
  * This class manages the reservations based on the associations between datareader
@@ -375,11 +375,11 @@ private:
   ACE_Time_Value scheduled_to_stop_at_;
 
   /// Map publication Id value to TransportSendListener.
-  typedef std::map<RepoId, TransportSendListener*, GUID_tKeyLessThan> IdToSendListenerMap;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportSendListener*, GUID_tKeyLessThan) IdToSendListenerMap;
   IdToSendListenerMap send_listeners_;
 
   /// Map subscription Id value to TransportReceieveListener.
-  typedef std::map<RepoId, TransportReceiveListener*, GUID_tKeyLessThan> IdToRecvListenerMap;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener*, GUID_tKeyLessThan) IdToRecvListenerMap;
   IdToRecvListenerMap recv_listeners_;
 
   /// If default_listener_ is not null and this DataLink receives a sample

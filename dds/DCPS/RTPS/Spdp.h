@@ -180,8 +180,8 @@ private:
     ACE_Time_Value last_seen_;
     DDS::InstanceHandle_t bit_ih_;
   };
-  typedef std::map<DCPS::RepoId, DiscoveredParticipant,
-                   DCPS::GUID_tKeyLessThan> DiscoveredParticipantMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
+                   DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;
   typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
   DiscoveredParticipantMap participants_;
 

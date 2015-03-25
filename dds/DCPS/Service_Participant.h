@@ -301,9 +301,9 @@ public:
 #endif
 
   /// For internal OpenDDS Use (needed for monitor code)
-  typedef std::map<Discovery::RepoKey, Discovery_rch> RepoKeyDiscoveryMap;
+  typedef OPENDDS_MAP(Discovery::RepoKey, Discovery_rch) RepoKeyDiscoveryMap;
   const RepoKeyDiscoveryMap& discoveryMap() const;
-  typedef std::map<DDS::DomainId_t, Discovery::RepoKey> DomainRepoMap;
+  typedef OPENDDS_MAP(DDS::DomainId_t, Discovery::RepoKey) DomainRepoMap;
   const DomainRepoMap& domainRepoMap() const;
 
   void register_discovery_type(const char* section_name,
@@ -409,7 +409,7 @@ private:
   int load_discovery_configuration(ACE_Configuration_Heap& cf,
                                    const ACE_TCHAR* section_name);
 
-  std::map<OPENDDS_STRING, Discovery::Config*> discovery_types_;
+  OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*) discovery_types_;
 
   ACE_ARGV ORB_argv_;
 

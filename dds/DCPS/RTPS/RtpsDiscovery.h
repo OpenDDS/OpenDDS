@@ -276,13 +276,13 @@ private:
     ACE_Thread_Mutex mtx_;
   } reactor_runner_;
 
-  typedef std::map<DCPS::RepoId, DCPS::RcHandle<Spdp>, DCPS::GUID_tKeyLessThan> ParticipantMap;
-  typedef std::map<DDS::DomainId_t, ParticipantMap> DomainParticipantMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, DCPS::RcHandle<Spdp>, DCPS::GUID_tKeyLessThan) ParticipantMap;
+  typedef OPENDDS_MAP(DDS::DomainId_t, ParticipantMap) DomainParticipantMap;
 
   DomainParticipantMap participants_;
 
-  std::map<DDS::DomainId_t, std::map<OPENDDS_STRING, Sedp::TopicDetails> > topics_;
-  std::map<DDS::DomainId_t, std::map<OPENDDS_STRING, unsigned int> > topic_use_;
+  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails) ) topics_;
+  OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, unsigned int) ) topic_use_;
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;

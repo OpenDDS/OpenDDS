@@ -116,7 +116,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
                                        typename SampleSeq::PrivateMemberAccess& received_data_p)
 {
   typedef typename SampleSeq::value_type Sample;
-  typedef std::map<SubscriptionInstance*, InstanceData> InstanceMap;
+  typedef OPENDDS_MAP(SubscriptionInstance*, InstanceData) InstanceMap;
   InstanceMap inst_map;
 
   typedef std::set<SubscriptionInstance*> InstanceSet;

@@ -26,7 +26,7 @@ class ReceivedDataSample;
 class OpenDDS_Dcps_Export ReceiveListenerSetMap {
 public:
 
-  typedef std::map<RepoId, ReceiveListenerSet_rch, GUID_tKeyLessThan> MapType;
+  typedef OPENDDS_MAP_CMP(RepoId, ReceiveListenerSet_rch, GUID_tKeyLessThan) MapType;
 
   ReceiveListenerSetMap();
   virtual ~ReceiveListenerSetMap();

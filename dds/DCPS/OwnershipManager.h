@@ -43,7 +43,7 @@ public:
     ReaderVec readers_;
   };
 
-  typedef std::map<OPENDDS_STRING, InstanceMap> TypeInstanceMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, InstanceMap) TypeInstanceMap;
 
   struct WriterInfo {
     WriterInfo (const PublicationId& pub_id,
@@ -69,7 +69,7 @@ public:
     InstanceStateVec instance_states_;
   };
 
-  typedef std::map < ::DDS::InstanceHandle_t, OwnershipWriterInfos> InstanceOwnershipWriterInfos;
+  typedef OPENDDS_MAP( ::DDS::InstanceHandle_t, OwnershipWriterInfos) InstanceOwnershipWriterInfos;
 
   OwnershipManager ();
   ~OwnershipManager ();

@@ -174,7 +174,7 @@ protected:
   };
 
   // key: topicName for this reader
-  std::map<OPENDDS_STRING, QueryPlan> query_plans_;
+  OPENDDS_MAP(OPENDDS_STRING, QueryPlan) query_plans_;
 };
 
 }

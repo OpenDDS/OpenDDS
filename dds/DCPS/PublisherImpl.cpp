@@ -646,7 +646,7 @@ PublisherImpl::wait_for_acknowledgments(
         DDS::RETCODE_NOT_ENABLED);
   }
 
-  typedef std::map<DataWriterImpl*, DataWriterImpl::AckToken> DataWriterAckMap;
+  typedef OPENDDS_MAP(DataWriterImpl*, DataWriterImpl::AckToken) DataWriterAckMap;
   DataWriterAckMap ack_writers;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
