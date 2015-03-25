@@ -279,7 +279,7 @@ module Xyz {
     float x;
     float y;
     wchar theWChar;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if !defined OPENDDS_SAFETY_PROFILE && !defined NO_TEST_WSTRING
     wstring theWString;
 #endif
     long double theLongDouble;

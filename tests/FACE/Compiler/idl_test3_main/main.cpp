@@ -587,7 +587,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   Xyz::Foo ss_foo;
 
   const size_t sz = 3593 // see running totals above
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_SAFETY_PROFILE || defined NO_TEST_WSTRING
     - 4 // theWString is gone
 #endif
     , pad = 507;
