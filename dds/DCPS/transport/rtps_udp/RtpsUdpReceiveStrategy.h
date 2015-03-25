@@ -84,7 +84,7 @@ private:
   SequenceNumber last_received_;
 
   const ReceivedDataSample* recvd_sample_;
-  std::set<RepoId, GUID_tKeyLessThan> readers_withheld_;
+  OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) readers_withheld_;
 
   SequenceRange frags_;
   TransportReassembly reassembly_;

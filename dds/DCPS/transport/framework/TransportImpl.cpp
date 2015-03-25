@@ -69,7 +69,7 @@ TransportImpl::shutdown()
 
   this->pre_shutdown_i();
 
-  std::set<TransportClient*> local_clients;
+  OPENDDS_SET(TransportClient*) local_clients;
 
   {
     GuardType guard(this->lock_);
@@ -85,7 +85,7 @@ TransportImpl::shutdown()
     // We can release our lock_ now.
   }
 
-  for (std::set<TransportClient*>::iterator it = local_clients.begin();
+  for (OPENDDS_SET(TransportClient*)::iterator it = local_clients.begin();
        it != local_clients.end(); ++it) {
     (*it)->transport_detached(this);
   }

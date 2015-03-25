@@ -14,6 +14,7 @@
 #include "ace/Null_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
 #include "dds/DCPS/LocalObject.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include <map>
 #include <set>
@@ -45,7 +46,7 @@ public:
 
   typedef Objref_Servant_Pair <DomainParticipantImpl, DDS::DomainParticipant,
     DDS::DomainParticipant_ptr, DDS::DomainParticipant_var> Participant_Pair;
-  typedef std::set<Participant_Pair> DPSet;
+  typedef OPENDDS_SET(Participant_Pair) DPSet;
   typedef std::map<DDS::DomainId_t, DPSet> DPMap;
 
   /** Constructor **/

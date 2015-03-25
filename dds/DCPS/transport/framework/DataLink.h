@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "ReceiveListenerSetMap.h"
 #include "RepoIdSetMap.h"
 #include "SendResponseListener.h"
@@ -164,7 +165,7 @@ public:
   /// Varation of data_received() that allows for excluding a subset of readers.
   /// Any reader ID that appears in the exclude set will be skipped.
   void data_received_excluding(ReceivedDataSample& sample,
-                               const std::set<RepoId, GUID_tKeyLessThan>& excl);
+                               const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& excl);
 
   /// Obtain a unique identifier for this DataLink object.
   DataLinkIdType id() const;
@@ -359,7 +360,7 @@ private:
 
   void data_received_i(ReceivedDataSample& sample,
                        const RepoId& readerId,
-                       const std::set<RepoId, GUID_tKeyLessThan>& exclude);
+                       const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& exclude);
 
   typedef ACE_SYNCH_MUTEX     LockType;
 

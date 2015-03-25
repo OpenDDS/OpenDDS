@@ -93,7 +93,7 @@ public:
   /// 'addrs' with the network addresses of any remote peers (or if 'local_id'
   /// is GUID_UNKNOWN, all known addresses).
   void get_locators(const RepoId& local_id,
-                    std::set<ACE_INET_Addr>& addrs) const;
+                    OPENDDS_SET(ACE_INET_Addr)& addrs) const;
 
   ACE_INET_Addr get_locator(const RepoId& remote_id) const;
 
@@ -286,7 +286,7 @@ public:
                                   bool durable = false);
 
   void send_nackfrag_replies(RtpsWriter& writer, DisjointSequence& gaps,
-                             std::set<ACE_INET_Addr>& gap_recipients);
+                             OPENDDS_SET(ACE_INET_Addr)& gap_recipients);
 
   template<typename T, typename FN>
   void datareader_dispatch(const T& submessage, const GuidPrefix_t& src_prefix,

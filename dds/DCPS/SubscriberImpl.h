@@ -174,7 +174,7 @@ private:
   /// std::set for now, want to encapsulate
   /// this so we can switch between a set or
   /// list depending on Presentation Qos.
-  typedef std::set<DataReaderImpl*> DataReaderSet;
+  typedef OPENDDS_SET(DataReaderImpl*) DataReaderSet;
 
   /// DataReader id to qos map.
   typedef std::map<RepoId, DDS::DataReaderQos, GUID_tKeyLessThan> DrIdToQosMap;

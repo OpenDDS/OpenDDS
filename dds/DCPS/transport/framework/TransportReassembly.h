@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "ReceivedDataSample.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include <list>
 #include <map>
@@ -93,7 +94,7 @@ private:
   typedef std::map<FragKey, std::list<FragRange> > FragMap;
   FragMap fragments_;
 
-  std::set<FragKey> have_first_;
+  OPENDDS_SET(FragKey) have_first_;
 
   static bool insert(std::list<FragRange>& flist,
                      const SequenceRange& seqRange,

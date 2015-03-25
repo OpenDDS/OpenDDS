@@ -894,7 +894,8 @@ private:
   /// Type of raw latency data buffer.
   DataCollector<double>::OnFull raw_latency_buffer_type_;
 
-  typedef std::set<DDS::ReadCondition_var, VarLess<DDS::ReadCondition> > ReadConditionSet;
+  typedef VarLess<DDS::ReadCondition> RCCompLess;
+  typedef OPENDDS_SET_CMP(DDS::ReadCondition_var,  RCCompLess) ReadConditionSet;
   ReadConditionSet read_conditions_;
 
   /// Monitor object for this entity

@@ -227,7 +227,7 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
 
 void
 RtpsUdpDataLink::get_locators(const RepoId& local_id,
-                              std::set<ACE_INET_Addr>& addrs) const
+                              OPENDDS_SET(ACE_INET_Addr)& addrs) const
 {
   using std::map;
   typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
@@ -1474,7 +1474,7 @@ RtpsUdpDataLink::send_nack_replies()
   for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
 
     // consolidate requests from N readers
-    std::set<ACE_INET_Addr> recipients;
+    OPENDDS_SET(ACE_INET_Addr) recipients;
     DisjointSequence requests;
     RtpsWriter& writer = rw->second;
 
@@ -1575,7 +1575,7 @@ RtpsUdpDataLink::send_nack_replies()
 void
 RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
                                        DisjointSequence& gaps,
-                                       std::set<ACE_INET_Addr>& gap_recipients)
+                                       OPENDDS_SET(ACE_INET_Addr)& gap_recipients)
 {
   typedef std::map<SequenceNumber, DisjointSequence> FragmentInfo;
   std::map<ACE_INET_Addr, FragmentInfo> requests;
@@ -1794,7 +1794,7 @@ RtpsUdpDataLink::send_heartbeats()
 
   using namespace OpenDDS::RTPS;
   OPENDDS_VECTOR(HeartBeatSubmessage) subm;
-  std::set<ACE_INET_Addr> recipients;
+  OPENDDS_SET(ACE_INET_Addr) recipients;
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
   const ACE_Time_Value now = ACE_OS::gettimeofday();
 
@@ -1902,7 +1902,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
   const RepoId pub_id = tsce->publication_id();
 
   // Populate the recipients.
-  std::set<ACE_INET_Addr> recipients;
+  OPENDDS_SET(ACE_INET_Addr) recipients;
   get_locators (pub_id, recipients);
   if (recipients.empty()) {
     return;

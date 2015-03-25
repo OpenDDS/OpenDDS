@@ -56,7 +56,7 @@ enum RtpsFlags { FLAG_E = 1, FLAG_Q = 2, FLAG_D = 4 };
 class RtpsDiscovery;
 class Spdp;
 
-typedef std::set<DCPS::RepoId, DCPS::GUID_tKeyLessThan> RepoIdSet;
+typedef OPENDDS_SET_CMP(DCPS::RepoId, DCPS::GUID_tKeyLessThan) RepoIdSet;
 
 class WaitForAcks;
 
@@ -429,7 +429,7 @@ private:
   }
 
   RepoIdSet ignored_guids_;
-  std::set<OPENDDS_STRING> ignored_topics_;
+  OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
 
   // Topic:
   struct TopicDetailsEx : TopicDetails {

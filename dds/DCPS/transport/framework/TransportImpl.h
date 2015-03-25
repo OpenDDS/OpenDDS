@@ -22,6 +22,7 @@
 #include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 #include <set>
 #include <string>
@@ -237,7 +238,7 @@ public:
   /// Lock to protect the config_ and reactor_task_ data members.
   mutable LockType lock_;
 
-  std::set<TransportClient*> clients_;
+  OPENDDS_SET(TransportClient*) clients_;
 
   /// A reference (via a smart pointer) to the TransportInst
   /// object that was supplied to us during our configure() method.

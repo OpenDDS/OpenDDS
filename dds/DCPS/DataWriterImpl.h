@@ -160,7 +160,7 @@ public:
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  typedef std::set<RepoId, GUID_tKeyLessThan> IdSet;
+  typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) IdSet;
   void get_readers(IdSet& readers);
 
   virtual DDS::ReturnCode_t get_matched_subscriptions(

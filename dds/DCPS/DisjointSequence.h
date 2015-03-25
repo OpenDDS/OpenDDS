@@ -116,7 +116,7 @@ private:
   }
 
   typedef bool (*SRCompare)(const SequenceRange&, const SequenceRange&);
-  typedef std::set<SequenceRange, SRCompare> RangeSet;
+  typedef OPENDDS_SET_CMP(SequenceRange, SRCompare) RangeSet;
   RangeSet sequences_;
 
 

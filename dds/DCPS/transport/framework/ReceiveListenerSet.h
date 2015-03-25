@@ -15,6 +15,7 @@
 
 #include "ace/Synch.h"
 
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 #include <set>
 
@@ -43,7 +44,7 @@ public:
   ssize_t size() const;
 
   void data_received(const ReceivedDataSample& sample,
-                     const std::set<RepoId, GUID_tKeyLessThan>& exclude);
+                     const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& exclude);
   void data_received(const ReceivedDataSample& sample, const RepoId& readerId);
 
   /// Give access to the underlying map for iteration purposes.

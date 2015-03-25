@@ -88,8 +88,8 @@ public:
   typedef Objref_Servant_Pair <TopicImpl, DDS::Topic,
                                DDS::Topic_ptr, DDS::Topic_var> Topic_Pair;
 
-  typedef std::set<Subscriber_Pair> SubscriberSet;
-  typedef std::set<Publisher_Pair> PublisherSet;
+  typedef OPENDDS_SET(Subscriber_Pair) SubscriberSet;
+  typedef OPENDDS_SET(Publisher_Pair) PublisherSet;
 
   class OpenDDS_Dcps_Export RepoIdSequence {
 public:
@@ -493,8 +493,8 @@ private:
   std::map<OPENDDS_STRING, RcHandle<FilterEvaluator> > filter_cache_;
 #endif
 
-  typedef std::set<Recorder_var, VarLess<Recorder> > RecorderSet;
-  typedef std::set<Replayer_var, VarLess<Replayer> > ReplayerSet;
+  typedef OPENDDS_SET_CMP(Recorder_var, VarLess<Recorder> ) RecorderSet;
+  typedef OPENDDS_SET_CMP(Replayer_var, VarLess<Replayer> ) ReplayerSet;
 
   RecorderSet recorders_;
   ReplayerSet replayers_;
