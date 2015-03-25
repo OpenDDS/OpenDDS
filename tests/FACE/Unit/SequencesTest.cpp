@@ -280,6 +280,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   const S1_var& s1vc = s1v;
   TEST_CHECK(s1vc[1] == 1);
 
+#if !defined __SUNPRO_CC && (!defined _MSC_VER || _MSC_VER >= 1500) && \
+  (!defined __GNUC__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC__MINOR__ > 1))
   S4_var s4v = new S4;
   s4v->length(2);
   s4v[0].i1_ = 3;
@@ -287,6 +289,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   s4v[1] = s4v[0];
   const S4_var& s4vc = s4v;
   TEST_CHECK(s4vc[1].s1_ == "testing");
+#endif
 
   printf("%d assertions passed\n", assertions);
   return 0;
