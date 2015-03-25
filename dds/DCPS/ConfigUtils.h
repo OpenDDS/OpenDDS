@@ -29,7 +29,7 @@ namespace DCPS {
   /// Helper types and functions for config file parsing
   typedef std::map<OPENDDS_STRING, OPENDDS_STRING> ValueMap;
   typedef std::pair<OPENDDS_STRING, ACE_Configuration_Section_Key> SubsectionPair;
-  typedef std::list<SubsectionPair> KeyList;
+  typedef OPENDDS_LIST(SubsectionPair) KeyList;
 
   template <typename T> bool convertToInteger( const OPENDDS_STRING& s,
                                                T& value )

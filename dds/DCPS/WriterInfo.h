@@ -128,7 +128,8 @@ public:
   ACE_Time_Value last_liveliness_activity_time_;
 
   /// Times after which we no longer need to respond to a REQUEST_ACK message.
-  typedef std::list<std::pair<SequenceNumber, ACE_Time_Value> > DeadlineList;
+  typedef std::pair<SequenceNumber, ACE_Time_Value> SeqDeadlinePair;
+  typedef OPENDDS_LIST(SeqDeadlinePair) DeadlineList;
   DeadlineList ack_deadlines_;
 
   DisjointSequence ack_sequence_;

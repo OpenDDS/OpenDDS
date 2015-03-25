@@ -109,6 +109,8 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
           OpenDDS::DCPS::PoolAllocator<K> >
 #define OPENDDS_VECTOR(T) std::vector<T, \
           OpenDDS::DCPS::PoolAllocator<T> >
+#define OPENDDS_LIST(T) std::list<T, \
+          OpenDDS::DCPS::PoolAllocator<T> >
 #else
 #define OPENDDS_STRING std::string
 #define OPENDDS_MAP(K, V) std::map<K, V>
@@ -118,6 +120,7 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 #define OPENDDS_SET(K) std::set<K>
 #define OPENDDS_SET_CMP(K, C) std::set<K, C>
 #define OPENDDS_VECTOR(T) std::vector<T>
+#define OPENDDS_LIST(T) std::list<T>
 #endif // OPENDDS_SAFETY_PROFILE
 
 #endif // OPENDDS_DCPS_POOL_ALLOCATOR_H

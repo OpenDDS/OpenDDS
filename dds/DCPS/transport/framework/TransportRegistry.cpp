@@ -91,7 +91,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
 
   // Record the transport instances created, so we can place them
   // in the implicit transport configuration for this file.
-  std::list<TransportInst_rch> instances;
+  OPENDDS_LIST(TransportInst_rch) instances;
 
   ACE_TString sect_name;
 
@@ -310,7 +310,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                        -1);
     }
     instances.sort(predicate);
-    for (std::list<TransportInst_rch>::const_iterator it = instances.begin();
+    for (OPENDDS_LIST(TransportInst_rch)::const_iterator it = instances.begin();
          it != instances.end(); ++it) {
       config->instances_.push_back(*it);
     }

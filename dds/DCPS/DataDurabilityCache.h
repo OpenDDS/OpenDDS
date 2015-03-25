@@ -182,7 +182,7 @@ public:
 
   typedef ACE_Hash_Map_With_Allocator<key_type,
   sample_list_type *> sample_map_type;
-  typedef std::list<long> timer_id_list_type;
+  typedef OPENDDS_LIST(long) timer_id_list_type;
 
   /// Constructors.
   DataDurabilityCache(DDS::DurabilityQosPolicyKind kind);
