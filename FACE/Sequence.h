@@ -292,13 +292,16 @@ namespace FaceTypes {
     // max_size() inherited from AllocPolicy
     bool empty() const { return !length_; }
 
+#ifndef __SUNPRO_CC
+  private:
+    friend struct AllocPolicy<T, Sequence, Bounds>;
+#endif
+    void replace_i(size_type maximum, size_type length,
+                   T* data, seq_flag_type release);
+
   private:
     using AllocPolicy<T, Sequence, Bounds>::allocate;
     void lazy_alloc() const;
-
-    friend struct AllocPolicy<T, Sequence, Bounds>;
-    void replace_i(size_type maximum, size_type length,
-                   T* data, seq_flag_type release);
 
     size_type length_;
     mutable seq_flag_type release_;
