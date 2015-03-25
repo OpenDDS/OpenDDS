@@ -855,7 +855,8 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                                      Discovery::RepoKey key,
                                      bool attach_participant)
 {
-  std::vector<std::pair<Discovery_rch, RepoId> > repoList;
+  typedef std::pair<Discovery_rch, RepoId> DiscRepoPair;
+  OPENDDS_VECTOR(DiscRepoPair) repoList;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
     DomainRepoMap::const_iterator where = this->domainRepoMap_.find(domain);
