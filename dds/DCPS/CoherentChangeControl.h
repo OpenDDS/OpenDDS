@@ -16,6 +16,7 @@
 #include "Serializer.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+#include "PoolAllocator.h"
 #include <map>
 #include <iosfwd>
 
