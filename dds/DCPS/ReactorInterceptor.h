@@ -9,6 +9,7 @@
 #ifndef OPENDDS_DCPS_REACTORINTERCEPTOR_H
 #define OPENDDS_DCPS_REACTORINTERCEPTOR_H
 
+#include "PoolAllocator.h"
 #include <queue>
 #include "ace/Reactor.h"
 #include "ace/Thread.h"
@@ -69,7 +70,7 @@ private:
   ACE_thread_t owner_;
   ACE_Thread_Mutex mutex_;
   ACE_Condition_Thread_Mutex condition_;
-  std::queue<Command*> command_queue_;
+  OPENDDS_QUEUE(Command*) command_queue_;
   ACE_UINT64 registration_counter_;
   bool destroy_;
 };
