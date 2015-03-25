@@ -46,7 +46,6 @@ TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
                             const SequenceRange& seqRange,
                             ReceivedDataSample& data)
 {
-  using std::list;
   const SequenceNumber::Value prev = seqRange.first.getValue() - 1,
     next = seqRange.second.getValue() + 1;
 
@@ -288,7 +287,6 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
 {
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::data_unavailable() "
     "dropped %q-%q\n", dropped.first.getValue(), dropped.second.getValue()));
-  using std::list;
   typedef OPENDDS_LIST(FragRange)::iterator list_iterator;
 
   for (FragMap::iterator iter = fragments_.begin(); iter != fragments_.end();
