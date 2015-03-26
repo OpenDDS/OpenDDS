@@ -21,8 +21,7 @@ const int num_messages = 10;
 
 Writer::Writer(DDS::DataWriter_ptr writer)
   : writer_(DDS::DataWriter::_duplicate(writer)),
-    finished_instances_(0),
-    timeout_writes_(0)
+    finished_instances_(0)
 {
 }
 
@@ -105,16 +104,15 @@ Writer::svc()
     message.count      = 0;
 
     for (int i = 0; i < num_messages; i++) {
-      DDS::ReturnCode_t error = message_dw->write(message, handle);
+      DDS::ReturnCode_t error;
+      do {
+        error = message_dw->write(message, handle);
+      } while (error == DDS::RETCODE_TIMEOUT);
 
       if (error != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: write returned %d!\n"), error));
-
-        if (error == DDS::RETCODE_TIMEOUT) {
-          timeout_writes_++;
-        }
       }
 
       message.count++;
@@ -133,10 +131,4 @@ bool
 Writer::is_finished() const
 {
   return finished_instances_ == num_instances_per_writer;
-}
-
-int
-Writer::get_timeout_writes() const
-{
-  return timeout_writes_.value();
 }
