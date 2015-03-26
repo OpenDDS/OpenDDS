@@ -46,35 +46,32 @@ namespace FilterExpressionGrammar {
   using namespace GrammarUtils;
 
   struct OptPlusMinus : Opt<Or<Char<'+'>, Char<'-'> > > {};
-  struct IntValDec : Seq<OptPlusMinus, Plus<Digit>,
-    NotAt<Digit>, NotAt<Or<Char<'x'>, Char<'X'>, Char<'.'> > > > {};
-  struct IntValHex : Seq<CharSeqIgnoreCase<'0', 'x'>, Plus<HexDigit>,
-    NotAlphaNum> {};
-  struct IntVal : Or<IntValDec, IntValHex> {};
+  struct IntValDec : Seq<OptPlusMinus, Plus<Digit>, NotAt<Digit>, NotAt<Or<Char<'x'>, Char<'X'>, Char<'.'> > > > {};
+  struct IntValHex : Seq<CharSeqIgnoreCase<'0', 'x'>, Plus<HexDigit>, NotAlphaNum> {};
+  struct IntVal : Or<
+    IntValDec,
+    IntValHex
+    > {};
 
   struct Quote : CharSetParser<CharSet<'\'', '`'> > {};
   struct CharVal : Seq<Quote, AnyChar, Char<'\''> > {};
 
   struct OptExp : Opt<Seq<Char<'e'>, OptPlusMinus, Plus<Digit> > > {};
-  struct FloatStartWithDigit : Seq<Plus<Digit>, Opt<Char<'.'> >,
-    Star<Digit> > {};
+  struct FloatStartWithDigit : Seq<Plus<Digit>, Opt<Char<'.'> >, Star<Digit> > {};
   struct FloatStartWithDot : Seq<Char<'.'>, Plus<Digit> > {};
-  struct FloatVal : Seq<OptPlusMinus,
-    Or<FloatStartWithDigit, FloatStartWithDot>, OptExp, NotAlphaNum> {};
+  struct FloatVal : Seq<OptPlusMinus, Or<FloatStartWithDigit, FloatStartWithDot>, OptExp, NotAlphaNum> {};
 
-  struct StrVal : Seq<Quote, Star<AnyCharExcept<CharSet<'\n', '\''> > >,
-    Char<'\''> > {};
+  struct StrVal : Seq<Quote, Star<AnyCharExcept<CharSet<'\n', '\''> > >, Char<'\''> > {};
 
   struct ParamVal : Seq<Char<'%'>, Digit, Opt<Digit> > {};
 
-  struct Param : Tok<Or<Store<IntVal>, Store<CharVal>, Store<FloatVal>,
-    Store<StrVal>, Store<ParamVal> > > {}; // EnumVal is parsed as StrVal
+  struct Param : Tok<Or<Store<IntVal>, Store<CharVal>, Store<FloatVal>, Store<StrVal>, Store<ParamVal> > > {}; // EnumVal is parsed as StrVal
 
   struct AND : Keyword<CharSeqIgnoreCase<'a', 'n', 'd'> > {};
   struct OR : Keyword<CharSeqIgnoreCase<'o', 'r'> > {};
   struct NOT : Keyword<CharSeqIgnoreCase<'n', 'o', 't'> > {};
-  struct BETWEEN
-    : Keyword<CharSeqIgnoreCase<'b', 'e', 't', 'w', 'e', 'e', 'n'> > {};
+  struct BETWEEN : Keyword<CharSeqIgnoreCase<'b', 'e', 't', 'w', 'e', 'e', 'n'> > {};
+  struct NOT_BETWEEN : Seq <NOT, BETWEEN> { };
 
   struct OP_EQ : Tok<Char<'='> > {};
   struct OP_LT : Tok<Seq<Char<'<'>, NotAt<Or<Char<'='>, Char<'>'> > > > > {};
@@ -83,30 +80,47 @@ namespace FilterExpressionGrammar {
   struct OP_GTEQ : Tok<Seq<Char<'>'>, Char<'='> > > {};
   struct OP_NEQ : Tok<Seq<Char<'<'>, Char<'>'> > > {};
   struct OP_LIKE : Keyword<CharSeqIgnoreCase<'l', 'i', 'k', 'e'> > {};
-  struct RelOp : Or<Store<OP_EQ>, Store<OP_LT>, Store<OP_GT>, Store<OP_LTEQ>,
-    Store<OP_GTEQ>, Store<OP_NEQ>, Store<OP_LIKE> > {};
+  struct RelOp : Or<
+    Store<OP_EQ>,
+    Store<OP_LT>,
+    Store<OP_GT>,
+    Store<OP_LTEQ>,
+    Store<OP_GTEQ>,
+    Store<OP_NEQ>,
+    Store<OP_LIKE>
+    > {};
 
-  struct FieldName : DelimitedList<Seq<Letter, Star<IdentNextChar> >,
-    Char<'.'> > {};
+  struct FieldName : DelimitedList<Seq<Letter, Star<IdentNextChar> >, Char<'.'> > {};
 
-  struct BetweenPred : Seq<ST<FieldName>, Opt<Store<NOT> >, BETWEEN,
-    Param, AND, Param> {};
-  struct CmpFnParam : Seq<ST<FieldName>, RelOp, Param> {};
-  struct CmpParamFn : Seq<Param, RelOp, ST<FieldName> > {};
-  struct CmpBothFn : Seq<ST<FieldName>, RelOp, ST<FieldName> > {};
-  struct Pred : Or<Store<BetweenPred>, Store<CmpFnParam>, Store<CmpParamFn>,
-    Store<CmpBothFn> > {};
+  struct Primary;
+  struct _Call : Seq< ST<FieldName>, Opt<Seq<Tok<Char<'('> >, Primary, Tok<Char<','> >, Primary, Tok<Char<')'> > > > > { };
+  struct Call : Store<_Call> { };
+  struct Primary : Or<
+    Call,
+    Param
+    > { };
+
+  struct _BetweenPred : Seq<ST<FieldName>, Or<Store<BETWEEN>, Store<NOT_BETWEEN> >, Param, AND, Param> {};
+  struct BetweenPred : Store<_BetweenPred> { };
+  struct _CompPred : Seq<Primary, RelOp, Primary> { };
+  struct CompPred : Store<_CompPred> { };
+  struct Pred : Or<
+    BetweenPred,
+    CompPred
+    > {};
 
   struct Cond;
   struct CondTail : Opt<Seq<Or<Store<AND>, Store<OR> >, Cond, CondTail> > {};
-  struct Cond : Or<Seq<Pred, CondTail>, Seq<Store<NOT>, Cond, CondTail>,
-    Seq<LPAREN, Store<Cond>, RPAREN, CondTail> > {};
+  struct _Cond : Or<
+    Seq<Pred, CondTail>,
+    Seq<Store<NOT>, Cond, CondTail>,
+    Seq<LPAREN, Cond, RPAREN, CondTail>
+    > {};
+  struct Cond : Store<_Cond> { };
   struct FilterCompleteInput : Seq<Cond, EndOfInput> {};
 
-  struct ORDERBY
-    : Keyword<CharSeqIgnoreCase<'o', 'r', 'd', 'e', 'r', ' ', 'b', 'y'> > {};
-  struct Query : Seq<Opt<Cond>, Opt<Seq<Store<ORDERBY>,
-    DelimitedList<ST<FieldName>, Tok<Char<','> > > > > > {};
+  struct ORDERBY : Keyword<CharSeqIgnoreCase<'o', 'r', 'd', 'e', 'r', ' ', 'b', 'y'> > {};
+  struct Query : Seq<Opt<Cond>, Opt<Seq<Store<ORDERBY>, DelimitedList<ST<FieldName>, Tok<Char<','> > > > > > {};
   struct QueryCompleteInput : Seq<Query, EndOfInput> {};
 }
 }
