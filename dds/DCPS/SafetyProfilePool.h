@@ -18,7 +18,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export PoolAllocation {
   friend class PoolAllocationTest;
 public:
-  
+
   PoolAllocation();
   char* ptr() { return ptr_; }
   size_t size() { return size_; }
@@ -54,23 +54,46 @@ private:
   size_t allocs_in_use_;
   PoolAllocation* allocs_;
   PoolAllocation* first_free_;  // Largest free block
+  bool debug_log_;
 
+  ////////////////////////
+  // Related to allocation
+  ////////////////////////
+
+  // Allocate a block of memory from a free block
   char* allocate_block(PoolAllocation* from_block,
                        PoolAllocation* prev_block,
                        size_t alloc_size);
 
-  // Slide array members down at index
+  // Slide array members down at index, and adjust impacted free pointers
   PoolAllocation* make_room_for_allocation(unsigned int index);
-  // Slide array members up to index, count number of slots
-  void recover_unused_allocation(unsigned int index, unsigned int count);
 
-  void reorder_block(PoolAllocation* resized_block, PoolAllocation* prev_block);
+  // When a free block is partially allocated, and gets smaller than the next
+  // free block, it must move ahead in the free list
+  void move_free_block_ahead(PoolAllocation* resized_block,
+                             PoolAllocation* prev_block);
+
+  //////////////////
+  // Related to free
+  //////////////////
 
   // Find an allocation for freeing
   PoolAllocation* find_alloc(void* ptr);
 
-  // Join this alloc with either contiguous free block
+  // Join this newly freed alloc with either adjacent free block, shift
+  // allocs and adjust impacted free pointers
   void join_free_allocs(PoolAllocation* alloc);
+
+  // Slide array members up to index, by count number of slots
+  void recover_unused_allocation(unsigned int index, unsigned int count);
+
+  // Account for shifted memory and size changes in free list
+  void adjust_free_list_after_joins(PoolAllocation* src,
+                                    unsigned int join_count,
+                                    PoolAllocation* new_or_grown,
+                                    PoolAllocation* removed);
+
+  // void remove_alloc_from_list(PoolAllocation* to_remove, PoolAllocation* start);
 };
 
 /// Memory pool for use when the Safety Profeile is enabled.
