@@ -530,7 +530,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   my_foo.y = 0.11f;                //+4 = 3574
   my_foo.theWChar = L'a';          //+3 = 3577
   //  wstring theWString;          //+4 = 3593    {padding +1 = 507}
-  //  long double theLongDouble;  //+16 = 3597
+  //  long double theLongDouble;  //+16 = 3597 {if no wstring, padding +4 = 511}
 
   Xyz::Foo foo2;
   foo2.key = 99;
@@ -586,11 +586,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   Xyz::Foo ss_foo;
 
-  const size_t sz = 3593 // see running totals above
+  const size_t sz = 3597 // see running totals above
 #if defined OPENDDS_SAFETY_PROFILE || defined NO_TEST_WSTRING
     - 4 // theWString is gone
 #endif
-    , pad = 507;
+    , pad = 507
+#if defined OPENDDS_SAFETY_PROFILE || defined NO_TEST_WSTRING
+    + 4 // theWString is gone, long double is aligned to 8
+#endif
+    ;
 
   try {
     if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,
