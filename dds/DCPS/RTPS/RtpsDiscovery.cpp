@@ -632,11 +632,11 @@ RtpsDiscovery::add_subscription(DDS::DomainId_t domainId,
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,
+                                const char* filterClassName,
                                 const char* filterExpr,
                                 const DDS::StringSeq& params)
 {
-  return get_part(domainId, participantId)->add_subscription(
-    topicId, subscription, qos, transInfo, subscriberQos, filterExpr, params);
+  return get_part(domainId, participantId)->add_subscription(topicId, subscription, qos, transInfo, subscriberQos, filterClassName, filterExpr, params);
 }
 
 bool

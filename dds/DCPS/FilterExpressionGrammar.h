@@ -93,17 +93,17 @@ namespace FilterExpressionGrammar {
   struct FieldName : DelimitedList<Seq<Letter, Star<IdentNextChar> >, Char<'.'> > {};
 
   struct Primary;
-  struct _Call : Seq< ST<FieldName>, Opt<Seq<Tok<Char<'('> >, Primary, Tok<Char<','> >, Primary, Tok<Char<')'> > > > > { };
-  struct Call : Store<_Call> { };
+  struct CallDef : Seq< ST<FieldName>, Opt<Seq<Tok<Char<'('> >, DelimitedList<Primary, Tok<Char<','> > >,  Tok<Char<')'> > > > > { };
+  struct Call : Store<CallDef> { };
   struct Primary : Or<
     Call,
     Param
     > { };
 
-  struct _BetweenPred : Seq<ST<FieldName>, Or<Store<BETWEEN>, Store<NOT_BETWEEN> >, Param, AND, Param> {};
-  struct BetweenPred : Store<_BetweenPred> { };
-  struct _CompPred : Seq<Primary, RelOp, Primary> { };
-  struct CompPred : Store<_CompPred> { };
+  struct BetweenPredDef : Seq<ST<FieldName>, Or<Store<BETWEEN>, Store<NOT_BETWEEN> >, Param, AND, Param> {};
+  struct BetweenPred : Store<BetweenPredDef> { };
+  struct CompPredDef : Seq<Primary, RelOp, Primary> { };
+  struct CompPred : Store<CompPredDef> { };
   struct Pred : Or<
     BetweenPred,
     CompPred

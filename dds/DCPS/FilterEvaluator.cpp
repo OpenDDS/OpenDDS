@@ -24,6 +24,8 @@
 #include <sstream>
 #include <algorithm>
 
+#define MOD "MOD"
+
 using namespace OpenDDS::DCPS::FilterExpressionGrammar;
 
 namespace OpenDDS {
@@ -349,10 +351,10 @@ namespace {
 
     Call(const OPENDDS_STRING& name)
     {
-      if (name == "MOD") {
+      if (name == MOD) {
         op_ = OP_MOD;
       } else {
-        assert(0);
+        throw std::runtime_error("Unknown function: " + std::string(name.c_str ()));
       }
     }
 
@@ -361,7 +363,11 @@ namespace {
       switch (op_) {
       case OP_MOD:
         {
-          assert(children_.size() == 2);
+          if (children_.size () != 2) {
+            std::stringstream ss;
+            ss << 2;
+            throw std::runtime_error(MOD " expects 2 arguments, given " + ss.str ());
+          }
           Value left = children_[0]->eval(data);
           Value right = children_[1]->eval(data);
           return left % right;
@@ -439,7 +445,7 @@ static FilterEvaluator::AstNodeWrapper child(const FilterEvaluator::AstNodeWrapp
 FilterEvaluator::EvalNode*
 FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
 {
-  if (node->TypeMatches<_CompPred>()) {
+  if (node->TypeMatches<CompPredDef>()) {
     Operand* left = walkOperand(child(node, 0));
     const FilterEvaluator::AstNodeWrapper& op = child(node, 1);
     Operand* right = walkOperand(child(node, 2));
@@ -447,7 +453,7 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
       extended_grammar_ = true;
     }
     return new Comparison(op, left, right);
-  } else if (node->TypeMatches<_BetweenPred>()) {
+  } else if (node->TypeMatches<BetweenPredDef>()) {
     Operand* field = walkOperand(child(node, 0));
     const FilterEvaluator::AstNodeWrapper& op = child(node, 1);
     Operand* low = walkOperand(child(node, 2));
@@ -486,7 +492,7 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
     return new LiteralString(node);
   } else if (node->TypeMatches<ParamVal>()) {
     return new Parameter(node);
-  } else if (node->TypeMatches<_Call>()) {
+  } else if (node->TypeMatches<CallDef>()) {
     if (arity(node) == 1) {
       return walkOperand(child(node, 0));
     } else {
@@ -743,12 +749,12 @@ namespace {
 
     bool operator()(const char*&) const
     {
-      assert(0);
+      throw std::runtime_error(MOD " cannot be applied to strings");
     }
 
     Value operator()(const bool&) const
     {
-      assert(0);
+      throw std::runtime_error(MOD " cannot be applied to booleans");
     }
 
     template<typename T>
@@ -759,12 +765,12 @@ namespace {
 
     Value operator()(const double&) const
     {
-      assert(0);
+      throw std::runtime_error(MOD " cannot be applied to doubles");
     }
 
     Value operator()(const long double&) const
     {
-      assert(0);
+      throw std::runtime_error(MOD " cannot be applied to long doubles");
     }
 
     const Value& lhs_;

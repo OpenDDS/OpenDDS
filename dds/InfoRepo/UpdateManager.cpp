@@ -378,7 +378,7 @@ Manager::add(const DActor& actor)
                             , actor.topicId, actor.actorId
                             , callback.c_str(), reader_qos
                             , transport_info, sub_qos
-                            , csi.filterExpr, csi.exprParams);
+                            , csi.filterClassName, csi.filterExpr, csi.exprParams);
 
   } else if (actor.type == DataWriter) {
     DDS::PublisherQos pub_qos;

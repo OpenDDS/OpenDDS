@@ -666,6 +666,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
   const DDS::DataReaderQos & qos,
   const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::SubscriberQos & subscriberQos,
+  const char* filterClassName,
   const char* filterExpression,
   const DDS::StringSeq& exprParams)
 {
@@ -734,6 +735,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
                      qos,
                      transInfo,
                      subscriberQos,
+                     filterClassName,
                      filterExpression,
                      exprParams),
                    OpenDDS::DCPS::GUID_UNKNOWN);
@@ -755,7 +757,7 @@ OpenDDS::DCPS::RepoId TAO_DDS_DCPSInfo_i::add_subscription(
 
   if (this->um_ && (partPtr->isBitPublisher() == false)) {
     CORBA::String_var callback = orb_->object_to_string(subscription);
-    Update::ContentSubscriptionInfo csi(filterExpression, exprParams);
+    Update::ContentSubscriptionInfo csi(filterClassName, filterExpression, exprParams);
 
     Update::URActor actor(domainId, subId, topicId, participantId, Update::DataReader
                           , callback.in()
@@ -791,6 +793,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
   const DDS::DataReaderQos & qos,
   const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
   const DDS::SubscriberQos & subscriberQos,
+  const char* filterClassName,
   const char* filterExpression,
   const DDS::StringSeq& exprParams,
   bool associate)
@@ -866,6 +869,7 @@ TAO_DDS_DCPSInfo_i::add_subscription(
                    qos,
                    transInfo,
                    subscriberQos,
+                   filterClassName,
                    filterExpression,
                    exprParams),
                  0);
@@ -2275,6 +2279,7 @@ TAO_DDS_DCPSInfo_i::receive_image(const Update::UImage& image)
                                 , sub->callback.c_str(), sub->drdwQos
                                 , sub->transportInterfaceInfo
                                 , sub->pubsubQos
+                                , sub->contentSubscriptionProfile.filterClassName
                                 , sub->contentSubscriptionProfile.filterExpr
                                 , sub->contentSubscriptionProfile.exprParams)) {
       OpenDDS::DCPS::RepoIdConverter sub_converter(sub->actorId);

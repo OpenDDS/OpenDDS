@@ -1325,11 +1325,17 @@ DataReaderImpl::enable()
 
     const TransportLocatorSeq& trans_conf_info = this->connection_info();
 
+    CORBA::String_var filterClassName = "";
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     DDS::ContentFilteredTopic_var cft = this->get_cf_topic();
     if (cft) {
+      OpenDDS::DCPS::ContentFilteredTopicImpl* impl =
+        dynamic_cast<OpenDDS::DCPS::ContentFilteredTopicImpl*>(cft.in());
+      if (impl) {
+        filterClassName = impl->get_filter_class_name();
+      }
       filterExpression = cft->get_filter_expression();
       cft->get_expression_parameters(exprParams);
     }
@@ -1348,6 +1354,7 @@ DataReaderImpl::enable()
             this->qos_,
             trans_conf_info,
             sub_qos,
+            filterClassName,
             filterExpression,
             exprParams);
 

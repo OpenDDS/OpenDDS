@@ -291,7 +291,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
                                  drQos.in(),
                                  tii,
                                  subQos.in(),
-                                 "", DDS::StringSeq());
+                                 "", "", DDS::StringSeq());
   if( OpenDDS::DCPS::GUID_UNKNOWN == subId)
     {
       failed = true;

@@ -69,6 +69,7 @@ module OpenDDS
       RepoId readerId;
       ::DDS::SubscriberQos subQos;
       ::DDS::DataReaderQos readerQos;
+      string filterClassName;
       string filterExpression;
       ::DDS::StringSeq exprParams;
     };

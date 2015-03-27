@@ -45,6 +45,7 @@ public:
                        const DDS::DataReaderQos& qos,
                        const OpenDDS::DCPS::TransportLocatorSeq& info,
                        const DDS::SubscriberQos& subscriberQos,
+                       const char* filterClassName,
                        const char* filterExpression,
                        const DDS::StringSeq& exprParams);
 
@@ -193,6 +194,7 @@ private:
   DDS::DataReaderQos qos_;
   OpenDDS::DCPS::TransportLocatorSeq info_;
   DDS::SubscriberQos subscriberQos_;
+  std::string filterClassName_;
   std::string filterExpression_;
   DDS::StringSeq exprParams_;
 

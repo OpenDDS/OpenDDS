@@ -177,6 +177,7 @@ public:
                                   const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                                   ,
+                                  const OPENDDS_STRING& filterClassName,
                                   const FilterEvaluator* eval,
                                   const DDS::StringSeq& params
 #endif
@@ -363,6 +364,7 @@ private:
                        const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                        ,
+                       const OPENDDS_STRING& filterClassName,
                        const FilterEvaluator* eval,
                        const DDS::StringSeq& params
 #endif

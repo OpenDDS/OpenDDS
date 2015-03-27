@@ -857,11 +857,12 @@ Spdp::add_subscription(const RepoId& topicId,
                        const DDS::DataReaderQos& qos,
                        const DCPS::TransportLocatorSeq& transInfo,
                        const DDS::SubscriberQos& subscriberQos,
+                       const char* filterClassName,
                        const char* filterExpr,
                        const DDS::StringSeq& params)
 {
   return sedp_.add_subscription(topicId, subscription, qos, transInfo,
-                                subscriberQos, filterExpr, params);
+                                subscriberQos, filterClassName, filterExpr, params);
 }
 
 void

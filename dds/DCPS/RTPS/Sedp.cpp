@@ -1033,6 +1033,7 @@ Sedp::add_subscription(const RepoId& topicId,
                        const DDS::DataReaderQos& qos,
                        const DCPS::TransportLocatorSeq& transInfo,
                        const DDS::SubscriberQos& subscriberQos,
+                       const char* filterClassName,
                        const char* filterExpr,
                        const DDS::StringSeq& params)
 {
@@ -1049,8 +1050,9 @@ Sedp::add_subscription(const RepoId& topicId,
   sb.qos_ = qos;
   sb.trans_info_ = transInfo;
   sb.subscriber_qos_ = subscriberQos;
-  sb.filter_ = filterExpr;
-  sb.params_ = params;
+  sb.filterProperties.filterClassName = filterClassName;
+  sb.filterProperties.filterExpression = filterExpr;
+  sb.filterProperties.expressionParameters = params;
 
   TopicDetailsEx& td = topics_[topic_names_[topicId]];
   td.endpoints_.insert(rid);
@@ -1127,7 +1129,7 @@ Sedp::update_subscription_params(const RepoId& subId,
   const LocalSubscriptionIter iter = local_subscriptions_.find(subId);
   if (iter != local_subscriptions_.end()) {
     LocalSubscription& sb = iter->second;
-    sb.params_ = params;
+    sb.filterProperties.expressionParameters = params;
 
     if (DDS::RETCODE_OK != write_subscription_data(subId, sb)) {
       return false;
@@ -1679,9 +1681,9 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
     drQos = &lsi->second.qos_;
     subQos = &lsi->second.subscriber_qos_;
     rTls = &lsi->second.trans_info_;
-    if (!lsi->second.filter_.empty()) {
-      tempCfp.filterExpression = lsi->second.filter_.c_str();
-      tempCfp.expressionParameters = lsi->second.params_;
+    if (lsi->second.filterProperties.filterExpression[0] != 0) {
+      tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
+      tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
     }
     cfProp = &tempCfp;
     if (!already_matched) {
@@ -1908,7 +1910,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 #else
     const DCPS::ReaderAssociation ra =
         {*rTls, reader, *subQos, *drQos,
-         cfProp->filterExpression, cfProp->expressionParameters};
+         cfProp->filterClassName, cfProp->filterExpression, cfProp->expressionParameters};
     const DCPS::WriterAssociation wa = {*wTls, writer, *pubQos, *dwQos};
 #endif
 
@@ -2561,8 +2563,8 @@ Sedp::populate_discovered_reader_msg(
     OPENDDS_STRING(DCPS::GuidConverter(subscription_id)).c_str();
   drd.contentFilterProperty.relatedTopicName = topic_name.c_str();
   drd.contentFilterProperty.filterClassName = ""; // PLConverter adds default
-  drd.contentFilterProperty.filterExpression = sub.filter_.c_str();
-  drd.contentFilterProperty.expressionParameters = sub.params_;
+  drd.contentFilterProperty.filterExpression = sub.filterProperties.filterExpression;
+  drd.contentFilterProperty.expressionParameters = sub.filterProperties.expressionParameters;
   for (RepoIdSet::const_iterator writer = sub.remote_opendds_associations_.begin();
        writer != sub.remote_opendds_associations_.end();
        ++writer)
