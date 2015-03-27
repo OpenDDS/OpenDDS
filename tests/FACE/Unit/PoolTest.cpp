@@ -85,6 +85,8 @@ public:
     char* ptr2 = pool.pool_alloc(128);
     char* ptr3 = pool.pool_alloc(512);
     validate_pool(pool, 1024);
+    TEST_CHECK(ptr1);
+    TEST_CHECK(ptr2);
     pool.pool_free(ptr0);
     pool.pool_free(ptr3);
 
@@ -98,6 +100,8 @@ public:
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(128);
     char* ptr3 = pool.pool_alloc(512);
+    TEST_CHECK(ptr1);
+    TEST_CHECK(ptr2);
     validate_pool(pool, 1024);
     pool.pool_free(ptr3);
     pool.pool_free(ptr0);
@@ -199,16 +203,112 @@ public:
     TEST_CHECK(ptr7 > ptr5);
   }
 
-  // Free largest block and the one to its right, case II
-  void test_pool_free_largest_join_right() {
+  // Free block and join with the one to its right (largest), case II
+  void test_pool_free_join_largest_right() {
+    Pool pool(2048, 64);
+    char* ptr0 = pool.pool_alloc(128); // rightmost
+    char* ptr1 = pool.pool_alloc(128);
+    char* ptr2 = pool.pool_alloc(256); // freed ahead of time (largest)
+    char* ptr3 = pool.pool_alloc(128); // free and join with ptr2
+    char* ptr4 = pool.pool_alloc(128);
+    char* ptr5 = pool.pool_alloc(128);
+    char* ptr6 = pool.pool_alloc(128); // leftmost
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr5);
+    TEST_CHECK(ptr6);
+    validate_pool(pool, 128*8);
+    pool.pool_free(ptr2);
+    validate_pool(pool, 128*6);
+    // now free ptr3, join right ptr2
+    pool.pool_free(ptr3);
+    validate_pool(pool, 128*5);
+    // Alloate from free
+    char* ptr7 = pool.pool_alloc(256);
+    TEST_CHECK(ptr7);
+    validate_pool(pool, 128*7);
+    TEST_CHECK(ptr7 < ptr1);
+    TEST_CHECK(ptr7 > ptr4);
   }
 
-  // Free largest block and the block to it's left, case III
-  void test_pool_free_largest_join_left() {
+  // Free block join with and the block to it's left (largest), case III
+  void test_pool_free_join_largest_left() {
+    Pool pool(2048, 64);
+    char* ptr0 = pool.pool_alloc(128); // rightmost
+    char* ptr1 = pool.pool_alloc(128); // free and join with ptr2
+    char* ptr2 = pool.pool_alloc(256); // freed ahead of time (largest)
+    char* ptr3 = pool.pool_alloc(128);
+    char* ptr4 = pool.pool_alloc(128);
+    char* ptr5 = pool.pool_alloc(128);
+    char* ptr6 = pool.pool_alloc(128); // leftmost
+    TEST_CHECK(ptr4);
+    TEST_CHECK(ptr5);
+    TEST_CHECK(ptr6);
+    validate_pool(pool, 128*8);
+    pool.pool_free(ptr2);
+    validate_pool(pool, 128*6);
+    // now free ptr1, join left ptr2
+    pool.pool_free(ptr1);
+    validate_pool(pool, 128*5);
+    // Alloate from free
+    char* ptr7 = pool.pool_alloc(256);
+    TEST_CHECK(ptr7);
+    validate_pool(pool, 128*7);
+    TEST_CHECK(ptr7 < ptr0);
+    TEST_CHECK(ptr7 > ptr3);
   }
 
-  // Free largest block and the ones to its left and right, case IV
-  void test_pool_free_largest_join_both() {
+  // Free block and join with the ones to its left and largest right, case IV
+  void test_pool_free_join_largest_both_right() {
+    Pool pool(2048, 64);
+    char* ptr0 = pool.pool_alloc(128); // rightmost
+    char* ptr1 = pool.pool_alloc(128);
+    char* ptr2 = pool.pool_alloc(256); // freed ahead of time
+    char* ptr3 = pool.pool_alloc(128); // free and join with ptr2 and ptr4
+    char* ptr4 = pool.pool_alloc(128); // freed ahead of time
+    char* ptr5 = pool.pool_alloc(128);
+    char* ptr6 = pool.pool_alloc(128); // leftmost
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr6);
+    validate_pool(pool, 128*8);
+    pool.pool_free(ptr2);
+    pool.pool_free(ptr4);
+    validate_pool(pool, 128*5);
+    // now free ptr3, join ptr2 and ptr4
+    pool.pool_free(ptr3);
+    validate_pool(pool, 128*4);
+    // Alloate from free
+    char* ptr7 = pool.pool_alloc(256);
+    TEST_CHECK(ptr7);
+    validate_pool(pool, 128*6);
+    TEST_CHECK(ptr7 < ptr1);
+    TEST_CHECK(ptr7 > ptr5);
+  }
+
+  // Free block and join with the ones to its largest left and right, case IV
+  void test_pool_free_join_largest_both_left() {
+    Pool pool(2048, 64);
+    char* ptr0 = pool.pool_alloc(128); // rightmost
+    char* ptr1 = pool.pool_alloc(128);
+    char* ptr2 = pool.pool_alloc(128); // freed ahead of time
+    char* ptr3 = pool.pool_alloc(128); // free and join with ptr2 and ptr4
+    char* ptr4 = pool.pool_alloc(256); // freed ahead of time
+    char* ptr5 = pool.pool_alloc(128);
+    char* ptr6 = pool.pool_alloc(128); // leftmost
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr6);
+    validate_pool(pool, 128*8);
+    pool.pool_free(ptr2);
+    pool.pool_free(ptr4);
+    validate_pool(pool, 128*5);
+    // now free ptr3, join ptr2 and ptr4
+    pool.pool_free(ptr3);
+    validate_pool(pool, 128*4);
+    // Alloate from free
+    char* ptr7 = pool.pool_alloc(256);
+    TEST_CHECK(ptr7);
+    validate_pool(pool, 128*6);
+    TEST_CHECK(ptr7 < ptr1);
+    TEST_CHECK(ptr7 > ptr5);
   }
 
   // Alloc and free same block repeatedly
@@ -431,14 +531,15 @@ int main(int, const char** )
   test.test_pool_free_join_left();
   test.test_pool_free_join_both();
 
-/*
-  test.test_pool_free_largest_join_right();
-  test.test_pool_free_largest_join_left();
-  test.test_pool_free_largest_join_both();
+  test.test_pool_free_join_largest_right();
+  test.test_pool_free_join_largest_left();
+  test.test_pool_free_join_largest_both_right();
+  test.test_pool_free_join_largest_both_left();
 
-  test.test_pool_free_smallest_join_right();
-  test.test_pool_free_smallest_join_left();
-  test.test_pool_free_smallest_join_both();
+/*
+  test.test_pool_free_join_smallest_right();
+  test.test_pool_free_join_smallest_left();
+  test.test_pool_free_join_smallest_both();
 
   test.test_pool_free_join_right_largest_and_smallest();
   test.test_pool_free_join_left__largest_and_smallest();
