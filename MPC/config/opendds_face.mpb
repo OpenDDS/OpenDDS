@@ -2,5 +2,15 @@ project: dcps, dcps_ts_defaults {
   avoids += uses_wchar
   libs  += OpenDDS_FACE
   after += OpenDDS_FACE
-  dcps_ts_flags += -Gface
+
+  dcps_ts_flags += -GfaceTS -Lface
+  idlflags += -SS
+
+  Modify_Custom(Idl) {
+    automatic_in = 0
+  }
+
+  Modify_Custom(TypeSupport) {
+    header_pre_extension += C
+  }
 }

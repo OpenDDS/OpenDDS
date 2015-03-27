@@ -1,20 +1,10 @@
-project : dcpslib {
-  sharedname = idl_test1_lib
-  libout       = .
-
-  idlflags    += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
-  dcps_ts_flags += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h
+project: dcps {
+  macros        += TEST_UNIONS
+  idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -DTEST_UNIONS
+  dcps_ts_flags += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -DTEST_UNIONS
   dynamicflags = FOOLIB_BUILD_DLL
-  pch_header   =
-  pch_source   =
-
-  IDL_Files {
-    FooDef.idl
-  }
 
   TypeSupport_Files {
     FooDef.idl
   }
 }
-
-

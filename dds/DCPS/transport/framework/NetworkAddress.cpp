@@ -33,17 +33,17 @@ operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
 {
   CORBA::Boolean byte_order;
 
-  if (inCdr >> ACE_InputCDR::to_boolean(byte_order) == 0)
+  if ((inCdr >> ACE_InputCDR::to_boolean(byte_order)) == 0)
     return 0;
 
   inCdr.reset_byte_order(byte_order);
 
-  if (inCdr >> ACE_InputCDR::to_octet(value.reserved_) == 0)
+  if ((inCdr >> ACE_InputCDR::to_octet(value.reserved_)) == 0)
     return 0;
 
   char* buf = 0;
 
-  if (inCdr >> buf == 0)
+  if ((inCdr >> buf) == 0)
     return 0;
 
   value.addr_ = buf;

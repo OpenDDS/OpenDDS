@@ -32,11 +32,11 @@ string dds_generator::scoped_helper(UTL_ScopedName* sn, const char* sep)
 }
 
 bool composite_generator::gen_const(UTL_ScopedName* name, bool nestedInInteface,
-  AST_Expression::ExprType type, AST_Expression::AST_ExprValue* value)
+  AST_Constant* constant)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
-    if (!(*it)->gen_const(name, nestedInInteface, type, value))
+    if (!(*it)->gen_const(name, nestedInInteface, constant))
       return false;
   }
 
@@ -56,11 +56,24 @@ bool composite_generator::gen_enum(UTL_ScopedName* name,
 }
 
 bool composite_generator::gen_struct(UTL_ScopedName* name,
-  const vector<AST_Field*>& fields, const char* repoid)
+  const vector<AST_Field*>& fields, AST_Type::SIZE_TYPE size,
+  const char* repoid)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
-    if (!(*it)->gen_struct(name, fields, repoid))
+    if (!(*it)->gen_struct(name, fields, size, repoid))
+      return false;
+  }
+
+  return true;
+}
+
+bool composite_generator::gen_struct_fwd(UTL_ScopedName* name,
+  AST_Type::SIZE_TYPE size)
+{
+  for (vector<dds_generator*>::iterator it(components_.begin());
+       it != components_.end(); ++it) {
+    if (!(*it)->gen_struct_fwd(name, size))
       return false;
   }
 

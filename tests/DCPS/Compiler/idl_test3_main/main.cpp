@@ -423,8 +423,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     Xyz::StructOfSeqOfAnEnum val_out;
 
-    const size_t max_sz = SEQ_LEN_SIZE + 6*4, sz = SEQ_LEN_SIZE + SEQ_LEN*4;
-    if (try_marshaling(val, val_out, max_sz, sz, 0, max_sz,
+    const size_t sz = SEQ_LEN_SIZE + SEQ_LEN*4;
+    if (try_marshaling(val, val_out, DONT_CHECK_MS, sz, 0, 0,
                        "Xyz::StructOfSeqOfAnEnum")) {
       for (CORBA::ULong ii = 0; ii < SEQ_LEN; ii++) {
         if (val_out.field[ii] != ((ii % 2 == 0) ? Xyz::greenx : Xyz::bluex)) {
@@ -631,7 +631,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   Xyz::Foo ss_foo;
 
-  const size_t sz = 4530, pad = 630; // see running totals above
+  const size_t sz = 4530 // see running totals above
+#ifdef OPENDDS_SAFETY_PROFILE
+    - 4 // theWString is gone
+#endif
+    , pad = 630;
 
   try {
     if (try_marshaling(my_foo, ss_foo, DONT_CHECK_MS, sz, pad, DONT_CHECK_MS,

@@ -1,7 +1,8 @@
 // $Id$
 
-feature (dds_suppress_anys) : taoidldefaults {
+feature (dds_suppress_anys) : taoidldefaults, dcps_ts_defaults {
   idlflags += -Sa -St
+  dcps_ts_flags += -Sa -St
 }
 
 feature (!dds_suppress_anys) : taoidldefaults, anytypecode {

@@ -170,7 +170,7 @@ namespace {
 
 bool v8_generator::gen_struct(UTL_ScopedName* name,
                               const std::vector<AST_Field*>& fields,
-                              const char* /*repoid*/)
+                              AST_Type::SIZE_TYPE, const char*)
 {
   fwd_decl();
   {
@@ -192,7 +192,7 @@ bool v8_generator::gen_struct(UTL_ScopedName* name,
   if (idl_global->is_dcps_type(name)) {
     be_global->add_include("dds/DCPS/V8TypeConverter.h",
                            BE_GlobalData::STREAM_CPP);
-    TS_NamespaceGuard cppGuard(name, be_global->impl_);
+    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
     const std::string lname = name->last_component()->get_string(),
       tsv8 = lname + "TypeSupportV8Impl";
     be_global->impl_ <<

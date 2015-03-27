@@ -41,10 +41,8 @@ public:
       this->allocator_ = 0;
 
       if (allocator) {
-        ACE_DES_FREE(this,
-                     allocator->free,
-                     RcObject);
-
+        this->~RcObject();
+        allocator->free(this);
       } else {
         delete this;
       }

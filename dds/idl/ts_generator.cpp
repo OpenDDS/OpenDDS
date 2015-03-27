@@ -67,7 +67,7 @@ ts_generator::ts_generator()
 }
 
 bool ts_generator::gen_struct(UTL_ScopedName* name,
-  const std::vector<AST_Field*>&, const char*)
+  const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
   if (idl_global->is_dcps_type(name) == 0) {
     // no #pragma DCPS_DATA_TYPE, so nothing to generate
@@ -113,13 +113,13 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
   replacements["EXPORT"] = be_global->export_macro().c_str();
   replacements["SEQ"] = be_global->sequence_suffix().c_str();
 
-  TS_NamespaceGuard idlGuard(name, be_global->idl_, "module");
+  ScopedNamespaceGuard idlGuard(name, be_global->idl_, "module");
   std::string idl = idl_template_;
   replaceAll(idl, replacements);
   be_global->idl_ << idl;
 
   {
-    TS_NamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard hGuard(name, be_global->header_);
     std::string h = h_template_;
     replaceAll(h, replacements);
     be_global->header_ << h;
@@ -136,13 +136,13 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
     "  typedef " << cxxName << "Seq Sequence;\n"
     "};\n}  }\n\n";
 
-  TS_NamespaceGuard cppGuard(name, be_global->impl_);
+  ScopedNamespaceGuard cppGuard(name, be_global->impl_);
   std::string cpp = cpp_template_;
   replaceAll(cpp, replacements);
   be_global->impl_ << cpp;
 
-  if (be_global->face()) {
-    face_ts_generator::generate(name, dc.c_str());
+  if (be_global->face_ts()) {
+    face_ts_generator::generate(name);
   }
 
   return true;
@@ -226,15 +226,13 @@ namespace java_ts_generator {
 
 namespace face_ts_generator {
 
-  void generate(UTL_ScopedName* name, std::string typeSuppHeader) {
+  void generate(UTL_ScopedName* name) {
     const std::string name_cxx = scoped(name),
       name_underscores = dds_generator::scoped_helper(name, "_"),
-      dataTypeHeader = typeSuppHeader.erase(typeSuppHeader.size() - 14, 11),
       exportMacro = be_global->export_macro().c_str(),
       exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
-    be_global->add_include("FACE/TS.hpp", BE_GlobalData::STREAM_FACE_H);
-    be_global->face_header_ <<
-      "#include \"" << dataTypeHeader << "\"\n\n"
+    be_global->add_include("FACE/TS.hpp", BE_GlobalData::STREAM_FACETS_H);
+    be_global->facets_header_ <<
       "namespace FACE\n"
       "{\n"
       "  namespace Read_Callback\n"
@@ -272,7 +270,7 @@ namespace face_ts_generator {
       "      /* out */ RETURN_CODE_TYPE& return_code);\n\n"
       "  }\n"
       "}\n\n";
-    be_global->face_impl_ <<
+    be_global->facets_impl_ <<
       "void Receive_Message(CONNECTION_ID_TYPE connection_id,\n"
       "                     TIMEOUT_TYPE timeout,\n"
       "                     TRANSACTION_ID_TYPE& transaction_id,\n"

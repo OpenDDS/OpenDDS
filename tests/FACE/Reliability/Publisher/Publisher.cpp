@@ -23,7 +23,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   ACE_OS::sleep(5); // connection established with Subscriber
 
   std::cout << "Publisher: about to send_message()" << std::endl;
-  for (CORBA::Long i = 0; i < 20; ++i) {
+  for (FACE::Long i = 0; i < 20; ++i) {
     Messenger::Message msg = {"Hello, world.", i};
     FACE::TRANSACTION_ID_TYPE txn;
     std::cout << "  sending " << i << std::endl;

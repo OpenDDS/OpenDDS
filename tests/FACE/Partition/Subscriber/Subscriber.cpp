@@ -6,6 +6,7 @@
 #endif
 
 #include "ace/OS_NS_stdio.h"
+#include "ace/Log_Msg.h"
 
 #include <iostream>
 
