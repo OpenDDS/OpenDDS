@@ -98,7 +98,7 @@ Pool::pool_alloc(size_t size)
     block_to_alloc = first_free_;
 
     // While there are more "small enough" blocks remaining
-    while (block_to_alloc->next_free_ && 
+    while (block_to_alloc->next_free_ &&
            block_to_alloc->next_free_->size_ >= alloc_size)
     {
       // Move ahead, tracking previous
@@ -243,7 +243,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
 
   while (iter) {
     if (debug_log_) printf("Visiting index %d\n", (int)(iter - allocs_));
-    
+
     bool iter_removed = false;
 
     // If after inserting new grown, have reached original position of grown
@@ -258,12 +258,12 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
     } else if (iter == to_remove) {
       if (!prev) {
         if (debug_log_) printf("Removing to_remove from head\n");
-        
+
         first_free_ = iter->next_free_;
         iter_removed = true;
       } else {
         if (debug_log_) printf("Removing to_remove from list\n");
-        
+
         prev->next_free_ = iter->next_free_;
         iter_removed = true;
       }
@@ -278,7 +278,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
         if (debug_log_) printf("grown did not grow enough to change positions\n");
 
       // Else if I have found a smaller alloc than one to insert
-      } else if ((!inserted) && 
+      } else if ((!inserted) &&
                  new_or_grown && new_or_grown->size_ >= iter->size_) {
         if (!prev) {
           if (debug_log_) printf("Inserting new/grown at head\n");
@@ -288,7 +288,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
 
         } else {
           if (debug_log_) printf("Inserting new/grown inside list\n");
-          
+
           prev->next_free_ = new_or_grown;
         }
 
@@ -304,7 +304,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
     if (iter->next_free_ >= first + join_count) {
       // Save for after adjustment
       PoolAllocation* next = iter->next_free_;
-      
+
       // Adjust for later move
       iter->next_free_ = iter->next_free_ - join_count;
 
