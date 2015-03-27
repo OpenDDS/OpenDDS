@@ -67,7 +67,7 @@ public:
     TEST_CHECK(ptr2 > ptr3);
   }
 
-  // Allocate a block and free it
+  // Allocate a block and free it, case I
   void test_pool_alloc_free() {
     Pool pool(1024, 64);
     char* ptr = pool.pool_alloc(128);
@@ -77,7 +77,35 @@ public:
     validate_pool(pool, 0);
   }
 
-  // Allocate a block and free it
+  // Allocate a block and free it, becoming largest
+  void test_pool_alloc_free_largest() {
+    Pool pool(1024, 64);
+    char* ptr0 = pool.pool_alloc(128);
+    char* ptr1 = pool.pool_alloc(256);
+    char* ptr2 = pool.pool_alloc(128);
+    char* ptr3 = pool.pool_alloc(512);
+    validate_pool(pool, 1024);
+    pool.pool_free(ptr0);
+    pool.pool_free(ptr3);
+
+    validate_pool(pool, 1024 - 512 - 128);
+  }
+
+  // Allocate a block and free it, becoming smallest
+  void test_pool_alloc_free_smallest() {
+    Pool pool(1024, 64);
+    char* ptr0 = pool.pool_alloc(128);
+    char* ptr1 = pool.pool_alloc(256);
+    char* ptr2 = pool.pool_alloc(128);
+    char* ptr3 = pool.pool_alloc(512);
+    validate_pool(pool, 1024);
+    pool.pool_free(ptr3);
+    pool.pool_free(ptr0);
+
+    validate_pool(pool, 1024 - 512 - 128);
+  }
+
+  // Allocate a block, free it, reallocate
   void test_pool_realloc() {
     Pool pool(1024, 64);
     char* ptr0 = pool.pool_alloc(128);
@@ -88,6 +116,99 @@ public:
 
     pool.pool_free(ptr1);
     validate_pool(pool, 0);
+  }
+
+  // Free a block and the one to its right, case II
+  void test_pool_free_join_right() {
+    Pool pool(2048, 64);
+    char* ptr0 = pool.pool_alloc(128); // rightmost
+    char* ptr1 = pool.pool_alloc(128);
+    char* ptr2 = pool.pool_alloc(128); // freed ahead of time
+    char* ptr3 = pool.pool_alloc(128); // free and join with ptr2
+    char* ptr4 = pool.pool_alloc(128);
+    char* ptr5 = pool.pool_alloc(128);
+    char* ptr6 = pool.pool_alloc(128); // leftmost
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr5);
+    TEST_CHECK(ptr6);
+    validate_pool(pool, 128*7);
+    pool.pool_free(ptr2);
+    validate_pool(pool, 128*6);
+    // now free ptr3, join right ptr2
+    pool.pool_free(ptr3);
+    validate_pool(pool, 128*5);
+    // Alloate from free
+    char* ptr7 = pool.pool_alloc(256);
+    TEST_CHECK(ptr7);
+    validate_pool(pool, 128*7);
+    TEST_CHECK(ptr7 < ptr1);
+    TEST_CHECK(ptr7 > ptr4);
+  }
+
+  // Free a block and the block to it's left, case III
+  void test_pool_free_join_left() {
+    Pool pool(2048, 64);
+    char* ptr0 = pool.pool_alloc(128); // rightmost
+    char* ptr1 = pool.pool_alloc(128); // free and join with ptr2
+    char* ptr2 = pool.pool_alloc(128); // freed ahead of time
+    char* ptr3 = pool.pool_alloc(128);
+    char* ptr4 = pool.pool_alloc(128);
+    char* ptr5 = pool.pool_alloc(128);
+    char* ptr6 = pool.pool_alloc(128); // leftmost
+    TEST_CHECK(ptr4);
+    TEST_CHECK(ptr5);
+    TEST_CHECK(ptr6);
+    validate_pool(pool, 128*7);
+    pool.pool_free(ptr2);
+    validate_pool(pool, 128*6);
+    // now free ptr1, join left ptr2
+    pool.pool_free(ptr1);
+    validate_pool(pool, 128*5);
+    // Alloate from free
+    char* ptr7 = pool.pool_alloc(256);
+    TEST_CHECK(ptr7);
+    validate_pool(pool, 128*7);
+    TEST_CHECK(ptr7 < ptr0);
+    TEST_CHECK(ptr7 > ptr3);
+  }
+
+  // Free a block and the ones to its left and right, case IV
+  void test_pool_free_join_both() {
+    Pool pool(2048, 64);
+    char* ptr0 = pool.pool_alloc(128); // rightmost
+    char* ptr1 = pool.pool_alloc(128);
+    char* ptr2 = pool.pool_alloc(128); // freed ahead of time
+    char* ptr3 = pool.pool_alloc(128); // free and join with ptr2 and ptr4
+    char* ptr4 = pool.pool_alloc(128); // freed ahead of time
+    char* ptr5 = pool.pool_alloc(128);
+    char* ptr6 = pool.pool_alloc(128); // leftmost
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr6);
+    validate_pool(pool, 128*7);
+    pool.pool_free(ptr2);
+    pool.pool_free(ptr4);
+    validate_pool(pool, 128*5);
+    // now free ptr3, join ptr2 and ptr4
+    pool.pool_free(ptr3);
+    validate_pool(pool, 128*4);
+    // Alloate from free
+    char* ptr7 = pool.pool_alloc(256);
+    TEST_CHECK(ptr7);
+    validate_pool(pool, 128*6);
+    TEST_CHECK(ptr7 < ptr1);
+    TEST_CHECK(ptr7 > ptr5);
+  }
+
+  // Free largest block and the one to its right, case II
+  void test_pool_free_largest_join_right() {
+  }
+
+  // Free largest block and the block to it's left, case III
+  void test_pool_free_largest_join_left() {
+  }
+
+  // Free largest block and the ones to its left and right, case IV
+  void test_pool_free_largest_join_both() {
   }
 
   // Alloc and free same block repeatedly
@@ -211,6 +332,7 @@ public:
     char* ptr7 = pool.pool_alloc(128);
     TEST_CHECK(ptr7);
     validate_pool(pool, 1024);
+    // Out of memory
     char* ptr8 = pool.pool_alloc(128);
     TEST_CHECK(!ptr8);
     validate_pool(pool, 1024);
@@ -296,18 +418,40 @@ int main(int, const char** )
   test.test_pool_alloc();
   test.test_pool_allocs();
   test.test_pool_alloc_last_avail();
+
   test.test_pool_alloc_free();
+  test.test_pool_alloc_free_largest();
+  test.test_pool_alloc_free_smallest();
+
   test.test_pool_alloc_free_repeated();
   test.test_pool_alloc_non_first_free_block();
   test.test_pool_realloc();
+
+  test.test_pool_free_join_right();
+  test.test_pool_free_join_left();
+  test.test_pool_free_join_both();
+
+/*
+  test.test_pool_free_largest_join_right();
+  test.test_pool_free_largest_join_left();
+  test.test_pool_free_largest_join_both();
+
+  test.test_pool_free_smallest_join_right();
+  test.test_pool_free_smallest_join_left();
+  test.test_pool_free_smallest_join_both();
+
+  test.test_pool_free_join_right_largest_and_smallest();
+  test.test_pool_free_join_left__largest_and_smallest();
+  test.test_pool_free_join_both__largest_and_smallest();
+*/
+
   test.test_pool_free_in_order();
   test.test_pool_free_in_reverse_order();
   test.test_pool_free_out_of_order();
-/*
+
   test.test_alloc_null_once_out_of_memory();
   test.test_alloc_null_once_out_of_allocs();
   test.test_free_null_should_ignore();
-*/
 
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
 
