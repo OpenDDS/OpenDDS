@@ -185,15 +185,14 @@ Pool::make_room_for_allocation(unsigned int index)
          iter != NULL;
          iter = iter->next_free_)
     {
-      if (iter->next_free_ >= src) {
+      if (iter->next_free_ > src) {
         // Impacted by move
         iter->next_free_ = iter->next_free_ + 1;
       }
     }
 
     // Move the memory
-    memmove(dest, &allocs_[index],
-            sizeof(PoolAllocation) * (allocs_in_use_ - index));
+    memmove(dest, src, sizeof(PoolAllocation) * (allocs_in_use_ - index));
   }
 
   return dest;
