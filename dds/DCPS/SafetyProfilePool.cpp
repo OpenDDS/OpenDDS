@@ -98,7 +98,8 @@ Pool::pool_alloc(size_t size)
     block_to_alloc = first_free_;
 
     // While there are more "small enough" blocks remaining
-    while (block_to_alloc->next_free_ && block_to_alloc->size_ >= alloc_size)
+    while (block_to_alloc->next_free_ && 
+           block_to_alloc->next_free_->size_ >= alloc_size)
     {
       // Move ahead, tracking previous
       prev_block = block_to_alloc;
@@ -219,78 +220,87 @@ void
 Pool::adjust_free_list_after_joins(PoolAllocation* first,
                                    unsigned int join_count,
                                    PoolAllocation* new_or_grown,
-                                   PoolAllocation* removed)
+                                   PoolAllocation* removed_alloc)
 
 {
+  // Find removed and remove
+  // Find grown insertion point and insert
+  // Find grown and remove
+
+  // At each node
+    // Prev always points to alloc before iter
+    //   when removing iter, point prev to iter's next and keep prev where it is
+    // If removed, remove it
+    // If grown and inserted, remove it
+    // If grown and not inserted, leave it
+    // If insertion point, insert
+    // Remember prev, so you can remove next
   PoolAllocation* prev = NULL;
   PoolAllocation* after_grown = new_or_grown ? new_or_grown->next_free_ : NULL;
   PoolAllocation* iter = first_free_;
   bool inserted = false;
 
-if (debug_log_) {
-  printf("Adjusting free list, count %d, new/grown %zx, removed %zx\n",
-       join_count, (unsigned long)new_or_grown, (unsigned long)removed);
-}
+  //if (debug_log_) printf("Adjusting free list, count %d, new/grown %zx, removed %zx\n", join_count, (unsigned long)new_or_grown, (unsigned long)removed);
 
   while (iter) {
-    // If I have reached the new/grown alloc
-    if (iter == new_or_grown && !inserted) {
-      // Grown, but not enough to move earlier.  Leave alone
-      inserted = true;
+    if (debug_log_) printf("Visiting index %d\n", (int)(iter - allocs_));
+    
+    bool iter_removed = false;
 
-    } else if (iter == new_or_grown && inserted) {
-      // After move, have reached original position of grown alloc
+    // If after inserting moving grown, have reached original position of grown
+    if (inserted && iter == new_or_grown) {
       if (prev) { // should always be true
+        if (debug_log_) printf("Removing old position of grown from list\n");
+
+printf("TODO figure this out, what should list look like, where should iter, prev be?\n");
         prev->next_free_ = after_grown;
+        iter_removed = true;
       }
     // Else if this is the alloc to remove
-    } else if (iter == removed) {
-      if (prev) {
-if (debug_log_) {
-printf("Removing removed %zx from list\n", (unsigned long)removed);
-}
-        prev->next_free_ = iter->next_free_;
-      } else {
-if (debug_log_) {
-printf("Removing removed %zx from head\n", (unsigned long)removed);
-}
+    } else if (iter == removed_alloc) {
+      if (!prev) {
+        if (debug_log_) printf("Removing removed from head\n");
+        
         first_free_ = iter->next_free_;
-      }
-      removed = NULL;
-    // Else if I have found a smaller alloc than one to insert
-    } else if ((!inserted) && 
-               new_or_grown && new_or_grown->size_ >= iter->size_) {
-      if (prev) {
-if (debug_log_) {
-printf("Inserting new/grown %zx inside list\n", (unsigned long)new_or_grown);
-        prev->next_free_ = new_or_grown;
-}
+        iter_removed = true;
       } else {
-if (debug_log_) {
-printf("Inserting new/grown %zx at head\n", (unsigned long)new_or_grown);
-}
-        // First alloc in list, make pool point to it
-        first_free_ = new_or_grown;
-      }
-
-      new_or_grown->next_free_ = iter;
-      inserted = true;
-    } else if (new_or_grown && iter == new_or_grown) {
-      if (prev) {
-if (debug_log_) {
-printf("Removing new/grown %zx from list\n", (unsigned long)new_or_grown);
-}
+        if (debug_log_) printf("Removing removed from list\n");
+        
         prev->next_free_ = iter->next_free_;
-      } else {
-if (debug_log_) {
-printf("Removing new/grown %zx from head\n", (unsigned long)new_or_grown);
-}
-        first_free_ = iter->next_free_;
+        iter_removed = true;
       }
     }
 
-    // Remember prev for next iteration
-    prev = iter;
+    // If iter is still in the list
+    if (!iter_removed) {
+      // If I have reached the new/grown alloc
+      if (iter == new_or_grown && !inserted) {
+        // Grown, but not enough to move earlier.  Leave alone
+        inserted = true;
+        if (debug_log_) printf("grown did not grow enough to change positions\n");
+
+      // Else if I have found a smaller alloc than one to insert
+      } else if ((!inserted) && 
+                 new_or_grown && new_or_grown->size_ >= iter->size_) {
+        if (!prev) {
+          if (debug_log_) printf("Inserting new/grown at head\n");
+
+          // First alloc in list, make pool point to it
+          first_free_ = new_or_grown;
+
+        } else {
+          if (debug_log_) printf("Inserting new/grown inside list\n");
+          
+          prev->next_free_ = new_or_grown;
+        }
+
+        new_or_grown->next_free_ = iter;
+        inserted = true;
+      }
+
+      // Remember prev for next iteration (only if iter is not removed)
+      prev = iter;
+    }
 
     // If iter's next pointer is now off
     if (iter->next_free_ >= first + join_count) {
@@ -417,7 +427,7 @@ Pool::join_free_allocs(PoolAllocation* freed)
   PoolAllocation* new_or_grown = NULL;
   PoolAllocation* removed = NULL;
 
-  // If this is not the last alloc
+  // Try to join with next adjancent alloc if this is not the last alloc
   if (freed != (allocs_ + (allocs_in_use_ - 1))) {
     PoolAllocation* next_alloc = freed + 1;
     if (freed->join_freed(next_alloc)) {
@@ -428,7 +438,7 @@ Pool::join_free_allocs(PoolAllocation* freed)
     }
   }
 
-  // If this is not the first alloc
+  // Try joining with previous adjacent alloc if this is not the first alloc
   if (freed != allocs_) {
     PoolAllocation* prev_alloc = freed - 1;
     // join freed and prev_alloc
@@ -452,6 +462,48 @@ Pool::join_free_allocs(PoolAllocation* freed)
   } else {
     // Nothing joined, just insert newly freed alloc
     adjust_free_list_after_joins(NULL, 0, freed, NULL);
+  }
+}
+
+void
+Pool::adjust_free_list_after_joins2(PoolAllocation* first,
+                                   unsigned int join_count,
+                                   PoolAllocation* new_or_grown,
+                                   PoolAllocation* removed)
+{
+  bool removed_first = removed && (first_free_ == removed);
+  bool grown_first = new_or_grown && (first_free_ == new_or_grown);
+  //bool insert_first = new_or_grown
+
+  if (removed && (first_free_ == removed)) {
+    // remove
+    first_free_ = removed->next_free_;
+  } else if (new_or_grown && (first_free_ == new_or_grown)) {
+    // remove
+    first_free_ = new_or_grown->next_free_;
+  }
+
+  PoolAllocation* before_removed = NULL;
+  PoolAllocation* before_grown   = NULL;
+  PoolAllocation* before_insert  = NULL;
+
+  for (PoolAllocation* iter = first_free_;
+       iter != NULL;
+       iter = iter->next_free_) {
+    if ((!before_removed) && removed && iter->next_free_ == removed) {
+      before_removed = iter;
+    }
+    if ((!before_grown) && new_or_grown && iter->next_free_ == new_or_grown) {
+      before_grown = iter;
+    }
+    if ((!before_insert) && new_or_grown && iter->next_free_ && 
+        iter->next_free_->size_ <= new_or_grown->size_) {
+      before_insert = iter;
+    }
+  }
+
+  if (before_removed) {
+    before_removed->next_free_ = removed->next_free_;
   }
 }
 

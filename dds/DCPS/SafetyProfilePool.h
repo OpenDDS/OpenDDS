@@ -91,8 +91,12 @@ private:
   void adjust_free_list_after_joins(PoolAllocation* src,
                                     unsigned int join_count,
                                     PoolAllocation* new_or_grown,
-                                    PoolAllocation* removed);
+                                    PoolAllocation* removed_alloc);
 
+  void adjust_free_list_after_joins2(PoolAllocation* src,
+                                    unsigned int join_count,
+                                    PoolAllocation* new_or_grown,
+                                    PoolAllocation* removed);
   // void remove_alloc_from_list(PoolAllocation* to_remove, PoolAllocation* start);
 };
 
