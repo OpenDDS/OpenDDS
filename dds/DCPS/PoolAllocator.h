@@ -101,7 +101,7 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
           OpenDDS::DCPS::PoolAllocator<std::pair<const K, V> > >
 #define OPENDDS_MULTIMAP(K, T) std::multimap<K, T, std::less<K>, \
           OpenDDS::DCPS::PoolAllocator<std::pair<const K, T> > >
-#define OPENDDS_MULTIMAP_CMP(K, T, C) std::map<K, T, C, \
+#define OPENDDS_MULTIMAP_CMP(K, T, C) std::multimap<K, T, C, \
           OpenDDS::DCPS::PoolAllocator<std::pair<const K, T> > >
 #define OPENDDS_SET(K) std::set<K, std::less<K>, \
           OpenDDS::DCPS::PoolAllocator<K> >
