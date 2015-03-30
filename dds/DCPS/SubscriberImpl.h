@@ -141,7 +141,7 @@ public:
 
   /// @}
 
-  typedef std::vector<RepoId> SubscriptionIdVec;
+  typedef OPENDDS_VECTOR(RepoId) SubscriptionIdVec;
   /// Populates a std::vector with the SubscriptionIds (GUIDs)
   /// of this Subscriber's Data Readers
   void get_subscription_ids(SubscriptionIdVec& subs);
@@ -168,16 +168,16 @@ private:
 
   /// Keep track of all the DataReaders attached to this
   /// Subscriber: key is the topic_name
-  typedef std::multimap<OPENDDS_STRING, DataReaderImpl*> DataReaderMap;
+  typedef OPENDDS_MULTIMAP(OPENDDS_STRING, DataReaderImpl*) DataReaderMap;
 
   /// Keep track of DataReaders with data
   /// std::set for now, want to encapsulate
   /// this so we can switch between a set or
   /// list depending on Presentation Qos.
-  typedef std::set<DataReaderImpl*> DataReaderSet;
+  typedef OPENDDS_SET(DataReaderImpl*) DataReaderSet;
 
   /// DataReader id to qos map.
-  typedef std::map<RepoId, DDS::DataReaderQos, GUID_tKeyLessThan> DrIdToQosMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::DataReaderQos, GUID_tKeyLessThan) DrIdToQosMap;
 
   DDS::InstanceHandle_t        handle_;
 
@@ -191,7 +191,7 @@ private:
   DataReaderSet                datareader_set_;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
-  std::map<OPENDDS_STRING, DDS::DataReader_var> multitopic_reader_map_;
+  OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_var) multitopic_reader_map_;
 #endif
 
   DomainParticipantImpl*       participant_;

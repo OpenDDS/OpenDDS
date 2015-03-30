@@ -50,8 +50,8 @@ public:
   /// fragments with sequence numbers in "range" from publication "pub_id".
   void remove_fragments(const SequenceRange& range, const RepoId& pub_id);
 
-  typedef std::vector<std::pair<SequenceNumber, RTPS::FragmentNumberSet> >
-    FragmentInfo;
+  typedef std::pair<SequenceNumber, RTPS::FragmentNumberSet> SeqFragPair;
+  typedef OPENDDS_VECTOR(SeqFragPair) FragmentInfo;
 
   bool has_fragments(const SequenceRange& range, const RepoId& pub_id,
                      FragmentInfo* frag_info = 0);
@@ -84,7 +84,7 @@ private:
   SequenceNumber last_received_;
 
   const ReceivedDataSample* recvd_sample_;
-  std::set<RepoId, GUID_tKeyLessThan> readers_withheld_;
+  OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) readers_withheld_;
 
   SequenceRange frags_;
   TransportReassembly reassembly_;

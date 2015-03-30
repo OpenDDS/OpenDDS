@@ -17,6 +17,7 @@
 
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Thread_Mutex.h"
 #include "ace/Condition_Recursive_Thread_Mutex.h"
@@ -67,8 +68,8 @@ public:
 
   static WaitSet_ptr _duplicate(WaitSet_ptr obj);
 
-  typedef std::set<Condition_var,
-  OpenDDS::DCPS::VarLess<Condition> > ConditionSet;
+  typedef OPENDDS_SET_CMP(Condition_var,
+  OpenDDS::DCPS::VarLess<Condition> ) ConditionSet;
 
 private:
   ReturnCode_t detach_i(const Condition_ptr cond);

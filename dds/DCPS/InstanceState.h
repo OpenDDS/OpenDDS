@@ -14,6 +14,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -196,7 +197,7 @@ private:
   DataReaderImpl* reader_;
   DDS::InstanceHandle_t handle_;
 
-  typedef std::set <PublicationId, GUID_tKeyLessThan> Writers;
+  typedef OPENDDS_SET_CMP(PublicationId, GUID_tKeyLessThan) Writers;
 
   Writers writers_;
   PublicationId owner_;

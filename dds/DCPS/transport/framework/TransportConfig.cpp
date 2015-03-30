@@ -30,7 +30,7 @@ void
 TransportConfig::sorted_insert(const TransportInst_rch& inst)
 {
   const OPENDDS_STRING name = inst->name();
-  std::vector<TransportInst_rch>::iterator it = instances_.begin();
+  OPENDDS_VECTOR(TransportInst_rch)::iterator it = instances_.begin();
   while (it != instances_.end() && (*it)->name() < name) {
     ++it;
   }

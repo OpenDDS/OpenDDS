@@ -72,7 +72,7 @@ private:
 
   ThreadLockType links_lock_;
   /// link for pubs.
-  typedef std::map<MulticastPeer, MulticastDataLink_rch> Links;
+  typedef OPENDDS_MAP(MulticastPeer, MulticastDataLink_rch) Links;
   Links client_links_;
   /// link for subs.
   Links server_links_;
@@ -86,7 +86,7 @@ private:
   ThreadLockType connections_lock_;
   typedef std::vector<DataLink::OnStartCallback> Callbacks;
   typedef std::pair<MulticastPeer, MulticastPeer> Peers;
-  typedef std::map<Peers, Callbacks> PendConnMap;
+  typedef OPENDDS_MAP(Peers, Callbacks) PendConnMap;
   PendConnMap pending_connections_;
   // remote peer to local peer
   std::set<Peers> connections_;

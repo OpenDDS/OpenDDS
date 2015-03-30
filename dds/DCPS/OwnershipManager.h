@@ -31,7 +31,7 @@ class DataReaderImpl;
 
 class OpenDDS_Dcps_Export OwnershipManager {
 public:
-  typedef std::vector<DataReaderImpl* > ReaderVec;
+  typedef OPENDDS_VECTOR(DataReaderImpl* ) ReaderVec;
   // The TypeInstanceMap is only used for EXCLUSIVE ownership.
   struct InstanceMap {
     InstanceMap () : map_(0) {};
@@ -43,7 +43,7 @@ public:
     ReaderVec readers_;
   };
 
-  typedef std::map<OPENDDS_STRING, InstanceMap> TypeInstanceMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, InstanceMap) TypeInstanceMap;
 
   struct WriterInfo {
     WriterInfo (const PublicationId& pub_id,
@@ -60,8 +60,8 @@ public:
     CORBA::Long ownership_strength_;
   };
 
-  typedef std::vector <WriterInfo> WriterInfos;
-  typedef std::vector <InstanceState* > InstanceStateVec;
+  typedef OPENDDS_VECTOR(WriterInfo) WriterInfos;
+  typedef OPENDDS_VECTOR(InstanceState* ) InstanceStateVec;
 
   struct OwnershipWriterInfos {
     WriterInfo owner_;
@@ -69,7 +69,7 @@ public:
     InstanceStateVec instance_states_;
   };
 
-  typedef std::map < ::DDS::InstanceHandle_t, OwnershipWriterInfos> InstanceOwnershipWriterInfos;
+  typedef OPENDDS_MAP( ::DDS::InstanceHandle_t, OwnershipWriterInfos) InstanceOwnershipWriterInfos;
 
   OwnershipManager ();
   ~OwnershipManager ();

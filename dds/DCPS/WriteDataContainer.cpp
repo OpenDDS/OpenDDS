@@ -551,7 +551,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     // Should be on sending_data_.  If it is in sent_data_
     // or unsent_data there was a problem.
     //
-    std::vector<SendStateDataSampleList*> send_lists;
+    OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
     send_lists.push_back(&sent_data_);
     send_lists.push_back(&unsent_data_);
 
@@ -703,7 +703,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     //
     // If it is in sent_data_ or unsent_data there was a problem.
     //
-    std::vector<SendStateDataSampleList*> send_lists;
+    OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
     send_lists.push_back(&sent_data_);
     send_lists.push_back(&unsent_data_);
 
@@ -767,7 +767,7 @@ WriteDataContainer::remove_oldest_historical_sample(
   // If the sample is not on the sent_data_ list, simply can't
   // be removed  -- not an error
 
-  std::vector<SendStateDataSampleList*> send_lists;
+  OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
   send_lists.push_back(&sent_data_);
 
   const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
@@ -856,7 +856,7 @@ WriteDataContainer::remove_oldest_sample(
   //
   // Locate the head of the list that the stale data is in.
   //
-  std::vector<SendStateDataSampleList*> send_lists;
+  OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
   send_lists.push_back(&sending_data_);
   send_lists.push_back(&sent_data_);
   send_lists.push_back(&unsent_data_);

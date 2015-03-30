@@ -42,15 +42,14 @@ namespace {
 }
 
 bool
-TransportReassembly::insert(std::list<FragRange>& flist,
+TransportReassembly::insert(OPENDDS_LIST(FragRange)& flist,
                             const SequenceRange& seqRange,
                             ReceivedDataSample& data)
 {
-  using std::list;
   const SequenceNumber::Value prev = seqRange.first.getValue() - 1,
     next = seqRange.second.getValue() + 1;
 
-  for (list<FragRange>::iterator it = flist.begin(); it != flist.end(); ++it) {
+  for (OPENDDS_LIST(FragRange)::iterator it = flist.begin(); it != flist.end(); ++it) {
     FragRange& fr = *it;
     if (next < fr.transport_seq_.first.getValue()) {
       // insert before 'it'
@@ -179,7 +178,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
   // low 32 bits of the 64-bit generalized sequence numbers in
   // FragRange::transport_seq_.
 
-  const std::list<FragRange>& flist = iter->second;
+  const OPENDDS_LIST(FragRange)& flist = iter->second;
   const SequenceNumber& first = flist.front().transport_seq_.first;
   const CORBA::ULong base = (first == 1)
     ? flist.front().transport_seq_.second.getLow() + 1
@@ -200,7 +199,7 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
     return base;
   }
 
-  typedef std::list<FragRange>::const_iterator list_iterator;
+  typedef OPENDDS_LIST(FragRange)::const_iterator list_iterator;
   for (list_iterator it = flist.begin(); it != flist.end(); ++it) {
     const list_iterator it_next = ++list_iterator(it);
     if (it_next == flist.end()) {
@@ -288,13 +287,12 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
 {
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::data_unavailable() "
     "dropped %q-%q\n", dropped.first.getValue(), dropped.second.getValue()));
-  using std::list;
-  typedef list<FragRange>::iterator list_iterator;
+  typedef OPENDDS_LIST(FragRange)::iterator list_iterator;
 
   for (FragMap::iterator iter = fragments_.begin(); iter != fragments_.end();
        ++iter) {
     const FragKey& key = iter->first;
-    list<FragRange>& flist = iter->second;
+    OPENDDS_LIST(FragRange)& flist = iter->second;
 
     ReceivedDataSample dummy(0);
     dummy.header_.sequence_ = key.data_sample_seq_;

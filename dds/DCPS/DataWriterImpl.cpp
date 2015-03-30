@@ -1727,7 +1727,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
-  std::set<GUID_t, GUID_tKeyLessThan> excluded;
+  OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) excluded;
 
   if (filter_out && !reader_info_.empty()) {
     const GUID_t* buf = filter_out->get_buffer();

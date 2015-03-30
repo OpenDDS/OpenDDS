@@ -346,7 +346,7 @@ SingleSendBuffer::resend_fragments_i(const SequenceNumber& seq,
     return;
   }
   const BufferMap& buffers = (*fragments_)[seq];
-  const std::vector<SequenceRange> psr =
+  const OPENDDS_VECTOR(SequenceRange) psr =
     requested_frags.present_sequence_ranges();
   SequenceNumber sent = SequenceNumber::ZERO();
   for (size_t i = 0; i < psr.size(); ++i) {

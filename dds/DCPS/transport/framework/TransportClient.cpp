@@ -92,7 +92,7 @@ TransportClient::~TransportClient()
   pending_assoc_timer_->wait();
   pending_assoc_timer_->destroy();
 
-  for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
+  for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
 
     (*it)->detach_client(this);
@@ -225,7 +225,7 @@ TransportClient::transport_detached(TransportImpl* which)
   }
 
   // Remove the 'which' TransportImpl from the impls_ list
-  for (std::vector<TransportImpl_rch>::iterator it = impls_.begin();
+  for (OPENDDS_VECTOR(TransportImpl_rch)::iterator it = impls_.begin();
        it != impls_.end(); ++it) {
     if (it->in() == which) {
       impls_.erase(it);

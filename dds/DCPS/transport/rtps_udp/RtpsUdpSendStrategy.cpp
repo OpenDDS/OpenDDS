@@ -68,7 +68,7 @@ RtpsUdpSendStrategy::send_bytes_i(const iovec iov[], int n)
   }
 
   const RepoId remote_id = elem->subscription_id();
-  std::set<ACE_INET_Addr> addrs;
+  OPENDDS_SET(ACE_INET_Addr) addrs;
 
   if (remote_id != GUID_UNKNOWN) {
     const ACE_INET_Addr remote = link_->get_locator(remote_id);
@@ -97,7 +97,7 @@ RtpsUdpSendStrategy::override_destinations(const ACE_INET_Addr& destination)
 }
 
 RtpsUdpSendStrategy::OverrideToken
-RtpsUdpSendStrategy::override_destinations(const std::set<ACE_INET_Addr>& dest)
+RtpsUdpSendStrategy::override_destinations(const OPENDDS_SET(ACE_INET_Addr)& dest)
 {
   override_dest_ = &dest;
   return OverrideToken(this);
@@ -136,7 +136,7 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
 
 void
 RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
-                                       const std::set<ACE_INET_Addr>& addrs)
+                                       const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
   rtps_header_mb_.cont(&submessages);
 
@@ -153,10 +153,10 @@ RtpsUdpSendStrategy::send_rtps_control(ACE_Message_Block& submessages,
 
 ssize_t
 RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
-                                  const std::set<ACE_INET_Addr>& addrs)
+                                  const OPENDDS_SET(ACE_INET_Addr)& addrs)
 {
   ssize_t result = -1;
-  typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
+  typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
     const ssize_t result_per_dest = send_single_i(iov, n, *iter);
     if (result_per_dest >= 0) {

@@ -20,7 +20,7 @@ my $test = new PerlDDS::TestFramework();
 
 my $multiple_instance=0;
 my $num_threads_to_write=1;
-my $num_writes_per_thread=1000;
+my $num_writes_per_thread=100;
 my $num_writers=1;
 #Make max_samples_per_instance large enough.
 my $max_samples_per_instance=12345678;

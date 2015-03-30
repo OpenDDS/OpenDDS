@@ -191,7 +191,7 @@ Service_Participant::~Service_Participant()
 {
   shutdown();
   ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
-  typedef std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter_t;
+  typedef OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter_t;
   for (iter_t it = discovery_types_.begin(); it != discovery_types_.end(); ++it) {
     delete it->second;
   }
@@ -265,7 +265,7 @@ Service_Participant::shutdown()
     persistent_data_cache_.reset();
 #endif
 
-    typedef std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter;
+    typedef OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter;
     for (iter i = discovery_types_.begin(); i != discovery_types_.end(); ++i) {
       delete i->second;
     }
@@ -829,7 +829,7 @@ Service_Participant::remap_domains(Discovery::RepoKey oldKey,
                                    bool attach_participant)
 {
   // Search the mappings for any domains mapped to this repository.
-  std::vector<DDS::DomainId_t> domainList;
+  OPENDDS_VECTOR(DDS::DomainId_t) domainList;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
 
@@ -855,7 +855,8 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                                      Discovery::RepoKey key,
                                      bool attach_participant)
 {
-  std::vector<std::pair<Discovery_rch, RepoId> > repoList;
+  typedef std::pair<Discovery_rch, RepoId> DiscRepoPair;
+  OPENDDS_VECTOR(DiscRepoPair) repoList;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
     DomainRepoMap::const_iterator where = this->domainRepoMap_.find(domain);
@@ -1688,7 +1689,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   if (cf.open_section(root, section_name, 0, sect) == 0) {
 
     const OPENDDS_STRING sect_name = ACE_TEXT_ALWAYS_CHAR(section_name);
-    std::map<OPENDDS_STRING, Discovery::Config*>::iterator iter =
+    OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*)::iterator iter =
       this->discovery_types_.find(sect_name);
 
     if (iter == this->discovery_types_.end()) {
