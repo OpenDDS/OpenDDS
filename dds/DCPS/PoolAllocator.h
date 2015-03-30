@@ -95,35 +95,35 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 #define OPENDDS_STRING std::basic_string<char, std::char_traits<char>, \
           OpenDDS::DCPS::PoolAllocator<char> >
 #endif // ACE_LYNXOS_MAJOR
-#define OPENDDS_MAP(K, V) std::map<K, V, std::less<K>, \
-          OpenDDS::DCPS::PoolAllocator<std::pair<const K, V> > >
+#define OPENDDS_MAP(K, V) std::map<K, V, std::less<K >, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<const K, V > > >
 #define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C, \
-          OpenDDS::DCPS::PoolAllocator<std::pair<const K, V> > >
-#define OPENDDS_MULTIMAP(K, T) std::multimap<K, T, std::less<K>, \
-          OpenDDS::DCPS::PoolAllocator<std::pair<const K, T> > >
+          OpenDDS::DCPS::PoolAllocator<std::pair<const K, V > > >
+#define OPENDDS_MULTIMAP(K, T) std::multimap<K, T, std::less<K >, \
+          OpenDDS::DCPS::PoolAllocator<std::pair<const K, T > > >
 #define OPENDDS_MULTIMAP_CMP(K, T, C) std::multimap<K, T, C, \
-          OpenDDS::DCPS::PoolAllocator<std::pair<const K, T> > >
-#define OPENDDS_SET(K) std::set<K, std::less<K>, \
-          OpenDDS::DCPS::PoolAllocator<K> >
+          OpenDDS::DCPS::PoolAllocator<std::pair<const K, T > > >
+#define OPENDDS_SET(K) std::set<K, std::less<K >, \
+          OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C, \
-          OpenDDS::DCPS::PoolAllocator<K> >
+          OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_VECTOR(T) std::vector<T, \
-          OpenDDS::DCPS::PoolAllocator<T> >
+          OpenDDS::DCPS::PoolAllocator<T > >
 #define OPENDDS_LIST(T) std::list<T, \
-          OpenDDS::DCPS::PoolAllocator<T> >
+          OpenDDS::DCPS::PoolAllocator<T > >
 #define OPENDDS_QUEUE(T) std::queue<T, std::deque<T, \
-          OpenDDS::DCPS::PoolAllocator<T> > >
+          OpenDDS::DCPS::PoolAllocator<T > > >
 #else
 #define OPENDDS_STRING std::string
-#define OPENDDS_MAP(K, V) std::map<K, V>
-#define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C>
-#define OPENDDS_MULTIMAP(K, T) std::multimap<K, T>
-#define OPENDDS_MULTIMAP_CMP(K, T, C) std::multimap<K, T, C>
-#define OPENDDS_SET(K) std::set<K>
-#define OPENDDS_SET_CMP(K, C) std::set<K, C>
-#define OPENDDS_VECTOR(T) std::vector<T>
-#define OPENDDS_LIST(T) std::list<T>
-#define OPENDDS_QUEUE(T) std::queue<T>
+#define OPENDDS_MAP(K, V) std::map<K, V >
+#define OPENDDS_MAP_CMP(K, V, C) std::map<K, V, C >
+#define OPENDDS_MULTIMAP(K, T) std::multimap<K, T >
+#define OPENDDS_MULTIMAP_CMP(K, T, C) std::multimap<K, T, C >
+#define OPENDDS_SET(K) std::set<K >
+#define OPENDDS_SET_CMP(K, C) std::set<K, C >
+#define OPENDDS_VECTOR(T) std::vector<T >
+#define OPENDDS_LIST(T) std::list<T >
+#define OPENDDS_QUEUE(T) std::queue<T >
 #endif // OPENDDS_SAFETY_PROFILE
 
 #endif // OPENDDS_DCPS_POOL_ALLOCATOR_H
