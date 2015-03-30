@@ -128,7 +128,8 @@ public:
   ACE_Time_Value last_liveliness_activity_time_;
 
   /// Times after which we no longer need to respond to a REQUEST_ACK message.
-  typedef std::list<std::pair<SequenceNumber, ACE_Time_Value> > DeadlineList;
+  typedef std::pair<SequenceNumber, ACE_Time_Value> SeqDeadlinePair;
+  typedef OPENDDS_LIST(SeqDeadlinePair) DeadlineList;
   DeadlineList ack_deadlines_;
 
   DisjointSequence ack_sequence_;
@@ -142,7 +143,7 @@ public:
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.
-  std::map<SequenceNumber, ReceivedDataSample> historic_samples_;
+  OPENDDS_MAP(SequenceNumber, ReceivedDataSample) historic_samples_;
 
   /// After receiving END_HISTORIC_SAMPLES, check for duplicates
   SequenceNumber last_historic_seq_;
@@ -171,7 +172,7 @@ public:
   ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
-  typedef std::map < ::DDS::InstanceHandle_t, bool> OwnerEvaluateFlags;
+  typedef OPENDDS_MAP( ::DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;
   OwnerEvaluateFlags owner_evaluated_;
 
   /// Data to support GROUP access scope.

@@ -89,7 +89,7 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
 {
   RtpsWriterMap::iterator iter = writers_.find(pub_id);
   if (iter != writers_.end() && !iter->second.elems_not_acked_.empty()) {
-    std::map<SequenceNumber, TransportQueueElement*>::iterator it = iter->second.elems_not_acked_.begin();
+    OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator it = iter->second.elems_not_acked_.begin();
     while (it != iter->second.elems_not_acked_.end()) {
       if (criteria.matches(*it->second)) {
         it->second->data_dropped(true);
@@ -227,10 +227,9 @@ RtpsUdpDataLink::add_locator(const RepoId& remote_id,
 
 void
 RtpsUdpDataLink::get_locators(const RepoId& local_id,
-                              std::set<ACE_INET_Addr>& addrs) const
+                              OPENDDS_SET(ACE_INET_Addr)& addrs) const
 {
-  using std::map;
-  typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
+  typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
 
   if (local_id == GUID_UNKNOWN) {
     for (iter_t iter = locators_.begin(); iter != locators_.end(); ++iter) {
@@ -254,8 +253,7 @@ RtpsUdpDataLink::get_locators(const RepoId& local_id,
 ACE_INET_Addr
 RtpsUdpDataLink::get_locator(const RepoId& remote_id) const
 {
-  using std::map;
-  typedef map<RepoId, RemoteInfo, GUID_tKeyLessThan>::const_iterator iter_t;
+  typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::const_iterator iter_t;
   const iter_t iter = locators_.find(remote_id);
   if (iter == locators_.end()) {
     const GuidConverter conv(remote_id);
@@ -662,7 +660,7 @@ RtpsUdpDataLink::requires_inline_qos(const PublicationId& pub_id)
     if (!peers.ptr()) {
       return false;
     }
-    typedef std::map<RepoId, RemoteInfo, GUID_tKeyLessThan>::iterator iter_t;
+    typedef OPENDDS_MAP_CMP(RepoId, RemoteInfo, GUID_tKeyLessThan)::iterator iter_t;
     for (CORBA::ULong i = 0; i < peers->length(); ++i) {
       const iter_t iter = locators_.find(peers[i]);
       if (iter != locators_.end() && iter->second.requires_inline_qos_) {
@@ -778,7 +776,7 @@ RtpsUdpDataLink::deliver_held_data(const RepoId& readerId, WriterInfo& info,
 {
   if (durable && (info.recvd_.empty() || info.recvd_.low() > 1)) return;
   const SequenceNumber ca = info.recvd_.cumulative_ack();
-  typedef std::map<SequenceNumber, ReceivedDataSample>::iterator iter;
+  typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
   const iter end = info.held_.upper_bound(ca);
   for (iter it = info.held_.begin(); it != end; /*increment in loop body*/) {
     data_received(it->second, readerId);
@@ -1047,7 +1045,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         };
         gen_find_size(info_dst, size, padding);
 
-        std::vector<NackFragSubmessage> nack_frags;
+        OPENDDS_VECTOR(NackFragSubmessage) nack_frags;
         size += generate_nack_frags(nack_frags, wi->second, wi->first);
 
         ACE_Message_Block mb_acknack(size + padding); //FUTURE: allocators?
@@ -1082,16 +1080,16 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 }
 
 size_t
-RtpsUdpDataLink::generate_nack_frags(std::vector<RTPS::NackFragSubmessage>& nf,
+RtpsUdpDataLink::generate_nack_frags(OPENDDS_VECTOR(RTPS::NackFragSubmessage)& nf,
                                      WriterInfo& wi, const RepoId& pub_id)
 {
-  typedef std::map<SequenceNumber, RTPS::FragmentNumber_t>::iterator iter_t;
+  typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumber_t)::iterator iter_t;
   typedef RtpsUdpReceiveStrategy::FragmentInfo::value_type Frag_t;
   RtpsUdpReceiveStrategy::FragmentInfo frag_info;
 
   // Populate frag_info with two possible sources of NackFrags:
   // 1. sequence #s in the reception gaps that we have partially received
-  std::vector<SequenceRange> missing = wi.recvd_.missing_sequence_ranges();
+  OPENDDS_VECTOR(SequenceRange) missing = wi.recvd_.missing_sequence_ranges();
   for (size_t i = 0; i < missing.size(); ++i) {
     recv_strategy_->has_fragments(missing[i], pub_id, &frag_info);
   }
@@ -1281,7 +1279,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     invoke_on_start_callbacks(true);
   }
 
-  std::map<SequenceNumber, TransportQueueElement*> pendingCallbacks;
+  OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
   const bool final = acknack.smHeader.flags & 2 /* FLAG_F */;
 
   if (!ri->second.durable_data_.empty()) {
@@ -1315,9 +1313,9 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       }
       // Attempt to reply to nacks for durable data
       bool sent_some = false;
-      typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+      typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
       iter_t it = ri->second.durable_data_.begin();
-      const std::vector<SequenceRange> psr = requests.present_sequence_ranges();
+      const OPENDDS_VECTOR(SequenceRange) psr = requests.present_sequence_ranges();
       SequenceNumber lastSent = SequenceNumber::ZERO();
       if (!requests.empty()) {
         lastSent = requests.low().previous();
@@ -1404,7 +1402,7 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   } else {
     acked_by_all_check_.schedule();
   }
-  typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+  typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
   for (iter_t it = pendingCallbacks.begin();
        it != pendingCallbacks.end(); ++it) {
     it->second->data_delivered();
@@ -1474,7 +1472,7 @@ RtpsUdpDataLink::send_nack_replies()
   for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
 
     // consolidate requests from N readers
-    std::set<ACE_INET_Addr> recipients;
+    OPENDDS_SET(ACE_INET_Addr) recipients;
     DisjointSequence requests;
     RtpsWriter& writer = rw->second;
 
@@ -1526,7 +1524,7 @@ RtpsUdpDataLink::send_nack_replies()
       if (writer.send_buff_.is_nil() || writer.send_buff_->empty()) {
         gaps = requests;
       } else {
-        std::vector<SequenceRange> ranges = requests.present_sequence_ranges();
+        OPENDDS_VECTOR(SequenceRange) ranges = requests.present_sequence_ranges();
         SingleSendBuffer& sb = *writer.send_buff_;
         ACE_GUARD(TransportSendBuffer::LockType, guard, sb.strategy_lock());
         const RtpsUdpSendStrategy::OverrideToken ot =
@@ -1561,7 +1559,7 @@ RtpsUdpDataLink::send_nack_replies()
       continue;
     }
     //if any messages fully acked, call data delivered and remove from map
-    typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+    typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
     iter_t it = writer.elems_not_acked_.begin();
     while (it != writer.elems_not_acked_.end() && it->first < all_readers_ack) {
       it->second->data_delivered();
@@ -1575,10 +1573,10 @@ RtpsUdpDataLink::send_nack_replies()
 void
 RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
                                        DisjointSequence& gaps,
-                                       std::set<ACE_INET_Addr>& gap_recipients)
+                                       OPENDDS_SET(ACE_INET_Addr)& gap_recipients)
 {
-  typedef std::map<SequenceNumber, DisjointSequence> FragmentInfo;
-  std::map<ACE_INET_Addr, FragmentInfo> requests;
+  typedef OPENDDS_MAP(SequenceNumber, DisjointSequence) FragmentInfo;
+  OPENDDS_MAP(ACE_INET_Addr, FragmentInfo) requests;
 
   typedef ReaderInfoMap::iterator ri_iter;
   const ri_iter end = writer.remote_readers_.end();
@@ -1590,7 +1588,7 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
 
     const ACE_INET_Addr& remote_addr = locators_[ri->first].addr_;
 
-    typedef std::map<SequenceNumber, RTPS::FragmentNumberSet>::iterator rf_iter;
+    typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet)::iterator rf_iter;
     const rf_iter rf_end = ri->second.requested_frags_.end();
     for (rf_iter rf = ri->second.requested_frags_.begin(); rf != rf_end; ++rf) {
 
@@ -1607,7 +1605,7 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
     ri->second.requested_frags_.clear();
   }
 
-  typedef std::map<ACE_INET_Addr, FragmentInfo>::iterator req_iter;
+  typedef OPENDDS_MAP(ACE_INET_Addr, FragmentInfo)::iterator req_iter;
   for (req_iter req = requests.begin(); req != requests.end(); ++req) {
     const FragmentInfo& fi = req->second;
 
@@ -1651,7 +1649,7 @@ RtpsUdpDataLink::process_acked_by_all()
         continue;
       }
       //if any messages fully acked, call data delivered and remove from map
-      typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+      typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
       iter_t it = writer.elems_not_acked_.begin();
       while (it != writer.elems_not_acked_.end()) {
         if (it->first < all_readers_ack) {
@@ -1707,7 +1705,7 @@ RtpsUdpDataLink::marshal_gaps(const RepoId& writer, const RepoId& reader,
     static_cast<CORBA::UShort>(gap_size + padding) - SMHDR_SZ;
 
   // For durable writers, change a non-directed Gap into multiple directed gaps.
-  std::vector<RepoId> readers;
+  OPENDDS_VECTOR(RepoId) readers;
   if (durable && reader.entityId == ENTITYID_UNKNOWN) {
     if (Transport_debug_level > 5) {
       const GuidConverter local_conv(writer);
@@ -1793,9 +1791,9 @@ RtpsUdpDataLink::send_heartbeats()
   }
 
   using namespace OpenDDS::RTPS;
-  std::vector<HeartBeatSubmessage> subm;
-  std::set<ACE_INET_Addr> recipients;
-  std::vector<TransportQueueElement*> pendingCallbacks;
+  OPENDDS_VECTOR(HeartBeatSubmessage) subm;
+  OPENDDS_SET(ACE_INET_Addr) recipients;
+  OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
   const ACE_Time_Value now = ACE_OS::gettimeofday();
 
   typedef RtpsWriterMap::iterator rw_iter;
@@ -1820,7 +1818,7 @@ RtpsUdpDataLink::send_heartbeats()
         const ACE_Time_Value expiration =
           ri->second.durable_timestamp_ + config_->durable_data_timeout_;
         if (now > expiration) {
-          typedef std::map<SequenceNumber, TransportQueueElement*>::iterator
+          typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator
             dd_iter;
           for (dd_iter it = ri->second.durable_data_.begin();
                it != ri->second.durable_data_.end(); ++it) {
@@ -1902,7 +1900,7 @@ RtpsUdpDataLink::send_heartbeats_manual(const TransportSendControlElement* tsce)
   const RepoId pub_id = tsce->publication_id();
 
   // Populate the recipients.
-  std::set<ACE_INET_Addr> recipients;
+  OPENDDS_SET(ACE_INET_Addr) recipients;
   get_locators (pub_id, recipients);
   if (recipients.empty()) {
     return;
@@ -1970,7 +1968,7 @@ RtpsUdpDataLink::ReaderInfo::~ReaderInfo()
 void
 RtpsUdpDataLink::ReaderInfo::expire_durable_data()
 {
-  typedef std::map<SequenceNumber, TransportQueueElement*>::iterator iter_t;
+  typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
   for (iter_t it = durable_data_.begin(); it != durable_data_.end(); ++it) {
     it->second->data_dropped();
   }
@@ -1987,7 +1985,7 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
 {
   if (!elems_not_acked_.empty()) {
-    std::map<SequenceNumber, TransportQueueElement*>::iterator iter = elems_not_acked_.begin();
+    OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter = elems_not_acked_.begin();
     while (iter != elems_not_acked_.end()) {
       iter->second->data_delivered();
       send_buff_->release_acked(iter->first);

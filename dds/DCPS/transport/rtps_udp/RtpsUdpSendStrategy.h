@@ -40,12 +40,12 @@ public:
 
   OverrideToken override_destinations(const ACE_INET_Addr& destination);
   OverrideToken override_destinations(
-    const std::set<ACE_INET_Addr>& destinations);
+    const OPENDDS_SET(ACE_INET_Addr)& destinations);
 
   void send_rtps_control(ACE_Message_Block& submessages,
                          const ACE_INET_Addr& destination);
   void send_rtps_control(ACE_Message_Block& submessages,
-                         const std::set<ACE_INET_Addr>& destinations);
+                         const OPENDDS_SET(ACE_INET_Addr)& destinations);
 
 protected:
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
@@ -61,12 +61,12 @@ protected:
 private:
   void marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
-                       const std::set<ACE_INET_Addr>& addrs);
+                       const OPENDDS_SET(ACE_INET_Addr)& addrs);
   ssize_t send_single_i(const iovec iov[], int n,
                         const ACE_INET_Addr& addr);
 
   RtpsUdpDataLink* link_;
-  const std::set<ACE_INET_Addr>* override_dest_;
+  const OPENDDS_SET(ACE_INET_Addr)* override_dest_;
   const ACE_INET_Addr* override_single_dest_;
 
   OpenDDS::RTPS::Header rtps_header_;

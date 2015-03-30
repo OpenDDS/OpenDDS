@@ -34,7 +34,7 @@ public:
 
   OPENDDS_STRING name() const { return name_; }
 
-  std::vector<TransportInst_rch> instances_;
+  OPENDDS_VECTOR(TransportInst_rch) instances_;
 
   bool swap_bytes_;
 

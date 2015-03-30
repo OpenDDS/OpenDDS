@@ -16,6 +16,7 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "ace/Synch.h"
 
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 
 namespace OpenDDS {
@@ -24,7 +25,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export RepoIdSet : public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
-  typedef std::map<RepoId, RepoId, GUID_tKeyLessThan> MapType;
+  typedef OPENDDS_MAP_CMP(RepoId, RepoId, GUID_tKeyLessThan) MapType;
 
   RepoIdSet();
   virtual ~RepoIdSet();

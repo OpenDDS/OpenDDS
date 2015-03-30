@@ -515,7 +515,7 @@ Spdp::SpdpTransport::dispose_unregister()
     return;
   }
 
-  typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
+  typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
     const ssize_t res =
       unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);
@@ -627,7 +627,7 @@ Spdp::SpdpTransport::write_i()
     return;
   }
 
-  typedef std::set<ACE_INET_Addr>::const_iterator iter_t;
+  typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
   for (iter_t iter = send_addrs_.begin(); iter != send_addrs_.end(); ++iter) {
     const ssize_t res =
       unicast_socket_.send(wbuff_.rd_ptr(), wbuff_.length(), *iter);

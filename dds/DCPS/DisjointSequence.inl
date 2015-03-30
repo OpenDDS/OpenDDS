@@ -75,7 +75,7 @@ DisjointSequence::insert(const SequenceRange& range)
 
 ACE_INLINE bool
 DisjointSequence::insert(const SequenceRange& range,
-                         std::vector<SequenceRange>& gaps)
+                         OPENDDS_VECTOR(SequenceRange)& gaps)
 {
   return insert_i(range, &gaps);
 }

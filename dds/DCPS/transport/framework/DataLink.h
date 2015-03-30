@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "ReceiveListenerSetMap.h"
 #include "RepoIdSetMap.h"
 #include "SendResponseListener.h"
@@ -51,7 +52,7 @@ class  DataSampleElement;
 class  ThreadPerConnectionSendTask;
 class  TransportClient;
 
-typedef std::map <RepoId, DataLinkSet_rch, GUID_tKeyLessThan> DataLinkSetMap;
+typedef OPENDDS_MAP_CMP(RepoId, DataLinkSet_rch, GUID_tKeyLessThan) DataLinkSetMap;
 
 /**
  * This class manages the reservations based on the associations between datareader
@@ -164,7 +165,7 @@ public:
   /// Varation of data_received() that allows for excluding a subset of readers.
   /// Any reader ID that appears in the exclude set will be skipped.
   void data_received_excluding(ReceivedDataSample& sample,
-                               const std::set<RepoId, GUID_tKeyLessThan>& excl);
+                               const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& excl);
 
   /// Obtain a unique identifier for this DataLink object.
   DataLinkIdType id() const;
@@ -359,7 +360,7 @@ private:
 
   void data_received_i(ReceivedDataSample& sample,
                        const RepoId& readerId,
-                       const std::set<RepoId, GUID_tKeyLessThan>& exclude);
+                       const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& exclude);
 
   typedef ACE_SYNCH_MUTEX     LockType;
 
@@ -375,11 +376,11 @@ private:
   ACE_Time_Value scheduled_to_stop_at_;
 
   /// Map publication Id value to TransportSendListener.
-  typedef std::map<RepoId, TransportSendListener*, GUID_tKeyLessThan> IdToSendListenerMap;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportSendListener*, GUID_tKeyLessThan) IdToSendListenerMap;
   IdToSendListenerMap send_listeners_;
 
   /// Map subscription Id value to TransportReceieveListener.
-  typedef std::map<RepoId, TransportReceiveListener*, GUID_tKeyLessThan> IdToRecvListenerMap;
+  typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener*, GUID_tKeyLessThan) IdToRecvListenerMap;
   IdToRecvListenerMap recv_listeners_;
 
   /// If default_listener_ is not null and this DataLink receives a sample
@@ -438,7 +439,7 @@ protected:
   TransportSendStrategy_rch send_strategy_;
 
   LockType strategy_lock_;
-  std::vector<OnStartCallback> on_start_callbacks_;
+  OPENDDS_VECTOR(OnStartCallback) on_start_callbacks_;
 
   /// Configurable delay in milliseconds that the datalink
   /// should be released after all associations are removed.

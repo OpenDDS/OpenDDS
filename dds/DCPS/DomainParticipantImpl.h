@@ -88,8 +88,8 @@ public:
   typedef Objref_Servant_Pair <TopicImpl, DDS::Topic,
                                DDS::Topic_ptr, DDS::Topic_var> Topic_Pair;
 
-  typedef std::set<Subscriber_Pair> SubscriberSet;
-  typedef std::set<Publisher_Pair> PublisherSet;
+  typedef OPENDDS_SET(Subscriber_Pair) SubscriberSet;
+  typedef OPENDDS_SET(Publisher_Pair) PublisherSet;
 
   class OpenDDS_Dcps_Export RepoIdSequence {
 public:
@@ -119,12 +119,12 @@ private:
     CORBA::Long client_refs_;
   };
 
-  typedef std::map<OPENDDS_STRING, RefCounted_Topic> TopicMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, RefCounted_Topic) TopicMap;
 
-  typedef std::map<OPENDDS_STRING, DDS::TopicDescription_var> TopicDescriptionMap;
+  typedef OPENDDS_MAP(OPENDDS_STRING, DDS::TopicDescription_var) TopicDescriptionMap;
 
-  typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> HandleMap;
-  typedef std::map<DDS::InstanceHandle_t, RepoId> RepoIdMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) HandleMap;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
 
   ///Constructor
   DomainParticipantImpl(DomainParticipantFactoryImpl *     factory,
@@ -322,7 +322,7 @@ private:
    */
   DDS::DomainParticipantListener_ptr listener_for(DDS::StatusKind kind);
 
-  typedef std::vector<RepoId> TopicIdVec;
+  typedef OPENDDS_VECTOR(RepoId) TopicIdVec;
   /**
    * Populates an std::vector with the RepoId of the topics this
    * participant has created/found.
@@ -490,11 +490,11 @@ private:
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   ACE_Thread_Mutex filter_cache_lock_;
-  std::map<OPENDDS_STRING, RcHandle<FilterEvaluator> > filter_cache_;
+  OPENDDS_MAP(OPENDDS_STRING, RcHandle<FilterEvaluator> ) filter_cache_;
 #endif
 
-  typedef std::set<Recorder_var, VarLess<Recorder> > RecorderSet;
-  typedef std::set<Replayer_var, VarLess<Replayer> > ReplayerSet;
+  typedef OPENDDS_SET_CMP(Recorder_var, VarLess<Recorder> ) RecorderSet;
+  typedef OPENDDS_SET_CMP(Replayer_var, VarLess<Replayer> ) ReplayerSet;
 
   RecorderSet recorders_;
   ReplayerSet replayers_;

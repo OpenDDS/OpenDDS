@@ -25,7 +25,7 @@ struct HostnameInfo {
   OPENDDS_STRING hostname_;
 };
 
-typedef std::vector<HostnameInfo> HostnameInfoVector;
+typedef OPENDDS_VECTOR(HostnameInfo) HostnameInfoVector;
 
 /**
  * @struct NetworkAddress

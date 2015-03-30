@@ -88,7 +88,7 @@ public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
 
-  typedef std::map<RepoId, SequenceNumber, GUID_tKeyLessThan> RepoIdToSequenceMap;
+  typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
 
   struct AckToken {
     ACE_Time_Value tstamp_;
@@ -157,10 +157,10 @@ public:
 
   virtual DDS::ReturnCode_t assert_liveliness_by_participant();
 
-  typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
+  typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  typedef std::set<RepoId, GUID_tKeyLessThan> IdSet;
+  typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) IdSet;
   void get_readers(IdSet& readers);
 
   virtual DDS::ReturnCode_t get_matched_subscriptions(
@@ -515,7 +515,7 @@ protected:
     ~ReaderInfo();
   };
 
-  typedef std::map<RepoId, ReaderInfo, GUID_tKeyLessThan> RepoIdToReaderInfoMap;
+  typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
   RepoIdToReaderInfoMap reader_info_;
 
   struct AckCustomization {
@@ -612,7 +612,7 @@ private:
   /// and status changes.
   ACE_Recursive_Thread_Mutex      lock_;
 
-  typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
 
   RepoIdToHandleMap               id_to_handle_map_;
 

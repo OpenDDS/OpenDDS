@@ -164,7 +164,7 @@ private:
 
   ACE_Recursive_Thread_Mutex publication_handle_lock_;
 
-  typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
   RepoIdToHandleMap id_to_handle_map_;
 
   DDS::RequestedIncompatibleQosStatus requested_incompatible_qos_status_;
@@ -175,8 +175,8 @@ private:
   bool is_bit_;
 
   /// publications writing to this reader.
-  typedef std::map<PublicationId, RcHandle<WriterInfo>,
-                   GUID_tKeyLessThan> WriterMapType;
+  typedef OPENDDS_MAP_CMP(PublicationId, RcHandle<WriterInfo>,
+                   GUID_tKeyLessThan) WriterMapType;
   WriterMapType writers_;
 
   /// RW lock for reading/writing publications.

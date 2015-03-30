@@ -16,6 +16,7 @@
 #include "Serializer.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+#include "PoolAllocator.h"
 #include <map>
 #include <iosfwd>
 
@@ -35,7 +36,7 @@ struct WriterCoherentSample {
   SequenceNumber last_sample_;
 };
 
-typedef std::map<PublicationId, WriterCoherentSample, GUID_tKeyLessThan> GroupCoherentSamples;
+typedef OPENDDS_MAP_CMP(PublicationId, WriterCoherentSample, GUID_tKeyLessThan) GroupCoherentSamples;
 
 /// End Coherent Change message.
 struct OpenDDS_Dcps_Export CoherentChangeControl {

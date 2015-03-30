@@ -76,7 +76,7 @@ private:
 
   /// Map of fully associated DataLinks for this transport.  Protected
   /// by links_lock_.
-  typedef std::map<std::string, ShmemDataLink_rch> ShmemDataLinkMap;
+  typedef OPENDDS_MAP(std::string, ShmemDataLink_rch) ShmemDataLinkMap;
   ShmemDataLinkMap links_;
 
   ShmemAllocator* alloc_;

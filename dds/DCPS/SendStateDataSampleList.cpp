@@ -24,7 +24,7 @@ namespace DCPS {
 
 const SendStateDataSampleList*
 SendStateDataSampleList::send_list_containing_element(const DataSampleElement* element,
-                                                 std::vector<SendStateDataSampleList*> send_lists)
+                                                 OPENDDS_VECTOR(SendStateDataSampleList*) send_lists)
 {
   DataSampleElement* head = const_cast<DataSampleElement*>(element);
 
@@ -34,7 +34,7 @@ SendStateDataSampleList::send_list_containing_element(const DataSampleElement* e
 
   SendStateDataSampleList* list_containing_element = 0;
 
-  for(std::vector<SendStateDataSampleList*>::iterator it = send_lists.begin(); it != send_lists.end(); ++it) {
+  for(OPENDDS_VECTOR(SendStateDataSampleList*)::iterator it = send_lists.begin(); it != send_lists.end(); ++it) {
     if ((*it)->head_ == head) {
         list_containing_element = *it;
         break;

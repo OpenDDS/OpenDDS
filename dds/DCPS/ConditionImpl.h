@@ -35,7 +35,7 @@ protected:
   ConditionImpl() {}
   virtual ~ConditionImpl() {}
 
-  typedef std::set<DDS::WaitSet_var, VarLess<DDS::WaitSet> > WaitSetSet;
+  typedef OPENDDS_SET_CMP(DDS::WaitSet_var, VarLess<DDS::WaitSet> ) WaitSetSet;
   WaitSetSet waitsets_;
   ACE_Recursive_Thread_Mutex lock_;
 };

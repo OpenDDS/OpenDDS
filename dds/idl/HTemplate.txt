@@ -66,8 +66,8 @@ public:
   typedef <%TYPE%>TypeSupportImpl typesupportimpl_type;
   typedef <%TYPE%>DataReaderImpl  datareader_type;
 
-  typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
-      OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
+  typedef OPENDDS_MAP_CMP(<%SCOPED%>, ::DDS::InstanceHandle_t,
+      OpenDDSGenerated::<%TYPE%>_KeyLessThan) InstanceMap;
   typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>  DataAllocator;
 
   /// Constructor
@@ -208,8 +208,8 @@ public:
   typedef <%TYPE%>TypeSupportImpl typesupportimpl_type;
   typedef <%TYPE%>DataWriterImpl  datawriter_type;
 
-  typedef std::map<<%SCOPED%>, ::DDS::InstanceHandle_t,
-      OpenDDSGenerated::<%TYPE%>_KeyLessThan> InstanceMap;
+  typedef OPENDDS_MAP_CMP(<%SCOPED%>, ::DDS::InstanceHandle_t,
+      OpenDDSGenerated::<%TYPE%>_KeyLessThan) InstanceMap;
   typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<<%SCOPED%>, ACE_Null_Mutex>  DataAllocator;
   typedef <%TYPE%>DataReader Interface;
 

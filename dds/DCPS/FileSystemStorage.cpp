@@ -599,10 +599,10 @@ Directory::DirectoryIterator Directory::end_dirs()
   return DirectoryIterator(dirs_.end(), this);
 }
 
-Directory::Ptr Directory::get_dir(const std::vector<OPENDDS_STRING>& path)
+Directory::Ptr Directory::get_dir(const OPENDDS_VECTOR(OPENDDS_STRING)& path)
 {
   Directory::Ptr dir(this, false);
-  typedef std::vector<OPENDDS_STRING>::const_iterator iterator;
+  typedef OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator iterator;
 
   for (iterator iter = path.begin(), end = path.end(); iter != end; ++iter) {
     dir = dir->get_subdir(iter->c_str());
@@ -696,7 +696,7 @@ ACE_TString Directory::add_entry()
     return ACE_TEXT("");
   }
 
-  typedef std::map<unsigned int, unsigned int>::iterator iterator;
+  typedef OPENDDS_MAP(unsigned int, unsigned int)::iterator iterator;
   // find existing overflow bucket with capacity
   bool found_gap(false);
   unsigned int last_seen(0), unused_bucket(0);
