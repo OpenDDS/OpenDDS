@@ -24,7 +24,9 @@
 #include <sstream>
 #include <algorithm>
 
-#define MOD "MOD"
+namespace {
+  const char MOD[] = "MOD";
+}
 
 using namespace OpenDDS::DCPS::FilterExpressionGrammar;
 
@@ -349,7 +351,7 @@ namespace {
   public:
     enum Operator { OP_MOD };
 
-    Call(const OPENDDS_STRING& name)
+    explicit Call(const OPENDDS_STRING& name)
     {
       if (name == MOD) {
         op_ = OP_MOD;
@@ -365,8 +367,8 @@ namespace {
         {
           if (children_.size () != 2) {
             std::stringstream ss;
-            ss << 2;
-            throw std::runtime_error(MOD " expects 2 arguments, given " + ss.str ());
+            ss << MOD << " expects 2 arguments, given " << 2;
+            throw std::runtime_error(ss.str ());
           }
           Value left = children_[0]->eval(data);
           Value right = children_[1]->eval(data);
@@ -385,7 +387,7 @@ namespace {
   public:
     enum LogicalOp {LG_AND, LG_OR, LG_NOT};
 
-    Logical(EvalNode* child)
+    explicit Logical(EvalNode* child)
       : op_(LG_NOT)
     {
       addChild(child);
@@ -749,12 +751,12 @@ namespace {
 
     bool operator()(const char*&) const
     {
-      throw std::runtime_error(MOD " cannot be applied to strings");
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to strings");
     }
 
     Value operator()(const bool&) const
     {
-      throw std::runtime_error(MOD " cannot be applied to booleans");
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to booleans");
     }
 
     template<typename T>
@@ -765,12 +767,12 @@ namespace {
 
     Value operator()(const double&) const
     {
-      throw std::runtime_error(MOD " cannot be applied to doubles");
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to doubles");
     }
 
     Value operator()(const long double&) const
     {
-      throw std::runtime_error(MOD " cannot be applied to long doubles");
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to long doubles");
     }
 
     const Value& lhs_;
