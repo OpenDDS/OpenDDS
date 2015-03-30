@@ -5,7 +5,7 @@
 #define ENTITYPROFILES_H
 
 #include "dds/DCPS/Service_Participant.h"
-#include <string>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS { namespace Model {
 
@@ -57,8 +57,8 @@ struct ParticipantProfile  {
  *   Type        = <string> # Name for a registered datatype.
  */
 struct TopicProfile {
-  std::string   participant;
-  std::string   type;
+  OPENDDS_STRING   participant;
+  OPENDDS_STRING   type;
   DDS::TopicQos qos;
 };
 
@@ -69,7 +69,7 @@ struct TopicProfile {
  *   TransportIndex = <number> # Index into transport configurations
  */
 struct PublisherProfile {
-  std::string       participant;
+  OPENDDS_STRING       participant;
   unsigned int      transport;
   DDS::PublisherQos qos;
 };
@@ -81,8 +81,8 @@ struct PublisherProfile {
  *   Topic             = <string> # One of topic <name>
  */
 struct WriterProfile {
-  std::string        publisher;
-  std::string        topic;
+  OPENDDS_STRING        publisher;
+  OPENDDS_STRING        topic;
   DDS::DataWriterQos qos;
   unsigned int       mask;
 
@@ -96,7 +96,7 @@ struct WriterProfile {
  *   TransportIndex          = <number> # Index into transport configurations
  */
 struct SubscriberProfile {
-  std::string        participant;
+  OPENDDS_STRING        participant;
   unsigned int       transport;
   DDS::SubscriberQos qos;
 };
@@ -108,8 +108,8 @@ struct SubscriberProfile {
  *   Topic                   = <string> # One of topic <name>
  */
 struct ReaderProfile {
-  std::string        subscriber;
-  std::string        topic;
+  OPENDDS_STRING        subscriber;
+  OPENDDS_STRING        topic;
   DDS::DataReaderQos qos;
   unsigned int       mask;
 

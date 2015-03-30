@@ -29,7 +29,6 @@
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/OS_NS_sys_time.h"
 
-#include <string>
 #include <sstream>
 #include <fstream>
 #include <algorithm>

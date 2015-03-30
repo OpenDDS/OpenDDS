@@ -6,7 +6,6 @@
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
-#include <string>
 #include <map>
 
 namespace FACE {
