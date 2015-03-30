@@ -14,6 +14,7 @@
 #include "TransportDirectives.h"
 #include "dds/DdsDcpsC.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include <vector>
 
@@ -49,11 +50,11 @@ namespace OpenDDS { namespace Model {
       DDS::DataReader_var reader(typename DataReaders::Values reader);
       ///}
 
-      const std::string transportConfigName(typename Participants::Values which);
-      const std::string transportConfigName(typename Publishers::Values which);
-      const std::string transportConfigName(typename Subscribers::Values which);
-      const std::string transportConfigName(typename DataWriters::Values which);
-      const std::string transportConfigName(typename DataReaders::Values which);
+      const OPENDDS_STRING transportConfigName(typename Participants::Values which);
+      const OPENDDS_STRING transportConfigName(typename Publishers::Values which);
+      const OPENDDS_STRING transportConfigName(typename Subscribers::Values which);
+      const OPENDDS_STRING transportConfigName(typename DataWriters::Values which);
+      const OPENDDS_STRING transportConfigName(typename DataReaders::Values which);
 
     private:
       ///{ @name Entity Creation.

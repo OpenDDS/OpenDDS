@@ -53,13 +53,13 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   init_typed(resulting_reader_);
   listener_ = new Listener(this);
 
-  std::map<string, string> fieldToTopic;
+  std::map<OPENDDS_STRING, OPENDDS_STRING> fieldToTopic;
 
   // key: name of field that's a key for the 'join'
   // mapped: set of topicNames that have this key in common
-  std::map<string, set<string> > joinKeys;
+  std::map<OPENDDS_STRING, set<OPENDDS_STRING> > joinKeys;
 
-  const vector<string>& selection = multitopic->get_selection();
+  const vector<OPENDDS_STRING>& selection = multitopic->get_selection();
   for (size_t i = 0; i < selection.size(); ++i) {
 
     const DDS::Duration_t no_wait = {0, 0};
@@ -81,7 +81,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
 
     for (const char** names = meta.getFieldNames(); *names; ++names) {
       if (fieldToTopic.count(*names)) { // already seen this field name
-        set<string>& topics = joinKeys[*names];
+        set<OPENDDS_STRING>& topics = joinKeys[*names];
         topics.insert(fieldToTopic[*names]);
         topics.insert(selection[i]);
       } else {
@@ -94,7 +94,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   if (aggregation.size() == 0) { // "SELECT * FROM ..."
     const MetaStruct& meta = getResultingMeta();
     for (const char** names = meta.getFieldNames(); *names; ++names) {
-      std::map<string, string>::const_iterator found =
+      std::map<OPENDDS_STRING, OPENDDS_STRING>::const_iterator found =
         fieldToTopic.find(*names);
       if (found == fieldToTopic.end()) {
         if (DCPS_debug_level > 1) {
@@ -111,7 +111,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     }
   } else { // "SELECT A, B FROM ..."
     for (size_t i = 0; i < aggregation.size(); ++i) {
-      std::map<string, string>::const_iterator found =
+      std::map<OPENDDS_STRING, OPENDDS_STRING>::const_iterator found =
         fieldToTopic.find(aggregation[i].incoming_name_);
       if (found == fieldToTopic.end()) {
         throw std::runtime_error("Projected field " +
@@ -122,22 +122,22 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
     }
   }
 
-  typedef std::map<string, set<string> >::const_iterator iter_t;
+  typedef std::map<OPENDDS_STRING, set<OPENDDS_STRING> >::const_iterator iter_t;
   for (iter_t iter = joinKeys.begin(); iter != joinKeys.end(); ++iter) {
-    const string& field = iter->first;
-    const set<string>& topics = iter->second;
-    for (set<string>::const_iterator iter2 = topics.begin();
+    const OPENDDS_STRING& field = iter->first;
+    const set<OPENDDS_STRING>& topics = iter->second;
+    for (set<OPENDDS_STRING>::const_iterator iter2 = topics.begin();
          iter2 != topics.end(); ++iter2) {
-      const string& topic = *iter2;
+      const OPENDDS_STRING& topic = *iter2;
       QueryPlan& qp = query_plans_[topic];
       if (find_if(qp.projection_.begin(), qp.projection_.end(),
                   MatchesIncomingName(field)) == qp.projection_.end()) {
         qp.keys_projected_out_.push_back(field);
       }
-      for (set<string>::const_iterator iter3 = topics.begin();
+      for (set<OPENDDS_STRING>::const_iterator iter3 = topics.begin();
            iter3 != topics.end(); ++iter3) {
         if (topic != *iter3) { // other topics
-          qp.adjacent_joins_.insert(pair<const string, string>(*iter3, field));
+          qp.adjacent_joins_.insert(pair<const OPENDDS_STRING, OPENDDS_STRING>(*iter3, field));
         }
       }
     }
@@ -165,7 +165,7 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
   using namespace std;
   using namespace DDS;
 
-  const string topic = topicNameFor(reader);
+  const OPENDDS_STRING topic = topicNameFor(reader);
   DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(reader);
   DataReaderImpl::GenericBundle gen;
   ReturnCode_t rc = dri->read_generic(gen, NOT_READ_SAMPLE_STATE,
