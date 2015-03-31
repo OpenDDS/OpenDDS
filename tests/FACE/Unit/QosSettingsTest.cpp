@@ -1,6 +1,7 @@
 #include "dds/FACE/config/QosSettings.h"
 
 #include "ace/OS_main.h"
+#include "test_check.h"
 
 #include <string.h>
 #include <iostream>

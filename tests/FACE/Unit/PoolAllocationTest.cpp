@@ -4,8 +4,10 @@
 #include <string.h>
 #include <iostream>
 
-unsigned int assertions = 0;
-unsigned int failed = 0;
+namespace {
+  unsigned int assertions = 0;
+  unsigned int failed = 0;
+}
 
 #define TEST_CHECK(COND) \
   ++assertions; \
@@ -54,15 +56,19 @@ public:
     char buffer[1024];
     PoolAllocation from;
     PoolAllocation to;
+    PoolAllocation next;
     from.set(buffer, 128, true);
     to.set(buffer + 128, 64, true);
+    next.set(buffer + 128, 32, true);
+    to.next_free_ = &next;
 
     TEST_CHECK(from.join_freed(&to));
     TEST_CHECK(from.ptr() == buffer);
     TEST_CHECK(from.size() == 128 + 64);
     TEST_CHECK(to.ptr() == NULL);
-    TEST_CHECK(to.size() == 0);
+    TEST_CHECK(to.size() == 64);
     TEST_CHECK(to.free_ = true);
+    TEST_CHECK(to.next_free_ == &next);
   }
 };
 

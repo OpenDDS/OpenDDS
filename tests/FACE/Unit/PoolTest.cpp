@@ -1,20 +1,14 @@
 #include "dds/DCPS/SafetyProfilePool.h"
 #include "ace/Log_Msg.h"
+#include "test_check.h"
 
 #include <string.h>
 #include <iostream>
 
-unsigned int assertions = 0;
-unsigned int failed = 0;
-
-#define TEST_CHECK(COND) \
-  ++assertions; \
-  if (!( COND )) {\
-    ++failed; \
-    ACE_DEBUG((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
-        #COND )); \
-    return; \
-  }
+namespace {
+  unsigned int assertions = 0;
+  unsigned int failed = 0;
+}
 
 using namespace OpenDDS::DCPS;
 
@@ -547,6 +541,33 @@ public:
   }
 
   void test_alloc_null_once_out_of_allocs() {
+    Pool pool(1024, 10);
+    char* ptr0 = pool.pool_alloc(64);  // 2 allocs
+    char* ptr1 = pool.pool_alloc(64);  // 3 allocs
+    char* ptr2 = pool.pool_alloc(64);  // 4 allocs
+    char* ptr3 = pool.pool_alloc(64);  // 5 allocs
+    char* ptr4 = pool.pool_alloc(64);  // 6 allocs
+    char* ptr5 = pool.pool_alloc(64);  // 7 allocs
+    char* ptr6 = pool.pool_alloc(64);  // 8 allocs
+    char* ptr7 = pool.pool_alloc(64);  // 9 allocs
+    char* ptr8 = pool.pool_alloc(64);  // 10 allocs
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr1);
+    TEST_CHECK(ptr2);
+    TEST_CHECK(ptr3);
+    TEST_CHECK(ptr4);
+    TEST_CHECK(ptr5);
+    TEST_CHECK(ptr6);
+    TEST_CHECK(ptr7);
+    TEST_CHECK(ptr8);
+    validate_pool(pool, 64*9);
+    // Out of allocs
+    char* ptr9 = pool.pool_alloc(64);  // 11 allocs
+    TEST_CHECK(!ptr9);
+    validate_pool(pool, 64*9);
+    pool.pool_free(ptr2);
+    pool.pool_free(ptr4);
+    validate_pool(pool, 64*7);
   }
 
   void test_free_null_should_ignore() {

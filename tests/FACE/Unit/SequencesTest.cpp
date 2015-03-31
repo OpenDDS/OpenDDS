@@ -15,6 +15,7 @@
 
 namespace {
   unsigned int assertions = 0;
+  unsigned int failed = 0;
 }
 
 using OpenDDS::FaceTypes::Sequence;
@@ -194,12 +195,16 @@ namespace TAO {
 struct SA4 : Sequence<SmallArry, Unbounded, ArrayEltPolicy<SmallArry_forany> >
 {};
 
+void basic_test()
+{
+}
+
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   S1 s1;
   S2 s2;
-  TEST_CHECK(s1.maximum() == 0);
-  TEST_CHECK(s2.maximum() == 5);
+  TEST_CHECK_RETURN(s1.maximum() == 0, -1);
+  TEST_CHECK_RETURN(s2.maximum() == 5, -1);
   int* const b1 = S1::allocbuf(3);
   int* const b2 = S2::allocbuf();
   S1::freebuf(b1);
@@ -213,7 +218,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   int i = 42;
   s2.replace(1, &i);
-  TEST_CHECK(s2[0] == i);
+  TEST_CHECK_RETURN(s2[0] == i, -1);
 
   S4 s4;
   MyStru2 stru = {42, "42"};
@@ -226,8 +231,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   testSeq(ss, FACE::string_dup(""));
 
   ss.length(2);
-  TEST_CHECK(ss[0][0] == '\0');
-  TEST_CHECK(ss[1][0] == '\0');
+  TEST_CHECK_RETURN(ss[0][0] == '\0', -1);
+  TEST_CHECK_RETURN(ss[1][0] == '\0', -1);
   ss[0] = "foo";
   ss[1] = "bar";
   ss[0] = "baz"; // frees "foo" before copying "baz"
@@ -239,14 +244,14 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
                     const_cast<char*>(storage[2]),
                     const_cast<char*>(storage[3])};
   ss.replace(4, 2, buffer);
-  TEST_CHECK(ss.maximum() == 4);
-  TEST_CHECK(ss.length() == 2);
-  TEST_CHECK(!ss.release());
-  TEST_CHECK(0 == std::strcmp(ss[0], "Hello"));
-  TEST_CHECK(0 == std::strcmp(ss[1], "world"));
+  TEST_CHECK_RETURN(ss.maximum() == 4, -1);
+  TEST_CHECK_RETURN(ss.length() == 2, -1);
+  TEST_CHECK_RETURN(!ss.release(), -1);
+  TEST_CHECK_RETURN(0 == std::strcmp(ss[0], "Hello"), -1);
+  TEST_CHECK_RETURN(0 == std::strcmp(ss[1], "world"), -1);
   ss.length(4);
-  TEST_CHECK(0 == std::strcmp(ss[2], "from"));
-  TEST_CHECK(0 == std::strcmp(ss[3], "sequence"));
+  TEST_CHECK_RETURN(0 == std::strcmp(ss[2], "from"), -1);
+  TEST_CHECK_RETURN(0 == std::strcmp(ss[3], "sequence"), -1);
 
   SB sb;
   testSeq(sb, FACE::string_dup(""));
@@ -254,7 +259,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   SB sb2;
   sb2.length(1);
   swap(sb, sb2);
-  TEST_CHECK(sb.length() == 1);
+  TEST_CHECK_RETURN(sb.length() == 1, -1);
 
   // Sequences of Arrays
 
@@ -278,7 +283,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   s1v[0] = 1;
   s1v[1] = s1v[0];
   const S1_var& s1vc = s1v;
-  TEST_CHECK(s1vc[1] == 1);
+  TEST_CHECK_RETURN(s1vc[1] == 1, -1);
 
 #if !defined __SUNPRO_CC && (!defined _MSC_VER || _MSC_VER >= 1500) && \
   (!defined __GNUC__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC__MINOR__ > 1))
@@ -288,7 +293,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   s4v[0].s1_ = "testing";
   s4v[1] = s4v[0];
   const S4_var& s4vc = s4v;
-  TEST_CHECK(s4vc[1].s1_ == "testing");
+  TEST_CHECK_RETURN(s4vc[1].s1_ == "testing", -1);
 #endif
 
   printf("%d assertions passed\n", assertions);

@@ -1,20 +1,15 @@
 #include "dds/DCPS/SafetyProfilePool.h"
 #include "ace/Log_Msg.h"
 
+#include "test_check.h"
+
 #include <string.h>
 #include <iostream>
 
-unsigned int assertions = 0;
-unsigned int failed = 0;
-
-#define TEST_CHECK(COND) \
-  ++assertions; \
-  if (!( COND )) {\
-    ++failed; \
-    ACE_DEBUG((LM_ERROR,"TEST_CHECK(%C) FAILED at %N:%l\n",\
-        #COND )); \
-    return; \
-  }
+namespace {
+  unsigned int assertions = 0;
+  unsigned int failed = 0;
+}
 
 using namespace OpenDDS::DCPS;
 
