@@ -40,6 +40,24 @@ public:
     TEST_CHECK(ptr1 > ptr2);
   }
 
+  // Test allocating sizes which are not multiples of 8
+  void test_pool_alloc_odd_size() {
+    Pool pool(1024, 64);
+    char* ptr0 = pool.pool_alloc(120);
+    validate_pool(pool, 120);
+    char* ptr1 = pool.pool_alloc(121);
+    validate_pool(pool, 120+128);
+    char* ptr2 = pool.pool_alloc(12);
+    validate_pool(pool, 120+128+16);
+    char* ptr3 = pool.pool_alloc(7);
+    validate_pool(pool, 120+128+16+8);
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr1);
+    TEST_CHECK(ptr2);
+    TEST_CHECK(ptr0 > ptr1);
+    TEST_CHECK(ptr1 > ptr2);
+  }
+
   // Allocate a several blocks until all gone
   void test_pool_alloc_last_avail() {
     Pool pool(1024, 64);
@@ -541,7 +559,7 @@ public:
   }
 
   void test_alloc_null_once_out_of_allocs() {
-    Pool pool(1024, 10);
+    Pool pool(1024, 5); // 5 gives us max 11 allocs
     char* ptr0 = pool.pool_alloc(64);  // 2 allocs
     char* ptr1 = pool.pool_alloc(64);  // 3 allocs
     char* ptr2 = pool.pool_alloc(64);  // 4 allocs
@@ -551,6 +569,7 @@ public:
     char* ptr6 = pool.pool_alloc(64);  // 8 allocs
     char* ptr7 = pool.pool_alloc(64);  // 9 allocs
     char* ptr8 = pool.pool_alloc(64);  // 10 allocs
+    char* ptr9 = pool.pool_alloc(64);  // 11 allocs
     TEST_CHECK(ptr0);
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
@@ -560,14 +579,14 @@ public:
     TEST_CHECK(ptr6);
     TEST_CHECK(ptr7);
     TEST_CHECK(ptr8);
-    validate_pool(pool, 64*9);
+    validate_pool(pool, 64*10);
     // Out of allocs
-    char* ptr9 = pool.pool_alloc(64);  // 11 allocs
-    TEST_CHECK(!ptr9);
-    validate_pool(pool, 64*9);
+    char* ptr10 = pool.pool_alloc(64);  // 11 allocs
+    TEST_CHECK(!ptr10);
+    validate_pool(pool, 64*10);
     pool.pool_free(ptr2);
     pool.pool_free(ptr4);
-    validate_pool(pool, 64*7);
+    validate_pool(pool, 64*8);
   }
 
   void test_free_null_should_ignore() {
@@ -646,6 +665,7 @@ int main(int, const char** )
 
   test.test_pool_alloc();
   test.test_pool_allocs();
+  test.test_pool_alloc_odd_size();
   test.test_pool_alloc_last_avail();
 
   test.test_pool_alloc_free();

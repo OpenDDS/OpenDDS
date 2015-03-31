@@ -128,7 +128,7 @@ Pool::allocate_block(PoolAllocation* from_block,
                      PoolAllocation* prev_block,
                      size_t alloc_size)
 {
-  char* buffer;
+  char* buffer = 0;
 
   if (from_block->size() == alloc_size) {
     // Going to use all of free block, keep size same
