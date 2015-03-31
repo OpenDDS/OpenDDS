@@ -115,7 +115,7 @@ namespace {
 Value
 FilterEvaluator::SerializedForEval::lookup(const char* field) const
 {
-  const std::map<OPENDDS_STRING, Value>::const_iterator iter = cache_.find(field);
+  const OPENDDS_MAP(OPENDDS_STRING, Value)::const_iterator iter = cache_.find(field);
   if (iter != cache_.end()) {
     return iter->second;
   }

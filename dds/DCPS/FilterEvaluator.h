@@ -143,7 +143,7 @@ private:
     Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
     bool swap_, cdr_;
-    mutable std::map<OPENDDS_STRING, Value> cache_;
+    mutable OPENDDS_MAP(OPENDDS_STRING, Value) cache_;
   };
 
   bool eval_i(DataForEval& data) const;
