@@ -30,8 +30,8 @@
 #include "ace/Null_Mutex.h"
 #include "ace/Synch_Traits.h"
 #include "ace/Functor_T.h"
+#include "PoolAllocator.h"
 
-#include <string>
 #include <memory>
 #include <utility>
 

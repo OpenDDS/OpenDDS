@@ -149,6 +149,7 @@ public:
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
+    const char* filterClassName,
     const char* filterExpression,
     const DDS::StringSeq& exprParams);
 

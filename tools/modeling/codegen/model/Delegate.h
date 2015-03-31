@@ -46,8 +46,8 @@ namespace OpenDDS { namespace Model {
       DDS::Topic*
       createTopic(
         DDS::DomainParticipant* participant,
-        const std::string&      topicName,
-        const std::string&      typeName,
+        const OPENDDS_STRING&   topicName,
+        const OPENDDS_STRING&   typeName,
         const DDS::TopicQos&    topicQos,
         DDS::StatusMask         mask
       );

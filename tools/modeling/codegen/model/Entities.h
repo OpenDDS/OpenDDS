@@ -74,35 +74,35 @@ class OpenDDS_Model_Export Entities  {
 
     /// @name DDS API Entity accessors.
     /// @{
-    DDS::DomainParticipant_var participant( const std::string& name,
+    DDS::DomainParticipant_var participant( const OPENDDS_STRING& name,
                                             const OPENDDS_STRING& transportConfig);
-    DDS::Topic_var             topic(       const std::string& name,
-                                            const std::string& participant,
+    DDS::Topic_var             topic(       const OPENDDS_STRING& name,
+                                            const OPENDDS_STRING& participant,
                                             const OPENDDS_STRING& transportConfig);
-    DDS::Publisher_var         publisher(   const std::string& name,
+    DDS::Publisher_var         publisher(   const OPENDDS_STRING& name,
                                             const OPENDDS_STRING& transportConfig);
-    DDS::Subscriber_var        subscriber(  const std::string& name,
+    DDS::Subscriber_var        subscriber(  const OPENDDS_STRING& name,
                                             const OPENDDS_STRING& transportConfig);
-    DDS::DataWriter_var        writer(      const std::string& name,
+    DDS::DataWriter_var        writer(      const OPENDDS_STRING& name,
                                             const OPENDDS_STRING& transportConfig);
-    DDS::DataReader_var        reader(      const std::string& name,
+    DDS::DataReader_var        reader(      const OPENDDS_STRING& name,
                                             const OPENDDS_STRING& transportConfig);
     /// @}
 
     /// @name Add user created Entities to the storage.
     /// @{
-    void add( const std::string& name, DDS::DomainParticipant_ptr participant);
-    void add( const std::string& name,
-              const std::string& participant, DDS::Topic_ptr      topic);
-    void add( const std::string& name,        DDS::Publisher_ptr  publisher);
-    void add( const std::string& name,        DDS::Subscriber_ptr subscriber);
-    void add( const std::string& name,        DDS::DataWriter_ptr writer);
-    void add( const std::string& name,        DDS::DataReader_ptr reader);
+    void add( const OPENDDS_STRING& name, DDS::DomainParticipant_ptr participant);
+    void add( const OPENDDS_STRING& name,
+              const OPENDDS_STRING& participant, DDS::Topic_ptr      topic);
+    void add( const OPENDDS_STRING& name,        DDS::Publisher_ptr  publisher);
+    void add( const OPENDDS_STRING& name,        DDS::Subscriber_ptr subscriber);
+    void add( const OPENDDS_STRING& name,        DDS::DataWriter_ptr writer);
+    void add( const OPENDDS_STRING& name,        DDS::DataReader_ptr reader);
 
     /// Type support is special.
     template< typename TypeSupport>
-    void add( const std::string& name,
-              const std::string& participant);
+    void add( const OPENDDS_STRING& name,
+              const OPENDDS_STRING& participant);
     /// @}
 
 
@@ -115,7 +115,7 @@ class OpenDDS_Model_Export Entities  {
     //transport( OpenDDS::DCPS::TransportIdType key);
 
     /// Deferred registration of type support for a participant.
-    void registerTypes(const std::string& participant,
+    void registerTypes(const OPENDDS_STRING& participant,
                        const OPENDDS_STRING& transportConfig);
 
     /// The command line and file configuration information.
@@ -123,7 +123,7 @@ class OpenDDS_Model_Export Entities  {
 
   private:
     /// Map of queues.
-    typedef OPENDDS_MAP( std::string, OPENDDS_QUEUE(DDS::TypeSupport_ptr) )
+    typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_QUEUE(DDS::TypeSupport_ptr) )
             TypeSupportByParticipantQueues;
 
     /// Store type support until it can be registered.
@@ -131,29 +131,29 @@ class OpenDDS_Model_Export Entities  {
 
     // Maps for access via string key names.
 
-    typedef OPENDDS_MAP( std::string, DDS::DomainParticipant_var)
+    typedef OPENDDS_MAP(OPENDDS_STRING, DDS::DomainParticipant_var)
             StringToParticipantMap;
 
-    typedef OPENDDS_MAP( std::string, std::string)
+    typedef OPENDDS_MAP(OPENDDS_STRING,OPENDDS_STRING)
             StringToTypeNameMap;
 
-    typedef OPENDDS_MAP( std::string, DDS::Topic_ptr) StringToTopicMap;
-    typedef OPENDDS_MAP( std::string, StringToTopicMap)
+    typedef OPENDDS_MAP(OPENDDS_STRING, DDS::Topic_ptr) StringToTopicMap;
+    typedef OPENDDS_MAP(OPENDDS_STRING, StringToTopicMap)
             ParticipantToTopicMap;
 
-    typedef OPENDDS_MAP( std::string, DDS::Publisher_ptr)
+    typedef OPENDDS_MAP(OPENDDS_STRING, DDS::Publisher_ptr)
             StringToPublisherMap;
 
-    typedef OPENDDS_MAP( std::string, DDS::Subscriber_ptr)
+    typedef OPENDDS_MAP(OPENDDS_STRING, DDS::Subscriber_ptr)
             StringToSubscriberMap;
 
-    typedef OPENDDS_MAP( std::string, DDS::DataWriter_ptr)
+    typedef OPENDDS_MAP(OPENDDS_STRING, DDS::DataWriter_ptr)
             StringToDataWriterMap;
 
-    typedef OPENDDS_MAP( std::string, DDS::DataReader_ptr)
+    typedef OPENDDS_MAP(OPENDDS_STRING, DDS::DataReader_ptr)
             StringToDataReaderMap;
 
-    typedef OPENDDS_MAP( std::string, OpenDDS::DCPS::TransportImpl*)
+    typedef OPENDDS_MAP(OPENDDS_STRING, OpenDDS::DCPS::TransportImpl*)
             StringToTransportImplMap;
 
     StringToParticipantMap   participantByString_;

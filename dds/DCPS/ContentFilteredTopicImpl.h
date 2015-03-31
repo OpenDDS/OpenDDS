@@ -52,6 +52,11 @@ public:
   void add_reader(DataReaderImpl& reader);
   void remove_reader(DataReaderImpl& reader);
 
+  const char* get_filter_class_name () const
+  {
+    return filter_eval_.usesExtendedGrammar () ? "OPENDDSSQL" : "DDSSQL";
+  }
+
 private:
   OPENDDS_STRING filter_expression_;
   FilterEvaluator filter_eval_;

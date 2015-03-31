@@ -88,6 +88,7 @@ public:
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,
+                                const char* filterClassName,
                                 const char* filterExpr,
                                 const DDS::StringSeq& params);
   void remove_subscription(const DCPS::RepoId& subscriptionId);

@@ -22,8 +22,6 @@
 
 #include <ace/Synch_Traits.h>
 
-#include <string>
-
 namespace OpenDDS {
 namespace DCPS {
 

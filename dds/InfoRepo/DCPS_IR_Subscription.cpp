@@ -26,6 +26,7 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
                                            const DDS::DataReaderQos& qos,
                                            const OpenDDS::DCPS::TransportLocatorSeq& info,
                                            const DDS::SubscriberQos& subscriberQos,
+                                           const char* filterClassName,
                                            const char* filterExpression,
                                            const DDS::StringSeq& exprParams)
   : id_(id),
@@ -36,6 +37,7 @@ DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
     qos_(qos),
     info_(info),
     subscriberQos_(subscriberQos),
+    filterClassName_(filterClassName),
     filterExpression_(filterExpression),
     exprParams_(exprParams)
 {

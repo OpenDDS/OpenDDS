@@ -24,6 +24,10 @@
 #include <sstream>
 #include <algorithm>
 
+namespace {
+  const char MOD[] = "MOD";
+}
+
 using namespace OpenDDS::DCPS::FilterExpressionGrammar;
 
 namespace OpenDDS {
@@ -36,7 +40,8 @@ FilterEvaluator::DeserializedForEval::~DeserializedForEval()
 {}
 
 FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
-  : filter_root_(0)
+  : extended_grammar_(false)
+  , filter_root_(0)
 {
   const char* out = filter + std::strlen(filter);
   yard::SimpleTextParser parser(filter, out);
@@ -53,13 +58,14 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
     } else if (found_order_by && iter->TypeMatches<FieldName>()) {
       order_bys_.push_back(toString(iter));
     } else {
-      filter_root_ = walkAst(iter, filter_root_);
+      filter_root_ = walkAst(iter);
     }
   }
 }
 
 FilterEvaluator::FilterEvaluator(const AstNodeWrapper& yardNode)
-  : filter_root_(walkAst(yardNode, NULL))
+  : extended_grammar_(false)
+  , filter_root_(walkAst(yardNode))
 {
 }
 
@@ -85,6 +91,11 @@ private:
 
 protected:
   OPENDDS_VECTOR(EvalNode*) children_;
+};
+
+class FilterEvaluator::Operand : public FilterEvaluator::EvalNode {
+public:
+  virtual bool isParameter() const { return false; }
 };
 
 Value
@@ -127,10 +138,7 @@ FilterEvaluator::~FilterEvaluator()
 
 namespace {
 
-  class Operand : public FilterEvaluator::EvalNode {
-  };
-
-  class FieldLookup : public Operand {
+  class FieldLookup : public FilterEvaluator::Operand {
   public:
     explicit FieldLookup(AstNode* fnNode)
       : fieldName_(toString(fnNode))
@@ -144,7 +152,7 @@ namespace {
     OPENDDS_STRING fieldName_;
   };
 
-  class LiteralInt : public Operand {
+  class LiteralInt : public FilterEvaluator::Operand {
   public:
     explicit LiteralInt(AstNode* fnNode)
     {
@@ -166,7 +174,7 @@ namespace {
     int value_;
   };
 
-  class LiteralChar : public Operand {
+  class LiteralChar : public FilterEvaluator::Operand {
   public:
     explicit LiteralChar(AstNode* fnNode)
       : value_(toString(fnNode)[1])
@@ -180,7 +188,7 @@ namespace {
     char value_;
   };
 
-  class LiteralFloat : public Operand {
+  class LiteralFloat : public FilterEvaluator::Operand {
   public:
     explicit LiteralFloat(AstNode* fnNode)
       : value_(std::atof(toString(fnNode).c_str()))
@@ -194,7 +202,7 @@ namespace {
     double value_;
   };
 
-  class LiteralString : public Operand {
+  class LiteralString : public FilterEvaluator::Operand {
   public:
     explicit LiteralString(AstNode* fnNode)
       : value_(toString(fnNode).substr(1) /* trim left ' */)
@@ -210,11 +218,13 @@ namespace {
     OPENDDS_STRING value_;
   };
 
-  class Parameter : public Operand {
+  class Parameter : public FilterEvaluator::Operand {
   public:
     explicit Parameter(AstNode* fnNode)
       : param_(std::atoi(toString(fnNode).c_str() + 1 /* skip % */))
     {}
+
+    bool isParameter() const { return true; }
 
     Value eval(FilterEvaluator::DataForEval& data)
     {
@@ -224,7 +234,7 @@ namespace {
     int param_;
   };
 
-  Operand* createOperand(AstNode* node)
+  FilterEvaluator::Operand* createOperand(AstNode* node)
   {
     if (node->TypeMatches<FieldName>()) {
       return new FieldLookup(node);
@@ -247,16 +257,13 @@ namespace {
     enum Operator {OPER_EQ, OPER_LT, OPER_GT, OPER_LTEQ, OPER_GTEQ, OPER_NEQ,
       OPER_LIKE, OPER_INVALID};
 
-    explicit Comparison(AstNode* cmpNode)
+    explicit Comparison(AstNode* op, FilterEvaluator::Operand* left, FilterEvaluator::Operand* right)
+      : left_(left)
+      , right_(right)
     {
-      AstNode* iter = cmpNode->GetFirstChild();
-      left_ = createOperand(iter);
       addChild(left_);
-      iter = iter->GetSibling();
-      setOperator(iter);
-      iter = iter->GetSibling();
-      right_ = createOperand(iter);
       addChild(right_);
+      setOperator(op);
     }
 
     Value eval(FilterEvaluator::DataForEval& data)
@@ -306,28 +313,21 @@ namespace {
       }
     }
 
-    Operand* left_;
-    Operand* right_;
+    FilterEvaluator::Operand* left_;
+    FilterEvaluator::Operand* right_;
     Operator oper_type_;
   };
 
   class Between : public FilterEvaluator::EvalNode {
   public:
-    explicit Between(AstNode* btwNode)
-      : invert_(false)
+    Between(FilterEvaluator::Operand* field, AstNode* betweenOrNot, FilterEvaluator::Operand* left, FilterEvaluator::Operand* right)
+      : invert_(betweenOrNot->TypeMatches<NOT_BETWEEN>())
+      , field_(field)
+      , left_(left)
+      , right_(right)
     {
-      AstNode* iter = btwNode->GetFirstChild();
-      field_ = new FieldLookup(iter);
       addChild(field_);
-      iter = iter->GetSibling();
-      if (iter->TypeMatches<NOT>()) {
-        invert_ = true;
-        iter = iter->GetSibling();
-      }
-      left_ = createOperand(iter);
       addChild(left_);
-      iter = iter->GetSibling();
-      right_ = createOperand(iter);
       addChild(right_);
     }
 
@@ -342,21 +342,67 @@ namespace {
 
   private:
     bool invert_;
-    FieldLookup* field_;
-    Operand* left_;
-    Operand* right_;
+    FilterEvaluator::Operand* field_;
+    FilterEvaluator::Operand* left_;
+    FilterEvaluator::Operand* right_;
+  };
+
+  class Call : public FilterEvaluator::Operand {
+  public:
+    enum Operator { OP_MOD };
+
+    explicit Call(const OPENDDS_STRING& name)
+    {
+      if (name == MOD) {
+        op_ = OP_MOD;
+      } else {
+        throw std::runtime_error("Unknown function: " + std::string(name.c_str ()));
+      }
+    }
+
+    virtual Value eval(FilterEvaluator::DataForEval& data)
+    {
+      switch (op_) {
+      case OP_MOD:
+        {
+          if (children_.size () != 2) {
+            std::stringstream ss;
+            ss << MOD << " expects 2 arguments, given " << 2;
+            throw std::runtime_error(ss.str ());
+          }
+          Value left = children_[0]->eval(data);
+          Value right = children_[1]->eval(data);
+          return left % right;
+        }
+        break;
+      }
+      assert(0);
+    }
+
+  private:
+    Operator op_;
   };
 
   class Logical : public FilterEvaluator::EvalNode {
   public:
     enum LogicalOp {LG_AND, LG_OR, LG_NOT};
 
-    Logical(LogicalOp op, EvalNode*& left)
-      : op_(op)
+    explicit Logical(EvalNode* child)
+      : op_(LG_NOT)
     {
-      if (op_ != LG_NOT) {
-        addChild(left);
-        left = 0;
+      addChild(child);
+    }
+
+    Logical(AstNode* op, EvalNode* left, EvalNode* right)
+    {
+      addChild(left);
+      addChild(right);
+      if (op->TypeMatches<AND>()) {
+        op_ = LG_AND;
+      } else if (op->TypeMatches<OR>()) {
+        op_ = LG_OR;
+      } else {
+        assert(0);
       }
     }
 
@@ -382,36 +428,85 @@ namespace {
   };
 }
 
-FilterEvaluator::EvalNode*
-FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node,
-                         EvalNode* prev)
+static size_t arity(const FilterEvaluator::AstNodeWrapper& node)
 {
-  EvalNode* eval = 0;
-  if (node->TypeMatches<CmpFnParam>() || node->TypeMatches<CmpParamFn>()
-      || node->TypeMatches<CmpBothFn>()) {
-    eval = new Comparison(node);
-  } else if (node->TypeMatches<BetweenPred>()) {
-    eval = new Between(node);
-  } else if (node->TypeMatches<AND>()) {
-    eval = new Logical(Logical::LG_AND, prev);
-  } else if (node->TypeMatches<OR>()) {
-    eval = new Logical(Logical::LG_OR, prev);
-  } else if (node->TypeMatches<NOT>()) {
-    eval = new Logical(Logical::LG_NOT, prev);
-  } else if (node->TypeMatches<Cond>()) {
-    for (AstNode* iter = node->GetFirstChild(); iter;
-         iter = iter->GetSibling()) {
-      eval = walkAst(iter, eval);
+  size_t a = 0;
+  for (AstNode* iter = node->GetFirstChild(); iter; iter = iter->GetSibling()) {
+    ++a;
+  }
+  return a;
+}
+
+static FilterEvaluator::AstNodeWrapper child(const FilterEvaluator::AstNodeWrapper& node, size_t idx)
+{
+  AstNode* iter = 0;
+  for (iter = node->GetFirstChild(); idx != 0; iter = iter->GetSibling(), --idx) ;;
+  return iter;
+}
+
+FilterEvaluator::EvalNode*
+FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
+{
+  if (node->TypeMatches<CompPredDef>()) {
+    Operand* left = walkOperand(child(node, 0));
+    const FilterEvaluator::AstNodeWrapper& op = child(node, 1);
+    Operand* right = walkOperand(child(node, 2));
+    if (left->isParameter() && right->isParameter()) {
+      extended_grammar_ = true;
     }
-  } else {
-    assert(0);
+    return new Comparison(op, left, right);
+  } else if (node->TypeMatches<BetweenPredDef>()) {
+    Operand* field = walkOperand(child(node, 0));
+    const FilterEvaluator::AstNodeWrapper& op = child(node, 1);
+    Operand* low = walkOperand(child(node, 2));
+    Operand* high = walkOperand(child(node, 3));
+    return new Between(field, op, low, high);
+  } else if (node->TypeMatches<_Cond>()) {
+    size_t a = arity(node);
+    if (a == 1) {
+      return walkAst(child(node, 0));
+    } else if (a == 2) {
+      assert(child(node, 0)->TypeMatches<NOT>());
+      return new Logical(walkAst(child(node, 1)));
+    } else if (a == 3) {
+      EvalNode* left = walkAst(child(node, 0));
+      const FilterEvaluator::AstNodeWrapper& op = child(node, 1);
+      EvalNode* right = walkAst(child(node, 2));
+      return new Logical(op, left, right);
+    }
   }
 
-  if (prev) {
-    prev->addChild(eval);
-    return prev;
+  assert(0);
+}
+
+FilterEvaluator::Operand*
+FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
+{
+  if (node->TypeMatches<FieldName>()) {
+    return new FieldLookup(node);
+  } else if (node->TypeMatches<IntVal>()) {
+    return new LiteralInt(node);
+  } else if (node->TypeMatches<CharVal>()) {
+    return new LiteralChar(node);
+  } else if (node->TypeMatches<FloatVal>()) {
+    return new LiteralFloat(node);
+  } else if (node->TypeMatches<StrVal>()) {
+    return new LiteralString(node);
+  } else if (node->TypeMatches<ParamVal>()) {
+    return new Parameter(node);
+  } else if (node->TypeMatches<CallDef>()) {
+    if (arity(node) == 1) {
+      return walkOperand(child(node, 0));
+    } else {
+      extended_grammar_ = true;
+      Call* call = new Call(toString(child(node, 0)));
+      for (AstNode* iter = child(node, 1); iter != 0; iter = iter->GetSibling()) {
+        call->addChild(walkOperand(iter));
+      }
+      return call;
+    }
   }
-  return eval;
+  assert(0);
 }
 
 bool
@@ -650,6 +745,38 @@ namespace {
 
     const Value& lhs_;
   };
+
+  struct Modulus : VisitorBase<Value> {
+    explicit Modulus(const Value& lhs) : lhs_(lhs) {}
+
+    bool operator()(const char*&) const
+    {
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to strings");
+    }
+
+    Value operator()(const bool&) const
+    {
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to booleans");
+    }
+
+    template<typename T>
+    Value operator()(const T& rhs) const
+    {
+      return lhs_. OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT get<T>() % rhs;
+    }
+
+    Value operator()(const double&) const
+    {
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to doubles");
+    }
+
+    Value operator()(const ACE_CDR::LongDouble&) const
+    {
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to ACE_CDR::LongDoubles");
+    }
+
+    const Value& lhs_;
+  };
 }
 
 bool
@@ -669,6 +796,16 @@ Value::operator<(const Value& v) const
   Value rhs = v;
   conversion(lhs, rhs);
   Less visitor(lhs);
+  return visit(visitor, rhs);
+}
+
+Value
+Value::operator%(const Value& v) const
+{
+  Value lhs = *this;
+  Value rhs = v;
+  conversion(lhs, rhs);
+  Modulus visitor(lhs);
   return visit(visitor, rhs);
 }
 

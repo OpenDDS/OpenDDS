@@ -48,8 +48,8 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::assign_fields(void* incoming,
                           incoming, sfs.incoming_name_.c_str(), meta);
   }
 
-  const vector<string>& proj_out = qp.keys_projected_out_;
-  for (vector<string>::const_iterator iter = proj_out.begin();
+  const vector<OPENDDS_STRING>& proj_out = qp.keys_projected_out_;
+  for (vector<OPENDDS_STRING>::const_iterator iter = proj_out.begin();
        iter != proj_out.end(); ++iter) {
     resulting_meta.assign(&resulting, iter->c_str(),
                           incoming, iter->c_str(), meta);
@@ -199,17 +199,17 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
 {
   using namespace std;
   const MetaStruct& resulting_meta = getResultingMeta();
-  const string this_topic = topicNameFor(qp.data_reader_);
-  typedef multimap<string, string>::const_iterator iter_t;
+  const OPENDDS_STRING this_topic = topicNameFor(qp.data_reader_);
+  typedef multimap<OPENDDS_STRING, OPENDDS_STRING>::const_iterator iter_t;
   for (iter_t iter = qp.adjacent_joins_.begin();
        iter != qp.adjacent_joins_.end();) { // for each topic we're joining
-    const string& other_topic = iter->first;
+    const OPENDDS_STRING& other_topic = iter->first;
     iter_t range_end = qp.adjacent_joins_.upper_bound(other_topic);
     const QueryPlan& other_qp = query_plans_[other_topic];
     DDS::DataReader_ptr other_dr = other_qp.data_reader_;
     const MetaStruct& other_meta = metaStructFor(other_dr);
 
-    vector<string> keys;
+    vector<OPENDDS_STRING> keys;
     for (; iter != range_end; ++iter) { // for each key in common w/ this topic
       keys.push_back(iter->second);
     }
@@ -244,7 +244,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
 
       combine(starting, found->second, keys, found->first);
       TopicSet newKey(found->first);
-      for (set<string>::const_iterator i3 = found->first.begin();
+      for (set<OPENDDS_STRING>::const_iterator i3 = found->first.begin();
            i3 != found->first.end(); ++i3) {
         newKey.insert(*i3);
       }
@@ -263,7 +263,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
 {
   using namespace std;
   const MetaStruct& other_meta = metaStructFor(qp.data_reader_);
-  vector<string> no_keys;
+  vector<OPENDDS_STRING> no_keys;
   for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
        partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
     SampleVec resulting;
@@ -299,7 +299,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   process_joins(partialResults, partialResults[seen], seen, qp);
 
   // Any topic we haven't seen needs to be cross-joined
-  for (std::map<string, QueryPlan>::iterator iter = query_plans_.begin();
+  for (std::map<OPENDDS_STRING, QueryPlan>::iterator iter = query_plans_.begin();
        iter != query_plans_.end(); ++iter) {
     typename std::map<TopicSet, SampleVec>::iterator found =
       find_if(partialResults.begin(), partialResults.end(),
@@ -316,7 +316,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
          i != iterPR->second.end(); ++i) {
       InstanceHandle_t ih = tdr->store_synthetic_data(i->sample_, i->view_);
       if (ih != HANDLE_NIL) {
-        typedef std::map<string, InstanceHandle_t>::iterator mapiter_t;
+        typedef std::map<OPENDDS_STRING, InstanceHandle_t>::iterator mapiter_t;
         for (mapiter_t iterMap = i->info_.begin(); iterMap != i->info_.end();
              ++iterMap) {
           query_plans_[iterMap->first].instances_.insert(

@@ -50,20 +50,19 @@ bool testEval() {
     params[0] = "3";
 
     static const char* filters_pass[] = {"name LIKE 'Ad%'",
-      "durability.kind = 'PERSISTENT_DURABILITY_QOS'",
-      "durability_service.history_depth > %0",
-      "durability_service.service_cleanup_delay.sec = 0 AND "
-        "durability_service.service_cleanup_delay.nanosec >= 10",
-      "durability_service.service_cleanup_delay.sec < "
-        "durability_service.service_cleanup_delay.nanosec"};
+                                         "durability.kind = 'PERSISTENT_DURABILITY_QOS'",
+                                         "durability_service.history_depth > %0",
+                                         "durability_service.service_cleanup_delay.sec = 0 AND durability_service.service_cleanup_delay.nanosec >= 10",
+                                         "durability_service.service_cleanup_delay.sec < durability_service.service_cleanup_delay.nanosec",
+                                         "MOD(durability_service.history_depth,3) = 0"
+    };
 
     static const char* filters_fail[] = {"name LIKE 'ZZ%'",
-      "durability.kind = 'TRANSIENT_DURABILITY_QOS'",
-      "durability_service.history_depth < %0",
-      "durability_service.service_cleanup_delay.sec = 0 AND "
-        "durability_service.service_cleanup_delay.nanosec BETWEEN 3 AND 5",
-      "durability_service.service_cleanup_delay.sec = "
-        "durability_service.service_cleanup_delay.nanosec"};
+                                         "durability.kind = 'TRANSIENT_DURABILITY_QOS'",
+                                         "durability_service.history_depth < %0",
+                                         "durability_service.service_cleanup_delay.sec = 0 AND durability_service.service_cleanup_delay.nanosec BETWEEN 3 AND 5",
+                                         "durability_service.service_cleanup_delay.sec = durability_service.service_cleanup_delay.nanosec",
+                                         "MOD(durability_service.history_depth,4) = 0"};
 
     std::cout << std::boolalpha;
     bool ok = doEvalTest(filters_pass, true, sample, params);
@@ -164,18 +163,63 @@ bool testParsing() {
     "a_.b_.c_.d_"};
   ok &= parserTest<FilterExpressionGrammar::FieldName>(fieldnames);
 
+  const char* primaries[] = {"MOD(inst.num, 3)",
+                             "MOD(inst.num, %0)"};
+  ok &= parserTest<FilterExpressionGrammar::Primary>(primaries);
+
+  const char* calls[] = {"MOD(inst.num, 3)",
+                         "MOD(inst.num, %0)"};
+  ok &= parserTest<FilterExpressionGrammar::Call>(calls);
+
+  const char* comppreds[] = {"MOD(inst.num, 3) = 0",
+                             "MOD(inst.num, %0) = %1"};
+  ok &= parserTest<FilterExpressionGrammar::CompPred>(comppreds);
+
   const char* predicates[] = {"x BETWEEN 1 AND 3",
-    "y.z NOT BETWEEN 'a' AND 'z'", "a = 3", "b > 5", "c >= 6", "d < 7",
-    "e <= 8", "f <> 'z'", "g.a1.b2.c3.d4 LIKE 'foo%bar'", "'x' = x", "a = b"};
+                              "y.z NOT BETWEEN 'a' AND 'z'",
+                              "a = 3",
+                              "b > 5",
+                              "c >= 6",
+                              "d < 7",
+                              "e <= 8",
+                              "f <> 'z'",
+                              "g.a1.b2.c3.d4 LIKE 'foo%bar'",
+                              "'x' = x",
+                              "a = b",
+                              "MOD(durability_service.history_depth,3) = 0",
+                              "MOD(durability_service.history_depth,%0) = 0"};
   ok &= parserTest<FilterExpressionGrammar::Pred>(predicates);
 
-  const char* conditions[] = {"x=3", "y = 4  AND z <> 'foo'",
-    "y = 4  OR z <> 'foo'", "NOT h >= 4", "(i<27)", "NOT (j  =1) AND k > 3",
-    "a=1 OR a=2 OR a=3 OR a=4 OR a=5 OR a=6 OR a=7"};
+  const char* conditions[] = {"x=3",
+                              "y = 4  AND z <> 'foo'",
+                              "y = 4  OR z <> 'foo'",
+                              "NOT h >= 4",
+                              "(i<27)",
+                              "NOT (j  =1) AND k > 3",
+                              "a=1 OR a=2 OR a=3 OR a=4 OR a=5 OR a=6 OR a=7",
+                              "MOD(durability_service.history_depth,3) = 0",
+                              "MOD(durability_service.history_depth,%0) = 0"};
   ok &= parserTest<FilterExpressionGrammar::Cond>(conditions);
 
-  const char* queries[] = {"ORDER BY x", "ORDER BY x,y", "ORDER BY x.a.b.cde",
-    "ORDER BY a.b.cd134.f_g5, e, h.i,   j.k.l", "x > 10 ORDER BY y"};
+  const char* filtercompletes[] = {"x=3",
+                                   "y = 4  AND z <> 'foo'",
+                                   "y = 4  OR z <> 'foo'",
+                                   "NOT h >= 4",
+                                   "(i<27)",
+                                   "NOT (j  =1) AND k > 3",
+                                   "a=1 OR a=2 OR a=3 OR a=4 OR a=5 OR a=6 OR a=7",
+                                   "MOD(durability_service.history_depth,3) = 0",
+                                   "MOD(durability_service.history_depth,%0) = 0"};
+  ok &= parserTest<FilterExpressionGrammar::FilterCompleteInput>(filtercompletes);
+
+
+  const char* queries[] = {"ORDER BY x",
+                           "ORDER BY x,y",
+                           "ORDER BY x.a.b.cde",
+                           "ORDER BY a.b.cd134.f_g5, e, h.i,   j.k.l",
+                           "x > 10 ORDER BY y",
+                           "MOD(durability_service.history_depth,3) = 0",
+                           "MOD(durability_service.history_depth,%0) = 0"};
   ok &= parserTest<FilterExpressionGrammar::Query>(queries);
 
   return ok;

@@ -11,7 +11,6 @@
 #include "ace/Singleton.h"
 
 #include <iostream>
-#include <string>
 
 namespace OpenDDS {
 namespace FaceTSS {

@@ -620,6 +620,7 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
                                     const DDS::DataReaderQos& qos,
                                     const DCPS::TransportLocatorSeq& transInfo,
                                     const DDS::SubscriberQos& subscriberQos,
+                                    const char* filterClassName,
                                     const char* filterExpr,
                                     const DDS::StringSeq& params)
 {
@@ -639,7 +640,8 @@ InfoRepoDiscovery::add_subscription(DDS::DomainId_t domainId,
       servant_to_remote_reference(reader_remote_impl, orb_);
 
     subId = get_dcps_info()->add_subscription(domainId, participantId, topicId,
-      dr_remote_obj, qos, transInfo, subscriberQos, filterExpr, params);
+                                              dr_remote_obj, qos, transInfo, subscriberQos,
+                                              filterClassName, filterExpr, params);
 
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, DCPS::GUID_UNKNOWN);
     // take ownership of the client allocated above

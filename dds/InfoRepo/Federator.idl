@@ -150,6 +150,7 @@ module OpenDDS { module Federator {
       OpenDDS::DCPS::TransportLocatorSeq  transport_info;
 
       // The following are for Content-Subscription Profile
+      string                              filter_class_name;
       string                              filter_expression;
       DDS::StringSeq                      expression_params;
     };

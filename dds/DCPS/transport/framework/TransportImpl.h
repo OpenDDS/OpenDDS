@@ -14,6 +14,7 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsPublicationC.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
 #include "TransportInst.h"
 #include "TransportInst_rch.h"
@@ -23,7 +24,6 @@
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include <string>
 
 namespace OpenDDS {
 namespace DCPS {

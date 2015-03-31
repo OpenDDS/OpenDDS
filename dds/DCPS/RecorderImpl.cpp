@@ -913,6 +913,7 @@ RecorderImpl::enable()
 
     const TransportLocatorSeq& trans_conf_info = this->connection_info();
 
+    CORBA::String_var filterClassName = "";
     CORBA::String_var filterExpression = "";
     DDS::StringSeq exprParams;
 
@@ -931,6 +932,7 @@ RecorderImpl::enable()
                               this->qos_,
                               trans_conf_info,
                               this->subqos_,
+                              filterClassName,
                               filterExpression,
                               exprParams);
 
