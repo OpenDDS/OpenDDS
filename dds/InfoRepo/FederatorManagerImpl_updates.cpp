@@ -119,6 +119,7 @@ ManagerImpl::create(const Update::URActor& reader)
   sample.datareader_qos = reader.drdwQos;
   sample.subscriber_qos = reader.pubsubQos;
   sample.transport_info = reader.transportInterfaceInfo;
+  sample.filter_class_name = reader.contentSubscriptionProfile.filterClassName;
   sample.filter_expression = reader.contentSubscriptionProfile.filterExpr;
   sample.expression_params = reader.contentSubscriptionProfile.exprParams;
 

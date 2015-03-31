@@ -111,12 +111,12 @@ namespace FilterExpressionGrammar {
 
   struct Cond;
   struct CondTail : Opt<Seq<Or<Store<AND>, Store<OR> >, Cond, CondTail> > {};
-  struct _Cond : Or<
+  struct CondDef : Or<
     Seq<Pred, CondTail>,
     Seq<Store<NOT>, Cond, CondTail>,
     Seq<LPAREN, Cond, RPAREN, CondTail>
     > {};
-  struct Cond : Store<_Cond> { };
+  struct Cond : Store<CondDef> { };
   struct FilterCompleteInput : Seq<Cond, EndOfInput> {};
 
   struct ORDERBY : Keyword<CharSeqIgnoreCase<'o', 'r', 'd', 'e', 'r', ' ', 'b', 'y'> > {};

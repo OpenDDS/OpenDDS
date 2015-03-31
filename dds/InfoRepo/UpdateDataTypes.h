@@ -113,6 +113,7 @@ struct ContentSubscriptionInfo {
 // exprParams attribute is itself a std::pair and naming is too confusing with
 // nested pairs.
 struct ContentSubscriptionBin {
+  ACE_CString filterClassName;
   ACE_CString filterExpr;
   BinSeq exprParams;
 };

@@ -64,6 +64,7 @@ int DCPS_IR_Publication::add_associated_subscription(DCPS_IR_Subscription* sub,
     association.readerId = sub->get_id();
     association.subQos = *(sub->get_subscriber_qos());
     association.readerQos = *(sub->get_datareader_qos());
+    association.filterClassName = sub->get_filter_class_name().c_str();
     association.filterExpression = sub->get_filter_expression().c_str();
     association.exprParams = sub->get_expr_params();
 

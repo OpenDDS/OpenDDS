@@ -717,6 +717,12 @@ DCPS_IR_Subscription::reader()
 }
 
 std::string
+DCPS_IR_Subscription::get_filter_class_name() const
+{
+  return filterClassName_;
+}
+
+std::string
 DCPS_IR_Subscription::get_filter_expression() const
 {
   return filterExpression_;

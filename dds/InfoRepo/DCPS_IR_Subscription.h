@@ -174,6 +174,7 @@ public:
   // Expose the datareader.
   OpenDDS::DCPS::DataReaderRemote_ptr reader();
 
+  std::string get_filter_class_name() const;
   std::string get_filter_expression() const;
   DDS::StringSeq get_expr_params() const;
 

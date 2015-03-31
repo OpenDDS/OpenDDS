@@ -461,7 +461,7 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
     Operand* low = walkOperand(child(node, 2));
     Operand* high = walkOperand(child(node, 3));
     return new Between(field, op, low, high);
-  } else if (node->TypeMatches<_Cond>()) {
+  } else if (node->TypeMatches<CondDef>() || node->TypeMatches<Cond>()) {
     size_t a = arity(node);
     if (a == 1) {
       return walkAst(child(node, 0));
