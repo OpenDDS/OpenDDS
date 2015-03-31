@@ -21,3 +21,9 @@ project(*SafetyProfilePool) : dcps, opendds_face {
     SafetyProfilePoolTest.cpp
   }
 }
+
+project(*Sequences): dcps, opendds_face {
+  Source_Files {
+    SequencesTest.cpp
+  }
+}

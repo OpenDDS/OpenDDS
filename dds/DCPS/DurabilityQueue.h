@@ -77,7 +77,7 @@ public:
   }
 
   //filesystem path
-  typedef std::vector<OPENDDS_STRING> fs_path_t;
+  typedef OPENDDS_VECTOR(OPENDDS_STRING) fs_path_t;
   fs_path_t fs_path_;
 };
 

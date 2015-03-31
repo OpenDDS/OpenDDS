@@ -14,7 +14,7 @@
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "DataSampleHeader.h"
-
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 
 class DDS_TEST;
@@ -99,7 +99,7 @@ public:
 
   TransportCustomizedElementAllocator* get_transport_customized_element_allocator() const;
 
-  typedef std::map<DataLinkIdType, GUIDSeq_var> DataLinkIdTypeGUIDMap;
+  typedef OPENDDS_MAP(DataLinkIdType, GUIDSeq_var) DataLinkIdTypeGUIDMap;
   DataLinkIdTypeGUIDMap& get_filter_per_link();
 
   void set_filter_out(GUIDSeq *filter_out);

@@ -1,0 +1,3 @@
+feature (!opendds_test_wstring) {
+  dcps_ts_flags += -DNO_TEST_WSTRING
+}

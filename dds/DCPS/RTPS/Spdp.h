@@ -160,7 +160,7 @@ private:
     ACE_Time_Value lease_duration_;
     ACE_SOCK_Dgram unicast_socket_;
     ACE_SOCK_Dgram_Mcast multicast_socket_;
-    std::set<ACE_INET_Addr> send_addrs_;
+    OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
 
   } *tport_;
@@ -180,8 +180,8 @@ private:
     ACE_Time_Value last_seen_;
     DDS::InstanceHandle_t bit_ih_;
   };
-  typedef std::map<DCPS::RepoId, DiscoveredParticipant,
-                   DCPS::GUID_tKeyLessThan> DiscoveredParticipantMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
+                   DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;
   typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
   DiscoveredParticipantMap participants_;
 

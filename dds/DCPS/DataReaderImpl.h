@@ -37,6 +37,7 @@
 #include "WriterInfo.h"
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"
+#include "PoolAllocator.h"
 
 #include "ace/String_Base.h"
 #include "ace/Reverse_Lock_T.h"
@@ -45,6 +46,7 @@
 
 #include <vector>
 #include <list>
+#include "dds/DCPS/PoolAllocator.h"
 #include <map>
 #include <memory>
 #include <queue>
@@ -247,10 +249,10 @@ public:
   friend class QueryConditionImpl;
   friend class SubscriberImpl;
 
-  typedef std::map<DDS::InstanceHandle_t, SubscriptionInstance*> SubscriptionInstanceMapType;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, SubscriptionInstance*) SubscriptionInstanceMapType;
 
   /// Type of collection of statistics for writers to this reader.
-  typedef std::map<PublicationId, WriterStats, GUID_tKeyLessThan> StatsMapType;
+  typedef OPENDDS_MAP_CMP(PublicationId, WriterStats, GUID_tKeyLessThan) StatsMapType;
 
   //Constructor
   DataReaderImpl();
@@ -498,11 +500,11 @@ public:
   RepoId get_topic_id();
   RepoId get_dp_id();
 
-  typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
+  typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
   typedef std::pair<PublicationId, WriterInfo::WriterState> WriterStatePair;
-  typedef std::vector<WriterStatePair> WriterStatePairVec;
+  typedef OPENDDS_VECTOR(WriterStatePair) WriterStatePairVec;
   void get_writer_states(WriterStatePairVec& writer_states);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -527,7 +529,7 @@ public:
 
   void update_subscription_params(const DDS::StringSeq& params) const;
 
-  typedef std::vector<void*> GenericSeq;
+  typedef OPENDDS_VECTOR(void*) GenericSeq;
 
   struct GenericBundle {
     GenericSeq samples_;
@@ -718,7 +720,7 @@ private:
   bool check_historic(const ReceivedDataSample& sample);
 
   /// deliver samples that were held by check_historic()
-  void deliver_historic(std::map<SequenceNumber, ReceivedDataSample>& samples);
+  void deliver_historic(OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& samples);
 
   void listener_add_ref() { EntityImpl::_add_ref(); }
   void listener_remove_ref() { EntityImpl::_remove_ref(); }
@@ -745,7 +747,7 @@ private:
   ACE_Recursive_Thread_Mutex   publication_handle_lock_;
   Reverse_Lock_t reverse_pub_handle_lock_;
 
-  typedef std::map<RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan> RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
   RepoIdToHandleMap            id_to_handle_map_;
 
   // Status conditions.
@@ -870,8 +872,8 @@ private:
   bool statistics_enabled_;
 
   /// publications writing to this reader.
-  typedef std::map<PublicationId, RcHandle<WriterInfo>,
-                   GUID_tKeyLessThan> WriterMapType;
+  typedef OPENDDS_MAP_CMP(PublicationId, RcHandle<WriterInfo>,
+                   GUID_tKeyLessThan) WriterMapType;
 
 #ifdef ACE_LYNXOS_MAJOR
 public:
@@ -893,7 +895,8 @@ private:
   /// Type of raw latency data buffer.
   DataCollector<double>::OnFull raw_latency_buffer_type_;
 
-  typedef std::set<DDS::ReadCondition_var, VarLess<DDS::ReadCondition> > ReadConditionSet;
+  typedef VarLess<DDS::ReadCondition> RCCompLess;
+  typedef OPENDDS_SET_CMP(DDS::ReadCondition_var,  RCCompLess) ReadConditionSet;
   ReadConditionSet read_conditions_;
 
   /// Monitor object for this entity

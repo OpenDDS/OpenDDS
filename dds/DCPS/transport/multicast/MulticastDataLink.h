@@ -101,10 +101,10 @@ private:
 
   ACE_SYNCH_RECURSIVE_MUTEX session_lock_;
 
-  typedef std::map<MulticastPeer, MulticastSession_rch> MulticastSessionMap;
+  typedef OPENDDS_MAP(MulticastPeer, MulticastSession_rch) MulticastSessionMap;
   MulticastSessionMap sessions_;
 
-  std::map<RepoId, DisjointSequence, OpenDDS::DCPS::GUID_tKeyLessThan> data_samples_seen_;
+  OPENDDS_MAP_CMP(RepoId, DisjointSequence, OpenDDS::DCPS::GUID_tKeyLessThan) data_samples_seen_;
 
   virtual void stop_i();
 

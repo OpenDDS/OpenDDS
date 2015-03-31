@@ -146,12 +146,12 @@ private:
   // privates.
   friend class ::DDS_TEST;
 
-  typedef std::map<RepoId, DataLink_rch, GUID_tKeyLessThan> DataLinkIndex;
+  typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
 
 
   struct PendingAssoc : ACE_Event_Handler {
     bool active_, removed_;
-    std::vector<TransportImpl_rch> impls_;
+    OPENDDS_VECTOR(TransportImpl_rch) impls_;
     CORBA::ULong blob_index_;
     AssociationData data_;
     TransportImpl::ConnectionAttribs attribs_;
@@ -164,7 +164,7 @@ private:
     int handle_timeout(const ACE_Time_Value& time, const void* arg);
   };
 
-  typedef std::map<RepoId, PendingAssoc*, GUID_tKeyLessThan> PendingMap;
+  typedef OPENDDS_MAP_CMP(RepoId, PendingAssoc*, GUID_tKeyLessThan) PendingMap;
 
   class PendingAssocTimer : public ReactorInterceptor {
   public:
@@ -255,7 +255,7 @@ private:
 
   // Associated Impls and DataLinks:
 
-  std::vector<TransportImpl_rch> impls_;
+  OPENDDS_VECTOR(TransportImpl_rch) impls_;
   PendingMap pending_;
   DataLinkSet links_;
   DataLinkIndex links_waiting_for_on_deleted_callback_;

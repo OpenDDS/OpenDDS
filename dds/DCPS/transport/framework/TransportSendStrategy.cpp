@@ -669,7 +669,7 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
   TransportQueueElement* sample = 0;
   SendMode mode = MODE_NOT_SET;
 
-  std::vector<std::pair<TransportQueueElement*, SendMode> > samples;
+  OPENDDS_VECTOR(TQESendModePair) samples;
 
   size_t num_delayed_notifications = 0;
   bool found_element = false;
@@ -694,7 +694,7 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
       }
 
     } else {
-      std::vector<std::pair<TransportQueueElement*, SendMode> >::iterator iter;
+      OPENDDS_VECTOR(TQESendModePair)::iterator iter;
       for (iter = delayed_delivered_notification_queue_.begin(); iter != delayed_delivered_notification_queue_.end(); ) {
         sample = iter->first;
         mode = iter->second;

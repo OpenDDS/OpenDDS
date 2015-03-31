@@ -115,7 +115,11 @@ WriterInfo::get_state_str() const
   default:
     oss << "UNSPECIFIED(" << int(this->state_) << ")";
   }
+#ifdef ACE_LYNXOS_MAJOR
+  return oss.str();
+#else
   return oss.str().c_str();
+#endif
 }
 
 void

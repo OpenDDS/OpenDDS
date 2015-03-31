@@ -367,7 +367,10 @@ namespace {
             be_global->impl_ <<
               streamAndCheck(">> " + getWrapper(args.str(), elem, WD_INPUT), 4);
           } else { // unbounded string
-            be_global->impl_ << streamAndCheck(">> seq.get_buffer()[i]", 4);
+            const string getbuffer =
+              (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
+              ? ".get_buffer()" : "";
+            be_global->impl_ << streamAndCheck(">> seq" + getbuffer + "[i]", 4);
           }
         } else { // Enum, Struct, Sequence, Union
           be_global->impl_ << streamAndCheck(">> seq[i]", 4);
@@ -450,7 +453,7 @@ namespace {
         if (elem_cls & CL_STRING) {
           be_global->impl_ <<
             indent << "find_size_ulong(size, padding);\n" <<
-            indent << "size += ACE_OS::strlen(arr" << nfl.index_ << ")"
+            indent << "size += ACE_OS::strlen(arr" << nfl.index_ << ".in())"
             << ((elem_cls & CL_WIDE)
                 ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
                 : " + 1;\n");
@@ -487,8 +490,9 @@ namespace {
               indent << cxx_elem << "_forany tmp = tmp_var.inout();\n" <<
               streamAndCheck("<< tmp", indent.size());
           } else {
+            string suffix = (elem_cls & CL_STRING) ? ".in()" : "";
             be_global->impl_ <<
-              streamAndCheck("<< arr" + nfl.index_, indent.size());
+              streamAndCheck("<< arr" + nfl.index_ + suffix , indent.size());
           }
         }
         be_global->impl_ << "  return true;\n";
@@ -857,8 +861,9 @@ namespace {
     if (fld_cls & CL_ENUM) {
       return indent + "find_size_ulong(size, padding);\n";
     } else if (fld_cls & CL_STRING) {
+      const string suffix = (prefix == "uni") ? "" : ".in()";
       return indent + "find_size_ulong(size, padding);\n" +
-        indent + "size += ACE_OS::strlen(" + qual + ")"
+        indent + "size += ACE_OS::strlen(" + qual + suffix + ")"
         + ((fld_cls & CL_WIDE) ? " * OpenDDS::DCPS::Serializer::WCHAR_SIZE;\n"
                                : " + 1;\n");
     } else if (fld_cls & CL_PRIMITIVE) {
@@ -916,12 +921,14 @@ namespace {
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
       string fieldref = prefix, local = name;
+      const bool accessor =
+        local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (fld_cls & CL_ARRAY) {
         string pre = prefix;
         if (shift == ">>" || shift == "<<") {
           pre.erase(0, 3);
         }
-        if (local.size() > 2 && local.substr(local.size() - 2) == "()") {
+        if (accessor) {
           local.erase(local.size() - 2);
         }
         intro += "  " + getArrayForany(pre.c_str(), name.c_str(),
@@ -930,6 +937,7 @@ namespace {
       } else {
         fieldref += '.';
       }
+      if ((fld_cls & CL_STRING) && !accessor) local += ".in()";
       return "(strm " + fieldref + local + ')';
     }
   }
@@ -1051,7 +1059,7 @@ namespace {
 }
 
 bool marshal_generator::gen_struct(UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, const char*)
+  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   NamespaceGuard ng;
   be_global->add_include("dds/DCPS/Serializer.h");

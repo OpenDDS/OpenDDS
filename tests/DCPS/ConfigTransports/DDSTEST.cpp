@@ -32,7 +32,7 @@ bool
     }
 
   OPENDDS_STRING supported;
-  for (std::vector<OpenDDS::DCPS::TransportImpl_rch>::const_iterator it = tc->impls_.begin(),
+  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl_rch)::const_iterator it = tc->impls_.begin(),
           end = tc->impls_.end();
           it != end;)
     {
@@ -48,7 +48,7 @@ bool
              name.c_str(),
              supported.c_str()));
 
-  for (std::vector<OpenDDS::DCPS::TransportImpl_rch>::const_iterator it = tc->impls_.begin();
+  for (OPENDDS_VECTOR(OpenDDS::DCPS::TransportImpl_rch)::const_iterator it = tc->impls_.begin();
           it != tc->impls_.end(); ++it)
     {
 

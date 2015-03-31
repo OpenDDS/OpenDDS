@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_SENDSTATEDATASAMPLELIST_H
 
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "PoolAllocator.h"
 #include "Definitions.h"
 #include "transport/framework/TransportDefs.h"
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
@@ -167,7 +168,7 @@ class OpenDDS_Dcps_Export SendStateDataSampleList {
   /// the send state of a DataSampleElement is tracked by shifting
   /// it between distinct SendStateDataSampleLists, one for each state
   static const SendStateDataSampleList* send_list_containing_element(const DataSampleElement* element,
-                                                                std::vector<SendStateDataSampleList*> send_lists);
+                                                                OPENDDS_VECTOR(SendStateDataSampleList*) send_lists);
 
   /// Reset to initial state.
   void reset();

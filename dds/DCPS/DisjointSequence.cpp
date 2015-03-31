@@ -25,7 +25,7 @@ namespace DCPS {
 
 bool
 DisjointSequence::insert_i(const SequenceRange& range,
-                           std::vector<SequenceRange>* gaps /* = 0 */)
+                           OPENDDS_VECTOR(SequenceRange)* gaps /* = 0 */)
 {
   validate(range);
 
@@ -292,10 +292,10 @@ DisjointSequence::fill_bitmap_range(CORBA::ULong low, CORBA::ULong high,
   return !clamped;
 }
 
-std::vector<SequenceRange>
+OPENDDS_VECTOR(SequenceRange)
 DisjointSequence::missing_sequence_ranges() const
 {
-  std::vector<SequenceRange> missing;
+  OPENDDS_VECTOR(SequenceRange) missing;
   if (!disjoint()) {
     return missing;
   }
@@ -315,10 +315,10 @@ DisjointSequence::missing_sequence_ranges() const
   return missing;
 }
 
-std::vector<SequenceRange>
+OPENDDS_VECTOR(SequenceRange)
 DisjointSequence::present_sequence_ranges() const
 {
-  std::vector<SequenceRange> present;
+  OPENDDS_VECTOR(SequenceRange) present;
   std::copy(sequences_.begin(), sequences_.end(), std::back_inserter(present));
   return present;
 }

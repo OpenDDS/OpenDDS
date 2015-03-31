@@ -780,13 +780,13 @@ int
 DataLink::data_received(ReceivedDataSample& sample,
                         const RepoId& readerId /* = GUID_UNKNOWN */)
 {
-  data_received_i(sample, readerId, std::set<RepoId, GUID_tKeyLessThan>());
+  data_received_i(sample, readerId, OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)());
   return 0;
 }
 
 void
 DataLink::data_received_excluding(ReceivedDataSample& sample,
-                                  const std::set<RepoId, GUID_tKeyLessThan>& excl)
+                                  const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& excl)
 {
   data_received_i(sample, GUID_UNKNOWN, excl);
 }
@@ -794,7 +794,7 @@ DataLink::data_received_excluding(ReceivedDataSample& sample,
 void
 DataLink::data_received_i(ReceivedDataSample& sample,
                           const RepoId& readerId,
-                          const std::set<RepoId, GUID_tKeyLessThan>& exclude)
+                          const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& exclude)
 {
   DBG_ENTRY_LVL("DataLink", "data_received_i", 6);
   // Which remote publication sent this message?

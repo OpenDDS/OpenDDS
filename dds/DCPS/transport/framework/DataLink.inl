@@ -303,7 +303,7 @@ DataLink::remove_on_start_callback(TransportClient* client, const RepoId& remote
 
 #ifdef ACE_LYNXOS_MAJOR
   // std::remove() is broken, this version doesn't attempt to preserve order
-  typedef std::vector<OnStartCallback>::iterator iter_t;
+  typedef OPENDDS_VECTOR(OnStartCallback)::iterator iter_t;
   const OnStartCallback to_remove = std::make_pair(client, remote);
   const iter_t last = on_start_callbacks_.end();
   iter_t found = std::find(on_start_callbacks_.begin(), last, to_remove);

@@ -33,6 +33,7 @@ $test->{'dcps_debug_level'} = 4;
 $test->{'dcps_transport_debug_level'} = 2;
 
 my $dbg_lvl = '-ORBDebugLevel 1';
+my $pending_timeout = '-DCPSPendingTimeout 2';
 
 my $thread_per_connection = $test->{'flags'}->{'thread_per'} ? '-p' : '';
 
@@ -47,9 +48,9 @@ $test->{'transport'} = ($PerlDDS::SafetyProfile ? 'rtps_disc' : 'tcp')
 my $stack_based = $test->{'flags'}->{'stack'} ? 1 : 0;
 
 $test->process('sub', ($stack_based ? 'stack_' : '') . 'subscriber',
-               "$dbg_lvl $default_tport");
+               "$dbg_lvl $default_tport $pending_timeout");
 $test->process('pub', 'publisher',
-               "$dbg_lvl $thread_per_connection $default_tport");
+               "$dbg_lvl $thread_per_connection $default_tport $pending_timeout");
 
 $test->setup_discovery();
 $test->start_process('pub');

@@ -148,7 +148,7 @@ void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
                          RETURN_CODE_TYPE& return_code)
 {
   Entities& entities = *Entities::instance();
-  std::map<CONNECTION_ID_TYPE, ::DDS::DataReader_var>& readers = entities.readers_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, ::DDS::DataReader_var)& readers = entities.readers_;
   if (readers.count(connection_id)) {
     readers[connection_id]->set_listener(NULL, 0);
     return_code = RC_NO_ERROR;
@@ -161,8 +161,8 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
                         RETURN_CODE_TYPE& return_code)
 {
   Entities& entities = *Entities::instance();
-  std::map<CONNECTION_ID_TYPE, ::DDS::DataWriter_var>& writers = entities.writers_;
-  std::map<CONNECTION_ID_TYPE, ::DDS::DataReader_var>& readers = entities.readers_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, ::DDS::DataWriter_var)& writers = entities.writers_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, ::DDS::DataReader_var)& readers = entities.readers_;
 
   ::DDS::DomainParticipant_var dp;
   if (writers.count(connection_id)) {

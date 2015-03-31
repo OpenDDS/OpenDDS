@@ -558,11 +558,13 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
         create_control_message(END_HISTORIC_SAMPLES, header, data, timestamp);
 
       guard.release();
-      if (send_w_control(list, header, end_historic_samples, remote_id)
-          == SEND_CONTROL_ERROR) {
+      SendControlStatus ret = send_w_control(list, header, end_historic_samples, remote_id);
+      if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                              ACE_TEXT("DataWriterImpl::association_complete_i: ")
                              ACE_TEXT("send_w_control failed.\n")));
+      } else {
+        this->controlTracker.message_sent();
       }
     }
   }
@@ -1725,7 +1727,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
-  std::set<GUID_t, GUID_tKeyLessThan> excluded;
+  OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) excluded;
 
   if (filter_out && !reader_info_.empty()) {
     const GUID_t* buf = filter_out->get_buffer();

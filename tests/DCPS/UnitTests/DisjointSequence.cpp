@@ -194,8 +194,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.insert(1);
     sequence.insert(6); // discontiguity
 
-    std::vector<SequenceRange> missingSet = sequence.missing_sequence_ranges();
-    std::vector<SequenceRange>::const_iterator it = missingSet.begin();
+    OPENDDS_VECTOR(SequenceRange) missingSet = sequence.missing_sequence_ranges();
+    OPENDDS_VECTOR(SequenceRange)::const_iterator it = missingSet.begin();
 
     range = *it;
     TEST_CHECK(range.first == SequenceNumber(2));
@@ -284,7 +284,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(!sequence.empty() && !sequence.disjoint());
     TEST_CHECK(zero == sequence.low() && zero == sequence.high());
     sequence.insert(2);
-    std::vector<SequenceRange> ranges = sequence.missing_sequence_ranges();
+    OPENDDS_VECTOR(SequenceRange) ranges = sequence.missing_sequence_ranges();
     TEST_CHECK(ranges.size() == 1);
     TEST_CHECK(ranges[0] == SequenceRange(1, 1));
     sequence.reset();
@@ -304,7 +304,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(sequence.disjoint());
     TEST_CHECK(sequence.low() == 3);
     TEST_CHECK(sequence.high() == 6);
-    std::vector<SequenceRange> ranges = sequence.present_sequence_ranges();
+    OPENDDS_VECTOR(SequenceRange) ranges = sequence.present_sequence_ranges();
     TEST_CHECK(ranges.size() == 2);
     TEST_CHECK(ranges[0] == SequenceRange(3, 3));
     TEST_CHECK(ranges[1] == SequenceRange(5, 6));
@@ -331,7 +331,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.insert(10);
     sequence.insert(11);
 
-    std::vector<SequenceRange> dropped;
+    OPENDDS_VECTOR(SequenceRange) dropped;
     TEST_CHECK(sequence.insert(SequenceRange(sequence.low(), 12), dropped));
     TEST_CHECK(!sequence.disjoint());
     TEST_CHECK(dropped.size() == 3);
@@ -346,7 +346,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.insert(6);
     sequence.insert(7);
 
-    std::vector<SequenceRange> dropped;
+    OPENDDS_VECTOR(SequenceRange) dropped;
     TEST_CHECK(sequence.insert(SequenceRange(sequence.low(), 7), dropped));
     TEST_CHECK(dropped.size() == 1);
     TEST_CHECK(dropped[0] == SequenceRange(4, 4));
@@ -357,7 +357,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.insert(6);
     sequence.insert(10);
 
-    std::vector<SequenceRange> dropped;
+    OPENDDS_VECTOR(SequenceRange) dropped;
     TEST_CHECK(sequence.insert(SequenceRange(sequence.low(), 8), dropped));
     TEST_CHECK(dropped.size() == 2);
     TEST_CHECK(dropped[0] == SequenceRange(5, 5));
@@ -375,7 +375,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.insert(7);
     sequence.insert(10);
 
-    std::vector<SequenceRange> dropped;
+    OPENDDS_VECTOR(SequenceRange) dropped;
     TEST_CHECK(sequence.insert(SequenceRange(sequence.low(), 9), dropped));
     TEST_CHECK(dropped.size() == 2);
     TEST_CHECK(dropped[0] == SequenceRange(6, 6));
@@ -387,7 +387,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     sequence.insert(5);
     sequence.insert(9);
 
-    std::vector<SequenceRange> dropped;
+    OPENDDS_VECTOR(SequenceRange) dropped;
     TEST_CHECK(sequence.insert(SequenceRange(4, 12), dropped));
     TEST_CHECK(dropped.size() == 3);
     TEST_CHECK(dropped[0] == SequenceRange(4, 4));

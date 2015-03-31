@@ -109,7 +109,11 @@ GuidConverter::operator OPENDDS_STRING() const
   os << guid_ << "(" << std::hex << checksum() << ")";
 
   // TODO remove streams
+#ifdef ACE_LYNXOS_MAJOR
+  return OPENDDS_STRING(os.str());
+#else
   return OPENDDS_STRING(os.str().c_str());
+#endif
 }
 
 #ifdef DDS_HAS_WCHAR

@@ -337,7 +337,7 @@ public:
    * Returns a vector of handles for the instances registered for this
    * data writer.
    */
-  typedef std::vector<DDS::InstanceHandle_t> InstanceHandleVec;
+  typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
   DDS::ReturnCode_t wait_ack_of_seq(const ACE_Time_Value& abs_deadline, const SequenceNumber& sequence);

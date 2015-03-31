@@ -90,13 +90,15 @@ Serializer::swapcpy(char* to, const char* from, size_t n)
 }
 
 void
-Serializer::read_string(ACE_CDR::Char*& dest)
+Serializer::read_string(ACE_CDR::Char*& dest,
+    ACE_CDR::Char* str_alloc(ACE_CDR::ULong),
+    void str_free(ACE_CDR::Char*))
 {
   this->alignment_ == ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULong));
   //
   // Ensure no bad values leave the routine.
   //
-  CORBA::string_free(dest);
+  str_free(dest);
   dest = 0;
 
   //
@@ -115,10 +117,8 @@ Serializer::read_string(ACE_CDR::Char*& dest)
   //       checked during the actual read as well.
   //
   if (length <= this->current_->total_length()) {
-    //
-    // Allocate the destination.
-    //
-    ACE_NEW_NORETURN(dest, ACE_CDR::Char[length]);
+
+    dest = str_alloc(length - 1);
 
     if (dest == 0) {
       this->good_bit_ = false;
@@ -131,20 +131,22 @@ Serializer::read_string(ACE_CDR::Char*& dest)
     }
 
     if (!this->good_bit_) {
-      delete [] dest;
+      str_free(dest);
       dest = 0;
     }
   }
 }
 
 void
-Serializer::read_string(ACE_CDR::WChar*& dest)
+Serializer::read_string(ACE_CDR::WChar*& dest,
+    ACE_CDR::WChar* str_alloc(ACE_CDR::ULong),
+    void str_free(ACE_CDR::WChar*))
 {
   this->alignment_ == ALIGN_NONE ? 0 : this->align_r(sizeof(ACE_CDR::ULong));
   //
   // Ensure no bad values leave the routine.
   //
-  CORBA::wstring_free(dest);
+  str_free(dest);
   dest = 0;
 
   //
@@ -166,10 +168,8 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
   if (bytecount <= this->current_->total_length()) {
 
     const ACE_CDR::ULong length = bytecount / WCHAR_SIZE;
-    //
-    // Allocate the destination.
-    //
-    ACE_NEW_NORETURN(dest, ACE_CDR::WChar[length + 1]);
+
+    dest = str_alloc(length);
 
     if (dest == 0) {
       this->good_bit_ = false;
@@ -195,7 +195,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest)
       dest[length] = L'\0';
 
     } else {
-      delete [] dest;
+      str_free(dest);
       dest = 0;
     }
   }

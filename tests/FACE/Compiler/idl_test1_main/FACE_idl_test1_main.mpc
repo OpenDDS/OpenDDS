@@ -1,0 +1,11 @@
+project: dcpsexe, opendds_face {
+  exename   = idl_test1
+  libs     +=  FACE_idl_test1_lib
+  libpaths +=  ../idl_test1_lib
+  after    += FACE_idl_test1_lib
+
+  Source_Files {
+    main.cpp
+  }
+}
+

@@ -141,7 +141,7 @@ public:
   ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
   bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
 
-  typedef std::vector<PublicationId> PublicationIdVec;
+  typedef OPENDDS_VECTOR(PublicationId) PublicationIdVec;
   /// Populates a std::vector with the PublicationIds (GUIDs)
   /// of this Publisher's Data Writers
   void get_publication_ids(PublicationIdVec& pubs);
@@ -154,13 +154,13 @@ public:
                                          DDS::Topic_ptr a_topic,
                                          DDS::DataWriterQos& dw_qos);
 private:
-  typedef std::multimap<OPENDDS_STRING, DataWriterImpl*> DataWriterMap;
+  typedef OPENDDS_MULTIMAP(OPENDDS_STRING, DataWriterImpl*) DataWriterMap;
 
-  typedef std::map<PublicationId, DataWriterImpl*, GUID_tKeyLessThan>
+  typedef OPENDDS_MAP_CMP(PublicationId, DataWriterImpl*, GUID_tKeyLessThan)
     PublicationMap;
 
   // DataWriter id to qos map.
-  typedef std::map<RepoId, DDS::DataWriterQos, GUID_tKeyLessThan> DwIdToQosMap;
+  typedef OPENDDS_MAP_CMP(RepoId, DDS::DataWriterQos, GUID_tKeyLessThan) DwIdToQosMap;
 
   DDS::InstanceHandle_t        handle_;
 

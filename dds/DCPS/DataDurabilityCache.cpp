@@ -35,7 +35,7 @@
 
 namespace {
 
-void cleanup_directory(const std::vector<OPENDDS_STRING> & path,
+void cleanup_directory(const OPENDDS_VECTOR(OPENDDS_STRING) & path,
                        const ACE_CString & data_dir)
 {
   if (path.empty()) return;
@@ -73,7 +73,7 @@ public:
   Cleanup_Handler(list_type & sample_list,
                   list_difference_type index,
                   ACE_Allocator * allocator,
-                  const std::vector<OPENDDS_STRING> & path,
+                  const OPENDDS_VECTOR(OPENDDS_STRING) & path,
                   const ACE_CString & data_dir)
   : sample_list_(sample_list)
   , index_(index)
@@ -159,7 +159,7 @@ private:
   OpenDDS::DCPS::DataDurabilityCache::timer_id_list_type *
   timer_ids_;
 
-  std::vector<OPENDDS_STRING> path_;
+  OPENDDS_VECTOR(OPENDDS_STRING) path_;
 
   ACE_CString data_dir_;
 };
@@ -326,7 +326,7 @@ void OpenDDS::DCPS::DataDurabilityCache::init()
     using OpenDDS::FileSystemStorage::Directory;
     using OpenDDS::FileSystemStorage::File;
     Directory::Ptr root_dir = Directory::create(this->data_dir_.c_str());
-    std::vector<OPENDDS_STRING> path(4);  // domain, topic, type, datawriter
+    OPENDDS_VECTOR(OPENDDS_STRING) path(4);  // domain, topic, type, datawriter
 
     for (Directory::DirectoryIterator domain = root_dir->begin_dirs(),
          domain_end = root_dir->end_dirs(); domain != domain_end; ++domain) {
@@ -532,7 +532,7 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
   using OpenDDS::FileSystemStorage::Directory;
   using OpenDDS::FileSystemStorage::File;
   Directory::Ptr dir;
-  std::vector<OPENDDS_STRING> path;
+  OPENDDS_VECTOR(OPENDDS_STRING) path;
   {
     ACE_Allocator * const allocator = this->allocator_.get();
 

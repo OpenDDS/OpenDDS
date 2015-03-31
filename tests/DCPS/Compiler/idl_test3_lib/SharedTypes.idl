@@ -9,7 +9,7 @@ module Xyz {
   typedef sequence<char,6>    SeqOfChar;
   typedef sequence<octet,6>   SeqOfOctet;
   typedef sequence<long,6>    SeqOfLong;
-  typedef sequence<AnEnum,6>  SeqOfAnEnum;
+  typedef sequence<AnEnum>    SeqOfAnEnum;
 
   // basic arrays
   typedef boolean    ArrayOfBoolean[5];

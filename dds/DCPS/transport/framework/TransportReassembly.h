@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/Definitions.h"
 #include "ReceivedDataSample.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include <list>
 #include <map>
@@ -90,12 +91,12 @@ private:
   // (one DataSampleHeader before fragmentation).  The list must have at
   // least one value in it.  If a FragRange in the list has a sample_ with
   // a null ACE_Message_Block*, it's one that was data_unavailable().
-  typedef std::map<FragKey, std::list<FragRange> > FragMap;
+  typedef OPENDDS_MAP(FragKey, OPENDDS_LIST(FragRange) ) FragMap;
   FragMap fragments_;
 
-  std::set<FragKey> have_first_;
+  OPENDDS_SET(FragKey) have_first_;
 
-  static bool insert(std::list<FragRange>& flist,
+  static bool insert(OPENDDS_LIST(FragRange)& flist,
                      const SequenceRange& seqRange,
                      ReceivedDataSample& data);
 };

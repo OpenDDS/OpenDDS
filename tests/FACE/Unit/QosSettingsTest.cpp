@@ -8,14 +8,6 @@
 unsigned int assertions = 0;
 unsigned int failed = 0;
 
-#define TEST_CHECK(COND) \
-  ++assertions; \
-  if (!( COND )) {\
-    ++failed; \
-    ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l %a\n",\
-        #COND , -1)); \
-  }
-
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
 class QosSettingsAccessor {
