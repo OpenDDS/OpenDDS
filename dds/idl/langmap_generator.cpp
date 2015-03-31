@@ -107,8 +107,8 @@ void langmap_generator::init()
     helpers_[HLP_OUT] = "::TAO_Out_T";
     helpers_[HLP_SEQ] = "::OpenDDS::FaceTypes::Sequence";
     helpers_[HLP_SEQ_NS] = "::OpenDDS::FaceTypes";
-    helpers_[HLP_SEQ_VAR_VAR] = "::TAO_VarSeq_Var_T";
-    helpers_[HLP_SEQ_FIX_VAR] = "::TAO_FixedSeq_Var_T";
+    helpers_[HLP_SEQ_VAR_VAR] = "::OpenDDS::FaceTypes::SequenceVar";
+    helpers_[HLP_SEQ_FIX_VAR] = "::OpenDDS::FaceTypes::SequenceVar";
     helpers_[HLP_SEQ_OUT] = "::TAO_Seq_Out_T";
     helpers_[HLP_ARR_VAR_VAR] = "::TAO_VarArray_Var_T";
     helpers_[HLP_ARR_FIX_VAR] = "::TAO_FixedArray_Var_T";
@@ -297,9 +297,9 @@ bool langmap_generator::gen_struct(UTL_ScopedName* name,
 namespace {
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
-    be_global->add_include("<tao/Seq_Var_T.h>", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("<tao/Seq_Out_T.h>", BE_GlobalData::STREAM_LANG_H);
     be_global->add_include("FACE/Sequence.h", BE_GlobalData::STREAM_LANG_H);
+    be_global->add_include("FACE/SequenceVar.h", BE_GlobalData::STREAM_LANG_H);
     const char* const nm = tdname->last_component()->get_string();
     AST_Type* elem = seq->base_type();
     const Classification elem_cls = classify(elem);
