@@ -100,12 +100,13 @@ typedef struct ParticipantStrt<DDS::DomainParticipantQos&> UParticipant;
 typedef struct ParticipantStrt<QosSeq>                     DParticipant;
 
 struct ContentSubscriptionInfo {
+  CORBA::String_var filterClassName;
   CORBA::String_var filterExpr;
   DDS::StringSeq exprParams;
 
   ContentSubscriptionInfo() {}
-  ContentSubscriptionInfo(const char* fx, const DDS::StringSeq& ep)
-    : filterExpr(fx), exprParams(ep) {}
+  ContentSubscriptionInfo(const char* fcn, const char* fx, const DDS::StringSeq& ep)
+    : filterClassName(fcn), filterExpr(fx), exprParams(ep) {}
 };
 
 // like std::pair but with names instead of "first" and "second", since the

@@ -203,6 +203,7 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                                   const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                                   ,
+                                  const OPENDDS_STRING& filterClassName,
                                   const FilterEvaluator* eval,
                                   const DDS::StringSeq& expression_params
 #endif
@@ -220,7 +221,7 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                           reader_id,
                           lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-                          , eval, expression_params
+                          , filterClassName, eval, expression_params
 #endif
                           );
 
@@ -230,7 +231,7 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                           reader_id,
                           lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-                          , eval, expression_params
+                          , filterClassName, eval, expression_params
 #endif
                           );
   }
@@ -1253,6 +1254,7 @@ WriteDataContainer::copy_and_append(SendStateDataSampleList& list,
                                     const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                                     ,
+                                    const OPENDDS_STRING& filterClassName,
                                     const FilterEvaluator* eval,
                                     const DDS::StringSeq& params
 #endif
@@ -1267,7 +1269,7 @@ WriteDataContainer::copy_and_append(SendStateDataSampleList& list,
       continue;
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-    if (eval && writer_->filter_out(*cur, *eval, params))
+    if (eval && writer_->filter_out(*cur, filterClassName, *eval, params))
       continue;
 #endif
 

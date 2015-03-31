@@ -453,6 +453,7 @@ public:
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   bool filter_out(const DataSampleElement& elt,
+                  const OPENDDS_STRING& filterClassName,
                   const FilterEvaluator& evaluator,
                   const DDS::StringSeq& expression_params) const;
 #endif
@@ -504,13 +505,14 @@ protected:
   struct ReaderInfo {
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     DomainParticipantImpl* participant_;
-    DDS::StringSeq expression_params_;
+    OPENDDS_STRING filter_class_name_;
     OPENDDS_STRING filter_;
+    DDS::StringSeq expression_params_;
     RcHandle<FilterEvaluator> eval_;
 #endif
     SequenceNumber expected_sequence_;
     bool durable_;
-    ReaderInfo(const char* filter, const DDS::StringSeq& params,
+    ReaderInfo(const char* filter_class_name, const char* filter, const DDS::StringSeq& params,
                DomainParticipantImpl* participant, bool durable);
     ~ReaderInfo();
   };

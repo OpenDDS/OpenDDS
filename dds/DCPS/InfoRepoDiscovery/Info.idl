@@ -119,6 +119,7 @@ module OpenDDS {
                                in ::DDS::DataReaderQos qos,
                                in TransportLocatorSeq transInfo,
                                in ::DDS::SubscriberQos subscriberQos,
+                               in string filterClassName,
                                in string filterExpression,
                                in ::DDS::StringSeq exprParams)
         raises (Invalid_Domain,
