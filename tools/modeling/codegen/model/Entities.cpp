@@ -27,7 +27,7 @@ void
 OpenDDS::Model::Entities::registerTypes( const std::string& participant,
                                          const OPENDDS_STRING& transportConfig)
 {
-  std::queue<DDS::TypeSupport_ptr>& queue = this->typeSupport_[ participant];
+  OPENDDS_QUEUE(DDS::TypeSupport_ptr)& queue = this->typeSupport_[ participant];
   if( queue.empty()) {
     return;
   }

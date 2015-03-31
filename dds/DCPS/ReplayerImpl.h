@@ -243,7 +243,7 @@ private:
 
   RepoIdToHandleMap id_to_handle_map_;
 
-  typedef std::set<RepoId, GUID_tKeyLessThan> IdSet;
+  typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) IdSet;
 
   IdSet readers_;
 

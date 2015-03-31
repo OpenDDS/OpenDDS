@@ -17,9 +17,7 @@
 #include "ace/Synch_Traits.h"
 
 #include "dds/DCPS/DisjointSequence.h"
-
-#include <map>
-#include <set>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -81,7 +79,7 @@ private:
   typedef OPENDDS_MAP(ACE_Time_Value, SequenceNumber) NakRequestMap;
   NakRequestMap nak_requests_;
 
-  typedef std::set<SequenceRange> NakPeerSet;
+  typedef OPENDDS_SET(SequenceRange) NakPeerSet;
   NakPeerSet nak_peers_;
 };
 

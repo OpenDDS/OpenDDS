@@ -85,7 +85,7 @@ public:
 
   ~FilterEvaluator();
 
-  std::vector<OPENDDS_STRING> getOrderBys() const;
+  OPENDDS_VECTOR(OPENDDS_STRING) getOrderBys() const;
 
   bool hasFilter() const;
 
@@ -147,7 +147,7 @@ private:
   bool eval_i(DataForEval& data) const;
 
   EvalNode* filter_root_;
-  std::vector<OPENDDS_STRING> order_bys_;
+  OPENDDS_VECTOR(OPENDDS_STRING) order_bys_;
 };
 
 class OpenDDS_Dcps_Export MetaStruct {

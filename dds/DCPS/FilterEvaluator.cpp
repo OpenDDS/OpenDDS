@@ -84,7 +84,7 @@ private:
   }
 
 protected:
-  std::vector<EvalNode*> children_;
+  OPENDDS_VECTOR(EvalNode*) children_;
 };
 
 Value
@@ -420,7 +420,7 @@ FilterEvaluator::eval_i(DataForEval& data) const
   return filter_root_->eval(data).b_;
 }
 
-std::vector<OPENDDS_STRING>
+OPENDDS_VECTOR(OPENDDS_STRING)
 FilterEvaluator::getOrderBys() const
 {
   return order_bys_;

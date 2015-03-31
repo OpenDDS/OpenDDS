@@ -15,8 +15,7 @@
 #include "MulticastTypes.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-
-#include <map>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -89,7 +88,7 @@ private:
   typedef OPENDDS_MAP(Peers, Callbacks) PendConnMap;
   PendConnMap pending_connections_;
   // remote peer to local peer
-  std::set<Peers> connections_;
+  OPENDDS_SET(Peers) connections_;
 };
 
 } // namespace DCPS
