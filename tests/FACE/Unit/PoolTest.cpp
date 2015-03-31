@@ -54,8 +54,10 @@ public:
     TEST_CHECK(ptr0);
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
+    TEST_CHECK(ptr3);
     TEST_CHECK(ptr0 > ptr1);
     TEST_CHECK(ptr1 > ptr2);
+    TEST_CHECK(ptr2 > ptr3);
   }
 
   // Allocate a several blocks until all gone
@@ -529,6 +531,7 @@ public:
     validate_pool(pool, 0);
   }
 
+  // Allocates after running out of memory should return null
   void test_alloc_null_once_out_of_memory() {
     Pool pool(1024, 64);
     char* ptr0 = pool.pool_alloc(256);
@@ -558,6 +561,24 @@ public:
     validate_pool(pool, 1024);
   }
 
+  // Allocates larger than remaining memory should return null
+  void test_alloc_too_large_returns_null() {
+    Pool pool(1024, 64);
+    char* ptr0 = pool.pool_alloc(256);
+    char* ptr1 = pool.pool_alloc(256);
+    char* ptr2 = pool.pool_alloc(256);
+    char* ptr3 = pool.pool_alloc(128);
+    char* ptr4 = pool.pool_alloc(640);
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr1);
+    TEST_CHECK(ptr2);
+    TEST_CHECK(ptr3);
+    TEST_CHECK(!ptr4);
+    validate_pool(pool, 1024 - 128);
+    pool.pool_free(ptr2);
+    validate_pool(pool, 1024 - 128 - 256);
+  }
+
   void test_alloc_null_once_out_of_allocs() {
     Pool pool(1024, 5); // 5 gives us max 11 allocs
     char* ptr0 = pool.pool_alloc(64);  // 2 allocs
@@ -579,6 +600,7 @@ public:
     TEST_CHECK(ptr6);
     TEST_CHECK(ptr7);
     TEST_CHECK(ptr8);
+    TEST_CHECK(ptr9);
     validate_pool(pool, 64*10);
     // Out of allocs
     char* ptr10 = pool.pool_alloc(64);  // 11 allocs
@@ -590,8 +612,16 @@ public:
   }
 
   void test_free_null_should_ignore() {
+    Pool pool(1024, 5); // 5 gives us max 11 allocs
+    char* ptr0 = pool.pool_alloc(64);  // 2 allocs
+    char* ptr1 = pool.pool_alloc(64);  // 3 allocs
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr1);
+    validate_pool(pool, 64*2);
+    pool.pool_free(ptr1);
+    pool.pool_free(NULL);
+    validate_pool(pool, 64);
   }
-
 
 private:
   void validate_pool(Pool& pool, size_t expected_allocated_bytes,
@@ -695,6 +725,7 @@ int main(int, const char** )
   test.test_pool_free_out_of_order();
 
   test.test_alloc_null_once_out_of_memory();
+  test.test_alloc_too_large_returns_null();
   test.test_alloc_null_once_out_of_allocs();
   test.test_free_null_should_ignore();
 
