@@ -12,12 +12,9 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/GuidUtils.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Synch.h"
-
-#include "dds/DCPS/PoolAllocator.h"
-#include <map>
-#include <set>
 
 namespace OpenDDS {
 namespace DCPS {

@@ -27,8 +27,6 @@
 
 #include "ace/Reverse_Lock_T.h"
 
-#include <vector>
-
 #if !defined (__ACE_INLINE__)
 #include "TransportSendStrategy.inl"
 #endif /* __ACE_INLINE__ */

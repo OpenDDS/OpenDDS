@@ -18,9 +18,7 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "RakeData.h"
 #include "Comparator_T.h"
-
-#include <vector>
-#include <set>
+#include "PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {

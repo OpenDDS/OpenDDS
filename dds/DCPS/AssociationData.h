@@ -13,8 +13,6 @@
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "ace/INET_Addr.h"
 
-#include <vector>
-
 namespace OpenDDS {
 namespace DCPS {
 

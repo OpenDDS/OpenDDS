@@ -4,6 +4,10 @@
 #include <limits>
 #include <string>
 #include <map>
+#include <list>
+#include <vector>
+#include <queue>
+#include <set>
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "dcps_export.h"
 #include "SafetyProfilePool.h"

@@ -29,9 +29,7 @@
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/GuidConverter.h"
-
-#include <map>
-#include <set>
+#include "dds/DCPS/PoolAllocator.h"
 
 class DDS_TEST;
 

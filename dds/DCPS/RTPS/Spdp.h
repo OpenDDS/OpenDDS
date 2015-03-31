@@ -25,8 +25,6 @@
 #include "ace/SOCK_Dgram_Mcast.h"
 #include "ace/Condition_Thread_Mutex.h"
 
-#include <map>
-#include <set>
 #include "dds/DCPS/PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

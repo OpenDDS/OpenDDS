@@ -1,7 +1,6 @@
 #ifndef OPENDDS_CONNECTION_SETTINGS_H
 #define OPENDDS_CONNECTION_SETTINGS_H
 
-#include <map>
 #include "FACE/TS_common.hpp"
 #include "dds/DCPS/PoolAllocator.h"
 #include "FACE/OpenDDS_FACE_Export.h"

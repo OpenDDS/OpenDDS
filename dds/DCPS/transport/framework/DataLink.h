@@ -30,10 +30,7 @@
 #include "ace/Synch.h"
 #include "ace/Event_Handler.h"
 
-#include <list>
-#include <map>
 #include <utility>
-#include <vector>
 
 #include <iosfwd> // For operator<<() diagnostic formatter.
 

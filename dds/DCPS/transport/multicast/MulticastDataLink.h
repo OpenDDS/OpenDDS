@@ -23,6 +23,7 @@
 #include "MulticastTypes.h"
 
 #include "dds/DCPS/DisjointSequence.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "dds/DCPS/transport/framework/DataLink.h"
 #include "dds/DCPS/transport/framework/TransportReactorTask.h"
@@ -30,8 +31,6 @@
 
 #include "ace/SOCK_Dgram_Mcast.h"
 #include "ace/Synch_Traits.h"
-
-#include <map>
 
 namespace OpenDDS {
 namespace DCPS {

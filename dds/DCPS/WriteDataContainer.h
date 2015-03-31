@@ -14,8 +14,8 @@
 #include "SendStateDataSampleList.h"
 #include "WriterDataSampleList.h"
 #include "DisjointSequence.h"
-
 #include "PoolAllocator.h"
+
 #include "ace/Condition_T.h"
 #include "Service_Participant.h"
 
@@ -23,8 +23,6 @@
 #include "ace/Thread_Mutex.h"
 #include "ace/Recursive_Thread_Mutex.h"
 
-#include <map>
-#include <set>
 #include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

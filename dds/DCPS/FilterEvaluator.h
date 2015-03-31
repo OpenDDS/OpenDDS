@@ -18,9 +18,6 @@
 #include "Comparator_T.h"
 #include "RcObject_T.h"
 
-#include <vector>
-#include <string>
-
 namespace OpenDDS {
 namespace DCPS {
 

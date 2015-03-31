@@ -23,8 +23,6 @@
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include <map>
-#include <set>
 #include <string>
 
 namespace OpenDDS {

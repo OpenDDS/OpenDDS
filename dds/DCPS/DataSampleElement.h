@@ -15,7 +15,6 @@
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "DataSampleHeader.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include <map>
 
 class DDS_TEST;
 

@@ -16,8 +16,7 @@
 
 #include "dds/DCPS/transport/framework/PriorityKey.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
-
-#include <map>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {

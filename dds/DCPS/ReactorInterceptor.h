@@ -10,7 +10,6 @@
 #define OPENDDS_DCPS_REACTORINTERCEPTOR_H
 
 #include "PoolAllocator.h"
-#include <queue>
 #include "ace/Reactor.h"
 #include "ace/Thread.h"
 #include "ace/Condition_Thread_Mutex.h"

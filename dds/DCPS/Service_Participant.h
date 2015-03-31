@@ -27,7 +27,6 @@
 
 #include "Recorder.h"
 #include "Replayer.h"
-#include <map>
 #include <memory>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

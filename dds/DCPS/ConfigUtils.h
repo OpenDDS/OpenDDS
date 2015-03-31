@@ -13,9 +13,6 @@
 #include "dcps_export.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#include <map>
-#include <list>
-
 #ifdef ACE_LYNXOS_MAJOR
 # include <strstream>
 # include <string>

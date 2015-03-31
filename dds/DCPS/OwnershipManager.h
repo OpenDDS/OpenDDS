@@ -15,9 +15,7 @@
 #include "Definitions.h"
 #include "GuidUtils.h"
 #include "dds/DdsDcpsInfrastructureC.h"
-#include <map>
 #include "PoolAllocator.h"
-#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

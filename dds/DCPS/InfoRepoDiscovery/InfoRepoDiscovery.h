@@ -23,7 +23,6 @@
 #include "ace/Thread_Mutex.h"
 
 #include <string>
-#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

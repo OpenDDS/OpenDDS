@@ -10,12 +10,13 @@
 #define OPENDDS_DCPS_NETWORKADDRESS_H
 
 #include "dds/DCPS/dcps_export.h"
+#include "dds/DCPS/PoolAllocator.h"
+
 #include "tao/Basic_Types.h"
+
 #include "ace/INET_Addr.h"
 #include "ace/CDR_Stream.h"
 #include "ace/SString.h"
-#include <vector>
-#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {

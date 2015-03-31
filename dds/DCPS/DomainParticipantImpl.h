@@ -32,10 +32,7 @@
 #include "ace/Recursive_Thread_Mutex.h"
 #include "ace/Condition_T.h"
 
-#include <map>
-#include <set>
 #include "dds/DCPS/PoolAllocator.h"
-#include <vector>
 
 #include "Recorder.h"
 #include "Replayer.h"

@@ -44,12 +44,8 @@
 #include "ace/Atomic_Op.h"
 #include "ace/Reactor.h"
 
-#include <vector>
-#include <list>
 #include "dds/DCPS/PoolAllocator.h"
-#include <map>
 #include <memory>
-#include <queue>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

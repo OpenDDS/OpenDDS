@@ -15,8 +15,8 @@
 #include "ShmemDataLink_rch.h"
 
 #include "dds/DCPS/transport/framework/TransportImpl.h"
+#include "dds/DCPS/PoolAllocator.h"
 
-#include <map>
 #include <string>
 
 namespace OpenDDS {

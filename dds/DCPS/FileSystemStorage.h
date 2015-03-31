@@ -24,8 +24,6 @@ class ACE_Dirent;
 ACE_END_VERSIONED_NAMESPACE_DECL
 
 #include <iosfwd>
-#include <vector>
-#include <map>
 #include "dds/DCPS/PoolAllocator.h"
 
 #include <iterator>

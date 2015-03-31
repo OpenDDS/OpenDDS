@@ -15,7 +15,6 @@
 #include "dds/DCPS/FilterEvaluator.h"
 
 #include "PoolAllocator.h"
-#include <vector>
 #include <utility>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

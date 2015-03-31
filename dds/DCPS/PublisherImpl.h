@@ -20,9 +20,6 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include <map>
-#include <list>
-
 namespace OpenDDS {
 namespace DCPS {
 

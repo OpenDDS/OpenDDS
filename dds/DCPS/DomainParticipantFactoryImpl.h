@@ -15,8 +15,6 @@
 #include "ace/Recursive_Thread_Mutex.h"
 #include "dds/DCPS/LocalObject.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include <map>
-#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

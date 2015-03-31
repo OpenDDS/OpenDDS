@@ -15,7 +15,6 @@
 #include "ace/Basic_Types.h"
 #include "ace/CDR_Base.h"
 #include "TransportDebug.h"
-#include <vector>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;

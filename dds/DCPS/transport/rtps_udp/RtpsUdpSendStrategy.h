@@ -17,8 +17,6 @@
 
 #include "ace/INET_Addr.h"
 
-#include <set>
-
 namespace OpenDDS {
 namespace DCPS {
 

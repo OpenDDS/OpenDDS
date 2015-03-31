@@ -21,7 +21,6 @@
 #include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"
 
-#include <set>
 #include <cstring>
 
 namespace OpenDDS {

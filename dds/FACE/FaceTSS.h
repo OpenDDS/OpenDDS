@@ -10,7 +10,6 @@
 
 #include "ace/Singleton.h"
 
-#include <map>
 #include <iostream>
 #include <string>
 

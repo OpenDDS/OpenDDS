@@ -15,7 +15,6 @@
 #include "RepoIdSet_rch.h"
 #include "dds/DCPS/Definitions.h"
 #include "ace/Synch.h"
-#include <map>
 #include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {

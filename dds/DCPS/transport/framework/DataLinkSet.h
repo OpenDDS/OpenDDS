@@ -11,14 +11,13 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject_T.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "DataLink_rch.h"
 #include "SendResponseListener.h"
 #include "TransportDefs.h"
 #include "TransportSendControlElement.h"
 
 #include "ace/Synch.h"
-
-#include <map>
 
 namespace OpenDDS {
 namespace DCPS {

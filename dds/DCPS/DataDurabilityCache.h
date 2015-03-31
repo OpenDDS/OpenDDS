@@ -20,6 +20,7 @@
 #include "dds/DCPS/DurabilityArray.h"
 #include "dds/DCPS/DurabilityQueue.h"
 #include "dds/DCPS/FileSystemStorage.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Hash_Map_With_Allocator_T.h"
 #include "ace/Array_Base.h"
@@ -31,7 +32,6 @@
 #include "ace/Functor_T.h"
 
 #include <string>
-#include <list>
 #include <memory>
 #include <utility>
 
