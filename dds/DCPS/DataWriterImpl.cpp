@@ -2509,7 +2509,8 @@ DataWriterImpl::pending_control()
 void
 DataWriterImpl::wait_control_pending()
 {
-  controlTracker.wait_messages_pending();
+  OPENDDS_STRING caller_string("DataWriterImpl::wait_control_pending");
+  controlTracker.wait_messages_pending(caller_string);
 }
 
 void
