@@ -770,9 +770,9 @@ namespace {
       throw std::runtime_error(std::string(MOD) + " cannot be applied to doubles");
     }
 
-    Value operator()(const long double&) const
+    Value operator()(const ACE_CDR::LongDouble&) const
     {
-      throw std::runtime_error(std::string(MOD) + " cannot be applied to long doubles");
+      throw std::runtime_error(std::string(MOD) + " cannot be applied to ACE_CDR::LongDoubles");
     }
 
     const Value& lhs_;
