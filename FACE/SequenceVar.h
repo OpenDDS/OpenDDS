@@ -5,90 +5,110 @@
 namespace OpenDDS {
 namespace FaceTypes {
 
+  /**
+   * @class SequenceVar
+   *
+   * @brief Parametrized implementation of var class for sequences.
+   *
+   */
   template <typename T>
   class SequenceVar {
   public:
     typedef typename T::subscript_type T_elem;
     typedef typename T::const_subscript_type T_const_elem;
 
-    SequenceVar ();
-    SequenceVar (T* p);
-    SequenceVar (const SequenceVar<T>& p);
+    SequenceVar()
+      : ptr_(0)
+    {
+    }
 
-    ~SequenceVar();
+    SequenceVar(T* p)
+      : ptr_(p)
+    {
+    }
 
-    SequenceVar& operator= (T* );
-    SequenceVar& operator= (const SequenceVar<T>& );
+    SequenceVar(const SequenceVar<T>& p)
+      : ptr_(p.ptr_ ? new T(*p.ptr_) : 0)
+    {
+    }
 
-    T* operator-> ();
-    const T* operator-> () const;
+    ~SequenceVar()
+    {
+      delete ptr_;
+    }
 
-    typedef const T&   _in_type;
-    typedef       T&   _inout_type;
-    typedef       T*&  _out_type;
-    typedef       T*   _retn_type;
 
-    // in, inout, out, _retn
-    _in_type      in () const;
-    _inout_type   inout ();
-    _out_type     out ();
-    _retn_type    _retn ();
+    SequenceVar& operator=(T* p);
+    SequenceVar& operator=(const SequenceVar<T>& p);
 
-    _retn_type    ptr () const;
+    T* operator->()
+    {
+      return ptr_;
+    }
 
-    T_elem operator[] (FACE::UnsignedLong index);
-    T_const_elem operator[] (FACE::UnsignedLong index) const;
+    const T* operator->() const
+    {
+      return ptr_;
+    }
 
-  protected:
+
+    typedef const T& _in_type;
+    typedef T& _inout_type;
+    typedef T*& _out_type;
+    typedef T* _retn_type;
+
+    _in_type in() const
+    {
+      return *ptr_;
+    }
+
+    _inout_type inout()
+    {
+      return *ptr_;
+    }
+
+    _out_type out();
+    _retn_type _retn();
+
+    _retn_type ptr() const
+    {
+      return ptr_;
+    }
+
+    T_elem operator[](FACE::UnsignedLong index)
+    {
+      return (*ptr_)[index];
+    }
+
+    T_const_elem operator[](FACE::UnsignedLong index) const
+    {
+      return (*ptr_)[index];
+    }
+
   private:
-    T * ptr_;
+    T* ptr_;
   };
-
-  template <typename T>
-  inline SequenceVar<T>::SequenceVar ()
-    : ptr_(0)
-  {
-  }
-
-  template <typename T>
-  inline SequenceVar<T>::SequenceVar (T* p)
-    : ptr_(p)
-  {
-  }
-
-  template <typename T>
-  inline SequenceVar<T>::SequenceVar (const SequenceVar<T>& p)
-    : ptr_ (p.ptr_ ? new T (*p.ptr_) : 0)
-  {
-  }
-
-  template<typename T>
-  inline
-  SequenceVar<T>::~SequenceVar ()
-  {
-    delete this->ptr_;
-  }
 
   template<typename T>
   inline
   SequenceVar<T>&
-  SequenceVar<T>::operator= (T* p)
+  SequenceVar<T>::operator=(T* p)
   {
-    delete this->ptr_;
-    this->ptr_ = p;
+    delete ptr_;
+    ptr_ = p;
     return *this;
   }
 
   template<typename T>
   inline
   SequenceVar<T>&
-  SequenceVar<T>::operator= (
+  SequenceVar<T>::operator=(
       const SequenceVar<T>& p)
   {
     SequenceVar<T> tmp(p);
 
-    T* old_ptr = this->ptr_;
-    this->ptr_ = tmp.ptr_;
+    T* old_ptr = ptr_;
+    ptr_ = tmp.ptr_;
     tmp.ptr_ = old_ptr;
 
     return *this;
@@ -96,78 +116,22 @@ namespace FaceTypes {
 
   template<typename T>
   inline
-  const T*
-  SequenceVar<T>::operator-> () const
-  {
-    return this->ptr_;
-  }
-
-  template<typename T>
-  inline
-  T*
-  SequenceVar<T>::operator-> ()
-  {
-    return this->ptr_;
-  }
-
-  template<typename T>
-  inline
-  const T&
-  SequenceVar<T>::in () const
-  {
-    return *this->ptr_;
-  }
-
-  template<typename T>
-  inline
-  T&
-  SequenceVar<T>::inout ()
-  {
-    return *this->ptr_;
-  }
-
-  template<typename T>
-  inline
   T*&
-  SequenceVar<T>::out ()
+  SequenceVar<T>::out()
   {
-    delete this->ptr_;
-    this->ptr_ = 0;
-    return this->ptr_;
+    delete ptr_;
+    ptr_ = 0;
+    return ptr_;
   }
 
   template<typename T>
   inline
   T*
-  SequenceVar<T>::_retn ()
+  SequenceVar<T>::_retn()
   {
-    T * tmp = this->ptr_;
-    this->ptr_ = 0;
+    T* tmp = ptr_;
+    ptr_ = 0;
     return tmp;
-  }
-
-  template<typename T>
-  inline
-  T*
-  SequenceVar<T>::ptr () const
-  {
-    return this->ptr_;
-  }
-
-  template<typename T>
-  inline
-  typename SequenceVar<T>::T_elem
-  SequenceVar<T>::operator[] (FACE::UnsignedLong index)
-  {
-    return this->ptr_->operator[] (index);
-  }
-
-  template<typename T>
-  inline
-  typename SequenceVar<T>::T_const_elem
-  SequenceVar<T>::operator[] (FACE::UnsignedLong index) const
-  {
-    return this->ptr_->operator[] (index);
   }
 }
 }
