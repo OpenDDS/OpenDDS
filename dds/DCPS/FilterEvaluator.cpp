@@ -234,24 +234,6 @@ namespace {
     int param_;
   };
 
-  FilterEvaluator::Operand* createOperand(AstNode* node)
-  {
-    if (node->TypeMatches<FieldName>()) {
-      return new FieldLookup(node);
-    } else if (node->TypeMatches<IntVal>()) {
-      return new LiteralInt(node);
-    } else if (node->TypeMatches<CharVal>()) {
-      return new LiteralChar(node);
-    } else if (node->TypeMatches<FloatVal>()) {
-      return new LiteralFloat(node);
-    } else if (node->TypeMatches<StrVal>()) {
-      return new LiteralString(node);
-    } else if (node->TypeMatches<ParamVal>()) {
-      return new Parameter(node);
-    }
-    return 0;
-  }
-
   class Comparison : public FilterEvaluator::EvalNode {
   public:
     enum Operator {OPER_EQ, OPER_LT, OPER_GT, OPER_LTEQ, OPER_GTEQ, OPER_NEQ,
@@ -377,6 +359,7 @@ namespace {
         break;
       }
       assert(0);
+      return Value(0);
     }
 
   private:
@@ -440,7 +423,7 @@ static size_t arity(const FilterEvaluator::AstNodeWrapper& node)
 static FilterEvaluator::AstNodeWrapper child(const FilterEvaluator::AstNodeWrapper& node, size_t idx)
 {
   AstNode* iter = 0;
-  for (iter = node->GetFirstChild(); idx != 0; iter = iter->GetSibling(), --idx) ;;
+  for (iter = node->GetFirstChild(); idx != 0; iter = iter->GetSibling(), --idx) {}
   return iter;
 }
 
@@ -477,6 +460,7 @@ FilterEvaluator::walkAst(const FilterEvaluator::AstNodeWrapper& node)
   }
 
   assert(0);
+  return 0;
 }
 
 FilterEvaluator::Operand*
@@ -507,6 +491,7 @@ FilterEvaluator::walkOperand(const FilterEvaluator::AstNodeWrapper& node)
     }
   }
   assert(0);
+  return 0;
 }
 
 bool
