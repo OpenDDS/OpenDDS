@@ -10,12 +10,16 @@
 #define GUIDUTILS_H
 
 #include "dds/DdsDcpsGuidC.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "dcps_export.h"
 
 #include "tao/Basic_Types.h"
 
+#ifndef OPENDDS_SAFETY_PROFILE
 #include <iosfwd>
+#endif
+
 #include <cstring>
 
 namespace OpenDDS {
@@ -153,6 +157,10 @@ struct EntityIdConverter {
   EntityId_t entityId;
 };
 
+OpenDDS_Dcps_Export OPENDDS_STRING
+to_string(const GUID_t& guid);
+
+#ifndef OPENDDS_SAFETY_PROFILE
 // Serialize to ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const GUID_t& rhs);
@@ -160,7 +168,7 @@ operator<<(std::ostream& os, const GUID_t& rhs);
 // Deserialize from ASCII Hex string: "xxxx.xxxx.xxxx.xxxx"
 OpenDDS_Dcps_Export std::istream&
 operator>>(std::istream& is, GUID_t& rhs);
-
+#endif
 } // namespace DCPS
 } // namespace OpenDDS
 

@@ -354,7 +354,7 @@ operator<<( std::ostream& str, const Test::Subscriber& value)
   str << " --- statistical summary ---" << std::endl;
   for( unsigned long index = 0; index < statistics.length(); ++index) {
     OpenDDS::DCPS::GuidConverter converter(statistics[ index].publication);
-    str << "  Writer[ " << converter << "]" << std::endl;
+    str << "  Writer[ " << OPENDDS_STRING(converter) << "]" << std::endl;
     str << "     samples: " << statistics[ index].n << std::endl;
     str << "        mean: " << statistics[ index].mean << std::endl;
     str << "     minimum: " << statistics[ index].minimum << std::endl;
@@ -389,7 +389,7 @@ Subscriber::rawData( std::ostream& str) const
        current != readerImpl->raw_latency_statistics().end();
        ++current, ++index) {
     OpenDDS::DCPS::GuidConverter converter(current->first);
-    str << std::endl << "  Writer[ " << converter << "]" << std::endl;
+    str << std::endl << "  Writer[ " << OPENDDS_STRING(converter) << "]" << std::endl;
     current->second.raw_data( str);
   }
   return str;

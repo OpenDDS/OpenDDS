@@ -1469,14 +1469,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   if (get_deleted()) return;
 
   if (DCPS_debug_level > 9) {
-    STRINGSTREAM buffer;
-    buffer << sample.header_ << std::ends;
     GuidConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
         ACE_TEXT("%C received sample: %C.\n"),
         OPENDDS_STRING(converter).c_str(),
-        buffer.str() STRINGSTREAM_CSTR));
+        to_string(sample.header_).c_str()));
   }
 
   switch (sample.header_.message_id_) {
@@ -2680,17 +2678,18 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
     const char* separator = "";
-    STRINGSTREAM buffer;
+    OPENDDS_STRING guids;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer << separator << GuidConverter(ids[i]);
+      guids += separator;
+      guids += OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
     }
 
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::lookup_instance_handles: ")
         ACE_TEXT("searching for handles for writer Ids: %C.\n"),
-        buffer.str() STRINGSTREAM_CSTR));
+        guids.c_str()));
   }
 
   CORBA::ULong const num_wrts = ids.length();
@@ -2890,26 +2889,33 @@ void DataReaderImpl::notify_liveliness_change()
   notify_status_condition();
 
   if (DCPS_debug_level > 9) {
-    STRINGSTREAM buffer;
-    buffer << "subscription " << GuidConverter(subscription_id_);
-    buffer << ", listener at: 0x" << std::hex << this->listener_.in ();
+    OPENDDS_STRING output_str;
+    output_str + "subscription ";
+    output_str += OPENDDS_STRING(GuidConverter(subscription_id_));
+    int len = sprintf(NULL, "%p", this->listener_.in ());
+    char buf[len];
+    sprintf(buf, "%p", this->listener_.in ());
+    output_str + ", listener at: 0x";
+    output_str += OPENDDS_STRING(buf);
 
     for (WriterMapType::iterator current = this->writers_.begin();
         current != this->writers_.end();
         ++current) {
       RepoId id = current->first;
-      buffer << std::endl << "\tNOTIFY: writer[ " << GuidConverter(id) << "] == ";
-      buffer << current->second->get_state_str();
+      output_str + "\n\tNOTIFY: writer[ ";
+      output_str += OPENDDS_STRING(GuidConverter(id));
+      output_str + "] == ";
+      output_str += current->second->get_state_str();
     }
 
-    buffer << std::endl;
+    output_str + "\n";
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
         ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
         ACE_TEXT("\tNOTIFY: %C\n"),
         listener.in (),
         listener_mask_,
-        buffer.str() STRINGSTREAM_CSTR));
+        output_str.c_str()));
   }
 }
 

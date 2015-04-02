@@ -807,14 +807,12 @@ DataLink::data_received_i(ReceivedDataSample& sample,
 
 #ifndef ACE_LYNXOS_MAJOR
   if (Transport_debug_level > 9) {
-    std::stringstream buffer;
-    buffer << sample.header_;
     const GuidConverter converter(publication_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
                ACE_TEXT("from publication %C received sample: %C.\n"),
                OPENDDS_STRING(converter).c_str(),
-               buffer.str().c_str()));
+               to_string(sample.header_).c_str()));
   }
 #endif
 

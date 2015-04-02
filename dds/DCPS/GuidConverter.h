@@ -9,8 +9,6 @@
 #ifndef DCPS_GUIDCONVERTER_H
 #define DCPS_GUIDCONVERTER_H
 
-#include <iostream>
-
 #include "tao/Basic_Types.h"
 
 #include "dds/DdsDcpsGuidC.h"
@@ -19,6 +17,7 @@
 
 #include "dcps_export.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
@@ -104,13 +103,15 @@ struct OpenDDS_Dcps_Export LogGuid {
   OPENDDS_STRING conv_;
 };
 
+#ifndef OPENDDS_SAFETY_PROFILE
 OpenDDS_Dcps_Export std::ostream&
 operator<<(std::ostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
 
 #ifdef DDS_HAS_WCHAR
 OpenDDS_Dcps_Export std::wostream&
 operator<<(std::wostream& os, const OpenDDS::DCPS::GuidConverter& rhs);
-#endif
+#endif //DDS_HAS_WCHAR
+#endif //OPENDDS_SAFETY_PROFILE
 
 } // namespace
 } // namespace

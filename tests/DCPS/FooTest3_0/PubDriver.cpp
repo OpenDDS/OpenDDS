@@ -353,7 +353,8 @@ PubDriver::run()
 {
   OpenDDS::DCPS::PublicationId pub_id = datawriter_servant_->get_publication_id ();
   std::stringstream buffer;
-  buffer << pub_id;
+
+  buffer << to_string(pub_id);
 
   // Write the publication id to a file.
   ACE_DEBUG ((LM_DEBUG,

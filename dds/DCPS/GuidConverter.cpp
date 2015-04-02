@@ -13,14 +13,6 @@
 
 #include "ace/ACE.h"
 
-#include <iomanip>
-
-#ifdef ACE_LYNXOS_MAJOR
-#include <strstream>
-#else
-#include <sstream>
-#endif
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -100,20 +92,15 @@ GuidConverter::entityKind() const
 
 GuidConverter::operator OPENDDS_STRING() const
 {
-#ifdef ACE_LYNXOS_MAJOR
-  std::ostrstream os;
-#else
-  std::ostringstream os;
-#endif
 
-  os << guid_ << "(" << std::hex << checksum() << ")";
+  OPENDDS_STRING ret(to_string(guid_));
+  ret += "(";
+  char buf[sizeof(unsigned long)];
+  sprintf(buf, "%01lx", (unsigned long) checksum());
+  ret += OPENDDS_STRING(buf);
+  ret += ")";
 
-  // TODO remove streams
-#ifdef ACE_LYNXOS_MAJOR
-  return OPENDDS_STRING(os.str());
-#else
-  return OPENDDS_STRING(os.str().c_str());
-#endif
+  return ret;
 }
 
 #ifdef DDS_HAS_WCHAR
@@ -127,6 +114,8 @@ GuidConverter::operator std::wstring() const
 }
 #endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
+
 std::ostream&
 operator<<(std::ostream& os, const GuidConverter& rhs)
 {
@@ -139,7 +128,8 @@ operator<<(std::wostream& os, const GuidConverter& rhs)
 {
   return os << std::wstring(rhs);
 }
-#endif
+#endif //DDS_HAS_WCHAR
+#endif //OPENDDS_SAFETY_PROFILE
 
 OPENDDS_STRING
 GuidConverter::uniqueId() const

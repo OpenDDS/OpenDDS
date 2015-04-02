@@ -245,10 +245,15 @@ private:
   size_t marshaled_size_;
 };
 
+OPENDDS_STRING to_string(const MessageId value);
+OPENDDS_STRING to_string(const SubMessageId value);
+OPENDDS_STRING to_string(const DataSampleHeader& value);
+
 /// Marshal/Insertion into a buffer.
 OpenDDS_Dcps_Export
 bool operator<<(ACE_Message_Block&, const DataSampleHeader& value);
 
+#ifndef OPENDDS_SAFETY_PROFILE
 /// Message Id enumeration insertion onto an ostream.
 OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const MessageId value);
@@ -260,6 +265,7 @@ std::ostream& operator<<(std::ostream& os, const SubMessageId rhs);
 /// Message header insertion onto an ostream.
 OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value);
+#endif //OPENDDS_SAFETY_PROFILE
 
 } // namespace DCPS
 } // namespace OpenDDS

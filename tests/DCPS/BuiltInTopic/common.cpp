@@ -54,9 +54,19 @@ int ignore ()
       ::OpenDDS::DCPS::RepoId ignore_id = participant_servant->get_id ();
 
       std::stringstream participantBuffer;
+#ifndef OPENDDS_SAFETY_PROFILE
       participantBuffer << part_id;
+#else
+      participantBuffer << ::OpenDDS::DCPS::to_string(part_id);
+#endif //OPENDDS_SAFETY_PROFILE
+
       std::stringstream ignoreBuffer;
+#ifndef OPENDDS_SAFETY_PROFILE
       ignoreBuffer << ignore_id;
+#else
+      ignoreBuffer << ::OpenDDS::DCPS::to_string(ignore_id);
+#endif //OPENDDS_SAFETY_PROFILE
+
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) IGNORE_PARTICIPANT,  participant %C ignore participant %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
@@ -88,9 +98,19 @@ int ignore ()
       ::OpenDDS::DCPS::RepoId ignore_id = topic_servant->get_id ();
 
       std::stringstream participantBuffer;
+#ifndef OPENDDS_SAFETY_PROFILE
       participantBuffer << part_id;
+#else
+      participantBuffer << ::OpenDDS::DCPS::to_string(part_id);
+#endif //OPENDDS_SAFETY_PROFILE
+
       std::stringstream ignoreBuffer;
+#ifndef OPENDDS_SAFETY_PROFILE
       ignoreBuffer << ignore_id;
+#else
+      ignoreBuffer << ::OpenDDS::DCPS::to_string(ignore_id);
+#endif //OPENDDS_SAFETY_PROFILE
+
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) IGNORE_TOPIC, participant %C ignore topic %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
@@ -120,9 +140,19 @@ int ignore ()
       ::OpenDDS::DCPS::RepoId ignore_id = datawriter_servant->get_publication_id ();
 
       std::stringstream participantBuffer;
+#ifndef OPENDDS_SAFETY_PROFILE
       participantBuffer << part_id;
+#else
+      participantBuffer << ::OpenDDS::DCPS::to_string(part_id);
+#endif //OPENDDS_SAFETY_PROFILE
+
       std::stringstream ignoreBuffer;
+#ifndef OPENDDS_SAFETY_PROFILE
       ignoreBuffer << ignore_id;
+#else
+      ignoreBuffer << ::OpenDDS::DCPS::to_string(ignore_id);
+#endif //OPENDDS_SAFETY_PROFILE
+
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) IGNORE_PUBLICATION, participant %C ignore publication %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));
@@ -152,9 +182,19 @@ int ignore ()
       ::OpenDDS::DCPS::RepoId ignore_id = datareader_servant->get_subscription_id ();
 
       std::stringstream participantBuffer;
+#ifndef OPENDDS_SAFETY_PROFILE
       participantBuffer << part_id;
+#else
+      participantBuffer << ::OpenDDS::DCPS::to_string(part_id);
+#endif //OPENDDS_SAFETY_PROFILE
+
       std::stringstream ignoreBuffer;
+#ifndef OPENDDS_SAFETY_PROFILE
       ignoreBuffer << ignore_id;
+#else
+      ignoreBuffer << ::OpenDDS::DCPS::to_string(ignore_id);
+#endif //OPENDDS_SAFETY_PROFILE
+
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) IGNORE_SUBSCRIPTION, participant %C ignore subscription %C .\n"),
                  participantBuffer.str().c_str(), ignoreBuffer.str().c_str()));

@@ -458,6 +458,141 @@ DataSampleHeader::join(const DataSampleHeader& first,
   return true;
 }
 
+OPENDDS_STRING to_string(const MessageId value)
+{
+  switch (value) {
+  case SAMPLE_DATA:
+	return "SAMPLE_DATA";
+  case DATAWRITER_LIVELINESS:
+	return "DATAWRITER_LIVELINESS";
+  case INSTANCE_REGISTRATION:
+	return "INSTANCE_REGISTRATION";
+  case UNREGISTER_INSTANCE:
+	return "UNREGISTER_INSTANCE";
+  case DISPOSE_INSTANCE:
+	return "DISPOSE_INSTANCE";
+  case GRACEFUL_DISCONNECT:
+	return "GRACEFUL_DISCONNECT";
+  case REQUEST_ACK:
+	return "REQUEST_ACK";
+  case SAMPLE_ACK:
+	return "SAMPLE_ACK";
+  case END_COHERENT_CHANGES:
+	return "END_COHERENT_CHANGES";
+  case TRANSPORT_CONTROL:
+	return "TRANSPORT_CONTROL";
+  case DISPOSE_UNREGISTER_INSTANCE:
+	return "DISPOSE_UNREGISTER_INSTANCE";
+  case END_HISTORIC_SAMPLES:
+	return "END_HISTORIC_SAMPLES";
+  default:
+	return "Unknown";
+  }
+}
+
+OPENDDS_STRING to_string(const SubMessageId value)
+{
+  switch (value) {
+  case SUBMESSAGE_NONE:
+	return "SUBMESSAGE_NONE";
+  case MULTICAST_SYN:
+	return "MULTICAST_SYN";
+  case MULTICAST_SYNACK:
+	return "MULTICAST_SYNACK";
+  case MULTICAST_NAK:
+	return "MULTICAST_NAK";
+  case MULTICAST_NAKACK:
+	return "MULTICAST_NAKACK";
+  default:
+	return "Unknown";
+  }
+}
+
+OPENDDS_STRING to_string(const DataSampleHeader& value)
+{
+  OPENDDS_STRING ret;
+  if (value.submessage_id_ != SUBMESSAGE_NONE) {
+    ret + to_string(SubMessageId(value.submessage_id_));
+    char buf[sizeof(unsigned)];
+    sprintf(buf, "%02x", unsigned(value.submessage_id_));
+    ret + " 0x";
+    ret + OPENDDS_STRING(buf);
+    ret + "), ";
+  } else {
+    ret + to_string(MessageId(value.message_id_));
+    char buf[sizeof(unsigned)];
+    sprintf(buf, "%02x", unsigned(value.message_id_));
+    ret + " (0x";
+    ret + OPENDDS_STRING(buf);
+    ret + "), ";
+  }
+
+  ret + "Length: ";
+  ret += value.message_length_;
+  ret + ", ";
+
+  ret + "Byte order: " + (value.byte_order_ == 1 ? "Little" : "Big")
+      + " Endian (0x";
+  char buf[sizeof(unsigned)];
+  sprintf(buf, "%02X", unsigned(value.byte_order_));
+  ret + OPENDDS_STRING(buf) + ")";
+
+  if (value.message_id_ != TRANSPORT_CONTROL) {
+    ret + ", ";
+
+    if (value.coherent_change_ == 1) ret + "Coherent, ";
+    if (value.historic_sample_ == 1) ret + "Historic, ";
+    if (value.lifespan_duration_ == 1) ret + "Lifespan, ";
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+    if (value.group_coherent_ == 1) ret + "Group-Coherent, ";
+#endif
+    if (value.content_filter_ == 1) ret + "Content-Filtered, ";
+    if (value.sequence_repair_ == 1) ret + "Sequence Repair, ";
+    if (value.more_fragments_ == 1) ret + "More Fragments, ";
+    if (value.cdr_encapsulation_ == 1) ret + "CDR Encapsulation, ";
+    if (value.key_fields_only_ == 1) ret + "Key Fields Only, ";
+
+    ret + "Sequence: 0x";
+    char seq_buf[sizeof(unsigned)];
+    sprintf(seq_buf, "%02X", unsigned(value.sequence_.getValue()));
+    ret + OPENDDS_STRING(seq_buf) + ", ";
+
+    ret + "Timestamp: ";
+    ret += value.source_timestamp_sec_;
+    ret + ".";
+    ret += value.source_timestamp_nanosec_;
+    ret + ", ";
+
+    if (value.lifespan_duration_) {
+      ret + "Lifespan: ";
+      ret += value.lifespan_duration_sec_;
+      ret + ".";
+      ret += value.lifespan_duration_nanosec_;
+      ret + ", ";
+    }
+
+    ret + "Publication: " + OPENDDS_STRING(GuidConverter(value.publication_id_));
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+    if (value.group_coherent_) {
+      ret + ", Publisher: " + OPENDDS_STRING(GuidConverter(value.publisher_id_));
+    }
+#endif
+
+    if (value.content_filter_) {
+      const CORBA::ULong len = value.content_filter_entries_.length();
+      ret + ", Content-Filter Entries (";
+      ret += len;
+      ret + "): [";
+      for (CORBA::ULong i(0); i < len; ++i) {
+        ret + OPENDDS_STRING(GuidConverter(value.content_filter_entries_[i])) + ' ';
+      }
+      ret + ']';
+    }
+  }
+  return ret;
+}
+
+#ifndef OPENDDS_SAFETY_PROFILE
 /// Message Id enumeration insertion onto an ostream.
 std::ostream& operator<<(std::ostream& str, const MessageId value)
 {
@@ -591,6 +726,8 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 
   return str;
 }
+#endif //OPENDDS_SAFETY_PROFILE
+
 
 bool
 DataSampleHeader::into_received_data_sample(ReceivedDataSample& rds)

@@ -140,7 +140,7 @@ Test::DataReaderListener::on_data_available (DDS::DataReader_ptr reader)
       readerex->get_latency_stats( statistics);
       std::stringstream buffer;
       for( unsigned long index = 0; index < statistics.length(); ++index) {
-        buffer << "Writer[ " << statistics[ index].publication << "] - ";
+        buffer << "Writer[ " << to_string(statistics[ index].publication) << "] - ";
         buffer << "samples==" << std::dec << statistics[ index].n;
         buffer << ", mean==" << statistics[ index].mean;
         buffer << ", minimum==" << statistics[ index].minimum;
