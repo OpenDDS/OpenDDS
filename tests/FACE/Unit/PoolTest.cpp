@@ -531,6 +531,113 @@ public:
     validate_pool(pool, 0);
   }
 
+  // Join two adjacent blocks, without moving in free list
+  void test_pool_free_join_without_moving() {
+    Pool pool(1024*20, 64);
+    char* ptr0 = pool.pool_alloc(1024);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr1 = pool.pool_alloc(512);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr2 = pool.pool_alloc(256);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr3 = pool.pool_alloc(128);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr4 = pool.pool_alloc(64);
+                       // no space here, 4+5 adjacent
+    char* ptr5 = pool.pool_alloc(32);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr6 = pool.pool_alloc(16);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr7 = pool.pool_alloc(8);
+    validate_pool(pool, 1024+512+256+128+64+32+16+8 + 8*6);
+    // Now create free list
+    pool.pool_free(ptr0);
+    TEST_CHECK(ptr1);
+    pool.pool_free(ptr2);
+    TEST_CHECK(ptr3);
+    pool.pool_free(ptr4);
+    TEST_CHECK(ptr5);
+    pool.pool_free(ptr6);
+    TEST_CHECK(ptr7);
+    // Free list sizes are 1024, 256, 64, 16
+    validate_pool(pool, 0+512+0+128+0+32+0+8 + 8*6);
+    // free 5, join with adjacent 4, making size (64+32)
+    pool.pool_free(ptr5);
+    validate_pool(pool, 0+512+0+128+0+0+0+8 + 8*6);
+  }
+
+  // Split free block, without moving in free list
+  void test_pool_alloc_split_without_moving() {
+    Pool pool(1024*20, 64);
+    char* ptr0 = pool.pool_alloc(1024);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr1 = pool.pool_alloc(512);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr2 = pool.pool_alloc(256);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr3 = pool.pool_alloc(128);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr4 = pool.pool_alloc(64);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr5 = pool.pool_alloc(32);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr6 = pool.pool_alloc(16);
+    pool.pool_alloc(8); // add alloc in between
+    char* ptr7 = pool.pool_alloc(8);
+    validate_pool(pool, 1024+512+256+128+64+32+16+8 + 8*7);
+    pool.pool_free(ptr0);
+    TEST_CHECK(ptr1);
+    pool.pool_free(ptr2);
+    TEST_CHECK(ptr3);
+    pool.pool_free(ptr4);
+    TEST_CHECK(ptr5);
+    pool.pool_free(ptr6);
+    TEST_CHECK(ptr7);
+    // Free list sizes are 1024, 256, 64, 16
+    validate_pool(pool, 0+512+0+128+0+32+0+8 + 8*7);
+    // allocate from free size 256
+    pool.pool_alloc(80);
+    validate_pool(pool, 0+512+80+128+0+32+0+8 + 8*7);
+  }
+
+  // Test shifting by allocating from earlier in the free list
+  // Caught by DCPS Reliability test
+  void test_pool_alloc_shift_free() {
+    Pool pool(1024, 64);
+    pool.pool_alloc(48);
+    pool.pool_alloc(40);
+    pool.pool_alloc(48);
+    char* p1 = pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p2 = pool.pool_alloc(24);
+    pool.pool_alloc(48);
+    pool.pool_alloc(40);
+    pool.pool_alloc(48);
+    pool.pool_alloc(40);
+    validate_pool(pool, 48+40+48+8+8+24+48+40+48+40);
+    pool.pool_free(p1);
+    pool.pool_free(p2);
+    validate_pool(pool, 48+40+48+8+48+40+48+40);
+    // Allocating 40 (from head) corrupts list
+    pool.pool_alloc(40);
+    validate_pool(pool, 40+48+40+48+8+48+40+48+40);
+  }
+
+  void test_pool_alloc_shift_first_free() {
+    Pool pool(1024, 64);
+    pool.pool_alloc(256);
+    pool.pool_alloc(256);
+    char* p1 = pool.pool_alloc(256);
+    pool.pool_alloc(32);
+    pool.pool_alloc(32);
+    pool.pool_alloc(32);
+    validate_pool(pool, 256*3 + 32*3);
+    pool.pool_free(p1); // Largest free buffer, first now 160
+    validate_pool(pool, 256*2 + 32*3);
+    char* p2 = pool.pool_alloc(96);
+    validate_pool(pool, 256*2 + 96 + 32*3);
+  }
+
   // Allocates after running out of memory should return null
   void test_alloc_null_once_out_of_memory() {
     Pool pool(1024, 64);
@@ -724,10 +831,16 @@ int main(int, const char** )
   test.test_pool_free_in_reverse_order();
   test.test_pool_free_out_of_order();
 
+  test.test_pool_free_join_without_moving();
+  test.test_pool_alloc_split_without_moving();
+  test.test_pool_alloc_shift_free();
+  test.test_pool_alloc_shift_first_free();
+
   test.test_alloc_null_once_out_of_memory();
   test.test_alloc_too_large_returns_null();
   test.test_alloc_null_once_out_of_allocs();
   test.test_free_null_should_ignore();
+
 
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
 

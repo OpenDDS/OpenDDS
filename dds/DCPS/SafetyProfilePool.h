@@ -43,7 +43,7 @@ class OpenDDS_Dcps_Export Pool {
 public:
   Pool(size_t size, size_t max_allocs);
   ~Pool();
-  bool include(void* ptr) { return (pool_ptr_ <= ptr) && (ptr < pool_end_); }
+  bool includes(void* ptr) { return (pool_ptr_ <= ptr) && (ptr < pool_end_); }
   char* pool_alloc(size_t size);
   void pool_free(void* ptr);
 
@@ -93,9 +93,11 @@ private:
                                     unsigned int join_count,
                                     PoolAllocation* new_or_grown,
                                     PoolAllocation* to_remove);
+
+  void log_allocs();
 };
 
-/// Memory pool for use when the Safety Profeile is enabled.
+/// Memory pool for use when the Safety Profile is enabled.
 ///
 /// Saftey Profile disallows std::free() and the delete operators
 /// See PoolAllocator.h for a class that allows STL containers to use an
@@ -104,23 +106,14 @@ private:
 /// This class currently allocates from a single array and doesn't attempt to
 /// reuse a free()'d block.  That's expected to change as Safety Profile
 /// work is completed and becomes ready for production use.
-class SafetyProfilePool : public ACE_Allocator
+class OpenDDS_Dcps_Export SafetyProfilePool : public ACE_Allocator
 {
   friend class SafetyProfilePoolTest;
 public:
-  SafetyProfilePool()
-  : init_pool_(new Pool(1024, 128))
-  , main_pool_(0)
-  {
-  }
+  SafetyProfilePool();
+  ~SafetyProfilePool();
 
-  ~SafetyProfilePool()
-  {
-#ifndef OPENDDS_SAFETY_PROFILE
-    delete init_pool_;
-    delete main_pool_;
-#endif
-  }
+  void configure_pool(size_t size, size_t allocs);
 
   void* malloc(std::size_t size)
   {
@@ -132,9 +125,14 @@ public:
     }
   }
 
-  void free(void*)
+  void free(void* ptr)
   {
     ACE_GUARD(ACE_Thread_Mutex, lock, lock_);
+    if (main_pool_ && main_pool_->includes(ptr)) {
+      return main_pool_->pool_free(ptr);
+    } else {
+      return init_pool_->pool_free(ptr);
+    }
   }
 
   void* calloc(std::size_t, char = '\0') { return 0; }
@@ -153,9 +151,7 @@ public:
   void dump() const {}
 
   /// Return a singleton instance of this class.
-  static SafetyProfilePool* instance() {
-    return ACE_Singleton<SafetyProfilePool, ACE_SYNCH_MUTEX>::instance();
-  }
+  static SafetyProfilePool* instance();
 
 private:
   SafetyProfilePool(const SafetyProfilePool&);
@@ -164,7 +160,6 @@ private:
   Pool* init_pool_;
   Pool* main_pool_;
   ACE_Thread_Mutex lock_;
-  //ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> idx_;
 };
 
 }}

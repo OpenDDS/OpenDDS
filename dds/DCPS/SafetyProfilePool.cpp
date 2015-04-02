@@ -107,7 +107,11 @@ Pool::pool_alloc(size_t size)
     }
 
     block = allocate_block(block_to_alloc, prev_block, alloc_size);
+  } else {
+    printf("first free block not large enough for %zu\n", alloc_size);
   }
+
+  if (debug_log_) log_allocs();
 
   return block;
 }
@@ -117,10 +121,13 @@ Pool::pool_free(void* ptr)
 {
   PoolAllocation* alloc = find_alloc(ptr);
   if (alloc) {
+    if (debug_log_) printf("freeing block of %zu at %zu\n",
+                           alloc->size(), alloc - allocs_);
     alloc->free_ = true;
     // Check next and prev for combining
     join_free_allocs(alloc);
   }
+  if (debug_log_) log_allocs();
 }
 
 char*
@@ -130,6 +137,7 @@ Pool::allocate_block(PoolAllocation* from_block,
 {
   char* buffer = 0;
 
+  if (debug_log_) printf("allocating %zu\n", alloc_size);
   if (from_block->size() == alloc_size) {
     // Going to use all of free block, keep size same
     buffer = from_block->ptr();
@@ -142,6 +150,8 @@ Pool::allocate_block(PoolAllocation* from_block,
     }
     from_block->next_free_ = NULL;
     from_block->free_ = false;
+    if (debug_log_) printf("allocating %zu from block %zu\n",
+                           alloc_size, from_block - allocs_);
   } else if (from_block->size() > alloc_size) {
     unsigned int index = from_block - allocs_;
     // Second clause should always be true,
@@ -151,6 +161,8 @@ Pool::allocate_block(PoolAllocation* from_block,
       // Slide alocations down to maintain buffer order
       PoolAllocation* target = make_room_for_allocation(index);
 
+      if (debug_log_) printf("allocating %zu from inserted block %zu\n",
+                           alloc_size, target - allocs_);
       // Allocate a buffer using taegetand put remainder in from_block
       buffer = static_cast<char*>(from_block->allocate(alloc_size, target));
       ++allocs_in_use_;
@@ -161,11 +173,14 @@ Pool::allocate_block(PoolAllocation* from_block,
       }
 
       // If no next block, the list is in the right order still
+    } else {
+      printf("out of allocations current %zu\n", allocs_in_use_);
     }
 
     // Going to split free block, need next one available
   } else {
     // Should not happen
+    printf("from block not large enough for %zu\n", alloc_size);
   }
 
   return buffer;
@@ -181,16 +196,24 @@ Pool::make_room_for_allocation(unsigned int index)
   if (index < allocs_in_use_ - 1) {
     // After the move, free list pointers will be off by one PoolAllocation.
     // Fix that now
-    for (PoolAllocation* iter = first_free_;
-         iter != NULL;
-         iter = iter->next_free_)
+    for (PoolAllocation* iter = first_free_; iter != NULL; )
+         
     {
+      // If impacted by move
       if (iter->next_free_ > src) {
-        // Impacted by move
+        PoolAllocation* next = iter->next_free_; // Save value before change
         iter->next_free_ = iter->next_free_ + 1;
+        iter = next;
+      } else {
+        iter = iter->next_free_; // Save value before change
       }
     }
 
+    // Move first_free also
+    if (first_free_ > src) {
+      first_free_ += 1;
+    }
+    
     // Move the memory
     memmove(dest, src, sizeof(PoolAllocation) * (allocs_in_use_ - index));
   }
@@ -239,7 +262,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
   PoolAllocation* iter = first_free_;
   bool inserted = false;
 
-  //if (debug_log_) printf("Adjusting free list, count %d, new/grown %zx, to_remove %zx\n", join_count, (unsigned long)new_or_grown, (unsigned long)to_remove);
+  if (debug_log_) printf("Adjusting free list, count %d, new/grown %zx, to_remove %zx\n", join_count, (unsigned long)new_or_grown, (unsigned long)to_remove);
 
   while (iter) {
     if (debug_log_) printf("Visiting index %d\n", (int)(iter - allocs_));
@@ -302,6 +325,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
 
     // If iter's next pointer is now off
     if (iter->next_free_ >= first + join_count) {
+      if (debug_log_) printf("now adjusting for joins\n");
       // Save for after adjustment
       PoolAllocation* next = iter->next_free_;
 
@@ -317,6 +341,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
 
   // May be smallest, and not inserted
   if (new_or_grown && !inserted) {
+    if (debug_log_) printf("inserting at end\n");
     if (prev) {
       prev->next_free_ = new_or_grown;
     } else {
@@ -324,6 +349,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
       first_free_ = new_or_grown;
     }
   }
+  if (debug_log_) printf("exiting\n");
 }
 
 PoolAllocation*
@@ -439,6 +465,59 @@ Pool::join_free_allocs(PoolAllocation* freed)
     adjust_free_list_after_joins(NULL, 0, freed, NULL);
   }
 }
+
+void
+Pool::log_allocs() {
+  char* expected = 0;
+  for (unsigned int i = 0; i < allocs_in_use_; ++i) {
+    PoolAllocation* alloc = allocs_ + i;
+    int next_index = -1;
+    if (alloc->next_free_) {
+      next_index = alloc->next_free_ - allocs_;
+    }
+    printf("[%u] %zx %s %s %zu %d\n",
+           i,
+           (unsigned long)alloc->ptr_,
+           alloc->free_ ? "free " : "alloc",
+           first_free_ == alloc ? "first" : "     ",
+           alloc->size(),
+           next_index);
+    if (expected && (alloc->ptr_ != expected)) {
+      printf("Alloc %u ptr not expected;\n", i);
+    }
+    expected = alloc->ptr_ + alloc->size();
+  }
+}
+
+SafetyProfilePool:: SafetyProfilePool()
+: init_pool_(new Pool(1024*1024, 256))
+, main_pool_(0)
+{
+}
+
+SafetyProfilePool::~SafetyProfilePool()
+{
+#ifndef OPENDDS_SAFETY_PROFILE
+  delete init_pool_;
+  delete main_pool_;
+#endif
+}
+
+void
+SafetyProfilePool::configure_pool(size_t size, size_t allocs)
+{
+  ACE_GUARD(ACE_Thread_Mutex, lock, lock_);
+
+  if (main_pool_ == NULL) {
+    main_pool_ = new Pool(size, allocs);
+  }
+}
+
+SafetyProfilePool*
+SafetyProfilePool::instance() {
+  return ACE_Singleton<SafetyProfilePool, ACE_SYNCH_MUTEX>::instance();
+}
+
 
 }}
 

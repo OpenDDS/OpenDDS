@@ -22,6 +22,8 @@ TopicMap Parser::topic_map_;
 int
 Parser::parse(const char* filename)
 {
+  pool_size_ = 1024*1024;
+  pool_allocs_ = 1024;
   ACE_Configuration_Heap config;
   config.open();
   ACE_Ini_ImpExp import(config);
@@ -33,7 +35,8 @@ Parser::parse(const char* filename)
                status));
     return status;
   } else {
-    status = parse_sections(config, DATAWRITER_QOS_SECTION, false) ||
+    status = parse_common(config, false) ||
+             parse_sections(config, DATAWRITER_QOS_SECTION, false) ||
              parse_sections(config, DATAREADER_QOS_SECTION, false) ||
              parse_sections(config, PUBLISHER_QOS_SECTION, false) ||
              parse_sections(config, SUBSCRIBER_QOS_SECTION, false) ||
@@ -82,6 +85,18 @@ Parser::find_qos(const char* name, QosSettings& target)
     target = result->second;
   }
   return status;
+}
+
+size_t
+Parser::pool_size() const
+{
+  return pool_size_;
+}
+
+size_t
+Parser::pool_allocs() const
+{
+  return pool_allocs_;
 }
 
 int
@@ -181,6 +196,37 @@ Parser::parse_qos(ACE_Configuration_Heap& config,
       printf("unexpected value type %d\n", value_type);
       status = -1;
       break;
+    }
+  }
+  return status;
+}
+
+int
+Parser::parse_common(ACE_Configuration_Heap& config, bool required)
+{
+  int status = 0;
+  ACE_TString size_str, allocs_str;
+  unsigned int size = 0;
+  unsigned int allocs = 0;
+  ACE_Configuration_Section_Key key;
+  if (config.open_section(config.root_section(), "common", 0, key) != 0) {
+    if (required) {
+      printf("Could not open common section in config file, status %d\n",
+             status);
+      status = -1;
+    }
+  } else {
+    if (!config.get_string_value(key, "PoolSize", size_str)) {
+      size = atoi(size_str.c_str());
+      if (size) {
+        pool_size_ = size;
+      }
+    }
+    if (!config.get_string_value(key, "PoolAllocs", allocs_str)) {
+      allocs = atoi(allocs_str.c_str());
+      if (allocs) {
+        pool_allocs_ = allocs;
+      }
     }
   }
   return status;
