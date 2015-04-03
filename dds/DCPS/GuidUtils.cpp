@@ -43,7 +43,7 @@ to_string(const GUID_t& guid)
   std::size_t tot_len;
 
   tot_len = sizeof(guid.guidPrefix) / sizeof(CORBA::Octet) +
-	    (((sizeof(guid.guidPrefix) / sizeof(CORBA::Octet)) / 4) * sizeof(".")) +
+        (((sizeof(guid.guidPrefix) / sizeof(CORBA::Octet)) / 4) * sizeof(".")) +
         sizeof(guid.entityId.entityKey) / sizeof(CORBA::Octet) +
         sizeof(CORBA::Octet);
 
@@ -55,9 +55,9 @@ to_string(const GUID_t& guid)
   for (std::size_t i = 0; i < len; ++i) {
     cur_char += sprintf(cur_char, "%02x", unsigned(guid.guidPrefix[i]));
 
-	if ((i + 1) % 4 == 0) {
+    if ((i + 1) % 4 == 0) {
       cur_char += sprintf(cur_char, ".");
-	}
+    }
   }
 
   len = sizeof(guid.entityId.entityKey) / sizeof(CORBA::Octet);

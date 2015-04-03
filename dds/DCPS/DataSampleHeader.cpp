@@ -462,31 +462,31 @@ OPENDDS_STRING to_string(const MessageId value)
 {
   switch (value) {
   case SAMPLE_DATA:
-	return "SAMPLE_DATA";
+    return "SAMPLE_DATA";
   case DATAWRITER_LIVELINESS:
-	return "DATAWRITER_LIVELINESS";
+    return "DATAWRITER_LIVELINESS";
   case INSTANCE_REGISTRATION:
-	return "INSTANCE_REGISTRATION";
+    return "INSTANCE_REGISTRATION";
   case UNREGISTER_INSTANCE:
-	return "UNREGISTER_INSTANCE";
+    return "UNREGISTER_INSTANCE";
   case DISPOSE_INSTANCE:
-	return "DISPOSE_INSTANCE";
+    return "DISPOSE_INSTANCE";
   case GRACEFUL_DISCONNECT:
-	return "GRACEFUL_DISCONNECT";
+    return "GRACEFUL_DISCONNECT";
   case REQUEST_ACK:
-	return "REQUEST_ACK";
+    return "REQUEST_ACK";
   case SAMPLE_ACK:
-	return "SAMPLE_ACK";
+    return "SAMPLE_ACK";
   case END_COHERENT_CHANGES:
-	return "END_COHERENT_CHANGES";
+    return "END_COHERENT_CHANGES";
   case TRANSPORT_CONTROL:
-	return "TRANSPORT_CONTROL";
+    return "TRANSPORT_CONTROL";
   case DISPOSE_UNREGISTER_INSTANCE:
-	return "DISPOSE_UNREGISTER_INSTANCE";
+    return "DISPOSE_UNREGISTER_INSTANCE";
   case END_HISTORIC_SAMPLES:
-	return "END_HISTORIC_SAMPLES";
+    return "END_HISTORIC_SAMPLES";
   default:
-	return "Unknown";
+    return "Unknown";
   }
 }
 
@@ -494,17 +494,17 @@ OPENDDS_STRING to_string(const SubMessageId value)
 {
   switch (value) {
   case SUBMESSAGE_NONE:
-	return "SUBMESSAGE_NONE";
+    return "SUBMESSAGE_NONE";
   case MULTICAST_SYN:
-	return "MULTICAST_SYN";
+    return "MULTICAST_SYN";
   case MULTICAST_SYNACK:
-	return "MULTICAST_SYNACK";
+    return "MULTICAST_SYNACK";
   case MULTICAST_NAK:
-	return "MULTICAST_NAK";
+    return "MULTICAST_NAK";
   case MULTICAST_NAKACK:
-	return "MULTICAST_NAKACK";
+    return "MULTICAST_NAKACK";
   default:
-	return "Unknown";
+    return "Unknown";
   }
 }
 
