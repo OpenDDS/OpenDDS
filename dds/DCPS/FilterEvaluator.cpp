@@ -16,12 +16,12 @@
 #include "FilterExpressionGrammar.h"
 #include "AstNodeWrapper.h"
 #include "Definitions.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include <ace/ACE.h>
 
 #include <stdexcept>
 #include <cstring>
-#include <sstream>
 #include <algorithm>
 
 namespace {

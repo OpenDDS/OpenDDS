@@ -19,10 +19,8 @@
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "tao/debug.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
-#ifndef ACE_LYNXOS_MAJOR
-#include <sstream>
-#endif
 
 #if !defined (__ACE_INLINE__)
 #include "TransportImpl.inl"
@@ -157,16 +155,21 @@ TransportImpl::configure(TransportInst* config)
     this->monitor_->report();
   }
 
-#ifndef OPENDDS_SAFETY_PROFILE
   if (Transport_debug_level > 0) {
+#ifndef OPENDDS_SAFETY_PROFILE
     std::stringstream os;
     dump(os);
 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportImpl::configure()\n%C"),
                os.str().c_str()));
-  }
+#else
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) TransportImpl::configure()\n%C"),
+               dump_to_str().c_str()));
 #endif
+  }
+
 
   return true;
 }
@@ -248,7 +251,21 @@ TransportImpl::dump()
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportImpl::dump() -\n%C"),
              os.str().c_str()));
+#else
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) TransportImpl::dump() -\n%C"),
+             dump_to_str().c_str()));
 #endif
+}
+
+OPENDDS_STRING
+TransportImpl::dump_to_str()
+{
+  if (this->config_.is_nil()) {
+    return OPENDDS_STRING(" (not configured)\n");
+  } else {
+    return this->config_->dump_to_str();
+  }
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE

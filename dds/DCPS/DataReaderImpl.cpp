@@ -29,6 +29,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -36,16 +37,6 @@
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
 #include "ace/OS_NS_sys_time.h"
-
-#ifdef ACE_LYNXOS_MAJOR
-#include <strstream>
-#define STRINGSTREAM std::strstream
-#define STRINGSTREAM_CSTR
-#else
-#include <sstream>
-#define STRINGSTREAM std::stringstream
-#define STRINGSTREAM_CSTR .c_str()
-#endif
 
 #include <stdexcept>
 
@@ -2161,12 +2152,14 @@ void OpenDDS::DCPS::WriterStats::reset_stats()
   this->stats_.reset();
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 std::ostream& OpenDDS::DCPS::WriterStats::raw_data(std::ostream& str) const
 {
   str << std::dec << this->stats_.size()
                               << " samples out of " << this->stats_.n() << std::endl;
   return str << this->stats_;
 }
+#endif //OPENDDS_SAFETY_PROFILE
 
 void
 DataReaderImpl::writer_removed(WriterInfo& info)

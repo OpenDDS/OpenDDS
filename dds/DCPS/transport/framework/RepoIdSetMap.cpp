@@ -12,10 +12,6 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
-#ifndef ACE_LYNXOS_MAJOR
-#include <sstream>
-#endif
-
 #if !defined (__ACE_INLINE__)
 #include "RepoIdSetMap.inl"
 #endif /* __ACE_INLINE__ */

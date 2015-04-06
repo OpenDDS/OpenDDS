@@ -12,8 +12,6 @@
 #ifndef OPENDDS_NO_MULTI_TOPIC
 
 #include <stdexcept>
-#include <sstream>
-
 
 namespace OpenDDS {
 namespace DCPS {
@@ -98,11 +96,12 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-        std::ostringstream rc_ss;
-        rc_ss << ret;
+        OPENDDS_STRING rc_ss;
+        rc_ss.reserve(sizeof(ReturnCode_t));
+        rc_ss += ret;
         throw std::runtime_error("In join(), incoming DataReader for " +
           OPENDDS_STRING(other_topic) + " read_instance_generic, error #" +
-          rc_ss.str());
+          rc_ss);
       } else if (ret == DDS::RETCODE_OK) {
         resulting.push_back(prototype);
         resulting.back().combine(SampleWithInfo(other_topic.in(), info));
@@ -119,11 +118,12 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       ret = other_dri->read_next_instance_generic(other_data.ptr_, info, ih,
         READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-        std::ostringstream rc_ss;
-        rc_ss << ret;
+        OPENDDS_STRING rc_ss;
+        rc_ss.reserve(sizeof(ReturnCode_t));
+        rc_ss += ret;
         throw std::runtime_error("In join(), incoming DataReader for " +
           OPENDDS_STRING(other_topic) + " read_next_instance_generic, error #" +
-          rc_ss.str());
+          rc_ss);
       } else if (ret == RETCODE_NO_DATA) {
         break;
       }

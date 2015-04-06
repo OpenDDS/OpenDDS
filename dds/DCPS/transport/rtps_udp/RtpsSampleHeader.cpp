@@ -23,10 +23,6 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 
-#ifdef OPENDDS_TEST_INLINE_QOS
-#include <sstream>
-#endif
-
 #include <cstring>
 
 #ifndef __ACE_INLINE__
@@ -169,12 +165,13 @@ RtpsSampleHeader::process_iqos(DataSampleHeader& opendds,
   using namespace OpenDDS::RTPS;
 #if defined(OPENDDS_TEST_INLINE_QOS)
   std::stringstream os;
-  os << "into_received_data_sample(): " << iqos.length()
-     << " inline QoS parameters\n";
+  OPENDDS_STRING output("into_received_data_sample(): ");
+  output += iqos.length()
+  output + " inline QoS parameters\n";
   for (CORBA::ULong index = 0; index < iqos.length(); ++index) {
-    os << "  parameter type = " << iqos[index]._d() << "\n";
+    output + "  parameter type = " += iqos[index]._d() + "\n";
   }
-  ACE_DEBUG((LM_DEBUG, "%C", os.str().c_str()));
+  ACE_DEBUG((LM_DEBUG, "%C", output.c_str()));
 #endif
   for (CORBA::ULong i = 0; i < iqos.length(); ++i) {
     if (iqos[i]._d() == PID_STATUS_INFO) {

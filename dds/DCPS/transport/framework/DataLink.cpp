@@ -23,6 +23,7 @@
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include "EntryExit.h"
 #include "tao/ORB_Core.h"
@@ -30,11 +31,6 @@
 #include "ace/Reactor.h"
 #include "ace/SOCK.h"
 
-#include <iostream>
-
-#ifndef ACE_LYNXOS_MAJOR
-#include <sstream>
-#endif
 
 #if !defined (__ACE_INLINE__)
 #include "DataLink.inl"

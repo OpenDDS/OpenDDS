@@ -28,6 +28,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -36,12 +37,6 @@
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
-
-#ifdef ACE_LYNXOS_MAJOR
-#include <strstream>
-#else
-#include <sstream>
-#endif
 
 #include <stdexcept>
 

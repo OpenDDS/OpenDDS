@@ -19,6 +19,7 @@
 #include "DataWriterImpl.h"
 #include "Qos_Helper.h"
 #include "debug.h"
+#include "SafetyProfileStreams.h"
 
 #include "tao/ORB_Core.h"
 
@@ -29,7 +30,6 @@
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/OS_NS_sys_time.h"
 
-#include <sstream>
 #include <fstream>
 #include <algorithm>
 

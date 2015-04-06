@@ -390,7 +390,9 @@ Subscriber::rawData( std::ostream& str) const
        ++current, ++index) {
     OpenDDS::DCPS::GuidConverter converter(current->first);
     str << std::endl << "  Writer[ " << OPENDDS_STRING(converter) << "]" << std::endl;
+#ifndef OPENDDS_SAFETY_PROFILE
     current->second.raw_data( str);
+#endif //OPENDDS_SAFETY_PROFILE
   }
   return str;
 }
