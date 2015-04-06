@@ -218,6 +218,28 @@ public:
     TEST_CHECK(ptr7 > ptr5);
   }
 
+  void test_pool_free_join_first_both() {
+    Pool pool(2048, 64);
+    char* ptr0 = pool.pool_alloc( 64); // rightmost
+    char* ptr1 = pool.pool_alloc(128);
+    char* ptr2 = pool.pool_alloc( 64); // freed ahead of time
+    char* ptr3 = pool.pool_alloc(128); 
+    char* ptr4 = pool.pool_alloc(128);
+    char* ptr5 = pool.pool_alloc(256); // freed ahead of time, second largest
+    char* ptr6 = pool.pool_alloc(128); // leftmost, join with head and ptr5
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr1);
+    TEST_CHECK(ptr3);
+    TEST_CHECK(ptr4);
+    TEST_CHECK(ptr6);
+    pool.pool_free(ptr5);
+    pool.pool_free(ptr2);
+    validate_pool(pool, 128*4 + 64);
+    // now free ptr6, join both largest and ptr5
+    pool.pool_free(ptr6);
+    validate_pool(pool, 128*3 + 64);
+  }
+
   // Free block and join with the one to its right (largest), case II
   void test_pool_free_join_largest_right() {
     Pool pool(2048, 64);
@@ -432,6 +454,33 @@ public:
     validate_pool(pool, 128*3 + 160);
     TEST_CHECK(ptr7 < ptr1);
     TEST_CHECK(ptr7 > ptr4);
+  }
+
+  // Allocate and move ahead in free list
+  void test_pool_alloc_move_ahead() {
+    Pool pool(1024, 64);
+    pool.pool_alloc(8);
+    char* ptr0 = pool.pool_alloc(128);
+    pool.pool_alloc(8);
+    char* ptr1 = pool.pool_alloc(256);
+    pool.pool_alloc(8);
+    char* ptr2 = pool.pool_alloc(64);
+    pool.pool_alloc(8);
+    char* ptr3 = pool.pool_alloc(36);
+    pool.pool_alloc(8);
+    char* ptr4 = pool.pool_alloc(16);
+    pool.pool_alloc(8);
+
+    pool.pool_free(ptr0);
+    pool.pool_free(ptr1);
+    pool.pool_free(ptr2);
+    pool.pool_free(ptr3);
+    pool.pool_free(ptr4);
+
+    validate_pool(pool, 48);
+    // Allocate from ptr0
+    pool.pool_alloc(80);
+    validate_pool(pool, 128);
   }
 
   // Alloc and free same block repeatedly
@@ -888,6 +937,7 @@ int main(int, const char** )
   test.test_pool_alloc_free_largest();
   test.test_pool_alloc_free_smallest();
 
+  test.test_pool_alloc_move_ahead();
   test.test_pool_alloc_free_repeated();
   test.test_pool_alloc_non_first_free_block();
   test.test_pool_realloc();
@@ -896,6 +946,7 @@ int main(int, const char** )
   test.test_pool_free_join_left();
   test.test_pool_free_join_both();
 
+  test.test_pool_free_join_first_both();
   test.test_pool_free_join_largest_right();
   test.test_pool_free_join_largest_left();
   test.test_pool_free_join_largest_both_right();

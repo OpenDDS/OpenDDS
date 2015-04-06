@@ -114,7 +114,7 @@ Pool::pool_alloc(size_t size)
   }
 
   //if (debug_log_) log_allocs();
-  validate();
+  //validate();
 
   return block;
 }
@@ -131,7 +131,7 @@ Pool::pool_free(void* ptr)
     // Check next and prev for combining
     join_free_allocs(alloc);
   }
-  validate();
+  //validate();
   //if (debug_log_) log_allocs();
 }
 
@@ -169,12 +169,17 @@ Pool::allocate_block(PoolAllocation* from_block,
       if (prev_block >= target) {
         prev_block += 1;
       }
+      if (next_block >= target) {
+        next_block += 1;
+      }
 
       if (debug_log_) printf("allocating %zu from inserted block %zu\n",
                            alloc_size, target - allocs_);
       // Allocate a buffer using taegetand put remainder in from_block
       buffer = static_cast<char*>(from_block->allocate(alloc_size, target));
       ++allocs_in_use_;
+
+      if (next_block) printf("comparing from block size %zu to next block size %zu\n", from_block->size_, next_block->size_);
 
       // from_block is now smaller
       if (next_block && from_block->size_ < next_block->size_) {
@@ -304,12 +309,12 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
       if (!prev) {
         if (debug_log_) printf("Removing to_remove from head\n");
 
-        first_free_ = iter->next_free_;
+        first_free_ = adjust_for_join(iter->next_free_, first, join_count);
         iter_removed = true;
       } else {
         if (debug_log_) printf("Removing to_remove from list\n");
 
-        prev->next_free_ = iter->next_free_;
+        prev->next_free_ = adjust_for_join(iter->next_free_, first, join_count);
         iter_removed = true;
       }
     }
@@ -414,28 +419,35 @@ Pool::move_free_block_ahead(PoolAllocation* resized_block, PoolAllocation* prev_
 {
   PoolAllocation* next_block = resized_block->next_free_;
 
+  printf("Moving free block ahead\n");
+
   // Remove resized_block from free list
   resized_block->next_free_ = NULL;
   if (prev_block) {
     // point it ahead
+    printf("  Pointing prev to next %zu\n", next_block - allocs_);
     prev_block->next_free_ = next_block;
   } else if (first_free_ == resized_block) {
     // Point to new head of list
+    printf("  Pointing head to next %zu\n", next_block - allocs_);
     first_free_ = next_block;
   }
 
   // Move ahead while the next block exists and is larger than the resized block
   while (next_block && resized_block->size_ < next_block->size_) {
+    printf("  Skipping size %zu\n", next_block->size());
     prev_block = next_block;
     next_block = next_block->next_free_;
   }
 
   // prev_block can't now be null, because resized block getting smaller than
   // next was a precondition for entering
+  printf("  Inserting resized block after %zu\n", prev_block - allocs_);
   prev_block->next_free_ = resized_block;
 
   // next_block is smaller than resized block, or null if none smaller
   resized_block->next_free_ = next_block;
+  printf("  Pointing resized block to %zu\n", next_block - allocs_);
 }
 
 void
