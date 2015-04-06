@@ -1,5 +1,6 @@
 /QosSettingsTest
 /PoolTest
 /PoolAllocationTest
+/PoolAllocatorTest
 /SafetyProfilePoolTest
 /SequencesTest

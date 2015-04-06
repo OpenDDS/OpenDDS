@@ -22,6 +22,12 @@ project(*SafetyProfilePool) : dcps, opendds_face {
   }
 }
 
+project(*PoolAllocator) : dcps, opendds_face {
+  Source_Files {
+    PoolAllocatorTest.cpp
+  }
+}
+
 project(*Sequences): dcps, opendds_face {
   Source_Files {
     SequencesTest.cpp

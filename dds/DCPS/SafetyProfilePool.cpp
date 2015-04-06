@@ -296,7 +296,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
       if (prev) { // should always be true
         if (debug_log_) printf("Removing old position of grown from list\n");
 
-        prev->next_free_ = after_grown;
+        prev->next_free_ = adjust_for_join(after_grown, first, join_count);
         iter_removed = true;
       }
     // Else if this is the alloc to remove, remove it
@@ -347,6 +347,11 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
     }
 
     // If iter's next pointer is now off
+    PoolAllocation* next = iter->next_free_;
+    iter->next_free_ = adjust_for_join(iter->next_free_, first, join_count);
+    iter = next;
+    
+/*
     if (join_count && (iter->next_free_ >= first + join_count)) {
       // Save for after adjustment
       PoolAllocation* next = iter->next_free_;
@@ -360,6 +365,7 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
     } else {
       iter = iter->next_free_;
     }
+*/
   }
 
   // May be smallest, and not inserted
@@ -375,12 +381,16 @@ Pool::adjust_free_list_after_joins(PoolAllocation* first,
 
   // Lastly, point new_or_grown to proper spot, to prevent a loop in the list
   if (smaller_than_new_or_grown) {
+    new_or_grown->next_free_ = adjust_for_join(
+      smaller_than_new_or_grown, first, join_count);
+/*
     if (join_count && (smaller_than_new_or_grown >= first + join_count)) {
       // adjust for join
       new_or_grown->next_free_ = smaller_than_new_or_grown - join_count;
     } else {
       new_or_grown->next_free_ = smaller_than_new_or_grown;
     }
+*/
   }
 
   if (debug_log_) printf("exiting\n");
@@ -538,9 +548,10 @@ Pool::validate() {
   for (unsigned int i = 0; i < allocs_in_use_; ++i) {
     PoolAllocation* alloc = allocs_ + i;
     if (debug_log_) {
-      printf("Index %d: alloc %zx, ptr is %zx, size %zu %s %s nextind %d\n",
+      printf("Index %d: alloc %zx, ptr is %zx, %s size %zu %s nextind %d\n",
               i, (unsigned long)alloc, (unsigned long)(void*)alloc->ptr(),
-              alloc->size(), alloc->free_ ? "free " : "alloc",
+              alloc->free_ ? "free " : "     ",
+              alloc->size(),
               alloc == first_free_ ? "FIRST" : "     ",
               alloc->next_free_ ? int(alloc->next_free_ - allocs_) : -1);
     }

@@ -102,6 +102,7 @@ public:
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
     pool.pool_free(ptr0);
+    validate_pool(pool, 1024 - 128);
     pool.pool_free(ptr3);
 
     validate_pool(pool, 1024 - 512 - 128);
@@ -634,8 +635,84 @@ public:
     validate_pool(pool, 256*3 + 32*3);
     pool.pool_free(p1); // Largest free buffer, first now 160
     validate_pool(pool, 256*2 + 32*3);
-    char* p2 = pool.pool_alloc(96);
+    pool.pool_alloc(96);
     validate_pool(pool, 256*2 + 96 + 32*3);
+  }
+
+  // Test moving ahead in free list where the block previous to the insert is 
+  // shifted
+  void test_pool_move_forward_prev_shifted() {
+    Pool pool(2024, 64);
+    pool.pool_alloc(8);
+    char* p1 = pool.pool_alloc(64);
+    pool.pool_alloc(8);
+    char* p2 = pool.pool_alloc(232);
+    pool.pool_alloc(32);
+    char* p3 = pool.pool_alloc(24);
+    pool.pool_alloc(32);
+    char* p4 = pool.pool_alloc(24);
+    pool.pool_alloc(32);
+    pool.pool_free(p1); // Free buffer to allocate from
+    pool.pool_free(p2); // Largest free buffer, first now 160
+    pool.pool_free(p3); // 
+    pool.pool_free(p4); // 
+    validate_pool(pool, 32*3 + 16);
+    // Now, allocate from p1, moving it to end
+    char* p5 = pool.pool_alloc(56);
+    validate_pool(pool, 32*3 + 16 + 56);
+    // Undo and restore
+    pool.pool_free(p5);
+    validate_pool(pool, 32*3 + 16);
+  }
+
+  // Make sure when joining free list does not get double-
+  void test_pool_move_forward_prev_shifted2() {
+    Pool pool(2024, 64);
+    char* p10 = (pool.pool_alloc(24));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p9 = (pool.pool_alloc(24));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p8 = (pool.pool_alloc(24));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p7 = (pool.pool_alloc(32));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p6 = (pool.pool_alloc(24));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p5 = (pool.pool_alloc(24));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p4 = (pool.pool_alloc(32));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p3 = (pool.pool_alloc(88));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p2 = (pool.pool_alloc(64));
+    pool.pool_alloc(8);
+    pool.pool_alloc(8);
+    char* p1 = pool.pool_alloc(56);  // Free last
+    char* p0 = pool.pool_alloc(8);
+    pool.pool_alloc(8);
+
+    pool.pool_free(p0);
+    pool.pool_free(p2);
+    pool.pool_free(p3);
+    pool.pool_free(p4);
+    pool.pool_free(p5);
+    pool.pool_free(p6);
+    pool.pool_free(p7);
+    pool.pool_free(p8);
+    pool.pool_free(p9);
+    pool.pool_free(p10);
+    validate_pool(pool, 56 + 8*19, true);
+    // Now free from end to middle
+    pool.pool_free(p1);
+    validate_pool(pool, 8*19, true);
   }
 
   // Allocates after running out of memory should return null
@@ -750,21 +827,23 @@ private:
                 alloc->next_free_ ? int(alloc->next_free_ - pool.allocs_) : -1);
       }
       TEST_CHECK(prev < alloc->ptr());
+      TEST_CHECK(alloc->size());
       if (prev_end) {
         TEST_CHECK(prev_end == alloc->ptr());
-        if (alloc->size()) {
-          // Validate  these are not consecutive free blocks
-          TEST_CHECK(!(prev_free && alloc->free_));
-        }
+        // Validate  these are not consecutive free blocks
+        TEST_CHECK(!(prev_free && alloc->free_));
       }
+
       prev_end = alloc->ptr() + alloc->size();
       prev_free = alloc->free_;
 
       if (!alloc->free_) {
         allocated_bytes += alloc->size();
+        TEST_CHECK(alloc->next_free_ == NULL);
       } else {
         free_bytes += alloc->size();
       }
+      prev = alloc->ptr();
     }
 
     TEST_CHECK(allocated_bytes == expected_allocated_bytes);
@@ -835,6 +914,8 @@ int main(int, const char** )
   test.test_pool_alloc_split_without_moving();
   test.test_pool_alloc_shift_free();
   test.test_pool_alloc_shift_first_free();
+  test.test_pool_move_forward_prev_shifted();
+  test.test_pool_move_forward_prev_shifted2();
 
   test.test_alloc_null_once_out_of_memory();
   test.test_alloc_too_large_returns_null();

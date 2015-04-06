@@ -95,6 +95,7 @@ private:
                                     PoolAllocation* to_remove);
 
   void log_allocs();
+  void validate();
 };
 
 /// Memory pool for use when the Safety Profile is enabled.
@@ -131,7 +132,8 @@ public:
     if (main_pool_ && main_pool_->includes(ptr)) {
       return main_pool_->pool_free(ptr);
     } else {
-      return init_pool_->pool_free(ptr);
+      // If this is uncommented, crash
+      // return init_pool_->pool_free(ptr);
     }
   }
 
