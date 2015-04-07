@@ -10,6 +10,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
+#ifndef OPENDDS_SAFETY_PROFILE
 template<typename DatumType>
 ACE_INLINE
 std::ostream& operator<<(
@@ -18,6 +19,7 @@ std::ostream& operator<<(
 {
   return value.insert(str);
 }
+#endif //OPENDDS_SAFETY_PROFILE
 
 template<typename DatumType>
 ACE_INLINE
@@ -33,6 +35,7 @@ DataCollector<DatumType>::DataCollector(unsigned int bound, OnFull onFull)
   }
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 template<typename DatumType>
 ACE_INLINE
 DataCollector<DatumType>&
@@ -41,6 +44,7 @@ DataCollector<DatumType>::operator<<(DatumType datum)
   this->collect(datum);
   return *this;
 }
+#endif //OPENDDS_SAFETY_PROFILE
 
 } // namespace DCPS
 } // namespace OpenDDS

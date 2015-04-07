@@ -7,8 +7,7 @@
  */
 
 #include "DataCollector_T.h"
-#include <iostream>
-#include <fstream>
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #if !defined (__ACE_INLINE__)
 #include "DataCollector_T.inl"
@@ -59,6 +58,7 @@ DataCollector<DatumType>::size() const
   else                            return this->writeAt_;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 template<typename DatumType>
 std::ostream&
 DataCollector<DatumType>::insert(std::ostream& str) const
@@ -97,6 +97,7 @@ DataCollector<DatumType>::insert(std::ostream& str) const
 
   return str;
 }
+#endif //OPENDDS_SAFETY_PROFILE
 
 } // namespace DCPS
 } // namespace OpenDDS
