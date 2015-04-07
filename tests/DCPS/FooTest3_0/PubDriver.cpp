@@ -15,6 +15,8 @@
 #include "DataWriterListener.h"
 #include "PublisherListener.h"
 #include "tests/DCPS/common/TestSupport.h"
+#include "tests/Utils/ExceptionStreams.h"
+
 
 #include <ace/Arg_Shifter.h>
 #include <ace/OS_NS_unistd.h>

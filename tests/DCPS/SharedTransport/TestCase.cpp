@@ -20,6 +20,7 @@
 #endif
 
 #include "TestCase.h"
+#include "tests/Utils/ExceptionStreams.h"
 
 
 namespace {
