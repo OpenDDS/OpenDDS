@@ -156,7 +156,7 @@ namespace {
   }
 }
 
-bool langmap_generator::gen_enum(UTL_ScopedName* name,
+bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
                                  const std::vector<AST_EnumVal*>& contents,
                                  const char*)
 {
@@ -212,7 +212,7 @@ bool langmap_generator::gen_struct_fwd(UTL_ScopedName* name,
   return true;
 }
 
-bool langmap_generator::gen_struct(UTL_ScopedName* name,
+bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
                                    const std::vector<AST_Field*>& fields,
                                    AST_Type::SIZE_TYPE size,
                                    const char*)
@@ -558,7 +558,7 @@ namespace {
   }
 }
 
-bool langmap_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
+bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* base,
                                     const char*)
 {
   AST_Array* arr = 0;
@@ -594,7 +594,7 @@ bool langmap_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
   return true;
 }
 
-bool langmap_generator::gen_union(UTL_ScopedName*,
+bool langmap_generator::gen_union(AST_Union*, UTL_ScopedName*,
                                   const std::vector<AST_UnionBranch*>&,
                                   AST_Type*, const char*)
 {

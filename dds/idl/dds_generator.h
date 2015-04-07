@@ -30,17 +30,23 @@ class dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
+  virtual bool do_included_files() const { return false; }
+
+  virtual void gen_prologue() {}
+
+  virtual void gen_epilogue() {}
+
   virtual bool gen_const(UTL_ScopedName* /*name*/,
                          bool /*nestedInInteface*/,
                          AST_Constant* /*constant*/)
   { return true; }
 
-  virtual bool gen_enum(UTL_ScopedName* /*name*/,
+  virtual bool gen_enum(AST_Enum* /*node*/, UTL_ScopedName* /*name*/,
                         const std::vector<AST_EnumVal*>& /*contents*/,
                         const char* /*repoid*/)
   { return true; }
 
-  virtual bool gen_struct(UTL_ScopedName* name,
+  virtual bool gen_struct(AST_Structure* node, UTL_ScopedName* name,
                           const std::vector<AST_Field*>& fields,
                           AST_Type::SIZE_TYPE size,
                           const char* repoid) = 0;
@@ -49,10 +55,10 @@ public:
                               AST_Type::SIZE_TYPE /*size*/)
   { return true; }
 
-  virtual bool gen_typedef(UTL_ScopedName* name, AST_Type* base,
+  virtual bool gen_typedef(AST_Typedef* node, UTL_ScopedName* name, AST_Type* base,
                            const char* repoid) = 0;
 
-  virtual bool gen_interf(UTL_ScopedName* /*name*/, bool /*local*/,
+  virtual bool gen_interf(AST_Interface* /*node*/, UTL_ScopedName* /*name*/, bool /*local*/,
                           const std::vector<AST_Interface*>& /*inherits*/,
                           const std::vector<AST_Interface*>& /*inherits_flat*/,
                           const std::vector<AST_Attribute*>& /*attrs*/,
@@ -63,10 +69,10 @@ public:
   virtual bool gen_interf_fwd(UTL_ScopedName* /*name*/)
   { return true; }
 
-  virtual bool gen_native(UTL_ScopedName* /*name*/, const char* /*repoid*/)
+  virtual bool gen_native(AST_Native* /*node*/, UTL_ScopedName* /*name*/, const char* /*repoid*/)
   { return true; }
 
-  virtual bool gen_union(UTL_ScopedName* name,
+  virtual bool gen_union(AST_Union* node, UTL_ScopedName* name,
                          const std::vector<AST_UnionBranch*>& branches,
                          AST_Type* discriminator,
                          const char* repoid) = 0;
@@ -76,21 +82,25 @@ public:
 
 class composite_generator : public dds_generator {
 public:
+  void gen_prologue();
+
+  void gen_epilogue();
+
   bool gen_const(UTL_ScopedName* name, bool nestedInInteface,
                  AST_Constant* constant);
 
-  bool gen_enum(UTL_ScopedName* name,
+  bool gen_enum(AST_Enum* node, UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
 
-  bool gen_struct(UTL_ScopedName* name,
+  bool gen_struct(AST_Structure* node, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
 
   bool gen_struct_fwd(UTL_ScopedName* name, AST_Type::SIZE_TYPE size);
 
-  bool gen_typedef(UTL_ScopedName* name, AST_Type* base, const char* repoid);
+  bool gen_typedef(AST_Typedef* node, UTL_ScopedName* name, AST_Type* base, const char* repoid);
 
-  bool gen_interf(UTL_ScopedName* name, bool local,
+  bool gen_interf(AST_Interface* node, UTL_ScopedName* name, bool local,
                   const std::vector<AST_Interface*>& inherits,
                   const std::vector<AST_Interface*>& inherits_flat,
                   const std::vector<AST_Attribute*>& attrs,
@@ -98,9 +108,9 @@ public:
 
   bool gen_interf_fwd(UTL_ScopedName* name);
 
-  bool gen_native(UTL_ScopedName* name, const char* repoid);
+  bool gen_native(AST_Native* node, UTL_ScopedName* name, const char* repoid);
 
-  bool gen_union(UTL_ScopedName* name,
+  bool gen_union(AST_Union* node, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* discriminator,
                  const char* repoid);
