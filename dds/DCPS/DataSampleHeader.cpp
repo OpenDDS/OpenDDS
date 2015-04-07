@@ -12,7 +12,7 @@
 #include "GuidConverter.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
-
+#include <cstdio>
 #include <iomanip>
 #include <iostream>
 
@@ -512,63 +512,71 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
 {
   OPENDDS_STRING ret;
   if (value.submessage_id_ != SUBMESSAGE_NONE) {
-    ret + to_string(SubMessageId(value.submessage_id_));
-    char buf[sizeof(unsigned)];
-    sprintf(buf, "%02x", unsigned(value.submessage_id_));
-    ret + " 0x";
-    ret + OPENDDS_STRING(buf);
-    ret + "), ";
+    ret += to_string(SubMessageId(value.submessage_id_));
+    int sz = std::snprintf(NULL, 0, "%02x", unsigned(value.submessage_id_));
+    int buff_size = sz + 1;
+    char buf[buff_size]; // note +1 for null terminator
+    std::snprintf(&buf[0], buff_size, "%02x", unsigned(value.submessage_id_));
+    ret += " 0x";
+    ret += OPENDDS_STRING(buf);
+    ret += "), ";
   } else {
-    ret + to_string(MessageId(value.message_id_));
-    char buf[sizeof(unsigned)];
-    sprintf(buf, "%02x", unsigned(value.message_id_));
-    ret + " (0x";
-    ret + OPENDDS_STRING(buf);
-    ret + "), ";
+    ret += to_string(MessageId(value.message_id_));
+    int sz = std::snprintf(NULL, 0, "%02x", unsigned(value.message_id_));
+    int buff_size = sz + 1;
+    char buf[buff_size]; // note +1 for null terminator
+    std::snprintf(&buf[0], buff_size, "%02x", unsigned(value.message_id_));
+    ret += " (0x";
+    ret += OPENDDS_STRING(buf);
+    ret += "), ";
   }
 
   ret + "Length: ";
   ret += value.message_length_;
-  ret + ", ";
+  ret += ", ";
 
   ret + "Byte order: " + (value.byte_order_ == 1 ? "Little" : "Big")
       + " Endian (0x";
-  char buf[sizeof(unsigned)];
-  sprintf(buf, "%02X", unsigned(value.byte_order_));
-  ret + OPENDDS_STRING(buf) + ")";
+  int sz = std::snprintf(NULL, 0, "%02X", unsigned(value.byte_order_));
+  int buff_size = sz + 1;
+  char buf[buff_size]; // note +1 for null terminator
+  std::snprintf(&buf[0], buff_size, "%02X", unsigned(value.byte_order_));
+  ret += OPENDDS_STRING(buf) + ")";
 
   if (value.message_id_ != TRANSPORT_CONTROL) {
-    ret + ", ";
+    ret += ", ";
 
-    if (value.coherent_change_ == 1) ret + "Coherent, ";
-    if (value.historic_sample_ == 1) ret + "Historic, ";
-    if (value.lifespan_duration_ == 1) ret + "Lifespan, ";
+    if (value.coherent_change_ == 1) ret += "Coherent, ";
+    if (value.historic_sample_ == 1) ret += "Historic, ";
+    if (value.lifespan_duration_ == 1) ret += "Lifespan, ";
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-    if (value.group_coherent_ == 1) ret + "Group-Coherent, ";
+    if (value.group_coherent_ == 1) ret += "Group-Coherent, ";
 #endif
-    if (value.content_filter_ == 1) ret + "Content-Filtered, ";
-    if (value.sequence_repair_ == 1) ret + "Sequence Repair, ";
-    if (value.more_fragments_ == 1) ret + "More Fragments, ";
-    if (value.cdr_encapsulation_ == 1) ret + "CDR Encapsulation, ";
-    if (value.key_fields_only_ == 1) ret + "Key Fields Only, ";
+    if (value.content_filter_ == 1) ret += "Content-Filtered, ";
+    if (value.sequence_repair_ == 1) ret += "Sequence Repair, ";
+    if (value.more_fragments_ == 1) ret += "More Fragments, ";
+    if (value.cdr_encapsulation_ == 1) ret += "CDR Encapsulation, ";
+    if (value.key_fields_only_ == 1) ret += "Key Fields Only, ";
 
-    ret + "Sequence: 0x";
-    char seq_buf[sizeof(unsigned)];
-    sprintf(seq_buf, "%02X", unsigned(value.sequence_.getValue()));
-    ret + OPENDDS_STRING(seq_buf) + ", ";
+    ret += "Sequence: 0x";
+    int sz2 = std::snprintf(NULL, 0, "%02X", unsigned(value.sequence_.getValue()));
+    int buff2_size = sz2 + 1;
+    char buf2[buff2_size]; // note +1 for null terminator
+    std::snprintf(&buf2[0], buff2_size, "%02X", unsigned(value.sequence_.getValue()));
+    ret += OPENDDS_STRING(buf2) + ", ";
 
-    ret + "Timestamp: ";
+    ret += "Timestamp: ";
     ret += value.source_timestamp_sec_;
-    ret + ".";
+    ret += ".";
     ret += value.source_timestamp_nanosec_;
-    ret + ", ";
+    ret += ", ";
 
     if (value.lifespan_duration_) {
-      ret + "Lifespan: ";
+      ret += "Lifespan: ";
       ret += value.lifespan_duration_sec_;
-      ret + ".";
+      ret += ".";
       ret += value.lifespan_duration_nanosec_;
-      ret + ", ";
+      ret += ", ";
     }
 
     ret + "Publication: " + OPENDDS_STRING(GuidConverter(value.publication_id_));

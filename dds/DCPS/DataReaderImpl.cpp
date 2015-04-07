@@ -38,6 +38,7 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/OS_NS_sys_time.h"
 
+#include <cstdio>
 #include <stdexcept>
 
 #if !defined (__ACE_INLINE__)
@@ -2885,9 +2886,10 @@ void DataReaderImpl::notify_liveliness_change()
     OPENDDS_STRING output_str;
     output_str + "subscription ";
     output_str += OPENDDS_STRING(GuidConverter(subscription_id_));
-    int len = sprintf(NULL, "%p", this->listener_.in ());
-    char buf[len];
-    sprintf(buf, "%p", this->listener_.in ());
+    int sz = std::snprintf(NULL, 0, "%p", this->listener_.in ());
+    int buff_size = sz + 1;
+    char buf[buff_size]; // note +1 for null terminator
+    std::snprintf(&buf[0], buff_size, "%p", this->listener_.in ());
     output_str + ", listener at: 0x";
     output_str += OPENDDS_STRING(buf);
 

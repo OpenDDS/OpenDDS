@@ -12,6 +12,7 @@
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #include "ace/ACE.h"
+#include <cstdio>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -95,8 +96,10 @@ GuidConverter::operator OPENDDS_STRING() const
 
   OPENDDS_STRING ret(to_string(guid_));
   ret += "(";
-  char buf[sizeof(unsigned long)];
-  sprintf(buf, "%01lx", (unsigned long) checksum());
+  int sz = std::snprintf(NULL, 0, "%01lx", (unsigned long) checksum());
+  int buff_size = sz + 1;
+  char buf[buff_size]; // note +1 for null terminator
+  std::snprintf(&buf[0], buff_size, "%01lx", (unsigned long) checksum());
   ret += OPENDDS_STRING(buf);
   ret += ")";
 

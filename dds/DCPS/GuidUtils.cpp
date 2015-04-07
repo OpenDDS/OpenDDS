@@ -10,7 +10,7 @@
 #include "DCPS/SafetyProfileStreams.h"
 
 #include <cstdlib>
-
+#include <cstdio>
 #include "ace/ACE.h"
 #include "ace/OS_NS_string.h"
 
@@ -47,27 +47,38 @@ to_string(const GUID_t& guid)
         sizeof(guid.entityId.entityKey) / sizeof(CORBA::Octet) +
         sizeof(CORBA::Octet);
 
-  char buffer[tot_len];
-  char* cur_char = buffer;
+  OPENDDS_STRING ret;
+  ret.reserve(tot_len);
+
 
   len = sizeof(guid.guidPrefix) / sizeof(CORBA::Octet);
 
   for (std::size_t i = 0; i < len; ++i) {
-    cur_char += sprintf(cur_char, "%02x", unsigned(guid.guidPrefix[i]));
+    int sz = std::snprintf(NULL, 0, "%02x", unsigned(guid.guidPrefix[i]));
+    int buff_size = sz + 1;
+    char buf[buff_size]; // note +1 for null terminator
+    std::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.guidPrefix[i]));
+    ret += OPENDDS_STRING(buf);
 
     if ((i + 1) % 4 == 0) {
-      cur_char += sprintf(cur_char, ".");
+      ret += ".";
     }
   }
 
   len = sizeof(guid.entityId.entityKey) / sizeof(CORBA::Octet);
 
   for (std::size_t i = 0; i < len; ++i) {
-    cur_char += sprintf(cur_char, "%02x", unsigned(guid.entityId.entityKey[i]));
+    int sz = std::snprintf(NULL, 0, "%02x", unsigned(guid.entityId.entityKey[i]));
+    int buff_size = sz + 1;
+    char buf[buff_size]; // note +1 for null terminator
+    std::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.entityId.entityKey[i]));
+    ret += OPENDDS_STRING(buf);
   }
-  cur_char += sprintf(cur_char, "%02x", unsigned(guid.entityId.entityKind));
-
-  OPENDDS_STRING ret(buffer);
+  int sz = std::snprintf(NULL, 0, "%02x", unsigned(guid.entityId.entityKind));
+  int buff_size = sz + 1;
+  char buf[buff_size]; // note +1 for null terminator
+  std::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.entityId.entityKind));
+  ret += OPENDDS_STRING(buf);
 
   return ret;
 }
