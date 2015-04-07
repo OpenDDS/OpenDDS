@@ -333,8 +333,7 @@ void OpenDDS::DCPS::DataDurabilityCache::init()
       path[0] = domain->name();
       DDS::DomainId_t domain_id;
       {
-        std::istringstream iss(path[0]);
-        iss >> domain_id;
+        domain_id = atol(path[0].c_str());
       }
 
       for (Directory::DirectoryIterator topic = domain->begin_dirs(),
