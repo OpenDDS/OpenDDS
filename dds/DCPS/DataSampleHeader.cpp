@@ -457,7 +457,8 @@ DataSampleHeader::join(const DataSampleHeader& first,
   return true;
 }
 
-OPENDDS_STRING to_string(const MessageId value)
+const char *
+to_string(const MessageId value)
 {
   switch (value) {
   case SAMPLE_DATA:
@@ -489,7 +490,8 @@ OPENDDS_STRING to_string(const MessageId value)
   }
 }
 
-OPENDDS_STRING to_string(const SubMessageId value)
+const char *
+to_string(const SubMessageId value)
 {
   switch (value) {
   case SUBMESSAGE_NONE:

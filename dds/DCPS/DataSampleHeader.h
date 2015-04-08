@@ -245,8 +245,8 @@ private:
   size_t marshaled_size_;
 };
 
-OPENDDS_STRING to_string(const MessageId value);
-OPENDDS_STRING to_string(const SubMessageId value);
+const char* to_string(const MessageId value);
+const char* to_string(const SubMessageId value);
 OPENDDS_STRING to_string(const DataSampleHeader& value);
 
 /// Marshal/Insertion into a buffer.
