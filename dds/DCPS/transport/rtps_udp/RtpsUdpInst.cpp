@@ -126,7 +126,7 @@ RtpsUdpInst::dump_to_str()
   // ACE_INET_Addr uses a static buffer for get_host_addr() so we can't
   // directly call it on both local_address_ and multicast_group_address_,
   // since the second call could overwrite the result of the first before the
-  // ostream gets a chance to see it.
+  // OPENDDS_STRING gets a chance to see it.
   const OPENDDS_STRING local = local_address_.get_host_addr(),
     multi = multicast_group_address_.get_host_addr();
   ret += TransportInst::dump_to_str();
