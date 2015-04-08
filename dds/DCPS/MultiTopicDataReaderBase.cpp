@@ -173,8 +173,12 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
     return;
   } else if (rc != RETCODE_OK) {
     OPENDDS_STRING rc_ss;
-    rc_ss.reserve(sizeof(ReturnCode_t));
-    rc_ss += rc;
+    int sz = ACE_OS::snprintf(NULL, 0, "%d", rc);
+    int buff_size = sz + 1;
+    char buf[buff_size]; // note +1 for null terminator
+    ACE_OS::snprintf(&buf[0], buff_size, "%d", rc);
+    rc_ss += buf;
+
     throw runtime_error("Incoming DataReader for " + topic +
       " could not be read, error #" + rc_ss);
   }
