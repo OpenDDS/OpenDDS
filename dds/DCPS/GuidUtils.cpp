@@ -42,16 +42,15 @@ to_string(const GUID_t& guid)
   std::size_t len;
   std::size_t tot_len;
 
-  tot_len = sizeof(guid.guidPrefix) / sizeof(CORBA::Octet) +
-        (((sizeof(guid.guidPrefix) / sizeof(CORBA::Octet)) / 4) * sizeof(".")) +
-        sizeof(guid.entityId.entityKey) / sizeof(CORBA::Octet) +
-        sizeof(CORBA::Octet);
+  tot_len = sizeof(guid.guidPrefix) +
+        ((sizeof(guid.guidPrefix) / 4) * sizeof(".")) +
+        sizeof(guid.entityId.entityKey) + 1;
 
   OPENDDS_STRING ret;
   ret.reserve(tot_len);
 
 
-  len = sizeof(guid.guidPrefix) / sizeof(CORBA::Octet);
+  len = sizeof(guid.guidPrefix);
 
   for (std::size_t i = 0; i < len; ++i) {
     int sz = std::snprintf(NULL, 0, "%02x", unsigned(guid.guidPrefix[i]));
@@ -65,7 +64,7 @@ to_string(const GUID_t& guid)
     }
   }
 
-  len = sizeof(guid.entityId.entityKey) / sizeof(CORBA::Octet);
+  len = sizeof(guid.entityId.entityKey);
 
   for (std::size_t i = 0; i < len; ++i) {
     int sz = std::snprintf(NULL, 0, "%02x", unsigned(guid.entityId.entityKey[i]));
@@ -89,7 +88,7 @@ operator<<(std::ostream& os, const GUID_t& rhs)
 {
   std::size_t len;
 
-  len = sizeof(rhs.guidPrefix) / sizeof(CORBA::Octet);
+  len = sizeof(rhs.guidPrefix);
 
   os << std::hex;
 
@@ -99,7 +98,7 @@ operator<<(std::ostream& os, const GUID_t& rhs)
     if ((i + 1) % 4 == 0) os << sep;
   }
 
-  len = sizeof(rhs.entityId.entityKey) / sizeof(CORBA::Octet);
+  len = sizeof(rhs.entityId.entityKey);
 
   for (std::size_t i = 0; i < len; ++i) {
     os << setopts << unsigned(rhs.entityId.entityKey[i]);
