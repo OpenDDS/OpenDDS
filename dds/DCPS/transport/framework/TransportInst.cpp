@@ -88,13 +88,13 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
   OPENDDS_STRING formatted_name;
   formatted_name.reserve(NAME_INDENT + NAME_WIDTH);
   for (int i = 0; i < NAME_INDENT; ++i) {
-    formatted_name.append(" ");
+    formatted_name += " ";
   }
-  formatted_name.append(name);
+  formatted_name += name;
   OPENDDS_STRING delim(": ");
-  formatted_name.append(delim);
+  formatted_name += delim;
   for (int i = 0; i < (NAME_WIDTH - strlen(name) - delim.length()); ++i) {
-    formatted_name.append(" ");
+    formatted_name += " ";
   }
   return formatted_name;
 #endif
