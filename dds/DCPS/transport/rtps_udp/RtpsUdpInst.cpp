@@ -11,10 +11,9 @@
 #include "RtpsUdpTransport.h"
 
 #include "dds/DCPS/transport/framework/TransportDefs.h"
-
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/Configuration.h"
 
-#include <iostream>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -119,6 +118,31 @@ RtpsUdpInst::dump(std::ostream& os)
 #endif
 }
 #endif
+
+OPENDDS_STRING
+RtpsUdpInst::dump_to_str()
+{
+  OPENDDS_STRING ret;
+  // ACE_INET_Addr uses a static buffer for get_host_addr() so we can't
+  // directly call it on both local_address_ and multicast_group_address_,
+  // since the second call could overwrite the result of the first before the
+  // ostream gets a chance to see it.
+  const OPENDDS_STRING local = local_address_.get_host_addr(),
+    multi = multicast_group_address_.get_host_addr();
+  ret += TransportInst::dump_to_str();
+  ret += formatNameForDump("local_address") += local;
+  ret + ':' += local_address_.get_port_number() + '\n';
+  ret += formatNameForDump("use_multicast") += (use_multicast_ ? "true" : "false") + '\n';
+  ret += formatNameForDump("multicast_group_address") += multi
+      + ':' += multicast_group_address_.get_port_number() + '\n';
+  ret += formatNameForDump("multicast_interface") += multicast_interface_ += '\n';
+  ret += formatNameForDump("nak_depth") += nak_depth_ + '\n';
+  ret += formatNameForDump("nak_response_delay") += nak_response_delay_.msec() + '\n';
+  ret += formatNameForDump("heartbeat_period") += heartbeat_period_.msec() + '\n';
+  ret += formatNameForDump("heartbeat_response_delay") += heartbeat_response_delay_.msec() + '\n';
+  ret += formatNameForDump("handshake_timeout") += handshake_timeout_.msec() + '\n';
+  return ret;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

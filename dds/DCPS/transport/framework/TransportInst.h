@@ -60,7 +60,7 @@ public:
 
   /// Diagnostic aid.
   void dump();
-  OPENDDS_STRING dump_to_str();
+  virtual OPENDDS_STRING dump_to_str();
 #ifndef OPENDDS_SAFETY_PROFILE
   virtual void dump(std::ostream& os);
 #endif
