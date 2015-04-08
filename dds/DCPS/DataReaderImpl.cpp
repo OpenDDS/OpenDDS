@@ -2886,12 +2886,12 @@ void DataReaderImpl::notify_liveliness_change()
     OPENDDS_STRING output_str;
     output_str + "subscription ";
     output_str += OPENDDS_STRING(GuidConverter(subscription_id_));
-    int sz = std::snprintf(NULL, 0, "%p", this->listener_.in ());
+    int sz = ACE_OS::snprintf(NULL, 0, "%p", this->listener_.in ());
     int buff_size = sz + 1;
     char buf[buff_size]; // note +1 for null terminator
-    std::snprintf(&buf[0], buff_size, "%p", this->listener_.in ());
+    ACE_OS::snprintf(&buf[0], buff_size, "%p", this->listener_.in ());
     output_str + ", listener at: 0x";
-    output_str += OPENDDS_STRING(buf);
+    output_str += buf;
 
     for (WriterMapType::iterator current = this->writers_.begin();
         current != this->writers_.end();

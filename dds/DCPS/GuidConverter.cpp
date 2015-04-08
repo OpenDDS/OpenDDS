@@ -96,11 +96,11 @@ GuidConverter::operator OPENDDS_STRING() const
 
   OPENDDS_STRING ret(to_string(guid_));
   ret += "(";
-  int sz = std::snprintf(NULL, 0, "%01lx", (unsigned long) checksum());
+  int sz = ACE_OS::snprintf(NULL, 0, "%01lx", (unsigned long) checksum());
   int buff_size = sz + 1;
   char buf[buff_size]; // note +1 for null terminator
-  std::snprintf(&buf[0], buff_size, "%01lx", (unsigned long) checksum());
-  ret += OPENDDS_STRING(buf);
+  ACE_OS::snprintf(&buf[0], buff_size, "%01lx", (unsigned long) checksum());
+  ret += buf;
   ret += ")";
 
   return ret;

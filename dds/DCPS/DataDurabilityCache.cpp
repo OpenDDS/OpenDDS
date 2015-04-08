@@ -540,10 +540,10 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
     if (this->kind_ == DDS::PERSISTENT_DURABILITY_QOS) {
       try {
         dir = Directory::create(this->data_dir_.c_str());
-        int sz = std::snprintf(NULL, 0, "%lu", domain_id);
+        int sz = ACE_OS::snprintf(NULL, 0, "%d", domain_id);
         int buff_size = sz + 1;
         char buf[buff_size]; // note +1 for null terminator
-        std::snprintf(&buf[0], buff_size, "%lu", domain_id);
+        ACE_OS::snprintf(&buf[0], buff_size, "%d", domain_id);
 
         path.push_back(OPENDDS_STRING(buf));
         path.push_back(topic_name);

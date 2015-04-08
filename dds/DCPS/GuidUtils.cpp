@@ -53,31 +53,31 @@ to_string(const GUID_t& guid)
   len = sizeof(guid.guidPrefix);
 
   for (std::size_t i = 0; i < len; ++i) {
-    int sz = std::snprintf(NULL, 0, "%02x", unsigned(guid.guidPrefix[i]));
+    int sz = ACE_OS::snprintf(NULL, 0, "%02x", unsigned(guid.guidPrefix[i]));
     int buff_size = sz + 1;
     char buf[buff_size]; // note +1 for null terminator
-    std::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.guidPrefix[i]));
-    ret += OPENDDS_STRING(buf);
+    ACE_OS::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.guidPrefix[i]));
+    ret += buf;
 
     if ((i + 1) % 4 == 0) {
-      ret += ".";
+      ret + '.';
     }
   }
 
   len = sizeof(guid.entityId.entityKey);
 
   for (std::size_t i = 0; i < len; ++i) {
-    int sz = std::snprintf(NULL, 0, "%02x", unsigned(guid.entityId.entityKey[i]));
+    int sz = ACE_OS::snprintf(NULL, 0, "%02x", unsigned(guid.entityId.entityKey[i]));
     int buff_size = sz + 1;
     char buf[buff_size]; // note +1 for null terminator
-    std::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.entityId.entityKey[i]));
-    ret += OPENDDS_STRING(buf);
+    ACE_OS::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.entityId.entityKey[i]));
+    ret += buf;
   }
-  int sz = std::snprintf(NULL, 0, "%02x", unsigned(guid.entityId.entityKind));
+  int sz = ACE_OS::snprintf(NULL, 0, "%02x", unsigned(guid.entityId.entityKind));
   int buff_size = sz + 1;
   char buf[buff_size]; // note +1 for null terminator
-  std::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.entityId.entityKind));
-  ret += OPENDDS_STRING(buf);
+  ACE_OS::snprintf(&buf[0], buff_size, "%02x", unsigned(guid.entityId.entityKind));
+  ret += buf;
 
   return ret;
 }
