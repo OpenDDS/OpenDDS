@@ -156,18 +156,10 @@ TransportImpl::configure(TransportInst* config)
   }
 
   if (Transport_debug_level > 0) {
-#ifndef OPENDDS_SAFETY_PROFILE
-    std::stringstream os;
-    dump(os);
 
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportImpl::configure()\n%C"),
-               os.str().c_str()));
-#else
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) TransportImpl::configure()\n%C"),
                dump_to_str().c_str()));
-#endif
   }
 
 
