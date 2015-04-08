@@ -130,17 +130,45 @@ RtpsUdpInst::dump_to_str()
   const OPENDDS_STRING local = local_address_.get_host_addr(),
     multi = multicast_group_address_.get_host_addr();
   ret += TransportInst::dump_to_str();
-  ret += formatNameForDump("local_address") += local;
-  ret + ':' += local_address_.get_port_number() + '\n';
-  ret += formatNameForDump("use_multicast") += (use_multicast_ ? "true" : "false") + '\n';
-  ret += formatNameForDump("multicast_group_address") += multi
-      + ':' += multicast_group_address_.get_port_number() + '\n';
-  ret += formatNameForDump("multicast_interface") += multicast_interface_ += '\n';
-  ret += formatNameForDump("nak_depth") += nak_depth_ + '\n';
-  ret += formatNameForDump("nak_response_delay") += nak_response_delay_.msec() + '\n';
-  ret += formatNameForDump("heartbeat_period") += heartbeat_period_.msec() + '\n';
-  ret += formatNameForDump("heartbeat_response_delay") += heartbeat_response_delay_.msec() + '\n';
-  ret += formatNameForDump("handshake_timeout") += handshake_timeout_.msec() + '\n';
+  ret += formatNameForDump("local_address") + local;
+  int sz = ACE_OS::snprintf(NULL, 0, "%hu", local_address_.get_port_number());
+  int buff_size = sz + 1;
+  char buf1[buff_size]; // note +1 for null terminator
+  ACE_OS::snprintf(&buf1[0], buff_size, "%hu", local_address_.get_port_number());
+  ret += ':' + buf1 + '\n';
+  ret += formatNameForDump("use_multicast") + (use_multicast_ ? "true" : "false") + '\n';
+  sz = ACE_OS::snprintf(NULL, 0, "%hu", multicast_group_address_.get_port_number());
+  buff_size = sz + 1;
+  char buf2[buff_size]; // note +1 for null terminator
+  ACE_OS::snprintf(&buf2[0], buff_size, "%hu", multicast_group_address_.get_port_number());
+  ret += formatNameForDump("multicast_group_address") + multi
+      + ':' + buf2 + '\n';
+  ret += formatNameForDump("multicast_interface") + multicast_interface_ + '\n';
+  sz = ACE_OS::snprintf(NULL, 0, "%u", unsigned(nak_depth_));
+  buff_size = sz + 1;
+  char buf3[buff_size]; // note +1 for null terminator
+  ACE_OS::snprintf(&buf3[0], buff_size, "%u", unsigned(nak_depth_));
+  ret += formatNameForDump("nak_depth") + buf3 + '\n';
+  sz = ACE_OS::snprintf(NULL, 0, "%lu", nak_response_delay_.msec());
+  buff_size = sz + 1;
+  char buf4[buff_size]; // note +1 for null terminator
+  ACE_OS::snprintf(&buf4[0], buff_size, "%lu", nak_response_delay_.msec());
+  ret += formatNameForDump("nak_response_delay") + buf4 + '\n';
+  sz = ACE_OS::snprintf(NULL, 0, "%lu", heartbeat_period_.msec());
+  buff_size = sz + 1;
+  char buf5[buff_size]; // note +1 for null terminator
+  ACE_OS::snprintf(&buf5[0], buff_size, "%lu", heartbeat_period_.msec());
+  ret += formatNameForDump("heartbeat_period") + buf5 + '\n';
+  sz = ACE_OS::snprintf(NULL, 0, "%lu", heartbeat_response_delay_.msec());
+  buff_size = sz + 1;
+  char buf6[buff_size]; // note +1 for null terminator
+  ACE_OS::snprintf(&buf6[0], buff_size, "%lu", heartbeat_response_delay_.msec());
+  ret += formatNameForDump("heartbeat_response_delay") + buf6 + '\n';
+  sz = ACE_OS::snprintf(NULL, 0, "%lu", handshake_timeout_.msec());
+  buff_size = sz + 1;
+  char buf7[buff_size]; // note +1 for null terminator
+  ACE_OS::snprintf(&buf7[0], buff_size, "%lu", handshake_timeout_.msec());
+  ret += formatNameForDump("handshake_timeout") + buf7 + '\n';
   return ret;
 }
 
