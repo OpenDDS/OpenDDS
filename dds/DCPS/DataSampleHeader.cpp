@@ -12,9 +12,8 @@
 #include "GuidConverter.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include <cstdio>
-#include <iomanip>
-#include <iostream>
 
 #if !defined (__ACE_INLINE__)
 #include "DataSampleHeader.inl"
