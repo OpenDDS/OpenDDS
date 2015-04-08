@@ -333,7 +333,7 @@ void OpenDDS::DCPS::DataDurabilityCache::init()
       path[0] = domain->name();
       DDS::DomainId_t domain_id;
       {
-        domain_id = atol(path[0].c_str());
+        domain_id = ACE_OS::atoi(path[0].c_str());
       }
 
       for (Directory::DirectoryIterator topic = domain->begin_dirs(),
