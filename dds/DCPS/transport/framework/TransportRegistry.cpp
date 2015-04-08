@@ -220,13 +220,13 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             if (name == "transports") {
               OPENDDS_STRING value = (*it).second;
 
-              OPENDDS_STRING delim = ",";
+              char delim = ',';
               size_t pos = 0;
               OPENDDS_STRING token;
               while ((pos = value.find(delim)) != OPENDDS_STRING::npos) {
                 token = value.substr(0, pos);
                 configInfo.second.push_back(token);
-                value.erase(0, pos + delim.length());
+                value.erase(0, pos + 1);
               }
               configInfo.second.push_back(value);
 
