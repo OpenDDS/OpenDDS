@@ -25,6 +25,7 @@ extern "C" {
 } // extern "C"
 
 #include <string>
+#include <map>
 
 #include "tools/dissector/dissector_export.h"
 
@@ -114,7 +115,7 @@ namespace OpenDDS
       /// Add the field to the tree, either directly using the configured
       /// format and supplied data pointer, or by handing off to the attached
       /// Sample_Dissector object for further evaluation.
-      size_t dissect_i (Wireshark_Bundle_Field &params, const std::string &alt_label);
+      size_t dissect_i (Wireshark_Bundle_Field &params, const std::string &alt_label, bool recur = true);
 
       size_t compute_field_length (guint8 *data);
       size_t compute_length (guint8 *data);
@@ -192,7 +193,7 @@ namespace OpenDDS
       /// one fields in the list.
       Sample_Field::IDLTypeID get_field_type ();
 
-      std::string stringify (guint8 *data);
+      virtual std::string stringify (guint8 *data);
 
     protected:
       /// Values used by the wireshark framework for rendering a sub-tree.
@@ -263,49 +264,14 @@ namespace OpenDDS
       virtual ~Sample_Enum ();
 
       Sample_Field *add_value (const std::string &val);
-
       virtual size_t compute_length (guint8 *data);
       bool index_of (const std::string &value, size_t &result);
+      virtual std::string stringify (guint8 *data);
 
     protected:
       virtual size_t dissect_i (Wireshark_Bundle_i &p, const std::string &l);
 
       Sample_Field *value_;
-    };
-
-    /*
-     * Switch Case is used by the union dissector to manage the list of
-     * value selectors. A single switch case may be composed of multiple
-     * discrete values, or ranges. Since the discriminator type is ordinal,
-     * a range is accepted as any value less than or equal to the value
-     *
-     * The field value is owned by the last element in the span, setting or
-     * getting the field value will recurse over the span_ list to ensure
-     * only the last member of the span has the field.
-     *
-     * Multiple case values are chained using the Sample_Field::next_ list.
-     */
-
-    class dissector_Export Switch_Case : public Sample_Field
-    {
-    public:
-      Switch_Case (Sample_Field::IDLTypeID type_id,
-                   const std::string &label,
-                   Sample_Field *field = 0);
-
-      virtual ~Switch_Case ();
-
-      Switch_Case *add_range (const std::string &label, Sample_Field *field = 0);
-      Switch_Case *chain (const std::string &label, Sample_Field *field = 0);
-      Switch_Case *chain (Switch_Case *next);
-
-      Sample_Field *do_switch (const std::string &_d, guint8 *data);
-      Sample_Field *get_field ();
-      void set_field (Sample_Field *field);
-
-    protected:
-      Switch_Case *span_;
-      Sample_Field *field_;
     };
 
     /*
@@ -322,7 +288,7 @@ namespace OpenDDS
       virtual ~Sample_Union ();
 
       void discriminator (Sample_Dissector *d);
-      Switch_Case *add_case (const std::string &label, Sample_Field *field = 0);
+      void add_label (const std::string& label, Sample_Field* field);
       void add_default (Sample_Field *value);
 
       virtual size_t compute_length (guint8 *data);
@@ -331,7 +297,8 @@ namespace OpenDDS
       virtual size_t dissect_i (Wireshark_Bundle_i &p, const std::string &l);
 
       Sample_Dissector *discriminator_;
-      Switch_Case *cases_;
+      typedef std::map<std::string, Sample_Field*> MapType;
+      MapType map_;
       Sample_Field *default_;
     };
 

@@ -1,0 +1,8 @@
+feature(!no_itl) {
+  includes += $(ITL_ROOT)/cpp
+  includes += $(ITL_ROOT)/cpp/rapidjson/include
+}
+
+feature(no_itl) {
+  macros += NO_ITL
+}

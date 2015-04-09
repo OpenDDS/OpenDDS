@@ -52,27 +52,18 @@ operator<<(std::ostream& out,
 {
   AST_Typedef* td = AST_Typedef::narrow_from_decl(it.type);
   if (td) {
-    be_global->itl_ << '"' << dds_generator::scoped_helper(it.type->name(), "/") << '"';
+    be_global->itl_ << '"' << it.type->repoID() << '"';
     return out;
   }
 
   Classification c = classify(it.type);
   if (c & CL_STRING) {
+    // TODO:  Support bounded strings.
     if (c & CL_WIDE) {
-      if (c & CL_BOUNDED) {
-        be_global->itl_ << "{ \"kind\" : \"string\", \"capacity\" : " << AST_String::narrow_from_decl(it.type)->max_size()->ev()->u.ulval << ", \"note\" : { \"idl\" : { \"type\" : \"wstring\" } } }";
-      }
-      else {
-        be_global->itl_ << "{ \"kind\" : \"string\", \"note\" : { \"idl\" : { \"type\" : \"wstring\" } } }";
-      }
+      be_global->itl_ << "{ \"kind\" : \"string\", \"note\" : { \"idl\" : { \"type\" : \"wstring\" } } }";
     }
     else {
-      if (c & CL_BOUNDED) {
-        be_global->itl_ << "{ \"kind\" : \"string\", \"capacity\" : " << AST_String::narrow_from_decl(it.type)->max_size()->ev()->u.ulval << ", \"note\" : { \"idl\" : { \"type\" : \"string\" } } }";
-      }
-      else {
-        be_global->itl_ << "{ \"kind\" : \"string\", \"note\" : { \"idl\" : { \"type\" : \"string\" } } }";
-      }
+      be_global->itl_ << "{ \"kind\" : \"string\" }";
     }
   }
   else if (c & CL_PRIMITIVE) {
@@ -105,16 +96,16 @@ operator<<(std::ostream& out,
       be_global->itl_ << "{ \"kind\" : \"float\", \"model\" : \"binary128\" }";
       break;
     case AST_PredefinedType::PT_char:
-      be_global->itl_ << "{ \"kind\" : \"byte\", \"note\" : { \"idl\" : { \"type\" : \"char\" } } }";
+      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"note\" : { \"presentation\" : { \"type\" : \"char\" } } }";
       break;
     case AST_PredefinedType::PT_wchar:
-      be_global->itl_ << "{ \"kind\" : \"sequence\", \"type\" : { \"kind\" : \"byte\" } \"note\" : { \"idl\" : { \"type\" : \"wchar\" } } }";
+      be_global->itl_ << "{ \"kind\" : \"int\", \"note\" : { \"presentation\" : { \"type\" : \"char\" }, \"idl\" : { \"type\" : \"wchar\" } } }";
       break;
     case AST_PredefinedType::PT_boolean:
-      be_global->itl_ << "{ \"kind\" : \"bool\" }";
+      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 1, \"note\" : { \"presentation\" : { \"type\" : \"bool\" } } }";
       break;
     case AST_PredefinedType::PT_octet:
-      be_global->itl_ << "{ \"kind\" : \"byte\" }";
+      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true }";
       break;
     case AST_PredefinedType::PT_any:
     case AST_PredefinedType::PT_object:
@@ -127,7 +118,7 @@ operator<<(std::ostream& out,
     }
   }
   else {
-    be_global->itl_ << '"' << dds_generator::scoped_helper(it.type->name(), "/") << '"';
+    be_global->itl_ << '"' << it.type->repoID() << '"';
   }
 
   return out;
@@ -157,8 +148,8 @@ void itl_generator::new_type()
   ++count_;
 }
 
-bool itl_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
-                             const std::vector<AST_EnumVal*>& contents, const char* /*repoid*/)
+bool itl_generator::gen_enum(AST_Enum*, UTL_ScopedName* /*name*/,
+                             const std::vector<AST_EnumVal*>& contents, const char* repoid)
 {
   if (!be_global->generate_itl())
     return true;
@@ -169,7 +160,7 @@ bool itl_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
                   << Indent(this) << "{\n"
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"alias\",\n"
-                  << Indent(this) << "\"name\" : \"" << scoped_helper(name, "/") << "\",\n"
+                  << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
                   << Indent(this) << "\"type\" :\n"
                   << Open(this)
                   << Indent(this) << "{\n"
@@ -177,33 +168,18 @@ bool itl_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
                   << Indent(this) << "\"kind\" : \"int\",\n"
                   << Indent(this) << "\"bits\" : 32,\n"
                   << Indent(this) << "\"unsigned\" : true,\n"
-                  << Indent(this) << "\"note\" :\n"
-                  << Open(this)
-                  << Indent(this) << "{\n"
-                  << Open(this)
-                  << Indent(this) << "\"collections\" : {"
-                  << "\"type\" : \"enum\","
-                  << "\"values\" : [";
+                  << Indent(this) << "\"constrained\" : true,\n"
+                  << Indent(this) << "\"values\" : {";
+
   for (size_t i = 0; i < contents.size(); ++i) {
     if (i > 0)
-      be_global->itl_<< ", ";
-    be_global->itl_ << "{\"name\" : \"" << contents[i]->local_name()->get_string() << "\", \"value\" : " << i << "}";
+      be_global->itl_ << ", ";
+    be_global->itl_ << '"' << contents[i]->local_name()->get_string() << '"'
+                    << " : "
+                    << '"' << i << '"';
   }
-  be_global->itl_ << "]},\n";
-  be_global->itl_ << Indent(this) << "\"idl\" : {"
-                  << "\"type\" : \"enum\","
-                  << "\"values\" : [";
-  for (size_t i = 0; i < contents.size(); ++i) {
-    if (i > 0)
-      be_global->itl_<< ", ";
-    be_global->itl_ << "{\"name\" : \"" << contents[i]->local_name()->get_string() << "\", \"value\" : " << i << "}";
-  }
-  be_global->itl_ << "]}\n";
 
-  be_global->itl_ << Close(this)
-                  << Indent(this) << "}\n"
-                  << Close(this);
-
+  be_global->itl_ << "}\n";
   be_global->itl_ << Close(this)
                   << Indent(this) << "}\n"
                   << Close(this);
@@ -215,9 +191,9 @@ bool itl_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   return true;
 }
 
-bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
+bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
                                 AST_Type* base,
-                                const char* /*repoid*/)
+                                const char* repoid)
 {
   if (!be_global->generate_itl())
     return true;
@@ -231,7 +207,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
                       << Indent(this) << "{\n"
                       << Open(this)
                       << Indent(this) << "\"kind\" : \"alias\",\n"
-                      << Indent(this) << "\"name\" : \"" << scoped_helper(name, "/") << "\",\n"
+                      << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
                       << Indent(this) << "\"type\" :\n"
                       << Open(this)
                       << Indent(this) << "{\n"
@@ -256,7 +232,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
                       << Indent(this) << "{\n"
                       << Open(this)
                       << Indent(this) << "\"kind\" : \"alias\",\n"
-                      << Indent(this) << "\"name\" : \"" << scoped_helper(name, "/") << "\",\n"
+                      << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
                       << Indent(this) << "\"type\" :\n"
                       << Open(this)
                       << Indent(this) << "{\n"
@@ -285,7 +261,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
                       << Indent(this) << "{\n"
                       << Open(this)
                       << Indent(this) << "\"kind\" : \"alias\",\n"
-                      << Indent(this) << "\"name\" : \"" << scoped_helper(name, "/") << "\",\n"
+                      << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
                       << Indent(this) << "\"type\" : " << InlineType(base) << "\n"
                       << Close(this)
                       << Indent(this) << "}\n"
@@ -297,9 +273,9 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   return true;
 }
 
-bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
+bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* /* name */,
                                const std::vector<AST_Field*>& fields,
-                               AST_Type::SIZE_TYPE, const char* /* repoid */)
+                               AST_Type::SIZE_TYPE, const char* repoid)
 {
   if (!be_global->generate_itl())
     return true;
@@ -309,7 +285,7 @@ bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
                   << Indent(this) << "{\n"
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"alias\",\n"
-                  << Indent(this) << "\"name\" : \"" << scoped_helper(name, "/") << "\",\n"
+                  << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
                   << Indent(this) << "\"type\" :\n"
                   << Open(this)
                   << Indent(this) << "{\n"
@@ -352,10 +328,10 @@ bool itl_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 }
 
 
-bool itl_generator::gen_union(AST_Union*, UTL_ScopedName* name,
+bool itl_generator::gen_union(AST_Union*, UTL_ScopedName* /*name*/,
                               const std::vector<AST_UnionBranch*>& cases,
                               AST_Type* _d,
-                              const char* /*repoid*/)
+                              const char* repoid)
 {
   if (!be_global->generate_itl())
     return true;
@@ -365,13 +341,13 @@ bool itl_generator::gen_union(AST_Union*, UTL_ScopedName* name,
                   << Indent(this) << "{\n"
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"alias\",\n"
-                  << Indent(this) << "\"name\" : \"" << scoped_helper(name, "/") << "\",\n"
+                  << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
                   << Indent(this) << "\"type\" :\n"
                   << Open(this)
                   << Indent(this) << "{\n"
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"union\",\n"
-                  << Indent(this) << "\"discriminator\" : \"" << InlineType(_d) << "\",\n"
+                  << Indent(this) << "\"discriminator\" : " << InlineType(_d) << ",\n"
                   << Indent(this) << "\"fields\" :\n"
                   << Open(this)
                   << Indent(this) << "[\n";

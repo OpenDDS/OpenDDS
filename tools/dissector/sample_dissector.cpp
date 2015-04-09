@@ -294,7 +294,8 @@ namespace OpenDDS
 
     size_t
     Sample_Field::dissect_i (Wireshark_Bundle_Field &params,
-                             const std::string &alt_label)
+                             const std::string &alt_label,
+                             bool recur)
     {
       size_t len = 0;
       if (this->nested_ == 0)
@@ -311,24 +312,20 @@ namespace OpenDDS
           if (this->type_id_ != WString)
             {
               this->to_stream (outstream, params.data);
-              outstream << std::ends;
-              std::string buffer = outstream.str();
               proto_tree_add_text (params.tree, params.tvb, params.offset,
-                                   (gint)len, "%s", buffer.c_str());
+                                   (gint)len, "%s", outstream.str().c_str());
             }
           else
             {
               guint32 len =
                 *(reinterpret_cast< guint32 * >(params.data));
               guint32 width = len * Serializer::WCHAR_SIZE;
-              outstream << std::ends;
-              std::string buffer = outstream.str();
 
               ACE_CDR::WChar * clone = new ACE_CDR::WChar[len + 1];
               ACE_OS::memcpy (clone, params.data+4, width);
               clone[len] = 0;
               proto_tree_add_text (params.tree, params.tvb, params.offset,
-                                   width + 4, "%s %ls", buffer.c_str(), clone);
+                                   width + 4, "%s %ls", outstream.str().c_str(), clone);
               delete [] clone;
             }
         }
@@ -339,7 +336,7 @@ namespace OpenDDS
 
       params.offset += (gint)len;
       params.data += len;
-      if (next_ != 0)
+      if (next_ != 0 && recur)
         len += next_->dissect_i (params, this->label_);
       return len;
     }
@@ -517,11 +514,10 @@ namespace OpenDDS
       outstream << label;
       if (params.use_index)
         outstream << "[" << params.index << "]";
-      outstream << " (length = " << count << ")" << std::ends;
-      std::string buffer = outstream.str();
+      outstream << " (length = " << count << ")";
       proto_item *item =
         proto_tree_add_text (params.tree, params.tvb, params.offset,
-                             len,"%s", buffer.c_str());
+                             len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
       size_t data_pos = 4;
@@ -574,11 +570,10 @@ namespace OpenDDS
       outstream << label;
       if (params.use_index)
         outstream << "[" << params.index << "]";
-      outstream << " (length = " << count_ << ")" << std::ends;
-      std::string buffer = outstream.str();
+      outstream << " (length = " << count_ << ")";
       proto_item *item =
         proto_tree_add_text (params.tree, params.tvb, params.offset,
-                             (gint)len,"%s", buffer.c_str());
+                             (gint)len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
       size_t data_pos = 0;
@@ -642,13 +637,12 @@ namespace OpenDDS
       if (params.use_index)
         outstream << "[" << params.index << "]";
       if (sf == 0)
-        outstream << ": <value out of bounds: " << value << "> " << std::ends;
+        outstream << ": <value out of bounds: " << value << "> ";
       else
-        outstream << ": " << sf->label_ << std::ends;
-      std::string buffer = outstream.str();
+        outstream << ": " << sf->label_;
 
       proto_tree_add_text (params.tree, params.tvb, params.offset,
-                           (gint)len, "%s", buffer.c_str());
+                           (gint)len, "%s", outstream.str().c_str());
       return len;
     }
 
@@ -673,104 +667,25 @@ namespace OpenDDS
       return false;
     }
 
+    std::string
+    Sample_Enum::stringify (guint8 *data)
+    {
+      guint32 value = *(reinterpret_cast< guint32 * >(data));
+      Sample_Field *sf = value_->get_link (value);
+
+      if (sf) {
+        return sf->label_;
+      }
+
+      std::stringstream outstream;
+      outstream << value;
+      return outstream.str();
+    }
+
     //----------------------------------------------------------------------
-
-    Switch_Case::Switch_Case (Sample_Field::IDLTypeID type_id,
-                              const std::string &label,
-                              Sample_Field *field)
-      : Sample_Field (type_id, label),
-        span_(0),
-        field_ (field)
-    {
-    }
-
-    Switch_Case::~Switch_Case ()
-    {
-      delete span_;
-      delete field_;
-    }
-
-    Switch_Case *
-    Switch_Case::add_range (const std::string &label, Sample_Field *field)
-    {
-      Switch_Case *c = new Switch_Case (this->type_id_, label);
-
-      c->field_ = (field != 0) ? field : this->field_;
-      this->field_ = 0;
-      if (span_ == 0)
-        span_ = c;
-      else
-        {
-          Switch_Case *last = span_;
-          while (last->span_ != 0)
-            last = last->span_;
-
-          c->field_ = (field != 0) ? field : last->field_;
-          last->field_ = 0;
-          last->span_ = c;
-        }
-      return c;
-    }
-
-    Switch_Case *
-    Switch_Case::chain (Switch_Case *next)
-    {
-      Sample_Field::chain (next);
-      return next;
-    }
-
-    Switch_Case *
-    Switch_Case::chain (const std::string &label, Sample_Field *field)
-    {
-      return chain (new Switch_Case (this->type_id_,label, field));
-    }
-
-    Sample_Field *
-    Switch_Case::do_switch (const std::string &_d, guint8 *data)
-    {
-      // extract the discriminator value pointed to by data,
-      // convert element label and compare. If lower_bound_ is nil,
-      // exactly match label, otherwise match
-      // accept any value between the converted "lower_bound_" and the "label_"
-      Sample_Field *value = 0;
-      if (_d.compare (this->label_) == 0)
-        value = this->get_field();
-
-      if (this->span_ != 0)
-        value = this->span_->do_switch (_d,data);
-
-      Switch_Case *sc = dynamic_cast<Switch_Case *>(this->next_);
-      if ( value == 0 && next_ != 0)
-        return sc->do_switch (_d,data);
-      return value;
-    }
-
-    Sample_Field *
-    Switch_Case::get_field ()
-    {
-      Switch_Case *last = this;
-      while (last->span_ != 0)
-        last = last->span_;
-      return last->field_;
-    }
-
-    void
-    Switch_Case::set_field (Sample_Field *field)
-    {
-      Switch_Case *last = this;
-      while (last->span_ != 0)
-        {
-          delete last->field_;
-          last->field_ = 0;
-
-          last = last->span_;
-        }
-      last->field_ = field;
-    }
 
     Sample_Union::Sample_Union ()
       :discriminator_ (0),
-       cases_ (0),
        default_ (0)
     {
       this->init ("union");
@@ -778,7 +693,6 @@ namespace OpenDDS
 
     Sample_Union::~Sample_Union ()
     {
-      delete cases_;
       delete default_;
     }
 
@@ -788,17 +702,10 @@ namespace OpenDDS
       this->discriminator_ = d;
     }
 
-    Switch_Case *
-    Sample_Union::add_case (const std::string &label, Sample_Field *field)
+    void
+    Sample_Union::add_label (const std::string& label, Sample_Field* field)
     {
-      Sample_Field::IDLTypeID type_id =
-        discriminator_->get_field_type();
-      Switch_Case *c = new Switch_Case (type_id, label, field);
-      if (this->cases_ == 0)
-        this->cases_ = c;
-      else
-        this->cases_->chain (c);
-      return c;
+      map_[label] = field;
     }
 
     void
@@ -814,11 +721,12 @@ namespace OpenDDS
       // Or is it length of specific field?
       size_t len = this->discriminator_->compute_length(data);
       std::string _d = this->discriminator_->stringify(data);
-      Sample_Field *value =
-        this->cases_->do_switch (_d, data);
-      if (value == 0)
-        value = this->default_;
-      return value->compute_length (data + len);
+      Sample_Field* value = this->default_;
+      MapType::const_iterator pos = map_.find(_d);
+      if (pos != map_.end()) {
+        value = pos->second;
+      }
+      return len + value->compute_length (data + len);
     }
 
     size_t
@@ -830,22 +738,22 @@ namespace OpenDDS
       std::string _d = this->discriminator_->stringify(data);
 
       size_t data_pos = len;
-      Sample_Field *value =
-        this->cases_->do_switch (_d, data);
-      if (value == 0)
-        value = this->default_;
-      len += value->compute_length (data + len);
+      Sample_Field* value = this->default_;
+      MapType::const_iterator pos = map_.find(_d);
+      if (pos != map_.end()) {
+        value = pos->second;
+      }
+      len += value->compute_field_length (data + len);
 
       std::stringstream outstream;
       outstream << label;
       if (params.use_index)
         outstream << "[" << params.index << "]";
-      outstream << " ( on " << _d << ")" << std::ends;
+      outstream << " (on " << _d << ")";
 
-      std::string buffer = outstream.str();
       proto_item *item =
         proto_tree_add_text (params.tree, params.tvb, params.offset,
-                             (gint)len,"%s", buffer.c_str());
+                             (gint)len,"%s", outstream.str().c_str());
       proto_tree *subtree = proto_item_add_subtree (item, ett_payload_);
 
 
@@ -858,7 +766,7 @@ namespace OpenDDS
       fp.index = 0;
       fp.data = data;
 
-      data_pos += value->dissect_i (fp, label);
+      data_pos += value->dissect_i (fp, label, false);
 
       return data_pos;
     }
