@@ -1,4 +1,5 @@
 #include "FACE/Sequence.h"
+#include "FACE/SequenceVar.h"
 
 #include <tao/Array_VarOut_T.h>
 #include <tao/Seq_Var_T.h>
@@ -18,6 +19,7 @@ namespace {
 }
 
 using OpenDDS::FaceTypes::Sequence;
+using OpenDDS::FaceTypes::SequenceVar;
 using OpenDDS::FaceTypes::Unbounded;
 using OpenDDS::FaceTypes::Bounded;
 using OpenDDS::FaceTypes::StringEltPolicy;
@@ -97,10 +99,10 @@ struct S3 : Sequence<MyStru, Bounded<3> > {};
 struct S4 : Sequence<MyStru2, Unbounded, VariEltPolicy<MyStru2> > {};
 struct S5 : Sequence<S4, Unbounded, VariEltPolicy<S4> > {};
 
-typedef TAO_FixedSeq_Var_T<S1> S1_var;
+typedef SequenceVar<S1> S1_var;
 typedef TAO_Seq_Out_T<S1> S1_out;
 
-typedef TAO_VarSeq_Var_T<S4> S4_var;
+typedef SequenceVar<S4> S4_var;
 typedef TAO_Seq_Out_T<S4> S4_out;
 
 struct SS : Sequence<char*, Unbounded, StringEltPolicy<char> > {};
@@ -280,8 +282,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   const S1_var& s1vc = s1v;
   TEST_CHECK(s1vc[1] == 1);
 
-#if !defined __SUNPRO_CC && (!defined _MSC_VER || _MSC_VER >= 1500) && \
-  (!defined __GNUC__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC__MINOR__ > 1))
   S4_var s4v = new S4;
   s4v->length(2);
   s4v[0].i1_ = 3;
@@ -289,7 +289,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   s4v[1] = s4v[0];
   const S4_var& s4vc = s4v;
   TEST_CHECK(s4vc[1].s1_ == "testing");
-#endif
 
   printf("%d assertions passed\n", assertions);
   return 0;
