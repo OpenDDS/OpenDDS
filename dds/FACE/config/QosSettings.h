@@ -1,7 +1,6 @@
 #ifndef OPENDDS_QOS_SETTINGS_H
 #define OPENDDS_QOS_SETTINGS_H
 
-#include <map>
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/PoolAllocator.h"

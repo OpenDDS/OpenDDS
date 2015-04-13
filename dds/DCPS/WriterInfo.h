@@ -10,8 +10,7 @@
 #ifndef OPENDDS_DCPS_WRITERINFO_H
 #define OPENDDS_DCPS_WRITERINFO_H
 
-#include <list>
-#include <map>
+#include "dds/DCPS/PoolAllocator.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 // #include "RcHandle_T.h"
 #include "RcObject_T.h"

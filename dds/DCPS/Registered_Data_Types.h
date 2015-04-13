@@ -18,8 +18,6 @@
 
 #include "ace/Singleton.h"
 
-#include <map>
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */

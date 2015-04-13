@@ -25,8 +25,6 @@
 #include "ace/SOCK_Dgram_Mcast.h"
 #include "ace/Condition_Thread_Mutex.h"
 
-#include <map>
-#include <set>
 #include "dds/DCPS/PoolAllocator.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -90,6 +88,7 @@ public:
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,
+                                const char* filterClassName,
                                 const char* filterExpr,
                                 const DDS::StringSeq& params);
   void remove_subscription(const DCPS::RepoId& subscriptionId);

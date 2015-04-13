@@ -10,7 +10,6 @@
 #ifndef OPENDDS_DCPS_REPLAYER_H
 #define OPENDDS_DCPS_REPLAYER_H
 
-#include <vector>
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/RcHandle_T.h"

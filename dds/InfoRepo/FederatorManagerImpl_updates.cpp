@@ -119,6 +119,7 @@ ManagerImpl::create(const Update::URActor& reader)
   sample.datareader_qos = reader.drdwQos;
   sample.subscriber_qos = reader.pubsubQos;
   sample.transport_info = reader.transportInterfaceInfo;
+  sample.filter_class_name = reader.contentSubscriptionProfile.filterClassName;
   sample.filter_expression = reader.contentSubscriptionProfile.filterExpr;
   sample.expression_params = reader.contentSubscriptionProfile.exprParams;
 
@@ -672,6 +673,7 @@ ManagerImpl::processCreate(const SubscriptionUpdate* sample, const DDS::SampleIn
                                              sample->datareader_qos,
                                              sample->transport_info,
                                              sample->subscriber_qos,
+                                             sample->filter_class_name,
                                              sample->filter_expression,
                                              sample->expression_params,
                                              true)) {
@@ -874,6 +876,7 @@ ManagerImpl::processDeferred()
                                                 current->datareader_qos,
                                                 current->transport_info,
                                                 current->subscriber_qos,
+                                                current->filter_class_name,
                                                 current->filter_expression,
                                                 current->expression_params,
                                                 true)) {

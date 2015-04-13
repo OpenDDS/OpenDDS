@@ -23,8 +23,6 @@
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 #include "ace/Atomic_Op.h"
 
-#include <set>
-
 namespace OpenDDS {
 namespace DCPS {
 

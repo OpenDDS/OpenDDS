@@ -19,9 +19,8 @@
 #include "TransportConfig_rch.h"
 #include "TransportConfig.h"
 #include "ace/Synch.h"
-
 #include "dds/DCPS/PoolAllocator.h"
-#include <map>
+
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;

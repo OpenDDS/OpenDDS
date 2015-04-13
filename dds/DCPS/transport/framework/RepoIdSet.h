@@ -17,7 +17,6 @@
 #include "ace/Synch.h"
 
 #include "dds/DCPS/PoolAllocator.h"
-#include <map>
 
 namespace OpenDDS {
 namespace DCPS {

@@ -16,7 +16,7 @@
 #include "ace/INET_Addr.h"
 
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
-#include <map>
+#include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {

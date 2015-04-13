@@ -12,7 +12,6 @@
 #include <ace/Unbounded_Queue.h>
 
 #include <algorithm>
-#include <vector>
 #include "dds/DCPS/PoolAllocator.h"
 
 namespace OpenDDS {

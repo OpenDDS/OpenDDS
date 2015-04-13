@@ -15,7 +15,6 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

@@ -49,7 +49,7 @@ namespace DCPS {
     /**
      * Block until all messages have been account for.
      */
-    void wait_messages_pending();
+    void wait_messages_pending(OPENDDS_STRING& caller_message);
 
     /**
      * Provide a timestamp for the passed in time.

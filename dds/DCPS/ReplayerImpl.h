@@ -32,9 +32,7 @@
 #include "ace/Condition_T.h"
 #include "ace/Condition_Recursive_Thread_Mutex.h"
 
-#include <map>
 #include <memory>
-#include <set>
 
 #include "Replayer.h"
 
@@ -243,7 +241,7 @@ private:
 
   RepoIdToHandleMap id_to_handle_map_;
 
-  typedef std::set<RepoId, GUID_tKeyLessThan> IdSet;
+  typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) IdSet;
 
   IdSet readers_;
 

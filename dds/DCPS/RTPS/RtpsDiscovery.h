@@ -20,7 +20,6 @@
 #include "ace/Configuration.h"
 
 #include "dds/DCPS/PoolAllocator.h"
-#include <vector>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -150,6 +149,7 @@ public:
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
+    const char* filterClassName,
     const char* filterExpression,
     const DDS::StringSeq& exprParams);
 

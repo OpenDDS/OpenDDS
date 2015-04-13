@@ -12,10 +12,9 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Recursive_Thread_Mutex.h"
-
-#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

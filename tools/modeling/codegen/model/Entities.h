@@ -20,8 +20,6 @@
 #include "model_export.h"
 
 #include <string>
-#include <map>
-#include <queue>
 
 namespace OpenDDS { namespace Model {
 
@@ -125,7 +123,7 @@ class OpenDDS_Model_Export Entities  {
 
   private:
     /// Map of queues.
-    typedef OPENDDS_MAP(OPENDDS_STRING, std::queue<DDS::TypeSupport_ptr> )
+    typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_QUEUE(DDS::TypeSupport_ptr) )
             TypeSupportByParticipantQueues;
 
     /// Store type support until it can be registered.

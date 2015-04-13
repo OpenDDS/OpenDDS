@@ -17,7 +17,6 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 #include "PoolAllocator.h"
-#include <map>
 #include <iosfwd>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

@@ -242,7 +242,8 @@ DataWriterImpl::add_association(const RepoId& yourId,
   {
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
-                                       ReaderInfo(TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
+                                       ReaderInfo(reader.filterClassName,
+                                                  TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -330,14 +331,16 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   }
 }
 
-DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
+DataWriterImpl::ReaderInfo::ReaderInfo(const char* filterClassName,
+                                       const char* filter,
                                        const DDS::StringSeq& params,
                                        DomainParticipantImpl* participant,
                                        bool durable)
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   : participant_(participant)
-  , expression_params_(params)
+  , filter_class_name_(filterClassName)
   , filter_(filter)
+  , expression_params_(params)
   , eval_(*filter ? participant->get_filter_eval(filter) : 0)
   , expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , durable_(durable)
@@ -346,6 +349,7 @@ DataWriterImpl::ReaderInfo::ReaderInfo(const char* filter,
   : expected_sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , durable_(durable)
 {
+  ACE_UNUSED_ARG(filterClassName);
   ACE_UNUSED_ARG(filter);
   ACE_UNUSED_ARG(params);
   ACE_UNUSED_ARG(participant);
@@ -411,6 +415,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
   bool reader_durable = false;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  OPENDDS_STRING filterClassName;
   RcHandle<FilterEvaluator> eval;
   DDS::StringSeq expression_params;
 #endif
@@ -432,6 +437,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     if (it != reader_info_.end()) {
       reader_durable = it->second.durable_;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+      filterClassName = it->second.filter_class_name_;
       eval = it->second.eval_;
       expression_params = it->second.expression_params_;
 #endif
@@ -503,7 +509,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     // samples.
     this->data_container_->reenqueue_all(remote_id, this->qos_.lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-                                         , eval.in(), expression_params
+                                         , filterClassName, eval.in(), expression_params
 #endif
                                         );
 
@@ -2067,6 +2073,7 @@ DataWriterImpl::parent() const
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
 bool
 DataWriterImpl::filter_out(const DataSampleElement& elt,
+                           const OPENDDS_STRING& filterClassName,
                            const FilterEvaluator& evaluator,
                            const DDS::StringSeq& expression_params) const
 {
@@ -2078,10 +2085,16 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
     return false;
   }
 
-  return !evaluator.eval(elt.get_sample()->cont(),
-                         elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                         elt.get_header().cdr_encapsulation_, typesupport->getMetaStructForType(),
-                         expression_params);
+  if (filterClassName == "DDSSQL" ||
+      filterClassName == "OPENDDSSQL") {
+    return !evaluator.eval(elt.get_sample()->cont(),
+                           elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
+                           elt.get_header().cdr_encapsulation_, typesupport->getMetaStructForType(),
+                           expression_params);
+  }
+  else {
+    return false;
+  }
 }
 #endif
 
@@ -2509,7 +2522,8 @@ DataWriterImpl::pending_control()
 void
 DataWriterImpl::wait_control_pending()
 {
-  controlTracker.wait_messages_pending();
+  OPENDDS_STRING caller_string("DataWriterImpl::wait_control_pending");
+  controlTracker.wait_messages_pending(caller_string);
 }
 
 void

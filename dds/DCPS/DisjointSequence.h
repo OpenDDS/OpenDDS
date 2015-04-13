@@ -13,8 +13,6 @@
 #include "Definitions.h"
 
 #include "PoolAllocator.h"
-#include <set>
-#include <vector>
 
 namespace OpenDDS {
 namespace DCPS {

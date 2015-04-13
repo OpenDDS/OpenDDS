@@ -45,6 +45,7 @@ public:
                        const DDS::DataReaderQos& qos,
                        const OpenDDS::DCPS::TransportLocatorSeq& info,
                        const DDS::SubscriberQos& subscriberQos,
+                       const char* filterClassName,
                        const char* filterExpression,
                        const DDS::StringSeq& exprParams);
 
@@ -173,6 +174,7 @@ public:
   // Expose the datareader.
   OpenDDS::DCPS::DataReaderRemote_ptr reader();
 
+  std::string get_filter_class_name() const;
   std::string get_filter_expression() const;
   DDS::StringSeq get_expr_params() const;
 
@@ -193,6 +195,7 @@ private:
   DDS::DataReaderQos qos_;
   OpenDDS::DCPS::TransportLocatorSeq info_;
   DDS::SubscriberQos subscriberQos_;
+  std::string filterClassName_;
   std::string filterExpression_;
   DDS::StringSeq exprParams_;
 

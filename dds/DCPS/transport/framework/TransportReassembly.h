@@ -14,10 +14,6 @@
 #include "ReceivedDataSample.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#include <list>
-#include <map>
-#include <set>
-
 namespace OpenDDS {
 namespace DCPS {
 

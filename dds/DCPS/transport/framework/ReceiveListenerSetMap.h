@@ -13,9 +13,8 @@
 #include "ReceiveListenerSet.h"
 #include "ReceiveListenerSet_rch.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/PoolAllocator.h"
 #include "ace/Synch.h"
-
-#include <map>
 
 namespace OpenDDS {
 namespace DCPS {

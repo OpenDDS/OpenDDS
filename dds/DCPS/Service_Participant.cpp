@@ -33,8 +33,6 @@
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 
-#include <vector>
-
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <cstdio>
 #else

@@ -34,8 +34,6 @@
 #include "ace/Condition_Thread_Mutex.h"
 #include "ace/Thread_Mutex.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include <map>
-#include <set>
 
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -128,6 +126,7 @@ public:
                                 const DDS::DataReaderQos& qos,
                                 const DCPS::TransportLocatorSeq& transInfo,
                                 const DDS::SubscriberQos& subscriberQos,
+                                const char* filterClassName,
                                 const char* filterExpr,
                                 const DDS::StringSeq& params);
   void remove_subscription(const DCPS::RepoId& subscriptionId);
@@ -345,8 +344,7 @@ private:
     DCPS::DataReaderCallbacks* subscription_;
     DDS::DataReaderQos qos_;
     DDS::SubscriberQos subscriber_qos_;
-    OPENDDS_STRING filter_;
-    DDS::StringSeq params_;
+    ContentFilterProperty_t filterProperties;
   };
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, LocalSubscription,
                    DCPS::GUID_tKeyLessThan) LocalSubscriptionMap;

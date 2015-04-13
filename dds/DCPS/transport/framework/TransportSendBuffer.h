@@ -18,7 +18,6 @@
 #include "dds/DCPS/Definitions.h"
 
 #include "dds/DCPS/PoolAllocator.h"
-#include <map>
 #include <utility>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL

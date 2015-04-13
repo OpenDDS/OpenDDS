@@ -238,6 +238,7 @@ Manager::pushImage(const DImage& image)
 
       ContentSubscriptionInfo* csi = 0;
       ACE_NEW_NORETURN(csi, ContentSubscriptionInfo);
+      csi->filterClassName = actor.contentSubscriptionProfile.filterClassName.c_str();
       csi->filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
       TAO_InputCDR csp_cdr(actor.contentSubscriptionProfile.exprParams.second,
                            actor.contentSubscriptionProfile.exprParams.first);
@@ -368,6 +369,7 @@ Manager::add(const DActor& actor)
     drdwCdr >> reader_qos;
 
     Update::ContentSubscriptionInfo csi;
+    csi.filterClassName = actor.contentSubscriptionProfile.filterClassName.c_str();
     csi.filterExpr = actor.contentSubscriptionProfile.filterExpr.c_str();
     TAO_InputCDR cspCdr(actor.contentSubscriptionProfile.exprParams.second,
                         actor.contentSubscriptionProfile.exprParams.first);
@@ -378,7 +380,7 @@ Manager::add(const DActor& actor)
                             , actor.topicId, actor.actorId
                             , callback.c_str(), reader_qos
                             , transport_info, sub_qos
-                            , csi.filterExpr, csi.exprParams);
+                            , csi.filterClassName, csi.filterExpr, csi.exprParams);
 
   } else if (actor.type == DataWriter) {
     DDS::PublisherQos pub_qos;

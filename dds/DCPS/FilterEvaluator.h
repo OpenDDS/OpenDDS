@@ -18,8 +18,6 @@
 #include "Comparator_T.h"
 #include "RcObject_T.h"
 
-#include <vector>
-
 namespace OpenDDS {
 namespace DCPS {
 
@@ -49,6 +47,7 @@ struct OpenDDS_Dcps_Export Value {
   bool operator==(const Value& v) const;
   bool operator<(const Value& v) const;
   bool like(const Value& v) const;
+  Value operator%(const Value& v) const;
 
   enum Type {VAL_BOOL, VAL_INT, VAL_UINT, VAL_I64, VAL_UI64, VAL_FLOAT,
              VAL_LNGDUB, VAL_LARGEST_NUMERIC = VAL_LNGDUB,
@@ -84,9 +83,11 @@ public:
 
   ~FilterEvaluator();
 
-  std::vector<OPENDDS_STRING> getOrderBys() const;
+  OPENDDS_VECTOR(OPENDDS_STRING) getOrderBys() const;
 
   bool hasFilter() const;
+
+  bool usesExtendedGrammar() const { return extended_grammar_; }
 
   template<typename T>
   bool eval(const T& sample, const DDS::StringSeq& params) const
@@ -105,6 +106,7 @@ public:
   }
 
   class EvalNode;
+  class Operand;
 
   struct OpenDDS_Dcps_Export DataForEval {
     DataForEval(const MetaStruct& meta, const DDS::StringSeq& params)
@@ -122,7 +124,8 @@ private:
   FilterEvaluator(const FilterEvaluator&);
   FilterEvaluator& operator=(const FilterEvaluator&);
 
-  EvalNode* walkAst(const AstNodeWrapper& node, EvalNode* prev);
+  EvalNode* walkAst(const AstNodeWrapper& node);
+  Operand* walkOperand(const AstNodeWrapper& node);
 
   struct OpenDDS_Dcps_Export DeserializedForEval : DataForEval {
     DeserializedForEval(const void* data, const MetaStruct& meta,
@@ -140,13 +143,14 @@ private:
     Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
     bool swap_, cdr_;
-    mutable std::map<OPENDDS_STRING, Value> cache_;
+    mutable OPENDDS_MAP(OPENDDS_STRING, Value) cache_;
   };
 
   bool eval_i(DataForEval& data) const;
 
+  bool extended_grammar_;
   EvalNode* filter_root_;
-  std::vector<OPENDDS_STRING> order_bys_;
+  OPENDDS_VECTOR(OPENDDS_STRING) order_bys_;
 };
 
 class OpenDDS_Dcps_Export MetaStruct {

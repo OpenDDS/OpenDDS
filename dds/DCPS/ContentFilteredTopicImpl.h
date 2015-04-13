@@ -15,8 +15,6 @@
 #include "dds/DCPS/FilterEvaluator.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#include <vector>
-
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -54,12 +52,17 @@ public:
   void add_reader(DataReaderImpl& reader);
   void remove_reader(DataReaderImpl& reader);
 
+  const char* get_filter_class_name () const
+  {
+    return filter_eval_.usesExtendedGrammar () ? "OPENDDSSQL" : "DDSSQL";
+  }
+
 private:
   OPENDDS_STRING filter_expression_;
   FilterEvaluator filter_eval_;
   DDS::StringSeq expression_parameters_;
   DDS::Topic_var related_topic_;
-  std::vector<DataReaderImpl*> readers_;
+  OPENDDS_VECTOR(DataReaderImpl*) readers_;
 
   /// Concurrent access to expression_parameters_ and readers_
   mutable ACE_Recursive_Thread_Mutex lock_;

@@ -12,8 +12,6 @@
 
 #include "ReceiveListenerSet.h"
 
-#include <vector>
-
 #if !defined (__ACE_INLINE__)
 #include "ReceiveListenerSet.inl"
 #endif /* __ACE_INLINE__ */

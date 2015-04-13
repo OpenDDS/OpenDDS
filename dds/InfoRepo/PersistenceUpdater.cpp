@@ -153,6 +153,9 @@ struct ActorStrt<QosSeq, QosSeq,
 
     assign(transportInterfaceInfo, actor.transportInterfaceInfo, allocator);
 
+    contentSubscriptionProfile.filterClassName =
+      ACE_CString(actor.contentSubscriptionProfile.filterClassName.c_str(),
+                  allocator);
     contentSubscriptionProfile.filterExpr =
       ACE_CString(actor.contentSubscriptionProfile.filterExpr.c_str(),
                   allocator);
@@ -509,6 +512,7 @@ PersistenceUpdater::requestImage()
 
     ContentSubscriptionBin in_csp_bin;
     if (actor->type == DataReader) {
+      in_csp_bin.filterClassName = actor->contentSubscriptionProfile.filterClassName;
       in_csp_bin.filterExpr = actor->contentSubscriptionProfile.filterExpr;
       BinSeq& params = in_csp_bin.exprParams;
       ACE_NEW_NORETURN(params.second, char[params.first]);
@@ -701,6 +705,7 @@ PersistenceUpdater::create(const URActor& actor)
 
   ACE_OS::memcpy(buf4, dst4.base(), len);
   ContentSubscriptionBin csp_bin;
+  csp_bin.filterClassName = actor.contentSubscriptionProfile.filterClassName;
   csp_bin.filterExpr = actor.contentSubscriptionProfile.filterExpr;
   csp_bin.exprParams = std::make_pair(len, buf4);
 

@@ -23,7 +23,6 @@
 #include "ace/Thread_Mutex.h"
 
 #include <string>
-#include <map>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -177,6 +176,7 @@ public:
     const DDS::DataReaderQos& qos,
     const OpenDDS::DCPS::TransportLocatorSeq& transInfo,
     const DDS::SubscriberQos& subscriberQos,
+    const char* filterClassName,
     const char* filterExpression,
     const DDS::StringSeq& exprParams);
 

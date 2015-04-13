@@ -7,8 +7,6 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/SafetyProfilePool.h"
 
-#include <map>
-
 namespace FACE {
 namespace TS {
 

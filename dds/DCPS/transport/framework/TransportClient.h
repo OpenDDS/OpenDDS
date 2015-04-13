@@ -17,12 +17,11 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/PoolAllocator.h"
 
 #include "ace/Time_Value.h"
 #include "ace/Event_Handler.h"
 #include "ace/Reverse_Lock_T.h"
-
-#include <vector>
 
 // Forward definition of a test-friendly class in the global name space
 class DDS_TEST;
