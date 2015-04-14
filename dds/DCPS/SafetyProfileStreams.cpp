@@ -38,10 +38,10 @@ to_dds_string(unsigned int to_convert, bool as_hex)
   const char* fmt;
   int buff_size;
   if (as_hex) {
-	fmt = "%02x";
-	buff_size = 3; // note +1 for null terminator
+    fmt = "%02x";
+    buff_size = 3; // note +1 for null terminator
   } else {
-	fmt = "%u";
+    fmt = "%u";
     buff_size = size_buffer(fmt, to_convert);
   }
   char buf[buff_size];
