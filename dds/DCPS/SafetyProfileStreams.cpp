@@ -13,7 +13,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 OPENDDS_STRING
-to_dds_string(u_short to_convert)
+to_dds_string(unsigned short int to_convert)
 {
   const char* fmt = "%hu";
   int buff_size = size_buffer(fmt, to_convert);

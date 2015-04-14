@@ -4,6 +4,7 @@
 #include "dds/DCPS/PoolAllocator.h"
 #include "dcps_export.h"
 
+#include "ace/OS_NS_stdio.h"
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #include <fstream>
@@ -25,7 +26,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(u_short to_convert);
+OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned short int to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(int to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned int to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long to_convert);
