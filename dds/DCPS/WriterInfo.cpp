@@ -104,11 +104,7 @@ WriterInfo::get_state_str() const
     break;
   default:
     ret += "UNSPECIFIED(";
-    int sz = ACE_OS::snprintf(NULL, 0, "%d", int(this->state_));
-    int buff_size = sz + 1;
-    char buf[buff_size]; // note +1 for null terminator
-    ACE_OS::snprintf(&buf[0], buff_size, "%d", int(this->state_));
-    ret += buf;
+    ret += to_dds_string(int(this->state_));
     ret += ")";
   }
   return ret.c_str();

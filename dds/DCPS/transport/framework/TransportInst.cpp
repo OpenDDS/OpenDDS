@@ -104,54 +104,16 @@ OPENDDS_STRING
 OpenDDS::DCPS::TransportInst::dump_to_str()
 {
   OPENDDS_STRING ret;
-  ret += formatNameForDump("transport_type")          + this->transport_type_;
-  ret += "\n";
-  ret += formatNameForDump("name")                    + this->name_;
-  ret += "\n";
-  int sz = ACE_OS::snprintf(NULL, 0, "%u", unsigned(this->queue_messages_per_pool_));
-  int buff_size = sz + 1;
-  char buf1[buff_size]; // note +1 for null terminator
-  ACE_OS::snprintf(&buf1[0], buff_size, "%u", unsigned(this->queue_messages_per_pool_));
-  ret += formatNameForDump("queue_messages_per_pool") + buf1;
-  ret += "\n";
-  sz = ACE_OS::snprintf(NULL, 0, "%u", unsigned(this->queue_initial_pools_));
-  buff_size = sz + 1;
-  char buf2[buff_size]; // note +1 for null terminator
-  ACE_OS::snprintf(&buf2[0], buff_size, "%u", unsigned(this->queue_initial_pools_));
-  ret += formatNameForDump("queue_initial_pools")     +buf2;
-  ret += "\n";
-  sz = ACE_OS::snprintf(NULL, 0, "%u", unsigned(this->max_packet_size_));
-  buff_size = sz + 1;
-  char buf3[buff_size]; // note +1 for null terminator
-  ACE_OS::snprintf(&buf3[0], buff_size, "%u", unsigned(this->max_packet_size_));
-  ret += formatNameForDump("max_packet_size")         + buf3;
-  ret += "\n";
-  sz = ACE_OS::snprintf(NULL, 0, "%u", unsigned(this->max_samples_per_packet_));
-  buff_size = sz + 1;
-  char buf4[buff_size]; // note +1 for null terminator
-  ACE_OS::snprintf(&buf4[0], buff_size, "%u", unsigned(this->max_samples_per_packet_));
-  ret += formatNameForDump("max_samples_per_packet")  + buf4;
-  ret += "\n";
-  sz = ACE_OS::snprintf(NULL, 0, "%u", unsigned(this->optimum_packet_size_));
-  buff_size = sz + 1;
-  char buf5[buff_size]; // note +1 for null terminator
-  ACE_OS::snprintf(&buf5[0], buff_size, "%u", unsigned(this->optimum_packet_size_));
-  ret += formatNameForDump("optimum_packet_size")     + buf5;
-  ret += "\n";
-  ret += formatNameForDump("thread_per_connection")   + (this->thread_per_connection_ ? "true" : "false");
-  ret += "\n";
-  sz = ACE_OS::snprintf(NULL, 0, "%ld", this->datalink_release_delay_);
-  buff_size = sz + 1;
-  char buf6[buff_size]; // note +1 for null terminator
-  ACE_OS::snprintf(&buf6[0], buff_size, "%ld", this->datalink_release_delay_);
-  ret += formatNameForDump("datalink_release_delay")  += buf6;
-  ret += "\n";
-  sz = ACE_OS::snprintf(NULL, 0, "%u", unsigned(this->datalink_control_chunks_));
-  buff_size = sz + 1;
-  char buf7[buff_size]; // note +1 for null terminator
-  ACE_OS::snprintf(&buf7[0], buff_size, "%u", unsigned(this->datalink_control_chunks_));
-  ret += formatNameForDump("datalink_control_chunks") + buf7;
-  ret += "\n";
+  ret += formatNameForDump("transport_type")          + this->transport_type_ + '\n';
+  ret += formatNameForDump("name")                    + this->name_ + '\n';
+  ret += formatNameForDump("queue_messages_per_pool") + to_dds_string(unsigned(this->queue_messages_per_pool_)) + '\n';
+  ret += formatNameForDump("queue_initial_pools")     + to_dds_string(unsigned(this->queue_initial_pools_)) + '\n';
+  ret += formatNameForDump("max_packet_size")         + to_dds_string(unsigned(this->max_packet_size_)) + '\n';
+  ret += formatNameForDump("max_samples_per_packet")  + to_dds_string(unsigned(this->max_samples_per_packet_)) + '\n';
+  ret += formatNameForDump("optimum_packet_size")     + to_dds_string(unsigned(this->optimum_packet_size_)) + '\n';
+  ret += formatNameForDump("thread_per_connection")   + (this->thread_per_connection_ ? "true" : "false") + '\n';
+  ret += formatNameForDump("datalink_release_delay")  + to_dds_string(this->datalink_release_delay_) + '\n';
+  ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(this->datalink_control_chunks_)) + '\n';
   return ret;
 }
 

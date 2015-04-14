@@ -514,19 +514,13 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
   OPENDDS_STRING ret;
   if (value.submessage_id_ != SUBMESSAGE_NONE) {
     ret += to_string(SubMessageId(value.submessage_id_));
-    int buff_size = 2 + 1; // note +1 for null terminator
-    char buf[buff_size];
-    ACE_OS::snprintf(&buf[0], buff_size, "%02x", unsigned(value.submessage_id_));
     ret += " 0x";
-    ret += buf;
+    ret += to_dds_string(unsigned(value.submessage_id_), true);
     ret += "), ";
   } else {
     ret += to_string(MessageId(value.message_id_));
-    int buff_size = 2 + 1; // note +1 for null terminator
-    char buf[buff_size];
-    ACE_OS::snprintf(&buf[0], buff_size, "%02x", unsigned(value.message_id_));
     ret += " (0x";
-    ret += buf;
+    ret += to_dds_string(unsigned(value.message_id_), true);
     ret += "), ";
   }
 
@@ -553,11 +547,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
     if (value.key_fields_only_ == 1) ret += "Key Fields Only, ";
 
     ret += "Sequence: 0x";
-    int sz2 = ACE_OS::snprintf(NULL, 0, "%02X", unsigned(value.sequence_.getValue()));
-    int buff2_size = sz2 + 1;
-    char buf2[buff2_size]; // note +1 for null terminator
-    ACE_OS::snprintf(&buf2[0], buff2_size, "%02X", unsigned(value.sequence_.getValue()));
-    ret += buf2;
+    ret += to_dds_string(unsigned(value.sequence_.getValue()), true);
     ret += ", ";
 
     ret += "Timestamp: ";

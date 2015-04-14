@@ -165,19 +165,11 @@ RtpsSampleHeader::process_iqos(DataSampleHeader& opendds,
   using namespace OpenDDS::RTPS;
 #if defined(OPENDDS_TEST_INLINE_QOS)
   OPENDDS_STRING output("into_received_data_sample(): ");
-  int sz = ACE_OS::snprintf(NULL, 0, "%d", iqos.length());
-  int buff_size = sz + 1;
-  char buf[buff_size]; // note +1 for null terminator
-  ACE_OS::snprintf(&buf[0], buff_size, "%d", iqos.length());
-  output += buf;
+  output += to_dds_string(iqos.length());
   output += " inline QoS parameters\n";
   for (CORBA::ULong index = 0; index < iqos.length(); ++index) {
-    int sz = ACE_OS::snprintf(NULL, 0, "%hu", iqos[index]._d());
-    int buff_size = sz + 1;
-    char buf[buff_size]; // note +1 for null terminator
-    ACE_OS::snprintf(&buf[0], buff_size, "%hu", iqos[index]._d());
     output += "  parameter type = ";
-    output += buf;
+    output += to_dds_string(iqos[index]._d());
     output += "\n";
   }
   ACE_DEBUG((LM_DEBUG, "%C", output.c_str()));
