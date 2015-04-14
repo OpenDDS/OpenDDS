@@ -127,8 +127,20 @@ RtpsUdpInst::dump_to_str()
   // directly call it on both local_address_ and multicast_group_address_,
   // since the second call could overwrite the result of the first before the
   // OPENDDS_STRING gets a chance to see it.
-  const OPENDDS_STRING local = local_address_.get_host_addr(),
-    multi = multicast_group_address_.get_host_addr();
+  OPENDDS_STRING local;
+  OPENDDS_STRING multi;
+  const char* loc = local_address_.get_host_addr();
+  if (loc) {
+    local = loc;
+  } else {
+    local = "NOT_SUPPORTED";
+  }
+  const char* mul = multicast_group_address_.get_host_addr();
+  if (mul) {
+    multi = mul;
+  } else {
+    multi = "NOT_SUPPORTED";
+  }
   ret += TransportInst::dump_to_str();
   ret += formatNameForDump("local_address") + local;
   int sz = ACE_OS::snprintf(NULL, 0, "%hu", local_address_.get_port_number());
