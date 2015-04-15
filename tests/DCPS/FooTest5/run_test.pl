@@ -121,6 +121,8 @@ sub cleanup
 
 $test->setup_discovery();
 
+$test->{dcps_debug_level} = 1;
+
 my $cfg = $PerlDDS::SafetyProfile ? 'rtps.ini' : 'all.ini';
 
 my $sub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast"
