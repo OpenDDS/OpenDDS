@@ -15,10 +15,12 @@ my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
 $test->enable_console_logging();
 $test->{dcps_debug_level} = 1;
+my $pending_timeout = '-DCPSPendingTimeout 2';
 my $verbose = $test->flag('--verbose');
-$test->process('sub', 'subscriber', $verbose ? '-v' : '');
+$test->process('sub', 'subscriber', ($verbose ? '-v' : '') . "$pending_timeout");
 $test->process('pub', 'publisher', ($verbose ? '-v ' : '') .
-                                   ($test->flag('--publisher') ? '-p ' : ''));
+                                   ($test->flag('--publisher') ? '-p ' : '') .
+                                    "$pending_timeout");
 
 $test->start_process('sub');
 $test->start_process('pub');
