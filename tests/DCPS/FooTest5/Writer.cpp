@@ -66,10 +66,12 @@ template<class DT, class DW, class DW_var>
 
         if (ret == ::DDS::RETCODE_TIMEOUT)
         {
-          ACE_DEBUG ((LM_DEBUG,
-                      ACE_TEXT("(%P|%t) NOTE: Writer::svc, ")
-                      ACE_TEXT ("%dth write() returned %d (RETCODE_TIMEOUT).\n"),
-                      i, ret));
+          if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
+            ACE_DEBUG ((LM_DEBUG,
+                        ACE_TEXT("(%P|%t) NOTE: Writer::svc, ")
+                        ACE_TEXT ("%dth write() returned %d (RETCODE_TIMEOUT).\n"),
+                        i, ret));
+          }
           timeout_writes ++;
         }
       }
