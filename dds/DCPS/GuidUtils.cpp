@@ -40,15 +40,8 @@ OPENDDS_STRING
 to_string(const GUID_t& guid)
 {
   std::size_t len;
-  std::size_t tot_len;
-
-  tot_len = sizeof(guid.guidPrefix) +
-        ((sizeof(guid.guidPrefix) / 4) * sizeof(".")) +
-        sizeof(guid.entityId.entityKey) + 1;
 
   OPENDDS_STRING ret;
-  ret.reserve(tot_len);
-
 
   len = sizeof(guid.guidPrefix);
 
