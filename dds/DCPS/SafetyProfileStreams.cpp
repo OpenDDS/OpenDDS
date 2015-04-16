@@ -13,10 +13,10 @@ namespace OpenDDS {
 namespace DCPS {
 
 OPENDDS_STRING
-to_dds_string(unsigned short int to_convert)
+to_dds_string(::CORBA::UShort to_convert)
 {
   const char* fmt = "%hu";
-  int buff_size = size_buffer(fmt, to_convert);
+  int buff_size = 5 + 1; // note +1 for null terminator
   char buf[buff_size];
   ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
   return OPENDDS_STRING(buf);
@@ -26,7 +26,7 @@ OPENDDS_STRING
 to_dds_string(int to_convert)
 {
   const char* fmt = "%d";
-  int buff_size = size_buffer(fmt, to_convert);
+  int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
   ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
   return OPENDDS_STRING(buf);
@@ -42,7 +42,7 @@ to_dds_string(unsigned int to_convert, bool as_hex)
     buff_size = 3; // note +1 for null terminator
   } else {
     fmt = "%u";
-    buff_size = size_buffer(fmt, to_convert);
+    buff_size = 20 + 1; // note +1 for null terminator
   }
   char buf[buff_size];
   ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
@@ -53,7 +53,7 @@ OPENDDS_STRING
 to_dds_string(long to_convert)
 {
   const char* fmt = "%ld";
-  int buff_size = size_buffer(fmt, to_convert);
+  int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
   ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
   return OPENDDS_STRING(buf);
@@ -68,7 +68,7 @@ to_dds_string(unsigned long to_convert, bool as_hex)
   } else {
     fmt = "%lu";
   }
-  int buff_size = size_buffer(fmt, to_convert);
+  int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
   ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
   return OPENDDS_STRING(buf);
