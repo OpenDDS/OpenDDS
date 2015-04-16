@@ -11,14 +11,10 @@
 #include "TransportImpl.h"
 #include "TransportExceptions.h"
 #include "EntryExit.h"
+#include "DCPS/SafetyProfileStreams.h"
 
 #include "ace/Configuration.h"
 
-#include <iomanip>
-
-#ifndef ACE_LYNXOS_MAJOR
-#include <sstream>
-#endif
 
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
@@ -68,6 +64,10 @@ OpenDDS::DCPS::TransportInst::dump()
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
              os.str().c_str()));
+#else
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
+             dump_to_str().c_str()));
 #endif
 }
 
@@ -85,9 +85,36 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
       << name << ": ";
   return oss.str();
 #else
-  ACE_UNUSED_ARG(name);
-  return "not implemented";
+  OPENDDS_STRING formatted_name;
+  formatted_name.reserve(NAME_INDENT + NAME_WIDTH);
+  for (int i = 0; i < NAME_INDENT; ++i) {
+    formatted_name += " ";
+  }
+  formatted_name += name;
+  OPENDDS_STRING delim(": ");
+  formatted_name += delim;
+  for (int i = 0; i < (NAME_WIDTH - strlen(name) - delim.length()); ++i) {
+    formatted_name += " ";
+  }
+  return formatted_name;
 #endif
+}
+
+OPENDDS_STRING
+OpenDDS::DCPS::TransportInst::dump_to_str()
+{
+  OPENDDS_STRING ret;
+  ret += formatNameForDump("transport_type")          + this->transport_type_ + '\n';
+  ret += formatNameForDump("name")                    + this->name_ + '\n';
+  ret += formatNameForDump("queue_messages_per_pool") + to_dds_string(unsigned(this->queue_messages_per_pool_)) + '\n';
+  ret += formatNameForDump("queue_initial_pools")     + to_dds_string(unsigned(this->queue_initial_pools_)) + '\n';
+  ret += formatNameForDump("max_packet_size")         + to_dds_string(unsigned(this->max_packet_size_)) + '\n';
+  ret += formatNameForDump("max_samples_per_packet")  + to_dds_string(unsigned(this->max_samples_per_packet_)) + '\n';
+  ret += formatNameForDump("optimum_packet_size")     + to_dds_string(unsigned(this->optimum_packet_size_)) + '\n';
+  ret += formatNameForDump("thread_per_connection")   + (this->thread_per_connection_ ? "true" : "false") + '\n';
+  ret += formatNameForDump("datalink_release_delay")  + to_dds_string(this->datalink_release_delay_) + '\n';
+  ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(this->datalink_control_chunks_)) + '\n';
+  return ret;
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE

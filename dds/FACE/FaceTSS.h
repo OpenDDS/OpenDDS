@@ -7,10 +7,10 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/WaitSet.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include "ace/Singleton.h"
 
-#include <iostream>
 
 namespace OpenDDS {
 namespace FaceTSS {

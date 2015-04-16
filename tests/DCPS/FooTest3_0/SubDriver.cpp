@@ -6,10 +6,12 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "DataReaderListener.h"
 #include "tests/DCPS/common/TestSupport.h"
+#include "tests/Utils/ExceptionStreams.h"
+
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
-#include <string>
 
+#include <string>
 #include <sstream>
 
 const long  MY_DOMAIN   = 411;

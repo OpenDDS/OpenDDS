@@ -5,6 +5,8 @@
 #include "TestException.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
+#include "tests/Utils/ExceptionStreams.h"
+
 
 // Only for Microsoft VC6
 #if defined (_MSC_VER) && (_MSC_VER >= 1200) && (_MSC_VER < 1300)

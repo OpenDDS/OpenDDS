@@ -4,6 +4,8 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "tests/DCPS/common/TestSupport.h"
 #include "DataReaderListener.h"
+#include "tests/Utils/ExceptionStreams.h"
+
 #include <ace/Arg_Shifter.h>
 #include <ace/Argv_Type_Converter.h>
 #include <string>

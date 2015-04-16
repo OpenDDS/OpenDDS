@@ -34,6 +34,8 @@
 
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
+#include "tests/Utils/ExceptionStreams.h"
+
 #include <cstdlib>
 
 namespace {

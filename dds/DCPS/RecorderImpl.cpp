@@ -28,6 +28,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -36,12 +37,6 @@
 
 #include "ace/Reactor.h"
 #include "ace/Auto_Ptr.h"
-
-#ifdef ACE_LYNXOS_MAJOR
-#include <strstream>
-#else
-#include <sstream>
-#endif
 
 #include <stdexcept>
 
@@ -199,20 +194,12 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
   if (DCPS_debug_level > 9) {
-#ifdef ACE_LYNXOS_MAJOR
-    std::strstream buffer;
-# define DOT_CSTR
-#else
-    std::stringstream buffer;
-# define DOT_CSTR .c_str()
-#endif
-    buffer << sample.header_ << std::ends;
     GuidConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::data_received: ")
                ACE_TEXT("%C received sample: %C.\n"),
                OPENDDS_STRING(converter).c_str(),
-               buffer.str() DOT_CSTR));
+               to_string(sample.header_).c_str()));
   }
 
   // we only support SAMPLE_DATA messages

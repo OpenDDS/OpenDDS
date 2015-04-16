@@ -93,7 +93,7 @@ public:
         "seq# = " << sample.header_.sequence_.getValue() << "\n\t"
         "byte order = " << sample.header_.byte_order_ << "\n\t"
         "length = " << sample.header_.message_length_ << "\n\t"
-        "publication = " << pub << "\n\t"
+        "publication = " << OPENDDS_STRING(pub) << "\n\t"
         "data.key = " << data.key << "\n\t"
         "data.value = " << data.value << "\n";
       ACE_DEBUG((LM_INFO, "%C", oss.str().c_str()));

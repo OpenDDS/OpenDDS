@@ -15,7 +15,6 @@
 #include "TypeSupportImpl.h"
 
 #include <stdexcept>
-#include <sstream>
 
 namespace {
   struct MatchesIncomingName { // predicate for std::find_if()
@@ -173,10 +172,8 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
   if (rc == RETCODE_NO_DATA) {
     return;
   } else if (rc != RETCODE_OK) {
-    ostringstream rc_ss;
-    rc_ss << rc;
     throw runtime_error("Incoming DataReader for " + topic +
-      " could not be read, error #" + rc_ss.str());
+      " could not be read, error #" + to_dds_string(rc));
   }
 
   const MetaStruct& meta = metaStructFor(reader);

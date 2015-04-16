@@ -9,6 +9,8 @@
 #include <ace/streams.h>
 #include <ace/OS_NS_time.h>
 
+#include "tests/Utils/ExceptionStreams.h"
+
 #include <time.h>
 #include <math.h>
 #include <string.h>
