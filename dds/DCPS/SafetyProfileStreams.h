@@ -38,7 +38,7 @@ OpenDDS_Dcps_Export OPENDDS_STRING
 to_dds_string (const T* to_convert)
 {
   const char* fmt = "%p";
-  int buff_size = 20 + 1; // note +1 for null terminator
+  const int buff_size = 20 + 1; // note +1 for null terminator
   char buf[buff_size];
   ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
   return OPENDDS_STRING(buf);
