@@ -34,8 +34,8 @@ OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long to_convert, bool as_hex = false);
 
 template <typename T>
-OpenDDS_Dcps_Export OPENDDS_STRING
-to_dds_string (const T* to_convert)
+inline OPENDDS_STRING
+to_dds_string(const T* to_convert)
 {
   const char* fmt = "%p";
   const int buff_size = 20 + 1; // note +1 for null terminator
