@@ -115,10 +115,6 @@ private:
   friend class TransportImpl;
   void transport_detached(TransportImpl* which);
 
-#ifdef ACE_LYNXOS_MAJOR
-public:
-#endif
-
   // helpers
   typedef ACE_Guard<ACE_Thread_Mutex> Guard;
   void use_datalink_i(const RepoId& remote_id,
@@ -135,9 +131,6 @@ public:
                           const TransportImpl::RemoteTransport& remote,
                           const TransportImpl::ConnectionAttribs& attribs_,
                           Guard& guard);
-#ifdef ACE_LYNXOS_MAJOR
-private:
-#endif
 
   void send_i(SendStateDataSampleList send_list, ACE_UINT64 transaction_id);
 
@@ -283,13 +276,7 @@ private:
 
   bool swap_bytes_, cdr_encapsulation_, reliable_, durable_;
 
-#ifdef ACE_LYNXOS_MAJOR
-public:
-#endif
   ACE_Time_Value passive_connect_duration_;
-#ifdef ACE_LYNXOS_MAJOR
-private:
-#endif
 
   TransportLocatorSeq conn_info_;
 

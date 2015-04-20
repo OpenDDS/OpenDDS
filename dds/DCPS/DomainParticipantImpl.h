@@ -538,15 +538,10 @@ private:
   };
   ParticipantLivelinessTimer participant_liveliness_timer_;
 
-#ifdef ACE_LYNXOS_MAJOR
-public:
-#endif
   ACE_Time_Value liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
   bool participant_liveliness_activity_after(const ACE_Time_Value& tv);
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
-#ifdef ACE_LYNXOS_MAJOR
-private:
-#endif
+
   ACE_Time_Value last_liveliness_activity_;
 
   virtual int handle_exception(ACE_HANDLE fd);
