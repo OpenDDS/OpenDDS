@@ -4,6 +4,11 @@ project(*QosSettings) : dcps, opendds_face {
   }
 }
 
+project(*MemoryPool) : dcps, opendds_face {
+  Source_Files {
+    MemoryPoolTest.cpp
+  }
+}
 project(*PoolAllocation) : dcps, opendds_face {
   Source_Files {
     PoolAllocationTest.cpp
