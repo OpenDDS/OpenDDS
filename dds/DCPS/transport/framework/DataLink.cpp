@@ -801,7 +801,6 @@ DataLink::data_received_i(ReceivedDataSample& sample,
   // from the remote publisher_id.
   ReceiveListenerSet_rch listener_set;
 
-#ifndef ACE_LYNXOS_MAJOR
   if (Transport_debug_level > 9) {
     const GuidConverter converter(publication_id);
     ACE_DEBUG((LM_DEBUG,
@@ -810,7 +809,6 @@ DataLink::data_received_i(ReceivedDataSample& sample,
                OPENDDS_STRING(converter).c_str(),
                to_string(sample.header_).c_str()));
   }
-#endif
 
   {
     GuardType guard(this->pub_sub_maps_lock_);

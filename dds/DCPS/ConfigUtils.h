@@ -13,12 +13,7 @@
 #include "dcps_export.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#ifdef ACE_LYNXOS_MAJOR
-# include <strstream>
-# include <string>
-#else
-# include <sstream>
-#endif
+#include <sstream>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -31,11 +26,7 @@ namespace DCPS {
   template <typename T> bool convertToInteger( const OPENDDS_STRING& s,
                                                T& value )
   {
-#ifdef ACE_LYNXOS_MAJOR
-    std::istrstream istr(s.c_str());
-#else
     std::stringstream istr(s.c_str());
-#endif
     if (!(istr >> value) || (istr.peek() != EOF)) return false;
     return true;
   }
