@@ -269,6 +269,14 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
 
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink "
               "no existing TcpConnection.\n"), 2);
+    if (DCPS_debug_level) {
+      GuidConverter remote_conv(remote.repo_id_);
+      GuidConverter local_conv(attribs.local_id_);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink - no existing TcpConnection, "
+                           "add_pending_connection and on_start_callback between local %C and remote %C\n",
+                           std::string(local_conv).c_str(),
+                           std::string(remote_conv).c_str()));
+    }
 
     add_pending_connection(client, link.in());
 

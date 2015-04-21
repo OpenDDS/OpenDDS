@@ -153,7 +153,10 @@ OpenDDS::DCPS::TcpDataLink::reuse_existing_connection(const TcpConnection_rch& c
   //proceed to determine if we can reuse/reset existing mechanisms or need to start from
   //scratch.
   if (!this->connection_.is_nil()) {
-
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpDataLink::reuse_existing_connection - "
+                           "trying to reuse existing connection\n"));
+    }
     this->connection_->transfer(connection.in());
 
     //Connection already exists.
