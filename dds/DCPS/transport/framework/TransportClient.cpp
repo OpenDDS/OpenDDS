@@ -263,11 +263,23 @@ TransportClient::associate(const AssociationData& data, bool active)
               "between %C and remote %C\n",
               std::string(tc_assoc).c_str(),
               std::string(remote_new).c_str()), 5);
-
+    if(DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::associate added PendingAssoc "
+                "between %C and remote %C\n",
+                std::string(tc_assoc).c_str(),
+                std::string(remote_new).c_str()));
+    }
   } else {
     if (iter->second->removed_) {
       iter->second->removed_ = false;
-
+      GuidConverter tc_assoc(this->repo_id_);
+      GuidConverter remote_new(data.remote_id_);
+      if(DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::associate found existing PendingAssoc "
+                  "between %C and remote %C, set removed to false to continue using this pending association\n",
+                  std::string(tc_assoc).c_str(),
+                  std::string(remote_new).c_str()));
+      }
     } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: TransportClient::associate ")
@@ -405,6 +417,14 @@ bool
 TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                                                 Guard& guard)
 {
+  GuidConverter local(tc->repo_id_);
+  GuidConverter remote(this->data_.remote_id_);
+  if(DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
+                         "between %C and remote %C\n",
+                         std::string(local).c_str(),
+                         std::string(remote).c_str()));
+  }
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
     const TransportImpl_rch& impl = impls_.back();
@@ -423,9 +443,24 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
           if (res.success_ && !this->removed_) {
+            if(DCPS_debug_level) {
+              GuidConverter local(tc->repo_id_);
+              GuidConverter remote(this->data_.remote_id_);
+              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) PendingAssoc::initiate_connect - ")
+                                   ACE_TEXT("between %C and remote %C success\n"),
+                                   std::string(local).c_str(),
+                                   std::string(remote).c_str()));
+            }
             return true;
           }
-
+          if(DCPS_debug_level) {
+            GuidConverter local(tc->repo_id_);
+            GuidConverter remote(this->data_.remote_id_);
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
+                                 "between %C and remote %C FAILED\n",
+                                 std::string(local).c_str(),
+                                 std::string(remote).c_str()));
+          }
           return false;
         }
 
@@ -477,10 +512,23 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
             this,
             link.in(),
             std::string(peerId_conv).c_str()), 5);
-
+  if (DCPS_debug_level) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
+                         "TransportClient(%@) using datalink[%@] from remote %C\n",
+                         this,
+                         link.in(),
+                         std::string(peerId_conv).c_str()));
+  }
   PendingMap::iterator iter = pending_.find(remote_id);
 
   if (iter == pending_.end()) {
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
+                           "TransportClient(%@) using datalink[%@] did not find Pending Association to remote %C\n",
+                           this,
+                           link.in(),
+                           std::string(peerId_conv).c_str()));
+    }
     return;
   }
 
@@ -489,10 +537,24 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   bool ok = false;
 
   if (pend->removed_) { // no-op
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
+                           "TransportClient(%@) using datalink[%@] pending association to remote %C was removed\n",
+                           this,
+                           link.in(),
+                           std::string(peerId_conv).c_str()));
+    }
     return;
   } else if (link.is_nil()) {
 
     if (pend->active_ && pend->initiate_connect(this, guard)) {
+      if (DCPS_debug_level) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
+                             "TransportClient(%@) using datalink[%@] link is nil, since this is active side, initiate_connect\n",
+                             this,
+                             link.in(),
+                             std::string(peerId_conv).c_str()));
+      }
       return;
     }
 
@@ -502,7 +564,13 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
               this,
               link.in(),
               std::string(peerId_conv).c_str()), 5);
-
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
+                "TransportClient(%@) about to add_link[%@] to remote: %C\n",
+                this,
+                link.in(),
+                std::string(peerId_conv).c_str()));
+    }
     add_link(link, remote_id);
     ok = true;
   }
