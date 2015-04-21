@@ -266,7 +266,9 @@ MemoryPool::remove_free_alloc(FreeHeader* block_to_alloc)
   FreeHeader* smaller = block_to_alloc->smaller_free(pool_ptr_);
   FreeHeader* larger = block_to_alloc->larger_free(pool_ptr_);
 
+  // If this was the largest free alloc
   if (block_to_alloc == largest_free_) {
+    // It no longer is
     largest_free_ = smaller;
   }
 
@@ -281,6 +283,7 @@ MemoryPool::remove_free_alloc(FreeHeader* block_to_alloc)
     smaller->set_larger_free(larger, pool_ptr_);
   }
 
+  // Remove from free index
   FreeIndex* index = find_insert_index(block_to_alloc->size());
   if (index->ptr() == block_to_alloc) {
     index->set_ptr(larger);
