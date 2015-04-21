@@ -29,7 +29,7 @@ public:
   void allocate(size_t size);
 
   // Set the values stored in this header 
-  void set_size(int size);
+  void set_size(size_t size);
   void set_prev_size(int size) { prev_size_ = size; }
   void set_free() { if (alloc_size_ > 0) alloc_size_ = - alloc_size_; }
   void set_alloc() { if (alloc_size_ < 0) alloc_size_ = - alloc_size_; }

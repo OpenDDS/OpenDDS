@@ -65,13 +65,13 @@ public:
   void test_pool_alloc_last_avail() {
     MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(128);
-    validate_pool(pool, 128, true);
+    validate_pool(pool, 128);
     char* ptr1 = pool.pool_alloc(256);
-    validate_pool(pool, 384, true);
+    validate_pool(pool, 384);
     char* ptr2 = pool.pool_alloc(128);
-    validate_pool(pool, 512, true);
+    validate_pool(pool, 512);
     char* ptr3 = pool.pool_alloc(448);
-    validate_pool(pool, 1024 - 64, true);
+    validate_pool(pool, 1024 - 64);
 
     TEST_CHECK(ptr0);
     TEST_CHECK(ptr1);
@@ -85,33 +85,33 @@ public:
   // Allocate a block and free it, case I
   void test_pool_alloc_free() {
     MemoryPool pool(1024, 8);
+    validate_pool(pool, 0);
     char* ptr = pool.pool_alloc(128);
     validate_pool(pool, 128);
     pool.pool_free(ptr);
-
     validate_pool(pool, 0);
   }
 
   // Allocate a block and free it, becoming largest
   void test_pool_alloc_free_largest() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(128);
     char* ptr3 = pool.pool_alloc(512);
-    validate_pool(pool, 1024);
+    validate_pool(pool, 1024, true);
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
     pool.pool_free(ptr0);
-    validate_pool(pool, 1024 - 128);
+    validate_pool(pool, 1024 - 128, true);
     pool.pool_free(ptr3);
 
-    validate_pool(pool, 1024 - 512 - 128);
+    validate_pool(pool, 1024 - 512 - 128, true);
   }
 
   // Allocate a block and free it, becoming smallest
   void test_pool_alloc_free_smallest() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(128);
@@ -127,7 +127,7 @@ public:
 
   // Allocate a block, free it, reallocate
   void test_pool_realloc() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(128);
     pool.pool_free(ptr0);
     char* ptr1 = pool.pool_alloc(128);
@@ -140,7 +140,7 @@ public:
 
   // Free a block and the one to its right, case II
   void test_pool_free_join_right() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(128); // freed ahead of time
@@ -167,7 +167,7 @@ public:
 
   // Free a block and the block to it's left, case III
   void test_pool_free_join_left() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128); // free and join with ptr2
     char* ptr2 = pool.pool_alloc(128); // freed ahead of time
@@ -194,7 +194,7 @@ public:
 
   // Free a block and the ones to its left and right, case IV
   void test_pool_free_join_both() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(128); // freed ahead of time
@@ -220,7 +220,7 @@ public:
   }
 
   void test_pool_free_join_first_both() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc( 64); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc( 64); // freed ahead of time
@@ -243,7 +243,7 @@ public:
 
   // Free block and join with the one to its right (largest), case II
   void test_pool_free_join_largest_right() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(256); // freed ahead of time (largest)
@@ -270,7 +270,7 @@ public:
 
   // Free block join with and the block to it's left (largest), case III
   void test_pool_free_join_largest_left() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128); // free and join with ptr2
     char* ptr2 = pool.pool_alloc(256); // freed ahead of time (largest)
@@ -297,7 +297,7 @@ public:
 
   // Free block and join with the ones to its left and largest right, case IV
   void test_pool_free_join_largest_both_right() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(256); // freed ahead of time
@@ -324,7 +324,7 @@ public:
 
   // Free block and join with the ones to its largest left and right, case IV
   void test_pool_free_join_largest_both_left() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(128); // freed ahead of time
@@ -351,7 +351,7 @@ public:
 
   // Free block and join with the one to its right (smallest), case II
   void test_pool_free_join_smallest_right() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(64);  // freed ahead of time (smallest)
@@ -378,7 +378,7 @@ public:
 
   // Free block and join with the one to its left (smallest), case III
   void test_pool_free_join_smallest_left() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(128);
@@ -404,7 +404,7 @@ public:
   }
 
   void test_pool_free_join_smallest_both_right() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(64);  // freed ahead of time (smallest)
@@ -431,7 +431,7 @@ public:
   }
 
   void test_pool_free_join_smallest_both_left() {
-    MemoryPool pool(2048, 64);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128); // rightmost
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(128); // freed ahead of time
@@ -459,7 +459,7 @@ public:
 
   // Allocate and move ahead in free list
   void test_pool_alloc_move_ahead() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     pool.pool_alloc(8);
     char* ptr0 = pool.pool_alloc(128);
     pool.pool_alloc(8);
@@ -486,7 +486,7 @@ public:
 
   // Alloc and free same block repeatedly
   void test_pool_alloc_free_repeated() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     for (int i = 0; i < 256; ++i) {
       char* ptr0 = pool.pool_alloc(128);
       validate_pool(pool, 128);
@@ -502,7 +502,7 @@ public:
   }
 
   void test_pool_alloc_non_first_free_block() {
-    MemoryPool pool(800, 64);
+    MemoryPool pool(800, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(128);
@@ -524,7 +524,7 @@ public:
 
   // Allocate blocks and free in alloc order
   void test_pool_free_in_order() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(128);
@@ -542,7 +542,7 @@ public:
 
   // Allocate blocks and free in reverse order
   void test_pool_free_in_reverse_order() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(128);
@@ -560,7 +560,7 @@ public:
 
   // Allocate in one order, free in other order
   void test_pool_free_out_of_order() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(128);
     char* ptr2 = pool.pool_alloc(128);
@@ -584,7 +584,7 @@ public:
 
   // Join two adjacent blocks, without moving in free list
   void test_pool_free_join_without_moving() {
-    MemoryPool pool(1024*20, 64);
+    MemoryPool pool(1024*20, 8);
     char* ptr0 = pool.pool_alloc(1024);
     pool.pool_alloc(8); // add alloc in between
     char* ptr1 = pool.pool_alloc(512);
@@ -619,7 +619,7 @@ public:
 
   // Split free block, without moving in free list
   void test_pool_alloc_split_without_moving() {
-    MemoryPool pool(1024*20, 64);
+    MemoryPool pool(1024*20, 8);
     char* ptr0 = pool.pool_alloc(1024);
     pool.pool_alloc(8); // add alloc in between
     char* ptr1 = pool.pool_alloc(512);
@@ -654,7 +654,7 @@ public:
   // Test shifting by allocating from earlier in the free list
   // Caught by DCPS Reliability test
   void test_pool_alloc_shift_free() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     pool.pool_alloc(48);
     pool.pool_alloc(40);
     pool.pool_alloc(48);
@@ -692,7 +692,7 @@ public:
   // Test moving ahead in free list where the block previous to the insert is 
   // shifted
   void test_pool_move_forward_prev_shifted() {
-    MemoryPool pool(2024, 64);
+    MemoryPool pool(2024, 8);
     pool.pool_alloc(8);
     char* p1 = pool.pool_alloc(64);
     pool.pool_alloc(8);
@@ -717,7 +717,7 @@ public:
 
   // Make sure when joining free list does not get double-
   void test_pool_move_forward_prev_shifted2() {
-    MemoryPool pool(2024, 64);
+    MemoryPool pool(2024, 8);
     char* p10 = (pool.pool_alloc(24));
     pool.pool_alloc(8);
     pool.pool_alloc(8);
@@ -767,7 +767,7 @@ public:
 
   // Allocates after running out of memory should return null
   void test_alloc_null_once_out_of_memory() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(256);
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(256);
@@ -797,7 +797,7 @@ public:
 
   // Allocates larger than remaining memory should return null
   void test_alloc_too_large_returns_null() {
-    MemoryPool pool(1024, 64);
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(256);
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(256);
@@ -813,40 +813,8 @@ public:
     validate_pool(pool, 1024 - 128 - 256);
   }
 
-  void test_alloc_null_once_out_of_allocs() {
-    MemoryPool pool(1024, 5); // 5 gives us max 11 allocs
-    char* ptr0 = pool.pool_alloc(64);  // 2 allocs
-    char* ptr1 = pool.pool_alloc(64);  // 3 allocs
-    char* ptr2 = pool.pool_alloc(64);  // 4 allocs
-    char* ptr3 = pool.pool_alloc(64);  // 5 allocs
-    char* ptr4 = pool.pool_alloc(64);  // 6 allocs
-    char* ptr5 = pool.pool_alloc(64);  // 7 allocs
-    char* ptr6 = pool.pool_alloc(64);  // 8 allocs
-    char* ptr7 = pool.pool_alloc(64);  // 9 allocs
-    char* ptr8 = pool.pool_alloc(64);  // 10 allocs
-    char* ptr9 = pool.pool_alloc(64);  // 11 allocs
-    TEST_CHECK(ptr0);
-    TEST_CHECK(ptr1);
-    TEST_CHECK(ptr2);
-    TEST_CHECK(ptr3);
-    TEST_CHECK(ptr4);
-    TEST_CHECK(ptr5);
-    TEST_CHECK(ptr6);
-    TEST_CHECK(ptr7);
-    TEST_CHECK(ptr8);
-    TEST_CHECK(ptr9);
-    validate_pool(pool, 64*10);
-    // Out of allocs
-    char* ptr10 = pool.pool_alloc(64);  // 11 allocs
-    TEST_CHECK(!ptr10);
-    validate_pool(pool, 64*10);
-    pool.pool_free(ptr2);
-    pool.pool_free(ptr4);
-    validate_pool(pool, 64*8);
-  }
-
   void test_free_null_should_ignore() {
-    MemoryPool pool(1024, 5); // 5 gives us max 11 allocs
+    MemoryPool pool(1024, 8);
     char* ptr0 = pool.pool_alloc(64);  // 2 allocs
     char* ptr1 = pool.pool_alloc(64);  // 3 allocs
     TEST_CHECK(ptr0);
@@ -877,7 +845,14 @@ private:
     while (pool.includes(alloc)) {
 
       if (log) {
-        printf("Alloc[%zu] %s at %zx ptr %zx size %d psize %d\n", index++, alloc->is_free() ? "free" : "    ", (unsigned long)alloc, (unsigned long)alloc->ptr(), alloc->size(), alloc->prev_size());
+        printf("Alloc[%zu] %s at %zx ptr %zx size %d psize %d\n",
+               index++,
+               alloc->is_free() ? 
+                 (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
+               (unsigned long)alloc,
+               (unsigned long)alloc->ptr(),
+               alloc->size(),
+               alloc->prev_size());
       }
 
       TEST_CHECK(alloc->size());
@@ -906,12 +881,11 @@ private:
 
     size_t prev_size = 0;
     size_t free_bytes_in_list = 0;
-    FreeHeader* first_free = pool.largest_free_;
-    FreeHeader* free_alloc;
-    FreeHeader* prev_free;
+    FreeHeader* free_alloc = NULL;
+    FreeHeader* prev_free = NULL;
 
     // Check all free blocks in size order
-    for (free_alloc = first_free;
+    for (free_alloc = pool.largest_free_;
          free_alloc;
          free_alloc = free_alloc->smaller_free(pool.pool_ptr_)) {
       // Check for infinite loop
@@ -923,7 +897,7 @@ private:
       free_bytes_in_list += free_alloc->size();
 
       // If not the first alloc
-      if (free_alloc != first_free) {
+      if (free_alloc != pool.largest_free_) {
         TEST_CHECK(free_alloc->size() <= prev_size);
         TEST_CHECK(free_alloc->size() > 0);
       }
@@ -966,12 +940,12 @@ int main(int, const char** )
   test.test_pool_alloc();
   test.test_pool_allocs();
   test.test_pool_alloc_odd_size();
-*/
+  test.test_pool_align_other_size();
   test.test_pool_alloc_last_avail();
-/*
-
   test.test_pool_alloc_free();
+*/
   test.test_pool_alloc_free_largest();
+/*
   test.test_pool_alloc_free_smallest();
 
   test.test_pool_alloc_move_ahead();

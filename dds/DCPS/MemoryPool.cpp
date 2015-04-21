@@ -39,7 +39,7 @@ AllocHeader::allocate(size_t size) {
 }
 
 void
-AllocHeader::set_size(int size)
+AllocHeader::set_size(size_t size)
 {
   if (is_free()) {
     size *= -1;
@@ -59,9 +59,10 @@ AllocHeader::joinable_prev() {
 
 void
 AllocHeader::join_next() {
+  // All unsigned, set_size will make negative if free (it is)
   size_t next_size = this->next_adjacent()->size();
   size_t joined_size = this->size() + next_size + sizeof(AllocHeader);
-  this->set_size(- static_cast<int>(joined_size));
+  this->set_size(joined_size);
 }
 
 void
@@ -123,7 +124,7 @@ FreeIndex::FreeIndex()
 , ptr_(0)
 {
 }
- 
+
 MemoryPool::MemoryPool(unsigned int pool_size, size_t alignment)
 : align_size_(alignment)
 , header_size_(align(sizeof(AllocHeader)))
@@ -189,7 +190,7 @@ MemoryPool::pool_alloc(size_t size)
     size_t free_block_size = block_to_alloc->size();
 
     size_t remainder = free_block_size - aligned_size;
- 
+
     // May not be enough room for another allocation
     if (remainder < min_free_size_) {
       aligned_size = free_block_size; // use it all
@@ -271,7 +272,11 @@ MemoryPool::remove_free_alloc(FreeHeader* block_to_alloc)
 
   if (larger) {
     larger->set_smaller_free(smaller, pool_ptr_);
+  } else {
+    // Should be largest
+    largest_free_ = smaller;
   }
+
   if (smaller) {
     smaller->set_larger_free(larger, pool_ptr_);
   }
@@ -384,16 +389,19 @@ char*
 MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
 {
   size_t free_block_size = free_block->size();
-  size_t remainder = free_block_size - alloc_size - align(sizeof(AllocHeader));
+  size_t remainder = free_block_size - alloc_size;
 
   // May not be enough room for another allocation
   if (remainder < min_free_size_) {
     alloc_size = free_block_size; // use it all
     remainder = 0;
   }
- 
+
   // If we are NOT allocating the whole block
   if (remainder) {
+    // Account for header here - won't overflow due to check, above
+    remainder -= align(sizeof(AllocHeader));
+
     // Adjust current adjacent block (after free block)
     AllocHeader* next_adjacent = free_block->next_adjacent();
     if (includes(next_adjacent)) {
@@ -408,22 +416,23 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
 
         // Remove from index
         remove_free_alloc(free_block);
-        // Change size 
+        // Change size
         free_block->set_size(remainder);
         // Insert back into index
         insert_free_alloc(free_block);
       // Else there is smaller, but free_block is still larger
       } else {
-        // Change size 
+        // Change size
         free_block->set_size(remainder);
       }
     // Else allocating from smallest block
     } else {
-      // Change size 
+      // Change size
       free_block->set_size(remainder);
     }
 
-    // I can use next_adjacent to get to the end of the resized block
+    // After resize, can use next_adjacent() to safely get to the end of the
+    // resized block
     AllocHeader* alloc_block = free_block->next_adjacent();
     // Allocate adjacent block (at end of existing block)
     alloc_block->set_size(alloc_size);
