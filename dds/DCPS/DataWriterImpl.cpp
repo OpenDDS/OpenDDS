@@ -292,7 +292,15 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     return;
   }
-
+  if (DCPS_debug_level) {
+    const GuidConverter writer_conv(publication_id_);
+    const GuidConverter conv(remote_id);
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
+               ACE_TEXT(" writer %C succeeded in associating with reader %C\n"),
+               std::string(writer_conv).c_str(),
+               std::string(conv).c_str()));
+  }
   if (flags & ASSOC_ACTIVE) {
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
