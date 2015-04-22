@@ -1,0 +1,10 @@
+project: opendds_face {
+
+  TypeSupport_Files {
+    Fixed.idl
+  }
+
+  IDL_Files {
+    FixedTypeSupport.idl
+  }
+}
