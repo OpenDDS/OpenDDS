@@ -381,12 +381,28 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
 {
   if (!guard.locked()) {
     //don't own the lock_ so can't release it...shouldn't happen
+    if (DCPS_debug_level) {
+      GuidConverter local(repo_id_);
+      GuidConverter remote_conv(remote.repo_id_);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
+                           "guard was not locked, return false - initiate_connect_i between local %C and remote %C unsuccessful\n",
+                           std::string(local).c_str(),
+                           std::string(remote_conv).c_str()));
+    }
     return false;
   }
 
   {
     //can't call connect while holding lock due to possible reactor deadlock
     ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+    if (DCPS_debug_level) {
+      GuidConverter local(repo_id_);
+      GuidConverter remote_conv(remote.repo_id_);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
+                           "attempt to connect_datalink between local %C and remote %C\n",
+                           std::string(local).c_str(),
+                           std::string(remote_conv).c_str()));
+    }
     result = impl->connect_datalink(remote, attribs_, this);
   }
 
@@ -395,12 +411,28 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
   PendingMap::iterator iter = pending_.find(remote.repo_id_);
 
   if (iter == pending_.end()) {
+    if (DCPS_debug_level) {
+      GuidConverter local(repo_id_);
+      GuidConverter remote_conv(remote.repo_id_);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
+                           "cannot find pending association after connecting datalink between local %C and remote %C\n",
+                           std::string(local).c_str(),
+                           std::string(remote_conv).c_str()));
+    }
     return false;
     //log some sort of error message...
     //PendingAssoc's are only erased from pending_ in use_datalink_i after
 
   } else {
     if (iter->second->removed_) {
+      if (DCPS_debug_level) {
+        GuidConverter local(repo_id_);
+        GuidConverter remote_conv(remote.repo_id_);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
+                             "pending association marked for removal already, after connecting datalink between local %C and remote %C\n",
+                             std::string(local).c_str(),
+                             std::string(remote_conv).c_str()));
+      }
       //this occurs if the transport client was told to disassociate while connecting
       //disassociate cleans up everything except this local AcceptConnectResult whose destructor
       //should take care of it because link has not been shifted into links_ by use_datalink_i
@@ -409,7 +441,14 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     }
 
   }
-
+  if (DCPS_debug_level) {
+    GuidConverter local(repo_id_);
+    GuidConverter remote_conv(remote.repo_id_);
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
+                         "connection between local %C and remote %C initiation successful\n",
+                         std::string(local).c_str(),
+                         std::string(remote_conv).c_str()));
+  }
   return true;
 }
 
@@ -471,9 +510,27 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           if (!res.link_.is_nil()) {
 
             tc->use_datalink_i(data_.remote_id_, res.link_, guard);
+          } else {
+            if (DCPS_debug_level) {
+              GuidConverter local(tc->repo_id_);
+              GuidConverter remote(this->data_.remote_id_);
+              ACE_DEBUG((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
+                                   "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
+                                   std::string(local).c_str(),
+                                   std::string(remote).c_str()));
+            }
           }
 
           return true;
+        } else {
+          if (DCPS_debug_level) {
+            GuidConverter local(tc->repo_id_);
+            GuidConverter remote(this->data_.remote_id_);
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
+                                 "result of initiate_connect_i (local: %C to remote: %C) was not success \n",
+                                 std::string(local).c_str(),
+                                 std::string(remote).c_str()));
+          }
         }
       }
     }
