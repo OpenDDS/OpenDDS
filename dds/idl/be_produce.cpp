@@ -242,6 +242,10 @@ void postprocess(const char* fn, ostringstream& content,
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
 
+#ifdef ACE_HAS_CDR_FIXED
+    out << "#define __OPENDDS_IDL_HAS_FIXED\n";
+#endif
+
     string filebase(be_global->filename());
     const size_t idx = filebase.find_last_of("/\\"); // allow either slash
     if (idx != string::npos) {
