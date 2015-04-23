@@ -24,7 +24,7 @@ void wireshark_generator::write_common (UTL_ScopedName *name,
   be_global->ws_config_ << ident << ".repoid = \"" << repoid << "\"\n";
 }
 
-bool wireshark_generator::gen_enum(UTL_ScopedName* name,
+bool wireshark_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char* repoid)
 {
   if (!be_global->generate_wireshark())
@@ -75,7 +75,7 @@ void wireshark_generator::gen_array(UTL_ScopedName* name, AST_Array* arr)
 }
 
 
-bool wireshark_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
+bool wireshark_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* base,
                                       const char* repoid)
 {
   if (!be_global->generate_wireshark())
@@ -146,7 +146,7 @@ namespace {
 }
 
 
-bool wireshark_generator::gen_struct(UTL_ScopedName* name,
+bool wireshark_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
                                      const std::vector<AST_Field*>& fields,
                                      AST_Type::SIZE_TYPE, const char* repoid)
 {
@@ -167,7 +167,7 @@ bool wireshark_generator::gen_struct(UTL_ScopedName* name,
 }
 
 
-bool wireshark_generator::gen_union(UTL_ScopedName* name,
+bool wireshark_generator::gen_union(AST_Union*, UTL_ScopedName* name,
                                     const std::vector<AST_UnionBranch*>& cases,
                                     AST_Type* _d,
                                     const char* repoid)

@@ -376,6 +376,12 @@ BE_produce()
                 be_global->ws_config_, BE_GlobalData::STREAM_WS);
   }
 
+  if (be_global->generate_itl()) {
+    if (!BE_GlobalData::writeFile(be_global->itl_name_.c_str(), be_global->itl_.str())) {
+      BE_abort();  //error message already printed
+    }
+  }
+
   if (be_global->face_ts()) {
     postprocess(be_global->facets_header_name_.c_str(), be_global->facets_header_,
                 BE_GlobalData::STREAM_FACETS_H);

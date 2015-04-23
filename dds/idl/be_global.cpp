@@ -36,6 +36,7 @@ BE_GlobalData::BE_GlobalData()
   , suppress_idl_(false)
   , suppress_typecode_(false)
   , generate_wireshark_(false)
+  , generate_itl_(false)
   , v8_(false)
   , face_ts_(false)
   , seq_("Seq")
@@ -154,11 +155,11 @@ bool BE_GlobalData::face_ts() const
   return this->face_ts_;
 }
 
-bool
-BE_GlobalData::do_included_files() const
-{
-  return false; //we never process included files
-}
+// bool
+// BE_GlobalData::do_included_files() const
+// {
+//   return false; //we never process included files
+// }
 
 void
 BE_GlobalData::open_streams(const char* filename)
@@ -187,6 +188,7 @@ BE_GlobalData::open_streams(const char* filename)
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
   ws_config_name_ = (filebase + "_ws.ini").c_str();
+  itl_name_ = (filebase + ".itl").c_str();
   facets_header_name_ = (filebase + "_TS.hpp").c_str();
   facets_impl_name_ = (filebase + "_TS.cpp").c_str();
   lang_header_name_ = (filebase + "C.h").c_str();
@@ -249,6 +251,8 @@ BE_GlobalData::parse_args(long& i, char** av)
   case 'G':
     if (0 == ACE_OS::strcmp(av[i], "-Gws"))
       generate_wireshark_ = true;
+    else if (0 == ACE_OS::strcmp(av[i], "-Gitl"))
+      generate_itl_ = true;
     else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS"))
       face_ts(true);
     else

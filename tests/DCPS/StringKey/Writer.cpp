@@ -79,6 +79,25 @@ Writer::svc ()
     ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) %T Writer::svc starting to write.\n")));
     for (int i = 0; i< num_messages; i ++) {
+      switch (i % 4) {
+      case 0:
+        message.e = b;
+        message.u.u_b (true);
+        break;
+      case 1:
+        message.e = s;
+        message.u.u_s (534);
+        break;
+      case 2:
+        message.e = d;
+        message.u.u_d (1.345);
+        break;
+      case 3:
+        message.e = other1;
+        message.u.u_f (3.14);
+        break;
+      }
+
       ::DDS::ReturnCode_t ret = message_dw->write(message, handle);
 
       if (ret != ::DDS::RETCODE_OK) {

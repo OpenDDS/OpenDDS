@@ -13,14 +13,14 @@
 
 class keys_generator : public dds_generator {
 public:
-  bool gen_struct(UTL_ScopedName* name,
+  bool gen_struct(AST_Structure* node, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
 
-  bool gen_typedef(UTL_ScopedName*, AST_Type*, const char*)
+  bool gen_typedef(AST_Typedef*, UTL_ScopedName*, AST_Type*, const char*)
   { return true; }
 
-  bool gen_union(UTL_ScopedName*, const std::vector<AST_UnionBranch*>&,
+  bool gen_union(AST_Union*, UTL_ScopedName*, const std::vector<AST_UnionBranch*>&,
                  AST_Type*, const char*)
   { return true; }
 };

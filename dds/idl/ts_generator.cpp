@@ -66,7 +66,7 @@ ts_generator::ts_generator()
 {
 }
 
-bool ts_generator::gen_struct(UTL_ScopedName* name,
+bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
   if (idl_global->is_dcps_type(name) == 0) {
@@ -148,7 +148,7 @@ bool ts_generator::gen_struct(UTL_ScopedName* name,
   return true;
 }
 
-bool ts_generator::gen_union(UTL_ScopedName* name,
+bool ts_generator::gen_union(AST_Union*, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>&, AST_Type*, const char*)
 {
   if (idl_global->is_dcps_type(name)) {
