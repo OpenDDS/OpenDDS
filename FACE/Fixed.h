@@ -5,6 +5,8 @@
 
 #include "dds/DCPS/Serializer.h"
 
+#include "tao/SystemException.h"
+
 #include <ace/CDR_Base.h>
 
 namespace OpenDDS {
@@ -12,7 +14,7 @@ namespace FaceTypes {
 
 /// General fixed-point decimal type based on the IDL-to-C++ mapping spec v1.3
 /// See OMG 2012-07-02 section 5.13
-class OpenDDS_FACE_Export Fixed
+class Fixed
 {
 public:
   Fixed(int val = 0);
@@ -108,14 +110,21 @@ public:
     return lhs.impl_ != rhs.impl_;
   }
 
-#ifdef ACE_HAS_CDR_FIXED
 protected:
+#ifdef ACE_HAS_CDR_FIXED
   ACE_CDR::Fixed impl_;
 
   Fixed(const ACE_CDR::Fixed& f)
     : impl_(f)
   {}
 #endif
+
+  static FACE::LongDouble doubleToLongDouble(FACE::Double d)
+  {
+    FACE::LongDouble ld;
+    ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, d);
+    return ld;
+  }
 };
 
 
@@ -136,7 +145,7 @@ inline Fixed::Fixed(FACE::UnsignedLongLong val)
 {}
 
 inline Fixed::Fixed(FACE::Double val)
-  : impl_(ACE_CDR::Fixed::from_floating(val))
+  : impl_(ACE_CDR::Fixed::from_floating(doubleToLongDouble(val)))
 {}
 
 inline Fixed::Fixed(FACE::LongDouble val)
@@ -247,6 +256,7 @@ public:
   Fixed_T(FACE::Double val);
   Fixed_T(FACE::LongDouble val);
   Fixed_T(const char* str);
+  Fixed_T(const Fixed& f);
 
 private:
   friend bool operator<<(DCPS::Serializer& ser, const Fixed_T& f)
@@ -274,7 +284,7 @@ private:
     if (!ser.read_octet_array(arr, n)) {
       return false;
     }
-    f.impl_ = ACE_CDR::Fixed::from_octets(arr, n);
+    f.impl_ = ACE_CDR::Fixed::from_octets(arr, n, Scale);
     return true;
 #else
     ACE_UNUSED_ARG(ser);
@@ -307,7 +317,7 @@ inline Fixed_T<Digits, Scale>::Fixed_T(FACE::UnsignedLongLong val)
 
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(FACE::Double val)
-  : Fixed(ACE_CDR::Fixed::from_floating(val))
+  : Fixed(ACE_CDR::Fixed::from_floating(doubleToLongDouble(val)))
 {}
 
 template <unsigned int Digits, unsigned int Scale>
@@ -321,11 +331,19 @@ inline Fixed_T<Digits, Scale>::Fixed_T(const char* str)
 {}
 
 template <unsigned int Digits, unsigned int Scale>
-inline void
-gen_find_size(const Fixed_T<Digits, Scale>&, size_t& size, size_t& padding)
+inline Fixed_T<Digits, Scale>::Fixed_T(const Fixed& f)
+  : Fixed(f.truncate(Scale))
 {
-  size = (Digits + 2) / 2;
-  padding = 0;
+  if (impl_.fixed_digits() > Digits) {
+    throw CORBA::DATA_CONVERSION();
+  }
+}
+
+template <unsigned int Digits, unsigned int Scale>
+inline void
+gen_find_size(const Fixed_T<Digits, Scale>&, size_t& size, size_t&)
+{
+  size += (Digits + 2) / 2;
 }
 
 template <unsigned int Digits, unsigned int Scale>
@@ -336,6 +354,10 @@ gen_skip_over(DCPS::Serializer& ser, Fixed_T<Digits, Scale>*)
 }
 
 }
+}
+
+namespace FACE {
+  typedef OpenDDS::FaceTypes::Fixed Fixed;
 }
 
 #endif
