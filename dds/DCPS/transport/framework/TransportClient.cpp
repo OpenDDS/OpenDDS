@@ -304,11 +304,11 @@ TransportClient::associate(const AssociationData& data, bool active)
     std::reverse_copy(impls_.begin(), impls_.end(),
                       std::back_inserter(pend.impls_));
 
-    pend.initiate_connect(this, guard);
+    return pend.initiate_connect(this, guard);
 
     //Revisit if this should be used instead of always returning true.
     //return pend.initiate_connect(this, guard);
-    return true;
+//    return true;
 
   } else { // passive
 
