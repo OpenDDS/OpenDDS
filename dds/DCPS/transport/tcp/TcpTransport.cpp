@@ -127,6 +127,24 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
 
     VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"), 2);
     ACE_DEBUG((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"));
+    //TODO: If the connection fails and, in the interim between releasing
+    //lock and re-acquiring to remove the failed link, another association has found
+    //the datalink in links_ (always using find_datalink_i)-- need to find a way to
+    //allow the other association to either try to connect again (might succeed for it)
+    //or try another transport.  If find_datalink_i was called for this datalink, an
+    //on_start_callback will be registered
+    VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink connect failed, remove link[%@]\n", link.in()), 2);
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink connect failed, remove link[%@]\n", link.in()));
+    {
+      GuardType guard(links_lock_);
+      if (links_.unbind(key, link) != 0 /*OK*/) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink "
+                   "Unable to unbind failed TcpDataLink[%@] from "
+                   "TcpTransport links_ map.\n", link.in()));
+      }
+    }
+    link->invoke_on_start_callbacks(false);
+
     return AcceptConnectResult();
   }
 
