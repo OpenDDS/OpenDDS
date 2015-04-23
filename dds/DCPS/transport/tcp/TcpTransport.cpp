@@ -124,9 +124,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
     connector_.connect(pConn, key.address(), ACE_Synch_Options::asynch);
 
   if (ret == -1 && errno != EWOULDBLOCK) {
-
-    VDBG_LVL((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"), 2);
-    ACE_DEBUG((LM_ERROR, "(%P|%t) TcpTransport::connect_datalink error %m.\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TcpTransport::connect_datalink error %m.\n"));
     return AcceptConnectResult();
   }
 
