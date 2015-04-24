@@ -46,7 +46,7 @@ public:
   const char* filename() const;
   void filename(const char* fname);
 
-  bool do_included_files() const;
+  //bool do_included_files() const;
 
   ACE_CString spawn_options();
   // Command line passed to ACE_Process::spawn. Different
@@ -75,9 +75,9 @@ public:
 
   void open_streams(const char* filename);
 
-  std::ostringstream header_, impl_, idl_, ws_config_, facets_header_, facets_impl_,
+  std::ostringstream header_, impl_, idl_, ws_config_, itl_, facets_header_, facets_impl_,
     lang_header_;
-  ACE_CString header_name_, impl_name_, idl_name_, ws_config_name_,
+  ACE_CString header_name_, impl_name_, idl_name_, ws_config_name_, itl_name_,
     facets_header_name_, facets_impl_name_, lang_header_name_,
     output_dir_, tao_inc_pre_;
 
@@ -85,7 +85,7 @@ public:
   void multicast(const char* message);
 
   enum stream_enum_t {
-    STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_WS,
+    STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_WS, STREAM_ITL,
     STREAM_FACETS_H, STREAM_FACETS_CPP,
     STREAM_LANG_H
   };
@@ -142,6 +142,7 @@ public:
   bool suppress_typecode() const { return suppress_typecode_; }
 
   bool generate_wireshark() const { return generate_wireshark_; }
+  bool generate_itl() const { return generate_itl_; }
 
   static bool writeFile(const char* fileName, const std::string &content);
 
@@ -150,7 +151,7 @@ private:
   // Name of the IDL file we are processing.
 
   bool java_, suppress_idl_, suppress_typecode_,
-    generate_wireshark_, v8_, face_ts_;
+    generate_wireshark_, generate_itl_, v8_, face_ts_;
 
   ACE_CString export_macro_, export_include_, pch_include_, java_arg_, seq_;
 

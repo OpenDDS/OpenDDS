@@ -7,15 +7,22 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef wireshark_generator_H
-#define wireshark_generator_H
+#ifndef itl_generator_H
+#define itl_generator_H
 
 #include "dds_generator.h"
 
-class wireshark_generator : public dds_generator {
+class itl_generator : public dds_generator {
 public:
-  wireshark_generator()
+  itl_generator()
+    : level_(0)
+    , count_(0)
   {}
+
+  bool do_included_files() const { return true; }
+
+  void gen_prologue();
+  void gen_epilogue();
 
   bool gen_enum(AST_Enum*, UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
@@ -29,12 +36,36 @@ public:
   bool gen_union(AST_Union*, UTL_ScopedName*, const std::vector<AST_UnionBranch*>&,
                  AST_Type*, const char*);
 
-private:
-  void write_common(UTL_ScopedName* name,
-                    const char* kind,
-                    const char* repoid);
+  struct Open {
+    itl_generator* generator;
 
-  void gen_array(UTL_ScopedName* tdname, AST_Array* arr);
+    Open (itl_generator* g)
+      : generator(g)
+    { }
+  };
+
+  struct Close {
+    itl_generator* generator;
+
+    Close (itl_generator* g)
+      : generator(g)
+    { }
+  };
+
+  struct Indent {
+    itl_generator* generator;
+
+    Indent (itl_generator* g)
+      : generator(g)
+    { }
+  };
+
+  int level_;
+
+private:
+  size_t count_;
+
+  void new_type();
 };
 
 #endif
