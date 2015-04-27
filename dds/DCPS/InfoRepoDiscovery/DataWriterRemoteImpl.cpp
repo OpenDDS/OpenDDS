@@ -79,10 +79,6 @@ DataWriterRemoteImpl::association_complete(const RepoId& remote_id)
     parent = this->parent_;
   }
   if (parent) {
-    if (DCPS_debug_level) {
-      GuidConverter remote(remote_id);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterRemoteImpl::association_complete - Inform DataWriterImpl that association has completed to remote: %C\n", std::string(remote).c_str()));
-    }
     parent->association_complete(remote_id);
   }
 }
