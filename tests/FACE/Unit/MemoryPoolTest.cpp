@@ -95,12 +95,10 @@ public:
 
   // Allocate a block and free it, becoming largest
   void test_pool_alloc_free_largest() {
-    MemoryPool pool(1024, 8);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(256);
-    validate_pool(pool, 384, true);
     char* ptr2 = pool.pool_alloc(128);
-    validate_pool(pool, 512, true);
     char* ptr3 = pool.pool_alloc(512);
     validate_pool(pool, 1024, true);
     TEST_CHECK(ptr1);
@@ -829,14 +827,32 @@ public:
   }
 
 private:
-  FreeIndex* find_free_index(MemoryPool& pool, FreeHeader* alloc) {
-    size_t i;
-    for (i = 0; i < pool.free_index_size_; ++i) {
-      if (pool.free_index_[i].ptr() == alloc) {
-        return pool.free_index_ + i;
+  void validate_index(FreeIndex& index, char* buff, bool log = false)
+  {
+    if (log) {
+      FreeIndexNode* node = index.nodes_;
+      while (node < index.nodes_ + index.size_) {
+        printf("  IND[%4d] -> ", node->size());
+        if (node->ptr()) {
+          printf(" %4d\n", node->ptr()->size());
+        } else {
+          printf(" NULL\n");
+        }
+        ++node;
+      };
+    }
+
+    for (size_t size = 8; size <= 4096; size *= 2) {
+      // Find size or larger
+      FreeHeader* header = index.find(size);
+      if (header) {
+        TEST_CHECK(header->size() >= size);
+        FreeHeader* smaller = header->smaller_free(buff);
+        if (smaller) {
+          TEST_CHECK(smaller->size() < size);
+        }
       }
     }
-    return NULL;
   }
 
   void validate_pool(MemoryPool& pool, size_t expected_allocated_bytes,
@@ -850,19 +866,21 @@ private:
     bool prev_was_free;
     size_t index = 0;
 
-    typedef std::map<FreeHeader*, int> FreeIndexMap;
-    FreeIndexMap free_index_map;
+    typedef std::map<FreeHeader*, int> FreeMap;
+    FreeMap free_map;
     // Gather all free indices
     AllocHeader* alloc = reinterpret_cast<AllocHeader*>(pool.pool_ptr_);
     while (pool.includes(alloc)) {
       FreeHeader* free_header = alloc->is_free() ? 
             reinterpret_cast<FreeHeader*>(alloc) : NULL;
       if (free_header) {
-        free_index_map[free_header] = (int)free_index_map.size() ;
+        free_map[free_header] = index;
       }
       alloc = alloc->next_adjacent();
+      ++index;
     }
 
+    index = 0;
     if (log) {
       printf("Pool ptr %zx end %zx\n", (unsigned long)pool.pool_ptr_,
              (unsigned long)pool_end);
@@ -880,23 +898,21 @@ private:
 
         FreeHeader* free_header = alloc->is_free() ? 
               reinterpret_cast<FreeHeader*>(alloc) : NULL;
-        FreeIndex* free_index = NULL;
         if (free_header) {
-          free_index = find_free_index(pool, free_header);
-          FreeIndexMap::const_iterator found;
-          found = free_index_map.find(free_header->smaller_free(pool.pool_ptr_));
-          if (found != free_index_map.end()) {
+          FreeMap::const_iterator found;
+          found = free_map.find(free_header->smaller_free(pool.pool_ptr_));
+          if (found != free_map.end()) {
             smlr_index = found->second;
             sprintf(smlr_buff, "[%2d]", smlr_index);
           }
-          found = free_index_map.find(free_header->larger_free(pool.pool_ptr_));
-          if (found != free_index_map.end()) {
+          found = free_map.find(free_header->larger_free(pool.pool_ptr_));
+          if (found != free_map.end()) {
             lrgr_index = found->second;
             sprintf(lrgr_buff, "[%2d]", lrgr_index);
           }
         }
         printf(
-          "Alloc[%zu] %s at %zx ptr %zx lrgr %s smlr %s size %d psize %d IND %d\n",
+          "Alloc[%zu] %s at %zx ptr %zx lg %s sm %s size %d psize %d\n",
           index++,
           alloc->is_free() ? 
           (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
@@ -905,8 +921,8 @@ private:
           lrgr_index >= 0 ? lrgr_buff : "[  ]",
           smlr_index >= 0 ? smlr_buff : "[  ]",
           alloc->size(),
-          alloc->prev_size(),
-          free_index ? free_index->size() : -1);
+          alloc->prev_size()
+          );
       }
 
       TEST_CHECK(alloc->size());
@@ -933,21 +949,21 @@ private:
     TEST_CHECK(allocated_bytes == expected_allocated_bytes);
     TEST_CHECK(allocated_bytes + free_bytes + oh_bytes == pool.pool_size_);
 
+    validate_index(pool.free_index_, pool.pool_ptr_, log);
+
     size_t prev_size = 0;
     size_t free_bytes_in_list = 0;
     FreeHeader* free_alloc = NULL;
     FreeHeader* prev_free = NULL;
-    FreeIndex* free_index = pool.free_index_ + pool.free_index_size_ - 1;
-    while (free_index >= pool.free_index_ && !free_index->ptr()) --free_index;
 
     // Check all free blocks in size order
     for (free_alloc = pool.largest_free_;
          free_alloc;
          free_alloc = free_alloc->smaller_free(pool.pool_ptr_)) {
-      // Check for infinite loop
-      TEST_CHECK(++free_count < 10000);
       // Should be marked free
       TEST_CHECK(free_alloc->is_free());
+      // Check for infinite loop
+      TEST_CHECK(++free_count < 10000);
 
       // Sum bytes found
       free_bytes_in_list += free_alloc->size();
@@ -959,30 +975,12 @@ private:
       }
       prev_size = free_alloc->size();
       prev_free = free_alloc;
-
-      if (free_index >= pool.free_index_) {
-        // Validate free index points to correct alloc
-        if (free_index->ptr() == free_alloc) {
-          TEST_CHECK(free_alloc->size() >= free_index->size());
-          // Free_alloc should be smalllest node larger or equal to index size
-          FreeHeader* larger = free_alloc->larger_free(pool.pool_ptr_);
-          if (larger) {
-            // Larger must be too large for index
-            TEST_CHECK(larger->size() >free_index->size());
-          }
-          while (free_index >= pool.free_index_ && !free_index->ptr()) {
-            --free_index;
-          }
-        }
-      }
     }
 
     TEST_CHECK(free_bytes == free_bytes_in_list);
 
     // Try again from smallest to largest
     if (prev_free) {
-      free_index = pool.free_index_;
-
       free_bytes_in_list = 0;
 
       for (free_alloc = prev_free;
@@ -1000,14 +998,6 @@ private:
           TEST_CHECK(free_alloc->size() > 0);
         }
         prev_size = free_alloc->size();
-
-        if (free_index < pool.free_index_ + pool.free_index_size_) {
-          if ((free_alloc->size() >= free_index->size()) &&
-              (free_alloc->size() < (free_index + 1)->size())) {
-            TEST_CHECK(free_index->ptr() == free_alloc);
-            ++free_index;
-          }
-        }
       }
       TEST_CHECK(free_bytes == free_bytes_in_list);
     }
@@ -1019,13 +1009,13 @@ int main(int, const char** )
   MemoryPoolTest test;
 
   test.test_pool_alloc();
-/*
   test.test_pool_allocs();
   test.test_pool_alloc_odd_size();
+/*
   test.test_pool_align_other_size();
+*/
   test.test_pool_alloc_last_avail();
   test.test_pool_alloc_free();
-*/
   test.test_pool_alloc_free_largest();
 /*
   test.test_pool_alloc_free_smallest();

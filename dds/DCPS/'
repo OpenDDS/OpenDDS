@@ -66,6 +66,11 @@ AllocHeader::join_next() {
 }
 
 void
+AllocHeader::join_prev() {
+  prev_adjacent()->join_next();
+}
+
+void
 FreeHeader::init_free_block(unsigned int free_size)
 {
   alloc_size_ = (static_cast<int>((free_size - sizeof(AllocHeader)) * -1));
@@ -74,16 +79,6 @@ FreeHeader::init_free_block(unsigned int free_size)
   set_larger_free(NULL, NULL);
 }
 
-void
-FreeHeader::set_free()
-{
-  // If this is newly freed
-  if (!is_free()) {
-    alloc_size_ = - alloc_size_;
-    set_smaller_free(NULL, NULL);
-    set_larger_free(NULL, NULL);
-  }
-}
 FreeHeader*
 FreeHeader::smaller_free(char* buffer) const
 {
@@ -126,16 +121,9 @@ FreeHeader::set_larger_free(FreeHeader* prev, char* buffer)
 
 FreeIndexNode::FreeIndexNode()
 : size_(0)
-, limit_(0)
+, size_limit_(0)
 , ptr_(0)
 {
-}
-
-void
-FreeIndexNode::set_sizes(size_t size, size_t limit)
-{
-  size_ = size;
-  limit_ = limit;
 }
 
 FreeIndex::FreeIndex()
@@ -144,75 +132,29 @@ FreeIndex::FreeIndex()
 }
 
 void
-FreeIndex::add(FreeHeader* free_block)
-{
-  FreeIndexNode* node = nodes_;
-  do {
-    if (node->contains(free_block->size())) {
-      if ((node->ptr() == NULL) || (node->ptr()->size() < free_block->size())) {
-        node->set_ptr(free_block);
-      }
-      break;
-    }
-    ++node;
-  } while (node < nodes_ + size_);
-}
-
-void
-FreeIndex::remove(FreeHeader* free_block, FreeHeader* next_largest)
-{
-  FreeIndexNode* node = nodes_;
-  do {
-    if (node->contains(free_block->size())) {
-      if (node->ptr() == free_block) {
-        if (next_largest && node->contains(next_largest->size())) {
-          node->set_ptr(next_largest);
-        } else {
-          node->set_ptr(NULL);
-        }
-      }
-      break;
-    }
-    ++node;
-  } while (node < nodes_ + size_);
-}
-
-void
-FreeIndex::init(FreeHeader* init_free_block)
+FreeIndex::init(FreeHeader* init_free)
 {
   int init_index = 0;
   unsigned int size = 8;
   while (size <= 4096) {
-    nodes_[size_].set_sizes(size, (size == 4096) ? -1 :  size*2);
-    if (init_free_block->size() >= size) {
+    nodes_[size_].set_size(size);
+    nodes_[size_].set_size_limit(size);
+    if (init_free->size() >= size) {
       init_index = size_;
     }
     ++size_;
     size *= 2;
   }
-  nodes_[init_index].set_ptr(init_free_block);
+  nodes_[init_index].set_ptr(init_free);
 }
 
-FreeHeader*
-FreeIndex::find(size_t size)
-{    
-  unsigned int i = 0;
-  // Search index
-  FreeIndexNode* index = nodes_;
-  for (i = 0; i < size_; ++i) {
-    if (index->ptr() && index->size() >= size) {
-      // Found
-      return index->ptr();
-    }
-    ++index;
+void
+FreeIndex::remove(FreeHeader* block, FreeHeader* larger) {
+  FreeIndexNode* index = find_index(block->size());
+  // If index pointed to this block
+  if (index->ptr() == block) {
+    index->set_ptr(larger);
   }
-  return NULL;
-}
-
-OldFreeIndex::OldFreeIndex()
-: size_(0)
-, ptr_(0)
-{
 }
 
 MemoryPool::MemoryPool(unsigned int pool_size, size_t alignment)
@@ -221,15 +163,13 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t alignment)
 , min_free_size_(align(sizeof(FreeHeader)))
 , pool_size_(align(pool_size))
 , pool_ptr_(new char[pool_size_])
-, old_free_index_size_(0)
 , debug_log_(false)
 {
   FreeHeader* first_free = reinterpret_cast<FreeHeader*>(pool_ptr_);
   first_free->init_free_block(pool_size_);
   largest_free_ = first_free;
 
-  init_index(first_free);  // Deprecated
-  free_index_.init(first_free);
+  init_index(first_free);
 }
 
 MemoryPool::~MemoryPool()
@@ -319,10 +259,6 @@ MemoryPool::pool_alloc(size_t size)
 void
 MemoryPool::pool_free(void* ptr)
 {
-  if (!ptr) {
-    return;
-  }
-
   FreeHeader* header = reinterpret_cast<FreeHeader*>(
       reinterpret_cast<AllocHeader*>(ptr) - 1);
 
@@ -343,23 +279,13 @@ MemoryPool::join_free_allocs(FreeHeader* freed)
     FreeHeader* next_free = reinterpret_cast<FreeHeader*>(freed->next_adjacent());
     remove_free_alloc(next_free);
     freed->join_next();
-    // Adjust psize of adjacent
-    AllocHeader* next = freed->next_adjacent();
-    if (includes(next)) {
-      next->set_prev_size(freed->size());
-    }
   }
   if (freed->joinable_prev()) {
     FreeHeader* prev_free = reinterpret_cast<FreeHeader*>(freed->prev_adjacent());
     remove_free_alloc(prev_free);
     // Join prev with freed
-    prev_free->join_next();
+    freed->join_prev();
     insert_free_alloc(prev_free);
-    // Adjust psize of adjacent
-    AllocHeader* next = prev_free->next_adjacent();
-    if (includes(next)) {
-      next->set_prev_size(prev_free->size());
-    }
   } else {
     insert_free_alloc(freed);
   }
@@ -395,31 +321,7 @@ MemoryPool::remove_free_alloc(FreeHeader* block_to_alloc)
 void
 MemoryPool::insert_free_alloc(FreeHeader* freed)
 {
-  // Find free alloc this size or larger
   FreeHeader* alloc = free_index_.find(freed->size());
-  // If found
-  if (alloc) {
-    if (alloc != freed) {
-      freed->set_larger_free(alloc, pool_ptr_);
-      alloc->set_smaller_free(freed, pool_ptr_);
-    }
-  // Else this is the largest alloc
-  } else {
-    if (freed != largest_free_) {
-      freed->set_smaller_free(largest_free_, pool_ptr_);
-      if (largest_free_) {
-        largest_free_->set_smaller_free(freed, pool_ptr_);
-      }
-      largest_free_ = freed;
-    }
-  }
-  
-  free_index_.add(freed);
-
-/*
-  OldFreeIndex* insert_index = find_insert_index(freed->size());
-  // Won't be null
-  FreeHeader* alloc = insert_index->ptr();
   // traverse to find correct point
   while (alloc && freed->size() > alloc->size()) {
     alloc = alloc->larger_free(pool_ptr_);
@@ -442,15 +344,15 @@ MemoryPool::insert_free_alloc(FreeHeader* freed)
     freed->set_smaller_free(largest_free_, pool_ptr_);
     largest_free_ = freed;
   }
-*/
 }
 
-OldFreeIndex*
+/*
+FreeIndex*
 MemoryPool::find_insert_index(size_t size) {
   // I have a free node of a given size to insert
-  OldFreeIndex* index = old_free_index_ + (old_free_index_size_ - 1);
+  FreeIndex* index = free_index_ + (free_index_size_ - 1);
   // Linear search
-  while (index >= old_free_index_) {
+  while (index >= free_index_) {
     if (size >= index->size()) {
       return index;
     }
@@ -459,22 +361,40 @@ MemoryPool::find_insert_index(size_t size) {
 
   return NULL;
 }
+*/
+
+unsigned long
+MemoryPool::offset_of(const AllocHeader* alloc)
+{
+  char* char_alloc = (char*)alloc;
+  return (char_alloc - pool_ptr_);
+}
 
 FreeHeader*
 MemoryPool::find_free_block(size_t req_size)
 {
   // If larger than final index
-  if (largest_free_ && req_size >= largest_free_->size()) {
-    FreeHeader* free_block = largest_free_;
+  if (req_size > free_index_[free_index_size_ - 1].size()) {
+    // Does not fit in index, start at end and move larger
+    FreeHeader* free_block = free_index_[free_index_size_ - 1].ptr();
     while (free_block) {
-      if (free_block->size() >= req_size) {
+      if (free_block->size() > req_size) {
         return free_block;
       } else {
         free_block = free_block->larger_free(pool_ptr_);
       }
     }
   } else {
-    return free_index_.find(req_size);
+    unsigned int i = 0;
+    // Search index
+    FreeIndex* index = free_index_;
+    for (i = 0; i < free_index_size_; ++i) {
+      if (index->ptr() && index->size() >= req_size) {
+        // Found
+        return free_index_[i].ptr();
+      }
+      ++index;
+    }
   }
   // Too large
   return NULL;
@@ -486,14 +406,14 @@ MemoryPool::init_index(FreeHeader* init_free)
   int init_index = 0;
   unsigned int size = 8;
   while (size <= 4096) {
-    old_free_index_[old_free_index_size_].set_size(size);
+    free_index_[free_index_size_].set_size(size);
     if (init_free->size() >= size) {
-      init_index = old_free_index_size_;
+      init_index = free_index_size_;
     }
-    ++old_free_index_size_;
+    ++free_index_size_;
     size *= 2;
   }
-  old_free_index_[init_index].set_ptr(init_free);
+  free_index_[init_index].set_ptr(init_free);
 }
 
 char*
@@ -525,31 +445,21 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
       if (remainder < smaller->size()) {
         // Move the free block ahead in the free list
 
-        // Remove from free list and index
+        // Remove from index
         remove_free_alloc(free_block);
         // Change size
         free_block->set_size(remainder);
-        // Insert back into free list and index
+        // Insert back into index
         insert_free_alloc(free_block);
       // Else there is smaller, but free_block is still larger
       } else {
-        FreeHeader* larger = free_block->larger_free(pool_ptr_);
-        // Remove from free list
-        free_index_.remove(free_block, larger);
         // Change size
         free_block->set_size(remainder);
-        // Add back to free list
-        free_index_.add(free_block);
       }
     // Else allocating from smallest block
     } else {
-      FreeHeader* larger = free_block->larger_free(pool_ptr_);
-      // Remove from free list
-      free_index_.remove(free_block, larger);
       // Change size
       free_block->set_size(remainder);
-      // Add back to free list
-      free_index_.add(free_block);
     }
 
     // After resize, can use next_adjacent() to safely get to the end of the

@@ -31,7 +31,6 @@ public:
   // Set the values stored in this header 
   void set_size(size_t size);
   void set_prev_size(int size) { prev_size_ = size; }
-  void set_free() { if (alloc_size_ > 0) alloc_size_ = - alloc_size_; }
   void set_alloc() { if (alloc_size_ < 0) alloc_size_ = - alloc_size_; }
 
   // Is this node joinable with an adjacent node
@@ -40,7 +39,7 @@ public:
 
   // Join with the next adjacent block (if both indeed free)
   void join_next();
-  void join_prev();
+
 protected:
   // Sizes are those of buffers, does not include size of headers
   long alloc_size_; // Size of my buffer, negative if free, positive if alloc
@@ -51,6 +50,8 @@ class OpenDDS_Dcps_Export FreeHeader : public AllocHeader {
 public:
   // Initialize the first AllocHeader with its size
   void init_free_block(unsigned int size);
+
+  void set_free();
 
   FreeHeader* smaller_free(char* buffer) const;
   FreeHeader* larger_free(char* buffer) const;
@@ -71,10 +72,44 @@ private:
   unsigned long offset_larger_free_; // Offset to prev (in size order) free block
 };
 
-// An index into the free list
-class FreeIndex {
+class FreeIndexNode {
+public:
+  FreeIndexNode();
+  void set_ptr(FreeHeader* ptr) { ptr_ = ptr; }
+  void set_sizes(size_t size, size_t limit);
+
+  bool contains(size_t size) { return ((size >= size_) && (size < limit_)); }
+
+  FreeHeader* ptr() { return ptr_; }
+  unsigned int size() const { return size_; }
+
+private:
+  size_t size_;       // size of buffer
+  size_t limit_;      // upper_limit of buffer size (one too large)
+  FreeHeader* ptr_;   // points to smallest free alloc of size_ or larger
+};
+
+class OpenDDS_Dcps_Export FreeIndex {
+  friend class ::MemoryPoolTest;
 public:
   FreeIndex();
+  void init(FreeHeader* init_free_block);
+
+  void add(FreeHeader* free_block);
+  void remove(FreeHeader* free_block, FreeHeader* next_largest);
+
+  // Find size or larger
+  FreeHeader* find(size_t size);
+
+private:
+  size_t size_;
+  FreeIndexNode nodes_[20];
+};
+
+// An index into the free list
+class OldFreeIndex {
+public:
+  OldFreeIndex();
   void set_ptr(FreeHeader* ptr) { ptr_ = ptr; }
   void set_size(unsigned int size) { size_ = size; }
 
@@ -112,8 +147,11 @@ private:
   const size_t pool_size_;       // Configured pool size
   char* pool_ptr_;
 
-  unsigned int free_index_size_;
-  FreeIndex free_index_[20];     // Index into free list
+  FreeIndex free_index_;
+
+  // Deprecated
+  unsigned int old_free_index_size_;
+  OldFreeIndex old_free_index_[20];     // Index into free list
 
   FreeHeader* largest_free_;
 
@@ -125,10 +163,8 @@ private:
   void remove_free_alloc(FreeHeader* block_to_alloc);
   void insert_free_alloc(FreeHeader* block_freed);
   void join_free_allocs(FreeHeader* block_freed);
-  FreeIndex* find_insert_index(size_t size);
+  OldFreeIndex* find_insert_index(size_t size);
   char* allocate(FreeHeader* free_block, size_t alloc_size);
-
-  unsigned long offset_of(const AllocHeader* alloc);
 
   void log_allocs();
   void validate();
