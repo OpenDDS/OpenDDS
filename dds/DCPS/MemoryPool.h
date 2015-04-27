@@ -148,22 +148,15 @@ private:
   char* pool_ptr_;
 
   FreeIndex free_index_;
-
-  // Deprecated
-  unsigned int old_free_index_size_;
-  OldFreeIndex old_free_index_[20];     // Index into free list
-
   FreeHeader* largest_free_;
 
   bool debug_log_;
 
   // Helpers
-  void init_index(FreeHeader* init_free);
   FreeHeader* find_free_block(size_t req_size);
   void remove_free_alloc(FreeHeader* block_to_alloc);
   void insert_free_alloc(FreeHeader* block_freed);
   void join_free_allocs(FreeHeader* block_freed);
-  OldFreeIndex* find_insert_index(size_t size);
   char* allocate(FreeHeader* free_block, size_t alloc_size);
 
   void log_allocs();

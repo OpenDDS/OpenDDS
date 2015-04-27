@@ -221,14 +221,11 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t alignment)
 , min_free_size_(align(sizeof(FreeHeader)))
 , pool_size_(align(pool_size))
 , pool_ptr_(new char[pool_size_])
-, old_free_index_size_(0)
 , debug_log_(false)
 {
   FreeHeader* first_free = reinterpret_cast<FreeHeader*>(pool_ptr_);
   first_free->init_free_block(pool_size_);
   largest_free_ = first_free;
-
-  init_index(first_free);  // Deprecated
   free_index_.init(first_free);
 }
 
@@ -451,21 +448,6 @@ MemoryPool::insert_free_alloc(FreeHeader* freed)
 */
 }
 
-OldFreeIndex*
-MemoryPool::find_insert_index(size_t size) {
-  // I have a free node of a given size to insert
-  OldFreeIndex* index = old_free_index_ + (old_free_index_size_ - 1);
-  // Linear search
-  while (index >= old_free_index_) {
-    if (size >= index->size()) {
-      return index;
-    }
-    --index;
-  }
-
-  return NULL;
-}
-
 FreeHeader*
 MemoryPool::find_free_block(size_t req_size)
 {
@@ -484,22 +466,6 @@ MemoryPool::find_free_block(size_t req_size)
   }
   // Too large
   return NULL;
-}
-
-void
-MemoryPool::init_index(FreeHeader* init_free)
-{
-  int init_index = 0;
-  unsigned int size = 8;
-  while (size <= 4096) {
-    old_free_index_[old_free_index_size_].set_size(size);
-    if (init_free->size() >= size) {
-      init_index = old_free_index_size_;
-    }
-    ++old_free_index_size_;
-    size *= 2;
-  }
-  old_free_index_[init_index].set_ptr(init_free);
 }
 
 char*
