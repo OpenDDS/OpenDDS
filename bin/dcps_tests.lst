@@ -319,3 +319,4 @@ tests/FACE/Reliability/run_test.pl: !DCPS_MIN !WCHAR RTPS
 tests/FACE/Partition/run_test.pl: !DCPS_MIN !WCHAR RTPS
 tests/FACE/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !WCHAR
 tests/FACE/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !WCHAR
+tests/FACE/Compiler/idl_test_fixed/TestFixed: !DCPS_MIN !WCHAR
