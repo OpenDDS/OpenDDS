@@ -236,30 +236,6 @@ MemoryPool::~MemoryPool()
 #endif
 }
 
-/*
-FreeHeader*
-MemoryPool::smaller_free(const FreeHeader* node)
-{
-  FreeHeader* result = NULL;
-  unsigned long offset = node->next_free_offset();
-  if (offset != ULONG_MAX) {
-    result = reinterpret_cast<FreeHeader*>(pool_ptr_ + offset);
-  }
-  return result;
-}
-
-FreeHeader*
-MemoryPool::larger_free(const FreeHeader* node)
-{
-  FreeHeader* result = NULL;
-  unsigned long offset = node->prev_free_offset();
-  if (offset != ULONG_MAX) {
-    result = reinterpret_cast<FreeHeader*>(pool_ptr_ + offset);
-  }
-  return result;
-}
-*/
-
 char*
 MemoryPool::pool_alloc(size_t size)
 {
@@ -274,37 +250,6 @@ MemoryPool::pool_alloc(size_t size)
 
   if (block_to_alloc) {
     block = allocate(block_to_alloc, aligned_size);
-/*
-    size_t free_block_size = block_to_alloc->size();
-
-    size_t remainder = free_block_size - aligned_size;
-
-    // May not be enough room for another allocation
-    if (remainder < min_free_size_) {
-      aligned_size = free_block_size; // use it all
-      remainder = 0;
-    }
-
-    // Change size and mark allocated
-    block_to_alloc->allocate(aligned_size);
-
-    // If free size is changing
-    if (remainder) {
-      block_to_alloc->set_alloc();
-      FreeHeader* next = reinterpret_cast<FreeHeader*>(block_to_alloc->next_adjacent());
-      next->set_size(remainder);
-      next->set_free();
-      next->set_prev_size(aligned_size);
-      next->next_adjacent()->set_prev_size(remainder);
-
-      // Maintain size order
-      remove_free_alloc(block_to_alloc);
-      insert_free_alloc(next);
-    // else free block is removed
-    } else {
-      remove_free_alloc(block_to_alloc);
-    }
-*/
   }
 
   //if (debug_log_) log_allocs();
@@ -418,34 +363,6 @@ MemoryPool::insert_free_alloc(FreeHeader* freed)
   }
   
   free_index_.add(freed);
-
-/*
-  OldFreeIndex* insert_index = find_insert_index(freed->size());
-  // Won't be null
-  FreeHeader* alloc = insert_index->ptr();
-  // traverse to find correct point
-  while (alloc && freed->size() > alloc->size()) {
-    alloc = alloc->larger_free(pool_ptr_);
-  }
-
-  if (alloc) {
-    // Alloc points to larger or equal size
-    FreeHeader* smaller = alloc->smaller_free(pool_ptr_);
-    alloc->set_smaller_free(freed, pool_ptr_);
-    freed->set_larger_free(alloc, pool_ptr_);
-    freed->set_smaller_free(alloc, pool_ptr_);
-    if (smaller) {
-      smaller->set_larger_free(freed, pool_ptr_);
-    }
-  } else {
-    // nothing larger
-    if (largest_free_) {
-      largest_free_->set_larger_free(freed, pool_ptr_);
-    }
-    freed->set_smaller_free(largest_free_, pool_ptr_);
-    largest_free_ = freed;
-  }
-*/
 }
 
 FreeHeader*
