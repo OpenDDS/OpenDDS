@@ -270,7 +270,22 @@ bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 
     for (size_t i = 0; i < fields.size(); ++i) {
       const std::string field_name = fields[i]->local_name()->get_string();
-      be_global->impl_ << field_name << " == rhs." << field_name;
+      AST_Type* field_type = fields[i]->field_type();
+      resolveActualType(field_type);
+      const Classification cls = classify(field_type);
+      if (cls & CL_ARRAY) {
+        ACE_CDR::ULong elems = 1;
+        const std::string flat_fn = field_name + array_dims(field_type, elems);
+        for (ACE_CDR::ULong j = 0; j < elems; ++j) {
+          be_global->impl_ << flat_fn << '[' << j << "] == rhs." << flat_fn
+                           << '[' << j << ']';
+          if (j < elems - 1) {
+            be_global->impl_ << "\n    && ";
+          }
+        }
+      } else {
+        be_global->impl_ << field_name << " == rhs." << field_name;
+      }
       if (i < fields.size() - 1) {
         be_global->impl_ << "\n    && ";
       }

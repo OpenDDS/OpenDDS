@@ -9,6 +9,8 @@
 
 #include <ace/CDR_Base.h>
 
+#include <cstring>
+
 namespace OpenDDS {
 namespace FaceTypes {
 
@@ -121,10 +123,12 @@ protected:
 
   static FACE::LongDouble doubleToLongDouble(FACE::Double d)
   {
-    FACE::LongDouble ld;
+    FACE::LongDouble ld = ACE_CDR_LONG_DOUBLE_INITIALIZER;
     ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, d);
     return ld;
   }
+
+  void enforce(unsigned int digits, unsigned int scale);
 };
 
 
@@ -243,6 +247,32 @@ inline FACE::UnsignedShort Fixed::fixed_scale() const
   return impl_.fixed_scale();
 }
 
+inline void Fixed::enforce(unsigned int digits, unsigned int scale)
+{
+  impl_ = impl_.truncate(scale);
+  if (impl_.fixed_digits() > digits) {
+    throw CORBA::DATA_CONVERSION();
+  }
+
+  if (impl_.fixed_scale() < scale) {
+    const int offset = scale - impl_.fixed_scale();
+    if (offset + impl_.fixed_digits() > int(digits)) {
+      throw CORBA::DATA_CONVERSION();
+    }
+
+    char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
+    impl_.to_string(buf, sizeof buf);
+
+    char* end = buf + std::strlen(buf);
+    if (!impl_.fixed_scale()) {
+      *end++ = '.';
+    }
+    std::memset(end, '0', offset);
+    end[offset] = 0;
+    impl_ = ACE_CDR::Fixed::from_string(buf);
+  }
+}
+
 
 /// Fixed-point decimal type with Digits and Scale set at compile time
 template <unsigned int Digits, unsigned int Scale>
@@ -298,45 +328,57 @@ private:
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(int val)
   : Fixed(ACE_CDR::Fixed::from_integer(FACE::LongLong(val)))
-{}
+{
+  enforce(Digits, Scale);
+}
 
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(unsigned int val)
   : Fixed(ACE_CDR::Fixed::from_integer(FACE::UnsignedLongLong(val)))
-{}
+{
+  enforce(Digits, Scale);
+}
 
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(FACE::LongLong val)
   : Fixed(ACE_CDR::Fixed::from_integer(val))
-{}
+{
+  enforce(Digits, Scale);
+}
 
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(FACE::UnsignedLongLong val)
   : Fixed(ACE_CDR::Fixed::from_integer(val))
-{}
+{
+  enforce(Digits, Scale);
+}
 
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(FACE::Double val)
   : Fixed(ACE_CDR::Fixed::from_floating(doubleToLongDouble(val)))
-{}
+{
+  enforce(Digits, Scale);
+}
 
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(FACE::LongDouble val)
   : Fixed(ACE_CDR::Fixed::from_floating(val))
-{}
+{
+  enforce(Digits, Scale);
+}
 
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(const char* str)
   : Fixed(ACE_CDR::Fixed::from_string(str))
-{}
+{
+  enforce(Digits, Scale);
+}
 
 template <unsigned int Digits, unsigned int Scale>
 inline Fixed_T<Digits, Scale>::Fixed_T(const Fixed& f)
-  : Fixed(f.truncate(Scale))
+  : Fixed(f)
 {
-  if (impl_.fixed_digits() > Digits) {
-    throw CORBA::DATA_CONVERSION();
-  }
+  enforce(Digits, Scale);
 }
 
 template <unsigned int Digits, unsigned int Scale>
