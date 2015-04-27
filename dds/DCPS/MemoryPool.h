@@ -53,11 +53,11 @@ public:
 
   void set_free();
 
-  FreeHeader* smaller_free(char* buffer) const;
-  FreeHeader* larger_free(char* buffer) const;
+  FreeHeader* smaller_free(char* pool_base) const;
+  FreeHeader* larger_free(char* pool_base) const;
 
-  void set_smaller_free(FreeHeader* next, char* buffer);
-  void set_larger_free(FreeHeader* prev, char* buffer);
+  void set_smaller_free(FreeHeader* next, char* pool_base);
+  void set_larger_free(FreeHeader* prev, char* pool_base);
 
   //void set_next(unsigned long offset) { offset_next_free_ = offset; }
   //void set_prev(unsigned long offset) { offset_prev_free_ = offset; }
@@ -99,7 +99,7 @@ public:
   void remove(FreeHeader* free_block, FreeHeader* next_largest);
 
   // Find size or larger
-  FreeHeader* find(size_t size);
+  FreeHeader* find(size_t size, char* base);
 
 private:
   size_t size_;
