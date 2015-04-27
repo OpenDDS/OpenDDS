@@ -149,7 +149,7 @@ FreeIndex::add(FreeHeader* free_block)
   FreeIndexNode* node = nodes_;
   do {
     if (node->contains(free_block->size())) {
-      if ((node->ptr() == NULL) || (node->ptr()->size() < free_block->size())) {
+      if ((node->ptr() == NULL) || (node->ptr()->size() > free_block->size())) {
         node->set_ptr(free_block);
       }
       break;
@@ -400,8 +400,14 @@ MemoryPool::insert_free_alloc(FreeHeader* freed)
   // If found
   if (alloc) {
     if (alloc != freed) {
+      FreeHeader* smaller = alloc->smaller_free(pool_ptr_);
+
       freed->set_larger_free(alloc, pool_ptr_);
       alloc->set_smaller_free(freed, pool_ptr_);
+      if (smaller) {
+        smaller->set_larger_free(freed, pool_ptr_);
+        freed->set_smaller_free(smaller, pool_ptr_);
+      }
     }
   // Else this is the largest alloc
   } else {
