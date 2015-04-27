@@ -408,7 +408,7 @@ MemoryPool::insert_free_alloc(FreeHeader* freed)
     if (freed != largest_free_) {
       freed->set_smaller_free(largest_free_, pool_ptr_);
       if (largest_free_) {
-        largest_free_->set_smaller_free(freed, pool_ptr_);
+        largest_free_->set_larger_free(freed, pool_ptr_);
       }
       largest_free_ = freed;
     }
