@@ -144,6 +144,7 @@ private:
   const size_t align_size_;      // Alignment size configured
   const size_t header_size_;     // Aligned header size
   const size_t min_free_size_;   // Aligned free header size
+  const size_t min_alloc_size_;  // Aligned minimum allocation size
   const size_t pool_size_;       // Configured pool size
   char* pool_ptr_;
 

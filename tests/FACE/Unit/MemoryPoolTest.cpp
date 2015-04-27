@@ -52,7 +52,7 @@ public:
     char* ptr2 = pool.pool_alloc(12);
     validate_pool(pool, 120+128+16);
     char* ptr3 = pool.pool_alloc(7);
-    validate_pool(pool, 120+128+16+8);
+    validate_pool(pool, 120+128+16+16);
     TEST_CHECK(ptr0);
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
@@ -94,25 +94,24 @@ public:
   }
 
   // Allocate a block and free it, becoming largest
-  void test_pool_alloc_free_largest() {
+  void test_pool_alloc_free_join_largest() {
     MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(128);
     char* ptr3 = pool.pool_alloc(512);
-    validate_pool(pool, 1024, true);
+    validate_pool(pool, 1024);
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
     pool.pool_free(ptr0);
-    validate_pool(pool, 1024 - 128, true);
+    validate_pool(pool, 1024 - 128);
     pool.pool_free(ptr3);
-
-    validate_pool(pool, 1024 - 512 - 128, true);
+    validate_pool(pool, 1024 - 512 - 128);
   }
 
   // Allocate a block and free it, becoming smallest
   void test_pool_alloc_free_smallest() {
-    MemoryPool pool(1024, 8);
+    MemoryPool pool(2048, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(128);
@@ -161,7 +160,7 @@ public:
     // Alloate from free
     char* ptr7 = pool.pool_alloc(256);
     TEST_CHECK(ptr7);
-    validate_pool(pool, 128*7);
+    validate_pool(pool, 128*7+sizeof(AllocHeader));
     TEST_CHECK(ptr7 < ptr1);
     TEST_CHECK(ptr7 > ptr4);
   }
@@ -188,7 +187,7 @@ public:
     // Alloate from free
     char* ptr7 = pool.pool_alloc(256);
     TEST_CHECK(ptr7);
-    validate_pool(pool, 128*7);
+    validate_pool(pool, 128*7+sizeof(AllocHeader));
     TEST_CHECK(ptr7 < ptr0);
     TEST_CHECK(ptr7 > ptr3);
   }
@@ -461,28 +460,37 @@ public:
   // Allocate and move ahead in free list
   void test_pool_alloc_move_ahead() {
     MemoryPool pool(1024, 8);
-    pool.pool_alloc(8);
+    pool.pool_alloc(16);
     char* ptr0 = pool.pool_alloc(128);
-    pool.pool_alloc(8);
+    pool.pool_alloc(16);
     char* ptr1 = pool.pool_alloc(256);
-    pool.pool_alloc(8);
+    pool.pool_alloc(16);
     char* ptr2 = pool.pool_alloc(64);
-    pool.pool_alloc(8);
-    char* ptr3 = pool.pool_alloc(36);
-    pool.pool_alloc(8);
+    pool.pool_alloc(16);
+    char* ptr3 = pool.pool_alloc(32);
+    pool.pool_alloc(16);
     char* ptr4 = pool.pool_alloc(16);
-    pool.pool_alloc(8);
+    pool.pool_alloc(16);
+    validate_pool(pool, 128+256+64+32+16+96);
 
     pool.pool_free(ptr0);
-    pool.pool_free(ptr1);
-    pool.pool_free(ptr2);
-    pool.pool_free(ptr3);
-    pool.pool_free(ptr4);
+    validate_pool(pool, 256+64+32+16+96);
 
-    validate_pool(pool, 48);
+    pool.pool_free(ptr1);
+    validate_pool(pool, 64+32+16+96);
+
+    pool.pool_free(ptr2);
+    validate_pool(pool, 32+16+96);
+
+    pool.pool_free(ptr3);
+    validate_pool(pool, 16+96);
+
+    pool.pool_free(ptr4);
+    validate_pool(pool, 96);
+
     // Allocate from ptr0
     pool.pool_alloc(80);
-    validate_pool(pool, 128);
+    validate_pool(pool, 96+80);
   }
 
   // Alloc and free same block repeatedly
@@ -503,7 +511,7 @@ public:
   }
 
   void test_pool_alloc_non_first_free_block() {
-    MemoryPool pool(800, 8);
+    MemoryPool pool(1800, 8);
     char* ptr0 = pool.pool_alloc(128);
     char* ptr1 = pool.pool_alloc(256);
     char* ptr2 = pool.pool_alloc(128);
@@ -518,9 +526,9 @@ public:
     // F160 A128 F384 A128
     char* ptr4 = pool.pool_alloc(320);
     validate_pool(pool, 256 + 320);
+    TEST_CHECK(ptr0);
+    TEST_CHECK(ptr3);
     TEST_CHECK(ptr4);
-    TEST_CHECK(ptr0 > ptr4);
-    TEST_CHECK(ptr4 > ptr3);
   }
 
   // Allocate blocks and free in alloc order
@@ -587,21 +595,19 @@ public:
   void test_pool_free_join_without_moving() {
     MemoryPool pool(1024*20, 8);
     char* ptr0 = pool.pool_alloc(1024);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr1 = pool.pool_alloc(512);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr2 = pool.pool_alloc(256);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr3 = pool.pool_alloc(128);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr4 = pool.pool_alloc(64);
                        // no space here, 4+5 adjacent
     char* ptr5 = pool.pool_alloc(32);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr6 = pool.pool_alloc(16);
-    pool.pool_alloc(8); // add alloc in between
-    char* ptr7 = pool.pool_alloc(8);
-    validate_pool(pool, 1024+512+256+128+64+32+16+8 + 8*6);
+    validate_pool(pool, 1024+512+256+128+64+32+16 + 16*5);
     // Now create free list
     pool.pool_free(ptr0);
     TEST_CHECK(ptr1);
@@ -610,33 +616,30 @@ public:
     pool.pool_free(ptr4);
     TEST_CHECK(ptr5);
     pool.pool_free(ptr6);
-    TEST_CHECK(ptr7);
-    // Free list sizes are 1024, 256, 64, 16
-    validate_pool(pool, 0+512+0+128+0+32+0+8 + 8*6);
+    // Free list sizes are 1024, 256, 64
+    validate_pool(pool, 0+512+0+128+0+32+0 + 16*5);
     // free 5, join with adjacent 4, making size (64+32)
     pool.pool_free(ptr5);
-    validate_pool(pool, 0+512+0+128+0+0+0+8 + 8*6);
+    validate_pool(pool, 0+512+0+128+0+0+0 + 16*5);
   }
 
   // Split free block, without moving in free list
   void test_pool_alloc_split_without_moving() {
     MemoryPool pool(1024*20, 8);
     char* ptr0 = pool.pool_alloc(1024);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr1 = pool.pool_alloc(512);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr2 = pool.pool_alloc(256);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr3 = pool.pool_alloc(128);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr4 = pool.pool_alloc(64);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr5 = pool.pool_alloc(32);
-    pool.pool_alloc(8); // add alloc in between
+    pool.pool_alloc(16); // add alloc in between
     char* ptr6 = pool.pool_alloc(16);
-    pool.pool_alloc(8); // add alloc in between
-    char* ptr7 = pool.pool_alloc(8);
-    validate_pool(pool, 1024+512+256+128+64+32+16+8 + 8*7);
+    validate_pool(pool, 1024+512+256+128+64+32+16 + 16*6);
     pool.pool_free(ptr0);
     TEST_CHECK(ptr1);
     pool.pool_free(ptr2);
@@ -644,12 +647,11 @@ public:
     pool.pool_free(ptr4);
     TEST_CHECK(ptr5);
     pool.pool_free(ptr6);
-    TEST_CHECK(ptr7);
     // Free list sizes are 1024, 256, 64, 16
-    validate_pool(pool, 0+512+0+128+0+32+0+8 + 8*7);
+    validate_pool(pool, 0+512+0+128+0+32+0 + 16*6);
     // allocate from free size 256
     pool.pool_alloc(80);
-    validate_pool(pool, 0+512+80+128+0+32+0+8 + 8*7);
+    validate_pool(pool, 0+512+80+128+0+32+0 + 16*6);
   }
 
   // Test shifting by allocating from earlier in the free list
@@ -659,20 +661,20 @@ public:
     pool.pool_alloc(48);
     pool.pool_alloc(40);
     pool.pool_alloc(48);
-    char* p1 = pool.pool_alloc(8);
-    pool.pool_alloc(8);
+    char* p1 = pool.pool_alloc(16);
+    pool.pool_alloc(16);
     char* p2 = pool.pool_alloc(24);
     pool.pool_alloc(48);
     pool.pool_alloc(40);
     pool.pool_alloc(48);
     pool.pool_alloc(40);
-    validate_pool(pool, 48+40+48+8+8+24+48+40+48+40);
+    validate_pool(pool, 48+40+48+16+16+24+48+40+48+40);
     pool.pool_free(p1);
     pool.pool_free(p2);
-    validate_pool(pool, 48+40+48+8+48+40+48+40);
+    validate_pool(pool, 48+40+48+16+48+40+48+40);
     // Allocating 40 (from head) corrupts list
     pool.pool_alloc(40);
-    validate_pool(pool, 40+48+40+48+8+48+40+48+40);
+    validate_pool(pool, 40+48+40+48+16+48+40+48+40);
   }
 
   void test_pool_alloc_shift_first_free() {
@@ -827,7 +829,7 @@ public:
   }
 
 private:
-  void validate_index(FreeIndex& index, char* buff, bool log = false)
+  void validate_index(FreeIndex& index, char* pool_base, bool log = false)
   {
     if (log) {
       FreeIndexNode* node = index.nodes_;
@@ -844,12 +846,12 @@ private:
 
     for (size_t size = 8; size <= 4096; size *= 2) {
       // Find size or larger
-      FreeHeader* header = index.find(size);
+      FreeHeader* header = index.find(size, pool_base);
       if (header) {
         TEST_CHECK(header->size() >= size);
-        FreeHeader* smaller = header->smaller_free(buff);
+        FreeHeader* smaller = header->smaller_free(pool_base);
         if (smaller) {
-          TEST_CHECK(smaller->size() < size);
+          TEST_CHECK(smaller->size() <= header->size());
         }
       }
     }
@@ -1016,8 +1018,8 @@ int main(int, const char** )
 */
   test.test_pool_alloc_last_avail();
   test.test_pool_alloc_free();
-  test.test_pool_alloc_free_largest();
-/*
+  //test.test_pool_alloc_free_largest();
+  test.test_pool_alloc_free_join_largest();
   test.test_pool_alloc_free_smallest();
 
   test.test_pool_alloc_move_ahead();
@@ -1043,10 +1045,10 @@ int main(int, const char** )
   test.test_pool_free_in_order();
   test.test_pool_free_in_reverse_order();
   test.test_pool_free_out_of_order();
-
   test.test_pool_free_join_without_moving();
   test.test_pool_alloc_split_without_moving();
   test.test_pool_alloc_shift_free();
+/*
   test.test_pool_alloc_shift_first_free();
   test.test_pool_move_forward_prev_shifted();
   test.test_pool_move_forward_prev_shifted2();

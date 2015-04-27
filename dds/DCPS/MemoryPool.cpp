@@ -230,6 +230,7 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t alignment)
 : align_size_(alignment)
 , header_size_(align(sizeof(AllocHeader)))
 , min_free_size_(align(sizeof(FreeHeader)))
+, min_alloc_size_(align(min_free_size_ - header_size_))
 , pool_size_(align(pool_size))
 , pool_ptr_(new char[pool_size_])
 , debug_log_(false)
@@ -255,6 +256,10 @@ MemoryPool::pool_alloc(size_t size)
 
   // Round up to 8-byte boundary
   size_t aligned_size = align(size);
+
+  if (aligned_size < min_alloc_size_) {
+    aligned_size = min_alloc_size_;
+  }
 
   // The block to allocate from
   FreeHeader* block_to_alloc = find_free_block(aligned_size);
