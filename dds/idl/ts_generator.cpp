@@ -63,7 +63,15 @@ ts_generator::ts_generator()
   : idl_template_(read_template("IDL"))
   , h_template_(read_template("H"))
   , cpp_template_(read_template("CPP"))
+  , needs_DataWriterImpl_T_cpp_(false)
 {
+}
+
+void ts_generator::gen_epilogue()
+{
+  if (needs_DataWriterImpl_T_cpp_) {
+    be_global->header_ << "#include \"dds/DCPS/DataWriterImpl_T.cpp\"\n";
+  }
 }
 
 bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
@@ -88,12 +96,16 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   be_global->add_include(dc.c_str());
 
   static const char* h_includes[] = {
-    "dds/DCPS/DataWriterImpl.h", "dds/DCPS/DataReaderImpl.h",
+    "dds/DCPS/DataWriterImpl_T.h",
+    "dds/DCPS/DataWriterImpl.h",
+    "dds/DCPS/DataReaderImpl_T.h",
+    "dds/DCPS/DataReaderImpl.h",
     "dds/DCPS/TypeSupportImpl.h",
     "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h",
     "dds/DCPS/SubscriptionInstance.h"
   };
   add_includes(h_includes, BE_GlobalData::STREAM_H);
+  needs_DataWriterImpl_T_cpp_ = true;
 
   static const char* cpp_includes[] = {
     "dds/DCPS/debug.h", "dds/DCPS/Registered_Data_Types.h",

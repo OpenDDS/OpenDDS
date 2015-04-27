@@ -207,7 +207,7 @@ private:
     DDS::TopicListener_var listener,
     DDS::StatusMask mask)
   {
-    typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
+    typedef typename WriterOrReaderImpl::TraitsType::TypeSupportImplType typesupportimpl_type;
     typedef typename typesupportimpl_type::typesupport_var typesupport_var;
 
     typesupport_var ts(new typesupportimpl_type);

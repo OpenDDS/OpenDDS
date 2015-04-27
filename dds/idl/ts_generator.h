@@ -25,6 +25,8 @@ class ts_generator : public dds_generator {
 public:
   ts_generator();
 
+  void gen_epilogue();
+
   bool gen_struct(AST_Structure* node, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
@@ -37,6 +39,7 @@ public:
 
 private:
   std::string idl_template_, h_template_, cpp_template_;
+  bool needs_DataWriterImpl_T_cpp_;
 };
 
 #endif

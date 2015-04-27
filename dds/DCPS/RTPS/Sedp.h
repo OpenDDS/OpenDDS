@@ -12,6 +12,7 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
@@ -39,12 +40,6 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-namespace DDS {
-  class TopicBuiltinTopicDataDataReaderImpl;
-  class PublicationBuiltinTopicDataDataReaderImpl;
-  class SubscriptionBuiltinTopicDataDataReaderImpl;
-}
 
 namespace OpenDDS {
 namespace RTPS {

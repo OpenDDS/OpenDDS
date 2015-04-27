@@ -58,7 +58,7 @@ class DDSTopicFacade
 {
 public:
   friend class DDSApp;
-  typedef typename WriterOrReaderImpl::typesupportimpl_type  typesupportimpl_type;
+  typedef typename WriterOrReaderImpl::TraitsType::TypeSupportImplType  typesupportimpl_type;
   typedef typename typesupportimpl_type::datawriter_type     datawriter_type;
   typedef typename typesupportimpl_type::datawriter_var      datawriter_var;
   typedef std::map<DDS::DataWriter_ptr, DDS::Publisher_var>  DataWriters;

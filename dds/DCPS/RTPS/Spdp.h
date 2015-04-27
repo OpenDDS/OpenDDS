@@ -12,6 +12,7 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -30,10 +31,6 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-namespace DDS {
-  class ParticipantBuiltinTopicDataDataReaderImpl;
-}
 
 namespace OpenDDS {
 namespace RTPS {
