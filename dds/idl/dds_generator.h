@@ -265,7 +265,8 @@ namespace AstTypeClassification {
   typedef size_t Classification;
   const Classification CL_UNKNOWN = 0, CL_SCALAR = 1, CL_PRIMITIVE = 2,
     CL_STRUCTURE = 4, CL_STRING = 8, CL_ENUM = 16, CL_UNION = 32, CL_ARRAY = 64,
-    CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024;
+    CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024,
+    CL_FIXED = 2048;
 
   inline Classification classify(AST_Type* type)
   {
@@ -302,6 +303,8 @@ namespace AstTypeClassification {
       return CL_SCALAR | CL_ENUM;
     case AST_Decl::NT_interface:
       return CL_INTERFACE;
+    case AST_Decl::NT_fixed:
+      return CL_FIXED;
     default:
       return CL_UNKNOWN;
     }
@@ -438,6 +441,14 @@ std::ostream& operator<<(std::ostream& o,
     return o << "L\"" << ev.u.wstrval << '"';
   case AST_Expression::EV_string:
     return o << '"' << ev.u.strval->get_string() << '"';
+#ifdef ACE_HAS_CDR_FIXED
+  case AST_Expression::EV_fixed:
+    {
+      char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
+      ev.u.fixedval.to_string(buf, sizeof buf);
+      return o << "\"" << buf << "\"";
+    }
+#endif
   default:
     return o;
   }

@@ -42,6 +42,10 @@ BE_post_init(char*[], long)
           << std::setw(2) << std::setfill('0') << DDS_MICRO_VERSION;
   DRV_cpp_putarg(version.str().c_str());
 
+#ifdef ACE_HAS_CDR_FIXED
+  DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_FIXED");
+#endif
+
   const char* env = ACE_OS::getenv("DDS_ROOT");
   if (env && env[0]) {
     std::string dds_root = env;
