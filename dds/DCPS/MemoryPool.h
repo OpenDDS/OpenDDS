@@ -17,7 +17,7 @@ public:
   bool is_free() const { return alloc_size_ < 0; }
 
   // Get pointer to start of my buffer
-  void* ptr() const;
+  unsigned char* ptr() const;
 
   // Go to next header
   AllocHeader* next_adjacent();
@@ -53,11 +53,11 @@ public:
 
   void set_free();
 
-  FreeHeader* smaller_free(char* pool_base) const;
-  FreeHeader* larger_free(char* pool_base) const;
+  FreeHeader* smaller_free(unsigned char* pool_base) const;
+  FreeHeader* larger_free(unsigned char* pool_base) const;
 
-  void set_smaller_free(FreeHeader* next, char* pool_base);
-  void set_larger_free(FreeHeader* prev, char* pool_base);
+  void set_smaller_free(FreeHeader* next, unsigned char* pool_base);
+  void set_larger_free(FreeHeader* prev, unsigned char* pool_base);
 
 private:
   size_t offset_smaller_free_; // Offset to next free block in size order
@@ -91,7 +91,7 @@ public:
   void remove(FreeHeader* free_block, FreeHeader* next_largest);
 
   // Find size or larger
-  FreeHeader* find(size_t size, char* base);
+  FreeHeader* find(size_t size, unsigned char* base);
 
 private:
   size_t size_;
@@ -138,7 +138,7 @@ private:
   const size_t min_free_size_;   // Aligned free header size
   const size_t min_alloc_size_;  // Aligned minimum allocation size
   const size_t pool_size_;       // Configured pool size
-  char* pool_ptr_;
+  unsigned char* pool_ptr_;
 
   FreeIndex free_index_;
   FreeHeader* largest_free_;
@@ -150,7 +150,7 @@ private:
   void remove_free_alloc(FreeHeader* block_to_alloc);
   void insert_free_alloc(FreeHeader* block_freed);
   void join_free_allocs(FreeHeader* block_freed);
-  char* allocate(FreeHeader* free_block, size_t alloc_size);
+  unsigned char* allocate(FreeHeader* free_block, size_t alloc_size);
 
   void log_allocs();
   void validate();

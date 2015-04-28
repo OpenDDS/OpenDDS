@@ -4,19 +4,19 @@
 
 namespace OpenDDS {  namespace DCPS {
 
-void*
+unsigned char*
 AllocHeader::ptr() const
 {
-  const char* self = reinterpret_cast<const char*>(this);
-  const char* buffer_start = self + sizeof(AllocHeader);
-  return (void*)buffer_start;
+  const unsigned char* self = reinterpret_cast<const unsigned char*>(this);
+  const unsigned char* buffer_start = self + sizeof(AllocHeader);
+  return const_cast<unsigned char*>(buffer_start);
 }
 
 AllocHeader*
 AllocHeader::next_adjacent() {
-  char* self = reinterpret_cast<char*>(this);
-  char* buffer_start = self + sizeof(AllocHeader);
-  char* past_buffer_end = buffer_start + size();
+  unsigned char* self = reinterpret_cast<unsigned char*>(this);
+  unsigned char* buffer_start = self + sizeof(AllocHeader);
+  unsigned char* past_buffer_end = buffer_start + size();
   return reinterpret_cast<AllocHeader*>(past_buffer_end);
 }
 
@@ -24,9 +24,9 @@ AllocHeader*
 AllocHeader::prev_adjacent() {
   AllocHeader* result = NULL;
   if (prev_size_) {
-    char* self = reinterpret_cast<char*>(this);
-    char* prev_buffer_start = self - prev_size_;
-    char* past_alloc = prev_buffer_start - sizeof(AllocHeader);
+    unsigned char* self = reinterpret_cast<unsigned char*>(this);
+    unsigned char* prev_buffer_start = self - prev_size_;
+    unsigned char* past_alloc = prev_buffer_start - sizeof(AllocHeader);
     result = reinterpret_cast<AllocHeader*>(past_alloc);
   }
   return result;
@@ -85,7 +85,7 @@ FreeHeader::set_free()
   }
 }
 FreeHeader*
-FreeHeader::smaller_free(char* pool_base) const
+FreeHeader::smaller_free(unsigned char* pool_base) const
 {
   FreeHeader* result = NULL;
   if (offset_smaller_free_ != ULONG_MAX) {
@@ -95,7 +95,7 @@ FreeHeader::smaller_free(char* pool_base) const
 }
 
 FreeHeader*
-FreeHeader::larger_free(char* pool_base) const
+FreeHeader::larger_free(unsigned char* pool_base) const
 {
   FreeHeader* result = NULL;
   if (offset_larger_free_ != ULONG_MAX) {
@@ -105,20 +105,20 @@ FreeHeader::larger_free(char* pool_base) const
 }
 
 void
-FreeHeader::set_smaller_free(FreeHeader* next, char* pool_base)
+FreeHeader::set_smaller_free(FreeHeader* next, unsigned char* pool_base)
 {
   if (next) {
-    offset_smaller_free_ = reinterpret_cast<char*>(next) - pool_base;
+    offset_smaller_free_ = reinterpret_cast<unsigned char*>(next) - pool_base;
   } else {
     offset_smaller_free_ = ULONG_MAX;
   }
 }
 
 void
-FreeHeader::set_larger_free(FreeHeader* prev, char* pool_base)
+FreeHeader::set_larger_free(FreeHeader* prev, unsigned char* pool_base)
 {
   if (prev) {
-    offset_larger_free_ = reinterpret_cast<char*>(prev) - pool_base;
+    offset_larger_free_ = reinterpret_cast<unsigned char*>(prev) - pool_base;
   } else {
     offset_larger_free_ = ULONG_MAX;
   }
@@ -194,7 +194,7 @@ FreeIndex::init(FreeHeader* init_free_block)
 }
 
 FreeHeader*
-FreeIndex::find(size_t size, char* pool_base)
+FreeIndex::find(size_t size, unsigned char* pool_base)
 {    
   // Search index
   FreeIndexNode* index = nodes_ + size_ - 1;
@@ -228,11 +228,11 @@ OldFreeIndex::OldFreeIndex()
 
 MemoryPool::MemoryPool(unsigned int pool_size, size_t alignment)
 : align_size_(alignment)
-, header_size_(align(sizeof(AllocHeader)))
-, min_free_size_(align(sizeof(FreeHeader)))
+, header_size_(sizeof(AllocHeader))
+, min_free_size_(sizeof(FreeHeader))
 , min_alloc_size_(align(min_free_size_ - header_size_))
 , pool_size_(align(pool_size))
-, pool_ptr_(new char[pool_size_])
+, pool_ptr_(new unsigned char[pool_size_])
 , debug_log_(false)
 {
   FreeHeader* first_free = reinterpret_cast<FreeHeader*>(pool_ptr_);
@@ -252,7 +252,7 @@ char*
 MemoryPool::pool_alloc(size_t size)
 {
   // Pointer to return
-  char* block = NULL;
+  unsigned char* block = NULL;
 
   // Round up to 8-byte boundary
   size_t aligned_size = align(size);
@@ -271,7 +271,7 @@ MemoryPool::pool_alloc(size_t size)
   //if (debug_log_) log_allocs();
   //validate();
 
-  return block;
+  return (char*)block;
 }
 
 void
@@ -404,7 +404,7 @@ MemoryPool::find_free_block(size_t req_size)
   return NULL;
 }
 
-char*
+unsigned char*
 MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
 {
   size_t free_block_size = free_block->size();
@@ -467,13 +467,13 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
     alloc_block->set_size(alloc_size);
     alloc_block->set_alloc();
     alloc_block->set_prev_size(remainder);
-    return (char*)alloc_block->ptr();
+    return alloc_block->ptr();
   // Else we ARE allocating the whole block
   } else {
     free_block->set_alloc();
     // remove free_block from free list
     remove_free_alloc(free_block);
-    return (char*)free_block->ptr();
+    return free_block->ptr();
   }
 }
 

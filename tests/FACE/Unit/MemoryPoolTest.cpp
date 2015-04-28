@@ -844,7 +844,7 @@ public:
   }
 
 private:
-  void validate_index(FreeIndex& index, char* pool_base, bool log = false)
+  void validate_index(FreeIndex& index, unsigned char* pool_base, bool log = false)
   {
     if (log) {
       FreeIndexNode* node = index.nodes_;
@@ -879,7 +879,7 @@ private:
     size_t free_bytes = 0;
     size_t oh_bytes = 0;
     size_t free_count = 0;
-    char* pool_end = pool.pool_ptr_ + pool.pool_size_;
+    unsigned char* pool_end = pool.pool_ptr_ + pool.pool_size_;
     bool prev_was_free;
     size_t index = 0;
 
@@ -961,7 +961,7 @@ private:
       prev = alloc;
       alloc = alloc->next_adjacent();
     }
-    TEST_CHECK((char*)alloc == pool_end);
+    TEST_CHECK((unsigned char*)alloc == pool_end);
 
     TEST_CHECK(allocated_bytes == expected_allocated_bytes);
     TEST_CHECK(allocated_bytes + free_bytes + oh_bytes == pool.pool_size_);
