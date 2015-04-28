@@ -98,21 +98,6 @@ private:
   FreeIndexNode nodes_[20];
 };
 
-// An index into the free list
-class OldFreeIndex {
-public:
-  OldFreeIndex();
-  void set_ptr(FreeHeader* ptr) { ptr_ = ptr; }
-  void set_size(unsigned int size) { size_ = size; }
-
-  FreeHeader* ptr() { return ptr_; }
-  unsigned int size() const { return size_; }
-
-private:
-  unsigned int size_; // size of buffer
-  FreeHeader* ptr_;   // points to smallest free alloc of size_ or larger
-};
-
 // MemoryPool tracks free list, in size order (next meaning largest to smallest)
 // and an index into the list at various sizes, which point to the smallest 
 // free allocation of that size or larger (but not larger than the next size).

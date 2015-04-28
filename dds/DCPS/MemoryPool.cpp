@@ -220,12 +220,6 @@ FreeIndex::find(size_t size, unsigned char* pool_base)
   return larger;
 }
 
-OldFreeIndex::OldFreeIndex()
-: size_(0)
-, ptr_(0)
-{
-}
-
 MemoryPool::MemoryPool(unsigned int pool_size, size_t alignment)
 : align_size_(alignment)
 , header_size_(sizeof(AllocHeader))
