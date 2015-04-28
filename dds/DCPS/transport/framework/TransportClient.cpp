@@ -270,8 +270,8 @@ TransportClient::associate(const AssociationData& data, bool active)
       GuidConverter remote_new(data.remote_id_);
       VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::associate found existing PendingAssoc "
                 "between %C and remote %C, set removed to false to continue using this pending association\n",
-                std::string(tc_assoc).c_str(),
-                std::string(remote_new).c_str()), 0);
+                OPENDDS_STRING(tc_assoc).c_str(),
+                OPENDDS_STRING(remote_new).c_str()), 0);
     } else {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: TransportClient::associate ")
@@ -377,8 +377,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     GuidConverter remote_conv(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                         "guard was not locked, return false - initiate_connect_i between local %C and remote %C unsuccessful\n",
-                        std::string(local).c_str(),
-                        std::string(remote_conv).c_str()), 0);
+                        OPENDDS_STRING(local).c_str(),
+                        OPENDDS_STRING(remote_conv).c_str()), 0);
     return false;
   }
 
@@ -389,8 +389,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     GuidConverter remote_conv(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                         "attempt to connect_datalink between local %C and remote %C\n",
-                        std::string(local).c_str(),
-                        std::string(remote_conv).c_str()), 0);
+                        OPENDDS_STRING(local).c_str(),
+                        OPENDDS_STRING(remote_conv).c_str()), 0);
     result = impl->connect_datalink(remote, attribs_, this);
   }
 
@@ -403,8 +403,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     GuidConverter remote_conv(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                         "cannot find pending association after connecting datalink between local %C and remote %C\n",
-                        std::string(local).c_str(),
-                        std::string(remote_conv).c_str()), 0);
+                        OPENDDS_STRING(local).c_str(),
+                        OPENDDS_STRING(remote_conv).c_str()), 0);
     return false;
     //log some sort of error message...
     //PendingAssoc's are only erased from pending_ in use_datalink_i after
@@ -415,8 +415,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
       GuidConverter remote_conv(remote.repo_id_);
       VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                           "pending association marked for removal already, after connecting datalink between local %C and remote %C\n",
-                          std::string(local).c_str(),
-                          std::string(remote_conv).c_str()), 0);
+                          OPENDDS_STRING(local).c_str(),
+                          OPENDDS_STRING(remote_conv).c_str()), 0);
       //this occurs if the transport client was told to disassociate while connecting
       //disassociate cleans up everything except this local AcceptConnectResult whose destructor
       //should take care of it because link has not been shifted into links_ by use_datalink_i
@@ -429,8 +429,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
   GuidConverter remote_conv(remote.repo_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                       "connection between local %C and remote %C initiation successful\n",
-                      std::string(local).c_str(),
-                      std::string(remote_conv).c_str()), 0);
+                      OPENDDS_STRING(local).c_str(),
+                      OPENDDS_STRING(remote_conv).c_str()), 0);
   return true;
 }
 
@@ -442,8 +442,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
   GuidConverter remote(this->data_.remote_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                       "between %C and remote %C\n",
-                      std::string(local).c_str(),
-                      std::string(remote).c_str()), 0);
+                      OPENDDS_STRING(local).c_str(),
+                      OPENDDS_STRING(remote).c_str()), 0);
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
     const TransportImpl_rch& impl = impls_.back();
@@ -466,16 +466,16 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
             GuidConverter remote(this->data_.remote_id_);
             VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) PendingAssoc::initiate_connect - ")
                                 ACE_TEXT("between %C and remote %C success\n"),
-                                std::string(local).c_str(),
-                                std::string(remote).c_str()), 0);
+                                OPENDDS_STRING(local).c_str(),
+                                OPENDDS_STRING(remote).c_str()), 0);
             return true;
           }
           GuidConverter local(tc->repo_id_);
           GuidConverter remote(this->data_.remote_id_);
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                               "between %C and remote %C unsuccessful\n",
-                              std::string(local).c_str(),
-                              std::string(remote).c_str()), 0);
+                              OPENDDS_STRING(local).c_str(),
+                              OPENDDS_STRING(remote).c_str()), 0);
           return false;
         }
 
@@ -491,8 +491,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
             GuidConverter remote(this->data_.remote_id_);
             VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                                 "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
-                                std::string(local).c_str(),
-                                std::string(remote).c_str()), 0);
+                                OPENDDS_STRING(local).c_str(),
+                                OPENDDS_STRING(remote).c_str()), 0);
           }
 
           return true;
@@ -501,8 +501,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           GuidConverter remote(this->data_.remote_id_);
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                               "result of initiate_connect_i (local: %C to remote: %C) was not success \n",
-                              std::string(local).c_str(),
-                              std::string(remote).c_str()), 0);
+                              OPENDDS_STRING(local).c_str(),
+                              OPENDDS_STRING(remote).c_str()), 0);
         }
       }
     }
@@ -549,7 +549,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
                         "TransportClient(%@) using datalink[%@] did not find Pending Association to remote %C\n",
                         this,
                         link.in(),
-                        std::string(peerId_conv).c_str()), 0);
+                        OPENDDS_STRING(peerId_conv).c_str()), 0);
     return;
   }
 
@@ -562,7 +562,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
                         "TransportClient(%@) using datalink[%@] pending association to remote %C was removed\n",
                         this,
                         link.in(),
-                        std::string(peerId_conv).c_str()), 0);
+                        OPENDDS_STRING(peerId_conv).c_str()), 0);
     return;
   } else if (link.is_nil()) {
 
@@ -571,7 +571,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
                           "TransportClient(%@) using datalink[%@] link is nil, since this is active side, initiate_connect\n",
                           this,
                           link.in(),
-                          std::string(peerId_conv).c_str()), 0);
+                          OPENDDS_STRING(peerId_conv).c_str()), 0);
       return;
     }
 
