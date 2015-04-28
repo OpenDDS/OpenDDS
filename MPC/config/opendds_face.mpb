@@ -4,7 +4,7 @@ project: dcps, dcps_ts_defaults {
   after += OpenDDS_FACE
 
   dcps_ts_flags += -GfaceTS -Lface
-  idlflags += -SS
+  idlflags += -SS -Wb,no_fixed_err
 
   Modify_Custom(Idl) {
     automatic_in = 0

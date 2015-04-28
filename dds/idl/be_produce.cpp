@@ -242,6 +242,10 @@ void postprocess(const char* fn, ostringstream& content,
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
 
+#ifdef ACE_HAS_CDR_FIXED
+    out << "#define __OPENDDS_IDL_HAS_FIXED\n";
+#endif
+
     string filebase(be_global->filename());
     const size_t idx = filebase.find_last_of("/\\"); // allow either slash
     if (idx != string::npos) {
@@ -374,6 +378,12 @@ BE_produce()
   if (be_global->generate_wireshark()) {
     postprocess(be_global->ws_config_name_.c_str(),
                 be_global->ws_config_, BE_GlobalData::STREAM_WS);
+  }
+
+  if (be_global->generate_itl()) {
+    if (!BE_GlobalData::writeFile(be_global->itl_name_.c_str(), be_global->itl_.str())) {
+      BE_abort();  //error message already printed
+    }
   }
 
   if (be_global->face_ts()) {

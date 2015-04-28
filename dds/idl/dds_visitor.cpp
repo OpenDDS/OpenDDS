@@ -39,6 +39,7 @@
 #include "marshal_generator.h"
 #include "keys_generator.h"
 #include "wireshark_generator.h"
+#include "itl_generator.h"
 #include "v8_generator.h"
 #include "langmap_generator.h"
 
@@ -55,10 +56,11 @@ namespace {
   ts_generator ts_gen_;
   metaclass_generator mc_gen_;
   wireshark_generator ws_gen_;
+  itl_generator itl_gen_;
   v8_generator v8_gen_;
   langmap_generator lm_gen_;
 
-  dds_generator* generators_[] = {&mar_gen_, &key_gen_, &ts_gen_, &mc_gen_, &ws_gen_};
+  dds_generator* generators_[] = {&mar_gen_, &key_gen_, &ts_gen_, &mc_gen_, &ws_gen_, &itl_gen_};
   const size_t N_MAP = sizeof(generators_) / sizeof(generators_[0]);
 
   composite_generator gen_target_(&generators_[0], &generators_[N_MAP]);
@@ -112,11 +114,13 @@ dds_visitor::visit_root(AST_Root* node)
 {
   error_ = false;
 
+  gen_target_.gen_prologue();
   if (this->visit_scope(node) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%N:%l) dds_visitor::visit_root -")
                       ACE_TEXT(" visit_scope failed\n")), -1);
   }
+  gen_target_.gen_epilogue();
 
   return (error_) ? -1 : 0;
 }
@@ -158,10 +162,6 @@ dds_visitor::visit_scope(UTL_Scope* node)
 int
 dds_visitor::visit_module(AST_Module* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("MODULE", name);
@@ -180,10 +180,6 @@ dds_visitor::visit_module(AST_Module* node)
 int
 dds_visitor::visit_interface(AST_Interface* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("INTERFACE", name);
@@ -208,7 +204,7 @@ dds_visitor::visit_interface(AST_Interface* node)
   scope2vector(ops, node, AST_Decl::NT_op);
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_interf(node->name(), node->is_local(),
+    error_ |= !gen_target_.gen_interf(node, node->name(), node->is_local(),
                                       inherits, inherits_flat, attrs, ops,
                                       node->repoID());
   }
@@ -225,10 +221,6 @@ dds_visitor::visit_interface(AST_Interface* node)
 int
 dds_visitor::visit_structure(AST_Structure* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("STRUCT", name);
@@ -250,7 +242,7 @@ dds_visitor::visit_structure(AST_Structure* node)
   }
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_struct(node->name(), fields,
+    error_ |= !gen_target_.gen_struct(node, node->name(), fields,
                                       node->size_type(), node->repoID());
   }
 
@@ -264,7 +256,7 @@ dds_visitor::visit_structure(AST_Structure* node)
 int
 dds_visitor::visit_exception(AST_Exception* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported()) {
     return 0;
   }
 
@@ -280,10 +272,6 @@ dds_visitor::visit_exception(AST_Exception* node)
 int
 dds_visitor::visit_typedef(AST_Typedef* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("TYPEDEF", name);
@@ -291,7 +279,7 @@ dds_visitor::visit_typedef(AST_Typedef* node)
   ACE_UNUSED_ARG(g);
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_typedef(node->name(), node->base_type(),
+    error_ |= !gen_target_.gen_typedef(node, node->name(), node->base_type(),
                                        node->repoID());
   }
 
@@ -301,10 +289,6 @@ dds_visitor::visit_typedef(AST_Typedef* node)
 int
 dds_visitor::visit_enum(AST_Enum* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("ENUM", name);
@@ -316,7 +300,7 @@ dds_visitor::visit_enum(AST_Enum* node)
   scope2vector(contents, node, AST_Decl::NT_enum_val);
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_enum(node->name(), contents, node->repoID());
+    error_ |= !gen_target_.gen_enum(node, node->name(), contents, node->repoID());
   }
 
   return 0;
@@ -352,10 +336,6 @@ dds_visitor::visit_structure_fwd(AST_StructureFwd* node)
 int
 dds_visitor::visit_constant(AST_Constant* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("CONST", name);
@@ -376,10 +356,6 @@ dds_visitor::visit_constant(AST_Constant* node)
 int
 dds_visitor::visit_native(AST_Native* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("NATIVE", name);
@@ -387,7 +363,7 @@ dds_visitor::visit_native(AST_Native* node)
   ACE_UNUSED_ARG(g);
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_native(node->name(), node->repoID());
+    error_ |= !gen_target_.gen_native(node, node->name(), node->repoID());
   }
 
   return 0;
@@ -396,10 +372,6 @@ dds_visitor::visit_native(AST_Native* node)
 int
 dds_visitor::visit_union(AST_Union* node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
-    return 0;
-  }
-
   const char* name = node->local_name()->get_string();
 
   BE_Comment_Guard g("UNION", name);
@@ -432,7 +404,7 @@ dds_visitor::visit_union(AST_Union* node)
   }
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_union(node->name(), branches, node->disc_type(),
+    error_ |= !gen_target_.gen_union(node, node->name(), branches, node->disc_type(),
                                      node->repoID());
   }
 

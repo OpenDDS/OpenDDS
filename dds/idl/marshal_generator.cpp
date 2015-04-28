@@ -20,7 +20,7 @@ using std::string;
 
 using namespace AstTypeClassification;
 
-bool marshal_generator::gen_enum(UTL_ScopedName* name,
+bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>&, const char*)
 {
   NamespaceGuard ng;
@@ -831,7 +831,7 @@ namespace {
   }
 }
 
-bool marshal_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
+bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* base,
   const char*)
 {
   switch (base->node_type()) {
@@ -1058,7 +1058,7 @@ namespace {
   };
 }
 
-bool marshal_generator::gen_struct(UTL_ScopedName* name,
+bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   NamespaceGuard ng;
@@ -1568,7 +1568,7 @@ namespace {
   }
 }
 
-bool marshal_generator::gen_union(UTL_ScopedName* name,
+bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
    const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
    const char*)
 {

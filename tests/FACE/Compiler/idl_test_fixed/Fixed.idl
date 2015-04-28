@@ -1,0 +1,21 @@
+#ifdef __OPENDDS_IDL_HAS_FIXED
+module M1 {
+
+  const fixed f1 = 81745891278902314890.23d;
+  typedef fixed<22, 2> Myfixed;
+
+  typedef Myfixed FixedArray[3];
+  typedef sequence<Myfixed> FixedSeq;
+
+  struct S1 {
+    unsigned long key;
+    Myfixed amount;
+    FixedArray vec;
+    FixedSeq lst;
+  };
+
+#pragma DCPS_DATA_TYPE "M1::S1"
+#pragma DCPS_DATA_KEY "M1::S1 key"
+
+};
+#endif

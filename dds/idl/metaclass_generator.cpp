@@ -36,7 +36,7 @@ namespace {
   };
 }
 
-bool metaclass_generator::gen_enum(UTL_ScopedName* name,
+bool metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& contents, const char*)
 {
   ContentSubscriptionGuard csg(!be_global->v8());
@@ -329,7 +329,7 @@ namespace {
   }
 }
 
-bool metaclass_generator::gen_struct(UTL_ScopedName* name,
+bool metaclass_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
 {
   ContentSubscriptionGuard csg;
@@ -451,7 +451,7 @@ bool metaclass_generator::gen_struct(UTL_ScopedName* name,
 }
 
 bool
-metaclass_generator::gen_typedef(UTL_ScopedName* name, AST_Type* type, const char*)
+metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* type, const char*)
 {
   AST_Array* arr = AST_Array::narrow_from_decl(type);
   AST_Sequence* seq = 0;
@@ -524,7 +524,7 @@ metaclass_generator::gen_typedef(UTL_ScopedName* name, AST_Type* type, const cha
 }
 
 bool
-metaclass_generator::gen_union(UTL_ScopedName* name,
+metaclass_generator::gen_union(AST_Union*, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
   const char*)
 {

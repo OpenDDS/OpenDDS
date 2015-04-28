@@ -95,9 +95,7 @@ RtpsUdpInst::dump(std::ostream& os)
   const OPENDDS_STRING local = local_address_.get_host_addr(),
     multi = multicast_group_address_.get_host_addr();
   TransportInst::dump(os);
-#ifndef ACE_LYNXOS_MAJOR
   const std::ios::fmtflags flags = os.setf(ios::boolalpha);
-#endif
   os << formatNameForDump("local_address") << local
      << ':' << local_address_.get_port_number() << '\n'
      << formatNameForDump("use_multicast") << use_multicast_ << '\n'
@@ -113,9 +111,7 @@ RtpsUdpInst::dump(std::ostream& os)
      << heartbeat_response_delay_.msec() << '\n'
      << formatNameForDump("handshake_timeout") << handshake_timeout_.msec()
      << std::endl;
-#ifndef ACE_LYNXOS_MAJOR
   os.flags(flags);
-#endif
 }
 #endif
 
