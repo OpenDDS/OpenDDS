@@ -22,6 +22,8 @@
 #include "ast_union_fwd.h"
 #include "ast_valuetype_fwd.h"
 
+#include "ace/CDR_Base.h"
+
 #include <string>
 #include <vector>
 #include <cstring>
@@ -303,8 +305,10 @@ namespace AstTypeClassification {
       return CL_SCALAR | CL_ENUM;
     case AST_Decl::NT_interface:
       return CL_INTERFACE;
+#ifdef ACE_HAS_CDR_FIXED
     case AST_Decl::NT_fixed:
       return CL_FIXED;
+#endif
     default:
       return CL_UNKNOWN;
     }
