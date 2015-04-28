@@ -241,7 +241,10 @@ bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 
   be_global->lang_header_ << "\n"
     "  bool operator==(const " << nm << "& rhs) const;\n"
+    "  OPENDDS_ALLOC_DEFINE_INLINE;\n"
     "};\n\n";
+
+  be_global->add_include("dds/DCPS/PoolAllocationBase.h");
 
   if (size == AST_Type::VARIABLE) {
     be_global->lang_header_ <<

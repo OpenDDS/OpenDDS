@@ -16,6 +16,8 @@
 #include "ace/Guard_T.h"
 #include "ace/Atomic_Op.h"
 
+#include "PoolAllocationBase.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -38,7 +40,7 @@ namespace DCPS {
 *
 */
 template <class T, class ACE_LOCK>
-class Cached_Allocator_With_Overflow : public ACE_New_Allocator {
+class Cached_Allocator_With_Overflow : public ACE_New_Allocator, public PoolAllocationBase {
 public:
   /// Create a cached memory pool with @a n_chunks chunks
   /// each with sizeof (TYPE) size.

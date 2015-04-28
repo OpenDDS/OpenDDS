@@ -15,6 +15,8 @@
 #include "ace/Free_List.h"
 #include "ace/Guard_T.h"
 
+#include "PoolAllocationBase.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -38,7 +40,7 @@ namespace DCPS {
 * ACE_Process_Mutex constructor API.
 */
 template <class ACE_LOCK>
-class Dynamic_Cached_Allocator_With_Overflow : public ACE_New_Allocator {
+class Dynamic_Cached_Allocator_With_Overflow : public ACE_New_Allocator, public PoolAllocationBase {
 public:
   /// Create a cached memory pool with @a n_chunks chunks
   /// each with @a chunk_size size.
