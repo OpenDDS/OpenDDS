@@ -691,8 +691,8 @@ public:
     validate_pool(pool, 256*3 + 32*3);
     pool.pool_free(p1); // Largest free buffer, first now 160
     validate_pool(pool, 256*2 + 32*3);
-    pool.pool_alloc(96);
-    validate_pool(pool, 256*2 + 96 + 32*3);
+    pool.pool_alloc(80);
+    validate_pool(pool, 256*2 + 80 + 32*3);
   }
 
   // Test moving ahead in free list where the block previous to the insert is 
@@ -714,8 +714,8 @@ public:
     pool.pool_free(p4); // 
     validate_pool(pool, 32*4);
     // Now, allocate from p1, moving it to end
-    char* p5 = pool.pool_alloc(56);
-    validate_pool(pool, 32*4 + 56);
+    char* p5 = pool.pool_alloc(40);
+    validate_pool(pool, 32*4 + 40);
     // Undo and restore
     pool.pool_free(p5);
     validate_pool(pool, 32*4);
@@ -783,25 +783,25 @@ public:
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
     TEST_CHECK(ptr3);
-    char* ptr4 = pool.pool_alloc(128 - 16*5);
-    // Out of memory
-    validate_pool(pool, 1024 - 16*5);
-    char* ptr5 = pool.pool_alloc(128);
+    char* ptr4 = pool.pool_alloc(128 - 8*5);
     TEST_CHECK(ptr4);
+    // Out of memory
+    validate_pool(pool, 1024 - 8*5);
+    char* ptr5 = pool.pool_alloc(128);
     TEST_CHECK(!ptr5);
-    validate_pool(pool, 1024 - 16*5);
+    validate_pool(pool, 1024 - 8*5);
     pool.pool_free(ptr2); // free 256
-    validate_pool(pool, 1024  - 16*5 - 256);
+    validate_pool(pool, 1024  - 8*5 - 256);
     char* ptr6 = pool.pool_alloc(128); // alloc 128 
     TEST_CHECK(ptr6);
-    validate_pool(pool, 1024 - 16*5 - 128);
+    validate_pool(pool, 1024 - 8*5 - 128);
     char* ptr7 = pool.pool_alloc(128 - 16);  // extra header
     TEST_CHECK(ptr7);
-    validate_pool(pool, 1024 - 16*6);
+    validate_pool(pool, 1024 - 8*6);
     // Out of memory
     char* ptr8 = pool.pool_alloc(128);
     TEST_CHECK(!ptr8);
-    validate_pool(pool, 1024 - 16*6);
+    validate_pool(pool, 1024 - 8*6);
   }
 
   // Allocates larger than remaining memory should return null
@@ -832,6 +832,15 @@ public:
     pool.pool_free(ptr1);
     pool.pool_free(NULL);
     validate_pool(pool, 64);
+  }
+
+  void test_pool_align_other_size() {
+    MemoryPool pool(1024, 32);
+    validate_pool(pool, 0);
+    char* ptr = pool.pool_alloc(128);
+    validate_pool(pool, 128);
+    pool.pool_free(ptr);
+    validate_pool(pool, 0);
   }
 
 private:
@@ -948,7 +957,7 @@ private:
         free_bytes += alloc->size();
         prev_was_free = true;
       }
-      oh_bytes += pool.align(sizeof(AllocHeader));
+      oh_bytes += sizeof(AllocHeader);
       prev = alloc;
       alloc = alloc->next_adjacent();
     }
@@ -1020,10 +1029,8 @@ int main(int, const char** )
   test.test_pool_allocs();
   test.test_pool_alloc_odd_size();
 
-  //test.test_pool_align_other_size();
   test.test_pool_alloc_last_avail();
   test.test_pool_alloc_free();
-  //test.test_pool_alloc_free_largest();
   test.test_pool_alloc_free_join_largest();
   test.test_pool_alloc_free_smallest();
 
@@ -1060,6 +1067,9 @@ int main(int, const char** )
   test.test_alloc_null_once_out_of_memory();
   test.test_alloc_too_large_returns_null();
   test.test_free_null_should_ignore();
+
+  //test.test_pool_align_other_size();
+  //test.test_pool_align_configure_too_small();
 
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
 

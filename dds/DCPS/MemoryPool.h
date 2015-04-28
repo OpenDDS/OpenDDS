@@ -42,8 +42,8 @@ public:
 
 protected:
   // Sizes are those of buffers, does not include size of headers
-  long alloc_size_; // Size of my buffer, negative if free, positive if alloc
-  long prev_size_;  // Size of previous buffer, or 0 if first
+  int alloc_size_; // Size of my buffer, negative if free, positive if alloc
+  int prev_size_;  // Size of previous buffer, or 0 if first
 };
 
 class OpenDDS_Dcps_Export FreeHeader : public AllocHeader {
@@ -59,17 +59,9 @@ public:
   void set_smaller_free(FreeHeader* next, char* pool_base);
   void set_larger_free(FreeHeader* prev, char* pool_base);
 
-  //void set_next(unsigned long offset) { offset_next_free_ = offset; }
-  //void set_prev(unsigned long offset) { offset_prev_free_ = offset; }
-
-  // Get the offset of next (in size order) free block
-  //unsigned long next_free_offset() const { return offset_next_free_; }
-  // Get the offset of prev (in size order) free block
-  //unsigned long prev_free_offset() const { return offset_prev_free_; }
-
 private:
-  unsigned long offset_smaller_free_; // Offset to next (in size order) free block
-  unsigned long offset_larger_free_; // Offset to prev (in size order) free block
+  size_t offset_smaller_free_; // Offset to next free block in size order
+  size_t offset_larger_free_; // Offset to prev free block in size order
 };
 
 class FreeIndexNode {

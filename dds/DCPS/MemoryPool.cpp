@@ -44,7 +44,7 @@ AllocHeader::set_size(size_t size)
   if (is_free()) {
     size *= -1;
   }
-  alloc_size_ = size;
+  alloc_size_ = (int)size;
 }
 
 bool
@@ -419,7 +419,7 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
   // If we are NOT allocating the whole block
   if (remainder) {
     // Account for header here - won't overflow due to check, above
-    remainder -= align(sizeof(AllocHeader));
+    remainder -= sizeof(AllocHeader);
 
     // Adjust current adjacent block (after free block)
     AllocHeader* next_adjacent = free_block->next_adjacent();
