@@ -1631,10 +1631,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
   case DATAWRITER_LIVELINESS: {
-    if (DCPS_debug_level > 0) {
+    if (DCPS_debug_level >= 4) {
+      GuidConverter reader_converter(subscription_id_);
+      GuidConverter writer_converter(sample.header_.publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
-                 ACE_TEXT("got datawriter liveliness\n")));
+                 ACE_TEXT("reader %C got datawriter liveliness from writer %C\n"),
+                 std::string(reader_converter).c_str(),
+                 std::string(writer_converter).c_str()));
     }
     this->writer_activity(sample.header_);
 
