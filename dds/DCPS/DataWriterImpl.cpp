@@ -243,7 +243,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
                                        ReaderInfo(reader.filterClassName,
-                                                  TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
+                                                  TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }

@@ -55,9 +55,6 @@ public:
   SendStateDataSampleListIterator& operator--();
   SendStateDataSampleListIterator  operator--(int);
 
-  typedef DataSampleElement& reference;
-  typedef DataSampleElement* pointer;
-
   reference operator*();
   pointer operator->();
 
