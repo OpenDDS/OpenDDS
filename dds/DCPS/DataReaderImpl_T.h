@@ -991,6 +991,10 @@ private:
   int ignored)
 #endif
 {
+#ifdef OPENDDS_NO_QUERY_CONDITION
+  ACE_UNUSED_ARG(ignored);
+#endif
+
   typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -1083,6 +1087,10 @@ private:
   int ignored)
 #endif
 {
+#ifdef OPENDDS_NO_QUERY_CONDITION
+  ACE_UNUSED_ARG(ignored);
+#endif
+
   typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -1176,6 +1184,10 @@ private:
 int ignored)
 #endif
 {
+#ifdef OPENDDS_NO_QUERY_CONDITION
+  ACE_UNUSED_ARG(ignored);
+#endif
+
   typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
 
   ::OpenDDS::DCPS::RakeResults< MessageSequenceType >
@@ -1237,6 +1249,10 @@ int ignored)
 int ignored)
 #endif
 {
+#ifdef OPENDDS_NO_QUERY_CONDITION
+  ACE_UNUSED_ARG(ignored);
+#endif
+
   typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
 
   ::OpenDDS::DCPS::RakeResults< MessageSequenceType >
@@ -1297,6 +1313,10 @@ int ignored)
 int ignored)
 #endif
 {
+#ifdef OPENDDS_NO_QUERY_CONDITION
+  ACE_UNUSED_ARG(ignored);
+#endif
+
   ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
@@ -1361,6 +1381,10 @@ return ::DDS::RETCODE_NO_DATA;
 int ignored)
 #endif
 {
+#ifdef OPENDDS_NO_QUERY_CONDITION
+  ACE_UNUSED_ARG(ignored);
+#endif
+
   ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
 
   ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,

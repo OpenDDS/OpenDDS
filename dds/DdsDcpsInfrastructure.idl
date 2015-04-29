@@ -9,6 +9,8 @@
 #ifndef OPENDDS_DCPS_INFRASTRUCTURE_IDL
 #define OPENDDS_DCPS_INFRASTRUCTURE_IDL
 
+#include "dds/DdsDcpsCore.idl"
+
 #define DOMAINID_TYPE_NATIVE long
 #define HANDLE_TYPE_NATIVE long
 #define HANDLE_NIL_NATIVE 0
@@ -54,7 +56,6 @@ module DDS {
     typedef sequence<InstanceHandle_t> InstanceHandleSeq;
 
     typedef long ReturnCode_t;
-    typedef long QosPolicyId_t;
 
     typedef sequence<string> StringSeq;
 
@@ -170,13 +171,6 @@ module DDS {
                 long total_count_change;
                 InstanceHandle_t last_instance_handle;
                 };
-
-    struct QosPolicyCount {
-                QosPolicyId_t policy_id;
-                long count;
-                };
-
-    typedef sequence<QosPolicyCount> QosPolicyCountSeq;
 
     struct OfferedIncompatibleQosStatus {
                 long total_count;

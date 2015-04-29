@@ -20,7 +20,11 @@ module OpenDDS
     // They are also the InstanceHandle_t in Sample_Info for built-in Topics
     typedef GUID_t RepoId;
 
+#ifdef __OPENDDS_IDL
+    typedef sequence<octet> TransportBLOB;
+#else
     typedef CORBA::OctetSeq TransportBLOB;
+#endif
 
     struct TransportLocator {
       /// The transport type (e.g. tcp or udp)

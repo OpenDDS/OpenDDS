@@ -2,7 +2,7 @@
 
 project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
                                dcps_ts_defaults, dds_suppress_any_support, install, \
-                               gen_ostream {
+                               gen_ostream, dcps_optional_safety {
   custom_only = 1
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
               -Wb,export_macro=OpenDDS_Dcps_Export \
@@ -13,12 +13,12 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
                    -Wb,export_macro=OpenDDS_Dcps_Export \
                    -Wb,export_include=dds/DCPS/dcps_export.h
   IDL_Files {
-    DdsDcpsInfoUtils.idl
     DdsDcpsGuid.idl
   }
 
   IDL_Files {
     DdsDcps.idl
+    DdsDcpsCore.idl
     DdsDcpsInfrastructure.idl
     DdsDcpsDomain.idl
     DdsDcpsPublication.idl
@@ -51,7 +51,6 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
   TypeSupport_Files {
     dcps_ts_flags += -SI
     DdsDcpsGuid.idl
-    DdsDcpsInfoUtils.idl
   }
 
   verbatim(gnuace, bottom, 1) {

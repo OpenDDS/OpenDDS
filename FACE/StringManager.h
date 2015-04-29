@@ -2,7 +2,7 @@
 #define OPENDDS_FACE_STRINGMANAGER_HEADER
 
 #include "FACE/types.hpp"
-#include "dds/DCPS/Definitions.h"
+//#include "dds/DCPS/Definitions.h"
 
 #include <cstring>
 #include <algorithm>
