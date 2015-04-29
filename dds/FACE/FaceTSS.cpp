@@ -39,7 +39,7 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
     return_code = INVALID_PARAM;
   } else {
     OpenDDS::DCPS::SafetyProfilePool::instance()->configure_pool(
-      parser.pool_size(), parser.pool_allocs());
+      parser.pool_size(), parser.pool_granularity());
     return_code = RC_NO_ERROR;
   }
 }

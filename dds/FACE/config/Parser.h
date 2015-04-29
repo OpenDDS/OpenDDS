@@ -19,11 +19,11 @@ public:
   int find_topic(const char* name, TopicSettings& target);
   int find_qos(const char* name, QosSettings& target);
   size_t pool_size() const;
-  size_t pool_allocs() const;
+  size_t pool_granularity() const;
 
 private:
   size_t pool_size_;
-  size_t pool_allocs_;
+  size_t pool_granularity_;
   static ConnectionMap connection_map_;
   static QosMap qos_map_;
   static TopicMap topic_map_;

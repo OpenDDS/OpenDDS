@@ -23,7 +23,7 @@ int
 Parser::parse(const char* filename)
 {
   pool_size_ = 1024*1024;
-  pool_allocs_ = 1024;
+  pool_granularity_ = 8;
   ACE_Configuration_Heap config;
   config.open();
   ACE_Ini_ImpExp import(config);
@@ -94,9 +94,9 @@ Parser::pool_size() const
 }
 
 size_t
-Parser::pool_allocs() const
+Parser::pool_granularity() const
 {
-  return pool_allocs_;
+  return pool_granularity_;
 }
 
 int
@@ -205,9 +205,9 @@ int
 Parser::parse_common(ACE_Configuration_Heap& config, bool required)
 {
   int status = 0;
-  ACE_TString size_str, allocs_str;
+  ACE_TString size_str, granularity_str;
   unsigned int size = 0;
-  unsigned int allocs = 0;
+  unsigned int granularity = 0;
   ACE_Configuration_Section_Key key;
   if (config.open_section(config.root_section(), "common", 0, key) != 0) {
     if (required) {
@@ -222,10 +222,10 @@ Parser::parse_common(ACE_Configuration_Heap& config, bool required)
         pool_size_ = size;
       }
     }
-    if (!config.get_string_value(key, "PoolAllocs", allocs_str)) {
-      allocs = atoi(allocs_str.c_str());
-      if (allocs) {
-        pool_allocs_ = allocs;
+    if (!config.get_string_value(key, "PoolGranularity", granularity_str)) {
+      granularity = atoi(granularity_str.c_str());
+      if (granularity) {
+        pool_granularity_ = granularity;
       }
     }
   }
