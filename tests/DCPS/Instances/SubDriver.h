@@ -16,17 +16,17 @@ class SetDataReaderQosUseTopicQos {
     }
 };
 
-template<typename TypeSupportImpl>
+template<typename Traits>
 class SubDriver
 {
-  public:
+public:
 
-    typedef typename TypeSupportImpl::message_type message_type;
-    typedef typename TypeSupportImpl::datareader_var datareader_var;
-    typedef typename TypeSupportImpl::datareader_type datareader_type;
-    typedef typename TypeSupportImpl::datareaderimpl_type datareaderimpl_type;
+  typedef typename Traits::MessageType message_type;
+  /* typedef typename TypeSupportImpl::datareader_var datareader_var; */
+  typedef typename Traits::DataReaderType datareader_type;
+  /* typedef typename TypeSupportImpl::datareaderimpl_type datareaderimpl_type; */
 
-    typedef std::vector < ::OpenDDS::DCPS::PublicationId > PublicationIds;
+    /* typedef std::vector < ::OpenDDS::DCPS::PublicationId > PublicationIds; */
 
     SubDriver()
     : num_writes_ (0),
@@ -72,8 +72,8 @@ class SubDriver
 
       const std::string topic_name("topic_name");
 
-      ::TestUtils::DDSTopicFacade< datareaderimpl_type> topic_facade =
-          ddsApp.topic_facade< datareaderimpl_type> (topic_name);
+      ::TestUtils::DDSTopicFacade<Traits> topic_facade =
+          ddsApp.topic_facade<Traits> (topic_name);
 
       // Create Listener
       typedef typename ::TestUtils::ListenerRecorder< message_type,

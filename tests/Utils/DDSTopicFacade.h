@@ -52,15 +52,15 @@ struct QosNoOp
 /// created subscriber (either set to the first subscriber explicitly passed
 /// to reader(...) or to the implicitly created subscriber from calling
 /// reader() with no subscriber).
-template<typename WriterOrReaderImpl>
+template<typename Traits>
 // TODO: change codegen and use Message
 class DDSTopicFacade
 {
 public:
   friend class DDSApp;
-  typedef typename WriterOrReaderImpl::TraitsType::TypeSupportImplType  typesupportimpl_type;
-  typedef typename typesupportimpl_type::datawriter_type     datawriter_type;
-  typedef typename typesupportimpl_type::datawriter_var      datawriter_var;
+  /* typedef TypeSupportImplType  typesupportimpl_type; */
+  typedef typename Traits::DataWriterType         datawriter_type;
+  typedef typename Traits::DataWriterVarType      datawriter_var;
   typedef std::map<DDS::DataWriter_ptr, DDS::Publisher_var>  DataWriters;
   typedef std::map<DDS::DataReader_ptr, DDS::Subscriber_var> DataReaders;
 

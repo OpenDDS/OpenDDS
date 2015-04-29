@@ -12,12 +12,12 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-template<typename TSI>
+template<typename Traits>
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 {
 public:
-  typedef typename TSI::data_sample_type DSample;
+  typedef typename Traits::MessageType DSample;
   typedef void (*DSPrinter)(const DSample&, int);
 
   DataReaderListenerImpl(int num_ops_per_thread, int& num_samples, DSPrinter printer)
@@ -120,13 +120,13 @@ private:
   DSPrinter print_sample_;
 };
 
-template<typename TSI>
-void DataReaderListenerImpl<TSI>::read(DDS::DataReader_ptr dr)
+template<typename Traits>
+void DataReaderListenerImpl<Traits>::read(DDS::DataReader_ptr dr)
 {
-  const typename TSI::data_reader_type::_var_type foo_dr =
-    TSI::data_reader_type::_narrow(dr);
+  const typename Traits::DataReaderType::_var_type foo_dr =
+    Traits::DataReaderType::_narrow(dr);
 
-  typename TSI::data_sequence_type foo(num_ops_per_thread_);
+  typename Traits::MessageSequenceType foo(num_ops_per_thread_);
   DDS::SampleInfoSeq si(num_ops_per_thread_);
 
   const DDS::ReturnCode_t status =

@@ -17,6 +17,8 @@
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig_rch.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include "MessengerTypeSupportImpl.h"
+
 #ifndef DDS_HAS_MINIMUM_BIT
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
@@ -26,7 +28,6 @@
 #endif
 
 #include "dds/DCPS/StaticIncludes.h"
-#include "MessengerTypeSupportImpl.h"
 
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
