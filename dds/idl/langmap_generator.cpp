@@ -569,6 +569,8 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
 
+    const Classification cls = classify(base);
+
     switch (base->node_type()) {
     case AST_Decl::NT_sequence:
       gen_sequence(name, AST_Sequence::narrow_from_decl(base));
@@ -579,10 +581,13 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
     default:
       be_global->lang_header_ <<
         "typedef " << map_type(base) << ' ' << nm << ";\n";
+      if ((cls & CL_STRING) == 0) {
+          be_global->lang_header_ <<
+            "typedef " << map_type(base) << "_out " << nm << "_out;\n";
+        }
       break;
     }
 
-    const Classification cls = classify(base);
     if (cls & CL_STRING) {
       const Helper var = (cls & CL_WIDE) ? HLP_WSTR_VAR : HLP_STR_VAR,
         out = (cls & CL_WIDE) ? HLP_WSTR_OUT : HLP_STR_OUT;
