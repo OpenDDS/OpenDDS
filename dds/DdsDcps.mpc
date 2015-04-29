@@ -19,6 +19,7 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
 
   IDL_Files {
     DdsDcps.idl
+    DdsDcpsCore.idl
     DdsDcpsInfrastructure.idl
     DdsDcpsDomain.idl
     DdsDcpsPublication.idl
