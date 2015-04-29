@@ -17,16 +17,16 @@ public:
     : first_struct_(true)
   {}
 
-  bool gen_enum(UTL_ScopedName* name,
+  bool gen_enum(AST_Enum* node, UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
 
-  bool gen_struct(UTL_ScopedName* name,
+  bool gen_struct(AST_Structure* node, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
 
-  bool gen_typedef(UTL_ScopedName* name, AST_Type* type, const char* repoid);
+  bool gen_typedef(AST_Typedef* node, UTL_ScopedName* name, AST_Type* type, const char* repoid);
 
-  bool gen_union(UTL_ScopedName* name,
+  bool gen_union(AST_Union* node, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* type, const char* repoid);
 

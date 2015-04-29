@@ -29,6 +29,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
@@ -37,16 +38,7 @@
 #include "ace/Auto_Ptr.h"
 #include "ace/OS_NS_sys_time.h"
 
-#ifdef ACE_LYNXOS_MAJOR
-#include <strstream>
-#define STRINGSTREAM std::strstream
-#define STRINGSTREAM_CSTR
-#else
-#include <sstream>
-#define STRINGSTREAM std::stringstream
-#define STRINGSTREAM_CSTR .c_str()
-#endif
-
+#include <cstdio>
 #include <stdexcept>
 
 #if !defined (__ACE_INLINE__)
@@ -1469,14 +1461,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   if (get_deleted()) return;
 
   if (DCPS_debug_level > 9) {
-    STRINGSTREAM buffer;
-    buffer << sample.header_ << std::ends;
     GuidConverter converter(subscription_id_);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
         ACE_TEXT("%C received sample: %C.\n"),
         OPENDDS_STRING(converter).c_str(),
-        buffer.str() STRINGSTREAM_CSTR));
+        to_string(sample.header_).c_str()));
   }
 
   switch (sample.header_.message_id_) {
@@ -1641,10 +1631,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif // OPENDDS_NO_OBJECT_MODEL_PROFILE
 
   case DATAWRITER_LIVELINESS: {
-    if (DCPS_debug_level > 0) {
+    if (DCPS_debug_level >= 4) {
+      GuidConverter reader_converter(subscription_id_);
+      GuidConverter writer_converter(sample.header_.publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
-                 ACE_TEXT("got datawriter liveliness\n")));
+                 ACE_TEXT("reader %C got datawriter liveliness from writer %C\n"),
+                 OPENDDS_STRING(reader_converter).c_str(),
+                 OPENDDS_STRING(writer_converter).c_str()));
     }
     this->writer_activity(sample.header_);
 
@@ -2163,12 +2157,14 @@ void OpenDDS::DCPS::WriterStats::reset_stats()
   this->stats_.reset();
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 std::ostream& OpenDDS::DCPS::WriterStats::raw_data(std::ostream& str) const
 {
   str << std::dec << this->stats_.size()
                               << " samples out of " << this->stats_.n() << std::endl;
   return str << this->stats_;
 }
+#endif //OPENDDS_SAFETY_PROFILE
 
 void
 DataReaderImpl::writer_removed(WriterInfo& info)
@@ -2680,17 +2676,18 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
   if (DCPS_debug_level > 9) {
     CORBA::ULong const size = ids.length();
     const char* separator = "";
-    STRINGSTREAM buffer;
+    OPENDDS_STRING guids;
 
     for (unsigned long i = 0; i < size; ++i) {
-      buffer << separator << GuidConverter(ids[i]);
+      guids += separator;
+      guids += OPENDDS_STRING(GuidConverter(ids[i]));
       separator = ", ";
     }
 
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::lookup_instance_handles: ")
         ACE_TEXT("searching for handles for writer Ids: %C.\n"),
-        buffer.str() STRINGSTREAM_CSTR));
+        guids.c_str()));
   }
 
   CORBA::ULong const num_wrts = ids.length();
@@ -2890,26 +2887,30 @@ void DataReaderImpl::notify_liveliness_change()
   notify_status_condition();
 
   if (DCPS_debug_level > 9) {
-    STRINGSTREAM buffer;
-    buffer << "subscription " << GuidConverter(subscription_id_);
-    buffer << ", listener at: 0x" << std::hex << this->listener_.in ();
+    OPENDDS_STRING output_str;
+    output_str + "subscription ";
+    output_str += OPENDDS_STRING(GuidConverter(subscription_id_));
+    output_str + ", listener at: 0x";
+    output_str += to_dds_string(this->listener_.in ());
 
     for (WriterMapType::iterator current = this->writers_.begin();
         current != this->writers_.end();
         ++current) {
       RepoId id = current->first;
-      buffer << std::endl << "\tNOTIFY: writer[ " << GuidConverter(id) << "] == ";
-      buffer << current->second->get_state_str();
+      output_str + "\n\tNOTIFY: writer[ ";
+      output_str += OPENDDS_STRING(GuidConverter(id));
+      output_str + "] == ";
+      output_str += current->second->get_state_str();
     }
 
-    buffer << std::endl;
+    output_str + "\n";
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
         ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
         ACE_TEXT("\tNOTIFY: %C\n"),
         listener.in (),
         listener_mask_,
-        buffer.str() STRINGSTREAM_CSTR));
+        output_str.c_str()));
   }
 }
 

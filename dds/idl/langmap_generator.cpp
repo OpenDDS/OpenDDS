@@ -8,6 +8,12 @@
 
 #include "utl_identifier.h"
 
+#include "ace/Version.h"
+#include "ace/CDR_Base.h"
+#ifdef ACE_HAS_CDR_FIXED
+#include "ast_fixed.h"
+#endif
+
 #include <map>
 #include <iostream>
 
@@ -22,6 +28,7 @@ namespace {
     HLP_FIX_VAR, HLP_VAR_VAR, HLP_OUT,
     HLP_SEQ, HLP_SEQ_NS, HLP_SEQ_VAR_VAR, HLP_SEQ_FIX_VAR, HLP_SEQ_OUT,
     HLP_ARR_VAR_VAR, HLP_ARR_FIX_VAR, HLP_ARR_OUT, HLP_ARR_FORANY,
+    HLP_FIXED, HLP_FIXED_CONSTANT,
   };
   std::map<Helper, std::string> helpers_;
 
@@ -38,7 +45,7 @@ namespace {
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
       return primtype_[chartype] + '*';
     }
-    if (cls & (CL_STRUCTURE | CL_SEQUENCE | CL_ARRAY | CL_ENUM)) {
+    if (cls & (CL_STRUCTURE | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
       return scoped(type->name());
     }
     return "<<unknown>>";
@@ -64,6 +71,11 @@ namespace {
     case AST_Expression::EV_bool: pt = AST_PredefinedType::PT_boolean; break;
     case AST_Expression::EV_string: pt = AST_PredefinedType::PT_char; break;
     case AST_Expression::EV_wstring: pt = AST_PredefinedType::PT_wchar; break;
+#ifdef ACE_HAS_CDR_FIXED
+    case AST_Expression::EV_fixed:
+      be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
+      return helpers_[HLP_FIXED_CONSTANT];
+#endif
     default: break;
     }
     if (type == AST_Expression::EV_string || type == AST_Expression::EV_wstring)
@@ -114,12 +126,14 @@ void langmap_generator::init()
     helpers_[HLP_ARR_FIX_VAR] = "::TAO_FixedArray_Var_T";
     helpers_[HLP_ARR_OUT] = "::TAO_Array_Out_T";
     helpers_[HLP_ARR_FORANY] = "::TAO_Array_Forany_T";
+    helpers_[HLP_FIXED] = "::OpenDDS::FaceTypes::Fixed_T";
+    helpers_[HLP_FIXED_CONSTANT] = "::OpenDDS::FaceTypes::Fixed";
     break;
   default: break;
   }
 }
 
-bool langmap_generator::gen_const(UTL_ScopedName* name, bool /*nestedInInterface*/,
+bool langmap_generator::gen_const(UTL_ScopedName* name, bool,
                                   AST_Constant* constant)
 {
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
@@ -156,7 +170,7 @@ namespace {
   }
 }
 
-bool langmap_generator::gen_enum(UTL_ScopedName* name,
+bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
                                  const std::vector<AST_EnumVal*>& contents,
                                  const char*)
 {
@@ -212,7 +226,7 @@ bool langmap_generator::gen_struct_fwd(UTL_ScopedName* name,
   return true;
 }
 
-bool langmap_generator::gen_struct(UTL_ScopedName* name,
+bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
                                    const std::vector<AST_Field*>& fields,
                                    AST_Type::SIZE_TYPE size,
                                    const char*)
@@ -257,7 +271,22 @@ bool langmap_generator::gen_struct(UTL_ScopedName* name,
 
     for (size_t i = 0; i < fields.size(); ++i) {
       const std::string field_name = fields[i]->local_name()->get_string();
-      be_global->impl_ << field_name << " == rhs." << field_name;
+      AST_Type* field_type = fields[i]->field_type();
+      resolveActualType(field_type);
+      const Classification cls = classify(field_type);
+      if (cls & CL_ARRAY) {
+        ACE_CDR::ULong elems = 1;
+        const std::string flat_fn = field_name + array_dims(field_type, elems);
+        for (ACE_CDR::ULong j = 0; j < elems; ++j) {
+          be_global->impl_ << flat_fn << '[' << j << "] == rhs." << flat_fn
+                           << '[' << j << ']';
+          if (j < elems - 1) {
+            be_global->impl_ << "\n    && ";
+          }
+        }
+      } else {
+        be_global->impl_ << field_name << " == rhs." << field_name;
+      }
       if (i < fields.size() - 1) {
         be_global->impl_ << "\n    && ";
       }
@@ -556,9 +585,21 @@ namespace {
       "  }\n"
       "};\n}\n\n";
   }
+
+#ifdef ACE_HAS_CDR_FIXED
+  void gen_fixed(UTL_ScopedName* name, AST_Fixed* fixed)
+  {
+    be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
+    const char* const nm = name->last_component()->get_string();
+    be_global->lang_header_ <<
+      "typedef " << helpers_[HLP_FIXED] << '<' << *fixed->digits()->ev()
+      << ", " << *fixed->scale()->ev() << "> " << nm << ";\n"
+      "typedef " << nm << "& " << nm << "_out;\n";
+  }
+#endif
 }
 
-bool langmap_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
+bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* base,
                                     const char*)
 {
   AST_Array* arr = 0;
@@ -573,6 +614,17 @@ bool langmap_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
     case AST_Decl::NT_array:
       gen_array(name, arr = AST_Array::narrow_from_decl(base));
       break;
+#if ACE_MAJOR_VERSION > 5
+    case AST_Decl::NT_fixed:
+# ifdef ACE_HAS_CDR_FIXED
+      gen_fixed(name, AST_Fixed::narrow_from_decl(base));
+      break;
+# else
+      std::cerr << "ERROR: fixed data type (for " << nm << ") is not supported"
+        " with this version of ACE+TAO\n";
+      return false;
+# endif
+#endif
     default:
       be_global->lang_header_ <<
         "typedef " << map_type(base) << ' ' << nm << ";\n";
@@ -594,7 +646,7 @@ bool langmap_generator::gen_typedef(UTL_ScopedName* name, AST_Type* base,
   return true;
 }
 
-bool langmap_generator::gen_union(UTL_ScopedName*,
+bool langmap_generator::gen_union(AST_Union*, UTL_ScopedName*,
                                   const std::vector<AST_UnionBranch*>&,
                                   AST_Type*, const char*)
 {

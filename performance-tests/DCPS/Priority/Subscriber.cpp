@@ -17,7 +17,7 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "dds/DCPS/StaticIncludes.h"
-#ifdef ACE_AS_STATIC_LIBS
+#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
 #endif
@@ -354,7 +354,7 @@ operator<<( std::ostream& str, const Test::Subscriber& value)
   str << " --- statistical summary ---" << std::endl;
   for( unsigned long index = 0; index < statistics.length(); ++index) {
     OpenDDS::DCPS::GuidConverter converter(statistics[ index].publication);
-    str << "  Writer[ " << converter << "]" << std::endl;
+    str << "  Writer[ " << OPENDDS_STRING(converter) << "]" << std::endl;
     str << "     samples: " << statistics[ index].n << std::endl;
     str << "        mean: " << statistics[ index].mean << std::endl;
     str << "     minimum: " << statistics[ index].minimum << std::endl;
@@ -389,8 +389,10 @@ Subscriber::rawData( std::ostream& str) const
        current != readerImpl->raw_latency_statistics().end();
        ++current, ++index) {
     OpenDDS::DCPS::GuidConverter converter(current->first);
-    str << std::endl << "  Writer[ " << converter << "]" << std::endl;
+    str << std::endl << "  Writer[ " << OPENDDS_STRING(converter) << "]" << std::endl;
+#ifndef OPENDDS_SAFETY_PROFILE
     current->second.raw_data( str);
+#endif //OPENDDS_SAFETY_PROFILE
   }
   return str;
 }

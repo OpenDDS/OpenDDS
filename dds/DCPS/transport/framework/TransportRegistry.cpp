@@ -16,6 +16,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/ConfigUtils.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
@@ -25,11 +26,6 @@
 #include "TransportRegistry.inl"
 #endif /* __ACE_INLINE__ */
 
-#ifdef ACE_LYNXOS_MAJOR
-#include <strstream>
-#else
-#include <sstream>
-#endif
 
 namespace {
   const ACE_TString OLD_TRANSPORT_PREFIX = ACE_TEXT("transport_");
@@ -223,15 +219,17 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             OPENDDS_STRING name = (*it).first;
             if (name == "transports") {
               OPENDDS_STRING value = (*it).second;
-#ifdef ACE_LYNXOS_MAJOR
-              std::istrstream ss(value.c_str());
-#else
-              std::stringstream ss(value.c_str());
-#endif
-              OPENDDS_STRING item;
-              while(std::getline(ss, item, ',')) {
-                configInfo.second.push_back(item);
+
+              char delim = ',';
+              size_t pos = 0;
+              OPENDDS_STRING token;
+              while ((pos = value.find(delim)) != OPENDDS_STRING::npos) {
+                token = value.substr(0, pos);
+                configInfo.second.push_back(token);
+                value.erase(0, pos + 1);
               }
+              configInfo.second.push_back(value);
+
               configInfoVec.push_back(configInfo);
             } else if (name == "swap_bytes") {
               OPENDDS_STRING value = (*it).second;

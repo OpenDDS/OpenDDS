@@ -12,10 +12,6 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
-#ifndef ACE_LYNXOS_MAJOR
-#include <sstream>
-#endif
-
 #if !defined (__ACE_INLINE__)
 #include "RepoIdSetMap.inl"
 #endif /* __ACE_INLINE__ */
@@ -233,7 +229,6 @@ OpenDDS::DCPS::RepoIdSetMap::clear()
 void
 OpenDDS::DCPS::RepoIdSetMap::dump()
 {
-#ifndef ACE_LYNXOS_MAJOR
   DBG_ENTRY_LVL("RepoIdSetMap","dump",6);
 
   for (MapType::iterator itr = map_.begin();
@@ -243,12 +238,14 @@ OpenDDS::DCPS::RepoIdSetMap::dump()
 
     for (RepoIdSet::MapType::iterator it = set->map().begin();
          it != set->map().end(); ++it) {
-      std::stringstream buffer;
-      buffer << "key  " << itr->first << " - value " << it->first;
+      OPENDDS_STRING buffer;
+      buffer + "key  ";
+      buffer += to_string(itr->first);
+      buffer + " - value ";
+      buffer += to_string(it->first);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t)   %C \n"),
-                 buffer.str().c_str()));
+                 buffer.c_str()));
     }
   }
-#endif
 }

@@ -19,6 +19,7 @@
 #include "DataWriterImpl.h"
 #include "Qos_Helper.h"
 #include "debug.h"
+#include "SafetyProfileStreams.h"
 
 #include "tao/ORB_Core.h"
 
@@ -29,7 +30,6 @@
 #include "ace/MMAP_Memory_Pool.h"
 #include "ace/OS_NS_sys_time.h"
 
-#include <sstream>
 #include <fstream>
 #include <algorithm>
 
@@ -333,8 +333,7 @@ void OpenDDS::DCPS::DataDurabilityCache::init()
       path[0] = domain->name();
       DDS::DomainId_t domain_id;
       {
-        std::istringstream iss(path[0]);
-        iss >> domain_id;
+        domain_id = ACE_OS::atoi(path[0].c_str());
       }
 
       for (Directory::DirectoryIterator topic = domain->begin_dirs(),
@@ -541,9 +540,8 @@ OpenDDS::DCPS::DataDurabilityCache::insert(
     if (this->kind_ == DDS::PERSISTENT_DURABILITY_QOS) {
       try {
         dir = Directory::create(this->data_dir_.c_str());
-        std::ostringstream oss;
-        oss << domain_id;
-        path.push_back(oss.str());
+
+        path.push_back(to_dds_string(domain_id));
         path.push_back(topic_name);
         path.push_back(type_name);
         dir = dir->get_dir(path);

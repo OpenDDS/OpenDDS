@@ -14,7 +14,7 @@
 #include <string>
 using std::string;
 
-bool keys_generator::gen_struct(UTL_ScopedName* name,
+bool keys_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   const std::vector<AST_Field*>&, AST_Type::SIZE_TYPE, const char*)
 {
   string cxx = scoped(name), under = scoped_helper(name, "_");

@@ -143,9 +143,7 @@ public:
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 
   static const bool host_is_bigendian_;
-#ifndef ACE_LYNXOS_MAJOR
 private:
-#endif
   DCPS::RepoId participant_id_;
   Spdp& spdp_;
   ACE_Thread_Mutex& lock_;

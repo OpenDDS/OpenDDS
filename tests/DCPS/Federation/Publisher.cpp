@@ -7,6 +7,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "ace/SString.h"
+#include "tests/Utils/ExceptionStreams.h"
 
 #include <set>
 

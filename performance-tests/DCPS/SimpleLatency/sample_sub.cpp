@@ -16,6 +16,7 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include "tests/Utils/ExceptionStreams.h"
 
 #include <ace/streams.h>
 

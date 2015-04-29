@@ -800,7 +800,7 @@ sub _create_process {
   $self->_info("TestFramework::_create_process creating executable="
     . "$executable w/ params=$params\n");
   if ($params !~ /-DCPSPendingTimeout /) {
-    my $flag = " -DCPSPendingTimeout 1 ";
+    my $flag = " -DCPSPendingTimeout 3 ";
     my $possible_would_be = ($self->{add_pending_timeout} ? "" : "would be ");
     my $prevent_or_allow = ($self->{add_pending_timeout} ? "prevent" : "allow");
     $self->_info("TestFramework::_create_process " . $possible_would_be

@@ -7,6 +7,8 @@
  */
 
 #include "ReliabilityTypeSupportImpl.h"
+#include "tests/Utils/ExceptionStreams.h"
+
 
 // Boilerplate code pulled out of mains of publisher and subscriber
 // in order to simplify this example.

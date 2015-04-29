@@ -76,6 +76,7 @@ be_util::usage (void)
     ACE_TEXT(" -Sa\t\t\tsuppress IDL any (ignored, for tao_idl compatibility)\n")
     ACE_TEXT(" -St\t\t\tsuppress IDL typecode when -L* option is present\n")
     ACE_TEXT(" -Gws\t\t\tgenerate wireshark sample dissector configuration\n")
+    ACE_TEXT(" -Gitl\t\t\tgenerate ITL\n")
     ACE_TEXT(" -GfaceTS\t\tgenerate FACE TS API for DCPS data types\n")
     ACE_TEXT(" -Wb,export_macro=<macro name>\t\tsets export macro ")
     ACE_TEXT("for all files\n")
@@ -100,4 +101,3 @@ be_util::generator_init (void)
   ACE_NEW_RETURN(gen, AST_Generator, 0);
   return gen;
 }
-

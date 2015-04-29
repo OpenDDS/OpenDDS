@@ -14,11 +14,6 @@
 
 #include "ace/OS_NS_sys_time.h"
 
-#ifdef ACE_LYNXOS_MAJOR
-#include <strstream>
-#else
-#include <sstream>
-#endif
 
 namespace OpenDDS {
 namespace DCPS {
@@ -96,30 +91,23 @@ WriterInfo::WriterInfo(WriterInfoListener*         reader,
 OPENDDS_STRING
 WriterInfo::get_state_str() const
 {
-#ifdef ACE_LYNXOS_MAJOR
-  std::ostrstream oss;
-#else
-  std::ostringstream oss;
-#endif
-
+  OPENDDS_STRING ret;
   switch (this->state_) {
   case WriterInfo::NOT_SET:
-    oss << "NOT_SET";
+    ret += "NOT_SET";
     break;
   case WriterInfo::ALIVE:
-    oss << "ALIVE";
+    ret += "ALIVE";
     break;
   case WriterInfo::DEAD:
-    oss << "DEAD";
+    ret += "DEAD";
     break;
   default:
-    oss << "UNSPECIFIED(" << int(this->state_) << ")";
+    ret += "UNSPECIFIED(";
+    ret += to_dds_string(int(this->state_));
+    ret += ")";
   }
-#ifdef ACE_LYNXOS_MAJOR
-  return oss.str();
-#else
-  return oss.str().c_str();
-#endif
+  return ret.c_str();
 }
 
 void

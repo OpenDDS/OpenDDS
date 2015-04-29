@@ -17,8 +17,9 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-#include <iosfwd>
-#include <vector>
+#include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
+
 
 namespace OpenDDS {
 namespace DCPS {
@@ -72,12 +73,14 @@ public:
   /// Amount of data actually stored.
   unsigned int size() const;
 
+#ifndef OPENDDS_SAFETY_PROFILE
   /// Convenience operator for collecting data by inserting it into the
   /// collector.
   DataCollector<DatumType>& operator<<(DatumType datum);
 
   /// Implement insertion of collected data onto an ostream.
   std::ostream& insert(std::ostream& str) const;
+#endif //OPENDDS_SAFETY_PROFILE
 
 private:
   /// The collected data goes here.
@@ -97,11 +100,13 @@ private:
   OnFull onFull_;
 };
 
+#ifndef OPENDDS_SAFETY_PROFILE
 /// Insert collected data onto an ostream.
 template<typename DatumType>
 std::ostream& operator<<(
   std::ostream& str,
   const DataCollector<DatumType>& value);
+#endif //OPENDDS_SAFETY_PROFILE
 
 } // namespace DCPS
 } // namespace OpenDDS

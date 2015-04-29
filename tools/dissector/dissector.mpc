@@ -2,7 +2,7 @@
 // $Id$
 //
 
-project : dcpslib, wireshark {
+project : dcpslib, wireshark, itl {
   sharedname    = OpenDDS_Dissector
   dynamicflags += DISSECTOR_BUILD_DLL
   macros       += NOMINMAX

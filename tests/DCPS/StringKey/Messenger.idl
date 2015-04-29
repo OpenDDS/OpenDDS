@@ -4,11 +4,22 @@ module Messenger {
 #pragma DCPS_DATA_TYPE "Messenger::Message"
 #pragma DCPS_DATA_KEY "Messenger::Message subject_id"
 
+  enum MyEnum {b, s, d, other1, other2};
+
+  union MyUnion switch (MyEnum) {
+    case b: boolean u_b;
+    case s: short u_s;
+    case d: double u_d;
+    default: float u_f;
+  };
+
   struct Message {
     string from;
     string subject;
     string subject_id;
     string text;
     long   count;
+    MyEnum e;
+    MyUnion u;
   };
 };

@@ -12,9 +12,8 @@
 #include "GuidConverter.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
-
-#include <iomanip>
-#include <iostream>
+#include "dds/DCPS/SafetyProfileStreams.h"
+#include <cstdio>
 
 #if !defined (__ACE_INLINE__)
 #include "DataSampleHeader.inl"
@@ -458,6 +457,136 @@ DataSampleHeader::join(const DataSampleHeader& first,
   return true;
 }
 
+const char *
+to_string(const MessageId value)
+{
+  switch (value) {
+  case SAMPLE_DATA:
+    return "SAMPLE_DATA";
+  case DATAWRITER_LIVELINESS:
+    return "DATAWRITER_LIVELINESS";
+  case INSTANCE_REGISTRATION:
+    return "INSTANCE_REGISTRATION";
+  case UNREGISTER_INSTANCE:
+    return "UNREGISTER_INSTANCE";
+  case DISPOSE_INSTANCE:
+    return "DISPOSE_INSTANCE";
+  case GRACEFUL_DISCONNECT:
+    return "GRACEFUL_DISCONNECT";
+  case REQUEST_ACK:
+    return "REQUEST_ACK";
+  case SAMPLE_ACK:
+    return "SAMPLE_ACK";
+  case END_COHERENT_CHANGES:
+    return "END_COHERENT_CHANGES";
+  case TRANSPORT_CONTROL:
+    return "TRANSPORT_CONTROL";
+  case DISPOSE_UNREGISTER_INSTANCE:
+    return "DISPOSE_UNREGISTER_INSTANCE";
+  case END_HISTORIC_SAMPLES:
+    return "END_HISTORIC_SAMPLES";
+  default:
+    return "Unknown";
+  }
+}
+
+const char *
+to_string(const SubMessageId value)
+{
+  switch (value) {
+  case SUBMESSAGE_NONE:
+    return "SUBMESSAGE_NONE";
+  case MULTICAST_SYN:
+    return "MULTICAST_SYN";
+  case MULTICAST_SYNACK:
+    return "MULTICAST_SYNACK";
+  case MULTICAST_NAK:
+    return "MULTICAST_NAK";
+  case MULTICAST_NAKACK:
+    return "MULTICAST_NAKACK";
+  default:
+    return "Unknown";
+  }
+}
+
+OPENDDS_STRING to_string(const DataSampleHeader& value)
+{
+  OPENDDS_STRING ret;
+  if (value.submessage_id_ != SUBMESSAGE_NONE) {
+    ret += to_string(SubMessageId(value.submessage_id_));
+    ret += " 0x";
+    ret += to_dds_string(unsigned(value.submessage_id_), true);
+    ret += "), ";
+  } else {
+    ret += to_string(MessageId(value.message_id_));
+    ret += " (0x";
+    ret += to_dds_string(unsigned(value.message_id_), true);
+    ret += "), ";
+  }
+
+  ret += "Length: ";
+  ret += to_dds_string(value.message_length_);
+  ret += ", ";
+
+  ret += "Byte order: ";
+  ret += (value.byte_order_ == 1 ? "Little" : "Big");
+  ret += " Endian";
+
+  if (value.message_id_ != TRANSPORT_CONTROL) {
+    ret += ", ";
+
+    if (value.coherent_change_ == 1) ret += "Coherent, ";
+    if (value.historic_sample_ == 1) ret += "Historic, ";
+    if (value.lifespan_duration_ == 1) ret += "Lifespan, ";
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+    if (value.group_coherent_ == 1) ret += "Group-Coherent, ";
+#endif
+    if (value.content_filter_ == 1) ret += "Content-Filtered, ";
+    if (value.sequence_repair_ == 1) ret += "Sequence Repair, ";
+    if (value.more_fragments_ == 1) ret += "More Fragments, ";
+    if (value.cdr_encapsulation_ == 1) ret += "CDR Encapsulation, ";
+    if (value.key_fields_only_ == 1) ret += "Key Fields Only, ";
+
+    ret += "Sequence: 0x";
+    ret += to_dds_string(unsigned(value.sequence_.getValue()), true);
+    ret += ", ";
+
+    ret += "Timestamp: ";
+    ret += to_dds_string(value.source_timestamp_sec_);
+    ret += ".";
+    ret += to_dds_string(value.source_timestamp_nanosec_);
+    ret += ", ";
+
+    if (value.lifespan_duration_) {
+      ret += "Lifespan: ";
+      ret += to_dds_string(value.lifespan_duration_sec_);
+      ret += ".";
+      ret += to_dds_string(value.lifespan_duration_nanosec_);
+      ret += ", ";
+    }
+
+    ret += "Publication: " + OPENDDS_STRING(GuidConverter(value.publication_id_));
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+    if (value.group_coherent_) {
+      ret += ", Publisher: " + OPENDDS_STRING(GuidConverter(value.publisher_id_));
+    }
+#endif
+
+    if (value.content_filter_) {
+      const CORBA::ULong len = value.content_filter_entries_.length();
+      ret += ", Content-Filter Entries (";
+      ret += to_dds_string(len);
+      ret += "): [";
+      for (CORBA::ULong i(0); i < len; ++i) {
+        ret += OPENDDS_STRING(GuidConverter(value.content_filter_entries_[i])) + ' ';
+      }
+      ret += ']';
+    }
+  }
+  return ret;
+}
+
+#ifndef OPENDDS_SAFETY_PROFILE
 /// Message Id enumeration insertion onto an ostream.
 std::ostream& operator<<(std::ostream& str, const MessageId value)
 {
@@ -514,8 +643,6 @@ std::ostream& operator<<(std::ostream& os, const SubMessageId rhs)
 extern OpenDDS_Dcps_Export
 std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 {
-  //TODO:
-#ifndef ACE_LYNXOS_MAJOR
   struct SaveAndRestoreStreamState {
     explicit SaveAndRestoreStreamState(std::ostream& s)
       : fill_(s.fill()), fmt_(s.flags()), s_(s) {}
@@ -528,7 +655,6 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
     std::ios_base::fmtflags fmt_;
     std::ostream& s_;
   } stream_state(str);
-#endif
 
   if (value.submessage_id_ != SUBMESSAGE_NONE) {
     str << SubMessageId(value.submessage_id_)
@@ -544,7 +670,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
   str << "Length: " << std::dec << value.message_length_ << ", ";
 
   str << "Byte order: " << (value.byte_order_ == 1 ? "Little" : "Big")
-      << " Endian (0x" << std::hex << unsigned(value.byte_order_) << ")";
+      << " Endian";
 
   if (value.message_id_ != TRANSPORT_CONTROL) {
     str << ", ";
@@ -591,6 +717,8 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
 
   return str;
 }
+#endif //OPENDDS_SAFETY_PROFILE
+
 
 bool
 DataSampleHeader::into_received_data_sample(ReceivedDataSample& rds)

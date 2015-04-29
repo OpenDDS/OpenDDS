@@ -21,19 +21,19 @@ private:
   bool gen_const(UTL_ScopedName* name, bool nestedInInteface,
                  AST_Constant* constant);
 
-  bool gen_enum(UTL_ScopedName* name,
+  bool gen_enum(AST_Enum*, UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
 
-  bool gen_struct(UTL_ScopedName* name,
+  bool gen_struct(AST_Structure*, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
 
   bool gen_struct_fwd(UTL_ScopedName* name,
                       AST_Type::SIZE_TYPE size);
 
-  bool gen_typedef(UTL_ScopedName* name, AST_Type* type, const char* repoid);
+  bool gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* type, const char* repoid);
 
-  bool gen_union(UTL_ScopedName* name,
+  bool gen_union(AST_Union*, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* type, const char* repoid);
 };

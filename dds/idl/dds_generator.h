@@ -22,6 +22,8 @@
 #include "ast_union_fwd.h"
 #include "ast_valuetype_fwd.h"
 
+#include "ace/CDR_Base.h"
+
 #include <string>
 #include <vector>
 #include <cstring>
@@ -30,17 +32,23 @@ class dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
+  virtual bool do_included_files() const { return false; }
+
+  virtual void gen_prologue() {}
+
+  virtual void gen_epilogue() {}
+
   virtual bool gen_const(UTL_ScopedName* /*name*/,
                          bool /*nestedInInteface*/,
                          AST_Constant* /*constant*/)
   { return true; }
 
-  virtual bool gen_enum(UTL_ScopedName* /*name*/,
+  virtual bool gen_enum(AST_Enum* /*node*/, UTL_ScopedName* /*name*/,
                         const std::vector<AST_EnumVal*>& /*contents*/,
                         const char* /*repoid*/)
   { return true; }
 
-  virtual bool gen_struct(UTL_ScopedName* name,
+  virtual bool gen_struct(AST_Structure* node, UTL_ScopedName* name,
                           const std::vector<AST_Field*>& fields,
                           AST_Type::SIZE_TYPE size,
                           const char* repoid) = 0;
@@ -49,10 +57,10 @@ public:
                               AST_Type::SIZE_TYPE /*size*/)
   { return true; }
 
-  virtual bool gen_typedef(UTL_ScopedName* name, AST_Type* base,
+  virtual bool gen_typedef(AST_Typedef* node, UTL_ScopedName* name, AST_Type* base,
                            const char* repoid) = 0;
 
-  virtual bool gen_interf(UTL_ScopedName* /*name*/, bool /*local*/,
+  virtual bool gen_interf(AST_Interface* /*node*/, UTL_ScopedName* /*name*/, bool /*local*/,
                           const std::vector<AST_Interface*>& /*inherits*/,
                           const std::vector<AST_Interface*>& /*inherits_flat*/,
                           const std::vector<AST_Attribute*>& /*attrs*/,
@@ -63,10 +71,10 @@ public:
   virtual bool gen_interf_fwd(UTL_ScopedName* /*name*/)
   { return true; }
 
-  virtual bool gen_native(UTL_ScopedName* /*name*/, const char* /*repoid*/)
+  virtual bool gen_native(AST_Native* /*node*/, UTL_ScopedName* /*name*/, const char* /*repoid*/)
   { return true; }
 
-  virtual bool gen_union(UTL_ScopedName* name,
+  virtual bool gen_union(AST_Union* node, UTL_ScopedName* name,
                          const std::vector<AST_UnionBranch*>& branches,
                          AST_Type* discriminator,
                          const char* repoid) = 0;
@@ -76,21 +84,25 @@ public:
 
 class composite_generator : public dds_generator {
 public:
+  void gen_prologue();
+
+  void gen_epilogue();
+
   bool gen_const(UTL_ScopedName* name, bool nestedInInteface,
                  AST_Constant* constant);
 
-  bool gen_enum(UTL_ScopedName* name,
+  bool gen_enum(AST_Enum* node, UTL_ScopedName* name,
                 const std::vector<AST_EnumVal*>& contents, const char* repoid);
 
-  bool gen_struct(UTL_ScopedName* name,
+  bool gen_struct(AST_Structure* node, UTL_ScopedName* name,
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE size, const char* repoid);
 
   bool gen_struct_fwd(UTL_ScopedName* name, AST_Type::SIZE_TYPE size);
 
-  bool gen_typedef(UTL_ScopedName* name, AST_Type* base, const char* repoid);
+  bool gen_typedef(AST_Typedef* node, UTL_ScopedName* name, AST_Type* base, const char* repoid);
 
-  bool gen_interf(UTL_ScopedName* name, bool local,
+  bool gen_interf(AST_Interface* node, UTL_ScopedName* name, bool local,
                   const std::vector<AST_Interface*>& inherits,
                   const std::vector<AST_Interface*>& inherits_flat,
                   const std::vector<AST_Attribute*>& attrs,
@@ -98,9 +110,9 @@ public:
 
   bool gen_interf_fwd(UTL_ScopedName* name);
 
-  bool gen_native(UTL_ScopedName* name, const char* repoid);
+  bool gen_native(AST_Native* node, UTL_ScopedName* name, const char* repoid);
 
-  bool gen_union(UTL_ScopedName* name,
+  bool gen_union(AST_Union* node, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* discriminator,
                  const char* repoid);
@@ -255,7 +267,8 @@ namespace AstTypeClassification {
   typedef size_t Classification;
   const Classification CL_UNKNOWN = 0, CL_SCALAR = 1, CL_PRIMITIVE = 2,
     CL_STRUCTURE = 4, CL_STRING = 8, CL_ENUM = 16, CL_UNION = 32, CL_ARRAY = 64,
-    CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024;
+    CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024,
+    CL_FIXED = 2048;
 
   inline Classification classify(AST_Type* type)
   {
@@ -292,6 +305,10 @@ namespace AstTypeClassification {
       return CL_SCALAR | CL_ENUM;
     case AST_Decl::NT_interface:
       return CL_INTERFACE;
+#ifdef ACE_HAS_CDR_FIXED
+    case AST_Decl::NT_fixed:
+      return CL_FIXED;
+#endif
     default:
       return CL_UNKNOWN;
     }
@@ -428,6 +445,14 @@ std::ostream& operator<<(std::ostream& o,
     return o << "L\"" << ev.u.wstrval << '"';
   case AST_Expression::EV_string:
     return o << '"' << ev.u.strval->get_string() << '"';
+#ifdef ACE_HAS_CDR_FIXED
+  case AST_Expression::EV_fixed:
+    {
+      char buf[ACE_CDR::Fixed::MAX_STRING_SIZE];
+      ev.u.fixedval.to_string(buf, sizeof buf);
+      return o << "\"" << buf << "\"";
+    }
+#endif
   default:
     return o;
   }
