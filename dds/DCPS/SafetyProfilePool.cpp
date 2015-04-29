@@ -614,7 +614,7 @@ printf("Free bytes %zu, in list %zu\n", free_bytes, free_bytes_in_list);
 }
 
 SafetyProfilePool:: SafetyProfilePool()
-: init_pool_(new Pool(1024*1024, 256))
+: init_pool_(new MemoryPool(1024*1024, 8))
 , main_pool_(0)
 {
 }
@@ -628,12 +628,12 @@ SafetyProfilePool::~SafetyProfilePool()
 }
 
 void
-SafetyProfilePool::configure_pool(size_t size, size_t allocs)
+SafetyProfilePool::configure_pool(size_t size, size_t granularity)
 {
   ACE_GUARD(ACE_Thread_Mutex, lock, lock_);
 
   if (main_pool_ == NULL) {
-    main_pool_ = new Pool(size, allocs);
+    main_pool_ = new MemoryPool(size, granularity);
   }
 }
 

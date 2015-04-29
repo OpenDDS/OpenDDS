@@ -7,6 +7,7 @@
 #include "ace/Atomic_Op.h"
 #include "ace/Singleton.h"
 #include "dcps_export.h"
+#include "MemoryPool.h"
 
 class PoolAllocationTest;
 class PoolTest;
@@ -114,7 +115,7 @@ public:
   SafetyProfilePool();
   ~SafetyProfilePool();
 
-  void configure_pool(size_t size, size_t allocs);
+  void configure_pool(size_t size, size_t granularity);
 
   void* malloc(std::size_t size)
   {
@@ -131,9 +132,9 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, lock, lock_);
     if (main_pool_ && main_pool_->includes(ptr)) {
       return main_pool_->pool_free(ptr);
-    } else {
+    } else if (init_pool_->includes(ptr)) {
       // If this is uncommented, crash
-      // return init_pool_->pool_free(ptr);
+      return init_pool_->pool_free(ptr);
     }
   }
 
@@ -159,8 +160,8 @@ private:
   SafetyProfilePool(const SafetyProfilePool&);
   SafetyProfilePool& operator=(const SafetyProfilePool&);
 
-  Pool* init_pool_;
-  Pool* main_pool_;
+  MemoryPool* init_pool_;
+  MemoryPool* main_pool_;
   ACE_Thread_Mutex lock_;
 };
 
