@@ -9,6 +9,9 @@
  */
 // ============================================================================
 
+#ifdef ACE_LYNXOS_MAJOR
+#define VMOS_DEV
+#endif
 
 #include "DataReaderListener.h"
 #include "TestException.h"
@@ -26,6 +29,8 @@
 #include "ace/Arg_Shifter.h"
 
 #include "common.h"
+
+#include <cstdio>
 
 
 ::DDS::DomainParticipantFactory_var dpf;
@@ -257,7 +262,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               if (writers_completed != 0)
                 {
                   //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
-                  fscanf (writers_completed, "%d\n", &timeout_writes);
+                  std::fscanf (writers_completed, "%d\n", &timeout_writes);
                   expected -= timeout_writes;
                   ACE_DEBUG((LM_DEBUG,
                              ACE_TEXT ("(%P|%t) timed out writes %d, we expect %d\n"),

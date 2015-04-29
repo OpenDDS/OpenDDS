@@ -17,7 +17,7 @@ namespace {
   OpenDDS::FaceTSS::config::Parser parser;
 
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
-                                           const ::DDS::DomainId_t domainId,
+                                           const DDS::DomainId_t domainId,
                                            const char* topic,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir,
@@ -146,7 +146,7 @@ void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
                          RETURN_CODE_TYPE& return_code)
 {
   Entities& entities = *Entities::instance();
-  OPENDDS_MAP(CONNECTION_ID_TYPE, ::DDS::DataReader_var)& readers = entities.readers_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = entities.readers_;
   if (readers.count(connection_id)) {
     readers[connection_id]->set_listener(NULL, 0);
     return_code = RC_NO_ERROR;
@@ -159,17 +159,17 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
                         RETURN_CODE_TYPE& return_code)
 {
   Entities& entities = *Entities::instance();
-  OPENDDS_MAP(CONNECTION_ID_TYPE, ::DDS::DataWriter_var)& writers = entities.writers_;
-  OPENDDS_MAP(CONNECTION_ID_TYPE, ::DDS::DataReader_var)& readers = entities.readers_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, DDS::DataWriter_var)& writers = entities.writers_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = entities.readers_;
 
-  ::DDS::DomainParticipant_var dp;
+  DDS::DomainParticipant_var dp;
   if (writers.count(connection_id)) {
-    const ::DDS::Publisher_var pub = writers[connection_id]->get_publisher();
+    const DDS::Publisher_var pub = writers[connection_id]->get_publisher();
     writers.erase(connection_id);
     dp = pub->get_participant();
 
   } else if (readers.count(connection_id)) {
-    const ::DDS::Subscriber_var sub = readers[connection_id]->get_subscriber();
+    const DDS::Subscriber_var sub = readers[connection_id]->get_subscriber();
     readers.erase(connection_id);
     dp = sub->get_participant();
   }
@@ -180,7 +180,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
   }
 
   dp->delete_contained_entities();
-  const ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+  const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
   dpf->delete_participant(dp);
 
   entities.connections_.erase(connection_id);
@@ -189,7 +189,7 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
 
 namespace {
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
-                                           const ::DDS::DomainId_t domainId,
+                                           const DDS::DomainId_t domainId,
                                            const char* topicName,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir,
@@ -201,10 +201,10 @@ namespace {
     TheServiceParticipant->set_BIT(false);
 #endif
 
-    const ::DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+    const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     if (!dpf) return INVALID_PARAM;
 
-    const ::DDS::DomainParticipant_var dp =
+    const DDS::DomainParticipant_var dp =
       dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
     if (!dp) return INVALID_PARAM;
 
@@ -217,39 +217,39 @@ namespace {
       Registered_Data_Types->register_type(dp, type, ts);
     }
 
-    const ::DDS::Topic_var topic =
+    const DDS::Topic_var topic =
       dp->create_topic(topicName, type, TOPIC_QOS_DEFAULT, 0, 0);
     if (!topic) return INVALID_PARAM;
 
     if (dir == SOURCE) {
-      ::DDS::PublisherQos publisher_qos;
+      DDS::PublisherQos publisher_qos;
       qos_settings.apply_to(publisher_qos);
 
-      const ::DDS::Publisher_var pub =
+      const DDS::Publisher_var pub =
         dp->create_publisher(publisher_qos, 0, 0);
       if (!pub) return INVALID_PARAM;
 
-      ::DDS::DataWriterQos datawriter_qos;
+      DDS::DataWriterQos datawriter_qos;
       qos_settings.apply_to(datawriter_qos);
 
-      const ::DDS::DataWriter_var dw =
+      const DDS::DataWriter_var dw =
         pub->create_datawriter(topic, datawriter_qos, 0, 0);
       if (!dw) return INVALID_PARAM;
 
       Entities::instance()->writers_[connectionId] = dw;
 
     } else { // dir == DESTINATION
-      ::DDS::SubscriberQos subscriber_qos;
+      DDS::SubscriberQos subscriber_qos;
       qos_settings.apply_to(subscriber_qos);
 
-      const ::DDS::Subscriber_var sub =
+      const DDS::Subscriber_var sub =
         dp->create_subscriber(subscriber_qos, 0, 0);
       if (!sub) return INVALID_PARAM;
 
-      ::DDS::DataReaderQos datareader_qos;
+      DDS::DataReaderQos datareader_qos;
       qos_settings.apply_to(datareader_qos);
 
-      const ::DDS::DataReader_var dr =
+      const DDS::DataReader_var dr =
         sub->create_datareader(topic, datareader_qos, 0, 0);
       if (!dr) return INVALID_PARAM;
 

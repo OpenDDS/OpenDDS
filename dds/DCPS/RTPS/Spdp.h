@@ -116,6 +116,7 @@ public:
 
   WaitForAcks& wait_for_acks();
 
+private:
   ACE_Reactor* reactor() const;
 
   ACE_Thread_Mutex lock_;
