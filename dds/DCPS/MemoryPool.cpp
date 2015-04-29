@@ -1,4 +1,5 @@
 #include "MemoryPool.h"
+#include "ace/Log_Msg.h"
 #include <stdexcept>
 #include <climits>
 
@@ -233,6 +234,7 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t alignment)
   first_free->init_free_block(pool_size_);
   largest_free_ = first_free;
   free_index_.init(first_free);
+  lwm_free_bytes_ = largest_free_->size();
 }
 
 MemoryPool::~MemoryPool()
@@ -240,6 +242,12 @@ MemoryPool::~MemoryPool()
 #ifndef OPENDDS_SAFETY_PROFILE
   delete [] pool_ptr_;
 #endif
+}
+
+size_t
+MemoryPool::lwm_free_bytes() const
+{
+  return lwm_free_bytes_;
 }
 
 char*
@@ -260,6 +268,15 @@ MemoryPool::pool_alloc(size_t size)
 
   if (block_to_alloc) {
     block = allocate(block_to_alloc, aligned_size);
+  }
+
+  // Update lwm
+  size_t largest_free_bytes = largest_free_->size();
+  if (largest_free_bytes < lwm_free_bytes_) {
+    lwm_free_bytes_ = largest_free_bytes;
+if (lwm_free_bytes_ < 10000) {
+  ACE_DEBUG((LM_DEBUG, "LWM under 10k\n"));
+}
   }
 
   //if (debug_log_) log_allocs();

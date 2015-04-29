@@ -1,4 +1,5 @@
 #include "SafetyProfilePool.h"
+#include "dds/DCPS/debug.h"
 #include <stdexcept>
 
 namespace OpenDDS {  namespace DCPS {
@@ -621,6 +622,16 @@ SafetyProfilePool:: SafetyProfilePool()
 
 SafetyProfilePool::~SafetyProfilePool()
 {
+  if (DCPS_debug_level) {
+    if (main_pool_) {
+      ACE_DEBUG((LM_INFO, "LWM: init pool: %d bytes, main pool: %d bytes\n",
+                 init_pool_->lwm_free_bytes(), main_pool_->lwm_free_bytes()));
+    } else {
+      ACE_DEBUG((LM_INFO, "LWM: init pool: %d bytes\n",
+                 init_pool_->lwm_free_bytes()));
+    }
+  }
+
 #ifndef OPENDDS_SAFETY_PROFILE
   delete init_pool_;
   delete main_pool_;

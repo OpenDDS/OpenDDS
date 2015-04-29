@@ -109,13 +109,18 @@ public:
   MemoryPool(unsigned int pool_size, size_t align_size = 8);
   ~MemoryPool();
 
-  size_t align(size_t size) {
-     return (size + align_size_ - 1) / align_size_ * align_size_; }
+  // Does the pool include a pointer
   bool includes(void* ptr) {
      return (pool_ptr_ <= ptr) && (ptr < pool_ptr_ + pool_size_); }
 
+  // Allocate bytes
   char* pool_alloc(size_t size);
+
+  // Free bytes
   void pool_free(void* ptr);
+
+  // Low water mark of available bytes
+  size_t lwm_free_bytes() const;
 
 private:
   const size_t align_size_;      // Alignment size configured
@@ -123,6 +128,7 @@ private:
   const size_t min_free_size_;   // Aligned free header size
   const size_t min_alloc_size_;  // Aligned minimum allocation size
   const size_t pool_size_;       // Configured pool size
+  size_t lwm_free_bytes_;        // Low water mark of available bytes
   unsigned char* pool_ptr_;
 
   FreeIndex free_index_;
@@ -136,6 +142,11 @@ private:
   void insert_free_alloc(FreeHeader* block_freed);
   void join_free_allocs(FreeHeader* block_freed);
   unsigned char* allocate(FreeHeader* free_block, size_t alloc_size);
+
+  // Calculate aligned size of allocation
+  size_t align(size_t size) {
+     return (size + align_size_ - 1) / align_size_ * align_size_; }
+
 
   void log_allocs();
   void validate();
