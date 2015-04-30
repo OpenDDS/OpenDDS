@@ -147,10 +147,8 @@ namespace {
       DiscoveredWriterData writer_data;
       writer_data.ddsPublicationData.durability =
           TheServiceParticipant->initial_DurabilityQosPolicy();
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       writer_data.ddsPublicationData.durability_service =
           TheServiceParticipant->initial_DurabilityServiceQosPolicy();
-#endif
       writer_data.ddsPublicationData.deadline =
           TheServiceParticipant->initial_DeadlineQosPolicy();
       writer_data.ddsPublicationData.latency_budget =
