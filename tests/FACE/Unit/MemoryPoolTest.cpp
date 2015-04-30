@@ -843,6 +843,15 @@ public:
     validate_pool(pool, 0);
   }
 
+  void test_pool_align_configure_too_small() {
+    MemoryPool pool(1024, 5);
+    validate_pool(pool, 0);
+    void* ptr = pool.pool_alloc(128);
+    validate_pool(pool, 128);
+    pool.pool_free(ptr);
+    validate_pool(pool, 0);
+  }
+
 private:
   void validate_index(FreeIndex& index, unsigned char* pool_base, bool log = false)
   {
@@ -1068,8 +1077,8 @@ int main(int, const char** )
   test.test_alloc_too_large_returns_null();
   test.test_free_null_should_ignore();
 
-  //test.test_pool_align_other_size();
-  //test.test_pool_align_configure_too_small();
+  test.test_pool_align_other_size();
+  test.test_pool_align_configure_too_small();
 
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
 

@@ -196,11 +196,11 @@ FreeIndex::init(FreeHeader* init_free_block)
 
 FreeHeader*
 FreeIndex::find(size_t size, unsigned char* pool_base)
-{    
+{
   // Search index
   FreeIndexNode* index = nodes_ + size_ - 1;
   FreeHeader* larger = NULL;
-  
+
   while (index >= nodes_) {
     if (index->ptr() && index->ptr()->size() >= size) {
       larger = index->ptr();
@@ -279,8 +279,7 @@ MemoryPool::pool_alloc(size_t size)
     }
   }
 
-  //if (debug_log_) log_allocs();
-  //validate();
+  //validate_pool(*this, debug_log_);
 
   return block;
 }
@@ -300,8 +299,7 @@ MemoryPool::pool_free(void* ptr)
 
   join_free_allocs(header);
 
-  //validate();
-  //if (debug_log_) log_allocs();
+  //validate_pool(*this, debug_log_);
 }
 
 void
@@ -391,7 +389,7 @@ MemoryPool::insert_free_alloc(FreeHeader* freed)
       largest_free_ = freed;
     }
   }
-  
+
   free_index_.add(freed);
 }
 
@@ -488,11 +486,163 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
   }
 }
 
-#define ASSERT(expr, msg) \
-  if (!(expr)) throw std::runtime_error(msg);
+#define TEST_CHECK(COND) \
+  ++assertions; \
+  if (!( COND )) {\
+    ++failed; \
+    throw std::runtime_error, "TEST_CHECK(" + #COND + ") FAILED at %N:%l\n",\
+        #COND )); \
+    return; \
+  }
 
 void
-MemoryPool::validate() {
+MemoryPool::validate_pool(
+  MemoryPool& pool,
+  bool log = false) {
+    AllocHeader* prev = 0;
+    size_t allocated_bytes = 0;
+    size_t free_bytes = 0;
+    size_t oh_bytes = 0;
+    size_t free_count = 0;
+    unsigned char* pool_end = pool.pool_ptr_ + pool.pool_size_;
+    bool prev_was_free;
+    size_t index = 0;
+
+    typedef std::map<FreeHeader*, int> FreeMap;
+    FreeMap free_map;
+    // Gather all free indices
+    AllocHeader* alloc = reinterpret_cast<AllocHeader*>(pool.pool_ptr_);
+    while (pool.includes(alloc)) {
+      FreeHeader* free_header = alloc->is_free() ?
+            reinterpret_cast<FreeHeader*>(alloc) : NULL;
+      if (free_header) {
+        free_map[free_header] = index;
+      }
+      alloc = alloc->next_adjacent();
+      ++index;
+    }
+
+    index = 0;
+    if (log) {
+      printf("Pool ptr %zx end %zx\n", (unsigned long)pool.pool_ptr_,
+             (unsigned long)pool_end);
+     }
+
+    // Check all allocs in positional order and not overlapping
+    alloc = reinterpret_cast<AllocHeader*>(pool.pool_ptr_);
+    while (pool.includes(alloc)) {
+      if (log) {
+
+        int smlr_index = -1;
+        int lrgr_index = -1;
+        char lrgr_buff[32];
+        char smlr_buff[32];
+
+        FreeHeader* free_header = alloc->is_free() ?
+              reinterpret_cast<FreeHeader*>(alloc) : NULL;
+        if (free_header) {
+          FreeMap::const_iterator found;
+          found = free_map.find(free_header->smaller_free(pool.pool_ptr_));
+          if (found != free_map.end()) {
+            smlr_index = found->second;
+            sprintf(smlr_buff, "[%2d]", smlr_index);
+          }
+          found = free_map.find(free_header->larger_free(pool.pool_ptr_));
+          if (found != free_map.end()) {
+            lrgr_index = found->second;
+            sprintf(lrgr_buff, "[%2d]", lrgr_index);
+          }
+        }
+        printf(
+          "Alloc[%zu] %s at %zx ptr %zx lg %s sm %s size %d psize %d\n",
+          index++,
+          alloc->is_free() ?
+          (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
+          (unsigned long)alloc,
+          (unsigned long)alloc->ptr(),
+          lrgr_index >= 0 ? lrgr_buff : "[  ]",
+          smlr_index >= 0 ? smlr_buff : "[  ]",
+          alloc->size(),
+          alloc->prev_size()
+          );
+      }
+
+      TEST_CHECK(alloc->size());
+      if (prev) {
+        TEST_CHECK(prev->next_adjacent() == alloc);
+        TEST_CHECK(alloc->prev_adjacent() == prev);
+        // Validate  these are not consecutive free blocks
+        TEST_CHECK(!(prev_was_free && alloc->is_free()));
+      }
+
+      if (!alloc->is_free()) {
+        allocated_bytes += alloc->size();
+        prev_was_free = false;
+      } else {
+        free_bytes += alloc->size();
+        prev_was_free = true;
+      }
+      oh_bytes += sizeof(AllocHeader);
+      prev = alloc;
+      alloc = alloc->next_adjacent();
+    }
+    TEST_CHECK((unsigned char*)alloc == pool_end);
+
+    TEST_CHECK(allocated_bytes + free_bytes + oh_bytes == pool.pool_size_);
+
+    validate_index(pool.free_index_, pool.pool_ptr_, log);
+
+    size_t prev_size = 0;
+    size_t free_bytes_in_list = 0;
+    FreeHeader* free_alloc = NULL;
+    FreeHeader* prev_free = NULL;
+
+    // Check all free blocks in size order
+    for (free_alloc = pool.largest_free_;
+         free_alloc;
+         free_alloc = free_alloc->smaller_free(pool.pool_ptr_)) {
+      // Should be marked free
+      TEST_CHECK(free_alloc->is_free());
+      // Check for infinite loop
+      TEST_CHECK(++free_count < 10000);
+
+      // Sum bytes found
+      free_bytes_in_list += free_alloc->size();
+
+      // If not the first alloc
+      if (free_alloc != pool.largest_free_) {
+        TEST_CHECK(free_alloc->size() <= prev_size);
+        TEST_CHECK(free_alloc->size() > 0);
+      }
+      prev_size = free_alloc->size();
+      prev_free = free_alloc;
+    }
+
+    TEST_CHECK(free_bytes == free_bytes_in_list);
+
+    // Try again from smallest to largest
+    if (prev_free) {
+      free_bytes_in_list = 0;
+
+      for (free_alloc = prev_free;
+           free_alloc;
+           free_alloc = free_alloc->larger_free(pool.pool_ptr_)) {
+        // Should be marked free
+        TEST_CHECK(free_alloc->is_free());
+
+        // Sum bytes found
+        free_bytes_in_list += free_alloc->size();
+
+        // If not the first alloc
+        if (free_alloc != prev_free) {
+          TEST_CHECK(free_alloc->size() >= prev_size);
+          TEST_CHECK(free_alloc->size() > 0);
+        }
+        prev_size = free_alloc->size();
+      }
+      TEST_CHECK(free_bytes == free_bytes_in_list);
+    }
+  }
 /*
   unsigned int free_nodes = 0;
   char* prev = 0;

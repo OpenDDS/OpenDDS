@@ -28,7 +28,7 @@ public:
   // Allocate from this block, return remainder size, or zero if not
   void allocate(size_t size);
 
-  // Set the values stored in this header 
+  // Set the values stored in this header
   void set_size(size_t size);
   void set_prev_size(int size) { prev_size_ = size; }
   void set_alloc() { if (alloc_size_ < 0) alloc_size_ = - alloc_size_; }
@@ -99,7 +99,7 @@ private:
 };
 
 // MemoryPool tracks free list, in size order (next meaning largest to smallest)
-// and an index into the list at various sizes, which point to the smallest 
+// and an index into the list at various sizes, which point to the smallest
 // free allocation of that size or larger (but not larger than the next size).
 // Allocations can be done by checking the index for the needed size, and going
 // to the first free block.
@@ -149,7 +149,7 @@ private:
 
 
   void log_allocs();
-  void validate();
+  static void validate_pool(MemoryPool& pool, bool log = false);
 };
 
 }} // end namespaces

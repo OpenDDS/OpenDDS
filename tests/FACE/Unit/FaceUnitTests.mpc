@@ -9,17 +9,6 @@ project(*MemoryPool) : dcps, opendds_face {
     MemoryPoolTest.cpp
   }
 }
-project(*PoolAllocation) : dcps, opendds_face {
-  Source_Files {
-    PoolAllocationTest.cpp
-  }
-}
-
-project(*Pool) : dcps, opendds_face {
-  Source_Files {
-    PoolTest.cpp
-  }
-}
 
 project(*SafetyProfilePool) : dcps, opendds_face {
   Source_Files {
