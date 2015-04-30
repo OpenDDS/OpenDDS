@@ -673,6 +673,11 @@ Service_Participant::initialize()
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
   initial_SubscriberQos_.group_data = initial_GroupDataQosPolicy_;
   initial_SubscriberQos_.entity_factory = initial_EntityFactoryQosPolicy_;
+
+#ifdef OPENDDS_SAFETY_PROFILE
+  // For tests which don't initialize a Memory Pool, do so automatically
+  SafetyProfilePool::instance()->configure_pool(1024*1024*20, 8);
+#endif
 }
 
 void
