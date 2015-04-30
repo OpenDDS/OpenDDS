@@ -38,7 +38,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   ACE_OS::sleep(5); // connection established with Subscriber
 
-  Messenger::Message msg = {"Hello, world.", 0};
+  Messenger::Message msg = {"Hello, world.", 0, 0};
+
+#ifdef ACE_HAS_CDR_FIXED
+  msg.deci = FACE::Fixed("987.654");
+#endif
+
   FACE::TRANSACTION_ID_TYPE txn;
   std::cout << "Publisher: about to Send_Message()" << std::endl;
   FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
