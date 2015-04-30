@@ -249,8 +249,8 @@ bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   if (size == AST_Type::VARIABLE) {
     be_global->lang_header_ <<
       exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
-    // be_global->lang_header_ <<
-    //   exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR &os, const " << nm << "& x);\n\n";
+    be_global->lang_header_ <<
+      exporter() << "inline ACE_CDR::Boolean operator<< (ACE_OutputCDR &os, const " << nm << "& x) { return true; }\n\n";
   }
 
   {
@@ -292,9 +292,6 @@ bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
         }
       }
       be_global->impl_ << "}\n\n";
-
-      // be_global->impl_ <<
-      //   exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR &os, const " << nm << "& x) { return true; }\n\n";
     }
   }
 
@@ -374,6 +371,8 @@ namespace {
         << elem_type << "* data, " << flag_type << " release = false)\n"
         "    : " << base << "(maximum, length, data, release) {}\n";
     }
+    be_global->lang_header_ <<
+      "void replace(CORBA::ULong length, ACE_Message_Block* mb);\n";
     be_global->lang_header_ <<
       "};\n\n";
 

@@ -214,8 +214,8 @@ bool paramsChanged(OpenDDS::RTPS::ContentFilterProperty_t& dest,
     return true;
   }
   for (CORBA::ULong i = 0; i < src.expressionParameters.length(); ++i) {
-    if (0 != std::strcmp(dest.expressionParameters[i].in(),
-                         src.expressionParameters[i].in())) {
+    if (0 != std::strcmp(dest.expressionParameters[i],
+                         src.expressionParameters[i])) {
       dest.expressionParameters = src.expressionParameters;
       return true;
     }
@@ -495,8 +495,7 @@ create_association_data_proto(DCPS::AssociationData& proto,
 
   proto.remote_data_.length(1);
   proto.remote_data_[0].transport_type = "rtps_udp";
-  proto.remote_data_[0].data.replace(
-    static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
+  message_block_to_sequence (mb_locator, proto.remote_data_[0].data);
 }
 
 void
@@ -1725,8 +1724,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 
         DCPS::TransportLocator tl;
         tl.transport_type = "rtps_udp";
-        tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()),
-                        &mb_locator);
+        message_block_to_sequence (mb_locator, tl.data);
         rTls->length(1);
         (*rTls)[0] = tl;
       } else {
@@ -1821,8 +1819,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 
         DCPS::TransportLocator tl;
         tl.transport_type = "rtps_udp";
-        tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()),
-                        &mb_locator);
+        message_block_to_sequence (mb_locator, tl.data);
         wTls->length(1);
         (*wTls)[0] = tl;
       } else {
@@ -1910,7 +1907,13 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 #else
     const DCPS::ReaderAssociation ra =
         {*rTls, reader, *subQos, *drQos,
-         cfProp->filterClassName, cfProp->filterExpression, cfProp->expressionParameters};
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+         cfProp->filterClassName, cfProp->filterExpression,
+#else
+         "", "",
+#endif
+         cfProp->expressionParameters};
+
     const DCPS::WriterAssociation wa = {*wTls, writer, *pubQos, *dwQos};
 #endif
 

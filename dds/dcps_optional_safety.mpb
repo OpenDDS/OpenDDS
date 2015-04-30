@@ -1,0 +1,21 @@
+feature(no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
+  IDL_Files {
+    DdsDcpsInfoUtils.idl
+    DdsDcpsCore.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -SI
+    DdsDcpsInfoUtils.idl
+    DdsDcpsCore.idl
+  }
+}
+
+feature(!no_opendds_safety_profile) : dcps_ts_defaults {
+
+  TypeSupport_Files {
+    dcps_ts_flags += -Lspcpp -SI
+    DdsDcpsInfoUtils.idl
+    DdsDcpsCore.idl
+  }
+}

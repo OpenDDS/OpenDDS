@@ -10,7 +10,20 @@
 #define OPENDDS_DCPS_CORE_IDL
 
 module DDS {
+// Make the IDL compiler produce include of zero-copy read info
+// sequence template.
+#pragma DCPS_SUPPORT_ZERO_COPY_READ
 
+    typedef sequence<string> StringSeq;
+
+    typedef long QosPolicyId_t;
+
+    struct QosPolicyCount {
+                QosPolicyId_t policy_id;
+                long count;
+                };
+
+    typedef sequence<QosPolicyCount> QosPolicyCountSeq;
 };
 
 #endif  /* OPENDDS_DCPS_CORE_IDL */

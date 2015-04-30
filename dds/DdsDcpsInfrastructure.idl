@@ -57,8 +57,6 @@ module DDS {
 
     typedef long ReturnCode_t;
 
-    typedef sequence<string> StringSeq;
-
     struct Duration_t {
                 long sec;
                 unsigned long nanosec;
