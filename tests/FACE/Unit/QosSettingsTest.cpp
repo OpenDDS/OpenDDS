@@ -1,13 +1,13 @@
 #include "dds/FACE/config/QosSettings.h"
 
 #include "ace/OS_main.h"
+#include "test_check.h"
 
 #include <string.h>
 #include <iostream>
 
-#include "test_check.h"
-
 unsigned int assertions = 0;
+unsigned int failed = 0;
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
 
@@ -1194,7 +1194,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_nanosec();
   test_set_datareader_reader_data_lifecycle_autopurge_disposed_samples_delay_both();
 
-  printf("%d assertions passed\n", assertions);
-  return 0;
+  printf("%d assertions failed, %d passed\n", failed, assertions - failed);
+  if (failed) {
+    printf("test FAILED\n");
+  } else {
+    printf("test PASSED\n");
+  }
+  return failed;
 }
 

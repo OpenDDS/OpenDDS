@@ -5,6 +5,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/SafetyProfilePool.h"
 
 namespace FACE {
 namespace TS {
@@ -37,6 +38,8 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
                status));
     return_code = INVALID_PARAM;
   } else {
+    OpenDDS::DCPS::SafetyProfilePool::instance()->configure_pool(
+      parser.pool_size(), parser.pool_granularity());
     return_code = RC_NO_ERROR;
   }
 }

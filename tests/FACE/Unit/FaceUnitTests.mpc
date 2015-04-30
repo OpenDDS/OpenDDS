@@ -4,6 +4,24 @@ project(*QosSettings) : dcps, opendds_face {
   }
 }
 
+project(*MemoryPool) : dcps, opendds_face {
+  Source_Files {
+    MemoryPoolTest.cpp
+  }
+}
+
+project(*SafetyProfilePool) : dcps, opendds_face {
+  Source_Files {
+    SafetyProfilePoolTest.cpp
+  }
+}
+
+project(*PoolAllocator) : dcps, opendds_face {
+  Source_Files {
+    PoolAllocatorTest.cpp
+  }
+}
+
 project(*Sequences): dcps, opendds_face {
   Source_Files {
     SequencesTest.cpp
