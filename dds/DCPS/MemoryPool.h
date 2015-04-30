@@ -114,7 +114,7 @@ public:
      return (pool_ptr_ <= ptr) && (ptr < pool_ptr_ + pool_size_); }
 
   // Allocate bytes
-  char* pool_alloc(size_t size);
+  void* pool_alloc(size_t size);
 
   // Free bytes
   void pool_free(void* ptr);

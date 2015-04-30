@@ -250,7 +250,7 @@ MemoryPool::lwm_free_bytes() const
   return lwm_free_bytes_;
 }
 
-char*
+void*
 MemoryPool::pool_alloc(size_t size)
 {
   // Pointer to return
@@ -271,18 +271,18 @@ MemoryPool::pool_alloc(size_t size)
   }
 
   // Update lwm
-  size_t largest_free_bytes = largest_free_->size();
+  size_t largest_free_bytes = largest_free_ ? largest_free_->size() : 0;
   if (largest_free_bytes < lwm_free_bytes_) {
     lwm_free_bytes_ = largest_free_bytes;
-if (lwm_free_bytes_ < 10000) {
-  ACE_DEBUG((LM_DEBUG, "LWM under 10k\n"));
-}
+    if (lwm_free_bytes_ < 10000) {
+      //ACE_DEBUG((LM_DEBUG, "LWM under 10k\n"));
+    }
   }
 
   //if (debug_log_) log_allocs();
   //validate();
 
-  return (char*)block;
+  return block;
 }
 
 void
