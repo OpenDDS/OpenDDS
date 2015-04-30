@@ -249,6 +249,8 @@ bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   if (size == AST_Type::VARIABLE) {
     be_global->lang_header_ <<
       exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
+    // be_global->lang_header_ <<
+    //   exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR &os, const " << nm << "& x);\n\n";
   }
 
   {
@@ -290,6 +292,9 @@ bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
         }
       }
       be_global->impl_ << "}\n\n";
+
+      // be_global->impl_ <<
+      //   exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR &os, const " << nm << "& x) { return true; }\n\n";
     }
   }
 
@@ -371,6 +376,13 @@ namespace {
     }
     be_global->lang_header_ <<
       "};\n\n";
+
+    be_global->lang_header_ <<
+      "inline ACE_CDR::Boolean operator<< (ACE_OutputCDR&, const " << nm << "&) { return true; }\n\n";
+
+    be_global->lang_header_ <<
+      "inline ACE_CDR::Boolean operator>> (ACE_InputCDR&, " << nm << "&) { return true; }\n\n";
+
   }
 
   void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
