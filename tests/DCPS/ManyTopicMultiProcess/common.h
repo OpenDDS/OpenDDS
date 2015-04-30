@@ -55,7 +55,7 @@ inline bool check_listener(const DataReaderListenerImpl* drl, int expected,
   }
 
   while (drl->num_samples() < expected) {
-    ACE_DEBUG((LM_INFO, "Only %d of %d samples, waiting\n", 
+    ACE_DEBUG((LM_INFO, "Only %d of %d samples, waiting\n",
                drl->num_samples(), expected));
     ACE_OS::sleep(small_time);
   }
