@@ -20,7 +20,76 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::TS::Create_Connection("pub", FACE::PUB_SUB, connId, dir, size, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  ACE_OS::sleep(5); // connection established with Subscriber
+  FACE::CONNECTION_ID_TYPE connId_INF;
+  FACE::CONNECTION_DIRECTION_TYPE dir_INF;
+  FACE::MESSAGE_SIZE_TYPE size_INF;
+  FACE::TS::Create_Connection("pub_INF", FACE::PUB_SUB, connId_INF, dir_INF, size_INF, status);
+  if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+
+  ACE_OS::sleep(10); // connection established with Subscriber
+
+  // Test timeout settings for send
+
+  std::cout << "Publisher: about to test timeout values in send_message()" << std::endl;
+  FACE::Long send_counter = 0;
+  FACE::TRANSACTION_ID_TYPE txn_INF;
+  FACE::RETURN_CODE_TYPE timeout_tests_status;
+  {
+    std::cout << "Test 1: sending with TIMEOUT=1 MAX_BLOCKING=INF, should return INVALID_PARAM" << std::endl;
+    Messenger::Message msg_INF = {"Hello, world.", send_counter};
+    FACE::TS::Send_Message(connId_INF, 1, txn_INF, msg_INF, size_INF, timeout_tests_status);
+    if (timeout_tests_status != FACE::INVALID_PARAM) {
+      std::cout << "Test 1: ERROR: Send with TIMEOUT=1 MAX_BLOCKING=INF did not fail." << std::endl;
+      return static_cast<int>(timeout_tests_status);
+    } else {
+      std::cout << "Test 1: PASSED" << std::endl;
+      timeout_tests_status = FACE::RC_NO_ERROR;
+    }
+  }
+  {
+    std::cout << "Test 2: sending with TIMEOUT=0 MAX_BLOCKING=Default (100000000 nsec), should return INVALID_PARAM" << std::endl;
+    Messenger::Message msg_INF = {"Hello, world.", send_counter};
+    FACE::TS::Send_Message(connId, 0, txn_INF, msg_INF, size, timeout_tests_status);
+    if (timeout_tests_status != FACE::INVALID_PARAM) {
+      std::cout << "Test 2: ERROR: Send with TIMEOUT=0 MAX_BLOCKING=Default (100000000 nsec) did not fail." << std::endl;
+      return static_cast<int>(timeout_tests_status);
+    } else {
+      std::cout << "Test 2: PASSED" << std::endl;
+      timeout_tests_status = FACE::TIMED_OUT;
+    }
+  }
+
+  {
+    std::cout << "Test 3: sending msg " << send_counter << " with TIMEOUT=100000000 nsec MAX_BLOCKING=Default (100000000 nsec), should succeed" << std::endl;
+    Messenger::Message msg_INF = {"Hello, world.", send_counter};
+    do {
+      FACE::TS::Send_Message(connId, 100000000, txn_INF, msg_INF, size_INF, timeout_tests_status);
+    } while (timeout_tests_status == FACE::TIMED_OUT);
+    if (timeout_tests_status != FACE::RC_NO_ERROR) {
+      std::cout << "Test 3: ERROR: Send with TIMEOUT=100000000 nsec MAX_BLOCKING=Default (100000000 nsec) did not succeed." << std::endl;
+      return static_cast<int>(timeout_tests_status);
+    } else {
+      std::cout << "Test 3: PASSED" << std::endl;
+      ++send_counter;
+      timeout_tests_status = FACE::TIMED_OUT;
+    }
+  }
+  {
+    std::cout << "Test 4: sending msg " << send_counter << " with TIMEOUT=200000000 nsec MAX_BLOCKING=Default (100000000 nsec), should succeed" << std::endl;
+    Messenger::Message msg_INF = {"Hello, world.", send_counter};
+    do {
+      FACE::TS::Send_Message(connId, 200000000, txn_INF, msg_INF, size_INF, timeout_tests_status);
+    } while (timeout_tests_status == FACE::TIMED_OUT);
+    if (timeout_tests_status != FACE::RC_NO_ERROR) {
+      std::cout << "Test 4: ERROR: Send with TIMEOUT=200000000 nsec MAX_BLOCKING=Default (100000000 nsec) did not succeed." << std::endl;
+      return static_cast<int>(timeout_tests_status);
+    } else {
+      std::cout << "Test 4: PASSED" << std::endl;
+      ++send_counter;
+      timeout_tests_status = FACE::TIMED_OUT;
+    }
+  }
+  // End Testing of timeout settings for send
 
   std::cout << "Publisher: about to send_message()" << std::endl;
   for (FACE::Long i = 0; i < 20; ++i) {
@@ -39,6 +108,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   ACE_OS::sleep(15); // Subscriber receives messages
 
+  // Always destroy connection, but don't overwrite bad status
+  FACE::RETURN_CODE_TYPE destroy_status_INF = FACE::RC_NO_ERROR;
+  FACE::TS::Destroy_Connection(connId_INF, destroy_status_INF);
+  if ((destroy_status_INF != FACE::RC_NO_ERROR) && (!status)) {
+    status = destroy_status_INF;
+  }
   // Always destroy connection, but don't overwrite bad status
   FACE::RETURN_CODE_TYPE destroy_status = FACE::RC_NO_ERROR;
   FACE::TS::Destroy_Connection(connId, destroy_status);
