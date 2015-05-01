@@ -87,7 +87,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
 
 template <typename Msg>
 void send_message(FACE::CONNECTION_ID_TYPE connection_id,
-                  FACE::TIMEOUT_TYPE /*timeout*/,
+                  FACE::TIMEOUT_TYPE timeout,
                   FACE::TRANSACTION_ID_TYPE& /*transaction_id*/,
                   const Msg& message,
                   FACE::MESSAGE_SIZE_TYPE /*message_size*/,
@@ -103,6 +103,15 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
   const typename DataWriter::_var_type typedWriter =
     DataWriter::_narrow(writers[connection_id]);
   if (!typedWriter) {
+    return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
+    return;
+  }
+  DDS::DataWriterQos dw_qos;
+  typedWriter->get_qos(dw_qos);
+  FACE::SYSTEM_TIME_TYPE max_blocking_time = convertDuration(dw_qos.reliability.max_blocking_time);
+  if (dw_qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS &&
+      timeout != FACE::INF_TIME_VALUE &&
+      ((max_blocking_time == FACE::INF_TIME_VALUE) || (timeout < max_blocking_time))) {
     return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     return;
   }
