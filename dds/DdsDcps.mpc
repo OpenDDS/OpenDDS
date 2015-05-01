@@ -89,6 +89,8 @@ project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install,
     DdsDcpsSubscriptionExtC.cpp
     DdsDcpsTopicC.cpp
     DdsDcpsTypeSupportExtC.cpp
+    DdsDcpsCoreC.cpp
+    DdsDcpsInfoUtilsC.cpp
 
     DdsDcpsGuidTypeSupportImpl.cpp
     DdsDcpsInfoUtilsTypeSupportImpl.cpp
