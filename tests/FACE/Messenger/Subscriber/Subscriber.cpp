@@ -59,6 +59,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     std::cout << msg.text << '\t' << msg.count << std::endl;
+#ifdef ACE_HAS_CDR_FIXED
+    std::cout << msg.deci;
+    if (msg.deci != FACE::Fixed("987.654")) {
+      std::cout << "ERROR: invalid fixed data " << msg.deci << std::endl;
+    }
+#endif
   }
 
   FACE::CONNECTION_NAME_TYPE name = {};
