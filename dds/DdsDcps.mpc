@@ -1,9 +1,18 @@
-// $Id$
+project(OpenDDS_Dcps): core, coverage_optional, dcps_bits, dcps_bits_source, \
+        dcps_optional_features, dcps_optional_safety, dcps_ts_defaults, dds_macros, \
+        dds_suppress_any_support, dds_taolib, gen_ostream, install {
+  sharedname   = OpenDDS_Dcps
+  dynamicflags = OPENDDS_DCPS_BUILD_DLL
+  libout       = $(DDS_ROOT)/lib
+  includes    += $(DDS_ROOT)
+  pch_header   = DCPS/DdsDcps_pch.h
+  pch_source   = DCPS/DdsDcps_pch.cpp
+  macros      += NOMINMAX         //don't #define min and max in Win32 headers
 
-project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
-                               dcps_ts_defaults, dds_suppress_any_support, install, \
-                               gen_ostream, dcps_optional_safety {
-  custom_only = 1
+  //The following is only to make the PCH work, client projects should not have
+  //this as an include path.
+  includes += $(DDS_ROOT)/dds
+
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
               -Wb,export_macro=OpenDDS_Dcps_Export \
               -Wb,export_include=dds/DCPS/dcps_export.h \
@@ -12,20 +21,6 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
   dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
                    -Wb,export_macro=OpenDDS_Dcps_Export \
                    -Wb,export_include=dds/DCPS/dcps_export.h
-  IDL_Files {
-    DdsDcpsGuid.idl
-  }
-
-  IDL_Files {
-    DdsDcps.idl
-    DdsDcpsInfrastructure.idl
-    DdsDcpsDomain.idl
-    DdsDcpsPublication.idl
-    DdsDcpsSubscription.idl
-    DdsDcpsTopic.idl
-    DdsDcpsSubscriptionExt.idl
-    DdsDcpsTypeSupportExt.idl
-  }
 
   TypeSupport_Files {
     dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
@@ -55,26 +50,6 @@ project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
   verbatim(gnuace, bottom, 1) {
     idl_stubs: DdsDcpsGuidTypeSupportImpl.cpp DdsDcpsInfoUtilsTypeSupportImpl.cpp DdsDcpsCoreTypeSupportImpl.cpp CorbaSeq/BooleanSeqTypeSupportImpl.cpp CorbaSeq/CharSeqTypeSupportImpl.cpp CorbaSeq/DoubleSeqTypeSupportImpl.cpp CorbaSeq/FloatSeqTypeSupportImpl.cpp CorbaSeq/LongDoubleSeqTypeSupportImpl.cpp CorbaSeq/LongLongSeqTypeSupportImpl.cpp CorbaSeq/LongSeqTypeSupportImpl.cpp CorbaSeq/OctetSeqTypeSupportImpl.cpp CorbaSeq/ShortSeqTypeSupportImpl.cpp CorbaSeq/StringSeqTypeSupportImpl.cpp CorbaSeq/ULongLongSeqTypeSupportImpl.cpp CorbaSeq/ULongSeqTypeSupportImpl.cpp CorbaSeq/UShortSeqTypeSupportImpl.cpp CorbaSeq/WCharSeqTypeSupportImpl.cpp CorbaSeq/WStringSeqTypeSupportImpl.cpp
   }
-}
-
-project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source, dds_suppress_any_support {
-  after       += OpenDDS_Dcps_idl_gen
-  sharedname   = OpenDDS_Dcps
-  dynamicflags = OPENDDS_DCPS_BUILD_DLL
-  libout       = $(DDS_ROOT)/lib
-  includes    += $(DDS_ROOT)
-  pch_header   = DCPS/DdsDcps_pch.h
-  pch_source   = DCPS/DdsDcps_pch.cpp
-  macros      += NOMINMAX         //don't #define min and max in Win32 headers
-
-  //The following is only to make the PCH work, client projects should not have
-  //this as an include path.
-  includes += $(DDS_ROOT)/dds
-
-  // Empty IDL list because dds_suppress_any_support brings in taoidldefaults,
-  // and we need dds_suppress_any_support so that we link against anytypecode.
-  IDL_Files {
-  }
 
   Source_Files {
     DCPS
@@ -89,8 +64,8 @@ project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install,
     DdsDcpsSubscriptionExtC.cpp
     DdsDcpsTopicC.cpp
     DdsDcpsTypeSupportExtC.cpp
-    DdsDcpsCoreC.cpp
-    DdsDcpsInfoUtilsC.cpp
+//     DdsDcpsCoreC.cpp
+//     DdsDcpsInfoUtilsC.cpp
 
     DdsDcpsGuidTypeSupportImpl.cpp
     DdsDcpsInfoUtilsTypeSupportImpl.cpp
@@ -210,4 +185,5 @@ project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install,
 "	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/dds"
 "	ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(INSTALL_PREFIX)/share/dds/dds"
   }
+
 }

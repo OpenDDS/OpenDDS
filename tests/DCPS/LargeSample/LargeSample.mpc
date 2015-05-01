@@ -1,5 +1,6 @@
 
 project(DDS*idl): dcps_test_lib {
+  requires      += no_opendds_safety_profile
   idlflags      += -Wb,stub_export_include=LargeSample_export.h \
                    -Wb,stub_export_macro=LargeSample_Export
   dcps_ts_flags += -Wb,export_macro=LargeSample_Export
@@ -14,7 +15,7 @@ project(DDS*idl): dcps_test_lib {
 
 
 project(DDS*Publisher): dcpsexe, dcps_transports_for_test {
-
+  requires      += no_opendds_safety_profile
   exename   = publisher
   after    += DDS*idl
   libs   += DDS*idl
@@ -29,7 +30,7 @@ project(DDS*Publisher): dcpsexe, dcps_transports_for_test {
 }
 
 project(DDS*Subscriber): dcpsexe, dcps_transports_for_test {
-
+  requires      += no_opendds_safety_profile
   exename   = subscriber
   after    += DDS*idl
   libs   += DDS*idl
@@ -42,4 +43,3 @@ project(DDS*Subscriber): dcpsexe, dcps_transports_for_test {
     DataReaderListener.cpp
   }
 }
-
