@@ -24,7 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
-      public virtual RcObject<ACE_SYNCH_MUTEX> {
+public virtual RcObject<ACE_SYNCH_MUTEX, RcObjectNullBase> {
 public:
 
   TransportReactorTask(bool useAsyncSend);

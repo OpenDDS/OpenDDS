@@ -12,16 +12,19 @@
 #include "dds/DCPS/dcps_export.h"
 #include "ace/Atomic_Op.h"
 #include "ace/Malloc_Base.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 namespace OpenDDS {
 namespace DCPS {
+
+struct RcObjectNullBase { };
 
 /// Templated reference counting mix-in.
 /// A non-DDS specific helper class.
 /// The T type is an ace lock type
 /// (eg, ACE_SYNCH_MUTEX, ACE_NULL_MUTEX, etc...)
-template <typename T>
-class OpenDDS_Dcps_Export RcObject {
+template <typename T, typename B = PoolAllocationBase>
+  class OpenDDS_Dcps_Export RcObject : public B {
 public:
 
   virtual ~RcObject() {}
