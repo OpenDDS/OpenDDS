@@ -13,6 +13,6 @@ feature (built_in_topics) {
 
   Source_Files {
     DdsDcpsInfrastructureTypeSupportC.cpp
-    DdsDcpsInfrastructureTypeSupportS.cpp
+//    DdsDcpsInfrastructureTypeSupportS.cpp
   }
 }
