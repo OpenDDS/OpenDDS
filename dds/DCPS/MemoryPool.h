@@ -84,7 +84,7 @@ private:
 class OpenDDS_Dcps_Export FreeIndex {
   friend class ::MemoryPoolTest;
 public:
-  FreeIndex();
+  FreeIndex(FreeHeader*& largest_free);
   void init(FreeHeader* init_free_block);
 
   void add(FreeHeader* free_block);
@@ -93,8 +93,12 @@ public:
   // Find size or larger
   FreeHeader* find(size_t size, unsigned char* base);
 
+  static void validate_index(FreeIndex& index,
+                             unsigned char* base,
+                             bool log = false);
 private:
   size_t size_;
+  FreeHeader*& largest_free_;
   FreeIndexNode nodes_[20];
 };
 
@@ -106,7 +110,7 @@ private:
 class OpenDDS_Dcps_Export MemoryPool {
   friend class ::MemoryPoolTest;
 public:
-  MemoryPool(unsigned int pool_size, size_t align_size = 8);
+  MemoryPool(unsigned int pool_size, size_t granularity = 8);
   ~MemoryPool();
 
   // Does the pool include a pointer
@@ -123,7 +127,7 @@ public:
   size_t lwm_free_bytes() const;
 
 private:
-  const size_t align_size_;      // Alignment size configured
+  const size_t granularity_;     // Configured granularity
   const size_t header_size_;     // Aligned header size
   const size_t min_free_size_;   // Aligned free header size
   const size_t min_alloc_size_;  // Aligned minimum allocation size
@@ -131,8 +135,8 @@ private:
   size_t lwm_free_bytes_;        // Low water mark of available bytes
   unsigned char* pool_ptr_;
 
-  FreeIndex free_index_;
   FreeHeader* largest_free_;
+  FreeIndex free_index_;
 
   bool debug_log_;
 
@@ -145,7 +149,7 @@ private:
 
   // Calculate aligned size of allocation
   size_t align(size_t size) {
-     return (size + align_size_ - 1) / align_size_ * align_size_; }
+     return (size + granularity_ - 1) / granularity_ * granularity_; }
 
 
   void log_allocs();
