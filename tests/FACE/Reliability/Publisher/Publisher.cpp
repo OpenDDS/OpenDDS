@@ -36,7 +36,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::RETURN_CODE_TYPE timeout_tests_status;
   {
     std::cout << "Test 1: sending with TIMEOUT=1 MAX_BLOCKING=INF, should return INVALID_PARAM" << std::endl;
-    Messenger::Message msg_INF = {"Hello, world.", send_counter};
+    Messenger::Message msg_INF = {"Hello, world.", send_counter, 0};
     FACE::TS::Send_Message(connId_INF, 1, txn_INF, msg_INF, size_INF, timeout_tests_status);
     if (timeout_tests_status != FACE::INVALID_PARAM) {
       std::cout << "Test 1: ERROR: Send with TIMEOUT=1 MAX_BLOCKING=INF did not fail." << std::endl;
@@ -48,7 +48,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   }
   {
     std::cout << "Test 2: sending with TIMEOUT=0 MAX_BLOCKING=Default (100000000 nsec), should return INVALID_PARAM" << std::endl;
-    Messenger::Message msg_INF = {"Hello, world.", send_counter};
+    Messenger::Message msg_INF = {"Hello, world.", send_counter, 0};
     FACE::TS::Send_Message(connId, 0, txn_INF, msg_INF, size, timeout_tests_status);
     if (timeout_tests_status != FACE::INVALID_PARAM) {
       std::cout << "Test 2: ERROR: Send with TIMEOUT=0 MAX_BLOCKING=Default (100000000 nsec) did not fail." << std::endl;
@@ -61,7 +61,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   {
     std::cout << "Test 3: sending msg " << send_counter << " with TIMEOUT=100000000 nsec MAX_BLOCKING=Default (100000000 nsec), should succeed" << std::endl;
-    Messenger::Message msg_INF = {"Hello, world.", send_counter};
+    Messenger::Message msg_INF = {"Hello, world.", send_counter, 0};
     do {
       FACE::TS::Send_Message(connId, 100000000, txn_INF, msg_INF, size_INF, timeout_tests_status);
     } while (timeout_tests_status == FACE::TIMED_OUT);
@@ -76,7 +76,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   }
   {
     std::cout << "Test 4: sending msg " << send_counter << " with TIMEOUT=200000000 nsec MAX_BLOCKING=Default (100000000 nsec), should succeed" << std::endl;
-    Messenger::Message msg_INF = {"Hello, world.", send_counter};
+    Messenger::Message msg_INF = {"Hello, world.", send_counter, 0};
     do {
       FACE::TS::Send_Message(connId, 200000000, txn_INF, msg_INF, size_INF, timeout_tests_status);
     } while (timeout_tests_status == FACE::TIMED_OUT);
