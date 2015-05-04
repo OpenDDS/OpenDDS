@@ -55,7 +55,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       return static_cast<int>(timeout_tests_status);
     } else {
       std::cout << "Test 2: PASSED" << std::endl;
-      timeout_tests_status = FACE::TIMED_OUT;
+      timeout_tests_status = FACE::RC_NO_ERROR;
     }
   }
 
@@ -63,6 +63,9 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     std::cout << "Test 3: sending msg " << send_counter << " with TIMEOUT=100000000 nsec MAX_BLOCKING=Default (100000000 nsec), should succeed" << std::endl;
     Messenger::Message msg_INF = {"Hello, world.", send_counter, 0};
     do {
+      if (timeout_tests_status == FACE::TIMED_OUT) {
+        std::cout << "Send_Message timed out, resending " << send_counter << std::endl;
+      }
       FACE::TS::Send_Message(connId, 100000000, txn_INF, msg_INF, size_INF, timeout_tests_status);
     } while (timeout_tests_status == FACE::TIMED_OUT);
     if (timeout_tests_status != FACE::RC_NO_ERROR) {
@@ -71,13 +74,15 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     } else {
       std::cout << "Test 3: PASSED" << std::endl;
       ++send_counter;
-      timeout_tests_status = FACE::TIMED_OUT;
     }
   }
   {
     std::cout << "Test 4: sending msg " << send_counter << " with TIMEOUT=200000000 nsec MAX_BLOCKING=Default (100000000 nsec), should succeed" << std::endl;
     Messenger::Message msg_INF = {"Hello, world.", send_counter, 0};
     do {
+      if (timeout_tests_status == FACE::TIMED_OUT) {
+        std::cout << "Send_Message timed out, resending " << send_counter << std::endl;
+      }
       FACE::TS::Send_Message(connId, 200000000, txn_INF, msg_INF, size_INF, timeout_tests_status);
     } while (timeout_tests_status == FACE::TIMED_OUT);
     if (timeout_tests_status != FACE::RC_NO_ERROR) {
@@ -86,7 +91,6 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     } else {
       std::cout << "Test 4: PASSED" << std::endl;
       ++send_counter;
-      timeout_tests_status = FACE::TIMED_OUT;
     }
   }
   // End Testing of timeout settings for send
