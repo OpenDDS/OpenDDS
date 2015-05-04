@@ -22,6 +22,10 @@ project(OpenDDS_Dcps): core, coverage_optional, dcps_bits, dcps_bits_source, \
                    -Wb,export_macro=OpenDDS_Dcps_Export \
                    -Wb,export_include=dds/DCPS/dcps_export.h
 
+  IDL_Files {
+    *.idl
+  }
+
   TypeSupport_Files {
     dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
     gendir = CorbaSeq
@@ -64,8 +68,6 @@ project(OpenDDS_Dcps): core, coverage_optional, dcps_bits, dcps_bits_source, \
     DdsDcpsSubscriptionExtC.cpp
     DdsDcpsTopicC.cpp
     DdsDcpsTypeSupportExtC.cpp
-//     DdsDcpsCoreC.cpp
-//     DdsDcpsInfoUtilsC.cpp
 
     DdsDcpsGuidTypeSupportImpl.cpp
     DdsDcpsInfoUtilsTypeSupportImpl.cpp

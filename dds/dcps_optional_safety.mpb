@@ -9,6 +9,11 @@ feature(no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
     DdsDcpsInfoUtils.idl
     DdsDcpsCore.idl
   }
+
+  Source_Files {
+    DdsDcpsCoreC.cpp
+    DdsDcpsInfoUtilsC.cpp
+  }
 }
 
 feature(!no_opendds_safety_profile) : dcps_ts_defaults {
