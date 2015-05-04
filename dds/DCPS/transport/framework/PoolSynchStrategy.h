@@ -34,6 +34,7 @@ public:
   virtual int svc();
   virtual int close(u_long);
 
+  void operator delete (void* ptr) { ThreadSynchStrategy::operator delete(ptr); }
 private:
 
   typedef ACE_SYNCH_MUTEX         LockType;

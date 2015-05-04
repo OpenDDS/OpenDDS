@@ -17,14 +17,12 @@
 namespace OpenDDS {
 namespace DCPS {
 
-struct RcObjectNullBase { };
-
 /// Templated reference counting mix-in.
 /// A non-DDS specific helper class.
 /// The T type is an ace lock type
 /// (eg, ACE_SYNCH_MUTEX, ACE_NULL_MUTEX, etc...)
-template <typename T, typename B = PoolAllocationBase>
-  class OpenDDS_Dcps_Export RcObject : public B {
+template <typename T>
+  class OpenDDS_Dcps_Export RcObject : public PoolAllocationBase {
 public:
 
   virtual ~RcObject() {}

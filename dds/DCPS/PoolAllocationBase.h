@@ -14,6 +14,9 @@ namespace OpenDDS {
       // TODO:  Exception behavior.
       void* operator new(size_t size) { return SafetyProfilePool::instance()->malloc(size); }
       void* operator new(size_t size, const std::nothrow_t&) { return SafetyProfilePool::instance()->malloc(size); }
+      void* operator new(size_t, void* ptr) { return ptr; }
+
+      void operator delete(void* ptr) { SafetyProfilePool::instance()->free(ptr); }
     };
   }
 }
