@@ -117,28 +117,55 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
 }
 
 void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
-                               CONNECTION_ID_TYPE& connection_id,
+                               CONNECTION_ID_TYPE& connection_id /* 0 if an out param */,
                                TRANSPORT_CONNECTION_STATUS_TYPE& status,
                                RETURN_CODE_TYPE& return_code)
 {
+  // connection_name is optional, if absent populate from connection_id lookup
+  // connection_id is also optional, if absent populate from connection_name lookup
+  // if both provided, validate
+  // if neither present, return error
   Entities& entities = *Entities::instance();
-  ConnectionSettings settings;
-  // connection_name is optional, if present use it to lookup the connection_id
-  // connection_id is also optional, if absent the connection_name must be used
-  if (connection_name[0] &&
-      0 == parser.find_connection(connection_name, settings)) {
-    connection_id = settings.connection_id_;
-  }
-  if (entities.connections_.count(connection_id)) {
-    status = entities.connections_[connection_id].second;
-    if (!connection_name[0]) {
+
+  if (connection_id != 0 && entities.connections_.count(connection_id)) {
+    // connection_id was provided
+    // if validated or populated, set return_code so status will be populated
+    if (connection_name[0]) {
+      // Validate provided connection_name
+      OPENDDS_STRING conn_name = entities.connections_[connection_id].first;
+      if (strcmp(connection_name, conn_name.c_str()) == 0) {
+        return_code = RC_NO_ERROR;
+      } else {
+        return_code = INVALID_PARAM;
+      }
+    } else {
+      // connection_name not provided
+      // so populate from connection_id lookup
+      // and set return code so status will be populated
       entities.connections_[connection_id].first.copy(connection_name,
                                                       sizeof(CONNECTION_NAME_TYPE));
       connection_name[sizeof(CONNECTION_NAME_TYPE) - 1] = 0;
+      return_code = RC_NO_ERROR;
     }
-    return_code = RC_NO_ERROR;
+
+  } else if (connection_name[0] && connection_id == 0) {
+    // connection_id was not specified, but name was provided.
+    // lookup connection_id and if found set return code to populate status
+    ConnectionSettings settings;
+    if (0 == parser.find_connection(connection_name, settings)) {
+      connection_id = settings.connection_id_;
+      return_code = RC_NO_ERROR;
+    } else {
+      // could not find connection for connection_name
+      return_code = INVALID_PARAM;
+    }
   } else {
+    //Neither connection_id or connection_name provided
+    // a valid connection
     return_code = INVALID_PARAM;
+  }
+  if (return_code == RC_NO_ERROR) {
+    status = entities.connections_[connection_id].second;
   }
 }
 
