@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "tao/corba.h"
 
 #define SEQUENCE_I(ELEM, BASE, ARG)                                     \

@@ -4,12 +4,10 @@
 //
 // ORB:         CORBA::Object operations
 
+#include "Common.h"
+
 #include "tao/Object.h"
 #include "tao/SystemException.h"
-
-#include "ace/Dynamic_Service.h"
-#include "ace/OS_NS_string.h"
-#include "ace/CORBA_macros.h"
 
 #if !defined (__ACE_INLINE__)
 # include "tao/Object.inl"

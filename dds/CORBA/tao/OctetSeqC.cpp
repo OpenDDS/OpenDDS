@@ -24,6 +24,7 @@
 // TAO_IDL - Generated from
 // be/be_codegen.cpp:381
 
+#include "Common.h"
 
 #include "tao/OctetSeqC.h"
 
