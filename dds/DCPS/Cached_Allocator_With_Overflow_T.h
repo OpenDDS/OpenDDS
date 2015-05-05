@@ -64,8 +64,7 @@ public:
     // previous versions of ACE
     size_t chunk_size = sizeof(T);
     chunk_size = ACE_MALLOC_ROUNDUP(chunk_size, ACE_MALLOC_ALIGN);
-    ACE_NEW(this->pool_,
-            char[n_chunks * chunk_size]);
+    this->pool_ = reinterpret_cast<char*> (DCPS::SafetyProfilePool::instance()->malloc(n_chunks * chunk_size));
 
     for (size_t c = 0; c < n_chunks; c++) {
       void* placement = this->pool_ + c * chunk_size;
@@ -81,7 +80,7 @@ public:
 
   /// Clear things up.
   ~Cached_Allocator_With_Overflow() {
-    delete [] this->pool_;
+    DCPS::SafetyProfilePool::instance()->free(this->pool_);
   }
   /**
   * Get a chunk of memory from free list cache.  Note that @a nbytes is
@@ -99,7 +98,7 @@ public:
     void* rtn =  this->free_list_.remove()->addr();
 
     if (0 == rtn) {
-      rtn = reinterpret_cast<void*>(new char[sizeof(T)]);
+      rtn = DCPS::SafetyProfilePool::instance()->malloc(sizeof(T));
       allocs_from_heap_++;
 
       if (DCPS_debug_level >= 2) {
@@ -158,7 +157,7 @@ public:
     if (ptr < reinterpret_cast<void*>(pool_) ||
         ptr > reinterpret_cast<void*>(last_)) {
       char* tmp = reinterpret_cast<char*>(ptr);
-      delete []tmp;
+      DCPS::SafetyProfilePool::instance()->free(tmp);
       frees_to_heap_++;
 
       if (frees_to_heap_ > allocs_from_heap_.value()) {

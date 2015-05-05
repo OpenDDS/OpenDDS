@@ -17,6 +17,7 @@
 #include "ReceivedDataElementList.h"
 #include "ReceivedDataStrategy.h"
 #include "InstanceState.h"
+#include "PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -33,7 +34,7 @@ class DataReaderImpl;
   * @brief Struct that has information about an instance and the instance
   *        sample list.
   */
-class SubscriptionInstance {
+class SubscriptionInstance : public PoolAllocationBase {
 public:
   SubscriptionInstance(DataReaderImpl *reader,
                        const DDS::DataReaderQos& qos,

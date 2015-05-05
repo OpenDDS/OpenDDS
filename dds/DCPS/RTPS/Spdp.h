@@ -27,6 +27,7 @@
 #include "ace/Condition_Thread_Mutex.h"
 
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -129,7 +130,7 @@ public:
 
   DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 
-  struct SpdpTransport : ACE_Event_Handler {
+  struct SpdpTransport : ACE_Event_Handler, public OpenDDS::DCPS::PoolAllocationBase {
     explicit SpdpTransport(Spdp* outer);
     ~SpdpTransport();
 

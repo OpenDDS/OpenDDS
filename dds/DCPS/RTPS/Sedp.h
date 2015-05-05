@@ -25,6 +25,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/DataSampleHeader.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
@@ -142,7 +143,7 @@ public:
   Spdp& spdp_;
   ACE_Thread_Mutex& lock_;
 
-  struct Msg {
+  struct Msg : public OpenDDS::DCPS::PoolAllocationBase {
     enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER, MSG_PARTICIPANT_DATA,
                    MSG_REMOVE_FROM_PUB_BIT, MSG_REMOVE_FROM_SUB_BIT,
                    MSG_FINI_BIT, MSG_STOP } type_;

@@ -22,7 +22,7 @@ namespace DCPS {
 class SafetyProfilePool : public ACE_Allocator
 {
 public:
-  explicit SafetyProfilePool(size_t size = 10*1024*1024)
+  explicit SafetyProfilePool(size_t size = 100*1024*1024)
     : size_(size)
     , pool_(new char[size])
     , idx_(0)
