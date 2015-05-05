@@ -1,8 +1,7 @@
 #ifndef dds_DCPS_PoolAllocationBase_h
 #define dds_DCPS_PoolAllocationBase_h
 
-#ifdef OPENDDS_SAFETY_PROFILE
-
+#include <new>
 #include "SafetyProfilePool.h"
 
 namespace OpenDDS {
@@ -22,17 +21,5 @@ namespace OpenDDS {
     };
   }
 }
-
-#else
-
-namespace OpenDDS {
-namespace DCPS {
-
-  class PoolAllocationBase { };
-
-}
-}
-
-#endif
 
 #endif /* dds_DCPS_PoolAllocationBase_h */
