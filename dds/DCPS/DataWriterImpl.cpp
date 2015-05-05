@@ -243,7 +243,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
     reader_info_.insert(std::make_pair(reader.readerId,
                                        ReaderInfo(reader.filterClassName,
-                                                  TheServiceParticipant->publisher_content_filter() ? reader.filterExpression.in() : "",
+                                                  TheServiceParticipant->publisher_content_filter() ? reader.filterExpression : "",
                                                   reader.exprParams, participant_servant_,
                                                   reader.readerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS)));
   }
@@ -291,14 +291,30 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     return;
   }
-
+  if (DCPS_debug_level) {
+    const GuidConverter writer_conv(publication_id_);
+    const GuidConverter conv(remote_id);
+    ACE_DEBUG((LM_INFO,
+               ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
+               ACE_TEXT(" writer %C succeeded in associating with reader %C\n"),
+               OPENDDS_STRING(writer_conv).c_str(),
+               OPENDDS_STRING(conv).c_str()));
+  }
   if (flags & ASSOC_ACTIVE) {
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
 
     // Have we already received an association_complete() callback?
     if (assoc_complete_readers_.count(remote_id)) {
-
+      if (DCPS_debug_level) {
+        const GuidConverter writer_conv(publication_id_);
+        const GuidConverter converter(remote_id);
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
+                   ACE_TEXT("writer %C found assoc_complete_reader %C, continue with association_complete_i\n"),
+                   OPENDDS_STRING(writer_conv).c_str(),
+                   OPENDDS_STRING(converter).c_str()));
+      }
       assoc_complete_readers_.erase(remote_id);
       association_complete_i(remote_id);
 
@@ -325,6 +341,13 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
   } else {
     // In the current implementation, DataWriter is always active, so this
     // code will not be applicable.
+    if (DCPS_debug_level) {
+      const GuidConverter conv(publication_id_);
+      ACE_DEBUG((LM_ERROR,
+                 ACE_TEXT("(%P|%t) DataWriterImpl::transport_assoc_done: ")
+                 ACE_TEXT("ERROR: DataWriter (%C) should always be active in current implementation\n"),
+                 OPENDDS_STRING(conv).c_str()));
+    }
     Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
     disco->association_complete(domain_id_, participant_servant_->get_id(),
                                 publication_id_, remote_id);
@@ -387,7 +410,17 @@ DataWriterImpl::association_complete(const RepoId& remote_id)
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
   if (OpenDDS::DCPS::remove(pending_readers_, remote_id) == -1) {
-
+    if (DCPS_debug_level) {
+      GuidConverter writer_converter(this->publication_id_);
+      GuidConverter reader_converter(remote_id);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataWriterImpl::association_complete - ")
+                 ACE_TEXT("bit %d local %C did not find pending reader: %C")
+                 ACE_TEXT("defer association_complete_i until add_association resumes\n"),
+                 is_bit_,
+                 OPENDDS_STRING(writer_converter).c_str(),
+                 OPENDDS_STRING(reader_converter).c_str()));
+    }
     // Not found in pending_readers_, defer calling association_complete_i()
     // until add_association() resumes and sees this ID in assoc_complete_readers_.
     assoc_complete_readers_.insert(remote_id);

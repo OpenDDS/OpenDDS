@@ -524,12 +524,13 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
     ret += "), ";
   }
 
-  ret + "Length: ";
-  ret += value.message_length_;
+  ret += "Length: ";
+  ret += to_dds_string(value.message_length_);
   ret += ", ";
 
-  ret + "Byte order: " + (value.byte_order_ == 1 ? "Little" : "Big")
-      + " Endian";
+  ret += "Byte order: ";
+  ret += (value.byte_order_ == 1 ? "Little" : "Big");
+  ret += " Endian";
 
   if (value.message_id_ != TRANSPORT_CONTROL) {
     ret += ", ";
@@ -551,35 +552,35 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
     ret += ", ";
 
     ret += "Timestamp: ";
-    ret += value.source_timestamp_sec_;
+    ret += to_dds_string(value.source_timestamp_sec_);
     ret += ".";
-    ret += value.source_timestamp_nanosec_;
+    ret += to_dds_string(value.source_timestamp_nanosec_);
     ret += ", ";
 
     if (value.lifespan_duration_) {
       ret += "Lifespan: ";
-      ret += value.lifespan_duration_sec_;
+      ret += to_dds_string(value.lifespan_duration_sec_);
       ret += ".";
-      ret += value.lifespan_duration_nanosec_;
+      ret += to_dds_string(value.lifespan_duration_nanosec_);
       ret += ", ";
     }
 
-    ret + "Publication: " + OPENDDS_STRING(GuidConverter(value.publication_id_));
+    ret += "Publication: " + OPENDDS_STRING(GuidConverter(value.publication_id_));
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
-      ret + ", Publisher: " + OPENDDS_STRING(GuidConverter(value.publisher_id_));
+      ret += ", Publisher: " + OPENDDS_STRING(GuidConverter(value.publisher_id_));
     }
 #endif
 
     if (value.content_filter_) {
       const CORBA::ULong len = value.content_filter_entries_.length();
-      ret + ", Content-Filter Entries (";
-      ret += len;
-      ret + "): [";
+      ret += ", Content-Filter Entries (";
+      ret += to_dds_string(len);
+      ret += "): [";
       for (CORBA::ULong i(0); i < len; ++i) {
-        ret + OPENDDS_STRING(GuidConverter(value.content_filter_entries_[i])) + ' ';
+        ret += OPENDDS_STRING(GuidConverter(value.content_filter_entries_[i])) + ' ';
       }
-      ret + ']';
+      ret += ']';
     }
   }
   return ret;

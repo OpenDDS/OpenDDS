@@ -72,8 +72,7 @@ private:
       if (!cmp_.in()) {
         // The following assumes that if no comparator is set
         // then PRESENTATION ordered access applies (TOPIC).
-        return OpenDDS::DCPS::operator<(lhs.rde_->source_timestamp_,
-                                        rhs.rde_->source_timestamp_);
+        return lhs.rde_->source_timestamp_ < rhs.rde_->source_timestamp_;
       }
 
       return cmp_->compare(lhs.rde_->registered_data_,

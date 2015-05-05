@@ -17,7 +17,9 @@
 #include <ace/Configuration.h>
 #include <ace/Configuration_Import_Export.h>
 
+#ifndef NO_ITL
 #include <itl/itl.hpp>
+#endif
 
 #include <cstring>
 
@@ -32,6 +34,7 @@ namespace OpenDDS
   namespace DCPS
   {
 
+#ifndef NO_ITL
     Sample_Dissector* get_dissector(std::map<itl::Type*, Sample_Dissector*>& map, itl::Type* type)
     {
       if (map.find(type) != map.end()) {
@@ -244,6 +247,7 @@ namespace OpenDDS
       map[type] = v.dissector;
       return v.dissector;
     }
+#endif
 
     //--------------------------------------------------------------------
     Sample_Manager
@@ -258,6 +262,7 @@ namespace OpenDDS
     void
     Sample_Manager::init_from_file (const ACE_TCHAR *filename)
     {
+#ifndef NO_ITL
       std::ifstream str(filename);
       itl::Dictionary d;
       try {
@@ -275,6 +280,7 @@ namespace OpenDDS
                     ACE_TEXT("error parsing itl: %s\n"),
                     e.what()));
       }
+#endif
     }
 
     void

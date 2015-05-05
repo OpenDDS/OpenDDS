@@ -231,8 +231,11 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   LocatorSeq locators;
   locators.length(1);
-  locators[0].kind = (remote_addr.get_type() == AF_INET6)
-                     ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  locators[0].kind =
+#ifdef ACE_HAS_IPV6
+    (remote_addr.get_type() == AF_INET6) ? LOCATOR_KIND_UDPv6 :
+#endif
+      LOCATOR_KIND_UDPv4;
   locators[0].port = port;
   address_to_bytes(locators[0].address, remote_addr);
 
