@@ -34,7 +34,7 @@ namespace TS {
   OpenDDS_FACE_Export
   void Get_Connection_Parameters(
     /* inout */ CONNECTION_NAME_TYPE& connection_name,
-    /* inout */ CONNECTION_ID_TYPE& connection_id,
+    /* inout (0 to specify out)*/ CONNECTION_ID_TYPE& connection_id,
     /* out */ TRANSPORT_CONNECTION_STATUS_TYPE& connection_status,
     /* out */ RETURN_CODE_TYPE& return_code);
 
