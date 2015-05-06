@@ -166,7 +166,8 @@ private:
       update_status(connection_id_, DDS::RETCODE_BAD_PARAMETER);
       return;
     }
-
+    FACE::TRANSPORT_CONNECTION_STATUS_TYPE& status =
+      Entities::instance()->connections_[connection_id_].second;
     Msg sample;
     DDS::SampleInfo sinfo;
     while (typedReader->take_next_sample(sample, sinfo) == DDS::RETCODE_OK) {
@@ -176,7 +177,7 @@ private:
         GuardType guard(callbacks_lock_);
         ACE_DEBUG((LM_DEBUG, "Listener::on_data_available - invoking %d callbacks\n", callbacks_.size()));
         for (size_t i = 0; i < callbacks_.size(); ++i) {
-          callbacks_.at(i)(0, sample, 0, 0, 0, retcode);
+          callbacks_.at(i)(0 /*Transaction_ID*/, sample, status.MESSAGE, status.MAX_MESSAGE, 0 /*WAITSET_TYPE*/, retcode);
         }
       }
     }
