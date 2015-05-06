@@ -4,6 +4,7 @@
 #include "dds/DCPS/PublicationInstance.h"
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/Util.h"
 
 namespace OpenDDS {
 
