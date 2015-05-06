@@ -48,6 +48,7 @@ if ($arg eq 'low') {
 my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
 $test->enable_console_logging();
+$test->{'dcps_debug_level'} = 1;
 
 $test->process('sub', 'subscriber', $sub_opts);
 $test->process('pub', 'publisher', $pub_opts);
