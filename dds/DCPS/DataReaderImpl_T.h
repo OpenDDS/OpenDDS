@@ -1489,7 +1489,7 @@ void store_instance_data(
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           if (!CORBA::is_nil(listener.in()))
             {
-              ACE_GUARD(DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+              ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
               listener->on_sample_rejected(dr.in (),
                                            sample_rejected_status_);
