@@ -16,6 +16,7 @@
 #include "ace/Guard_T.h"
 #include "ace/Atomic_Op.h"
 
+#include "dds/DCPS/SafetyProfilePool.h"
 #include "PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

@@ -133,6 +133,10 @@ public:
   Priority& transport_priority();
   Priority  transport_priority() const;
 
+  void* operator new(size_t size) { return RcObject<ACE_SYNCH_MUTEX>::operator new(size); }
+  void* operator new(size_t size, const std::nothrow_t& nt) { return RcObject<ACE_SYNCH_MUTEX>::operator new(size, nt); }
+  void operator delete(void* ptr) { RcObject<ACE_SYNCH_MUTEX>::operator delete(ptr); }
+
 private:
 
   /// Attempt an active connection establishment to the remote address.
