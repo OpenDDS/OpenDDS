@@ -642,11 +642,12 @@ bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   if (size == AST_Type::VARIABLE) {
     be_global->lang_header_ <<
       exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
-    be_global->lang_header_ <<
-      exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR& os, const " << nm << "& x);\n\n";
-    be_global->lang_header_ <<
-      exporter() << "ACE_CDR::Boolean operator>> (ACE_InputCDR& os, " << nm << "& x);\n\n";
   }
+
+  be_global->lang_header_ <<
+    exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR& os, const " << nm << "& x);\n\n";
+  be_global->lang_header_ <<
+    exporter() << "ACE_CDR::Boolean operator>> (ACE_InputCDR& os, " << nm << "& x);\n\n";
 
   {
     const ScopedNamespaceGuard guard(name, be_global->impl_);
@@ -702,12 +703,12 @@ bool langmap_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
         }
       }
       be_global->impl_ << "}\n\n";
-
-      be_global->impl_ <<
-        "ACE_CDR::Boolean operator<< (ACE_OutputCDR &, const " << nm << "&) { return true; }\n\n";
-      be_global->impl_ <<
-        "ACE_CDR::Boolean operator>> (ACE_InputCDR &, " << nm << "&) { return true; }\n\n";
     }
+
+    be_global->impl_ <<
+      "ACE_CDR::Boolean operator<< (ACE_OutputCDR &, const " << nm << "&) { return true; }\n\n";
+    be_global->impl_ <<
+      "ACE_CDR::Boolean operator>> (ACE_InputCDR &, " << nm << "&) { return true; }\n\n";
   }
 
   gen_typecode(name);
