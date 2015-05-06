@@ -5,6 +5,7 @@
 #include "dds/DCPS/RakeResults_T.h"
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/Util.h"
 
 namespace OpenDDS {
 
