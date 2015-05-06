@@ -1489,7 +1489,7 @@ void store_instance_data(
           ::DDS::DataReader_var dr = get_dr_obj_ref();
           if (!CORBA::is_nil(listener.in()))
             {
-              ACE_GUARD(DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+              ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
               listener->on_sample_rejected(dr.in (),
                                            sample_rejected_status_);
@@ -1665,7 +1665,7 @@ void store_instance_data(
               ::DDS::DataReader_var dr = get_dr_obj_ref();
               if (!CORBA::is_nil(listener.in()))
                 {
-                  ACE_GUARD(DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+                  ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
                   listener->on_sample_rejected(dr.in (),
                                                sample_rejected_status_);
@@ -1728,7 +1728,7 @@ void store_instance_data(
                   ::DDS::DataReader_var dr = get_dr_obj_ref();
                   if (!CORBA::is_nil(listener.in()))
                     {
-                      ACE_GUARD(DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+                      ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
                       listener->on_sample_rejected(dr.in (),
                                                    sample_rejected_status_);
@@ -1819,7 +1819,7 @@ void store_instance_data(
               ::DDS::DataReader_var dr = get_dr_obj_ref();
               if (!CORBA::is_nil(listener.in()))
                 {
-                  ACE_GUARD(DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+                  ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
                   listener->on_sample_lost(dr.in (), sample_lost_status_);
                 }
@@ -1842,7 +1842,7 @@ void store_instance_data(
             sub->listener_for(::DDS::DATA_ON_READERS_STATUS);
         if (!CORBA::is_nil(sub_listener.in()) && !this->coherent_)
           {
-            ACE_GUARD(DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+            ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
             sub_listener->on_data_on_readers(sub);
             sub->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
@@ -1857,7 +1857,7 @@ void store_instance_data(
             ::DDS::DataReader_var dr = get_dr_obj_ref();
             if (!CORBA::is_nil(listener.in()))
               {
-                ACE_GUARD(DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+                ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
 
                 listener->on_data_available(dr.in ());
                 set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
@@ -1900,7 +1900,7 @@ void notify_status_condition_no_sample_lock()
   // status notification this member function is used in
   // store_instance_data() to release sample_lock_ before making
   // the notification.
-  ACE_GUARD(DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+  ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
   notify_status_condition();
 }
 
