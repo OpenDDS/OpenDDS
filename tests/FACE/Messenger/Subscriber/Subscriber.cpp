@@ -10,6 +10,7 @@
 #include <cstring>
 
 bool callbackHappened = false;
+int callback_count = 0;
 
 void callback(FACE::TRANSACTION_ID_TYPE,
               Messenger::Message& msg,
@@ -18,7 +19,8 @@ void callback(FACE::TRANSACTION_ID_TYPE,
               const FACE::WAITSET_TYPE,
               FACE::RETURN_CODE_TYPE& return_code)
 {
-  std::cout << "In callback(): "
+  ++callback_count;
+  std::cout << "In callback() (the " << callback_count << " time) : "
             << msg.text << '\t' << msg.count << std::endl;
   callbackHappened = true;
   return_code = FACE::RC_NO_ERROR;
@@ -43,9 +45,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     std::cout << "Subscriber: about to Register_Callback()" << std::endl;
     FACE::TS::Register_Callback(connId, 0, callback, 0, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+    FACE::TS::Register_Callback(connId, 0, callback, 0, status);
+    if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_OS::sleep(15);
-    if (!callbackHappened) {
-      std::cout << "ERROR: no callback seen" << std::endl;
+    if (!callbackHappened || callback_count != 2) {
+      std::cout << "ERROR: number callbacks seen incorrect (seen: " << callback_count << " expected: 2)" << std::endl;
       testPassed = false;
     }
     FACE::TS::Unregister_Callback(connId, status);

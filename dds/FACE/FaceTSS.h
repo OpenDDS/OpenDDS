@@ -87,7 +87,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
 
 template <typename Msg>
 void send_message(FACE::CONNECTION_ID_TYPE connection_id,
-                  FACE::TIMEOUT_TYPE /*timeout*/,
+                  FACE::TIMEOUT_TYPE timeout,
                   FACE::TRANSACTION_ID_TYPE& /*transaction_id*/,
                   const Msg& message,
                   FACE::MESSAGE_SIZE_TYPE /*message_size*/,
@@ -106,6 +106,15 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
     return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     return;
   }
+  DDS::DataWriterQos dw_qos;
+  typedWriter->get_qos(dw_qos);
+  FACE::SYSTEM_TIME_TYPE max_blocking_time = convertDuration(dw_qos.reliability.max_blocking_time);
+  if (dw_qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS &&
+      timeout != FACE::INF_TIME_VALUE &&
+      ((max_blocking_time == FACE::INF_TIME_VALUE) || (timeout < max_blocking_time))) {
+    return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
+    return;
+  }
 
   return_code = update_status(connection_id, typedWriter->write(message, DDS::HANDLE_NIL));
 }
@@ -120,9 +129,15 @@ public:
                            FACE::RETURN_CODE_TYPE&);
 
   Listener(Callback callback, FACE::CONNECTION_ID_TYPE connection_id)
-    : callback_(callback)
-    , connection_id_(connection_id)
-  {}
+    : connection_id_(connection_id)
+  {
+    callbacks_.push_back(callback);
+  }
+
+  void add_callback(Callback callback) {
+    GuardType guard(callbacks_lock_);
+    callbacks_.push_back(callback);
+  }
 
 private:
   void on_requested_deadline_missed(DDS::DataReader_ptr,
@@ -158,12 +173,19 @@ private:
       if (sinfo.valid_data) {
         update_status(connection_id_, DDS::RETCODE_OK);
         FACE::RETURN_CODE_TYPE retcode;
-        callback_(0, sample, 0, 0, 0, retcode);
+        GuardType guard(callbacks_lock_);
+        ACE_DEBUG((LM_DEBUG, "Listener::on_data_available - invoking %d callbacks\n", callbacks_.size()));
+        for (size_t i = 0; i < callbacks_.size(); ++i) {
+          callbacks_.at(i)(0, sample, 0, 0, 0, retcode);
+        }
       }
     }
   }
 
-  const Callback callback_;
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  LockType callbacks_lock_;
+  OPENDDS_VECTOR(Callback) callbacks_;
   const FACE::CONNECTION_ID_TYPE connection_id_;
 };
 
@@ -183,9 +205,14 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
     return_code = FACE::INVALID_PARAM;
     return;
   }
-
-  DDS::DataReaderListener_var listener = new Listener<Msg>(callback, connection_id);
-  readers[connection_id]->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);
+  DDS::DataReaderListener_ptr existing_listener = readers[connection_id]->get_listener();
+  if (existing_listener) {
+    Listener<Msg>* typedListener = dynamic_cast<Listener<Msg>*>(existing_listener);
+    typedListener->add_callback(callback);
+  } else {
+    DDS::DataReaderListener_var listener = new Listener<Msg>(callback, connection_id);
+    readers[connection_id]->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);
+  }
   return_code = FACE::RC_NO_ERROR;
 }
 

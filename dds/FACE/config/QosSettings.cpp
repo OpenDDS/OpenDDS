@@ -109,12 +109,20 @@ set_duration_qos_value(DDS::Duration_t& target,
   strncpy(buffer, prefix_match, 64 - 4);
   strcat(buffer, ".sec");
   if (!std::strcmp(name, buffer)) {
+    if (!std::strcmp(value, "DURATION_INFINITE_SEC")) {
+      target.sec=DDS::DURATION_INFINITE_SEC;
+      return true;
+    }
     target.sec = atoi(value);
     return true;
   }
   strncpy(buffer, prefix_match, 64 - 7);
   strcat(buffer, ".nanosec");
   if (!std::strcmp(name, buffer)) {
+    if (!std::strcmp(value, "DURATION_INFINITE_NSEC")) {
+      target.nanosec=DDS::DURATION_INFINITE_NSEC;
+      return true;
+    }
     target.nanosec = atoi(value);
     return true;
   }

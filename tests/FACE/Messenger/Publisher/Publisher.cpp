@@ -25,6 +25,34 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::TS::Get_Connection_Parameters(name, connId, connectionStatus, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
+  //Check that name & connection validated ok
+  FACE::CONNECTION_NAME_TYPE goodName = "pub";
+  FACE::TS::Get_Connection_Parameters(goodName, connId, connectionStatus, status);
+  if (status != FACE::RC_NO_ERROR) {
+    std::cout << "ERROR: Get_Connection_Parameters with goodName and good connection Id failed\n";
+  }
+
+  //Check that wrong name & connection validated - INVALID_PARAM
+  FACE::CONNECTION_NAME_TYPE badName = "wrong_pub";
+  FACE::TS::Get_Connection_Parameters(badName, connId, connectionStatus, status);
+  if (status != FACE::INVALID_PARAM) {
+    std::cout << "ERROR: Get_Connection_Parameters with bad name and good connection Id failed to return INVALID_PARAM\n";
+  }
+
+  //Check that name & wrong connection validated - INVALID_PARAM
+  FACE::CONNECTION_ID_TYPE wrongConnectionId = 5;
+  FACE::TS::Get_Connection_Parameters(goodName, wrongConnectionId, connectionStatus, status);
+  if (status != FACE::INVALID_PARAM) {
+    std::cout << "ERROR: Get_Connection_Parameters with good name and bad connection Id failed to return INVALID_PARAM\n";
+  }
+
+  //Check that no name & no connection validated - INVALID_PARAM
+  FACE::CONNECTION_NAME_TYPE noName = {};
+  FACE::CONNECTION_ID_TYPE noConnectionId = 0;
+  FACE::TS::Get_Connection_Parameters(noName, noConnectionId, connectionStatus, status);
+  if (status != FACE::INVALID_PARAM) {
+    std::cout << "ERROR: Get_Connection_Parameters with no name and no connection Id failed to return INVALID_PARAM\n";
+  }
   FACE::CONNECTION_ID_TYPE getConnectionId = 0;
   FACE::TS::Get_Connection_Parameters(name, getConnectionId, connectionStatus, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
