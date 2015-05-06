@@ -567,11 +567,17 @@ namespace {
   {
     be_global->add_include("<tao/VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
     const char* const nm = name->last_component()->get_string();
-    const Helper var = (size == AST_Type::VARIABLE) ? HLP_VAR_VAR : HLP_FIX_VAR;
     be_global->lang_header_ <<
-      "struct " << nm << ";\n"
-      "typedef " << helpers_[var] << '<' << nm << "> " << nm << "_var;\n"
-      "typedef " << helpers_[HLP_OUT] << '<' << nm << "> " << nm << "_out;\n";
+      "struct " << nm << ";\n";
+    if (size == AST_Type::VARIABLE) {
+      be_global->lang_header_ <<
+        "typedef " << helpers_[HLP_VAR_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
+        "typedef " << helpers_[HLP_OUT] << '<' << nm << "> " << nm << "_out;\n";
+    } else {
+      be_global->lang_header_ <<
+        "typedef " << helpers_[HLP_FIX_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
+        "typedef " << nm << "& " << nm << "_out;\n";
+    }
   }
 
   std::string array_dims(AST_Type* type, ACE_CDR::ULong& elems) {
