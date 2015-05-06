@@ -9,7 +9,7 @@
   if (!( COND )) { \
     char msg[1024]; \
     snprintf(msg, 1024, "%s: FAILED at %s:%d", #COND, __FILE__, __LINE__); \
-    ACE_DEBUG((LM_ERROR, "(%P|%t) %C\n", msg)); \
+    printf(("%s\n", msg)); \
     throw std::runtime_error(msg); \
     return; \
   }
@@ -252,10 +252,9 @@ FreeIndex::validate_index(FreeIndex& index, unsigned char* base, bool log)
     FreeIndexNode* node = index.nodes_;
     while (node < index.nodes_ + index.size_) {
       if (node->ptr()) {
-        ACE_DEBUG((LM_INFO, "  IND[%4d] -> %4d\n", 
-                   node->size(), node->ptr()->size()));
+        printf("  IND[%4d] -> %4d\n", node->size(), node->ptr()->size());
       } else {
-        ACE_DEBUG((LM_INFO, "  IND[%4d] -> NULL\n", node->size()));
+        printf("  IND[%4d] -> NULL\n", node->size());
       }
       ++node;
     };
@@ -335,15 +334,15 @@ MemoryPool::pool_alloc(size_t size)
   if (largest_free_bytes < lwm_free_bytes_) {
     lwm_free_bytes_ = largest_free_bytes;
     if (lwm_free_bytes_ < 10000) {
-      //ACE_DEBUG((LM_DEBUG, "LWM under 10k\n"));
+      printf("WARN: LWM under 10k\n");
     }
   }
 
-  //ACE_DEBUG((LM_INFO, "After alloc of %u\n", size));
-  validate_pool(*this, debug_log_);
+  //printf("After alloc of %zu\n", size);
+  //validate_pool(*this, debug_log_);
 
   if (!block) {
-    ACE_DEBUG((LM_INFO, "Alloc of %u returning NULL\n", size));
+    printf("ERROR: Alloc of %zu returning NULL\n", size);
   }
   return block;
 }
@@ -363,8 +362,8 @@ MemoryPool::pool_free(void* ptr)
 
   join_free_allocs(header);
 
-  //ACE_DEBUG((LM_INFO, "After free of %x\n", ptr));
-  validate_pool(*this, debug_log_);
+  //printf("After free of %x\n", ptr);
+  //validate_pool(*this, debug_log_);
 }
 
 void
@@ -414,10 +413,6 @@ MemoryPool::remove_free_alloc(FreeHeader* block_to_alloc)
 
   if (larger) {
     larger->set_smaller_free(smaller, pool_ptr_);
-  } else {
-    // Should be largest
-    //ACE_DEBUG((LM_INFO, "removing alloc with none larger\n"));
-    //largest_free_ = smaller;
   }
 
   if (smaller) {
@@ -580,10 +575,8 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
 
   index = 0;
   if (log) {
-    ACE_DEBUG((LM_INFO, " Pool ptr %x end %x\n", 
-              (unsigned long)pool.pool_ptr_, (unsigned long)pool_end));
-    //printf("Pool ptr %zx end %zx\n", (unsigned long)pool.pool_ptr_,
-           //(unsigned long)pool_end);
+    printf("Pool ptr %zx end %zx\n", (unsigned long)pool.pool_ptr_,
+           (unsigned long)pool_end);
    }
 
   // Check all allocs in positional order and not overlapping
@@ -611,19 +604,6 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
           sprintf(lrgr_buff, "[%2d]", lrgr_index);
         }
       }
-      ACE_DEBUG((LM_INFO,
-                 "Alloc[%u] %s at %x ptr %x lg %s sm %s size %d psize %d\n",
-                 index++,
-                 alloc->is_free() ?
-                 (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
-                 (unsigned long)alloc,
-                 (unsigned long)alloc->ptr(),
-                 lrgr_index >= 0 ? lrgr_buff : "[  ]",
-                 smlr_index >= 0 ? smlr_buff : "[  ]",
-                 alloc->size(),
-                 alloc->prev_size()
-      ));
-/*
       printf(
         "Alloc[%zu] %s at %zx ptr %zx lg %s sm %s size %d psize %d\n",
         index++,
@@ -635,8 +615,7 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
         smlr_index >= 0 ? smlr_buff : "[  ]",
         alloc->size(),
         alloc->prev_size()
-        );
-*/
+      );
     }
 
     TEST_CHECK(alloc->size());
