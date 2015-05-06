@@ -53,7 +53,7 @@ public:
       free_list_(ACE_PURE_FREE_LIST),
       chunk_size_(chunk_size) {
     chunk_size_ = ACE_MALLOC_ROUNDUP(chunk_size, ACE_MALLOC_ALIGN);
-    this->pool_ = reinterpret_cast<char*> (DCPS::SafetyProfilePool::instance()->malloc(n_chunks * chunk_size));
+    this->pool_ = reinterpret_cast<char*> (DCPS::SafetyProfilePool::instance()->malloc(n_chunks * chunk_size_));
 
     for (size_t c = 0;
          c < n_chunks;
