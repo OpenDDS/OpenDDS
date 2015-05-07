@@ -1,7 +1,6 @@
 #ifndef OPENDDS_MEMORY_POOL_H
 #define OPENDDS_MEMORY_POOL_H
 
-#ifdef OPENDDS_SAFETY_PROFILE
 #include "dcps_export.h"
 
 class MemoryPoolTest;
@@ -157,7 +156,5 @@ private:
 };
 
 }} // end namespaces
-
-#endif // OPENDDS_SAFETY_PROFILE
 
 #endif // OPENDDS_MEMORY_POOL_H
