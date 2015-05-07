@@ -9,7 +9,7 @@
   if (!( COND )) { \
     char msg[1024]; \
     snprintf(msg, 1024, "%s: FAILED at %s:%d", #COND, __FILE__, __LINE__); \
-    printf(("%s\n", msg)); \
+    printf("%s\n", msg); \
     throw std::runtime_error(msg); \
     return; \
   }
@@ -342,7 +342,7 @@ MemoryPool::pool_alloc(size_t size)
   //validate_pool(*this, debug_log_);
 
   if (!block) {
-    printf("ERROR: Alloc of %zu returning NULL\n", size);
+    printf("WARN: Alloc of %zu returning NULL\n", size);
   }
   return block;
 }
