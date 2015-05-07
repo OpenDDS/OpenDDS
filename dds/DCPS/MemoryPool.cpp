@@ -265,7 +265,7 @@ FreeIndex::validate_index(FreeIndex& index, unsigned char* base, bool log)
     FreeHeader* first = index.find(size, base);
     if (first) {
       TEST_CHECK(first->size() >= size);
-      
+
       FreeHeader* next_free = first;
       while (FreeHeader* smaller = next_free->smaller_free(base)) {
         TEST_CHECK(smaller->size() < first->size());
