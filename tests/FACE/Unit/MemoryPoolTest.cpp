@@ -247,7 +247,7 @@ public:
     void* ptr0 = pool.pool_alloc( 64); // rightmost
     void* ptr1 = pool.pool_alloc(128);
     void* ptr2 = pool.pool_alloc( 64); // freed ahead of time
-    void* ptr3 = pool.pool_alloc(128); 
+    void* ptr3 = pool.pool_alloc(128);
     void* ptr4 = pool.pool_alloc(128);
     void* ptr5 = pool.pool_alloc(256); // freed ahead of time, second largest
     void* ptr6 = pool.pool_alloc(128); // leftmost, join with head and ptr5
@@ -771,7 +771,7 @@ public:
     validate_pool(pool, 256*2 + 80 + 32*3);
   }
 
-  // Test moving ahead in free list where the block previous to the insert is 
+  // Test moving ahead in free list where the block previous to the insert is
   // shifted
   void test_pool_move_forward_prev_shifted() {
     MemoryPool pool(1056, 8);
@@ -786,8 +786,8 @@ public:
     pool.pool_alloc(32);
     pool.pool_free(p1); // Free buffer to allocate from
     pool.pool_free(p2); // Becomes largest free buffer
-    pool.pool_free(p3); // 
-    pool.pool_free(p4); // 
+    pool.pool_free(p3); //
+    pool.pool_free(p4); //
     validate_pool(pool, 32*4);
     // Now, allocate from p1, moving it to end
     void* p5 = pool.pool_alloc(40);
@@ -868,7 +868,7 @@ public:
     validate_pool(pool, 1024 - 8*5);
     pool.pool_free(ptr2); // free 256
     validate_pool(pool, 1024  - 8*5 - 256);
-    void* ptr6 = pool.pool_alloc(128); // alloc 128 
+    void* ptr6 = pool.pool_alloc(128); // alloc 128
     TEST_CHECK(ptr6);
     validate_pool(pool, 1024 - 8*5 - 128);
     void* ptr7 = pool.pool_alloc(128 - 16);  // extra header
@@ -973,7 +973,7 @@ private:
     // Gather all free indices
     AllocHeader* alloc = reinterpret_cast<AllocHeader*>(pool.pool_ptr_);
     while (pool.includes(alloc)) {
-      FreeHeader* free_header = alloc->is_free() ? 
+      FreeHeader* free_header = alloc->is_free() ?
             reinterpret_cast<FreeHeader*>(alloc) : NULL;
       if (free_header) {
         free_map[free_header] = index;
@@ -992,13 +992,13 @@ private:
     alloc = reinterpret_cast<AllocHeader*>(pool.pool_ptr_);
     while (pool.includes(alloc)) {
       if (log) {
-        
+
         int smlr_index = -1;
         int lrgr_index = -1;
         char lrgr_buff[32];
         char smlr_buff[32];
 
-        FreeHeader* free_header = alloc->is_free() ? 
+        FreeHeader* free_header = alloc->is_free() ?
               reinterpret_cast<FreeHeader*>(alloc) : NULL;
         if (free_header) {
           FreeMap::const_iterator found;
@@ -1016,7 +1016,7 @@ private:
         printf(
           "Alloc[%zu] %s at %zx ptr %zx lg %s sm %s size %d psize %d\n",
           index++,
-          alloc->is_free() ? 
+          alloc->is_free() ?
           (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
           (unsigned long)alloc,
           (unsigned long)alloc->ptr(),
