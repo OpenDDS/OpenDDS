@@ -9,6 +9,7 @@
 #ifndef RTPS_BASEMESSAGEUTILS_H
 #define RTPS_BASEMESSAGEUTILS_H
 
+#include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
 #include "RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/Serializer.h"

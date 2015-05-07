@@ -33,6 +33,7 @@
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 

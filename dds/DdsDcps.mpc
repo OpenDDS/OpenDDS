@@ -46,11 +46,6 @@ project(OpenDDS_Dcps): core, coverage_optional, dcps_bits, dcps_bits_source, \
     CorbaSeq/WStringSeq.idl
   }
 
-  TypeSupport_Files {
-    dcps_ts_flags += -SI
-    DdsDcpsGuid.idl
-  }
-
   verbatim(gnuace, bottom, 1) {
     idl_stubs: DdsDcpsGuidTypeSupportImpl.cpp DdsDcpsInfoUtilsTypeSupportImpl.cpp DdsDcpsCoreTypeSupportImpl.cpp CorbaSeq/BooleanSeqTypeSupportImpl.cpp CorbaSeq/CharSeqTypeSupportImpl.cpp CorbaSeq/DoubleSeqTypeSupportImpl.cpp CorbaSeq/FloatSeqTypeSupportImpl.cpp CorbaSeq/LongDoubleSeqTypeSupportImpl.cpp CorbaSeq/LongLongSeqTypeSupportImpl.cpp CorbaSeq/LongSeqTypeSupportImpl.cpp CorbaSeq/OctetSeqTypeSupportImpl.cpp CorbaSeq/ShortSeqTypeSupportImpl.cpp CorbaSeq/StringSeqTypeSupportImpl.cpp CorbaSeq/ULongLongSeqTypeSupportImpl.cpp CorbaSeq/ULongSeqTypeSupportImpl.cpp CorbaSeq/UShortSeqTypeSupportImpl.cpp CorbaSeq/WCharSeqTypeSupportImpl.cpp CorbaSeq/WStringSeqTypeSupportImpl.cpp
   }
@@ -61,7 +56,6 @@ project(OpenDDS_Dcps): core, coverage_optional, dcps_bits, dcps_bits_source, \
 
     DdsDcpsC.cpp
     DdsDcpsDomainC.cpp
-    DdsDcpsGuidC.cpp
     DdsDcpsInfrastructureC.cpp
     DdsDcpsPublicationC.cpp
     DdsDcpsSubscriptionC.cpp

@@ -3,12 +3,12 @@ feature(no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
   TypeSupport_Files {
     dcps_ts_flags += -SI
     DdsDcpsInfoUtils.idl
-    DdsDcpsCore.idl
+    DdsDcpsGuid.idl
   }
 
   Source_Files {
-    DdsDcpsCoreC.cpp
     DdsDcpsInfoUtilsC.cpp
+    DdsDcpsGuidC.cpp
   }
 }
 
@@ -16,12 +16,60 @@ feature(!no_opendds_safety_profile) : dcps_ts_defaults {
 
   IDL_Files {
     ^DdsDcpsInfoUtils.idl
-    ^DdsDcpsCore.idl
+    ^DdsDcpsGuid.idl
   }
 
   TypeSupport_Files {
     dcps_ts_flags += -Lspcpp -SI
     DdsDcpsInfoUtils.idl
+    DdsDcpsGuid.idl
+  }
+}
+
+feature(no_opendds_safety_profile, built_in_topics) : taoidldefaults, dcps_ts_defaults {
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h
+  TypeSupport_Files {
+    dcps_ts_flags += -SI
     DdsDcpsCore.idl
+  }
+
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+  IDL_Files {
+    DdsDcpsCoreTypeSupport.idl
+  }
+
+  Source_Files {
+    DdsDcpsCoreC.cpp
+  }
+}
+
+feature(no_opendds_safety_profile, !built_in_topics) : taoidldefaults, dcps_ts_defaults {
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -DDDS_HAS_MINIMUM_BIT
+
+  TypeSupport_Files {
+    dcps_ts_flags += -SI
+    DdsDcpsCore.idl
+  }
+
+  Source_Files {
+    DdsDcpsCoreC.cpp
+  }
+}
+
+feature(!no_opendds_safety_profile, built_in_topics) : dcps_ts_defaults, taoidldefaults {
+
+  IDL_Files {
+    ^DdsDcpsCore.idl
+  }
+
+  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h
+  TypeSupport_Files {
+    dcps_ts_flags += -Lspcpp
+    DdsDcpsCore.idl
+  }
+
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+  IDL_Files {
+    DdsDcpsCoreTypeSupport.idl
   }
 }

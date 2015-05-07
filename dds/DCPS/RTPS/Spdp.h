@@ -13,6 +13,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/GuidUtils.h"

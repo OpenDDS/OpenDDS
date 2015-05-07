@@ -16,6 +16,7 @@
 #include "Discovery.h"
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 namespace OpenDDS {
 namespace DCPS {

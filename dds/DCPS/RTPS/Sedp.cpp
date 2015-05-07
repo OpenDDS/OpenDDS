@@ -12,6 +12,7 @@
 #include "MessageTypes.h"
 #include "RtpsDiscovery.h"
 #include "RtpsMessageTypesC.h"
+#include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
 #include "ParameterListConverter.h"
 
@@ -734,28 +735,25 @@ void
 Sedp::remove_from_bit(const DiscoveredPublication& pub)
 {
   pub_key_to_id_.erase(pub.writer_data_.ddsPublicationData.key);
-  task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT,
-                new DDS::InstanceHandle_t(pub.bit_ih_));
+  task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT, pub.bit_ih_);
 }
 
 void
 Sedp::remove_from_bit(const DiscoveredSubscription& sub)
 {
   sub_key_to_id_.erase(sub.reader_data_.ddsSubscriptionData.key);
-  task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT,
-                new DDS::InstanceHandle_t(sub.bit_ih_));
+  task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT, sub.bit_ih_);
 }
 
 void
-Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
+Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
-  ACE_Auto_Basic_Ptr<const DDS::InstanceHandle_t> delete_the_ih(bit_ih);
   switch (which_bit) {
   case Msg::MSG_REMOVE_FROM_PUB_BIT: {
     DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
     // bit may be null if the DomainParticipant is shutting down
-    if (bit && *bit_ih != DDS::HANDLE_NIL) {
-      bit->set_instance_state(*bit_ih,
+    if (bit && bit_ih != DDS::HANDLE_NIL) {
+      bit->set_instance_state(bit_ih,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
     break;
@@ -763,8 +761,8 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
   case Msg::MSG_REMOVE_FROM_SUB_BIT: {
     DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp_->sub_bit();
     // bit may be null if the DomainParticipant is shutting down
-    if (bit && *bit_ih != DDS::HANDLE_NIL) {
-      bit->set_instance_state(*bit_ih,
+    if (bit && bit_ih != DDS::HANDLE_NIL) {
+      bit->set_instance_state(bit_ih,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
     break;
@@ -2742,7 +2740,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, const ParticipantMessageData* data)
 }
 
 void
-Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
+Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
@@ -2759,21 +2757,20 @@ Sedp::Task::svc()
     ACE_Auto_Basic_Ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
     case Msg::MSG_PARTICIPANT:
-      svc_i(static_cast<const SPDPdiscoveredParticipantData*>(msg->payload_));
+      svc_i(msg->dpdata_);
       break;
     case Msg::MSG_WRITER:
-      svc_i(msg->id_, static_cast<const DiscoveredWriterData*>(msg->payload_));
+      svc_i(msg->id_, msg->wdata_);
       break;
     case Msg::MSG_READER:
-      svc_i(msg->id_, static_cast<const DiscoveredReaderData*>(msg->payload_));
+      svc_i(msg->id_, msg->rdata_);
       break;
     case Msg::MSG_PARTICIPANT_DATA:
-      svc_i(msg->id_, static_cast<const ParticipantMessageData*>(msg->payload_));
+      svc_i(msg->id_, msg->pmdata_);
       break;
     case Msg::MSG_REMOVE_FROM_PUB_BIT:
     case Msg::MSG_REMOVE_FROM_SUB_BIT:
-      svc_i(msg->type_,
-            static_cast<const DDS::InstanceHandle_t*>(msg->payload_));
+      svc_i(msg->type_, msg->ih_);
       break;
     case Msg::MSG_FINI_BIT:
       // acknowledge that fini_bit has been called (this just ensures that
