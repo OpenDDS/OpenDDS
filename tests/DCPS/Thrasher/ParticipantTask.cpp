@@ -180,11 +180,7 @@ ParticipantTask::svc()
         foo.key = 3;
         DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
 
-        DDS::ReturnCode_t status = DDS::RETCODE_TIMEOUT;
-        while (status == DDS::RETCODE_TIMEOUT) {
-          status = writer_i->write(foo, handle);
-        }
-        if (status != DDS::RETCODE_OK) {
+        if (writer_i->write(foo, handle) != DDS::RETCODE_OK)
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l: svc()")
                             ACE_TEXT(" write failed!\n")), 1);
