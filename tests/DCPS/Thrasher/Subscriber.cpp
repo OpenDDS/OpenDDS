@@ -118,8 +118,6 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-#else 
-      reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 #endif
 
       DDS::DataReader_var reader =
