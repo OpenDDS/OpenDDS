@@ -14,14 +14,14 @@ int callback_count = 0;
 
 void callback(FACE::TRANSACTION_ID_TYPE,
               Messenger::Message& msg,
-              FACE::MESSAGE_TYPE_GUID,
-              FACE::MESSAGE_SIZE_TYPE,
+              FACE::MESSAGE_TYPE_GUID message_type_id,
+              FACE::MESSAGE_SIZE_TYPE message_size,
               const FACE::WAITSET_TYPE,
               FACE::RETURN_CODE_TYPE& return_code)
 {
   ++callback_count;
   std::cout << "In callback() (the " << callback_count << " time) : "
-            << msg.text << '\t' << msg.count << std::endl;
+            << msg.text << '\t' << msg.count << "\tmessage_type: " << message_type_id << "\tmessageg_size_type: " << message_size << std::endl;
   callbackHappened = true;
   return_code = FACE::RC_NO_ERROR;
 }
@@ -76,8 +76,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   FACE::TS::Get_Connection_Parameters(name, connId, connectionStatus, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  if (connectionStatus.MESSAGE != 1
-      || connectionStatus.LAST_MSG_VALIDITY != FACE::VALID) {
+  if (connectionStatus.LAST_MSG_VALIDITY != FACE::VALID) {
     std::cout << "ERROR: unexpected value in connection parameters after receiving\n";
     return EXIT_FAILURE;
   }

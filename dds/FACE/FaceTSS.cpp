@@ -107,7 +107,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     OpenDDS::FaceTSS::convertDuration(qos.data_writer_qos().lifespan.duration) : 0;
 
   const TRANSPORT_CONNECTION_STATUS_TYPE status = {
-    0, // MESSAGE
+    topic.message_definition_guid_, // MESSAGE
     ACE_INT32_MAX, // MAX_MESSAGE
     max_message_size,
     connection_direction,
@@ -313,7 +313,6 @@ FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
   switch (retcode) {
   case DDS::RETCODE_OK:
     status.LAST_MSG_VALIDITY = FACE::VALID;
-    ++status.MESSAGE;
     return FACE::RC_NO_ERROR;
 
   case DDS::RETCODE_ERROR:
