@@ -1,7 +1,7 @@
 feature(no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
 
   TypeSupport_Files {
-    dcps_ts_flags += -SI
+    dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI
     RtpsCore.idl
   }
 

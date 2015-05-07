@@ -29,7 +29,6 @@ feature(!no_opendds_safety_profile) : dcps_ts_defaults {
 feature(no_opendds_safety_profile, built_in_topics) : taoidldefaults, dcps_ts_defaults {
   dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h
   TypeSupport_Files {
-    dcps_ts_flags += -SI
     DdsDcpsCore.idl
   }
 
