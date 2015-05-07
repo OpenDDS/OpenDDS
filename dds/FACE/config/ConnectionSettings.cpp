@@ -25,10 +25,20 @@ ConnectionSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "qos")) {
     strncpy(qos_name_, value, sizeof(qos_name_));
   } else if (!std::strcmp(name, "direction")) {
-    if (!std::strcmp(value, "source")) {
+    if (!std::strcmp(value, "source") ||
+        !std::strcmp(value, "one_way_request_source") ||
+        !std::strcmp(value, "two_way_request_synchronous_source") ||
+        !std::strcmp(value, "two_way_request_reply_asynchronous_source")) {
       direction_ = FACE::SOURCE;
-    } else if (!std::strcmp(value, "destination")) {
+    } else if (!std::strcmp(value, "destination") ||
+               !std::strcmp(value, "one_way_request_destination") ||
+               !std::strcmp(value, "two_way_request_synchronous_destination") ||
+               !std::strcmp(value, "two_way_request_reply_asynchronous_destination")) {
       direction_ = FACE::DESTINATION;
+    } else if (!std::strcmp(value, "bi_directional") ||
+               !std::strcmp(value, "not_defined_connection_direction_type")) {
+      printf("Direction not supported: %s\n", value);
+      status = 1;
     } else {
       printf("Don't know of direction %s\n", value);
       status = 1;

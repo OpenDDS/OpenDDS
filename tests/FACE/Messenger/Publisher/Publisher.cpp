@@ -57,7 +57,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::TS::Get_Connection_Parameters(name, getConnectionId, connectionStatus, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  if (connectionStatus.MESSAGE || connectionStatus.LAST_MSG_VALIDITY != FACE::INVALID
+  if (connectionStatus.LAST_MSG_VALIDITY != FACE::INVALID
       || connectionStatus.CONNECTION_DIRECTION != FACE::SOURCE
       || getConnectionId != connId) {
     std::cout << "ERROR: unexpected value in connection parameters before sending\n";
