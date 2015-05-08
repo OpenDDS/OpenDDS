@@ -757,7 +757,7 @@ namespace {
           : elem_type.substr(idx_last + 2));
       be_global->impl_ <<
         "  for (int i = 0; i < " << total.str() << "; ++i) {\n"
-        "    begin[i]." << elem_type << "::~" << elem_last << "();\n"
+        "    begin[i].~" << elem_last << "();\n"
         "  }\n";
     }
 
