@@ -16,6 +16,7 @@ namespace OpenDDS {
       void operator delete(void* ptr, const std::nothrow_t&) { OpenDDS::DCPS::SafetyProfilePool::instance()->free(ptr); } \
 \
       void* operator new(size_t, void* ptr) { return ptr; } \
+      void operator delete(void*, void*) {} \
 \
       void* operator new[](size_t size) { return OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(size); } \
       void operator delete[](void* ptr) { OpenDDS::DCPS::SafetyProfilePool::instance()->free(ptr); }
