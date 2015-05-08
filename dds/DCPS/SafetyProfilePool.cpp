@@ -1,10 +1,20 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include "DCPS/DdsDcps_pch.h"  ////Only the _pch include should start with DCPS/
 #include "SafetyProfilePool.h"
 #include "dds/DCPS/debug.h"
 #include <stdexcept>
 
+#ifdef OPENDDS_SAFETY_PROFILE
 namespace OpenDDS {  namespace DCPS {
 
-SafetyProfilePool:: SafetyProfilePool()
+SafetyProfilePool::SafetyProfilePool()
 : init_pool_(new MemoryPool(1024*1024, 8))
 , main_pool_(0)
 {
@@ -22,10 +32,10 @@ SafetyProfilePool::~SafetyProfilePool()
     }
   }
 
-#ifndef OPENDDS_SAFETY_PROFILE
-  delete init_pool_;
-  delete main_pool_;
-#endif
+
+  // Never delete, because this is always a SAFETY_PROFILE build
+  //delete init_pool_;
+  //delete main_pool_;
 }
 
 void
@@ -45,3 +55,4 @@ SafetyProfilePool::instance() {
 
 }}
 
+#endif

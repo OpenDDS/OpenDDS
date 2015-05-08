@@ -1,6 +1,16 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#include "DCPS/DdsDcps_pch.h"  ////Only the _pch include should start with DCPS/
 #include "MemoryPool.h"
 #include "PoolAllocator.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS_NS_stdio.h"
 #include <stdexcept>
 #include <climits>
 #include <map>
@@ -8,8 +18,8 @@
 #define TEST_CHECK(COND) \
   if (!( COND )) { \
     char msg[1024]; \
-    snprintf(msg, 1024, "%s: FAILED at %s:%d", #COND, __FILE__, __LINE__); \
-    printf("%s\n", msg); \
+    ACE_OS::snprintf(msg, 1024, "%s: FAILED at %s:%d", #COND, __FILE__, __LINE__); \
+    ACE_OS::printf("%s\n", msg); \
     throw std::runtime_error(msg); \
     return; \
   }
@@ -19,16 +29,13 @@ namespace OpenDDS {  namespace DCPS {
 unsigned char*
 AllocHeader::ptr() const
 {
-  const unsigned char* self = reinterpret_cast<const unsigned char*>(this);
-  const unsigned char* buffer_start = self + sizeof(AllocHeader);
-  return const_cast<unsigned char*>(buffer_start);
+  const unsigned char* buff = reinterpret_cast<const unsigned char*>(this + 1);
+  return const_cast<unsigned char*>(buff);
 }
 
 AllocHeader*
 AllocHeader::next_adjacent() {
-  unsigned char* self = reinterpret_cast<unsigned char*>(this);
-  unsigned char* buffer_start = self + sizeof(AllocHeader);
-  unsigned char* past_buffer_end = buffer_start + size();
+  unsigned char* past_buffer_end = ptr() + size();
   return reinterpret_cast<AllocHeader*>(past_buffer_end);
 }
 
@@ -46,7 +53,7 @@ AllocHeader::prev_adjacent() {
 
 void
 AllocHeader::allocate(size_t size) {
-  set_alloc();
+  set_allocated();
   set_size(size);
 }
 
@@ -78,12 +85,11 @@ AllocHeader::join_next() {
 }
 
 void
-FreeHeader::init_free_block(unsigned int free_size)
+FreeHeader::init_free_block(unsigned int pool_size)
 {
-  alloc_size_ = (static_cast<int>((free_size - sizeof(AllocHeader)) * -1));
+  alloc_size_ = static_cast<int>(pool_size - sizeof(AllocHeader));
   prev_size_ = 0;
-  set_smaller_free(NULL, NULL);
-  set_larger_free(NULL, NULL);
+  set_free();
 }
 
 void
@@ -91,7 +97,7 @@ FreeHeader::set_free()
 {
   // If this is newly freed
   if (!is_free()) {
-    alloc_size_ = - alloc_size_;
+    alloc_size_ *= -1;
     set_smaller_free(NULL, NULL);
     set_larger_free(NULL, NULL);
   }
@@ -159,8 +165,7 @@ FreeIndex::FreeIndex(FreeHeader*& largest_free)
 void
 FreeIndex::add(FreeHeader* freed)
 {
-  FreeIndexNode* node = nodes_;
-  do {
+  for (FreeIndexNode* node = nodes_; node < nodes_ + size_; ++node) {
     // If the freed block is of the size this node manages
     if (node->contains(freed->size())) {
       if ((node->ptr() == NULL) || (node->ptr()->size() >= freed->size())) {
@@ -168,15 +173,13 @@ FreeIndex::add(FreeHeader* freed)
       }
       break;
     }
-    ++node;
-  } while (node < nodes_ + size_);
+  }
 }
 
 void
 FreeIndex::remove(FreeHeader* free_block, FreeHeader* larger)
 {
-  FreeIndexNode* node = nodes_;
-  do {
+  for (FreeIndexNode* node = nodes_; node < nodes_ + size_; ++node) {
     if (node->contains(free_block->size())) {
       if (node->ptr() == free_block) {
         if (larger && node->contains(larger->size())) {
@@ -187,17 +190,17 @@ FreeIndex::remove(FreeHeader* free_block, FreeHeader* larger)
       }
       break;
     }
-    ++node;
-  } while (node < nodes_ + size_);
+  } 
 }
 
 void
 FreeIndex::init(FreeHeader* init_free_block)
 {
   int init_index = 0;
-  unsigned int size = 8;
-  while (size <= 4096) {
-    nodes_[size_].set_sizes(size, (size == 4096) ? -1 :  size*2);
+  unsigned int size = min_index;
+  unsigned int limit = max_index;
+  while (size <= limit) {
+    nodes_[size_].set_sizes(size, (size == limit) ? -1 :  size*2);
     if (init_free_block->size() >= size) {
       init_index = size_;
     }
@@ -208,34 +211,35 @@ FreeIndex::init(FreeHeader* init_free_block)
 }
 
 FreeHeader*
-FreeIndex::find(size_t size, unsigned char* pool_base)
+FreeIndex::find(size_t search_size, unsigned char* pool_base)
 {
   // Search index
-  FreeIndexNode* index = nodes_ + size_ - 1;
+  FreeIndexNode* index_node = nodes_ + size_ - 1;
 
-  // Larger or equal to size
+  // Larger or equal to search_size
   FreeHeader* result = NULL;
-  if (largest_free_ && (largest_free_->size() >= size)) {
+  if (largest_free_ && (largest_free_->size() >= search_size)) {
     result = largest_free_;
 
     // Look from largest to smallest
-    while (index >= nodes_) {
-      if (index->ptr() && index->ptr()->size() >= size) {
-        result = index->ptr();
+    while (index_node >= nodes_) {
+      if (index_node->ptr() && index_node->ptr()->size() >= search_size) {
+        result = index_node->ptr();
       }
 
-      if (index->size() < size) {
+      // If this node is the final one to check
+      if (index_node->size() < search_size) {
         // No more will be large enough
         break;
       }
-      --index;
+      --index_node;
     }
   }
 
   // Now traverse, searching for smaller than result
   while (result) {
     FreeHeader* smaller = result->smaller_free(pool_base);
-    if (smaller && smaller->size() >= size) {
+    if (smaller && smaller->size() >= search_size) {
       result = smaller;
     } else {
       break;
@@ -245,6 +249,7 @@ FreeIndex::find(size_t size, unsigned char* pool_base)
   return result;
 }
 
+#ifdef VALIDATE_MEMORY_POOL
 void
 FreeIndex::validate_index(FreeIndex& index, unsigned char* base, bool log)
 {
@@ -252,42 +257,40 @@ FreeIndex::validate_index(FreeIndex& index, unsigned char* base, bool log)
     FreeIndexNode* node = index.nodes_;
     while (node < index.nodes_ + index.size_) {
       if (node->ptr()) {
-        printf("  IND[%4d] -> %4d\n", node->size(), node->ptr()->size());
+        ACE_OS::printf("  IND[%4d] -> %4d\n", node->size(), node->ptr()->size());
       } else {
-        printf("  IND[%4d] -> NULL\n", node->size());
+        ACE_OS::printf("  IND[%4d] -> NULL\n", node->size());
       }
       ++node;
-    };
+    }
   }
 
-  for (size_t size = 8; size <= 4096; size *= 2) {
+  for (size_t size = min_index; size <= max_index; size *= 2) {
     // Find size or larger
     FreeHeader* first = index.find(size, base);
     if (first) {
       TEST_CHECK(first->size() >= size);
+      if (size < max_index) {
+        TEST_CHECK(first->size() < size*2 );
+      }
 
-      FreeHeader* next_free = first;
-      while (FreeHeader* smaller = next_free->smaller_free(base)) {
-        TEST_CHECK(smaller->size() < first->size());
-        TEST_CHECK(smaller->size() <= next_free->size());
-        // Anything smaller should be too small
+      FreeHeader* smaller = first;
+      while ((smaller = smaller->smaller_free(base))) {
+        // Anything smaller should be too small for this node
         TEST_CHECK(smaller->size() < size);
-        next_free = smaller;
       }
     }
   }
 }
+#endif
 
 MemoryPool::MemoryPool(unsigned int pool_size, size_t granularity)
 : granularity_((granularity + 8 - 1) / 8 * 8)
-, header_size_(sizeof(AllocHeader))
-, min_free_size_(sizeof(FreeHeader))
-, min_alloc_size_(align(min_free_size_ - header_size_))
+, min_alloc_size_(align(min_free_size - sizeof(AllocHeader)))
 , pool_size_(align(pool_size))
 , pool_ptr_(new unsigned char[pool_size_])
 , largest_free_(NULL)
 , free_index_(largest_free_)
-, debug_log_(false)
 {
   FreeHeader* first_free = reinterpret_cast<FreeHeader*>(pool_ptr_);
   first_free->init_free_block(pool_size_);
@@ -323,7 +326,7 @@ MemoryPool::pool_alloc(size_t size)
   }
 
   // The block to allocate from
-  FreeHeader* block_to_alloc = find_free_block(aligned_size);
+  FreeHeader* block_to_alloc = free_index_.find(aligned_size, pool_ptr_);
 
   if (block_to_alloc) {
     block = allocate(block_to_alloc, aligned_size);
@@ -333,37 +336,36 @@ MemoryPool::pool_alloc(size_t size)
   size_t largest_free_bytes = largest_free_ ? largest_free_->size() : 0;
   if (largest_free_bytes < lwm_free_bytes_) {
     lwm_free_bytes_ = largest_free_bytes;
-    if (lwm_free_bytes_ < 10000) {
-      printf("WARN: LWM under 10k\n");
-    }
   }
 
-  //printf("After alloc of %zu\n", size);
-  //validate_pool(*this, debug_log_);
+#ifdef VALIDATE_MEMORY_POOL
+  validate_pool(*this, true);
+#endif
 
-  if (!block) {
-    printf("WARN: Alloc of %zu returning NULL\n", size);
-  }
   return block;
 }
 
-void
+bool
 MemoryPool::pool_free(void* ptr)
 {
-  if (!ptr) {
-    return;
+  bool freed = false;
+  if (ptr && includes(ptr)) {
+
+    FreeHeader* header = reinterpret_cast<FreeHeader*>(
+        reinterpret_cast<AllocHeader*>(ptr) - 1);
+
+    // Free header
+    header->set_free();
+
+    join_free_allocs(header);
+
+#ifdef VALIDATE_MEMORY_POOL
+    validate_pool(*this, true);
+#endif
+
+    freed = true;
   }
-
-  FreeHeader* header = reinterpret_cast<FreeHeader*>(
-      reinterpret_cast<AllocHeader*>(ptr) - 1);
-
-  // Free header
-  header->set_free();
-
-  join_free_allocs(header);
-
-  //printf("After free of %x\n", ptr);
-  //validate_pool(*this, debug_log_);
+  return freed;
 }
 
 void
@@ -430,16 +432,15 @@ MemoryPool::insert_free_alloc(FreeHeader* freed)
   FreeHeader* alloc = free_index_.find(freed->size(), pool_ptr_);
   // If found
   if (alloc) {
-    TEST_CHECK(alloc != freed);
-      FreeHeader* smaller = alloc->smaller_free(pool_ptr_);
+    FreeHeader* smaller = alloc->smaller_free(pool_ptr_);
 
-      // Insert into list
-      freed->set_larger_free(alloc, pool_ptr_);
-      alloc->set_smaller_free(freed, pool_ptr_);
-      if (smaller) {
-        smaller->set_larger_free(freed, pool_ptr_);
-        freed->set_smaller_free(smaller, pool_ptr_);
-      }
+    // Insert into list
+    freed->set_larger_free(alloc, pool_ptr_);
+    alloc->set_smaller_free(freed, pool_ptr_);
+    if (smaller) {
+      smaller->set_larger_free(freed, pool_ptr_);
+      freed->set_smaller_free(smaller, pool_ptr_);
+    }
   // Else freed the largest alloc
   } else {
     if (freed != largest_free_) {
@@ -482,7 +483,7 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
   size_t remainder = free_block_size - alloc_size;
 
   // May not be enough room for another allocation
-  if (remainder < min_free_size_) {
+  if (remainder < min_free_size) {
     alloc_size = free_block_size; // use it all
     remainder = 0;
   }
@@ -536,18 +537,19 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
     AllocHeader* alloc_block = free_block->next_adjacent();
     // Allocate adjacent block (at end of existing block)
     alloc_block->set_size(alloc_size);
-    alloc_block->set_alloc();
+    alloc_block->set_allocated();
     alloc_block->set_prev_size(remainder);
     return alloc_block->ptr();
   // Else we ARE allocating the whole block
   } else {
-    free_block->set_alloc();
+    free_block->set_allocated();
     // remove free_block from free list
     remove_free_alloc(free_block);
     return free_block->ptr();
   }
 }
 
+#ifdef VALIDATE_MEMORY_POOL
 void
 MemoryPool::validate_pool(MemoryPool& pool, bool log) {
   AllocHeader* prev = 0;
@@ -575,7 +577,7 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
 
   index = 0;
   if (log) {
-    printf("Pool ptr %zx end %zx\n", (unsigned long)pool.pool_ptr_,
+    ACE_OS::printf("Pool ptr %zx end %zx\n", (unsigned long)pool.pool_ptr_,
            (unsigned long)pool_end);
    }
 
@@ -596,15 +598,15 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
         found = free_map.find(free_header->smaller_free(pool.pool_ptr_));
         if (found != free_map.end()) {
           smlr_index = found->second;
-          sprintf(smlr_buff, "[%2d]", smlr_index);
+          ACE_OS::sprintf(smlr_buff, "[%2d]", smlr_index);
         }
         found = free_map.find(free_header->larger_free(pool.pool_ptr_));
         if (found != free_map.end()) {
           lrgr_index = found->second;
-          sprintf(lrgr_buff, "[%2d]", lrgr_index);
+          ACE_OS::sprintf(lrgr_buff, "[%2d]", lrgr_index);
         }
       }
-      printf(
+      ACE_OS::printf(
         "Alloc[%zu] %s at %zx ptr %zx lg %s sm %s size %d psize %d\n",
         index++,
         alloc->is_free() ?
@@ -694,6 +696,7 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
     TEST_CHECK(free_bytes == free_bytes_in_list);
   }
 }
+#endif
 
 }}
 

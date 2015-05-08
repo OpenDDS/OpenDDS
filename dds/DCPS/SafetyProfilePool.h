@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 #define OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 
@@ -45,11 +53,9 @@ public:
   void free(void* ptr)
   {
     ACE_GUARD(ACE_Thread_Mutex, lock, lock_);
-    if (main_pool_ && main_pool_->includes(ptr)) {
-      return main_pool_->pool_free(ptr);
-    } else if (init_pool_->includes(ptr)) {
-      // If this is uncommented, crash
-      return init_pool_->pool_free(ptr);
+    // Try main pool first
+    if (!(main_pool_ && main_pool_->pool_free(ptr))) {
+      init_pool_->pool_free(ptr);
     }
   }
 
