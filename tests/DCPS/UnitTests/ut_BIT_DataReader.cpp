@@ -2,6 +2,7 @@
 #include "ace/OS_main.h"
 #include "../common/TestSupport.h"
 #include "dds/DdsDcpsDomainC.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Marked_Default_Qos.h"

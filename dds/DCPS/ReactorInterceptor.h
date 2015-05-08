@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_REACTORINTERCEPTOR_H
 
 #include "PoolAllocator.h"
+#include "PoolAllocationBase.h"
 #include "ace/Reactor.h"
 #include "ace/Thread.h"
 #include "ace/Condition_Thread_Mutex.h"
@@ -18,10 +19,10 @@
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ReactorInterceptor : public ACE_Event_Handler {
+class OpenDDS_Dcps_Export ReactorInterceptor : public ACE_Event_Handler, public PoolAllocationBase {
 public:
 
-  class Command {
+  class Command : public PoolAllocationBase {
   public:
     virtual ~Command() { }
     virtual void execute() = 0;

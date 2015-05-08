@@ -16,6 +16,7 @@
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
+#include "dds/DCPS/TypeSupportImpl_T.h"
 
 #include <map>
 #include <string>
@@ -113,23 +114,23 @@ public:
   /// function or else it should be an object that provides the
   /// implementation:
   /// void operator()(DDS::TopicQos& qos)
-  template<typename WriterOrReaderImpl>
-  DDSTopicFacade<WriterOrReaderImpl> topic_facade(
+  template<typename Traits>
+  DDSTopicFacade<Traits> topic_facade(
     std::string topic_name,
     DDS::DomainParticipant_var participant = DDS::DomainParticipant_var(),
     DDS::TopicListener_var listener = DDS::TopicListener::_nil(),
     DDS::StatusMask mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
   {
     determine_participant(participant);
-    return create_topic_facade<WriterOrReaderImpl>(topic_name,
-                                            participant,
-                                            TOPIC_QOS_DEFAULT,
-                                            listener,
-                                            mask);
+    return create_topic_facade<Traits>(topic_name,
+                                                    participant,
+                                                    TOPIC_QOS_DEFAULT,
+                                                    listener,
+                                                    mask);
   }
 
-  template<typename WriterOrReaderImpl, typename QosFunc>
-  DDSTopicFacade<WriterOrReaderImpl> topic_facade(
+  template<typename Traits, typename QosFunc>
+  DDSTopicFacade<Traits> topic_facade(
     std::string topic_name,
     DDS::DomainParticipant_var participant,
     QosFunc qos_func,
@@ -139,15 +140,15 @@ public:
     DDS::TopicQos qos;
     participant->get_default_topic_qos(qos);
     qos_func(qos);
-    return create_topic_facade<WriterOrReaderImpl>(topic_name,
-                                            participant,
-                                            qos,
-                                            listener,
-                                            mask);
+    return create_topic_facade<Traits>(topic_name,
+                                                    participant,
+                                                    qos,
+                                                    listener,
+                                                    mask);
   }
 
-  template<typename WriterOrReaderImpl, typename QosFunc>
-  DDSTopicFacade<WriterOrReaderImpl> topic_facade(
+  template<typename Traits, typename QosFunc>
+  DDSTopicFacade<Traits> topic_facade(
     std::string topic_name,
     QosFunc qos_func,
     DDS::TopicListener_var listener = DDS::TopicListener::_nil(),
@@ -158,11 +159,11 @@ public:
     DDS::TopicQos qos;
     participant->get_default_topic_qos(qos);
     qos_func(qos);
-    return create_topic_facade<WriterOrReaderImpl>(topic_name,
-                                            participant,
-                                            qos,
-                                            listener,
-                                            mask);
+    return create_topic_facade<Traits>(topic_name,
+                                                    participant,
+                                                    qos,
+                                                    listener,
+                                                    mask);
   }
 
   /// cleans up the specified participant, or default participant
@@ -199,16 +200,16 @@ private:
                                  DDS::SubscriberListener_var a_listener,
                                  DDS::StatusMask             mask);
 
-  template<typename WriterOrReaderImpl>
-  DDSTopicFacade<WriterOrReaderImpl> create_topic_facade(
+  template<typename Traits>
+  DDSTopicFacade<Traits> create_topic_facade(
     std::string topic_name,
     DDS::DomainParticipant_var participant,
     const DDS::TopicQos& qos,
     DDS::TopicListener_var listener,
     DDS::StatusMask mask)
   {
-    typedef typename WriterOrReaderImpl::typesupportimpl_type typesupportimpl_type;
-    typedef typename typesupportimpl_type::typesupport_var typesupport_var;
+    typedef ::OpenDDS::TypeSupportImpl<Traits> typesupportimpl_type;
+    typedef typename Traits::TypeSupportVarType typesupport_var;
 
     typesupport_var ts(new typesupportimpl_type);
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
@@ -233,7 +234,7 @@ private:
       throw std::runtime_error(message);
     }
 
-    return DDSTopicFacade<WriterOrReaderImpl>(participant, topic);
+    return DDSTopicFacade<Traits>(participant, topic);
   }
 
   // track the default status for domain id

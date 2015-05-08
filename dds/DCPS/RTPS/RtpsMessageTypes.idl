@@ -25,31 +25,6 @@ module OpenDDS {
     // The others follow directly here.
     // Note that we are not doing "typedef Foo_t Foo;" -- no need for it.
 
-    typedef sequence<long, 8> LongSeq8;
-
-    /* SequenceNumberSet SubmessageElements are used as parts of several
-       messages to provide binary information about individual sequence numbers
-       within a range. */
-    /* custom de/serializer implemented in opendds_idl: see 9.4.2.6 */
-    struct SequenceNumberSet {
-      SequenceNumber_t bitmapBase;
-      unsigned long numBits;
-      LongSeq8 bitmap;
-    };
-
-    /* FragmentNumberSet SubmessageElements are used to provide binary
-       information about individual fragment numbers within a range. */
-    /* custom de/serializer implemented in opendds_idl: see 9.4.2.8 */
-    struct FragmentNumberSet {
-      FragmentNumber_t bitmapBase;
-      unsigned long numBits;
-      LongSeq8 bitmap;
-    };
-
-    /* LocatorList is used to specify a list of locators. */
-    typedef sequence<Locator_t, 8> LocatorList;
-
-
     // ======== 9.4.4 Header ========
 
     /* All messages should include a leading RTPS Header. */
@@ -62,28 +37,6 @@ module OpenDDS {
 
 
     // ======== 9.4.5 Submessages ========
-
-    /* all Submessages are composed of a leading SubmessageHeader */
-    struct SubmessageHeader {
-      octet submessageId;
-      octet flags;           // E = flags & 1 (EndiannessFlag)
-      unsigned short submessageLength; /* octetsToNextHeader */
-    };
-    // Valid constants for the submessageId field are the enumerators
-    // of the SubmessageKind enum in MessageTypes.h.
-    // The least-significant bit of "flags" is E, the endianness flag:
-    // pseudoenum E { BIG_ENDIAN = 0, LITTLE_ENDIAN = 1};
-
-    /* Provides information on the state of a Reader to a Writer. AckNack
-       messages are sent by a Reader to one or more Writers. */
-    struct AckNackSubmessage {
-      SubmessageHeader smHeader;
-        // F = smHeader.flags & 2 (FinalFlag)
-      EntityId_t readerId;
-      EntityId_t writerId;
-      SequenceNumberSet readerSNState;
-      Count_t count;
-    };
 
     /* Sent from an RTPS Writer to an RTPS Reader. Notifies the RTPS Reader of a
        change to a data-object belonging to the RTPS Writer */
@@ -125,16 +78,6 @@ module OpenDDS {
       //   so they do not contain any payload data.
     };
 
-    /* Sent from an RTPS Writer to an RTPS Reader. Indicates to the RTPS
-       Reader that a range of sequence numbers is no longer relevant. */
-    struct GapSubmessage {
-      SubmessageHeader smHeader;
-      EntityId_t readerId;
-      EntityId_t writerId;
-      SequenceNumber_t gapStart;
-      SequenceNumberSet gapList;
-    };
-
     /* Sent from an RTPS Writer to an RTPS Reader to communicate the sequence
        numbers of changes that the Writer has available. */
     struct HeartBeatSubmessage {
@@ -166,16 +109,6 @@ module OpenDDS {
       GuidPrefix_t guidPrefix;
     };
 
-    /* Sent from an RTPS Reader to an RTPS Writer. It contains explicit
-       information on where to send a reply to the Submessages that follow it
-       within the same message. */
-    struct InfoReplySubmessage {
-      SubmessageHeader smHeader;
-        // M = smHeader.flags & 2 (MulticastFlag)
-      LocatorList unicastLocatorList;
-      LocatorList multicastLocatorList; // if M
-    };
-
     /* This message modifies the logical source of the Submessages that follow. */
     struct InfoSourceSubmessage {
       SubmessageHeader smHeader;
@@ -198,17 +131,6 @@ module OpenDDS {
        empty */
     struct PadSubmessage {
       SubmessageHeader smHeader;
-    };
-
-    /* The NackFrag Submessage is used to communicate the state of a Reader to a
-       Writer. */
-    struct NackFragSubmessage {
-      SubmessageHeader smHeader;
-      EntityId_t readerId;
-      EntityId_t writerId;
-      SequenceNumber_t writerSN;
-      FragmentNumberSet fragmentNumberState;
-      Count_t count;
     };
 
     /* InfoReplyIp4 is provided for efficiency reasons and can be used instead
@@ -295,72 +217,11 @@ module OpenDDS {
     // Section 9.6: "Mapping of the RTPS Protocol"
     // ======== 9.6.2 Data for Built-in Endpoints ========
 
-    /* Type used to hold data exchanged between Participants.
-       This is used for the BuiltinParticipantMessage{Writer,Reader}
-       to implement the Writer Liveliness Protocol (8.4.13). */
-    struct ParticipantMessageData {
-      GUID_t participantGuid;
-      OctetSeq data;
-    };
-    // See PARTICIPANT_MESSAGE_DATA_KIND_* constants for the 'kind'
-    // field of ParticipantMessageData, in MessageTypes.h.
-
     /* The following structs are used for the serializedData of
      * the SPDP/SEDP discovery protocol writers & readers.
      * They are serialized as a ParameterList, not CDR (see section 9.6.2.2).
      * Each of the fields should have a PID_* in Tables 9.12 and 9.13.
      */
-
-    typedef sequence<Locator_t> LocatorSeq;
-
-    struct ParticipantProxy_t {
-      ProtocolVersion_t protocolVersion;
-      GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
-      VendorId_t vendorId;
-      boolean expectsInlineQos;
-      BuiltinEndpointSet_t availableBuiltinEndpoints;
-      LocatorSeq metatrafficUnicastLocatorList;
-      LocatorSeq metatrafficMulticastLocatorList;
-      LocatorSeq defaultMulticastLocatorList;
-      LocatorSeq defaultUnicastLocatorList;
-      Count_t manualLivelinessCount;
-    };
-
-    // top-level data type for SPDP
-    struct SPDPdiscoveredParticipantData {
-      DDS::ParticipantBuiltinTopicData ddsParticipantData;
-      ParticipantProxy_t participantProxy;
-      Duration_t leaseDuration;
-    };
-
-    struct WriterProxy_t {
-      GUID_t remoteWriterGuid;  // optional in DiscoveredWriterData
-      LocatorSeq unicastLocatorList;
-      LocatorSeq multicastLocatorList;
-      OpenDDS::DCPS::TransportLocatorSeq allLocators;
-    };
-
-    // top-level data type for SEDPbuiltinPublications
-    struct DiscoveredWriterData {
-      DDS::PublicationBuiltinTopicData ddsPublicationData;
-      WriterProxy_t writerProxy;
-    };
-
-    struct ReaderProxy_t {
-      GUID_t remoteReaderGuid;  // optional in DiscoveredReaderData
-      boolean expectsInlineQos;
-      LocatorSeq unicastLocatorList;
-      LocatorSeq multicastLocatorList;
-      OpenDDS::DCPS::TransportLocatorSeq allLocators;
-      GUIDSeq associatedWriters;
-    };
-
-    // top-level data type for SEDPbuiltinSubscriptions
-    struct DiscoveredReaderData {
-      DDS::SubscriptionBuiltinTopicData ddsSubscriptionData;
-      ReaderProxy_t readerProxy;
-      ContentFilterProperty_t contentFilterProperty;
-    };
 
     // top-level data type for SEDPbuiltinTopics
     struct DiscoveredTopicData {

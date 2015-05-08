@@ -21,6 +21,7 @@
 #include "dds/DdsDcpsTopicC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 #include "tests/DCPS/common/TestSupport.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #if !defined(DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/StaticIncludes.h"

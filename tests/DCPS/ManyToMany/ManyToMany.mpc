@@ -1,6 +1,6 @@
 
 project(DDS*Publisher): dcpsexe, dcps_transports_for_test {
-
+  requires += no_opendds_safety_profile
   exename   = publisher
   libpaths += ../LargeSample
   after    += DDS_LargeSample_Idl
@@ -16,7 +16,7 @@ project(DDS*Publisher): dcpsexe, dcps_transports_for_test {
 }
 
 project(DDS*Subscriber): dcpsexe, dcps_transports_for_test {
-
+  requires += no_opendds_safety_profile
   exename   = subscriber
   libpaths += ../LargeSample
   after    += DDS_LargeSample_Idl
@@ -30,4 +30,3 @@ project(DDS*Subscriber): dcpsexe, dcps_transports_for_test {
     DataReaderListener.cpp
   }
 }
-

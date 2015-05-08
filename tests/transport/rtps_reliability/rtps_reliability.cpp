@@ -793,8 +793,7 @@ bool run_test()
   part1_writer.remote_durable_ = true;
   part1_writer.remote_data_.length(1);
   part1_writer.remote_data_[0].transport_type = "rtps_udp";
-  part1_writer.remote_data_[0].data.replace(
-    static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
+  message_block_to_sequence (mb_locator, part1_writer.remote_data_[0].data);
   if (!sdr2.associate(part1_writer, false /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataReader(reader2) could not associate with writer1\n"));

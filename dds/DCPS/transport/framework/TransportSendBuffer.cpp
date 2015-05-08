@@ -49,15 +49,13 @@ SingleSendBuffer::SingleSendBuffer(size_t capacity,
     retained_db_allocator_(this->n_chunks_ * 2),
     replaced_allocator_(this->n_chunks_),
     replaced_mb_allocator_(this->n_chunks_ * 2),
-    replaced_db_allocator_(this->n_chunks_ * 2),
-    fragments_(0)
+    replaced_db_allocator_(this->n_chunks_ * 2)
 {
 }
 
 SingleSendBuffer::~SingleSendBuffer()
 {
   release_all();
-  delete fragments_;
 }
 
 void
@@ -111,10 +109,10 @@ SingleSendBuffer::release(BufferMap::iterator buffer_iter)
     buffer.second->release();
     buffer.second = 0;
 
-  } else if (fragments_) {
+  } else {
     // data actually stored in fragments_
-    const FragmentMap::iterator fm_it = fragments_->find(buffer_iter->first);
-    if (fm_it != fragments_->end()) {
+    const FragmentMap::iterator fm_it = fragments_.find(buffer_iter->first);
+    if (fm_it != fragments_.end()) {
       for (BufferMap::iterator bm_it = fm_it->second.begin();
            bm_it != fm_it->second.end(); ++bm_it) {
         RemoveAllVisitor visitor;
@@ -124,7 +122,7 @@ SingleSendBuffer::release(BufferMap::iterator buffer_iter)
         bm_it->second.second->release();
         bm_it->second.second = 0;
       }
-      fragments_->erase(fm_it);
+      fragments_.erase(fm_it);
     }
   }
 
@@ -157,9 +155,9 @@ SingleSendBuffer::retain_all(RepoId pub_id)
         ++it;
       }
 
-    } else if (fragments_) {
-      const FragmentMap::iterator fm_it = fragments_->find(it->first);
-      if (fm_it != fragments_->end()) {
+    } else {
+      const FragmentMap::iterator fm_it = fragments_.find(it->first);
+      if (fm_it != fragments_.end()) {
         for (BufferMap::iterator bm_it = fm_it->second.begin();
              bm_it != fm_it->second.end();) {
           if (retain_buffer(pub_id, bm_it->second) == REMOVE_ERROR) {
@@ -251,11 +249,7 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
   buffers_[sequence] = std::make_pair(static_cast<QueueType*>(0),
                                       static_cast<ACE_Message_Block*>(0));
 
-  if (!fragments_) {
-    fragments_ = new FragmentMap;
-  }
-
-  BufferType& buffer = (*fragments_)[sequence][fragment];
+  BufferType& buffer = fragments_[sequence][fragment];
   insert_buffer(buffer, queue, chain);
 
   if (Transport_debug_level > 5) {
@@ -322,9 +316,9 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
       }
       if (it->second.first && it->second.second) {
         resend_one(it->second);
-      } else if (fragments_) {
-        const FragmentMap::iterator fm_it = fragments_->find(it->first);
-        if (fm_it != fragments_->end()) {
+      } else {
+        const FragmentMap::iterator fm_it = fragments_.find(it->first);
+        if (fm_it != fragments_.end()) {
           for (BufferMap::iterator bm_it = fm_it->second.begin();
                 bm_it != fm_it->second.end(); ++bm_it) {
             resend_one(bm_it->second);
@@ -342,10 +336,10 @@ void
 SingleSendBuffer::resend_fragments_i(const SequenceNumber& seq,
                                      const DisjointSequence& requested_frags)
 {
-  if (!fragments_ || fragments_->empty() || requested_frags.empty()) {
+  if (fragments_.empty() || requested_frags.empty()) {
     return;
   }
-  const BufferMap& buffers = (*fragments_)[seq];
+  const BufferMap& buffers = fragments_[seq];
   const OPENDDS_VECTOR(SequenceRange) psr =
     requested_frags.present_sequence_ranges();
   SequenceNumber sent = SequenceNumber::ZERO();

@@ -6,6 +6,7 @@
 
 #include "dds/DCPS/SafetyProfilePool.h"
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #include <tao/Array_VarOut_T.h> // Array_Traits
 
@@ -226,7 +227,8 @@ namespace FaceTypes {
   /// @tparam Elts element handling policy
   template <typename T, typename Bounds, typename Elts = DefaultEltPolicy<T> >
   class Sequence
-    : public AllocPolicy<T, Sequence<T, Bounds, Elts>, Bounds> {
+    : public AllocPolicy<T, Sequence<T, Bounds, Elts>, Bounds>
+    , public ::OpenDDS::DCPS::PoolAllocationBase {
   public:
     typedef seq_size_type size_type;  // from std C++ Container concept
     typedef seq_size_type _size_type; // from IDL-to-C++ specification

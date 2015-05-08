@@ -9,6 +9,6 @@ module Test {
     long   key;
     long   count;
     string text;
-    CORBA::LongSeq ls;
+    //CORBA::LongSeq ls;
   };
 };

@@ -88,7 +88,7 @@ namespace {
       Registered_Data_Types->lookup(participant, type);
 
     DDS::DataReader_var dr = type_support->create_datareader();
-    DataReaderImpl* dri = dynamic_cast<DataReaderImpl*>(dr.in());
+    OpenDDS::DCPS::DataReaderImpl* dri = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in());
 
     dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/,
               participant_i, sub, dr);

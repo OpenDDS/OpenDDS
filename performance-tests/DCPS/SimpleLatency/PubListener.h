@@ -7,16 +7,11 @@
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsPublicationC.h>
 #include "ace/High_Res_Timer.h"
+#include "DDSPerfTestTypeSupportImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-namespace DDSPerfTest
-{
-  class AckMessageDataReaderImpl;
-  class PubMessageDataWriterImpl;
-}
 
 //Class AckDataReaderListenerImpl
 class AckDataReaderListenerImpl

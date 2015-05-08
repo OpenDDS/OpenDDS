@@ -17,6 +17,7 @@
 #include "ace/Task.h"
 #include "ace/Synch.h"
 #include "ace/Condition_T.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -39,7 +40,7 @@ enum SendStrategyOpType {
   REMOVE_ALL_CONTROL_SAMPLES
 };
 
-struct SendRequest {
+struct SendRequest : public PoolAllocationBase {
   SendStrategyOpType op_;
   TransportQueueElement* element_;
 };
