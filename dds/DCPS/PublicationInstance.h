@@ -12,6 +12,7 @@
 #include "dcps_export.h"
 #include "InstanceDataSampleList.h"
 #include "DataSampleElement.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -30,7 +31,7 @@ namespace DCPS {
   *        from typed datawriter. The data will be duplicated for the register,
   *        unregister and dispose control message.
   */
-struct OpenDDS_Dcps_Export PublicationInstance {
+struct OpenDDS_Dcps_Export PublicationInstance : public PoolAllocationBase {
 
   PublicationInstance(DataSample* registered_sample)
     : sequence_(),

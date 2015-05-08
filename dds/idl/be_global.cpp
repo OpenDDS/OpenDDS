@@ -266,6 +266,8 @@ BE_GlobalData::parse_args(long& i, char** av)
   case 'L':
     if (0 == ACE_OS::strcasecmp(av[i], "-Lface"))
       language_mapping(LANGMAP_FACE_CXX);
+    else if (0 == ACE_OS::strcasecmp(av[i], "-Lspcpp"))
+      language_mapping(LANGMAP_SP_CXX);
     else {
       ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
                   ACE_TEXT(" option\n"), av[i]));

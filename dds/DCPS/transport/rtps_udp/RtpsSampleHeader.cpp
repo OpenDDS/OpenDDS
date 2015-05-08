@@ -16,6 +16,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DisjointSequence.h"
 
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"

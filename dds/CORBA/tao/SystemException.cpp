@@ -2,6 +2,9 @@
 
 #include "tao/SystemException.h"
 #include "tao/ORB_Constants.h"
+#include "tao/CORBA_String.h"
+#include "tao/debug.h"
+#include "tao/Allocation_Macros.h"
 
 #include "ace/Malloc.h"
 #include "ace/SString.h"
@@ -909,7 +912,7 @@ CORBA::Exception * \
 CORBA::name ::_tao_duplicate (void) const \
 { \
   CORBA::Exception * result = 0; \
-  ACE_NEW_RETURN (result, CORBA::name (*this), 0); \
+  ACE_ALLOCATOR_NEW (result, CORBA::name (*this), 0); \
   return result; \
 }
 
@@ -921,7 +924,7 @@ CORBA::SystemException * \
 CORBA::name ::_tao_create (void) \
 { \
   CORBA::name *result = 0; \
-  ACE_NEW_RETURN (result, CORBA::name (), 0); \
+  ACE_ALLOCATOR_NEW (result, CORBA::name, 0); \
   return result; \
 }
 

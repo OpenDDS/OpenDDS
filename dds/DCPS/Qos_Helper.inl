@@ -22,6 +22,7 @@ namespace DCPS {
 
 // These operators are used in some inline functions below.  Some
 // compilers require the inline definition to appear before its use.
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool
 operator== (DDS::Duration_t const & t1,
@@ -29,6 +30,7 @@ operator== (DDS::Duration_t const & t1,
 {
   return t1.sec == t2.sec && t1.nanosec == t2.nanosec;
 }
+#endif
 
 ACE_INLINE
 bool
@@ -152,41 +154,52 @@ operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
   return t;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::UserDataQosPolicy& qos1,
                   const DDS::UserDataQosPolicy& qos2)
 {
   return qos1.value == qos2.value;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::TopicDataQosPolicy & qos1,
                   const DDS::TopicDataQosPolicy & qos2)
 {
   return qos1.value == qos2.value;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::GroupDataQosPolicy& qos1,
                   const DDS::GroupDataQosPolicy& qos2)
 {
   return qos1.value == qos2.value;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::TransportPriorityQosPolicy& qos1,
                   const DDS::TransportPriorityQosPolicy& qos2)
 {
   return qos1.value == qos2.value;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::LifespanQosPolicy& qos1,
                   const DDS::LifespanQosPolicy& qos2)
 {
   return qos1.duration == qos2.duration;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool
 operator== (const DDS::DurabilityQosPolicy& qos1,
@@ -195,7 +208,9 @@ operator== (const DDS::DurabilityQosPolicy& qos1,
   return
     qos1.kind == qos2.kind;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool
 operator== (DDS::DurabilityServiceQosPolicy const & qos1,
@@ -209,7 +224,9 @@ operator== (DDS::DurabilityServiceQosPolicy const & qos1,
     && qos1.max_instances == qos2.max_instances
     && qos1.max_samples_per_instance == qos2.max_samples_per_instance;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::PresentationQosPolicy& qos1,
                   const DDS::PresentationQosPolicy& qos2)
@@ -219,35 +236,45 @@ bool operator == (const DDS::PresentationQosPolicy& qos1,
     && qos1.coherent_access == qos2.coherent_access
     && qos1.ordered_access == qos2.ordered_access;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::DeadlineQosPolicy& qos1,
                   const DDS::DeadlineQosPolicy& qos2)
 {
   return qos1.period == qos2.period;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::LatencyBudgetQosPolicy& qos1,
                   const DDS::LatencyBudgetQosPolicy& qos2)
 {
   return qos1.duration == qos2.duration;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::OwnershipQosPolicy& qos1,
                   const DDS::OwnershipQosPolicy& qos2)
 {
   return qos1.kind == qos2.kind;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::OwnershipStrengthQosPolicy& qos1,
                   const DDS::OwnershipStrengthQosPolicy& qos2)
 {
   return qos1.value == qos2.value;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::LivelinessQosPolicy& qos1,
                   const DDS::LivelinessQosPolicy& qos2)
@@ -256,14 +283,18 @@ bool operator == (const DDS::LivelinessQosPolicy& qos1,
     qos1.kind == qos2.kind
     && qos1.lease_duration == qos2.lease_duration;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::TimeBasedFilterQosPolicy& qos1,
                   const DDS::TimeBasedFilterQosPolicy& qos2)
 {
   return qos1.minimum_separation == qos2.minimum_separation;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::PartitionQosPolicy& qos1,
                   const DDS::PartitionQosPolicy& qos2)
@@ -282,7 +313,9 @@ bool operator == (const DDS::PartitionQosPolicy& qos1,
 
   return false;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::ReliabilityQosPolicy& qos1,
                   const DDS::ReliabilityQosPolicy& qos2)
@@ -291,14 +324,18 @@ bool operator == (const DDS::ReliabilityQosPolicy& qos1,
     qos1.kind == qos2.kind
     && qos1.max_blocking_time == qos2.max_blocking_time;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::DestinationOrderQosPolicy& qos1,
                   const DDS::DestinationOrderQosPolicy& qos2)
 {
   return qos1.kind == qos2.kind;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::HistoryQosPolicy& qos1,
                   const DDS::HistoryQosPolicy& qos2)
@@ -307,7 +344,9 @@ bool operator == (const DDS::HistoryQosPolicy& qos1,
     qos1.kind == qos2.kind
     && qos1.depth == qos2.depth;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::ResourceLimitsQosPolicy& qos1,
                   const DDS::ResourceLimitsQosPolicy& qos2)
@@ -317,6 +356,7 @@ bool operator == (const DDS::ResourceLimitsQosPolicy& qos1,
     && qos1.max_instances == qos2.max_instances
     && qos1.max_samples_per_instance == qos2.max_samples_per_instance;
 }
+#endif
 
 ACE_INLINE
 bool operator == (const DDS::EntityFactoryQosPolicy& qos1,
@@ -353,6 +393,7 @@ bool operator == (const DDS::DomainParticipantQos& qos1,
     && qos1.entity_factory == qos2.entity_factory;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::TopicQos& qos1,
                   const DDS::TopicQos& qos2)
@@ -372,6 +413,7 @@ bool operator == (const DDS::TopicQos& qos1,
     && qos1.lifespan == qos2.lifespan
     && qos1.ownership == qos2.ownership;
 }
+#endif
 
 ACE_INLINE
 bool operator == (const DDS::DataWriterQos& qos1,

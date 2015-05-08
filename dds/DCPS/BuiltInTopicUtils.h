@@ -13,8 +13,9 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 #include "Service_Participant.h"
-#include "dds/DCPS/DomainParticipantImpl.h"
+#include "DomainParticipantImpl.h"
 
 namespace OpenDDS {
 namespace DCPS {

@@ -10,6 +10,7 @@
 #define DCPS_RECEIVEDDATASTRATEGY_H
 
 #include "CoherentChangeControl.h"
+#include "PoolAllocationBase.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -17,7 +18,7 @@ namespace DCPS {
 class ReceivedDataElementList;
 class ReceivedDataElement;
 
-class OpenDDS_Dcps_Export ReceivedDataStrategy {
+class OpenDDS_Dcps_Export ReceivedDataStrategy : public PoolAllocationBase {
 public:
   explicit ReceivedDataStrategy(ReceivedDataElementList& rcvd_samples);
   virtual ~ReceivedDataStrategy();

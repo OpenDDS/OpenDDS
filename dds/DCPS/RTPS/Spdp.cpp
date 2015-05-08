@@ -10,6 +10,7 @@
 #include "Spdp.h"
 #include "BaseMessageTypes.h"
 #include "MessageTypes.h"
+#include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
 #include "RtpsMessageTypesTypeSupportImpl.h"
 #include "ParameterListConverter.h"

@@ -107,14 +107,14 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-template<typename TSI> // TSI is some generated TypeSupportImpl
-typename TSI::data_writer_type::_var_type
+template<typename Traits>
+typename Traits::DataWriterType::_var_type
 create_writer(const DDS::Publisher_var& pub, const char* topicName,
   const DDS::DataWriterQos& qos = DATAWRITER_QOS_DEFAULT,
   const DDS::DataWriterListener_var& listener = 0,
   const DDS::StatusMask& mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
 {
-  const DDS::TypeSupport_var ts = new TSI;
+  const DDS::TypeSupport_var ts = new ::OpenDDS::TypeSupportImpl<Traits>();
   const DDS::DomainParticipant_var dp = pub->get_participant();
   const CORBA::String_var typeName = ts->get_type_name();
   (void) ts->register_type(dp, typeName); // may have been registered before
@@ -125,7 +125,7 @@ create_writer(const DDS::Publisher_var& pub, const char* topicName,
 
   const DDS::DataWriter_var dw =
     pub->create_datawriter(topic, qos, listener, mask);
-  return TSI::data_writer_type::_narrow(dw);
+  return Traits::DataWriterType::_narrow(dw);
 }
 
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
@@ -235,7 +235,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T1)
       {
-        dw1 = create_writer<T1::Foo1TypeSupportImpl>(pub, MY_TOPIC1, dw_qos);
+        dw1 = create_writer<T1::Foo1Traits>(pub, MY_TOPIC1, dw_qos);
 
         if (CORBA::is_nil(dw1.in()))
         {
@@ -247,7 +247,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T2)
       {
-        dw2 = create_writer<T2::Foo2TypeSupportImpl>(pub, MY_TOPIC2, dw_qos);
+        dw2 = create_writer<T2::Foo2Traits>(pub, MY_TOPIC2, dw_qos);
 
         if (CORBA::is_nil(dw2.in()))
         {
@@ -259,7 +259,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T3)
       {
-        dw3 = create_writer<T3::Foo3TypeSupportImpl>(pub, MY_TOPIC3, dw_qos);
+        dw3 = create_writer<T3::Foo3Traits>(pub, MY_TOPIC3, dw_qos);
 
         if (CORBA::is_nil(dw3.in()))
         {
@@ -271,7 +271,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T4)
       {
-        dw4 = create_writer<T3::Foo3TypeSupportImpl>(pub, MY_TOPIC4, dw_qos);
+        dw4 = create_writer<T3::Foo3Traits>(pub, MY_TOPIC4, dw_qos);
 
         if (CORBA::is_nil(dw4.in()))
         {
@@ -326,8 +326,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T1)
       {
-        TypedWriter<T1::Foo1TypeSupportImpl>* tw =
-          new TypedWriter<T1::Foo1TypeSupportImpl>(dw1, 1, num_ops_per_thread);
+        TypedWriter<T1::Foo1Traits>* tw =
+          new TypedWriter<T1::Foo1Traits>(dw1, 1, num_ops_per_thread);
         tw->init_instance_handler(t1_init);
         tw->next_sample_handler(t1_next);
         writers[idx++] = tw;
@@ -335,8 +335,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T2)
       {
-        TypedWriter<T2::Foo2TypeSupportImpl>* tw =
-          new TypedWriter<T2::Foo2TypeSupportImpl>(dw2, 1, num_ops_per_thread);
+        TypedWriter<T2::Foo2Traits>* tw =
+          new TypedWriter<T2::Foo2Traits>(dw2, 1, num_ops_per_thread);
         tw->init_instance_handler(t2_init);
         tw->next_sample_handler(t2_next);
         writers[idx++] = tw;
@@ -344,8 +344,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T3)
       {
-        TypedWriter<T3::Foo3TypeSupportImpl>* tw =
-          new TypedWriter<T3::Foo3TypeSupportImpl>(dw3, 1, num_ops_per_thread);
+        TypedWriter<T3::Foo3Traits>* tw =
+          new TypedWriter<T3::Foo3Traits>(dw3, 1, num_ops_per_thread);
         tw->init_instance_handler(t3_init);
         tw->next_sample_handler(t3_next);
         writers[idx++] = tw;
@@ -353,8 +353,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       if (topics & TOPIC_T4)
       {
-        TypedWriter<T3::Foo3TypeSupportImpl>* tw =
-          new TypedWriter<T3::Foo3TypeSupportImpl>(dw4, 1, num_ops_per_thread);
+        TypedWriter<T3::Foo3Traits>* tw =
+          new TypedWriter<T3::Foo3Traits>(dw4, 1, num_ops_per_thread);
         tw->init_instance_handler(t3_init);
         tw->next_sample_handler(t3_next);
         writers[idx++] = tw;

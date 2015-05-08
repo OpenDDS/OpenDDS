@@ -21,12 +21,11 @@ struct TypeSequenceLessThan
   }
 };
 
-template<typename WriterOrReaderImpl>
+template<typename Traits>
 class InstanceDataMap
 {
   public:
-
-    typedef typename WriterOrReaderImpl::message_type message_type;
+    typedef typename Traits::MessageType message_type;
     typedef typename std::set< message_type, TypeSequenceLessThan<message_type> > DataSet;
     typedef typename std::map < ::DDS::InstanceHandle_t, DataSet > DataMap;
 

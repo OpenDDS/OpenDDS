@@ -12,6 +12,7 @@
 #include "dds/DCPS/dcps_export.h"
 #include "ace/Atomic_Op.h"
 #include "ace/Malloc_Base.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -21,7 +22,7 @@ namespace DCPS {
 /// The T type is an ace lock type
 /// (eg, ACE_SYNCH_MUTEX, ACE_NULL_MUTEX, etc...)
 template <typename T>
-class OpenDDS_Dcps_Export RcObject {
+  class OpenDDS_Dcps_Export RcObject : public PoolAllocationBase {
 public:
 
   virtual ~RcObject() {}

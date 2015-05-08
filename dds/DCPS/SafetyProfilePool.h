@@ -22,7 +22,7 @@ namespace DCPS {
 class SafetyProfilePool : public ACE_Allocator
 {
 public:
-  explicit SafetyProfilePool(size_t size = 10*1024*1024)
+  explicit SafetyProfilePool(size_t size = 300*1024*1024)
     : size_(size)
     , pool_(new char[size])
     , idx_(0)
@@ -40,6 +40,8 @@ public:
   {
     const unsigned long end = idx_ += n;
     if (end > size_) {
+      ACE_DEBUG((LM_ERROR,
+                 "SafetyProfilePool::malloc out of memory\n"));
       return 0;
     }
     return pool_ + end - n;
@@ -49,8 +51,18 @@ public:
   {
   }
 
-  void* calloc(std::size_t, char = '\0') { return 0; }
-  void* calloc(std::size_t, std::size_t, char = '\0') { return 0; }
+  void* calloc(std::size_t, char = '\0')
+  {
+    ACE_DEBUG((LM_ERROR,
+               "SafetyProfilePool::calloc not supported\n"));
+    return 0;
+  }
+  void* calloc(std::size_t, std::size_t, char = '\0')
+  {
+    ACE_DEBUG((LM_ERROR,
+               "SafetyProfilePool::calloc not supported\n"));
+    return 0;
+  }
   int remove() { return -1; }
   int bind(const char*, void*, int = 0) { return -1; }
   int trybind(const char*, void*&) { return -1; }

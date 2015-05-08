@@ -45,11 +45,11 @@ void waitForMatch(const DataWriter_var& dw, int count = 1)
   ws->detach_condition(sc);
 }
 
-template <typename TSImpl>
+template <typename Traits>
 struct Writer {
   Writer(const Publisher_var& pub, const char* topic_name,
          const DomainParticipant_var& other_participant)
-    : ts_(new TSImpl)
+    : ts_(new ::OpenDDS::TypeSupportImpl<Traits>())
   {
     DomainParticipant_var dp = pub->get_participant();
     check(ts_->register_type(dp, ""));
@@ -63,7 +63,7 @@ struct Writer {
       DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   }
 
-  typename TSImpl::_var_type ts_;
+  typename Traits::TypeSupportVarType ts_;
   DataWriter_var dw_;
 };
 
@@ -73,10 +73,10 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
 
   // Writer-side setup
 
-  Writer<LocationInfoTypeSupportImpl> location(pub, "Location", sub_dp);
-  Writer<PlanInfoTypeSupportImpl> flightplan(pub, "FlightPlan", sub_dp);
-  Writer<MoreInfoTypeSupportImpl> more(pub, "More", sub_dp);
-  Writer<UnrelatedInfoTypeSupportImpl> unrelated(pub, "Unrelated", sub_dp);
+  Writer<LocationInfoTraits> location(pub, "Location", sub_dp);
+  Writer<PlanInfoTraits> flightplan(pub, "FlightPlan", sub_dp);
+  Writer<MoreInfoTraits> more(pub, "More", sub_dp);
+  Writer<UnrelatedInfoTraits> unrelated(pub, "Unrelated", sub_dp);
   MoreInfoDataWriter_var midw = MoreInfoDataWriter::_narrow(more.dw_);
 
   // Reader-side setup

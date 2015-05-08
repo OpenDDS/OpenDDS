@@ -1,4 +1,5 @@
 project: dcpsexe, dcps_transports_for_test {
+  requires += no_opendds_safety_profile
   exename = main
 
   TypeSupport_Files {

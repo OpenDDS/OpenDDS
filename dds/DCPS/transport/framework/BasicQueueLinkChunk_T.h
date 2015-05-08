@@ -12,12 +12,13 @@
 #include "BasicQueueLink_T.h"
 
 #include "ace/OS_NS_stdlib.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
 template <typename T>
-struct BasicQueueLinkChunk {
+struct BasicQueueLinkChunk : public PoolAllocationBase {
   typedef BasicQueueLink<T> LinkType;
 
   BasicQueueLinkChunk(size_t chunk_size)
