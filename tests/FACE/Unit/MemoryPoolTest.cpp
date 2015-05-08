@@ -135,6 +135,7 @@ public:
     void* ptr3 = pool.pool_alloc(48);
     void* ptr4 = pool.pool_alloc(2664);
     pool.pool_alloc(16);
+    TEST_CHECK(ptr0);
     TEST_CHECK(ptr1);
     TEST_CHECK(ptr2);
     validate_pool(pool, 16*3 + 6096 + 2048 + 5288 + 48 + 2664);
