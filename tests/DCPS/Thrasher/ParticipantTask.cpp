@@ -64,7 +64,7 @@ ParticipantTask::svc()
       snprintf(inst_name, 64, "rtps_%d", thread_index);
 
       ACE_DEBUG((LM_INFO,
-        "(%P|%t)    -> PARTICIPANT creating transport config %s\n",
+        "(%P|%t)    -> PARTICIPANT creating transport config %C\n",
         config_name));
       OpenDDS::DCPS::TransportConfig_rch config =
         TheTransportRegistry->create_config(config_name);
