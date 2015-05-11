@@ -676,7 +676,7 @@ Service_Participant::initialize()
 
 #ifdef OPENDDS_SAFETY_PROFILE
   // For tests which don't initialize a Memory Pool, do so automatically
-  SafetyProfilePool::instance()->configure_pool(1024*1024*20, 8);
+  SafetyProfilePool::instance()->configure_pool(1024*1024*450, 8);
 #endif
 }
 
