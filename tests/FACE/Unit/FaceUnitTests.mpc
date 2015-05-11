@@ -10,6 +10,12 @@ project(*MemoryPool) : dcps, opendds_face {
   }
 }
 
+project(*FreeIndex) : dcps, opendds_face {
+  Source_Files {
+    FreeIndexTest.cpp
+  }
+}
+
 project(*SafetyProfilePool) : dcps, opendds_face {
   Source_Files {
     SafetyProfilePoolTest.cpp
