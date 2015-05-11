@@ -72,7 +72,7 @@ namespace OpenDDS {
       return Traits::gen_has_key(MessageType());
     }
 
-    static _ptr_type _narrow(CORBA::Object_ptr obj) {
+    static typename Traits::TypeSupportType::_ptr_type _narrow(CORBA::Object_ptr obj) {
       return TypeSupportType::_narrow(obj);
     }
   };
