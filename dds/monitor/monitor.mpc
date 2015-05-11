@@ -3,7 +3,9 @@ project(OpenDDS_monitor) : dcpslib, install {
   sharedname   = OpenDDS_monitor
   dynamicflags = MONITOR_BUILD_DLL
 
-  includes  += $(DDS_ROOT)
+  specific (vc9, vc10) {
+    compile_flags += /bigobj
+  }
 
   idlflags    += -Wb,export_macro=OpenDDS_monitor_Export -Wb,export_include=monitor_export.h
   dynamicflags = OPENDDS_MONITOR_BUILD_DLL
@@ -11,18 +13,6 @@ project(OpenDDS_monitor) : dcpslib, install {
 
   TypeSupport_Files {
     monitor.idl
-  }
-
-  IDL_Files {
-    monitor.idl
-    monitorTypeSupport.idl
-  }
-
-  Header_Files {
-    monitor_export.h
-  }
-
-  Template_Files {
   }
 
   specific {

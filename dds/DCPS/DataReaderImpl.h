@@ -91,8 +91,10 @@ public:
   /// Reset the latency statistics for this writer.
   void reset_stats();
 
+#ifndef OPENDDS_SAFETY_PROFILE
   /// Dump any raw data.
   std::ostream& raw_data(std::ostream& str) const;
+#endif
 
 private:
   /// Latency statistics for the DataWriter to this DataReader.
