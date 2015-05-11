@@ -12,6 +12,8 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/GuidUtils.h"
@@ -26,14 +28,11 @@
 #include "ace/Condition_Thread_Mutex.h"
 
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-namespace DDS {
-  class ParticipantBuiltinTopicDataDataReaderImpl;
-}
 
 namespace OpenDDS {
 namespace RTPS {
@@ -133,7 +132,7 @@ private:
 
   DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
 
-  struct SpdpTransport : ACE_Event_Handler {
+  struct SpdpTransport : ACE_Event_Handler, public OpenDDS::DCPS::PoolAllocationBase {
     explicit SpdpTransport(Spdp* outer);
     ~SpdpTransport();
 

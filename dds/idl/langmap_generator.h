@@ -8,13 +8,15 @@
 
 #include "dds_generator.h"
 
+class GeneratorBase;
+
 /// Generate code for the IDL -> Programming Language mapping
 /// For example, IDL structs -> C++ structs, etc.
 /// Enabled by the -L* command line options
 class langmap_generator : public dds_generator {
 
 public:
-  langmap_generator() {}
+  langmap_generator() : generator_(0) {}
   void init();
 
 private:
@@ -36,6 +38,8 @@ private:
   bool gen_union(AST_Union*, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches,
                  AST_Type* type, const char* repoid);
+
+  GeneratorBase* generator_;
 };
 
 #endif

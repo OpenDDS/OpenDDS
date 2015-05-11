@@ -15,6 +15,7 @@
 #include "WriterDataSampleList.h"
 #include "DisjointSequence.h"
 #include "PoolAllocator.h"
+#include "PoolAllocationBase.h"
 
 #include "ace/Condition_T.h"
 #include "Service_Participant.h"
@@ -113,7 +114,7 @@ typedef OPENDDS_MAP(DDS::InstanceHandle_t, PublicationInstance*)
  *           we do not deadlock; and, 2) we incur the cost of
  *           obtaining the lock only once.
  */
-class OpenDDS_Dcps_Export WriteDataContainer {
+class OpenDDS_Dcps_Export WriteDataContainer : public PoolAllocationBase {
 public:
 
   friend class DataWriterImpl;

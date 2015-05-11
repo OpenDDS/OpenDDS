@@ -11,6 +11,7 @@
 
 #include "tao/LocalObject.h"
 #include "tao/Version.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -31,6 +32,7 @@ class LocalObject
 #else
   , public virtual TAO_Local_RefCounted_Object
 #endif
+  , public virtual PoolAllocationBase
 {
 public:
   typedef typename Stub::_ptr_type _ptr_type;

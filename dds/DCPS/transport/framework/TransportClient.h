@@ -18,6 +18,7 @@
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #include "ace/Time_Value.h"
 #include "ace/Event_Handler.h"
@@ -141,7 +142,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
 
 
-  struct PendingAssoc : ACE_Event_Handler {
+  struct PendingAssoc : ACE_Event_Handler, public PoolAllocationBase {
     bool active_, removed_;
     OPENDDS_VECTOR(TransportImpl_rch) impls_;
     CORBA::ULong blob_index_;

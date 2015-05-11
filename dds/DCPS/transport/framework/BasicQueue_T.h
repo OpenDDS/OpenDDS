@@ -11,12 +11,13 @@
 
 #include "BasicQueueLinkPool_T.h"
 #include "BasicQueueVisitor_T.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
 template <typename T>
-class BasicQueue {
+class BasicQueue : public PoolAllocationBase {
 private:
 
   typedef BasicQueueLinkPool<T> PoolType;

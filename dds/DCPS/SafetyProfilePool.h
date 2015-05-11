@@ -59,8 +59,18 @@ public:
     }
   }
 
-  void* calloc(std::size_t, char = '\0') { return 0; }
-  void* calloc(std::size_t, std::size_t, char = '\0') { return 0; }
+  void* calloc(std::size_t, char = '\0')
+  {
+    ACE_DEBUG((LM_ERROR,
+               "SafetyProfilePool::calloc not supported\n"));
+    return 0;
+  }
+  void* calloc(std::size_t, std::size_t, char = '\0')
+  {
+    ACE_DEBUG((LM_ERROR,
+               "SafetyProfilePool::calloc not supported\n"));
+    return 0;
+  }
   int remove() { return -1; }
   int bind(const char*, void*, int = 0) { return -1; }
   int trybind(const char*, void*&) { return -1; }

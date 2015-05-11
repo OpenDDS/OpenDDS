@@ -34,12 +34,12 @@ protected:
   int max_wait_ ;
 };
 
-template<typename TSI>
+template<typename Traits>
 class TypedWriter : public Writer
 {
 public:
-  typedef typename TSI::data_writer_type::_var_type DWVar;
-  typedef typename TSI::data_sample_type DSample;
+  typedef typename Traits::DataWriterType::_var_type DWVar;
+  typedef typename Traits::MessageType DSample;
   typedef void (*DSModifier)(DSample&, int);
 
   explicit TypedWriter(const DWVar& dw, int num_thread_to_write = 1,

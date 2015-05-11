@@ -24,7 +24,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Dcps_Export TransportReactorTask : public virtual ACE_Task_Base,
-      public virtual RcObject<ACE_SYNCH_MUTEX> {
+public virtual RcObject<ACE_SYNCH_MUTEX> {
 public:
 
   TransportReactorTask(bool useAsyncSend);
@@ -45,6 +45,10 @@ public:
   const ACE_Proactor* get_proactor() const;
 
   void wait_for_startup() { barrier_.wait(); }
+
+  void* operator new (size_t size) { return RcObject<ACE_SYNCH_MUTEX>::operator new (size); }
+  void operator delete (void* ptr) { RcObject<ACE_SYNCH_MUTEX>::operator delete (ptr); }
+
 private:
 
   typedef ACE_SYNCH_MUTEX         LockType;

@@ -1,4 +1,5 @@
 project(*Idl): dcps_test_lib {
+  requires += no_opendds_safety_profile
   idlflags      += -Wb,stub_export_include=CorbaSeq_export.h \
                    -Wb,stub_export_macro=CorbaSeq_Export
   dcps_ts_flags += -Wb,export_macro=CorbaSeq_Export
@@ -11,6 +12,7 @@ project(*Idl): dcps_test_lib {
 }
 
 project(*Publisher) : dcpsexe, dcps_transports_for_test {
+  requires += no_opendds_safety_profile
   after    += *Idl
   libs     += *Idl
   exename   = publisher
@@ -25,6 +27,7 @@ project(*Publisher) : dcpsexe, dcps_transports_for_test {
 }
 
 project(*Subscriber) : dcpsexe, dcps_transports_for_test {
+  requires += no_opendds_safety_profile
   after    += *Idl
   libs     += *Idl
   exename   = subscriber
@@ -37,5 +40,3 @@ project(*Subscriber) : dcpsexe, dcps_transports_for_test {
     DataReaderListener.cpp
   }
 }
-
-

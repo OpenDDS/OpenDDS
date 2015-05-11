@@ -88,10 +88,9 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   be_global->add_include(dc.c_str());
 
   static const char* h_includes[] = {
-    "dds/DCPS/DataWriterImpl.h", "dds/DCPS/DataReaderImpl.h",
-    "dds/DCPS/TypeSupportImpl.h",
-    "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h",
-    "dds/DCPS/SubscriptionInstance.h"
+    "dds/DCPS/DataWriterImpl_T.h",
+    "dds/DCPS/DataReaderImpl_T.h",
+    "dds/DCPS/TypeSupportImpl_T.h"
   };
   add_includes(h_includes, BE_GlobalData::STREAM_H);
 

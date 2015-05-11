@@ -29,6 +29,7 @@
 
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 #include "dds/DCPS/transport/tcp/TcpInst_rch.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #endif
 
 namespace {

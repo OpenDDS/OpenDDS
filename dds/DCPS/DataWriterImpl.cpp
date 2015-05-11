@@ -29,6 +29,7 @@
 #endif
 
 #include "AssociationData.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 

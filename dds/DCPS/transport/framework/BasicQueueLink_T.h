@@ -9,11 +9,13 @@
 #ifndef OPENDDS_DCPS_BASICQUEUELINK_T_H
 #define OPENDDS_DCPS_BASICQUEUELINK_T_H
 
+#include "dds/DCPS/PoolAllocationBase.h"
+
 namespace OpenDDS {
 namespace DCPS {
 
 template <typename T>
-class BasicQueueLink {
+class BasicQueueLink : public PoolAllocationBase {
 public:
 
   BasicQueueLink()
