@@ -272,7 +272,7 @@ private:
   FreeHeader* largest_free_;
 };  // end class
 
-int main(int, const char** )
+int ACE_TMAIN(int, ACE_TCHAR* [] )
 {
   FreeIndexTest test;
 

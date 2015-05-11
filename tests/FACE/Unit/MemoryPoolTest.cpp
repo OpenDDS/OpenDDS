@@ -1107,7 +1107,7 @@ private:
   }
 };
 
-int main(int, const char** )
+int ACE_TMAIN(int, ACE_TCHAR* [] )
 {
   MemoryPoolTest test;
 

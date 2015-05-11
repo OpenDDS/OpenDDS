@@ -38,7 +38,7 @@ void test_mallocs() {
   TEST_CHECK(p4 > p5);
 }
 
-int main(int, const char** )
+int ACE_TMAIN(int, ACE_TCHAR* [] )
 {
   test_malloc();
   test_mallocs();
