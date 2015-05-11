@@ -4,8 +4,6 @@
 //
 // ORB:         CORBA::Object operations
 
-#include "Common.h"
-
 #include "tao/Object.h"
 #include "tao/SystemException.h"
 

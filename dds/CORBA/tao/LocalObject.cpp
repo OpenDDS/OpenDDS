@@ -1,5 +1,3 @@
-#include "Common.h"
-
 #include "tao/LocalObject.h"
 
 #if !defined (__ACE_INLINE__)
