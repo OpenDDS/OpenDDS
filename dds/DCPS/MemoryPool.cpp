@@ -12,7 +12,7 @@
 #include "ace/Log_Msg.h"
 #include "ace/OS_NS_stdio.h"
 #include <stdexcept>
-#include <climits>
+#include <limits>
 #include <map>
 
 #define TEST_CHECK(COND) \
@@ -106,7 +106,7 @@ FreeHeader*
 FreeHeader::smaller_free(unsigned char* pool_base) const
 {
   FreeHeader* result = NULL;
-  if (offset_smaller_free_ != ULONG_MAX) {
+  if (offset_smaller_free_ != std::numeric_limits<size_t>::max()) {
     result = reinterpret_cast<FreeHeader*>(pool_base + offset_smaller_free_);
   }
   return result;
@@ -116,7 +116,7 @@ FreeHeader*
 FreeHeader::larger_free(unsigned char* pool_base) const
 {
   FreeHeader* result = NULL;
-  if (offset_larger_free_ != ULONG_MAX) {
+  if (offset_larger_free_ != std::numeric_limits<size_t>::max()) {
     result = reinterpret_cast<FreeHeader*>(pool_base + offset_larger_free_);
   }
   return result;
@@ -128,7 +128,7 @@ FreeHeader::set_smaller_free(FreeHeader* next, unsigned char* pool_base)
   if (next) {
     offset_smaller_free_ = reinterpret_cast<unsigned char*>(next) - pool_base;
   } else {
-    offset_smaller_free_ = ULONG_MAX;
+    offset_smaller_free_ = std::numeric_limits<size_t>::max();
   }
 }
 
@@ -138,7 +138,7 @@ FreeHeader::set_larger_free(FreeHeader* prev, unsigned char* pool_base)
   if (prev) {
     offset_larger_free_ = reinterpret_cast<unsigned char*>(prev) - pool_base;
   } else {
-    offset_larger_free_ = ULONG_MAX;
+    offset_larger_free_ = std::numeric_limits<size_t>::max();
   }
 }
 
@@ -196,18 +196,12 @@ FreeIndex::remove(FreeHeader* free_block, FreeHeader* larger)
 void
 FreeIndex::init(FreeHeader* init_free_block)
 {
-  int init_index = 0;
-  unsigned int size = min_index;
-  unsigned int limit = max_index;
-  while (size <= limit) {
-    nodes_[size_].set_sizes(size, (size == limit) ? -1 :  size*2);
-    if (init_free_block->size() >= size) {
-      init_index = size_;
-    }
+  size_t max = std::numeric_limits<size_t>::max();
+  for (size_t size = min_index; size <= max_index; size *= 2) {
+    nodes_[size_].set_sizes(size, (size == max_index) ? max  :  size*2);
     ++size_;
-    size *= 2;
   }
-  nodes_[init_index].set_ptr(init_free_block);
+  add(init_free_block);
 }
 
 FreeHeader*
@@ -285,9 +279,9 @@ FreeIndex::validate_index(FreeIndex& index, unsigned char* base, bool log)
 #endif
 
 MemoryPool::MemoryPool(unsigned int pool_size, size_t granularity)
-: granularity_((granularity + 8 - 1) / 8 * 8)
-, min_alloc_size_(align(min_free_size - sizeof(AllocHeader)))
-, pool_size_(align(pool_size))
+: granularity_(align(granularity, 8))
+, min_alloc_size_(align(min_free_size - sizeof(AllocHeader), granularity_))
+, pool_size_(align(pool_size, granularity_))
 , pool_ptr_(new unsigned char[pool_size_])
 , largest_free_(NULL)
 , free_index_(largest_free_)
@@ -319,7 +313,7 @@ MemoryPool::pool_alloc(size_t size)
   unsigned char* block = NULL;
 
   // Round up to 8-byte boundary
-  size_t aligned_size = align(size);
+  size_t aligned_size = align(size, granularity_);
 
   if (aligned_size < min_alloc_size_) {
     aligned_size = min_alloc_size_;
@@ -342,6 +336,7 @@ MemoryPool::pool_alloc(size_t size)
   validate_pool(*this, true);
 #endif
 
+  if (!block) printf("pool_alloc NULL\n");
   return block;
 }
 

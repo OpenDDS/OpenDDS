@@ -12,6 +12,7 @@
 #include "dcps_export.h"
 
 class MemoryPoolTest;
+class FreeIndexTest;
 
 namespace OpenDDS {
 namespace DCPS {
@@ -117,6 +118,7 @@ private:
 /// Allows for a faster search of free nodes
 class OpenDDS_Dcps_Export FreeIndex {
   friend class ::MemoryPoolTest;
+  friend class ::FreeIndexTest;
 public:
   explicit FreeIndex(FreeHeader*& largest_free);
   /** Initialize index with initial free block */
@@ -176,6 +178,10 @@ public:
   /** Low water mark of maximum available bytes for an allocation */
   size_t lwm_free_bytes() const;
 
+  /** Calculate aligned size of allocation */
+  static size_t align(size_t size, size_t granularity) {
+     return (size + granularity - 1) / granularity * granularity; }
+
 private:
   const size_t granularity_;     ///< Configured granularity
   const size_t min_alloc_size_;  ///< Aligned minimum allocation size
@@ -196,11 +202,6 @@ private:
   void insert_free_alloc(FreeHeader* block_freed);
   void join_free_allocs(FreeHeader* block_freed);
   unsigned char* allocate(FreeHeader* free_block, size_t alloc_size);
-
-  // Calculate aligned size of allocation
-  size_t align(size_t size) {
-     return (size + granularity_ - 1) / granularity_ * granularity_; }
-
 
 #ifdef VALIDATE_MEMORY_POOL
   static void validate_pool(MemoryPool& pool, bool log = false);
