@@ -257,6 +257,34 @@ module DDS {
                 TopicDataQosPolicy topic_data;
                 GroupDataQosPolicy group_data;
                 };
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+// These pragmas are OpenDDS-specific.
+#pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[2]"
+#endif
+
+    struct TopicBuiltinTopicData {
+                BuiltinTopicKey_t key;
+                string name;
+                string type_name;
+                DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
+                DeadlineQosPolicy deadline;
+                LatencyBudgetQosPolicy latency_budget;
+                LivelinessQosPolicy liveliness;
+                ReliabilityQosPolicy reliability;
+                TransportPriorityQosPolicy transport_priority;
+                LifespanQosPolicy lifespan;
+                DestinationOrderQosPolicy destination_order;
+                HistoryQosPolicy history;
+                ResourceLimitsQosPolicy resource_limits;
+                OwnershipQosPolicy ownership;
+                TopicDataQosPolicy topic_data;
+                };
+
 };
 
 #endif  /* OPENDDS_DCPS_CORE_IDL */
