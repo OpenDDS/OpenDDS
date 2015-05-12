@@ -9,6 +9,11 @@
 #ifndef OPENDDS_DCPS_CORE_IDL
 #define OPENDDS_DCPS_CORE_IDL
 
+// The includes below are needed to deal with compilers that
+// have ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT
+#include "tao/StringSeq.pidl"
+#include "tao/LongSeq.pidl"
+
 #define BUILTIN_TOPIC_KEY_TYPE_NATIVE long
 
 module DDS {
