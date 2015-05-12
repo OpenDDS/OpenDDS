@@ -170,7 +170,7 @@ Service_Participant::Service_Participant()
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
     schedulerQuantum_(ACE_Time_Value::zero),
-    pool_size_(std::numeric_limits<size_t>::max()),
+    pool_size_(1024*1024*20),
     pool_granularity_(8),
     scheduler_(-1),
     priority_min_(0),
@@ -356,6 +356,14 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
       }
 
+#ifdef OPENDDS_SAFETY_PROFILE
+      if (pool_size_) {
+        // For tests which don't initialize a Memory Pool, do so automatically
+        SafetyProfilePool::instance()->configure_pool(pool_size_, pool_granularity_);
+      } else {
+        // Use default allocator
+      }
+#endif
       // Establish the default scheduling mechanism and
       // priority here.  Sadly, the ORB is already
       // initialized so we have no influence over its
@@ -537,11 +545,6 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     }
   }
 
-
-#ifdef OPENDDS_SAFETY_PROFILE
-  // For tests which don't initialize a Memory Pool, do so automatically
-  SafetyProfilePool::instance()->configure_pool(1024*1024*450, 8);
-#endif
   // Indicates sucessful parsing of the command line
   return 0;
 }
@@ -1532,10 +1535,6 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
 #ifdef OPENDDS_SAFETY_PROFILE
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_granularity"), pool_granularity_, size_t)
-    if (pool_size_ != std::numeric_limits<size_t>::max()) {
-      // For tests which don't initialize a Memory Pool, do so automatically
-      SafetyProfilePool::instance()->configure_pool(pool_size_, pool_granularity_);
-    }
 #endif
 
     //
