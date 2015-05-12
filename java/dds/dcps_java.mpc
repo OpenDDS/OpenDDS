@@ -32,13 +32,13 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional {
 
   Idl2Jni_Files {
     idl2jniflags += -Wb,stub_extra_include=dds/DdsDcpsDomainC.h
-    $(DDS_ROOT)/dds/DdsDcpsTopic.idl << DdsDcpsInfrastructureJC.h
+    $(DDS_ROOT)/dds/DdsDcpsTopic.idl << DdsDcpsCoreJC.h DdsDcpsInfrastructureJC.h
   }
 
   Idl2Jni_Files {
     idl2jniflags += -Wb,stub_extra_include=dds/DdsDcpsTopicC.h
-    $(DDS_ROOT)/dds/DdsDcpsPublication.idl << DdsDcpsInfrastructureJC.h
-    $(DDS_ROOT)/dds/DdsDcpsSubscription.idl << DdsDcpsInfrastructureJC.h DdsDcpsGuidJC.h
+    $(DDS_ROOT)/dds/DdsDcpsPublication.idl << DdsDcpsCoreJC.h DdsDcpsInfrastructureJC.h
+    $(DDS_ROOT)/dds/DdsDcpsSubscription.idl << DdsDcpsCoreJC.h DdsDcpsInfrastructureJC.h DdsDcpsGuidJC.h
     $(DDS_ROOT)/dds/DdsDcpsSubscriptionExt.idl << DdsDcpsSubscriptionJC.h
   }
 
