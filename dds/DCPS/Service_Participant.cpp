@@ -170,6 +170,8 @@ Service_Participant::Service_Participant()
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
     schedulerQuantum_(ACE_Time_Value::zero),
+    pool_size_(std::numeric_limits<size_t>::max()),
+    pool_granularity_(8),
     scheduler_(-1),
     priority_min_(0),
     priority_max_(0),
@@ -535,6 +537,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     }
   }
 
+
+#ifdef OPENDDS_SAFETY_PROFILE
+  // For tests which don't initialize a Memory Pool, do so automatically
+  SafetyProfilePool::instance()->configure_pool(1024*1024*450, 8);
+#endif
   // Indicates sucessful parsing of the command line
   return 0;
 }
@@ -673,11 +680,6 @@ Service_Participant::initialize()
   initial_SubscriberQos_.partition = initial_PartitionQosPolicy_;
   initial_SubscriberQos_.group_data = initial_GroupDataQosPolicy_;
   initial_SubscriberQos_.entity_factory = initial_EntityFactoryQosPolicy_;
-
-#ifdef OPENDDS_SAFETY_PROFILE
-  // For tests which don't initialize a Memory Pool, do so automatically
-  SafetyProfilePool::instance()->configure_pool(1024*1024*450, 8);
-#endif
 }
 
 void
@@ -1526,6 +1528,15 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationInitialBackoffSeconds"), this->federation_initial_backoff_seconds_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
+
+#ifdef OPENDDS_SAFETY_PROFILE
+    GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
+    GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_granularity"), pool_granularity_, size_t)
+    if (pool_size_ != std::numeric_limits<size_t>::max()) {
+      // For tests which don't initialize a Memory Pool, do so automatically
+      SafetyProfilePool::instance()->configure_pool(pool_size_, pool_granularity_);
+    }
+#endif
 
     //
     // Establish the scheduler if specified.
