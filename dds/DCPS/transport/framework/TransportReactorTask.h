@@ -46,8 +46,7 @@ public:
 
   void wait_for_startup() { barrier_.wait(); }
 
-  void* operator new (size_t size) { return RcObject<ACE_SYNCH_MUTEX>::operator new (size); }
-  void operator delete (void* ptr) { RcObject<ACE_SYNCH_MUTEX>::operator delete (ptr); }
+  OPENDDS_POOL_ALLOCATION_FWD
 
 private:
 

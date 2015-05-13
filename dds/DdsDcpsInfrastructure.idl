@@ -31,11 +31,6 @@
 //#define DATAWRITER_QOS_USE_TOPIC_QOS
 //#define DATAREADER_QOS_USE_TOPIC_QOS
 
-// The below include is needed to bypass a vc71/vc8/intel c++ bug
-// dealing with base template exports
-#include "tao/StringSeq.pidl"
-#include "tao/LongSeq.pidl"
-
 #pragma ciao lem "dds/DdsDcpsInfrastructureE.idl"
 
 module DDS {
@@ -404,33 +399,6 @@ module DDS {
                 PartitionQosPolicy partition;
                 GroupDataQosPolicy group_data;
                 EntityFactoryQosPolicy entity_factory;
-                };
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-// These pragmas are OpenDDS-specific.
-#pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[0]"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[1]"
-#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[2]"
-#endif
-
-    struct TopicBuiltinTopicData {
-                BuiltinTopicKey_t key;
-                string name;
-                string type_name;
-                DurabilityQosPolicy durability;
-                DurabilityServiceQosPolicy durability_service;
-                DeadlineQosPolicy deadline;
-                LatencyBudgetQosPolicy latency_budget;
-                LivelinessQosPolicy liveliness;
-                ReliabilityQosPolicy reliability;
-                TransportPriorityQosPolicy transport_priority;
-                LifespanQosPolicy lifespan;
-                DestinationOrderQosPolicy destination_order;
-                HistoryQosPolicy history;
-                ResourceLimitsQosPolicy resource_limits;
-                OwnershipQosPolicy ownership;
-                TopicDataQosPolicy topic_data;
                 };
 
     // ----------------------------------------------------------------------
