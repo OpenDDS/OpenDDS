@@ -62,7 +62,6 @@ namespace {
 ts_generator::ts_generator()
   : idl_template_(read_template("IDL"))
   , h_template_(read_template("H"))
-  , cpp_template_(read_template("CPP"))
 {
 }
 
@@ -136,9 +135,6 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     "};\n}  }\n\n";
 
   ScopedNamespaceGuard cppGuard(name, be_global->impl_);
-  std::string cpp = cpp_template_;
-  replaceAll(cpp, replacements);
-  be_global->impl_ << cpp;
 
   if (be_global->face_ts()) {
     face_ts_generator::generate(name);
