@@ -533,7 +533,7 @@ public:
 
     be_global->lang_header_ << "\n"
       "  bool operator==(const " << nm << "& rhs) const;\n"
-      "  POOL_ALLOCATION_HOOKS\n"
+      "  OPENDDS_POOL_ALLOCATION_HOOKS\n"
       "};\n\n";
 
     be_global->add_include("dds/DCPS/PoolAllocationBase.h");
