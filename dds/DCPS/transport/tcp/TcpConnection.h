@@ -157,7 +157,7 @@ private:
   /// Lock to avoid the reconnect() called multiple times when
   /// both send() and recv() fail.
   LockType  reconnect_lock_;
-  
+
   /// Flag indicates if connected or disconneted. It's set to true
   /// when actively connecting or passively acepting succeeds and set
   /// to false whenever the peer stream is closed.
@@ -165,7 +165,7 @@ private:
 
   /// Flag indicate this connection object is the connector or acceptor.
   bool is_connector_;
-  
+
   /// Reference to the receiving strategy.
   TcpReceiveStrategy_rch receive_strategy_;
 
