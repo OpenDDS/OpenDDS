@@ -28,7 +28,7 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
                     -Wb,stub_export_include=dcps_java_export.h \
                     -Wb,stub_export_macro=dcps_java_Export
     $(DDS_ROOT)/dds/DdsDcpsCoreTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
-    $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
+    //$(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
   }
 
   Define_Custom(TypeSupportJavaOnly) {
