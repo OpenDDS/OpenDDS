@@ -18,6 +18,7 @@ feature(!no_opendds_safety_profile) : dcps_ts_defaults {
   }
 
   Source_Files {
+    *.cpp
     RtpsCoreTypeSupportImpl.cpp
   }
 }
