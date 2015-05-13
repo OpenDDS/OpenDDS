@@ -190,7 +190,7 @@ FreeIndex::remove(FreeHeader* free_block, FreeHeader* larger)
       }
       break;
     }
-  } 
+  }
 }
 
 void

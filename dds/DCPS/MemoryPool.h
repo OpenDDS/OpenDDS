@@ -63,7 +63,7 @@ protected:
 };
 
 /// Header of free allocations - found at beginning of allocation inside pool.
-/// This forces a minimum allocation size, so that, when freed, header can 
+/// This forces a minimum allocation size, so that, when freed, header can
 /// be cast to this type.
 class OpenDDS_Dcps_Export FreeHeader : public AllocHeader {
 public:
