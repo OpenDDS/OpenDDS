@@ -13,7 +13,6 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"

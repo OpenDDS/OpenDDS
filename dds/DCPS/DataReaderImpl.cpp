@@ -32,6 +32,7 @@
 #include "dds/DCPS/SafetyProfileStreams.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "ace/Reactor.h"
