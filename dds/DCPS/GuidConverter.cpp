@@ -12,7 +12,7 @@
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #include "ace/ACE.h"
-#include <stdio.h>
+#include "ace/OS_NS_stdio.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -134,7 +134,7 @@ OPENDDS_STRING
 GuidConverter::uniqueId() const
 {
   char id[64];
-  snprintf(id, sizeof id,
+  ACE_OS::snprintf(id, sizeof id,
           "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
           guid_.guidPrefix[ 0],
           guid_.guidPrefix[ 1],
