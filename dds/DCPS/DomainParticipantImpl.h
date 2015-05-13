@@ -24,7 +24,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/DdsDcpsInfrastructureTypeSupportC.h"
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "dds/DCPS/transport/framework/TransportImpl_rch.h"

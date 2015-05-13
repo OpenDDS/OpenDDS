@@ -52,10 +52,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DCPS/transport/framework
 
     DdsDcpsC.cpp
-    DdsDcpsCoreC.cpp
     DdsDcpsDomainC.cpp
-    DdsDcpsGuidC.cpp
-    DdsDcpsInfoUtilsC.cpp
     DdsDcpsInfrastructureC.cpp
     DdsDcpsPublicationC.cpp
     DdsDcpsSubscriptionC.cpp
