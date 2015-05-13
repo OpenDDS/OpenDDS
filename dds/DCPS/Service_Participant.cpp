@@ -34,7 +34,7 @@
 #include "ReplayerImpl.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
-#include <cstdio>
+#include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
 #include <fstream>
 #endif
@@ -48,7 +48,7 @@ namespace {
 void set_log_file_name(const char* fname)
 {
 #ifdef OPENDDS_SAFETY_PROFILE
-  ACE_LOG_MSG->msg_ostream(std::fopen(fname, "a"), true);
+  ACE_LOG_MSG->msg_ostream(fopen(fname, "a"), true);
 #else
   std::ofstream* output_stream = new std::ofstream(fname, ios::app);
   if (output_stream->bad()) {

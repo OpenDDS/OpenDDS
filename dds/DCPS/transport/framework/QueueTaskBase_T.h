@@ -40,7 +40,7 @@ public:
   : work_available_(lock_),
       shutdown_initiated_(false),
       opened_(false),
-      thr_id_(0) {
+      thr_id_(ACE_OS::NULL_thread) {
     DBG_ENTRY("QueueTaskBase","QueueTaskBase");
   }
 
@@ -159,7 +159,7 @@ public:
       this->work_available_.signal();
     }
 
-    if (this->opened_ && this->thr_id_ != ACE_OS::thr_self())
+    if (this->opened_ && !ACE_OS::thr_equal(this->thr_id_, ACE_OS::thr_self()))
       this->wait();
 
     return 0;

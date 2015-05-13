@@ -12,6 +12,8 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
+#include <cstring>
+
 namespace OpenDDS { namespace RTPS {
 
 using DCPS::operator!=;
@@ -247,7 +249,7 @@ namespace {
 
   bool not_default(const ContentFilterProperty_t& cfprop)
   {
-    return (strlen(cfprop.filterExpression.in()));
+    return std::strlen(cfprop.filterExpression);
   }
 
   void normalize(DDS::Duration_t& dur)
@@ -500,14 +502,14 @@ int to_param_list(const DiscoveredWriterData& writer_data,
     // Each locator has a blob of interest
     const DCPS::TransportLocator& tl = writer_data.writerProxy.allLocators[i];
     // If this is an rtps udp transport
-    if (!strcmp(tl.transport_type.in(), "rtps_udp")) {
+    if (!std::strcmp(tl.transport_type, "rtps_udp")) {
       // Append the locator's deserialized locator and an RTPS PID
       add_param_rtps_locator(param_list, tl);
     // Otherwise, this is an OpenDDS, custom transport
     } else {
       // Append the blob and a custom PID
       add_param_dcps_locator(param_list, tl);
-      if (!strcmp(tl.transport_type.in(), "multicast")) {
+      if (!std::strcmp(tl.transport_type, "multicast")) {
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) to_param_list(dwd) - ")
                    ACE_TEXT("Multicast transport with RTPS ")
@@ -646,7 +648,7 @@ int to_param_list(const DiscoveredReaderData& reader_data,
   {
     Parameter param;
     ContentFilterProperty_t cfprop_copy = reader_data.contentFilterProperty;
-    if (!strlen(cfprop_copy.filterClassName)) {
+    if (!std::strlen(cfprop_copy.filterClassName)) {
       cfprop_copy.filterClassName = "DDSSQL";
     }
     param.content_filter_property(cfprop_copy);
@@ -662,14 +664,14 @@ int to_param_list(const DiscoveredReaderData& reader_data,
     // Each locator has a blob of interest
     const DCPS::TransportLocator& tl = reader_data.readerProxy.allLocators[i];
     // If this is an rtps udp transport
-    if (!strcmp(tl.transport_type.in(), "rtps_udp")) {
+    if (!std::strcmp(tl.transport_type, "rtps_udp")) {
       // Append the locator's deserialized locator and an RTPS PID
       add_param_rtps_locator(param_list, tl);
     // Otherwise, this is an OpenDDS, custom transport
     } else {
       // Append the blob and a custom PID
       add_param_dcps_locator(param_list, tl);
-      if (!strcmp(tl.transport_type.in(), "multicast")) {
+      if (!std::strcmp(tl.transport_type, "multicast")) {
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) to_param_list(drd) - ")
                    ACE_TEXT("Multicast transport with RTPS ")
