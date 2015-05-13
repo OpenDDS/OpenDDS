@@ -26,7 +26,6 @@
 #include "CoherentChangeControl.h"
 #endif
 #include "AssociationData.h"
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"

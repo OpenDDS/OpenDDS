@@ -11,8 +11,7 @@
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
 #include "Registered_Data_Types.h"
-#include "DdsDcpsCoreTypeSupportImpl.h"
-#include "DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "DdsDcpsCoreC.h"
 #include "Marked_Default_Qos.h"
 
 namespace OpenDDS {
