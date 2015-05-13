@@ -750,9 +750,7 @@ namespace {
     } else {
       const std::string::size_type idx_last = elem_type.rfind("::");
       const std::string elem_last =
-#if !defined _MSC_VER || _MSC_VER > 1310
         (elem_cls & CL_STRING) ? "StringManager" :
-#endif
         ((idx_last == std::string::npos) ? elem_type
           : elem_type.substr(idx_last + 2));
       be_global->impl_ <<
