@@ -13,7 +13,7 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsCoreTypeSupportC.h"
+#include "dds/DdsDcpsCoreC.h"
 #include "Service_Participant.h"
 #include "DomainParticipantImpl.h"
 

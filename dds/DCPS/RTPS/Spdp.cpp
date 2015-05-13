@@ -17,7 +17,6 @@
 #include "RtpsDiscovery.h"
 
 #include "dds/DdsDcpsGuidC.h"
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
