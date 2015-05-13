@@ -1,6 +1,5 @@
 
 project(*Publisher) : dcpsexe, dcps_transports_for_test {
-  requires += no_opendds_safety_profile
   exename   = publisher
 
   TypeSupport_Files {
@@ -14,7 +13,6 @@ project(*Publisher) : dcpsexe, dcps_transports_for_test {
 }
 
 project(*Subscriber) : dcpsexe, dcps_transports_for_test {
-  requires += no_opendds_safety_profile
   exename   = subscriber
   after    += *Publisher
 
