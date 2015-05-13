@@ -31,11 +31,6 @@
 //#define DATAWRITER_QOS_USE_TOPIC_QOS
 //#define DATAREADER_QOS_USE_TOPIC_QOS
 
-// The below include is needed to bypass a vc71/vc8/intel c++ bug
-// dealing with base template exports
-#include "tao/StringSeq.pidl"
-#include "tao/LongSeq.pidl"
-
 #pragma ciao lem "dds/DdsDcpsInfrastructureE.idl"
 
 module DDS {
