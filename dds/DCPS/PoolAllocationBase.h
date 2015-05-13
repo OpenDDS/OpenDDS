@@ -9,7 +9,13 @@ namespace OpenDDS {
 
       // TODO:  Exception behavior.
 #define OPENDDS_POOL_ALLOCATION_HOOKS \
-      void* operator new(size_t size) { return OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(size); } \
+      void* operator new(size_t size) { \
+        void* ptr = OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(size); \
+        if (ptr == 0) {                                                 \
+          throw std::bad_alloc();                                       \
+        }                                                               \
+        return ptr;                                                     \
+      }                                                                 \
       void operator delete(void* ptr) { OpenDDS::DCPS::SafetyProfilePool::instance()->free(ptr); } \
 \
       void* operator new(size_t size, const std::nothrow_t&) { return OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(size); } \
@@ -18,7 +24,13 @@ namespace OpenDDS {
       void* operator new(size_t, void* ptr) { return ptr; } \
       void operator delete(void*, void*) {} \
 \
-      void* operator new[](size_t size) { return OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(size); } \
+      void* operator new[](size_t size) { \
+        void*ptr = OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(size); \
+        if (ptr == 0) {                                                 \
+          throw std::bad_alloc();                                       \
+        }                                                               \
+        return ptr;                                                     \
+      }                                                                 \
       void operator delete[](void* ptr) { OpenDDS::DCPS::SafetyProfilePool::instance()->free(ptr); }
 
 #define OPENDDS_POOL_ALLOCATION_FWD \
