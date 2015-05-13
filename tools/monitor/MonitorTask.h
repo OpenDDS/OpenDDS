@@ -18,7 +18,7 @@
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/Service_Participant.h"
 
-
+#include <ace/Condition_T.h>
 #include <ace/Task.h>
 
 namespace Monitor {

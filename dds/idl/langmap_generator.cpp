@@ -139,6 +139,7 @@ namespace {
 class GeneratorBase
 {
 public:
+  virtual ~GeneratorBase() {}
   virtual void init() = 0;
   virtual void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq) = 0;
   virtual bool gen_struct(AST_Structure* s, UTL_ScopedName* name, const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE size, const char* x) = 0;
@@ -532,7 +533,7 @@ public:
 
     be_global->lang_header_ << "\n"
       "  bool operator==(const " << nm << "& rhs) const;\n"
-      "  POOL_ALLOCATION_HOOKS\n"
+      "  OPENDDS_POOL_ALLOCATION_HOOKS\n"
       "};\n\n";
 
     be_global->add_include("dds/DCPS/PoolAllocationBase.h");
@@ -750,14 +751,16 @@ namespace {
     } else {
       const std::string::size_type idx_last = elem_type.rfind("::");
       const std::string elem_last =
-#if !defined _MSC_VER || _MSC_VER > 1310
         (elem_cls & CL_STRING) ? "StringManager" :
-#endif
         ((idx_last == std::string::npos) ? elem_type
           : elem_type.substr(idx_last + 2));
       be_global->impl_ <<
         "  for (int i = 0; i < " << total.str() << "; ++i) {\n"
-        "    begin[i]." << elem_type << "::~" << elem_last << "();\n"
+        "    begin[i]."
+#ifdef __SUNPRO_CC
+        << elem_type << "::"
+#endif
+        "~" << elem_last << "();\n"
         "  }\n";
     }
 

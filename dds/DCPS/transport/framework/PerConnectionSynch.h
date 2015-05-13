@@ -30,8 +30,7 @@ public:
   virtual int svc();
   virtual int close(u_long);
 
-  void* operator new (size_t size) { return ThreadSynch::operator new (size); }
-  void operator delete (void* ptr) { ThreadSynch::operator delete (ptr); }
+  OPENDDS_POOL_ALLOCATION_FWD
 
 protected:
 

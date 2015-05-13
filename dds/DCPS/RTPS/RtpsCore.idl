@@ -9,7 +9,7 @@
 #ifndef RTPS_RTPSCORE_IDL
 #define RTPS_RTPSCORE_IDL
 
-#include "../../DdsDcpsInfoUtils.idl"
+#include "dds/DdsDcpsInfoUtils.idl"
 
 module OpenDDS {
   module RTPS {
