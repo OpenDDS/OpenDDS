@@ -6,6 +6,7 @@
 #include <string.h>
 #include <iostream>
 
+#ifdef OPENDDS_SAFETY_PROFILE
 namespace {
   unsigned int assertions = 0;
   unsigned int failed = 0;
@@ -51,4 +52,5 @@ int ACE_TMAIN(int, ACE_TCHAR* [] )
   }
   return failed;
 }
+#endif
 

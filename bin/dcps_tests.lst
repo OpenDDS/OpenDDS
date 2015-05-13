@@ -315,7 +315,7 @@ tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter nokey: !D
 tests/FACE/Unit/QosSettingsTest: !DCPS_MIN !WCHAR
 tests/FACE/Unit/MemoryPoolTest: !DCPS_MIN !WCHAR
 tests/FACE/Unit/FreeIndexTest: !DCPS_MIN !WCHAR
-tests/FACE/Unit/SafetyProfilePoolTest: !DCPS_MIN !WCHAR
+tests/FACE/Unit/SafetyProfilePoolTest: !DCPS_MIN !WCHAR OPENDDS_SAFETY_PROFILE
 tests/FACE/Unit/SequencesTest: !DCPS_MIN !WCHAR
 tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS
 tests/FACE/Reliability/run_test.pl: !DCPS_MIN !WCHAR RTPS
