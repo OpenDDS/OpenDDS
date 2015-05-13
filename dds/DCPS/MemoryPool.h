@@ -197,7 +197,6 @@ private:
   };
 
   // Helpers
-  FreeHeader* find_free_block(size_t req_size);
   void remove_free_alloc(FreeHeader* block_to_alloc);
   void insert_free_alloc(FreeHeader* block_freed);
   void join_free_allocs(FreeHeader* block_freed);

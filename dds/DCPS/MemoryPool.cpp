@@ -207,26 +207,29 @@ FreeIndex::init(FreeHeader* init_free_block)
 FreeHeader*
 FreeIndex::find(size_t search_size, unsigned char* pool_base)
 {
-  // Search index
-  FreeIndexNode* index_node = nodes_ + size_ - 1;
+  // Use shifting to perform log base 2 of size
+  //   start by using min + 1 (+1 because  min is a power of 2 whch is already
+  //   one bit)
+  size_t size_copy = search_size >> (min_index_pow + 1);
+  unsigned int pow = 0;
+  while (size_copy && pow < max_index_pow) {
+    ++pow;
+    size_copy = size_copy >> 1;
+  }
+  FreeIndexNode* index_node = nodes_ + pow;
 
   // Larger or equal to search_size
   FreeHeader* result = NULL;
   if (largest_free_ && (largest_free_->size() >= search_size)) {
     result = largest_free_;
 
-    // Look from largest to smallest
-    while (index_node >= nodes_) {
+    // Look from here and larger
+    while (index_node < nodes_ + size_) {
       if (index_node->ptr() && index_node->ptr()->size() >= search_size) {
         result = index_node->ptr();
-      }
-
-      // If this node is the final one to check
-      if (index_node->size() < search_size) {
-        // No more will be large enough
         break;
       }
-      --index_node;
+      ++index_node;
     }
   }
 
@@ -259,19 +262,26 @@ FreeIndex::validate_index(FreeIndex& index, unsigned char* base, bool log)
     }
   }
 
+  // Validate searches of each size
   for (size_t size = min_index; size <= max_index; size *= 2) {
     // Find size or larger
-    FreeHeader* first = index.find(size, base);
-    if (first) {
-      TEST_CHECK(first->size() >= size);
-      if (size < max_index) {
-        TEST_CHECK(first->size() < size*2 );
-      }
+    FreeHeader* size_or_larger = index.find(size, base);
+    if (size_or_larger) {
+      TEST_CHECK(size_or_larger->size() >= size);
+    }
+  }
 
-      FreeHeader* smaller = first;
+  // Validate each node points to a free block of the proper size;
+  for (FreeIndexNode* node = index.nodes_; node < index.nodes_ + index.size_; ++node) {
+    FreeHeader* block = node->ptr();
+    if (block) {
+      // node should point to a free block of the proper size;
+      TEST_CHECK(node->contains(block->size()));
+
+      FreeHeader* smaller = block;
       while ((smaller = smaller->smaller_free(base))) {
         // Anything smaller should be too small for this node
-        TEST_CHECK(smaller->size() < size);
+        TEST_CHECK(smaller->size() < node->size());
       }
     }
   }
@@ -333,10 +343,9 @@ MemoryPool::pool_alloc(size_t size)
   }
 
 #ifdef VALIDATE_MEMORY_POOL
-  validate_pool(*this, true);
+  validate_pool(*this, false);
 #endif
 
-  if (!block) printf("pool_alloc NULL\n");
   return block;
 }
 
@@ -355,7 +364,7 @@ MemoryPool::pool_free(void* ptr)
     join_free_allocs(header);
 
 #ifdef VALIDATE_MEMORY_POOL
-    validate_pool(*this, true);
+    validate_pool(*this, false);
 #endif
 
     freed = true;
@@ -451,26 +460,6 @@ MemoryPool::insert_free_alloc(FreeHeader* freed)
   free_index_.add(freed);
 }
 
-FreeHeader*
-MemoryPool::find_free_block(size_t req_size)
-{
-  // If larger than final index
-  if (largest_free_ && req_size >= largest_free_->size()) {
-    FreeHeader* free_block = largest_free_;
-    while (free_block) {
-      if (free_block->size() >= req_size) {
-        return free_block;
-      } else {
-        free_block = free_block->larger_free(pool_ptr_);
-      }
-    }
-  } else {
-    return free_index_.find(req_size, pool_ptr_);
-  }
-  // Too large
-  return NULL;
-}
-
 unsigned char*
 MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
 {
@@ -494,38 +483,11 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
       next_adjacent->set_prev_size(alloc_size);
     }
 
-    // If there is a free block smaller than the one we are allocating from
-    if (FreeHeader* smaller = free_block->smaller_free(pool_ptr_)) {
-      // If next smaller is now larger
-      if (remainder < smaller->size()) {
-        // Move the free block ahead in the free list
-
-        // Remove from free list and index
-        remove_free_alloc(free_block);
-        // Change size
-        free_block->set_size(remainder);
-        // Insert back into free list and index
-        insert_free_alloc(free_block);
-      // Else there is smaller, but free_block is still larger
-      } else {
-        FreeHeader* larger = free_block->larger_free(pool_ptr_);
-        // Remove from free list
-        free_index_.remove(free_block, larger);
-        // Change size
-        free_block->set_size(remainder);
-        // Add back to free list
-        free_index_.add(free_block);
-      }
-    // Else allocating from smallest block
-    } else {
-      FreeHeader* larger = free_block->larger_free(pool_ptr_);
-      // Remove from free list
-      free_index_.remove(free_block, larger);
-      // Change size
-      free_block->set_size(remainder);
-      // Add back to free list
-      free_index_.add(free_block);
-    }
+    // Always remove, resize, and reinsert to make sure free list and free
+    // index are in sync
+    remove_free_alloc(free_block);
+    free_block->set_size(remainder);
+    insert_free_alloc(free_block);
 
     // After resize, can use next_adjacent() to safely get to the end of the
     // resized block
@@ -593,12 +555,12 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
         found = free_map.find(free_header->smaller_free(pool.pool_ptr_));
         if (found != free_map.end()) {
           smlr_index = found->second;
-          ACE_OS::sprintf(smlr_buff, "[%2d]", smlr_index);
+          sprintf(smlr_buff, "[%2d]", smlr_index); // preprocessed out
         }
         found = free_map.find(free_header->larger_free(pool.pool_ptr_));
         if (found != free_map.end()) {
           lrgr_index = found->second;
-          ACE_OS::sprintf(lrgr_buff, "[%2d]", lrgr_index);
+          sprintf(lrgr_buff, "[%2d]", lrgr_index); //preprocessed out
         }
       }
       ACE_OS::printf(
