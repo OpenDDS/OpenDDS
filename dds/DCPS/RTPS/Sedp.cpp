@@ -36,8 +36,6 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
 
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
-
 #include <ace/Reverse_Lock_T.h>
 #include <ace/Auto_Ptr.h>
 
