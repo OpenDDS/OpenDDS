@@ -1,6 +1,9 @@
 #include "Parser.h"
-#include "ace/Configuration_Import_Export.h"
 #include "dds/DCPS/Service_Participant.h"
+
+#include "ace/Configuration_Import_Export.h"
+#include "ace/OS_NS_stdio.h"
+
 #include <cstring>
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
@@ -99,15 +102,14 @@ Parser::parse_topic(ACE_Configuration_Heap& config,
   while (!config.enumerate_values(key,
                                   value_index++,
                                   value_name,
-                                  value_type))
-  {
+                                  value_type)) {
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
         status = status || topic.set(value_name.c_str(), value.c_str());
       }
     } else {
-      printf("unexpected value type %d\n", value_type);
+      ACE_OS::printf("unexpected value type %d\n", value_type);
       status = -1;
       break;
     }
@@ -133,15 +135,14 @@ Parser::parse_connection(ACE_Configuration_Heap& config,
   while (!config.enumerate_values(key,
                                   value_index++,
                                   value_name,
-                                  value_type))
-  {
+                                  value_type)) {
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
         status = status || connection.set(value_name.c_str(), value.c_str());
       }
     } else {
-      printf("unexpected value type %d\n", value_type);
+      ACE_OS::printf("unexpected value type %d\n", value_type);
       status = -1;
       break;
     }
@@ -169,8 +170,7 @@ Parser::parse_qos(ACE_Configuration_Heap& config,
   while (!config.enumerate_values(key,
                                   value_index++,
                                   value_name,
-                                  value_type))
-  {
+                                  value_type)) {
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
@@ -178,7 +178,7 @@ Parser::parse_qos(ACE_Configuration_Heap& config,
                  qos.set_qos(level, value_name.c_str(), value.c_str());
       }
     } else {
-      printf("unexpected value type %d\n", value_type);
+      ACE_OS::printf("unexpected value type %d\n", value_type);
       status = -1;
       break;
     }
@@ -199,8 +199,8 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
                           0, // don't create if missing
                           key) != 0) {
     if (required) {
-      printf("Could not open %s section in config file, status %d\n",
-             section_type, status);
+      ACE_OS::printf("Could not open %s section in config file, status %d\n",
+                     section_type, status);
       status = -1;
     }
   // Else, we can open this section
@@ -211,16 +211,14 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
 
     while (!config.enumerate_sections(key,
                                       section_index++,
-                                      section_name))
-    {
+                                      section_name)) {
       ACE_Configuration_Section_Key subkey;
       // Open subsection
       if (config.open_section(key,
                               section_name.c_str(),
                               0, // don't create if missing
-                              subkey) != 0)
-      {
-        printf("Could not open subsections of %s\n", section_name.c_str());
+                              subkey) != 0) {
+        ACE_OS::printf("Could not open subsections of %s\n", section_name.c_str());
         break;
       }
 
@@ -241,7 +239,7 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
         status = parse_qos(
             config, subkey, section_name.c_str(), QosSettings::subscriber);
       } else {
-        printf("unknown section %s\n", section_type);
+        ACE_OS::printf("unknown section %s\n", section_type);
       }
     }
   }
