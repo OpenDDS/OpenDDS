@@ -89,8 +89,13 @@
 /DdsDcpsInfoUtilsS.cpp
 /DdsDcpsInfoUtilsS.h
 /DdsDcpsInfoUtilsS.inl
+/DdsDcpsInfoUtilsTypeSupport.idl
+/DdsDcpsInfoUtilsTypeSupportC.cpp
+/DdsDcpsInfoUtilsTypeSupportC.h
+/DdsDcpsInfoUtilsTypeSupportC.inl
 /DdsDcpsInfoUtilsTypeSupportImpl.cpp
 /DdsDcpsInfoUtilsTypeSupportImpl.h
+/DdsDcpsInfoUtilsTypeSupportS.h
 /DdsDcpsInfrastructureC.cpp
 /DdsDcpsInfrastructureC.h
 /DdsDcpsInfrastructureC.inl
