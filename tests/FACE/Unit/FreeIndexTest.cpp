@@ -50,7 +50,7 @@ void test_index_lookup() {
   TEST_CHECK(FreeIndex::node_index(4097) == 9);
   TEST_CHECK(FreeIndex::node_index(9000) == 9);
   TEST_CHECK(FreeIndex::node_index(12000) == 9);
-  TEST_CHECK(FreeIndex::node_index(12000) == 20);
+  TEST_CHECK(FreeIndex::node_index(120000) == 9);
 }
 
 // add should insert

@@ -165,30 +165,29 @@ FreeIndex::FreeIndex(FreeHeader*& largest_free)
 void
 FreeIndex::add(FreeHeader* freed)
 {
-  for (FreeIndexNode* node = nodes_; node < nodes_ + size_; ++node) {
-    // If the freed block is of the size this node manages
-    if (node->contains(freed->size())) {
-      if ((node->ptr() == NULL) || (node->ptr()->size() >= freed->size())) {
-        node->set_ptr(freed);
-      }
-      break;
-    }
+  unsigned int index = node_index(freed->size());
+  FreeIndexNode* node = nodes_ + index;
+
+  // If the node is empty, or if freed is smaller or equal to the node's alloc
+  if ((node->ptr() == NULL) || (node->ptr()->size() >= freed->size())) {
+    // Use this alloc in the index
+    node->set_ptr(freed);
   }
 }
 
 void
 FreeIndex::remove(FreeHeader* free_block, FreeHeader* larger)
 {
-  for (FreeIndexNode* node = nodes_; node < nodes_ + size_; ++node) {
-    if (node->contains(free_block->size())) {
-      if (node->ptr() == free_block) {
-        if (larger && node->contains(larger->size())) {
-          node->set_ptr(larger);
-        } else {
-          node->set_ptr(NULL);
-        }
-      }
-      break;
+  unsigned int index = node_index(free_block->size());
+  FreeIndexNode* node = nodes_ + index;
+
+  // If the node points to the free block
+  if (node->ptr() == free_block) {
+    // If the larger can be used by this node
+    if (larger && node->contains(larger->size())) {
+      node->set_ptr(larger);
+    } else {
+      node->set_ptr(NULL);
     }
   }
 }
@@ -207,16 +206,8 @@ FreeIndex::init(FreeHeader* init_free_block)
 FreeHeader*
 FreeIndex::find(size_t search_size, unsigned char* pool_base)
 {
-  // Use shifting to perform log base 2 of size
-  //   start by using min + 1 (+1 because  min is a power of 2 whch is already
-  //   one bit)
-  size_t size_copy = search_size >> (min_index_pow + 1);
-  unsigned int pow = 0;
-  while (size_copy && pow < max_index_pow) {
-    ++pow;
-    size_copy = size_copy >> 1;
-  }
-  FreeIndexNode* index_node = nodes_ + pow;
+  unsigned int index = node_index(search_size);
+  FreeIndexNode* index_node = nodes_ + index;
 
   // Larger or equal to search_size
   FreeHeader* result = NULL;
@@ -254,7 +245,8 @@ FreeIndex::node_index(size_t size)
   //   one bit)
   size_t size_copy = size >> (min_index_pow + 1);
   unsigned int index = 0;
-  while (size_copy && index < max_index_pow) {
+  unsigned int max_index = max_index_pow - min_index_pow;
+  while (size_copy && (index < max_index)) {
     ++index;
     size_copy = size_copy >> 1;
   }
