@@ -34,8 +34,7 @@ namespace {
 
   std::string map_type(AST_Type* type)
   {
-    AST_Type* actual = type;
-    resolveActualType(actual);
+    AST_Type* actual = resolveActualType(type);
     const Classification cls = classify(actual);
     if (cls & CL_PRIMITIVE) {
       return primtype_[AST_PredefinedType::narrow_from_decl(actual)->pt()];
@@ -45,7 +44,7 @@ namespace {
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
       return primtype_[chartype] + '*';
     }
-    if (cls & (CL_STRUCTURE | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
+    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
       return scoped(type->name());
     }
     return "<<unknown>>";
@@ -94,14 +93,19 @@ namespace {
     const char* const nm = name->last_component()->get_string();
     be_global->lang_header_ <<
       "struct " << nm << ";\n";
-    if (size == AST_Type::VARIABLE) {
-      be_global->lang_header_ <<
-        "typedef " << helpers_[HLP_VAR_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
-        "typedef " << helpers_[HLP_OUT] << '<' << nm << "> " << nm << "_out;\n";
-    } else {
+    switch (size) {
+    case AST_Type::SIZE_UNKNOWN:
+      be_global->lang_header_ << "/* Unknown size */\n";
+    case AST_Type::FIXED:
       be_global->lang_header_ <<
         "typedef " << helpers_[HLP_FIX_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
         "typedef " << nm << "& " << nm << "_out;\n";
+      break;
+    case AST_Type::VARIABLE:
+      be_global->lang_header_ <<
+        "typedef " << helpers_[HLP_VAR_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
+        "typedef " << helpers_[HLP_OUT] << '<' << nm << "> " << nm << "_out;\n";
+      break;
     }
   }
 
@@ -112,8 +116,7 @@ namespace {
       elems *= arr->dims()[dim]->ev()->u.ulval;
       if (dim) ret += "[0]";
     }
-    AST_Type* base = arr->base_type();
-    resolveActualType(base);
+    AST_Type* base = resolveActualType(arr->base_type());
     if (AST_Array::narrow_from_decl(base)) {
       ret += "[0]" + array_dims(base, elems);
     }
@@ -143,6 +146,7 @@ public:
   virtual void init() = 0;
   virtual void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq) = 0;
   virtual bool gen_struct(AST_Structure* s, UTL_ScopedName* name, const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE size, const char* x) = 0;
+  virtual bool gen_union(AST_Union*, UTL_ScopedName* name, const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator) = 0;
 };
 
 class FaceGenerator : public GeneratorBase
@@ -323,8 +327,7 @@ public:
 
       for (size_t i = 0; i < fields.size(); ++i) {
         const std::string field_name = fields[i]->local_name()->get_string();
-        AST_Type* field_type = fields[i]->field_type();
-        resolveActualType(field_type);
+        AST_Type* field_type = resolveActualType(fields[i]->field_type());
         const Classification cls = classify(field_type);
         if (cls & CL_ARRAY) {
           ACE_CDR::ULong elems = 1;
@@ -352,8 +355,7 @@ public:
           "  using std::swap;\n";
         for (size_t i = 0; i < fields.size(); ++i) {
           const std::string fn = fields[i]->local_name()->get_string();
-          AST_Type* field_type = fields[i]->field_type();
-          resolveActualType(field_type);
+          AST_Type* field_type = resolveActualType(fields[i]->field_type());
           const Classification cls = classify(field_type);
           if (cls & CL_ARRAY) {
             ACE_CDR::ULong elems = 1;
@@ -378,6 +380,12 @@ public:
 
     gen_typecode(name);
     return true;
+  }
+
+  virtual bool gen_union(AST_Union*, UTL_ScopedName*, const std::vector<AST_UnionBranch*>&, AST_Type*)
+  {
+    std::cerr << "ERROR: unions are not supported with -L*\n";
+    return false;
   }
 
   static FaceGenerator instance;
@@ -558,8 +566,7 @@ public:
 
       for (size_t i = 0; i < fields.size(); ++i) {
         const std::string field_name = fields[i]->local_name()->get_string();
-        AST_Type* field_type = fields[i]->field_type();
-        resolveActualType(field_type);
+        AST_Type* field_type = resolveActualType(fields[i]->field_type());
         const Classification cls = classify(field_type);
         if (cls & CL_ARRAY) {
           ACE_CDR::ULong elems = 1;
@@ -587,8 +594,7 @@ public:
           "  using std::swap;\n";
         for (size_t i = 0; i < fields.size(); ++i) {
           const std::string fn = fields[i]->local_name()->get_string();
-          AST_Type* field_type = fields[i]->field_type();
-          resolveActualType(field_type);
+          AST_Type* field_type = resolveActualType(fields[i]->field_type());
           const Classification cls = classify(field_type);
           if (cls & CL_ARRAY) {
             ACE_CDR::ULong elems = 1;
@@ -604,6 +610,310 @@ public:
         }
         be_global->impl_ << "}\n\n";
       }
+
+      be_global->impl_ <<
+        "ACE_CDR::Boolean operator<< (ACE_OutputCDR &, const " << nm << "&) { return true; }\n\n";
+      be_global->impl_ <<
+        "ACE_CDR::Boolean operator>> (ACE_InputCDR &, " << nm << "&) { return true; }\n\n";
+    }
+
+    gen_typecode(name);
+    return true;
+  }
+
+  struct GenerateGettersAndSetters
+  {
+    AST_Type* discriminator;
+
+    GenerateGettersAndSetters (AST_Type* d)
+      : discriminator(d)
+    { }
+
+    void operator() (AST_UnionBranch* branch)
+    {
+      const char* field_name = branch->local_name()->get_string();
+      std::stringstream first_label;
+      {
+        AST_UnionLabel* label = branch->label(0);
+        if (label->label_kind() == AST_UnionLabel::UL_default) {
+          // TODO:  Pick a default value.
+          first_label << "some_default_value";
+        } else if (discriminator->node_type() == AST_Decl::NT_enum) {
+          first_label << getEnumLabel(label->label_val(), discriminator);
+        } else {
+          first_label << *label->label_val()->ev();
+        }
+      }
+
+      AST_Type* field_type = branch->field_type();
+      const std::string field_type_string = map_type(field_type);
+      AST_Type* actual_field_type = resolveActualType(field_type);
+      const Classification cls = classify(actual_field_type);
+      if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+        be_global->lang_header_ <<
+          "  void " << field_name << " (" << field_type_string << " x) {\n"
+          "    _reset();\n"
+          "    this->_u." << field_name << " = x;\n"
+          "    _discriminator = " << first_label.str() << ";\n"
+          "  }\n"
+          "  " << field_type_string << ' ' << field_name << " () const {\n"
+          "    return this->_u." << field_name << ";\n"
+          "  }\n";
+      } else if (cls & CL_STRING) {
+        const std::string& primtype = (cls & CL_WIDE) ? primtype_[AST_PredefinedType::PT_wchar] : primtype_[AST_PredefinedType::PT_char];
+        const std::string& helper = (cls & CL_WIDE) ? helpers_[HLP_WSTR_VAR] : helpers_[HLP_STR_VAR];
+        be_global->lang_header_ <<
+          "  void " << field_name << " (" << primtype << "* x) {\n"
+          "    _reset();\n" <<
+          "    this->_u." << field_name << " = x;\n"
+          "    _discriminator = " << first_label.str() << ";\n"
+          "  }\n"
+          "  void " << field_name << " (const " << primtype << "* x) {\n"
+          "    _reset();\n"
+          "    this->_u." << field_name << " = ::CORBA::string_dup(x);\n"
+          "    _discriminator = " << first_label.str() << ";\n"
+          "  }\n"
+          "  void " << field_name << " (const " << helper << "& x) {\n"
+          "    _reset();\n" <<
+          "    this->_u." << field_name << " = ::CORBA::string_dup(x.in());\n"
+          "    _discriminator = " << first_label.str() << ";\n"
+          "  }\n"
+          "  const " << primtype << "* " << field_name << " () const {\n"
+          "    return this->_u." << field_name << ";\n"
+          "  }\n";
+      } else if (cls & CL_ARRAY) {
+        // TODO:  Generate code.
+        be_global->lang_header_ <<
+          "  void " << field_name << " (" << field_type_string << ");\n"
+          "  " << field_type_string << "_slice* " << field_name << " () const;\n";
+      } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+        be_global->lang_header_ <<
+          "  void " << field_name << " (const " << field_type_string << "& x) {\n"
+          "    _reset();\n"
+          "    this->_u." << field_name << " = new " << field_type_string << "(x);\n"
+          "    _discriminator = " << first_label.str() << ";\n"
+          "  }\n"
+          "  const " << field_type_string << "& " << field_name << " () const {\n"
+          "    return *this->_u." << field_name << ";\n"
+          "  }\n"
+          "  " << field_type_string << "& " << field_name << " () {\n"
+          "    return *this->_u." << field_name << ";\n"
+          "  }\n";
+      } else {
+        std::cerr << "Unsupported type for union element\n";
+      }
+    }
+  };
+
+  static void generate_union_field (AST_UnionBranch* branch)
+  {
+    AST_Type* field_type = branch->field_type();
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+      be_global->lang_header_ <<
+        "    " << map_type(field_type) << ' ' << branch->local_name()->get_string() << ";\n";
+    } else if (cls & CL_STRING) {
+      const AST_PredefinedType::PredefinedType chartype = (cls & CL_WIDE)
+        ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
+      be_global->lang_header_ <<
+        "    " << primtype_[chartype] << "* " << branch->local_name()->get_string() << ";\n";
+    } else if (cls & (CL_ARRAY | CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+      be_global->lang_header_ <<
+        "    " << map_type(field_type) << "* " << branch->local_name()->get_string() << ";\n";
+    } else {
+      std::cerr << "Unsupported type for union element\n";
+    }
+  }
+
+  static bool hasDefaultLabel (const std::vector<AST_UnionBranch*>& branches)
+  {
+    for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin(), limit = branches.end();
+         pos != limit;
+         ++pos) {
+      AST_UnionBranch* branch = *pos;
+      for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
+        AST_UnionLabel* label = branch->label(j);
+        if (label->label_kind() == AST_UnionLabel::UL_default) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  static size_t countLabels (const std::vector<AST_UnionBranch*>& branches)
+  {
+    size_t count = 0;
+
+    for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin(), limit = branches.end();
+         pos != limit;
+         ++pos) {
+      count += (*pos)->label_list_length();
+    }
+
+    return count;
+  }
+
+  static bool needsDefault (const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
+  {
+    return !hasDefaultLabel(branches) && needSyntheticDefault(discriminator, countLabels(branches));
+  }
+
+  virtual bool gen_union(AST_Union* u, UTL_ScopedName* name, const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
+  {
+    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const char* const nm = name->last_component()->get_string();
+    struct_decls(name, u->size_type());
+    be_global->lang_header_ <<
+      "\n"
+      "class " << exporter() << nm << " \n"
+      "{\n"
+      " public:\n"
+      "  typedef " << nm << "_var _var_type;\n"
+      "  typedef " << nm << "_out _out_type;\n"
+      "  " << nm << "();\n"
+      "  " << nm << "(const " << nm << "&);\n"
+      "  ~" << nm << "() { _reset(); };\n"
+      "  " << nm << "& operator=(const " << nm << "&);\n"
+      "  void _d(" << scoped(discriminator->name()) << " d) { _discriminator = d; }\n"
+      "  " << scoped(discriminator->name()) << " _d() const { return _discriminator; }\n";
+
+    std::for_each (branches.begin(), branches.end(), GenerateGettersAndSetters(discriminator));
+
+    if (needsDefault(branches, discriminator)) {
+      // TODO:  Generate.
+      be_global->lang_header_ <<
+        "  void _default();\n";
+    }
+
+    be_global->lang_header_ <<
+      "  bool operator==(const " << nm << "& rhs) const;\n"
+      "  POOL_ALLOCATION_HOOKS\n";
+
+    // TODO:  Generate operator== and swap.
+
+    be_global->lang_header_ <<
+      " private:\n"
+      "  " << scoped(discriminator->name()) << " _discriminator;\n"
+      "  union {\n";
+
+    std::for_each (branches.begin(), branches.end(), generate_union_field);
+
+    be_global->lang_header_ <<
+      "  } _u;\n";
+
+    be_global->lang_header_ <<
+      "  void _reset();\n"
+      "};\n\n";
+
+    be_global->add_include("dds/DCPS/PoolAllocationBase.h");
+    be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
+
+    be_global->lang_header_ <<
+      exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR& os, const " << nm << "& x);\n\n";
+    be_global->lang_header_ <<
+      exporter() << "ACE_CDR::Boolean operator>> (ACE_InputCDR& os, " << nm << "& x);\n\n";
+
+    {
+      const ScopedNamespaceGuard guard(name, be_global->impl_);
+
+      be_global->impl_ <<
+        nm << "::" << nm << "() { std::memset (this, 0, sizeof (" << nm << ")); }\n\n";
+
+      be_global->impl_ <<
+        nm << "::" << nm << "(const " << nm << "& other) {\n" <<
+        "  this->_discriminator = other._discriminator;\n" <<
+        "  switch (this->_discriminator) {\n";
+
+      for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin (), limit = branches.end ();
+           pos != limit;
+           ++pos) {
+        AST_UnionBranch* branch = *pos;
+        for (size_t idx = 0; idx != branch->label_list_length(); ++idx) {
+          AST_UnionLabel* label = branch->label(idx);
+          if (label->label_kind() == AST_UnionLabel::UL_default) {
+            be_global->impl_ << "  default:\n";
+          } else if (discriminator->node_type() == AST_Decl::NT_enum) {
+            be_global->impl_ << "  case "
+                             << getEnumLabel(label->label_val(), discriminator) << ":\n";
+          } else {
+            be_global->impl_ << "  case " << *label->label_val()->ev() << ":\n";
+          }
+        }
+
+        AST_Type* field_type = branch->field_type();
+        AST_Type* actual_field_type = resolveActualType(field_type);
+        const Classification cls = classify(actual_field_type);
+        if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+          be_global->impl_ <<
+            "    this->_u." << branch->local_name()->get_string() << " = other._u." << branch->local_name()->get_string() << ";\n";
+        } else if (cls & CL_STRING) {
+          be_global->impl_ <<
+            "    this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? ::CORBA::string_dup(other._u." << branch->local_name()->get_string() << ") : 0 ;\n";
+        } else if (cls & (CL_ARRAY | CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+          be_global->impl_ <<
+            "    this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? new " << map_type(field_type) << "(*other._u." << branch->local_name()->get_string() << ") : 0;\n";
+        } else {
+          std::cerr << "Unsupported type for union element\n";
+        }
+
+        be_global->impl_ <<
+          "  break;\n";
+      }
+
+      be_global->impl_ <<
+        "  }\n"
+        "}\n\n";
+
+      be_global->impl_ <<
+        nm << "& " << nm << "::operator=(const " << nm << "& other) {\n" <<
+        "  if (this != &other) {\n" <<
+        "    _reset();\n" <<
+        "    this->_discriminator = other._discriminator;\n" <<
+        "    switch (this->_discriminator) {\n";
+
+      for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin (), limit = branches.end ();
+           pos != limit;
+           ++pos) {
+        AST_UnionBranch* branch = *pos;
+        for (size_t idx = 0; idx != branch->label_list_length(); ++idx) {
+          AST_UnionLabel* label = branch->label(idx);
+          if (label->label_kind() == AST_UnionLabel::UL_default) {
+            be_global->impl_ << "    default:\n";
+          } else if (discriminator->node_type() == AST_Decl::NT_enum) {
+            be_global->impl_ << "    case "
+                             << getEnumLabel(label->label_val(), discriminator) << ":\n";
+          } else {
+            be_global->impl_ << "    case " << *label->label_val()->ev() << ":\n";
+          }
+        }
+
+        AST_Type* field_type = branch->field_type();
+        AST_Type* actual_field_type = resolveActualType(field_type);
+        const Classification cls = classify(actual_field_type);
+        if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+          be_global->impl_ <<
+            "      this->_u." << branch->local_name()->get_string() << " = other._u." << branch->local_name()->get_string() << ";\n";
+        } else if (cls & CL_STRING) {
+          be_global->impl_ <<
+            "      this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? ::CORBA::string_dup(other._u." << branch->local_name()->get_string() << ") : 0 ;\n";
+        } else if (cls & (CL_ARRAY | CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+          be_global->impl_ <<
+            "      this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? new " << map_type(field_type) << "(*other._u." << branch->local_name()->get_string() << ") : 0;\n";
+        } else {
+          std::cerr << "Unsupported type for union element\n";
+        }
+
+        be_global->impl_ <<
+          "      break;\n";
+      }
+
+      be_global->impl_ <<
+        "    }\n"
+        "  }\n"
+        "  return *this;\n"
+        "}\n\n";
 
       be_global->impl_ <<
         "ACE_CDR::Boolean operator<< (ACE_OutputCDR &, const " << nm << "&) { return true; }\n\n";
@@ -938,8 +1248,7 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
             "typedef " << map_type(base) << "_out " << nm << "_out;\n";
         }
 
-      AST_Type* actual_base = base;
-      resolveActualType(actual_base);
+      AST_Type* actual_base = resolveActualType(base);
       if (actual_base->node_type() == AST_Decl::NT_array) {
         be_global->lang_header_ <<
           "typedef " << map_type(base) << "_var " << nm << "_var;\n" <<
@@ -968,10 +1277,19 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
   return true;
 }
 
-bool langmap_generator::gen_union(AST_Union*, UTL_ScopedName*,
-                                  const std::vector<AST_UnionBranch*>&,
-                                  AST_Type*, const char*)
+bool langmap_generator::gen_union_fwd(AST_UnionFwd* node,
+                                      UTL_ScopedName* name,
+                                      AST_Type::SIZE_TYPE size)
 {
-  std::cerr << "ERROR: unions are not supported with -L*\n";
-  return false;
+  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+  struct_decls(name, node->full_definition()->size_type());
+  return true;
+}
+
+bool langmap_generator::gen_union(AST_Union* u, UTL_ScopedName* name,
+                                  const std::vector<AST_UnionBranch*>& branches,
+                                  AST_Type* discriminator,
+                                  const char*)
+{
+  return generator_->gen_union(u, name, branches, discriminator);
 }

@@ -152,15 +152,29 @@ bool composite_generator::gen_native(AST_Native* node, UTL_ScopedName* name, con
   return true;
 }
 
-bool composite_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-  const char* repoid)
+bool composite_generator::gen_union(AST_Union* node,
+                                    UTL_ScopedName* name,
+                                    const std::vector<AST_UnionBranch*>& branches,
+                                    AST_Type* discriminator,
+                                    const char* repoid)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
     if (!node->imported() || (*it)->do_included_files())
       if (!(*it)->gen_union(node, name, branches, discriminator, repoid))
         return false;
+  }
+
+  return true;
+}
+
+bool composite_generator::gen_union_fwd(AST_UnionFwd* uf, UTL_ScopedName* name,
+  AST_Type::SIZE_TYPE size)
+{
+  for (vector<dds_generator*>::iterator it(components_.begin());
+       it != components_.end(); ++it) {
+    if (!(*it)->gen_union_fwd(uf, name, size))
+      return false;
   }
 
   return true;

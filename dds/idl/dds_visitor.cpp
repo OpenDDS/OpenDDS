@@ -512,8 +512,16 @@ dds_visitor::visit_string(AST_String*)
   return 0;
 }
 
-int dds_visitor::visit_union_fwd(AST_UnionFwd*)
+int
+dds_visitor::visit_union_fwd(AST_UnionFwd* node)
 {
+  const char* name = node->local_name()->get_string();
+  BE_Comment_Guard g("UNION-FWD", name);
+
+  if (!java_ts_only_) {
+    error_ |= !gen_target_.gen_union_fwd(node, node->name(), node->size_type());
+  }
+
   return 0;
 }
 
