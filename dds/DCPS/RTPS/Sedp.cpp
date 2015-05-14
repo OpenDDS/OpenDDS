@@ -36,8 +36,6 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
 
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
-
 #include <ace/Reverse_Lock_T.h>
 #include <ace/Auto_Ptr.h>
 
@@ -2701,8 +2699,8 @@ Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
 bool
 Sedp::is_opendds(const GUID_t& endpoint)
 {
-  return !memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
-                 sizeof(DCPS::VENDORID_OCI));
+  return !std::memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
+                      sizeof(DCPS::VENDORID_OCI));
 }
 
 void

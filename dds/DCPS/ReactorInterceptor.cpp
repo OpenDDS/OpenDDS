@@ -40,7 +40,7 @@ ReactorInterceptor::~ReactorInterceptor()
 
 bool ReactorInterceptor::should_execute_immediately()
 {
-  return owner_ == ACE_Thread::self() ||
+  return ACE_OS::thr_equal(owner_, ACE_Thread::self()) ||
     reactor_is_shut_down();
 }
 

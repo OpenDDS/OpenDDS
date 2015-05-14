@@ -8,7 +8,7 @@
 
 #ifndef OPENDDS_DCPS_INFO_UTILS_IDL
 #define OPENDDS_DCPS_INFO_UTILS_IDL
-#include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsCore.idl"
 #include "dds/DdsDcpsGuid.idl"
 
 module OpenDDS

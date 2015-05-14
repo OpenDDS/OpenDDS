@@ -42,7 +42,7 @@ int
 QosSettings::set_qos(QosLevel level, const char* name, const char* value)
 {
   int status = 0;
-  switch(level) {
+  switch (level) {
     case publisher:
       status = set_qos(publisher_qos_, name, value);
       break;
@@ -106,8 +106,8 @@ set_duration_qos_value(DDS::Duration_t& target,
                        const char* value)        // config value provided
 {
   char buffer[64];
-  strncpy(buffer, prefix_match, 64 - 4);
-  strcat(buffer, ".sec");
+  std::strncpy(buffer, prefix_match, 64 - 4);
+  std::strcat(buffer, ".sec");
   if (!std::strcmp(name, buffer)) {
     if (!std::strcmp(value, "DURATION_INFINITE_SEC")) {
       target.sec=DDS::DURATION_INFINITE_SEC;
@@ -116,8 +116,8 @@ set_duration_qos_value(DDS::Duration_t& target,
     target.sec = atoi(value);
     return true;
   }
-  strncpy(buffer, prefix_match, 64 - 7);
-  strcat(buffer, ".nanosec");
+  std::strncpy(buffer, prefix_match, 64 - 7);
+  std::strcat(buffer, ".nanosec");
   if (!std::strcmp(name, buffer)) {
     if (!std::strcmp(value, "DURATION_INFINITE_NSEC")) {
       target.nanosec=DDS::DURATION_INFINITE_NSEC;
@@ -164,10 +164,10 @@ set_partition_name_qos(
     // Value can be a comma-separated list
     const char* start = value;
     char buffer[128];
-    memset(buffer, 0, sizeof(buffer));
-    while (const char* next_comma = strchr(start, ',')) {
+    std::memset(buffer, 0, sizeof(buffer));
+    while (const char* next_comma = std::strchr(start, ',')) {
       // Copy into temp buffer, won't have null
-      strncpy(buffer, start, next_comma - start);
+      std::strncpy(buffer, start, next_comma - start);
       // Append null
       buffer[next_comma - start] = '\0';
       // Add to QOS
