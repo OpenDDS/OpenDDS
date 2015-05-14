@@ -15,6 +15,7 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsDomainC.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 
 #include "dds/DCPS/Marked_Default_Qos.h"
 
@@ -52,19 +53,19 @@ struct QosNoOp
 /// created subscriber (either set to the first subscriber explicitly passed
 /// to reader(...) or to the implicitly created subscriber from calling
 /// reader() with no subscriber).
-template<typename Traits>
+template<typename MessageType>
 // TODO: change codegen and use Message
 class DDSTopicFacade
 {
 public:
   friend class DDSApp;
-  /* typedef TypeSupportImplType  typesupportimpl_type; */
-  typedef typename Traits::DataWriterType         datawriter_type;
-  typedef typename Traits::DataWriterVarType      datawriter_var;
+  typedef OpenDDS::DCPS::DDSTraits<MessageType> TraitsType;
+  typedef typename TraitsType::DataWriterType         DataWriterType;
+  typedef typename TraitsType::DataWriterType::_var_type     DataWriterVarType;
   typedef std::map<DDS::DataWriter_ptr, DDS::Publisher_var>  DataWriters;
   typedef std::map<DDS::DataReader_ptr, DDS::Subscriber_var> DataReaders;
 
-  datawriter_var writer(DDS::Publisher_var          publisher = DDS::Publisher_var(),
+  DataWriterVarType writer(DDS::Publisher_var          publisher = DDS::Publisher_var(),
                         DDS::DataWriterListener_var a_listener =
                           DDS::DataWriterListener::_nil(),
                         DDS::StatusMask             mask =
@@ -74,7 +75,7 @@ public:
   }
 
   template<typename QosFunc>
-  datawriter_var writer(QosFunc                     qos_func)
+  DataWriterVarType writer(QosFunc                     qos_func)
   {
     DDS::Publisher_var publisher;
     determine_publisher(publisher);
@@ -85,7 +86,7 @@ public:
   }
 
   template<typename QosFunc>
-  datawriter_var writer(DDS::Publisher_var          publisher,
+  DataWriterVarType writer(DDS::Publisher_var          publisher,
                         QosFunc                     qos_func,
                         DDS::DataWriterListener_var a_listener =
                           DDS::DataWriterListener::_nil(),
@@ -101,7 +102,7 @@ public:
                                    qos,
                                    a_listener.in(),
                                    mask);
-    return datawriter_var(datawriter_type::_narrow(writer.in()));
+    return DataWriterVarType(DataWriterType::_narrow(writer.in()));
   }
 
   DDS::DataReader_var reader(DDS::DataReaderListener_var listener,
@@ -134,7 +135,7 @@ public:
                                          mask);
   }
 
-  void remove(datawriter_var& writer)
+  void remove(DataWriterVarType& writer)
   {
     if (remove(writer.in(), "DataWriter", writers_))
       writer = 0;

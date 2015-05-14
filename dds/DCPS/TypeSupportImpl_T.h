@@ -8,6 +8,7 @@
 #include "dds/DCPS/DataReaderImpl_T.h"
 
 namespace OpenDDS {
+  namespace DCPS {
 
 /** Servant for TypeSupport interface of Traits::MessageType data type.
  *
@@ -15,22 +16,21 @@ namespace OpenDDS {
  * this interface.
  *
  */
-  template <typename Traits>
-  class TypeSupportImpl
-    : public virtual OpenDDS::DCPS::LocalObject<typename Traits::TypeSupportType>
+  template <typename MessageType>
+  class TypeSupportImpl_T
+    : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::TypeSupportType>
     , public virtual OpenDDS::DCPS::TypeSupportImpl
   {
   public:
-    typedef Traits TraitsType;
-    typedef typename Traits::MessageType MessageType;
-    typedef typename Traits::TypeSupportType TypeSupportType;
+    typedef DDSTraits<MessageType> TraitsType;
+    typedef typename TraitsType::TypeSupportType TypeSupportType;
 
-    TypeSupportImpl() { }
-    virtual ~TypeSupportImpl() { }
+    TypeSupportImpl_T() { }
+    virtual ~TypeSupportImpl_T() { }
 
     virtual ::DDS::DataWriter_ptr create_datawriter()
     {
-      typedef DataWriterImpl<Traits> DataWriterImplType;
+      typedef DataWriterImpl_T<MessageType> DataWriterImplType;
 
       DataWriterImplType* writer_impl;
       ACE_NEW_RETURN(writer_impl,
@@ -42,7 +42,7 @@ namespace OpenDDS {
 
     virtual ::DDS::DataReader_ptr create_datareader()
     {
-      typedef DataReaderImpl<Traits> DataReaderImplType;
+      typedef DataReaderImpl_T<MessageType> DataReaderImplType;
 
       DataReaderImplType* reader_impl = 0;
       ACE_NEW_RETURN(reader_impl,
@@ -55,7 +55,7 @@ namespace OpenDDS {
 #ifndef OPENDDS_NO_MULTI_TOPIC
     virtual ::DDS::DataReader_ptr create_multitopic_datareader()
     {
-      typedef DataReaderImpl<Traits> DataReaderImplType;
+      typedef DataReaderImpl_T<MessageType> DataReaderImplType;
       return new OpenDDS::DCPS::MultiTopicDataReader_T<MessageType, DataReaderImplType>;
     }
 #endif
@@ -69,14 +69,15 @@ namespace OpenDDS {
 
     virtual bool has_dcps_key()
     {
-      return Traits::gen_has_key(MessageType());
+      return TraitsType::gen_has_key(MessageType());
     }
 
-    static typename Traits::TypeSupportType::_ptr_type _narrow(CORBA::Object_ptr obj) {
+    static typename TraitsType::TypeSupportType::_ptr_type _narrow(CORBA::Object_ptr obj) {
       return TypeSupportType::_narrow(obj);
     }
   };
 
+  }
 }
 
 #endif /* dds_DCPS_TypeSupportImpl_h */

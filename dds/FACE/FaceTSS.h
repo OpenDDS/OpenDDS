@@ -47,7 +47,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
     return;
   }
 
-  typedef typename DCPS::DDSTraits<Msg>::DataReader DataReader;
+  typedef typename DCPS::DDSTraits<Msg>::DataReaderType DataReader;
   const typename DataReader::_var_type typedReader =
     DataReader::_narrow(readers[connection_id]);
   if (!typedReader) {
@@ -72,7 +72,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
     return;
   }
 
-  typename DCPS::DDSTraits<Msg>::Sequence seq;
+  typename DCPS::DDSTraits<Msg>::MessageSequenceType seq;
   DDS::SampleInfoSeq sinfo;
   ret = typedReader->take_w_condition(seq, sinfo, 1 /*max*/, rc);
 
@@ -99,7 +99,7 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
     return;
   }
 
-  typedef typename DCPS::DDSTraits<Msg>::DataWriter DataWriter;
+  typedef typename DCPS::DDSTraits<Msg>::DataWriterType DataWriter;
   const typename DataWriter::_var_type typedWriter =
     DataWriter::_narrow(writers[connection_id]);
   if (!typedWriter) {
@@ -159,7 +159,7 @@ private:
 
   void on_data_available(DDS::DataReader_ptr reader)
   {
-    typedef typename DCPS::DDSTraits<Msg>::DataReader DataReader;
+    typedef typename DCPS::DDSTraits<Msg>::DataReaderType DataReader;
     const typename DataReader::_var_type typedReader =
       DataReader::_narrow(reader);
     if (!typedReader) {
