@@ -17,6 +17,7 @@ project(*FreeIndex) : dcps, opendds_face {
 }
 
 project(*SafetyProfilePool) : dcps, opendds_face {
+  avoids      += no_opendds_safety_profile
   Source_Files {
     SafetyProfilePoolTest.cpp
   }
