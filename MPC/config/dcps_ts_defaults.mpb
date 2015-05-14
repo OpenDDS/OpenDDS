@@ -17,7 +17,6 @@ project : dds_macros {
     libpath               = $(ACE_ROOT)/lib
     command   = $(OPENDDS_IDL)
     dependent = $(OPENDDS_IDL_DEP) \
-      $(DDS_ROOT)/dds/idl/CPPTemplate.txt \
       $(DDS_ROOT)/dds/idl/HTemplate.txt $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_flags = commandflags
     inputext              = .idl

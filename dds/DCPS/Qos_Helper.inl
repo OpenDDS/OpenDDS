@@ -358,6 +358,7 @@ bool operator == (const DDS::ResourceLimitsQosPolicy& qos1,
 }
 #endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::EntityFactoryQosPolicy& qos1,
                   const DDS::EntityFactoryQosPolicy& qos2)
@@ -365,7 +366,9 @@ bool operator == (const DDS::EntityFactoryQosPolicy& qos1,
   return
     qos1.autoenable_created_entities == qos2.autoenable_created_entities;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::WriterDataLifecycleQosPolicy& qos1,
                   const DDS::WriterDataLifecycleQosPolicy& qos2)
@@ -373,7 +376,9 @@ bool operator == (const DDS::WriterDataLifecycleQosPolicy& qos1,
   return
     qos1.autodispose_unregistered_instances == qos2.autodispose_unregistered_instances;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::ReaderDataLifecycleQosPolicy& qos1,
                   const DDS::ReaderDataLifecycleQosPolicy& qos2)
@@ -383,6 +388,7 @@ bool operator == (const DDS::ReaderDataLifecycleQosPolicy& qos1,
     && (qos1.autopurge_disposed_samples_delay == qos2.autopurge_disposed_samples_delay);
 
 }
+#endif
 
 ACE_INLINE
 bool operator == (const DDS::DomainParticipantQos& qos1,
@@ -415,6 +421,7 @@ bool operator == (const DDS::TopicQos& qos1,
 }
 #endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::DataWriterQos& qos1,
                   const DDS::DataWriterQos& qos2)
@@ -438,7 +445,9 @@ bool operator == (const DDS::DataWriterQos& qos1,
 #endif
     && qos1.writer_data_lifecycle == qos2.writer_data_lifecycle;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::PublisherQos& qos1,
                   const DDS::PublisherQos& qos2)
@@ -449,7 +458,9 @@ bool operator == (const DDS::PublisherQos& qos1,
     && qos1.group_data == qos2.group_data
     && qos1.entity_factory == qos2.entity_factory;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::DataReaderQos& qos1,
                   const DDS::DataReaderQos& qos2)
@@ -467,7 +478,9 @@ bool operator == (const DDS::DataReaderQos& qos1,
     && qos1.time_based_filter == qos2.time_based_filter
     && qos1.reader_data_lifecycle == qos2.reader_data_lifecycle;
 }
+#endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE
 bool operator == (const DDS::SubscriberQos& qos1,
                   const DDS::SubscriberQos& qos2)
@@ -478,6 +491,7 @@ bool operator == (const DDS::SubscriberQos& qos1,
     && qos1.group_data == qos2.group_data
     && qos1.entity_factory == qos2.entity_factory;
 }
+#endif
 
 ACE_INLINE
 bool operator == (const DDS::DomainParticipantFactoryQos& qos1,

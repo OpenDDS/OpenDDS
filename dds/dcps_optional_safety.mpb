@@ -9,6 +9,7 @@ feature(no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
   }
 
   Source_Files {
+    DdsDcpsGuidC.cpp
     DdsDcpsGuidTypeSupportImpl.cpp
   }
 }
@@ -19,14 +20,16 @@ feature(!no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
                    -Wb,export_include=dds/DCPS/dcps_export.h
 
   IDL_Files {
-    ^DdsDcpsInfoUtils.idl
     ^DdsDcpsGuid.idl
   }
 
   TypeSupport_Files {
     dcps_ts_flags += -Lspcpp -SI
-    DdsDcpsInfoUtils.idl
     DdsDcpsGuid.idl
+  }
+
+  Source_Files {
+    DdsDcpsGuidTypeSupportImpl.cpp
   }
 }
 
@@ -55,6 +58,8 @@ feature(no_opendds_safety_profile, built_in_topics) : taoidldefaults, dcps_ts_de
   }
 
   Source_Files {
+    DdsDcpsCoreC.cpp
+    DdsDcpsInfoUtilsC.cpp
     DdsDcpsCoreTypeSupportC.cpp
     DdsDcpsInfoUtilsTypeSupportC.cpp
     DdsDcpsInfrastructureTypeSupportC.cpp
@@ -77,6 +82,8 @@ feature(no_opendds_safety_profile, !built_in_topics) : taoidldefaults, dcps_ts_d
   }
 
   Source_Files {
+    DdsDcpsCoreC.cpp
+    DdsDcpsInfoUtilsC.cpp
     DdsDcpsCoreTypeSupportImpl.cpp
     DdsDcpsInfoUtilsTypeSupportImpl.cpp
     DdsDcpsInfrastructureTypeSupportImpl.cpp
@@ -88,17 +95,31 @@ feature(!no_opendds_safety_profile, built_in_topics) : dcps_ts_defaults, taoidld
                    -Wb,export_macro=OpenDDS_Dcps_Export \
                    -Wb,export_include=dds/DCPS/dcps_export.h
 
-  IDL_Files {
-    ^DdsDcpsCore.idl
-  }
-
   TypeSupport_Files {
     dcps_ts_flags += -Lspcpp
     DdsDcpsCore.idl
+    DdsDcpsInfoUtils.idl
   }
 
   idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
+
   IDL_Files {
+    ^DdsDcpsCore.idl
+    ^DdsDcpsInfoUtils.idl
     DdsDcpsCoreTypeSupport.idl
+    DdsDcpsInfoUtilsTypeSupport.idl
   }
+
+  Header_Files {
+    DdsDcpsCoreTypeSupportC.h
+    DdsDcpsInfoUtilsTypeSupportC.h
+  }
+
+  Source_Files {
+    DdsDcpsCoreTypeSupportC.cpp
+    DdsDcpsInfoUtilsTypeSupportC.cpp
+    DdsDcpsCoreTypeSupportImpl.cpp
+    DdsDcpsInfoUtilsTypeSupportImpl.cpp
+  }
+
 }
