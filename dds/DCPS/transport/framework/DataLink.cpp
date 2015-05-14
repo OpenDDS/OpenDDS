@@ -1482,6 +1482,8 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
 
 #endif /* IPV6_TCLASS */
 #endif /* ACE_HAS_IPV6 */
+
+#ifdef IP_TOS
   result = socket.set_option(
              IPPROTO_IP,
              IP_TOS,
@@ -1493,13 +1495,14 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
       && (errno != WSAEINVAL)
 #endif
      ) {
+#endif // IP_TOS
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::set_dscp_codepoint() - ")
                ACE_TEXT("failed to set the %C codepoint to %d: %m, ")
                ACE_TEXT("try running as superuser.\n"),
                which,
                cp));
-
+#ifdef IP_TOS
   } else if (DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::set_dscp_codepoint() - ")
@@ -1507,6 +1510,7 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
                which,
                cp));
   }
+#endif
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE

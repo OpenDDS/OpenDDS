@@ -6,6 +6,8 @@
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
+#include <cstring>
+
 namespace FACE {
 namespace TS {
 
@@ -133,7 +135,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
     if (connection_name[0]) {
       // Validate provided connection_name
       OPENDDS_STRING conn_name = entities.connections_[connection_id].first;
-      if (strcmp(connection_name, conn_name.c_str()) == 0) {
+      if (std::strcmp(connection_name, conn_name.c_str()) == 0) {
         return_code = RC_NO_ERROR;
       } else {
         return_code = INVALID_PARAM;

@@ -17,8 +17,13 @@
 /RtpsCoreC.h
 /RtpsCoreC.inl
 /RtpsCoreS.h
+/RtpsCoreTypeSupport.idl
+/RtpsCoreTypeSupportC.cpp
+/RtpsCoreTypeSupportC.h
+/RtpsCoreTypeSupportC.inl
 /RtpsCoreTypeSupportImpl.cpp
 /RtpsCoreTypeSupportImpl.h
+/RtpsCoreTypeSupportS.h
 /RtpsMessageTypesC.cpp
 /RtpsMessageTypesC.h
 /RtpsMessageTypesC.inl

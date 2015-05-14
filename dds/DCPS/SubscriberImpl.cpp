@@ -558,9 +558,10 @@ SubscriberImpl::set_qos(
                          guard,
                          this->si_lock_,
                          DDS::RETCODE_ERROR);
-        DataReaderMap::const_iterator endIter = datareader_map_.end();
+        // after FaceCTS bug 619 is fixed, make endIter and iter const iteratorsx
+        DataReaderMap::iterator endIter = datareader_map_.end();
 
-        for (DataReaderMap::const_iterator iter = datareader_map_.begin();
+        for (DataReaderMap::iterator iter = datareader_map_.begin();
              iter != endIter; ++iter) {
           DataReaderImpl* reader = iter->second;
           reader->set_subscriber_qos (qos);

@@ -164,7 +164,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (try_marshaling(val, val_out, 60, ARRAY_LEN*5+14, 2+3+3+2, 60,
                        "Xyz::StructOfArrayOfString")) {
       for (ACE_CDR::ULong ii =0; ii < ARRAY_LEN; ii++) {
-        if (strcmp(val.f[ii], val_out.f[ii])) {
+        if (std::strcmp(val.f[ii], val_out.f[ii])) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("Xyz::StructOfArrayOfString: marshaling comparison failure\n")));
           failed = true;
@@ -326,7 +326,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (try_marshaling(val, val_out, DONT_CHECK_MS, SEQ_LEN_SIZE+SEQ_LEN*5+14,
                        2+3+3+2, DONT_CHECK_MS, "Xyz::StructOfSeqOfString")) {
       for (ACE_CDR::ULong ii =0; ii < SEQ_LEN; ii++) {
-        if (strcmp(val.field[ii], val_out.field[ii])) {
+        if (std::strcmp(val.field[ii], val_out.field[ii])) {
           ACE_ERROR((LM_ERROR,
                      ACE_TEXT("Xyz::StructOfSeqOfString: marshaling comparison failure\n")));
           failed = true;
@@ -619,7 +619,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize octer\n")));
         failed = true;
 
-      } else if (0 != strcmp(ss_foo.theString.in(), my_foo.theString.in())) {
+      } else if (0 != std::strcmp(ss_foo.theString, my_foo.theString)) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
                    my_foo.theString.in(), ss_foo.theString.in()));
