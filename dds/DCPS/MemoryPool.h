@@ -132,6 +132,9 @@ public:
   /** Find smallest free block of size or larger */
   FreeHeader* find(size_t size, unsigned char* base);
 
+  /** Calculate index of node corresponding to a size */
+  static unsigned int node_index(size_t size);
+
 #ifdef VALIDATE_MEMORY_POOL
   static void validate_index(FreeIndex& index,
                              unsigned char* base,

@@ -246,6 +246,21 @@ FreeIndex::find(size_t search_size, unsigned char* pool_base)
   return result;
 }
 
+unsigned int
+FreeIndex::node_index(size_t size)
+{
+  // Use shifting to perform log base 2 of size
+  //   start by using min + 1 (+1 because  min is a power of 2 whch is already
+  //   one bit)
+  size_t size_copy = size >> (min_index_pow + 1);
+  unsigned int index = 0;
+  while (size_copy && index < max_index_pow) {
+    ++index;
+    size_copy = size_copy >> 1;
+  }
+  return index;
+}
+
 #ifdef VALIDATE_MEMORY_POOL
 void
 FreeIndex::validate_index(FreeIndex& index, unsigned char* base, bool log)

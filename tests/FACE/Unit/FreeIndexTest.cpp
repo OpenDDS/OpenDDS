@@ -31,6 +31,28 @@ void test_setup() {
   TEST_CHECK(index.nodes_[9].ptr() == largest_free_);
 }
 
+void test_index_lookup() {
+  TEST_CHECK(FreeIndex::node_index(0) == 0);
+  TEST_CHECK(FreeIndex::node_index(8) == 0);
+  TEST_CHECK(FreeIndex::node_index(9) == 0);
+  TEST_CHECK(FreeIndex::node_index(15) == 0);
+  TEST_CHECK(FreeIndex::node_index(16) == 1);
+  TEST_CHECK(FreeIndex::node_index(31) == 1);
+  TEST_CHECK(FreeIndex::node_index(32) == 2);
+  TEST_CHECK(FreeIndex::node_index(63) == 2);
+  TEST_CHECK(FreeIndex::node_index(64) == 3);
+  TEST_CHECK(FreeIndex::node_index(128) == 4);
+  TEST_CHECK(FreeIndex::node_index(256) == 5);
+  TEST_CHECK(FreeIndex::node_index(512) == 6);
+  TEST_CHECK(FreeIndex::node_index(1024) == 7);
+  TEST_CHECK(FreeIndex::node_index(2048) == 8);
+  TEST_CHECK(FreeIndex::node_index(4096) == 9);
+  TEST_CHECK(FreeIndex::node_index(4097) == 9);
+  TEST_CHECK(FreeIndex::node_index(9000) == 9);
+  TEST_CHECK(FreeIndex::node_index(12000) == 9);
+  TEST_CHECK(FreeIndex::node_index(12000) == 20);
+}
+
 // add should insert
 void test_add() {
   FreeIndex index(largest_free_);
@@ -278,6 +300,9 @@ int ACE_TMAIN(int, ACE_TCHAR* [] )
   FreeIndexTest test;
 
   test.test_setup();
+
+  test.test_index_lookup();
+
   test.test_add();
   test.test_add_odd_size();
   test.test_add_same_size();
