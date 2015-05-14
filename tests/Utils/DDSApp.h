@@ -147,8 +147,8 @@ public:
                                                     mask);
   }
 
-  template<typename Traits, typename QosFunc>
-  DDSTopicFacade<Traits> topic_facade(
+  template<typename MessageType, typename QosFunc>
+  DDSTopicFacade<MessageType> topic_facade(
     std::string topic_name,
     QosFunc qos_func,
     DDS::TopicListener_var listener = DDS::TopicListener::_nil(),
@@ -159,11 +159,11 @@ public:
     DDS::TopicQos qos;
     participant->get_default_topic_qos(qos);
     qos_func(qos);
-    return create_topic_facade<Traits>(topic_name,
-                                                    participant,
-                                                    qos,
-                                                    listener,
-                                                    mask);
+    return create_topic_facade<MessageType>(topic_name,
+                                            participant,
+                                            qos,
+                                            listener,
+                                            mask);
   }
 
   /// cleans up the specified participant, or default participant
@@ -200,18 +200,19 @@ private:
                                  DDS::SubscriberListener_var a_listener,
                                  DDS::StatusMask             mask);
 
-  template<typename Traits>
-  DDSTopicFacade<Traits> create_topic_facade(
+  template<typename MessageType>
+  DDSTopicFacade<MessageType> create_topic_facade(
     std::string topic_name,
     DDS::DomainParticipant_var participant,
     const DDS::TopicQos& qos,
     DDS::TopicListener_var listener,
     DDS::StatusMask mask)
   {
-    typedef ::OpenDDS::TypeSupportImpl<Traits> typesupportimpl_type;
-    typedef typename Traits::TypeSupportVarType typesupport_var;
+    typedef OpenDDS::DCPS::DDSTraits<MessageType> TraitsType;
+    typedef ::OpenDDS::DCPS::TypeSupportImpl_T<MessageType> TypeSupportImplType;
+    typedef typename TraitsType::TypeSupportType::_var_type TypeSupportVarType;
 
-    typesupport_var ts(new typesupportimpl_type);
+    TypeSupportVarType ts(new TypeSupportImplType);
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
       throw std::runtime_error(" ERROR: register_type failed!");
     }
@@ -234,7 +235,7 @@ private:
       throw std::runtime_error(message);
     }
 
-    return DDSTopicFacade<Traits>(participant, topic);
+    return DDSTopicFacade<MessageType>(participant, topic);
   }
 
   // track the default status for domain id

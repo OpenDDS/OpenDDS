@@ -7,17 +7,18 @@
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DCPS/Definitions.h"
 #include "../common/SampleInfo.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-template<typename Traits>
+template<typename MessageType>
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataReaderListener>
 {
 public:
-  typedef typename Traits::MessageType DSample;
+  typedef MessageType DSample;
   typedef void (*DSPrinter)(const DSample&, int);
 
   DataReaderListenerImpl(int num_ops_per_thread, int& num_samples, DSPrinter printer)
@@ -120,13 +121,14 @@ private:
   DSPrinter print_sample_;
 };
 
-template<typename Traits>
-void DataReaderListenerImpl<Traits>::read(DDS::DataReader_ptr dr)
+template<typename MessageType>
+void DataReaderListenerImpl<MessageType>::read(DDS::DataReader_ptr dr)
 {
-  const typename Traits::DataReaderType::_var_type foo_dr =
-    Traits::DataReaderType::_narrow(dr);
+  typedef OpenDDS::DCPS::DDSTraits<MessageType> TraitsType;
+  const typename TraitsType::DataReaderType::_var_type foo_dr =
+    TraitsType::DataReaderType::_narrow(dr);
 
-  typename Traits::MessageSequenceType foo(num_ops_per_thread_);
+  typename TraitsType::MessageSequenceType foo(num_ops_per_thread_);
   DDS::SampleInfoSeq si(num_ops_per_thread_);
 
   const DDS::ReturnCode_t status =

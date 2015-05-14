@@ -36,11 +36,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     ::TestUtils::Options options(argc, argv, args);
 
     if (options.get<bool>("keyed_data") == true ) {
-      SubDriver< ::Xyz::KeyedDataTraits> driver;
+      SubDriver< ::Xyz::KeyedData > driver;
       driver.run(ddsApp, options);
       ddsApp.cleanup();
     } else {
-      SubDriver< ::Xyz::NoKeyDataTraits> driver;
+      SubDriver< ::Xyz::NoKeyData > driver;
       driver.run(ddsApp, options);
       ddsApp.cleanup();
     }

@@ -109,14 +109,14 @@ int parse_args(int argc, ACE_TCHAR *argv[])
 
 // We don't really need the type-specific data reader here, but we'll
 // return it anyway in order to demostrate the use of the nested typedefs.
-template<typename Traits> // TSI is some generated TypeSupportImpl
+template<typename MessageType> // TSI is some generated TypeSupportImpl
 DDS::DataReader_var
 create_reader(const DDS::Subscriber_var& sub, const char* topicName,
   const DDS::DataReaderQos& qos = DATAREADER_QOS_DEFAULT,
   const DDS::DataReaderListener_var& listener = 0,
   const DDS::StatusMask& mask = OpenDDS::DCPS::DEFAULT_STATUS_MASK)
 {
-  const DDS::TypeSupport_var ts = new ::OpenDDS::TypeSupportImpl<Traits>();
+  const DDS::TypeSupport_var ts = new ::OpenDDS::DCPS::TypeSupportImpl_T<MessageType>();
   const DDS::DomainParticipant_var dp = sub->get_participant();
   const CORBA::String_var typeName = ts->get_type_name();
   (void) ts->register_type(dp, typeName); // may have been registered before
@@ -127,7 +127,7 @@ create_reader(const DDS::Subscriber_var& sub, const char* topicName,
 
   const DDS::DataReader_var dr =
     sub->create_datareader(topic, qos, listener, mask);
-  return Traits::DataReaderType::_narrow(dr);
+  return OpenDDS::DCPS::DDSTraits<MessageType>::DataReaderType::_narrow(dr);
 }
 
 
@@ -216,13 +216,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       drl3_num_samples = 0, drl4_num_samples = 0;
 
     ::DDS::DataReaderListener_var drl1 =
-        new DataReaderListenerImpl<T1::Foo1Traits>(num_ops_per_thread, drl1_num_samples, print1);
+        new DataReaderListenerImpl<T1::Foo1>(num_ops_per_thread, drl1_num_samples, print1);
     ::DDS::DataReaderListener_var drl2 =
-        new DataReaderListenerImpl<T2::Foo2Traits>(num_ops_per_thread, drl2_num_samples, print2);
+        new DataReaderListenerImpl<T2::Foo2>(num_ops_per_thread, drl2_num_samples, print2);
     ::DDS::DataReaderListener_var drl3 =
-        new DataReaderListenerImpl<T3::Foo3Traits>(num_ops_per_thread, drl3_num_samples, print3);
+        new DataReaderListenerImpl<T3::Foo3>(num_ops_per_thread, drl3_num_samples, print3);
     ::DDS::DataReaderListener_var drl4 =
-        new DataReaderListenerImpl<T3::Foo3Traits>(num_ops_per_thread, drl4_num_samples, print3);
+        new DataReaderListenerImpl<T3::Foo3>(num_ops_per_thread, drl4_num_samples, print3);
 
     ::DDS::DataReader_var dr1;
     ::DDS::DataReader_var dr2;
@@ -231,22 +231,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (topics & TOPIC_T1)
     {
-      dr1 = create_reader<T1::Foo1Traits>(sub, MY_TOPIC1, dr_qos, drl1);
+      dr1 = create_reader<T1::Foo1>(sub, MY_TOPIC1, dr_qos, drl1);
     }
 
     if (topics & TOPIC_T2)
     {
-      dr2 = create_reader<T2::Foo2Traits>(sub, MY_TOPIC2, dr_qos, drl2);
+      dr2 = create_reader<T2::Foo2>(sub, MY_TOPIC2, dr_qos, drl2);
     }
 
     if (topics & TOPIC_T3)
     {
-      dr3 = create_reader<T3::Foo3Traits>(sub, MY_TOPIC3, dr_qos, drl3);
+      dr3 = create_reader<T3::Foo3>(sub, MY_TOPIC3, dr_qos, drl3);
     }
 
     if (topics & TOPIC_T4)
     {
-      dr4 = create_reader<T3::Foo3Traits>(sub, MY_TOPIC4, dr_qos, drl4);
+      dr4 = create_reader<T3::Foo3>(sub, MY_TOPIC4, dr_qos, drl4);
     }
 
     /*
