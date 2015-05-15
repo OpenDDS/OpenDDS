@@ -6,6 +6,7 @@
 #include <ace/Basic_Types.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_stdio.h>
 #include <ace/Thread_Mutex.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
