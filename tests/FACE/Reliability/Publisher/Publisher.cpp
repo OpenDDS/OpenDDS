@@ -102,7 +102,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     std::cout << "  sending " << i << std::endl;
     do {
       if (status == FACE::TIMED_OUT) {
-        std::cout << "Send_Message timed out, resending " << i << std::endl;
+        std::cout << "Resending message " << i << std::endl;
       }
       FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
     } while (status == FACE::TIMED_OUT);
@@ -125,5 +125,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     status = destroy_status;
   }
 
+  if (status) {
+    std::cout << "Publisher status " << status << std::endl;
+  }
   return static_cast<int>(status);
 }

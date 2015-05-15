@@ -31,6 +31,25 @@ string dds_generator::scoped_helper(UTL_ScopedName* sn, const char* sep)
   return sname;
 }
 
+string dds_generator::module_scope_helper(UTL_ScopedName* sn, const char* sep)
+{
+  string sname;
+
+  for (; sn; sn = static_cast<UTL_ScopedName*>(sn->tail())) {
+    if (sn->tail() != 0) {
+      if (sn->head()->escaped())
+        sname += "_";
+
+      sname += sn->head()->get_string();
+
+      if (sname != "" && sn->tail())
+        sname += sep;
+    }
+  }
+
+  return sname;
+}
+
 void composite_generator::gen_prologue()
 {
   for (vector<dds_generator*>::iterator it(components_.begin());

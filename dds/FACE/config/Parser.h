@@ -20,7 +20,6 @@ public:
   int find_qos(const char* name, QosSettings& target);
 
 private:
-  int foo;
   static ConnectionMap connection_map_;
   static QosMap qos_map_;
   static TopicMap topic_map_;

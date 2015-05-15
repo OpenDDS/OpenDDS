@@ -6,8 +6,10 @@
 #include "dds/DCPS/SubscriberImpl.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 
 namespace OpenDDS {
+  namespace DCPS {
 
   /** Servant for DataReader interface of Traits::MessageType data type.
    *
@@ -15,30 +17,29 @@ namespace OpenDDS {
    * this interface.
    *
    */
-  template <typename Traits>
-  class DataReaderImpl
-    : public virtual OpenDDS::DCPS::LocalObject<typename Traits::DataReaderType>,
+  template <typename MessageType>
+  class DataReaderImpl_T
+    : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataReaderType>,
       public virtual OpenDDS::DCPS::DataReaderImpl
   {
   public:
-    typedef Traits TraitsType;
-    typedef typename Traits::MessageType MessageType;
-    typedef typename Traits::MessageSequenceType MessageSequenceType;
+    typedef DDSTraits<MessageType> TraitsType;
+    typedef typename TraitsType::MessageSequenceType MessageSequenceType;
 
     typedef OPENDDS_MAP_CMP(MessageType, ::DDS::InstanceHandle_t,
-                            typename Traits::LessThanType) InstanceMap;
+                            typename TraitsType::LessThanType) InstanceMap;
     typedef ::OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageType, ACE_Null_Mutex>  DataAllocator;
 
-    typedef typename Traits::DataReaderType Interface;
+    typedef typename TraitsType::DataReaderType Interface;
 
     /// Constructor
-    DataReaderImpl (void)
+    DataReaderImpl_T (void)
       : data_allocator_ (0)
     {
     }
 
     /// Destructor
-    virtual ~DataReaderImpl (void)
+    virtual ~DataReaderImpl_T (void)
     {
       for (typename InstanceMap::iterator it = instance_map_.begin();
            it != instance_map_.end(); ++it)
@@ -65,7 +66,7 @@ namespace OpenDDS {
                    ACE_TEXT("enable_specific-data")
                    ACE_TEXT(" Cached_Allocator_With_Overflow ")
                    ACE_TEXT("%x with %d chunks\n"),
-                   Traits::type_name(),
+                   TraitsType::type_name(),
                    data_allocator_,
                    this->get_n_chunks ()));
 
@@ -1518,7 +1519,7 @@ void store_instance_data(
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%sDataReaderImpl::")
                       ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("acquire instance_lock failed. \n"), Traits::type_name()));
+                      ACE_TEXT("acquire instance_lock failed. \n"), TraitsType::type_name()));
           return;
         }
 
@@ -1555,7 +1556,7 @@ void store_instance_data(
                         ACE_TEXT("(%P|%t) ")
                         ACE_TEXT("%sDataReaderImpl::")
                         ACE_TEXT("store_instance_data, ")
-                        ACE_TEXT("insert handle failed. \n"), Traits::type_name()));
+                        ACE_TEXT("insert handle failed. \n"), TraitsType::type_name()));
             return;
           }
       }
@@ -1578,7 +1579,7 @@ void store_instance_data(
                           ACE_TEXT("(%P|%t) ")
                           ACE_TEXT("%sDataReaderImpl::")
                           ACE_TEXT("store_instance_data, ")
-                          ACE_TEXT("insert to participant scope %s failed. \n"), Traits::type_name(), Traits::type_name()));
+                          ACE_TEXT("insert to participant scope %s failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
               return;
             }
         }
@@ -1588,7 +1589,7 @@ void store_instance_data(
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%sDataReaderImpl::")
                       ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("release instance_lock failed. \n"), Traits::type_name()));
+                      ACE_TEXT("release instance_lock failed. \n"), TraitsType::type_name()));
           return;
         }
       }
@@ -1603,7 +1604,7 @@ void store_instance_data(
                       ACE_TEXT("(%P|%t) ")
                       ACE_TEXT("%sDataReaderImpl::")
                       ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("insert %s failed. \n"), Traits::type_name(), Traits::type_name()));
+                      ACE_TEXT("insert %s failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
           return;
         }
     }
@@ -1929,7 +1930,7 @@ void notify_status_condition_no_sample_lock()
                  ACE_TEXT("(%P|%t) %sDataReaderImpl::%C ")
                  ACE_TEXT("PRECONDITION_NOT_MET sample and info input ")
                  ACE_TEXT("sequences do not match.\n"),
-                 Traits::type_name(),
+                 TraitsType::type_name(),
                  method_name ));
       return ::DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -1941,7 +1942,7 @@ void notify_status_condition_no_sample_lock()
                  ACE_TEXT("(%P|%t) %sDataReaderImpl::%C ")
                  ACE_TEXT("PRECONDITION_NOT_MET mismatch of ")
                  ACE_TEXT("maximum %d and owns %d\n"),
-                 Traits::type_name(),
+                 TraitsType::type_name(),
                  method_name,
                  received_data.maximum(),
                  received_data.release() ));
@@ -1972,7 +1973,7 @@ void notify_status_condition_no_sample_lock()
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) %sDataReaderImpl::%C ")
                      ACE_TEXT("PRECONDITION_NOT_MET max_samples %d > maximum %d\n"),
-                     Traits::type_name(),
+                     TraitsType::type_name(),
                      method_name,
                      max_samples,
                      received_data.maximum()));
@@ -1998,6 +1999,7 @@ InstanceMap  instance_map_;
 DataAllocator* data_allocator_;
 };
 
+}
 }
 
 #endif /* dds_DCPS_DataReaderImpl_T_h */

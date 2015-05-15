@@ -84,6 +84,7 @@ public:
   { return true; }
 
   static std::string scoped_helper(UTL_ScopedName* sn, const char* sep);
+  static std::string module_scope_helper(UTL_ScopedName* sn, const char* sep);
 };
 
 class composite_generator : public dds_generator {
@@ -218,6 +219,11 @@ struct Function {
 inline std::string scoped(UTL_ScopedName* sn)
 {
   return dds_generator::scoped_helper(sn, "::");
+}
+
+inline std::string module_scope(UTL_ScopedName* sn)
+{
+  return dds_generator::module_scope_helper(sn, "::");
 }
 
 namespace AstTypeClassification {

@@ -1,3 +1,11 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 #define OPENDDS_DCPS_SAFETY_PROFILE_POOL_H
 
@@ -6,6 +14,10 @@
 #ifdef OPENDDS_SAFETY_PROFILE
 #include "ace/Atomic_Op.h"
 #include "ace/Singleton.h"
+#include "dcps_export.h"
+#include "MemoryPool.h"
+
+class SafetyProfilePoolTest;
 
 namespace OpenDDS {
 namespace DCPS {
@@ -19,36 +31,32 @@ namespace DCPS {
 /// This class currently allocates from a single array and doesn't attempt to
 /// reuse a free()'d block.  That's expected to change as Safety Profile
 /// work is completed and becomes ready for production use.
-class SafetyProfilePool : public ACE_Allocator
+class OpenDDS_Dcps_Export SafetyProfilePool : public ACE_Allocator
 {
+  friend class SafetyProfilePoolTest;
 public:
-  explicit SafetyProfilePool(size_t size = 300*1024*1024)
-    : size_(size)
-    , pool_(new char[size])
-    , idx_(0)
-  {
-  }
+  SafetyProfilePool();
+  ~SafetyProfilePool();
 
-  ~SafetyProfilePool()
-  {
-#ifndef OPENDDS_SAFETY_PROFILE
-    delete[] pool_;
-#endif
-  }
+  void configure_pool(size_t size, size_t granularity);
 
-  void* malloc(std::size_t n)
+  void* malloc(std::size_t size)
   {
-    const unsigned long end = idx_ += n;
-    if (end > size_) {
-      ACE_DEBUG((LM_ERROR,
-                 "SafetyProfilePool::malloc out of memory\n"));
-      return 0;
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, lock, lock_, 0);
+    if (main_pool_) {
+      return main_pool_->pool_alloc(size);
+    } else {
+      return init_pool_->pool_alloc(size);
     }
-    return pool_ + end - n;
   }
 
-  void free(void*)
+  void free(void* ptr)
   {
+    ACE_GUARD(ACE_Thread_Mutex, lock, lock_);
+    // Try main pool first
+    if (!(main_pool_ && main_pool_->pool_free(ptr))) {
+      init_pool_->pool_free(ptr);
+    }
   }
 
   void* calloc(std::size_t, char = '\0')
@@ -77,17 +85,15 @@ public:
   void dump() const {}
 
   /// Return a singleton instance of this class.
-  static SafetyProfilePool* instance() {
-    return ACE_Singleton<SafetyProfilePool, ACE_SYNCH_MUTEX>::instance();
-  }
+  static SafetyProfilePool* instance();
 
 private:
   SafetyProfilePool(const SafetyProfilePool&);
   SafetyProfilePool& operator=(const SafetyProfilePool&);
 
-  const size_t size_;
-  char* const pool_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> idx_;
+  MemoryPool* init_pool_;
+  MemoryPool* main_pool_;
+  ACE_Thread_Mutex lock_;
 };
 
 }}
