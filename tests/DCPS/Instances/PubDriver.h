@@ -21,15 +21,15 @@
 const int default_key = 101010;
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
-template<typename Traits>
+template<typename MessageType>
 class Writer : public ACE_Task_Base
 {
 public:
-  typedef typename Traits::MessageType message_type;
-  typedef typename Traits::DataWriterVarType datawriter_var;
-  typedef typename Traits::DataWriterType datawriter_type;
+  typedef OpenDDS::DCPS::DDSTraits<MessageType> TraitsType;
+  typedef typename TraitsType::DataWriterType DataWriterType;
+  typedef typename TraitsType::DataWriterType::_var_type DataWriterVarType;
 
-  Writer(datawriter_var writer,
+  Writer(DataWriterVarType writer,
     bool keyed_data = true,
     long num_thread_to_write = 1,
     long num_writes_per_thread = 1,
@@ -37,7 +37,7 @@ public:
     long writer_id = -1,
     long write_delay_msec = 0,
     long check_data_dropped = 0)
-  : writer_ (datawriter_type::_duplicate(writer)),
+  : writer_ (DataWriterType::_duplicate(writer)),
     writer_servant_ (0),
     keyed_data_ (keyed_data),
     num_thread_to_write_ (num_thread_to_write),
@@ -101,7 +101,7 @@ public:
 
     try
     {
-      message_type msg;
+      MessageType msg;
       msg.sample_sequence = -1;
       msg.handle_value    = -1;
       msg.writer_id       = writer_id_;
@@ -117,7 +117,7 @@ public:
         msg.a_long_value = default_key;
       }
 
-      datawriter_var msg_dw = datawriter_type::_narrow( writer_.in () );
+      DataWriterVarType msg_dw = DataWriterType::_narrow( writer_.in () );
 
       TEST_CHECK (! CORBA::is_nil (msg_dw.in ()));
 
@@ -134,7 +134,7 @@ public:
 
         if (true == keyed_data_)
         {
-          message_type key_holder;
+          MessageType key_holder;
           ret = msg_dw->get_key_value(key_holder, handle);
 
           TEST_CHECK(ret == ::DDS::RETCODE_OK);
@@ -193,7 +193,7 @@ public:
     return writer_id_;
   }
 
-  InstanceDataMap<Traits>& data_map ()
+  InstanceDataMap<MessageType>& data_map ()
   {
     return data_map_;
   }
@@ -202,8 +202,8 @@ public:
 
 private:
 
-  InstanceDataMap<Traits> data_map_;
-  datawriter_var writer_;
+  InstanceDataMap<MessageType> data_map_;
+  DataWriterVarType writer_;
   ::OpenDDS::DCPS::DataWriterImpl* writer_servant_;
   bool keyed_data_;
   long num_thread_to_write_;
@@ -233,15 +233,10 @@ public:
     int depth_;
 };
 
-template<typename Traits>
+template<typename MessageType>
 class PubDriver
 {
   public:
-  //typedef typename TypeSupportImpl::TraitsType TraitsType;
-  //typedef typename TraitsType::MessageType message_type;
-  /* typedef typename TypeSupportImpl::datawriter_var datawriter_var; */
-  /* typedef typename TypeSupportImpl::datawriter_type datawriter_type; */
-  /* typedef typename TypeSupportImpl::datawriterimpl_type datawriterimpl_type; */
 
   PubDriver()
   : keyed_data_ (true),
@@ -306,8 +301,8 @@ class PubDriver
     SetHistoryDepthQOS history_depth_qos(history_depth_);
     const std::string topic_name("topic_name");
 
-    ::TestUtils::DDSTopicFacade<Traits> topic_facade =
-      ddsApp.topic_facade<Traits, SetHistoryDepthQOS>
+    ::TestUtils::DDSTopicFacade<MessageType> topic_facade =
+      ddsApp.topic_facade<MessageType, SetHistoryDepthQOS>
         (topic_name, history_depth_qos);
 
     // Create one datawriter or multiple datawriters belong to the same
@@ -319,15 +314,15 @@ class PubDriver
     for (int i = 0; i < num_datawriters_; i++)
     {
       writers_.push_back(
-                         new Writer<Traits>( topic_facade.writer(history_depth_qos),
-                                             keyed_data_,
-                                             num_threads_to_write_,
-                                             num_writes_per_thread_,
-                                             multiple_instances_,
-                                             i,
-                                             write_delay_msec_,
-                                             check_data_dropped_
-                                             )
+                         new Writer<MessageType>( topic_facade.writer(history_depth_qos),
+                                                  keyed_data_,
+                                                  num_threads_to_write_,
+                                                  num_writes_per_thread_,
+                                                  multiple_instances_,
+                                                  i,
+                                                  write_delay_msec_,
+                                                  check_data_dropped_
+                                                  )
                          );
 
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
@@ -371,7 +366,7 @@ class PubDriver
     {
       writers_[i]->end ();
 
-      InstanceDataMap<Traits>& map = writers_[i]->data_map ();
+      InstanceDataMap<MessageType>& map = writers_[i]->data_map ();
 
       if (multiple_instances_ == false || keyed_data_ == false)
       {
@@ -387,7 +382,7 @@ class PubDriver
     }
   }
 
-  typedef std::vector< Writer<Traits>* > WriterVector;
+  typedef std::vector< Writer<MessageType>* > WriterVector;
   WriterVector writers_;
 
   bool  keyed_data_;

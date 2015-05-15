@@ -7,6 +7,7 @@
 #include "dds/DdsDcpsPublicationC.h"
 #include "ace/Task.h"
 #include "model/Sync.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 
 class Writer : public ACE_Task_Base
 {
@@ -34,12 +35,13 @@ protected:
   int max_wait_ ;
 };
 
-template<typename Traits>
+template<typename MessageType>
 class TypedWriter : public Writer
 {
 public:
-  typedef typename Traits::DataWriterType::_var_type DWVar;
-  typedef typename Traits::MessageType DSample;
+  typedef OpenDDS::DCPS::DDSTraits<MessageType> TraitsType;
+  typedef typename TraitsType::DataWriterType::_var_type DWVar;
+  typedef typename TraitsType::MessageType DSample;
   typedef void (*DSModifier)(DSample&, int);
 
   explicit TypedWriter(const DWVar& dw, int num_thread_to_write = 1,

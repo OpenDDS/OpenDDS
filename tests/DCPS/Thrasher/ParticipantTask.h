@@ -26,6 +26,7 @@ private:
 
   LockType lock_;
   const std::size_t& samples_per_thread_;
+  int thread_index_;
 };
 
 #endif /* DCPS_THRASHER_PARTICIPANTTASK_H */

@@ -534,6 +534,12 @@ private:
   /// Scheduler time slice from configuration file.
   ACE_Time_Value schedulerQuantum_;
 
+  /// Pool size from configuration file.
+  size_t pool_size_;
+
+  /// Pool granularity from configuration file.
+  size_t pool_granularity_;
+
   /// Scheduling policy value used for setting thread priorities.
   long scheduler_;
 

@@ -61,5 +61,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     status = destroy_status;
   }
 
+  if (status) {
+    std::cout << "Subscriber status " << status << std::endl;
+  }
   return static_cast<int>(status);
 }

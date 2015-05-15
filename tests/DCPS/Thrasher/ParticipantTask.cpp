@@ -13,6 +13,9 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportConfig.h>
+#include <dds/DCPS/transport/framework/TransportInst.h>
 
 #include "ParticipantTask.h"
 #include "ProgressIndicator.h"
@@ -20,7 +23,9 @@
 
 ParticipantTask::ParticipantTask(const std::size_t& samples_per_thread)
   : samples_per_thread_(samples_per_thread)
-{}
+  , thread_index_(0)
+{
+}
 
 ParticipantTask::~ParticipantTask()
 {}
@@ -39,16 +44,35 @@ ParticipantTask::svc()
     FooDataWriter_var writer_i;
     DDS::StatusCondition_var cond;
     DDS::WaitSet_var ws = new DDS::WaitSet;
+    int thread_index = -1;
 
     { // Scope for guard to serialize creating Entities.
       GuardType guard(lock_);
 
+      thread_index = thread_index_++;
       // Create Participant
       participant =
         dpf->create_participant(42,
                                 PARTICIPANT_QOS_DEFAULT,
                                 DDS::DomainParticipantListener::_nil(),
                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+#ifdef OPENDDS_SAFETY_PROFILE
+      // RTPS cannot be shared
+      char config_name[64], inst_name[64];
+      snprintf(config_name, 64, "cfg_%d", thread_index);
+      snprintf(inst_name, 64, "rtps_%d", thread_index);
+
+      ACE_DEBUG((LM_INFO,
+        "(%P|%t)    -> PARTICIPANT creating transport config %C\n",
+        config_name));
+      OpenDDS::DCPS::TransportConfig_rch config =
+        TheTransportRegistry->create_config(config_name);
+      OpenDDS::DCPS::TransportInst_rch inst =
+        TheTransportRegistry->create_inst(inst_name, "rtps_udp");
+      config->instances_.push_back(inst);
+      TheTransportRegistry->bind_config(config_name, participant);
+#endif
 
     } // End of lock scope.
 
@@ -156,10 +180,11 @@ ParticipantTask::svc()
         foo.key = 3;
         DDS::InstanceHandle_t handle = writer_i->register_instance(foo);
 
-        if (writer_i->write(foo, handle) != DDS::RETCODE_OK)
+        if (writer_i->write(foo, handle) != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("%N:%l: svc()")
                             ACE_TEXT(" write failed!\n")), 1);
+        }
         ++progress;
       }
 

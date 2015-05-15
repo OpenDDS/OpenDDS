@@ -5,29 +5,30 @@
 #include "dds/DCPS/DataWriterImpl.h"
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Util.h"
+#include "dds/DCPS/TypeSupportImpl.h"
 
 namespace OpenDDS {
+  namespace DCPS {
 
 /** Servant for DataWriter interface of the Traits::MessageType data type.
  *
  * See the DDS specification, OMG formal/04-12-02, for a description of
  * this interface.
  */
-  template <typename Traits>
-  class DataWriterImpl
-    : public virtual OpenDDS::DCPS::LocalObject<typename Traits::DataWriterType>,
+  template <typename MessageType>
+  class DataWriterImpl_T
+    : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataWriterType>,
       public virtual OpenDDS::DCPS::DataWriterImpl
   {
   public:
-    typedef Traits TraitsType;
-    typedef typename Traits::MessageType MessageType;
+    typedef DDSTraits<MessageType> TraitsType;
 
     typedef OPENDDS_MAP_CMP(MessageType, ::DDS::InstanceHandle_t,
-                            typename Traits::LessThanType) InstanceMap;
+                            typename TraitsType::LessThanType) InstanceMap;
     typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>  DataAllocator;
 
     /// Constructor
-    DataWriterImpl (void)
+    DataWriterImpl_T (void)
       : marshaled_size_ (0)
       , key_marshaled_size_ (0)
       , data_allocator_ (0)
@@ -37,7 +38,7 @@ namespace OpenDDS {
     }
 
     /// Destructor
-    virtual ~DataWriterImpl (void)
+    virtual ~DataWriterImpl_T (void)
     {
       delete data_allocator_;
       delete mb_allocator_;
@@ -69,7 +70,7 @@ namespace OpenDDS {
                       ACE_TEXT("%sDataWriterImpl::")
                       ACE_TEXT("register_instance_w_timestamp, ")
                       ACE_TEXT("register failed error=%d.\n"),
-                      Traits::type_name(),
+                      TraitsType::type_name(),
                       ret));
         }
 
@@ -105,7 +106,7 @@ namespace OpenDDS {
                              ACE_TEXT("%sDataWriterImpl::")
                              ACE_TEXT("unregister_instance_w_timestamp, ")
                              ACE_TEXT("The instance is not registered.\n"),
-                             Traits::type_name()),
+                             TraitsType::type_name()),
                             ::DDS::RETCODE_ERROR);
         }
       else if (handle != ::DDS::HANDLE_NIL && handle != registered_handle)
@@ -116,7 +117,7 @@ namespace OpenDDS {
                              ACE_TEXT("unregister_w_timestamp, ")
                              ACE_TEXT("The given handle=%X is different from ")
                              ACE_TEXT("registered handle=%X.\n"),
-                             Traits::type_name(),
+                             TraitsType::type_name(),
                              handle, registered_handle),
                             ::DDS::RETCODE_ERROR);
         }
@@ -165,7 +166,7 @@ namespace OpenDDS {
                             ACE_TEXT("(%P|%t) ")
                             ACE_TEXT("%sDataWriterImpl::write, ")
                             ACE_TEXT("register failed err=%d.\n"),
-                            Traits::type_name(),
+                            TraitsType::type_name(),
                             ret),
                            ret);
         }
@@ -226,7 +227,7 @@ namespace OpenDDS {
                                  ACE_TEXT("(%P|%t) ")
                                  ACE_TEXT("%sDataWriterImpl::dispose, ")
                                  ACE_TEXT("The instance sample is not registered.\n"),
-                                 Traits::type_name()),
+                                 TraitsType::type_name()),
                                 ::DDS::RETCODE_ERROR);
             }
         }
@@ -303,15 +304,15 @@ namespace OpenDDS {
                                            dw_objref);
 
       MessageType data;
-      if (Traits::gen_is_bounded_size(data)) {
-        marshaled_size_ = 8 + Traits::gen_max_marshaled_size(data, true);
+      if (TraitsType::gen_is_bounded_size(data)) {
+        marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(data, true);
         // worst case: CDR encapsulation (4 bytes) + Padding for alignment (4 bytes)
       } else {
         marshaled_size_ = 0; // should use gen_find_size when marshaling
       }
       OpenDDS::DCPS::KeyOnly<const MessageType > ko(data);
-      if (Traits::gen_is_bounded_size(ko)) {
-        key_marshaled_size_ = 8 + Traits::gen_max_marshaled_size(ko, true);
+      if (TraitsType::gen_is_bounded_size(ko)) {
+        key_marshaled_size_ = 8 + TraitsType::gen_max_marshaled_size(ko, true);
         // worst case: CDR Encapsulation (4 bytes) + Padding for alignment (4 bytes)
       } else {
         key_marshaled_size_ = 0; // should use gen_find_size when marshaling
@@ -325,7 +326,7 @@ namespace OpenDDS {
     virtual ::DDS::ReturnCode_t enable_specific ()
     {
       MessageType data;
-      if (Traits::gen_is_bounded_size (data))
+      if (TraitsType::gen_is_bounded_size (data))
         {
           data_allocator_ = new DataAllocator (n_chunks_, marshaled_size_);
           if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
@@ -334,7 +335,7 @@ namespace OpenDDS {
                        ACE_TEXT("enable_specific-data")
                        ACE_TEXT(" Dynamic_Cached_Allocator_With_Overflow %x ")
                        ACE_TEXT("with %d chunks\n"),
-                       Traits::type_name(),
+                       TraitsType::type_name(),
                        data_allocator_,
                        n_chunks_));
         }
@@ -343,7 +344,7 @@ namespace OpenDDS {
           if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
             ACE_DEBUG((LM_DEBUG,
                        ACE_TEXT("(%P|%t) %sDataWriterImpl::enable_specific")
-                       ACE_TEXT(" is unbounded data - allocate from heap\n"), Traits::type_name()));
+                       ACE_TEXT(" is unbounded data - allocate from heap\n"), TraitsType::type_name()));
         }
 
       mb_allocator_ =
@@ -358,7 +359,7 @@ namespace OpenDDS {
                      ACE_TEXT("enable_specific-mb ")
                      ACE_TEXT("Cached_Allocator_With_Overflow ")
                      ACE_TEXT("%x with %d chunks\n"),
-                     Traits::type_name(),
+                     TraitsType::type_name(),
                      mb_allocator_,
                      n_chunks_ * association_chunk_multiplier_));
           ACE_DEBUG((LM_DEBUG,
@@ -366,7 +367,7 @@ namespace OpenDDS {
                      ACE_TEXT("enable_specific-db ")
                      ACE_TEXT("Cached_Allocator_With_Overflow ")
                      ACE_TEXT("%x with %d chunks\n"),
-                     Traits::type_name(),
+                     TraitsType::type_name(),
                      db_allocator_,
                      n_chunks_));
         }
@@ -424,7 +425,7 @@ private:
           if (cdr) {
             effective_size = 4; // CDR encapsulation
           }
-          Traits::gen_find_size(ko_instance_data, effective_size, padding);
+          TraitsType::gen_find_size(ko_instance_data, effective_size, padding);
         }
         if (cdr) {
           effective_size += padding;
@@ -453,7 +454,7 @@ private:
           if (cdr) {
             effective_size = 4; // CDR encapsulation
           }
-          Traits::gen_find_size(instance_data, effective_size, padding);
+          TraitsType::gen_find_size(instance_data, effective_size, padding);
         }
         if (cdr) {
           effective_size += padding;
@@ -556,7 +557,7 @@ private:
                                      ACE_TEXT("%sDataWriterImpl::")
                                      ACE_TEXT("get_or_create_instance_handle, ")
                                      ACE_TEXT("insert %s failed. \n"),
-                                     Traits::type_name(), Traits::type_name()),
+                                     TraitsType::type_name(), TraitsType::type_name()),
                                     ::DDS::RETCODE_ERROR);
                 }
             } // end of if (needs_creation)
@@ -580,6 +581,7 @@ private:
     friend class ::DDS_TEST;
   };
 
+  }
 }
 
 #endif /* dds_DCPS_DataWriterImpl_T_h */
