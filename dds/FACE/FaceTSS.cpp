@@ -48,6 +48,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
                        CONNECTION_ID_TYPE& connection_id,
                        CONNECTION_DIRECTION_TYPE& connection_direction,
                        MESSAGE_SIZE_TYPE& max_message_size,
+                       TIMEOUT_TYPE,
                        RETURN_CODE_TYPE& return_code)
 {
   return_code = RC_NO_ERROR;

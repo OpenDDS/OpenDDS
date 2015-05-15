@@ -17,13 +17,15 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
   FACE::MESSAGE_SIZE_TYPE size;
-  FACE::TS::Create_Connection("pub", FACE::PUB_SUB, connId, dir, size, status);
+  FACE::TS::Create_Connection("pub", FACE::PUB_SUB, connId, dir, size,
+                              FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   FACE::CONNECTION_ID_TYPE connId_INF;
   FACE::CONNECTION_DIRECTION_TYPE dir_INF;
   FACE::MESSAGE_SIZE_TYPE size_INF;
-  FACE::TS::Create_Connection("pub_INF", FACE::PUB_SUB, connId_INF, dir_INF, size_INF, status);
+  FACE::TS::Create_Connection("pub_INF", FACE::PUB_SUB, connId_INF, dir_INF,
+                              size_INF, FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   ACE_OS::sleep(10); // connection established with Subscriber

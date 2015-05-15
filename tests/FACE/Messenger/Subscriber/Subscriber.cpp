@@ -39,7 +39,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
   FACE::MESSAGE_SIZE_TYPE size;
-  FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size, status);
+  FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size,
+                              FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   bool testPassed = true;
