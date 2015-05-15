@@ -1,0 +1,15 @@
+project: opendds_face {
+  idlflags      += -Wb,export_include=SampleModel_Export.h \
+                   -Wb,export_macro=SampleModel_Export
+  dcps_ts_flags += -Wb,export_include=SampleModel_Export.h \
+                   -Wb,export_macro=SampleModel_Export
+  dynamicflags  += SAMPLEMODEL_BUILD_DLL
+
+  TypeSupport_Files {
+    SampleModel.idl
+  }
+
+  IDL_Files {
+    SampleModelTypeSupport.idl
+  }
+}
