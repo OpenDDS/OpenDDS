@@ -68,7 +68,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_DEBUG((LM_INFO, "%C\t%d\n", msg.text.in(), msg.count));
 #ifdef ACE_HAS_CDR_FIXED
-    std::cout << msg.deci;
     if (msg.deci != FACE::Fixed("987.654")) {
       const FACE::String_var decimal = msg.deci.to_string();
       ACE_ERROR((LM_ERROR, "ERROR: invalid fixed data %C\n", decimal.in());
