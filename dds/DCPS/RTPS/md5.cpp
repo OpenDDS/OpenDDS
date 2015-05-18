@@ -37,6 +37,8 @@
 
 #ifndef HAVE_OPENSSL
 
+#include <ace/config-all.h>
+
 #include <string.h>
 
 #include "md5.h"

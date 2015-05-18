@@ -11,6 +11,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "ThreadSynchWorker.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -28,7 +29,7 @@ class ThreadSynchResource;
  * 2) The ThreadSynch object is created by the ThreadSynchResource object and it owns
  *    the ThreadSynchResource object.
  */
-class OpenDDS_Dcps_Export ThreadSynch {
+class OpenDDS_Dcps_Export ThreadSynch : public PoolAllocationBase {
 public:
 
   virtual ~ThreadSynch();
@@ -93,4 +94,3 @@ private:
 #endif /* __ACE_INLINE__ */
 
 #endif  /* OPENDDS_DCPS_THREADSYNCH_H */
-

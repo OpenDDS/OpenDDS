@@ -28,8 +28,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     FACE::MESSAGE_SIZE_TYPE size;
     char connection_name[16];
     ACE_OS::snprintf(connection_name, sizeof(connection_name), "pub_%d", part);
-    FACE::TS::Create_Connection(
-      connection_name, FACE::PUB_SUB, connId, dir, size, status);
+    FACE::TS::Create_Connection(connection_name, FACE::PUB_SUB, connId, dir, size,
+                                FACE::INF_TIME_VALUE, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
     ACE_OS::sleep(5); // connection established with Subscriber

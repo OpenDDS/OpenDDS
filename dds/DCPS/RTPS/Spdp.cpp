@@ -10,13 +10,13 @@
 #include "Spdp.h"
 #include "BaseMessageTypes.h"
 #include "MessageTypes.h"
+#include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
 #include "RtpsMessageTypesTypeSupportImpl.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
 
 #include "dds/DdsDcpsGuidC.h"
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"

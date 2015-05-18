@@ -62,7 +62,7 @@ namespace {
       Locator_t* dm_locs = NULL,
       CORBA::ULong num_dm_locs = 0,
       long liveliness_count = 0,
-      long lease_dur_seconds = 0,
+      long lease_dur_seconds = 100,
       unsigned long lease_dur_fraction = 0
     )
     {
@@ -123,10 +123,8 @@ namespace {
         result.participantProxy.manualLivelinessCount.value = liveliness_count;
       }
 
-      if (lease_dur_seconds || lease_dur_fraction) {
-        result.leaseDuration.seconds = lease_dur_seconds;
-        result.leaseDuration.fraction = lease_dur_fraction;
-      }
+      result.leaseDuration.seconds = lease_dur_seconds;
+      result.leaseDuration.fraction = lease_dur_fraction;
 
       return result;
     }
@@ -147,10 +145,8 @@ namespace {
       DiscoveredWriterData writer_data;
       writer_data.ddsPublicationData.durability =
           TheServiceParticipant->initial_DurabilityQosPolicy();
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       writer_data.ddsPublicationData.durability_service =
           TheServiceParticipant->initial_DurabilityServiceQosPolicy();
-#endif
       writer_data.ddsPublicationData.deadline =
           TheServiceParticipant->initial_DeadlineQosPolicy();
       writer_data.ddsPublicationData.latency_budget =
@@ -179,6 +175,8 @@ namespace {
           TheServiceParticipant->initial_TopicDataQosPolicy();
       writer_data.ddsPublicationData.group_data =
           TheServiceParticipant->initial_GroupDataQosPolicy();
+
+      memset (&writer_data.writerProxy.remoteWriterGuid, 0, sizeof (GUID_t));
 
       return writer_data;
     }
@@ -261,7 +259,6 @@ namespace {
         result.ddsPublicationData.type_name  = type_name;
       }
       result.ddsPublicationData.durability.kind = durability;
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       result.ddsPublicationData.durability_service.service_cleanup_delay.sec = svc_del_sec;
       result.ddsPublicationData.durability_service.service_cleanup_delay.nanosec = svc_del_nsec;
       result.ddsPublicationData.durability_service.history_kind = hist;
@@ -269,15 +266,6 @@ namespace {
       result.ddsPublicationData.durability_service.max_samples = max_samples;
       result.ddsPublicationData.durability_service.max_instances = max_instances;
       result.ddsPublicationData.durability_service.max_samples_per_instance = max_samples_per_instance;
-#else
-      ACE_UNUSED_ARG(svc_del_sec);
-      ACE_UNUSED_ARG(svc_del_nsec);
-      ACE_UNUSED_ARG(hist);
-      ACE_UNUSED_ARG(hist_depth);
-      ACE_UNUSED_ARG(max_samples);
-      ACE_UNUSED_ARG(max_instances);
-      ACE_UNUSED_ARG(max_samples_per_instance);
-#endif
       result.ddsPublicationData.deadline.period.sec = deadline_sec;
       result.ddsPublicationData.deadline.period.nanosec = deadline_nsec;
       result.ddsPublicationData.latency_budget.duration.sec = lb_sec;
@@ -512,7 +500,7 @@ int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
   { // Should encode participant data with 1 locator to param list properly
-    SPDPdiscoveredParticipantData participant_data;
+    SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
     ParameterList param_list;
     participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
     int status = to_param_list(participant_data, param_list);
@@ -522,11 +510,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_missing(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
     TEST_ASSERT(is_missing(param_list, PID_DEFAULT_UNICAST_LOCATOR));
     TEST_ASSERT(is_missing(param_list, PID_DEFAULT_MULTICAST_LOCATOR));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
+    TEST_ASSERT(is_missing(param_list, PID_PARTICIPANT_LEASE_DURATION));
   }
 
   { // Should encode participant data with 2 locators to param list properly
-    SPDPdiscoveredParticipantData participant_data;
+    SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
     ParameterList param_list;
     participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
     participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
@@ -537,11 +525,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
     TEST_ASSERT(is_missing(param_list, PID_DEFAULT_UNICAST_LOCATOR));
     TEST_ASSERT(is_missing(param_list, PID_DEFAULT_MULTICAST_LOCATOR));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
+    TEST_ASSERT(is_missing(param_list, PID_PARTICIPANT_LEASE_DURATION));
   }
 
   { // Should encode participant data with 3 locators to param list properly
-    SPDPdiscoveredParticipantData participant_data;
+    SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
     ParameterList param_list;
     participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
     participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
@@ -553,11 +541,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
     TEST_ASSERT(is_present(param_list, PID_DEFAULT_UNICAST_LOCATOR));
     TEST_ASSERT(is_missing(param_list, PID_DEFAULT_MULTICAST_LOCATOR));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
+    TEST_ASSERT(is_missing(param_list, PID_PARTICIPANT_LEASE_DURATION));
   }
 
   { // Should encode participant data with 4 locators to param list properly
-    SPDPdiscoveredParticipantData participant_data;
+    SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
     ParameterList param_list;
     participant_data.participantProxy.metatrafficUnicastLocatorList.length(1);
     participant_data.participantProxy.metatrafficMulticastLocatorList.length(1);
@@ -570,7 +558,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_METATRAFFIC_MULTICAST_LOCATOR));
     TEST_ASSERT(is_present(param_list, PID_DEFAULT_UNICAST_LOCATOR));
     TEST_ASSERT(is_present(param_list, PID_DEFAULT_MULTICAST_LOCATOR));
-    TEST_ASSERT(is_present(param_list, PID_PARTICIPANT_LEASE_DURATION));
+    TEST_ASSERT(is_missing(param_list, PID_PARTICIPANT_LEASE_DURATION));
   }
 
   { // Should encode participant user data properly
@@ -1182,7 +1170,8 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   { // Should encode writer data
-    DiscoveredWriterData writer_data; ParameterList param_list;
+    DiscoveredWriterData writer_data = Factory::default_writer_data();
+    ParameterList param_list;
     TEST_ASSERT(!to_param_list(writer_data, param_list));
   }
 
@@ -1999,7 +1988,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_ASSERT(is_present(param_list, PID_ENDPOINT_GUID));
   }
   { // Should decode writer guid
-    DiscoveredWriterData writer_data;
+    DiscoveredWriterData writer_data = Factory::default_writer_data();
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(writer_data, param_list));
     DiscoveredWriterData writer_data_out;
@@ -2108,7 +2097,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   { // Should encode reader data
-    DiscoveredReaderData reader_data;
+    DiscoveredReaderData reader_data = Factory::default_reader_data();
     ParameterList param_list;
     TEST_ASSERT(!to_param_list(reader_data, param_list));
   }

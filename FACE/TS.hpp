@@ -19,6 +19,7 @@ namespace TS {
     /* out */ CONNECTION_ID_TYPE& connection_id,
     /* out */ CONNECTION_DIRECTION_TYPE& connection_direction,
     /* out */ MESSAGE_SIZE_TYPE& max_message_size,
+    /* in */ TIMEOUT_TYPE timeout,
     /* out */ RETURN_CODE_TYPE& return_code);
 
   OpenDDS_FACE_Export

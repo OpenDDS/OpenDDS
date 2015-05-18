@@ -8,8 +8,8 @@ namespace OpenDDS { namespace FaceTSS { namespace config {
 QosSettings::QosSettings() :
   publisher_qos_(TheServiceParticipant->initial_PublisherQos())
 , subscriber_qos_(TheServiceParticipant->initial_SubscriberQos())
-, data_writer_qos_(TheServiceParticipant->initial_DataWriterQos())
-, data_reader_qos_(TheServiceParticipant->initial_DataReaderQos())
+, datawriter_qos_(TheServiceParticipant->initial_DataWriterQos())
+, datareader_qos_(TheServiceParticipant->initial_DataReaderQos())
 {
 
 }
@@ -29,38 +29,38 @@ QosSettings::apply_to(DDS::SubscriberQos&  target) const
 void
 QosSettings::apply_to(DDS::DataWriterQos&  target) const
 {
-  target = data_writer_qos_;
+  target = datawriter_qos_;
 }
 
 void
 QosSettings::apply_to(DDS::DataReaderQos&  target) const
 {
-  target = data_reader_qos_;
+  target = datareader_qos_;
 }
 
 int
 QosSettings::set_qos(QosLevel level, const char* name, const char* value)
 {
   int status = 0;
-  switch(level) {
+  switch (level) {
     case publisher:
       status = set_qos(publisher_qos_, name, value);
       break;
     case subscriber:
       status = set_qos(subscriber_qos_, name, value);
       break;
-    case data_writer:
-      status = set_qos(data_writer_qos_, name, value);
+    case datawriter:
+      status = set_qos(datawriter_qos_, name, value);
       break;
-    case data_reader:
-      status = set_qos(data_reader_qos_, name, value);
+    case datareader:
+      status = set_qos(datareader_qos_, name, value);
       break;
   }
   return status;
 }
 
 bool
-set_presentation_access_scope_kind_qos(
+set_presentation_access_scope_qos(
   DDS::PresentationQosPolicy& target,
   const char* name,
   const char* value)
@@ -106,8 +106,8 @@ set_duration_qos_value(DDS::Duration_t& target,
                        const char* value)        // config value provided
 {
   char buffer[64];
-  strncpy(buffer, prefix_match, 64 - 4);
-  strcat(buffer, ".sec");
+  std::strncpy(buffer, prefix_match, 64 - 4);
+  std::strcat(buffer, ".sec");
   if (!std::strcmp(name, buffer)) {
     if (!std::strcmp(value, "DURATION_INFINITE_SEC")) {
       target.sec=DDS::DURATION_INFINITE_SEC;
@@ -116,8 +116,8 @@ set_duration_qos_value(DDS::Duration_t& target,
     target.sec = atoi(value);
     return true;
   }
-  strncpy(buffer, prefix_match, 64 - 7);
-  strcat(buffer, ".nanosec");
+  std::strncpy(buffer, prefix_match, 64 - 7);
+  std::strcat(buffer, ".nanosec");
   if (!std::strcmp(name, buffer)) {
     if (!std::strcmp(value, "DURATION_INFINITE_NSEC")) {
       target.nanosec=DDS::DURATION_INFINITE_NSEC;
@@ -164,10 +164,10 @@ set_partition_name_qos(
     // Value can be a comma-separated list
     const char* start = value;
     char buffer[128];
-    memset(buffer, 0, sizeof(buffer));
-    while (const char* next_comma = strchr(start, ',')) {
+    std::memset(buffer, 0, sizeof(buffer));
+    while (const char* next_comma = std::strchr(start, ',')) {
       // Copy into temp buffer, won't have null
-      strncpy(buffer, start, next_comma - start);
+      std::strncpy(buffer, start, next_comma - start);
       // Append null
       buffer[next_comma - start] = '\0';
       // Add to QOS
@@ -429,7 +429,7 @@ int QosSettings::set_qos(
   DDS::PublisherQos& target, const char* name, const char* value)
 {
   bool matched =
-    set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
+    set_presentation_access_scope_qos(target.presentation, name, value) ||
     set_presentation_coherent_access_qos(target.presentation, name, value) ||
     set_presentation_ordered_access_qos(target.presentation, name, value) ||
     set_partition_name_qos(target.partition, name, value);
@@ -446,7 +446,7 @@ int QosSettings::set_qos(
   DDS::SubscriberQos& target, const char* name, const char* value)
 {
   bool matched =
-    set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
+    set_presentation_access_scope_qos(target.presentation, name, value) ||
     set_presentation_coherent_access_qos(target.presentation, name, value) ||
     set_presentation_ordered_access_qos(target.presentation, name, value) ||
     set_partition_name_qos(target.partition, name, value);

@@ -1,0 +1,292 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef RTPS_RTPSCORE_IDL
+#define RTPS_RTPSCORE_IDL
+
+#include "dds/DdsDcpsInfoUtils.idl"
+
+module OpenDDS {
+  module RTPS {
+
+    typedef octet OctetArray2[2];
+    typedef octet OctetArray4[4];
+    typedef octet OctetArray16[16];
+
+    typedef DDS::OctetSeq OctetSeq;
+
+    /* A list of filters that were applied to the sample.
+       See section 9.6.3.1 for the signature-generation algorithm. */
+    typedef long FilterSignature_t[4];
+
+    /* For each filter signature, the results indicate whether the
+       sample passed the filter. */
+    typedef sequence<long> FilterResult_t;
+
+    typedef sequence<FilterSignature_t> FilterSignatureSeq;
+
+    struct ContentFilterInfo_t {
+      FilterResult_t filterResult;
+      FilterSignatureSeq filterSignatures;
+    };
+
+    typedef DDS::StringSeq StringSeq;
+    typedef string<256> String256;
+
+    /* information to enable content filtering */
+    struct ContentFilterProperty_t {
+      String256 contentFilteredTopicName;
+      String256 relatedTopicName;
+      String256 filterClassName;
+      string filterExpression;
+      StringSeq expressionParameters;
+    };
+
+    struct Property_t {
+      string name;
+      string value;
+    };
+
+    typedef sequence<Property_t> PropertySeq;
+
+    struct EntityName_t {
+      string name;
+    };
+
+    typedef DCPS::EntityId_t EntityId_t;
+    // see ENTITYID_* constants in BaseMessageTypes.h
+
+    /* Type used to encapsulate a count that is incremented monotonically, used
+       to identify message duplicates. */
+    struct Count_t {
+      long value;
+    };
+
+    /* Type used to hold sequence numbers. */
+    struct SequenceNumber_t {
+      long high;
+      unsigned long low;
+    };
+    // see SEQUENCENUMBER_UNKNOWN constant in BaseMessageTypes.h
+
+    typedef sequence<long, 8> LongSeq8;
+
+    /* SequenceNumberSet SubmessageElements are used as parts of several
+       messages to provide binary information about individual sequence numbers
+       within a range. */
+    /* custom de/serializer implemented in opendds_idl: see 9.4.2.6 */
+    struct SequenceNumberSet {
+      SequenceNumber_t bitmapBase;
+      unsigned long numBits;
+      LongSeq8 bitmap;
+    };
+
+    /* Type used to represent the addressing information needed to send a
+       message to an RTPS Endpoint */
+    struct Locator_t {
+      long kind;
+      unsigned long _port;
+      OctetArray16 address;
+    };
+
+    /* LocatorList is used to specify a list of locators. */
+    typedef sequence<Locator_t, 8> LocatorList;
+
+    /* all Submessages are composed of a leading SubmessageHeader */
+    struct SubmessageHeader {
+      octet submessageId;
+      octet flags;           // E = flags & 1 (EndiannessFlag)
+      unsigned short submessageLength; /* octetsToNextHeader */
+    };
+    // Valid constants for the submessageId field are the enumerators
+    // of the SubmessageKind enum in MessageTypes.h.
+    // The least-significant bit of "flags" is E, the endianness flag:
+    // pseudoenum E { BIG_ENDIAN = 0, LITTLE_ENDIAN = 1};
+
+    /* Type used to hold fragment numbers. */
+    struct FragmentNumber_t {
+      unsigned long value;
+    };
+
+    /* FragmentNumberSet SubmessageElements are used to provide binary
+       information about individual fragment numbers within a range. */
+    /* custom de/serializer implemented in opendds_idl: see 9.4.2.8 */
+    struct FragmentNumberSet {
+      FragmentNumber_t bitmapBase;
+      unsigned long numBits;
+      LongSeq8 bitmap;
+    };
+
+    /* Provides information on the state of a Reader to a Writer. AckNack
+       messages are sent by a Reader to one or more Writers. */
+    struct AckNackSubmessage {
+      SubmessageHeader smHeader;
+        // F = smHeader.flags & 2 (FinalFlag)
+      EntityId_t readerId;
+      EntityId_t writerId;
+      SequenceNumberSet readerSNState;
+      Count_t count;
+    };
+
+    /* Sent from an RTPS Writer to an RTPS Reader. Indicates to the RTPS
+       Reader that a range of sequence numbers is no longer relevant. */
+    struct GapSubmessage {
+      SubmessageHeader smHeader;
+      EntityId_t readerId;
+      EntityId_t writerId;
+      SequenceNumber_t gapStart;
+      SequenceNumberSet gapList;
+    };
+
+    /* Sent from an RTPS Reader to an RTPS Writer. It contains explicit
+       information on where to send a reply to the Submessages that follow it
+       within the same message. */
+    struct InfoReplySubmessage {
+      SubmessageHeader smHeader;
+        // M = smHeader.flags & 2 (MulticastFlag)
+      LocatorList unicastLocatorList;
+      LocatorList multicastLocatorList; // if M
+    };
+
+    /* The NackFrag Submessage is used to communicate the state of a Reader to a
+       Writer. */
+    struct NackFragSubmessage {
+      SubmessageHeader smHeader;
+      EntityId_t readerId;
+      EntityId_t writerId;
+      SequenceNumber_t writerSN;
+      FragmentNumberSet fragmentNumberState;
+      Count_t count;
+    };
+
+    typedef DCPS::GuidPrefix_t GuidPrefix_t;
+    // see GUIDPREFIX_UNKNOWN constant in BaseMessageTypes.h
+
+    /* Identifies the version of the RTPS protocol. */
+    struct ProtocolVersion_t {
+      octet major;
+      octet minor;
+    };
+    // see PROTOCOLVERSION* constants in BaseMessageTypes.h
+
+    /* Type used to represent the vendor of the service
+       implementing the RTPS protocol. */
+    struct VendorId_t {
+      OctetArray2 vendorId;
+    };
+    // see VENDORID_* constants in BaseMessageTypes.h
+
+    typedef unsigned long BuiltinEndpointSet_t;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER =
+      1 << 0;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR =
+      1 << 1;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER =
+      1 << 2;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR =
+      1 << 3;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER =
+      1 << 4;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR =
+      1 << 5;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER =
+      1 << 6;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR =
+      1 << 7;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER =
+      1 << 8;
+    const BuiltinEndpointSet_t DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR =
+      1 << 9;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER =
+      1 << 10;
+    const BuiltinEndpointSet_t BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER =
+      1 << 11;
+
+    typedef sequence<Locator_t> LocatorSeq;
+
+    /* Type used to hold a timestamp. */
+    struct Time_t { // IETF RFC 1305: time = seconds + fraction / 2^32
+      long seconds;
+      unsigned long fraction;
+    };
+
+    /* Duration_t isn't defined in the PSM. It is used to hold time-differences.
+       Should have at least nano-second resolution.  Table 9.13's row for
+       PID_PARTICIPANT_LEASE_DURATION indicates this a 2-item struct or array,
+       just like Time_t (which does have the needed resolution).  So we'll use
+       Time_t for the Duration_t datatype. */
+    typedef Time_t Duration_t;
+
+    typedef DCPS::GUID_t GUID_t;
+    // see GUID_UNKNOWN constant in BaseMessageTypes.h
+
+    typedef DCPS::GUIDSeq GUIDSeq;
+
+    struct ParticipantProxy_t {
+      ProtocolVersion_t protocolVersion;
+      GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
+      VendorId_t vendorId;
+      boolean expectsInlineQos;
+      BuiltinEndpointSet_t availableBuiltinEndpoints;
+      LocatorSeq metatrafficUnicastLocatorList;
+      LocatorSeq metatrafficMulticastLocatorList;
+      LocatorSeq defaultMulticastLocatorList;
+      LocatorSeq defaultUnicastLocatorList;
+      Count_t manualLivelinessCount;
+    };
+
+    // top-level data type for SPDP
+    struct SPDPdiscoveredParticipantData {
+      DDS::ParticipantBuiltinTopicData ddsParticipantData;
+      ParticipantProxy_t participantProxy;
+      Duration_t leaseDuration;
+    };
+
+    struct WriterProxy_t {
+      GUID_t remoteWriterGuid;  // optional in DiscoveredWriterData
+      LocatorSeq unicastLocatorList;
+      LocatorSeq multicastLocatorList;
+      OpenDDS::DCPS::TransportLocatorSeq allLocators;
+    };
+
+    // top-level data type for SEDPbuiltinPublications
+    struct DiscoveredWriterData {
+      DDS::PublicationBuiltinTopicData ddsPublicationData;
+      WriterProxy_t writerProxy;
+    };
+
+    struct ReaderProxy_t {
+      GUID_t remoteReaderGuid;  // optional in DiscoveredReaderData
+      boolean expectsInlineQos;
+      LocatorSeq unicastLocatorList;
+      LocatorSeq multicastLocatorList;
+      OpenDDS::DCPS::TransportLocatorSeq allLocators;
+      GUIDSeq associatedWriters;
+    };
+
+    // top-level data type for SEDPbuiltinSubscriptions
+    struct DiscoveredReaderData {
+      DDS::SubscriptionBuiltinTopicData ddsSubscriptionData;
+      ReaderProxy_t readerProxy;
+      ContentFilterProperty_t contentFilterProperty;
+    };
+
+    /* Type used to hold data exchanged between Participants.
+       This is used for the BuiltinParticipantMessage{Writer,Reader}
+       to implement the Writer Liveliness Protocol (8.4.13). */
+    struct ParticipantMessageData {
+      GUID_t participantGuid;
+      OctetSeq data;
+    };
+    // See PARTICIPANT_MESSAGE_DATA_KIND_* constants for the 'kind'
+    // field of ParticipantMessageData, in MessageTypes.h.
+
+  };
+};
+
+#endif /* RTPS_RTPSCORE_IDL */

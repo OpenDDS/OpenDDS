@@ -585,7 +585,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
     try { // the real testing.
       ::Test::Simple foo;
-      ::CORBA::LongSeq ls;
+      ::Test::LongSeq ls;
       //::Test::Simple::_ls_seq ls;
       ls.length(1);
       ls[0] = 5;

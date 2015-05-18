@@ -11,6 +11,8 @@ module Messenger {
 #pragma DCPS_DATA_TYPE "Messenger::Message"
 #pragma DCPS_DATA_KEY "Messenger::Message writer_id"
 
+  typedef sequence<octet> OctetSeq;
+
   struct Message {
     string process_id;
     string from;
@@ -18,6 +20,6 @@ module Messenger {
     long writer_id;
     string text;
     long   sample_id;
-    CORBA::OctetSeq data;
+    OctetSeq data;
   };
 };

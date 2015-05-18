@@ -29,11 +29,12 @@
 #endif
 
 #include "AssociationData.h"
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "dds/DdsDcpsCoreC.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "Util.h"

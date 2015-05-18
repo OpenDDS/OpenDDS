@@ -15,6 +15,7 @@
 
 #include "ace/Configuration.h"
 
+#include <cstring>
 
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
@@ -93,7 +94,7 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
   formatted_name += name;
   OPENDDS_STRING delim(": ");
   formatted_name += delim;
-  for (size_t i = 0; i < (NAME_WIDTH - strlen(name) - delim.length()); ++i) {
+  for (unsigned int i = 0; i < (NAME_WIDTH - std::strlen(name) - delim.length()); ++i) {
     formatted_name += " ";
   }
   return formatted_name;

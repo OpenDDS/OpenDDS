@@ -18,6 +18,7 @@
 #include "dds/DdsDcpsSubscriptionC.h"
 
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -66,7 +67,7 @@ public:
 
   RepoKey key() const { return this->key_; }
 
-  class OpenDDS_Dcps_Export Config {
+  class OpenDDS_Dcps_Export Config : public PoolAllocationBase {
   public:
     virtual ~Config();
     virtual int discovery_config(ACE_Configuration_Heap& cf) = 0;

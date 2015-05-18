@@ -13,12 +13,13 @@
 #include "BasicQueueLinkChunk_T.h"
 #include "ace/Malloc_T.h"
 #include "ace/Null_Mutex.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 namespace OpenDDS {
 namespace DCPS {
 
 template <typename T>
-class BasicQueueLinkAllocator : public ACE_New_Allocator {
+class BasicQueueLinkAllocator : public ACE_New_Allocator, public PoolAllocationBase {
 private:
 
   typedef BasicQueueLink<T>                              LinkType;

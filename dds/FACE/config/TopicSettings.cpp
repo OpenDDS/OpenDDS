@@ -1,5 +1,7 @@
 #include "TopicSettings.h"
 
+#include "ace/OS_NS_stdio.h"
+
 #include <cstring>
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
@@ -13,10 +15,10 @@ TopicSettings::set(const char* name, const char* value)
   } else if (!std::strcmp(name, "max_message_size")) {
     max_message_size_ = atoi(value);
   } else if (!std::strcmp(name, "type_name")) {
-    strncpy(type_name_, value, sizeof(type_name_));
+    std::strncpy(type_name_, value, sizeof(type_name_));
   } else {
     // no match
-    printf("Don't know of setting %s\n", name);
+    ACE_OS::printf("Don't know of setting %s\n", name);
     status = 1;
   }
 

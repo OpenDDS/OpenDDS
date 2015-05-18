@@ -4,7 +4,9 @@
 
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
+
 #include <map>
+#include <cstring>
 
 namespace {
   template <typename T>
@@ -444,7 +446,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     } else if (ss_foo.octer != my_foo.octer) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize octer\n")));
       failed = true;
-    } else if (0 != strcmp(ss_foo.theString.in(), my_foo.theString.in())) {
+    } else if (0 != std::strcmp(ss_foo.theString, my_foo.theString)) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
         my_foo.theString.in(), ss_foo.theString.in()));

@@ -7,6 +7,9 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/SafetyProfilePool.h"
+
+#include <cstring>
 
 namespace FACE {
 namespace TS {
@@ -58,6 +61,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
                        CONNECTION_ID_TYPE& connection_id,
                        CONNECTION_DIRECTION_TYPE& connection_direction,
                        MESSAGE_SIZE_TYPE& max_message_size,
+                       TIMEOUT_TYPE,
                        RETURN_CODE_TYPE& return_code)
 {
   return_code = RC_NO_ERROR;
@@ -75,16 +79,9 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
   if (!parser.find_connection(connection_name, connection)) {
     // Find topic
     if (!parser.find_topic(connection.topic_name_, topic)) {
-      // If qos name was specified for the connection
-      if (connection.qos_name_[0]) {
-        // Find Qos by specified name
-        if (parser.find_qos(connection.qos_name_, qos)) {
-          return_code = INVALID_CONFIG;
-        }
-      } else {
-        // Find Qos by default (topic) name
-        parser.find_qos(connection.topic_name_, qos);
-        // Ignore result, not required
+      // Find Qos by specified name(s)
+      if (parser.find_qos(connection, qos)) {
+        return_code = INVALID_CONFIG;
       }
     } else {
       return_code = INVALID_CONFIG;
@@ -113,7 +110,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
 
   const SYSTEM_TIME_TYPE refresh_period =
     (connection_direction == SOURCE) ?
-    OpenDDS::FaceTSS::convertDuration(qos.data_writer_qos().lifespan.duration) : 0;
+    OpenDDS::FaceTSS::convertDuration(qos.datawriter_qos().lifespan.duration) : 0;
 
   const TRANSPORT_CONNECTION_STATUS_TYPE status = {
     topic.message_definition_guid_, // MESSAGE
@@ -145,7 +142,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
     if (connection_name[0]) {
       // Validate provided connection_name
       OPENDDS_STRING conn_name = entities.connections_[connection_id].first;
-      if (strcmp(connection_name, conn_name.c_str()) == 0) {
+      if (std::strcmp(connection_name, conn_name.c_str()) == 0) {
         return_code = RC_NO_ERROR;
       } else {
         return_code = INVALID_PARAM;

@@ -16,6 +16,9 @@
 #include "ace/Guard_T.h"
 #include "ace/Atomic_Op.h"
 
+#include "dds/DCPS/SafetyProfilePool.h"
+#include "PoolAllocationBase.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -38,7 +41,7 @@ namespace DCPS {
 *
 */
 template <class T, class ACE_LOCK>
-class Cached_Allocator_With_Overflow : public ACE_New_Allocator {
+class Cached_Allocator_With_Overflow : public ACE_New_Allocator, public PoolAllocationBase {
 public:
   /// Create a cached memory pool with @a n_chunks chunks
   /// each with sizeof (TYPE) size.
@@ -47,7 +50,6 @@ public:
       allocs_from_pool_(0),
       frees_to_heap_(0),
       frees_to_pool_(0),
-      pool_(0),
       free_list_(ACE_PURE_FREE_LIST) {
     // To maintain alignment requirements, make sure that each element
     // inserted into the free list is aligned properly for the platform.
@@ -55,31 +57,29 @@ public:
     // To make sure enough room is allocated, round up the size so that
     // each element starts aligned.
     //
-    // NOTE - this would probably be easier by defining pool_ as a pointer
+    // NOTE - this would probably be easier by defining begin_ as a pointer
     // to T and allocating an array of them (the compiler would probably
     // take care of the alignment for us), but then the ACE_NEW below would
     // require a default constructor on T - a requirement that is not in
     // previous versions of ACE
     size_t chunk_size = sizeof(T);
     chunk_size = ACE_MALLOC_ROUNDUP(chunk_size, ACE_MALLOC_ALIGN);
-    ACE_NEW(this->pool_,
-            char[n_chunks * chunk_size]);
-
-    for (size_t c = 0; c < n_chunks; c++) {
-      void* placement = this->pool_ + c * chunk_size;
-      this->free_list_.add(new(placement) ACE_Cached_Mem_Pool_Node<T>);
-    }
-
-    // Put into free list using placement contructor, no real memory
-    // allocation in the above <new>.
+    begin_ = static_cast<unsigned char*> (DCPS::SafetyProfilePool::instance()->malloc(n_chunks * chunk_size));
 
     // Remember end of the pool.
-    last_ = reinterpret_cast<char*>(this->pool_ + n_chunks * chunk_size - 1);
+    end_ = begin_ + n_chunks * chunk_size;
+
+    // Put into free list using placement contructor, no real memory
+    // allocation in the <new> below.
+    for (size_t c = 0; c < n_chunks; c++) {
+      void* placement = begin_ + c * chunk_size;
+      this->free_list_.add(new(placement) ACE_Cached_Mem_Pool_Node<T>);
+    }
   }
 
   /// Clear things up.
   ~Cached_Allocator_With_Overflow() {
-    delete [] this->pool_;
+    DCPS::SafetyProfilePool::instance()->free(begin_);
   }
   /**
   * Get a chunk of memory from free list cache.  Note that @a nbytes is
@@ -97,22 +97,22 @@ public:
     void* rtn =  this->free_list_.remove()->addr();
 
     if (0 == rtn) {
-      rtn = reinterpret_cast<void*>(new char[sizeof(T)]);
+      rtn = DCPS::SafetyProfilePool::instance()->malloc(sizeof(T));
       allocs_from_heap_++;
 
       if (DCPS_debug_level >= 2) {
         if (allocs_from_heap_ == 1 && DCPS_debug_level >= 2)
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) Cached_Allocator_With_Overflow::malloc %x"
-                     " %d heap allocs with %d outstanding\n",
+                     "(%P|%t) Cached_Allocator_With_Overflow::malloc %@"
+                     " %Lu heap allocs with %Lu outstanding\n",
                      this, this->allocs_from_heap_.value(),
                      this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
 
         if (DCPS_debug_level >= 6)
           if (allocs_from_heap_.value() % 500 == 0)
             ACE_DEBUG((LM_DEBUG,
-                       "(%P|%t) Cached_Allocator_With_Overflow::malloc %x"
-                       " %d heap allocs with %d outstanding\n",
+                       "(%P|%t) Cached_Allocator_With_Overflow::malloc %@"
+                       " %Lu heap allocs with %Lu outstanding\n",
                        this, this->allocs_from_heap_.value(),
                        this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
       }
@@ -123,8 +123,8 @@ public:
       if (DCPS_debug_level >= 6)
         if (allocs_from_pool_.value() % 500 == 0)
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) Cached_Allocator_With_Overflow::malloc %x"
-                     " %d pool allocs %d pool frees with %d available\n",
+                     "(%P|%t) Cached_Allocator_With_Overflow::malloc %@"
+                     " %Lu pool allocs %Lu pool frees with %Lu available\n",
                      this, this->allocs_from_pool_.value(), this->frees_to_pool_.value(),
                      this->available()));
     }
@@ -153,16 +153,16 @@ public:
 
   /// Return a chunk of memory back to free list cache.
   void free(void * ptr) {
-    if (ptr < reinterpret_cast<void*>(pool_) ||
-        ptr > reinterpret_cast<void*>(last_)) {
-      char* tmp = reinterpret_cast<char*>(ptr);
-      delete []tmp;
+    unsigned char* tmp = static_cast<unsigned char*>(ptr);
+    if (tmp < begin_ ||
+        tmp >= end_) {
+      DCPS::SafetyProfilePool::instance()->free(tmp);
       frees_to_heap_++;
 
       if (frees_to_heap_ > allocs_from_heap_.value()) {
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR:Cached_Allocator_With_Overflow::free %x"
-                   " more deletes %d than allocs %d to the heap\n",
+                   "(%P|%t) ERROR:Cached_Allocator_With_Overflow::free %@"
+                   " more deletes %Lu than allocs %Lu to the heap\n",
                    this,
                    this->frees_to_heap_.value(),
                    this->allocs_from_heap_.value()));
@@ -171,8 +171,8 @@ public:
       if (DCPS_debug_level >= 6) {
         if (frees_to_heap_.value() % 500 == 0) {
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) Cached_Allocator_With_Overflow::free %x"
-                     " %d heap allocs with %d outstanding\n",
+                     "(%P|%t) Cached_Allocator_With_Overflow::free %@"
+                     " %Lu heap allocs with %Lu outstanding\n",
                      this, this->allocs_from_heap_.value(),
                      this->allocs_from_heap_.value() - this->frees_to_heap_.value()));
         }
@@ -183,11 +183,11 @@ public:
 
       if (frees_to_pool_ > allocs_from_pool_.value()) {
         ACE_ERROR((LM_ERROR,
-                   "(%P|%t) ERROR: Cached_Allocator_With_Overflow::free %x"
-                   " more deletes %d than allocs %d from the pool\n",
+                   "(%P|%t) ERROR: Cached_Allocator_With_Overflow::free %@"
+                   " more deletes %Lu than allocs %Lu from the pool ptr=%@ begin_=%@ end_=%@\n",
                    this,
                    this->frees_to_pool_.value(),
-                   this->allocs_from_pool_.value()));
+                   this->allocs_from_pool_.value(), ptr, begin_, end_));
       }
 
       this->free_list_.add((ACE_Cached_Mem_Pool_Node<T> *) ptr) ;
@@ -195,8 +195,8 @@ public:
       if (DCPS_debug_level >= 6)
         if (this->available() % 500 == 0)
           ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) Cached_Allocator_With_Overflow::malloc %x"
-                     " %d pool allocs %d pool free with %d available\n",
+                     "(%P|%t) Cached_Allocator_With_Overflow::malloc %@"
+                     " %Lu pool allocs %Lu pool free with %Lu available\n",
                      this, this->allocs_from_pool_.value(),
                      this->frees_to_pool_.value(),
                      this->available()));
@@ -219,10 +219,9 @@ public:
 private:
   /// Remember how we allocate the memory in the first place so
   /// we can clear things up later.
-  char *pool_;
-
+  unsigned char* begin_;
   /// The end of the pool.
-  char *last_;
+  unsigned char* end_;
 
   /// Maintain a cached memory free list.
   ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<T>, ACE_LOCK> free_list_;

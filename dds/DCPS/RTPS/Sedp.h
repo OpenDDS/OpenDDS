@@ -12,6 +12,7 @@
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 
 #include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
@@ -24,6 +25,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DataSampleElement.h"
 #include "dds/DCPS/DataSampleHeader.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
@@ -39,12 +41,6 @@
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-namespace DDS {
-  class TopicBuiltinTopicDataDataReaderImpl;
-  class PublicationBuiltinTopicDataDataReaderImpl;
-  class SubscriptionBuiltinTopicDataDataReaderImpl;
-}
 
 namespace OpenDDS {
 namespace RTPS {
@@ -148,14 +144,28 @@ private:
   Spdp& spdp_;
   ACE_Thread_Mutex& lock_;
 
-  struct Msg {
+  struct Msg : public OpenDDS::DCPS::PoolAllocationBase {
     enum MsgType { MSG_PARTICIPANT, MSG_WRITER, MSG_READER, MSG_PARTICIPANT_DATA,
                    MSG_REMOVE_FROM_PUB_BIT, MSG_REMOVE_FROM_SUB_BIT,
                    MSG_FINI_BIT, MSG_STOP } type_;
     DCPS::MessageId id_;
-    const void* payload_;
-    Msg(MsgType mt, DCPS::MessageId id, const void* p)
-      : type_(mt), id_(id), payload_(p) {}
+    union {
+      const SPDPdiscoveredParticipantData* dpdata_;
+      const DiscoveredWriterData* wdata_;
+      const DiscoveredReaderData* rdata_;
+      const ParticipantMessageData* pmdata_;
+      DDS::InstanceHandle_t ih_;
+    };
+    Msg(MsgType mt, DCPS::MessageId id, const SPDPdiscoveredParticipantData* dpdata)
+      : type_(mt), id_(id), dpdata_(dpdata) {}
+    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredWriterData* wdata)
+      : type_(mt), id_(id), wdata_(wdata) {}
+    Msg(MsgType mt, DCPS::MessageId id, const DiscoveredReaderData* rdata)
+      : type_(mt), id_(id), rdata_(rdata) {}
+    Msg(MsgType mt, DCPS::MessageId id, const ParticipantMessageData* pmdata)
+      : type_(mt), id_(id), pmdata_(pmdata) {}
+    Msg(MsgType mt, DCPS::MessageId id, DDS::InstanceHandle_t ih)
+      : type_(mt), id_(id), ih_(ih) {}
   };
 
   class Endpoint : public DCPS::TransportClient {
@@ -286,7 +296,7 @@ private:
     void enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata);
     void enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata);
     void enqueue(DCPS::MessageId id, const ParticipantMessageData* data);
-    void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
+    void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
     void acknowledge();
     void shutdown();
@@ -299,7 +309,7 @@ private:
     void svc_i(DCPS::MessageId id, const DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const DiscoveredReaderData* rdata);
     void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
-    void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih);
+    void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
 
     Spdp* spdp_;
     Sedp* sedp_;

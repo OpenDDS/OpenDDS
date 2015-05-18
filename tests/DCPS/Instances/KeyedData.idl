@@ -12,7 +12,6 @@ module Xyz {
     long  handle_value;
     long  sample_sequence;
     long  writer_id;
-    CORBA::FloatSeq unbounded_sequence;
   };
 
 };

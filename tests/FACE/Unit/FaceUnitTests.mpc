@@ -4,6 +4,25 @@ project(*QosSettings) : dcps, opendds_face {
   }
 }
 
+project(*MemoryPool) : dcps, opendds_face {
+  Source_Files {
+    MemoryPoolTest.cpp
+  }
+}
+
+project(*FreeIndex) : dcps, opendds_face {
+  Source_Files {
+    FreeIndexTest.cpp
+  }
+}
+
+project(*SafetyProfilePool) : dcps, opendds_face {
+  avoids      += no_opendds_safety_profile
+  Source_Files {
+    SafetyProfilePoolTest.cpp
+  }
+}
+
 project(*Sequences): dcps, opendds_face {
   Source_Files {
     SequencesTest.cpp

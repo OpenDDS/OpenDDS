@@ -13,6 +13,7 @@
 #include "ace/Thread_Mutex.h"
 #include "ace/Containers_T.h"
 #include "dcps_export.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 /**
  * @class DataBlockLockPool
@@ -25,7 +26,7 @@
  *
  * @NOTE: This class is thread safe.
  */
-class OpenDDS_Dcps_Export DataBlockLockPool {
+class OpenDDS_Dcps_Export DataBlockLockPool : public OpenDDS::DCPS::PoolAllocationBase {
 public:
   typedef ACE_Lock_Adapter<ACE_Thread_Mutex> DataBlockLock;
 

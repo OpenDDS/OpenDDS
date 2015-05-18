@@ -11,8 +11,12 @@
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
 #include "Registered_Data_Types.h"
-#include "DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "DdsDcpsCoreC.h"
 #include "Marked_Default_Qos.h"
+
+#ifndef DDS_HAS_MINIMUM_BIT
+#include "DdsDcpsCoreTypeSupportImpl.h"
+#endif
 
 namespace OpenDDS {
 namespace DCPS {

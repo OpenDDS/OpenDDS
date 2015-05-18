@@ -36,7 +36,7 @@ public:
                  AST_Type*, const char*);
 
 private:
-  std::string idl_template_, h_template_, cpp_template_;
+  std::string idl_template_;
 };
 
 #endif

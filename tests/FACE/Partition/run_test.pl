@@ -9,11 +9,11 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-PerlDDS::add_lib_path("./Idl");
+PerlDDS::add_lib_path("Idl");
 
 my $test = new PerlDDS::TestFramework();
 
-$test->setup_discovery();
+$test->enable_console_logging();
 
 $test->process('Subscriber1', 'Subscriber/subscriber', '1');
 $test->process('Subscriber2', 'Subscriber/subscriber', '2');

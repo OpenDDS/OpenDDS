@@ -45,6 +45,9 @@ if ($arg eq 'low') {
   $sub_opts .= "-t 1 -n 1024";
 }
 
+$pub_opts = "-DCPSConfigFile thrasher.ini";
+$sub_opts = "-DCPSConfigFile thrasher.ini";
+
 my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
 $test->enable_console_logging();

@@ -15,6 +15,7 @@
 #include "Dynamic_Cached_Allocator_With_Overflow_T.h"
 #include "DataSampleHeader.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 class DDS_TEST;
 
@@ -55,7 +56,7 @@ typedef ACE_Message_Block DataSample;
 * the element can simultaneously be in at most one InstanceDataSampleList list, one
 * SendStateDataSampleList list, and one WriterDataSampleList list.
 */
-class OpenDDS_Dcps_Export DataSampleElement {
+class OpenDDS_Dcps_Export DataSampleElement : public PoolAllocationBase {
 
 
 public:

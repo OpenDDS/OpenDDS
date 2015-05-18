@@ -1,0 +1,350 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_CORE_IDL
+#define OPENDDS_DCPS_CORE_IDL
+
+// The includes below are needed to deal with compilers that
+// have ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION_EXPORT
+#include "tao/StringSeq.pidl"
+#include "tao/LongSeq.pidl"
+
+#define BUILTIN_TOPIC_KEY_TYPE_NATIVE long
+
+module DDS {
+// Make the IDL compiler produce include of zero-copy read info
+// sequence template.
+#pragma DCPS_SUPPORT_ZERO_COPY_READ
+
+    typedef sequence<string> StringSeq;
+
+    typedef BUILTIN_TOPIC_KEY_TYPE_NATIVE BuiltinTopicKeyValue[3];
+
+    typedef long QosPolicyId_t;
+
+    struct QosPolicyCount {
+                QosPolicyId_t policy_id;
+                long count;
+                };
+
+    typedef sequence<QosPolicyCount> QosPolicyCountSeq;
+
+    typedef sequence<octet> OctetSeq;
+
+    struct Duration_t {
+                long sec;
+                unsigned long nanosec;
+                };
+
+    struct UserDataQosPolicy {
+                OctetSeq value;
+                };
+
+    struct GroupDataQosPolicy {
+                OctetSeq value;
+                };
+
+    struct TopicDataQosPolicy {
+                OctetSeq value;
+                };
+
+    struct PartitionQosPolicy {
+                StringSeq name;
+                };
+
+    enum HistoryQosPolicyKind {
+                KEEP_LAST_HISTORY_QOS,
+                KEEP_ALL_HISTORY_QOS
+                };
+
+    enum DurabilityQosPolicyKind {
+                VOLATILE_DURABILITY_QOS,
+                TRANSIENT_LOCAL_DURABILITY_QOS,
+                TRANSIENT_DURABILITY_QOS,
+                PERSISTENT_DURABILITY_QOS
+                };
+
+    struct DurabilityQosPolicy {
+                DurabilityQosPolicyKind kind;
+                };
+
+    struct DurabilityServiceQosPolicy {
+        Duration_t              service_cleanup_delay;
+        HistoryQosPolicyKind    history_kind;
+        long                    history_depth;
+        long                    max_samples;
+        long                    max_instances;
+        long                    max_samples_per_instance;
+    };
+
+    struct DeadlineQosPolicy {
+                Duration_t period;
+                };
+
+    struct LatencyBudgetQosPolicy {
+                Duration_t duration;
+                };
+
+    enum LivelinessQosPolicyKind {
+                AUTOMATIC_LIVELINESS_QOS,
+                MANUAL_BY_PARTICIPANT_LIVELINESS_QOS,
+                MANUAL_BY_TOPIC_LIVELINESS_QOS
+                };
+
+    struct LivelinessQosPolicy {
+                LivelinessQosPolicyKind kind;
+                Duration_t lease_duration;
+                };
+
+    enum ReliabilityQosPolicyKind {
+                BEST_EFFORT_RELIABILITY_QOS,
+                RELIABLE_RELIABILITY_QOS
+                };
+
+    struct ReliabilityQosPolicy {
+                ReliabilityQosPolicyKind kind;
+                Duration_t max_blocking_time;
+                };
+
+    enum DestinationOrderQosPolicyKind {
+                BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS,
+                BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS
+                };
+
+    struct DestinationOrderQosPolicy {
+                DestinationOrderQosPolicyKind kind;
+                };
+
+    struct HistoryQosPolicy {
+                HistoryQosPolicyKind kind;
+                long depth;
+                };
+
+    struct ResourceLimitsQosPolicy {
+                long max_samples;
+                long max_instances;
+                long max_samples_per_instance;
+                };
+
+    struct TransportPriorityQosPolicy {
+                long value;
+                };
+
+    struct LifespanQosPolicy {
+                Duration_t duration;
+                };
+
+    enum OwnershipQosPolicyKind {
+                SHARED_OWNERSHIP_QOS,
+                EXCLUSIVE_OWNERSHIP_QOS
+                };
+
+    struct OwnershipQosPolicy {
+                OwnershipQosPolicyKind kind;
+                };
+
+    struct OwnershipStrengthQosPolicy {
+                long value;
+                };
+
+    enum PresentationQosPolicyAccessScopeKind {
+                INSTANCE_PRESENTATION_QOS,
+                TOPIC_PRESENTATION_QOS,
+                GROUP_PRESENTATION_QOS
+                };
+
+    struct PresentationQosPolicy {
+                PresentationQosPolicyAccessScopeKind access_scope;
+                boolean coherent_access;
+                boolean ordered_access;
+                };
+
+    struct TimeBasedFilterQosPolicy {
+                Duration_t minimum_separation;
+                };
+
+    struct TopicQos {
+                TopicDataQosPolicy topic_data;
+                DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
+                DeadlineQosPolicy deadline;
+                LatencyBudgetQosPolicy latency_budget;
+                LivelinessQosPolicy liveliness;
+                ReliabilityQosPolicy reliability;
+                DestinationOrderQosPolicy destination_order;
+                HistoryQosPolicy history;
+                ResourceLimitsQosPolicy resource_limits;
+                TransportPriorityQosPolicy transport_priority;
+                LifespanQosPolicy lifespan;
+                OwnershipQosPolicy ownership;
+                };
+
+    struct WriterDataLifecycleQosPolicy {
+                boolean autodispose_unregistered_instances;
+                };
+
+    struct DataWriterQos {
+                DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
+                DeadlineQosPolicy deadline;
+                LatencyBudgetQosPolicy latency_budget;
+                LivelinessQosPolicy liveliness;
+                ReliabilityQosPolicy reliability;
+                DestinationOrderQosPolicy destination_order;
+                HistoryQosPolicy history;
+                ResourceLimitsQosPolicy resource_limits;
+                TransportPriorityQosPolicy transport_priority;
+                LifespanQosPolicy lifespan;
+                UserDataQosPolicy user_data;
+                OwnershipQosPolicy ownership;
+                OwnershipStrengthQosPolicy ownership_strength;
+                WriterDataLifecycleQosPolicy writer_data_lifecycle;
+                };
+
+    struct EntityFactoryQosPolicy {
+                boolean autoenable_created_entities;
+                };
+
+    struct PublisherQos {
+                PresentationQosPolicy presentation;
+                PartitionQosPolicy partition;
+                GroupDataQosPolicy group_data;
+                EntityFactoryQosPolicy entity_factory;
+                };
+
+    struct ReaderDataLifecycleQosPolicy {
+                Duration_t autopurge_nowriter_samples_delay;
+                Duration_t autopurge_disposed_samples_delay;
+                };
+
+    struct DataReaderQos {
+                DurabilityQosPolicy durability;
+                DeadlineQosPolicy deadline;
+                LatencyBudgetQosPolicy latency_budget;
+                LivelinessQosPolicy liveliness;
+                ReliabilityQosPolicy reliability;
+                DestinationOrderQosPolicy destination_order;
+                HistoryQosPolicy history;
+                ResourceLimitsQosPolicy resource_limits;
+                UserDataQosPolicy user_data;
+                OwnershipQosPolicy ownership;
+                TimeBasedFilterQosPolicy time_based_filter;
+                ReaderDataLifecycleQosPolicy reader_data_lifecycle;
+                };
+
+    struct SubscriberQos {
+                PresentationQosPolicy presentation;
+                PartitionQosPolicy partition;
+                GroupDataQosPolicy group_data;
+                EntityFactoryQosPolicy entity_factory;
+                };
+
+    struct BuiltinTopicKey_t {
+                BuiltinTopicKeyValue value;
+                };
+
+    // ----------------------------------------------------------------------
+#if !defined (DDS_HAS_MINIMUM_BIT)
+// These pragmas are OpenDDS-specific.
+#pragma DCPS_DATA_TYPE "DDS::ParticipantBuiltinTopicData"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::ParticipantBuiltinTopicData key.value[2]"
+#endif
+
+    struct ParticipantBuiltinTopicData {
+      BuiltinTopicKey_t key;
+      UserDataQosPolicy user_data;
+    };
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+// These pragmas are OpenDDS-specific.
+#pragma DCPS_DATA_TYPE "DDS::PublicationBuiltinTopicData"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::PublicationBuiltinTopicData key.value[2]"
+#endif
+    struct PublicationBuiltinTopicData {
+                BuiltinTopicKey_t key;
+                BuiltinTopicKey_t participant_key;
+                string topic_name;
+                string type_name;
+                DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
+                DeadlineQosPolicy deadline;
+                LatencyBudgetQosPolicy latency_budget;
+                LivelinessQosPolicy liveliness;
+                ReliabilityQosPolicy reliability;
+                LifespanQosPolicy lifespan;
+                UserDataQosPolicy user_data;
+                OwnershipQosPolicy ownership;
+                OwnershipStrengthQosPolicy ownership_strength;
+                DestinationOrderQosPolicy destination_order;
+                PresentationQosPolicy presentation;
+                PartitionQosPolicy partition;
+                TopicDataQosPolicy topic_data;
+                GroupDataQosPolicy group_data;
+                };
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+// These pragmas are OpenDDS-specific.
+#pragma DCPS_DATA_TYPE "DDS::SubscriptionBuiltinTopicData"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::SubscriptionBuiltinTopicData key.value[2]"
+#endif
+    struct SubscriptionBuiltinTopicData {
+                BuiltinTopicKey_t key;
+                BuiltinTopicKey_t participant_key;
+                string topic_name;
+                string type_name;
+                DurabilityQosPolicy durability;
+                DeadlineQosPolicy deadline;
+                LatencyBudgetQosPolicy latency_budget;
+                LivelinessQosPolicy liveliness;
+                ReliabilityQosPolicy reliability;
+                OwnershipQosPolicy ownership;
+                DestinationOrderQosPolicy destination_order;
+                UserDataQosPolicy user_data;
+                TimeBasedFilterQosPolicy time_based_filter;
+                PresentationQosPolicy presentation;
+                PartitionQosPolicy partition;
+                TopicDataQosPolicy topic_data;
+                GroupDataQosPolicy group_data;
+                };
+
+#if !defined (DDS_HAS_MINIMUM_BIT)
+// These pragmas are OpenDDS-specific.
+#pragma DCPS_DATA_TYPE "DDS::TopicBuiltinTopicData"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[0]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[1]"
+#pragma DCPS_DATA_KEY  "DDS::TopicBuiltinTopicData key.value[2]"
+#endif
+
+    struct TopicBuiltinTopicData {
+                BuiltinTopicKey_t key;
+                string name;
+                string type_name;
+                DurabilityQosPolicy durability;
+                DurabilityServiceQosPolicy durability_service;
+                DeadlineQosPolicy deadline;
+                LatencyBudgetQosPolicy latency_budget;
+                LivelinessQosPolicy liveliness;
+                ReliabilityQosPolicy reliability;
+                TransportPriorityQosPolicy transport_priority;
+                LifespanQosPolicy lifespan;
+                DestinationOrderQosPolicy destination_order;
+                HistoryQosPolicy history;
+                ResourceLimitsQosPolicy resource_limits;
+                OwnershipQosPolicy ownership;
+                TopicDataQosPolicy topic_data;
+                };
+
+};
+
+#endif  /* OPENDDS_DCPS_CORE_IDL */

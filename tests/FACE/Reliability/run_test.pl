@@ -13,7 +13,7 @@ PerlDDS::add_lib_path("../Messenger/Idl");
 
 my $test = new PerlDDS::TestFramework();
 
-$test->setup_discovery();
+$test->enable_console_logging();
 
 $test->process('Subscriber', 'Subscriber/subscriber');
 $test->start_process('Subscriber');

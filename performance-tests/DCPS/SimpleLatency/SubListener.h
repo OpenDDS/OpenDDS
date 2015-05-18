@@ -6,16 +6,11 @@
 
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DdsDcpsPublicationC.h>
+#include "DDSPerfTestTypeSupportImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
-
-namespace DDSPerfTest
-{
-  class PubMessageDataReaderImpl;
-  class AckMessageDataWriterImpl;
-}
 
 //Class PubDataReaderListenerImpl
 class PubDataReaderListenerImpl

@@ -3,9 +3,9 @@
 #include "ace/OS_NS_string.h"
 #include "ace/OS_NS_wchar.h"
 #include "ace/OS_Memory.h"
-
 // FUZZ: disable check_for_streams_include
 #include "ace/streams.h"
+#include "tao/Allocation_Macros.h"
 
 TAO_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -37,9 +37,9 @@ CORBA::string_alloc (CORBA::ULong len)
 {
   // Allocate 1 + strlen to accomodate the null terminating character.
   char *s = 0;
-  ACE_NEW_RETURN (s,
-                  char[size_t (len + 1)],
-                  0);
+  ACE_ALLOCATOR_NEW (s,
+                     char[size_t (len + 1)],
+                     0);
 
   s[0]= '\0';
 
@@ -79,9 +79,9 @@ CORBA::WChar*
 CORBA::wstring_alloc (CORBA::ULong len)
 {
   CORBA::WChar *s = 0;
-  ACE_NEW_RETURN (s,
-                  CORBA::WChar [(size_t) (len + 1)],
-                  0);
+  ACE_ALLOCATOR_NEW (s,
+                     CORBA::WChar [(size_t) (len + 1)],
+                     0);
 
   return s;
 }

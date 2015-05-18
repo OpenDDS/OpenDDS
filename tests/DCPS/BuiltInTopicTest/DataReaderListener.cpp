@@ -9,6 +9,7 @@
 #include <ace/streams.h>
 #include <iostream>
 #include "tests/Utils/ExceptionStreams.h"
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 using namespace std;
 

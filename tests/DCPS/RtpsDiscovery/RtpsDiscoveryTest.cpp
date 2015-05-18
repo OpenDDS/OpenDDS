@@ -9,6 +9,7 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "dds/DdsDcpsInfrastructureC.h"
+#include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/GuidConverter.h"
 
 #include "dds/DCPS/StaticIncludes.h"

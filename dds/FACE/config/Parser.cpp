@@ -1,6 +1,9 @@
 #include "Parser.h"
-#include "ace/Configuration_Import_Export.h"
 #include "dds/DCPS/Service_Participant.h"
+
+#include "ace/Configuration_Import_Export.h"
+#include "ace/OS_NS_stdio.h"
+
 #include <cstring>
 
 namespace OpenDDS { namespace FaceTSS { namespace config {
@@ -73,14 +76,56 @@ Parser::find_topic(const char* name,
 }
 
 int
-Parser::find_qos(const char* name, QosSettings& target)
+Parser::find_qos(const ConnectionSettings& conn, QosSettings& target)
 {
-  int status = 1;
+  int status = 0;
   QosMap::iterator result;
-  if ((result = qos_map_.find(name)) != qos_map_.end()) {
-    status = 0;
-    target = result->second;
+  // If thie is a SOURCE
+  if (conn.direction_ == FACE::SOURCE) {
+    if (conn.datawriter_qos_set()) {
+      // Name specified, must be in map
+      result = qos_map_.find(conn.datawriter_qos_name());
+      if (result != qos_map_.end()) {
+        result->second.apply_to(target.datawriter_qos());
+      } else {
+        // Failed
+        status = 1;
+      }
+    }
+    if (status == 0 && (conn.publisher_qos_set())) {
+      // Name specified, must be in map
+      result = qos_map_.find(conn.publisher_qos_name());
+      if (result != qos_map_.end()) {
+        result->second.apply_to(target.publisher_qos());
+      } else {
+        // Failed
+        status = 1;
+      }
+    }
+  // Else DESTINATION
+  } else {
+    if (conn.datareader_qos_set()) {
+      // Name specified, must be in map
+      result = qos_map_.find(conn.datareader_qos_name());
+      if (result != qos_map_.end()) {
+        result->second.apply_to(target.datareader_qos());
+      } else {
+        // Failed
+        status = 1;
+      }
+    }
+    if (status == 0 && (conn.subscriber_qos_set())) {
+      // Name specified, must be in map
+      result = qos_map_.find(conn.subscriber_qos_name());
+      if (result != qos_map_.end()) {
+        result->second.apply_to(target.subscriber_qos());
+      } else {
+        // Failed
+        status = 1;
+      }
+    }
   }
+
   return status;
 }
 
@@ -99,15 +144,14 @@ Parser::parse_topic(ACE_Configuration_Heap& config,
   while (!config.enumerate_values(key,
                                   value_index++,
                                   value_name,
-                                  value_type))
-  {
+                                  value_type)) {
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
         status = status || topic.set(value_name.c_str(), value.c_str());
       }
     } else {
-      printf("unexpected value type %d\n", value_type);
+      ACE_OS::printf("unexpected value type %d\n", value_type);
       status = -1;
       break;
     }
@@ -133,15 +177,14 @@ Parser::parse_connection(ACE_Configuration_Heap& config,
   while (!config.enumerate_values(key,
                                   value_index++,
                                   value_name,
-                                  value_type))
-  {
+                                  value_type)) {
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
         status = status || connection.set(value_name.c_str(), value.c_str());
       }
     } else {
-      printf("unexpected value type %d\n", value_type);
+      ACE_OS::printf("unexpected value type %d\n", value_type);
       status = -1;
       break;
     }
@@ -169,8 +212,7 @@ Parser::parse_qos(ACE_Configuration_Heap& config,
   while (!config.enumerate_values(key,
                                   value_index++,
                                   value_name,
-                                  value_type))
-  {
+                                  value_type)) {
     if (value_type == ACE_Configuration::STRING) {
       status = config.get_string_value(key, value_name.c_str(), value);
       if (!status) {
@@ -178,7 +220,7 @@ Parser::parse_qos(ACE_Configuration_Heap& config,
                  qos.set_qos(level, value_name.c_str(), value.c_str());
       }
     } else {
-      printf("unexpected value type %d\n", value_type);
+      ACE_OS::printf("unexpected value type %d\n", value_type);
       status = -1;
       break;
     }
@@ -199,8 +241,8 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
                           0, // don't create if missing
                           key) != 0) {
     if (required) {
-      printf("Could not open %s section in config file, status %d\n",
-             section_type, status);
+      ACE_OS::printf("Could not open %s section in config file, status %d\n",
+                     section_type, status);
       status = -1;
     }
   // Else, we can open this section
@@ -211,16 +253,14 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
 
     while (!config.enumerate_sections(key,
                                       section_index++,
-                                      section_name))
-    {
+                                      section_name)) {
       ACE_Configuration_Section_Key subkey;
       // Open subsection
       if (config.open_section(key,
                               section_name.c_str(),
                               0, // don't create if missing
-                              subkey) != 0)
-      {
-        printf("Could not open subsections of %s\n", section_name.c_str());
+                              subkey) != 0) {
+        ACE_OS::printf("Could not open subsections of %s\n", section_name.c_str());
         break;
       }
 
@@ -230,10 +270,10 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
         status = parse_topic(config, subkey, section_name.c_str());
       } else if (std::strcmp(section_type, DATAWRITER_QOS_SECTION) == 0) {
         status = parse_qos(
-            config, subkey, section_name.c_str(), QosSettings::data_writer);
+            config, subkey, section_name.c_str(), QosSettings::datawriter);
       } else if (std::strcmp(section_type, DATAREADER_QOS_SECTION) == 0) {
         status = parse_qos(
-            config, subkey, section_name.c_str(), QosSettings::data_reader);
+            config, subkey, section_name.c_str(), QosSettings::datareader);
       } else if (std::strcmp(section_type, PUBLISHER_QOS_SECTION) == 0) {
         status = parse_qos(
             config, subkey, section_name.c_str(), QosSettings::publisher);
@@ -241,7 +281,7 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
         status = parse_qos(
             config, subkey, section_name.c_str(), QosSettings::subscriber);
       } else {
-        printf("unknown section %s\n", section_type);
+        ACE_OS::printf("unknown section %s\n", section_type);
       }
     }
   }

@@ -12,6 +12,7 @@
 #include "MessageTypes.h"
 #include "RtpsDiscovery.h"
 #include "RtpsMessageTypesC.h"
+#include "RtpsCoreTypeSupportImpl.h"
 #include "RtpsBaseMessageTypesTypeSupportImpl.h"
 #include "ParameterListConverter.h"
 
@@ -34,8 +35,6 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
-
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
 
 #include <ace/Reverse_Lock_T.h>
 #include <ace/Auto_Ptr.h>
@@ -214,8 +213,8 @@ bool paramsChanged(OpenDDS::RTPS::ContentFilterProperty_t& dest,
     return true;
   }
   for (CORBA::ULong i = 0; i < src.expressionParameters.length(); ++i) {
-    if (0 != std::strcmp(dest.expressionParameters[i].in(),
-                         src.expressionParameters[i].in())) {
+    if (0 != std::strcmp(dest.expressionParameters[i],
+                         src.expressionParameters[i])) {
       dest.expressionParameters = src.expressionParameters;
       return true;
     }
@@ -495,8 +494,7 @@ create_association_data_proto(DCPS::AssociationData& proto,
 
   proto.remote_data_.length(1);
   proto.remote_data_[0].transport_type = "rtps_udp";
-  proto.remote_data_[0].data.replace(
-    static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
+  message_block_to_sequence (mb_locator, proto.remote_data_[0].data);
 }
 
 void
@@ -735,28 +733,25 @@ void
 Sedp::remove_from_bit(const DiscoveredPublication& pub)
 {
   pub_key_to_id_.erase(pub.writer_data_.ddsPublicationData.key);
-  task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT,
-                new DDS::InstanceHandle_t(pub.bit_ih_));
+  task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT, pub.bit_ih_);
 }
 
 void
 Sedp::remove_from_bit(const DiscoveredSubscription& sub)
 {
   sub_key_to_id_.erase(sub.reader_data_.ddsSubscriptionData.key);
-  task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT,
-                new DDS::InstanceHandle_t(sub.bit_ih_));
+  task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT, sub.bit_ih_);
 }
 
 void
-Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
+Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
-  ACE_Auto_Basic_Ptr<const DDS::InstanceHandle_t> delete_the_ih(bit_ih);
   switch (which_bit) {
   case Msg::MSG_REMOVE_FROM_PUB_BIT: {
     DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
     // bit may be null if the DomainParticipant is shutting down
-    if (bit && *bit_ih != DDS::HANDLE_NIL) {
-      bit->set_instance_state(*bit_ih,
+    if (bit && bit_ih != DDS::HANDLE_NIL) {
+      bit->set_instance_state(bit_ih,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
     break;
@@ -764,8 +759,8 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
   case Msg::MSG_REMOVE_FROM_SUB_BIT: {
     DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sedp_->sub_bit();
     // bit may be null if the DomainParticipant is shutting down
-    if (bit && *bit_ih != DDS::HANDLE_NIL) {
-      bit->set_instance_state(*bit_ih,
+    if (bit && bit_ih != DDS::HANDLE_NIL) {
+      bit->set_instance_state(bit_ih,
                               DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
     }
     break;
@@ -1725,8 +1720,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 
         DCPS::TransportLocator tl;
         tl.transport_type = "rtps_udp";
-        tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()),
-                        &mb_locator);
+        message_block_to_sequence (mb_locator, tl.data);
         rTls->length(1);
         (*rTls)[0] = tl;
       } else {
@@ -1821,8 +1815,7 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 
         DCPS::TransportLocator tl;
         tl.transport_type = "rtps_udp";
-        tl.data.replace(static_cast<CORBA::ULong>(mb_locator.length()),
-                        &mb_locator);
+        message_block_to_sequence (mb_locator, tl.data);
         wTls->length(1);
         (*wTls)[0] = tl;
       } else {
@@ -1910,7 +1903,13 @@ Sedp::match(const RepoId& writer, const RepoId& reader)
 #else
     const DCPS::ReaderAssociation ra =
         {*rTls, reader, *subQos, *drQos,
-         cfProp->filterClassName, cfProp->filterExpression, cfProp->expressionParameters};
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+         cfProp->filterClassName, cfProp->filterExpression,
+#else
+         "", "",
+#endif
+         cfProp->expressionParameters};
+
     const DCPS::WriterAssociation wa = {*wTls, writer, *pubQos, *dwQos};
 #endif
 
@@ -2700,8 +2699,8 @@ Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
 bool
 Sedp::is_opendds(const GUID_t& endpoint)
 {
-  return !memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
-                 sizeof(DCPS::VENDORID_OCI));
+  return !std::memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
+                      sizeof(DCPS::VENDORID_OCI));
 }
 
 void
@@ -2739,7 +2738,7 @@ Sedp::Task::enqueue(DCPS::MessageId id, const ParticipantMessageData* data)
 }
 
 void
-Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t* bit_ih)
+Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
@@ -2756,21 +2755,20 @@ Sedp::Task::svc()
     ACE_Auto_Basic_Ptr<Msg> delete_the_msg(msg);
     switch (msg->type_) {
     case Msg::MSG_PARTICIPANT:
-      svc_i(static_cast<const SPDPdiscoveredParticipantData*>(msg->payload_));
+      svc_i(msg->dpdata_);
       break;
     case Msg::MSG_WRITER:
-      svc_i(msg->id_, static_cast<const DiscoveredWriterData*>(msg->payload_));
+      svc_i(msg->id_, msg->wdata_);
       break;
     case Msg::MSG_READER:
-      svc_i(msg->id_, static_cast<const DiscoveredReaderData*>(msg->payload_));
+      svc_i(msg->id_, msg->rdata_);
       break;
     case Msg::MSG_PARTICIPANT_DATA:
-      svc_i(msg->id_, static_cast<const ParticipantMessageData*>(msg->payload_));
+      svc_i(msg->id_, msg->pmdata_);
       break;
     case Msg::MSG_REMOVE_FROM_PUB_BIT:
     case Msg::MSG_REMOVE_FROM_SUB_BIT:
-      svc_i(msg->type_,
-            static_cast<const DDS::InstanceHandle_t*>(msg->payload_));
+      svc_i(msg->type_, msg->ih_);
       break;
     case Msg::MSG_FINI_BIT:
       // acknowledge that fini_bit has been called (this just ensures that
