@@ -6,7 +6,7 @@
 #endif
 
 #include "ace/OS_NS_unistd.h"
-#include <iostream>
+#include "ace/Log_Msg.h"
 #include <cstring>
 
 bool callbackHappened = false;
@@ -20,8 +20,10 @@ void callback(FACE::TRANSACTION_ID_TYPE,
               FACE::RETURN_CODE_TYPE& return_code)
 {
   ++callback_count;
-  std::cout << "In callback() (the " << callback_count << " time) : "
-            << msg.text << '\t' << msg.count << "\tmessage_type: " << message_type_id << "\tmessage_size_type: " << message_size << std::endl;
+  ACE_DEBUG((LM_INFO, "In callback() (the %d time): %C\t%d\t"
+             "message_type_id: %Ld\tmessage_size: %d\n",
+             callback_count, msg.text.in(), msg.count,
+             message_type_id, message_size));
   callbackHappened = true;
   return_code = FACE::RC_NO_ERROR;
 }
@@ -37,19 +39,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
   FACE::MESSAGE_SIZE_TYPE size;
-  FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size, status);
+  FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size,
+                              FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   bool testPassed = true;
   if (useCallback) {
-    std::cout << "Subscriber: about to Register_Callback()" << std::endl;
+    ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
     FACE::TS::Register_Callback(connId, 0, callback, 0, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     FACE::TS::Register_Callback(connId, 0, callback, 0, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_OS::sleep(15);
     if (!callbackHappened || callback_count != 2) {
-      std::cout << "ERROR: number callbacks seen incorrect (seen: " << callback_count << " expected: 2)" << std::endl;
+      ACE_ERROR((LM_ERROR,
+                 "ERROR: number callbacks seen incorrect (seen: %d expected: 2)\n"));
       testPassed = false;
     }
     FACE::TS::Unregister_Callback(connId, status);
@@ -59,14 +63,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
     FACE::TRANSACTION_ID_TYPE txn;
     Messenger::Message msg;
-    std::cout << "Subscriber: about to Receive_Message()" << std::endl;
+    ACE_DEBUG((LM_INFO, "Subscriber: about to Receive_Message()\n"));
     FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
-    std::cout << msg.text << '\t' << msg.count << std::endl;
+    ACE_DEBUG((LM_INFO, "%C\t%d\n", msg.text.in(), msg.count));
 #ifdef ACE_HAS_CDR_FIXED
-    std::cout << msg.deci;
     if (msg.deci != FACE::Fixed("987.654")) {
-      std::cout << "ERROR: invalid fixed data " << msg.deci << std::endl;
+      const FACE::String_var decimal = msg.deci.to_string();
+      ACE_ERROR((LM_ERROR, "ERROR: invalid fixed data %C\n", decimal.in()));
+      testPassed = false;
     }
 #endif
   }
@@ -77,7 +82,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   if (connectionStatus.LAST_MSG_VALIDITY != FACE::VALID) {
-    std::cout << "ERROR: unexpected value in connection parameters after receiving\n";
+    ACE_ERROR((LM_ERROR,
+               "ERROR: unexpected value in connection parameters after receiving\n"));
     return EXIT_FAILURE;
   }
 
