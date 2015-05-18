@@ -8,8 +8,8 @@ namespace OpenDDS { namespace FaceTSS { namespace config {
 QosSettings::QosSettings() :
   publisher_qos_(TheServiceParticipant->initial_PublisherQos())
 , subscriber_qos_(TheServiceParticipant->initial_SubscriberQos())
-, data_writer_qos_(TheServiceParticipant->initial_DataWriterQos())
-, data_reader_qos_(TheServiceParticipant->initial_DataReaderQos())
+, datawriter_qos_(TheServiceParticipant->initial_DataWriterQos())
+, datareader_qos_(TheServiceParticipant->initial_DataReaderQos())
 {
 
 }
@@ -29,13 +29,13 @@ QosSettings::apply_to(DDS::SubscriberQos&  target) const
 void
 QosSettings::apply_to(DDS::DataWriterQos&  target) const
 {
-  target = data_writer_qos_;
+  target = datawriter_qos_;
 }
 
 void
 QosSettings::apply_to(DDS::DataReaderQos&  target) const
 {
-  target = data_reader_qos_;
+  target = datareader_qos_;
 }
 
 int
@@ -49,18 +49,18 @@ QosSettings::set_qos(QosLevel level, const char* name, const char* value)
     case subscriber:
       status = set_qos(subscriber_qos_, name, value);
       break;
-    case data_writer:
-      status = set_qos(data_writer_qos_, name, value);
+    case datawriter:
+      status = set_qos(datawriter_qos_, name, value);
       break;
-    case data_reader:
-      status = set_qos(data_reader_qos_, name, value);
+    case datareader:
+      status = set_qos(datareader_qos_, name, value);
       break;
   }
   return status;
 }
 
 bool
-set_presentation_access_scope_kind_qos(
+set_presentation_access_scope_qos(
   DDS::PresentationQosPolicy& target,
   const char* name,
   const char* value)
@@ -429,7 +429,7 @@ int QosSettings::set_qos(
   DDS::PublisherQos& target, const char* name, const char* value)
 {
   bool matched =
-    set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
+    set_presentation_access_scope_qos(target.presentation, name, value) ||
     set_presentation_coherent_access_qos(target.presentation, name, value) ||
     set_presentation_ordered_access_qos(target.presentation, name, value) ||
     set_partition_name_qos(target.partition, name, value);
@@ -446,7 +446,7 @@ int QosSettings::set_qos(
   DDS::SubscriberQos& target, const char* name, const char* value)
 {
   bool matched =
-    set_presentation_access_scope_kind_qos(target.presentation, name, value) ||
+    set_presentation_access_scope_qos(target.presentation, name, value) ||
     set_presentation_coherent_access_qos(target.presentation, name, value) ||
     set_presentation_ordered_access_qos(target.presentation, name, value) ||
     set_partition_name_qos(target.partition, name, value);
