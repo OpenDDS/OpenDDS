@@ -21,7 +21,7 @@ void callback(FACE::TRANSACTION_ID_TYPE,
 {
   ++callback_count;
   std::cout << "In callback() (the " << callback_count << " time) : "
-            << msg.text << '\t' << msg.count << "\tmessage_type: " << message_type_id << "\tmessageg_size_type: " << message_size << std::endl;
+            << msg.text << '\t' << msg.count << "\tmessage_type: " << message_type_id << "\tmessage_size_type: " << message_size << std::endl;
   callbackHappened = true;
   return_code = FACE::RC_NO_ERROR;
 }
