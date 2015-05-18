@@ -15,8 +15,8 @@ class OpenDDS_FACE_Export QosSettings {
     enum QosLevel {
       publisher,
       subscriber,
-      data_writer,
-      data_reader
+      datawriter,
+      datareader
     };
 
     int set_qos(QosLevel level, const char* name, const char* value);
@@ -26,18 +26,18 @@ class OpenDDS_FACE_Export QosSettings {
     void apply_to(DDS::DataWriterQos& target) const;
     void apply_to(DDS::DataReaderQos& target) const;
 
-    const DDS::PublisherQos& publisher_qos() const { return publisher_qos_; }
-    const DDS::SubscriberQos& subscriber_qos() const { return subscriber_qos_; }
-    const DDS::DataWriterQos& data_writer_qos() const { return data_writer_qos_; }
-    const DDS::DataReaderQos& data_reader_qos() const { return data_reader_qos_; }
+    DDS::PublisherQos& publisher_qos() { return publisher_qos_; }
+    DDS::SubscriberQos& subscriber_qos() { return subscriber_qos_; }
+    DDS::DataWriterQos& datawriter_qos() { return datawriter_qos_; }
+    DDS::DataReaderQos& datareader_qos() { return datareader_qos_; }
 
   private:
     // DomainPartipantFactory, DomainParticipant, and Topic qos
     // are not usable in FACE
     DDS::PublisherQos publisher_qos_;
     DDS::SubscriberQos subscriber_qos_;
-    DDS::DataWriterQos data_writer_qos_;
-    DDS::DataReaderQos data_reader_qos_;
+    DDS::DataWriterQos datawriter_qos_;
+    DDS::DataReaderQos datareader_qos_;
 
     int set_qos(DDS::PublisherQos& target, const char* name, const char* value);
     int set_qos(DDS::SubscriberQos& target, const char* name, const char* value);

@@ -12,7 +12,10 @@ ConnectionSettings::ConnectionSettings()
   domain_id_(0)
 {
   std::strcpy(topic_name_, "");
-  std::strcpy(qos_name_, "");
+  std::strcpy(datawriter_qos_name_, "");
+  std::strcpy(datareader_qos_name_, "");
+  std::strcpy(publisher_qos_name_, "");
+  std::strcpy(subscriber_qos_name_, "");
 }
 
 int
@@ -25,8 +28,14 @@ ConnectionSettings::set(const char* name, const char* value)
     domain_id_ = atoi(value);
   } else if (!std::strcmp(name, "topic")) {
     std::strncpy(topic_name_, value, sizeof(topic_name_));
-  } else if (!std::strcmp(name, "qos")) {
-    std::strncpy(qos_name_, value, sizeof(qos_name_));
+  } else if (!std::strcmp(name, "datawriterqos")) {
+    std::strncpy(datawriter_qos_name_, value, sizeof(datawriter_qos_name_));
+  } else if (!std::strcmp(name, "datareaderqos")) {
+    std::strncpy(datareader_qos_name_, value, sizeof(datareader_qos_name_));
+  } else if (!std::strcmp(name, "publisherqos")) {
+    std::strncpy(publisher_qos_name_, value, sizeof(publisher_qos_name_));
+  } else if (!std::strcmp(name, "subscriberqos")) {
+    std::strncpy(subscriber_qos_name_, value, sizeof(subscriber_qos_name_));
   } else if (!std::strcmp(name, "direction")) {
     if (!std::strcmp(value, "source") ||
         !std::strcmp(value, "one_way_request_source") ||
@@ -53,6 +62,54 @@ ConnectionSettings::set(const char* name, const char* value)
   }
 
   return status;
+}
+
+const char*
+ConnectionSettings::datawriter_qos_name() const
+{
+  return datawriter_qos_name_;
+}
+
+const char*
+ConnectionSettings::datareader_qos_name() const
+{
+  return datareader_qos_name_;
+}
+
+const char*
+ConnectionSettings::publisher_qos_name() const
+{
+  return publisher_qos_name_;
+}
+
+const char*
+ConnectionSettings::subscriber_qos_name() const
+{
+  return subscriber_qos_name_;
+}
+
+bool
+ConnectionSettings::datawriter_qos_set() const
+{
+  return datawriter_qos_name_[0];
+}
+
+bool
+ConnectionSettings::datareader_qos_set() const
+{
+  return datareader_qos_name_[0];
+}
+
+bool
+ConnectionSettings::publisher_qos_set() const
+{
+  return publisher_qos_name_[0];
+}
+
+bool
+ConnectionSettings::subscriber_qos_set() const
+{
+  return subscriber_qos_name_[0];
 }
 
 } } }
