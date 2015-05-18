@@ -1,0 +1,72 @@
+#include "Idl/FaceMessage_TS.hpp"
+
+#ifdef ACE_AS_STATIC_LIBS
+# include "dds/DCPS/RTPS/RtpsDiscovery.h"
+# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
+
+#include <iostream>
+
+int ACE_TMAIN(int, ACE_TCHAR*[])
+{
+  FACE::RETURN_CODE_TYPE status = FACE::RC_NO_ERROR;
+  FACE::TS::Initialize("face_config.ini", status);
+  FACE::CONNECTION_ID_TYPE connId;
+  FACE::MESSAGE_SIZE_TYPE size;
+
+  if (!status) {
+    FACE::CONNECTION_DIRECTION_TYPE dir;
+    FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size, status);
+  }
+
+  if (!status) {
+    const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
+    FACE::TRANSACTION_ID_TYPE txn;
+    Messenger::Message msg;
+    long expected = 0;
+    std::cout << "Subscriber: about to receive_message()" << std::endl;
+    while (expected <= 19) {
+      FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
+      if (status != FACE::RC_NO_ERROR) break;
+      std::cout << msg.text.in() << '\t' << msg.count << "\ttid: " << txn << std::endl;
+      if ((msg.count != expected) && expected > 0) {
+        std::cerr << "ERROR: Expected count " << expected << ", got "
+                  << msg.count << std::endl;
+        status = FACE::INVALID_PARAM;
+        break;
+      } else {
+        if (expected % 2 == 0) {
+          FACE::TS::MessageHeader hdr;
+          FACE::TS::Receive_Message(connId, timeout, txn, hdr, size, status);
+          if (status != FACE::RC_NO_ERROR) {
+            std::cout << "ERROR: Receive_Message for header failed for tid: " << txn << " with status: " << status << std::endl;
+            break;
+          }
+          std::cout << "Message Header - tid: " << txn
+                    << "\n\tdefinition guid: " << hdr.message_definition_guid
+                    << "\n\tsource timestamp: " << hdr.message_timestamp
+                    << "\n\tinstance guid: " << hdr.message_instance_guid
+                    << "\n\tsource guid: " << hdr.message_source_guid
+                    << "\n\tvalidity " << hdr.message_validity << std::endl;
+          if (hdr.message_source_guid != 1234567890) {
+            std::cout << "ERROR: Receive_Message for header failed.  Header source guid " << hdr.message_source_guid << " does not equal 1234567890" << std::endl;
+            status = FACE::INVALID_PARAM;
+            break;
+          }
+        } else {
+          std::cout << "Message Header - not scheduled to receive header for this msg for tid: " << txn << std::endl;
+        }
+        expected = msg.count + 1;
+      }
+    }
+  }
+
+  // Always destroy connection, but don't overwrite bad status
+  FACE::RETURN_CODE_TYPE destroy_status = FACE::RC_NO_ERROR;
+  FACE::TS::Destroy_Connection(connId, destroy_status);
+  if ((destroy_status != FACE::RC_NO_ERROR) && (!status)) {
+    status = destroy_status;
+  }
+
+  return static_cast<int>(status);
+}

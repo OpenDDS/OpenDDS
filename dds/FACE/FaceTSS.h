@@ -8,7 +8,6 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
-
 #include "ace/Singleton.h"
 
 
@@ -17,31 +16,46 @@ namespace FaceTSS {
 
 class Entities {
   friend class ACE_Singleton<Entities, ACE_Thread_Mutex>;
+
   Entities();
   ~Entities();
+
 public:
+  struct FaceReceiver {
+    FaceReceiver () : last_msg_tid(0) {};
+    DDS::DataReader_var dr;
+    FACE::TS::MessageHeader last_msg_header;
+    FACE::TRANSACTION_ID_TYPE last_msg_tid;
+  };
+
   OpenDDS_FACE_Export static Entities* instance();
   OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var) writers_;
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var) readers_;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, FaceReceiver) receivers_;
+
   typedef std::pair<OPENDDS_STRING, FACE::TRANSPORT_CONNECTION_STATUS_TYPE> StrConStatPair;
   OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, StrConStatPair ) connections_;
 };
 
 OpenDDS_FACE_Export DDS::Duration_t convertTimeout(FACE::TIMEOUT_TYPE timeout);
 OpenDDS_FACE_Export FACE::SYSTEM_TIME_TYPE convertDuration(const DDS::Duration_t& duration);
+OpenDDS_FACE_Export FACE::SYSTEM_TIME_TYPE convertTime(const DDS::Time_t& timestamp);
+OpenDDS_FACE_Export void populate_header_received(FACE::CONNECTION_ID_TYPE connection_id,
+                                                  DDS::DomainParticipant_var part,
+                                                  DDS::SampleInfoSeq sinfo,
+                                                  FACE::RETURN_CODE_TYPE& return_code);
 
 OpenDDS_FACE_Export FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
     DDS::ReturnCode_t retcode);
 
 template <typename Msg>
-void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
-                     FACE::TIMEOUT_TYPE timeout,
-                     FACE::TRANSACTION_ID_TYPE& /*transaction_id*/,
-                     Msg& message,
-                     FACE::MESSAGE_SIZE_TYPE /*message_size*/,
-                     FACE::RETURN_CODE_TYPE& return_code)
+void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
+                     /*in*/    FACE::TIMEOUT_TYPE timeout,
+                     /*inout*/ FACE::TRANSACTION_ID_TYPE& transaction_id,
+                     /*inout*/ Msg& message,
+                     /*in*/    FACE::MESSAGE_SIZE_TYPE /*message_size*/,
+                     /*out*/   FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = Entities::instance()->readers_;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
@@ -49,7 +63,7 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
 
   typedef typename DCPS::DDSTraits<Msg>::DataReader DataReader;
   const typename DataReader::_var_type typedReader =
-    DataReader::_narrow(readers[connection_id]);
+    DataReader::_narrow(readers[connection_id].dr);
   if (!typedReader) {
     return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     return;
@@ -75,13 +89,21 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
   typename DCPS::DDSTraits<Msg>::Sequence seq;
   DDS::SampleInfoSeq sinfo;
   ret = typedReader->take_w_condition(seq, sinfo, 1 /*max*/, rc);
-
   if (ret == DDS::RETCODE_OK && sinfo[0].valid_data) {
+    DDS::DomainParticipant_var participant = typedReader->get_subscriber()->get_participant();
+    FACE::RETURN_CODE_TYPE ret_code;
+    populate_header_received(connection_id, participant, sinfo, ret_code);
+    if (ret_code != FACE::RC_NO_ERROR) {
+      return_code = update_status(connection_id, ret_code);
+      return;
+    }
+
+    transaction_id = ++readers[connection_id].last_msg_tid;
+
     message = seq[0];
     return_code = update_status(connection_id, ret);
     return;
   }
-
   return_code = update_status(connection_id, DDS::RETCODE_NO_DATA);
 }
 
@@ -201,18 +223,18 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
                        FACE::MESSAGE_SIZE_TYPE /*max_message_size*/,
                        FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = Entities::instance()->readers_;
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
   }
-  DDS::DataReaderListener_ptr existing_listener = readers[connection_id]->get_listener();
+  DDS::DataReaderListener_ptr existing_listener = readers[connection_id].dr->get_listener();
   if (existing_listener) {
     Listener<Msg>* typedListener = dynamic_cast<Listener<Msg>*>(existing_listener);
     typedListener->add_callback(callback);
   } else {
     DDS::DataReaderListener_var listener = new Listener<Msg>(callback, connection_id);
-    readers[connection_id]->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);
+    readers[connection_id].dr->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);
   }
   return_code = FACE::RC_NO_ERROR;
 }

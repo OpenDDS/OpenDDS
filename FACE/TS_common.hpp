@@ -2,12 +2,19 @@
 #define FACE_TS_COMMON_HPP_HEADER_FILE
 #include "common.hpp"
 
+#include <tao/Basic_Types.h>
+#include <tao/VarOut_T.h>
+
+
 namespace FACE {
 
 typedef Char CONNECTION_NAME_TYPE[64];
 
 typedef Long MESSAGE_SIZE_TYPE;
 
+typedef LongLong MESSAGE_INSTANCE_GUID;
+typedef LongLong MESSAGE_DEFINITION_GUID;
+typedef LongLong MESSAGE_SOURCE_GUID;
 typedef LongLong MESSAGE_TYPE_GUID;
 
 /**
@@ -39,6 +46,8 @@ enum CONNECTION_DIRECTION_TYPE {
 };
 
 typedef LongLong CONNECTION_ID_TYPE;
+
+typedef LongLong WRITER_ID_TYPE;
 
 typedef LongLong TRANSACTION_ID_TYPE;
 
@@ -110,6 +119,27 @@ struct TRANSPORT_CONNECTION_STATUS_TYPE {
   VALIDITY_TYPE LAST_MSG_VALIDITY;
 };
 
+namespace TS {
+struct MessageHeader;
+typedef ::TAO_Fixed_Var_T<MessageHeader> MessageHeader_var;
+typedef ::TAO_Out_T<MessageHeader> MessageHeader_out;
+
+struct MessageHeader
+{
+  typedef MessageHeader_var _var_type;
+  typedef MessageHeader_out _out_type;
+
+  MESSAGE_INSTANCE_GUID message_instance_guid;
+  MESSAGE_DEFINITION_GUID message_definition_guid;
+  MESSAGE_SOURCE_GUID message_source_guid;
+  SYSTEM_TIME_TYPE message_timestamp;
+  VALIDITY_TYPE message_validity;
+
+  bool operator==(const MessageHeader& rhs) const;
+};
+
+extern const ::CORBA::TypeCode_ptr _tc_MessageHeader;
+}
 
 }
 
