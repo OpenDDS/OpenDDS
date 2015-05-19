@@ -64,109 +64,19 @@ feature(no_opendds_safety_profile, !built_in_topics) : taoidldefaults, dcps_ts_d
   }
 }
 
-// feature(!no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
-//   IDL_Files {
-//     ^DdsDcpsGuid.idl
-//   }
+feature(!no_opendds_safety_profile, built_in_topics) : taoidldefaults, dcps_ts_defaults {
+  TypeSupport_Files {
+    dcps_ts_flags += -SI -Lspcpp
+    DdsDcpsGuid.idl
+    DdsDcpsInfoUtils.idl
+  }
 
-//   TypeSupport_Files {
-//     dcps_ts_flags += -Lspcpp -SI
-//     DdsDcpsGuid.idl
-//   }
+  TypeSupport_Files {
+    dcps_ts_flags += -Lspcpp
+    DdsDcpsCore.idl
+  }
 
-//   verbatim(gnuace, bottom, 1) {
-//     idl_stubs: DdsDcpsGuidTypeSupportImpl.h
-//   }
-
-//   Source_Files {
-//     DdsDcpsGuidTypeSupportImpl.cpp
-//   }
-// }
-
-// feature(no_opendds_safety_profile, built_in_topics) : taoidldefaults, dcps_ts_defaults {
-//   TypeSupport_Files {
-//     DdsDcpsCore.idl
-//     DdsDcpsInfoUtils.idl
-//     DdsDcpsInfrastructure.idl
-//   }
-
-//   verbatim(gnuace, bottom, 1) {
-//     idl_stubs: DdsDcpsCoreTypeSupportImpl.h DdsDcpsInfoUtilsTypeSupportImpl.h DdsDcpsInfrastructureTypeSupportImpl.h
-//   }
-
-//   IDL_Files {
-//     DdsDcpsCoreTypeSupport.idl
-//     DdsDcpsInfoUtilsTypeSupport.idl
-//     DdsDcpsInfrastructureTypeSupport.idl
-//   }
-
-//   Header_Files {
-//     DdsDcpsCoreTypeSupportC.h
-//     DdsDcpsInfoUtilsTypeSupportC.h
-//     DdsDcpsInfrastructureTypeSupportC.h
-//   }
-
-//   Source_Files {
-//     DdsDcpsCoreC.cpp
-//     DdsDcpsInfoUtilsC.cpp
-//     DdsDcpsCoreTypeSupportC.cpp
-//     DdsDcpsInfoUtilsTypeSupportC.cpp
-//     DdsDcpsInfrastructureTypeSupportC.cpp
-//     DdsDcpsCoreTypeSupportImpl.cpp
-//     DdsDcpsInfoUtilsTypeSupportImpl.cpp
-//     DdsDcpsInfrastructureTypeSupportImpl.cpp
-//   }
-// }
-
-// feature(no_opendds_safety_profile, !built_in_topics) : taoidldefaults, dcps_ts_defaults {
-//   TypeSupport_Files {
-//     dcps_ts_flags += -SI
-//     DdsDcpsCore.idl
-//     DdsDcpsInfoUtils.idl
-//     DdsDcpsInfrastructure.idl
-//   }
-
-//   verbatim(gnuace, bottom, 1) {
-//     idl_stubs: DdsDcpsCoreTypeSupportImpl.h DdsDcpsInfoUtilsTypeSupportImpl.h DdsDcpsInfrastructureTypeSupportImpl.h
-//   }
-
-//   Source_Files {
-//     DdsDcpsCoreC.cpp
-//     DdsDcpsInfoUtilsC.cpp
-//     DdsDcpsCoreTypeSupportImpl.cpp
-//     DdsDcpsInfoUtilsTypeSupportImpl.cpp
-//     DdsDcpsInfrastructureTypeSupportImpl.cpp
-//   }
-// }
-
-// feature(!no_opendds_safety_profile, built_in_topics) : dcps_ts_defaults, taoidldefaults {
-//   TypeSupport_Files {
-//     dcps_ts_flags += -Lspcpp
-//     DdsDcpsCore.idl
-//     DdsDcpsInfoUtils.idl
-//   }
-
-//   verbatim(gnuace, bottom, 1) {
-//     idl_stubs: DdsDcpsCoreTypeSupportImpl.h DdsDcpsInfoUtilsTypeSupportImpl.h
-//   }
-
-//   IDL_Files {
-//     ^DdsDcpsCore.idl
-//     ^DdsDcpsInfoUtils.idl
-//     DdsDcpsCoreTypeSupport.idl
-//     DdsDcpsInfoUtilsTypeSupport.idl
-//   }
-
-//   Header_Files {
-//     DdsDcpsCoreTypeSupportC.h
-//     DdsDcpsInfoUtilsTypeSupportC.h
-//   }
-
-//   Source_Files {
-//     DdsDcpsCoreTypeSupportC.cpp
-//     DdsDcpsInfoUtilsTypeSupportC.cpp
-//     DdsDcpsCoreTypeSupportImpl.cpp
-//     DdsDcpsInfoUtilsTypeSupportImpl.cpp
-//   }
-
-// }
+  IDL_Files {
+    DdsDcpsCoreTypeSupport.idl
+  }
+}
