@@ -22,7 +22,6 @@ bool MessageHeader::operator==(const MessageHeader& rhs) const
     && message_timestamp == rhs.message_timestamp
     && message_validity == rhs.message_validity;
 }
-const ::CORBA::TypeCode_ptr _tc_MessageHeader = 0;
 
 using OpenDDS::FaceTSS::config::ConnectionSettings;
 using OpenDDS::FaceTSS::config::TopicSettings;

@@ -2,9 +2,6 @@
 #define FACE_TS_COMMON_HPP_HEADER_FILE
 #include "common.hpp"
 
-#include <tao/Basic_Types.h>
-#include <tao/VarOut_T.h>
-
 
 namespace FACE {
 
@@ -120,15 +117,9 @@ struct TRANSPORT_CONNECTION_STATUS_TYPE {
 };
 
 namespace TS {
-struct MessageHeader;
-typedef ::TAO_Fixed_Var_T<MessageHeader> MessageHeader_var;
-typedef ::TAO_Out_T<MessageHeader> MessageHeader_out;
 
 struct MessageHeader
 {
-  typedef MessageHeader_var _var_type;
-  typedef MessageHeader_out _out_type;
-
   MESSAGE_INSTANCE_GUID message_instance_guid;
   MESSAGE_DEFINITION_GUID message_definition_guid;
   MESSAGE_SOURCE_GUID message_source_guid;
@@ -137,8 +128,6 @@ struct MessageHeader
 
   bool operator==(const MessageHeader& rhs) const;
 };
-
-extern const ::CORBA::TypeCode_ptr _tc_MessageHeader;
 }
 
 }
