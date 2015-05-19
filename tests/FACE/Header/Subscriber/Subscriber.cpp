@@ -16,7 +16,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   if (!status) {
     FACE::CONNECTION_DIRECTION_TYPE dir;
-    FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size, status);
+    FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size, FACE::INF_TIME_VALUE, status);
   }
 
   if (!status) {
