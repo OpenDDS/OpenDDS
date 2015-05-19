@@ -10,7 +10,6 @@
 #define OPENDDS_DCPS_DATAWRITER_REMOTE_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
-#include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsPublication.idl"
 
 module OpenDDS {
