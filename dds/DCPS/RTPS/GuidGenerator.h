@@ -10,6 +10,7 @@
 #include "dds/DCPS/RTPS/rtps_export.h"
 
 #include "ace/Basic_Types.h"
+#include "ace/Thread_Mutex.h"
 
 namespace OpenDDS {
   namespace RTPS {
@@ -52,7 +53,7 @@ private:
 
   Node_ID node_id_;
   pid_t pid_;
-  ACE_SYNCH_MUTEX counter_lock_;
+  ACE_Thread_Mutex counter_lock_;
   ACE_UINT16 counter_;
 };
 

@@ -905,7 +905,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
             size_t n_subs;
             GUIDSeq_var ti =
               itr->second->target_intersection(cur->get_pub_id(),
-                                               cur->filter_out_, n_subs);
+                                               cur->filter_out_.in(), n_subs);
 
             if (ti.ptr() == 0 || ti->length() != n_subs) {
               if (!subset.in()) {
