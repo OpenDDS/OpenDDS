@@ -76,14 +76,56 @@ Parser::find_topic(const char* name,
 }
 
 int
-Parser::find_qos(const char* name, QosSettings& target)
+Parser::find_qos(const ConnectionSettings& conn, QosSettings& target)
 {
-  int status = 1;
+  int status = 0;
   QosMap::iterator result;
-  if ((result = qos_map_.find(name)) != qos_map_.end()) {
-    status = 0;
-    target = result->second;
+  // If thie is a SOURCE
+  if (conn.direction_ == FACE::SOURCE) {
+    if (conn.datawriter_qos_set()) {
+      // Name specified, must be in map
+      result = qos_map_.find(conn.datawriter_qos_name());
+      if (result != qos_map_.end()) {
+        result->second.apply_to(target.datawriter_qos());
+      } else {
+        // Failed
+        status = 1;
+      }
+    }
+    if (status == 0 && (conn.publisher_qos_set())) {
+      // Name specified, must be in map
+      result = qos_map_.find(conn.publisher_qos_name());
+      if (result != qos_map_.end()) {
+        result->second.apply_to(target.publisher_qos());
+      } else {
+        // Failed
+        status = 1;
+      }
+    }
+  // Else DESTINATION
+  } else {
+    if (conn.datareader_qos_set()) {
+      // Name specified, must be in map
+      result = qos_map_.find(conn.datareader_qos_name());
+      if (result != qos_map_.end()) {
+        result->second.apply_to(target.datareader_qos());
+      } else {
+        // Failed
+        status = 1;
+      }
+    }
+    if (status == 0 && (conn.subscriber_qos_set())) {
+      // Name specified, must be in map
+      result = qos_map_.find(conn.subscriber_qos_name());
+      if (result != qos_map_.end()) {
+        result->second.apply_to(target.subscriber_qos());
+      } else {
+        // Failed
+        status = 1;
+      }
+    }
   }
+
   return status;
 }
 
@@ -228,10 +270,10 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
         status = parse_topic(config, subkey, section_name.c_str());
       } else if (std::strcmp(section_type, DATAWRITER_QOS_SECTION) == 0) {
         status = parse_qos(
-            config, subkey, section_name.c_str(), QosSettings::data_writer);
+            config, subkey, section_name.c_str(), QosSettings::datawriter);
       } else if (std::strcmp(section_type, DATAREADER_QOS_SECTION) == 0) {
         status = parse_qos(
-            config, subkey, section_name.c_str(), QosSettings::data_reader);
+            config, subkey, section_name.c_str(), QosSettings::datareader);
       } else if (std::strcmp(section_type, PUBLISHER_QOS_SECTION) == 0) {
         status = parse_qos(
             config, subkey, section_name.c_str(), QosSettings::publisher);

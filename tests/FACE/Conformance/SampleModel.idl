@@ -1,0 +1,40 @@
+module FACE {
+  module DM {
+
+    typedef double Latitude, Longitude, Altitude;
+
+    struct Position
+    {
+      Latitude lat;
+      Longitude lon;
+      Altitude alt;
+    };
+
+#pragma DCPS_DATA_TYPE "FACE::DM::EGI_Data"
+    struct EGI_Data
+    {
+      Position pos;
+    };
+
+
+    struct AttitudeBodyFrame
+    {
+      octet empty;
+    };
+
+#pragma DCPS_DATA_TYPE "FACE::DM::IMU_Data"
+    struct IMU_Data
+    {
+      AttitudeBodyFrame att;
+    };
+
+
+#pragma DCPS_DATA_TYPE "FACE::DM::Nav_Data"
+    struct Nav_Data
+    {
+      Position pos;
+      AttitudeBodyFrame att;
+    };
+
+  };
+};
