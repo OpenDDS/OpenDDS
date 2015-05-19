@@ -318,6 +318,7 @@ tests/FACE/Unit/FreeIndexTest: !DCPS_MIN !WCHAR
 tests/FACE/Unit/SafetyProfilePoolTest: !DCPS_MIN !WCHAR OPENDDS_SAFETY_PROFILE
 tests/FACE/Unit/SequencesTest: !DCPS_MIN !WCHAR
 tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS
+tests/FACE/Header/run_test.pl: !DCPS_MIN !WCHAR RTPS
 tests/FACE/Reliability/run_test.pl: !DCPS_MIN !WCHAR RTPS
 tests/FACE/Partition/run_test.pl: !DCPS_MIN !WCHAR RTPS
 tests/FACE/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !WCHAR
