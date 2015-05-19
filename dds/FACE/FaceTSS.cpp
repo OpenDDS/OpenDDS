@@ -13,7 +13,7 @@
 
 namespace FACE {
 namespace TS {
-  
+
 bool MessageHeader::operator==(const MessageHeader& rhs) const
 {
   return message_instance_guid == rhs.message_instance_guid
