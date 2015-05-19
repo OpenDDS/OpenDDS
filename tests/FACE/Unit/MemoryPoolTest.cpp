@@ -53,6 +53,7 @@ public:
     void* ptr2 = pool.pool_alloc(12);
     validate_pool(pool, 120+128+16);
     void* ptr3 = pool.pool_alloc(7);
+    ACE_DEBUG((LM_INFO, "pool sizes: min_free_size %u, min_alloc_size_ %u, alloc hdr %u, free hdr %u\n", pool.min_free_size, pool.min_alloc_size_, sizeof(AllocHeader), sizeof(FreeHeader)));
     validate_pool(pool, 120+128+16+16);
     TEST_CHECK(ptr0);
     TEST_CHECK(ptr1);
