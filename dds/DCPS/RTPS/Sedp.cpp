@@ -11,9 +11,7 @@
 #include "Spdp.h"
 #include "MessageTypes.h"
 #include "RtpsDiscovery.h"
-#include "RtpsMessageTypesC.h"
 #include "RtpsCoreTypeSupportImpl.h"
-#include "RtpsBaseMessageTypesTypeSupportImpl.h"
 #include "ParameterListConverter.h"
 
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"

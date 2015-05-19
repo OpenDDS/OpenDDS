@@ -12,7 +12,7 @@
 #include "Rtps_Udp_Export.h"
 
 #include "ace/Basic_Types.h"
-#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
 #include "dds/DCPS/transport/framework/TransportSendListener.h"
 

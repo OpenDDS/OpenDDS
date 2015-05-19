@@ -67,8 +67,6 @@ module Xyz {
     ArrayOfAStruct f1;
   };
 
-#ifdef TEST_UNIONS
-
   union AUnion switch (ColorX) {
     case redx:
       //long rlv;
@@ -85,8 +83,6 @@ module Xyz {
   };
 
   typedef sequence<AUnion,3> AUnionSeq;
-
-#endif // TEST_UNIONS
 
   typedef sequence<char, 2> AcharSeq;
   typedef sequence<string, 4> AStringSeq; // BoundedSeqOfUnboundedString
@@ -136,9 +132,7 @@ module Xyz {
     ArrayOfAStruct structArray; //+36 > 119
     float x; //+4 > 123
     float y; //+4 = 127
-#ifdef TEST_UNIONS
     AUnion theUnion; //+4+4 =135
-#endif
   };
 
   // regression test for typedef'ed enum (metaclass_generator.cpp)
@@ -148,7 +142,6 @@ module Xyz {
     TypedefTestEnum tte;
   };
 
-#ifdef TEST_UNIONS
   // regression test for boolean-discriminated union (marshal_generator.cpp)
   union TestUnion switch (boolean) {
   case FALSE:
@@ -156,7 +149,6 @@ module Xyz {
   case TRUE:
     StructWithTypedefedEnum swte;
   };
-#endif
 };
 
 module N1 {

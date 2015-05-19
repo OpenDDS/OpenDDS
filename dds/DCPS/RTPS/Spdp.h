@@ -18,7 +18,7 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Definitions.h"
 
-#include "RtpsMessageTypesC.h"
+#include "RtpsCoreC.h"
 #include "Sedp.h"
 
 #include "ace/Atomic_Op.h"

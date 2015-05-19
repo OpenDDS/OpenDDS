@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 #ifndef __ACE_INLINE__
 #include "RtpsTransportHeader.inl"

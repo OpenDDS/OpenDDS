@@ -9,7 +9,7 @@
 #ifndef RTPS_BASEMESSAGETYPES_H
 #define RTPS_BASEMESSAGETYPES_H
 
-#include "RtpsBaseMessageTypesC.h"
+#include "RtpsCoreC.h"
 #include "dds/DCPS/GuidUtils.h"
 
 namespace OpenDDS {

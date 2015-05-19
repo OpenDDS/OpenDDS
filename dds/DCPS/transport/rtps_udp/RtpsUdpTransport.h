@@ -17,7 +17,7 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 #include "dds/DCPS/PoolAllocator.h"
 
-#include "dds/DCPS/RTPS/RtpsBaseMessageTypesC.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
 
 namespace OpenDDS {
 namespace DCPS {

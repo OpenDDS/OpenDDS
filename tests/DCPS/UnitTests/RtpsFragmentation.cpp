@@ -15,7 +15,7 @@
 #include "dds/DCPS/Service_Participant.h"
 
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 #include "dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h"
 

@@ -10,10 +10,7 @@
 #define RTPS_BASEMESSAGEUTILS_H
 
 #include "RtpsCoreTypeSupportImpl.h"
-#include "RtpsBaseMessageTypesTypeSupportImpl.h"
-#include "RtpsMessageTypesTypeSupportImpl.h"
 #include "dds/DCPS/Serializer.h"
-#include "RtpsBaseMessageTypesC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "md5.h"
 #include "ace/INET_Addr.h"

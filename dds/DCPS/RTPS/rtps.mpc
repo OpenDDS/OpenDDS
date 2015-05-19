@@ -4,9 +4,7 @@ project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety {
   idlflags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SS
   dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h
 
-  TypeSupport_Files {
-    RtpsBaseMessageTypes.idl
-    RtpsMessageTypes.idl
+  IDL_Files {
   }
 
   specific {
