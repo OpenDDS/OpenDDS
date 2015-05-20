@@ -520,6 +520,38 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   return true;
 }
 
+static std::string func(const std::string&,
+                        AST_Type* br_type,
+                        const std::string&,
+                        std::string&,
+                        const std::string&)
+{
+  std::stringstream ss;
+  const Classification br_cls = classify(br_type);
+  if (br_cls & CL_STRING) {
+    ss <<
+      "      ACE_CDR::ULong len;\n"
+      "      ser >> len;\n"
+      "      ser.skip(len);\n";
+  } else if (br_cls & CL_WIDE) {
+    ss <<
+      "      ACE_CDR::Octet len;\n"
+      "      ser >> ACE_InputCDR::to_octet(len);\n"
+      "      ser.skip(len);\n";
+  } else if (br_cls & CL_SCALAR) {
+    int sz = 1;
+    to_cxx_type(br_type, sz);
+    ss <<
+      "    ser.skip(1, " << sz << ");\n";
+  } else {
+    ss <<
+      "    gen_skip_over(ser, static_cast<" << scoped(br_type->name())
+                                            << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
+  }
+
+  return ss.str();
+}
+
 bool
 metaclass_generator::gen_union(AST_Union*, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
@@ -536,47 +568,7 @@ metaclass_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     "  " << scoped(discriminator->name()) << " disc;\n"
     "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
     "    return;\n"
-    "  }\n"
-    "  switch (disc) {\n";
-  size_t n_labels = 0;
-  bool has_default = false;
-  for (size_t i = 0; i < branches.size(); ++i) {
-    generateBranchLabels(branches[i], discriminator, n_labels, has_default);
-    AST_Type* br_type = branches[i]->field_type();
-    const Classification br_cls = classify(br_type);
-    if (br_cls & CL_STRING) {
-      be_global->impl_ <<
-        "    {\n"
-        "      ACE_CDR::ULong len;\n"
-        "      ser >> len;\n"
-        "      ser.skip(len);\n"
-        "    }\n";
-    } else if (br_cls & CL_WIDE) {
-      be_global->impl_ <<
-        "    {\n"
-        "      ACE_CDR::Octet len;\n"
-        "      ser >> ACE_InputCDR::to_octet(len);\n"
-        "      ser.skip(len);\n"
-        "    }\n";
-    } else if (br_cls & CL_SCALAR) {
-      int sz = 1;
-      to_cxx_type(br_type, sz);
-      be_global->impl_ <<
-        "    ser.skip(1, " << sz << ");\n";
-    } else {
-      be_global->impl_ <<
-        "    gen_skip_over(ser, static_cast<" << scoped(br_type->name())
-        << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
-    }
-    be_global->impl_ <<
-      "    break;\n";
-  }
-  if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
-    be_global->impl_ <<
-      "  default:\n"
-      "    break;\n";
-  }
-  be_global->impl_ <<
     "  }\n";
+  generateSwitchForUnion("disc", func, branches, discriminator, "");
   return true;
 }

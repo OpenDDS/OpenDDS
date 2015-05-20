@@ -285,7 +285,7 @@ namespace AstTypeClassification {
 
   inline Classification classify(AST_Type* type)
   {
-    type = resolveActualType(type);
+    type = AstTypeClassification::resolveActualType(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
@@ -510,6 +510,150 @@ inline bool needSyntheticDefault(AST_Type* disc, size_t n_labels)
     return n_labels < ACE_UINT32_MAX;
   default:
     return true;
+  }
+}
+
+typedef std::string (*CommonFn)(const std::string& name, AST_Type* type,
+                                const std::string& prefix, std::string& intro,
+                                const std::string&);
+
+inline void generateCaseBody(CommonFn commonFn,
+                             AST_UnionBranch* branch,
+                             const char* statementPrefix,
+                             const char* namePrefix,
+                             const std::string& uni,
+                             bool generateBreaks)
+{
+  using namespace AstTypeClassification;
+  std::string intro, name = branch->local_name()->get_string();
+  if (namePrefix == std::string(">> ")) {
+    std::string brType = scoped(branch->field_type()->name()), forany;
+    AST_Type* br = resolveActualType(branch->field_type());
+    Classification br_cls = classify(br);
+    if (!br->in_main_file()
+        && br->node_type() != AST_Decl::NT_pre_defined) {
+      be_global->add_referenced(br->file_name().c_str());
+    }
+    std::string rhs;
+    if (br_cls & CL_STRING) {
+      brType = std::string("CORBA::") + ((br_cls & CL_WIDE) ? "W" : "")
+        + "String_var";
+      rhs = "tmp.out()";
+    } else if (br_cls & CL_ARRAY) {
+      forany = "      " + brType + "_forany fa = tmp;\n";
+      rhs = getWrapper("fa", br, WD_INPUT);
+    } else {
+      rhs = getWrapper("tmp", br, WD_INPUT);
+    }
+    be_global->impl_ <<
+      "    {\n"
+      "      " << brType << " tmp;\n" << forany <<
+      "      if (strm >> " << rhs << ") {\n"
+      "        uni." << name << "(tmp);\n"
+      "        uni._d(disc);\n"
+      "        return true;\n"
+      "      }\n"
+      "      return false;\n"
+      "    }\n";
+  } else {
+    const char* breakString = (generateBreaks) ? "      break;\n" : "";
+
+    std::string expr = commonFn(name + "()", branch->field_type(),
+                                std::string(namePrefix) + "uni", intro, uni);
+    be_global->impl_ <<
+      "    {\n" <<
+      (intro.length() ? "    " : "") << intro;
+    if (*statementPrefix) {
+      be_global->impl_ <<
+        "      " << statementPrefix << " " << expr << ";\n" <<
+        (statementPrefix == std::string("return") ? "" : breakString);
+    } else {
+      be_global->impl_ << expr << breakString;
+    }
+    be_global->impl_<<
+      "    }\n";
+  }
+}
+
+inline void generateSwitchBodyForUnion(CommonFn commonFn,
+                                       const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
+                                       const char* statementPrefix, const char* namePrefix = "",
+                                       const std::string& uni = "", bool forceDisableDefault = false)
+{
+  size_t n_labels = 0;
+  bool has_default = false;
+  for (size_t i = 0; i < branches.size(); ++i) {
+    AST_UnionBranch* branch = branches[i];
+    if (forceDisableDefault) {
+      bool foundDefault = false;
+      for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
+        if (branch->label(j)->label_kind() == AST_UnionLabel::UL_default) {
+          foundDefault = true;
+        }
+      }
+      if (foundDefault) {
+        has_default = true;
+        continue;
+      }
+    }
+    generateBranchLabels(branch, discriminator, n_labels, has_default);
+    generateCaseBody(commonFn, branch, statementPrefix, namePrefix, uni, true);
+  }
+  if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
+    be_global->impl_ <<
+      "  default:\n" <<
+      ((namePrefix == std::string(">> ")) ? "    uni._d(disc);\n" : "") <<
+      "    break;\n";
+  }
+}
+
+inline void generateSwitchForUnion(const std::string& switchExpr, CommonFn commonFn,
+                                   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
+                                   const char* statementPrefix, const char* namePrefix = "",
+                                   const std::string& uni = "", bool forceDisableDefault = false)
+{
+  using namespace AstTypeClassification;
+  AST_Type* dt = resolveActualType(discriminator);
+  AST_PredefinedType* bt = AST_PredefinedType::narrow_from_decl(dt);
+  if (bt && bt->pt() == AST_PredefinedType::PT_boolean) {
+    AST_UnionBranch* true_branch = 0;
+    AST_UnionBranch* false_branch = 0;
+    AST_UnionBranch* default_branch = 0;
+    for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin(), limit = branches.end();
+         pos != limit;
+         ++pos) {
+      AST_UnionBranch* branch = *pos;
+      for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
+        AST_UnionLabel* label = branch->label(j);
+        if (label->label_kind() == AST_UnionLabel::UL_default) {
+          default_branch = branch;
+        }
+        if (label->label_val()->ev()->u.bval) {
+          true_branch = branch;
+        }
+        if (!label->label_val()->ev()->u.bval) {
+          false_branch = branch;
+        }
+      }
+    }
+
+    be_global->impl_ <<
+      "  if (" << switchExpr << ") \n";
+    if (true_branch || default_branch) {
+      generateCaseBody(commonFn, true_branch ? true_branch : default_branch, statementPrefix, namePrefix, uni, false);
+    }
+    be_global->impl_ <<
+      "  else \n";
+    if (false_branch || default_branch) {
+      generateCaseBody(commonFn, false_branch ? false_branch : default_branch, statementPrefix, namePrefix, uni, false);
+    }
+  }
+  else {
+    be_global->impl_ <<
+      "  switch (" << switchExpr << ") {\n";
+    generateSwitchBodyForUnion(commonFn, branches, discriminator, statementPrefix, namePrefix, uni, forceDisableDefault);
+    be_global->impl_ <<
+      "  }\n";
   }
 }
 
