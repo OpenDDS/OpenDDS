@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <limits>
 #include <map>
+#include <cstring>
 
 #define TEST_CHECK(COND) \
   if (!( COND )) { \
@@ -299,7 +300,7 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t granularity)
 , largest_free_(NULL)
 , free_index_(largest_free_)
 {
-  memset(pool_ptr_, pool_size_, 0);
+  std::memset(pool_ptr_, pool_size_, 0);
   AllocHeader* the_pool = new (pool_ptr_) AllocHeader();
   FreeHeader* first_free = reinterpret_cast<FreeHeader*>(the_pool);
   first_free->init_free_block(pool_size_);
