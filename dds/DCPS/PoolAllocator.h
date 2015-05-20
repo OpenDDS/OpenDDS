@@ -100,6 +100,8 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
           OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C, \
           OpenDDS::DCPS::PoolAllocator<K > >
+#define OPENDDS_MULTISET_CMP(K, C) std::multiset<K, C, \
+          OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_VECTOR(T) std::vector<T, \
           OpenDDS::DCPS::PoolAllocator<T > >
 #define OPENDDS_LIST(T) std::list<T, \
@@ -137,6 +139,7 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 #define OPENDDS_MULTIMAP_CMP(K, T, C) std::multimap<K, T, C >
 #define OPENDDS_SET(K) std::set<K >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C >
+#define OPENDDS_MULTISET_CMP(K, C) std::multiset<K, C >
 #define OPENDDS_VECTOR(T) std::vector<T >
 #define OPENDDS_LIST(T) std::list<T >
 #define OPENDDS_QUEUE(T) std::queue<T >

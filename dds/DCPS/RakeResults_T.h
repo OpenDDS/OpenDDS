@@ -86,16 +86,16 @@ private:
   };
 
   bool do_sort_, do_filter_;
-  typedef std::multiset<RakeData, SortedSetCmp> SortedSet;
+  typedef OPENDDS_MULTISET_CMP(RakeData, SortedSetCmp) SortedSet;
 
   // Contains data for QueryCondition/Ordered access
   SortedSet sorted_;
 
   // Contains data for all other use cases
-  std::vector<RakeData> unsorted_;
+  OPENDDS_VECTOR(RakeData) unsorted_;
 
   // data structures used by copy_into()
-  typedef std::vector<CORBA::ULong> IndexList;
+  typedef OPENDDS_VECTOR(CORBA::ULong) IndexList;
   struct InstanceData {
     bool most_recent_generation_;
     size_t MRSIC_index_;

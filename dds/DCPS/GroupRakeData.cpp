@@ -39,6 +39,7 @@ bool GroupRakeData::insert_sample(ReceivedDataElement* sample,
 void
 GroupRakeData::get_datareaders(DDS::DataReaderSeq & readers)
 {
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   readers.length(static_cast<CORBA::ULong>(this->sorted_.size()));
   int i = 0;
   SortedSet::iterator itEnd = this->sorted_.end();
@@ -46,6 +47,7 @@ GroupRakeData::get_datareaders(DDS::DataReaderSeq & readers)
     readers[i++] =
       DDS::DataReader::_duplicate(it->si_->instance_state_.data_reader());
   }
+#endif
 }
 
 
@@ -66,5 +68,3 @@ GroupRakeData::get_data()
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-

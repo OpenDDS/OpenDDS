@@ -726,7 +726,8 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-  typedef std::vector<std::pair<RepoId, RcHandle<WriterInfo> > > WriterSet;
+  typedef std::pair<RepoId, RcHandle<WriterInfo> > WriterSetElement;
+  typedef OPENDDS_VECTOR(WriterSetElement) WriterSet;
   WriterSet writers;
 
   {
