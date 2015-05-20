@@ -6,6 +6,7 @@
 #include <ace/Basic_Types.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_stdio.h>
 #include <ace/Thread_Mutex.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
@@ -60,8 +61,8 @@ ParticipantTask::svc()
 #ifdef OPENDDS_SAFETY_PROFILE
       // RTPS cannot be shared
       char config_name[64], inst_name[64];
-      snprintf(config_name, 64, "cfg_%d", thread_index);
-      snprintf(inst_name, 64, "rtps_%d", thread_index);
+      ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index);
+      ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index);
 
       ACE_DEBUG((LM_INFO,
         "(%P|%t)    -> PARTICIPANT creating transport config %C\n",

@@ -19,7 +19,6 @@
 #include /**/ "dds/DdsDcpsInfoUtilsC.h"
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include /**/ "dds/DdsDcpsInfrastructureTypeSupportC.h"
 #include /**/ "dds/DdsDcpsCoreTypeSupportImpl.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 

@@ -17,7 +17,7 @@ public:
   int parse(const char* filename);
   int find_connection(const char* name, ConnectionSettings& target);
   int find_topic(const char* name, TopicSettings& target);
-  int find_qos(const char* name, QosSettings& target);
+  int find_qos(const ConnectionSettings& conn, QosSettings& target);
 
 private:
   static ConnectionMap connection_map_;

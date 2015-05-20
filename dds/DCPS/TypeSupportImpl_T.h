@@ -24,6 +24,8 @@ namespace OpenDDS {
   public:
     typedef DDSTraits<MessageType> TraitsType;
     typedef typename TraitsType::TypeSupportType TypeSupportType;
+    typedef typename OpenDDS::DCPS::LocalObject<TypeSupportType>::_var_type _var_type;
+    typedef typename OpenDDS::DCPS::LocalObject<TypeSupportType>::_ptr_type _ptr_type;
 
     TypeSupportImpl_T() { }
     virtual ~TypeSupportImpl_T() { }
