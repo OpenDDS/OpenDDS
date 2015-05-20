@@ -21,6 +21,8 @@ namespace DCPS {
 /// Extra room must be added to each allocation for this header.
 class OpenDDS_Dcps_Export AllocHeader {
 public:
+  /** Construct */
+  AllocHeader();
 
   /** Get alloc size */
   unsigned int size() const { return is_free() ? -alloc_size_ : alloc_size_; }
@@ -47,11 +49,6 @@ public:
   void set_prev_size(int size) { prev_size_ = size; }
   /** Mark this block as allocated */
   void set_allocated() { if (alloc_size_ < 0) alloc_size_ = - alloc_size_; }
-
-  /** Is this node joinable with the next adjacent node */
-  bool joinable_next();
-  /** Is this node joinable with the previous adjacent node */
-  bool joinable_prev();
 
   /** Join with the next adjacent block */
   void join_next();
@@ -204,6 +201,9 @@ private:
   void insert_free_alloc(FreeHeader* block_freed);
   void join_free_allocs(FreeHeader* block_freed);
   unsigned char* allocate(FreeHeader* free_block, size_t alloc_size);
+
+  bool joinable_next(FreeHeader* freed);
+  bool joinable_prev(FreeHeader* freed);
 
 #ifdef VALIDATE_MEMORY_POOL
   static void validate_pool(MemoryPool& pool, bool log = false);

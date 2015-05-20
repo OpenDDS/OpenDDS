@@ -9,6 +9,10 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+if ($^O ne 'MSWin32') {
+    system('$DDS_ROOT/tools/scripts/analyze_operator_new.sh $DDS_ROOT/lib/libOpenDDS_Corba.so $DDS_ROOT/lib/libOpenDDS_Dcps.so $DDS_ROOT/lib/libOpenDDS_Rtps.so $DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so $DDS_ROOT/lib/libOpenDDS_FACE.so Publisher/publisher Subscriber/subscriber | awk \'{ print "ERROR: Call to global operator new: " $2; }\'');
+}
+
 PerlDDS::add_lib_path("Idl");
 
 my $test = new PerlDDS::TestFramework();
