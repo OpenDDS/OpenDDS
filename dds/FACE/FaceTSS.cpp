@@ -476,10 +476,12 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   readers[connection_id].sum_recvd_msgs_latency += (convertTime(OpenDDS::DCPS::time_value_to_time(now)) - header.message_timestamp);
   ++readers[connection_id].total_msgs_recvd;
 
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: Latency is now (tot_latency %d / tot_msgs_recvd %d): %d\n",
-      readers[connection_id].sum_recvd_msgs_latency,
-      readers[connection_id].total_msgs_recvd,
-      readers[connection_id].sum_recvd_msgs_latency/readers[connection_id].total_msgs_recvd));
+  if (OpenDDS::DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: Latency is now (tot_latency %d / tot_msgs_recvd %d): %d\n",
+        readers[connection_id].sum_recvd_msgs_latency,
+        readers[connection_id].total_msgs_recvd,
+        readers[connection_id].sum_recvd_msgs_latency/readers[connection_id].total_msgs_recvd));
+  }
   ::DDS::Subscriber_var bit_subscriber
    = part->get_builtin_subscriber () ;
 
