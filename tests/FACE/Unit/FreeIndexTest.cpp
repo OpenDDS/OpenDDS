@@ -290,10 +290,13 @@ private:
     block->set_larger_free(NULL, NULL);
   }
 
-  unsigned char pool_ptr_[1024*1024];
+  static unsigned char pool_ptr_[1024*1024];
   unsigned char* next_alloc_;
   FreeHeader* largest_free_;
 };  // end class
+
+unsigned char
+FreeIndexTest::pool_ptr_[1024*1024];
 
 int ACE_TMAIN(int, ACE_TCHAR* [] )
 {

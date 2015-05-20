@@ -112,14 +112,12 @@ gen_max_marshaled_size(const GUID_t&)
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE
-#ifndef DDS_HAS_MINIMUM_BIT
 inline bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
   GUID_tKeyLessThan lessThan;
   return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
 }
-#endif
 #endif
 
 inline bool
@@ -138,14 +136,12 @@ struct GuidPrefixEqual {
 };
 
 #ifndef OPENDDS_SAFETY_PROFILE
-#ifndef DDS_HAS_MINIMUM_BIT
 inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)
 {
   return !GUID_tKeyLessThan::entity_less(lhs, rhs)
     && !GUID_tKeyLessThan::entity_less(rhs, lhs);
 }
-#endif
 #endif
 
 inline bool
