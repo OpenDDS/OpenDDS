@@ -26,6 +26,12 @@
 
 namespace OpenDDS {  namespace DCPS {
 
+AllocHeader::AllocHeader()
+: alloc_size_(0)
+, prev_size_(0)
+{
+}
+
 unsigned char*
 AllocHeader::ptr() const
 {
@@ -64,16 +70,6 @@ AllocHeader::set_size(size_t size)
     size *= -1;
   }
   alloc_size_ = (int)size;
-}
-
-bool
-AllocHeader::joinable_next() {
-  return (next_adjacent() && is_free() && next_adjacent()->is_free());
-}
-
-bool
-AllocHeader::joinable_prev() {
-  return (prev_adjacent() && is_free() && prev_adjacent()->is_free());
 }
 
 void
@@ -303,7 +299,9 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t granularity)
 , largest_free_(NULL)
 , free_index_(largest_free_)
 {
-  FreeHeader* first_free = reinterpret_cast<FreeHeader*>(pool_ptr_);
+  memset(pool_ptr_, pool_size_, 0);
+  AllocHeader* the_pool = new (pool_ptr_) AllocHeader();
+  FreeHeader* first_free = reinterpret_cast<FreeHeader*>(the_pool);
   first_free->init_free_block(pool_size_);
   largest_free_ = first_free;
   free_index_.init(first_free);
@@ -383,7 +381,7 @@ void
 MemoryPool::join_free_allocs(FreeHeader* freed)
 {
   // Check adjacent
-  if (freed->joinable_next()) {
+  if (joinable_next(freed)) {
     FreeHeader* next_free = reinterpret_cast<FreeHeader*>(freed->next_adjacent());
     remove_free_alloc(next_free);
     freed->join_next();
@@ -393,7 +391,7 @@ MemoryPool::join_free_allocs(FreeHeader* freed)
       next->set_prev_size(freed->size());
     }
   }
-  if (freed->joinable_prev()) {
+  if (joinable_prev(freed)) {
     FreeHeader* prev_free = reinterpret_cast<FreeHeader*>(freed->prev_adjacent());
     remove_free_alloc(prev_free);
     // Join prev with freed
@@ -497,8 +495,10 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
     insert_free_alloc(free_block);
 
     // After resize, can use next_adjacent() to safely get to the end of the
-    // resized block
-    AllocHeader* alloc_block = free_block->next_adjacent();
+    // resized block.
+    // Taking free memory and allocating, so invoke constructor
+    AllocHeader* alloc_block = new(free_block->next_adjacent()) AllocHeader();
+
     // Allocate adjacent block (at end of existing block)
     alloc_block->set_size(alloc_size);
     alloc_block->set_allocated();
@@ -511,6 +511,24 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
     remove_free_alloc(free_block);
     return free_block->ptr();
   }
+}
+
+bool
+MemoryPool::joinable_next(FreeHeader* freed)
+{
+  AllocHeader* next_alloc = freed->next_adjacent();
+  return freed->is_free() &&
+         includes(next_alloc) &&
+         next_alloc->is_free();
+}
+
+bool
+MemoryPool::joinable_prev(FreeHeader* freed)
+{
+  AllocHeader* prev_alloc = freed->prev_adjacent();
+  return freed->is_free() &&
+         includes(prev_alloc) &&
+         prev_alloc->is_free();
 }
 
 #ifdef VALIDATE_MEMORY_POOL
