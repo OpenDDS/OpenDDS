@@ -21,17 +21,43 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::TS::Create_Connection("pub", FACE::PUB_SUB, connId, dir, size, FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
+
   ACE_OS::sleep(10); // connection established with Subscriber
 
-  std::cout << "Publisher: about to send_message()" << std::endl;
-  for (FACE::Long i = 0; i < 20; ++i) {
+  std::cout << "Publisher: about to send_message() 10x for callbacks" << std::endl;
+  FACE::Long i = 0;
+  for (; i < 10; ++i) {
     Messenger::Message msg = {"Hello, world.", i};
     FACE::TRANSACTION_ID_TYPE txn;
     std::cout << "  sending " << i << std::endl;
     int retries = 40;
     do {
       if (status == FACE::TIMED_OUT) {
-        std::cout << "Send_Message timed out, resending " << i << std::endl;
+        if (retries % 5 == 0) {
+          std::cout << "Send_Message timed out (x5), keep trying, resending msg " << i << std::endl;
+        }
+        --retries;
+      }
+      FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
+    } while (status == FACE::TIMED_OUT && retries > 0);
+
+    if (status != FACE::RC_NO_ERROR) break;
+  }
+  std::cout << "Sleep - wait for callback to unregister" << std::endl;
+  ACE_OS::sleep(20); // Subscriber receives messages
+  std::cout << "Sleep - done waiting for callback to unregister" << std::endl;
+
+  std::cout << "Publisher: about to send_message() 10x for receives" << std::endl;
+  for (; i < 20; ++i) {
+    Messenger::Message msg = {"Hello, world.", i};
+    FACE::TRANSACTION_ID_TYPE txn;
+    std::cout << "  sending " << i << std::endl;
+    int retries = 40;
+    do {
+      if (status == FACE::TIMED_OUT) {
+        if (retries % 5 == 0) {
+          std::cout << "Send_Message timed out (x5), keep trying, resending msg " << i << std::endl;
+        }
         --retries;
       }
       FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
