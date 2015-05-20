@@ -295,6 +295,9 @@ private:
   FreeHeader* largest_free_;
 };  // end class
 
+unsigned char
+FreeIndexTest::pool_ptr_[1024*1024];
+
 int ACE_TMAIN(int, ACE_TCHAR* [] )
 {
   FreeIndexTest test;
