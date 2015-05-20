@@ -84,7 +84,7 @@ public:
 
 private:
   /// The collected data goes here.
-  std::vector<DatumType> buffer_;
+  OPENDDS_VECTOR(DatumType) buffer_;
 
   /// Where to write the next datum collected.
   unsigned int writeAt_;
