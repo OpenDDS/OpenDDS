@@ -64,12 +64,14 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   {
     std::cout << "Test 3: sending msg " << send_counter << " with TIMEOUT=100000000 nsec MAX_BLOCKING=Default (100000000 nsec), should succeed" << std::endl;
     Messenger::Message msg_INF = {"Hello, world.", send_counter, 0};
+    int retries = 40;
     do {
       if (timeout_tests_status == FACE::TIMED_OUT) {
         std::cout << "Send_Message timed out, resending " << send_counter << std::endl;
+        --retries;
       }
       FACE::TS::Send_Message(connId, 100000000, txn_INF, msg_INF, size_INF, timeout_tests_status);
-    } while (timeout_tests_status == FACE::TIMED_OUT);
+    } while (timeout_tests_status == FACE::TIMED_OUT && retries > 0);
     if (timeout_tests_status != FACE::RC_NO_ERROR) {
       std::cout << "Test 3: ERROR: Send with TIMEOUT=100000000 nsec MAX_BLOCKING=Default (100000000 nsec) did not succeed." << std::endl;
       return static_cast<int>(timeout_tests_status);
@@ -81,12 +83,14 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   {
     std::cout << "Test 4: sending msg " << send_counter << " with TIMEOUT=200000000 nsec MAX_BLOCKING=Default (100000000 nsec), should succeed" << std::endl;
     Messenger::Message msg_INF = {"Hello, world.", send_counter, 0};
+    int retries = 40;
     do {
       if (timeout_tests_status == FACE::TIMED_OUT) {
         std::cout << "Send_Message timed out, resending " << send_counter << std::endl;
+        --retries;
       }
       FACE::TS::Send_Message(connId, 200000000, txn_INF, msg_INF, size_INF, timeout_tests_status);
-    } while (timeout_tests_status == FACE::TIMED_OUT);
+    } while (timeout_tests_status == FACE::TIMED_OUT && retries > 0);
     if (timeout_tests_status != FACE::RC_NO_ERROR) {
       std::cout << "Test 4: ERROR: Send with TIMEOUT=200000000 nsec MAX_BLOCKING=Default (100000000 nsec) did not succeed." << std::endl;
       return static_cast<int>(timeout_tests_status);
@@ -102,12 +106,14 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger::Message msg = {"Hello, world.", i, 0};
     FACE::TRANSACTION_ID_TYPE txn;
     std::cout << "  sending " << i << std::endl;
+    int retries = 40;
     do {
       if (status == FACE::TIMED_OUT) {
-        std::cout << "Resending message " << i << std::endl;
+        std::cout << "Send_Message timed out, resending " << i << std::endl;
+        --retries;
       }
       FACE::TS::Send_Message(connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
-    } while (status == FACE::TIMED_OUT);
+    } while (status == FACE::TIMED_OUT && retries > 0);
 
     if (status != FACE::RC_NO_ERROR) break;
   }

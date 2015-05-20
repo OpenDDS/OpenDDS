@@ -24,12 +24,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::CONNECTION_NAME_TYPE name = {};
   FACE::TRANSPORT_CONNECTION_STATUS_TYPE connectionStatus;
   FACE::TS::Get_Connection_Parameters(name, connId, connectionStatus, status);
-  if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+  if (status != FACE::NOT_AVAILABLE) return static_cast<int>(status);
 
   //Check that name & connection validated ok
   FACE::CONNECTION_NAME_TYPE goodName = "pub";
   FACE::TS::Get_Connection_Parameters(goodName, connId, connectionStatus, status);
-  if (status != FACE::RC_NO_ERROR) {
+  if (status != FACE::NOT_AVAILABLE) {
     ACE_ERROR((LM_ERROR, "ERROR: Get_Connection_Parameters with goodName and good "
                "connection Id failed\n"));
   }
@@ -60,15 +60,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   }
   FACE::CONNECTION_ID_TYPE getConnectionId = 0;
   FACE::TS::Get_Connection_Parameters(name, getConnectionId, connectionStatus, status);
-  if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+  if (status != FACE::NOT_AVAILABLE) return static_cast<int>(status);
 
-  if (connectionStatus.LAST_MSG_VALIDITY != FACE::INVALID
-      || connectionStatus.CONNECTION_DIRECTION != FACE::SOURCE
-      || getConnectionId != connId) {
-    ACE_ERROR((LM_ERROR, "ERROR: unexpected value in connection parameters "
-               "before sending\n"));
-    return EXIT_FAILURE;
-  }
 
   ACE_OS::sleep(5); // connection established with Subscriber
 
@@ -87,7 +80,10 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   if (connectionStatus.MESSAGE != 1
-      || connectionStatus.LAST_MSG_VALIDITY != FACE::VALID) {
+      || connectionStatus.LAST_MSG_VALIDITY != FACE::VALID
+      || connectionStatus.WAITING_PROCESSES_OR_MESSAGES != 0
+      || connectionStatus.CONNECTION_DIRECTION != FACE::SOURCE
+      || connectionStatus.REFRESH_PERIOD != 0) {
     ACE_ERROR((LM_ERROR, "ERROR: unexpected value in connection "
                "parameters after sending\n"));
     return EXIT_FAILURE;

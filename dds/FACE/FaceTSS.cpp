@@ -5,12 +5,23 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/SafetyProfilePool.h"
 
 #include <cstring>
 
 namespace FACE {
 namespace TS {
+
+bool MessageHeader::operator==(const MessageHeader& rhs) const
+{
+  return message_instance_guid == rhs.message_instance_guid
+    && message_definition_guid == rhs.message_definition_guid
+    && message_source_guid == rhs.message_source_guid
+    && message_timestamp == rhs.message_timestamp
+    && message_validity == rhs.message_validity;
+}
 
 using OpenDDS::FaceTSS::config::ConnectionSettings;
 using OpenDDS::FaceTSS::config::TopicSettings;
@@ -162,7 +173,32 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
     return_code = INVALID_PARAM;
   }
   if (return_code == RC_NO_ERROR) {
-    status = entities.connections_[connection_id].second;
+    TRANSPORT_CONNECTION_STATUS_TYPE& cur_status = entities.connections_[connection_id].second;
+    if (cur_status.CONNECTION_DIRECTION == FACE::DESTINATION) {
+      Entities::FaceReceiver& receiver = entities.receivers_[connection_id];
+      if (receiver.status_valid != FACE::VALID) {
+        return_code = NOT_AVAILABLE;
+        return;
+      }
+      cur_status.LAST_MSG_VALIDITY = receiver.last_msg_header.message_validity;
+      if (entities.receivers_[connection_id].total_msgs_recvd != 0) {
+        cur_status.REFRESH_PERIOD = entities.receivers_[connection_id].sum_recvd_msgs_latency/entities.receivers_[connection_id].total_msgs_recvd;
+      } else {
+        cur_status.REFRESH_PERIOD = 0;
+      }
+      cur_status.WAITING_PROCESSES_OR_MESSAGES = receiver.messages_waiting();
+    } else {
+      //DDS Only supports Destination/Source therefore
+      // CONNECTION_DIRECTION == FACE::SOURCE
+      Entities::FaceSender& sender = entities.senders_[connection_id];
+      if (sender.status_valid != FACE::VALID) {
+        return_code = NOT_AVAILABLE;
+        return;
+      }
+      cur_status.REFRESH_PERIOD = 0;
+      cur_status.WAITING_PROCESSES_OR_MESSAGES = 0;
+    }
+    status = cur_status;
   }
 }
 
@@ -170,9 +206,9 @@ void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
                          RETURN_CODE_TYPE& return_code)
 {
   Entities& entities = *Entities::instance();
-  OPENDDS_MAP(CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = entities.readers_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = entities.receivers_;
   if (readers.count(connection_id)) {
-    readers[connection_id]->set_listener(NULL, 0);
+    readers[connection_id].dr->set_listener(NULL, 0);
     return_code = RC_NO_ERROR;
     return;
   }
@@ -183,17 +219,17 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
                         RETURN_CODE_TYPE& return_code)
 {
   Entities& entities = *Entities::instance();
-  OPENDDS_MAP(CONNECTION_ID_TYPE, DDS::DataWriter_var)& writers = entities.writers_;
-  OPENDDS_MAP(CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = entities.readers_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, Entities::FaceSender)& writers = entities.senders_;
+  OPENDDS_MAP(CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = entities.receivers_;
 
   DDS::DomainParticipant_var dp;
   if (writers.count(connection_id)) {
-    const DDS::Publisher_var pub = writers[connection_id]->get_publisher();
+    const DDS::Publisher_var pub = writers[connection_id].dw->get_publisher();
     writers.erase(connection_id);
     dp = pub->get_participant();
 
   } else if (readers.count(connection_id)) {
-    const DDS::Subscriber_var sub = readers[connection_id]->get_subscriber();
+    const DDS::Subscriber_var sub = readers[connection_id].dr->get_subscriber();
     readers.erase(connection_id);
     dp = sub->get_participant();
   }
@@ -209,6 +245,43 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
 
   entities.connections_.erase(connection_id);
   return_code = RC_NO_ERROR;
+}
+OpenDDS_FACE_Export
+void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
+                    /*in*/    FACE::TIMEOUT_TYPE /*timeout*/,
+                    /*inout*/ FACE::TRANSACTION_ID_TYPE& transaction_id,
+                    /*inout*/ FACE::TS::MessageHeader& message_header,
+                    /*in*/    FACE::MESSAGE_SIZE_TYPE /*message_size*/,
+                    /*out*/   FACE::RETURN_CODE_TYPE& return_code)
+{
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers =
+    Entities::instance()->receivers_;
+  // transaction_id cannot be 0 due to initialization
+  // of last_msg_tid to 0 before a msg has been received so
+  // only valid transaction_ids are > 0.
+  if (!readers.count(connection_id) || transaction_id == 0) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
+  if (transaction_id == readers[connection_id].last_msg_tid) {
+    message_header = readers[connection_id].last_msg_header;
+    return_code = OpenDDS::FaceTSS::update_status(connection_id, DDS::RETCODE_OK);
+  } else {
+    return_code = OpenDDS::FaceTSS::update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
+  }
+}
+
+void Receive_Message(
+  /* in */ CONNECTION_ID_TYPE connection_id,
+  /* in */ TIMEOUT_TYPE timeout,
+  /* inout */ TRANSACTION_ID_TYPE& transaction_id,
+  /* out */ MessageHeader& message_header,
+  /* in */ MESSAGE_SIZE_TYPE message_size,
+  /* out */ RETURN_CODE_TYPE& return_code)
+{
+  receive_header(connection_id, timeout,
+                 transaction_id, message_header,
+                 message_size, return_code);
 }
 
 namespace {
@@ -256,11 +329,18 @@ namespace {
       DDS::DataWriterQos datawriter_qos;
       qos_settings.apply_to(datawriter_qos);
 
+      // set up user data in DW qos
+      OPENDDS_STRING connId = OpenDDS::DCPS::to_dds_string(connectionId);
+      datawriter_qos.user_data.value.length (connId.size()+1); /* +1 for NULL terminator*/
+      datawriter_qos.user_data.value.replace (connId.size()+1,
+                                              connId.size()+1,
+                                              reinterpret_cast<CORBA::Octet*>(const_cast<char*>(connId.c_str())));
+
       const DDS::DataWriter_var dw =
         pub->create_datawriter(topic, datawriter_qos, 0, 0);
       if (!dw) return INVALID_PARAM;
 
-      Entities::instance()->writers_[connectionId] = dw;
+      Entities::instance()->senders_[connectionId].dw = dw;
 
     } else { // dir == DESTINATION
       DDS::SubscriberQos subscriber_qos;
@@ -277,7 +357,7 @@ namespace {
         sub->create_datareader(topic, datareader_qos, 0, 0);
       if (!dr) return INVALID_PARAM;
 
-      Entities::instance()->readers_[connectionId] = dr;
+      Entities::instance()->receivers_[connectionId].dr = dr;
     }
 
     return RC_NO_ERROR;
@@ -369,5 +449,103 @@ FACE::SYSTEM_TIME_TYPE convertDuration(const DDS::Duration_t& duration)
     duration.sec * static_cast<FACE::SYSTEM_TIME_TYPE>(NSEC_PER_SEC);
 }
 
+FACE::SYSTEM_TIME_TYPE convertTime(const DDS::Time_t& timestamp)
+{
+  return timestamp.nanosec +
+      timestamp.sec * static_cast<FACE::SYSTEM_TIME_TYPE>(NSEC_PER_SEC);
+}
+
+void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
+                              const DDS::DomainParticipant_var part,
+                              const DDS::SampleInfo& sinfo,
+                              FACE::RETURN_CODE_TYPE& return_code)
+{
+  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = Entities::instance()->receivers_;
+  if (!readers.count(connection_id)) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
+  FACE::TS::MessageHeader& header = readers[connection_id].last_msg_header;
+
+  //TODO: Populate other header fields appropriately
+  header.message_definition_guid = Entities::instance()->connections_[connection_id].second.MESSAGE;
+  //  header.message_instance_guid = sinfo.instance_handle;
+  header.message_timestamp = convertTime(sinfo.source_timestamp);
+  ACE_Time_Value now(ACE_OS::gettimeofday());
+
+  readers[connection_id].sum_recvd_msgs_latency += (convertTime(OpenDDS::DCPS::time_value_to_time(now)) - header.message_timestamp);
+  ++readers[connection_id].total_msgs_recvd;
+
+  if (OpenDDS::DCPS::DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: Latency is now (tot_latency %d / tot_msgs_recvd %d): %d\n",
+        readers[connection_id].sum_recvd_msgs_latency,
+        readers[connection_id].total_msgs_recvd,
+        readers[connection_id].sum_recvd_msgs_latency/readers[connection_id].total_msgs_recvd));
+  }
+  ::DDS::Subscriber_var bit_subscriber
+   = part->get_builtin_subscriber () ;
+
+  ::DDS::DataReader_var reader
+   = bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
+  ::DDS::PublicationBuiltinTopicDataDataReader_var pub_reader
+   = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow (reader.in ());
+  if (CORBA::is_nil (pub_reader.in ())) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) populate_header_received: failed to get BUILT_IN_PUBLICATION_TOPIC datareader.\n"));
+    return_code = FACE::NOT_AVAILABLE;
+    return;
+  }
+
+  ::DDS::ReturnCode_t ret;
+  ::DDS::SampleInfoSeq pubinfos(1);
+  ::DDS::PublicationBuiltinTopicDataSeq pubdata(1);
+  ret = pub_reader->read_instance(pubdata,
+                                  pubinfos,
+                                  1,
+                                  sinfo.publication_handle,
+                                  ::DDS::ANY_SAMPLE_STATE,
+                                  ::DDS::ANY_VIEW_STATE,
+                                  ::DDS::ALIVE_INSTANCE_STATE);
+
+  if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
+    ACE_ERROR((LM_ERROR,
+        "(%P|%t) populate_header_received:  failed to read BIT publication data.\n"));
+    return_code = FACE::NOT_AVAILABLE;
+    return;
+  }
+
+  CORBA::ULong i = 0;
+
+//  ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: DW user data %C \n",
+//                       pubdata[i].user_data.value.get_buffer()));
+  header.message_source_guid = atoi(reinterpret_cast <char*> (pubdata[i].user_data.value.get_buffer()));
+//  ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: DW lifespan qos value: sec: %d nanosec: %d\n",
+//                         pubdata[i].lifespan.duration.sec, pubdata[i].lifespan.duration.nanosec));
+
+  DDS::Duration_t lifespan = pubdata[i].lifespan.duration;
+  if (lifespan.sec != DDS::DURATION_INFINITE_SEC &&
+      lifespan.nanosec != DDS::DURATION_INFINITE_NSEC) {
+    // Finite lifespan.  Check if data has expired.
+
+    DDS::Time_t const tmp = {
+      sinfo.source_timestamp.sec + lifespan.sec,
+      sinfo.source_timestamp.nanosec + lifespan.nanosec
+    };
+
+    // We assume that the publisher host's clock and subcriber host's
+    // clock are synchronized (allowed by the spec).
+    ACE_Time_Value const expiration_time(
+        OpenDDS::DCPS::time_to_time_value(tmp));
+
+    if (now >= expiration_time) {
+//      ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: Last message expired, setting message_validity to INVALID\n"));
+      header.message_validity = FACE::INVALID;
+      return_code = FACE::RC_NO_ERROR;
+      return;
+    }
+  }
+//  ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: Setting message_validity to VALID\n"));
+  header.message_validity = FACE::VALID;
+  return_code = FACE::RC_NO_ERROR;
+}
 }}
 
