@@ -119,7 +119,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
   typedef OPENDDS_MAP(SubscriptionInstance*, InstanceData) InstanceMap;
   InstanceMap inst_map;
 
-  typedef std::set<SubscriptionInstance*> InstanceSet;
+  typedef OPENDDS_SET(SubscriptionInstance*) InstanceSet;
   InstanceSet released_instances;
 
   for (CORBA::ULong idx = 0; iter != end && idx < max_samples_; ++idx, ++iter) {
