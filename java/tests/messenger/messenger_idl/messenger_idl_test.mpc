@@ -22,4 +22,7 @@ project: dcps_test_java {
     Messenger.idl
   }
 
+  verbatim(gnuace, bottom, 1) {
+    idl_stubs: _MessageTypeSupportTAOPeer.java
+  }
 }

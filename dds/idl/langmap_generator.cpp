@@ -34,9 +34,12 @@ namespace {
 
   std::string map_type(AST_Type* type)
   {
-    AST_Type* actual = resolveActualType(type);
-    const Classification cls = classify(actual);
+    if (AST_Typedef::narrow_from_decl(type)) {
+      return scoped(type->name());
+    }
+    const Classification cls = classify(type);
     if (cls & CL_PRIMITIVE) {
+      AST_Type* actual = resolveActualType(type);
       return primtype_[AST_PredefinedType::narrow_from_decl(actual)->pt()];
     }
     if (cls & CL_STRING) {

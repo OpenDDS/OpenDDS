@@ -10,11 +10,8 @@
 #define OPENDDS_DCPS_DCPSINFO_IDL
 
 #include "dds/DdsDcpsInfoUtils.idl"
-#include "dds/DdsDcpsInfrastructure.idl"
 #include "dds/DdsDcpsPublication.idl"
 #include "dds/DdsDcpsSubscription.idl"
-
-#include "dds/DdsDcpsInfoUtils.idl"
 
 #include "dds/DCPS/InfoRepoDiscovery/DataWriterRemote.idl"
 #include "dds/DCPS/InfoRepoDiscovery/DataReaderRemote.idl"

@@ -22,6 +22,9 @@ project : dds_macros {
     pre_extension         = TypeSupportImpl
     source_outputext      = .cpp
     header_outputext      = .h
+    optional(header_pre_extension) {
+      commandflags(-Lspcpp) += C
+    }
 
     // See $DDS_ROOT/MPC/modules/TYPESUPPORTHelper.pm for .idl and .java output
     // files and additional source and header files due to the -Gface option.

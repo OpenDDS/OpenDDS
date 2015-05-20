@@ -1,125 +1,82 @@
-feature(no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
+project : dds_suppress_any_support, dcps_ts_defaults {
+  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
+              -Wb,export_macro=OpenDDS_Dcps_Export \
+              -Wb,export_include=dds/DCPS/dcps_export.h \
+              -SS \
+              -I$(DDS_ROOT)
+
   dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
                    -Wb,export_macro=OpenDDS_Dcps_Export \
                    -Wb,export_include=dds/DCPS/dcps_export.h
-
-  TypeSupport_Files {
-    dcps_ts_flags += -SI
-    DdsDcpsGuid.idl
-  }
-
-  Source_Files {
-    DdsDcpsGuidC.cpp
-    DdsDcpsGuidTypeSupportImpl.cpp
-  }
 }
 
-feature(!no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
-  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
-                   -Wb,export_macro=OpenDDS_Dcps_Export \
-                   -Wb,export_include=dds/DCPS/dcps_export.h
-
+feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults {
+  // Process with tao_idl for the InfoRepo.
   IDL_Files {
-    ^DdsDcpsGuid.idl
-  }
-
-  TypeSupport_Files {
-    dcps_ts_flags += -Lspcpp -SI
     DdsDcpsGuid.idl
-  }
-
-  Source_Files {
-    DdsDcpsGuidTypeSupportImpl.cpp
-  }
-}
-
-feature(no_opendds_safety_profile, built_in_topics) : taoidldefaults, dcps_ts_defaults {
-  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
-                   -Wb,export_macro=OpenDDS_Dcps_Export \
-                   -Wb,export_include=dds/DCPS/dcps_export.h
-
-  TypeSupport_Files {
     DdsDcpsCore.idl
     DdsDcpsInfoUtils.idl
+  }
+
+  TypeSupport_Files {
+    DdsDcpsGuid.idl
+    DdsDcpsCore.idl
     DdsDcpsInfrastructure.idl
   }
 
-  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
   IDL_Files {
+    DdsDcpsGuidTypeSupport.idl
     DdsDcpsCoreTypeSupport.idl
-    DdsDcpsInfoUtilsTypeSupport.idl
     DdsDcpsInfrastructureTypeSupport.idl
   }
 
-  Header_Files {
-    DdsDcpsCoreTypeSupportC.h
-    DdsDcpsInfoUtilsTypeSupportC.h
-    DdsDcpsInfrastructureTypeSupportC.h
-  }
-
-  Source_Files {
-    DdsDcpsCoreC.cpp
-    DdsDcpsInfoUtilsC.cpp
-    DdsDcpsCoreTypeSupportC.cpp
-    DdsDcpsInfoUtilsTypeSupportC.cpp
-    DdsDcpsInfrastructureTypeSupportC.cpp
-    DdsDcpsCoreTypeSupportImpl.cpp
-    DdsDcpsInfoUtilsTypeSupportImpl.cpp
-    DdsDcpsInfrastructureTypeSupportImpl.cpp
+  TypeSupport_Files {
+    dcps_ts_flags += -SI
+    DdsDcpsInfoUtils.idl
   }
 }
 
-feature(no_opendds_safety_profile, !built_in_topics) : taoidldefaults, dcps_ts_defaults {
-  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
-                   -Wb,export_macro=OpenDDS_Dcps_Export \
-                   -Wb,export_include=dds/DCPS/dcps_export.h
+feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support, dcps_ts_defaults {
+  // Process with tao_idl for the InfoRepo.
+
+  TypeSupport_Files {
+    dcps_ts_flags += -SI -Lspcpp
+    DdsDcpsGuid.idl
+  }
+
+  IDL_Files {
+    DdsDcpsCore.idl
+    DdsDcpsInfoUtils.idl
+  }
 
   TypeSupport_Files {
     dcps_ts_flags += -SI
     DdsDcpsCore.idl
     DdsDcpsInfoUtils.idl
+  }
+
+  TypeSupport_Files {
     DdsDcpsInfrastructure.idl
   }
 
-  Source_Files {
-    DdsDcpsCoreC.cpp
-    DdsDcpsInfoUtilsC.cpp
-    DdsDcpsCoreTypeSupportImpl.cpp
-    DdsDcpsInfoUtilsTypeSupportImpl.cpp
-    DdsDcpsInfrastructureTypeSupportImpl.cpp
+  IDL_Files {
+    DdsDcpsInfrastructureTypeSupport.idl
   }
 }
 
-feature(!no_opendds_safety_profile, built_in_topics) : dcps_ts_defaults, taoidldefaults {
-  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
-                   -Wb,export_macro=OpenDDS_Dcps_Export \
-                   -Wb,export_include=dds/DCPS/dcps_export.h
+feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults {
+  TypeSupport_Files {
+    dcps_ts_flags += -SI -Lspcpp
+    DdsDcpsGuid.idl
+    DdsDcpsInfoUtils.idl
+  }
 
   TypeSupport_Files {
     dcps_ts_flags += -Lspcpp
     DdsDcpsCore.idl
-    DdsDcpsInfoUtils.idl
   }
-
-  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h -Wb,export_macro=OpenDDS_Dcps_Export -Wb,export_include=dds/DCPS/dcps_export.h -I$(DDS_ROOT)
 
   IDL_Files {
-    ^DdsDcpsCore.idl
-    ^DdsDcpsInfoUtils.idl
     DdsDcpsCoreTypeSupport.idl
-    DdsDcpsInfoUtilsTypeSupport.idl
   }
-
-  Header_Files {
-    DdsDcpsCoreTypeSupportC.h
-    DdsDcpsInfoUtilsTypeSupportC.h
-  }
-
-  Source_Files {
-    DdsDcpsCoreTypeSupportC.cpp
-    DdsDcpsInfoUtilsTypeSupportC.cpp
-    DdsDcpsCoreTypeSupportImpl.cpp
-    DdsDcpsInfoUtilsTypeSupportImpl.cpp
-  }
-
 }

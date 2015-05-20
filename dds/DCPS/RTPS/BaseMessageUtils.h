@@ -185,12 +185,8 @@ template <typename T>
 void
   message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)
 {
-#ifdef OPENDDS_SAFETY_PROFILE
   out.length (mb_locator.length());
   std::memcpy (out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
-#else
-  out.replace(static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
-#endif
 }
 
 inline void

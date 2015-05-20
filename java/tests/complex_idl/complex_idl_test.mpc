@@ -21,4 +21,8 @@ project: dcpslib, dcps_tcp, dcps_test_java {
     TypeSupport_Files {
         Complex_Idl.idl
     }
+
+    verbatim(gnuace, bottom, 1) {
+      idl_stubs: _DataTypeSupportTAOPeer.java
+    }
 }
