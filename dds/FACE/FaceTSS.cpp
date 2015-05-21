@@ -353,6 +353,13 @@ namespace {
       DDS::DataReaderQos datareader_qos;
       qos_settings.apply_to(datareader_qos);
 
+      // set up user data in DR qos
+      OPENDDS_STRING connId = OpenDDS::DCPS::to_dds_string(connectionId);
+      datareader_qos.user_data.value.length (connId.size()+1); /* +1 for NULL terminator*/
+      datareader_qos.user_data.value.replace (connId.size()+1,
+                                              connId.size()+1,
+                                              reinterpret_cast<CORBA::Octet*>(const_cast<char*>(connId.c_str())));
+
       const DDS::DataReader_var dr =
         sub->create_datareader(topic, datareader_qos, 0, 0);
       if (!dr) return INVALID_PARAM;
