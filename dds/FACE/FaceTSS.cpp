@@ -13,6 +13,8 @@
 
 #include <cstring>
 
+using OpenDDS::DCPS::operator==;
+
 namespace FACE {
 namespace TS {
 
