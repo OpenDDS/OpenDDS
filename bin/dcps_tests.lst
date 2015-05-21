@@ -312,14 +312,16 @@ tests/DCPS/Instances/run_test.pl single_instance multiple_datawriter nokey: !DCP
 tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter keyed: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 
-tests/FACE/Unit/QosSettingsTest: !DCPS_MIN !WCHAR
-tests/FACE/Unit/MemoryPoolTest: !DCPS_MIN !WCHAR
-tests/FACE/Unit/FreeIndexTest: !DCPS_MIN !WCHAR
-tests/FACE/Unit/SafetyProfilePoolTest: !DCPS_MIN !WCHAR OPENDDS_SAFETY_PROFILE
-tests/FACE/Unit/SequencesTest: !DCPS_MIN !WCHAR
-tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS
-tests/FACE/Reliability/run_test.pl: !DCPS_MIN !WCHAR RTPS
-tests/FACE/Partition/run_test.pl: !DCPS_MIN !WCHAR RTPS
-tests/FACE/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !WCHAR
-tests/FACE/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !WCHAR
-tests/FACE/Compiler/idl_test_fixed/TestFixed: !DCPS_MIN !WCHAR
+tests/FACE/Unit/QosSettingsTest: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
+tests/FACE/Unit/MemoryPoolTest: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
+tests/FACE/Unit/FreeIndexTest: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
+tests/FACE/Unit/SafetyProfilePoolTest: !DCPS_MIN !WCHAR OPENDDS_SAFETY_PROFILE  !NO_BUILT_IN_TOPICS
+tests/FACE/Unit/SequencesTest: !DCPS_MIN !WCHAR  !NO_BUILT_IN_TOPICS
+tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
+tests/FACE/CallbackAndReceive/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
+tests/FACE/Header/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
+tests/FACE/Reliability/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
+tests/FACE/Partition/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
+tests/FACE/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
+tests/FACE/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
+tests/FACE/Compiler/idl_test_fixed/TestFixed: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS

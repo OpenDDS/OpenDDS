@@ -39,6 +39,7 @@ bool GroupRakeData::insert_sample(ReceivedDataElement* sample,
 void
 GroupRakeData::get_datareaders(DDS::DataReaderSeq & readers)
 {
+  ACE_UNUSED_ARG(readers);
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   readers.length(static_cast<CORBA::ULong>(this->sorted_.size()));
   int i = 0;
