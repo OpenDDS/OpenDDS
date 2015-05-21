@@ -45,9 +45,12 @@ public:
     FACE::LongLong total_msgs_recvd;
   };
 
+  typedef OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, FaceSender) ConnIdToSenderMap;
+  typedef OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, FaceReceiver) ConnIdToReceiverMap;
+
   OpenDDS_FACE_Export static Entities* instance();
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, FaceSender) senders_;
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, FaceReceiver) receivers_;
+  ConnIdToSenderMap senders_;
+  ConnIdToReceiverMap receivers_;
 
   typedef std::pair<OPENDDS_STRING, FACE::TRANSPORT_CONNECTION_STATUS_TYPE> StrConStatPair;
   OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, StrConStatPair ) connections_;
@@ -72,7 +75,7 @@ void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
                      /*in*/    FACE::MESSAGE_SIZE_TYPE /*message_size*/,
                      /*out*/   FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = Entities::instance()->receivers_;
+  Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
@@ -132,7 +135,7 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
                   FACE::MESSAGE_SIZE_TYPE /*message_size*/,
                   FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceSender)& writers = Entities::instance()->senders_;
+  Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
   if (!writers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
@@ -225,7 +228,9 @@ private:
         update_status(connection_id_, DDS::RETCODE_OK);
         FACE::RETURN_CODE_TYPE retcode;
         GuardType guard(callbacks_lock_);
-        ACE_DEBUG((LM_DEBUG, "Listener::on_data_available - invoking %d callbacks\n", callbacks_.size()));
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "Listener::on_data_available - invoking %d callbacks\n", callbacks_.size()));
+        }
         for (size_t i = 0; i < callbacks_.size(); ++i) {
           callbacks_.at(i)(transaction_id /*Transaction_ID*/, sample, status.MESSAGE, status.MAX_MESSAGE, 0 /*WAITSET_TYPE*/, retcode);
         }
@@ -251,7 +256,7 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
                        FACE::MESSAGE_SIZE_TYPE /*max_message_size*/,
                        FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = Entities::instance()->receivers_;
+  Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
