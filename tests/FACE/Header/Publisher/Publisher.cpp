@@ -27,7 +27,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   std::cout << "Publisher: about to send_message() 10x for callbacks" << std::endl;
   FACE::Long i = 0;
   for (; i < 10; ++i) {
-    Messenger::Message msg = {"Hello, world.", i};
+    Messenger::Message msg = {"Hello, world.", i, 0};
     FACE::TRANSACTION_ID_TYPE txn;
     std::cout << "  sending " << i << std::endl;
     int retries = 40;
