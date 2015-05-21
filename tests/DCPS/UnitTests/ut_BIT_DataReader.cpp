@@ -43,7 +43,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   Subscriber_var bit_sub = dp->get_builtin_subscriber();
   DataReader_var dr = bit_sub->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
   ParticipantBuiltinTopicDataDataReaderImpl* bit_dr =
-      dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(dr.in());
+#if defined __GNUC__ && __GNUC__ == 4 && __GNUC_MINOR__ == 1
+    static_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(dr.in());
+#else
+    dynamic_cast<ParticipantBuiltinTopicDataDataReaderImpl*>(dr.in());
+#endif
   ReturnCode_t result;
 
   { // Should be able to read synthetic data
