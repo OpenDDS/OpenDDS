@@ -344,6 +344,115 @@ public:
     }
   }
 
+  static std::string generateCopyCtor(const std::string& name, AST_Type* field_type,
+                                      const std::string&, std::string&,
+                                      const std::string&)
+  {
+    std::stringstream ss;
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+      ss <<
+        "    this->_u." << name << " = other._u." << name << ";\n";
+    } else if (cls & CL_STRING) {
+      ss <<
+        "    this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+    } else if (cls & CL_ARRAY) {
+      ss <<
+        "    this->_u." << name << " = (other._u." << name << ") ? " << map_type(field_type) << "_dup(other._u." << name << ") : 0 ;\n";
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+      ss <<
+        "    this->_u." << name << " = (other._u." << name << ") ? new " << map_type(field_type) << "(*other._u." << name << ") : 0;\n";
+    } else {
+      std::cerr << "Unsupported type for union element\n";
+    }
+
+    return ss.str();
+  }
+
+  static std::string generateAssign(const std::string& name, AST_Type* field_type,
+                                    const std::string&, std::string&,
+                                    const std::string&)
+  {
+    std::stringstream ss;
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+      ss <<
+        "      this->_u." << name << " = other._u." << name << ";\n";
+    } else if (cls & CL_STRING) {
+      ss <<
+        "      this->_u." << name << " = (other._u." << name << ") ? ::CORBA::string_dup(other._u." << name << ") : 0 ;\n";
+    } else if (cls & CL_ARRAY) {
+      ss <<
+        "    this->_u." << name << " = (other._u." << name << ") ? " << map_type(field_type) << "_dup(other._u." << name << ") : 0 ;\n";
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+      ss <<
+        "      this->_u." << name << " = (other._u." << name << ") ? new " << map_type(field_type) << "(*other._u." << name << ") : 0;\n";
+    } else {
+      std::cerr << "Unsupported type for union element\n";
+    }
+
+    return ss.str();
+  }
+
+  static std::string generateEqual(const std::string& name, AST_Type* field_type,
+                                   const std::string&, std::string&,
+                                   const std::string&)
+  {
+    std::stringstream ss;
+
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+      ss <<
+        "      return this->_u." << name << " == rhs._u." << name << ";\n";
+    } else if (cls & CL_STRING) {
+      ss <<
+        "      return std::strcmp (this->_u." << name << ", rhs._u." << name << ") == 0 ;\n";
+    } else if (cls & CL_ARRAY) {
+      // TODO
+      ss <<
+        "      return false;\n";
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+      ss <<
+        "      return *this->_u." << name << " == *rhs._u." << name << ";\n";
+    } else {
+      std::cerr << "Unsupported type for union element\n";
+    }
+
+    return ss.str();
+  }
+
+  static std::string generateReset(const std::string& name, AST_Type* field_type,
+                                   const std::string&, std::string&,
+                                   const std::string&)
+  {
+    std::stringstream ss;
+
+    AST_Type* actual_field_type = resolveActualType(field_type);
+    const Classification cls = classify(actual_field_type);
+    if (cls & (CL_PRIMITIVE | CL_ENUM)) {
+      // Do nothing.
+    } else if (cls & CL_STRING) {
+      ss <<
+        "      ::CORBA::string_free(this->_u." << name << ");\n"
+        "      this->_u." << name << " = 0;\n";
+    } else if (cls & CL_ARRAY) {
+      ss <<
+        "      " << map_type(field_type) << "_free(this->_u." << name << ");\n"
+        "      this->_u." << name << " = 0;\n";
+    } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
+      ss <<
+        "      delete this->_u." << name << ";\n"
+        "      this->_u." << name << " = 0;\n";
+    } else {
+      std::cerr << "Unsupported type for union element\n";
+    }
+
+    return ss.str();
+  }
+
   bool gen_union(AST_Union* u, UTL_ScopedName* name, const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
@@ -407,100 +516,18 @@ public:
 
       be_global->impl_ <<
         nm << "::" << nm << "(const " << nm << "& other) {\n" <<
-        "  this->_discriminator = other._discriminator;\n" <<
-        "  switch (this->_discriminator) {\n";
-
-      for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin (), limit = branches.end ();
-           pos != limit;
-           ++pos) {
-        AST_UnionBranch* branch = *pos;
-        for (size_t idx = 0; idx != branch->label_list_length(); ++idx) {
-          AST_UnionLabel* label = branch->label(idx);
-          if (label->label_kind() == AST_UnionLabel::UL_default) {
-            be_global->impl_ << "  default:\n";
-          } else if (discriminator->node_type() == AST_Decl::NT_enum) {
-            be_global->impl_ << "  case "
-                             << getEnumLabel(label->label_val(), discriminator) << ":\n";
-          } else {
-            be_global->impl_ << "  case " << *label->label_val()->ev() << ":\n";
-          }
-        }
-
-        AST_Type* field_type = branch->field_type();
-        AST_Type* actual_field_type = resolveActualType(field_type);
-        const Classification cls = classify(actual_field_type);
-        if (cls & (CL_PRIMITIVE | CL_ENUM)) {
-          be_global->impl_ <<
-            "    this->_u." << branch->local_name()->get_string() << " = other._u." << branch->local_name()->get_string() << ";\n";
-        } else if (cls & CL_STRING) {
-          be_global->impl_ <<
-            "    this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? ::CORBA::string_dup(other._u." << branch->local_name()->get_string() << ") : 0 ;\n";
-        } else if (cls & CL_ARRAY) {
-          be_global->impl_ <<
-            "    this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? " << map_type(field_type) << "_dup(other._u." << branch->local_name()->get_string() << ") : 0 ;\n";
-        } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
-          be_global->impl_ <<
-            "    this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? new " << map_type(field_type) << "(*other._u." << branch->local_name()->get_string() << ") : 0;\n";
-        } else {
-          std::cerr << "Unsupported type for union element\n";
-        }
-
-        be_global->impl_ <<
-          "  break;\n";
-      }
-
+        "  this->_discriminator = other._discriminator;\n";
+      generateSwitchForUnion("this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
-        "  }\n"
         "}\n\n";
 
       be_global->impl_ <<
         nm << "& " << nm << "::operator=(const " << nm << "& other) {\n" <<
         "  if (this != &other) {\n" <<
         "    _reset();\n" <<
-        "    this->_discriminator = other._discriminator;\n" <<
-        "    switch (this->_discriminator) {\n";
-
-      for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin (), limit = branches.end ();
-           pos != limit;
-           ++pos) {
-        AST_UnionBranch* branch = *pos;
-        for (size_t idx = 0; idx != branch->label_list_length(); ++idx) {
-          AST_UnionLabel* label = branch->label(idx);
-          if (label->label_kind() == AST_UnionLabel::UL_default) {
-            be_global->impl_ << "    default:\n";
-          } else if (discriminator->node_type() == AST_Decl::NT_enum) {
-            be_global->impl_ << "    case "
-                             << getEnumLabel(label->label_val(), discriminator) << ":\n";
-          } else {
-            be_global->impl_ << "    case " << *label->label_val()->ev() << ":\n";
-          }
-        }
-
-        AST_Type* field_type = branch->field_type();
-        AST_Type* actual_field_type = resolveActualType(field_type);
-        const Classification cls = classify(actual_field_type);
-        if (cls & (CL_PRIMITIVE | CL_ENUM)) {
-          be_global->impl_ <<
-            "      this->_u." << branch->local_name()->get_string() << " = other._u." << branch->local_name()->get_string() << ";\n";
-        } else if (cls & CL_STRING) {
-          be_global->impl_ <<
-            "      this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? ::CORBA::string_dup(other._u." << branch->local_name()->get_string() << ") : 0 ;\n";
-        } else if (cls & CL_ARRAY) {
-          be_global->impl_ <<
-            "    this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? " << map_type(field_type) << "_dup(other._u." << branch->local_name()->get_string() << ") : 0 ;\n";
-        } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
-          be_global->impl_ <<
-            "      this->_u." << branch->local_name()->get_string() << " = (other._u." << branch->local_name()->get_string() << ") ? new " << map_type(field_type) << "(*other._u." << branch->local_name()->get_string() << ") : 0;\n";
-        } else {
-          std::cerr << "Unsupported type for union element\n";
-        }
-
-        be_global->impl_ <<
-          "      break;\n";
-      }
-
+        "    this->_discriminator = other._discriminator;\n";
+      generateSwitchForUnion("this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
-        "    }\n"
         "  }\n"
         "  return *this;\n"
         "}\n\n";
@@ -508,102 +535,17 @@ public:
       be_global->impl_ <<
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n"
-        "  if (this->_discriminator != rhs._discriminator) return false;"
-        "    switch (this->_discriminator) {\n";
-
-      for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin (), limit = branches.end ();
-           pos != limit;
-           ++pos) {
-        AST_UnionBranch* branch = *pos;
-        for (size_t idx = 0; idx != branch->label_list_length(); ++idx) {
-          AST_UnionLabel* label = branch->label(idx);
-          if (label->label_kind() == AST_UnionLabel::UL_default) {
-            be_global->impl_ << "    default:\n";
-          } else if (discriminator->node_type() == AST_Decl::NT_enum) {
-            be_global->impl_ << "    case "
-                             << getEnumLabel(label->label_val(), discriminator) << ":\n";
-          } else {
-            be_global->impl_ << "    case " << *label->label_val()->ev() << ":\n";
-          }
-        }
-
-        AST_Type* field_type = branch->field_type();
-        AST_Type* actual_field_type = resolveActualType(field_type);
-        const Classification cls = classify(actual_field_type);
-        if (cls & (CL_PRIMITIVE | CL_ENUM)) {
-          be_global->impl_ <<
-            "      return this->_u." << branch->local_name()->get_string() << " == rhs._u." << branch->local_name()->get_string() << ";\n";
-        } else if (cls & CL_STRING) {
-          be_global->impl_ <<
-            "      return std::strcmp (this->_u." << branch->local_name()->get_string() << ", rhs._u." << branch->local_name()->get_string() << ") == 0 ;\n";
-        } else if (cls & CL_ARRAY) {
-          // TODO
-          be_global->impl_ <<
-            "      return false;\n";
-        } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
-          be_global->impl_ <<
-            "      return *this->_u." << branch->local_name()->get_string() << " == *rhs._u." << branch->local_name()->get_string() << ";\n";
-        } else {
-          std::cerr << "Unsupported type for union element\n";
-        }
-
-        be_global->impl_ <<
-          "      break;\n";
-      }
-
+        "  if (this->_discriminator != rhs._discriminator) return false;";
+      generateSwitchForUnion("this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
-        "    }\n"
         "    return false;\n"
         "  }\n";
 
       be_global->impl_ <<
         "void " << nm << "::_reset()\n"
-        "{\n"
-        "    switch (this->_discriminator) {\n";
-
-      for (std::vector<AST_UnionBranch*>::const_iterator pos = branches.begin (), limit = branches.end ();
-           pos != limit;
-           ++pos) {
-        AST_UnionBranch* branch = *pos;
-        for (size_t idx = 0; idx != branch->label_list_length(); ++idx) {
-          AST_UnionLabel* label = branch->label(idx);
-          if (label->label_kind() == AST_UnionLabel::UL_default) {
-            be_global->impl_ << "    default:\n";
-          } else if (discriminator->node_type() == AST_Decl::NT_enum) {
-            be_global->impl_ << "    case "
-                             << getEnumLabel(label->label_val(), discriminator) << ":\n";
-          } else {
-            be_global->impl_ << "    case " << *label->label_val()->ev() << ":\n";
-          }
-        }
-
-        AST_Type* field_type = branch->field_type();
-        AST_Type* actual_field_type = resolveActualType(field_type);
-        const Classification cls = classify(actual_field_type);
-        if (cls & (CL_PRIMITIVE | CL_ENUM)) {
-          // Do nothing.
-        } else if (cls & CL_STRING) {
-          be_global->impl_ <<
-            "      ::CORBA::string_free(this->_u." << branch->local_name()->get_string() << ");\n"
-            "      this->_u." << branch->local_name()->get_string() << " = 0;\n";
-        } else if (cls & CL_ARRAY) {
-          be_global->impl_ <<
-            "      " << map_type(field_type) << "_free(this->_u." << branch->local_name()->get_string() << ");\n"
-            "      this->_u." << branch->local_name()->get_string() << " = 0;\n";
-        } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
-          be_global->impl_ <<
-            "      delete this->_u." << branch->local_name()->get_string() << ";\n"
-            "      this->_u." << branch->local_name()->get_string() << " = 0;\n";
-        } else {
-          std::cerr << "Unsupported type for union element\n";
-        }
-
-        be_global->impl_ <<
-          "      break;\n";
-      }
-
+        "{\n";
+      generateSwitchForUnion("this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
       be_global->impl_ <<
-        "    }\n"
         "  }\n";
 
       be_global->impl_ <<
