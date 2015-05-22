@@ -34,7 +34,7 @@ OpenDDS::DCPS::DataLinkSet::DataLinkSet()
 {
   DBG_ENTRY_LVL("DataLinkSet","DataLinkSet",6);
 
-  if (OpenDDS::DCPS::Transport_debug_level >= 2) {
+  if (OpenDDS::DCPS::Transport_debug_level > 3) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLinkSet send_control_element_allocator %x with %d chunks\n",
                &send_control_element_allocator_, NUM_SEND_CONTROL_ELEMENT_CHUNKS));
   }

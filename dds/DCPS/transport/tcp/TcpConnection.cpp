@@ -550,7 +550,7 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
 {
   DBG_ENTRY_LVL("TcpConnection","reconnect",6);
   if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) reconnect initiated on transport: %C to %C:%d.\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect initiated on transport: %C to %C:%d.\n",
                this->link_->get_transport_impl()->config()->name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
