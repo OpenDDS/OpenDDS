@@ -1,4 +1,5 @@
 project: dcps, dcps_ts_defaults {
+  requires += built_in_topics
   avoids += uses_wchar
   libs  += OpenDDS_FACE
   after += OpenDDS_FACE
