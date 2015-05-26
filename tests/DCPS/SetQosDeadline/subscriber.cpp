@@ -32,6 +32,8 @@
 
 using namespace std;
 
+char synch_fname[] = "dr_unmatch_done";
+
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 {
   try
@@ -181,6 +183,13 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       }
       ws->detach_condition(sc);
+      // Create synch file.
+      FILE* fp = ACE_OS::fopen (synch_fname, ACE_TEXT("w"));
+      if (fp != 0)
+      {
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) dr unmatch is done write to sync file\n")));
+        ACE_OS::fclose (fp);
+      }
       ACE_DEBUG((LM_DEBUG, "(%P|%t) done dr1 unmatch\n"));
 
       // Now change second DataReader to have deadline period to be 5 seconds. This
