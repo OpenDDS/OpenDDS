@@ -8,11 +8,24 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/Log_Msg.h"
 
+static bool no_global_new = false;
+
+#ifdef OPENDDS_SAFETY_PROFILE
+void* operator new(size_t sz) {
+  if (no_global_new) {
+    ACE_ERROR((LM_ERROR, "ERROR: call to global operator new\n"));
+  }
+  return OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(sz);
+}
+#endif
+
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   FACE::RETURN_CODE_TYPE status;
   FACE::TS::Initialize("face_config.ini", status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+
+  no_global_new = true;
 
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;

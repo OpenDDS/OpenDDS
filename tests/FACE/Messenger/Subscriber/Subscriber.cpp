@@ -28,6 +28,17 @@ void callback(FACE::TRANSACTION_ID_TYPE,
   return_code = FACE::RC_NO_ERROR;
 }
 
+static bool no_global_new = false;
+
+#ifdef OPENDDS_SAFETY_PROFILE
+void* operator new(size_t sz) {
+  if (no_global_new) {
+    ACE_ERROR((LM_ERROR, "ERROR: call to global operator new\n"));
+  }
+  return OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(sz);
+}
+#endif
+
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   const bool useCallback = argc > 1 && 0 == std::strcmp(argv[1], "callback");
@@ -35,6 +46,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   FACE::RETURN_CODE_TYPE status;
   FACE::TS::Initialize("face_config.ini", status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
+
+  no_global_new = true;
 
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
