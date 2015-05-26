@@ -2536,8 +2536,8 @@ DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 
   SubscriptionInstanceMapType::iterator iter = instances_.find(handle);
   if (iter == instances_.end()) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: ")
         ACE_TEXT("DataReaderImpl::get_handle_instance: ")
         ACE_TEXT("lookup for 0x%x failed\n"),
         handle));

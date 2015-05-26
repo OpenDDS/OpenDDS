@@ -8,8 +8,12 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "dds/DCPS/SafetyProfilePool.h"
+#include "dds/DCPS/Qos_Helper.h"
+#include "dds/DdsDcpsCoreC.h"
 
 #include <cstring>
+
+using OpenDDS::DCPS::operator==;
 
 namespace FACE {
 namespace TS {
@@ -29,6 +33,20 @@ using OpenDDS::FaceTSS::config::QosSettings;
 
 namespace {
   OpenDDS::FaceTSS::config::Parser parser;
+
+  void find_or_create_dp(const DDS::DomainId_t& domainId,
+                         const DDS::DomainParticipantFactory_var& dpf,
+                         DDS::DomainParticipant_var& dp);
+  void find_or_create_pub(const DDS::PublisherQos& qos,
+                          const DDS::DomainParticipant_var& dp,
+                          DDS::Publisher_var& pub);
+  void find_or_create_sub(const DDS::SubscriberQos& qos,
+                          const DDS::DomainParticipant_var& dp,
+                          DDS::Subscriber_var& sub);
+
+  bool cleanup_opendds_publisher(const DDS::Publisher_var pub);
+  bool cleanup_opendds_subscriber(const DDS::Subscriber_var sub);
+  void cleanup_opendds_participant(const DDS::DomainParticipant_var dp);
 
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
                                            const DDS::DomainId_t domainId,
@@ -223,15 +241,22 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
   OPENDDS_MAP(CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = entities.receivers_;
 
   DDS::DomainParticipant_var dp;
+  bool try_cleanup_participant = false;
   if (writers.count(connection_id)) {
-    const DDS::Publisher_var pub = writers[connection_id].dw->get_publisher();
+    const DDS::DataWriter_var datawriter = writers[connection_id].dw;
+    const DDS::Publisher_var pub = datawriter->get_publisher();
     writers.erase(connection_id);
+    pub->delete_datawriter(datawriter);
     dp = pub->get_participant();
+    try_cleanup_participant = cleanup_opendds_publisher(pub);
 
   } else if (readers.count(connection_id)) {
-    const DDS::Subscriber_var sub = readers[connection_id].dr->get_subscriber();
+    const DDS::DataReader_var datareader= readers[connection_id].dr;
+    const DDS::Subscriber_var sub = datareader->get_subscriber();
     readers.erase(connection_id);
+    sub->delete_datareader(datareader);
     dp = sub->get_participant();
+    try_cleanup_participant = cleanup_opendds_subscriber(sub);
   }
 
   if (!dp) {
@@ -239,9 +264,9 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
     return;
   }
 
-  dp->delete_contained_entities();
-  const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-  dpf->delete_participant(dp);
+  if (try_cleanup_participant) {
+    cleanup_opendds_participant(dp);
+  }
 
   entities.connections_.erase(connection_id);
   return_code = RC_NO_ERROR;
@@ -254,7 +279,7 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
                     /*in*/    FACE::MESSAGE_SIZE_TYPE /*message_size*/,
                     /*out*/   FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers =
+  Entities::ConnIdToReceiverMap& readers =
     Entities::instance()->receivers_;
   // transaction_id cannot be 0 due to initialization
   // of last_msg_tid to 0 before a msg has been received so
@@ -285,6 +310,214 @@ void Receive_Message(
 }
 
 namespace {
+  void find_or_create_dp(const DDS::DomainId_t& domainId,
+                         const DDS::DomainParticipantFactory_var& dpf,
+                         DDS::DomainParticipant_var& dp) {
+    DDS::DomainParticipant_var temp_dp;
+    Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
+    Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
+    while (rdrIter != readers.end()) {
+      temp_dp = rdrIter->second.dr->get_subscriber()->get_participant();
+      if (domainId == temp_dp->get_domain_id()) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d in receivers\n", domainId));
+        }
+        dp = temp_dp;
+        return;
+      } else {
+        ++rdrIter;
+      }
+    }
+
+    Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
+    Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();
+
+    while (wtrIter != writers.end()) {
+      temp_dp = wtrIter->second.dw->get_publisher()->get_participant();
+      if (domainId == temp_dp->get_domain_id()) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d in senders\n", domainId));
+        }
+        dp = temp_dp;
+        return;
+      } else {
+        ++wtrIter;
+      }
+    }
+    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - created new participant for domainId: %d\n", domainId));
+    }
+    dp = dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
+  }
+
+  void find_or_create_pub(const DDS::PublisherQos& qos,
+                          const DDS::DomainParticipant_var& dp,
+                          DDS::Publisher_var& pub) {
+    DDS::DomainParticipant_var temp_dp;
+    DDS::Publisher_var temp_pub;
+
+    Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
+    Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();
+
+    while (wtrIter != writers.end()) {
+      temp_pub = wtrIter->second.dw->get_publisher();
+      temp_dp = temp_pub->get_participant();
+      DDS::PublisherQos temp_qos;
+      temp_pub->get_qos(temp_qos);
+      if (dp->get_domain_id() == temp_dp->get_domain_id() &&
+          temp_qos == qos) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_pub - found exiting publisher in senders\n"));
+        }
+        pub = temp_pub;
+        return;
+      } else {
+        ++wtrIter;
+      }
+    }
+    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_pub - created new publisher\n"));
+    }
+    pub = dp->create_publisher(qos, 0, 0);
+  }
+
+  void find_or_create_sub(const DDS::SubscriberQos& qos,
+                          const DDS::DomainParticipant_var& dp,
+                          DDS::Subscriber_var& sub)
+  {
+    DDS::DomainParticipant_var temp_dp;
+    DDS::Subscriber_var temp_sub;
+
+    Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
+    Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
+
+    while (rdrIter != readers.end()) {
+      temp_sub = rdrIter->second.dr->get_subscriber();
+      temp_dp = temp_sub->get_participant();
+      DDS::SubscriberQos temp_qos;
+      temp_sub->get_qos(temp_qos);
+      if (dp->get_domain_id() == temp_dp->get_domain_id() &&
+          temp_qos == qos) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_sub - found exiting subscriber in receivers\n"));
+        }
+        sub = temp_sub;
+        return;
+      } else {
+        ++rdrIter;
+      }
+    }
+    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_sub - created new subscriber\n"));
+    }
+    sub = dp->create_subscriber(qos, 0, 0);
+  }
+
+  bool cleanup_opendds_publisher(const DDS::Publisher_var pub)
+  {
+    DDS::Publisher_var temp_pub;
+    DDS::PublisherQos pub_qos;
+    pub->get_qos(pub_qos);
+    DDS::DomainParticipant_var dp = pub->get_participant();
+    DDS::DomainParticipant_var temp_dp;
+    DDS::PublisherQos temp_qos;
+
+    Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
+    Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();
+    while (wtrIter != writers.end()) {
+      temp_pub = wtrIter->second.dw->get_publisher();
+      temp_dp = temp_pub->get_participant();
+      if (dp->get_domain_id() == temp_dp->get_domain_id()) {
+        temp_pub->get_qos(temp_qos);
+        if (pub_qos == temp_qos) {
+          if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_publisher - publisher still in use by other writer\n"));
+          }
+          return false;
+        }
+      }
+      ++wtrIter;
+    }
+    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_publisher - publisher no longer in use, delete pub\n"));
+    }
+    dp->delete_publisher(pub);
+    return true;
+  }
+
+  bool cleanup_opendds_subscriber(const DDS::Subscriber_var sub)
+  {
+    DDS::Subscriber_var temp_sub;
+    DDS::SubscriberQos sub_qos;
+    sub->get_qos(sub_qos);
+    DDS::DomainParticipant_var dp = sub->get_participant();
+    DDS::DomainParticipant_var temp_dp;
+    DDS::SubscriberQos temp_qos;
+
+
+    Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
+    Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
+    while (rdrIter != readers.end()) {
+      temp_sub = rdrIter->second.dr->get_subscriber();
+      temp_dp = temp_sub->get_participant();
+
+      if (dp->get_domain_id() == temp_dp->get_domain_id()) {
+        temp_sub->get_qos(temp_qos);
+        if (sub_qos == temp_qos) {
+          if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_subscriber - subscriber still in use by other reader\n"));
+          }
+          return false;
+        }
+      }
+      ++rdrIter;
+    }
+    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_subscriber - subscriber no longer in use, delete sub\n"));
+    }
+    dp->delete_subscriber(sub);
+    return true;
+  }
+
+  void cleanup_opendds_participant(const DDS::DomainParticipant_var dp)
+  {
+    DDS::DomainParticipant_var temp_dp;
+    Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
+    Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
+    while (rdrIter != readers.end()) {
+      temp_dp = rdrIter->second.dr->get_subscriber()->get_participant();
+      if (dp->get_domain_id() == temp_dp->get_domain_id()) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_participant - participant still in use by reader\n"));
+        }
+        return;
+      } else {
+        ++rdrIter;
+      }
+    }
+
+    Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
+    Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();
+
+    while (wtrIter != writers.end()) {
+      temp_dp = wtrIter->second.dw->get_publisher()->get_participant();
+      if (dp->get_domain_id() == temp_dp->get_domain_id()) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_participant - participant still in use by writer\n"));
+        }
+        return;
+      } else {
+        ++wtrIter;
+      }
+    }
+    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_participant - participant for domain: %d no longer in use, delete entities and participant\n", dp->get_domain_id()));
+    }
+    dp->delete_contained_entities();
+    const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
+    dpf->delete_participant(dp);
+  }
+
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
                                            const DDS::DomainId_t domainId,
                                            const char* topicName,
@@ -301,8 +534,8 @@ namespace {
     const DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
     if (!dpf) return INVALID_PARAM;
 
-    const DDS::DomainParticipant_var dp =
-      dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
+    DDS::DomainParticipant_var dp;
+    find_or_create_dp(domainId, dpf, dp);
     if (!dp) return INVALID_PARAM;
 
     using OpenDDS::DCPS::Data_Types_Register;
@@ -322,8 +555,8 @@ namespace {
       DDS::PublisherQos publisher_qos;
       qos_settings.apply_to(publisher_qos);
 
-      const DDS::Publisher_var pub =
-        dp->create_publisher(publisher_qos, 0, 0);
+      DDS::Publisher_var pub;
+      find_or_create_pub(publisher_qos, dp, pub);
       if (!pub) return INVALID_PARAM;
 
       DDS::DataWriterQos datawriter_qos;
@@ -346,8 +579,8 @@ namespace {
       DDS::SubscriberQos subscriber_qos;
       qos_settings.apply_to(subscriber_qos);
 
-      const DDS::Subscriber_var sub =
-        dp->create_subscriber(subscriber_qos, 0, 0);
+      DDS::Subscriber_var sub;
+      find_or_create_sub(subscriber_qos, dp, sub);
       if (!sub) return INVALID_PARAM;
 
       DDS::DataReaderQos datareader_qos;
@@ -467,7 +700,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
                               const DDS::SampleInfo& sinfo,
                               FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = Entities::instance()->receivers_;
+  Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
