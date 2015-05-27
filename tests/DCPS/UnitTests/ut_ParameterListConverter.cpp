@@ -13,7 +13,7 @@
 #include "dds/DCPS/GuidBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include <iostream>
 

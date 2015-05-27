@@ -1,20 +1,20 @@
-feature(no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
-  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h
+feature(no_opendds_safety_profile) : dcps_ts_defaults {
+  idlflags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SS
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI
+
+  IDL_Files {
+    RtpsCore.idl
+  }
 
   TypeSupport_Files {
     RtpsCore.idl
   }
 }
 
-feature(!no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
-  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h
-
-  IDL_Files {
-    ^RtpsCore.idl
-  }
+feature(!no_opendds_safety_profile) : dcps_ts_defaults {
+  dcps_ts_flags += -Wb,export_macro=OpenDDS_Rtps_Export -Wb,export_include=rtps_export.h -SI -Lspcpp
 
   TypeSupport_Files {
-    dcps_ts_flags += -Lspcpp
     RtpsCore.idl
   }
 }

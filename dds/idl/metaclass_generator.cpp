@@ -80,8 +80,7 @@ namespace {
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;
       if (cls & CL_ENUM) {
-        AST_Type* enum_type = field->field_type();
-        resolveActualType(enum_type);
+        AST_Type* enum_type = resolveActualType(field->field_type());
         prefix = "gen_" +
           dds_generator::scoped_helper(enum_type->name(), "_")
           + "_names[";
@@ -112,7 +111,7 @@ namespace {
         + std::string("String_Manager");
     }
     if (cls & CL_PRIMITIVE) {
-      resolveActualType(type);
+      type = resolveActualType(type);
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
       switch (p->pt()) {
       case AST_PredefinedType::PT_long:
@@ -169,7 +168,7 @@ namespace {
     int size = 0;
     const std::string cxx_type = to_cxx_type(type, size);
     if (cls & CL_SCALAR) {
-      resolveActualType(type);
+      type = resolveActualType(type);
       const std::string val =
         (cls & CL_STRING) ? "val.out()" : getWrapper("val", type, WD_INPUT);
       be_global->impl_ <<
@@ -268,8 +267,7 @@ namespace {
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_ARRAY) {
-      AST_Type* unTD = field->field_type();
-      resolveActualType(unTD);
+      AST_Type* unTD = resolveActualType(field->field_type());
       AST_Array* arr = AST_Array::narrow_from_decl(unTD);
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
@@ -279,8 +277,7 @@ namespace {
         fieldType << "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
       AST_Type* elem = arr->base_type();
-      AST_Type* elemUnTD = elem;
-      resolveActualType(elemUnTD);
+      AST_Type* elemUnTD = resolveActualType(elem);
       if (classify(elemUnTD) & CL_ARRAY) {
         // array-of-array case, fall back on the Serializer
         be_global->impl_ <<
@@ -489,7 +486,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   }
 
   const std::string cxx_elem = scoped(elem->name());
-  resolveActualType(elem);
+  elem = resolveActualType(elem);
   const Classification elem_cls = classify(elem);
 
   if ((elem_cls & (CL_PRIMITIVE | CL_ENUM)) && !(elem_cls & CL_WIDE)) {
@@ -523,6 +520,38 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type* t
   return true;
 }
 
+static std::string func(const std::string&,
+                        AST_Type* br_type,
+                        const std::string&,
+                        std::string&,
+                        const std::string&)
+{
+  std::stringstream ss;
+  const Classification br_cls = classify(br_type);
+  if (br_cls & CL_STRING) {
+    ss <<
+      "      ACE_CDR::ULong len;\n"
+      "      ser >> len;\n"
+      "      ser.skip(len);\n";
+  } else if (br_cls & CL_WIDE) {
+    ss <<
+      "      ACE_CDR::Octet len;\n"
+      "      ser >> ACE_InputCDR::to_octet(len);\n"
+      "      ser.skip(len);\n";
+  } else if (br_cls & CL_SCALAR) {
+    int sz = 1;
+    to_cxx_type(br_type, sz);
+    ss <<
+      "    ser.skip(1, " << sz << ");\n";
+  } else {
+    ss <<
+      "    gen_skip_over(ser, static_cast<" << scoped(br_type->name())
+                                            << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
+  }
+
+  return ss.str();
+}
+
 bool
 metaclass_generator::gen_union(AST_Union*, UTL_ScopedName* name,
   const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
@@ -539,47 +568,7 @@ metaclass_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     "  " << scoped(discriminator->name()) << " disc;\n"
     "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
     "    return;\n"
-    "  }\n"
-    "  switch (disc) {\n";
-  size_t n_labels = 0;
-  bool has_default = false;
-  for (size_t i = 0; i < branches.size(); ++i) {
-    generateBranchLabels(branches[i], discriminator, n_labels, has_default);
-    AST_Type* br_type = branches[i]->field_type();
-    const Classification br_cls = classify(br_type);
-    if (br_cls & CL_STRING) {
-      be_global->impl_ <<
-        "    {\n"
-        "      ACE_CDR::ULong len;\n"
-        "      ser >> len;\n"
-        "      ser.skip(len);\n"
-        "    }\n";
-    } else if (br_cls & CL_WIDE) {
-      be_global->impl_ <<
-        "    {\n"
-        "      ACE_CDR::Octet len;\n"
-        "      ser >> ACE_InputCDR::to_octet(len);\n"
-        "      ser.skip(len);\n"
-        "    }\n";
-    } else if (br_cls & CL_SCALAR) {
-      int sz = 1;
-      to_cxx_type(br_type, sz);
-      be_global->impl_ <<
-        "    ser.skip(1, " << sz << ");\n";
-    } else {
-      be_global->impl_ <<
-        "    gen_skip_over(ser, static_cast<" << scoped(br_type->name())
-        << ((br_cls & CL_ARRAY) ? "_forany" : "") << "*>(0));\n";
-    }
-    be_global->impl_ <<
-      "    break;\n";
-  }
-  if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
-    be_global->impl_ <<
-      "  default:\n"
-      "    break;\n";
-  }
-  be_global->impl_ <<
     "  }\n";
+  generateSwitchForUnion("disc", func, branches, discriminator, "");
   return true;
 }

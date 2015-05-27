@@ -12,7 +12,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
-#include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"

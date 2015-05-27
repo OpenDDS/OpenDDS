@@ -41,8 +41,7 @@ namespace {
     if (cls & (CL_STRUCTURE | CL_UNION)) return "Object";
     if (cls & (CL_ARRAY | CL_SEQUENCE)) return "Array";
     if (cls & CL_PRIMITIVE) {
-      AST_Type* actual = type;
-      resolveActualType(actual);
+      AST_Type* actual = resolveActualType(type);
       AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(actual);
       if (pt) *pt = p->pt();
       switch (p->pt()) {
@@ -132,8 +131,7 @@ namespace {
              << prefix << src << suffix << "));\n";
 
     } else if ((cls & CL_SEQUENCE) && builtInSeq(type)) {
-      AST_Type* real_type = type;
-      resolveActualType(real_type);
+      AST_Type* real_type = resolveActualType(type);
       AST_Sequence* seq = AST_Sequence::narrow_from_decl(real_type);
       AST_Type* elem = seq->base_type();
       be_global->impl_ <<

@@ -18,7 +18,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 #include "ace/CDR_Base.h"
 #include "ace/Log_Msg.h"
