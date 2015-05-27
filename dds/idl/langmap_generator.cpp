@@ -903,6 +903,8 @@ public:
       be_global->lang_header_ <<
         "  " << nm << "(" << len_type << " maximum)\n"
         "    : " << base << "(maximum, 0u, 0, true) {}\n"
+        "  " << nm << "(" << len_type << " maximum, " << len_type << " length)\n"
+        "    : " << base << "(maximum, length, 0, true) {}\n"
         "  " << nm << "(" << len_type << " maximum, " << len_type << " length, "
         << elem_type << "* data, " << flag_type << " release = false)\n"
         "    : " << base << "(maximum, length, data, release) {}\n";
