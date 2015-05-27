@@ -2484,6 +2484,7 @@ void DataReaderImpl::notify_latency(PublicationId writer)
   }
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 void
 DataReaderImpl::get_latency_stats(
     OpenDDS::DCPS::LatencyStatisticsSeq & stats)
@@ -2498,6 +2499,7 @@ DataReaderImpl::get_latency_stats(
     stats[ index].publication = current->first;
   }
 }
+#endif
 
 void
 DataReaderImpl::reset_latency_stats()

@@ -12,7 +12,6 @@
 #include "dds/DdsDcpsCore.idl"
 
 #define DOMAINID_TYPE_NATIVE long
-#define HANDLE_TYPE_NATIVE long
 #define HANDLE_NIL_NATIVE 0
 // Implementation Note:
 //   Client code must include "Service_Participant.h"
@@ -34,22 +33,13 @@
 #pragma ciao lem "dds/DdsDcpsInfrastructureE.idl"
 
 module DDS {
-
-// Make the IDL compiler produce include of zero-copy read info
-// sequence template.
-#pragma DCPS_SUPPORT_ZERO_COPY_READ
     typedef DOMAINID_TYPE_NATIVE  DomainId_t;
-    typedef HANDLE_TYPE_NATIVE    InstanceHandle_t;
-    // typedef BUILTIN_TOPIC_KEY_TYPE_NATIVE BuiltinTopicKeyValue[3]; moved to DdsDcpsCore.idl
-
-    typedef sequence<InstanceHandle_t> InstanceHandleSeq;
+    // Moved to DdsDcpsCore.idl
+    // typedef HANDLE_TYPE_NATIVE    InstanceHandle_t;
+    // typedef BUILTIN_TOPIC_KEY_TYPE_NATIVE BuiltinTopicKeyValue[3];
+    // typedef sequence<InstanceHandle_t> InstanceHandleSeq;
 
     typedef long ReturnCode_t;
-
-    struct Time_t {
-                long sec;
-                unsigned long nanosec;
-                };
 
     // ----------------------------------------------------------------------
     // Pre-defined values
@@ -251,37 +241,6 @@ module DDS {
         Entity get_entity();
     };
 
-    // Sample states to support reads
-    typedef unsigned long SampleStateKind;
-
-    const SampleStateKind READ_SAMPLE_STATE = 0x0001 << 0;
-    const SampleStateKind NOT_READ_SAMPLE_STATE = 0x0001 << 1;
-
-    // This is a bit-mask SampleStateKind
-    typedef unsigned long SampleStateMask;
-    const SampleStateMask ANY_SAMPLE_STATE = 0xffff;
-
-    // View states to support reads
-    typedef unsigned long ViewStateKind;
-    const ViewStateKind NEW_VIEW_STATE = 0x0001 << 0;
-    const ViewStateKind NOT_NEW_VIEW_STATE = 0x0001 << 1;
-
-    // This is a bit-mask ViewStateKind
-    typedef unsigned long ViewStateMask;
-    const ViewStateMask ANY_VIEW_STATE = 0xffff;
-
-    // Instance states to support reads
-    typedef unsigned long InstanceStateKind;
-    const InstanceStateKind ALIVE_INSTANCE_STATE = 0x0001 << 0;
-    const InstanceStateKind NOT_ALIVE_DISPOSED_INSTANCE_STATE   = 0x0001 << 1;
-    const InstanceStateKind NOT_ALIVE_NO_WRITERS_INSTANCE_STATE = 0x0001 << 2;
-
-    // This is a bit-mask InstanceStateKind
-    typedef unsigned long InstanceStateMask;
-    const InstanceStateMask ANY_INSTANCE_STATE                  = 0xffff;
-    const InstanceStateMask NOT_ALIVE_INSTANCE_STATE            = 0x006;
-
-
     // ----------------------------------------------------------------------
     // Qos
     // ----------------------------------------------------------------------
@@ -360,25 +319,6 @@ module DDS {
 
       InstanceHandle_t get_instance_handle();
     };
-
-
-    struct SampleInfo {
-                SampleStateKind sample_state;
-                ViewStateKind view_state;
-                InstanceStateKind instance_state;
-                Time_t source_timestamp;
-                InstanceHandle_t instance_handle;
-                InstanceHandle_t publication_handle;
-                long disposed_generation_count;
-                long no_writers_generation_count;
-                long sample_rank;
-                long generation_rank;
-                long absolute_generation_rank;
-                boolean valid_data;
-                };
-
-    native SampleInfoSeq; // support zero-copy read
-    //typedef sequence<SampleInfo> SampleInfoSeq;
 
 };
 

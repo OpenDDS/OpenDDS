@@ -7,6 +7,7 @@
 #include "model_export.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/LocalObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -32,4 +33,3 @@ namespace OpenDDS { namespace Model {
 } } // End of namespace OpenDDS::Model
 
 #endif /* NULLTOPICLISTENER_H  */
-

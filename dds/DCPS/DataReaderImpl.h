@@ -382,8 +382,10 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
+#ifndef OPENDDS_SAFETY_PROFILE
   virtual void get_latency_stats(
     OpenDDS::DCPS::LatencyStatisticsSeq & stats);
+#endif
 
   virtual void reset_latency_stats();
 
