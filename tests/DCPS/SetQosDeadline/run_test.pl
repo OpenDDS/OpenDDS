@@ -42,6 +42,9 @@ if (!$is_rtps_disc) {
   }
 }
 
+my $synch_file = "dr_unmatch_done";
+unlink $synch_file;
+
 print $Publisher->CommandLine() . "\n";
 print $Subscriber->CommandLine() . "\n";
 $Publisher->Spawn();
@@ -68,6 +71,7 @@ if (!$is_rtps_disc) {
   }
 }
 
+unlink $synch_file;
 unlink $dcpsrepo_ior;
 
 if ($status == 0) {

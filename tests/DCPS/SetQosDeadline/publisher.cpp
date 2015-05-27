@@ -32,6 +32,7 @@
 using namespace Messenger;
 using namespace std;
 
+char synch_fname[] = "dr_unmatch_done";
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
   try
@@ -159,7 +160,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]){
         // We know the reader has been disassociated, but the reader itself may
         // not have been notified yet.  Introducing delay here to let the reader
         // sync up with the disassociated state before re-associating.
-        ACE_OS::sleep(1);
+
+        // Wait for reader to finish unmatching.
+        FILE* fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
+        int i = 0;
+        while (fp == 0 &&  i < 15)
+        {
+          ACE_DEBUG ((LM_DEBUG,
+            ACE_TEXT("(%P|%t) waiting reader to unmatch...\n")));
+          ACE_OS::sleep (1);
+          ++i;
+          fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
+        }
+        if (fp != 0)
+          ACE_OS::fclose (fp);
+
         ACE_DEBUG((LM_DEBUG, "Writer restoring deadline to compatible value\n"));
 
         // change it back

@@ -11,11 +11,19 @@
 static bool no_global_new = false;
 
 #ifdef OPENDDS_SAFETY_PROFILE
-void* operator new(size_t sz) {
+void* operator new(size_t sz)
+#ifdef ACE_HAS_NEW_THROW_SPEC
+  throw (std::bad_alloc)
+#endif
+ {
   if (no_global_new) {
-    ACE_ERROR((LM_ERROR, "ERROR: call to global operator new\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: call to global operator new\n%?\n"));
   }
-  return OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(sz);
+  return ::malloc(sz);
+}
+
+void operator delete(void* ptr) {
+  ::free(ptr);
 }
 #endif
 
