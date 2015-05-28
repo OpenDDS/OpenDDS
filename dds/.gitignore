@@ -75,6 +75,11 @@
 /DdsDcpsGuidS.inl
 /DdsDcpsGuidTypeSupportImpl.cpp
 /DdsDcpsGuidTypeSupportImpl.h
+/DdsDcpsGuidTypeSupport.idl
+/DdsDcpsGuidTypeSupportC.cpp
+/DdsDcpsGuidTypeSupportC.h
+/DdsDcpsGuidTypeSupportC.inl
+/DdsDcpsGuidTypeSupportS.h
 /DdsDcpsInfoC.cpp
 /DdsDcpsInfoC.h
 /DdsDcpsInfoC.inl
