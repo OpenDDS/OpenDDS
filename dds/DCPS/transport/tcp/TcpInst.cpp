@@ -12,6 +12,7 @@
 #include "ace/Configuration.h"
 
 #include <iostream>
+#include <sstream>
 
 #if !defined (__ACE_INLINE__)
 #include "TcpInst.inl"
@@ -78,4 +79,12 @@ OpenDDS::DCPS::TcpInst::dump(std::ostream& os)
   os << formatNameForDump("conn_retry_attempts")           << this->conn_retry_attempts_ << std::endl;
   os << formatNameForDump("passive_reconnect_duration")    << this->passive_reconnect_duration_ << std::endl;
   os << formatNameForDump("max_output_pause_period")       << this->max_output_pause_period_ << std::endl;
+}
+
+OPENDDS_STRING
+OpenDDS::DCPS::TcpInst::dump_to_str()
+{
+  std::ostringstream os;
+  dump(os);
+  return OPENDDS_STRING(os.str());
 }
