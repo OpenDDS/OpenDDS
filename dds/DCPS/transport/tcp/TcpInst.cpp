@@ -50,8 +50,8 @@ OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("conn_retry_initial_delay"),
                    this->conn_retry_initial_delay_, int)
 
-  GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("conn_retry_backoff_multiplier"),
-                   this->conn_retry_backoff_multiplier_, double)
+  GET_CONFIG_DOUBLE_VALUE(cf, trans_sect, ACE_TEXT("conn_retry_backoff_multiplier"),
+                   this->conn_retry_backoff_multiplier_)
 
   GET_CONFIG_VALUE(cf, trans_sect, ACE_TEXT("conn_retry_attempts"),
                    this->conn_retry_attempts_, int)
