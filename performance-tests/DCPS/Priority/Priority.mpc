@@ -1,4 +1,5 @@
 project(perf*idl): dcps_test_lib {
+  requires      += no_opendds_safety_profile
   idlflags      += -Wb,stub_export_include=Priority_export.h \
                    -Wb,stub_export_macro=Priority_Export
   dcps_ts_flags += -Wb,export_macro=Priority_Export
@@ -10,6 +11,7 @@ project(perf*idl): dcps_test_lib {
 }
 
 project(perf*Publisher): dcpsexe, dcps_transports_for_test {
+  requires      += no_opendds_safety_profile
   exename = publisher
   after  += perf*idl
   libs   += perf*idl
@@ -27,6 +29,7 @@ project(perf*Publisher): dcpsexe, dcps_transports_for_test {
 }
 
 project(perf*Subscriber): dcpsexe, dcps_transports_for_test {
+  requires      += no_opendds_safety_profile
   exename = subscriber
   after  += perf*idl
   libs   += perf*idl

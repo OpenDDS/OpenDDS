@@ -101,11 +101,13 @@ operator!(const DDS::Time_t& t)
          || t.nanosec == DDS::TIME_INVALID_NSEC;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE bool
 operator==(const DDS::Time_t& t1, const DDS::Time_t& t2)
 {
   return !(t1 < t2) && !(t2 < t1);
 }
+#endif
 
 ACE_INLINE bool
 operator!=(const DDS::Time_t& t1, const DDS::Time_t& t2)

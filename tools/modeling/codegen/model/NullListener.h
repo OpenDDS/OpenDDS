@@ -13,6 +13,7 @@
 #include "model_export.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/LocalObject.h"
 
 namespace OpenDDS { namespace Model {
 
@@ -65,4 +66,3 @@ public:
 } } // End of namespace OpenDDS::Model
 
 #endif /* NULLLISTENER_H  */
-
