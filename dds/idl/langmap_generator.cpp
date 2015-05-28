@@ -50,6 +50,9 @@ namespace {
     if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
       return scoped(type->name());
     }
+    if (cls & CL_INTERFACE) {
+      return scoped(type->name()) + "_var";
+    }
     return "<<unknown>>";
   }
 
