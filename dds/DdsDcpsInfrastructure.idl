@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_INFRASTRUCTURE_IDL
 
 #include "dds/DdsDcpsCore.idl"
+#include "dds/DdsDcpsConditionSeq.idl"
 
 #define DOMAINID_TYPE_NATIVE long
 #define HANDLE_NIL_NATIVE 0
@@ -195,17 +196,6 @@ module DDS {
     //typedef sequence<DataReader> DataReaderSeq;
 
     local interface Listener {};
-
-
-    // ----------------------------------------------------------------------
-    // Conditions
-    // ----------------------------------------------------------------------
-
-    local interface Condition {
-        boolean get_trigger_value();
-    };
-
-    typedef sequence<Condition> ConditionSeq;
 
     // WaitSet and GuardCondition can't be expressed in IDL because they are
     // required by the spec to be default-constructable by the user

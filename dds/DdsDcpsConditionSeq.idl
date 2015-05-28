@@ -1,0 +1,18 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_CONDITIONSEQ_IDL
+#define OPENDDS_DCPS_CONDITIONSEQ_IDL
+
+#include "dds/DdsDcpsCondition.idl"
+
+module DDS {
+    typedef sequence<Condition> ConditionSeq;
+};
+
+#endif  /* OPENDDS_DCPS_CONDITIONSEQ_IDL */

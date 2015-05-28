@@ -1,0 +1,23 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_CONDITION_IDL
+#define OPENDDS_DCPS_CONDITION_IDL
+
+module DDS {
+
+    // ----------------------------------------------------------------------
+    // Conditions
+    // ----------------------------------------------------------------------
+
+    local interface Condition {
+        boolean get_trigger_value();
+    };
+};
+
+#endif  /* OPENDDS_DCPS_CONDITION_IDL */

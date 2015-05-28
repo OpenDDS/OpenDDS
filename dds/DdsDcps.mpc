@@ -18,6 +18,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   IDL_Files {
     DdsDcps.idl
     DdsDcpsDomain.idl
+    DdsDcpsCondition.idl
     DdsDcpsInfrastructure.idl
     DdsDcpsPublication.idl
     DdsDcpsSubscription.idl
