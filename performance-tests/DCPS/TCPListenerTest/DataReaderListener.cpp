@@ -28,7 +28,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 
   const ::CORBA::Long max_read_samples = 100;
   Tseq samples(use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
-  Iseq infos(  use_zero_copy_reads ? 0 : max_read_samples, max_read_samples);
+  Iseq infos(use_zero_copy_reads ? 0 : max_read_samples, 0, 0);
 
   std::size_t samples_recvd = 0;
   DDS::ReturnCode_t status;

@@ -8,6 +8,7 @@
 #include "ace/Containers_T.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/LocalObject.h"
 #include "TestStats.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)

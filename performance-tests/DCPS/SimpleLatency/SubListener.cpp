@@ -57,7 +57,7 @@ void PubDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
     {
       ::CORBA::Long max_read_samples = 1;
       DDSPerfTest::PubMessageSeq message(0, max_read_samples);
-      DDS::SampleInfoSeq              si(0, max_read_samples);
+      DDS::SampleInfoSeq              si(0, max_read_samples, 0);
       // Use the reader data member (instead of the argument) for efficiency
       // reasons
       this->dr_servant_->take(message, si, max_read_samples,

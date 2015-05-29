@@ -3,6 +3,7 @@
 
 #include <dds/DdsDcpsSubscriptionC.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/LocalObject.h>
 
 class AbstractionLayer;
 

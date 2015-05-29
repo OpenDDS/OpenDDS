@@ -269,7 +269,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   // my_foo.structArray      //+24 = 65    {padding +3 = 7}
   my_foo.x = 0.99f; //+4 = 69
   my_foo.y = 0.11f; //+4 = 73
-  // my_foo.theUnion //+6 = 79
+  my_foo.theUnion.rsv("a string"); // (discriminator + string length + string data + null) +4+4+8+1 = 90
 
   Xyz::Foo foo2;
   foo2.key = 99;
@@ -324,7 +324,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   const bool expected_bounded = false;
-  const size_t expected_find_size = 73;
+  const size_t expected_find_size = 90;
   const size_t expected_padding = 7;
 
   size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(my_foo, false /*align*/);

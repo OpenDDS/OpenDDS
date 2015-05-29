@@ -618,7 +618,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         const CORBA::Long max_samples = 2;
         // 0 means zero-copy
         Test::SimpleSeq      data1 (0, max_samples);
-        ::DDS::SampleInfoSeq info1 (0, max_samples);
+        ::DDS::SampleInfoSeq info1 (max_samples, 0, 0);
 
 
         DDS::ReturnCode_t status  ;
@@ -1253,7 +1253,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         // 0 means zero-copy
         Test::SimpleSeq     data2 (0, max_samples);
-        ::DDS::SampleInfoSeq info2(0, max_samples); //testing alternate ctor
+        ::DDS::SampleInfoSeq info2(max_samples, 0, 0); //testing alternate ctor
         if (do_by_instance)
           {
             status = fast_dr->take_instance ( data2
