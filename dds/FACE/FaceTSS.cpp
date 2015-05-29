@@ -193,18 +193,30 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
   if (return_code == RC_NO_ERROR) {
     TRANSPORT_CONNECTION_STATUS_TYPE& cur_status = entities.connections_[connection_id].second;
     if (cur_status.CONNECTION_DIRECTION == FACE::DESTINATION) {
-      Entities::FaceReceiver& receiver = entities.receivers_[connection_id];
+      Entities::FaceReceiver& receiver = *entities.receivers_[connection_id];
       if (receiver.status_valid != FACE::VALID) {
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "Get_Connection_Parameters: returning NOT_AVAILABLE due to receiver's status not valid\n"));
+        }
         return_code = NOT_AVAILABLE;
         return;
       }
       cur_status.LAST_MSG_VALIDITY = receiver.last_msg_header.message_validity;
-      if (entities.receivers_[connection_id].total_msgs_recvd != 0) {
-        cur_status.REFRESH_PERIOD = entities.receivers_[connection_id].sum_recvd_msgs_latency/entities.receivers_[connection_id].total_msgs_recvd;
+      if (entities.receivers_[connection_id]->total_msgs_recvd != 0) {
+        cur_status.REFRESH_PERIOD = entities.receivers_[connection_id]->sum_recvd_msgs_latency/entities.receivers_[connection_id]->total_msgs_recvd;
       } else {
         cur_status.REFRESH_PERIOD = 0;
       }
-      cur_status.WAITING_PROCESSES_OR_MESSAGES = receiver.messages_waiting();
+      WAITING_RANGE_TYPE num_waiting;
+      if (receiver.messages_waiting(num_waiting) == FACE::RC_NO_ERROR) {
+          cur_status.WAITING_PROCESSES_OR_MESSAGES = num_waiting;
+      } else {
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "Get_Connection_Parameters: returning NOT_AVAILABLE due to messages_waiting\n"));
+        }
+        return_code = NOT_AVAILABLE;
+        return;
+      }
     } else {
       //DDS Only supports Destination/Source therefore
       // CONNECTION_DIRECTION == FACE::SOURCE
@@ -224,9 +236,9 @@ void Unregister_Callback(CONNECTION_ID_TYPE connection_id,
                          RETURN_CODE_TYPE& return_code)
 {
   Entities& entities = *Entities::instance();
-  OPENDDS_MAP(CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = entities.receivers_;
+  Entities::ConnIdToReceiverMap& readers = entities.receivers_;
   if (readers.count(connection_id)) {
-    readers[connection_id].dr->set_listener(NULL, 0);
+    readers[connection_id]->dr->set_listener(NULL, 0);
     return_code = RC_NO_ERROR;
     return;
   }
@@ -237,8 +249,8 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
                         RETURN_CODE_TYPE& return_code)
 {
   Entities& entities = *Entities::instance();
-  OPENDDS_MAP(CONNECTION_ID_TYPE, Entities::FaceSender)& writers = entities.senders_;
-  OPENDDS_MAP(CONNECTION_ID_TYPE, Entities::FaceReceiver)& readers = entities.receivers_;
+  Entities::ConnIdToSenderMap& writers = entities.senders_;
+  Entities::ConnIdToReceiverMap& readers = entities.receivers_;
 
   DDS::DomainParticipant_var dp;
   bool try_cleanup_participant = false;
@@ -251,8 +263,9 @@ void Destroy_Connection(CONNECTION_ID_TYPE connection_id,
     try_cleanup_participant = cleanup_opendds_publisher(pub);
 
   } else if (readers.count(connection_id)) {
-    const DDS::DataReader_var datareader= readers[connection_id].dr;
+    const DDS::DataReader_var datareader = readers[connection_id]->dr;
     const DDS::Subscriber_var sub = datareader->get_subscriber();
+    delete readers[connection_id];
     readers.erase(connection_id);
     sub->delete_datareader(datareader);
     dp = sub->get_participant();
@@ -288,8 +301,8 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
     return_code = FACE::INVALID_PARAM;
     return;
   }
-  if (transaction_id == readers[connection_id].last_msg_tid) {
-    message_header = readers[connection_id].last_msg_header;
+  if (transaction_id == readers[connection_id]->last_msg_tid) {
+    message_header = readers[connection_id]->last_msg_header;
     return_code = OpenDDS::FaceTSS::update_status(connection_id, DDS::RETCODE_OK);
   } else {
     return_code = OpenDDS::FaceTSS::update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
@@ -317,7 +330,7 @@ namespace {
     Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
     Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
     while (rdrIter != readers.end()) {
-      temp_dp = rdrIter->second.dr->get_subscriber()->get_participant();
+      temp_dp = rdrIter->second->dr->get_subscriber()->get_participant();
       if (domainId == temp_dp->get_domain_id()) {
         if (OpenDDS::DCPS::DCPS_debug_level > 3) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d in receivers\n", domainId));
@@ -392,7 +405,7 @@ namespace {
     Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
 
     while (rdrIter != readers.end()) {
-      temp_sub = rdrIter->second.dr->get_subscriber();
+      temp_sub = rdrIter->second->dr->get_subscriber();
       temp_dp = temp_sub->get_participant();
       DDS::SubscriberQos temp_qos;
       temp_sub->get_qos(temp_qos);
@@ -458,7 +471,7 @@ namespace {
     Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
     Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
     while (rdrIter != readers.end()) {
-      temp_sub = rdrIter->second.dr->get_subscriber();
+      temp_sub = rdrIter->second->dr->get_subscriber();
       temp_dp = temp_sub->get_participant();
 
       if (dp->get_domain_id() == temp_dp->get_domain_id()) {
@@ -485,7 +498,7 @@ namespace {
     Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
     Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
     while (rdrIter != readers.end()) {
-      temp_dp = rdrIter->second.dr->get_subscriber()->get_participant();
+      temp_dp = rdrIter->second->dr->get_subscriber()->get_participant();
       if (dp->get_domain_id() == temp_dp->get_domain_id()) {
         if (OpenDDS::DCPS::DCPS_debug_level > 3) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) cleanup_opendds_participant - participant still in use by reader\n"));
@@ -596,8 +609,8 @@ namespace {
       const DDS::DataReader_var dr =
         sub->create_datareader(topic, datareader_qos, 0, 0);
       if (!dr) return INVALID_PARAM;
-
-      Entities::instance()->receivers_[connectionId].dr = dr;
+      Entities::instance()->receivers_[connectionId] = new Entities::FaceReceiver();
+      Entities::instance()->receivers_[connectionId]->dr = dr;
     }
 
     return RC_NO_ERROR;
@@ -705,7 +718,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
     return_code = FACE::INVALID_PARAM;
     return;
   }
-  FACE::TS::MessageHeader& header = readers[connection_id].last_msg_header;
+  FACE::TS::MessageHeader& header = readers[connection_id]->last_msg_header;
 
   //TODO: Populate other header fields appropriately
   header.message_definition_guid = Entities::instance()->connections_[connection_id].second.MESSAGE;
@@ -713,14 +726,14 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   header.message_timestamp = convertTime(sinfo.source_timestamp);
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
-  readers[connection_id].sum_recvd_msgs_latency += (convertTime(OpenDDS::DCPS::time_value_to_time(now)) - header.message_timestamp);
-  ++readers[connection_id].total_msgs_recvd;
+  readers[connection_id]->sum_recvd_msgs_latency += (convertTime(OpenDDS::DCPS::time_value_to_time(now)) - header.message_timestamp);
+  ++readers[connection_id]->total_msgs_recvd;
 
   if (OpenDDS::DCPS::DCPS_debug_level > 8) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: Latency is now (tot_latency %d / tot_msgs_recvd %d): %d\n",
-        readers[connection_id].sum_recvd_msgs_latency,
-        readers[connection_id].total_msgs_recvd,
-        readers[connection_id].sum_recvd_msgs_latency/readers[connection_id].total_msgs_recvd));
+        readers[connection_id]->sum_recvd_msgs_latency,
+        readers[connection_id]->total_msgs_recvd,
+        readers[connection_id]->sum_recvd_msgs_latency/readers[connection_id]->total_msgs_recvd));
   }
   ::DDS::Subscriber_var bit_subscriber
    = part->get_builtin_subscriber () ;
