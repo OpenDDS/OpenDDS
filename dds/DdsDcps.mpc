@@ -26,17 +26,6 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsTypeSupportExt.idl
   }
 
-  // Special for CorbaSeq directory.
-  TypeSupport_Files {
-    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
-    gendir = CorbaSeq
-    CorbaSeq/*.idl
-  }
-
-  verbatim(gnuace, bottom, 1) {
-    idl_stubs: $(foreach f,$(wildcard CorbaSeq/*.idl),$(f:.idl=TypeSupportImpl.h))
-  }
-
   Source_Files {
     DCPS
     DCPS/transport/framework

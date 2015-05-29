@@ -36,6 +36,17 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
     dcps_ts_flags += -SI
     DdsDcpsInfoUtils.idl
   }
+
+  // Special for CorbaSeq directory.
+  TypeSupport_Files {
+    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
+    gendir = CorbaSeq
+    CorbaSeq/*.idl
+  }
+
+  verbatim(gnuace, bottom, 1) {
+    idl_stubs: $(foreach f,$(wildcard CorbaSeq/*.idl),$(f:.idl=TypeSupportImpl.h))
+  }
 }
 
 feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support, dcps_ts_defaults {
@@ -62,6 +73,17 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
 
   IDL_Files {
     DdsDcpsInfrastructureTypeSupport.idl
+  }
+
+  // Special for CorbaSeq directory.
+  TypeSupport_Files {
+    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
+    gendir = CorbaSeq
+    CorbaSeq/*.idl
+  }
+
+  verbatim(gnuace, bottom, 1) {
+    idl_stubs: $(foreach f,$(wildcard CorbaSeq/*.idl),$(f:.idl=TypeSupportImpl.h))
   }
 }
 
