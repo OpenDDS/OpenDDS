@@ -15,7 +15,7 @@ $status = 0;
 
 PerlDDS::add_lib_path('../idl_test3_lib');
 
-$TESTDVR = PerlDDS::create_process ("valgrind", "idl_test3");
+$TESTDVR = PerlDDS::create_process ("idl_test3");
 
 $status = $TESTDVR->SpawnWaitKill (300);
 

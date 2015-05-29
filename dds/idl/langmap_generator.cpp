@@ -260,14 +260,6 @@ public:
           "  const " << primtype << "* " << field_name << " () const {\n"
           "    return this->_u." << field_name << ";\n"
           "  }\n";
-        if (helper != "CORBA::String_var") {
-          be_global->lang_header_ <<
-            "  void " << field_name << " (const CORBA::String_var& x) {\n"
-            "    _reset();\n" <<
-            "    this->_u." << field_name << " = ::CORBA::string_dup(x.in());\n"
-            "    _discriminator = " << first_label.str() << ";\n"
-            "  }\n";
-        }
       } else if (cls & CL_ARRAY) {
         be_global->lang_header_ <<
           "  void " << field_name << " (" << field_type_string << " x) {\n"

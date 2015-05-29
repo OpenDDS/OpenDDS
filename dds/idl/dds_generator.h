@@ -537,8 +537,13 @@ inline void generateCaseBody(CommonFn commonFn,
     }
     std::string rhs;
     if (br_cls & CL_STRING) {
-      brType = std::string("CORBA::") + ((br_cls & CL_WIDE) ? "W" : "")
-        + "String_var";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+        brType = std::string("FACE::") + ((br_cls & CL_WIDE) ? "W" : "")
+          + "String_var";
+      } else {
+        brType = std::string("CORBA::") + ((br_cls & CL_WIDE) ? "W" : "")
+          + "String_var";
+      }
       rhs = "tmp.out()";
     } else if (br_cls & CL_ARRAY) {
       forany = "      " + brType + "_forany fa = tmp;\n";
