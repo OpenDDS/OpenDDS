@@ -293,6 +293,18 @@ BE_GlobalData::parse_args(long& i, char** av)
                                     | IDL_CF_ONLY_USAGE);
     }
     break;
+  case 'Z':
+    switch (av[i][2]) {
+    case 'C':
+      add_include (av[++i], STREAM_CPP);
+      break;
+    default:
+      ACE_ERROR((LM_ERROR, ACE_TEXT("IDL: I don't understand the '%C'")
+                 ACE_TEXT(" option\n"), av[i]));
+      idl_global->set_compile_flags(idl_global->compile_flags()
+                                    | IDL_CF_ONLY_USAGE);
+    }
+    break;
   case '-':
     if (0 == ACE_OS::strncasecmp(av[i], WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
       this->export_macro(av[i] + SZ_WB_EXPORT_MACRO);

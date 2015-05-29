@@ -13,6 +13,7 @@
 
 #include <string>
 #include <sstream>
+#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
