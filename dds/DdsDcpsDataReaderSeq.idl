@@ -1,0 +1,17 @@
+/*
+ * $Id$
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_DATAREADERSEQ_IDL
+#define OPENDDS_DCPS_DATAREADERSEQ_IDL
+
+module DDS {
+    local interface DataReader;
+    typedef sequence<DataReader> DataReaderSeq;
+};
+
+#endif  /* OPENDDS_DCPS_DATAREADERSEQ_IDL */

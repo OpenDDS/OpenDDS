@@ -197,6 +197,14 @@ module DDS {
 
     local interface Listener {};
 
+    // ----------------------------------------------------------------------
+    // Conditions
+    // ----------------------------------------------------------------------
+
+    local interface Condition {
+        boolean get_trigger_value();
+    };
+
     // WaitSet and GuardCondition can't be expressed in IDL because they are
     // required by the spec to be default-constructable by the user
     // (07-01-01 section 7.2.2 pgh 11).  Therefore in IDL we have WaitSetInterf

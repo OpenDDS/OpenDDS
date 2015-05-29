@@ -17,6 +17,7 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
     DdsDcpsCore.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsConditionSeq.idl
+    DdsDcpsDataReaderSeq.idl
   }
 
   TypeSupport_Files {
@@ -45,6 +46,7 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
     DdsDcpsCore.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsConditionSeq.idl
+    DdsDcpsDataReaderSeq.idl
   }
 
   TypeSupport_Files {
@@ -69,15 +71,12 @@ feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support,
     DdsDcpsGuid.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsConditionSeq.idl
+    DdsDcpsDataReaderSeq.idl
   }
 
   TypeSupport_Files {
     dcps_ts_flags += -Lspcpp
     DdsDcpsCore.idl
-  }
-
-  TypeSupport_Files {
-    DdsDcpsCondition.idl
   }
 
   IDL_Files {

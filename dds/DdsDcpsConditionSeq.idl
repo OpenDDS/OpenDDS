@@ -9,9 +9,8 @@
 #ifndef OPENDDS_DCPS_CONDITIONSEQ_IDL
 #define OPENDDS_DCPS_CONDITIONSEQ_IDL
 
-#include "dds/DdsDcpsCondition.idl"
-
 module DDS {
+    local interface Condition;
     typedef sequence<Condition> ConditionSeq;
 };
 
