@@ -22,10 +22,10 @@ $test->{dcps_debug_level} = 4;
 $test->{dcps_transport_debug_level} = 2;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
-my $dbg_lvl = ' -DCPSDebugLevel 1 -DCPSTransportDebugLevel 1 ';
+my $dbg_lvl = '-ORBVerboseLogging 1 -DCPSBIT 0 -DCPSDebugLevel 1 -DCPSTransportDebugLevel 1 ';
 my $pub_opts = "$dbg_lvl";
 my $sub_opts = "$dbg_lvl";
-my $repo_bit_opt = "";
+my $repo_bit_opt = "-DCPSBIT 0";
 my $is_rtps_disc = 0;
 my $DCPSREPO;
 
@@ -66,6 +66,10 @@ my $resub = "[common]\n" .
     "DCPSGlobalTransportConfig=\$file\n\n" .
     "[transport/t1]\n" .
     "transport_type=tcp\n" .
+    "datalink_release_delay=60000\n" .
+    "conn_retry_backoff_multiplier=1.5\n" .
+    "conn_retry_attempts=13\n" .
+    "passive_reconnect_duration=60000\n" .
     "local_address=$stubSubSideHost:$stubSubSidePort\n" .
     "pub_address=$stubPubSideHost:$stubPubSidePort\n";
 
@@ -97,6 +101,7 @@ $test->start_process("publisher");
 $test->ignore_error("(Redmine Issue# 1446)");
 
 # Ignore normal disconnect/reconnect messages
+$test->ignore_error("Failed to connect. connect: connection refused");
 $test->ignore_error("Failed to connect. connect: Connection refused");
 $test->ignore_error("Unrecoverable problem with data link detected");
 

@@ -85,7 +85,7 @@ Writer::svc()
 
     int sleep_between_writes_ms = 250000;
     int writes_per_second = 1000000 / sleep_between_writes_ms;
-    int num_messages = (stub_kills + 1) * stub_duration * writes_per_second;
+    int num_messages = (stub_kills + 1) * (stub_duration+5) * writes_per_second;
     for (int i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
 
