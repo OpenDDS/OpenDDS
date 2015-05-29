@@ -43,6 +43,9 @@ private:
   bool gen_union_fwd(AST_UnionFwd*, UTL_ScopedName* name,
                      AST_Type::SIZE_TYPE size);
 
+  bool gen_interf_fwd(UTL_ScopedName* name,
+                      AST_Type::SIZE_TYPE size);
+
   GeneratorBase* generator_;
 };
 

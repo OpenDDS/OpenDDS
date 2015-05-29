@@ -148,11 +148,11 @@ bool composite_generator::gen_interf(AST_Interface* node, UTL_ScopedName* name, 
   return true;
 }
 
-bool composite_generator::gen_interf_fwd(UTL_ScopedName* name)
+bool composite_generator::gen_interf_fwd(UTL_ScopedName* name, AST_Type::SIZE_TYPE size)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
-    if (!(*it)->gen_interf_fwd(name))
+    if (!(*it)->gen_interf_fwd(name, size))
       return false;
   }
 
