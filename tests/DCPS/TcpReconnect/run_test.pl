@@ -19,7 +19,7 @@ my $status = 0;
 my $test = new PerlDDS::TestFramework();
 
 $test->{dcps_debug_level} = 4;
-$test->{dcps_transport_debug_level} = 6;
+$test->{dcps_transport_debug_level} = 2;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
 my $dbg_lvl = '-ORBVerboseLogging 1 -DCPSBIT 0 -DCPSDebugLevel 1 -DCPSTransportDebugLevel 1 ';
@@ -101,6 +101,7 @@ $test->start_process("publisher");
 $test->ignore_error("(Redmine Issue# 1446)");
 
 # Ignore normal disconnect/reconnect messages
+$test->ignore_error("Failed to connect. connect: connection refused");
 $test->ignore_error("Failed to connect. connect: Connection refused");
 $test->ignore_error("Unrecoverable problem with data link detected");
 
