@@ -19,8 +19,14 @@
 /DDS_SUBSCRIBER_QOS_DEFAULT.h
 /DDS_TOPIC_QOS_DEFAULT.h
 /DDS_WaitSet.h
+/DdsDcpsConditionSeqJC.cpp
+/DdsDcpsConditionSeqJC.h
 /DdsDcpsCoreJC.cpp
 /DdsDcpsCoreJC.h
+/DdsDcpsCoreTypeSupportJC.cpp
+/DdsDcpsCoreTypeSupportJC.h
+/DdsDcpsDataReaderSeqJC.cpp
+/DdsDcpsDataReaderSeqJC.h
 /DdsDcpsDomainExtJC.cpp
 /DdsDcpsDomainExtJC.h
 /DdsDcpsDomainJC.cpp

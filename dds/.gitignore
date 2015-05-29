@@ -15,6 +15,10 @@
 /DdsDcpsC.cpp
 /DdsDcpsC.h
 /DdsDcpsC.inl
+/DdsDcpsConditionSeqC.cpp
+/DdsDcpsConditionSeqC.h
+/DdsDcpsConditionSeqC.inl
+/DdsDcpsConditionSeqS.h
 /DdsDcpsCoreC.cpp
 /DdsDcpsCoreC.h
 /DdsDcpsCoreC.inl
@@ -34,6 +38,10 @@
 /DdsDcpsDataReaderRemoteS.cpp
 /DdsDcpsDataReaderRemoteS.h
 /DdsDcpsDataReaderRemoteS.inl
+/DdsDcpsDataReaderSeqC.cpp
+/DdsDcpsDataReaderSeqC.h
+/DdsDcpsDataReaderSeqC.inl
+/DdsDcpsDataReaderSeqS.h
 /DdsDcpsDataWriterRemoteC.cpp
 /DdsDcpsDataWriterRemoteC.h
 /DdsDcpsDataWriterRemoteC.inl
@@ -73,8 +81,13 @@
 /DdsDcpsGuidS.cpp
 /DdsDcpsGuidS.h
 /DdsDcpsGuidS.inl
+/DdsDcpsGuidTypeSupport.idl
+/DdsDcpsGuidTypeSupportC.cpp
+/DdsDcpsGuidTypeSupportC.h
+/DdsDcpsGuidTypeSupportC.inl
 /DdsDcpsGuidTypeSupportImpl.cpp
 /DdsDcpsGuidTypeSupportImpl.h
+/DdsDcpsGuidTypeSupportS.h
 /DdsDcpsInfoC.cpp
 /DdsDcpsInfoC.h
 /DdsDcpsInfoC.inl
