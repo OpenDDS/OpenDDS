@@ -1397,3 +1397,19 @@ bool langmap_generator::gen_union(AST_Union* u, UTL_ScopedName* name,
 {
   return generator_->gen_union(u, name, branches, discriminator);
 }
+
+bool langmap_generator::gen_interf_fwd(UTL_ScopedName* name,
+                                       AST_Type::SIZE_TYPE size)
+{
+  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+
+  be_global->add_include("<tao/Objref_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
+  const char* const nm = name->last_component()->get_string();
+  be_global->lang_header_ <<
+    "class " << nm << ";\n"
+    "typedef " << nm << '*' << nm << "_ptr;\n"
+    "typedef TAO_Objref_Var_T<" << nm << "> " << nm << "_var;\n"
+    "typedef TAO_Objref_Out_T<" << nm << "> " << nm << "_out;\n";
+
+  return true;
+}

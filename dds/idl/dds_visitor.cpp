@@ -314,7 +314,7 @@ dds_visitor::visit_interface_fwd(AST_InterfaceFwd* node)
   ACE_UNUSED_ARG(g);
 
   if (!java_ts_only_) {
-    error_ |= !gen_target_.gen_interf_fwd(node->name());
+    error_ |= !gen_target_.gen_interf_fwd(node->name(), node->size_type());
   }
 
   return 0;
