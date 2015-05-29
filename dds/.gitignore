@@ -19,6 +19,8 @@
 /DdsDcpsConditionSeqC.h
 /DdsDcpsConditionSeqC.inl
 /DdsDcpsConditionSeqS.h
+/DdsDcpsConditionSeqTypeSupportImpl.cpp
+/DdsDcpsConditionSeqTypeSupportImpl.h
 /DdsDcpsCoreC.cpp
 /DdsDcpsCoreC.h
 /DdsDcpsCoreC.inl
@@ -42,6 +44,8 @@
 /DdsDcpsDataReaderSeqC.h
 /DdsDcpsDataReaderSeqC.inl
 /DdsDcpsDataReaderSeqS.h
+/DdsDcpsDataReaderSeqTypeSupportImpl.cpp
+/DdsDcpsDataReaderSeqTypeSupportImpl.h
 /DdsDcpsDataWriterRemoteC.cpp
 /DdsDcpsDataWriterRemoteC.h
 /DdsDcpsDataWriterRemoteC.inl
