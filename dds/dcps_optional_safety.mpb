@@ -70,7 +70,15 @@ feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support,
     dcps_ts_flags += -SI -Lspcpp
     DdsDcpsGuid.idl
     DdsDcpsInfoUtils.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -SI -Lspcpp -ZC DdsDcpsInfrastructureC.h
     DdsDcpsConditionSeq.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -SI -Lspcpp -ZC DdsDcpsSubscriptionC.h
     DdsDcpsDataReaderSeq.idl
   }
 
