@@ -202,8 +202,8 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
         return;
       }
       cur_status.LAST_MSG_VALIDITY = receiver.last_msg_header.message_validity;
-      if (entities.receivers_[connection_id]->total_msgs_recvd != 0) {
-        cur_status.REFRESH_PERIOD = entities.receivers_[connection_id]->sum_recvd_msgs_latency/entities.receivers_[connection_id]->total_msgs_recvd;
+      if (receiver.total_msgs_recvd != 0) {
+        cur_status.REFRESH_PERIOD = receiver.sum_recvd_msgs_latency/receiver.total_msgs_recvd;
       } else {
         cur_status.REFRESH_PERIOD = 0;
       }
