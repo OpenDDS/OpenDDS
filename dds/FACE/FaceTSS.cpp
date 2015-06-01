@@ -70,6 +70,9 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
     return_code = INVALID_PARAM;
   } else {
     return_code = RC_NO_ERROR;
+#ifdef OPENDDS_SAFETY_PROFILE
+    TheServiceParticipant->configure_pool();
+#endif
   }
 }
 
