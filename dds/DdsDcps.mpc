@@ -85,3 +85,80 @@ project(OpenDDS_Dcps): core, coverage_optional, \
   }
 
 }
+
+// Approach to translating IDL files
+// =================================
+// A type defined in an IDL file belongs to one of three categories:
+//   1. message type - Values of this type will be serialized and sent in messages.
+//   2. interface type - Values of this type are objects described by the spec or
+//      an extension.  These types are not serialized.
+//   3. support type - Remaining types.  Often used in conjunction with an
+//      interface.
+
+// For each type, we must generate a language mapping which is the
+// expression of the type in C++.  When using tao_idl for language
+// mapping, the generated code will be placed in fileC.h, fileC.cpp, and
+// fileC.inl.  When using opendds_idl with -Lface or -Lspcpp, the
+// generated code will be placed in fileC.h, fileTypeSupportImpl.h, and
+// fileTypeSupportImpl.cpp.
+
+// For message types, we must generate serialization and deserialization
+// code.  If tao_idl is used to generate the language mapping, then
+// opendds_idl can be used to generate fileTypeSupport.idl,
+// fileTypeSupportImpl.h, and fileTypeSupportImpl.cpp.  The
+// fileTypeSupport.idl file is then processed with tao_idl to generate a
+// language mapping for readers and writers of that type.  If opendds_idl
+// is used to generate the language mapping, then the appropriate code is
+// already generated in fileTypeSupportImpl.h and
+// fileTypeSupportImpl.cpp.
+
+// If type support is generated for a file, then all IDL files that it
+// includes must also have type support files generated.  The compiler
+// will let you know if you do this.
+
+// So, given a particular IDL file, should tao_idl or opendds_idl be used
+// to process it?
+
+// The answer to this question depends on three things:
+//  1. The content of the file.
+//  2. The presence of builtin topics.
+//  3. Standard profile vs. safety profile.
+
+// If an IDL file defines (as opposed to declaring) an interface, then
+// tao_idl must be used to generate its language mapping.  This is the
+// only processing required for these files.  If the file contains
+// message types, then they should be moved to a different file and
+// included.
+
+// For IDL files containing message types, there are three scenarios (see
+// dcps_optional_safety.mpb):
+
+//  1. Standard profile with builtin topics
+
+//    The main driver here in the InfoRepo.  Most files will be processed
+//    with tao_idl, type support will be generated with opendds_idl, and
+//    then fileTypeSupport.idl will be processed with tao_idl.
+
+// 2. Standard profile with no builtin topics
+
+//    Similar to the previous case except fileTypeSupport.idl and its
+//    products can be avoided for most files.
+
+// 3. Safety profile (with builtinin topics)
+
+//    The main driver here is control of the language mapping.  In this
+//    configuration, opendds_idl is used with -I (prevent
+//    fileTypeSupport.idl) and -Lspcpp (to generate language mappings and
+//    serialization code).  Message types for builtin topics are in
+//    DdsDcpsCore.idl which means that opendds_idl generates
+//    DdsDcpsCoreTypeSupport.idl which is then processed with tao_idl.
+
+// Various interfaces use sequences of interfaces.  This is a problem in
+// safety profile builds because the included TAO headers have calls to
+// global operator new.  Sequences of interfaces are handled by pulling
+// out the sequence typedef to a separate file.  This allows the sequence
+// to be processed by opendds_idl in the safety profile.  The only caveat
+// is that the fileTypeSupportImpl.cpp file requires access to the
+// definition of the sequence element type.  This is accomplished by
+// manually (using a commandline option) adding an include to the
+// fileTypeSupportImpl.cpp.
