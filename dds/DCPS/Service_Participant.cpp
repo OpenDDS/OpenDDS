@@ -357,13 +357,10 @@ Service_Participant::get_domain_participant_factory(int &argc,
       }
 
 #ifdef OPENDDS_SAFETY_PROFILE
-      if (pool_size_) {
-        // For tests which don't initialize a Memory Pool, do so automatically
-        SafetyProfilePool::instance()->configure_pool(pool_size_, pool_granularity_);
-      } else {
-        // Use default allocator
-      }
+      // For non-FACE tests, configure pool
+      configure_pool();
 #endif
+
       // Establish the default scheduling mechanism and
       // priority here.  Sadly, the ORB is already
       // initialized so we have no influence over its
@@ -1726,6 +1723,16 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   }
   return 0;
 }
+
+#ifdef OPENDDS_SAFETY_PROFILE
+void
+Service_Participant::configure_pool()
+{
+  if (pool_size_) {
+    SafetyProfilePool::instance()->configure_pool(pool_size_, pool_granularity_);
+  }
+}
+#endif
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 DataDurabilityCache *

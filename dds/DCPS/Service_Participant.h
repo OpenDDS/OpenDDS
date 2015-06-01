@@ -361,6 +361,13 @@ public:
   int load_configuration(ACE_Configuration_Heap& cf,
                          const ACE_TCHAR* filename);
 
+#ifdef OPENDDS_SAFETY_PROFILE
+  /**
+   * Configure the safety profile pool
+   */
+  void configure_pool();
+#endif
+
 private:
 
   /// Initialize default qos.
