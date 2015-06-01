@@ -59,6 +59,7 @@ public:
   /// subscription sub_id.  Returns pointer to the in-progress data so
   /// it can be stored for later delivery.
   const ReceivedDataSample* withhold_data_from(const RepoId& sub_id);
+  void do_not_withhold_data_from(const RepoId& sub_id);
 
 private:
   virtual ssize_t receive_bytes(iovec iov[],
@@ -84,6 +85,7 @@ private:
 
   const ReceivedDataSample* recvd_sample_;
   OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) readers_withheld_;
+  OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) readers_selected_;
 
   SequenceRange frags_;
   TransportReassembly reassembly_;

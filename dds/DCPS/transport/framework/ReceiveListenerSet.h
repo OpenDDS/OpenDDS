@@ -26,6 +26,11 @@ class OpenDDS_Dcps_Export ReceiveListenerSet :
       public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
+  enum ConstrainReceiveSet {
+    SET_EXCLUDED,
+    SET_INCLUDED
+  };
+
   typedef OPENDDS_MAP_CMP(RepoId, TransportReceiveListener*, GUID_tKeyLessThan) MapType;
 
   ReceiveListenerSet();
@@ -41,7 +46,8 @@ public:
   ssize_t size() const;
 
   void data_received(const ReceivedDataSample& sample,
-                     const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& exclude);
+                     const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl_excl,
+                     ConstrainReceiveSet constrain);
   void data_received(const ReceivedDataSample& sample, const RepoId& readerId);
 
   /// Give access to the underlying map for iteration purposes.

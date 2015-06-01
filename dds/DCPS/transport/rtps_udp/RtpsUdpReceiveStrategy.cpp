@@ -92,9 +92,11 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
     receiver_.fill_header(sample.header_);
     const DataSubmessage& data = rsh.submessage_.data_sm();
     recvd_sample_ = &sample;
+    readers_selected_.clear();
     readers_withheld_.clear();
     // If this sample should be withheld from some readers in order to maintain
-    // in-order delivery, link_->received() will add it to readers_withheld_.
+    // in-order delivery, link_->received() will add it to readers_withheld_ otherwise
+    // it will be added to readers_selected_
     link_->received(data, receiver_.source_guid_prefix_);
     recvd_sample_ = 0;
 
@@ -104,11 +106,50 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                   sizeof(GuidPrefix_t));
       reader.entityId = data.readerId;
       if (!readers_withheld_.count(reader)) {
+        if (Transport_debug_level > 5) {
+          GuidConverter reader_conv(reader);
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received for seq: %q to reader %C\n", this,
+                               sample.header_.sequence_.getValue(),
+                               OPENDDS_STRING(reader_conv).c_str()));
+        }
         link_->data_received(sample, reader);
       }
 
     } else {
-      link_->data_received_excluding(sample, readers_withheld_);
+      if (Transport_debug_level > 5) {
+        OPENDDS_STRING included_ids;
+        bool first = true;
+        OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)::iterator iter = readers_selected_.begin();
+        while(iter != readers_selected_.end()) {
+          included_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter));
+          first = false;
+          ++iter;
+        }
+        OPENDDS_STRING excluded_ids;
+        first = true;
+        OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)::iterator iter2 = this->readers_withheld_.begin();
+        while(iter2 != readers_withheld_.end()) {
+            excluded_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter2));
+          first = false;
+          ++iter2;
+        }
+        ACE_DEBUG((LM_DEBUG, "(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample \nreaders_selected ids:\n%C\n", this, included_ids.c_str()));
+        ACE_DEBUG((LM_DEBUG, "(%P|%t)  - RtpsUdpReceiveStrategy[%@]::deliver_sample \nreaders_withheld ids:\n%C\n", this, excluded_ids.c_str()));
+      }
+
+      if (readers_withheld_.empty() && readers_selected_.empty()) {
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received for seq: %q TO ALL, no exclusion or inclusion\n", this,
+                               sample.header_.sequence_.getValue()));
+        }
+        link_->data_received(sample);
+      } else {
+        if (Transport_debug_level > 5) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample - calling DataLink::data_received_include for seq: %q to readers_selected_\n", this,
+                               sample.header_.sequence_.getValue()));
+        }
+        link_->data_received_include(sample, readers_selected_);
+      }
     }
     break;
   }
@@ -236,6 +277,12 @@ RtpsUdpReceiveStrategy::withhold_data_from(const RepoId& sub_id)
 {
   readers_withheld_.insert(sub_id);
   return recvd_sample_;
+}
+
+void
+RtpsUdpReceiveStrategy::do_not_withhold_data_from(const RepoId& sub_id)
+{
+  readers_selected_.insert(sub_id);
 }
 
 bool

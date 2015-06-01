@@ -140,15 +140,24 @@ ReceiveListenerSet::clear()
 
 void
 ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
-                                  const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& exclude)
+                                  const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl_excl,
+                                  ConstrainReceiveSet constrain)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received", 6);
   OPENDDS_VECTOR(ReceiveListenerHandle) handles;
   {
     GuardType guard(this->lock_);
     for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
-      if (itr->second && exclude.count(itr->first) == 0) {
-        handles.push_back(ReceiveListenerHandle(itr->second));
+      if (constrain == ReceiveListenerSet::SET_EXCLUDED) {
+        if (itr->second && incl_excl.count(itr->first) == 0) {
+          handles.push_back(ReceiveListenerHandle(itr->second));
+        }
+      } else if (constrain == ReceiveListenerSet::SET_INCLUDED) { //SET_INCLUDED
+        if (itr->second && incl_excl.count(itr->first) != 0) {
+          handles.push_back(ReceiveListenerHandle(itr->second));
+        }
+      } else {
+        ACE_DEBUG((LM_ERROR, "(%P|%t) ERROR: ReceiveListenerSet::data_received - NOTHING\n"));
       }
     }
   }

@@ -776,21 +776,22 @@ int
 DataLink::data_received(ReceivedDataSample& sample,
                         const RepoId& readerId /* = GUID_UNKNOWN */)
 {
-  data_received_i(sample, readerId, OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)());
+  data_received_i(sample, readerId, OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)(), ReceiveListenerSet::SET_EXCLUDED);
   return 0;
 }
 
 void
-DataLink::data_received_excluding(ReceivedDataSample& sample,
-                                  const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& excl)
+DataLink::data_received_include(ReceivedDataSample& sample,
+                                  const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl)
 {
-  data_received_i(sample, GUID_UNKNOWN, excl);
+  data_received_i(sample, GUID_UNKNOWN, incl, ReceiveListenerSet::SET_INCLUDED);
 }
 
 void
 DataLink::data_received_i(ReceivedDataSample& sample,
                           const RepoId& readerId,
-                          const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& exclude)
+                          const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl_excl,
+                          ReceiveListenerSet::ConstrainReceiveSet constrain)
 {
   DBG_ENTRY_LVL("DataLink", "data_received_i", 6);
   // Which remote publication sent this message?
@@ -800,6 +801,17 @@ DataLink::data_received_i(ReceivedDataSample& sample,
   // DataLink that are interested in hearing about any samples received
   // from the remote publisher_id.
   ReceiveListenerSet_rch listener_set;
+  if (DCPS_debug_level > 9) {
+    const GuidConverter converter(publication_id);
+    const GuidConverter reader(readerId);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
+               ACE_TEXT("from publication %C received sample: %C to readerId %C (%s).\n"),
+               OPENDDS_STRING(converter).c_str(),
+               to_string(sample.header_).c_str(),
+               OPENDDS_STRING(reader).c_str(),
+               constrain == ReceiveListenerSet::SET_EXCLUDED ? "SET_EXCLUDED" : "SET_INCLUDED"));
+  }
 
   if (Transport_debug_level > 9) {
     const GuidConverter converter(publication_id);
@@ -844,15 +856,27 @@ DataLink::data_received_i(ReceivedDataSample& sample,
       && sample.header_.content_filter_entries_.length()) {
     ReceiveListenerSet subset(*listener_set.in());
     subset.remove_all(sample.header_.content_filter_entries_);
-    subset.data_received(sample, exclude);
+    subset.data_received(sample, incl_excl, constrain);
 
   } else {
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-    // Just get the set to do our dirty work by having it iterate over its
-    // collection of TransportReceiveListeners, and invoke the data_received()
-    // method on each one.
-    listener_set->data_received(sample, exclude);
+    if (DCPS_debug_level > 9) {
+      // Just get the set to do our dirty work by having it iterate over its
+      // collection of TransportReceiveListeners, and invoke the data_received()
+      // method on each one.
+      OPENDDS_STRING included_ids;
+      bool first = true;
+      OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)::iterator iter = incl_excl.begin();
+      while(iter != incl_excl.end()) {
+        included_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter));
+        first = false;
+        ++iter;
+      }
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataLink::data_received_i - normal data received to each subscription in listener_set %s ids:%C\n",
+                 constrain == ReceiveListenerSet::SET_EXCLUDED ? "exclude" : "include", included_ids.c_str()));
+    }
+    listener_set->data_received(sample, incl_excl, constrain);
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   }
 
