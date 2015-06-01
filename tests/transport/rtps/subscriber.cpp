@@ -224,9 +224,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                                "rtps_udp");
 
     RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
+#ifdef OPENDDS_SAFETY_PROFILE
     if (host == "localhost") {
       host = "127.0.0.1";
     }
+#endif
     rtps_inst->local_address_.set(port, host.c_str());
     rtps_inst->datalink_release_delay_ = 0;
 

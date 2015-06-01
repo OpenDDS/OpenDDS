@@ -198,10 +198,11 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   // 0. initialization
 
+#ifdef OPENDDS_SAFETY_PROFILE
   if (host == "localhost") {
     host = "127.0.0.1";
   }
-
+#endif
   ACE_INET_Addr remote_addr(port, host.c_str());
 
   TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",

@@ -774,8 +774,11 @@ bool run_test()
     exit(1);
   }
   part1_sock.get_local_addr(part1_addr);
+#ifdef OPENDDS_SAFETY_PROFILE
+  part1_addr.set(part1_addr.get_port_number(), "127.0.0.1");
+#else
   part1_addr.set(part1_addr.get_port_number(), "localhost");
-
+#endif
   SimpleDataWriter sdw2(writer2);
   sdw2.enable_transport(true /*reliable*/, true /*durable*/);
 
