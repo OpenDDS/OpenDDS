@@ -15,7 +15,7 @@ using namespace std;
 DataReaderListenerImpl::DataReaderListenerImpl()
   : ok_(true), num_reads_(0), last_non_durable_(0)
 {
-  ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl\n"));
+  ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListnerImpl[%@]\n", this));
 }
 
 // Implementation skeleton destructor
@@ -45,10 +45,10 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
         if (durable) ++num_reads_;
 
-        ACE_DEBUG((LM_INFO, "(%P|%t) %s count = %d\n",
+        ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListenerImpl[%@]::on_data_available - %s count = %d\n", this,
               durable ? "Durable " : "Volatile", message.count));
         if (durable && (message.count != num_reads_)) {
-          ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: durable reader received out-of-order data\n"));
+          ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: durable reader received out-of-order data (msg count = %d and num_reads = %d)\n", message.count, num_reads_));
           ok_ = false;
         } else if (!durable) {
           if (last_non_durable_ && message.count != last_non_durable_ + 1) {
