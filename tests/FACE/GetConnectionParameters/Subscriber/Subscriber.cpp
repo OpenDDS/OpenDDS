@@ -99,6 +99,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   bool receiveMessageHappened = false;
   int recv_msg_count = 0;
+  bool firstReceive = true;
   if (!status) {
     const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
     FACE::TRANSACTION_ID_TYPE txn;
@@ -113,6 +114,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
                  txn));
       ++recv_msg_count;
       receiveMessageHappened = true;
+      if (firstReceive) {
+        //Let messages queue up so that we can check in connection parameters
+        // that WAITING_PROCESSES_OR_MESSAGES > 0
+        std::cout << "Sleep for 3 seconds to allow WAITING_PROCESSES_OR_MESSAGES to become > 1 after first receive" << std::endl;
+        ACE_OS::sleep(3);
+      }
       if ((msg.count != expected) && expected > 0) {
         std::cerr << "ERROR: Expected count " << expected << ", got "
                   << msg.count << std::endl;
@@ -131,6 +138,16 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
                     << "\tWAITING_PROCESSES_OR_MESSAGES: " << connectionStatus.WAITING_PROCESSES_OR_MESSAGES << "\n"
                     << "\tREFRESH_PERIOD: " << connectionStatus.REFRESH_PERIOD << "\n"
                     << "\tLAST_MSG_VALIDITY: " << connectionStatus.LAST_MSG_VALIDITY << std::endl;
+          if (firstReceive) {
+            if (connectionStatus.WAITING_PROCESSES_OR_MESSAGES < 1) {
+              std::cout << "ERROR: WAITING_PROCESSES_OR_MESSAGES was < 1 after first receive"
+                        << " (sleep after first receive should force messages to queue up)" << std::endl;
+            } else {
+              std::cout << "SUCCESS: WAITING_PROCESSES_OR_MESSAGES was > 0 (actual value: "
+                        << connectionStatus.WAITING_PROCESSES_OR_MESSAGES << ") after first receive" << std::endl;
+            }
+            firstReceive = false;
+          }
         } else {
           std::cout << "ERROR: Status after Get_Connection_Parameters was: " << status << std::endl;
           break;
