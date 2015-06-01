@@ -21,7 +21,7 @@ class Entities {
   ~Entities();
 
 public:
-  struct DDSAdapter {
+  struct DDSAdapter : public OpenDDS::DCPS::PoolAllocationBase {
     DDSAdapter ()
       : status_valid(FACE::INVALID) {};
 
