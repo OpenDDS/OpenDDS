@@ -6,6 +6,7 @@
 #define SUBSCRIBER_CYCLE_SUSCRIBERLISTENERIMPL_H
 
 #include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DCPS/LocalObject.h>
 
 class SubscriberListenerImpl
 : public virtual ::OpenDDS::DCPS::LocalObject< ::DDS::SubscriberListener>

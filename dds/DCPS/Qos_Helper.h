@@ -306,8 +306,10 @@ bool operator>= (const DDS::Duration_t& t1,
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!(const DDS::Time_t& t);
 
+#ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::Time_t& t1, const DDS::Time_t& t2);
+#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!=(const DDS::Time_t& t1, const DDS::Time_t& t2);

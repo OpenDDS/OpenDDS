@@ -31,6 +31,16 @@ project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional {
   }
 
   Idl2Jni_Files {
+    idl2jniflags += -Wb,stub_extra_include=dds/DdsDcpsInfrastructureC.h
+    $(DDS_ROOT)/dds/DdsDcpsConditionSeq.idl
+  }
+
+  Idl2Jni_Files {
+    idl2jniflags += -Wb,stub_extra_include=dds/DdsDcpsSubscriptionC.h
+    $(DDS_ROOT)/dds/DdsDcpsDataReaderSeq.idl
+  }
+
+  Idl2Jni_Files {
     idl2jniflags += -Wb,stub_extra_include=dds/DdsDcpsDomainC.h
     $(DDS_ROOT)/dds/DdsDcpsTopic.idl << DdsDcpsCoreJC.h DdsDcpsInfrastructureJC.h
   }

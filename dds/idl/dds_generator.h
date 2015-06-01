@@ -68,7 +68,7 @@ public:
                           const char* /*repoid*/)
   { return true; }
 
-  virtual bool gen_interf_fwd(UTL_ScopedName* /*name*/)
+  virtual bool gen_interf_fwd(UTL_ScopedName* /*name*/, AST_Type::SIZE_TYPE /*size*/)
   { return true; }
 
   virtual bool gen_native(AST_Native* /*node*/, UTL_ScopedName* /*name*/, const char* /*repoid*/)
@@ -113,7 +113,7 @@ public:
                   const std::vector<AST_Attribute*>& attrs,
                   const std::vector<AST_Operation*>& ops, const char* repoid);
 
-  bool gen_interf_fwd(UTL_ScopedName* name);
+  bool gen_interf_fwd(UTL_ScopedName* name, AST_Type::SIZE_TYPE size);
 
   bool gen_native(AST_Native* node, UTL_ScopedName* name, const char* repoid);
 
@@ -537,8 +537,13 @@ inline void generateCaseBody(CommonFn commonFn,
     }
     std::string rhs;
     if (br_cls & CL_STRING) {
-      brType = std::string("CORBA::") + ((br_cls & CL_WIDE) ? "W" : "")
-        + "String_var";
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+        brType = std::string("FACE::") + ((br_cls & CL_WIDE) ? "W" : "")
+          + "String_var";
+      } else {
+        brType = std::string("CORBA::") + ((br_cls & CL_WIDE) ? "W" : "")
+          + "String_var";
+      }
       rhs = "tmp.out()";
     } else if (br_cls & CL_ARRAY) {
       forany = "      " + brType + "_forany fa = tmp;\n";
