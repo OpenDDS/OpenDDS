@@ -301,6 +301,7 @@ private:
           ACE_DEBUG((LM_DEBUG, "Listener::on_data_available - invoking %d callbacks\n", callbacks_.size()));
         }
         for (size_t i = 0; i < callbacks_.size(); ++i) {
+          retcode = FACE::RC_NO_ERROR;
           callbacks_.at(i)(transaction_id /*Transaction_ID*/, sample, status.MESSAGE, status.MAX_MESSAGE, 0 /*WAITSET_TYPE*/, retcode);
           if (retcode != FACE::RC_NO_ERROR) {
             ACE_ERROR((LM_ERROR, "ERROR: Listener::on_data_available - callback %d returned retcode: %d\n", i, retcode));
