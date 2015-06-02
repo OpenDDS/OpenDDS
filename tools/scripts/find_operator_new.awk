@@ -3,6 +3,6 @@
     next;
 }
 
-/<operator new/ && /call/ {
+/<operator new/ && /(call)|(jmp)|(je)|(jne)|(jb)|(jbe)|(ja)|(jae)|(jl)|(jle)|(jg)|(jge)|(js)|(jns)/ {
     print location;
 }
