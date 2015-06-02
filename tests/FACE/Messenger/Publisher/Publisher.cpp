@@ -11,18 +11,42 @@
 static bool no_global_new = false;
 
 #ifdef OPENDDS_SAFETY_PROFILE
+#include <execinfo.h>
+
 void* operator new(size_t sz)
 #ifdef ACE_HAS_NEW_THROW_SPEC
   throw (std::bad_alloc)
 #endif
  {
   if (no_global_new) {
-    ACE_ERROR((LM_ERROR, "ERROR: call to global operator new\n%?\n"));
+    printf ("ERROR: call to global operator new\n");
   }
   return ::malloc(sz);
 }
 
 void operator delete(void* ptr) {
+  ::free(ptr);
+}
+
+void* operator new[](size_t sz, const std::nothrow_t&)
+#ifdef ACE_HAS_NEW_THROW_SPEC
+  throw (std::bad_alloc)
+#endif
+{
+  if (no_global_new) {
+    printf ("ERROR: Publisher call to global operator new[]\n");
+    void* addresses[32];
+    int count = backtrace(addresses, 32);
+    char** text = backtrace_symbols(addresses, count);
+    for (int i = 0; i != count; ++i) {
+      printf ("Publisher %s\n", text[i]);
+    }
+    ::free(text);
+  }
+  return ::malloc(sz);
+}
+
+void operator delete[](void* ptr) {
   ::free(ptr);
 }
 #endif
