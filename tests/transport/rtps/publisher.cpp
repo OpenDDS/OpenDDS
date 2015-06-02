@@ -57,7 +57,7 @@ public:
 
 void log_time(const ACE_Time_Value& t)
 {
-  char buffer[32];
+  ACE_TCHAR buffer[32];
   const std::time_t seconds = t.sec();
   std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime_r(&seconds, buffer, 32)));
   timestr.erase(timestr.size() - 1); // remove \n from ctime()

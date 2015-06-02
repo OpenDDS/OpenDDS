@@ -85,7 +85,7 @@ public:
                         sample.header_.source_timestamp_nanosec_};
       ACE_Time_Value atv = time_to_time_value(ts);
       std::time_t seconds = atv.sec();
-      char buffer[32];
+      ACE_TCHAR buffer[32];
       std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime_r(&seconds, buffer, 32)));
       std::ostringstream oss;
       oss << "data_received():\n\t"
