@@ -116,7 +116,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           ACE_TEXT("(%P|%t) ERROR: %dth write() returned %d.\n"),
           message.count, ret));
       } else {
-        std::cout << "wrote message " << message.count << std::endl;
+        std::cout << "wrote message " << message.count << " to " << pubmatched.current_count << " matched" << std::endl;
       }
 
       ++message.count;
