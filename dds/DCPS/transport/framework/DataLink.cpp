@@ -867,7 +867,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
       // method on each one.
       OPENDDS_STRING included_ids;
       bool first = true;
-      OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)::iterator iter = incl_excl.begin();
+      OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)::const_iterator iter = incl_excl.begin();
       while(iter != incl_excl.end()) {
         included_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter));
         first = false;
