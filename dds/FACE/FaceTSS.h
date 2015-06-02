@@ -39,6 +39,7 @@ public:
         total_msgs_recvd(0)
     {};
 
+    virtual ~FaceReceiver() {};
     virtual FACE::RETURN_CODE_TYPE messages_waiting(FACE::WAITING_RANGE_TYPE& /*num_waiting*/)
     {
       return FACE::NOT_AVAILABLE;
@@ -54,6 +55,7 @@ public:
   class DDSTypedAdapter : public FaceReceiver {
   public:
     DDSTypedAdapter(FaceReceiver& rcvr);
+    ~DDSTypedAdapter();
     virtual FACE::RETURN_CODE_TYPE messages_waiting(FACE::WAITING_RANGE_TYPE& num_waiting);
     typedef typename DCPS::DDSTraits<Msg>::DataReaderType DataReader;
   };
@@ -89,6 +91,11 @@ Entities::DDSTypedAdapter<Msg>::DDSTypedAdapter(FaceReceiver& rcvr)
   last_msg_tid = rcvr.last_msg_tid;
   sum_recvd_msgs_latency = rcvr.sum_recvd_msgs_latency;
   total_msgs_recvd = rcvr.total_msgs_recvd;
+}
+
+template <typename Msg>
+Entities::DDSTypedAdapter<Msg>::~DDSTypedAdapter()
+{
 }
 
 template <typename Msg>

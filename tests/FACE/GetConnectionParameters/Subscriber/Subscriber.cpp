@@ -57,7 +57,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
                 << " not FACE::NOT_AVAILABLE (" << FACE::NOT_AVAILABLE << ")" << std::endl;
       return EXIT_FAILURE;
     }
-    status == FACE::RC_NO_ERROR;
+    status = FACE::RC_NO_ERROR;
   }
 
   ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
