@@ -60,7 +60,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       std::cerr << pid << "Pub Stage " << stage << " Creating writer\n";
 
       // ?? fix to code gen will allow using ::Xyz::Foo
-      ::TestUtils::DDSTopicFacade< ::Xyz::FooDataWriterImpl> topic_facade = dds.topic_facade< ::Xyz::FooDataWriterImpl>("bar");
+      ::TestUtils::DDSTopicFacade< ::Xyz::Foo > topic_facade = dds.topic_facade< ::Xyz::Foo >("bar");
 
       ::Xyz::FooDataWriter_var msg_writer;
       msg_writer = topic_facade.writer();

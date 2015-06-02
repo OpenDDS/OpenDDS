@@ -34,7 +34,7 @@ int read (::DDS::DataReader_ptr reader, bool useZeroCopy)
   // initialize to zero.
 
   ::profilingTest::testMsgSeq samples(useZeroCopy ? 0 : max_read_samples, max_read_samples);
-  ::DDS::SampleInfoSeq        infos  (useZeroCopy ? 0 : max_read_samples, max_read_samples);
+  ::DDS::SampleInfoSeq        infos  (useZeroCopy ? 0 : max_read_samples, max_read_samples, 0);
 
   status = dr_servant->read (
     samples,

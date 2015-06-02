@@ -7,6 +7,7 @@
 #include "model_export.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/LocalObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -90,4 +91,3 @@ namespace OpenDDS { namespace Model {
 } } // End of namespace OpenDDS::Model
 
 #endif /* NULLPARTICIPANTLISTENER_H  */
-

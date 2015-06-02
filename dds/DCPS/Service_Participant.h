@@ -361,6 +361,13 @@ public:
   int load_configuration(ACE_Configuration_Heap& cf,
                          const ACE_TCHAR* filename);
 
+#ifdef OPENDDS_SAFETY_PROFILE
+  /**
+   * Configure the safety profile pool
+   */
+  void configure_pool();
+#endif
+
 private:
 
   /// Initialize default qos.
@@ -533,6 +540,12 @@ private:
 
   /// Scheduler time slice from configuration file.
   ACE_Time_Value schedulerQuantum_;
+
+  /// Pool size from configuration file.
+  size_t pool_size_;
+
+  /// Pool granularity from configuration file.
+  size_t pool_granularity_;
 
   /// Scheduling policy value used for setting thread priorities.
   long scheduler_;

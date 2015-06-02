@@ -9,7 +9,7 @@
 #define PARAMETER_LIST_CONVERTER_H
 
 #include "dds/DCPS/RTPS/rtps_export.h"
-#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
 
 namespace OpenDDS { namespace RTPS {
 

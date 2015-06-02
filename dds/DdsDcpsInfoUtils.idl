@@ -8,9 +8,8 @@
 
 #ifndef OPENDDS_DCPS_INFO_UTILS_IDL
 #define OPENDDS_DCPS_INFO_UTILS_IDL
-#include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsCore.idl"
 #include "dds/DdsDcpsGuid.idl"
-#include "tao/OctetSeq.pidl"
 
 module OpenDDS
 {
@@ -20,7 +19,7 @@ module OpenDDS
     // They are also the InstanceHandle_t in Sample_Info for built-in Topics
     typedef GUID_t RepoId;
 
-    typedef CORBA::OctetSeq TransportBLOB;
+    typedef DDS::OctetSeq TransportBLOB;
 
     struct TransportLocator {
       /// The transport type (e.g. tcp or udp)

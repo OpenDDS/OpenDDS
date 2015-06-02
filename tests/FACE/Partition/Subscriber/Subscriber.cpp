@@ -31,8 +31,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     char connection_name[16];
     ACE_OS::snprintf(connection_name, sizeof(connection_name), "sub_%d", part);
 
-    FACE::TS::Create_Connection(
-      connection_name, FACE::PUB_SUB, connId, dir, size, status);
+    FACE::TS::Create_Connection(connection_name, FACE::PUB_SUB, connId, dir, size,
+                                FACE::INF_TIME_VALUE, status);
   }
 
   if (!status) {

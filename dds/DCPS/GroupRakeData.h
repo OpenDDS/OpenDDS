@@ -21,7 +21,7 @@
 #include "RakeData.h"
 #include "Comparator_T.h"
 
-#include <set>
+#include "PoolAllocator.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -71,7 +71,7 @@ private:
     ComparatorBase::Ptr cmp_;
   };
 
-  typedef std::multiset<RakeData, SortedSetCmp> SortedSet;
+  typedef OPENDDS_MULTISET_CMP(RakeData, SortedSetCmp) SortedSet;
 
   // Contains data for QueryCondition/Ordered access
   SortedSet sorted_;

@@ -52,4 +52,3 @@ project(ManyTopicMultiProcessSubscriber): dcpsexe, dcps_transports_for_test, dds
     Writer.cpp
   }
 }
-

@@ -155,12 +155,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         ACE_OS::sleep(small_time);
       }
 
-      std::cout << "deleting DW" << std::endl;
+      std::cerr << "deleting DW" << std::endl;
       delete writer;
     }
     // Clean-up!
+    std::cerr << "deleting contained entities" << std::endl;
     participant->delete_contained_entities();
+    std::cerr << "deleting participant" << std::endl;
     dpf->delete_participant(participant.in());
+    std::cerr << "shutdown" << std::endl;
     TheServiceParticipant->shutdown();
 
   } catch (const CORBA::Exception& e) {

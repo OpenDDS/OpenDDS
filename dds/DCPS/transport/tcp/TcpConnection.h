@@ -32,8 +32,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TcpConnection
-  : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>,
-      public RcObject<ACE_SYNCH_MUTEX> {
+  : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
+  , public RcObject<ACE_SYNCH_MUTEX> {
 public:
 
   /// States are used during reconnecting.
@@ -105,8 +105,7 @@ public:
 
   void transfer(TcpConnection* connection);
 
-  int handle_timeout(const ACE_Time_Value &tv,
-                     const void *arg);
+  int handle_timeout(const ACE_Time_Value &tv, const void *arg);
 
   /// Cache the reference to the datalink object for lost connection
   /// callbacks.
@@ -117,13 +116,13 @@ public:
   ACE_INET_Addr get_remote_address();
 
   /// Reconnect initiated by send strategy
-  void  relink_from_send(bool do_suspend);
+  void relink_from_send(bool do_suspend);
 
   /// Reconnect initiated by receive strategy
-  void  relink_from_recv(bool do_suspend);
+  void relink_from_recv(bool do_suspend);
 
   /// Called by the reconnect task to inform us that the
-  /// link (& any associated data can be torn down.
+  /// link & any associated data can be torn down.
   /// This call is done with no DCPS/transport locks held.
   bool tear_link();
 
@@ -132,6 +131,8 @@ public:
   /// Access TRANSPORT_PRIORITY.value policy value if set.
   Priority& transport_priority();
   Priority  transport_priority() const;
+
+  OPENDDS_POOL_ALLOCATION_FWD
 
 private:
 
@@ -156,24 +157,32 @@ private:
   /// Lock to avoid the reconnect() called multiple times when
   /// both send() and recv() fail.
   LockType  reconnect_lock_;
+
   /// Flag indicates if connected or disconneted. It's set to true
   /// when actively connecting or passively acepting succeeds and set
   /// to false whenever the peer stream is closed.
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool>  connected_;
+
   /// Flag indicate this connection object is the connector or acceptor.
-  bool      is_connector_;
+  bool is_connector_;
+
   /// Reference to the receiving strategy.
   TcpReceiveStrategy_rch receive_strategy_;
+
   /// Reference to the send strategy.
   TcpSendStrategy_rch send_strategy_;
+
   /// Remote address.
   ACE_INET_Addr remote_address_;
+
   /// Local address.
   ACE_INET_Addr local_address_;
+
   /// The configuration used by this connection.
   TcpInst_rch tcp_config_;
+
   /// Datalink object which is needed for connection lost callback.
-  TcpDataLink_rch      link_;
+  TcpDataLink_rch link_;
 
   /// The id of the scheduled timer. The timer is scheduled to check if the connection
   /// is re-established during the passive_reconnect_duration_. This id controls

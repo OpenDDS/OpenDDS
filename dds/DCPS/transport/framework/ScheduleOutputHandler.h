@@ -11,6 +11,7 @@
 
 #include <ace/Reactor.h>
 #include <ace/Event_Handler.h>
+#include "dds/DCPS/PoolAllocationBase.h"
 
 namespace OpenDDS { namespace DCPS {
 
@@ -27,7 +28,7 @@ class TransportSendStrategy;
  * is queueing data, then the reactor is enabled to process on output
  * events.  Otherwise the output processing callbacks are cancelled.
  */
-class ScheduleOutputHandler : public ACE_Event_Handler {
+class ScheduleOutputHandler : public ACE_Event_Handler, public PoolAllocationBase {
   public:
     /// Construct with the reactor and strategy.
     ScheduleOutputHandler( TransportSendStrategy* strategy,
@@ -59,4 +60,3 @@ class ScheduleOutputHandler : public ACE_Event_Handler {
 #endif /* __ACE_INLINE__ */
 
 #endif /* OPENDDS_SCHEDULEOUTPUTHANDER_H */
-

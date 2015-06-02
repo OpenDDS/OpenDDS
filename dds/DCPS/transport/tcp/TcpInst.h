@@ -29,6 +29,7 @@ public:
 
   /// Diagnostic aid.
   virtual void dump(std::ostream& os);
+  virtual OPENDDS_STRING dump_to_str();
 
   /// Describes the local endpoint to be used to accept
   /// passive connections.

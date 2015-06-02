@@ -78,7 +78,14 @@ int Writer::svc()
         rsleep();
         foo.x = (float)i;
         foo.c = 'A' + (i % 26);
-        foo_dw->write(foo, handle);
+        DDS::ReturnCode_t status = foo_dw->write(foo, handle);
+        while (status == DDS::RETCODE_TIMEOUT) {
+          ACE_DEBUG((LM_DEBUG, "Resending after timeout\n"));
+          status = foo_dw->write(foo, handle);
+        }
+        if (status != DDS::RETCODE_OK) {
+          ACE_DEBUG((LM_DEBUG, "ERROR write status %d\n", status));
+        }
       }
 
     } else if (!ACE_OS::strcmp(topic_name, MY_TOPIC2)) {
@@ -108,9 +115,17 @@ int Writer::svc()
           foo.values[j] = (float) (i * i - j);
         }
 
-        foo_dw->write(foo, handle);
+        DDS::ReturnCode_t status = foo_dw->write(foo, handle);
+        while (status == DDS::RETCODE_TIMEOUT) {
+          ACE_DEBUG((LM_DEBUG, "Resending after timeout\n"));
+          status = foo_dw->write(foo, handle);
+        }
+        if (status != DDS::RETCODE_OK) {
+          ACE_DEBUG((LM_DEBUG, "ERROR write status %d\n", status));
+        }
       }
     }
+    ACE_DEBUG((LM_DEBUG,"(%P|%t) %C: Writer::svc finished.\n", topic_name.in()));
 
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("Exception caught in svc:");
@@ -118,7 +133,6 @@ int Writer::svc()
 
   finished_sending_ = true;
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer::svc finished.\n")));
   return 0;
 }
 

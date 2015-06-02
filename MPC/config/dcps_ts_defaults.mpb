@@ -16,14 +16,15 @@ project : dds_macros {
     output_follows_input  = 0
     libpath               = $(ACE_ROOT)/lib
     command   = $(OPENDDS_IDL)
-    dependent = $(OPENDDS_IDL_DEP) \
-      $(DDS_ROOT)/dds/idl/CPPTemplate.txt \
-      $(DDS_ROOT)/dds/idl/HTemplate.txt $(DDS_ROOT)/dds/idl/IDLTemplate.txt
+    dependent = $(OPENDDS_IDL_DEP) $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_flags = commandflags
     inputext              = .idl
     pre_extension         = TypeSupportImpl
     source_outputext      = .cpp
     header_outputext      = .h
+    optional(header_pre_extension) {
+      commandflags(-Lspcpp) += C
+    }
 
     // See $DDS_ROOT/MPC/modules/TYPESUPPORTHelper.pm for .idl and .java output
     // files and additional source and header files due to the -Gface option.

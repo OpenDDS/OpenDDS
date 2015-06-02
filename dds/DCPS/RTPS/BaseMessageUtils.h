@@ -9,10 +9,8 @@
 #ifndef RTPS_BASEMESSAGEUTILS_H
 #define RTPS_BASEMESSAGEUTILS_H
 
-#include "RtpsBaseMessageTypesTypeSupportImpl.h"
-#include "RtpsMessageTypesTypeSupportImpl.h"
+#include "RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/Serializer.h"
-#include "RtpsBaseMessageTypesC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 #include "md5.h"
 #include "ace/INET_Addr.h"
@@ -183,6 +181,14 @@ blob_to_locators(
   return DDS::RETCODE_OK;
 }
 
+template <typename T>
+void
+  message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)
+{
+  out.length (mb_locator.length());
+  std::memcpy (out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
+}
+
 inline void
 locators_to_blob(const LocatorSeq& locators, DCPS::TransportBLOB& blob)
 {
@@ -196,7 +202,7 @@ locators_to_blob(const LocatorSeq& locators, DCPS::TransportBLOB& blob)
   // if the bool is no longer the last octet of the sequence then that function
   // must be changed as well.
   ser_loc << ACE_OutputCDR::from_boolean(false);
-  blob.replace(static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
+  message_block_to_sequence(mb_locator, blob);
 }
 
 }

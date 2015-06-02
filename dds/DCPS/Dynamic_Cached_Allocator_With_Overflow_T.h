@@ -15,6 +15,8 @@
 #include "ace/Free_List.h"
 #include "ace/Guard_T.h"
 
+#include "PoolAllocationBase.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -38,40 +40,37 @@ namespace DCPS {
 * ACE_Process_Mutex constructor API.
 */
 template <class ACE_LOCK>
-class Dynamic_Cached_Allocator_With_Overflow : public ACE_New_Allocator {
+class Dynamic_Cached_Allocator_With_Overflow : public ACE_New_Allocator, public PoolAllocationBase {
 public:
   /// Create a cached memory pool with @a n_chunks chunks
   /// each with @a chunk_size size.
   Dynamic_Cached_Allocator_With_Overflow(size_t n_chunks, size_t chunk_size)
   : allocs_from_heap_(0),
-      allocs_from_pool_(0),
-      frees_to_heap_(0),
-      frees_to_pool_(0),
-      pool_(0),
-      free_list_(ACE_PURE_FREE_LIST),
-      chunk_size_(chunk_size) {
+    allocs_from_pool_(0),
+    frees_to_heap_(0),
+    frees_to_pool_(0),
+    free_list_(ACE_PURE_FREE_LIST)
+  {
     chunk_size_ = ACE_MALLOC_ROUNDUP(chunk_size, ACE_MALLOC_ALIGN);
-    ACE_NEW(this->pool_, char[n_chunks * chunk_size_]);
+    begin_ = static_cast<unsigned char*> (DCPS::SafetyProfilePool::instance()->malloc(n_chunks * chunk_size_));
+    // Remember end of the pool.
+    end_ = begin_ + n_chunks * chunk_size_;
 
+    // Put into free list using placement contructor, no real memory
+    // allocation in the <new> below.
     for (size_t c = 0;
          c < n_chunks;
          c++) {
-      void* placement = this->pool_ + c * chunk_size_;
+      void* placement = begin_ + c * chunk_size_;
 
       this->free_list_.add(new(placement) ACE_Cached_Mem_Pool_Node<char>);
     }
-
-    // Put into free list using placement contructor, no real memory
-    // allocation in the above <new>.
-
-    // Remember end of the pool.
-    last_ = reinterpret_cast<char*>(this->pool_ + n_chunks * chunk_size_ - 1);
   }
 
   /// Clear things up.
   ~Dynamic_Cached_Allocator_With_Overflow() {
-    delete [] this->pool_;
-    this->pool_ = 0;
+    DCPS::SafetyProfilePool::instance()->free(begin_);
+    begin_ = 0;
     chunk_size_ = 0;
   }
 
@@ -91,7 +90,7 @@ public:
     void* rtn = this->free_list_.remove()->addr();
 
     if (0 == rtn) {
-      rtn = reinterpret_cast<void*>(new char[chunk_size_]);
+      rtn = DCPS::SafetyProfilePool::instance()->malloc(chunk_size_);
       allocs_from_heap_++;
 
       if (DCPS_debug_level >= 2) {
@@ -148,10 +147,10 @@ public:
 
   /// Return a chunk of memory back to free list cache.
   void free(void * ptr) {
-    if (ptr < reinterpret_cast<void*>(pool_) ||
-        ptr > reinterpret_cast<void*>(last_)) {
-      char* tmp = reinterpret_cast<char*>(ptr);
-      delete []tmp;
+    unsigned char* tmp = static_cast<unsigned char*> (ptr);
+    if (tmp < begin_ ||
+        tmp >= end_) {
+      DCPS::SafetyProfilePool::instance()->free(tmp);
       frees_to_heap_ ++;
 
       if (frees_to_heap_.value() > allocs_from_heap_.value()) {
@@ -223,10 +222,9 @@ public:
 private:
   /// Remember how we allocate the memory in the first place so
   /// we can clear things up later.
-  char *pool_;
-
+  unsigned char* begin_;
   /// The end of the pool.
-  char *last_;
+  unsigned char* end_;
 
   /// Maintain a cached memory free list. We use @c char as template
   /// parameter, although sizeof(char) is usually less than

@@ -34,7 +34,7 @@
 #include "ReplayerImpl.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
-#include <cstdio>
+#include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
 #include <fstream>
 #endif
@@ -48,7 +48,7 @@ namespace {
 void set_log_file_name(const char* fname)
 {
 #ifdef OPENDDS_SAFETY_PROFILE
-  ACE_LOG_MSG->msg_ostream(std::fopen(fname, "a"), true);
+  ACE_LOG_MSG->msg_ostream(fopen(fname, "a"), true);
 #else
   std::ofstream* output_stream = new std::ofstream(fname, ios::app);
   if (output_stream->bad()) {
@@ -170,6 +170,8 @@ Service_Participant::Service_Participant()
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
     schedulerQuantum_(ACE_Time_Value::zero),
+    pool_size_(1024*1024*20),
+    pool_granularity_(8),
     scheduler_(-1),
     priority_min_(0),
     priority_max_(0),
@@ -353,6 +355,11 @@ Service_Participant::get_domain_participant_factory(int &argc,
           }
         }
       }
+
+#ifdef OPENDDS_SAFETY_PROFILE
+      // For non-FACE tests, configure pool
+      configure_pool();
+#endif
 
       // Establish the default scheduling mechanism and
       // priority here.  Sadly, the ORB is already
@@ -1522,6 +1529,11 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
 
+#ifdef OPENDDS_SAFETY_PROFILE
+    GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
+    GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_granularity"), pool_granularity_, size_t)
+#endif
+
     //
     // Establish the scheduler if specified.
     //
@@ -1711,6 +1723,16 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   }
   return 0;
 }
+
+#ifdef OPENDDS_SAFETY_PROFILE
+void
+Service_Participant::configure_pool()
+{
+  if (pool_size_) {
+    SafetyProfilePool::instance()->configure_pool(pool_size_, pool_granularity_);
+  }
+}
+#endif
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 DataDurabilityCache *

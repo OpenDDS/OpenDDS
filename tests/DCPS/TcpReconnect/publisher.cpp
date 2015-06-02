@@ -205,6 +205,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       writer->start();
 
       int stubKillCount = stub_kills;
+      std::cout << "Publisher will kill stub " << stub_kills << " times." << std::endl;
       while (stubKillCount > 0) {
         ACE_OS::sleep(stub_duration);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) publisher killing connection for the %d time\n", stub_kills - stubKillCount + 1));
@@ -217,10 +218,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 # endif
         process.wait();
         writer->increment_phase();
+        ACE_OS::sleep(5);
         pid = process.spawn(options);
         std::cout << "stub (connection) reconnected after killing " << stub_kills - stubKillCount + 1 << " time" << std::endl;
         ACE_DEBUG((LM_DEBUG, "(%P|%t) publisher reconnected after killing connection for the %d time\n", stub_kills - stubKillCount + 1));
-        stubKillCount--;
+        --stubKillCount;
       }
 
       while (!writer->is_finished()) {

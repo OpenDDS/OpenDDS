@@ -31,6 +31,25 @@ string dds_generator::scoped_helper(UTL_ScopedName* sn, const char* sep)
   return sname;
 }
 
+string dds_generator::module_scope_helper(UTL_ScopedName* sn, const char* sep)
+{
+  string sname;
+
+  for (; sn; sn = static_cast<UTL_ScopedName*>(sn->tail())) {
+    if (sn->tail() != 0) {
+      if (sn->head()->escaped())
+        sname += "_";
+
+      sname += sn->head()->get_string();
+
+      if (sname != "" && sn->tail())
+        sname += sep;
+    }
+  }
+
+  return sname;
+}
+
 void composite_generator::gen_prologue()
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
@@ -129,11 +148,11 @@ bool composite_generator::gen_interf(AST_Interface* node, UTL_ScopedName* name, 
   return true;
 }
 
-bool composite_generator::gen_interf_fwd(UTL_ScopedName* name)
+bool composite_generator::gen_interf_fwd(UTL_ScopedName* name, AST_Type::SIZE_TYPE size)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
-    if (!(*it)->gen_interf_fwd(name))
+    if (!(*it)->gen_interf_fwd(name, size))
       return false;
   }
 
@@ -152,15 +171,29 @@ bool composite_generator::gen_native(AST_Native* node, UTL_ScopedName* name, con
   return true;
 }
 
-bool composite_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
-  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-  const char* repoid)
+bool composite_generator::gen_union(AST_Union* node,
+                                    UTL_ScopedName* name,
+                                    const std::vector<AST_UnionBranch*>& branches,
+                                    AST_Type* discriminator,
+                                    const char* repoid)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
     if (!node->imported() || (*it)->do_included_files())
       if (!(*it)->gen_union(node, name, branches, discriminator, repoid))
         return false;
+  }
+
+  return true;
+}
+
+bool composite_generator::gen_union_fwd(AST_UnionFwd* uf, UTL_ScopedName* name,
+  AST_Type::SIZE_TYPE size)
+{
+  for (vector<dds_generator*>::iterator it(components_.begin());
+       it != components_.end(); ++it) {
+    if (!(*it)->gen_union_fwd(uf, name, size))
+      return false;
   }
 
   return true;

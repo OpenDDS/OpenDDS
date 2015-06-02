@@ -10,6 +10,7 @@
 #define UPDATE_DATA_TYPES
 
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 #include <vector>
 #include <string>

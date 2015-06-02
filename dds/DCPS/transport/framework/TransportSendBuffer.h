@@ -124,7 +124,7 @@ private:
   BufferMap buffers_;
 
   typedef OPENDDS_MAP(SequenceNumber, BufferMap) FragmentMap;
-  FragmentMap* fragments_;
+  FragmentMap fragments_;
 };
 
 } // namespace DCPS

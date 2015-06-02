@@ -119,7 +119,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
   typedef OPENDDS_MAP(SubscriptionInstance*, InstanceData) InstanceMap;
   InstanceMap inst_map;
 
-  typedef std::set<SubscriptionInstance*> InstanceSet;
+  typedef OPENDDS_SET(SubscriptionInstance*) InstanceSet;
   InstanceSet released_instances;
 
   for (CORBA::ULong idx = 0; iter != end && idx < max_samples_; ++idx, ++iter) {
@@ -222,7 +222,8 @@ bool RakeResults<SampleSeq>::copy_to_user()
   typename SampleSeq::PrivateMemberAccess received_data_p(received_data_);
 
   if (do_sort_) {
-    size_t len = std::min(sorted_.size(), static_cast<size_t>(max_samples_));
+    size_t len = std::min(static_cast<size_t>(sorted_.size()),
+                          static_cast<size_t>(max_samples_));
     received_data_p.internal_set_length(static_cast<CORBA::ULong>(len));
     info_seq_.length(static_cast<CORBA::ULong>(len));
     return copy_into(sorted_.begin(), sorted_.end(), received_data_p);

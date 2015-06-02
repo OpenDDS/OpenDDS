@@ -27,11 +27,12 @@
 #include "MonitorFactory.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "dds/DdsDcpsCoreC.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
 #include "ace/Reactor.h"
@@ -2483,6 +2484,7 @@ void DataReaderImpl::notify_latency(PublicationId writer)
   }
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 void
 DataReaderImpl::get_latency_stats(
     OpenDDS::DCPS::LatencyStatisticsSeq & stats)
@@ -2497,6 +2499,7 @@ DataReaderImpl::get_latency_stats(
     stats[ index].publication = current->first;
   }
 }
+#endif
 
 void
 DataReaderImpl::reset_latency_stats()
@@ -2535,8 +2538,8 @@ DataReaderImpl::get_handle_instance(DDS::InstanceHandle_t handle)
 
   SubscriptionInstanceMapType::iterator iter = instances_.find(handle);
   if (iter == instances_.end()) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_DEBUG((LM_WARNING,
+        ACE_TEXT("(%P|%t) WARNING: ")
         ACE_TEXT("DataReaderImpl::get_handle_instance: ")
         ACE_TEXT("lookup for 0x%x failed\n"),
         handle));

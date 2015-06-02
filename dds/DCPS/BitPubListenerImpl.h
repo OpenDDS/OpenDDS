@@ -13,6 +13,7 @@
 
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "Definitions.h"
+#include "LocalObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

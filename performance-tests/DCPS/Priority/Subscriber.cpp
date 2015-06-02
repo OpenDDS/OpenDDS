@@ -17,7 +17,7 @@
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "dds/DCPS/StaticIncludes.h"
-#ifdef ACE_AS_STATIC_LIBS
+#if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #include "dds/DCPS/transport/udp/Udp.h"
 #include "dds/DCPS/transport/multicast/Multicast.h"
 #endif

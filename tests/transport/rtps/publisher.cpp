@@ -9,7 +9,7 @@
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
-#include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
@@ -57,8 +57,9 @@ public:
 
 void log_time(const ACE_Time_Value& t)
 {
+  char buffer[32];
   const std::time_t seconds = t.sec();
-  std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime(&seconds)));
+  std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime_r(&seconds, buffer, 32)));
   timestr.erase(timestr.size() - 1); // remove \n from ctime()
   ACE_DEBUG((LM_INFO, "Sending with timestamp %C %q usec\n",
              timestr.c_str(), ACE_INT64(t.usec())));
@@ -197,6 +198,11 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   // 0. initialization
 
+#ifdef OPENDDS_SAFETY_PROFILE
+  if (host == "localhost") {
+    host = "127.0.0.1";
+  }
+#endif
   ACE_INET_Addr remote_addr(port, host.c_str());
 
   TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
@@ -231,8 +237,11 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   LocatorSeq locators;
   locators.length(1);
-  locators[0].kind = (remote_addr.get_type() == AF_INET6)
-                     ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  locators[0].kind =
+#ifdef ACE_HAS_IPV6
+    (remote_addr.get_type() == AF_INET6) ? LOCATOR_KIND_UDPv6 :
+#endif
+      LOCATOR_KIND_UDPv4;
   locators[0].port = port;
   address_to_bytes(locators[0].address, remote_addr);
 
@@ -250,8 +259,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   subscription.remote_reliable_ = false;
   subscription.remote_data_.length(1);
   subscription.remote_data_[0].transport_type = "rtps_udp";
-  subscription.remote_data_[0].data.replace(
-    static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
+  message_block_to_sequence (mb_locator, subscription.remote_data_[0].data);
 
   if (!sdw.init(subscription)) {
     std::cerr << "publisher TransportClient::associate() failed\n";

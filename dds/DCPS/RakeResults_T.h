@@ -72,8 +72,7 @@ private:
       if (!cmp_.in()) {
         // The following assumes that if no comparator is set
         // then PRESENTATION ordered access applies (TOPIC).
-        return OpenDDS::DCPS::operator<(lhs.rde_->source_timestamp_,
-                                        rhs.rde_->source_timestamp_);
+        return lhs.rde_->source_timestamp_ < rhs.rde_->source_timestamp_;
       }
 
       return cmp_->compare(lhs.rde_->registered_data_,
@@ -87,16 +86,16 @@ private:
   };
 
   bool do_sort_, do_filter_;
-  typedef std::multiset<RakeData, SortedSetCmp> SortedSet;
+  typedef OPENDDS_MULTISET_CMP(RakeData, SortedSetCmp) SortedSet;
 
   // Contains data for QueryCondition/Ordered access
   SortedSet sorted_;
 
   // Contains data for all other use cases
-  std::vector<RakeData> unsorted_;
+  OPENDDS_VECTOR(RakeData) unsorted_;
 
   // data structures used by copy_into()
-  typedef std::vector<CORBA::ULong> IndexList;
+  typedef OPENDDS_VECTOR(CORBA::ULong) IndexList;
   struct InstanceData {
     bool most_recent_generation_;
     size_t MRSIC_index_;

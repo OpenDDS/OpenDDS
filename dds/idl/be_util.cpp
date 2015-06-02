@@ -72,6 +72,7 @@ be_util::usage (void)
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT(" -o <dir>\t\tsets output directory for all files\n")
     ACE_TEXT(" -Lface\t\t\tgenerate FACE IDL to C++ mapping\n")
+    ACE_TEXT(" -Lspcpp\t\t\tgenerate Safety Profile IDL to C++ mapping\n")
     ACE_TEXT(" -SI\t\t\tsuppress generation of *TypeSupport.idl\n")
     ACE_TEXT(" -Sa\t\t\tsuppress IDL any (ignored, for tao_idl compatibility)\n")
     ACE_TEXT(" -St\t\t\tsuppress IDL typecode when -L* option is present\n")

@@ -13,6 +13,7 @@
 
 #include <string>
 #include <sstream>
+#include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -130,6 +131,7 @@ public:
   enum LanguageMapping {
     LANGMAP_NONE, ///< Don't generate, let tao_idl handle it
     LANGMAP_FACE_CXX, ///< Generate C++ language mapping from FACE spec
+    LANGMAP_SP_CXX, ///< Generate C++ language mapping for Safety Profile
   };
 
   LanguageMapping language_mapping() const;

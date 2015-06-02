@@ -14,9 +14,16 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::CONNECTION_ID_TYPE connId;
   FACE::MESSAGE_SIZE_TYPE size;
 
+  FACE::CONNECTION_ID_TYPE connId_INF;
+  FACE::MESSAGE_SIZE_TYPE size_INF;
+  FACE::CONNECTION_DIRECTION_TYPE dir_INF;
+
   if (!status) {
     FACE::CONNECTION_DIRECTION_TYPE dir;
-    FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size, status);
+    FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size,
+                                FACE::INF_TIME_VALUE, status);
+    FACE::TS::Create_Connection("sub_INF", FACE::PUB_SUB, connId_INF, dir_INF,
+                                size_INF, FACE::INF_TIME_VALUE, status);
   }
 
   if (!status) {
@@ -41,11 +48,21 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   }
 
   // Always destroy connection, but don't overwrite bad status
+  FACE::RETURN_CODE_TYPE destroy_status_INF = FACE::RC_NO_ERROR;
+  FACE::TS::Destroy_Connection(connId_INF, destroy_status_INF);
+  if ((destroy_status_INF != FACE::RC_NO_ERROR) && (!status)) {
+    status = destroy_status_INF;
+  }
+
+  // Always destroy connection, but don't overwrite bad status
   FACE::RETURN_CODE_TYPE destroy_status = FACE::RC_NO_ERROR;
   FACE::TS::Destroy_Connection(connId, destroy_status);
   if ((destroy_status != FACE::RC_NO_ERROR) && (!status)) {
     status = destroy_status;
   }
 
+  if (status) {
+    std::cout << "Subscriber status " << status << std::endl;
+  }
   return static_cast<int>(status);
 }

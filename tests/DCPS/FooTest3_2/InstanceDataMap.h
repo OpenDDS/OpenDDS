@@ -4,7 +4,7 @@
 #ifndef INSTANCE_DATA_MAP_H
 #define INSTANCE_DATA_MAP_H
 
-#include  "dds/DdsDcpsInfoUtilsC.h"
+#include  "dds/DdsDcpsInfrastructureC.h"
 #include  "tests/DCPS/FooType3Unbounded/FooDefC.h"
 #include  "ace/Synch.h"
 

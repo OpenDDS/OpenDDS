@@ -30,6 +30,8 @@ public:
   virtual int svc();
   virtual int close(u_long);
 
+  OPENDDS_POOL_ALLOCATION_FWD
+
 protected:
 
   virtual int register_worker_i();

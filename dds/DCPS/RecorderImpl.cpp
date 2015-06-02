@@ -26,11 +26,12 @@
 #include "MonitorFactory.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DdsDcpsInfrastructureTypeSupportImpl.h"
+#include "dds/DdsDcpsCoreC.h"
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #if !defined (DDS_HAS_MINIMUM_BIT)
 #include "BuiltInTopicUtils.h"
+#include "dds/DdsDcpsCoreTypeSupportC.h"
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 #include "RecorderImpl.h"
 #include "PoolAllocator.h"
@@ -725,7 +726,8 @@ RecorderImpl::signal_liveliness(const RepoId& remote_participant)
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-  typedef std::vector<std::pair<RepoId, RcHandle<WriterInfo> > > WriterSet;
+  typedef std::pair<RepoId, RcHandle<WriterInfo> > WriterSetElement;
+  typedef OPENDDS_VECTOR(WriterSetElement) WriterSet;
   WriterSet writers;
 
   {

@@ -85,7 +85,8 @@ public:
                         sample.header_.source_timestamp_nanosec_};
       ACE_Time_Value atv = time_to_time_value(ts);
       std::time_t seconds = atv.sec();
-      std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime(&seconds)));
+      char buffer[32];
+      std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime_r(&seconds, buffer, 32)));
       std::ostringstream oss;
       oss << "data_received():\n\t"
         "id = " << int(sample.header_.message_id_) << "\n\t"
@@ -223,6 +224,11 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                                "rtps_udp");
 
     RtpsUdpInst* rtps_inst = dynamic_cast<RtpsUdpInst*>(inst.in());
+#ifdef OPENDDS_SAFETY_PROFILE
+    if (host == "localhost") {
+      host = "127.0.0.1";
+    }
+#endif
     rtps_inst->local_address_.set(port, host.c_str());
     rtps_inst->datalink_release_delay_ = 0;
 

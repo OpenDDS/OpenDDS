@@ -14,6 +14,7 @@
 #include "Definitions.h"
 #include "ace/SString.h"
 #include "ace/Atomic_Op.h"
+#include "LocalObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once

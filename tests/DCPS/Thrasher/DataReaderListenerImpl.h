@@ -6,6 +6,7 @@
 #define DCPS_THRASHER_DATAREADERLISTENERIMPL_H
 
 #include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DCPS/LocalObject.h>
 
 #include "ProgressIndicator.h"
 

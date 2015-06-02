@@ -219,8 +219,7 @@ namespace {
       genRtpsSpecialSequence(cxx);
       return;
     }
-    AST_Type* elem = seq->base_type();
-    resolveActualType(elem);
+    AST_Type* elem = resolveActualType(seq->base_type());
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
@@ -410,8 +409,7 @@ namespace {
     be_global->add_include("dds/DCPS/Serializer.h");
     NamespaceGuard ng;
     string cxx = scoped(name);
-    AST_Type* elem = arr->base_type();
-    resolveActualType(elem);
+    AST_Type* elem = resolveActualType(arr->base_type());
     Classification elem_cls = classify(elem);
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
@@ -641,7 +639,7 @@ namespace {
   {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
-    resolveActualType(type);
+    type = resolveActualType(type);
     for (unsigned int i = 0; i < type_stack.size(); i++) {
       // If we encounter the same type recursively, then we are unbounded
       if (type == type_stack[i]) return false;
@@ -714,7 +712,7 @@ namespace {
   // Should only be called on bounded types (see above function)
   void max_marshaled_size(AST_Type* type, size_t& size, size_t& padding)
   {
-    resolveActualType(type);
+    type = resolveActualType(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
         AST_PredefinedType* p = AST_PredefinedType::narrow_from_decl(type);
@@ -854,7 +852,7 @@ namespace {
                         const string& = "") // same sig as streamCommon
   {
     AST_Type* typedeff = type;
-    resolveActualType(type);
+    type = resolveActualType(type);
     Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name;
     const string indent = (prefix == "uni") ? "      " : "  ";
@@ -903,7 +901,7 @@ namespace {
                       const string& stru = "")
   {
     AST_Type* typedeff = type;
-    resolveActualType(type);
+    type = resolveActualType(type);
     Classification fld_cls = classify(type);
     const string qual = prefix + '.' + name, shift = prefix.substr(0, 2);
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
@@ -1076,8 +1074,7 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
     find_size.endArgs();
     string expr, intro;
     for (size_t i = 0; i < fields.size(); ++i) {
-      AST_Type* field_type = fields[i]->field_type();
-      resolveActualType(field_type);
+      AST_Type* field_type = resolveActualType(fields[i]->field_type());
       if (!field_type->in_main_file()
           && field_type->node_type() != AST_Decl::NT_pre_defined) {
         be_global->add_referenced(field_type->file_name().c_str());
@@ -1322,86 +1319,6 @@ bool marshal_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 }
 
 namespace {
-  typedef string (*CommonFn)(const string& name, AST_Type* type,
-                             const string& prefix, string& intro,
-                             const string&);
-  void generateSwitchBodyForUnion(CommonFn commonFn,
-    const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator,
-    const char* statementPrefix, const char* namePrefix = "",
-    const string& uni = "", bool forceDisableDefault = false)
-  {
-    size_t n_labels = 0;
-    bool has_default = false;
-    for (size_t i = 0; i < branches.size(); ++i) {
-      AST_UnionBranch* branch = branches[i];
-      if (forceDisableDefault) {
-        bool foundDefault = false;
-        for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
-          if (branch->label(j)->label_kind() == AST_UnionLabel::UL_default) {
-            foundDefault = true;
-          }
-        }
-        if (foundDefault) {
-          has_default = true;
-          continue;
-        }
-      }
-      generateBranchLabels(branch, discriminator, n_labels, has_default);
-      string intro, name = branch->local_name()->get_string();
-      if (namePrefix == string(">> ")) {
-        string brType = scoped(branch->field_type()->name()), forany;
-        AST_Type* br = branch->field_type();
-        resolveActualType(br);
-        Classification br_cls = classify(br);
-        if (!br->in_main_file()
-            && br->node_type() != AST_Decl::NT_pre_defined) {
-          be_global->add_referenced(br->file_name().c_str());
-        }
-        string rhs;
-        if (br_cls & CL_STRING) {
-          brType = string("CORBA::") + ((br_cls & CL_WIDE) ? "W" : "")
-            + "String_var";
-          rhs = "tmp.out()";
-        } else if (br_cls & CL_ARRAY) {
-          forany = "      " + brType + "_forany fa = tmp;\n";
-          rhs = getWrapper("fa", br, WD_INPUT);
-        } else {
-          rhs = getWrapper("tmp", br, WD_INPUT);
-        }
-        be_global->impl_ <<
-          "    {\n"
-          "      " << brType << " tmp;\n" << forany <<
-          "      if (strm >> " << rhs << ") {\n"
-          "        uni." << name << "(tmp);\n"
-          "        uni._d(disc);\n"
-          "        return true;\n"
-          "      }\n"
-          "      return false;\n"
-          "    }\n";
-      } else {
-        string expr = commonFn(name + "()", branch->field_type(),
-                               string(namePrefix) + "uni", intro, uni);
-        be_global->impl_ <<
-          "    {\n" <<
-          (intro.length() ? "    " : "") << intro;
-        if (*statementPrefix) {
-          be_global->impl_ <<
-            "      " << statementPrefix << " " << expr << ";\n" <<
-            (statementPrefix == string("return") ? "" : "      break;\n");
-        } else {
-          be_global->impl_ << expr << "      break;\n";
-        }
-        be_global->impl_<<
-          "    }\n";
-      }
-    }
-    if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
-      be_global->impl_ <<
-        "  default:\n" <<
-        ((namePrefix == string(">> ")) ? "    uni._d(disc);\n" : "") <<
-        "    break;\n";
-    }
-  }
 
   bool isRtpsSpecialUnion(const string& cxx)
   {
@@ -1419,12 +1336,9 @@ namespace {
       find_size.addArg("size", "size_t&");
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
-      be_global->impl_ <<
-        "  switch (uni._d()) {\n";
-      generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
+      generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                                  "", "", cxx);
       be_global->impl_ <<
-        "  }\n"
         "  size += 4; // parameterId & length\n";
     }
     {
@@ -1469,12 +1383,8 @@ namespace {
       insertData.addArg("strm", "Serializer&");
       insertData.addArg("uni", "const " + cxx + "&");
       insertData.endArgs();
-      be_global->impl_ <<
-        "  switch (uni._d()) {\n";
-      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+      generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
                                  "return", "<< ", cxx);
-      be_global->impl_ <<
-        "  }\n";
     }
     {
       Function extraction("operator>>", "bool");
@@ -1526,24 +1436,16 @@ namespace {
       find_size.addArg("size", "size_t&");
       find_size.addArg("padding", "size_t&");
       find_size.endArgs();
-      be_global->impl_ <<
-        "  switch (uni._d()) {\n";
-      generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
+      generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                                  "", "", cxx);
-      be_global->impl_ <<
-        "  }\n";
     }
     {
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
-        "  switch (uni._d()) {\n";
-      generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+      generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
                                  "return", "<< ", cxx);
-      be_global->impl_ <<
-        "  }\n";
     }
     {
       Function insertion("operator>>", "bool");
@@ -1594,12 +1496,9 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
         "  }\n";
     }
     be_global->impl_ <<
-      "  size += gen_max_marshaled_size(" << wrap_out << ");\n"
-      "  switch (uni._d()) {\n";
-    generateSwitchBodyForUnion(findSizeCommon, branches, discriminator,
+      "  size += gen_max_marshaled_size(" << wrap_out << ");\n";
+      generateSwitchForUnion("uni._d()", findSizeCommon, branches, discriminator,
                                "", "", cxx);
-    be_global->impl_ <<
-      "  }\n";
   }
   {
     Function insertion("operator<<", "bool");
@@ -1607,12 +1506,10 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
     be_global->impl_ <<
-      streamAndCheck("<< " + wrap_out) <<
-      "  switch (uni._d()) {\n";
-    generateSwitchBodyForUnion(streamCommon, branches, discriminator,
+      streamAndCheck("<< " + wrap_out);
+    generateSwitchForUnion("uni._d()", streamCommon, branches, discriminator,
                                "return", "<< ", cxx);
     be_global->impl_ <<
-      "  }\n"
       "  return true;\n";
   }
   {
@@ -1622,12 +1519,10 @@ bool marshal_generator::gen_union(AST_Union*, UTL_ScopedName* name,
     extraction.endArgs();
     be_global->impl_ <<
       "  " << scoped(discriminator->name()) << " disc;\n" <<
-      streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT)) <<
-      "  switch (disc) {\n";
-    generateSwitchBodyForUnion(streamCommon, branches, discriminator,
-                               "if", ">> ", cxx);
+      streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+    generateSwitchForUnion("disc", streamCommon, branches, discriminator,
+                           "if", ">> ", cxx);
     be_global->impl_ <<
-      "  }\n"
       "  return true;\n";
   }
   return true;

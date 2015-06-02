@@ -8,7 +8,6 @@
 #include "dds/DCPS/TypeSupportImpl.h"
 #include "dds/DCPS/WaitSet.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
-
 #include "ace/Singleton.h"
 
 
@@ -17,43 +16,78 @@ namespace FaceTSS {
 
 class Entities {
   friend class ACE_Singleton<Entities, ACE_Thread_Mutex>;
+
   Entities();
   ~Entities();
+
 public:
+  struct DDSAdapter {
+    DDSAdapter ()
+      : status_valid(FACE::INVALID) {};
+
+    FACE::VALIDITY_TYPE status_valid;
+  };
+  struct FaceSender : public DDSAdapter {
+    FaceSender () {};
+    DDS::DataWriter_var dw;
+  };
+  struct FaceReceiver : public DDSAdapter {
+    FaceReceiver ()
+      : last_msg_tid(0),
+        sum_recvd_msgs_latency(0),
+        total_msgs_recvd(0)
+    {};
+    FACE::WAITING_RANGE_TYPE messages_waiting() { /*TODO: actually populate #msgs waiting*/return 0;};
+    DDS::DataReader_var dr;
+    FACE::TS::MessageHeader last_msg_header;
+    FACE::TRANSACTION_ID_TYPE last_msg_tid;
+    FACE::SYSTEM_TIME_TYPE sum_recvd_msgs_latency;
+    FACE::LongLong total_msgs_recvd;
+  };
+
+  typedef OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, FaceSender) ConnIdToSenderMap;
+  typedef OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, FaceReceiver) ConnIdToReceiverMap;
+
   OpenDDS_FACE_Export static Entities* instance();
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var) writers_;
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var) readers_;
+  ConnIdToSenderMap senders_;
+  ConnIdToReceiverMap receivers_;
+
   typedef std::pair<OPENDDS_STRING, FACE::TRANSPORT_CONNECTION_STATUS_TYPE> StrConStatPair;
   OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, StrConStatPair ) connections_;
 };
 
 OpenDDS_FACE_Export DDS::Duration_t convertTimeout(FACE::TIMEOUT_TYPE timeout);
 OpenDDS_FACE_Export FACE::SYSTEM_TIME_TYPE convertDuration(const DDS::Duration_t& duration);
+OpenDDS_FACE_Export FACE::SYSTEM_TIME_TYPE convertTime(const DDS::Time_t& timestamp);
+OpenDDS_FACE_Export void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
+                                                  const DDS::DomainParticipant_var part,
+                                                  const DDS::SampleInfo& sinfo,
+                                                  FACE::RETURN_CODE_TYPE& return_code);
 
 OpenDDS_FACE_Export FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
     DDS::ReturnCode_t retcode);
 
 template <typename Msg>
-void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
-                     FACE::TIMEOUT_TYPE timeout,
-                     FACE::TRANSACTION_ID_TYPE& /*transaction_id*/,
-                     Msg& message,
-                     FACE::MESSAGE_SIZE_TYPE /*message_size*/,
-                     FACE::RETURN_CODE_TYPE& return_code)
+void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
+                     /*in*/    FACE::TIMEOUT_TYPE timeout,
+                     /*inout*/ FACE::TRANSACTION_ID_TYPE& transaction_id,
+                     /*inout*/ Msg& message,
+                     /*in*/    FACE::MESSAGE_SIZE_TYPE /*message_size*/,
+                     /*out*/   FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = Entities::instance()->readers_;
+  Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
   }
-
-  typedef typename DCPS::DDSTraits<Msg>::DataReader DataReader;
+  typedef typename DCPS::DDSTraits<Msg>::DataReaderType DataReader;
   const typename DataReader::_var_type typedReader =
-    DataReader::_narrow(readers[connection_id]);
+    DataReader::_narrow(readers[connection_id].dr);
   if (!typedReader) {
     return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     return;
   }
+  readers[connection_id].status_valid = FACE::VALID;
 
   const DDS::ReadCondition_var rc =
     typedReader->create_readcondition(DDS::NOT_READ_SAMPLE_STATE,
@@ -72,37 +106,56 @@ void receive_message(FACE::CONNECTION_ID_TYPE connection_id,
     return;
   }
 
-  typename DCPS::DDSTraits<Msg>::Sequence seq;
+  typename DCPS::DDSTraits<Msg>::MessageSequenceType seq;
   DDS::SampleInfoSeq sinfo;
   ret = typedReader->take_w_condition(seq, sinfo, 1 /*max*/, rc);
-
   if (ret == DDS::RETCODE_OK && sinfo[0].valid_data) {
+    DDS::DomainParticipant_var participant = typedReader->get_subscriber()->get_participant();
+    FACE::RETURN_CODE_TYPE ret_code;
+    populate_header_received(connection_id, participant, sinfo[0], ret_code);
+    if (ret_code != FACE::RC_NO_ERROR) {
+      return_code = update_status(connection_id, ret_code);
+      return;
+    }
+
+    transaction_id = ++readers[connection_id].last_msg_tid;
+
     message = seq[0];
     return_code = update_status(connection_id, ret);
     return;
   }
-
   return_code = update_status(connection_id, DDS::RETCODE_NO_DATA);
 }
 
 template <typename Msg>
 void send_message(FACE::CONNECTION_ID_TYPE connection_id,
-                  FACE::TIMEOUT_TYPE /*timeout*/,
+                  FACE::TIMEOUT_TYPE timeout,
                   FACE::TRANSACTION_ID_TYPE& /*transaction_id*/,
                   const Msg& message,
                   FACE::MESSAGE_SIZE_TYPE /*message_size*/,
                   FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataWriter_var)& writers = Entities::instance()->writers_;
+  Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
   if (!writers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
   }
 
-  typedef typename DCPS::DDSTraits<Msg>::DataWriter DataWriter;
+  typedef typename DCPS::DDSTraits<Msg>::DataWriterType DataWriter;
   const typename DataWriter::_var_type typedWriter =
-    DataWriter::_narrow(writers[connection_id]);
+    DataWriter::_narrow(writers[connection_id].dw);
   if (!typedWriter) {
+    return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
+    return;
+  }
+  writers[connection_id].status_valid = FACE::VALID;
+
+  DDS::DataWriterQos dw_qos;
+  typedWriter->get_qos(dw_qos);
+  FACE::SYSTEM_TIME_TYPE max_blocking_time = convertDuration(dw_qos.reliability.max_blocking_time);
+  if (dw_qos.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS &&
+      timeout != FACE::INF_TIME_VALUE &&
+      ((max_blocking_time == FACE::INF_TIME_VALUE) || (timeout < max_blocking_time))) {
     return_code = update_status(connection_id, DDS::RETCODE_BAD_PARAMETER);
     return;
   }
@@ -120,9 +173,15 @@ public:
                            FACE::RETURN_CODE_TYPE&);
 
   Listener(Callback callback, FACE::CONNECTION_ID_TYPE connection_id)
-    : callback_(callback)
-    , connection_id_(connection_id)
-  {}
+    : connection_id_(connection_id)
+  {
+    callbacks_.push_back(callback);
+  }
+
+  void add_callback(Callback callback) {
+    GuardType guard(callbacks_lock_);
+    callbacks_.push_back(callback);
+  }
 
 private:
   void on_requested_deadline_missed(DDS::DataReader_ptr,
@@ -144,26 +203,45 @@ private:
 
   void on_data_available(DDS::DataReader_ptr reader)
   {
-    typedef typename DCPS::DDSTraits<Msg>::DataReader DataReader;
+    typedef typename DCPS::DDSTraits<Msg>::DataReaderType DataReader;
     const typename DataReader::_var_type typedReader =
       DataReader::_narrow(reader);
     if (!typedReader) {
       update_status(connection_id_, DDS::RETCODE_BAD_PARAMETER);
       return;
     }
-
+    FACE::TRANSPORT_CONNECTION_STATUS_TYPE& status =
+      Entities::instance()->connections_[connection_id_].second;
     Msg sample;
     DDS::SampleInfo sinfo;
     while (typedReader->take_next_sample(sample, sinfo) == DDS::RETCODE_OK) {
       if (sinfo.valid_data) {
+        DDS::DomainParticipant_var participant = typedReader->get_subscriber()->get_participant();
+        FACE::RETURN_CODE_TYPE ret_code;
+        populate_header_received(connection_id_, participant, sinfo, ret_code);
+        if (ret_code != FACE::RC_NO_ERROR) {
+          update_status(connection_id_, ret_code);
+          return;
+        }
+
+        FACE::TRANSACTION_ID_TYPE transaction_id = ++Entities::instance()->receivers_[connection_id_].last_msg_tid;
         update_status(connection_id_, DDS::RETCODE_OK);
         FACE::RETURN_CODE_TYPE retcode;
-        callback_(0, sample, 0, 0, 0, retcode);
+        GuardType guard(callbacks_lock_);
+        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, "Listener::on_data_available - invoking %d callbacks\n", callbacks_.size()));
+        }
+        for (size_t i = 0; i < callbacks_.size(); ++i) {
+          callbacks_.at(i)(transaction_id /*Transaction_ID*/, sample, status.MESSAGE, status.MAX_MESSAGE, 0 /*WAITSET_TYPE*/, retcode);
+        }
       }
     }
   }
 
-  const Callback callback_;
+  typedef ACE_SYNCH_MUTEX     LockType;
+  typedef ACE_Guard<LockType> GuardType;
+  LockType callbacks_lock_;
+  OPENDDS_VECTOR(Callback) callbacks_;
   const FACE::CONNECTION_ID_TYPE connection_id_;
 };
 
@@ -178,14 +256,21 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
                        FACE::MESSAGE_SIZE_TYPE /*max_message_size*/,
                        FACE::RETURN_CODE_TYPE& return_code)
 {
-  OPENDDS_MAP(FACE::CONNECTION_ID_TYPE, DDS::DataReader_var)& readers = Entities::instance()->readers_;
+  Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
     return;
   }
+  DDS::DataReaderListener_ptr existing_listener = readers[connection_id].dr->get_listener();
+  if (existing_listener) {
+    Listener<Msg>* typedListener = dynamic_cast<Listener<Msg>*>(existing_listener);
+    typedListener->add_callback(callback);
+  } else {
+    DDS::DataReaderListener_var listener = new Listener<Msg>(callback, connection_id);
+    readers[connection_id].dr->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);
+  }
+  readers[connection_id].status_valid = FACE::VALID;
 
-  DDS::DataReaderListener_var listener = new Listener<Msg>(callback, connection_id);
-  readers[connection_id]->set_listener(listener, DDS::DATA_AVAILABLE_STATUS);
   return_code = FACE::RC_NO_ERROR;
 }
 

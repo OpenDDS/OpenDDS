@@ -10,7 +10,7 @@
 #define DCPS_RTPSTRANSPORTHEADER_H
 
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;

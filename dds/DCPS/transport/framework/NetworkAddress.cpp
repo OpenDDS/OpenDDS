@@ -148,8 +148,18 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
       return fullname;
     }
 
+#ifdef OPENDDS_SAFETY_PROFILE
+    // address resolution may not be available due to safety profile,
+    // return an address that should work for running tests
+    if (addr) {
+      static const char local[] = {1, 0, 0, 127};
+      addr->set_address(local, sizeof local);
+    }
+    return "localhost";
+#else
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: failed to discover the fully qualified hostname\n"));
+#endif
   }
 
   if (addr) {

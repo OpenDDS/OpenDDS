@@ -1,5 +1,21 @@
 feature (!content_subscription): idl2jni {
-  idl2jniflags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  idl2jniflags += -DOPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE -DOPENDDS_NO_QUERY_CONDITION -DOPENDDS_NO_CONTENT_FILTERED_TOPIC -DOPENDDS_NO_MULTI_TOPIC
+}
+
+feature (!ownership_profile): idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE -DOPENDDS_NO_OWNERSHIP_PROFILE
+}
+
+feature (!ownership_kind_exclusive): idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+}
+
+feature (!object_model_profile): idl2jni {
+  idl2jniflags += -DOPENDDS_NO_OBJECT_MODEL_PROFILE
+}
+
+feature (!persistence_profile): idl2jni {
+  idl2jniflags += -DOPENDDS_NO_PERSISTENCE_PROFILE
 }
 
 feature (built_in_topics): dcps_ts_defaults, idl2jni {
@@ -11,7 +27,8 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     idl2jniflags += -SS -I$(TAO_ROOT) -I$(DDS_ROOT) -I$(DDS_ROOT)/dds \
                     -Wb,stub_export_include=dcps_java_export.h \
                     -Wb,stub_export_macro=dcps_java_Export
-    $(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
+    $(DDS_ROOT)/dds/DdsDcpsCoreTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
+    //$(DDS_ROOT)/dds/DdsDcpsInfrastructureTypeSupport.idl << DdsDcpsTypeSupportExtJC.h
   }
 
   Define_Custom(TypeSupportJavaOnly) {
@@ -19,15 +36,13 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
     automatic_out = 1
     libpath       = $(ACE_ROOT)/lib
     command       = $(DDS_ROOT)/bin/opendds_idl
-    dependent = $(DDS_ROOT)/bin/opendds_idl \
-      $(DDS_ROOT)/dds/idl/CPPTemplate.txt $(DDS_ROOT)/dds/idl/HTemplate.txt \
-      $(DDS_ROOT)/dds/idl/IDLTemplate.txt
+    dependent = $(DDS_ROOT)/bin/opendds_idl $(DDS_ROOT)/dds/idl/IDLTemplate.txt
     keyword dcps_ts_java_flags = commandflags
   }
 
   TypeSupportJavaOnly_Files {
     dcps_ts_java_flags += -Wb,java=BitsJC.cpp
-    $(DDS_ROOT)/dds/DdsDcpsInfrastructure.idl >> BitsJC.cpp DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java DDS/TopicBuiltinTopicDataTypeSupportImpl.java DDS/PublicationBuiltinTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
+    $(DDS_ROOT)/dds/DdsDcpsCore.idl >> BitsJC.cpp DDS/ParticipantBuiltinTopicDataTypeSupportImpl.java DDS/TopicBuiltinTopicDataTypeSupportImpl.java DDS/PublicationBuiltinTopicDataTypeSupportImpl.java DDS/SubscriptionBuiltinTopicDataTypeSupportImpl.java
   }
 
   Java_Files {
@@ -42,4 +57,3 @@ feature (built_in_topics): dcps_ts_defaults, idl2jni {
 feature (!built_in_topics): idl2jni {
   idl2jniflags += -DDDS_HAS_MINIMUM_BIT
 }
-

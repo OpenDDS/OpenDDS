@@ -1,66 +1,6 @@
-// $Id$
-
-project(OpenDDS_Dcps_idl_gen): dcps_bits, dcps_optional_features, \
-                               dcps_ts_defaults, dds_suppress_any_support, install, \
-                               gen_ostream {
-  custom_only = 1
-  idlflags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
-              -Wb,export_macro=OpenDDS_Dcps_Export \
-              -Wb,export_include=dds/DCPS/dcps_export.h \
-              -SS \
-              -I$(DDS_ROOT)
-  dcps_ts_flags += -Wb,pch_include=DCPS/DdsDcps_pch.h \
-                   -Wb,export_macro=OpenDDS_Dcps_Export \
-                   -Wb,export_include=dds/DCPS/dcps_export.h
-  IDL_Files {
-    DdsDcpsInfoUtils.idl
-    DdsDcpsGuid.idl
-  }
-
-  IDL_Files {
-    DdsDcps.idl
-    DdsDcpsInfrastructure.idl
-    DdsDcpsDomain.idl
-    DdsDcpsPublication.idl
-    DdsDcpsSubscription.idl
-    DdsDcpsTopic.idl
-    DdsDcpsSubscriptionExt.idl
-    DdsDcpsTypeSupportExt.idl
-  }
-
-  TypeSupport_Files {
-    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
-    gendir = CorbaSeq
-    CorbaSeq/BooleanSeq.idl
-    CorbaSeq/CharSeq.idl
-    CorbaSeq/DoubleSeq.idl
-    CorbaSeq/FloatSeq.idl
-    CorbaSeq/LongDoubleSeq.idl
-    CorbaSeq/LongLongSeq.idl
-    CorbaSeq/LongSeq.idl
-    CorbaSeq/OctetSeq.idl
-    CorbaSeq/ShortSeq.idl
-    CorbaSeq/StringSeq.idl
-    CorbaSeq/ULongLongSeq.idl
-    CorbaSeq/ULongSeq.idl
-    CorbaSeq/UShortSeq.idl
-    CorbaSeq/WCharSeq.idl
-    CorbaSeq/WStringSeq.idl
-  }
-
-  TypeSupport_Files {
-    dcps_ts_flags += -SI
-    DdsDcpsGuid.idl
-    DdsDcpsInfoUtils.idl
-  }
-
-  verbatim(gnuace, bottom, 1) {
-    idl_stubs: DdsDcpsGuidTypeSupportImpl.cpp DdsDcpsInfoUtilsTypeSupportImpl.cpp CorbaSeq/BooleanSeqTypeSupportImpl.cpp CorbaSeq/CharSeqTypeSupportImpl.cpp CorbaSeq/DoubleSeqTypeSupportImpl.cpp CorbaSeq/FloatSeqTypeSupportImpl.cpp CorbaSeq/LongDoubleSeqTypeSupportImpl.cpp CorbaSeq/LongLongSeqTypeSupportImpl.cpp CorbaSeq/LongSeqTypeSupportImpl.cpp CorbaSeq/OctetSeqTypeSupportImpl.cpp CorbaSeq/ShortSeqTypeSupportImpl.cpp CorbaSeq/StringSeqTypeSupportImpl.cpp CorbaSeq/ULongLongSeqTypeSupportImpl.cpp CorbaSeq/ULongSeqTypeSupportImpl.cpp CorbaSeq/UShortSeqTypeSupportImpl.cpp CorbaSeq/WCharSeqTypeSupportImpl.cpp CorbaSeq/WStringSeqTypeSupportImpl.cpp
-  }
-}
-
-project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install, dcps_optional_features, dcps_bits_source, dds_suppress_any_support {
-  after       += OpenDDS_Dcps_idl_gen
+project(OpenDDS_Dcps): core, coverage_optional, \
+        dcps_optional_features, dcps_optional_safety, dds_macros, \
+        dds_suppress_any_support, dds_taolib, gen_ostream, install {
   sharedname   = OpenDDS_Dcps
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
   libout       = $(DDS_ROOT)/lib
@@ -73,45 +13,22 @@ project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install,
   //this as an include path.
   includes += $(DDS_ROOT)/dds
 
-  // Empty IDL list because dds_suppress_any_support brings in taoidldefaults,
-  // and we need dds_suppress_any_support so that we link against anytypecode.
+  // These should only contain interfaces and unserialized types.
+  // They will be processed by tao_idl.
   IDL_Files {
+    DdsDcps.idl
+    DdsDcpsDomain.idl
+    DdsDcpsInfrastructure.idl
+    DdsDcpsPublication.idl
+    DdsDcpsSubscription.idl
+    DdsDcpsSubscriptionExt.idl
+    DdsDcpsTopic.idl
+    DdsDcpsTypeSupportExt.idl
   }
 
   Source_Files {
     DCPS
     DCPS/transport/framework
-
-    DdsDcpsC.cpp
-    DdsDcpsDomainC.cpp
-    DdsDcpsGuidC.cpp
-    DdsDcpsInfoUtilsC.cpp
-    DdsDcpsInfrastructureC.cpp
-    DdsDcpsPublicationC.cpp
-    DdsDcpsSubscriptionC.cpp
-    DdsDcpsSubscriptionExtC.cpp
-    DdsDcpsTopicC.cpp
-    DdsDcpsTypeSupportExtC.cpp
-
-    DdsDcpsGuidTypeSupportImpl.cpp
-    DdsDcpsInfoUtilsTypeSupportImpl.cpp
-    DdsDcpsInfrastructureTypeSupportImpl.cpp
-
-    CorbaSeq/BooleanSeqTypeSupportImpl.cpp
-    CorbaSeq/CharSeqTypeSupportImpl.cpp
-    CorbaSeq/DoubleSeqTypeSupportImpl.cpp
-    CorbaSeq/FloatSeqTypeSupportImpl.cpp
-    CorbaSeq/LongDoubleSeqTypeSupportImpl.cpp
-    CorbaSeq/LongLongSeqTypeSupportImpl.cpp
-    CorbaSeq/LongSeqTypeSupportImpl.cpp
-    CorbaSeq/OctetSeqTypeSupportImpl.cpp
-    CorbaSeq/ShortSeqTypeSupportImpl.cpp
-    CorbaSeq/StringSeqTypeSupportImpl.cpp
-    CorbaSeq/ULongLongSeqTypeSupportImpl.cpp
-    CorbaSeq/ULongSeqTypeSupportImpl.cpp
-    CorbaSeq/UShortSeqTypeSupportImpl.cpp
-    CorbaSeq/WCharSeqTypeSupportImpl.cpp
-    CorbaSeq/WStringSeqTypeSupportImpl.cpp
   }
 
   Header_Files {
@@ -119,21 +36,6 @@ project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install,
     DCPS
     DCPS/transport/framework
     DCPS/yard
-
-    DdsDcpsC.h
-    DdsDcpsDomainC.h
-    DdsDcpsGuidC.h
-    DdsDcpsInfoUtilsC.h
-    DdsDcpsInfrastructureC.h
-    DdsDcpsPublicationC.h
-    DdsDcpsSubscriptionC.h
-    DdsDcpsSubscriptionExtC.h
-    DdsDcpsTopicC.h
-    DdsDcpsTypeSupportExtC.h
-
-    DdsDcpsGuidTypeSupportImpl.h
-    DdsDcpsInfoUtilsTypeSupportImpl.h
-    DdsDcpsInfrastructureTypeSupportImpl.h
 
     // Although these files only contain comments since
     // service-side suppression is done,
@@ -149,35 +51,10 @@ project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install,
     DdsDcpsSubscriptionExtS.h
     DdsDcpsTopicS.h
     DdsDcpsTypeSupportExtS.h
-
-    CorbaSeq/BooleanSeqTypeSupportImpl.h
-    CorbaSeq/CharSeqTypeSupportImpl.h
-    CorbaSeq/DoubleSeqTypeSupportImpl.h
-    CorbaSeq/FloatSeqTypeSupportImpl.h
-    CorbaSeq/LongDoubleSeqTypeSupportImpl.h
-    CorbaSeq/LongLongSeqTypeSupportImpl.h
-    CorbaSeq/LongSeqTypeSupportImpl.h
-    CorbaSeq/OctetSeqTypeSupportImpl.h
-    CorbaSeq/ShortSeqTypeSupportImpl.h
-    CorbaSeq/StringSeqTypeSupportImpl.h
-    CorbaSeq/ULongLongSeqTypeSupportImpl.h
-    CorbaSeq/ULongSeqTypeSupportImpl.h
-    CorbaSeq/UShortSeqTypeSupportImpl.h
-    CorbaSeq/WCharSeqTypeSupportImpl.h
-    CorbaSeq/WStringSeqTypeSupportImpl.h
   }
 
+  // Should this be removed?
   Inline_Files {
-    DdsDcpsC.inl
-    DdsDcpsDomainC.inl
-    DdsDcpsGuidC.inl
-    DdsDcpsInfoUtilsC.inl
-    DdsDcpsInfrastructureC.inl
-    DdsDcpsPublicationC.inl
-    DdsDcpsSubscriptionC.inl
-    DdsDcpsSubscriptionExtC.inl
-    DdsDcpsTopicC.inl
-    DdsDcpsTypeSupportExtC.inl
   }
 
   Template_Files {
@@ -206,4 +83,82 @@ project(OpenDDS_Dcps): dds_taolib, core, coverage_optional, dds_macros, install,
 "	@$(MKDIR) $(INSTALL_PREFIX)/share/dds/dds"
 "	ln -sf $(INSTALL_PREFIX)/include/dds/Version.h $(INSTALL_PREFIX)/share/dds/dds"
   }
+
 }
+
+// Approach to translating IDL files
+// =================================
+// A type defined in an IDL file belongs to one of three categories:
+//   1. message type - Values of this type will be serialized and sent in messages.
+//   2. interface type - Values of this type are objects described by the spec or
+//      an extension.  These types are not serialized.
+//   3. support type - Remaining types.  Often used in conjunction with an
+//      interface.
+
+// For each type, we must generate a language mapping which is the
+// expression of the type in C++.  When using tao_idl for language
+// mapping, the generated code will be placed in fileC.h, fileC.cpp, and
+// fileC.inl.  When using opendds_idl with -Lface or -Lspcpp, the
+// generated code will be placed in fileC.h, fileTypeSupportImpl.h, and
+// fileTypeSupportImpl.cpp.
+
+// For message types, we must generate serialization and deserialization
+// code.  If tao_idl is used to generate the language mapping, then
+// opendds_idl can be used to generate fileTypeSupport.idl,
+// fileTypeSupportImpl.h, and fileTypeSupportImpl.cpp.  The
+// fileTypeSupport.idl file is then processed with tao_idl to generate a
+// language mapping for readers and writers of that type.  If opendds_idl
+// is used to generate the language mapping, then the appropriate code is
+// already generated in fileTypeSupportImpl.h and
+// fileTypeSupportImpl.cpp.
+
+// If type support is generated for a file, then all IDL files that it
+// includes must also have type support files generated.  The compiler
+// will let you know if you do this.
+
+// So, given a particular IDL file, should tao_idl or opendds_idl be used
+// to process it?
+
+// The answer to this question depends on three things:
+//  1. The content of the file.
+//  2. The presence of builtin topics.
+//  3. Standard profile vs. safety profile.
+
+// If an IDL file defines (as opposed to declaring) an interface, then
+// tao_idl must be used to generate its language mapping.  This is the
+// only processing required for these files.  If the file contains
+// message types, then they should be moved to a different file and
+// included.
+
+// For IDL files containing message types, there are three scenarios (see
+// dcps_optional_safety.mpb):
+
+//  1. Standard profile with builtin topics
+
+//    The main driver here in the InfoRepo.  Most files will be processed
+//    with tao_idl, type support will be generated with opendds_idl, and
+//    then fileTypeSupport.idl will be processed with tao_idl.
+
+// 2. Standard profile with no builtin topics
+
+//    Similar to the previous case except fileTypeSupport.idl and its
+//    products can be avoided for most files.
+
+// 3. Safety profile (with builtinin topics)
+
+//    The main driver here is control of the language mapping.  In this
+//    configuration, opendds_idl is used with -I (prevent
+//    fileTypeSupport.idl) and -Lspcpp (to generate language mappings and
+//    serialization code).  Message types for builtin topics are in
+//    DdsDcpsCore.idl which means that opendds_idl generates
+//    DdsDcpsCoreTypeSupport.idl which is then processed with tao_idl.
+
+// Various interfaces use sequences of interfaces.  This is a problem in
+// safety profile builds because the included TAO headers have calls to
+// global operator new.  Sequences of interfaces are handled by pulling
+// out the sequence typedef to a separate file.  This allows the sequence
+// to be processed by opendds_idl in the safety profile.  The only caveat
+// is that the fileTypeSupportImpl.cpp file requires access to the
+// definition of the sequence element type.  This is accomplished by
+// manually (using a commandline option) adding an include to the
+// fileTypeSupportImpl.cpp.

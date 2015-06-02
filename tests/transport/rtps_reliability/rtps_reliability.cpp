@@ -12,7 +12,7 @@
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
-#include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
@@ -707,8 +707,11 @@ void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
 {
   LocatorSeq part1_locators;
   part1_locators.length(1);
-  part1_locators[0].kind = (part1_addr.get_type() == AF_INET6)
-                           ? LOCATOR_KIND_UDPv6 : LOCATOR_KIND_UDPv4;
+  part1_locators[0].kind =
+#ifdef ACE_HAS_IPV6
+    (part1_addr.get_type() == AF_INET6) ? LOCATOR_KIND_UDPv6 :
+#endif
+      LOCATOR_KIND_UDPv4;
   part1_locators[0].port = part1_addr.get_port_number();
   address_to_bytes(part1_locators[0].address, part1_addr);
   size_t size_locator = 0, padding_locator = 0;
@@ -734,7 +737,9 @@ bool blob_to_addr(const TransportBLOB& blob, ACE_INET_Addr& addr)
     return false;
   }
   if (locators[0].kind == LOCATOR_KIND_UDPv6) {
+#ifdef ACE_HAS_IPV6
     addr.set_type(AF_INET6);
+#endif
     addr.set_address(reinterpret_cast<const char*>(locators[0].address), 16);
   } else if (locators[0].kind == LOCATOR_KIND_UDPv4) {
     addr.set_type(AF_INET);
@@ -769,8 +774,11 @@ bool run_test()
     exit(1);
   }
   part1_sock.get_local_addr(part1_addr);
+#ifdef OPENDDS_SAFETY_PROFILE
+  part1_addr.set(part1_addr.get_port_number(), "127.0.0.1");
+#else
   part1_addr.set(part1_addr.get_port_number(), "localhost");
-
+#endif
   SimpleDataWriter sdw2(writer2);
   sdw2.enable_transport(true /*reliable*/, true /*durable*/);
 
@@ -788,8 +796,7 @@ bool run_test()
   part1_writer.remote_durable_ = true;
   part1_writer.remote_data_.length(1);
   part1_writer.remote_data_[0].transport_type = "rtps_udp";
-  part1_writer.remote_data_[0].data.replace(
-    static_cast<CORBA::ULong>(mb_locator.length()), &mb_locator);
+  message_block_to_sequence (mb_locator, part1_writer.remote_data_[0].data);
   if (!sdr2.associate(part1_writer, false /*active*/)) {
     ACE_DEBUG((LM_DEBUG,
                "SimpleDataReader(reader2) could not associate with writer1\n"));

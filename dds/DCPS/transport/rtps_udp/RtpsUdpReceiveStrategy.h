@@ -15,8 +15,7 @@
 
 #include "dds/DCPS/transport/framework/TransportReceiveStrategy_T.h"
 
-#include "dds/DCPS/RTPS/RtpsBaseMessageTypesC.h"
-#include "dds/DCPS/RTPS/RtpsMessageTypesC.h"
+#include "dds/DCPS/RTPS/RtpsCoreC.h"
 
 #include "ace/Event_Handler.h"
 #include "ace/INET_Addr.h"

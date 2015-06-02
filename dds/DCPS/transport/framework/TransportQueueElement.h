@@ -13,6 +13,7 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidUtils.h"
 #include "ace/Synch.h"
+#include "dds/DCPS/PoolAllocationBase.h"
 
 #include <utility>
 
@@ -45,7 +46,7 @@ typedef std::pair<TransportQueueElement*, TransportQueueElement*> ElementPair;
  * This wrapper object will "return the loan" when all DataLinks have
  * "returned" their sub-loans.
  */
-class OpenDDS_Dcps_Export TransportQueueElement {
+class OpenDDS_Dcps_Export TransportQueueElement : public PoolAllocationBase {
 public:
 
   virtual ~TransportQueueElement();

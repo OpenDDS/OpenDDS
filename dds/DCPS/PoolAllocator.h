@@ -100,12 +100,37 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
           OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C, \
           OpenDDS::DCPS::PoolAllocator<K > >
+#define OPENDDS_MULTISET_CMP(K, C) std::multiset<K, C, \
+          OpenDDS::DCPS::PoolAllocator<K > >
 #define OPENDDS_VECTOR(T) std::vector<T, \
           OpenDDS::DCPS::PoolAllocator<T > >
 #define OPENDDS_LIST(T) std::list<T, \
           OpenDDS::DCPS::PoolAllocator<T > >
 #define OPENDDS_QUEUE(T) std::queue<T, std::deque<T, \
           OpenDDS::DCPS::PoolAllocator<T > > >
+
+// TODO:  Error handling policy.
+
+#ifdef NOT_DEFINE
+#define OPENDDS_NEW_RETURN(POINTER,CONSTRUCTOR,RET_VAL) \
+  do { void* ptr = DCPS::SafetyProfilePool::instance()->malloc(sizeof(CONSTRUCTOR)); \
+       if (ptr == 0) { errno = ENOMEM; return RET_VAL; }                   \
+       POINTER = new (ptr) CONSTRUCTOR;                                 \
+  } while (0)
+
+#define OPENDDS_NEW(POINTER,CONSTRUCTOR) \
+  do { void* ptr = DCPS::SafetyProfilePool::instance()->malloc(sizeof(CONSTRUCTOR)); \
+       if (ptr == 0) { errno = ENOMEM; return; }                     \
+       POINTER = new (ptr) CONSTRUCTOR; \
+  } while (0)
+
+#define OPENDDS_NEW_NORETURN(POINTER,CONSTRUCTOR) \
+  do { void* ptr = DCPS::SafetyProfilePool::instance()->malloc(sizeof(CONSTRUCTOR)); \
+       if (ptr == 0) { errno = ENOMEM; }                                     \
+       POINTER = new (ptr) CONSTRUCTOR; \
+  } while (0)
+#endif
+
 #else
 #define OPENDDS_STRING std::string
 #define OPENDDS_MAP(K, V) std::map<K, V >
@@ -114,9 +139,21 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 #define OPENDDS_MULTIMAP_CMP(K, T, C) std::multimap<K, T, C >
 #define OPENDDS_SET(K) std::set<K >
 #define OPENDDS_SET_CMP(K, C) std::set<K, C >
+#define OPENDDS_MULTISET_CMP(K, C) std::multiset<K, C >
 #define OPENDDS_VECTOR(T) std::vector<T >
 #define OPENDDS_LIST(T) std::list<T >
 #define OPENDDS_QUEUE(T) std::queue<T >
+
+#ifdef NOT_DEFINED
+#define OPENDDS_NEW_RETURN(pointer, ctor, default) ACE_NEW_RETURN(pointer, ctor, default)
+#define OPENDDS_NEW(pointer, ctor) ACE_NEW(pointer, ctor)
+#define OPENDDS_NEW_NORETURN(pointer, ctor) ACE_NEW_NORETURN(pointer, ctor)
+
+#define OPENDDS_DELETE(pointer) delete pointer
+#define OPENDDS_DELETE_ARR(pointer) delete[] pointer
+#endif
+
 #endif // OPENDDS_SAFETY_PROFILE
+
 
 #endif // OPENDDS_DCPS_POOL_ALLOCATOR_H

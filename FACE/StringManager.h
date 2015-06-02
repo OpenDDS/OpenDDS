@@ -53,6 +53,10 @@ class StringBase
 protected:
   typedef StringTraits<CharT> Traits;
 
+  StringBase()
+    : str_(Traits::empty())
+  { }
+
   explicit StringBase(CharT* moved)
     : str_(moved)
   {}
@@ -157,7 +161,7 @@ class String_var : public StringBase<CharT>
 
 public:
   String_var()
-    : Base(0)
+    : Base()
   {}
 
   String_var(const String_var& copied)

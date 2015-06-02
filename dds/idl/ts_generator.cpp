@@ -61,8 +61,6 @@ namespace {
 
 ts_generator::ts_generator()
   : idl_template_(read_template("IDL"))
-  , h_template_(read_template("H"))
-  , cpp_template_(read_template("CPP"))
 {
 }
 
@@ -75,6 +73,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   }
 
   const std::string cxxName = scoped(name);
+  const std::string short_name = name->last_component()->get_string();
 
   static const char* idl_includes[] = {
     "dds/DdsDcpsInfrastructure.idl", "dds/DdsDcpsTopic.idl",
@@ -88,10 +87,9 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   be_global->add_include(dc.c_str());
 
   static const char* h_includes[] = {
-    "dds/DCPS/DataWriterImpl.h", "dds/DCPS/DataReaderImpl.h",
-    "dds/DCPS/TypeSupportImpl.h",
-    "dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h",
-    "dds/DCPS/SubscriptionInstance.h"
+    "dds/DCPS/DataWriterImpl_T.h",
+    "dds/DCPS/DataReaderImpl_T.h",
+    "dds/DCPS/TypeSupportImpl_T.h"
   };
   add_includes(h_includes, BE_GlobalData::STREAM_H);
 
@@ -109,7 +107,7 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
 
   std::map<std::string, std::string> replacements;
   replacements["SCOPED"] = cxxName;
-  replacements["TYPE"] = name->last_component()->get_string();
+  replacements["TYPE"] = short_name;
   replacements["EXPORT"] = be_global->export_macro().c_str();
   replacements["SEQ"] = be_global->sequence_suffix().c_str();
 
@@ -118,28 +116,38 @@ bool ts_generator::gen_struct(AST_Structure*, UTL_ScopedName* name,
   replaceAll(idl, replacements);
   be_global->idl_ << idl;
 
-  {
-    ScopedNamespaceGuard hGuard(name, be_global->header_);
-    std::string h = h_template_;
-    replaceAll(h, replacements);
-    be_global->header_ << h;
-  }
-
   be_global->header_ <<
     "namespace OpenDDS { namespace DCPS {\n"
     "template <>\n"
     "struct DDSTraits<" << cxxName << "> {\n"
-    "  typedef " << cxxName << "DataWriter DataWriter;\n"
-    "  typedef " << cxxName << "DataReader DataReader;\n"
-    "  typedef " << cxxName << "TypeSupport TypeSupport;\n"
-    "  typedef " << cxxName << "TypeSupportImpl TypeSupportImpl;\n"
-    "  typedef " << cxxName << "Seq Sequence;\n"
+    "  typedef " << cxxName << " MessageType;\n"
+    "  typedef " << cxxName << "Seq MessageSequenceType;\n"
+    "  typedef " << cxxName << "TypeSupport TypeSupportType;\n"
+    "  typedef " << cxxName << "DataWriter DataWriterType;\n"
+    "  typedef " << cxxName << "DataReader DataReaderType;\n"
+    "  typedef " << module_scope(name) << "OpenDDSGenerated::" << short_name << "_KeyLessThan LessThanType;\n"
+    "\n"
+    "  inline static const char* type_name () { return \"" << cxxName << "\"; }\n"
+    "  inline static bool gen_has_key (const MessageType& x) { return ::OpenDDS::DCPS::gen_has_key(x); }\n"
+    "\n"
+    "  inline static bool gen_is_bounded_size (const MessageType& x) { return ::OpenDDS::DCPS::gen_is_bounded_size(x); }\n"
+    "  inline static size_t gen_max_marshaled_size(const MessageType& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
+    "  inline static void gen_find_size(const MessageType& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
+    "\n"
+    "  inline static bool gen_is_bounded_size (const OpenDDS::DCPS::KeyOnly<const MessageType>& x) { return ::OpenDDS::DCPS::gen_is_bounded_size(x); }\n"
+    "  inline static size_t gen_max_marshaled_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& x, bool align) { return ::OpenDDS::DCPS::gen_max_marshaled_size(x, align); }\n"
+    "  inline static void gen_find_size(const OpenDDS::DCPS::KeyOnly<const MessageType>& arr, size_t& size, size_t& padding) { ::OpenDDS::DCPS::gen_find_size(arr, size, padding); }\n"
     "};\n}  }\n\n";
 
+  {
+    ScopedNamespaceGuard hGuard(name, be_global->header_);
+    be_global->header_ <<
+      "  typedef OpenDDS::DCPS::DataWriterImpl_T<" << cxxName << "> " << short_name << "DataWriterImpl;\n"
+      "  typedef OpenDDS::DCPS::DataReaderImpl_T<" << cxxName << "> " << short_name << "DataReaderImpl;\n"
+      "  typedef OpenDDS::DCPS::TypeSupportImpl_T<" << cxxName << "> " << short_name << "TypeSupportImpl;\n";
+  }
+
   ScopedNamespaceGuard cppGuard(name, be_global->impl_);
-  std::string cpp = cpp_template_;
-  replaceAll(cpp, replacements);
-  be_global->impl_ << cpp;
 
   if (be_global->face_ts()) {
     face_ts_generator::generate(name);

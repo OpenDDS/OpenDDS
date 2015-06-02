@@ -16,7 +16,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/DisjointSequence.h"
 
-#include "dds/DCPS/RTPS/RtpsMessageTypesTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 
@@ -42,6 +42,7 @@ namespace {
 namespace OpenDDS {
 namespace RTPS {
 
+#ifndef OPENDDS_SAFETY_PROFILE
 inline bool
 operator==(const StatusInfo_t& lhs, const StatusInfo_t& rhs)
 {
@@ -51,6 +52,7 @@ operator==(const StatusInfo_t& lhs, const StatusInfo_t& rhs)
     (lhs.value[1] == rhs.value[1]) &&
     (lhs.value[0] == rhs.value[0]);
 }
+#endif
 
 }
 namespace DCPS {

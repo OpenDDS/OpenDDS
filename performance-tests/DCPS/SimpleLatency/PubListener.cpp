@@ -146,7 +146,7 @@ void AckDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr)
     {
       ::CORBA::Long max_read_samples = 1;
       AckMessageSeq messageZC(0, max_read_samples);
-      DDS::SampleInfoSeq siZC(0, max_read_samples);
+      DDS::SampleInfoSeq siZC(0, max_read_samples, 0);
       status = this->dr_servant_->take(messageZC,
                                        siZC,
                                        max_read_samples,

@@ -43,8 +43,6 @@ module OpenDDS
       double                  variance;
     };
 
-    typedef sequence<LatencyStatistics> LatencyStatisticsSeq;
-
     local interface DataReaderListener : ::DDS::DataReaderListener {
 
       // Called when a connection failure has been detected
@@ -84,6 +82,9 @@ module OpenDDS
         in BudgetExceededStatus status);
     };
 
+#ifndef OPENDDS_SAFETY_PROFILE
+    typedef sequence<LatencyStatistics> LatencyStatisticsSeq;
+
     local interface DataReaderEx : ::DDS::DataReader {
       /// Obtain a sequence of statistics summaries.
       void get_latency_stats( inout LatencyStatisticsSeq stats);
@@ -94,7 +95,9 @@ module OpenDDS
       /// Statistics gathering enable state.
       attribute boolean statistics_enabled;
     };
-
+#else
+    local interface DataReaderEx : ::DDS::DataReader { };
+#endif
   };
 
 };

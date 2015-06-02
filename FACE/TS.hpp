@@ -19,6 +19,7 @@ namespace TS {
     /* out */ CONNECTION_ID_TYPE& connection_id,
     /* out */ CONNECTION_DIRECTION_TYPE& connection_direction,
     /* out */ MESSAGE_SIZE_TYPE& max_message_size,
+    /* in */ TIMEOUT_TYPE timeout,
     /* out */ RETURN_CODE_TYPE& return_code);
 
   OpenDDS_FACE_Export
@@ -34,10 +35,18 @@ namespace TS {
   OpenDDS_FACE_Export
   void Get_Connection_Parameters(
     /* inout */ CONNECTION_NAME_TYPE& connection_name,
-    /* inout */ CONNECTION_ID_TYPE& connection_id,
+    /* inout (0 to specify out)*/ CONNECTION_ID_TYPE& connection_id,
     /* out */ TRANSPORT_CONNECTION_STATUS_TYPE& connection_status,
     /* out */ RETURN_CODE_TYPE& return_code);
 
+  OpenDDS_FACE_Export
+  void Receive_Message(
+    /* in */ CONNECTION_ID_TYPE connection_id,
+    /* in */ TIMEOUT_TYPE timeout,
+    /* inout */ TRANSACTION_ID_TYPE& transaction_id,
+    /* out */ MessageHeader& message_header,
+    /* in */ MESSAGE_SIZE_TYPE message_size,
+    /* out */ RETURN_CODE_TYPE& return_code);
 } // namespace TS
 } // namespace FACE
 

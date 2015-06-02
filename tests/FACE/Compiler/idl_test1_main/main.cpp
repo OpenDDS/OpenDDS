@@ -4,7 +4,9 @@
 
 #include "ace/ACE.h"
 #include "ace/Log_Msg.h"
+
 #include <map>
+#include <cstring>
 
 namespace {
   template <typename T>
@@ -267,7 +269,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   // my_foo.structArray      //+24 = 65    {padding +3 = 7}
   my_foo.x = 0.99f; //+4 = 69
   my_foo.y = 0.11f; //+4 = 73
-  // my_foo.theUnion //+6 = 79
+  my_foo.theUnion.rsv("a string"); // (discriminator + string length + string data + null) +4+4+8+1 = 90
 
   Xyz::Foo foo2;
   foo2.key = 99;
@@ -322,7 +324,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   }
 
   const bool expected_bounded = false;
-  const size_t expected_find_size = 73;
+  const size_t expected_find_size = 90;
   const size_t expected_padding = 7;
 
   size_t ms = OpenDDS::DCPS::gen_max_marshaled_size(my_foo, false /*align*/);
@@ -444,7 +446,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     } else if (ss_foo.octer != my_foo.octer) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Failed to serialize octer\n")));
       failed = true;
-    } else if (0 != strcmp(ss_foo.theString.in(), my_foo.theString.in())) {
+    } else if (0 != std::strcmp(ss_foo.theString, my_foo.theString)) {
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("Failed to serialize theString \"%C\" => \"%C\"\n"),
         my_foo.theString.in(), ss_foo.theString.in()));

@@ -16,6 +16,7 @@ project(DDS*Pub): dcpsexe {
   after  += *idl
   libs   += *idl
   exename = dds_pub
+  requires += no_opendds_safety_profile
 
   Idl_Files {
   }
@@ -31,6 +32,7 @@ project(DDS*Sub): dcpsexe {
   after  += *idl
   libs   += *idl
   exename = dds_sub
+  requires += no_opendds_safety_profile
 
   Idl_Files {
   }

@@ -550,13 +550,16 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
 {
   DBG_ENTRY_LVL("TcpConnection","reconnect",6);
   if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) reconnect initiated on transport: %C to %C:%d.\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect initiated on transport: %C to %C:%d.\n",
                this->link_->get_transport_impl()->config()->name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
   }
 
   if (on_new_association) {
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect on new association\n"));
+    }
     return this->active_reconnect_on_new_association();
   }
 
@@ -564,18 +567,29 @@ OpenDDS::DCPS::TcpConnection::reconnect(bool on_new_association)
   // We need make sure if the link release is pending. If does, do
   // not try to reconnect.
   else if (!this->link_->is_release_pending()) {
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect release not currently pending\n"));
+    }
     // Try to reconnect if it's connector previously.
     if (this->is_connector_ && this->active_reconnect_i() == -1) {
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect is connector but active_reconnect_i failed\n"));
+      }
       return -1;
     }
 
     // Schedule a timer to see if a incoming connection is accepted when timeout.
     else if (!this->is_connector_ && this->passive_reconnect_i() == -1) {
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect is acceptor but passive_reconnect_i failed\n"));
+      }
       return -1;
     }
 
   }
-
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::reconnect returning 0\n"));
+  }
   return 0;
 }
 
@@ -678,7 +692,13 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
         this->remote_address_.get_host_addr(), this->remote_address_.get_port_number(),
         this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
         this->reconnect_state_));
-
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
+          "active_reconnect_i(%C:%d->%C:%d) reconnect_state = %d\n",
+          this->remote_address_.get_host_addr(), this->remote_address_.get_port_number(),
+          this->local_address_.get_host_addr(), this->local_address_.get_port_number(),
+          this->reconnect_state_));
+  }
   // We need reset the state to INIT_STATE if we are previously reconnected.
   // This would allow re-establishing connection after the re-established
   // connection lost again.
@@ -775,7 +795,7 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
 
   switch (this->reconnect_state_) {
   case PASSIVE_WAITING_STATE: {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection on transport: %C to %C:%d.\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, we tried and failed to re-establish connection on transport: %C to %C:%d.\n",
                this->link_->get_transport_impl()->config()->name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));
@@ -799,7 +819,7 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
 
   case RECONNECTED_STATE:
     // reconnected successfully.
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) re-established connection on transport: %C to %C:%d.\n",
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, re-established connection on transport: %C to %C:%d.\n",
                this->link_->get_transport_impl()->config()->name().c_str(),
                this->remote_address_.get_host_addr(),
                this->remote_address_.get_port_number()));

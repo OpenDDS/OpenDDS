@@ -35,7 +35,7 @@
 #define TOPIC_T6 32
 #define TOPIC_T7 64
 
-static const ACE_Time_Value small_time(0, 250000);
+static const ACE_Time_Value small_time(2, 250000);
 
 static const int LEASE_DURATION_SEC = 5; // seconds
 
@@ -55,6 +55,8 @@ inline bool check_listener(const DataReaderListenerImpl* drl, int expected,
   }
 
   while (drl->num_samples() < expected) {
+    ACE_DEBUG((LM_INFO, "Only %d of %d samples, waiting\n",
+               drl->num_samples(), expected));
     ACE_OS::sleep(small_time);
   }
 

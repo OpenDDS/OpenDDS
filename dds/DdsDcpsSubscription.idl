@@ -10,6 +10,7 @@
 #define OPENDDS_DCPS_SUBSCRIPTION_IDL
 
 #include "dds/DdsDcpsInfrastructure.idl"
+#include "dds/DdsDcpsDataReaderSeq.idl"
 
 #pragma ciao lem "dds/DdsDcpsSubscriptionE.idl"
 
@@ -18,9 +19,6 @@ module DDS {
     local interface DomainParticipant;
     local interface DataReader;
     local interface Subscriber;
-
-    typedef sequence<DataReader> DataReaderSeq;
-
 
     local interface DataReaderListener : Listener {
     void on_requested_deadline_missed(

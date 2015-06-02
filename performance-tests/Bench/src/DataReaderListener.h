@@ -6,6 +6,7 @@
 #define DATA_READER_LISTENER_IMPL
 
 #include <dds/DdsDcpsSubscriptionExtC.h>
+#include <dds/DCPS/LocalObject.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -176,4 +177,3 @@ namespace Test {
 } // End of namespace Test
 
 #endif /* DATA_READER_LISTENER_IMPL  */
-
