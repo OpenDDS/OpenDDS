@@ -49,7 +49,7 @@ CORBA::string_alloc (CORBA::ULong len)
 void
 CORBA::string_free (char *str)
 {
-  delete [] str;
+  ACE_Allocator::instance ()->free (str);
 }
 
 // ****************************************************************
