@@ -89,7 +89,7 @@ CORBA::wstring_alloc (CORBA::ULong len)
 void
 CORBA::wstring_free (CORBA::WChar *const str)
 {
-  delete [] str;
+  ACE_Allocator::instance ()->free(str);
 }
 
 TAO_END_VERSIONED_NAMESPACE_DECL

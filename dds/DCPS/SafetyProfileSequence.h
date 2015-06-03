@@ -333,7 +333,7 @@ namespace SafetyProfile {
   inline T* AllocPolicy<T, Sequence, Bounded<N> >::allocbuf()
   {
     void* const raw =
-      DCPS::SafetyProfilePool::instance()->malloc(N * sizeof(T));
+      ACE_Allocator::instance()->malloc(N * sizeof(T));
     T* const mem = static_cast<T*>(raw);
     Sequence::ElementPolicy::construct(mem, N, false);
     return mem;
@@ -343,7 +343,7 @@ namespace SafetyProfile {
   inline T* AllocPolicy<T, Sequence, Unbounded>::allocbuf(seq_size_type n)
   {
     const size_t bytes = (n + Sequence::ElementPolicy::extra) * sizeof(T);
-    void* const raw = DCPS::SafetyProfilePool::instance()->malloc(bytes);
+    void* const raw = ACE_Allocator::instance()->malloc(bytes);
     T* const mem = static_cast<T*>(raw);
     Sequence::ElementPolicy::construct(mem, n, true);
     return mem + Sequence::ElementPolicy::extra;
@@ -656,7 +656,7 @@ namespace SafetyProfile {
   {
     if (!data) return;
     T* const allocated = Elts::destroy(data, Bounds::Bounds);
-    DCPS::SafetyProfilePool::instance()->free(allocated);
+    ACE_Allocator::instance()->free(allocated);
   }
 
   template <typename T, typename Bounds, typename Elts>

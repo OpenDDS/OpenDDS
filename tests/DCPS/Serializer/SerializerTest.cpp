@@ -1,5 +1,6 @@
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/Definitions.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include "ace/ACE.h"
 #include "ace/Arg_Shifter.h"
@@ -426,6 +427,8 @@ bool runAlignmentTest();
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
+  TheServiceParticipant->configure_pool();
+
   const char string[] = "This is a test of the string serialization.";
 #ifdef DDS_HAS_WCHAR
   const ACE_CDR::WChar wstring[] = L"This is a test of the wstring serialization.";

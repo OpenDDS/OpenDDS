@@ -1127,7 +1127,7 @@ namespace {
     be_global->impl_ <<
       nm << "_slice* " << nm << "_alloc()\n"
       "{\n"
-      "  void* const raw = OpenDDS::DCPS::SafetyProfilePool::instance()->malloc"
+      "  void* const raw = ACE_Allocator::instance()->malloc"
       "(sizeof(" << nm << "));\n"
       "  " << nm << "_slice* const slice = static_cast<" << nm << "_slice*"
       << ">(raw);\n"
@@ -1184,7 +1184,7 @@ namespace {
       "{\n"
       "  if (!slice) return;\n"
       "  " << nm << "_fini_i(slice" << zeros << ");\n"
-      "  OpenDDS::DCPS::SafetyProfilePool::instance()->free(slice);\n"
+      "  ACE_Allocator::instance()->free(slice);\n"
       "}\n\n" <<
       nm << "_slice* " << nm << "_dup(const " << nm << "_slice* slice)\n"
       "{\n"

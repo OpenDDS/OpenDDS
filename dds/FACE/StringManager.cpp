@@ -16,7 +16,7 @@ Char* string_alloc(UnsignedLong len)
 {
   if (len == 0) return &s_empty;
   void* const raw =
-    OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(len + 1);
+    ACE_Allocator::instance()->malloc(len + 1);
   Char* const str = static_cast<Char*>(raw);
   if (str) str[0] = static_cast<Char>(0);
   return str;
@@ -34,7 +34,7 @@ Char* string_dup(const Char* str)
 
 void string_free(Char* str)
 {
-  if (str != &s_empty) OpenDDS::DCPS::SafetyProfilePool::instance()->free(str);
+  if (str != &s_empty) ACE_Allocator::instance()->free(str);
 }
 
 #ifdef DDS_HAS_WCHAR
@@ -42,7 +42,7 @@ WChar* wstring_alloc(UnsignedLong len)
 {
   if (len == 0) return &s_wempty;
   const size_t n = (len + 1) * sizeof(WChar);
-  void* const raw = OpenDDS::DCPS::SafetyProfilePool::instance()->malloc(n);
+  void* const raw = ACE_Allocator::instance()->malloc(n);
   WChar* const str = static_cast<WChar*>(raw);
   if (str) str[0] = static_cast<WChar>(0);
   return str;
@@ -60,7 +60,7 @@ WChar* wstring_dup(const WChar* str)
 
 void wstring_free(WChar* str)
 {
-  if (str != &s_wempty) OpenDDS::DCPS::SafetyProfilePool::instance()->free(str);
+  if (str != &s_wempty) ACE_Allocator::instance()->free(str);
 }
 #endif // DDS_HAS_WCHAR
 }
