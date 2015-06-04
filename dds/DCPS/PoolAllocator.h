@@ -46,14 +46,14 @@ public:
 
   static T* allocate(std::size_t n)
   {
-    void* raw_mem = SafetyProfilePool::instance()->malloc(n * sizeof(T));
+    void* raw_mem = ACE_Allocator::instance()->malloc(n * sizeof(T));
     if (!raw_mem) throw std::bad_alloc();
     return static_cast<T*>(raw_mem);
   }
 
   static void deallocate(T* ptr, std::size_t)
   {
-    SafetyProfilePool::instance()->free(ptr);
+    ACE_Allocator::instance()->free(ptr);
   }
 
   static void construct(T* ptr, const T& value)
@@ -113,19 +113,19 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 
 #ifdef NOT_DEFINE
 #define OPENDDS_NEW_RETURN(POINTER,CONSTRUCTOR,RET_VAL) \
-  do { void* ptr = DCPS::SafetyProfilePool::instance()->malloc(sizeof(CONSTRUCTOR)); \
+  do { void* ptr = ACE_Allocator::instance()->malloc(sizeof(CONSTRUCTOR)); \
        if (ptr == 0) { errno = ENOMEM; return RET_VAL; }                   \
        POINTER = new (ptr) CONSTRUCTOR;                                 \
   } while (0)
 
 #define OPENDDS_NEW(POINTER,CONSTRUCTOR) \
-  do { void* ptr = DCPS::SafetyProfilePool::instance()->malloc(sizeof(CONSTRUCTOR)); \
+  do { void* ptr = ACE_Allocator::instance()->malloc(sizeof(CONSTRUCTOR)); \
        if (ptr == 0) { errno = ENOMEM; return; }                     \
        POINTER = new (ptr) CONSTRUCTOR; \
   } while (0)
 
 #define OPENDDS_NEW_NORETURN(POINTER,CONSTRUCTOR) \
-  do { void* ptr = DCPS::SafetyProfilePool::instance()->malloc(sizeof(CONSTRUCTOR)); \
+  do { void* ptr = ACE_Allocator::instance()->malloc(sizeof(CONSTRUCTOR)); \
        if (ptr == 0) { errno = ENOMEM; }                                     \
        POINTER = new (ptr) CONSTRUCTOR; \
   } while (0)

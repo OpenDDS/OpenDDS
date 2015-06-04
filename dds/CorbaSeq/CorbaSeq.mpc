@@ -1,0 +1,14 @@
+project(OpenDDS_CorbaSeq): dcps {
+  avoids      += no_opendds_safety_profile
+
+  sharedname = OpenDDS_CorbaSeq
+
+  // Special for CorbaSeq directory.
+  IDL_Files {
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -SI -Wb,tao_include_prefix=tao/
+    *.idl
+  }
+}

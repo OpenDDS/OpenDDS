@@ -52,7 +52,7 @@ public:
     free_list_(ACE_PURE_FREE_LIST)
   {
     chunk_size_ = ACE_MALLOC_ROUNDUP(chunk_size, ACE_MALLOC_ALIGN);
-    begin_ = static_cast<unsigned char*> (DCPS::SafetyProfilePool::instance()->malloc(n_chunks * chunk_size_));
+    begin_ = static_cast<unsigned char*> (ACE_Allocator::instance()->malloc(n_chunks * chunk_size_));
     // Remember end of the pool.
     end_ = begin_ + n_chunks * chunk_size_;
 
@@ -69,7 +69,7 @@ public:
 
   /// Clear things up.
   ~Dynamic_Cached_Allocator_With_Overflow() {
-    DCPS::SafetyProfilePool::instance()->free(begin_);
+    ACE_Allocator::instance()->free(begin_);
     begin_ = 0;
     chunk_size_ = 0;
   }
@@ -90,7 +90,7 @@ public:
     void* rtn = this->free_list_.remove()->addr();
 
     if (0 == rtn) {
-      rtn = DCPS::SafetyProfilePool::instance()->malloc(chunk_size_);
+      rtn = ACE_Allocator::instance()->malloc(chunk_size_);
       allocs_from_heap_++;
 
       if (DCPS_debug_level >= 2) {
@@ -150,7 +150,7 @@ public:
     unsigned char* tmp = static_cast<unsigned char*> (ptr);
     if (tmp < begin_ ||
         tmp >= end_) {
-      DCPS::SafetyProfilePool::instance()->free(tmp);
+      ACE_Allocator::instance()->free(tmp);
       frees_to_heap_ ++;
 
       if (frees_to_heap_.value() > allocs_from_heap_.value()) {
