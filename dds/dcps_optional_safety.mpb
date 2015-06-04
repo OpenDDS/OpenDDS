@@ -97,7 +97,7 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
   }
 }
 
-feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults {
+feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, dcps_ts_defaults, dcps_optional_features {
   TypeSupport_Files {
     dcps_ts_flags += -SI -Lspcpp
     DdsDcpsGuid.idl
