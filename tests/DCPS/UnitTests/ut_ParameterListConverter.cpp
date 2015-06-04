@@ -499,7 +499,6 @@ Parameter get(const ParameterList& param_list,
 int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
-  TheServiceParticipant->configure_pool();
   { // Should encode participant data with 1 locator to param list properly
     SPDPdiscoveredParticipantData participant_data = Factory::default_participant_data();
     ParameterList param_list;
