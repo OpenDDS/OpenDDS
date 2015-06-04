@@ -1,0 +1,3 @@
+project(OpenDDS_CorbaSeq): OptionalCorbaSeq {
+
+}
