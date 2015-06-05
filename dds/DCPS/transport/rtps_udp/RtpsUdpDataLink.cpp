@@ -87,18 +87,34 @@ RtpsUdpDataLink::add_delayed_notification(TransportQueueElement* element)
 void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
   const TransportQueueElement::MatchCriteria& criteria)
 {
-  RtpsWriterMap::iterator iter = writers_.find(pub_id);
-  if (iter != writers_.end() && !iter->second.elems_not_acked_.empty()) {
-    OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator it = iter->second.elems_not_acked_.begin();
-    while (it != iter->second.elems_not_acked_.end()) {
-      if (criteria.matches(*it->second)) {
-        it->second->data_dropped(true);
-        iter->second.send_buff_->release_acked(it->first);
-        iter->second.elems_not_acked_.erase(it);
-        break;
-      } else {
-        ++it;
+  bool remove = false;
+  TransportQueueElement* tqe_to_remove;
+  SequenceNumber sn_to_remove;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+    RtpsWriterMap::iterator iter = writers_.find(pub_id);
+    if (iter != writers_.end() && !iter->second.elems_not_acked_.empty()) {
+      OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator it = iter->second.elems_not_acked_.begin();
+      while (it != iter->second.elems_not_acked_.end()) {
+        if (criteria.matches(*it->second)) {
+          tqe_to_remove = it->second;
+          sn_to_remove = it->first;
+          iter->second.elems_not_acked_.erase(it);
+          remove = true;
+          break;
+        } else {
+          ++it;
+        }
       }
+    }
+  }
+  if (remove) {
+    tqe_to_remove->data_dropped(true);
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    RtpsWriterMap::iterator iter = writers_.find(pub_id);
+    if (iter != writers_.end()) {
+      iter->second.send_buff_->release_acked(sn_to_remove);
     }
   }
 }
@@ -1681,12 +1697,20 @@ RtpsUdpDataLink::send_nackfrag_replies(RtpsWriter& writer,
 void
 RtpsUdpDataLink::process_acked_by_all()
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  // Reply from local DW to remote DR: GAP or DATA
   using namespace OpenDDS::RTPS;
   typedef RtpsWriterMap::iterator rw_iter;
-  for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
 
+  OPENDDS_VECTOR(RepoId) to_check;
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (rw_iter rw_init = writers_.begin(); rw_init != writers_.end(); ++rw_init) {
+    to_check.push_back(rw_init->first);
+  }
+  // Reply from local DW to remote DR: GAP or DATA
+  for (size_t i = 0; i < to_check.size(); ++i) {
+    rw_iter rw = writers_.find(to_check.at(i));
+    if (rw == writers_.end()) {
+      continue;
+    }
     RtpsWriter& writer = rw->second;
     if (!writer.elems_not_acked_.empty()) {
 
@@ -1704,19 +1728,34 @@ RtpsUdpDataLink::process_acked_by_all()
       if (all_readers_ack == SequenceNumber::MAX_VALUE) {
         continue;
       }
+      OPENDDS_VECTOR(TransportQueueElement*) tqes;
+      OPENDDS_VECTOR(SequenceNumber) sns;
       //if any messages fully acked, call data delivered and remove from map
       typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
       iter_t it = writer.elems_not_acked_.begin();
       while (it != writer.elems_not_acked_.end()) {
         if (it->first < all_readers_ack) {
-          it->second->data_delivered();
+          tqes.push_back(it->second);
+          sns.push_back(it->first);
           iter_t last = it;
           ++it;
-          writer.send_buff_->release_acked(last->first);
           writer.elems_not_acked_.erase(last);
         } else {
           break;
         }
+      }
+      g.release();
+      for (size_t x = 0; x < tqes.size(); ++x) {
+        tqes.at(x)->data_delivered();
+      }
+      g.acquire();
+      rw_iter rw_cleanup = writers_.find(to_check.at(i));
+      if (rw_cleanup == writers_.end()) {
+        continue;
+      }
+      RtpsWriter& writer = rw_cleanup->second;
+      for (size_t y = 0; y < sns.size(); ++y) {
+        writer.send_buff_->release_acked(sns.at(y));
       }
     }
   }
