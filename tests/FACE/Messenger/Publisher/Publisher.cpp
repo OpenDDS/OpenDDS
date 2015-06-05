@@ -10,7 +10,8 @@
 
 static bool no_global_new = false;
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined(OPENDDS_SAFETY_PROFILE) && (defined(__GLIBC__) || defined(ACE_HAS_EXECINFO_H))
+
 #include <execinfo.h>
 
 void* operator new(size_t sz)

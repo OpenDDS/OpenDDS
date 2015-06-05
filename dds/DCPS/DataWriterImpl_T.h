@@ -6,6 +6,7 @@
 #include "dds/DCPS/DataReaderImpl.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/TypeSupportImpl.h"
+#include "dcps_export.h"
 
 namespace OpenDDS {
   namespace DCPS {
@@ -16,7 +17,7 @@ namespace OpenDDS {
  * this interface.
  */
   template <typename MessageType>
-  class DataWriterImpl_T
+  class OpenDDS_Dcps_Export DataWriterImpl_T
     : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataWriterType>,
       public virtual OpenDDS::DCPS::DataWriterImpl
   {
