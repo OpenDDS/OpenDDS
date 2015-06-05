@@ -397,6 +397,7 @@ RtpsUdpDataLink::stop_i()
 {
   nack_reply_.cancel();
   heartbeat_reply_.cancel();
+  acked_by_all_check_.cancel();
   heartbeat_.disable();
   unicast_socket_.close();
   multicast_socket_.close();
