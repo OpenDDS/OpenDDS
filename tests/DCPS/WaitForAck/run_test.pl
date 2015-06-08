@@ -15,6 +15,7 @@ my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
 $test->enable_console_logging();
 $test->{dcps_debug_level} = 1;
+$test->{transport} = 'rtps';
 my $pending_timeout = '-DCPSPendingTimeout 2';
 my $verbose = $test->flag('--verbose');
 $test->process('sub', 'subscriber', ($verbose ? '-v' : '') . "$pending_timeout");
