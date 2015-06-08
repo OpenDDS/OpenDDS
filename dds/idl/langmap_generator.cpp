@@ -1398,8 +1398,7 @@ bool langmap_generator::gen_union(AST_Union* u, UTL_ScopedName* name,
   return generator_->gen_union(u, name, branches, discriminator);
 }
 
-bool langmap_generator::gen_interf_fwd(UTL_ScopedName* name,
-                                       AST_Type::SIZE_TYPE size)
+bool langmap_generator::gen_interf_fwd(UTL_ScopedName* name)
 {
   const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
 

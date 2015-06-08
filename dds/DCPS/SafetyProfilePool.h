@@ -39,24 +39,18 @@ public:
   ~SafetyProfilePool();
 
   void configure_pool(size_t size, size_t granularity);
+  void install();
 
   void* malloc(std::size_t size)
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, lock, lock_, 0);
-    if (main_pool_) {
-      return main_pool_->pool_alloc(size);
-    } else {
-      return init_pool_->pool_alloc(size);
-    }
+    return main_pool_->pool_alloc(size);
   }
 
   void free(void* ptr)
   {
     ACE_GUARD(ACE_Thread_Mutex, lock, lock_);
-    // Try main pool first
-    if (!(main_pool_ && main_pool_->pool_free(ptr))) {
-      init_pool_->pool_free(ptr);
-    }
+    main_pool_->pool_free(ptr);
   }
 
   void* calloc(std::size_t, char = '\0')
@@ -91,9 +85,10 @@ private:
   SafetyProfilePool(const SafetyProfilePool&);
   SafetyProfilePool& operator=(const SafetyProfilePool&);
 
-  MemoryPool* init_pool_;
   MemoryPool* main_pool_;
   ACE_Thread_Mutex lock_;
+  static SafetyProfilePool* instance_;
+  friend class InstanceMaker;
 };
 
 }}

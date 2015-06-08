@@ -34,10 +34,6 @@
 #include "ReplayerImpl.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
-#include "ace/Use_FACE_Allocator.h"
-#endif
-
-#ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
 #include <fstream>
@@ -1733,8 +1729,8 @@ void
 Service_Participant::configure_pool()
 {
   if (pool_size_) {
-    dynamic_cast<ACE_FACE_Safety_Allocator *>(ACE_Allocator::instance ())->configure_pool(40000000, 10000); // size, max number of allocs
     SafetyProfilePool::instance()->configure_pool(pool_size_, pool_granularity_);
+    SafetyProfilePool::instance()->install();
   }
 }
 #endif
