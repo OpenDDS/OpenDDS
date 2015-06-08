@@ -27,7 +27,7 @@ OpenDDS_Dcps_Export void pool_free_memory(void* ptr);
 ///
 /// This class template models the C++03 Allocator concept and is stateless.
 template <typename T>
-class PoolAllocator
+class OpenDDS_Dcps_Export PoolAllocator
 {
 public:
   typedef T value_type;
