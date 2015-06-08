@@ -19,7 +19,11 @@ namespace OpenDDS {
    *
    */
   template <typename MessageType>
-  class OpenDDS_Dcps_Export DataReaderImpl_T
+    class
+#if ( __GNUC__ == 4 && __GNUC_MINOR__ == 1)
+    OpenDDS_Dcps_Export
+#endif
+    DataReaderImpl_T
     : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataReaderType>,
       public virtual OpenDDS::DCPS::DataReaderImpl
   {

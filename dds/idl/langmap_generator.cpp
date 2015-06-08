@@ -93,12 +93,12 @@ namespace {
       : be_global->export_macro().c_str() + std::string(" ");
   }
 
-  void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE size)
+  void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE size, const char* struct_or_class = "struct")
   {
     be_global->add_include("<tao/VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
     const char* const nm = name->last_component()->get_string();
     be_global->lang_header_ <<
-      "struct " << nm << ";\n";
+      struct_or_class << ' ' << nm << ";\n";
     switch (size) {
     case AST_Type::SIZE_UNKNOWN:
       be_global->lang_header_ << "/* Unknown size */\n";
@@ -460,7 +460,7 @@ public:
   {
     const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
-    struct_decls(name, u->size_type());
+    struct_decls(name, u->size_type(), "class");
     be_global->lang_header_ <<
       "\n"
       "class " << exporter() << nm << " \n"

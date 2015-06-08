@@ -23,12 +23,13 @@ class Entities {
 public:
   struct DDSAdapter : public OpenDDS::DCPS::PoolAllocationBase {
     DDSAdapter ()
-      : status_valid(FACE::INVALID) {};
+      : status_valid(FACE::INVALID)
+    {}
 
     FACE::VALIDITY_TYPE status_valid;
   };
   struct FaceSender : public DDSAdapter {
-    FaceSender () {};
+    FaceSender () {}
     DDS::DataWriter_var dw;
   };
 
@@ -37,9 +38,9 @@ public:
       : last_msg_tid(0),
         sum_recvd_msgs_latency(0),
         total_msgs_recvd(0)
-    {};
+    {}
 
-    virtual ~FaceReceiver() {};
+    virtual ~FaceReceiver() {}
     virtual FACE::RETURN_CODE_TYPE messages_waiting(FACE::WAITING_RANGE_TYPE& /*num_waiting*/)
     {
       return FACE::NOT_AVAILABLE;

@@ -92,6 +92,7 @@ be_util::usage (void)
     ACE_TEXT("generated header file.\n")
     ACE_TEXT(" -Wb,v8\t\t\tgenerate TypeSupport for converting data samples ")
     ACE_TEXT("to v8 JavaScript objects\n")
+    ACE_TEXT(" -ZC <include>\t\t\tadd <include> to *TypeSupportImpl.cpp\n")
   ));
 }
 
