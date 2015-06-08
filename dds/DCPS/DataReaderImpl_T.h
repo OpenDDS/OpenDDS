@@ -7,6 +7,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/TypeSupportImpl.h"
+#include "dcps_export.h"
 
 namespace OpenDDS {
   namespace DCPS {
@@ -18,7 +19,11 @@ namespace OpenDDS {
    *
    */
   template <typename MessageType>
-  class DataReaderImpl_T
+    class
+#if ( __GNUC__ == 4 && __GNUC_MINOR__ == 1)
+    OpenDDS_Dcps_Export
+#endif
+    DataReaderImpl_T
     : public virtual OpenDDS::DCPS::LocalObject<typename DDSTraits<MessageType>::DataReaderType>,
       public virtual OpenDDS::DCPS::DataReaderImpl
   {
