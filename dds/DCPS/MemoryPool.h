@@ -182,6 +182,8 @@ public:
   static size_t align(size_t size, size_t granularity) {
      return (size + granularity - 1) / granularity * granularity; }
 
+  size_t size () const { return pool_size_; }
+
 private:
   const size_t granularity_;     ///< Configured granularity
   const size_t min_alloc_size_;  ///< Aligned minimum allocation size
