@@ -3,6 +3,10 @@
     next;
 }
 
-/<operator new/ && /call/ {
+/<operator new/ && /call/ && !/operator new\(unsigned long, void\*\)/ && !/operator new\[\]\(unsigned long, void\*\)/ {
+    print location;
+}
+
+/<operator delete/ && /call/ && !/operator delete\(unsigned long, void\*\)/ && !/operator delete\[\]\(unsigned long, void\*\)/ {
     print location;
 }
