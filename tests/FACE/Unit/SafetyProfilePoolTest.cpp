@@ -18,12 +18,14 @@ using namespace OpenDDS::DCPS;
 // Malloc should return pointer
 void test_malloc() {
   SafetyProfilePool pool;
+  pool.configure_pool(1024, sizeof(void*));
   TEST_CHECK(pool.malloc(24));
 }
 
 // Malloc should return pointer
 void test_mallocs() {
   SafetyProfilePool pool;
+  pool.configure_pool(1024, sizeof(void*));
   void* p1;
   void* p2;
   void* p3;
@@ -54,4 +56,3 @@ int ACE_TMAIN(int, ACE_TCHAR* [] )
   return failed;
 }
 #endif
-
