@@ -144,7 +144,7 @@ $test->process("publisher", "publisher", $pub_parameters);
 $test->start_process("publisher");
 $test->start_process("subscriber");
 
-my $status = $test->finish(30, "publisher");
+my $status = $test->finish(300, "publisher");
 
 unlink $subscriber_completed;
 unlink $subscriber_ready;
