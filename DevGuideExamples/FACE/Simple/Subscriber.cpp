@@ -6,7 +6,7 @@
 # include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
-int ACE_TMAIN(int, ACE_TCHAR*[])
+int main(int, const char*[])
 {
   // Initialize the TS interface
   FACE::RETURN_CODE_TYPE status;
@@ -28,6 +28,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     return static_cast<int>(status);
   }
 
+  // Receive a message
   const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
   FACE::TRANSACTION_ID_TYPE txn;
   Messenger::Message msg;
@@ -40,6 +41,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     return static_cast<int>(status);
   }
 
+  // Output the message
   ACE_DEBUG((LM_INFO, "%C\t%d\n", msg.from.in(), msg.count));
 
   // Destroy the sub connection
