@@ -292,7 +292,7 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
                     /*in*/    FACE::TIMEOUT_TYPE /*timeout*/,
                     /*inout*/ FACE::TRANSACTION_ID_TYPE& transaction_id,
                     /*inout*/ FACE::TS::MessageHeader& message_header,
-                    /*in*/    FACE::MESSAGE_SIZE_TYPE /*message_size*/,
+                    /*in*/    FACE::MESSAGE_SIZE_TYPE message_size,
                     /*out*/   FACE::RETURN_CODE_TYPE& return_code)
 {
   Entities::ConnIdToReceiverMap& readers =
@@ -301,6 +301,11 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
   // of last_msg_tid to 0 before a msg has been received so
   // only valid transaction_ids are > 0.
   if (!readers.count(connection_id) || transaction_id == 0) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
+
+  if (message_size < 0 || (unsigned)message_size < sizeof(FACE::TS::MessageHeader)) {
     return_code = FACE::INVALID_PARAM;
     return;
   }
