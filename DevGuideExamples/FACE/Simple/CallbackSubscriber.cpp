@@ -9,13 +9,13 @@
 
 void callback(FACE::TRANSACTION_ID_TYPE,
               Messenger::Message& msg,
-              FACE::MESSAGE_TYPE_GUID message_type_id,
-              FACE::MESSAGE_SIZE_TYPE message_size,
+              FACE::MESSAGE_TYPE_GUID,
+              FACE::MESSAGE_SIZE_TYPE,
               const FACE::WAITSET_TYPE,
               FACE::RETURN_CODE_TYPE& return_code)
 {
   ACE_DEBUG((LM_INFO,
-    "Callback: %C\t%d\n", msg.from.in(), msg.count));
+    "Callback: %C\t%d\n", msg.text.in(), msg.count));
   return_code = FACE::RC_NO_ERROR;
 }
 
@@ -40,14 +40,15 @@ int main(int, const char*[])
   }
 
   // Register a callback
-  ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
-  FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
+  FACE::TS::Register_Callback(
+    connId, 0, callback, max_msg_size, status);
 
   if (status != FACE::RC_NO_ERROR) {
     return static_cast<int>(status);
   }
 
   // Give message time to be processed before exiting
+  ACE_DEBUG((LM_INFO, "Subscriber: waiting for callback\n"));
   ACE_OS::sleep(15);
 
   // Unregister the callback

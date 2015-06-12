@@ -20,23 +20,27 @@ int main(int, const char*[])
   // Create the pub connection
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
-  FACE::MESSAGE_SIZE_TYPE size;
+  FACE::MESSAGE_SIZE_TYPE max_msg_size;
   FACE::TS::Create_Connection(
     "pub", FACE::PUB_SUB, connId, dir,
-    size, FACE::INF_TIME_VALUE, status);
+    max_msg_size, FACE::INF_TIME_VALUE, status);
 
   if (status != FACE::RC_NO_ERROR) {
     return static_cast<int>(status);
   }
 
   // Message to send
-  Messenger::Message msg = {"Hello, world.", 14, 1};
+  Messenger::Message msg;
+  msg.text = "Hello, World!";
+  msg.subject_id = 14;
+  msg.count = 1;
 
   // Send message
   FACE::TRANSACTION_ID_TYPE txn;
   ACE_DEBUG((LM_INFO, "Publisher: about to Send_Message()\n"));
   FACE::TS::Send_Message(
-    connId, FACE::INF_TIME_VALUE, txn, msg, size, status);
+    connId, FACE::INF_TIME_VALUE, txn, msg,
+    max_msg_size, status);
   if (status != FACE::RC_NO_ERROR) {
     return static_cast<int>(status);
   }
@@ -46,6 +50,7 @@ int main(int, const char*[])
 
   // Destroy the pub connection
   FACE::TS::Destroy_Connection(connId, status);
+
   if (status != FACE::RC_NO_ERROR) {
     return static_cast<int>(status);
   }
