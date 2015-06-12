@@ -6,6 +6,7 @@
 # include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
+// FUZZ: disable check_for_improper_main_declaration
 int main(int, const char*[])
 {
   // Initialize the TS interface
@@ -55,3 +56,4 @@ int main(int, const char*[])
 
   return EXIT_SUCCESS;
 }
+// FUZZ: enable check_for_improper_main_declaration

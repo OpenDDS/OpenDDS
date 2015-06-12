@@ -19,6 +19,7 @@ void callback(FACE::TRANSACTION_ID_TYPE,
   return_code = FACE::RC_NO_ERROR;
 }
 
+// FUZZ: disable check_for_improper_main_declaration
 int main(int, const char*[])
 {
   // Initialize the TS interface
@@ -67,3 +68,4 @@ int main(int, const char*[])
 
   return EXIT_SUCCESS;
 }
+// FUZZ: enable check_for_improper_main_declaration
