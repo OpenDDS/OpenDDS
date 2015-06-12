@@ -51,11 +51,13 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ../ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
    ],
-   ['Advanced ACE+TAO configuration:',
+   ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
     'mpcopts=s', 'Extra command-line args for MPC (if MPC is run)',
+    'face-host!', 'FACE host tools build',
+    'face-target!', 'FACE target build',
    ],
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
@@ -147,6 +149,10 @@ iterate(sub {
 if (! -r 'rules.dds.GNU') {
   print "ERROR: this script must be run from its own directory\n";
   exit 1;
+}
+
+if ($opts{'face-host'}) {
+  print "configuring for FACE host build\n";
 }
 
 GetOptions(\%opts, @getopts) or usage();
@@ -346,7 +352,20 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
     print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
   }
   else {
-    eval {require LWP::UserAgent;};
+    eval {
+      require LWP::UserAgent;
+      my $ua = LWP::UserAgent->new;
+      $ua->env_proxy;
+      print $download_message . "\n";
+      if ($opts{'dry-run'}) {
+        print "Dry-run: would LWP::UserAgent get $urlbase$file\nExiting\n";
+        exit 1;
+      }
+      my $response = $ua->get($urlbase . $file, ':content_file' => $file);
+      if ($response->is_error) {
+        die $response->message . "\nstopped";
+      }
+    };
     if ($@) {
       if (which('wget')) {
         print $download_message . " (using wget)\n";
@@ -371,19 +390,6 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
       else {
         die "Can't download ACE+TAO using LWP, wget, or curl.\nDownload it ".
           "from $urlbase$file, place the file here\n, and re-run the script.\n";
-      }
-    }
-    else {
-      my $ua = LWP::UserAgent->new;
-      $ua->env_proxy;
-      print $download_message . "\n";
-      if ($opts{'dry-run'}) {
-        print "Dry-run: would LWP::UserAgent get $urlbase$file\nExiting\n";
-        exit 1;
-      }
-      my $response = $ua->get($urlbase . $file, ':content_file' => $file);
-      if ($response->is_error) {
-        die $response->message . "\nstopped";
       }
     }
   }
