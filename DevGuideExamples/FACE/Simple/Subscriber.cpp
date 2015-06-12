@@ -33,7 +33,9 @@ int main(int, const char*[])
   FACE::TRANSACTION_ID_TYPE txn;
   Messenger::Message msg;
 
-  ACE_DEBUG((LM_INFO, "Subscriber: about to Receive_Message()\n"));
+  ACE_DEBUG((
+    LM_INFO, "Subscriber: about to Receive_Message()\n"));
+
   FACE::TS::Receive_Message(
     connId, timeout, txn, msg, size, status);
 
