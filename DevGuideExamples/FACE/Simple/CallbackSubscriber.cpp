@@ -1,5 +1,6 @@
 #include "FaceMessage_TS.hpp"
 #include "ace/Log_Msg.h"
+#include "ace/OS_NS_unistd.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 # include "dds/DCPS/RTPS/RtpsDiscovery.h"
