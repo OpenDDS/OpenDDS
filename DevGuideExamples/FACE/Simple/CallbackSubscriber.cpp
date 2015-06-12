@@ -32,18 +32,16 @@ int main(int, const char*[])
   // Create the sub connection
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
-  FACE::MESSAGE_SIZE_TYPE size;
-  FACE::TS::Create_Connection(
-    "sub", FACE::PUB_SUB, connId, dir, size,
-    FACE::INF_TIME_VALUE, status);
-
+  FACE::MESSAGE_SIZE_TYPE max_msg_size;
+  FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, max_msg_size,
+                              FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) {
     return static_cast<int>(status);
   }
 
   // Register a callback
   ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
-  FACE::TS::Register_Callback(connId, 0, callback, 0, status);
+  FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
 
   if (status != FACE::RC_NO_ERROR) {
     return static_cast<int>(status);

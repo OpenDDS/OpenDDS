@@ -137,11 +137,21 @@ void receive_message(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
                      /*in*/    FACE::TIMEOUT_TYPE timeout,
                      /*inout*/ FACE::TRANSACTION_ID_TYPE& transaction_id,
                      /*inout*/ Msg& message,
-                     /*in*/    FACE::MESSAGE_SIZE_TYPE /*message_size*/,
+                     /*in*/    FACE::MESSAGE_SIZE_TYPE message_size,
                      /*out*/   FACE::RETURN_CODE_TYPE& return_code)
 {
   Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
+  if(!Entities::instance()->connections_.count(connection_id)) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
+  FACE::TRANSPORT_CONNECTION_STATUS_TYPE status =
+    Entities::instance()->connections_[connection_id].second;
+  if (message_size < status.MAX_MESSAGE_SIZE) {
     return_code = FACE::INVALID_PARAM;
     return;
   }
@@ -202,9 +212,19 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
                   FACE::TIMEOUT_TYPE timeout,
                   FACE::TRANSACTION_ID_TYPE& /*transaction_id*/,
                   const Msg& message,
-                  FACE::MESSAGE_SIZE_TYPE /*message_size*/,
+                  FACE::MESSAGE_SIZE_TYPE message_size,
                   FACE::RETURN_CODE_TYPE& return_code)
 {
+  if(!Entities::instance()->connections_.count(connection_id)) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
+  FACE::TRANSPORT_CONNECTION_STATUS_TYPE status =
+    Entities::instance()->connections_[connection_id].second;
+  if (message_size < status.MAX_MESSAGE_SIZE) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
   Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
   if (!writers.count(connection_id)) {
     return_code = FACE::INVALID_PARAM;
@@ -303,7 +323,7 @@ private:
         }
         for (size_t i = 0; i < callbacks_.size(); ++i) {
           retcode = FACE::RC_NO_ERROR;
-          callbacks_.at(i)(transaction_id /*Transaction_ID*/, sample, status.MESSAGE, status.MAX_MESSAGE, 0 /*WAITSET_TYPE*/, retcode);
+          callbacks_.at(i)(transaction_id /*Transaction_ID*/, sample, status.MESSAGE, status.MAX_MESSAGE_SIZE, 0 /*WAITSET_TYPE*/, retcode);
           if (retcode != FACE::RC_NO_ERROR) {
             ACE_ERROR((LM_ERROR, "ERROR: Listener::on_data_available - callback %d returned retcode: %d\n", i, retcode));
           }
@@ -327,11 +347,21 @@ void register_callback(FACE::CONNECTION_ID_TYPE connection_id,
                                         FACE::MESSAGE_SIZE_TYPE,
                                         const FACE::WAITSET_TYPE,
                                         FACE::RETURN_CODE_TYPE&),
-                       FACE::MESSAGE_SIZE_TYPE /*max_message_size*/,
+                       FACE::MESSAGE_SIZE_TYPE max_message_size,
                        FACE::RETURN_CODE_TYPE& return_code)
 {
   Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
   if (!readers.count(connection_id)) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
+  if(!Entities::instance()->connections_.count(connection_id)) {
+    return_code = FACE::INVALID_PARAM;
+    return;
+  }
+  FACE::TRANSPORT_CONNECTION_STATUS_TYPE status =
+    Entities::instance()->connections_[connection_id].second;
+  if (max_message_size < status.MAX_MESSAGE_SIZE) {
     return_code = FACE::INVALID_PARAM;
     return;
   }

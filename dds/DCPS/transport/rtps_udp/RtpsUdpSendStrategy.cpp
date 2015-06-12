@@ -194,7 +194,9 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
 #endif
   if (result < 0) {
     ACE_TCHAR addr_buff[256] = {};
+    int err = errno;
     addr.addr_to_string(addr_buff, 256, 0);
+    errno = err;
     ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
       "destination %s failed %p\n", addr_buff, ACE_TEXT("send")));
   }

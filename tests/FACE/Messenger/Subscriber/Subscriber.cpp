@@ -83,17 +83,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
-  FACE::MESSAGE_SIZE_TYPE size;
-  FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size,
+  FACE::MESSAGE_SIZE_TYPE max_msg_size;
+  FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, max_msg_size,
                               FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   bool testPassed = true;
   if (useCallback) {
     ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
-    FACE::TS::Register_Callback(connId, 0, callback, 0, status);
+    FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
-    FACE::TS::Register_Callback(connId, 0, callback, 0, status);
+    FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_OS::sleep(15);
     if (!callbackHappened || callback_count != 2) {
@@ -109,7 +109,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     FACE::TRANSACTION_ID_TYPE txn;
     Messenger::Message msg;
     ACE_DEBUG((LM_INFO, "Subscriber: about to Receive_Message()\n"));
-    FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
+    FACE::TS::Receive_Message(connId, timeout, txn, msg, max_msg_size, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
     ACE_DEBUG((LM_INFO, "%C\t%d\n", msg.text.in(), msg.count));
 #ifdef ACE_HAS_CDR_FIXED

@@ -60,18 +60,18 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   FACE::RETURN_CODE_TYPE status = FACE::RC_NO_ERROR;
   FACE::TS::Initialize("face_config.ini", status);
-  FACE::MESSAGE_SIZE_TYPE size;
+  FACE::MESSAGE_SIZE_TYPE max_msg_size;
 
   if (!status) {
     FACE::CONNECTION_DIRECTION_TYPE dir;
-    FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, size, FACE::INF_TIME_VALUE, status);
+    FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, max_msg_size, FACE::INF_TIME_VALUE, status);
     if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
   }
 
   //First test receive header for a callback processed message
   //Should receive 10 messages, process/receive their headers then unregister callback
   ACE_DEBUG((LM_INFO, "Subscriber: about to Register_Callback()\n"));
-  FACE::TS::Register_Callback(connId, 0, callback, 0, status);
+  FACE::TS::Register_Callback(connId, 0, callback, max_msg_size, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   // Second test receive header after a Receive_Message processed message
@@ -83,7 +83,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     Messenger::Message msg;
     std::cout << "Subscriber: about to Receive_Message()" << std::endl;
     while (expected <= 19) {
-      FACE::TS::Receive_Message(connId, timeout, txn, msg, size, status);
+      FACE::TS::Receive_Message(connId, timeout, txn, msg, max_msg_size, status);
       if (status != FACE::RC_NO_ERROR) break;
         ACE_DEBUG((LM_INFO, "Receive_Message: (the %d time): %C\t%d\t"
                    "ttid: %Ld\n",
@@ -98,7 +98,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
         break;
       } else {
         FACE::TS::MessageHeader hdr;
-        FACE::TS::Receive_Message(connId, timeout, txn, hdr, size, status);
+        FACE::TS::Receive_Message(connId, timeout, txn, hdr, max_msg_size, status);
         if (status != FACE::RC_NO_ERROR) {
           std::cout << "ERROR: Receive_Message for header failed for tid: " << txn << " with status: " << status << std::endl;
           break;
