@@ -186,7 +186,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
 
+#ifndef OPENDDS_SAFETY_PROFILE
   TheServiceParticipant->configure_pool ();
+#endif
 
   try
     {
