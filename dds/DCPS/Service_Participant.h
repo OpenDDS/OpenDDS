@@ -308,7 +308,9 @@ public:
   void register_discovery_type(const char* section_name,
                                Discovery::Config* cfg);
 
+#ifndef OPENDDS_SAFETY_PROFILE
   ACE_ARGV* ORB_argv() { return &ORB_argv_; }
+#endif
 
   /**
    *  Create a Recorder object.
@@ -417,7 +419,9 @@ private:
 
   OPENDDS_MAP(OPENDDS_STRING, Discovery::Config*) discovery_types_;
 
+#ifndef OPENDDS_SAFETY_PROFILE
   ACE_ARGV ORB_argv_;
+#endif
 
   ACE_Reactor* reactor_; //TODO: integrate with threadpool
   ACE_thread_t reactor_owner_;
