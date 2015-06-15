@@ -1,7 +1,7 @@
 
 project(*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=SetQosDeadline_export.h \
-                   -Wb,stub_export_macro=SetQosDeadline_Export
+                   -Wb,stub_export_macro=SetQosDeadline_Export -SS
   dcps_ts_flags += -Wb,export_macro=SetQosDeadline_Export
   dynamicflags  += SETQOSDEADLINE_BUILD_DLL
 
@@ -38,4 +38,3 @@ project(*Subscriber) : dcpsexe, dcps_transports_for_test {
     DataReaderListener.cpp
   }
 }
-

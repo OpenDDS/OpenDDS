@@ -186,6 +186,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
 
+  TheServiceParticipant->configure_pool ();
+
   try
     {
       ACE_DEBUG((LM_INFO,"(%P|%t) %T publisher main\n"));

@@ -1,6 +1,6 @@
 project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=Priority_export.h \
-                   -Wb,stub_export_macro=Priority_Export
+                   -Wb,stub_export_macro=Priority_Export -SS
   dcps_ts_flags += -Wb,export_macro=Priority_Export
   dynamicflags  += PRIORITY_BUILD_DLL
 

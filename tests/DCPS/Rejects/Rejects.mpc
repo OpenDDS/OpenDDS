@@ -1,7 +1,7 @@
 
 project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=Rejects_export.h \
-                   -Wb,stub_export_macro=Rejects_Export
+                   -Wb,stub_export_macro=Rejects_Export -SS
   dcps_ts_flags += -Wb,export_macro=Rejects_Export
   dynamicflags  += REJECTS_BUILD_DLL
 

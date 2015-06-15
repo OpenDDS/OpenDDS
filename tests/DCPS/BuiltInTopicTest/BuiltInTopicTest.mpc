@@ -1,6 +1,6 @@
 project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=BuiltInTopicTest_export.h \
-                   -Wb,stub_export_macro=BuiltInTopicTest_Export
+                   -Wb,stub_export_macro=BuiltInTopicTest_Export -SS
   dcps_ts_flags += -Wb,export_macro=BuiltInTopicTest_Export
   dynamicflags  += BUILTINTOPICTEST_BUILD_DLL
 
