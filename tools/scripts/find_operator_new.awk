@@ -7,6 +7,6 @@
     print location;
 }
 
-/<operator delete/ && /call/ && !/operator delete\(unsigned long, void\*\)/ && !/operator delete\[\]\(unsigned long, void\*\)/ {
-    print location;
-}
+# /<operator delete/ && /call/ && !/operator delete\(void\*, void\*\)/ && !/operator delete\[\]\(void\*, void\*\)/ {
+#     print location;
+# }
