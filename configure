@@ -306,58 +306,83 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
-## DDS_ROOT
+my %hostEnv;
+my %targetEnv;
 
-my %extraENV;
-sub setenv {
-  my($name, $val) = @_;
+sub setEnv {
+  my($name, $val, %env) = @_;
   $val = Cwd::abs_path($val) if -d $val;
   $val =~ s!/!\\!g if $slash eq '\\';
-  $ENV{$name} = $extraENV{$name} = $val;
+  $env{$name} = $val;
+  # Used to set $ENV{$name} also
   print "Setting $name to $val\n" if $opts{'verbose'};
 }
 
-setenv('DDS_ROOT', '.');
+sub setHostEnv {
+  my($name, $val) = @_;
+  setEnv($name, $val, %hostEnv);
+}
+
+sub setTargetEnv {
+  my($name, $val) = @_;
+  setEnv($name, $val, %targetEnv);
+}
+
+## DDS_ROOT
+
+print "setting DDS_ROOT\n";
+
+setHostEnv('DDS_ROOT', './build/host');
+setTargetEnv('DDS_ROOT', './build/target');
 
 ## ace
+my $ace_src_root;
 
 # if --ace specified at the command line
 if ($opts{'ace'}) {
   if (!-r $opts{'ace'} . '/ace/ACE.h') {
     die "Can't find ACE at $opts{'ace'}\n";
   }
-  setenv('ACE_ROOT', $opts{'ace'});
+  $ace_src_root = $opts{'ace'};
 }
 # else if ACE_ROOT set
-elsif ($ENV{'ACE_ROOT'} && !-r $ENV{'ACE_ROOT'} . '/ace/ACE.h') {
-  die "Can't find ACE at $ENV{'ACE_ROOT'}\n";
+elsif ($ENV{'ACE_ROOT'}) {
+  if (!-r $ENV{'ACE_ROOT'} . '/ace/ACE.h') {
+    die "Can't find ACE at $ENV{'ACE_ROOT'}\n";
+  }
+  $ace_src_root = $ENV{'ACE_ROOT'};
 }
 # else if ACE_wrappers peer directory exists
-elsif (!$ENV{'ACE_ROOT'} && -r '../ACE_wrappers/ace/ACE.h'
-       && -r '../ACE_wrappers/TAO/tao/ORB.h') {
-  setenv('ACE_ROOT', '../ACE_wrappers');
-  setenv('TAO_ROOT', $ENV{'ACE_ROOT'} . $slash . 'TAO');
+elsif (-r '../ACE_wrappers/ace/ACE.h') {
+  $ace_src_root = "../ACE_wrappers";
 }
 
 ## tao
 
+my $tao_src_root;
+
+# if --tao specified at the command line
 if ($opts{'tao'}) {
   if (!-r $opts{'tao'} . '/tao/ORB.h') {
     die "Can't find TAO at $opts{'tao'}\n";
   }
-  setenv('TAO_ROOT', $opts{'tao'});
+  $tao_src_root = $opts{'tao'};
 }
-elsif ($ENV{'TAO_ROOT'} && !-r $ENV{'TAO_ROOT'} . '/tao/ORB.h') {
-  die "Can't find TAO at $ENV{'TAO_ROOT'}\n";
+# else if TAO_ROOT set
+elsif ($ENV{'TAO_ROOT'}) {
+  if  (!-r $ENV{'TAO_ROOT'} . '/tao/ORB.h') {
+    die "Can't find TAO at $ENV{'TAO_ROOT'}\n";
+  }
+  $tao_src_root = $ENV{'TAO_ROOT'};
 }
-elsif (!$ENV{'TAO_ROOT'} && $ENV{'ACE_ROOT'}
-       && -r $ENV{'ACE_ROOT'} . '/TAO/tao/ORB.h') {
-  setenv('TAO_ROOT', $ENV{'ACE_ROOT'} . $slash . 'TAO');
+# else if TAO is within the ace source root
+elsif (-r $ace_src_root . '/TAO/tao/ORB.h') {
+  $tao_src_root =  $ace_src_root . $slash . 'TAO';
 }
 
 ## Download ACE+TAO
 
-if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
+if (!$ace_src_root || !$tao_src_root) {
   my $urlbase = 'http://download.ociweb.com/TAO-' . $tao_version . '/';
   my $file = 'ACE+TAO-' . $tao_version . '_with_latest_patches_NO_makefiles.'
     . ($slash eq '/' ? 'tar.gz' : 'zip');
@@ -439,14 +464,20 @@ if (!$ENV{'ACE_ROOT'} || !$ENV{'TAO_ROOT'}) {
     }
   }
 
-  setenv('ACE_ROOT', '../ACE_wrappers');
-  setenv('TAO_ROOT', $ENV{'ACE_ROOT'} . $slash . 'TAO');
+  $ace_src_root = '../ACE_wrappers';
+  $tao_src_root = '../ACE_wrappers/TAO';
 }
 
-print "Using ACE_ROOT: $ENV{'ACE_ROOT'}\n" if $opts{'verbose'};
-print "Using TAO_ROOT: $ENV{'TAO_ROOT'}\n" if $opts{'verbose'};
+print "Using ace_src_root: $ace_src_root\n" if $opts{'verbose'};
+print "Using tao_src_root: $tao_src_root\n" if $opts{'verbose'};
+
+setHostEnv('ACE_ROOT', $ace_src_root . "/build/host");
+setHostEnv('TAO_ROOT', $tao_src_root . "/build/host"); # ???
+setTargetEnv('ACE_ROOT', $ace_src_root . "/build/target");
+setTargetEnv('TAO_ROOT', $tao_src_root . "/build/target"); # ???
+
 my $tao_maj = 1;
-open TAOVER, $ENV{'TAO_ROOT'} . '/VERSION' or die "can't open TAO VERSION\n";
+open TAOVER, $tao_src_root . '/VERSION' or die "can't open TAO VERSION\n";
 while (<TAOVER>) {
   if (/^This is TAO version (\d)/) {
     $tao_maj = $1;
@@ -480,7 +511,7 @@ sub clone_host_and_target {
 ## Clone build trees
 if ($cross_compile) {
   clone_host_and_target(".", "OpenDDS");
-  clone_host_and_target($ENV{'ACE_ROOT'}, "ACE");
+  clone_host_and_target($ace_src_root, "ACE");
 }
 
 die "exiting";
@@ -649,21 +680,40 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
 
 ## PATH and LD_LIBRARY_PATH
 
-$extraENV{'PATH'} = [$ENV{'ACE_ROOT'} . $slash . 'bin',
-                     $ENV{'DDS_ROOT'} . $slash . 'bin'];
+$hostEnv{'PATH'} = [
+  $hostEnv{'ACE_ROOT'} . $slash . 'bin',
+  $hostEnv{'DDS_ROOT'} . $slash . 'bin',
+];
 
-my $libpaths = [$ENV{'ACE_ROOT'} . $slash . 'lib',
-                $ENV{'DDS_ROOT'} . $slash . 'lib'];
+$targetEnv{'PATH'} = [
+  $targetEnv{'ACE_ROOT'} . $slash . 'bin',
+  $targetEnv{'DDS_ROOT'} . $slash . 'bin',
+];
 
-my $libvarname = $platforminfo{$opts{'host'}}->{'libpath'};
-if (exists $extraENV{$libvarname}) {
-  push(@{$extraENV{$libvarname}}, @$libpaths);
+sub push_libpath {
+  my($path, %env) = @_;
+  my $libvarname = $platforminfo{$opts{'host'}}->{'libpath'};
+  
+  # Append or set
+  if (exists $env{$libvarname}) {
+    push(@{$env{$libvarname}}, @$path);
+  }
+  else {
+    $env{$libvarname} = $path;
+  }
 }
-else {
-  $extraENV{$libvarname} = $libpaths;
-}
+
+push_libpath($hostEnv{'ACE_ROOT'} . $slash . 'lib', %hostEnv);
+push_libpath($hostEnv{'DDS_ROOT'} . $slash . 'lib', %hostEnv);
+push_libpath($targetEnv{'ACE_ROOT'} . $slash . 'lib', %targetEnv);
+push_libpath($targetEnv{'DDS_ROOT'} . $slash . 'lib', %targetEnv);
 
 ## Run MPC (if needed)
+
+
+sub setup_build {
+}
+
 
 for my $feat (qw/built-in-topics content-subscription content-filtered-topic
                  multi-topic query-condition ownership-profile
@@ -784,28 +834,28 @@ if ($slash eq '/') {
   $MK = backup_and_open('GNUmakefile');
 }
 
-my $SE = backup_and_open('setenv.' . $specific{'ext'});
-for my $key (keys %extraENV) {
-  if (UNIVERSAL::isa($extraENV{$key}, 'ARRAY')) {
-    print $SE "$specific{'export'} $key=",
-      join($specific{'pathsep'}, @{$extraENV{$key}}), $specific{'pathsep'},
-        $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
-    if ($MK) {
-      print $MK "export $key := ",
-        join($specific{'pathsep'}, @{$extraENV{$key}}), $specific{'pathsep'},
-          $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
-    }
-  }
-  else {
-    print $SE "$specific{'export'} $key=$extraENV{$key}\n";
-    if ($MK) {
-      print $MK "export $key := $extraENV{$key}\n";
-    }
-  }
-}
-
-$SE->close;
-print "Wrote setenv.$specific{'ext'}\n" if $opts{'verbose'};
+#my $SE = backup_and_open('setenv.' . $specific{'ext'});
+#for my $key (keys %extraENV) {
+#  if (UNIVERSAL::isa($extraENV{$key}, 'ARRAY')) {
+#    print $SE "$specific{'export'} $key=",
+#      join($specific{'pathsep'}, @{$extraENV{$key}}), $specific{'pathsep'},
+#        $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
+#    if ($MK) {
+#      print $MK "export $key := ",
+#        join($specific{'pathsep'}, @{$extraENV{$key}}), $specific{'pathsep'},
+#          $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
+#    }
+#  }
+#  else {
+#    print $SE "$specific{'export'} $key=$extraENV{$key}\n";
+#    if ($MK) {
+#      print $MK "export $key := $extraENV{$key}\n";
+#    }
+#  }
+#}
+#
+#$SE->close;
+#print "Wrote setenv.$specific{'ext'}\n" if $opts{'verbose'};
 
 if ($MK) {
   print $MK "include GNUmakefile.dist\n";
