@@ -9,7 +9,5 @@ project(DdsDcps_UnitTest): dcpsexe, dcps_transports_for_test {
     Main.cpp
     MyTypeSupportImpl.cpp
     MyTypeSupportC.cpp
-    MyTypeSupportS.cpp
   }
 }
-

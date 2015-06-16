@@ -2,7 +2,7 @@
 
 project(*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=SubInitLoop_export.h \
-                   -Wb,stub_export_macro=SubInitLoop_Export
+                   -Wb,stub_export_macro=SubInitLoop_Export -SS
   dcps_ts_flags += -Wb,export_macro=SubInitLoop_Export
   dynamicflags  += SUBINITLOOP_BUILD_DLL
 

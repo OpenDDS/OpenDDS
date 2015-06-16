@@ -1,7 +1,7 @@
 
 project(DDS*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=TransientLocalTest_export.h \
-                   -Wb,stub_export_macro=TransientLocalTest_Export
+                   -Wb,stub_export_macro=TransientLocalTest_Export -SS
   dcps_ts_flags += -Wb,export_macro=TransientLocalTest_Export
   dynamicflags  += TRANSIENTLOCALTEST_BUILD_DLL
 
