@@ -56,8 +56,6 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'macros=s@', 'Extra text for platform_macros.GNU',
     'features=s@', 'Extra text for default.features',
     'mpcopts=s', 'Extra command-line args for MPC (if MPC is run)',
-    'face-host!', 'FACE host tools build',
-    'face-target!', 'FACE target build',
    ],
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
@@ -80,6 +78,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ownership-kind-exclusive!', 'Exclusive Ownership (Ownership Profile) (yes)',
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
+    'safety-profile!', 'Safety Profile (no)',
     'tests!', 'Build tests, examples, and performance tests (yes)',
    ],
   );
@@ -135,6 +134,8 @@ EOT
 my %opts = ();
 
 ## set defaults
+my $cross_compile = 0;
+my $needmpc = 0;
 
 my @getopts = ();
 iterate(sub {
@@ -149,10 +150,6 @@ iterate(sub {
 if (! -r 'rules.dds.GNU') {
   print "ERROR: this script must be run from its own directory\n";
   exit 1;
-}
-
-if ($opts{'face-host'}) {
-  print "configuring for FACE host build\n";
 }
 
 GetOptions(\%opts, @getopts) or usage();
@@ -212,6 +209,23 @@ if ($opts{'host'} eq 'macosx') {
   }
   $opts{'host_version'} = $versToName{$1};
   print "Mac OS X version is: $opts{'host_version'}\n" if $opts{'verbose'};
+}
+
+$opts{'target'} = $opts{'host'} unless $opts{'target'};
+
+if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
+  print "building safety profile\n";
+  $tao_version = "face-safety-22a";
+  if ($opts{'target'} !~ /-safety$/) {
+    print "Adding -safety to target\n";
+    $opts{'target'} = $opts{'target'} . "-safety";
+  }
+}
+
+if ($opts{'host'} ne $opts{'target'}) {
+  print "Setting cross-compile build\n";
+  $needmpc = 1;
+  $cross_compile = 1;
 }
 
 my ($slash, $exeext) = ($opts{'host'} eq 'win32') ? ('\\', '.exe') : ('/', '');
@@ -289,12 +303,6 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
-## target
-
-if ($opts{'target'}) {
-  die "Cross-compilation is not yet supported with this script (--target)\n";
-}
-
 ## DDS_ROOT
 
 my %extraENV;
@@ -310,15 +318,18 @@ setenv('DDS_ROOT', '.');
 
 ## ace
 
+# if --ace specified at the command line
 if ($opts{'ace'}) {
   if (!-r $opts{'ace'} . '/ace/ACE.h') {
     die "Can't find ACE at $opts{'ace'}\n";
   }
   setenv('ACE_ROOT', $opts{'ace'});
 }
+# else if ACE_ROOT set
 elsif ($ENV{'ACE_ROOT'} && !-r $ENV{'ACE_ROOT'} . '/ace/ACE.h') {
   die "Can't find ACE at $ENV{'ACE_ROOT'}\n";
 }
+# else if ACE_wrappers peer directory exists
 elsif (!$ENV{'ACE_ROOT'} && -r '../ACE_wrappers/ace/ACE.h'
        && -r '../ACE_wrappers/TAO/tao/ORB.h') {
   setenv('ACE_ROOT', '../ACE_wrappers');
@@ -440,6 +451,34 @@ while (<TAOVER>) {
   }
 }
 close TAOVER;
+
+sub clone_host_and_target {
+  my($source_dir, $name) = @_;
+  my $cur_dir = getcwd;
+  print "Changing dir to $source_dir\n";
+  chdir($source_dir);
+  eval {
+    if (! -d "build") {
+      mkdir "build";
+    }
+    if (! -d "build/host") {
+      printf "cloning host $name\n";
+      system("$ENV{'MPC_ROOT'}/clone_build_tree.pl host");
+    }
+    if (! -d "build/target") {
+      printf "cloning target $name\n";
+      system("$ENV{'MPC_ROOT'}/clone_build_tree.pl target");
+    }
+  };
+  print "Changing dir back to $cur_dir\n";
+  chdir($cur_dir);
+}
+
+## Clone build trees
+if ($cross_compile) {
+  clone_host_and_target(".", "OpenDDS");
+  clone_host_and_target($ENV{'ACE_ROOT'}, "ACE");
+}
 
 ## Configure ACE+TAO
 
@@ -633,7 +672,7 @@ for my $feat (qw/built-in-topics content-subscription content-filtered-topic
   }
 }
 
-my $needmpc = scalar @features ? 1 : 0;
+$needmpc = $needmpc || (scalar @features ? 1 : 0);
 if ($needmpc && $slash eq '/') {
   print "Creating user_macros.GNU with MPC feature settings\n"
     if $opts{'verbose'};
