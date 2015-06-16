@@ -214,16 +214,19 @@ if ($opts{'host'} eq 'macosx') {
 $opts{'target'} = $opts{'host'} unless $opts{'target'};
 
 if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
-  print "building safety profile\n";
+  print "configuring safety profile build\n" if $opts{'verbose'};
   $tao_version = "face-safety-22a";
   if ($opts{'target'} !~ /-safety$/) {
-    print "Adding -safety to target\n";
+    if ($opts{'verbose'}) {
+      print "Changing target from $opts{'target'} to $opts{'target'}" . 
+            "-safety\n";
+    }
     $opts{'target'} = $opts{'target'} . "-safety";
   }
 }
 
 if ($opts{'host'} ne $opts{'target'}) {
-  print "Setting cross-compile build\n";
+  print "Setting cross-compile build\n" if $opts{'verbose'};
   $needmpc = 1;
   $cross_compile = 1;
 }
@@ -455,7 +458,7 @@ close TAOVER;
 sub clone_host_and_target {
   my($source_dir, $name) = @_;
   my $cur_dir = getcwd;
-  print "Changing dir to $source_dir\n";
+  print "Changing dir to $source_dir\n" if $opts{'verbose'};
   chdir($source_dir);
   eval {
     if (! -d "build") {
@@ -470,7 +473,7 @@ sub clone_host_and_target {
       system("$ENV{'MPC_ROOT'}/clone_build_tree.pl target");
     }
   };
-  print "Changing dir back to $cur_dir\n";
+  print "Changing dir back to $cur_dir\n" if $opts{'verbose'};
   chdir($cur_dir);
 }
 
@@ -480,6 +483,7 @@ if ($cross_compile) {
   clone_host_and_target($ENV{'ACE_ROOT'}, "ACE");
 }
 
+die "exiting";
 ## Configure ACE+TAO
 
 sub backup_and_open {
