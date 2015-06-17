@@ -721,6 +721,7 @@ sub write_host_workspace {
   my %buildEnv =  %{$_[0]};
   my $MWC = backup_and_open($buildEnv{'DDS_ROOT'} . '/host_tools.mwc');
   print $MWC "workspace {\n";
+  print $MWC "  \$(ACE_ROOT)/ace/ace.mpc\n";
   print $MWC "  \$(ACE_ROOT)/apps/gperf/src/gperf.mpc\n";
   print $MWC "  \$(TAO_ROOT)/TAO_IDL/tao_idl.mpc\n";
   print $MWC "  dds/idl/opendds_idl.mpc\n";
@@ -862,42 +863,47 @@ my %specific =
     'refpost' => '%')
   );
 
-my $MK = undef;
-if ($slash eq '/') {
-  if (!$opts{'dry-run'} && !-r 'GNUmakefile.dist') {
-    move('GNUmakefile', 'GNUmakefile.dist');
+# Environment setenv and GNUmakefile.dist
+sub write_environment {
+  my %buildEnv =  %{$_[0]};
+  my $dds_root = $buildEnv{'DDS_ROOT'};
+  my $MK = undef;
+  if ($slash eq '/') {
+    if (!$opts{'dry-run'} && !-r 'GNUmakefile.dist') {
+      move($dds_root . '/GNUmakefile', $dds_root . '/GNUmakefile.dist');
+    }
+    $MK = backup_and_open($dds_root . '/GNUmakefile');
   }
-  $MK = backup_and_open('GNUmakefile');
-}
 
-#my $SE = backup_and_open('setenv.' . $specific{'ext'});
-#for my $key (keys %extraENV) {
-#  if (UNIVERSAL::isa($extraENV{$key}, 'ARRAY')) {
-#    print $SE "$specific{'export'} $key=",
-#      join($specific{'pathsep'}, @{$extraENV{$key}}), $specific{'pathsep'},
-#        $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
-#    if ($MK) {
-#      print $MK "export $key := ",
-#        join($specific{'pathsep'}, @{$extraENV{$key}}), $specific{'pathsep'},
-#          $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
-#    }
-#  }
-#  else {
-#    print $SE "$specific{'export'} $key=$extraENV{$key}\n";
-#    if ($MK) {
-#      print $MK "export $key := $extraENV{$key}\n";
-#    }
-#  }
-#}
-#
-#$SE->close;
-#print "Wrote setenv.$specific{'ext'}\n" if $opts{'verbose'};
+  my $SE = backup_and_open($dds_root . '/setenv.' . $specific{'ext'});
+  for my $key (keys %buildEnv) {
+    if (UNIVERSAL::isa($buildEnv{$key}, 'ARRAY')) {
+      print $SE "$specific{'export'} $key=",
+        join($specific{'pathsep'}, @{$buildEnv{$key}}), $specific{'pathsep'},
+          $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
+      if ($MK) {
+        print $MK "export $key := ",
+          join($specific{'pathsep'}, @{$buildEnv{$key}}), $specific{'pathsep'},
+            $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
+      }
+    }
+    else {
+      print $SE "$specific{'export'} $key=$buildEnv{$key}\n";
+      if ($MK) {
+        print $MK "export $key := $buildEnv{$key}\n";
+      }
+    }
+  }
 
-if ($MK) {
-  print $MK "include GNUmakefile.dist\n";
-  $MK->close;
-  print "Wrote GNUmakefile, wrapping orignial GNUmakefile.dist\n"
-    if $opts{'verbose'};
+  $SE->close;
+  print "Wrote setenv.$specific{'ext'}\n" if $opts{'verbose'};
+
+  if ($MK) {
+    print $MK "include GNUmakefile.dist\n";
+    $MK->close;
+    print "Wrote GNUmakefile, wrapping orignial GNUmakefile.dist\n"
+      if $opts{'verbose'};
+  }
 }
 
 sub configure_build {
@@ -906,6 +912,7 @@ sub configure_build {
   write_default_features($buildEnvRef);
   write_platform_macros($buildEnvRef);
   generate_workspace($buildEnvRef);
+  write_environment($buildEnvRef);
 }
 
 if ($cross_compile) {
@@ -915,8 +922,6 @@ if ($cross_compile) {
 } else {
   configure_build(\%ENV);
 }
-
-die "TMP exiting";
 
 ## Final message
 
