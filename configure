@@ -310,13 +310,10 @@ my %hostEnv = ();
 my %targetEnv = ();
 
 sub setEnv {
-  my($name, $val, %env) = @_;
+  my($name, $val) = @_;
   $val = Cwd::abs_path($val) if -d $val;
   $val =~ s!/!\\!g if $slash eq '\\';
-  print "Setting $name to $val\n" if $opts{'verbose'};
-  $env{$name} = $val;
-  # Used to set $ENV{$name} also
-  print "Set $name to $env{$name}\n" if $opts{'verbose'};
+  $ENV{$name} = $val;
 }
 
 sub setHostEnv {
@@ -324,7 +321,6 @@ sub setHostEnv {
   $val = Cwd::abs_path($val) if -d $val;
   $val =~ s!/!\\!g if $slash eq '\\';
   $hostEnv{$name} = $val;
-  # Used to set $ENV{$name} also
 }
 
 sub setTargetEnv {
@@ -332,7 +328,6 @@ sub setTargetEnv {
   $val = Cwd::abs_path($val) if -d $val;
   $val =~ s!/!\\!g if $slash eq '\\';
   $targetEnv{$name} = $val;
-  # Used to set $ENV{$name} also
 }
 
 ## DDS_ROOT
@@ -477,9 +472,9 @@ print "Using ace_src_root: $ace_src_root\n" if $opts{'verbose'};
 print "Using tao_src_root: $tao_src_root\n" if $opts{'verbose'};
 
 setHostEnv('ACE_ROOT', $ace_src_root . "/build/host");
-setHostEnv('TAO_ROOT', $tao_src_root . "/build/host"); # ???
+setHostEnv('TAO_ROOT', $ace_src_root . "/build/host/TAO");
 setTargetEnv('ACE_ROOT', $ace_src_root . "/build/target");
-setTargetEnv('TAO_ROOT', $tao_src_root . "/build/target"); # ???
+setTargetEnv('TAO_ROOT', $ace_src_root . "/build/target/TAO");
 
 my $tao_maj = 1;
 open TAOVER, $tao_src_root . '/VERSION' or die "can't open TAO VERSION\n";
@@ -616,22 +611,6 @@ sub write_platform_macros {
   }
 }
 
-sub configure_build {
-  my $buildEnvRef = shift;
-  write_config_h($buildEnvRef);
-  write_default_features($buildEnvRef);
-  write_platform_macros($buildEnvRef);
-}
-
-if ($cross_compile) {
-  configure_build(\%hostEnv);
-  configure_build(\%targetEnv);
-} else {
-  configure_build(\%ENV);
-}
-
-die "TMP exiting";
-
 ## Optional OpenDDS dependencies
 
 my %optdep =
@@ -649,14 +628,14 @@ if (exists $opts{'java'}) {
   if ($opts{'static'}) {
     die "ERROR: --static can't be used with --java\n";
   }
-  setenv('JAVA_PLATFORM', $opts{'host'});
+  setEnv('JAVA_PLATFORM', $opts{'host'});
 }
 
 sub env_from_opt {
   my $key = shift;
   my $e = shift;
   if ($opts{$key} && (!$ENV{$e} || $opts{$key} ne $ENV{$e})) {
-    setenv($e, $opts{$key});
+    setEnv($e, $opts{$key});
   }
 }
 
@@ -697,7 +676,7 @@ if (exists $opts{'wireshark'} && !exists $opts{'glib'}) {
 }
 
 if ($opts{'qt-include'}) {
-  setenv('QT4_INCDIR', $opts{'qt-include'});
+  setEnv('QT4_INCDIR', $opts{'qt-include'});
 }
 
 if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
@@ -739,106 +718,123 @@ push_libpath($targetEnv{'DDS_ROOT'} . $slash . 'lib', %targetEnv);
 
 ## Run MPC (if needed)
 
-
-for my $feat (qw/built-in-topics content-subscription content-filtered-topic
-                 multi-topic query-condition ownership-profile
-                 ownership-kind-exclusive object-model-profile
-                 persistence-profile/) {
-  if (exists $opts{$feat} && !$opts{$feat}) {
-    my $f = $feat;
-    $f =~ s/-/_/g;
-    push(@features, "$f=0");
-  }
-}
-
-$needmpc = $needmpc || (scalar @features ? 1 : 0);
-if ($needmpc && $slash eq '/') {
-  print "Creating user_macros.GNU with MPC feature settings\n"
-    if $opts{'verbose'};
-  my $UM = backup_and_open('user_macros.GNU');
-  for my $feat (@features) {
-    print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
-  }
-  $UM->close;
-}
-
-my $tests = 1;
-($needmpc, $tests) = (1, 0) if (exists $opts{'tests'} && !$opts{'tests'});
-
 my $buildtao = 0;
-$needmpc = $buildtao = 1 if !-x "$ENV{'ACE_ROOT'}/bin/tao_idl$exeext";
-
-if ($slash eq '/' && ($needmpc || !-r 'GNUmakefile')) {
-  $needmpc = 'gnuace';
-}
-elsif ($slash ne '/' && ($needmpc || !-r 'DDS.sln')) {
-  $needmpc = $opts{'compiler_version'};
-}
-
-if ($needmpc) {
-  if (!$ENV{'MPC_ROOT'} && -r $ENV{'ACE_ROOT'} . '/MPC/MPC.ico') {
-    setenv('MPC_ROOT', $ENV{'ACE_ROOT'} . $slash . 'MPC');
-  }
-  elsif (!$ENV{'MPC_ROOT'}) {
-    die "Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in the\n".
-      "'MPC' directory under ACE_ROOT ($ENV{'ACE_ROOT'}), stopped";
-  }
-
-  if (@features) {
-    my $df_file =
-      "$ENV{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
-    my $DF = $wrote_df
-      ? ($opts{'dry-run'} ? File::Temp->new(UNLINK => 1)
-                          : new FileHandle(">>$df_file"))
-      : backup_and_open($df_file);
-    for my $f (@features) {
-      print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
-    }
-    $DF->close;
-    if ($opts{'verbose'}) {
-      print '' . ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n";
+sub generate_workspace {
+  my %buildEnv =  %{$_[0]};
+  for my $feat (qw/built-in-topics content-subscription content-filtered-topic
+                   multi-topic query-condition ownership-profile
+                   ownership-kind-exclusive object-model-profile
+                   persistence-profile/) {
+    if (exists $opts{$feat} && !$opts{$feat}) {
+      my $f = $feat;
+      $f =~ s/-/_/g;
+      push(@features, "$f=0");
     }
   }
 
-  my $ws = 'DDS.mwc';
-  if (!$tests && $buildtao) {
-    $ws = 'DDS_TAO.mwc';
-  }
-  elsif (!$tests && !$buildtao) {
-    $ws = 'DDS_no_tests.mwc';
-  }
-  elsif ($buildtao) {
-    $ws = 'DDS_TAO_all.mwc';
-  }
-
-  if ($tao_maj == 2 && $ws =~ /TAO/) {
-    $ws =~ s/TAO/TAOv2/;
-  }
-
-  my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
-
-  if (!defined $ENV{'CIAO_ROOT'}) {
-    setenv('CIAO_ROOT', 'dont_use_ciao'); # otherwise MPC.cfg includes /MPC
-  }
-
-  print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
-                                     'project files'), ".\n";
-  my $mwcargs = "-type $needmpc $ws $static " . $opts{'mpcargs'};
-  print "mwc command line: $mwcargs\n"
-    if $opts{'verbose'};
-  if (!$opts{'dry-run'}) {
-    if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
-      die "Error from MPC, stopped";
+  $needmpc = $needmpc || (scalar @features ? 1 : 0);
+  # Create user macros
+  if ($needmpc && $slash eq '/') {
+    print "Creating user_macros.GNU with MPC feature settings\n"
+      if $opts{'verbose'};
+    my $UM = backup_and_open($buildEnv{'DDS_ROOT'} . '/user_macros.GNU');
+    for my $feat (@features) {
+      print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
     }
+    $UM->close;
   }
 
-  $ws =~ s/\.mwc$/.sln/;
-  $opts{'solution_file'} = $ws;
-}
-elsif ($opts{'compiler_version'}) { #win32, using DDS release package projects
-  $opts{'solution_file'} = 'DDS' . ($opts{'static'} ? '_Static' : '') .
-    ($opts{'compiler_version'} ne 'vc71' ? "_$opts{'compiler_version'}" : '') .
-      '.sln';
+  my $tests = 1;
+  ($needmpc, $tests) = (1, 0) if (exists $opts{'tests'} && !$opts{'tests'});
+
+  $needmpc = $buildtao = 1 if !-x "$buildEnv{'ACE_ROOT'}/bin/tao_idl$exeext";
+
+  if ($slash eq '/' && ($needmpc || !-r 'GNUmakefile')) {
+    $needmpc = 'gnuace';
+  }
+  elsif ($slash ne '/' && ($needmpc || !-r 'DDS.sln')) {
+    $needmpc = $opts{'compiler_version'};
+  }
+
+  if ($needmpc) {
+    if (!$ENV{'MPC_ROOT'} && -r $buildEnv{'ACE_ROOT'} . '/MPC/MPC.ico') {
+      setEnv('MPC_ROOT', $buildEnv{'ACE_ROOT'} . $slash . 'MPC');
+    }
+    elsif (!$ENV{'MPC_ROOT'}) {
+      die "Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in the\n".
+        "'MPC' directory under ACE_ROOT ($buildEnv{'ACE_ROOT'}), stopped";
+    }
+
+    # Append to default.features
+    if (@features) {
+      my $df_file =
+        "$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
+      my $DF = $wrote_df
+        ? ($opts{'dry-run'} ? File::Temp->new(UNLINK => 1)
+                            : new FileHandle(">>$df_file"))
+        : backup_and_open($df_file);
+      for my $f (@features) {
+        print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
+      }
+      $DF->close;
+      if ($opts{'verbose'}) {
+        print '' . ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n";
+      }
+    }
+
+    my $ws = 'DDS.mwc';
+    if (!$tests && $buildtao) {
+      $ws = 'DDS_TAO.mwc';
+    }
+    elsif (!$tests && !$buildtao) {
+      $ws = 'DDS_no_tests.mwc';
+    }
+    elsif ($buildtao) {
+      $ws = 'DDS_TAO_all.mwc';
+    }
+
+    if ($tao_maj == 2 && $ws =~ /TAO/) {
+      $ws =~ s/TAO/TAOv2/;
+    }
+
+    my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
+
+    if (!defined $ENV{'CIAO_ROOT'}) {
+      setEnv('CIAO_ROOT', 'dont_use_ciao'); # otherwise MPC.cfg includes /MPC
+    }
+
+    print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
+                                       'project files'), ".\n";
+    my $mwcargs = "-type $needmpc $buildEnv{'DDS_ROOT'}$slash$ws $static " . $opts{'mpcargs'};
+    print "mwc command line: $mwcargs\n"
+      if $opts{'verbose'};
+    if (!$opts{'dry-run'}) {
+      # Temporarily set to the build environment
+      my $prev_ace_root = $ENV{'ACE_ROOT'};
+      my $prev_tao_root = $ENV{'TAO_ROOT'};
+      my $prev_dds_root = $ENV{'DDS_ROOT'};
+      setEnv('ACE_ROOT', $buildEnv{'ACE_ROOT'});
+      setEnv('TAO_ROOT', $buildEnv{'TAO_ROOT'});
+      setEnv('DDS_ROOT', $buildEnv{'DDS_ROOT'});
+
+      if (system("perl $ace_src_root/bin/mwc.pl $mwcargs") != 0) {
+        die "Error from MPC, stopped";
+      }
+
+      # Undo Temporary set of build environment
+      setEnv('ACE_ROOT', $prev_ace_root);
+      setEnv('TAO_ROOT', $prev_tao_root);
+      setEnv('DDS_ROOT', $prev_dds_root);
+    }
+
+    $ws =~ s/\.mwc$/.sln/;
+    $opts{'solution_file'} = $ws;
+  }
+  elsif ($opts{'compiler_version'}) { #win32, using DDS release package projects
+    $opts{'solution_file'} = 'DDS' . ($opts{'static'} ? '_Static' : '') .
+      ($opts{'compiler_version'} ne 'vc71' ? "_$opts{'compiler_version'}" : '') .
+        '.sln';
+  }
 }
 
 ## Create setenv.sh and "master" GNUmakefile
@@ -888,6 +884,23 @@ if ($MK) {
   print "Wrote GNUmakefile, wrapping orignial GNUmakefile.dist\n"
     if $opts{'verbose'};
 }
+
+sub configure_build {
+  my $buildEnvRef = shift;
+  write_config_h($buildEnvRef);
+  write_default_features($buildEnvRef);
+  write_platform_macros($buildEnvRef);
+  generate_workspace($buildEnvRef);
+}
+
+if ($cross_compile) {
+  configure_build(\%hostEnv);
+  configure_build(\%targetEnv);
+} else {
+  configure_build(\%ENV);
+}
+
+die "TMP exiting";
 
 ## Final message
 
