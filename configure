@@ -716,6 +716,18 @@ push_libpath($hostEnv{'DDS_ROOT'} . $slash . 'lib', %hostEnv);
 push_libpath($targetEnv{'ACE_ROOT'} . $slash . 'lib', %targetEnv);
 push_libpath($targetEnv{'DDS_ROOT'} . $slash . 'lib', %targetEnv);
 
+# host_tools.mwc/
+sub write_host_workspace {
+  my %buildEnv =  %{$_[0]};
+  my $MWC = backup_and_open($buildEnv{'DDS_ROOT'} . '/host_tools.mwc');
+  print $MWC "workspace {\n";
+  print $MWC "  \$(ACE_ROOT)/apps/gperf/src/gperf.mpc\n";
+  print $MWC "  \$(TAO_ROOT)/TAO_IDL/tao_idl.mpc\n";
+  print $MWC "  dds/idl/opendds_idl.mpc\n";
+  print $MWC "}\n";
+  $MWC->close;
+}
+
 ## Run MPC (if needed)
 
 my $buildtao = 0;
@@ -783,7 +795,10 @@ sub generate_workspace {
     }
 
     my $ws = 'DDS.mwc';
-    if (!$tests && $buildtao) {
+    if (-r $buildEnv{'DDS_ROOT'} . "/host_tools.mwc") {
+      $ws = 'host_tools.mwc';
+    }
+    elsif (!$tests && $buildtao) {
       $ws = 'DDS_TAO.mwc';
     }
     elsif (!$tests && !$buildtao) {
@@ -894,6 +909,7 @@ sub configure_build {
 }
 
 if ($cross_compile) {
+  write_host_workspace(\%hostEnv);
   configure_build(\%hostEnv);
   configure_build(\%targetEnv);
 } else {
