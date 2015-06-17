@@ -540,6 +540,7 @@ sub backup_and_open {
 my $wrote_df = 0;
 my $pi = $platforminfo{$opts{'host'}};
 
+# config.h
 sub write_config_h {
   my %buildEnv =  %{$_[0]};
   if (-r "$buildEnv{'ACE_ROOT'}/ace/config.h") {
@@ -548,7 +549,6 @@ sub write_config_h {
   else {
     $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
-    # config.h
     my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
     for my $line (@{$opts{'configh'}}) {
       print $CFGH "$line\n";
@@ -565,10 +565,11 @@ sub write_config_h {
   }
 }
 
+# default.features
 sub write_default_features {
-  # default.features
+  my %buildEnv =  %{$_[0]};
   if ($opts{'ipv6'} || $opts{'features'}) {
-    my $DF = backup_and_open("$ENV{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
+    my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
                              "/default.features");
     $wrote_df = 1;
     print $DF "ipv6=1\n" if $opts{'ipv6'};
@@ -580,10 +581,11 @@ sub write_default_features {
   }
 }
 
+# platform_macros.GNU
 sub write_platform_macros {
-  # platform_macros.GNU
+  my %buildEnv =  %{$_[0]};
   if ($slash eq '/') {
-    my $PMG = backup_and_open("$ENV{'ACE_ROOT'}/include/makeinclude" .
+    my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
     for my $line (@{$opts{'macros'}}) {
       print $PMG "$line\n";
@@ -617,12 +619,17 @@ sub write_platform_macros {
 sub configure_build {
   my $buildEnvRef = shift;
   write_config_h($buildEnvRef);
-# write_default_features();
-# write_platform_macros();
+  write_default_features($buildEnvRef);
+  write_platform_macros($buildEnvRef);
 }
 
-print "TMP configuring $hostEnv{'ACE_ROOT'}\n";
-configure_build(\%hostEnv);
+if ($cross_compile) {
+  configure_build(\%hostEnv);
+  configure_build(\%targetEnv);
+} else {
+  configure_build(\%ENV);
+}
+
 die "TMP exiting";
 
 ## Optional OpenDDS dependencies
@@ -731,10 +738,6 @@ push_libpath($targetEnv{'ACE_ROOT'} . $slash . 'lib', %targetEnv);
 push_libpath($targetEnv{'DDS_ROOT'} . $slash . 'lib', %targetEnv);
 
 ## Run MPC (if needed)
-
-
-sub setup_build {
-}
 
 
 for my $feat (qw/built-in-topics content-subscription content-filtered-topic
