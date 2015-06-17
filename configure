@@ -306,31 +306,36 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
-my %hostEnv;
-my %targetEnv;
+my %hostEnv = ();
+my %targetEnv = ();
 
 sub setEnv {
   my($name, $val, %env) = @_;
   $val = Cwd::abs_path($val) if -d $val;
   $val =~ s!/!\\!g if $slash eq '\\';
+  print "Setting $name to $val\n" if $opts{'verbose'};
   $env{$name} = $val;
   # Used to set $ENV{$name} also
-  print "Setting $name to $val\n" if $opts{'verbose'};
+  print "Set $name to $env{$name}\n" if $opts{'verbose'};
 }
 
 sub setHostEnv {
   my($name, $val) = @_;
-  setEnv($name, $val, %hostEnv);
+  $val = Cwd::abs_path($val) if -d $val;
+  $val =~ s!/!\\!g if $slash eq '\\';
+  $hostEnv{$name} = $val;
+  # Used to set $ENV{$name} also
 }
 
 sub setTargetEnv {
   my($name, $val) = @_;
-  setEnv($name, $val, %targetEnv);
+  $val = Cwd::abs_path($val) if -d $val;
+  $val =~ s!/!\\!g if $slash eq '\\';
+  $targetEnv{$name} = $val;
+  # Used to set $ENV{$name} also
 }
 
 ## DDS_ROOT
-
-print "setting DDS_ROOT\n";
 
 setHostEnv('DDS_ROOT', './build/host');
 setTargetEnv('DDS_ROOT', './build/target');
@@ -514,7 +519,6 @@ if ($cross_compile) {
   clone_host_and_target($ace_src_root, "ACE");
 }
 
-die "exiting";
 ## Configure ACE+TAO
 
 sub backup_and_open {
@@ -534,29 +538,34 @@ sub backup_and_open {
 }
 
 my $wrote_df = 0;
+my $pi = $platforminfo{$opts{'host'}};
 
-if (-r "$ENV{'ACE_ROOT'}/ace/config.h") {
-  print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
+sub write_config_h {
+  my %buildEnv =  %{$_[0]};
+  if (-r "$buildEnv{'ACE_ROOT'}/ace/config.h") {
+    print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
+  }
+  else {
+    $opts{'optimize'} = 0 if !exists $opts{'optimize'};
+
+    # config.h
+    my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
+    for my $line (@{$opts{'configh'}}) {
+      print $CFGH "$line\n";
+    }
+    my $cfg = $opts{'host'};
+    if ($pi->{'aceconfig'}) {
+      $cfg = $pi->{'aceconfig'};
+      $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
+    }
+    $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
+    print $CFGH "#include \"ace/config-$cfg.h\"\n";
+    close $CFGH;
+    print "Wrote config.h\n" if $opts{'verbose'};
+  }
 }
-else {
-  $opts{'optimize'} = 0 if !exists $opts{'optimize'};
-  my $pi = $platforminfo{$opts{'host'}};
 
-  # config.h
-  my $CFGH = backup_and_open("$ENV{'ACE_ROOT'}/ace/config.h");
-  for my $line (@{$opts{'configh'}}) {
-    print $CFGH "$line\n";
-  }
-  my $cfg = $opts{'host'};
-  if ($pi->{'aceconfig'}) {
-    $cfg = $pi->{'aceconfig'};
-    $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
-  }
-  $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
-  print $CFGH "#include \"ace/config-$cfg.h\"\n";
-  close $CFGH;
-  print "Wrote config.h\n" if $opts{'verbose'};
-
+sub write_default_features {
   # default.features
   if ($opts{'ipv6'} || $opts{'features'}) {
     my $DF = backup_and_open("$ENV{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
@@ -569,7 +578,9 @@ else {
     $DF->close;
     print "Wrote default.features\n" if $opts{'verbose'};
   }
+}
 
+sub write_platform_macros {
   # platform_macros.GNU
   if ($slash eq '/') {
     my $PMG = backup_and_open("$ENV{'ACE_ROOT'}/include/makeinclude" .
@@ -602,6 +613,17 @@ else {
     print "Wrote platform_macros.GNU\n" if $opts{'verbose'};
   }
 }
+
+sub configure_build {
+  my $buildEnvRef = shift;
+  write_config_h($buildEnvRef);
+# write_default_features();
+# write_platform_macros();
+}
+
+print "TMP configuring $hostEnv{'ACE_ROOT'}\n";
+configure_build(\%hostEnv);
+die "TMP exiting";
 
 ## Optional OpenDDS dependencies
 
