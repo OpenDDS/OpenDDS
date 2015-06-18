@@ -140,9 +140,6 @@ my $needmpc = 0;
 my @getopts = ();
 iterate(sub {
           my ($group, $opt, $descr, $optkey) = @_;
-          if ($descr =~ / \(yes\)$/) {
-            $opts{$optkey} = 1;
-          }
           push @getopts, $opt;
         }
        );
@@ -719,11 +716,12 @@ sub generate_workspace {
                multi-topic query-condition ownership-kind-exclusive
                object-model-profile persistence-profile
                no-opendds-safety-profile/) {
-    if ($opts{'no-opendds-safety-profile'}) {
+    if (defined $opts{'no-opendds-safety-profile'}) {
       # Turns default to 0 for these
-
+      printf "Checking if user enabled $feat\n" if ($opts{verbose});
       # Unless user enabled feature
       if (!(exists $opts{$feat} && $opts{$feat})) {
+        printf "$feat not enabled, turned off for safety profile\n" if ($opts{verbose});
         my $f = $feat;
         $f =~ s/-/_/g;
         # Set to 0
