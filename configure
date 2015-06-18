@@ -670,18 +670,6 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
                              $ENV{'QTDIR'}) . "\nstopped";
 }
 
-## PATH and LD_LIBRARY_PATH
-
-$hostEnv{'PATH'} = [
-  $hostEnv{'ACE_ROOT'} . $slash . 'bin',
-  $hostEnv{'DDS_ROOT'} . $slash . 'bin',
-];
-
-$targetEnv{'PATH'} = [
-  $targetEnv{'ACE_ROOT'} . $slash . 'bin',
-  $targetEnv{'DDS_ROOT'} . $slash . 'bin',
-];
-
 sub push_libpath {
   my($path, %env) = @_;
   my $libvarname = $platforminfo{$opts{'host'}}->{'libpath'};
@@ -694,11 +682,6 @@ sub push_libpath {
     $env{$libvarname} = $path;
   }
 }
-
-push_libpath($hostEnv{'ACE_ROOT'} . $slash . 'lib', %hostEnv);
-push_libpath($hostEnv{'DDS_ROOT'} . $slash . 'lib', %hostEnv);
-push_libpath($targetEnv{'ACE_ROOT'} . $slash . 'lib', %targetEnv);
-push_libpath($targetEnv{'DDS_ROOT'} . $slash . 'lib', %targetEnv);
 
 # host_tools.mwc/
 sub write_host_workspace {
@@ -719,20 +702,40 @@ my $buildtao;
 sub generate_workspace {
   $buildtao = 0;
   my %buildEnv =  %{$_[0]};
-  for my $feat (qw/built-in-topics content-subscription content-filtered-topic
-                   multi-topic query-condition ownership-profile
-                   ownership-kind-exclusive object-model-profile
-                   persistence-profile/) {
 
-  if ($opts{'safety-profile'}) {
-    # Turns default to 0 for many of these
-  } else {
-  }
-
+  # Always default these to 1
+  for my $feat (qw/built-in-topics ownership-profile/) {
+    # If user disabled
     if (exists $opts{$feat} && !$opts{$feat}) {
       my $f = $feat;
       $f =~ s/-/_/g;
+      # Set to 0
       push(@features, "$f=0");
+    }
+  }
+
+  # default of these depends on whether we are doing a safety-profile build
+  for my $feat (qw/content-subscription content-filtered-topic
+               multi-topic query-condition ownership-kind-exclusive
+               object-model-profile persistence-profile
+               no-opendds-safety-profile/) {
+    if ($opts{'no-opendds-safety-profile'}) {
+      # Turns default to 0 for these
+
+      # Unless user enabled feature
+      if (!(exists $opts{$feat} && $opts{$feat})) {
+        my $f = $feat;
+        $f =~ s/-/_/g;
+        # Set to 0
+        push(@features, "$f=0");
+      }
+    } else {
+      # If user disabled
+      if (exists $opts{$feat} && !$opts{$feat}) {
+        my $f = $feat;
+        $f =~ s/-/_/g;
+        push(@features, "$f=0");
+      }
     }
   }
 
@@ -919,11 +922,33 @@ if ($cross_compile) {
   setTargetEnv('TAO_ROOT', $ace_src_root . "/build/target/TAO");
   setTargetEnv('DDS_ROOT', './build/target');
 
+  ## PATH and LD_LIBRARY_PATH
+  $hostEnv{'PATH'} = [
+    $hostEnv{'ACE_ROOT'} . $slash . 'bin',
+    $hostEnv{'DDS_ROOT'} . $slash . 'bin',
+  ];
+
+  $targetEnv{'PATH'} = [
+    $targetEnv{'ACE_ROOT'} . $slash . 'bin',
+    $targetEnv{'DDS_ROOT'} . $slash . 'bin',
+  ];
+
+  push_libpath($hostEnv{'ACE_ROOT'} . $slash . 'lib', %hostEnv);
+  push_libpath($hostEnv{'DDS_ROOT'} . $slash . 'lib', %hostEnv);
+  push_libpath($targetEnv{'ACE_ROOT'} . $slash . 'lib', %targetEnv);
+  push_libpath($targetEnv{'DDS_ROOT'} . $slash . 'lib', %targetEnv);
+
   # host_tools.mwc
   write_host_workspace(\%hostEnv);
 
   # All other build stuff
   configure_build(\%hostEnv);
+
+  # Before configuring target, set default
+  if ($opts{'safety-profile'}) {
+    $opts{'no-opendds-safety-profile'} = 0;
+  }
+
   configure_build(\%targetEnv);
 
   # Write main GNUmakefile
@@ -931,6 +956,13 @@ if ($cross_compile) {
   setEnv('ACE_ROOT', $ace_src_root);
   setEnv('TAO_ROOT', $ace_src_root . "/TAO");
   setEnv('DDS_ROOT', '.');
+  setEnv('PATH', [
+    $ENV{'ACE_ROOT'} . $slash . 'bin',
+    $ENV{'DDS_ROOT'} . $slash . 'bin',
+  ]);
+  push_libpath($ENV{'ACE_ROOT'} . $slash . 'lib', %ENV);
+  push_libpath($ENV{'DDS_ROOT'} . $slash . 'lib', %ENV);
+
   configure_build(\%ENV);
 }
 
