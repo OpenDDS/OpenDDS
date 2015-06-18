@@ -536,6 +536,9 @@ sub write_config_h {
     }
     $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
     print $CFGH "#include \"ace/config-$cfg.h\"\n";
+    if (defined $opts{'no-opendds-safety-profile'}) {
+      print $CFGH "#define ACE_FACE_SAFETY_BASE\n";
+    }
     close $CFGH;
     print "Wrote config.h\n" if $opts{'verbose'};
   }
@@ -686,8 +689,9 @@ sub write_host_workspace {
   my $MWC = backup_and_open($buildEnv{'DDS_ROOT'} . '/host_tools.mwc');
   print $MWC "workspace {\n";
   print $MWC "  \$(ACE_ROOT)/ace/ace.mpc\n";
-  print $MWC "  \$(ACE_ROOT)/apps/gperf/src/gperf.mpc\n";
-  print $MWC "  \$(TAO_ROOT)/TAO_IDL/tao_idl.mpc\n";
+  print $MWC "  \$(ACE_ROOT)/apps/gperf/src\n";
+  print $MWC "  \$(TAO_ROOT)/TAO_IDL\n";
+  print $MWC "  \$(TAO_ROOT)/tao/tao.mpc\n";
   print $MWC "  dds/idl/opendds_idl.mpc\n";
   print $MWC "}\n";
   $MWC->close;
