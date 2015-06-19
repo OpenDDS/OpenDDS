@@ -936,6 +936,15 @@ sub configure_build {
   write_environment($buildEnvRef);
 }
 
+sub write_cross_compile_makefile {
+  my $MF = backup_and_open("GNUmakefile");
+  print $MF "all clean install depend:\n";
+  print $MF "\tcd build/host && \$(MAKE) \$@\n";
+  print $MF "\tcd $targetEnv{ACE_ROOT}/ace && \$(MAKE) \$@\n";
+  print $MF "\tcd build/target && \$(MAKE) \$@\n";
+  $MF->close;
+}
+
 if ($cross_compile) {
   # Clone build trees
   clone_host_and_target(".", "OpenDDS");
@@ -979,6 +988,7 @@ if ($cross_compile) {
   configure_build(\%targetEnv);
 
   # Write main GNUmakefile
+  write_cross_compile_makefile();
 } else {
   setEnv('ACE_ROOT', $ace_src_root);
   setEnv('TAO_ROOT', $ace_src_root . "/TAO");
