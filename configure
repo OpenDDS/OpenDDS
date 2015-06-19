@@ -756,7 +756,15 @@ sub generate_workspace {
   my $tests = 1;
   ($needmpc, $tests) = (1, 0) if (exists $opts{'tests'} && !$opts{'tests'});
 
-  $needmpc = $buildtao = 1 if !-x "$buildEnv{'ACE_ROOT'}/bin/tao_idl$exeext";
+
+  # If this is a target safety profile build
+  if (defined $opts{'no-opendds-safety-profile'}) {
+    # TAO will be built seperately
+    $buildtao = 0;
+  } else {
+    # build tao if tao_idl does not exist, unless this is a safety profile build
+    $buildtao = 1 if !-x "$buildEnv{'ACE_ROOT'}/bin/tao_idl$exeext";
+  }
 
   if ($slash eq '/' && ($needmpc || !-r 'GNUmakefile')) {
     $needmpc = 'gnuace';
@@ -829,10 +837,27 @@ sub generate_workspace {
       setEnv('TAO_ROOT', $buildEnv{'TAO_ROOT'});
       setEnv('DDS_ROOT', $buildEnv{'DDS_ROOT'});
 
-      if (system("perl $ace_src_root/bin/mwc.pl $mwcargs") != 0) {
+      # Create OpenDDS workspace
+      if (system("perl $ENV{ACE_ROOT}/bin/mwc.pl $mwcargs") != 0) {
         die "Error from MPC, stopped";
       }
 
+      # If this is a target safety profile build
+      if (defined $opts{'no-opendds-safety-profile'}) {
+        my $ddsroot = getcwd;
+        print "Changing dir to $buildEnv{ACE_ROOT}\n" if $opts{'verbose'};
+        chdir($buildEnv{ACE_ROOT});
+
+        # Generate ACE workspace separately, to exclude TAO
+        my $mwcargs = "-type $needmpc --recurse --exclude TAO,ACE.mwc $static " . $opts{'mpcargs'};
+
+        if (system("perl $ENV{ACE_ROOT}/bin/mwc.pl $mwcargs") != 0) {
+          die "Error from MPC, stopped";
+        }
+
+        print "Changing dir back to $ddsroot\n" if $opts{'verbose'};
+        chdir($ddsroot);
+      }
       # Undo Temporary set of build environment
       setEnv('ACE_ROOT', $prev_ace_root);
       setEnv('TAO_ROOT', $prev_tao_root);
