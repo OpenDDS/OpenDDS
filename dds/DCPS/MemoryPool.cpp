@@ -16,6 +16,10 @@
 #include <map>
 #include <cstring>
 
+#if defined(WITH_VALGRIND)
+#include "valgrind/memcheck.h"
+#endif
+
 #define TEST_CHECK(COND) \
   if (!( COND )) { \
     char msg[1024]; \
@@ -306,6 +310,10 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t granularity)
   largest_free_ = first_free;
   free_index_.init(first_free);
   lwm_free_bytes_ = largest_free_->size();
+#if defined(WITH_VALGRIND)
+  VALGRIND_MAKE_MEM_NOACCESS(pool_ptr_, pool_size_);
+  VALGRIND_CREATE_MEMPOOL(pool_ptr_, 0, false);
+#endif
 }
 
 MemoryPool::~MemoryPool()
@@ -324,6 +332,10 @@ MemoryPool::lwm_free_bytes() const
 void*
 MemoryPool::pool_alloc(size_t size)
 {
+#if defined(WITH_VALGRIND)
+  VALGRIND_DISABLE_ADDR_ERROR_REPORTING_IN_RANGE(pool_ptr_, pool_size_);
+#endif
+
   // Pointer to return
   unsigned char* block = NULL;
 
@@ -351,6 +363,11 @@ MemoryPool::pool_alloc(size_t size)
   validate_pool(*this, false);
 #endif
 
+#if defined(WITH_VALGRIND)
+  VALGRIND_ENABLE_ADDR_ERROR_REPORTING_IN_RANGE(pool_ptr_, pool_size_);
+  VALGRIND_MEMPOOL_ALLOC(pool_ptr_, block, size);
+#endif
+
   return block;
 }
 
@@ -359,6 +376,9 @@ MemoryPool::pool_free(void* ptr)
 {
   bool freed = false;
   if (ptr && includes(ptr)) {
+#if defined(WITH_VALGRIND)
+    VALGRIND_DISABLE_ADDR_ERROR_REPORTING_IN_RANGE(pool_ptr_, pool_size_);
+#endif
 
     FreeHeader* header = reinterpret_cast<FreeHeader*>(
         reinterpret_cast<AllocHeader*>(ptr) - 1);
@@ -373,7 +393,13 @@ MemoryPool::pool_free(void* ptr)
 #endif
 
     freed = true;
+
+#if defined(WITH_VALGRIND)
+    VALGRIND_DISABLE_ADDR_ERROR_REPORTING_IN_RANGE(pool_ptr_, pool_size_);
+    VALGRIND_MEMPOOL_FREE(pool_ptr_, ptr);
+#endif
   }
+
   return freed;
 }
 
