@@ -887,16 +887,16 @@ my %specific =
 # Environment setenv and GNUmakefile.dist
 sub write_environment {
   my %buildEnv =  %{$_[0]};
-  my $dds_root = $buildEnv{'DDS_ROOT'};
+  my $dir =  $_[1];
   my $MK = undef;
   if ($slash eq '/') {
-    if (!$opts{'dry-run'} && !-r 'GNUmakefile.dist') {
-      move($dds_root . '/GNUmakefile', $dds_root . '/GNUmakefile.dist');
+    if (!$opts{'dry-run'} && !-r $dir . '/GNUmakefile.dist') {
+      move($dir . '/GNUmakefile', $dir . '/GNUmakefile.dist');
     }
-    $MK = backup_and_open($dds_root . '/GNUmakefile');
+    $MK = backup_and_open($dir . '/GNUmakefile');
   }
 
-  my $SE = backup_and_open($dds_root . '/setenv.' . $specific{'ext'});
+  my $SE = backup_and_open($dir . '/setenv.' . $specific{'ext'});
   for my $key (keys %buildEnv) {
     if (UNIVERSAL::isa($buildEnv{$key}, 'ARRAY')) {
       print $SE "$specific{'export'} $key=",
@@ -933,7 +933,7 @@ sub configure_build {
   write_default_features($buildEnvRef);
   write_platform_macros($buildEnvRef);
   generate_workspace($buildEnvRef);
-  write_environment($buildEnvRef);
+  write_environment($buildEnvRef, $buildEnvRef->{DDS_ROOT});
 }
 
 sub write_cross_compile_makefile {
@@ -986,6 +986,9 @@ if ($cross_compile) {
   }
 
   configure_build(\%targetEnv);
+
+  # Write environment for ACE target
+  write_environment(\%targetEnv, $targetEnv{ACE_ROOT} . '/ace');
 
   # Write main GNUmakefile
   write_cross_compile_makefile();
