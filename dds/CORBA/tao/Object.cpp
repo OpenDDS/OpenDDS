@@ -4,6 +4,9 @@
 //
 // ORB:         CORBA::Object operations
 
+#define TAOLIB_ERROR ;
+#define TAOLIB_DEBUG ;
+
 #include "tao/Object.h"
 #include "tao/SystemException.h"
 

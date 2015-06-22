@@ -1,3 +1,6 @@
+#define TAOLIB_ERROR ;
+#define TAOLIB_DEBUG ;
+
 #include "tao/LocalObject.h"
 
 #if !defined (__ACE_INLINE__)
