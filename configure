@@ -303,8 +303,8 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
-my %hostEnv = ();
-my %targetEnv = ();
+my %hostEnv = ('build' => 'host');
+my %targetEnv = ('build' => 'target');
 
 sub setEnv {
   my($name, $val) = @_;
@@ -575,6 +575,11 @@ sub write_platform_macros {
         print $PMG "$macro = $opts{$key}\n";
       }
     }
+    # IF not -static and this is the HOST cross-compile build
+    if ($cross_compile && !exists $opts{'static'} &&
+        $buildEnv{'build'} eq 'host') {
+      print $PMG "static_libs_only = 1\n";
+    }
     if ($opts{'prefix'}) {
       print $PMG "INSTALL_PREFIX=" . $opts{'prefix'} . "\n";
     }
@@ -749,6 +754,13 @@ sub generate_workspace {
     my $UM = backup_and_open($buildEnv{'DDS_ROOT'} . '/user_macros.GNU');
     for my $feat (@features) {
       print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
+    }
+    # If this is a cross-compile target build
+    if ($buildEnv{'build'} eq 'target') {
+      print $UM "TAO_IDL=\$(HOST_ACE)/bin/tao_idl\n";
+      print $UM "TAO_IDL_DEP=\$(TAO_IDL)\n";
+      print $UM "OPENDDS_IDL=\$(HOST_DDS)/bin/opendds_idl\n";
+      print $UM "OPENDDS_IDL_DEP=\$(OPENDDS_IDL)\n";
     }
     $UM->close;
   }
@@ -955,8 +967,10 @@ if ($cross_compile) {
   setHostEnv('TAO_ROOT', $ace_src_root . "/build/host/TAO");
   setHostEnv('DDS_ROOT', './build/host');
   setTargetEnv('ACE_ROOT', $ace_src_root . "/build/target");
-  setTargetEnv('TAO_ROOT', $ace_src_root . "/build/target/TAO");
+  setTargetEnv('TAO_ROOT', $ace_src_root . "/build/host/TAO");
   setTargetEnv('DDS_ROOT', './build/target');
+  setTargetEnv('HOST_ACE', $ace_src_root . "/build/host");
+  setTargetEnv('HOST_DDS', './build/host');
 
   ## PATH and LD_LIBRARY_PATH
   $hostEnv{'PATH'} = [
@@ -965,8 +979,8 @@ if ($cross_compile) {
   ];
 
   $targetEnv{'PATH'} = [
-    $targetEnv{'ACE_ROOT'} . $slash . 'bin',
-    $targetEnv{'DDS_ROOT'} . $slash . 'bin',
+    $hostEnv{'ACE_ROOT'} . $slash . 'bin',
+    $hostEnv{'DDS_ROOT'} . $slash . 'bin',
   ];
 
   push_libpath($hostEnv{'ACE_ROOT'} . $slash . 'lib', %hostEnv);
