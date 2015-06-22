@@ -676,15 +676,15 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
 }
 
 sub push_libpath {
-  my($path, %env) = @_;
+  my ($buildEnvRef, $path) = @_;
   my $libvarname = $platforminfo{$opts{'host'}}->{'libpath'};
   
   # Append or set
-  if (exists $env{$libvarname}) {
-    push(@{$env{$libvarname}}, @$path);
+  if (exists $buildEnvRef->{$libvarname}) {
+    push(@{$buildEnvRef->{$libvarname}}, $path);
   }
   else {
-    $env{$libvarname} = $path;
+    $buildEnvRef->{$libvarname} = [$path];
   }
 }
 
@@ -920,7 +920,7 @@ sub write_environment {
             $specific{'refpre'}, $key, $specific{'refpost'}, "\n";
       }
     }
-    else {
+    elsif ($key ne 'build') {
       print $SE "$specific{'export'} $key=$buildEnv{$key}\n";
       if ($MK) {
         print $MK "export $key := $buildEnv{$key}\n";
@@ -983,10 +983,10 @@ if ($cross_compile) {
     $hostEnv{'DDS_ROOT'} . $slash . 'bin',
   ];
 
-  push_libpath($hostEnv{'ACE_ROOT'} . $slash . 'lib', %hostEnv);
-  push_libpath($hostEnv{'DDS_ROOT'} . $slash . 'lib', %hostEnv);
-  push_libpath($targetEnv{'ACE_ROOT'} . $slash . 'lib', %targetEnv);
-  push_libpath($targetEnv{'DDS_ROOT'} . $slash . 'lib', %targetEnv);
+  push_libpath(\%hostEnv, $hostEnv{'ACE_ROOT'} . $slash . 'lib');
+  push_libpath(\%hostEnv, $hostEnv{'DDS_ROOT'} . $slash . 'lib');
+  push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
+  push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
 
   # host_tools.mwc
   write_host_workspace(\%hostEnv);
