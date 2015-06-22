@@ -1,6 +1,6 @@
 project(*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=WaitForAck_export.h \
-                   -Wb,stub_export_macro=WaitForAck_Export
+                   -Wb,stub_export_macro=WaitForAck_Export -SS
   dcps_ts_flags += -Wb,export_macro=WaitForAck_Export
   dynamicflags  += WAITFORACK_BUILD_DLL
 

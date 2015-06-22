@@ -9,7 +9,6 @@
 #ifndef OPENDDS_DCPS_DATAWRITER_H
 #define OPENDDS_DCPS_DATAWRITER_H
 
-#include "dds/DdsDcpsPublicationS.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DCPS/DataWriterCallbacks.h"

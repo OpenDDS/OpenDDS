@@ -1,7 +1,7 @@
 
 project(*idl): dcps_test_lib {
   idlflags      += -Wb,stub_export_include=SetQosPartition_export.h \
-                   -Wb,stub_export_macro=SetQosPartition_Export
+                   -Wb,stub_export_macro=SetQosPartition_Export -SS
   dcps_ts_flags += -Wb,export_macro=SetQosPartition_Export
   dynamicflags  += SETQOSPARTITION_BUILD_DLL
 
@@ -38,4 +38,3 @@ project(*Subscriber) : dcpsexe, dcps_transports_for_test {
     DataReaderListener.cpp
   }
 }
-

@@ -41,13 +41,13 @@ CORBA::Object::Object(IOP::IOR* ior, TAO_ORB_Core* orb_core)
 void
 CORBA::Object::_add_ref()
 {
-  this->refcount_.increment();
+  ++this->refcount_;
 }
 
 void
 CORBA::Object::_remove_ref()
 {
-  if (this->refcount_.decrement() != 0)
+  if (--this->refcount_ != 0)
     return;
 
   delete this;
@@ -113,11 +113,6 @@ CORBA::Boolean
 CORBA::Object::_is_collocated() const
 {
   return false;
-}
-
-void
-CORBA::Object::set_collocated_servant(TAO_Abstract_ServantBase*)
-{
 }
 
 CORBA::Boolean

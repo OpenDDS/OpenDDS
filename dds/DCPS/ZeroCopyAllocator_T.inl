@@ -24,7 +24,11 @@ FirstTimeFastAllocator<T, N>::malloc(size_t nbytes)
     return (void*) pool_;
 
   } else {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+    return ACE_Allocator::instance()->malloc(nbytes);
+#else
     return ACE_OS::malloc(nbytes);
+#endif /* ACE_HAS_ALLOC_HOOKS */
   }
 }
 
@@ -33,7 +37,11 @@ void
 FirstTimeFastAllocator<T, N>::free(void *ptr)
 {
   if (ptr != (void*) pool_) {
+#if defined (ACE_HAS_ALLOC_HOOKS)
+     ACE_Allocator::instance()->free(ptr);
+#else
     ACE_OS::free(ptr);
+#endif /* ACE_HAS_ALLOC_HOOKS */
   }
 }
 

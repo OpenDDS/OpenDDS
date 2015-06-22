@@ -146,7 +146,10 @@ static bool got_log_fname = false;
 static bool got_log_verbose = false;
 
 Service_Participant::Service_Participant()
-  : ORB_argv_(false /*substitute_env_args*/),
+  :
+#ifndef OPENDDS_SAFETY_PROFILE
+    ORB_argv_(false /*substitute_env_args*/),
+#endif
     reactor_(0),
     dp_factory_servant_(0),
     defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
@@ -170,7 +173,7 @@ Service_Participant::Service_Participant()
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
     schedulerQuantum_(ACE_Time_Value::zero),
-    pool_size_(1024*1024*20),
+    pool_size_(1024*1024*40),
     pool_granularity_(8),
     scheduler_(-1),
     priority_min_(0),
@@ -302,7 +305,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
       // The exceptions are -ORBLogFile and -ORBVerboseLogging, which
       // are processed by the service participant. This allows log control
       // even if an ORB is not being used.
+#ifndef OPENDDS_SAFETY_PROFILE
       ORB_argv_.add(ACE_TEXT("unused_arg_0"));
+#endif
       ACE_Arg_Shifter shifter(argc, argv);
       while (shifter.is_anything_left()) {
         if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORBLogFile")) == 0) {
@@ -312,10 +317,14 @@ Service_Participant::get_domain_participant_factory(int &argc,
         } else if (shifter.cur_arg_strncasecmp(ACE_TEXT("-ORB")) < 0) {
           shifter.ignore_arg();
         } else {
+#ifndef OPENDDS_SAFETY_PROFILE
           ORB_argv_.add(shifter.get_current());
+#endif
           shifter.consume_arg();
           if (shifter.is_parameter_next()) {
+#ifndef OPENDDS_SAFETY_PROFILE
             ORB_argv_.add(shifter.get_current(), true /*quote_arg*/);
+#endif
             shifter.consume_arg();
           }
         }

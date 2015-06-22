@@ -1,6 +1,6 @@
 project(DCPS_Perf*) : dcps {
   libout         = .
-  idlflags      += -Wb,export_macro=PTTypeLib_Export -Wb,export_include=PTTypeLib_Export.h
+  idlflags      += -Wb,export_macro=PTTypeLib_Export -Wb,export_include=PTTypeLib_Export.h -SS
   dynamicflags   = PTTYPELIB_BUILD_DLL
   pch_header     =
   pch_source     =
@@ -11,4 +11,3 @@ project(DCPS_Perf*) : dcps {
     PTDef.idl
   }
 }
-

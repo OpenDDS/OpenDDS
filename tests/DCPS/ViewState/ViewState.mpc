@@ -1,6 +1,6 @@
 project: dcpsexe, dcps_transports_for_test {
   exename = main
-
+  idlflags += -SS
   TypeSupport_Files {
     Simple.idl
   }

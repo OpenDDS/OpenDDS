@@ -1,5 +1,5 @@
 project(DDS*idl): dcps_test_lib {
-  idlflags      += -Wb,export_macro=ManyFooLib_Export -Wb,export_include=manyfoolib_export.h
+  idlflags      += -Wb,export_macro=ManyFooLib_Export -Wb,export_include=manyfoolib_export.h -SS
   dcps_ts_flags += -Wb,export_macro=ManyFooLib_Export
   libout         = .
   dynamicflags  += MANYFOOLIB_BUILD_DLL
