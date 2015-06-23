@@ -312,6 +312,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
+my %extraEnv = ('build' => 'main');
 my %hostEnv = ('build' => 'host');
 my %targetEnv = ('build' => 'target');
 
@@ -320,6 +321,13 @@ sub setEnv {
   $val = Cwd::abs_path($val) if -d $val;
   $val =~ s!/!\\!g if $slash eq '\\';
   $ENV{$name} = $val;
+}
+
+sub setExtraEnv {
+  my($name, $val) = @_;
+  $val = Cwd::abs_path($val) if -d $val;
+  $val =~ s!/!\\!g if $slash eq '\\';
+  $extraEnv{$name} = $val;
 }
 
 sub setHostEnv {
@@ -1008,17 +1016,17 @@ if ($cross_compile) {
   # Write main GNUmakefile
   write_cross_compile_makefile();
 } else {
-  setEnv('ACE_ROOT', $ace_src_root);
-  setEnv('TAO_ROOT', $ace_src_root . "/TAO");
-  setEnv('DDS_ROOT', '.');
-  setEnv('PATH', [
-    $ENV{'ACE_ROOT'} . $slash . 'bin',
-    $ENV{'DDS_ROOT'} . $slash . 'bin',
+  setExtraEnv('ACE_ROOT', $ace_src_root);
+  setExtraEnv('TAO_ROOT', $ace_src_root . "/TAO");
+  setExtraEnv('DDS_ROOT', '.');
+  setExtraEnv('PATH', [
+    $extraEnv{'ACE_ROOT'} . $slash . 'bin',
+    $extraEnv{'DDS_ROOT'} . $slash . 'bin',
   ]);
-  push_libpath(\%ENV, $ENV{'ACE_ROOT'} . $slash . 'lib');
-  push_libpath(\%ENV, $ENV{'DDS_ROOT'} . $slash . 'lib');
+  push_libpath(\%extraEnv, $extraEnv{'ACE_ROOT'} . $slash . 'lib');
+  push_libpath(\%extraEnv, $extraEnv{'DDS_ROOT'} . $slash . 'lib');
 
-  configure_build(\%ENV);
+  configure_build(\%extraEnv);
 }
 
 ## Final message
