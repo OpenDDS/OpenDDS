@@ -7,7 +7,6 @@
 namespace OpenDDS {
   namespace DCPS {
 
-      // TODO:  Exception behavior.
 #define OPENDDS_POOL_ALLOCATION_HOOKS \
       void* operator new(size_t size) { \
         void* ptr = ACE_Allocator::instance()->malloc(size); \

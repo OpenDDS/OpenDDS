@@ -109,28 +109,6 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 #define OPENDDS_QUEUE(T) std::queue<T, std::deque<T, \
           OpenDDS::DCPS::PoolAllocator<T > > >
 
-// TODO:  Error handling policy.
-
-#ifdef NOT_DEFINE
-#define OPENDDS_NEW_RETURN(POINTER,CONSTRUCTOR,RET_VAL) \
-  do { void* ptr = ACE_Allocator::instance()->malloc(sizeof(CONSTRUCTOR)); \
-       if (ptr == 0) { errno = ENOMEM; return RET_VAL; }                   \
-       POINTER = new (ptr) CONSTRUCTOR;                                 \
-  } while (0)
-
-#define OPENDDS_NEW(POINTER,CONSTRUCTOR) \
-  do { void* ptr = ACE_Allocator::instance()->malloc(sizeof(CONSTRUCTOR)); \
-       if (ptr == 0) { errno = ENOMEM; return; }                     \
-       POINTER = new (ptr) CONSTRUCTOR; \
-  } while (0)
-
-#define OPENDDS_NEW_NORETURN(POINTER,CONSTRUCTOR) \
-  do { void* ptr = ACE_Allocator::instance()->malloc(sizeof(CONSTRUCTOR)); \
-       if (ptr == 0) { errno = ENOMEM; }                                     \
-       POINTER = new (ptr) CONSTRUCTOR; \
-  } while (0)
-#endif
-
 #else
 #define OPENDDS_STRING std::string
 #define OPENDDS_MAP(K, V) std::map<K, V >
