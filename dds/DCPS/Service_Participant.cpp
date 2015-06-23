@@ -1893,13 +1893,3 @@ Service_Participant::create_typeless_topic(DDS::DomainParticipant_ptr participan
 
 } // namespace DCPS
 } // namespace OpenDDS
-
-#if defined (ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION)
-
-template class ACE_Singleton<Service_Participant, TAO_SYNCH_MUTEX>;
-
-#elif defined (ACE_HAS_TEMPLATENSTANTIATION_PRAGMA)
-
-#pragma instantiate ACE_Singleton<Service_Participant, TAO_SYNCH_MUTEX>
-
-#endif /*ACE_HAS_EXPLICIT_TEMPLATE_INSTANTIATION */
