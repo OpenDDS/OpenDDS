@@ -10,7 +10,7 @@
 #define OPENDDS_DCPS_TRANSPORTTYPE_RCH_H
 
 #include <ace/config.h>
-#ifndef ACE_LACKS_PRAGMA_ONCE
+#if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif
 
