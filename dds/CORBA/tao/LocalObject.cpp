@@ -1,5 +1,5 @@
-#define TAOLIB_ERROR ;
-#define TAOLIB_DEBUG ;
+#define TAOLIB_ERROR ACELIB_ERROR
+#define TAOLIB_DEBUG ACELIB_DEBUG
 
 #include "tao/LocalObject.h"
 
