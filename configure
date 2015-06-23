@@ -218,7 +218,7 @@ if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
       print "Changing target from $opts{'target'} to $opts{'target'}" . 
             "-safety\n";
     }
-    $opts{'target'} = $opts{'target'} . "-safety";
+    $opts{'target'} .= "-safety";
   }
 }
 
@@ -847,8 +847,8 @@ sub generate_workspace {
     print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
                                        'project files'), ".\n";
     my $mwcargs = "-type $needmpc $buildEnv{'DDS_ROOT'}$slash$ws $static " . $opts{'mpcargs'};
-    print "mwc command line: $mwcargs\n"
-      if $opts{'verbose'};
+    print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
+
     if (!$opts{'dry-run'}) {
       # Temporarily set to the build environment
       my $prev_ace_root = $ENV{'ACE_ROOT'};
@@ -871,6 +871,8 @@ sub generate_workspace {
 
         # Generate ACE workspace separately, to exclude TAO
         my $mwcargs = "-type $needmpc --recurse --exclude TAO,ACE.mwc $static " . $opts{'mpcargs'};
+
+        print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
 
         if (system("perl $ENV{ACE_ROOT}/bin/mwc.pl $mwcargs") != 0) {
           die "Error from MPC, stopped";
