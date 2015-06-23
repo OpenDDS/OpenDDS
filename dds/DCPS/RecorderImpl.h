@@ -21,9 +21,66 @@
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "Recorder.h"
+#include "ReactorInterceptor.h"
+
 
 namespace OpenDDS {
 namespace DCPS {
+
+// Class to cleanup associations scheduled for removal
+class RemoveRecorderAssociationSweeper : public ReactorInterceptor {
+public:
+  RemoveRecorderAssociationSweeper(ACE_Reactor* reactor,
+                                   ACE_thread_t owner,
+                                   RecorderImpl* recorder);
+
+  void schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback);
+  void cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info);
+
+  // Arg will be PublicationId
+  int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
+
+  virtual bool reactor_is_shut_down() const
+  {
+    return TheServiceParticipant->is_shut_down();
+  }
+
+private:
+  ~RemoveRecorderAssociationSweeper();
+
+  RecorderImpl* recorder_;
+
+  class CommandBase : public Command {
+  public:
+    CommandBase(RemoveRecorderAssociationSweeper* sweeper,
+                OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : sweeper_ (sweeper)
+      , info_(info)
+    { }
+
+  protected:
+    RemoveRecorderAssociationSweeper* sweeper_;
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo> info_;
+  };
+
+  class ScheduleCommand : public CommandBase {
+  public:
+    ScheduleCommand(RemoveRecorderAssociationSweeper* sweeper,
+                    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : CommandBase(sweeper, info)
+    { }
+    virtual void execute();
+  };
+
+  class CancelCommand : public CommandBase {
+  public:
+    CancelCommand(RemoveRecorderAssociationSweeper* sweeper,
+                  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+      : CommandBase(sweeper, info)
+    { }
+    virtual void execute();
+  };
+};
 
 /**
  * @class RecorderImpl
@@ -126,6 +183,10 @@ public:
   }
 
   virtual DDS::InstanceHandle_t get_instance_handle();
+protected:
+  virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
+  void remove_or_reschedule(const PublicationId& pub_id);
+
 private:
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
@@ -155,12 +216,15 @@ private:
 
   DDS::SubscriberQos subqos_;
 
+  friend class RemoveRecorderAssociationSweeper;
+
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var topic_desc_;
   DDS::StatusMask listener_mask_;
   RecorderListener_rch listener_;
   DDS::DomainId_t domain_id_;
+  RemoveRecorderAssociationSweeper* remove_association_sweeper_;
 
   ACE_Recursive_Thread_Mutex publication_handle_lock_;
 
