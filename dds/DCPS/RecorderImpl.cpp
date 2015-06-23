@@ -59,6 +59,10 @@ RecorderImpl::RecorderImpl()
   topic_desc_(0),
   listener_mask_(DEFAULT_STATUS_MASK),
   domain_id_(0),
+  remove_association_sweeper_(
+    new RemoveRecorderAssociationSweeper(TheServiceParticipant->reactor(),
+                                         TheServiceParticipant->reactor_owner(),
+                                         this)),
   is_bit_(false)
 {
 
@@ -81,6 +85,19 @@ RecorderImpl::RecorderImpl()
 RecorderImpl::~RecorderImpl()
 {
   DBG_ENTRY_LVL("RecorderImpl","~RecorderImpl",6);
+  {
+    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
+                   read_guard,
+                   this->writers_lock_);
+    // Cancel any uncancelled sweeper timers to decrement reference count.
+    WriterMapType::iterator writer;
+    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
+      remove_association_sweeper_->cancel_timer(writer->second);
+    }
+  }
+
+  remove_association_sweeper_->wait();
+  remove_association_sweeper_->destroy();
 }
 
 
@@ -108,6 +125,19 @@ RecorderImpl::cleanup()
     topic_servant_->remove_entity_ref();
     topic_servant_->_remove_ref();
   }
+  {
+    ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
+                   read_guard,
+                   this->writers_lock_,
+                   0);
+    // Cancel any uncancelled sweeper timers
+    WriterMapType::iterator writer;
+    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
+      remove_association_sweeper_->cancel_timer(writer->second);
+    }
+  }
+
+  remove_association_sweeper_->wait();
   return DDS::RETCODE_OK;
 }
 
@@ -504,6 +534,9 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
                                   bool               notify_lost)
 {
   DBG_ENTRY_LVL("RecorderImpl", "remove_associations", 6);
+  if (writers.length() == 0) {
+    return;
+  }
 
   if (DCPS_debug_level >= 1) {
     GuidConverter reader_converter(subscription_id_);
@@ -516,7 +549,76 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
                OPENDDS_STRING(writer_converter).c_str(),
                writers.length()));
   }
+  if (!this->entity_deleted_.value()) {
+    // stop pending associations for these writer ids
+    this->stop_associating(writers.get_buffer(), writers.length());
 
+    // writers which are considered non-active and can
+    // be removed immediately
+    WriterIdSeq non_active_writers;
+    {
+      CORBA::ULong wr_len = writers.length();
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+
+      for (CORBA::ULong i = 0; i < wr_len; i++) {
+        PublicationId writer_id = writers[i];
+
+        WriterMapType::iterator it = this->writers_.find(writer_id);
+        if (it != this->writers_.end() &&
+            it->second->active(TheServiceParticipant->pending_timeout())) {
+          remove_association_sweeper_->schedule_timer(it->second, notify_lost);
+        } else {
+          push_back(non_active_writers, writer_id);
+        }
+      }
+    }
+    remove_associations_i(non_active_writers, notify_lost);
+  } else {
+    remove_associations_i(writers, notify_lost);
+  }
+}
+
+void
+RecorderImpl::remove_or_reschedule(const PublicationId& pub_id)
+{
+  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+  WriterMapType::iterator where = writers_.find(pub_id);
+  if (writers_.end() != where) {
+    WriterInfo& info = *where->second;
+    WriterIdSeq writers;
+    push_back(writers, pub_id);
+    bool notify = info.notify_lost_;
+    if (info.removal_deadline_ < ACE_OS::gettimeofday()) {
+      write_guard.release();
+      remove_associations_i(writers, notify);
+    } else {
+      write_guard.release();
+      remove_associations(writers, notify);
+    }
+  }
+}
+
+void
+RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
+    bool notify_lost)
+{
+  DBG_ENTRY_LVL("RecorderImpl", "remove_associations_i", 6);
+
+  if (writers.length() == 0) {
+    return;
+  }
+
+  if (DCPS_debug_level >= 1) {
+    GuidConverter reader_converter(subscription_id_);
+    GuidConverter writer_converter(writers[0]);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
+               ACE_TEXT("bit %d local %C remote %C num remotes %d \n"),
+               is_bit_,
+               OPENDDS_STRING(reader_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str(),
+               writers.length()));
+  }
   DDS::InstanceHandleSeq handles;
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->publication_handle_lock_);
@@ -544,13 +646,14 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
 
       if (it != this->writers_.end()) {
         it->second->removed();
+        remove_association_sweeper_->cancel_timer(it->second);
       }
 
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 1) {
           GuidConverter converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
+                     ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
                      ACE_TEXT("the writer local %C was already removed.\n"),
                      OPENDDS_STRING(converter).c_str()));
         }
@@ -574,7 +677,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     if (this->lookup_instance_handles(updated_writers, handles) == false) {
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
+                   ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
                    ACE_TEXT("lookup_instance_handles failed.\n")));
       }
     }
@@ -588,7 +691,6 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
-
     // Derive the change in the number of publications writing to this reader.
     int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
     this->subscription_match_status_.current_count_change
@@ -608,7 +710,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
       // DDS::DataReaderListener_var listener
       // = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-      if (listener_.in()) {
+      if (!CORBA::is_nil(listener_.in())) {
         listener_->on_recorder_matched(
           this,
           this->subscription_match_status_);
@@ -981,5 +1083,82 @@ RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
   return ret;
 }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+
+//Starting RemoveRecorderAssociationSweeper
+RemoveRecorderAssociationSweeper::RemoveRecorderAssociationSweeper(ACE_Reactor* reactor,
+                                                   ACE_thread_t owner,
+                                                   RecorderImpl* recorder)
+  : ReactorInterceptor (reactor, owner)
+  , recorder_(recorder)
+{ }
+
+RemoveRecorderAssociationSweeper::~RemoveRecorderAssociationSweeper()
+{ }
+
+void RemoveRecorderAssociationSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback)
+{
+  info->scheduled_for_removal_ = true;
+  info->notify_lost_ = callback;
+  ACE_Time_Value ten_seconds(10);
+  info->removal_deadline_ = ACE_OS::gettimeofday() + ten_seconds;
+  ScheduleCommand c(this, info);
+  execute_or_enqueue(c);
+}
+
+void RemoveRecorderAssociationSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
+{
+  info->scheduled_for_removal_ = false;
+  info->removal_deadline_ = ACE_Time_Value::zero;
+  CancelCommand c(this, info);
+  execute_or_enqueue(c);
+}
+
+int RemoveRecorderAssociationSweeper::handle_timeout(
+    const ACE_Time_Value& ,
+    const void* arg)
+{
+  PublicationId pub_id = reinterpret_cast<const WriterInfo*>(arg)->writer_id_;
+
+  if (DCPS_debug_level >= 1) {
+    GuidConverter sub_repo(recorder_->get_repo_id());
+    GuidConverter pub_repo(pub_id);
+    ACE_DEBUG((LM_INFO, "((%P|%t)) RemoveRecorderAssociationSweeper::handle_timeout reader: %C waiting on writer: %C\n",
+               OPENDDS_STRING(sub_repo).c_str(),
+               OPENDDS_STRING(pub_repo).c_str()));
+  }
+
+  recorder_->remove_or_reschedule(pub_id);
+  return 0;
+}
+
+void RemoveRecorderAssociationSweeper::ScheduleCommand::execute()
+{
+  static const ACE_Time_Value two_seconds(2);
+
+  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
+  const void* arg = reinterpret_cast<const void*>(info_.in());
+  info_->_add_ref();
+
+  info_->remove_association_timer_ = sweeper_->reactor()->schedule_timer(sweeper_,
+                                                                       arg,
+                                                                       two_seconds);
+  if (DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) RemoveRecorderAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", info_->remove_association_timer_));
+  }
+}
+
+void RemoveRecorderAssociationSweeper::CancelCommand::execute()
+{
+  if (info_->remove_association_timer_ != WriterInfo::NO_TIMER) {
+    sweeper_->reactor()->cancel_timer(info_->remove_association_timer_);
+    if (DCPS_debug_level) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) RemoveRecorderAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->remove_association_timer_));
+    }
+    info_->remove_association_timer_ = WriterInfo::NO_TIMER;
+    info_->_remove_ref();
+  }
+}
+//End RemoveRecorderAssociationSweeper
+
 } // namespace DCPS
 } // namespace
