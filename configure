@@ -230,6 +230,15 @@ if ($opts{'host'} ne $opts{'target'}) {
 
 my ($slash, $exeext) = ($opts{'host'} eq 'win32') ? ('\\', '.exe') : ('/', '');
 
+## Platform specifics
+my %specific =
+  ($slash eq '/' ?
+   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
+    'refpost' => '}') :
+   ('ext' => 'cmd', 'export' => 'set', 'pathsep' => ';', 'refpre' => '%',
+    'refpost' => '%')
+  );
+
 sub which {
   my $file = shift;
   for my $p (File::Spec->path()) {
@@ -681,10 +690,10 @@ sub push_libpath {
   
   # Append or set
   if (exists $buildEnvRef->{$libvarname}) {
-    push(@{$buildEnvRef->{$libvarname}}, $path);
+    $buildEnvRef->{$libvarname} .= ($specific{'pathsep'} . $path);
   }
   else {
-    $buildEnvRef->{$libvarname} = [$path];
+    $buildEnvRef->{$libvarname} = $path;
   }
 }
 
@@ -886,16 +895,6 @@ sub generate_workspace {
   }
 }
 
-## Create setenv.sh and "master" GNUmakefile
-
-my %specific =
-  ($slash eq '/' ?
-   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
-    'refpost' => '}') :
-   ('ext' => 'cmd', 'export' => 'set', 'pathsep' => ';', 'refpre' => '%',
-    'refpost' => '%')
-  );
-
 # Environment setenv and GNUmakefile.dist
 sub write_environment {
   my %buildEnv =  %{$_[0]};
@@ -1014,8 +1013,8 @@ if ($cross_compile) {
     $ENV{'ACE_ROOT'} . $slash . 'bin',
     $ENV{'DDS_ROOT'} . $slash . 'bin',
   ]);
-  push_libpath($ENV{'ACE_ROOT'} . $slash . 'lib', %ENV);
-  push_libpath($ENV{'DDS_ROOT'} . $slash . 'lib', %ENV);
+  push_libpath(\%ENV, $ENV{'ACE_ROOT'} . $slash . 'lib');
+  push_libpath(\%ENV, $ENV{'DDS_ROOT'} . $slash . 'lib');
 
   configure_build(\%ENV);
 }
