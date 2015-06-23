@@ -635,6 +635,8 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
                readers.length()));
   }
 
+  this->stop_associating(readers.get_buffer(), readers.length());
+
   ReaderIdSeq fully_associated_readers;
   CORBA::ULong fully_associated_len = 0;
   ReaderIdSeq rds;
@@ -730,6 +732,7 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
         /// Section 7.1.4.1: total_count will not decrement.
 
         /// @TODO: Reconcile this with the verbiage in section 7.1.4.1
+        /// TODO: Should rds_len really be fully_associated_len here??
         this->publication_match_status_.last_subscription_handle =
           handles[rds_len - 1];
 
@@ -762,6 +765,8 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
 
 void ReplayerImpl::remove_all_associations()
 {
+  this->stop_associating();
+
   OpenDDS::DCPS::ReaderIdSeq readers;
   CORBA::ULong size;
   CORBA::ULong num_pending_readers;
