@@ -116,8 +116,8 @@ defined.
    generated under the "classes" subdirectory of the current directory.
 
 5. Run MPC to generate platform-specific build files.
-   Unix    => $ACE_ROOT/bin/mwc.pl -type gnuace
-   Windows => %ACE_ROOT%\bin\mwc.pl -type [CompilerType]
+   Unix    => $ACE_ROOT/bin/mpc.pl -type gnuace
+   Windows => %ACE_ROOT%\bin\mpc.pl -type [CompilerType]
                          ** CompilerType options are: vc71, vc8, vc9, and nmake
                             Make sure this is running ActiveState Perl.
 
