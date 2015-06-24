@@ -60,7 +60,7 @@ RecorderImpl::RecorderImpl()
   listener_mask_(DEFAULT_STATUS_MASK),
   domain_id_(0),
   remove_association_sweeper_(
-    new RemoveRecorderAssociationSweeper(TheServiceParticipant->reactor(),
+    new RemoveAssociationSweeper<RecorderImpl>(TheServiceParticipant->reactor(),
                                          TheServiceParticipant->reactor_owner(),
                                          this)),
   is_bit_(false)
@@ -1083,82 +1083,6 @@ RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,
   return ret;
 }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
-
-//Starting RemoveRecorderAssociationSweeper
-RemoveRecorderAssociationSweeper::RemoveRecorderAssociationSweeper(ACE_Reactor* reactor,
-                                                   ACE_thread_t owner,
-                                                   RecorderImpl* recorder)
-  : ReactorInterceptor (reactor, owner)
-  , recorder_(recorder)
-{ }
-
-RemoveRecorderAssociationSweeper::~RemoveRecorderAssociationSweeper()
-{ }
-
-void RemoveRecorderAssociationSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback)
-{
-  info->scheduled_for_removal_ = true;
-  info->notify_lost_ = callback;
-  ACE_Time_Value ten_seconds(10);
-  info->removal_deadline_ = ACE_OS::gettimeofday() + ten_seconds;
-  ScheduleCommand c(this, info);
-  execute_or_enqueue(c);
-}
-
-void RemoveRecorderAssociationSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-{
-  info->scheduled_for_removal_ = false;
-  info->removal_deadline_ = ACE_Time_Value::zero;
-  CancelCommand c(this, info);
-  execute_or_enqueue(c);
-}
-
-int RemoveRecorderAssociationSweeper::handle_timeout(
-    const ACE_Time_Value& ,
-    const void* arg)
-{
-  PublicationId pub_id = reinterpret_cast<const WriterInfo*>(arg)->writer_id_;
-
-  if (DCPS_debug_level >= 1) {
-    GuidConverter sub_repo(recorder_->get_repo_id());
-    GuidConverter pub_repo(pub_id);
-    ACE_DEBUG((LM_INFO, "((%P|%t)) RemoveRecorderAssociationSweeper::handle_timeout reader: %C waiting on writer: %C\n",
-               OPENDDS_STRING(sub_repo).c_str(),
-               OPENDDS_STRING(pub_repo).c_str()));
-  }
-
-  recorder_->remove_or_reschedule(pub_id);
-  return 0;
-}
-
-void RemoveRecorderAssociationSweeper::ScheduleCommand::execute()
-{
-  static const ACE_Time_Value two_seconds(2);
-
-  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
-  const void* arg = reinterpret_cast<const void*>(info_.in());
-  info_->_add_ref();
-
-  info_->remove_association_timer_ = sweeper_->reactor()->schedule_timer(sweeper_,
-                                                                       arg,
-                                                                       two_seconds);
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) RemoveRecorderAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", info_->remove_association_timer_));
-  }
-}
-
-void RemoveRecorderAssociationSweeper::CancelCommand::execute()
-{
-  if (info_->remove_association_timer_ != WriterInfo::NO_TIMER) {
-    sweeper_->reactor()->cancel_timer(info_->remove_association_timer_);
-    if (DCPS_debug_level) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) RemoveRecorderAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->remove_association_timer_));
-    }
-    info_->remove_association_timer_ = WriterInfo::NO_TIMER;
-    info_->_remove_ref();
-  }
-}
-//End RemoveRecorderAssociationSweeper
 
 } // namespace DCPS
 } // namespace

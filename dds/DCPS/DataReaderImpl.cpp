@@ -68,7 +68,7 @@ DataReaderImpl::DataReaderImpl()
     domain_id_(0),
     subscriber_servant_(0),
     end_historic_sweeper_(new EndHistoricSamplesMissedSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-    remove_association_sweeper_(new RemoveAssociationSweeper(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
+    remove_association_sweeper_(new RemoveAssociationSweeper<DataReaderImpl>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
     n_chunks_(TheServiceParticipant->n_chunks()),
     reverse_pub_handle_lock_(publication_handle_lock_),
     reactor_(0),
@@ -3418,81 +3418,6 @@ void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
     info_->_remove_ref();
   }
 }
-//Starting RemoveAssociationSweeper
-RemoveAssociationSweeper::RemoveAssociationSweeper(ACE_Reactor* reactor,
-                                                   ACE_thread_t owner,
-                                                   DataReaderImpl* reader)
-  : ReactorInterceptor (reactor, owner)
-  , reader_(reader)
-{ }
-
-RemoveAssociationSweeper::~RemoveAssociationSweeper()
-{ }
-
-void RemoveAssociationSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info, bool callback)
-{
-  info->scheduled_for_removal_ = true;
-  info->notify_lost_ = callback;
-  ACE_Time_Value ten_seconds(10);
-  info->removal_deadline_ = ACE_OS::gettimeofday() + ten_seconds;
-  ScheduleCommand c(this, info);
-  execute_or_enqueue(c);
-}
-
-void RemoveAssociationSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
-{
-  info->scheduled_for_removal_ = false;
-  info->removal_deadline_ = ACE_Time_Value::zero;
-  CancelCommand c(this, info);
-  execute_or_enqueue(c);
-}
-
-int RemoveAssociationSweeper::handle_timeout(
-    const ACE_Time_Value& ,
-    const void* arg)
-{
-  PublicationId pub_id = reinterpret_cast<const WriterInfo*>(arg)->writer_id_;
-
-  if (DCPS_debug_level >= 1) {
-    GuidConverter sub_repo(reader_->get_repo_id());
-    GuidConverter pub_repo(pub_id);
-    ACE_DEBUG((LM_INFO, "((%P|%t)) RemoveAssociationSweeper::handle_timeout reader: %C waiting on writer: %C\n",
-               OPENDDS_STRING(sub_repo).c_str(),
-               OPENDDS_STRING(pub_repo).c_str()));
-  }
-
-  reader_->remove_or_reschedule(pub_id);
-  return 0;
-}
-
-void RemoveAssociationSweeper::ScheduleCommand::execute()
-{
-  static const ACE_Time_Value two_seconds(2);
-
-  //Pass pointer to writer info for timer to use, must decrease ref count when canceling timer
-  const void* arg = reinterpret_cast<const void*>(info_.in());
-  info_->_add_ref();
-
-  info_->remove_association_timer_ = sweeper_->reactor()->schedule_timer(sweeper_,
-                                                                       arg,
-                                                                       two_seconds);
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - Scheduled sweeper %d\n", info_->remove_association_timer_));
-  }
-}
-
-void RemoveAssociationSweeper::CancelCommand::execute()
-{
-  if (info_->remove_association_timer_ != WriterInfo::NO_TIMER) {
-    sweeper_->reactor()->cancel_timer(info_->remove_association_timer_);
-    if (DCPS_debug_level) {
-      ACE_DEBUG((LM_INFO, "(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - Unscheduled sweeper %d\n", info_->remove_association_timer_));
-    }
-    info_->remove_association_timer_ = WriterInfo::NO_TIMER;
-    info_->_remove_ref();
-  }
-}
-//End RemoveAssociationSweeper
 
 } // namespace DCPS
 } // namespace OpenDDS
