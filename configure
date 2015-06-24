@@ -218,7 +218,7 @@ if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
       print "Changing target from $opts{'target'} to $opts{'target'}" . 
             "-safety\n";
     }
-    $opts{'target'} = $opts{'target'} . "-safety";
+    $opts{'target'} .= "-safety";
   }
 }
 
@@ -229,6 +229,15 @@ if ($opts{'host'} ne $opts{'target'}) {
 }
 
 my ($slash, $exeext) = ($opts{'host'} eq 'win32') ? ('\\', '.exe') : ('/', '');
+
+## Platform specifics
+my %specific =
+  ($slash eq '/' ?
+   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
+    'refpost' => '}') :
+   ('ext' => 'cmd', 'export' => 'set', 'pathsep' => ';', 'refpre' => '%',
+    'refpost' => '%')
+  );
 
 sub which {
   my $file = shift;
@@ -303,6 +312,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
+my %extraEnv = ('build' => 'main');
 my %hostEnv = ('build' => 'host');
 my %targetEnv = ('build' => 'target');
 
@@ -311,6 +321,13 @@ sub setEnv {
   $val = Cwd::abs_path($val) if -d $val;
   $val =~ s!/!\\!g if $slash eq '\\';
   $ENV{$name} = $val;
+}
+
+sub setExtraEnv {
+  my($name, $val) = @_;
+  $val = Cwd::abs_path($val) if -d $val;
+  $val =~ s!/!\\!g if $slash eq '\\';
+  $extraEnv{$name} = $val;
 }
 
 sub setHostEnv {
@@ -681,10 +698,10 @@ sub push_libpath {
   
   # Append or set
   if (exists $buildEnvRef->{$libvarname}) {
-    push(@{$buildEnvRef->{$libvarname}}, $path);
+    $buildEnvRef->{$libvarname} .= ($specific{'pathsep'} . $path);
   }
   else {
-    $buildEnvRef->{$libvarname} = [$path];
+    $buildEnvRef->{$libvarname} = $path;
   }
 }
 
@@ -838,8 +855,8 @@ sub generate_workspace {
     print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
                                        'project files'), ".\n";
     my $mwcargs = "-type $needmpc $buildEnv{'DDS_ROOT'}$slash$ws $static " . $opts{'mpcargs'};
-    print "mwc command line: $mwcargs\n"
-      if $opts{'verbose'};
+    print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
+
     if (!$opts{'dry-run'}) {
       # Temporarily set to the build environment
       my $prev_ace_root = $ENV{'ACE_ROOT'};
@@ -863,6 +880,8 @@ sub generate_workspace {
         # Generate ACE workspace separately, to exclude TAO
         my $mwcargs = "-type $needmpc --recurse --exclude TAO,ACE.mwc $static " . $opts{'mpcargs'};
 
+        print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
+
         if (system("perl $ENV{ACE_ROOT}/bin/mwc.pl $mwcargs") != 0) {
           die "Error from MPC, stopped";
         }
@@ -885,16 +904,6 @@ sub generate_workspace {
         '.sln';
   }
 }
-
-## Create setenv.sh and "master" GNUmakefile
-
-my %specific =
-  ($slash eq '/' ?
-   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
-    'refpost' => '}') :
-   ('ext' => 'cmd', 'export' => 'set', 'pathsep' => ';', 'refpre' => '%',
-    'refpost' => '%')
-  );
 
 # Environment setenv and GNUmakefile.dist
 sub write_environment {
@@ -1007,17 +1016,17 @@ if ($cross_compile) {
   # Write main GNUmakefile
   write_cross_compile_makefile();
 } else {
-  setEnv('ACE_ROOT', $ace_src_root);
-  setEnv('TAO_ROOT', $ace_src_root . "/TAO");
-  setEnv('DDS_ROOT', '.');
-  setEnv('PATH', [
-    $ENV{'ACE_ROOT'} . $slash . 'bin',
-    $ENV{'DDS_ROOT'} . $slash . 'bin',
+  setExtraEnv('ACE_ROOT', $ace_src_root);
+  setExtraEnv('TAO_ROOT', $ace_src_root . "/TAO");
+  setExtraEnv('DDS_ROOT', '.');
+  setExtraEnv('PATH', [
+    $extraEnv{'ACE_ROOT'} . $slash . 'bin',
+    $extraEnv{'DDS_ROOT'} . $slash . 'bin',
   ]);
-  push_libpath($ENV{'ACE_ROOT'} . $slash . 'lib', %ENV);
-  push_libpath($ENV{'DDS_ROOT'} . $slash . 'lib', %ENV);
+  push_libpath(\%extraEnv, $extraEnv{'ACE_ROOT'} . $slash . 'lib');
+  push_libpath(\%extraEnv, $extraEnv{'DDS_ROOT'} . $slash . 'lib');
 
-  configure_build(\%ENV);
+  configure_build(\%extraEnv);
 }
 
 ## Final message
