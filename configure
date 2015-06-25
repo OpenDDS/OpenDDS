@@ -397,6 +397,17 @@ elsif (-r $ace_src_root . '/../TAO/tao/ORB.h') {
   $tao_src_root =  $ace_src_root . $slash . 'TAO';
 }
 
+sub locate_mpc {
+  if (!$ENV{'MPC_ROOT'} && -r $ace_src_root . '/MPC/MPC.ico') {
+    setEnv('MPC_ROOT', $ace_src_root . $slash . 'MPC');
+  }
+  elsif (!$ENV{'MPC_ROOT'}) {
+    die "Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in the\n".
+      "'MPC' directory under ACE_ROOT ($ace_src_root), stopped";
+  }
+  return $ENV{MPC_ROOT};
+}
+
 ## Download ACE+TAO
 
 if (!$ace_src_root || !$tao_src_root) {
@@ -502,6 +513,7 @@ sub clone_host_and_target {
   my($source_dir, $name) = @_;
   my $cur_dir = getcwd;
   print "Changing dir to $source_dir\n" if $opts{'verbose'};
+  locate_mpc();
   chdir($source_dir);
   eval {
     if (! -d "build") {
@@ -705,7 +717,9 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
 sub push_libpath {
   my ($buildEnvRef, $path) = @_;
   my $build = $buildEnvRef->{'build'};
-  my $libvarname = $platforminfo{$opts{$build}}->{'libpath'};
+  my $build_copy = $opts{$build};
+  $build_copy =~ s/-safety$//;
+  my $libvarname = $platforminfo{$build_copy}->{'libpath'};
   
   # Append or set
   if (exists $buildEnvRef->{$libvarname}) {
@@ -814,13 +828,7 @@ sub generate_workspace {
   }
 
   if ($needmpc) {
-    if (!$ENV{'MPC_ROOT'} && -r $buildEnv{'ACE_ROOT'} . '/MPC/MPC.ico') {
-      setEnv('MPC_ROOT', $buildEnv{'ACE_ROOT'} . $slash . 'MPC');
-    }
-    elsif (!$ENV{'MPC_ROOT'}) {
-      die "Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in the\n".
-        "'MPC' directory under ACE_ROOT ($buildEnv{'ACE_ROOT'}), stopped";
-    }
+    locate_mpc();
 
     # Append to default.features
     if (@features) {
