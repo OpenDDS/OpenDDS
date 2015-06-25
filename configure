@@ -473,8 +473,8 @@ if (!$ace_src_root || !$tao_src_root) {
     }
   }
 
-  $ace_src_root = '../ACE_wrappers';
-  $tao_src_root = '../ACE_wrappers/TAO';
+  $ace_src_root ||= '../ACE_wrappers';
+  $tao_src_root ||= '../ACE_wrappers/TAO';
 }
 
 print "Using ace_src_root: $ace_src_root\n" if $opts{'verbose'};
@@ -553,6 +553,7 @@ sub write_config_h {
     }
     $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
     print $CFGH "#include \"ace/config-$cfg.h\"\n";
+    # For safety profile builds, define the proper symbol in config.h
     if (defined $opts{'no-opendds-safety-profile'}) {
       print $CFGH "#define ACE_FACE_SAFETY_BASE\n";
     }
@@ -786,8 +787,8 @@ sub generate_workspace {
   ($needmpc, $tests) = (1, 0) if (exists $opts{'tests'} && !$opts{'tests'});
 
 
-  # If this is a target safety profile build
-  if (defined $opts{'no-opendds-safety-profile'}) {
+  # If this is a target cross-compile build
+  if ($buildEnv{build} eq 'target') {
     # TAO will be built seperately
     $buildtao = 0;
   } else {
@@ -967,20 +968,30 @@ sub write_cross_compile_makefile {
 }
 
 if ($cross_compile) {
-  # Clone build trees
+  # Clone build trees for ACE and DDS
   clone_host_and_target(".", "OpenDDS");
   clone_host_and_target($ace_src_root, "ACE");
-
-  # ACE_ROOT, TAO_ROOT, DDS_ROOT
   setHostEnv('ACE_ROOT', $ace_src_root . "/build/host");
-  setHostEnv('TAO_ROOT', $ace_src_root . "/build/host/TAO");
   setHostEnv('DDS_ROOT', './build/host');
   setTargetEnv('ACE_ROOT', $ace_src_root . "/build/target");
-  setTargetEnv('TAO_ROOT', $ace_src_root . "/build/host/TAO");
   setTargetEnv('DDS_ROOT', './build/target');
   setTargetEnv('HOST_ACE', $ace_src_root . "/build/host");
   setTargetEnv('HOST_DDS', './build/host');
 
+  # Clone build tree for TAO, if not nested in ACE
+  my $ace_src_fullpath = Cwd::abs_path($ace_src_root);
+  my $tao_src_fullpath = Cwd::abs_path($tao_src_root);
+  # If TAO is nested within ACE
+  if (substr($tao_src_root, 0, length($ace_src_root)) eq $ace_src_root) {
+    setHostEnv('TAO_ROOT', $ace_src_root . "/build/host/TAO");
+    setTargetEnv('TAO_ROOT', $ace_src_root . "/build/host/TAO");
+  } else {
+    # No need to clone, built only in host
+    setHostEnv('TAO_ROOT', $tao_src_root);
+    setTargetEnv('TAO_ROOT', $tao_src_root);
+  }
+
+  # ACE_ROOT, TAO_ROOT, DDS_ROOT
   ## PATH and LD_LIBRARY_PATH
   $hostEnv{'PATH'} = [
     $hostEnv{'ACE_ROOT'} . $slash . 'bin',
@@ -1017,7 +1028,7 @@ if ($cross_compile) {
   write_cross_compile_makefile();
 } else {
   setExtraEnv('ACE_ROOT', $ace_src_root);
-  setExtraEnv('TAO_ROOT', $ace_src_root . "/TAO");
+  setExtraEnv('TAO_ROOT', $tao_src_root);
   setExtraEnv('DDS_ROOT', '.');
   setExtraEnv('PATH', [
     $extraEnv{'ACE_ROOT'} . $slash . 'bin',
