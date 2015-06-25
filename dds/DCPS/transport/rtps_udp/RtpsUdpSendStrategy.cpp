@@ -180,7 +180,7 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
   char buffer[UDP_MAX_MESSAGE_SIZE];
   char *iter = buffer;
   for (int i = 0; i < n; ++i) {
-    if (iter - buffer + iov[i].iov_len > UDP_MAX_MESSAGE_SIZE) {
+    if (size_t(iter - buffer + iov[i].iov_len) > UDP_MAX_MESSAGE_SIZE) {
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "
                  "message too large at index %d size %d\n", i, iov[i].iov_len));
       return -1;

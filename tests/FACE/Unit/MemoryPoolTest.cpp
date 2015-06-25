@@ -987,8 +987,8 @@ private:
 
     index = 0;
     if (log) {
-      printf("Pool ptr %zx end %zx\n", (unsigned long)pool.pool_ptr_,
-             (unsigned long)pool_end);
+      printf("Pool ptr %zx end %zx\n", (size_t)pool.pool_ptr_,
+             (size_t)pool_end);
      }
 
     // Check all allocs in positional order and not overlapping
@@ -1020,9 +1020,9 @@ private:
           "Alloc[%zu] %s at %zx ptr %zx lg %s sm %s size %d psize %d\n",
           index++,
           alloc->is_free() ?
-          (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
-          (unsigned long)alloc,
-          (unsigned long)alloc->ptr(),
+            (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
+          (size_t)alloc,
+          (size_t)alloc->ptr(),
           lrgr_index >= 0 ? lrgr_buff : "[  ]",
           smlr_index >= 0 ? smlr_buff : "[  ]",
           alloc->size(),
