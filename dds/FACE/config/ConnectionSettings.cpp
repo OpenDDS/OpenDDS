@@ -16,6 +16,7 @@ ConnectionSettings::ConnectionSettings()
   std::strcpy(datareader_qos_name_, "");
   std::strcpy(publisher_qos_name_, "");
   std::strcpy(subscriber_qos_name_, "");
+  std::strcpy(transport_name_, "");
 }
 
 int
@@ -55,6 +56,8 @@ ConnectionSettings::set(const char* name, const char* value)
       ACE_OS::printf("Don't know of direction %s\n", value);
       status = 1;
     }
+  } else if (!std::strcmp(name, "transport")) {
+    std::strncpy(transport_name_, value, sizeof(transport_name_));
   } else {
     // no match
     ACE_OS::printf("Don't know of setting %s\n", name);
@@ -88,6 +91,12 @@ ConnectionSettings::subscriber_qos_name() const
   return subscriber_qos_name_;
 }
 
+const char*
+ConnectionSettings::transport_name() const
+{
+  return transport_name_;
+}
+
 bool
 ConnectionSettings::datawriter_qos_set() const
 {
@@ -110,6 +119,12 @@ bool
 ConnectionSettings::subscriber_qos_set() const
 {
   return subscriber_qos_name_[0];
+}
+
+bool
+ConnectionSettings::transport_set() const
+{
+  return transport_name_[0];
 }
 
 } } }
