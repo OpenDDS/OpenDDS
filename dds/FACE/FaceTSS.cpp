@@ -10,6 +10,7 @@
 #include "dds/DCPS/SafetyProfilePool.h"
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DdsDcpsCoreC.h"
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include <cstring>
 
@@ -53,7 +54,8 @@ namespace {
                                            const char* topic,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir,
-                                           QosSettings& qos);
+                                           QosSettings& qos,
+                                           const char* transport);
 }
 
 using OpenDDS::FaceTSS::Entities;
@@ -123,7 +125,8 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
                                         connection.topic_name_,
                                         topic.type_name_,
                                         connection_direction,
-                                        qos);
+                                        qos,
+                                        connection.transport_name_);
   if (return_code != RC_NO_ERROR) {
     return;
   }
@@ -544,7 +547,8 @@ namespace {
                                            const char* topicName,
                                            const char* type,
                                            CONNECTION_DIRECTION_TYPE dir,
-                                           QosSettings& qos_settings)
+                                           QosSettings& qos_settings,
+                                           const char* transport)
   {
 #ifdef DEBUG_OPENDDS_FACETSS
     OpenDDS::DCPS::set_DCPS_debug_level(8);
@@ -580,6 +584,12 @@ namespace {
       find_or_create_pub(publisher_qos, dp, pub);
       if (!pub) return INVALID_PARAM;
 
+      if (transport && transport[0]) {
+        OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->get_config(transport);
+        if (config.is_nil()) return INVALID_PARAM;
+        TheTransportRegistry->bind_config(config, pub);
+      }
+
       DDS::DataWriterQos datawriter_qos;
       qos_settings.apply_to(datawriter_qos);
 
@@ -603,6 +613,12 @@ namespace {
       DDS::Subscriber_var sub;
       find_or_create_sub(subscriber_qos, dp, sub);
       if (!sub) return INVALID_PARAM;
+
+      if (transport && transport[0]) {
+        OpenDDS::DCPS::TransportConfig_rch config = TheTransportRegistry->get_config(transport);
+        if (config.is_nil()) return INVALID_PARAM;
+        TheTransportRegistry->bind_config(config, sub);
+      }
 
       DDS::DataReaderQos datareader_qos;
       qos_settings.apply_to(datareader_qos);
@@ -809,4 +825,3 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   return_code = FACE::RC_NO_ERROR;
 }
 }}
-
