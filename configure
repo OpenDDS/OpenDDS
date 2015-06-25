@@ -210,6 +210,10 @@ if ($opts{'host'} eq 'macosx') {
 
 $opts{'target'} = $opts{'host'} unless $opts{'target'};
 
+if (!exists $platforminfo{$opts{'target'}}) {
+  die "ERROR: unknown target $opts{'target'}, stopped";
+}
+
 if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
   print "configuring safety profile build\n" if $opts{'verbose'};
   $tao_version = "face-safety-22a";
@@ -312,7 +316,7 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
-my %extraEnv = ('build' => 'main');
+my %extraEnv = ('build' => 'target');
 my %hostEnv = ('build' => 'host');
 my %targetEnv = ('build' => 'target');
 
@@ -386,6 +390,10 @@ elsif ($ENV{'TAO_ROOT'}) {
 }
 # else if TAO is within the ace source root
 elsif (-r $ace_src_root . '/TAO/tao/ORB.h') {
+  $tao_src_root =  $ace_src_root . $slash . 'TAO';
+}
+# else if TAO is a peer of the ace source root
+elsif (-r $ace_src_root . '/../TAO/tao/ORB.h') {
   $tao_src_root =  $ace_src_root . $slash . 'TAO';
 }
 
@@ -531,7 +539,6 @@ sub backup_and_open {
 }
 
 my $wrote_df = 0;
-my $pi = $platforminfo{$opts{'host'}};
 
 # config.h
 sub write_config_h {
@@ -540,6 +547,7 @@ sub write_config_h {
     print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
   }
   else {
+    my $pi = $platforminfo{$buildEnv{'build'}};
     $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
     my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
@@ -581,6 +589,7 @@ sub write_default_features {
 sub write_platform_macros {
   my %buildEnv =  %{$_[0]};
   if ($slash eq '/') {
+    my $pi = $platforminfo{$buildEnv{'build'}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
     for my $line (@{$opts{'macros'}}) {
@@ -694,7 +703,8 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
 
 sub push_libpath {
   my ($buildEnvRef, $path) = @_;
-  my $libvarname = $platforminfo{$opts{'host'}}->{'libpath'};
+  my $build = $buildEnvRef->{'build'};
+  my $libvarname = $platforminfo{$opts{$build}}->{'libpath'};
   
   # Append or set
   if (exists $buildEnvRef->{$libvarname}) {
