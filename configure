@@ -561,6 +561,7 @@ sub write_config_h {
     }
     $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
     print $CFGH "#include \"ace/config-$cfg.h\"\n";
+    # For safety profile builds, define the proper symbol in config.h
     if (defined $opts{'no-opendds-safety-profile'}) {
       print $CFGH "#define ACE_FACE_SAFETY_BASE\n";
     }
@@ -796,8 +797,8 @@ sub generate_workspace {
   ($needmpc, $tests) = (1, 0) if (exists $opts{'tests'} && !$opts{'tests'});
 
 
-  # If this is a target safety profile build
-  if (defined $opts{'no-opendds-safety-profile'}) {
+  # If this is a target cross-compile build
+  if ($buildEnv{build} eq 'target') {
     # TAO will be built seperately
     $buildtao = 0;
   } else {
