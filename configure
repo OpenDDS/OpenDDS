@@ -732,11 +732,11 @@ sub generate_workspace {
                    no-opendds-safety-profile/) {
     if (defined $opts{'no-opendds-safety-profile'}) {
       # Turns default to 0 for these
-      print "Checking if user enabled $feat\n" if ($opts{verbose});
+      print "Checking if user enabled $feat\n" if $opts{verbose};
       # Unless user enabled feature
       if (!(exists $opts{$feat} && $opts{$feat})) {
         print "$feat not enabled, turned off for safety profile\n"
-          if ($opts{verbose});
+          if $opts{verbose};
         my $f = $feat;
         $f =~ s/-/_/g;
         push(@features, "$f=0");
