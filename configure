@@ -548,8 +548,11 @@ sub write_config_h {
     $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
     my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
-    for my $line (@{$opts{'configh'}}) {
-      print $CFGH "$line\n";
+    # If this is not a cross-compile build, or the target cross-compile build
+    if ($buildEnv{'build'} eq 'target') {
+      for my $line (@{$opts{'configh'}}) {
+        print $CFGH "$line\n";
+      }
     }
     my $cfg = $opts{'host'};
     if ($pi->{'aceconfig'}) {
@@ -570,16 +573,19 @@ sub write_config_h {
 # default.features
 sub write_default_features {
   my %buildEnv = %{shift()};
-  if ($opts{'ipv6'} || $opts{'features'}) {
-    my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
-                             "/config/default.features");
-    $wrote_df = 1;
-    print $DF "ipv6=1\n" if $opts{'ipv6'};
-    for my $f (@{$opts{'features'}}) {
-      print $DF "$f\n";
+  # If this is not a cross-compile build, or the target cross-compile build
+  if ($buildEnv{'build'} eq 'target') {
+    if ($opts{'ipv6'} || $opts{'features'}) {
+      my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
+                               "/config/default.features");
+      $wrote_df = 1;
+      print $DF "ipv6=1\n" if $opts{'ipv6'};
+      for my $f (@{$opts{'features'}}) {
+        print $DF "$f\n";
+      }
+      $DF->close;
+      print "Wrote default.features\n" if $opts{'verbose'};
     }
-    $DF->close;
-    print "Wrote default.features\n" if $opts{'verbose'};
   }
 }
 
@@ -590,18 +596,20 @@ sub write_platform_macros {
     my $pi = $platforminfo{$buildEnv{'build'}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
-    for my $line (@{$opts{'macros'}}) {
-      print $PMG "$line\n";
-    }
-    for my $key ('debug', 'optimize', 'inline', 'static', 'ipv6') {
-      if (exists $opts{$key}) {
-        my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
-        print $PMG "$macro = $opts{$key}\n";
+    # If this is not a cross-compile build, or the target cross-compile build
+    if ($buildEnv{'build'} eq 'target') {
+      for my $line (@{$opts{'macros'}}) {
+        print $PMG "$line\n";
+      }
+      for my $key ('debug', 'optimize', 'inline', 'static', 'ipv6') {
+        if (exists $opts{$key}) {
+          my $macro = ($key eq 'static') ? 'static_libs_only' : $key;
+          print $PMG "$macro = $opts{$key}\n";
+        }
       }
     }
-    # IF not -static and this is the HOST cross-compile build
-    if ($cross_compile && !exists $opts{'static'} &&
-        $buildEnv{'build'} eq 'host') {
+    # If this is the HOST cross-compile build
+    if ($buildEnv{'build'} eq 'host') {
       print $PMG "static_libs_only = 1\n";
     }
     if ($opts{'prefix'}) {
