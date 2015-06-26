@@ -16,12 +16,10 @@ use File::Temp ();
 use FileHandle;
 use Cwd;
 use strict;
+use warnings;
 
 ## Version of OCI's TAO to download
 my $tao_version = '2.2a';
-
-## faster, and hopefully more reliable extraction:
-$Archive::Extract::PREFER_BIN = 1;
 
 ## arg processing and usage
 
@@ -75,7 +73,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'multi-topic!', 'MultiTopic (CS Profile) (yes)',
     'query-condition!', 'QueryCondition (CS Profile) (yes)',
     'ownership-profile!', 'Ownership Profile (yes)',
-    'ownership-kind-exclusive!', 'Exclusive Ownership (Ownership Profile) (yes)',
+    'ownership-kind-exclusive!',
+        'Exclusive Ownership (Ownership Profile) (yes)',
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
     'safety-profile!', 'Safety Profile (no)',
@@ -103,7 +102,7 @@ sub usage {
     $ver = $1 if /#define DDS_VERSION "([^"]+)"/;
   }
   close VER;
-  print <<EOT;
+  print <<"EOT";
 Welcome to OpenDDS version $ver
 
 Options for this script are listed below, with the default behavior described
@@ -200,7 +199,8 @@ print "host system is: $opts{'host'}\n" if $opts{'verbose'};
 if ($opts{'host'} eq 'macosx') {
   my $vers = `sw_vers -productVersion`;
   $vers =~ /10\.(\d+)\.?/;
-  my %versToName = (5 => 'leopard', 6 => 'snowleopard', 9 => 'lion', 8 => 'mountainlion', 9 => 'mavericks');
+  my %versToName = (5 => 'leopard', 6 => 'snowleopard', 7 => 'lion',
+                    8 => 'mountainlion', 9 => 'mavericks');
   if (!exists $versToName{$1}) {
     die "ERROR: Unknown/unsupported Mac OS X version: $1, stopped";
   }
@@ -218,10 +218,8 @@ if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
   print "configuring safety profile build\n" if $opts{'verbose'};
   $tao_version = "face-safety-22a";
   if ($opts{'target'} !~ /-safety$/) {
-    if ($opts{'verbose'}) {
-      print "Changing target from $opts{'target'} to $opts{'target'}" . 
-            "-safety\n";
-    }
+    print "Changing target from $opts{'target'} to $opts{'target'}-safety\n"
+      if $opts{'verbose'};
     $opts{'target'} .= "-safety";
   }
 }
@@ -249,8 +247,8 @@ sub which {
     if (-x "$p/$file") {
       return "$p/$file";
     }
-    elsif ($opts{'host'} eq 'win32' && -x "$p/$file.exe") {
-      return "$p/$file.exe";
+    elsif ($exeext ne '' && -x "$p/$file$exeext") {
+      return "$p/$file$exeext";
     }
   }
   return undef;
@@ -320,32 +318,27 @@ my %extraEnv = ('build' => 'target');
 my %hostEnv = ('build' => 'host');
 my %targetEnv = ('build' => 'target');
 
-sub setEnv {
-  my($name, $val) = @_;
+sub setSomeEnv {
+  my($name, $val, $hashref) = @_;
   $val = Cwd::abs_path($val) if -d $val;
   $val =~ s!/!\\!g if $slash eq '\\';
-  $ENV{$name} = $val;
+  $hashref->{$name} = $val;
+}
+
+sub setEnv {
+  setSomeEnv(@_, \%ENV);
 }
 
 sub setExtraEnv {
-  my($name, $val) = @_;
-  $val = Cwd::abs_path($val) if -d $val;
-  $val =~ s!/!\\!g if $slash eq '\\';
-  $extraEnv{$name} = $val;
+  setSomeEnv(@_, \%extraEnv);
 }
 
 sub setHostEnv {
-  my($name, $val) = @_;
-  $val = Cwd::abs_path($val) if -d $val;
-  $val =~ s!/!\\!g if $slash eq '\\';
-  $hostEnv{$name} = $val;
+  setSomeEnv(@_, \%hostEnv);
 }
 
 sub setTargetEnv {
-  my($name, $val) = @_;
-  $val = Cwd::abs_path($val) if -d $val;
-  $val =~ s!/!\\!g if $slash eq '\\';
-  $targetEnv{$name} = $val;
+  setSomeEnv(@_, \%targetEnv);
 }
 
 ## ace
@@ -389,8 +382,8 @@ elsif ($ENV{'TAO_ROOT'}) {
   $tao_src_root = $ENV{'TAO_ROOT'};
 }
 # else if TAO is within the ace source root
-elsif (-r $ace_src_root . '/TAO/tao/ORB.h') {
-  $tao_src_root =  $ace_src_root . $slash . 'TAO';
+elsif (defined $ace_src_root && -r $ace_src_root . '/TAO/tao/ORB.h') {
+  $tao_src_root = $ace_src_root . $slash . 'TAO';
 }
 # else if TAO is a peer of the ace source root
 elsif (-r $ace_src_root . '/../TAO/tao/ORB.h') {
@@ -402,8 +395,8 @@ sub locate_mpc {
     setEnv('MPC_ROOT', $ace_src_root . $slash . 'MPC');
   }
   elsif (!$ENV{'MPC_ROOT'}) {
-    die "Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in the\n".
-      "'MPC' directory under ACE_ROOT ($ace_src_root), stopped";
+    die "Can't find MPC.  Please set MPC_ROOT or make sure MPC exists in\n".
+      "the 'MPC' directory under ACE_ROOT ($ace_src_root), stopped";
   }
   return $ENV{MPC_ROOT};
 }
@@ -414,7 +407,7 @@ if (!$ace_src_root || !$tao_src_root) {
   my $urlbase = 'http://download.ociweb.com/TAO-' . $tao_version . '/';
   my $file = 'ACE+TAO-' . $tao_version . '_with_latest_patches_NO_makefiles.'
     . ($slash eq '/' ? 'tar.gz' : 'zip');
-  my $download_message = "Downloading ACE+TAO " . $tao_version . " with latest patches";
+  my $download_message = "Downloading ACE+TAO $tao_version with latest patches";
   if (-r $file) {
     print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
   }
@@ -482,6 +475,7 @@ if (!$ace_src_root || !$tao_src_root) {
     chdir($ddsroot);
   }
   else {
+    {no warnings 'once'; $Archive::Extract::PREFER_BIN = 1}
     my $ae = Archive::Extract->new('archive' => $file);
     if ($opts{'dry-run'}) {
       print "Dry-run: would Archive::Extract $file\nExiting\n";
@@ -516,17 +510,8 @@ sub clone_host_and_target {
   locate_mpc();
   chdir($source_dir);
   eval {
-    if (! -d "build") {
-      mkdir "build";
-    }
-    if (! -d "build/host") {
-      printf "cloning host $name\n";
-      system("$ENV{'MPC_ROOT'}/clone_build_tree.pl host");
-    }
-    if (! -d "build/target") {
-      printf "cloning target $name\n";
-      system("$ENV{'MPC_ROOT'}/clone_build_tree.pl target");
-    }
+    print "cloning build tree\n" if $opts{'verbose'};
+    system("$ENV{'MPC_ROOT'}/clone_build_tree.pl host target");
   };
   print "Changing dir back to $cur_dir\n" if $opts{'verbose'};
   chdir($cur_dir);
@@ -554,7 +539,7 @@ my $wrote_df = 0;
 
 # config.h
 sub write_config_h {
-  my %buildEnv =  %{$_[0]};
+  my %buildEnv = %{shift()};
   if (-r "$buildEnv{'ACE_ROOT'}/ace/config.h") {
     print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
   }
@@ -584,10 +569,10 @@ sub write_config_h {
 
 # default.features
 sub write_default_features {
-  my %buildEnv =  %{$_[0]};
+  my %buildEnv = %{shift()};
   if ($opts{'ipv6'} || $opts{'features'}) {
-    my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
-                             "/default.features");
+    my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
+                             "/config/default.features");
     $wrote_df = 1;
     print $DF "ipv6=1\n" if $opts{'ipv6'};
     for my $f (@{$opts{'features'}}) {
@@ -600,7 +585,7 @@ sub write_default_features {
 
 # platform_macros.GNU
 sub write_platform_macros {
-  my %buildEnv =  %{$_[0]};
+  my %buildEnv = %{shift()};
   if ($slash eq '/') {
     my $pi = $platforminfo{$buildEnv{'build'}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
@@ -720,7 +705,7 @@ sub push_libpath {
   my $build_copy = $opts{$build};
   $build_copy =~ s/-safety$//;
   my $libvarname = $platforminfo{$build_copy}->{'libpath'};
-  
+
   # Append or set
   if (exists $buildEnvRef->{$libvarname}) {
     $buildEnvRef->{$libvarname} .= ($specific{'pathsep'} . $path);
@@ -730,17 +715,19 @@ sub push_libpath {
   }
 }
 
-# host_tools.mwc/
+# host_tools.mwc
 sub write_host_workspace {
-  my %buildEnv =  %{$_[0]};
+  my %buildEnv = %{shift()};
   my $MWC = backup_and_open($buildEnv{'DDS_ROOT'} . '/host_tools.mwc');
-  print $MWC "workspace {\n";
-  print $MWC "  \$(ACE_ROOT)/ace/ace.mpc\n";
-  print $MWC "  \$(ACE_ROOT)/apps/gperf/src\n";
-  print $MWC "  \$(TAO_ROOT)/TAO_IDL\n";
-  print $MWC "  \$(TAO_ROOT)/tao/tao.mpc\n";
-  print $MWC "  dds/idl/opendds_idl.mpc\n";
-  print $MWC "}\n";
+  print $MWC <<'EOT';
+workspace {
+  $(ACE_ROOT)/ace/ace.mpc
+  $(ACE_ROOT)/apps/gperf/src
+  $(TAO_ROOT)/TAO_IDL
+  $(TAO_ROOT)/tao/tao.mpc
+  dds/idl/opendds_idl.mpc
+}
+EOT
   $MWC->close;
 }
 
@@ -749,7 +736,7 @@ sub write_host_workspace {
 my $buildtao;
 sub generate_workspace {
   $buildtao = 0;
-  my %buildEnv =  %{$_[0]};
+  my %buildEnv = %{shift()};
 
   # Always default these to 1
   for my $feat (qw/built-in-topics ownership-profile/) {
@@ -764,18 +751,18 @@ sub generate_workspace {
 
   # default of these depends on whether we are doing a safety-profile build
   for my $feat (qw/content-subscription content-filtered-topic
-               multi-topic query-condition ownership-kind-exclusive
-               object-model-profile persistence-profile
-               no-opendds-safety-profile/) {
+                   multi-topic query-condition ownership-kind-exclusive
+                   object-model-profile persistence-profile
+                   no-opendds-safety-profile/) {
     if (defined $opts{'no-opendds-safety-profile'}) {
       # Turns default to 0 for these
-      printf "Checking if user enabled $feat\n" if ($opts{verbose});
+      print "Checking if user enabled $feat\n" if $opts{verbose};
       # Unless user enabled feature
       if (!(exists $opts{$feat} && $opts{$feat})) {
-        printf "$feat not enabled, turned off for safety profile\n" if ($opts{verbose});
+        print "$feat not enabled, turned off for safety profile\n"
+          if $opts{verbose};
         my $f = $feat;
         $f =~ s/-/_/g;
-        # Set to 0
         push(@features, "$f=0");
       }
     } else {
@@ -788,7 +775,7 @@ sub generate_workspace {
     }
   }
 
-  $needmpc = $needmpc || (scalar @features ? 1 : 0);
+  $needmpc ||= (scalar @features ? 1 : 0);
   # Create user macros
   if ($needmpc && $slash eq '/') {
     print "Creating user_macros.GNU with MPC feature settings\n"
@@ -799,10 +786,12 @@ sub generate_workspace {
     }
     # If this is a cross-compile target build
     if ($buildEnv{'build'} eq 'target') {
-      print $UM "TAO_IDL=\$(HOST_ACE)/bin/tao_idl\n";
-      print $UM "TAO_IDL_DEP=\$(TAO_IDL)\n";
-      print $UM "OPENDDS_IDL=\$(HOST_DDS)/bin/opendds_idl\n";
-      print $UM "OPENDDS_IDL_DEP=\$(OPENDDS_IDL)\n";
+      print $UM <<'EOT';
+TAO_IDL = $(HOST_ACE)/bin/tao_idl
+TAO_IDL_DEP = $(TAO_IDL)
+OPENDDS_IDL = $(HOST_DDS)/bin/opendds_idl
+OPENDDS_IDL_DEP = $(OPENDDS_IDL)
+EOT
     }
     $UM->close;
   }
@@ -812,7 +801,7 @@ sub generate_workspace {
 
 
   # If this is a target cross-compile build
-  if ($buildEnv{build} eq 'target') {
+  if ($buildEnv{'build'} eq 'target') {
     # TAO will be built seperately
     $buildtao = 0;
   } else {
@@ -842,9 +831,8 @@ sub generate_workspace {
         print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
       }
       $DF->close;
-      if ($opts{'verbose'}) {
-        print '' . ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n";
-      }
+      print '' . ($wrote_df ? 'Appended to' : 'Wrote') . " default.features\n"
+        if $opts{'verbose'};
     }
 
     my $ws = 'DDS.mwc';
@@ -873,7 +861,8 @@ sub generate_workspace {
 
     print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
                                        'project files'), ".\n";
-    my $mwcargs = "-type $needmpc $buildEnv{'DDS_ROOT'}$slash$ws $static " . $opts{'mpcargs'};
+    my $mwcargs = "-type $needmpc $buildEnv{'DDS_ROOT'}$slash$ws $static";
+    $mwcargs .= ' ' . $opts{'mpcargs'} if defined $opts{'mpcargs'};
     print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
 
     if (!$opts{'dry-run'}) {
@@ -886,22 +875,23 @@ sub generate_workspace {
       setEnv('DDS_ROOT', $buildEnv{'DDS_ROOT'});
 
       # Create OpenDDS workspace
-      if (system("perl $ENV{ACE_ROOT}/bin/mwc.pl $mwcargs") != 0) {
+      if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
         die "Error from MPC, stopped";
       }
 
       # If this is a target safety profile build
       if (defined $opts{'no-opendds-safety-profile'}) {
         my $ddsroot = getcwd;
-        print "Changing dir to $buildEnv{ACE_ROOT}\n" if $opts{'verbose'};
-        chdir($buildEnv{ACE_ROOT});
+        print "Changing dir to $buildEnv{'ACE_ROOT'}\n" if $opts{'verbose'};
+        chdir($buildEnv{'ACE_ROOT'});
 
         # Generate ACE workspace separately, to exclude TAO
-        my $mwcargs = "-type $needmpc --recurse --exclude TAO,ACE.mwc $static " . $opts{'mpcargs'};
+        my $mwcargs = "-type $needmpc -recurse -exclude TAO,ACE.mwc $static "
+          . $opts{'mpcargs'};
 
         print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
 
-        if (system("perl $ENV{ACE_ROOT}/bin/mwc.pl $mwcargs") != 0) {
+        if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
           die "Error from MPC, stopped";
         }
 
@@ -909,9 +899,9 @@ sub generate_workspace {
         chdir($ddsroot);
       }
       # Undo Temporary set of build environment
-      setEnv('ACE_ROOT', $prev_ace_root);
-      setEnv('TAO_ROOT', $prev_tao_root);
-      setEnv('DDS_ROOT', $prev_dds_root);
+      setEnv('ACE_ROOT', $prev_ace_root) if defined $prev_ace_root;
+      setEnv('TAO_ROOT', $prev_tao_root) if defined $prev_tao_root;
+      setEnv('DDS_ROOT', $prev_dds_root) if defined $prev_dds_root;
     }
 
     $ws =~ s/\.mwc$/.sln/;
@@ -919,15 +909,15 @@ sub generate_workspace {
   }
   elsif ($opts{'compiler_version'}) { #win32, using DDS release package projects
     $opts{'solution_file'} = 'DDS' . ($opts{'static'} ? '_Static' : '') .
-      ($opts{'compiler_version'} ne 'vc71' ? "_$opts{'compiler_version'}" : '') .
+      ($opts{'compiler_version'} ne 'vc71' ? "_$opts{'compiler_version'}" : '').
         '.sln';
   }
 }
 
 # Environment setenv and GNUmakefile.dist
 sub write_environment {
-  my %buildEnv =  %{$_[0]};
-  my $dir =  $_[1];
+  my %buildEnv = %{shift()};
+  my $dir = shift;
   my $MK = undef;
   if ($slash eq '/') {
     if (!$opts{'dry-run'} && !-r $dir . '/GNUmakefile.dist') {
@@ -973,15 +963,18 @@ sub configure_build {
   write_default_features($buildEnvRef);
   write_platform_macros($buildEnvRef);
   generate_workspace($buildEnvRef);
-  write_environment($buildEnvRef, $buildEnvRef->{DDS_ROOT});
+  write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 }
 
 sub write_cross_compile_makefile {
   my $MF = backup_and_open("GNUmakefile");
-  print $MF "all clean install depend:\n";
-  print $MF "\tcd build/host && \$(MAKE) \$@\n";
-  print $MF "\tcd $targetEnv{ACE_ROOT}/ace && \$(MAKE) \$@\n";
-  print $MF "\tcd build/target && \$(MAKE) \$@\n";
+  print $MF <<"EOT";
+all clean realclean install depend:
+	cd build/host && \$(MAKE) \$@
+	cd $targetEnv{'ACE_ROOT'}/ace && \$(MAKE) \$@
+	cd build/target && \$(MAKE) \$@
+.PHONY: all clean realclean install depend
+EOT
   $MF->close;
 }
 
