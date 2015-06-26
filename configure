@@ -890,12 +890,13 @@ EOT
       # If this is a target safety profile build
       if (defined $opts{'no-opendds-safety-profile'}) {
         my $ddsroot = getcwd;
-        print "Changing dir to $buildEnv{'ACE_ROOT'}\n" if $opts{'verbose'};
-        chdir($buildEnv{'ACE_ROOT'});
+        if ($opts{'verbose'}) {
+          print "Changing dir to $buildEnv{'ACE_ROOT'}" . $slash . "ace\n"
+        }
+        chdir($buildEnv{'ACE_ROOT'}. "/ace");
 
         # Generate ACE workspace separately, to exclude TAO
-        my $mwcargs = "-type $needmpc -recurse -exclude TAO,ACE.mwc $static "
-          . $opts{'mpcargs'};
+        my $mwcargs = "-type $needmpc $static " . $opts{'mpcargs'};
 
         print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
 
