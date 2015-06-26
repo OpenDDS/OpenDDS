@@ -18,7 +18,6 @@ project(*idl): opendds_face {
 }
 
 project(*publisher) : dcps_rtps_udp, opendds_face {
-  avoids += no_opendds_safety_profile
   exename   = publisher
   after    += *idl
   libs     += *idl
@@ -29,7 +28,6 @@ project(*publisher) : dcps_rtps_udp, opendds_face {
 }
 
 project(*subscriber) : dcps_rtps_udp, opendds_face {
-  avoids += no_opendds_safety_profile
   exename   = subscriber
   after    += *idl
   libs     += *idl
@@ -40,7 +38,6 @@ project(*subscriber) : dcps_rtps_udp, opendds_face {
 }
 
 project(*callbacksubscriber) : dcps_rtps_udp, opendds_face {
-  avoids += no_opendds_safety_profile
   exename   = callback_subscriber
   after    += *idl
   libs     += *idl
