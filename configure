@@ -386,7 +386,7 @@ elsif (defined $ace_src_root && -r $ace_src_root . '/TAO/tao/ORB.h') {
   $tao_src_root = $ace_src_root . $slash . 'TAO';
 }
 # else if TAO is a peer of the ace source root
-elsif (-r $ace_src_root . '/../TAO/tao/ORB.h') {
+elsif (defined $ace_src_root && -r $ace_src_root . '/../TAO/tao/ORB.h') {
   $tao_src_root =  $ace_src_root . $slash . 'TAO';
 }
 
