@@ -20,7 +20,7 @@ void callback(FACE::TRANSACTION_ID_TYPE,
 }
 
 // FUZZ: disable check_for_improper_main_declaration
-int main(int, const char*[])
+int main(int, char*[])
 {
   // Initialize the TS interface
   FACE::RETURN_CODE_TYPE status;
