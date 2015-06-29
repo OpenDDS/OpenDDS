@@ -21,6 +21,8 @@
 #include "dds/DCPS/transport/framework/TransportReceiveListener.h"
 #include "dds/DCPS/transport/framework/TransportClient.h"
 #include "Recorder.h"
+#include "RemoveAssociationSweeper.h"
+
 
 namespace OpenDDS {
 namespace DCPS {
@@ -126,6 +128,10 @@ public:
   }
 
   virtual DDS::InstanceHandle_t get_instance_handle();
+protected:
+  virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
+  void remove_or_reschedule(const PublicationId& pub_id);
+
 private:
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
@@ -155,12 +161,15 @@ private:
 
   DDS::SubscriberQos subqos_;
 
+  friend class RemoveAssociationSweeper<RecorderImpl>;
+
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var topic_desc_;
   DDS::StatusMask listener_mask_;
   RecorderListener_rch listener_;
   DDS::DomainId_t domain_id_;
+  RemoveAssociationSweeper<RecorderImpl>* remove_association_sweeper_;
 
   ACE_Recursive_Thread_Mutex publication_handle_lock_;
 
