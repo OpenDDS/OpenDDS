@@ -314,9 +314,10 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
-my %extraEnv = ('build' => 'target');
-my %hostEnv = ('build' => 'host');
-my %targetEnv = ('build' => 'target');
+my $curpathRef = $specific{refpre} . 'PATH' . $specific{refpost};
+my %extraEnv = ('build' => 'target',  'PATH' => $curpathRef);
+my %hostEnv = ('build' => 'host',  'PATH' => $curpathRef);
+my %targetEnv = ('build' => 'target',  'PATH' => $curpathRef);
 
 sub setSomeEnv {
   my($name, $val, $hashref) = @_;
@@ -548,7 +549,7 @@ sub write_config_h {
     $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
     my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
-    # If this is not a cross-compile build, or the target cross-compile build
+    # If this is not a cross-compile host build
     if ($buildEnv{'build'} eq 'target') {
       for my $line (@{$opts{'configh'}}) {
         print $CFGH "$line\n";
@@ -573,7 +574,7 @@ sub write_config_h {
 # default.features
 sub write_default_features {
   my %buildEnv = %{shift()};
-  # If this is not a cross-compile build, or the target cross-compile build
+  # If this is not a cross-compile host build
   if ($buildEnv{'build'} eq 'target') {
     if ($opts{'ipv6'} || $opts{'features'}) {
       my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
@@ -596,7 +597,7 @@ sub write_platform_macros {
     my $pi = $platforminfo{$buildEnv{'build'}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
-    # If this is not a cross-compile build, or the target cross-compile build
+    # If this is not a cross-compile host build
     if ($buildEnv{'build'} eq 'target') {
       for my $line (@{$opts{'macros'}}) {
         print $PMG "$line\n";
@@ -707,6 +708,17 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
                              $ENV{'QTDIR'}) . "\nstopped";
 }
 
+sub push_path {
+  my ($buildEnvRef, $path) = @_;
+  # Append or set
+  if (exists $buildEnvRef->{PATH}) {
+    $buildEnvRef->{PATH} .= ($specific{'pathsep'} . $path);
+  }
+  else {
+    $buildEnvRef->{PATH} = $path;
+  }
+}
+
 sub push_libpath {
   my ($buildEnvRef, $path) = @_;
   my $build = $buildEnvRef->{'build'};
@@ -792,7 +804,7 @@ sub generate_workspace {
     for my $feat (@features) {
       print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
     }
-    # If this is a cross-compile target build
+    # If this is not a cross-compile host build
     if ($buildEnv{'build'} eq 'target') {
       print $UM <<'EOT';
 TAO_IDL = $(HOST_ACE)/bin/tao_idl
@@ -809,7 +821,7 @@ EOT
 
 
   # If this is a target cross-compile build
-  if ($buildEnv{'build'} eq 'target') {
+  if ($cross_compile && $buildEnv{'build'} eq 'target') {
     # TAO will be built seperately
     $buildtao = 0;
   } else {
@@ -1050,10 +1062,11 @@ if ($cross_compile) {
   setExtraEnv('ACE_ROOT', $ace_src_root);
   setExtraEnv('TAO_ROOT', $tao_src_root);
   setExtraEnv('DDS_ROOT', '.');
-  setExtraEnv('PATH', [
-    $extraEnv{'ACE_ROOT'} . $slash . 'bin',
-    $extraEnv{'DDS_ROOT'} . $slash . 'bin',
-  ]);
+  
+  my $extraPath = $extraEnv{'ACE_ROOT'} . $slash . 'bin' . $specific{pathsep} .
+                  $extraEnv{'DDS_ROOT'} . $slash . 'bin';
+  push_path(\%extraEnv, $extraPath);
+
   push_libpath(\%extraEnv, $extraEnv{'ACE_ROOT'} . $slash . 'lib');
   push_libpath(\%extraEnv, $extraEnv{'DDS_ROOT'} . $slash . 'lib');
 
