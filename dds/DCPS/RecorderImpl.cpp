@@ -710,7 +710,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
       // DDS::DataReaderListener_var listener
       // = listener_for(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-      if (!CORBA::is_nil(listener_.in())) {
+      if (listener_.in()) {
         listener_->on_recorder_matched(
           this,
           this->subscription_match_status_);
