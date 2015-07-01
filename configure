@@ -186,7 +186,7 @@ my %platforminfo =
                  'aceconfig' => 'sunos$UNAMER', # $UNAMER = `uname -r`
                 },
    'linux' => {
-               'compilers' => ['g++', 'clang'],
+               'compilers' => ['g++', 'clang', 'clang++'],
                'libpath' => 'LD_LIBRARY_PATH',
                'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
