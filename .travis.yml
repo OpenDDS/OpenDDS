@@ -27,17 +27,18 @@ before_script:
   - tar czf modeling_plugins.tar.gz tools/modeling/plugins
   - rm -rf tools/modeling/plugins
   - perl $DDS_ROOT/tools/scripts/dds_fuzz.pl
-  - if [ "$CXX" == "g++" ]; then ./configure; fi
-  - if [ "$CXX" == "clang++" ]; then echo -e "#include \"ace/config-linux.h\"" > $ACE_ROOT/ace/config.h; fi
-  - if [ "$CXX" == "clang++" ]; then echo -e "inline=0" > $ACE_ROOT/include/makeinclude/platform_macros.GNU; fi
-  - if [ "$CXX" == "clang++" ]; then echo -e "include \$(ACE_ROOT)/include/makeinclude/platform_linux_clang.GNU" >> $ACE_ROOT/include/makeinclude/platform_macros.GNU; fi
+  - ./configure --compiler=$CXX
+#  - if [ "$CXX" == "g++" ]; then ./configure; fi
+#  - if [ "$CXX" == "clang++" ]; then echo -e "#include \"ace/config-linux.h\"" > $ACE_ROOT/ace/config.h; fi
+#  - if [ "$CXX" == "clang++" ]; then echo -e "inline=0" > $ACE_ROOT/include/makeinclude/platform_macros.GNU; fi
+#  - if [ "$CXX" == "clang++" ]; then echo -e "include \$(ACE_ROOT)/include/makeinclude/platform_linux_clang.GNU" >> $ACE_ROOT/include/makeinclude/platform_macros.GNU; fi
 #  - cat $ACE_ROOT/bin/MakeProjectCreator/config/default.features
   - cat $ACE_ROOT/ace/config.h
   - cat $ACE_ROOT/include/makeinclude/platform_macros.GNU
-
-script:
   - tar xzf modeling_plugins.tar.gz
   - rm modeling_plugins.tar.gz
-  - if [ "$CXX" == "clang++" ]; then perl $ACE_ROOT/bin/mwc.pl -type gnuace -workers 2 DDS_TAOv2_all.mwc; fi
+
+script:
+#  - if [ "$CXX" == "clang++" ]; then perl $ACE_ROOT/bin/mwc.pl -type gnuace -workers 2 DDS_TAOv2_all.mwc; fi
   - make -j2
   - cd tests/DCPS/Messenger && ./run_test.pl all
