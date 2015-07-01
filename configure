@@ -186,8 +186,9 @@ my %platforminfo =
                  'aceconfig' => 'sunos$UNAMER', # $UNAMER = `uname -r`
                 },
    'linux' => {
-               'compilers' => ['g++'],
+               'compilers' => ['g++', 'clang'],
                'libpath' => 'LD_LIBRARY_PATH',
+               'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
   );
 
@@ -594,7 +595,7 @@ sub write_default_features {
 sub write_platform_macros {
   my %buildEnv = %{shift()};
   if ($slash eq '/') {
-    my $pi = $platforminfo{$buildEnv{'build'}};
+    my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
     # If this is not a cross-compile host build
@@ -620,6 +621,8 @@ sub write_platform_macros {
     if ($pi->{'aceplatform'}) {
       $plat = $pi->{'aceplatform'};
       $plat =~ s/\$COMP/($opts{'compiler'} =~ m!CC!) ? 'sunc++' : 'g++'/e;
+      $plat =~ s/\$NONSTDCOMP/($opts{'compiler'} =~ m!clang!) ? 'clang' : ''/e;
+      $plat =~ s/_$//e; # Trailing _
     }
     $plat .= '_' . $opts{'host_version'} if $opts{'host_version'};
     print $PMG "include \$(ACE_ROOT)/include/makeinclude/platform_$plat.GNU\n";
