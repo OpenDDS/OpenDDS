@@ -219,9 +219,10 @@ if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
   print "configuring safety profile build\n" if $opts{'verbose'};
   $tao_version = "face-safety-22a";
   $opts{'target'} =~ s/-safety$//;
+  $cross_compile = 1;
 }
 
-if ($opts{'host'} ne $opts{'target'}) {
+if ($opts{'host'} ne $opts{'target'} || $cross_compile) {
   print "Setting cross-compile build\n" if $opts{'verbose'};
   $needmpc = 1;
   $cross_compile = 1;
