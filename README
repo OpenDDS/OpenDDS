@@ -57,7 +57,7 @@ This release of OpenDDS is based on the DDS Specification formal/07-01-01
 ** RTPS over UDP/IP (unicast and multicast)
 
 RTPS (Interoperability) features are based on the DDS-RTPS Specification
-formal/2010-11-01 (version 2.1).  See the OpenDDS Developer's Guide and
+formal/2014-09-01 (version 2.2).  See the OpenDDS Developer's Guide and
 the file docs/design/RTPS for more details on RTPS.
 
 OpenDDS has been found to perform better than other similar TAO
