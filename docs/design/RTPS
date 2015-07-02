@@ -1,7 +1,11 @@
 RTPS
 ----
-- Spec is DDS-RTPS v2.1
+- Initial implementation written to spec DDS-RTPS v2.1
   - In this document, section numbers refer to RTPS v2.1 (formal/2010-11-01)
+- Current version number is v2.2 (format/2014-09-01)
+  - See PROTOCOLVERSION in dds/DCSP/RTPS/BaseMessageTypes.h
+  - No other changes are needed for v2.2 which is mostly editorial changes
+  - All RTPS version 2.x implementations are designed to be interoperable
 - Implemented as an OpenDDS pluggable transport + a new discovery mechanism
   - See RTPS_DISCOVERY in this directory for further discovery details
   - Note that transport and discovery mechanisms are separately configured

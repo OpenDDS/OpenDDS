@@ -164,9 +164,9 @@ bool test_messages()
 #endif
   bool ok = true;
   {
-    const Header hdr = { {'R', 'T', 'P', 'S'}, PROTOCOLVERSION_2_1,
+    const Header hdr = { {'R', 'T', 'P', 'S'}, PROTOCOLVERSION_2_2,
       VENDORID_OPENDDS, {0} /*GUIDPREFIX_UNKNOWN*/ };
-    const CORBA::Octet expected[] = "RTPS\x02\x01\x01\x03\x00\x00\x00\x00\x00"
+    const CORBA::Octet expected[] = "RTPS\x02\x02\x01\x03\x00\x00\x00\x00\x00"
       "\x00\x00\x00\x00\x00\x00" /*includes null*/;
     ok &= test(hdr, expected, "Header");
   }
