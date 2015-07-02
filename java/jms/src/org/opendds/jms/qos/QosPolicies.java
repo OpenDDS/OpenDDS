@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -47,7 +46,6 @@ import DDS.WriterDataLifecycleQosPolicy;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class QosPolicies {
 

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -12,7 +11,6 @@ import java.util.EventListener;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public interface ConnectionStateListener extends EventListener {
 

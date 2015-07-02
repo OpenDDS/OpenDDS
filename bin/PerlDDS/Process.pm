@@ -1,4 +1,3 @@
-# $Id$
 use PerlACE::Process;
 
 package PerlDDS::Process;

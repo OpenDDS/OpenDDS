@@ -4,7 +4,6 @@
 /**
  *  @file    OpenDDS_Publication_Manager.h
  *
- *  $Id$
  *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */

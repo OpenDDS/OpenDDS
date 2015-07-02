@@ -6,7 +6,6 @@
 /**
  *  @file   SampleInfo.h
  *
- *  $Id$
  *
  *
  */

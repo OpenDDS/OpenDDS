@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef NULLTOPICLISTENER_H
 #define NULLTOPICLISTENER_H
 

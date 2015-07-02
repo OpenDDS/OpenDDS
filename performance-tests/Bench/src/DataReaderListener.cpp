@@ -1,4 +1,3 @@
-// $Id$
 
 #include "DataReaderListener.h"
 #include "Publication.h"

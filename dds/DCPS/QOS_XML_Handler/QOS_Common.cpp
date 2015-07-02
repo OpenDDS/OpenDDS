@@ -1,4 +1,3 @@
-// $Id$
 
 #include "QOS_Common.h"
 

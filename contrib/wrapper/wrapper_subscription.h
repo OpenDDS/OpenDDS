@@ -4,7 +4,6 @@
 /**
  *  @file    wrapper_subscription.h
  *
- *  $Id$
  *
  *  @autho   Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */

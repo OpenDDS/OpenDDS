@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -21,7 +20,6 @@ import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class DataReaderQosPolicy implements QosPolicy<DataReaderQos> {
     private static Logger logger = Logger.getLogger(DataReaderQosPolicy.class);

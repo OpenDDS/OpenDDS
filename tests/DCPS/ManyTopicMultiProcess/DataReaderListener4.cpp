@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "DataReaderListener4.h"
 #include "common.h"

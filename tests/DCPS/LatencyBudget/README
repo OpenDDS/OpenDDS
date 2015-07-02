@@ -1,4 +1,3 @@
-# $Id$
 
 This test confirms that LATENCY_BUDGET support in OpenDDS functions
 according to the OMG DDS specification.  This test has two modes of

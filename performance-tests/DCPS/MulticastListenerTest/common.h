@@ -3,7 +3,6 @@
 /**
  *  @file   common.h
  *
- *  $Id$
  *
  *
  */

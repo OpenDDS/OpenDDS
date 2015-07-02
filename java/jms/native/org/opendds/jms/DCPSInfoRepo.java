@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -18,7 +17,6 @@ package org.opendds.jms;
  * creating additional instances.
  *
  * @author  Steven Stallion
- * @version $Revision$
  */
 public final class DCPSInfoRepo implements Runnable {
 

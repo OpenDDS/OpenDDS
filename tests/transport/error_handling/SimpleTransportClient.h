@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef SIMPLETRANSPORTCLIENT_H
 #define SIMPLETRANSPORTCLIENT_H
 

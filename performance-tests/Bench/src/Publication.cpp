@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 // This include needs to appear near the top so ACE gets a chance
 // to figure out the correct time_t typedef.

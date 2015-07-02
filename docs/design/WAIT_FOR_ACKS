@@ -1,5 +1,4 @@
 
-# $Id$
 
 DataWriter::wait_for_acknowledgments()
 

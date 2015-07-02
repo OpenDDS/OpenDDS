@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import OpenDDS.JMS.StreamItem;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class StreamMessageImpl extends AbstractMessageImpl implements StreamMessage {
     protected StreamBodyFacade streamBody;

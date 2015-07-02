@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "dds/DCPS/debug.h"
 #include "PublicationProfile.h"

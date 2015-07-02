@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -19,7 +18,6 @@ import OpenDDS.DCPS.TheServiceParticipant;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class MultiRepoBase {
     public static final int DOMAIN1_ID = 42;

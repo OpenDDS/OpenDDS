@@ -1,4 +1,3 @@
-# $Id$
 
 This test verifies the PARTITION QoS support in OpenDDS.  It does so
 by creating publishers that offer a number of partitions.  Only

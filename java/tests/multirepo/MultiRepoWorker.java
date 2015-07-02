@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -46,7 +45,6 @@ import MultiRepo.MessageTypeSupportImpl;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class MultiRepoWorker {
     private static volatile int transportId;

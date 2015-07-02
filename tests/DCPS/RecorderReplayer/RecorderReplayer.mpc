@@ -1,5 +1,4 @@
 //
-// $Id$
 //
 
 project(DDS*idl): dcps_test_lib {

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -27,7 +26,6 @@ import org.opendds.jms.common.lang.Annotations;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class BeanHelper {
     private static TypeRegistry registry = new TypeRegistry();

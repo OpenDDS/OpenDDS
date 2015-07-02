@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -19,7 +18,6 @@ import org.opendds.jms.management.DynamicMBeanSupport;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ArgumentWriter {
     private DynamicMBeanSupport instance;

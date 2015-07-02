@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -23,7 +22,6 @@ import org.opendds.jms.common.lang.ByteArrays;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class StreamBodyFacade {
     private final MessageBody body;

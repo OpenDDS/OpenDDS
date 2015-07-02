@@ -3,7 +3,6 @@
 /**
  *  @file   FooDataReaderImpl.h
  *
- *  $Id$
  *
  *
  */

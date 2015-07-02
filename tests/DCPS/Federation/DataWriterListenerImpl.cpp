@@ -1,4 +1,3 @@
-// $Id$
 
 #include "DataWriterListenerImpl.h"
 #include "dds/DdsDcpsPublicationC.h"

@@ -1,4 +1,3 @@
-# $Id$
 
 This test verifies that all publishers and subscribers associate.  For reliable
 transports it verifies that all samples from all publishers are received by all
