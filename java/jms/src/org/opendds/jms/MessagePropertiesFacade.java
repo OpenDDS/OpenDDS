@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -29,7 +28,6 @@ import org.opendds.jms.common.lang.Objects;
  * is hard to manage
  *
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MessagePropertiesFacade {
     private final MessagePayload payload;

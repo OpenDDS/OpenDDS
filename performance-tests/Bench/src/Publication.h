@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef PUBLICATION_H
 #define PUBLICATION_H
 

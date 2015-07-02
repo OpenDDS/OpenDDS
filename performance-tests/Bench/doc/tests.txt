@@ -1,5 +1,4 @@
 
-$Id$
 
 This file explains the basics of executing multi-host tests using the
 framework supplied here.

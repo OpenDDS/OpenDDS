@@ -1,5 +1,4 @@
 // -*- C++ -*-
-// $Id$
 
 #include "Options.h"
 #include "Test.h"

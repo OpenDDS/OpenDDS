@@ -3,7 +3,6 @@
 /**
  *  @file   publisher.cpp
  *
- *  $Id$
  *
  *
  */

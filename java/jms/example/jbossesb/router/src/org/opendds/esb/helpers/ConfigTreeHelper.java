@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -12,7 +11,6 @@ import org.jboss.soa.esb.helpers.ConfigTree;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ConfigTreeHelper {
     public static String requireAttribute(ConfigTree config, String name) {

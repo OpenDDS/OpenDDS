@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -53,7 +52,6 @@ import org.opendds.jms.qos.QosPolicies;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MessageConsumerImpl implements MessageConsumer {
     private Logger logger;

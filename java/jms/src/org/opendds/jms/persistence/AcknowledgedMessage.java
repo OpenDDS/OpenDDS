@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -15,7 +14,6 @@ import org.opendds.jms.common.lang.Objects;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class AcknowledgedMessage implements Serializable {
     private String clientID;

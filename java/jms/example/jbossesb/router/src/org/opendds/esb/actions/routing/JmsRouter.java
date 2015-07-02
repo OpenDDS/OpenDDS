@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -43,7 +42,6 @@ import org.opendds.esb.helpers.ThreadedQueue;
  * </li>
  *
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class JmsRouter extends AbstractRouter {
     private static Log log = LogFactory.getLog(JmsRouter.class);

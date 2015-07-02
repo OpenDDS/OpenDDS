@@ -1,5 +1,4 @@
 
-$Id$
 
 The testing scenarios included in the 'tests' directory can be used to
 execute multi-host testing for various conditions.

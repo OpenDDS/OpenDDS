@@ -1,4 +1,3 @@
-// $Id$
 
 #include "XML_File_Intf.h"
 #include "ace/XML_Utils/XML_Typedefs.h"

@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef SIMPLEDATAREADER_H
 #define SIMPLEDATAREADER_H
 

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -27,7 +26,6 @@ import Complex_Idl.*;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ComplexIDLTest extends QuoteSupport {
     private static final int DOMAIN_ID = 42;

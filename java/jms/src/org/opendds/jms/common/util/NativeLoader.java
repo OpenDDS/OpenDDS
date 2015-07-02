@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -22,7 +21,6 @@ import org.opendds.jms.common.lang.ClassLoaders;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class NativeLoader {
     private static final String NATIVE_DIR_PROPERTY = "opendds.native.dir";

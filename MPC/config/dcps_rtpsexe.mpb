@@ -1,5 +1,4 @@
 // -*- MPC -*-
-// $Id$
 
 project : dcpsexe, dcps_rtps {
 }

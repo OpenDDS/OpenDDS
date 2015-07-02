@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -17,7 +16,6 @@ import javax.naming.NamingException;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class JndiHelper {
     private Context context;

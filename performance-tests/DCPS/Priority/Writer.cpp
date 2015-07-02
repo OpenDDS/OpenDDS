@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "Writer.h"
 #include "PublicationProfile.h"
 #include "TestTypeSupportC.h"

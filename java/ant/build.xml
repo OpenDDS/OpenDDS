@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    $Id$
 
     Author:  Steven Stallion
-    Version: $Revision$
 -->
 <project name="opendds-ant" default="archive" basedir=".">
     <property name="build.dir" value="${basedir}/build"/>

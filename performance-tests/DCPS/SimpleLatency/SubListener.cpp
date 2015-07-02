@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "SubListener.h"
 #include "DDSPerfTestTypeSupportImpl.h"
 #include "DDSPerfTestTypeSupportC.h"

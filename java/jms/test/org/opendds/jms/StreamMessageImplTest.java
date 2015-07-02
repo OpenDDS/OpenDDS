@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -25,7 +24,6 @@ import org.opendds.jms.common.lang.ByteArrays;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class StreamMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;

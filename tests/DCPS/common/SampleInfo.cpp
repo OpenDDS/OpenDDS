@@ -4,7 +4,6 @@
 /**
  *  @file   SampleInfo.cpp
  *
- *  $Id$
  *
  *
  */

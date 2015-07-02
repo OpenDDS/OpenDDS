@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -24,7 +23,6 @@ import org.jboss.soa.esb.message.format.MessageFactory;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class HelloWorldServlet extends HttpServlet {
 

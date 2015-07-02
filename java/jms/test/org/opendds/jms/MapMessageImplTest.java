@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -28,7 +27,6 @@ import org.junit.Test;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MapMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;

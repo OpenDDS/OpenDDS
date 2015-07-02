@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -25,7 +24,6 @@ import org.opendds.jms.common.lang.Objects;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MapBodyFacade {
     private final MessageBody body;

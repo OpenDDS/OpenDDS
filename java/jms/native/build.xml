@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    $Id$
 
     Author:  Weiqi Gao
-    Version: $Revision$
 -->
 <project name="opendds-jms-native" default="compile" basedir=".">
     <property name="perl.executable" value="perl"/>

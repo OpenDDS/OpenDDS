@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -18,7 +17,6 @@ import org.opendds.jms.management.DynamicMBeanSupport;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class DynamicArguments {
     public static final String DELIMS = ";, \t\r\n\f";

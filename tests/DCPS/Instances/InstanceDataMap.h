@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef INSTANCE_DATA_MAP_H
 #define INSTANCE_DATA_MAP_H
 

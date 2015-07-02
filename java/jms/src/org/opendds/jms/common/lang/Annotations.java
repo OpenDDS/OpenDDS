@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import java.util.Set;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class Annotations {
 

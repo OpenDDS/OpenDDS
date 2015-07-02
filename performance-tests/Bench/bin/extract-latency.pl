@@ -10,7 +10,6 @@ use File::Basename;
 
 extract-latency.pl - extract summary statistics from plot datafiles.
 
-$Id$
 
 =head1 SYNOPSIS
 

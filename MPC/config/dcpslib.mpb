@@ -1,5 +1,4 @@
 // -*- MPC -*-
-// $Id$
 
 // Base project for internal OpenDDS libraries.
 // External: Use base dcps to depend on the OpenDDS_Dcps shared library

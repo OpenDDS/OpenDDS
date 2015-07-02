@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "EntityProfiles.h"
 #include "Entities.h"

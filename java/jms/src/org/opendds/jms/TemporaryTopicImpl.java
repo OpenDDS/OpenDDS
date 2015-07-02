@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -20,7 +19,6 @@ import org.opendds.jms.common.util.Logger;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class TemporaryTopicImpl extends TopicImpl implements TemporaryTopic {
     private ConnectionImpl connection;

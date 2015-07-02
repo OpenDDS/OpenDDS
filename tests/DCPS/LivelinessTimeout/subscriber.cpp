@@ -3,7 +3,6 @@
 /**
  *  @file   subscriber.cpp
  *
- *  $Id$
  *
  *
  */

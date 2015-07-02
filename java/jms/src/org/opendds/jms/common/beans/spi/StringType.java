@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -10,7 +9,6 @@ package org.opendds.jms.common.beans.spi;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class StringType implements Type<String> {
 

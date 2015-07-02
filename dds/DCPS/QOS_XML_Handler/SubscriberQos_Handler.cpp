@@ -1,4 +1,3 @@
-// $Id$
 
 #include "SubscriberQos_Handler.h"
 #include "QOS_PubSub_T.h"

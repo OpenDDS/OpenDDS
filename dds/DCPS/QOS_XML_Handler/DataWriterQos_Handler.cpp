@@ -1,4 +1,3 @@
-// $Id$
 #include "DataWriterQos_Handler.h"
 #include "QOS_DataWriter_T.h"
 #include "dds/DCPS/debug.h"

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    $Id$
 
     Author:  Steven Stallion
-    Version: $Revision$
 -->
 <project name="opendds-router" default="compile" basedir=".">
     <property name="shared.dir" value="${basedir}/../shared"/>

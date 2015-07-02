@@ -1,6 +1,5 @@
 #!/bin/sh
 #
-# $Id$
 #
 
 if [ ! "$DDS_ROOT" ]; then
