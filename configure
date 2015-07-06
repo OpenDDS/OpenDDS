@@ -634,7 +634,7 @@ sub write_platform_macros {
       $plat = $pi->{'aceplatform'};
       $plat =~ s/\$COMP/($opts{'compiler'} =~ m!CC!) ? 'sunc++' : 'g++'/e;
       $plat =~ s/\$NONSTDCOMP/($opts{'compiler'} =~ m!clang!) ? 'clang' : ''/e;
-      $plat =~ s/_//; # Trailing _
+      $plat =~ s/_$//; # Trailing _
     }
     $plat .= '_' . $opts{'host_version'} if $opts{'host_version'};
     print $PMG "include \$(ACE_ROOT)/include/makeinclude/platform_$plat.GNU\n";
