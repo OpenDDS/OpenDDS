@@ -143,6 +143,15 @@ WriteDataContainer::~WriteDataContainer()
     }
   }
 
+  if (this->orphaned_to_transport_.size() > 0) {
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) WriteDataContainer::~WriteDataContainer() - ")
+                 ACE_TEXT("destroyed with %d samples orphaned_to_transport.\n"),
+                 this->orphaned_to_transport_.size()));
+    }
+  }
+
   if (!shutdown_) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
@@ -406,7 +415,6 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
 
   if (this->writer_->watchdog_)
     this->writer_->watchdog_->cancel_timer(instance);
-
   return DDS::RETCODE_OK;
 }
 
@@ -515,6 +523,7 @@ bool
 WriteDataContainer::pending_data()
 {
   return this->sending_data_.size() != 0
+         || this->orphaned_to_transport_.size() != 0
          || this->unsent_data_.size() != 0;
 }
 
@@ -546,7 +555,6 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   // sending_data_ list signifying it was given to the transport to
   // deliver and now the transport is signaling it has been delivered
   if (!sending_data_.dequeue(sample)) {
-
     //
     // Should be on sending_data_.  If it is in sent_data_
     // or unsent_data there was a problem.
@@ -554,6 +562,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
     send_lists.push_back(&sent_data_);
     send_lists.push_back(&unsent_data_);
+    send_lists.push_back(&orphaned_to_transport_);
 
     const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
@@ -570,6 +579,11 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN unsent_data_ list.\n")));
     } else {
+
+      if (containing_list == &this->orphaned_to_transport_) {
+        orphaned_to_transport_.dequeue(sample);
+        release_buffer(stale);
+      }
       //No-op: elements may be removed from all WriteDataContainer lists during shutdown
       //and inform transport of their release.  Transport will call data-delivered on the
       //elements as it processes the removal but they will already be gone from the send lists.
@@ -586,6 +600,9 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
         }
         writer_->controlTracker.message_delivered();
       }
+
+      if (!pending_data())
+        empty_condition_.broadcast();
     }
 
     return;
@@ -706,6 +723,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     OPENDDS_VECTOR(SendStateDataSampleList*) send_lists;
     send_lists.push_back(&sent_data_);
     send_lists.push_back(&unsent_data_);
+    send_lists.push_back(&orphaned_to_transport_);
 
     const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
@@ -737,6 +755,12 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
                      OPENDDS_STRING(converter).c_str()));
         }
         writer_->controlTracker.message_dropped();
+      }
+      if (containing_list == &this->orphaned_to_transport_) {
+        orphaned_to_transport_.dequeue(sample);
+        release_buffer(stale);
+        if (!pending_data())
+          empty_condition_.broadcast();
       }
     }
 
@@ -860,6 +884,7 @@ WriteDataContainer::remove_oldest_sample(
   send_lists.push_back(&sending_data_);
   send_lists.push_back(&sent_data_);
   send_lists.push_back(&unsent_data_);
+  send_lists.push_back(&orphaned_to_transport_);
 
   const SendStateDataSampleList* containing_list = SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
@@ -884,9 +909,22 @@ WriteDataContainer::remove_oldest_sample(
 
     // This means transport is still using the sample that needs to
     // be released currently so notify transport that sample is being removed.
-    result = this->sending_data_.dequeue(stale) != 0;
-    this->writer_->remove_sample(stale);
-    release_buffer(stale);
+
+    if (this->writer_->remove_sample(stale)) {
+      if (this->sent_data_.dequeue(stale)) {
+        release_buffer(stale);
+        result = true;
+      }
+
+    } else {
+      if (this->sending_data_.dequeue(stale)) {
+        this->orphaned_to_transport_.enqueue_tail(stale);
+      } else if (this->sent_data_.dequeue(stale)) {
+        release_buffer(stale);
+        result = true;
+      }
+      result = true;
+    }
     released = true;
 
   } else if (containing_list == &this->sent_data_) {
@@ -1378,12 +1416,13 @@ WriteDataContainer::wait_pending()
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
                  ACE_TEXT("Timed out waiting for messages to be transported")));
+      if (DCPS_debug_level) this->log_send_state_lists("Wait pending failed: ");
       break;
     }
   }
   if (report) {
     ACE_DEBUG((LM_DEBUG,
-               "%T WriteDataContainer::wait_pending done\n"));
+               "%T (%P|%t) WriteDataContainer::wait_pending done\n"));
   }
 }
 
@@ -1470,11 +1509,12 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
 void
 WriteDataContainer::log_send_state_lists (OPENDDS_STRING description)
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), sending(%d), sent(%d), num_all_samples(%d), num_instances(%d)\n",
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), sending(%d), sent(%d), orphaned_to_transport(%d), num_all_samples(%d), num_instances(%d)\n",
              description.c_str(),
              unsent_data_.size(),
              sending_data_.size(),
              sent_data_.size(),
+             orphaned_to_transport_.size(),
              num_all_samples(),
              instances_.size()));
 }
