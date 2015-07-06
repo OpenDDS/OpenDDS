@@ -197,6 +197,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
   // Wait for any control messages to be transported during
   // unregistering of instances.
+  dw_servant->wait_pending();
   dw_servant->wait_control_pending();
 
   CORBA::String_var topic_name = dw_servant->get_topic_name();
