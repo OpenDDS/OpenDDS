@@ -101,6 +101,8 @@ public:
 
   bool check_handshake_complete(const RepoId& local, const RepoId& remote);
 
+  virtual void pre_stop_i();
+
 private:
   virtual void stop_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
@@ -191,7 +193,9 @@ private:
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
-    OPENDDS_MAP(SequenceNumber, TransportQueueElement*) elems_not_acked_;
+    OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) elems_not_acked_;
+    //Only accessed with RtpsUdpDataLink lock held
+    OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) to_deliver_;
     CORBA::Long heartbeat_count_;
     bool durable_;
 
@@ -320,7 +324,7 @@ private:
 
   // Timers for reliability:
   void send_nack_replies();
-  void process_acked_by_all();
+  void process_acked_by_all_i(ACE_Guard<ACE_Thread_Mutex>& g, const RepoId& pub_id);
   void send_heartbeats();
   void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
@@ -351,7 +355,7 @@ private:
     ACE_Time_Value timeout_;
     bool scheduled_;
 
-  } nack_reply_, heartbeat_reply_, acked_by_all_check_;
+  } nack_reply_, heartbeat_reply_;
 
 
   struct HeartBeat : ACE_Event_Handler {
