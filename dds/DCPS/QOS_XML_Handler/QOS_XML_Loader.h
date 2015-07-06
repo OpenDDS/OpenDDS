@@ -1,7 +1,6 @@
 /**
  * @author Marcel Smit (msmit@remedy.nl)
  *
- * $Id$
  *
  * Starting point for QOS XML parsing library.
  *

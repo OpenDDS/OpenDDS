@@ -1,5 +1,4 @@
 // -*- C++ -*-
-// $Id$
 
 #include "Subscriber.h"
 #include "Test.h"

@@ -4,7 +4,6 @@
      xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'>
   <!--
-    ** $Id$
     **
     ** Generate C++ header code.
     **

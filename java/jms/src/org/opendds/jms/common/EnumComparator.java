@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -14,7 +13,6 @@ import OpenDDS.JMS.PropertyValueKind;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class EnumComparator {
 

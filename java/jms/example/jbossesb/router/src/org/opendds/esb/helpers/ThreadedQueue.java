@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -15,7 +14,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ThreadedQueue<T> {
     public static final int MIN_THREADS = 1;

@@ -2,7 +2,6 @@
 /**
  *  @file   Foo_Singleton_Transport.h
  *
- *  $Id$
  *
  *
  */

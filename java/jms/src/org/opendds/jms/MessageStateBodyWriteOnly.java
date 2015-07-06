@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import javax.jms.MessageNotWriteableException;
  * A freshly created or clearBody()-ed BytesMessage and StreamMessage is in this state.
  *
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MessageStateBodyWriteOnly implements MessageState {
     private AbstractMessageImpl message;

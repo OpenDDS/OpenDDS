@@ -1,6 +1,5 @@
 // -*- MPC -*-
 //
-// $Id$
 
 project(*Publisher): dcpsexe, dcps_tcp, dcps_shmem {
   requires += no_opendds_safety_profile

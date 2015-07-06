@@ -1,9 +1,7 @@
 // -*- C++ -*-
 //
-// $Id$
 // -*- C++ -*-
 //
-// $Id$
 #include "Writer.h"
 #include "PubDriver.h"
 #include "TestException.h"

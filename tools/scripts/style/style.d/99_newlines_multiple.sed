@@ -1,5 +1,4 @@
 #
-# $Id$
 #
 
 # Strip extraneous newlines.

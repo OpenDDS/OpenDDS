@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -12,7 +11,6 @@ import org.opendds.jms.common.beans.UnsupportedTypeException;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ByteType implements Type<Byte> {
 

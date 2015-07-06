@@ -3,7 +3,6 @@
 /**
  *  @file   MyTypeSupportImpl.h
  *
- *  $Id$
  *
  *
  */

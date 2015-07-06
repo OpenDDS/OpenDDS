@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "DataReaderListener.h"
 #include "TestException.h"
 #include "tests/DCPS/FooType5/FooDefTypeSupportC.h"

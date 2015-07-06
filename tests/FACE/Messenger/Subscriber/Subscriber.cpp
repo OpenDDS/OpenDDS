@@ -9,6 +9,8 @@
 #include "ace/Log_Msg.h"
 #include <cstring>
 
+#include "tests/Utils/Safety.h"
+
 bool callbackHappened = false;
 int callback_count = 0;
 
@@ -28,49 +30,6 @@ void callback(FACE::TRANSACTION_ID_TYPE,
   return_code = FACE::RC_NO_ERROR;
 }
 
-static bool no_global_new = false;
-
-#if defined(OPENDDS_SAFETY_PROFILE) && (defined(__GLIBC__) || defined(ACE_HAS_EXECINFO_H))
-#include <execinfo.h>
-
-void* operator new(size_t sz)
-#ifdef ACE_HAS_NEW_THROW_SPEC
-  throw (std::bad_alloc)
-#endif
- {
-  if (no_global_new) {
-    printf ("ERROR: call to global operator new\n");
-  }
-  return ::malloc(sz);
-}
-
-void operator delete(void* ptr) {
-  ::free(ptr);
-}
-
-void* operator new[](size_t sz, const std::nothrow_t&)
-#ifdef ACE_HAS_NEW_THROW_SPEC
-  throw (std::bad_alloc)
-#endif
-{
-  if (no_global_new) {
-    printf ("ERROR: Subscriber call to global operator new[]\n");
-    void* addresses[32];
-    int count = backtrace(addresses, 32);
-    char** text = backtrace_symbols(addresses, count);
-    for (int i = 0; i != count; ++i) {
-      printf ("Subscriber %s\n", text[i]);
-    }
-    ::free(text);
-  }
-  return ::malloc(sz);
-}
-
-void operator delete[](void* ptr) {
-  ::free(ptr);
-}
-#endif
-
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   const bool useCallback = argc > 1 && 0 == std::strcmp(argv[1], "callback");
@@ -79,7 +38,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   FACE::TS::Initialize("face_config.ini", status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  no_global_new = true;
+  DisableGlobalNew dgn;
 
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;

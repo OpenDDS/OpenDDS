@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -25,7 +24,6 @@ import OpenDDS.DCPS.TheServiceParticipant;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 @Description("OpenDDS DomainParticipantFactory MBean")
 public class ParticipantFactoryService extends DynamicMBeanSupport implements ServiceMBean {

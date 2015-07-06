@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    $Id$
 
     Author:  Steven Stallion
-    Version: $Revision$
 -->
 <ejb-jar version="3.0"
          xmlns="http://java.sun.com/xml/ns/javaee"

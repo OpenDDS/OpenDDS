@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "PublisherListener.h"
 
 extern int offered_incompatible_qos_called_on_pub;

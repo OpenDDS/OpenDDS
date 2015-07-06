@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef SUBSCRIPTION_H
 #define SUBSCRIPTION_H
 

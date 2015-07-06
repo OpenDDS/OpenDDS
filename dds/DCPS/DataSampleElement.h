@@ -1,11 +1,7 @@
-///*
-// * $Id$
-// *
-// *
-// * Distributed under the OpenDDS License.
-// * See: http://www.opendds.org/license.html
-// */
-//
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
 #ifndef OPENDDS_DCPS_DATASAMPLEELEMENT_H
 #define OPENDDS_DCPS_DATASAMPLEELEMENT_H
 

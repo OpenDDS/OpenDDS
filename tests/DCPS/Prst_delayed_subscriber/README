@@ -1,4 +1,3 @@
-$Id$
 
 Simple test to test InfoRepo persistance mechanism. The
 publisher expects two subscribers. The test driver starts up the

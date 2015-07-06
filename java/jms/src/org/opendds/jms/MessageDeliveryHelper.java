@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -14,7 +13,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class MessageDeliveryHelper implements ConnectionStateListener {
     private ConnectionImpl connection;

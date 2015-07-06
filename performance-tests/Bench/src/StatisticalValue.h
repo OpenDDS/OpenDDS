@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef STATISTICALVALUE_H
 #define STATISTICALVALUE_H
 

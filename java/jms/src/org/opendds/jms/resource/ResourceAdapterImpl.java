@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -20,7 +19,6 @@ import org.opendds.jms.common.util.NativeLoader;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ResourceAdapterImpl implements ResourceAdapter {
     private static Logger logger = Logger.getLogger(ResourceAdapterImpl.class);

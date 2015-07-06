@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -35,7 +34,6 @@ import org.opendds.jms.management.annotation.Operation;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class DynamicMBeanMetaData implements Serializable {
     private Map<String, KeyPropertyModel> properties =

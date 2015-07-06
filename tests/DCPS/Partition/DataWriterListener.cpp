@@ -1,4 +1,3 @@
-// $Id$
 
 #include "DataWriterListener.h"
 

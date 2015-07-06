@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import javax.jms.MessageNotReadableException;
  * this state.
  *
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MessageStateWritable implements MessageState {
     public void checkReadable() throws MessageNotReadableException {

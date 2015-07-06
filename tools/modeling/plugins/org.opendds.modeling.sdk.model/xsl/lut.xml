@@ -1,7 +1,6 @@
 <lut:tables
      xmlns:lut='http://www.opendds.org/modeling/schemas/Lut/1.0'>
   <!--
-    ** $Id$
     **
     ** lookup type information
     **

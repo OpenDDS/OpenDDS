@@ -1,4 +1,3 @@
-// $Id$
 
 project: taolib_with_idl, portableserver, java, dds_macros {
 

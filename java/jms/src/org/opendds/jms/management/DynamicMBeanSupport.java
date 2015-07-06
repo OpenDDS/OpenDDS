@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -35,7 +34,6 @@ import org.opendds.jms.common.util.Logger;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public abstract class DynamicMBeanSupport implements DynamicMBean, MBeanRegistration {
     protected MBeanServer server;

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -17,7 +16,6 @@ import javax.resource.spi.ResourceAdapter;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ActivactionSpecImpl implements ActivationSpec, Serializable {
     private ResourceAdapterImpl adapter;

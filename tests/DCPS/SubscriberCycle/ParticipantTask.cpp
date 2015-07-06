@@ -1,5 +1,4 @@
 /*
- * $Id$
  */
 
 #include <ace/Atomic_Op_T.h>

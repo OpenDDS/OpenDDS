@@ -6,7 +6,6 @@
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'
      xmlns:generator='http://www.opendds.org/modeling/schemas/Generator/1.0'>
   <!--
-    ** $Id$
     **
     ** Generate C++ implementation code.
     **

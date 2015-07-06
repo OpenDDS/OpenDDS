@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -15,7 +14,6 @@ import org.apache.tools.ant.types.PatternSet;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class LibFileSet extends FileSet {
 

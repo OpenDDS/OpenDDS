@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -14,7 +13,6 @@ import javax.jms.Connection;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ConnectionStateEvent extends EventObject {
     public static final int CONNECTION_STARTED = 1;

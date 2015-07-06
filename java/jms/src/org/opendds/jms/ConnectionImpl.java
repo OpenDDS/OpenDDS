@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -39,7 +38,6 @@ import org.opendds.jms.resource.ManagedConnectionImpl;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ConnectionImpl implements Connection {
     private Logger logger;

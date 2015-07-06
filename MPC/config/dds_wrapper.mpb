@@ -1,4 +1,3 @@
-// $Id$
 
 project : dcps_tcp, dcps_udp, dcps_multicast {
   after += DDSWrapper_OpenDDS

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -14,7 +13,6 @@ import java.io.OutputStream;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class Streams {
     public static final int BUFFER_CAPACITY = 16384;

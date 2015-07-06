@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "NullTopicListener.h"
 #include <dds/DCPS/debug.h>
 

@@ -1,5 +1,4 @@
 //
-// $Id$
 //
 
 project(*idl): dcps_test_lib {

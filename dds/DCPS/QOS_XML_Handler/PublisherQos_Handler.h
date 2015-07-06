@@ -1,7 +1,6 @@
 /**
  * @author Marcel Smit (msmit@remedy.nl)
  *
- * $Id$
  *
  */
 #ifndef PUBLISHER_QOS_HANDLER_H

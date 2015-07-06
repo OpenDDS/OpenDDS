@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "FooDefTypeSupportImpl.h"
 #include "dds/DCPS/Registered_Data_Types.h"

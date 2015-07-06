@@ -1,4 +1,3 @@
-# $Id$
 
 This is to test the behavior how DCPSInfoRepo re-evaluate the
 compatibility and associations when the DEADLINE QoS policy

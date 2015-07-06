@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -31,7 +30,6 @@ import org.opendds.jms.transport.TransportManager;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class PublisherManager {
     private ManagedConnectionImpl connection;

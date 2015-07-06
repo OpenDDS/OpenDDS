@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -17,7 +16,6 @@ import static org.opendds.jms.common.EnumComparator.compare;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class StreamItemConversion {
     public static boolean convertToBoolean(StreamItem item) throws MessageFormatException {

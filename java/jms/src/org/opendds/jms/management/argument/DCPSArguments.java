@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import org.opendds.jms.transport.Transports;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class DCPSArguments implements DynamicArgumentProvider {
     public static final String DCPS_DEBUG_LEVEL = "DCPSDebugLevel";

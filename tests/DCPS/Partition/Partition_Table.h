@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 namespace Test
 {
