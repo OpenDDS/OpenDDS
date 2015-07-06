@@ -1,5 +1,4 @@
 // -*- MPC -*-
-// $Id$
 
 // This file contains a number of optional features that disable VC8
 // warnings regarding various items that VC8 turned into warnings that were

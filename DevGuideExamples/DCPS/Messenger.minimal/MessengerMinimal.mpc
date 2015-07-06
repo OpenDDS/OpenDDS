@@ -1,5 +1,4 @@
 // -*- MPC -*-
-// $Id$
 
 project(*idl): dcps {
   requires += no_opendds_safety_profile

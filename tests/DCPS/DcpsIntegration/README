@@ -1,4 +1,3 @@
-$Id$
 
 This test test the Service_Participant (TAO specific), DomainParticipantFactory,
 DomainParticipant (except create_xx methods which are check in other tests)

@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef SIMPLEDATAWRITER_H
 #define SIMPLEDATAWRITER_H
 

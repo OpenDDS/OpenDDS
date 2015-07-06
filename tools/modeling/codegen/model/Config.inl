@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 ACE_INLINE
 OpenDDS::Model::Config::operator bool() const

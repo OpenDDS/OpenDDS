@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -19,7 +18,6 @@ import org.junit.Test;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class TextMessageImplTest {
     @Test

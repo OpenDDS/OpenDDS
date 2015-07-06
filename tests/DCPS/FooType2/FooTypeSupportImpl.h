@@ -3,7 +3,6 @@
 /**
  *  @file   FooTypeSupportImpl.h
  *
- *  $Id$
  *
  *
  */

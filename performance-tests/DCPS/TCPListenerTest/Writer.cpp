@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "Writer.h"
 //#include "TestException.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"

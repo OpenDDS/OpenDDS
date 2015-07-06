@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "DataReaderListener.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "../TypeNoKeyBounded/PTDefTypeSupportC.h"

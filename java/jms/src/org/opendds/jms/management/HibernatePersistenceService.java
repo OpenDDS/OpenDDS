@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -23,7 +22,6 @@ import org.opendds.jms.persistence.PersistenceManager;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 @Description("OpenDDS Hibernate PersistenceManager MBean")
 public class HibernatePersistenceService extends DynamicMBeanSupport implements ServiceMBean {

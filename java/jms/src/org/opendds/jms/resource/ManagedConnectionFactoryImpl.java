@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -34,7 +33,6 @@ import org.opendds.jms.transport.TransportFactory;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ManagedConnectionFactoryImpl implements ManagedConnectionFactory {
     private static Logger logger = Logger.getLogger(ManagedConnectionFactoryImpl.class);

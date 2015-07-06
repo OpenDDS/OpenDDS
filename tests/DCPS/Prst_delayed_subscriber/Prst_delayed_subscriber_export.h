@@ -1,6 +1,5 @@
 
 // -*- C++ -*-
-// $Id$
 // Definition for Win32 Export directives.
 // This file is generated automatically by generate_export_file.pl Prst_delayed_subscriber
 // ------------------------------

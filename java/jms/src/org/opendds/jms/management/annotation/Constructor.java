@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -19,7 +18,6 @@ import java.lang.annotation.Target;
  * MBeans utilizing a non-default constructor.
  *
  * @author  Steven Stallion
- * @version $Revision$
  *
  * @see     javax.management.MBeanConstructorInfo
  */

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -14,7 +13,6 @@ import OpenDDS.DCPS.transport.TransportConfig;
 
 /**
  * @author Steven Stallion
- * @version $Revision$
  */
 public class TransportManager {
     private TransportFactory tf;

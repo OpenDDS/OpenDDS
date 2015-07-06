@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -17,7 +16,6 @@ import org.opendds.jms.persistence.DurableSubscriptionStore;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class DurableMessageConsumerImpl extends MessageConsumerImpl implements TopicSubscriber {
     private boolean noLocal;

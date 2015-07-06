@@ -1,5 +1,4 @@
 //
-// $Id$
 //
 
 project(ConfigFile): dcpsexe, dcps_tcp, dcps_multicast, dcps_udp, dcps_rtps, dcps_inforepodiscovery {

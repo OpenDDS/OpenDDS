@@ -3,7 +3,6 @@
 /**
  *  @file   LivelinessCompatibility.cpp
  *
- *  $Id$
  *
  *
  */

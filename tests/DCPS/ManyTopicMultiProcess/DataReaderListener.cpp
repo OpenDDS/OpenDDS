@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "DataReaderListener.h"
 
 DataReaderListenerImpl::DataReaderListenerImpl(int num_ops_per_thread)

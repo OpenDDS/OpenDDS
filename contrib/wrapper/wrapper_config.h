@@ -4,7 +4,6 @@
 /**
  *  @file    wrapper_config.h
  *
- *  $Id$
  *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */

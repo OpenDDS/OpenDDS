@@ -9,7 +9,6 @@ use strict;
 
 expandColors.pl - Convert the TiddlyWiki ColorPalette slices to actual CSS colors
 
-$Id$
 
 =head1 SYNOPSIS
 

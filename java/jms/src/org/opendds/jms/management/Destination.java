@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -25,7 +24,6 @@ import org.opendds.jms.qos.TopicQosPolicy;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 @Description("OpenDDS Destination MBean")
 public class Destination extends DynamicMBeanSupport implements Serializable, ServiceMBean {

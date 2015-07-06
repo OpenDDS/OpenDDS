@@ -1,5 +1,4 @@
 // -*- MPC -*-
-// $Id$
 
 project {
   libs  += OpenDDS_monitor

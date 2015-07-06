@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -35,7 +34,6 @@ import static org.opendds.jms.ConsumerMessageFactory.buildMessageFromPayload;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
     private MessageConsumerImpl consumer;

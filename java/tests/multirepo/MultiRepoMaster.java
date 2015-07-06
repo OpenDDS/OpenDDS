@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -8,7 +7,6 @@
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class MultiRepoMaster extends MultiRepoBase {
 

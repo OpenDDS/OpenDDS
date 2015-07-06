@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportC.h"
 #include "MessengerTypeSupportImpl.h"

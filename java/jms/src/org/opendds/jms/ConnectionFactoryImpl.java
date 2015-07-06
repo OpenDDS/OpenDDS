@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -23,7 +22,6 @@ import org.opendds.jms.common.util.Logger;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class ConnectionFactoryImpl implements ConnectionFactory, Serializable {
     private static Logger logger = Logger.getLogger(ConnectionFactoryImpl.class);

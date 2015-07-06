@@ -1,4 +1,3 @@
-// $Id$
 
 project : taoexe, dcps_qos_xml_handler {
   exename   = qos_dump

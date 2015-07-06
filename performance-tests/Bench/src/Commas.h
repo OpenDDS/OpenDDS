@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef COMMAS_H
 #define COMMAS_H
 

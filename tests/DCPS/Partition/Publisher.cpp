@@ -1,4 +1,3 @@
-// $Id$
 
 #include "TestTypeSupportImpl.h"
 #include "Partition_Table.h"

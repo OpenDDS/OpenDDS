@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -24,7 +23,6 @@ import OpenDDS.DCPS.transport.TransportInst;
 
 /**
  * @author Steven Stallion
- * @version $Revision$
  */
 public class TransportFactory {
     private static final Serial serial = new Serial();

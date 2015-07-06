@@ -1,5 +1,4 @@
 #
-# $Id$
 #
 
 # Remove Emacs file ident:

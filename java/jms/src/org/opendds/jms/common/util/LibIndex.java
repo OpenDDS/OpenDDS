@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -23,7 +22,6 @@ import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class LibIndex {
     public static final String DEFAULT_RESOURCE = "META-INF/INDEX.LIBS";

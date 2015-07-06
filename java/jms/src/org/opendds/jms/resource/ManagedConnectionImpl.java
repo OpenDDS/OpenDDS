@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -43,7 +42,6 @@ import org.opendds.jms.qos.QosPolicies;
 
 /**
  * @author Steven Stallion
- * @version $Revision$
  */
 public class ManagedConnectionImpl implements ManagedConnection {
     private Logger logger;

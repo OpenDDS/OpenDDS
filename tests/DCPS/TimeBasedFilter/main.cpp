@@ -1,5 +1,4 @@
 /*
- * $Id$
  */
 
 #include <ace/Arg_Shifter.h>

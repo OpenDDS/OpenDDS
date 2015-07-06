@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef DOMAIN_PARTICIPANT_LISTENER_IMPL
 #define DOMAIN_PARTICIPANT_LISTENER_IMPL
 

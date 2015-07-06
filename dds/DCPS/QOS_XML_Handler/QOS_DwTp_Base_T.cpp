@@ -1,4 +1,3 @@
-// $Id$
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "QOS_Common.h"
