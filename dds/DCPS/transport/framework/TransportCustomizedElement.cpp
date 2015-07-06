@@ -30,15 +30,18 @@ void
 TransportCustomizedElement::release_element(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportCustomizedElement", "release_element", 6);
-
+  TransportQueueElement* decided = 0;
   if (orig_) {
-    orig_->decision_made(dropped_by_transport);
+    decided = orig_;
   }
 
   if (allocator_) {
     ACE_DES_FREE(this, allocator_->free, TransportCustomizedElement);
   } else {
     delete this;
+  }
+  if (decided) {
+    decided->decision_made(dropped_by_transport);
   }
 }
 
