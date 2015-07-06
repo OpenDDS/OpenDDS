@@ -218,14 +218,11 @@ if (!exists $platforminfo{$opts{'target'}}) {
 if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
   print "configuring safety profile build\n" if $opts{'verbose'};
   $tao_version = "face-safety-22a";
-  if ($opts{'target'} !~ /-safety$/) {
-    print "Changing target from $opts{'target'} to $opts{'target'}-safety\n"
-      if $opts{'verbose'};
-    $opts{'target'} .= "-safety";
-  }
+  $opts{'target'} =~ s/-safety$//;
+  $cross_compile = 1;
 }
 
-if ($opts{'host'} ne $opts{'target'}) {
+if ($opts{'host'} ne $opts{'target'} || $cross_compile) {
   print "Setting cross-compile build\n" if $opts{'verbose'};
   $needmpc = 1;
   $cross_compile = 1;
@@ -315,10 +312,25 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
+sub addCurLibPathRef {
+  my $buildEnvRef = shift();
+  my $build = $buildEnvRef->{'build'};
+  my $platform = $opts{$build};
+  my $libpathname = $platforminfo{$platform}->{'libpath'};
+  my $curLibPathRef = $specific{refpre} . $libpathname . $specific{refpost};
+  # Add to hash
+  $buildEnvRef->{$libpathname} = $curLibPathRef;
+}
+
 my $curpathRef = $specific{refpre} . 'PATH' . $specific{refpost};
 my %extraEnv = ('build' => 'target',  'PATH' => $curpathRef);
 my %hostEnv = ('build' => 'host',  'PATH' => $curpathRef);
 my %targetEnv = ('build' => 'target',  'PATH' => $curpathRef);
+
+# Set initial libpath
+addCurLibPathRef(\%extraEnv);
+addCurLibPathRef(\%hostEnv);
+addCurLibPathRef(\%targetEnv);
 
 sub setSomeEnv {
   my($name, $val, $hashref) = @_;
@@ -622,7 +634,7 @@ sub write_platform_macros {
       $plat = $pi->{'aceplatform'};
       $plat =~ s/\$COMP/($opts{'compiler'} =~ m!CC!) ? 'sunc++' : 'g++'/e;
       $plat =~ s/\$NONSTDCOMP/($opts{'compiler'} =~ m!clang!) ? 'clang' : ''/e;
-      $plat =~ s/_$//e; # Trailing _
+      $plat =~ s/_$//; # Trailing _
     }
     $plat .= '_' . $opts{'host_version'} if $opts{'host_version'};
     print $PMG "include \$(ACE_ROOT)/include/makeinclude/platform_$plat.GNU\n";
@@ -711,31 +723,28 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
                              $ENV{'QTDIR'}) . "\nstopped";
 }
 
-sub push_path {
-  my ($buildEnvRef, $path) = @_;
+sub push_env_dir {
+  my ($buildEnvRef, $var, $path) = @_;
   # Append or set
   if (exists $buildEnvRef->{PATH}) {
-    $buildEnvRef->{PATH} .= ($specific{'pathsep'} . $path);
+    $buildEnvRef->{$var} .= ($specific{'pathsep'} . $path);
   }
   else {
-    $buildEnvRef->{PATH} = $path;
+    $buildEnvRef->{$var} = $path;
   }
+}
+
+sub push_path {
+  my ($buildEnvRef, $path) = @_;
+  push_env_dir($buildEnvRef, 'PATH', $path);
 }
 
 sub push_libpath {
   my ($buildEnvRef, $path) = @_;
   my $build = $buildEnvRef->{'build'};
-  my $build_copy = $opts{$build};
-  $build_copy =~ s/-safety$//;
-  my $libvarname = $platforminfo{$build_copy}->{'libpath'};
-
-  # Append or set
-  if (exists $buildEnvRef->{$libvarname}) {
-    $buildEnvRef->{$libvarname} .= ($specific{'pathsep'} . $path);
-  }
-  else {
-    $buildEnvRef->{$libvarname} = $path;
-  }
+  my $platform = $opts{$build};
+  my $libpathname = $platforminfo{$platform}->{'libpath'};
+  push_env_dir($buildEnvRef, $libpathname, $path);
 }
 
 # host_tools.mwc
@@ -1028,15 +1037,10 @@ if ($cross_compile) {
 
   # ACE_ROOT, TAO_ROOT, DDS_ROOT
   ## PATH and LD_LIBRARY_PATH
-  $hostEnv{'PATH'} = [
-    $hostEnv{'ACE_ROOT'} . $slash . 'bin',
-    $hostEnv{'DDS_ROOT'} . $slash . 'bin',
-  ];
-
-  $targetEnv{'PATH'} = [
-    $hostEnv{'ACE_ROOT'} . $slash . 'bin',
-    $hostEnv{'DDS_ROOT'} . $slash . 'bin',
-  ];
+  my $extraPath = $hostEnv{'ACE_ROOT'} . $slash . 'bin' . $specific{pathsep} .
+                  $hostEnv{'DDS_ROOT'} . $slash . 'bin';
+  push_path(\%hostEnv, $extraPath);
+  push_path(\%targetEnv, $extraPath);
 
   push_libpath(\%hostEnv, $hostEnv{'ACE_ROOT'} . $slash . 'lib');
   push_libpath(\%hostEnv, $hostEnv{'DDS_ROOT'} . $slash . 'lib');
@@ -1065,7 +1069,7 @@ if ($cross_compile) {
   setExtraEnv('ACE_ROOT', $ace_src_root);
   setExtraEnv('TAO_ROOT', $tao_src_root);
   setExtraEnv('DDS_ROOT', '.');
-  
+
   my $extraPath = $extraEnv{'ACE_ROOT'} . $slash . 'bin' . $specific{pathsep} .
                   $extraEnv{'DDS_ROOT'} . $slash . 'bin';
   push_path(\%extraEnv, $extraPath);
