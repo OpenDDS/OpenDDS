@@ -639,6 +639,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   CORBA::ULong rds_len = 0;
   DDS::InstanceHandleSeq handles;
 
+  ACE_GUARD(ACE_Thread_Mutex, wait_guard, sync_unreg_rem_assocs_lock_);
   {
     // Ensure the same acquisition order as in wait_for_acknowledgments().
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -1655,14 +1656,18 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
 void
 DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 {
-  PublicationInstanceMapType::iterator it =
-    this->data_container_->instances_.begin();
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, sync_unreg_rem_assocs_lock_);
 
-  while (it != this->data_container_->instances_.end()) {
-    DDS::InstanceHandle_t handle = it->first;
-    ++it; // avoid mangling the iterator
+    PublicationInstanceMapType::iterator it =
+      this->data_container_->instances_.begin();
 
-    this->unregister_instance_i(handle, source_timestamp);
+    while (it != this->data_container_->instances_.end()) {
+      DDS::InstanceHandle_t handle = it->first;
+      ++it; // avoid mangling the iterator
+
+      this->unregister_instance_i(handle, source_timestamp);
+    }
   }
 }
 
