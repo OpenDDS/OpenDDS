@@ -597,14 +597,14 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       ACE_Message_Block* const end_historic_samples =
         create_control_message(END_HISTORIC_SAMPLES, header, data, timestamp);
 
+      this->controlTracker.message_sent();
       guard.release();
       SendControlStatus ret = send_w_control(list, header, end_historic_samples, remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                              ACE_TEXT("DataWriterImpl::association_complete_i: ")
                              ACE_TEXT("send_w_control failed.\n")));
-      } else {
-        this->controlTracker.message_sent();
+        this->controlTracker.message_dropped();
       }
     }
   }
@@ -2611,10 +2611,12 @@ SendControlStatus
 DataWriterImpl::send_control(const DataSampleHeader& header,
                              ACE_Message_Block* msg)
 {
+  controlTracker.message_sent();
+
   SendControlStatus status = TransportClient::send_control(header, msg);
 
-  if (status == SEND_CONTROL_OK) {
-    controlTracker.message_sent();
+  if (status != SEND_CONTROL_OK) {
+    controlTracker.message_dropped();
   }
 
   return status;
