@@ -8,6 +8,11 @@ workspace {
   }
 
   exclude {
+    // For the case where configure downloads ACE_wrappers
+    ACE_wrappers
+    // For the case where the user clones git repository
+    ATCD
+
     contrib/wrapper
     // Run tools/modeling/tests/setup.pl to generate
     // tools/modeling/tests/modeling_tests.mwc.
