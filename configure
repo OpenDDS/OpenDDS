@@ -46,7 +46,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ipv6!', 'IPv6 support (no)',
    ],
    ['Required dependencies for OpenDDS:',
-    'ace=s', 'ACE (use ACE_ROOT, ../ACE_wrappers, or download)',
+    'ace=s', 'ACE (use ACE_ROOT, ./ACE_wrappers, ../ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
    ],
    ['Advanced configuration:',
@@ -372,6 +372,10 @@ elsif ($ENV{'ACE_ROOT'}) {
   }
   $ace_src_root = $ENV{'ACE_ROOT'};
 }
+# else if ACE_wrappers subdirectory exists
+elsif (-r './ACE_wrappers/ace/ACE.h') {
+  $ace_src_root = "./ACE_wrappers";
+}
 # else if ACE_wrappers peer directory exists
 elsif (-r '../ACE_wrappers/ace/ACE.h') {
   $ace_src_root = "../ACE_wrappers";
@@ -471,9 +475,8 @@ if (!$ace_src_root || !$tao_src_root) {
   print "Extracting archive $file\n";
   eval {require Archive::Extract;};
   if ($@) {
-    my $ddsroot = getcwd;
-    chdir('..');
     my $err = 1;
+    my $ddsroot = getcwd;
     if ($slash eq '/') {
       if ($opts{'dry-run'}) {
         print "Dry-run: would run " . ($^O eq 'solaris' ? 'g' : '') .
@@ -486,7 +489,6 @@ if (!$ace_src_root || !$tao_src_root) {
       die "Can't extract $file, extract it to " . Cwd::abs_path('.') .
         "\nand run this script again.\nStopped";
     }
-    chdir($ddsroot);
   }
   else {
     {no warnings 'once'; $Archive::Extract::PREFER_BIN = 1}
@@ -495,13 +497,13 @@ if (!$ace_src_root || !$tao_src_root) {
       print "Dry-run: would Archive::Extract $file\nExiting\n";
       exit 1;
     }
-    if (!$ae->extract('to' => '..')) {
+    if (!$ae->extract('to' => '.')) {
       die $ae->error . "\nstopped";
     }
   }
 
-  $ace_src_root ||= '../ACE_wrappers';
-  $tao_src_root ||= '../ACE_wrappers/TAO';
+  $ace_src_root ||= './ACE_wrappers';
+  $tao_src_root ||= './ACE_wrappers/TAO';
 }
 
 print "Using ace_src_root: $ace_src_root\n" if $opts{'verbose'};
