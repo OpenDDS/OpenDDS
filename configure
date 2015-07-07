@@ -1094,9 +1094,12 @@ else {
   print "build '", $opts{'solution_file'}, "' using the '",
     ($opts{'optimize'} ? 'Release' : 'Debug'), "' configuration";
 }
-print " to compile OpenDDS", ($buildtao ? ' and ACE+TAO' : '') ,".\n",
-  "You can use the generated setenv.$specific{'ext'} script to set ",
-  "environment variables for\nfuture shell sessions.\n";
+print " to compile ", 
+  ($cross_compile ? "\nthe host and target builds of " : ''),
+  "OpenDDS", (($buildtao || $cross_compile) ? ' and ACE+TAO' : '') ,".\n",
+  "You can use the generated setenv.$specific{'ext'} script ",
+  ($cross_compile ? "in the\nbuilds/host and builds/target dirs " : ''),
+  "to set environment\nvariables for future shell sessions.\n";
 if ($slash ne '/') {
   print "Start Visual Studio from this command prompt so that it inherits ",
     "the correct\nenvironment variables.\n";
