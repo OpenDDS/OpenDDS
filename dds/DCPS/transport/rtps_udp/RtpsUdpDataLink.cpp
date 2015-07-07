@@ -96,16 +96,22 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
       to_deliver.insert(iter->second.to_deliver_.begin(), iter->second.to_deliver_.end());
       iter->second.to_deliver_.clear();
       iter_t it = iter->second.elems_not_acked_.begin();
+      OPENDDS_SET(SequenceNumber) sns_to_release;
       while (it != iter->second.elems_not_acked_.end()) {
         if (criteria.matches(*it->second)) {
           sn_tqe_map.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
-          iter->second.send_buff_->release_acked(it->first);
+          sns_to_release.insert(it->first);
           iter_t last = it;
           ++it;
           iter->second.elems_not_acked_.erase(last);
         } else {
           ++it;
         }
+      }
+      OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
+      while (sns_it != sns_to_release.end()) {
+        iter->second.send_buff_->release_acked(*sns_it);
+        ++sns_it;
       }
     }
   }
@@ -361,18 +367,23 @@ RtpsUdpDataLink::pre_stop_i()
         iter_t iter = writer.to_deliver_.begin();
         while (iter != writer.to_deliver_.end()) {
           to_deliver.push_back(iter->second);
-          writer.send_buff_->release_acked(iter->first);
           writer.to_deliver_.erase(iter);
           iter = writer.to_deliver_.begin();
         }
       }
       if (!writer.elems_not_acked_.empty()) {
+        OPENDDS_SET(SequenceNumber) sns_to_release;
         iter_t iter = writer.elems_not_acked_.begin();
         while (iter != writer.elems_not_acked_.end()) {
           to_drop.push_back(iter->second);
-          writer.send_buff_->release_acked(iter->first);
+          sns_to_release.insert(iter->first);
           writer.elems_not_acked_.erase(iter);
           iter = writer.elems_not_acked_.begin();
+        }
+        OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
+        while (sns_it != sns_to_release.end()) {
+          writer.send_buff_->release_acked(*sns_it);
+          ++sns_it;
         }
       }
       RtpsWriterMap::iterator last = iter;
@@ -427,18 +438,23 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
           iter_t iter = writer.to_deliver_.begin();
           while (iter != writer.to_deliver_.end()) {
             to_deliver.push_back(iter->second);
-            writer.send_buff_->release_acked(iter->first);
             writer.to_deliver_.erase(iter);
             iter = writer.to_deliver_.begin();
           }
         }
         if (!writer.elems_not_acked_.empty()) {
+          OPENDDS_SET(SequenceNumber) sns_to_release;
           iter_t iter = writer.elems_not_acked_.begin();
           while (iter != writer.elems_not_acked_.end()) {
             to_drop.push_back(iter->second);
-            writer.send_buff_->release_acked(iter->first);
+            sns_to_release.insert(iter->first);
             writer.elems_not_acked_.erase(iter);
             iter = writer.elems_not_acked_.begin();
+          }
+          OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
+          while (sns_it != sns_to_release.end()) {
+            writer.send_buff_->release_acked(*sns_it);
+            ++sns_it;
           }
         }
         writers_.erase(rw);
@@ -1803,16 +1819,22 @@ RtpsUdpDataLink::process_acked_by_all_i(ACE_Guard<ACE_Thread_Mutex>& g, const Re
     //if any messages fully acked, call data delivered and remove from map
 
     iter_t it = writer.elems_not_acked_.begin();
+    OPENDDS_SET(SequenceNumber) sns_to_release;
     while (it != writer.elems_not_acked_.end()) {
       if (it->first < all_readers_ack) {
         writer.to_deliver_.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
-        writer.send_buff_->release_acked(it->first);
+        sns_to_release.insert(it->first);
         iter_t last = it;
         ++it;
         writer.elems_not_acked_.erase(last);
       } else {
         break;
       }
+    }
+    OPENDDS_SET(SequenceNumber)::iterator sns_it = sns_to_release.begin();
+    while (sns_it != sns_to_release.end()) {
+      writer.send_buff_->release_acked(*sns_it);
+      ++sns_it;
     }
     TransportQueueElement* tqe_to_deliver;
 
