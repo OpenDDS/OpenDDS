@@ -192,9 +192,10 @@ private:
     ReaderInfoMap remote_readers_;
     RcHandle<SingleSendBuffer> send_buff_;
     SequenceNumber expected_;
-    OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) elems_not_acked_;
+    typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) SnToTqeMap;
+    SnToTqeMap elems_not_acked_;
     //Only accessed with RtpsUdpDataLink lock held
-    OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) to_deliver_;
+    SnToTqeMap to_deliver_;
     CORBA::Long heartbeat_count_;
     bool durable_;
 

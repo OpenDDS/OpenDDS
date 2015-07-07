@@ -84,10 +84,9 @@ RtpsUdpDataLink::add_delayed_notification(TransportQueueElement* element)
 void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
   const TransportQueueElement::MatchCriteria& criteria)
 {
-  typedef OPENDDS_MULTIMAP(SequenceNumber, TransportQueueElement*) SeqToTqeMap;
-  SeqToTqeMap sn_tqe_map;
-  SeqToTqeMap to_deliver;
-  typedef SeqToTqeMap::iterator iter_t;
+  RtpsWriter::SnToTqeMap sn_tqe_map;
+  RtpsWriter::SnToTqeMap to_deliver;
+  typedef RtpsWriter::SnToTqeMap::iterator iter_t;
 
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -99,7 +98,7 @@ void RtpsUdpDataLink::do_remove_sample(const RepoId& pub_id,
       iter_t it = iter->second.elems_not_acked_.begin();
       while (it != iter->second.elems_not_acked_.end()) {
         if (criteria.matches(*it->second)) {
-          sn_tqe_map.insert(std::make_pair(it->first, it->second));
+          sn_tqe_map.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
           iter->second.send_buff_->release_acked(it->first);
           iter_t last = it;
           ++it;
@@ -1806,7 +1805,7 @@ RtpsUdpDataLink::process_acked_by_all_i(ACE_Guard<ACE_Thread_Mutex>& g, const Re
     iter_t it = writer.elems_not_acked_.begin();
     while (it != writer.elems_not_acked_.end()) {
       if (it->first < all_readers_ack) {
-        writer.to_deliver_.insert(std::make_pair(it->first, it->second));
+        writer.to_deliver_.insert(RtpsWriter::SnToTqeMap::value_type(it->first, it->second));
         writer.send_buff_->release_acked(it->first);
         iter_t last = it;
         ++it;
@@ -2190,7 +2189,7 @@ RtpsUdpDataLink::RtpsWriter::heartbeat_high(const ReaderInfo& ri) const
 void
 RtpsUdpDataLink::RtpsWriter::add_elem_awaiting_ack(TransportQueueElement* element)
 {
-  elems_not_acked_.insert(std::make_pair(element->sequence(), element));
+  elems_not_acked_.insert(SnToTqeMap::value_type(element->sequence(), element));
 }
 
 
