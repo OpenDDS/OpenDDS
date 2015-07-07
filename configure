@@ -812,20 +812,22 @@ sub generate_workspace {
   if ($needmpc && $slash eq '/') {
     print "Creating user_macros.GNU with MPC feature settings\n"
       if $opts{'verbose'};
-    my $UM = backup_and_open($buildEnv{'DDS_ROOT'} . '/user_macros.GNU');
-    for my $feat (@features) {
-      print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
-    }
     # If this is not a cross-compile host build
     if ($buildEnv{'build'} eq 'target') {
+      my $UM = backup_and_open($buildEnv{'DDS_ROOT'} . '/user_macros.GNU');
+      for my $feat (@features) {
+        print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
+      }
+      if ($cross_compile) {
       print $UM <<'EOT';
 TAO_IDL = $(HOST_ACE)/bin/tao_idl
 TAO_IDL_DEP = $(TAO_IDL)
 OPENDDS_IDL = $(HOST_DDS)/bin/opendds_idl
 OPENDDS_IDL_DEP = $(OPENDDS_IDL)
 EOT
+      }
+      $UM->close;
     }
-    $UM->close;
   }
 
   my $tests = 1;
@@ -852,7 +854,7 @@ EOT
     locate_mpc();
 
     # Append to default.features
-    if (@features) {
+    if (@features && ($buildEnv{'build'} eq 'target')) {
       my $df_file =
         "$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
       my $DF = $wrote_df
