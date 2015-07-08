@@ -136,7 +136,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     OpenDDS::FaceTSS::convertDuration(qos.datawriter_qos().lifespan.duration) : 0;
 
   const TRANSPORT_CONNECTION_STATUS_TYPE status = {
-    topic.platform_view_guid_, // MESSAGE
+    0, // MESSAGE currently set to 0 due to type mismatch in MESSAGE_RANGE_TYPE and MESSAGE_TYPE_GUID
     ACE_INT32_MAX, // MAX_MESSAGE
     max_message_size,
     connection_direction,
@@ -144,8 +144,10 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     refresh_period,
     INVALID,
   };
-  Entities::instance()->connections_[connection_id] =
-    std::pair<OPENDDS_STRING, TRANSPORT_CONNECTION_STATUS_TYPE>(connection_name, status);
+  Entities::ConnectionInfo& conn_info = Entities::instance()->connections_[connection_id];
+  conn_info.connection_name = connection_name;
+  conn_info.connection_status = status;
+  conn_info.platform_view_guid = topic.platform_view_guid_;
 }
 
 void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
@@ -164,7 +166,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
     // if validated or populated, set return_code so status will be populated
     if (connection_name[0]) {
       // Validate provided connection_name
-      OPENDDS_STRING conn_name = entities.connections_[connection_id].first;
+      OPENDDS_STRING conn_name = entities.connections_[connection_id].connection_name;
       if (std::strcmp(connection_name, conn_name.c_str()) == 0) {
         return_code = RC_NO_ERROR;
       } else {
@@ -174,7 +176,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
       // connection_name not provided
       // so populate from connection_id lookup
       // and set return code so status will be populated
-      entities.connections_[connection_id].first.copy(connection_name,
+      entities.connections_[connection_id].connection_name.copy(connection_name,
                                                       sizeof(CONNECTION_NAME_TYPE));
       connection_name[sizeof(CONNECTION_NAME_TYPE) - 1] = 0;
       return_code = RC_NO_ERROR;
@@ -197,7 +199,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
     return_code = INVALID_PARAM;
   }
   if (return_code == RC_NO_ERROR) {
-    TRANSPORT_CONNECTION_STATUS_TYPE& cur_status = entities.connections_[connection_id].second;
+    TRANSPORT_CONNECTION_STATUS_TYPE& cur_status = entities.connections_[connection_id].connection_status;
     if (cur_status.CONNECTION_DIRECTION == FACE::DESTINATION) {
       Entities::FaceReceiver& receiver = *entities.receivers_[connection_id];
       if (receiver.status_valid != FACE::VALID) {
@@ -658,7 +660,7 @@ FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
   DDS::ReturnCode_t retcode)
 {
   FACE::TRANSPORT_CONNECTION_STATUS_TYPE& status =
-    Entities::instance()->connections_[connection_id].second;
+    Entities::instance()->connections_[connection_id].connection_status;
   FACE::RETURN_CODE_TYPE rc = FACE::INVALID_PARAM;
 
   switch (retcode) {
@@ -745,7 +747,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   FACE::TS::MessageHeader& header = readers[connection_id]->last_msg_header;
 
   //TODO: Populate other header fields appropriately
-  header.platform_view_guid = Entities::instance()->connections_[connection_id].second.MESSAGE;
+  header.platform_view_guid = Entities::instance()->connections_[connection_id].platform_view_guid;
   //  header.message_instance_guid = sinfo.instance_handle;
   header.message_timestamp = convertTime(sinfo.source_timestamp);
   ACE_Time_Value now(ACE_OS::gettimeofday());
