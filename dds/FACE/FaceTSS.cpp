@@ -22,7 +22,7 @@ namespace TS {
 bool MessageHeader::operator==(const MessageHeader& rhs) const
 {
   return message_instance_guid == rhs.message_instance_guid
-    && message_definition_guid == rhs.message_definition_guid
+    && platform_view_guid == rhs.platform_view_guid
     && message_source_guid == rhs.message_source_guid
     && message_timestamp == rhs.message_timestamp
     && message_validity == rhs.message_validity;
@@ -136,7 +136,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     OpenDDS::FaceTSS::convertDuration(qos.datawriter_qos().lifespan.duration) : 0;
 
   const TRANSPORT_CONNECTION_STATUS_TYPE status = {
-    topic.message_definition_guid_, // MESSAGE
+    topic.platform_view_guid_, // MESSAGE
     ACE_INT32_MAX, // MAX_MESSAGE
     max_message_size,
     connection_direction,
@@ -745,7 +745,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   FACE::TS::MessageHeader& header = readers[connection_id]->last_msg_header;
 
   //TODO: Populate other header fields appropriately
-  header.message_definition_guid = Entities::instance()->connections_[connection_id].second.MESSAGE;
+  header.platform_view_guid = Entities::instance()->connections_[connection_id].second.MESSAGE;
   //  header.message_instance_guid = sinfo.instance_handle;
   header.message_timestamp = convertTime(sinfo.source_timestamp);
   ACE_Time_Value now(ACE_OS::gettimeofday());
