@@ -37,7 +37,7 @@ void callback(FACE::TRANSACTION_ID_TYPE txn,
     return;
   }
   std::cout << "In callback() Message Header - tid: " << txn
-            << "\n\tdefinition guid: " << hdr.message_definition_guid
+            << "\n\tplatform view guid: " << hdr.platform_view_guid
             << "\n\tsource timestamp: " << hdr.message_timestamp
             << "\n\tinstance guid: " << hdr.message_instance_guid
             << "\n\tsource guid: " << hdr.message_source_guid
@@ -104,7 +104,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
           break;
         }
         std::cout << "Message Header - tid: " << txn
-                  << "\n\tdefinition guid: " << hdr.message_definition_guid
+                  << "\n\tplatform view guid: " << hdr.platform_view_guid
                   << "\n\tsource timestamp: " << hdr.message_timestamp
                   << "\n\tinstance guid: " << hdr.message_instance_guid
                   << "\n\tsource guid: " << hdr.message_source_guid

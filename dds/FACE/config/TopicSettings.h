@@ -12,7 +12,7 @@ public:
   int set(const char* name, const char* value);
 
   char type_name_[128];
-  FACE::MESSAGE_TYPE_GUID message_definition_guid_;
+  FACE::MESSAGE_TYPE_GUID platform_view_guid_;
   FACE::MESSAGE_SIZE_TYPE max_message_size_;
 };
 
