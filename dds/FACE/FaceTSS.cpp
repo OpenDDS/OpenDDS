@@ -340,40 +340,19 @@ namespace {
                          const DDS::DomainParticipantFactory_var& dpf,
                          DDS::DomainParticipant_var& dp) {
     DDS::DomainParticipant_var temp_dp;
-    Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
-    Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
-    while (rdrIter != readers.end()) {
-      temp_dp = rdrIter->second->dr->get_subscriber()->get_participant();
-      if (domainId == temp_dp->get_domain_id()) {
-        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d in receivers\n", domainId));
-        }
-        dp = temp_dp;
-        return;
-      } else {
-        ++rdrIter;
-      }
-    }
 
-    Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
-    Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();
-
-    while (wtrIter != writers.end()) {
-      temp_dp = wtrIter->second.dw->get_publisher()->get_participant();
-      if (domainId == temp_dp->get_domain_id()) {
-        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d in senders\n", domainId));
-        }
-        dp = temp_dp;
-        return;
-      } else {
-        ++wtrIter;
+    temp_dp = dpf->lookup_participant(domainId);
+    if (!temp_dp) {
+      if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - created new participant for domainId: %d\n", domainId));
       }
+      dp = dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
+      return;
     }
     if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - created new participant for domainId: %d\n", domainId));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d \n", domainId));
     }
-    dp = dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
+    dp = temp_dp;
   }
 
   void find_or_create_pub(const DDS::PublisherQos& qos,
