@@ -76,7 +76,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     if (connectionStatus.CONNECTION_DIRECTION != FACE::DESTINATION ||
         connectionStatus.LAST_MSG_VALIDITY != FACE::INVALID ||
         connectionStatus.MESSAGE != 0 ||
-        connectionStatus.MAX_MESSAGE != ACE_INT32_MAX ||
+        connectionStatus.MAX_MESSAGE != 300 ||
         connectionStatus.MAX_MESSAGE_SIZE != 300 ||
         connectionStatus.WAITING_PROCESSES_OR_MESSAGES != 0 ||
         connectionStatus.REFRESH_PERIOD != 0) {
@@ -86,7 +86,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       std::cout << "Get_Connection_Parameters after registering callback Connection Status values were as expected" << std::endl;
     }
     std::cout << "\tMESSAGE: " << connectionStatus.MESSAGE << " should be 0\n"
-              << "\tMAX_MESSAGE: " << connectionStatus.MAX_MESSAGE << " should be " << ACE_INT32_MAX << "\n"
+              << "\tMAX_MESSAGE: " << connectionStatus.MAX_MESSAGE << " should be " << 300 << "\n"
               << "\tMAX_MESSAGE_SIZE: " << connectionStatus.MAX_MESSAGE_SIZE << " should be 300\n"
               << "\tCONNECTION_DIRECTION: " << connectionStatus.CONNECTION_DIRECTION << " should be " << FACE::DESTINATION << "\n"
               << "\tWAITING_PROCESSES_OR_MESSAGES: " << connectionStatus.WAITING_PROCESSES_OR_MESSAGES << " should be 0\n"
@@ -170,7 +170,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     if (connectionStatus.CONNECTION_DIRECTION != FACE::DESTINATION ||
         connectionStatus.LAST_MSG_VALIDITY != FACE::VALID ||
         connectionStatus.MESSAGE != 0 ||
-        connectionStatus.MAX_MESSAGE != ACE_INT32_MAX ||
+        connectionStatus.MAX_MESSAGE != 300 ||
         connectionStatus.MAX_MESSAGE_SIZE != 300 ||
         connectionStatus.WAITING_PROCESSES_OR_MESSAGES != 0 ||
         connectionStatus.REFRESH_PERIOD <= 0) {
@@ -180,7 +180,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       std::cout << "Get_Connection_Parameters after all messages received Connection Status values were as expected" << std::endl;
     }
     std::cout << "\tMESSAGE: " << connectionStatus.MESSAGE << " should be 0\n"
-              << "\tMAX_MESSAGE: " << connectionStatus.MAX_MESSAGE << " should be " << ACE_INT32_MAX << "\n"
+              << "\tMAX_MESSAGE: " << connectionStatus.MAX_MESSAGE << " should be " << 300 << "\n"
               << "\tMAX_MESSAGE_SIZE: " << connectionStatus.MAX_MESSAGE_SIZE << " should be 300\n"
               << "\tCONNECTION_DIRECTION: " << connectionStatus.CONNECTION_DIRECTION << " should be " << FACE::DESTINATION << "\n"
               << "\tWAITING_PROCESSES_OR_MESSAGES: " << connectionStatus.WAITING_PROCESSES_OR_MESSAGES << " should be 0\n"

@@ -137,7 +137,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
 
   const TRANSPORT_CONNECTION_STATUS_TYPE status = {
     0, // MESSAGE currently set to 0 due to type mismatch in MESSAGE_RANGE_TYPE and MESSAGE_TYPE_GUID
-    ACE_INT32_MAX, // MAX_MESSAGE
+    max_message_size, // MAX_MESSAGE with no transformations, set to config value
     max_message_size,
     connection_direction,
     0, // WAITING_PROCESSES_OR_MESSAGES
