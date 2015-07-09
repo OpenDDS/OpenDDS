@@ -31,7 +31,7 @@ void callback(FACE::TRANSACTION_ID_TYPE txn,
              message_type_id, message_size, txn));
   callbackHappened = true;
   FACE::TS::MessageHeader hdr;
-  FACE::TS::Receive_Message(connId, timeout, txn, hdr, message_size, return_code);
+  FACE::TS::Receive_Message(connId, timeout, txn, hdr, sizeof(FACE::TS::MessageHeader), return_code);
   if (return_code != FACE::RC_NO_ERROR) {
     std::cout << "ERROR: In callback() - Receive header failed for tid: " << txn << " with status: " << return_code << std::endl;
     return;
@@ -98,7 +98,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
         break;
       } else {
         FACE::TS::MessageHeader hdr;
-        FACE::TS::Receive_Message(connId, timeout, txn, hdr, max_msg_size, status);
+        FACE::TS::Receive_Message(connId, timeout, txn, hdr, sizeof(FACE::TS::MessageHeader), status);
         if (status != FACE::RC_NO_ERROR) {
           std::cout << "ERROR: Receive_Message for header failed for tid: " << txn << " with status: " << status << std::endl;
           break;
