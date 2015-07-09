@@ -304,8 +304,7 @@ private:
       update_status(connection_id_, DDS::RETCODE_BAD_PARAMETER);
       return;
     }
-    FACE::TRANSPORT_CONNECTION_STATUS_TYPE& status =
-      Entities::instance()->connections_[connection_id_].connection_status;
+
     FACE::MESSAGE_TYPE_GUID& msg_id = Entities::instance()->connections_[connection_id_].platform_view_guid;
     Msg sample;
     DDS::SampleInfo sinfo;
