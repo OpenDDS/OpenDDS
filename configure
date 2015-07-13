@@ -56,6 +56,13 @@ my %platforminfo =
                'libpath' => 'LD_LIBRARY_PATH',
                'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
+   'lynxos-178' => {
+                    'compilers' => ['g++'],
+                    'libpath' => 'LD_LIBRARY_PATH',
+                    'no_host' => 1,
+                    'aceplatform' => 'lynxos',
+                    'compiler_root_env' => 'ENV_PREFIX',
+                   },
   );
 
 ## arg processing and usage
@@ -197,6 +204,7 @@ my $needmpc = 0;
 my %opts = %{parseArgs()};
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
+
 my ($slash, $exeext) = ($opts{'host'} eq 'win32') ? ('\\', '.exe') : ('/', '');
 
 my %specific =
@@ -250,7 +258,8 @@ sub locate_mpc {
   $hostEnv{'MPC_ROOT'} = $targetEnv{'MPC_ROOT'};
 }
 
-if (!exists $platforminfo{$opts{'host'}}) {
+if (!exists $platforminfo{$opts{'host'}} ||
+    $platforminfo{$opts{'host'}}->{'no_host'}) {
   die "ERROR: unknown host $opts{'host'}, stopped";
 }
 print "host system is: $opts{'host'}\n" if $opts{'verbose'};
@@ -284,6 +293,17 @@ if ($opts{'host'} ne $opts{'target'} || $cross_compile) {
   print "Setting cross-compile build\n" if $opts{'verbose'};
   $needmpc = 1;
   $cross_compile = 1;
+}
+
+if ($platforminfo{$opts{'target'}}->{'compiler_root_env'}) {
+  # This target puts its cross-compiler in the PATH before the host compiler,
+  # we will need to override (not append to) PATH for the host build.
+  my $root_env = $platforminfo{$opts{'target'}}->{'compiler_root_env'};
+  my $root_dir = $ENV{$root_env};
+  my @oldpath = split /$specific{'pathsep'}/, $ENV{'PATH'};
+  my $newpath = join($specific{'pathsep'}, grep {!/^$root_dir/} @oldpath);
+  $hostEnv{'PATH'} =~
+    s/\Q$specific{'refpre'}\EPATH\Q$specific{'refpost'}\E/$newpath/;
 }
 
 ## compiler
@@ -596,7 +616,7 @@ sub write_config_h {
         print $CFGH "$line\n";
       }
     }
-    my $cfg = $opts{'host'};
+    my $cfg = $opts{$buildEnv{'build'}};
     if ($pi->{'aceconfig'}) {
       $cfg = $pi->{'aceconfig'};
       $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
@@ -787,10 +807,10 @@ workspace {
   $(ACE_ROOT)/ace/ace.mpc
   $(ACE_ROOT)/apps/gperf/src
   $(TAO_ROOT)/TAO_IDL
-  $(TAO_ROOT)/tao/tao.mpc
   dds/idl/opendds_idl.mpc
-}
 EOT
+  print $MWC "  \$(TAO_ROOT)/tao/tao.mpc\n" if $opts{'safety-profile'};
+  print $MWC "}\n";
   $MWC->close;
   print "Wrote host_tools.mwc in $buildEnv{'DDS_ROOT'}\n" if $opts{'verbose'};
   dump_and_unlink($MWC) if $opts{'dry-run'};
@@ -1027,12 +1047,13 @@ sub configure_build {
 
 sub write_cross_compile_makefile {
   my $MF = backup_and_open('GNUmakefile');
+  my $safety_profile_step = $opts{'safety-profile'} ?
+    "\tcd $targetEnv{'ACE_ROOT'}/ace && \$(MAKE) \$@\n" : '';
   print $MF <<"EOT";
 # OpenDDS configure script: $0 @ARGS
 all clean realclean install depend:
-	cd build/host && \$(MAKE) \$@
-	cd $targetEnv{'ACE_ROOT'}/ace && \$(MAKE) \$@
-	cd build/target && \$(MAKE) \$@
+\tcd build/host && \$(MAKE) \$@
+$safety_profile_step\tcd build/target && \$(MAKE) \$@
 .PHONY: all clean realclean install depend
 EOT
   $MF->close;
