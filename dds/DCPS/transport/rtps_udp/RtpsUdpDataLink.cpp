@@ -2189,7 +2189,6 @@ RtpsUdpDataLink::ReaderInfo::expecting_durable_data() const
 
 RtpsUdpDataLink::RtpsWriter::~RtpsWriter()
 {
-  typedef OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator iter_t;
   if (!to_deliver_.empty()) {
     ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: RtpsWriter::~RtpsWriter - deleting with %d elements left to deliver\n", to_deliver_.size()));
   }
