@@ -2,7 +2,6 @@
  * <copyright>
  * </copyright>
  *
- * $Id$
  */
 package org.opendds.modeling.sdk.model.GeneratorSpecification.Provider;
 

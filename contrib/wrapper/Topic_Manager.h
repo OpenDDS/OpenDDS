@@ -4,7 +4,6 @@
 /**
  *  @file    Topic_Manager.h
  *
- *  $Id$
  *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */

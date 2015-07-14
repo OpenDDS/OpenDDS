@@ -1,5 +1,4 @@
 /*
- * $Id$
  */
 
 #ifndef SUBSCRIBER_CYCLE_SUSCRIBERLISTENERIMPL_H

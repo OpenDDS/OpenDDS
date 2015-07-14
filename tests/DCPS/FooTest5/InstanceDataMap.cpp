@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "InstanceDataMap.h"
 #include "common.h"
 

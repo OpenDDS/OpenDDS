@@ -9,7 +9,6 @@ use strict;
 
 mktable.pl - create a TiddlyWiki or HTML table with latency test data
 
-$Id$
 
 =head1 SYNOPSIS
 

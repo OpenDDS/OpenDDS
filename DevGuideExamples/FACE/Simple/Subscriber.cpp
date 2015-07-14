@@ -7,7 +7,7 @@
 #endif
 
 // FUZZ: disable check_for_improper_main_declaration
-int main(int, const char*[])
+int main(int, char*[])
 {
   // Initialize the TS interface
   FACE::RETURN_CODE_TYPE status;

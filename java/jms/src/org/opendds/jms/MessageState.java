@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -13,7 +12,6 @@ import javax.jms.MessageNotWriteableException;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public interface MessageState {
     /**

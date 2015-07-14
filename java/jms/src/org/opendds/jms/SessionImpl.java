@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -40,7 +39,6 @@ import org.opendds.jms.persistence.DurableSubscriptionStore;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class SessionImpl implements Session {
     private Logger logger;

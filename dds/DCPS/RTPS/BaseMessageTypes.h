@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -55,7 +54,8 @@ namespace OpenDDS {
     const ProtocolVersion_t PROTOCOLVERSION_1_1 = { 1, 1 };
     const ProtocolVersion_t PROTOCOLVERSION_2_0 = { 2, 0 };
     const ProtocolVersion_t PROTOCOLVERSION_2_1 = { 2, 1 };
-    const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_1;
+    const ProtocolVersion_t PROTOCOLVERSION_2_2 = { 2, 2 };
+    const ProtocolVersion_t PROTOCOLVERSION = PROTOCOLVERSION_2_2;
   }
 }
 

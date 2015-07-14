@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -24,7 +23,6 @@ import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class DurableSubscriptionStore implements Serializable {
     private SessionFactory sessionFactory;

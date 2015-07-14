@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -21,7 +20,6 @@ import org.apache.tools.ant.types.FileSet;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class LibIndex extends Task {
     public static String DEFAULT_FILE = "INDEX.LIBS";

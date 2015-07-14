@@ -1,7 +1,6 @@
 /**
  * @author Marcel Smit (msmit@remedy.nl)
  *
- * $Id$
  *
  * This template contains the parsing of all QOS XML setting
  * which the Publisher and the Subscriber have in common.

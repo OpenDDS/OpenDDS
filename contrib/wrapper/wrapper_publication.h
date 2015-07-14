@@ -4,7 +4,6 @@
 /**
  *  @file    wrapper_publication.h
  *
- *  $Id$
  *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */

@@ -1,4 +1,3 @@
-// $Id$
 
 project(DDS*idl): dcps_test_lib {
   requires += no_opendds_safety_profile

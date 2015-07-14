@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -52,7 +51,6 @@ import Messenger.MessageTypeSupportImpl;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class BuiltinTopicsTest {
     private static final int DOMAIN_ID = 42;

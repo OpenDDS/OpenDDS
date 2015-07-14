@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import javax.jms.MessageNotWriteableException;
  * A freshly receiveed TextMessage, ObjectMessage and MapMessage that is in this state.
  *
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MessageStateBodyNonWritable implements MessageState {
     private AbstractMessageImpl message;

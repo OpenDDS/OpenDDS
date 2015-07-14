@@ -9,7 +9,6 @@ use strict;
 
 extract-throughput.pl - extract summary statistics from test results.
 
-$Id$
 
 =head1 SYNOPSIS
 

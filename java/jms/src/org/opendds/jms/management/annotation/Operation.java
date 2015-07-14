@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -18,7 +17,6 @@ import java.lang.annotation.Target;
  * Indicates an MBean operation.
  *
  * @author  Steven Stallion
- * @version $Revision$
  *
  * @see     javax.management.MBeanOperationInfo
  */

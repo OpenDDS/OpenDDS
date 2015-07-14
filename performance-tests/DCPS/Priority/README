@@ -1,4 +1,3 @@
-# $Id$
 
 This test attempts to characterize the performance of the TRANSPORT_PRIORITY
 Quality of Service policy values.  See the Perl POD description embedded

@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "NullPublisherListener.h"
 #include <dds/DCPS/debug.h>
 

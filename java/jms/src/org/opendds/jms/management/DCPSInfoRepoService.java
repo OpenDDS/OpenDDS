@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -23,7 +22,6 @@ import org.opendds.jms.management.argument.ORBArguments;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 @Description("OpenDDS DCPSInfoRepo MBean")
 public class DCPSInfoRepoService extends DynamicMBeanSupport implements ServiceMBean {

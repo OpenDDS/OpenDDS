@@ -1,5 +1,4 @@
 // -*- C++ -*-
-// $Id$
 
 #include "Publisher.h"
 #include "Test.h"

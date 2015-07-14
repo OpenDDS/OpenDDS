@@ -1,4 +1,3 @@
-// $Id$
 
 #include "dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h"
 #include "dds/DCPS/QOS_XML_Handler/XML_File_Intf.h"

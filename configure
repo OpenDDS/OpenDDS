@@ -46,7 +46,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ipv6!', 'IPv6 support (no)',
    ],
    ['Required dependencies for OpenDDS:',
-    'ace=s', 'ACE (use ACE_ROOT, ../ACE_wrappers, or download)',
+    'ace=s', 'ACE (use ACE_ROOT, ./ACE_wrappers, ../ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
    ],
    ['Advanced configuration:',
@@ -186,8 +186,9 @@ my %platforminfo =
                  'aceconfig' => 'sunos$UNAMER', # $UNAMER = `uname -r`
                 },
    'linux' => {
-               'compilers' => ['g++'],
+               'compilers' => ['g++', 'clang', 'clang++'],
                'libpath' => 'LD_LIBRARY_PATH',
+               'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
   );
 
@@ -217,14 +218,11 @@ if (!exists $platforminfo{$opts{'target'}}) {
 if ($opts{'safety-profile'} || $opts{'target'} =~ /-safety$/) {
   print "configuring safety profile build\n" if $opts{'verbose'};
   $tao_version = "face-safety-22a";
-  if ($opts{'target'} !~ /-safety$/) {
-    print "Changing target from $opts{'target'} to $opts{'target'}-safety\n"
-      if $opts{'verbose'};
-    $opts{'target'} .= "-safety";
-  }
+  $opts{'target'} =~ s/-safety$//;
+  $cross_compile = 1;
 }
 
-if ($opts{'host'} ne $opts{'target'}) {
+if ($opts{'host'} ne $opts{'target'} || $cross_compile) {
   print "Setting cross-compile build\n" if $opts{'verbose'};
   $needmpc = 1;
   $cross_compile = 1;
@@ -314,9 +312,25 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
     if $opts{'verbose'};
 }
 
-my %extraEnv = ('build' => 'target');
-my %hostEnv = ('build' => 'host');
-my %targetEnv = ('build' => 'target');
+sub addCurLibPathRef {
+  my $buildEnvRef = shift();
+  my $build = $buildEnvRef->{'build'};
+  my $platform = $opts{$build};
+  my $libpathname = $platforminfo{$platform}->{'libpath'};
+  my $curLibPathRef = $specific{refpre} . $libpathname . $specific{refpost};
+  # Add to hash
+  $buildEnvRef->{$libpathname} = $curLibPathRef;
+}
+
+my $curpathRef = $specific{refpre} . 'PATH' . $specific{refpost};
+my %extraEnv = ('build' => 'target',  'PATH' => $curpathRef);
+my %hostEnv = ('build' => 'host',  'PATH' => $curpathRef);
+my %targetEnv = ('build' => 'target',  'PATH' => $curpathRef);
+
+# Set initial libpath
+addCurLibPathRef(\%extraEnv);
+addCurLibPathRef(\%hostEnv);
+addCurLibPathRef(\%targetEnv);
 
 sub setSomeEnv {
   my($name, $val, $hashref) = @_;
@@ -357,6 +371,10 @@ elsif ($ENV{'ACE_ROOT'}) {
     die "Can't find ACE at $ENV{'ACE_ROOT'}\n";
   }
   $ace_src_root = $ENV{'ACE_ROOT'};
+}
+# else if ACE_wrappers subdirectory exists
+elsif (-r './ACE_wrappers/ace/ACE.h') {
+  $ace_src_root = "./ACE_wrappers";
 }
 # else if ACE_wrappers peer directory exists
 elsif (-r '../ACE_wrappers/ace/ACE.h') {
@@ -457,9 +475,8 @@ if (!$ace_src_root || !$tao_src_root) {
   print "Extracting archive $file\n";
   eval {require Archive::Extract;};
   if ($@) {
-    my $ddsroot = getcwd;
-    chdir('..');
     my $err = 1;
+    my $ddsroot = getcwd;
     if ($slash eq '/') {
       if ($opts{'dry-run'}) {
         print "Dry-run: would run " . ($^O eq 'solaris' ? 'g' : '') .
@@ -472,7 +489,6 @@ if (!$ace_src_root || !$tao_src_root) {
       die "Can't extract $file, extract it to " . Cwd::abs_path('.') .
         "\nand run this script again.\nStopped";
     }
-    chdir($ddsroot);
   }
   else {
     {no warnings 'once'; $Archive::Extract::PREFER_BIN = 1}
@@ -481,13 +497,13 @@ if (!$ace_src_root || !$tao_src_root) {
       print "Dry-run: would Archive::Extract $file\nExiting\n";
       exit 1;
     }
-    if (!$ae->extract('to' => '..')) {
+    if (!$ae->extract('to' => '.')) {
       die $ae->error . "\nstopped";
     }
   }
 
-  $ace_src_root ||= '../ACE_wrappers';
-  $tao_src_root ||= '../ACE_wrappers/TAO';
+  $ace_src_root ||= './ACE_wrappers';
+  $tao_src_root ||= './ACE_wrappers/TAO';
 }
 
 print "Using ace_src_root: $ace_src_root\n" if $opts{'verbose'};
@@ -548,7 +564,7 @@ sub write_config_h {
     $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
     my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
-    # If this is not a cross-compile build, or the target cross-compile build
+    # If this is not a cross-compile host build
     if ($buildEnv{'build'} eq 'target') {
       for my $line (@{$opts{'configh'}}) {
         print $CFGH "$line\n";
@@ -573,7 +589,7 @@ sub write_config_h {
 # default.features
 sub write_default_features {
   my %buildEnv = %{shift()};
-  # If this is not a cross-compile build, or the target cross-compile build
+  # If this is not a cross-compile host build
   if ($buildEnv{'build'} eq 'target') {
     if ($opts{'ipv6'} || $opts{'features'}) {
       my $DF = backup_and_open("$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator" .
@@ -593,10 +609,10 @@ sub write_default_features {
 sub write_platform_macros {
   my %buildEnv = %{shift()};
   if ($slash eq '/') {
-    my $pi = $platforminfo{$buildEnv{'build'}};
+    my $pi = $platforminfo{$opts{$buildEnv{'build'}}};
     my $PMG = backup_and_open("$buildEnv{'ACE_ROOT'}/include/makeinclude" .
                                "/platform_macros.GNU");
-    # If this is not a cross-compile build, or the target cross-compile build
+    # If this is not a cross-compile host build
     if ($buildEnv{'build'} eq 'target') {
       for my $line (@{$opts{'macros'}}) {
         print $PMG "$line\n";
@@ -619,6 +635,8 @@ sub write_platform_macros {
     if ($pi->{'aceplatform'}) {
       $plat = $pi->{'aceplatform'};
       $plat =~ s/\$COMP/($opts{'compiler'} =~ m!CC!) ? 'sunc++' : 'g++'/e;
+      $plat =~ s/\$NONSTDCOMP/($opts{'compiler'} =~ m!clang!) ? 'clang' : ''/e;
+      $plat =~ s/_$//; # Trailing _
     }
     $plat .= '_' . $opts{'host_version'} if $opts{'host_version'};
     print $PMG "include \$(ACE_ROOT)/include/makeinclude/platform_$plat.GNU\n";
@@ -707,20 +725,28 @@ if (exists $opts{'qt'} && !-r ($ENV{'QT4_INCDIR'} ? $ENV{'QT4_INCDIR'} :
                              $ENV{'QTDIR'}) . "\nstopped";
 }
 
+sub push_env_dir {
+  my ($buildEnvRef, $var, $path) = @_;
+  # Append or set
+  if (exists $buildEnvRef->{PATH}) {
+    $buildEnvRef->{$var} .= ($specific{'pathsep'} . $path);
+  }
+  else {
+    $buildEnvRef->{$var} = $path;
+  }
+}
+
+sub push_path {
+  my ($buildEnvRef, $path) = @_;
+  push_env_dir($buildEnvRef, 'PATH', $path);
+}
+
 sub push_libpath {
   my ($buildEnvRef, $path) = @_;
   my $build = $buildEnvRef->{'build'};
-  my $build_copy = $opts{$build};
-  $build_copy =~ s/-safety$//;
-  my $libvarname = $platforminfo{$build_copy}->{'libpath'};
-
-  # Append or set
-  if (exists $buildEnvRef->{$libvarname}) {
-    $buildEnvRef->{$libvarname} .= ($specific{'pathsep'} . $path);
-  }
-  else {
-    $buildEnvRef->{$libvarname} = $path;
-  }
+  my $platform = $opts{$build};
+  my $libpathname = $platforminfo{$platform}->{'libpath'};
+  push_env_dir($buildEnvRef, $libpathname, $path);
 }
 
 # host_tools.mwc
@@ -788,20 +814,22 @@ sub generate_workspace {
   if ($needmpc && $slash eq '/') {
     print "Creating user_macros.GNU with MPC feature settings\n"
       if $opts{'verbose'};
-    my $UM = backup_and_open($buildEnv{'DDS_ROOT'} . '/user_macros.GNU');
-    for my $feat (@features) {
-      print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
-    }
-    # If this is a cross-compile target build
+    # If this is not a cross-compile host build
     if ($buildEnv{'build'} eq 'target') {
+      my $UM = backup_and_open($buildEnv{'DDS_ROOT'} . '/user_macros.GNU');
+      for my $feat (@features) {
+        print $UM ($feat =~ /=/ ? $feat : "$feat=1"), "\n";
+      }
+      if ($cross_compile) {
       print $UM <<'EOT';
 TAO_IDL = $(HOST_ACE)/bin/tao_idl
 TAO_IDL_DEP = $(TAO_IDL)
 OPENDDS_IDL = $(HOST_DDS)/bin/opendds_idl
 OPENDDS_IDL_DEP = $(OPENDDS_IDL)
 EOT
+      }
+      $UM->close;
     }
-    $UM->close;
   }
 
   my $tests = 1;
@@ -809,7 +837,7 @@ EOT
 
 
   # If this is a target cross-compile build
-  if ($buildEnv{'build'} eq 'target') {
+  if ($cross_compile && $buildEnv{'build'} eq 'target') {
     # TAO will be built seperately
     $buildtao = 0;
   } else {
@@ -828,7 +856,7 @@ EOT
     locate_mpc();
 
     # Append to default.features
-    if (@features) {
+    if (@features && ($buildEnv{'build'} eq 'target')) {
       my $df_file =
         "$buildEnv{'ACE_ROOT'}/bin/MakeProjectCreator/config/default.features";
       my $DF = $wrote_df
@@ -1013,15 +1041,10 @@ if ($cross_compile) {
 
   # ACE_ROOT, TAO_ROOT, DDS_ROOT
   ## PATH and LD_LIBRARY_PATH
-  $hostEnv{'PATH'} = [
-    $hostEnv{'ACE_ROOT'} . $slash . 'bin',
-    $hostEnv{'DDS_ROOT'} . $slash . 'bin',
-  ];
-
-  $targetEnv{'PATH'} = [
-    $hostEnv{'ACE_ROOT'} . $slash . 'bin',
-    $hostEnv{'DDS_ROOT'} . $slash . 'bin',
-  ];
+  my $extraPath = $hostEnv{'ACE_ROOT'} . $slash . 'bin' . $specific{pathsep} .
+                  $hostEnv{'DDS_ROOT'} . $slash . 'bin';
+  push_path(\%hostEnv, $extraPath);
+  push_path(\%targetEnv, $extraPath);
 
   push_libpath(\%hostEnv, $hostEnv{'ACE_ROOT'} . $slash . 'lib');
   push_libpath(\%hostEnv, $hostEnv{'DDS_ROOT'} . $slash . 'lib');
@@ -1050,10 +1073,11 @@ if ($cross_compile) {
   setExtraEnv('ACE_ROOT', $ace_src_root);
   setExtraEnv('TAO_ROOT', $tao_src_root);
   setExtraEnv('DDS_ROOT', '.');
-  setExtraEnv('PATH', [
-    $extraEnv{'ACE_ROOT'} . $slash . 'bin',
-    $extraEnv{'DDS_ROOT'} . $slash . 'bin',
-  ]);
+
+  my $extraPath = $extraEnv{'ACE_ROOT'} . $slash . 'bin' . $specific{pathsep} .
+                  $extraEnv{'DDS_ROOT'} . $slash . 'bin';
+  push_path(\%extraEnv, $extraPath);
+
   push_libpath(\%extraEnv, $extraEnv{'ACE_ROOT'} . $slash . 'lib');
   push_libpath(\%extraEnv, $extraEnv{'DDS_ROOT'} . $slash . 'lib');
 
@@ -1070,9 +1094,12 @@ else {
   print "build '", $opts{'solution_file'}, "' using the '",
     ($opts{'optimize'} ? 'Release' : 'Debug'), "' configuration";
 }
-print " to compile OpenDDS", ($buildtao ? ' and ACE+TAO' : '') ,".\n",
-  "You can use the generated setenv.$specific{'ext'} script to set ",
-  "environment variables for\nfuture shell sessions.\n";
+print " to compile ", 
+  ($cross_compile ? "\nthe host and target builds of " : ''),
+  "OpenDDS", (($buildtao || $cross_compile) ? ' and ACE+TAO' : '') ,".\n",
+  "You can use the generated setenv.$specific{'ext'} script ",
+  ($cross_compile ? "in the\nbuilds/host and builds/target dirs " : ''),
+  "to set environment\nvariables for future shell sessions.\n";
 if ($slash ne '/') {
   print "Start Visual Studio from this command prompt so that it inherits ",
     "the correct\nenvironment variables.\n";

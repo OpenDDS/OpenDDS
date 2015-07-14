@@ -10,8 +10,8 @@ int
 TopicSettings::set(const char* name, const char* value)
 {
   int status = 0;
-  if (!std::strcmp(name, "message_definition_guid")) {
-    message_definition_guid_ = atoi(value);
+  if (!std::strcmp(name, "platform_view_guid")) {
+    platform_view_guid_ = atoi(value);
   } else if (!std::strcmp(name, "max_message_size")) {
     max_message_size_ = atoi(value);
   } else if (!std::strcmp(name, "type_name")) {

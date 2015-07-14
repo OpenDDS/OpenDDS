@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef PUBLISHERLISTENERIMPL_H
 #define PUBLISHERLISTENERIMPL_H
 

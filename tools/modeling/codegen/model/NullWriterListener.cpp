@@ -1,4 +1,3 @@
-// $Id$
 
 #include "NullWriterListener.h"
 #include "dds/DCPS/debug.h"

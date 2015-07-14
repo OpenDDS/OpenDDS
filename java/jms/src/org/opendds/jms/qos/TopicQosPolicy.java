@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import org.opendds.jms.common.util.PropertiesHelper;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class TopicQosPolicy implements QosPolicy<TopicQos> {
     private Properties properties;

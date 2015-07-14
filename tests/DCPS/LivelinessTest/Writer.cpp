@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "Writer.h"
 #include "../common/TestException.h"
 #include "../common/TestSupport.h"

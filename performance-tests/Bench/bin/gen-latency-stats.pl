@@ -10,7 +10,6 @@ use File::Basename;
 
 gen-latency-stats.pl - create GNUPlot statistical summary data string variables
 
-$Id$
 
 =head1 SYNOPSIS
 

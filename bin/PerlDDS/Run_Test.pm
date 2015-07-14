@@ -1,4 +1,3 @@
-# $Id$
 
 # This module contains a few miscellaneous functions and some
 # startup ARGV processing that is used by all tests.

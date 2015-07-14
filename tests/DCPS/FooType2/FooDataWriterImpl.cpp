@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 
 #include "FooDataWriterImpl.h"

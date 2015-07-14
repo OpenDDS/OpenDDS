@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "Writer.h"
 #include "common.h"
 #include "tests/DCPS/common/TestException.h"

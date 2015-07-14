@@ -1,4 +1,3 @@
-$Id$
 
 This test verifies that a subscriber with a reader receiving samples
 can gracefully be deleted while the publisher is continuing to sending

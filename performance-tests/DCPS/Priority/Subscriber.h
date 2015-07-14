@@ -1,5 +1,4 @@
 // -*- C++ -*-
-// $Id$
 
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsSubscriptionExtC.h"

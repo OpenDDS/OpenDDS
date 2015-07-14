@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "DomainParticipantListener.h"
 
 extern int offered_incompatible_qos_called_on_dp;

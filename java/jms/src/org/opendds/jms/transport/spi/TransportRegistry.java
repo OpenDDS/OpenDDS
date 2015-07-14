@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -12,7 +11,6 @@ import org.opendds.jms.common.spi.ServiceRegistry;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class TransportRegistry extends ServiceRegistry<Transport> {
 

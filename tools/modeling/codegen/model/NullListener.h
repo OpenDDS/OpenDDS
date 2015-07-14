@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef NULLLISTENER_H
 #define NULLLISTENER_H
 

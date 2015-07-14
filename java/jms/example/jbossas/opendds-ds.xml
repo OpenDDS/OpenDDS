@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-    $Id$
 -->
 <!DOCTYPE connection-factories PUBLIC "-//JBoss//DTD JBOSS JCA Config 1.5//EN"
     "http://www.jboss.org/j2ee/dtd/jboss-ds_1_5.dtd">

@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef FORWARDINGLISTENER_H
 #define FORWARDINGLISTENER_H
 

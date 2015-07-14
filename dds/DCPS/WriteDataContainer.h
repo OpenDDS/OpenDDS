@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -420,6 +419,10 @@ private:
 
   /// List of data that has already been sent.
   SendStateDataSampleList   sent_data_;
+
+  /// List of data that has been released by WriteDataContainer
+  /// but is still in process of delivery (or dropping) by transport
+  SendStateDataSampleList  orphaned_to_transport_;
 
   /// The list of all samples written to this datawriter in
   /// writing order.

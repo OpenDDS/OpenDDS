@@ -1,5 +1,4 @@
 // -*- MPC -*-
-// $Id$
 
 workspace {
   $(ACE_ROOT)/ace/ace.mpc

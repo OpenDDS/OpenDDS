@@ -1,4 +1,3 @@
-// $Id$
 #include "ParticipantQos_Handler.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DCPS/debug.h"

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -15,7 +14,6 @@ import org.opendds.jms.management.DynamicMBeanSupport;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class InfoRepoArguments implements DynamicArgumentProvider {
     public static final String BIT_LISTEN_ADDRESS = "BitListenAddress";

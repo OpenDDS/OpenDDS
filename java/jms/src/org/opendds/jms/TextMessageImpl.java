@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -15,7 +14,6 @@ import OpenDDS.JMS.MessagePayload;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class TextMessageImpl extends AbstractMessageImpl implements TextMessage {
     public TextMessageImpl(SessionImpl sessionImpl) {

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -28,7 +27,6 @@ import org.junit.runner.RunWith;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 @Remote(endpoint = "http://localhost:8080/opendds-jms-compat/")
 @RunWith(RemoteRunner.class)

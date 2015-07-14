@@ -1,5 +1,4 @@
 
-# $Id$
 
 Overall test configuration requires that each process be identified.
 Each process can then be configured using the configuration file format
