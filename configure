@@ -603,34 +603,29 @@ sub dump_and_unlink { # removes temp files created by dry-run
 
 sub write_config_h {
   my %buildEnv = %{shift()};
-  if (-r "$buildEnv{'ACE_ROOT'}/ace/config.h") {
-    print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
-  }
-  else {
-    my $pi = $platforminfo{$buildEnv{'build'}};
-    $opts{'optimize'} = 0 if !exists $opts{'optimize'};
+  my $pi = $platforminfo{$buildEnv{'build'}};
+  $opts{'optimize'} = 0 if !exists $opts{'optimize'};
 
-    my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
-    if ($buildEnv{'build'} eq 'target') {
-      for my $line (@{$opts{'configh'}}) {
-        print $CFGH "$line\n";
-      }
+  my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
+  if ($buildEnv{'build'} eq 'target') {
+    for my $line (@{$opts{'configh'}}) {
+      print $CFGH "$line\n";
     }
-    my $cfg = $opts{$buildEnv{'build'}};
-    if ($pi->{'aceconfig'}) {
-      $cfg = $pi->{'aceconfig'};
-      $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
-    }
-    $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
-    print $CFGH "#include \"ace/config-$cfg.h\"\n";
-    if (defined $opts{'no-opendds-safety-profile'}) {
-      print $CFGH "#define ACE_FACE_SAFETY_BASE\n";
-    }
-
-    close $CFGH;
-    print "Wrote $buildEnv{'ACE_ROOT'}/ace/config.h\n" if $opts{'verbose'};
-    dump_and_unlink($CFGH) if $opts{'dry-run'};
   }
+  my $cfg = $opts{$buildEnv{'build'}};
+  if ($pi->{'aceconfig'}) {
+    $cfg = $pi->{'aceconfig'};
+    $cfg =~ s/\$UNAMER/my $u = `uname -r`; chomp $u; $u/e;
+  }
+  $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
+  print $CFGH "#include \"ace/config-$cfg.h\"\n";
+  if (defined $opts{'no-opendds-safety-profile'}) {
+    print $CFGH "#define ACE_FACE_SAFETY_BASE\n";
+  }
+
+  close $CFGH;
+  print "Wrote $buildEnv{'ACE_ROOT'}/ace/config.h\n" if $opts{'verbose'};
+  dump_and_unlink($CFGH) if $opts{'dry-run'};
 }
 
 my $wrote_df = 0;
@@ -1038,9 +1033,13 @@ sub write_environment {
 
 sub configure_build {
   my $buildEnvRef = shift;
-  write_config_h($buildEnvRef);
-  write_default_features($buildEnvRef);
-  write_platform_macros($buildEnvRef);
+  if (-r "$buildEnvRef->{ACE_ROOT}/ace/config.h") {
+    print "ACE_ROOT/ace/config.h exists, skipping configuration of ACE+TAO\n";
+  } else {
+    write_config_h($buildEnvRef);
+    write_default_features($buildEnvRef);
+    write_platform_macros($buildEnvRef);
+  }
   generate_workspace($buildEnvRef);
   write_environment($buildEnvRef, $buildEnvRef->{'DDS_ROOT'});
 }
