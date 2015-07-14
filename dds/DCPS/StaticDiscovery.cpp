@@ -135,8 +135,6 @@ namespace OpenDDS {
                                                   LocalPublication& pub,
                                                   const DCPS::RepoId& /*reader*/)
     {
-      // TODO:  Segregate reliable from best effort.
-
       /*
         Find all matching remote readers.
         If the reader is best effort, then associate immediately.
@@ -153,16 +151,32 @@ namespace OpenDDS {
       for (EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.begin(), limit = registry_.reader_map.end();
            pos != limit;
            ++pos) {
+        const RepoId& readerid = pos->first;
 
         // pos represents a remote reader.  Try to match.
-        if (!GuidPrefixEqual()(pos->first.guidPrefix, writerid.guidPrefix) &&
+        if (!GuidPrefixEqual()(readerid.guidPrefix, writerid.guidPrefix) &&
             pos->second.topic_name == topic_name) {
           // Different participants, same topic.
           DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
           DCPS::IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
 
           if (DCPS::compatibleQOS(&writerStatus, &readerStatus, pub.trans_info_, pos->second.trans_info, &pub.qos_, &pos->second.qos, &pub.publisher_qos_, &pos->second.subscriber_qos)) {
-            pub.publication_->register_for_reader(participant_id_, writerid, pos->first, pos->second.trans_info, this);
+            switch (pos->second.qos.reliability.kind) {
+            case DDS::BEST_EFFORT_RELIABILITY_QOS:
+              {
+                const DCPS::ReaderAssociation ra =
+                  {pos->second.trans_info, readerid, pos->second.subscriber_qos, pos->second.qos,
+                   "", "",
+                   0};
+                pub.publication_->add_association(readerid, ra, true);
+                pub.publication_->association_complete(readerid);
+              }
+              break;
+            case DDS::RELIABLE_RELIABILITY_QOS:
+              pub.publication_->register_for_reader(participant_id_, writerid, readerid, pos->second.trans_info, this);
+              break;
+            }
+
           }
         }
       }
@@ -181,8 +195,6 @@ namespace OpenDDS {
                                                    LocalSubscription& sub,
                                                    const DCPS::RepoId& /*reader*/)
     {
-      // TODO:  Segregate reliable from best effort.
-
       /*
         Find all matching remote writers.
         If we (the reader) is best effort, then associate immediately.
@@ -199,16 +211,29 @@ namespace OpenDDS {
       for (EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.begin(), limit = registry_.writer_map.end();
            pos != limit;
            ++pos) {
+        const RepoId& writerid = pos->first;
 
         // pos represents a remote writer.  Try to match.
-        if (!GuidPrefixEqual()(pos->first.guidPrefix, readerid.guidPrefix) &&
+        if (!GuidPrefixEqual()(writerid.guidPrefix, readerid.guidPrefix) &&
             pos->second.topic_name == topic_name) {
           // Different participants, same topic.
           DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
           DCPS::IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
 
           if (DCPS::compatibleQOS(&writerStatus, &readerStatus, pos->second.trans_info, sub.trans_info_, &pos->second.qos, &sub.qos_, &pos->second.publisher_qos, &sub.subscriber_qos_)) {
-            sub.subscription_->register_for_writer(participant_id_, readerid, pos->first, pos->second.trans_info, this);
+            switch (sub.qos_.reliability.kind) {
+            case DDS::BEST_EFFORT_RELIABILITY_QOS:
+              {
+                const DCPS::WriterAssociation wa =
+                  {pos->second.trans_info, writerid, pos->second.publisher_qos, pos->second.qos};
+
+                sub.subscription_->add_association(writerid, wa, false);
+              }
+              break;
+            case DDS::RELIABLE_RELIABILITY_QOS:
+              sub.subscription_->register_for_writer(participant_id_, readerid, writerid, pos->second.trans_info, this);
+              break;
+            }
           }
         }
       }
@@ -280,13 +305,8 @@ namespace OpenDDS {
            "", "",
            0};
 
-        // TODO
-        ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::reader_exists reader %s exists for %s TODO 1\n"), LogGuid(readerid).c_str(), LogGuid(writerid).c_str()));
         dwr->add_association(readerid, ra, true);
         dwr->association_complete(readerid);
-        ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::reader_exists reader %s exists for %s TODO 2\n"), LogGuid(readerid).c_str(), LogGuid(writerid).c_str()));
-
-        // Call association_complete.
       }
     }
 
@@ -302,10 +322,7 @@ namespace OpenDDS {
         const DCPS::WriterAssociation wa =
           {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
 
-        // TODO
-        ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::writer_exists writer %s exists for %s TODO 1\n"), LogGuid(writerid).c_str(), LogGuid(readerid).c_str()));
         drr->add_association(writerid, wa, false);
-        ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) StaticEndpointManager::writer_exists writer %s exists for %s TODO 2\n"), LogGuid(writerid).c_str(), LogGuid(readerid).c_str()));
       }
     }
 

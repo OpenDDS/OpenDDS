@@ -12,6 +12,7 @@ use strict;
 my $result = 0;
 my $participant = 0;
 my $entity = 0;
+my $reliable = 1;
 
 sub generateConfig {
     my $fh = shift;
@@ -35,6 +36,11 @@ sub generateConfig {
             print $fh "type=reader\n";
             print $fh "config=Config\n";
             print $fh "topic=TheTopic\n";
+            if ($reliable) {
+                print $fh "datareaderqos=ReliableReader\n";
+            } else {
+                print $fh "datareaderqos=BestEffortReader\n";
+            }
             print $fh "\n";
         }
         for (my $i = 0; $i != $writers; ++$i) {
@@ -47,6 +53,11 @@ sub generateConfig {
             print $fh "type=writer\n";
             print $fh "config=Config\n";
             print $fh "topic=TheTopic\n";
+            if ($reliable) {
+                print $fh "datawriterqos=ReliableWriter\n";
+            } else {
+                print $fh "datawriterqos=BestEffortWriter\n";
+            }
             print $fh "\n";
         }
     }
@@ -66,6 +77,10 @@ sub runTest {
     my $test = new PerlDDS::TestFramework();
     $test->enable_console_logging();
 
+    if ($test->flag('best_effort')) {
+        $reliable = 0;
+    }
+
     # Generate the config files.
     open(my $fh, '>', 'config.ini') or die "Could not open file 'config.ini' $!";
     print $fh "[common]\n";
@@ -84,6 +99,21 @@ sub runTest {
     print $fh "transport_type=rtps_udp\n";
     print $fh "local_address=localhost\n";
     print $fh "\n";
+    print $fh "[datawriterqos/ReliableWriter]\n";
+    print $fh "reliability.kind=RELIABLE\n";
+    print $fh "reliability.max_blocking_time.sec=DURATION_INFINITE_SEC\n";
+    print $fh "resource_limits.max_instances=10\n";
+    print $fh "history.depth=10\n";
+    print $fh "\n";
+    print $fh "[datareaderqos/ReliableReader]\n";
+    print $fh "reliability.kind=RELIABLE\n";
+    print $fh "\n";
+    print $fh "[datawriterqos/BestEffortWriter]\n";
+    print $fh "reliability.kind=BEST_EFFORT\n";
+    print $fh "\n";
+    print $fh "[datareaderqos/BestEffortReader]\n";
+    print $fh "reliability.kind=BEST_EFFORT\n";
+    print $fh "\n";
 
     my @alpha_participant_array;
     my @alpha_reader_array;
@@ -99,7 +129,7 @@ sub runTest {
     print "Spawning $alpha_count alphas\n";
 
     for (my $i = 0; $i != $alpha_count; ++$i) {
-        $test->process("alpha$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini $alpha_participant_array[$i] @alpha_reader_array @alpha_writer_array");
+        $test->process("alpha$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @alpha_reader_array @alpha_writer_array");
         $test->start_process("alpha$i");
     }
 
@@ -108,7 +138,7 @@ sub runTest {
     print "Spawning $beta_count betas\n";
 
     for (my $i = 0; $i != $beta_count; ++$i) {
-        $test->process("beta$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini $beta_participant_array[$i] @beta_reader_array @beta_writer_array");
+        $test->process("beta$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @beta_reader_array @beta_writer_array");
         $test->start_process("beta$i");
     }
 
@@ -120,7 +150,7 @@ sub runTest {
 }
 
 # 1 process with 1 reader and 1 writer
-#runTest(1, 1, 1, 0, 0, 0, 0);
+runTest(1, 1, 1, 0, 0, 0, 0);
 # 1 process with 1 reader, 1 process with 1 writer
 #runTest(1, 1, 0, 1, 0, 1, 0);
 # 1 process with 1 reader, 5 second delay, 1 process with 1 writer
@@ -130,6 +160,6 @@ sub runTest {
 # 1 process with 1 reader and 5 writers
 #runTest(1, 1, 5, 0, 0, 0, 0);
 # 5 processes with 5 readers and 5 writers
-runTest(5, 5, 5, 0, 0, 0, 0);
+#runTest(5, 5, 5, 0, 0, 0, 0);
 
 exit $result;

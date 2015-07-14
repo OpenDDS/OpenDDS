@@ -52,10 +52,12 @@ class WriterTask : public ACE_Task_Base {
 public:
   WriterTask (std::vector<std::string>& writers,
               DDS::DomainParticipant_var participant,
-              DDS::Topic_var topic)
+              DDS::Topic_var topic,
+              const bool& reliable)
     : writers_(writers)
     , participant_(participant)
     , topic_(topic)
+    , reliable_(reliable)
   { }
 
   int svc()
@@ -83,6 +85,14 @@ public:
     qos.user_data.value[0] = fromhex(writers_[thread_id], 0);
     qos.user_data.value[1] = fromhex(writers_[thread_id], 1);
     qos.user_data.value[2] = fromhex(writers_[thread_id], 2);
+    if (reliable_) {
+      qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      qos.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
+      qos.resource_limits.max_instances = 10;
+      qos.history.depth = 10;
+    } else {
+      qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
+    }
 
     // Create DataWriter
     DDS::DataWriter_var writer =
@@ -320,6 +330,7 @@ private:
   static ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> thread_counter_;
   DDS::DomainParticipant_var participant_;
   DDS::Topic_var topic_;
+  const bool& reliable_;
 };
 
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> WriterTask::thread_counter_;
@@ -335,6 +346,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::string participant_id;
     std::vector<std::string> readers;
     std::vector<std::string> writers;
+    bool reliable = false;
 
     {
       // New scope.
@@ -352,6 +364,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         x = shifter.get_the_parameter (ACE_TEXT("-writer"));
         if (x != NULL) {
           writers.push_back(x);
+        }
+        x = shifter.get_the_parameter (ACE_TEXT("-reliable"));
+        if (x != NULL) {
+          reliable = atoi(x);
         }
 
         shifter.consume_arg ();
@@ -437,6 +453,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       qos.user_data.value[0] = fromhex(*pos, 0);
       qos.user_data.value[1] = fromhex(*pos, 1);
       qos.user_data.value[2] = fromhex(*pos, 2);
+      qos.reliability.kind = reliable ? DDS::RELIABLE_RELIABILITY_QOS : DDS::BEST_EFFORT_RELIABILITY_QOS;
 
       DDS::DataReader_var reader =
         subscriber->create_datareader(topic,
@@ -461,7 +478,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    WriterTask task(writers, participant, topic);
+    WriterTask task(writers, participant, topic, reliable);
     task.activate(DEFAULT_FLAGS, writers.size());
     task.wait();
 
