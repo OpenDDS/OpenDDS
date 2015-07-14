@@ -83,7 +83,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::TS::Get_Connection_Parameters(name, connId, connectionStatus, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  if (connectionStatus.MESSAGE != 1
+  if (connectionStatus.MESSAGE != 0
       || connectionStatus.LAST_MSG_VALIDITY != FACE::VALID
       || connectionStatus.WAITING_PROCESSES_OR_MESSAGES != 0
       || connectionStatus.CONNECTION_DIRECTION != FACE::SOURCE

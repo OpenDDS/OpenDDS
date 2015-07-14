@@ -10,7 +10,6 @@ typedef Char CONNECTION_NAME_TYPE[64];
 typedef Long MESSAGE_SIZE_TYPE;
 
 typedef LongLong MESSAGE_INSTANCE_GUID;
-typedef LongLong MESSAGE_DEFINITION_GUID;
 typedef LongLong MESSAGE_SOURCE_GUID;
 typedef LongLong MESSAGE_TYPE_GUID;
 
@@ -121,7 +120,7 @@ namespace TS {
 struct MessageHeader
 {
   MESSAGE_INSTANCE_GUID message_instance_guid;
-  MESSAGE_DEFINITION_GUID message_definition_guid;
+  MESSAGE_TYPE_GUID platform_view_guid;
   MESSAGE_SOURCE_GUID message_source_guid;
   SYSTEM_TIME_TYPE message_timestamp;
   VALIDITY_TYPE message_validity;
