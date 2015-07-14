@@ -8,6 +8,8 @@
 #include "Tcp_pch.h"
 #include "TcpInst.h"
 
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
+
 #include "ace/Configuration.h"
 
 #include <iostream>
