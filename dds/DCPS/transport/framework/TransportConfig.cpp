@@ -30,11 +30,23 @@ void
 TransportConfig::sorted_insert(const TransportInst_rch& inst)
 {
   const OPENDDS_STRING name = inst->name();
-  OPENDDS_VECTOR(TransportInst_rch)::iterator it = instances_.begin();
+  InstancesType::iterator it = instances_.begin();
   while (it != instances_.end() && (*it)->name() < name) {
     ++it;
   }
   instances_.insert(it, inst);
+}
+
+void
+TransportConfig::populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_info) const
+{
+  for (InstancesType::const_iterator pos = instances_.begin(), limit = instances_.end();
+       pos != limit;
+       ++pos) {
+    size_t idx = trans_info.length();
+    trans_info.length(idx + 1);
+    (*pos)->populate_locator(trans_info[idx]);
+  }
 }
 
 }

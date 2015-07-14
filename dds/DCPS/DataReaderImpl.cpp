@@ -3349,6 +3349,16 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   }
 }
 
+void
+DataReaderImpl::register_for_writer(const RepoId& participant,
+                                    const RepoId& readerid,
+                                    const RepoId& writerid,
+                                    const TransportLocatorSeq& locators,
+                                    DiscoveryListener* listener)
+{
+  TransportClient::register_for_writer(participant, readerid, writerid, locators, listener);
+}
+
 EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                                                  ACE_thread_t owner,
                                                                  DataReaderImpl* reader)

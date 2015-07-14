@@ -11,6 +11,7 @@
 #include "MulticastTransport.h"
 
 #include "dds/DCPS/transport/framework/TransportDefs.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #include "ace/Configuration.h"
 
@@ -181,6 +182,22 @@ MulticastInst::dump(std::ostream& os)
 #else
   os << "Not Supported on this Platform" << std::endl;
 #endif
+}
+
+void
+MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+{
+  NetworkAddress network_address(this->group_address_);
+
+  ACE_OutputCDR cdr;
+  cdr << network_address;
+  cdr << ACE_OutputCDR::from_boolean (ACE_CDR::Boolean (this->is_reliable ()));
+
+  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+  char* buffer = const_cast<char*>(cdr.buffer()); // safe
+
+  info.transport_type = "multicast";
+  info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
 }
 
 } // namespace DCPS

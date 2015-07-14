@@ -88,3 +88,19 @@ OpenDDS::DCPS::TcpInst::dump_to_str()
   dump(os);
   return OPENDDS_STRING(os.str());
 }
+
+void
+OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info) const
+{
+  // Get the public address string from the inst (usually the local address)
+  NetworkAddress network_order_address(this->get_public_address());
+
+  ACE_OutputCDR cdr;
+  cdr << network_order_address;
+  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+  char* buffer = const_cast<char*>(cdr.buffer()); // safe
+
+  local_info.transport_type = "tcp";
+  local_info.data = TransportBLOB(len, len,
+                                  reinterpret_cast<CORBA::Octet*>(buffer));
+}

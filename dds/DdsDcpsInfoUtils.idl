@@ -77,6 +77,59 @@ module OpenDDS
 
     typedef sequence<RepoId> ReaderIdSeq;
 
+    typedef octet OctetArray16[16];
+
+    /* Type used to represent the addressing information needed to send a
+       message to an RTPS Endpoint */
+    struct Locator_t {
+      long kind;
+      unsigned long _port;
+      OctetArray16 address;
+    };
+
+    typedef sequence<Locator_t> LocatorSeq;
+
+    typedef string<256> String256;
+    typedef DDS::StringSeq StringSeq;
+
+    /* information to enable content filtering */
+    struct ContentFilterProperty_t {
+      String256 contentFilteredTopicName;
+      String256 relatedTopicName;
+      String256 filterClassName;
+      string filterExpression;
+      StringSeq expressionParameters;
+    };
+
+    struct ReaderProxy_t {
+      GUID_t remoteReaderGuid;  // optional in DiscoveredReaderData
+      boolean expectsInlineQos;
+      LocatorSeq unicastLocatorList;
+      LocatorSeq multicastLocatorList;
+      OpenDDS::DCPS::TransportLocatorSeq allLocators;
+      GUIDSeq associatedWriters;
+    };
+
+    // top-level data type for SEDPbuiltinSubscriptions
+    struct DiscoveredReaderData {
+      DDS::SubscriptionBuiltinTopicData ddsSubscriptionData;
+      ReaderProxy_t readerProxy;
+      ContentFilterProperty_t contentFilterProperty;
+    };
+
+    struct WriterProxy_t {
+      GUID_t remoteWriterGuid;  // optional in DiscoveredWriterData
+      LocatorSeq unicastLocatorList;
+      LocatorSeq multicastLocatorList;
+      OpenDDS::DCPS::TransportLocatorSeq allLocators;
+    };
+
+    // top-level data type for SEDPbuiltinPublications
+    struct DiscoveredWriterData {
+      DDS::PublicationBuiltinTopicData ddsPublicationData;
+      WriterProxy_t writerProxy;
+    };
+
   }; // module DDS
 }; // module OpenDDS
 

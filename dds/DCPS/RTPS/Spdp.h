@@ -20,6 +20,7 @@
 
 #include "RtpsCoreC.h"
 #include "Sedp.h"
+#include "rtps_export.h"
 
 #include "ace/Atomic_Op.h"
 #include "ace/SOCK_Dgram.h"
@@ -40,71 +41,22 @@ class RtpsDiscovery;
 
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
-class Spdp : public DCPS::RcObject<ACE_SYNCH_MUTEX> {
+class OpenDDS_Rtps_Export Spdp : public OpenDDS::DCPS::LocalParticipant<Sedp> {
 public:
   Spdp(DDS::DomainId_t domain, DCPS::RepoId& guid,
        const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco);
   ~Spdp();
 
   // Participant
-  void ignore_domain_participant(const DCPS::RepoId& ignoreId);
-  bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
   void init_bit(const DDS::Subscriber_var& bit_subscriber);
   void fini_bit();
   DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
   bool get_default_locators(const DCPS::RepoId& part_id,
-                            LocatorSeq& target,
+                            OpenDDS::DCPS::LocatorSeq& target,
                             bool& inlineQos);
 
-  // Topic
-  DCPS::TopicStatus assert_topic(DCPS::RepoId_out topicId,
-                                 const char* topicName,
-                                 const char* dataTypeName,
-                                 const DDS::TopicQos& qos,
-                                 bool hasDcpsKey);
-  DCPS::TopicStatus remove_topic(const DCPS::RepoId& topicId,
-                                 OPENDDS_STRING& name);
-  void ignore_topic(const DCPS::RepoId& ignoreId);
-  bool update_topic_qos(const DCPS::RepoId& topicId, const DDS::TopicQos& qos,
-                        OPENDDS_STRING& name);
-
-  // Publication
-  DCPS::RepoId add_publication(const DCPS::RepoId& topicId,
-                               DCPS::DataWriterCallbacks* publication,
-                               const DDS::DataWriterQos& qos,
-                               const DCPS::TransportLocatorSeq& transInfo,
-                               const DDS::PublisherQos& publisherQos);
-  void remove_publication(const DCPS::RepoId& publicationId);
-  void ignore_publication(const DCPS::RepoId& ignoreId);
-  bool update_publication_qos(const DCPS::RepoId& publicationId,
-                              const DDS::DataWriterQos& qos,
-                              const DDS::PublisherQos& publisherQos);
-
-  // Subscription
-  DCPS::RepoId add_subscription(const DCPS::RepoId& topicId,
-                                DCPS::DataReaderCallbacks* subscription,
-                                const DDS::DataReaderQos& qos,
-                                const DCPS::TransportLocatorSeq& transInfo,
-                                const DDS::SubscriberQos& subscriberQos,
-                                const char* filterClassName,
-                                const char* filterExpr,
-                                const DDS::StringSeq& params);
-  void remove_subscription(const DCPS::RepoId& subscriptionId);
-  void ignore_subscription(const DCPS::RepoId& ignoreId);
-  bool update_subscription_qos(const DCPS::RepoId& subscriptionId,
-                               const DDS::DataReaderQos& qos,
-                               const DDS::SubscriberQos& subscriberQos);
-  bool update_subscription_params(const DCPS::RepoId& subId,
-                                  const DDS::StringSeq& params);
-
   // Managing reader/writer associations
-  void association_complete(const DCPS::RepoId& localId,
-                            const DCPS::RepoId& remoteId);
-
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
-
-  DCPS::RepoId bit_key_to_repo_id(const char* bit_topic_name,
-                                  const DDS::BuiltinTopicKey_t& key);
 
   // Is Spdp shutting down?
   bool shutting_down() { return shutdown_flag_.value(); }
@@ -114,18 +66,18 @@ public:
 
   WaitForAcks& wait_for_acks();
 
+protected:
+  Sedp& endpoint_manager() { return sedp_; }
+
 private:
   ACE_Reactor* reactor() const;
 
-  ACE_Thread_Mutex lock_;
   RtpsDiscovery* disco_;
 
   // Participant:
   const DDS::DomainId_t domain_;
   DCPS::RepoId guid_;
-  DDS::DomainParticipantQos qos_;
-  DDS::Subscriber_var bit_subscriber_;
-  LocatorSeq sedp_unicast_, sedp_multicast_;
+  OpenDDS::DCPS::LocatorSeq sedp_unicast_, sedp_multicast_;
 
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
@@ -164,23 +116,8 @@ private:
   ACE_Condition_Thread_Mutex shutdown_cond_;
   ACE_Atomic_Op<ACE_Thread_Mutex, long> shutdown_flag_; // Spdp shutting down
 
-  struct DiscoveredParticipant {
-    DiscoveredParticipant() : bit_ih_(0) {}
-    DiscoveredParticipant(const SPDPdiscoveredParticipantData& p,
-                          const ACE_Time_Value& t)
-      : pdata_(p), last_seen_(t), bit_ih_(DDS::HANDLE_NIL) {}
-
-    SPDPdiscoveredParticipantData pdata_;
-    ACE_Time_Value last_seen_;
-    DDS::InstanceHandle_t bit_ih_;
-  };
-  typedef OPENDDS_MAP_CMP(DCPS::RepoId, DiscoveredParticipant,
-                   DCPS::GUID_tKeyLessThan) DiscoveredParticipantMap;
-  typedef DiscoveredParticipantMap::iterator DiscoveredParticipantIter;
-  DiscoveredParticipantMap participants_;
-
-  void remove_discovered_participant(DiscoveredParticipantIter iter);
   void remove_expired_participants();
+  typedef Sedp::RepoIdSet RepoIdSet;
   void get_discovered_participant_ids(RepoIdSet& results) const;
 
   Sedp sedp_;

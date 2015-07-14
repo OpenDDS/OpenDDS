@@ -13,7 +13,7 @@
 #include "dds/DCPS/transport/framework/TransportDefs.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/Configuration.h"
-
+#include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -150,6 +150,48 @@ RtpsUdpInst::dump_to_str()
   ret += formatNameForDump("heartbeat_response_delay") + to_dds_string(heartbeat_response_delay_.msec()) + '\n';
   ret += formatNameForDump("handshake_timeout") + to_dds_string(handshake_timeout_.msec()) + '\n';
   return ret;
+}
+
+void
+RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+{
+  using namespace OpenDDS::RTPS;
+
+  LocatorSeq locators;
+  CORBA::ULong idx = 0;
+
+  // multicast first so it's preferred by remote peers
+  if (this->use_multicast_) {
+    locators.length(2);
+    locators[0].kind = address_to_kind(this->multicast_group_address_);
+    locators[0].port = this->multicast_group_address_.get_port_number();
+    RTPS::address_to_bytes(locators[0].address,
+                           this->multicast_group_address_);
+    idx = 1;
+
+  } else {
+    locators.length(1);
+  }
+
+  locators[idx].kind = address_to_kind(this->local_address_);
+  locators[idx].port = this->local_address_.get_port_number();
+  RTPS::address_to_bytes(locators[idx].address,
+                         this->local_address_);
+
+  info.transport_type = "rtps_udp";
+  RTPS::locators_to_blob(locators, info.data);
+}
+
+const TransportBLOB*
+RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const
+{
+  for (size_t idx = 0, limit = trans_info.length(); idx != limit; ++idx) {
+    if (strcmp(trans_info[idx].transport_type, "rtps_udp") == 0) {
+      return &trans_info[idx].data;
+    }
+  }
+
+  return 0;
 }
 
 } // namespace DCPS

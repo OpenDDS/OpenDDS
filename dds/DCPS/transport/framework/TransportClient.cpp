@@ -769,6 +769,36 @@ TransportClient::disassociate(const RepoId& peerId)
   }
 }
 
+void
+TransportClient::register_for_reader(const RepoId& participant,
+                                     const RepoId& writerid,
+                                     const RepoId& readerid,
+                                     const TransportLocatorSeq& locators,
+                                     OpenDDS::DCPS::DiscoveryListener* listener)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    (*pos)->register_for_reader(participant, writerid, readerid, locators, listener);
+  }
+}
+
+void
+TransportClient::register_for_writer(const RepoId& participant,
+                                     const RepoId& readerid,
+                                     const RepoId& writerid,
+                                     const TransportLocatorSeq& locators,
+                                     DiscoveryListener* listener)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    (*pos)->register_for_writer(participant, readerid, writerid, locators, listener);
+  }
+}
+
 bool
 TransportClient::send_response(const RepoId& peer,
                                const DataSampleHeader& header,

@@ -1,0 +1,8 @@
+project: dcpsexe, dcps_transports_for_test, dds_model {
+  exename = StaticDiscoveryTest
+  requires += built_in_topics
+  idlflags += -SS
+  TypeSupport_Files {
+    TestMsg.idl
+  }
+}

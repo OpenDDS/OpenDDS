@@ -12,6 +12,7 @@
 #include "RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/Serializer.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
 #include "md5.h"
 #include "ace/INET_Addr.h"
 #include "ace/Message_Block.h"
@@ -68,13 +69,13 @@ inline void assign(OpenDDS::RTPS::GuidPrefix_t& dest,
   std::memcpy(&dest[0], &src[0], sizeof(GuidPrefix_t));
 }
 
-inline void assign(OpenDDS::RTPS::OctetArray16& dest,
-                   const OpenDDS::RTPS::OctetArray16& src)
+inline void assign(OpenDDS::DCPS::OctetArray16& dest,
+                   const OpenDDS::DCPS::OctetArray16& src)
 {
-  std::memcpy(&dest[0], &src[0], sizeof(OpenDDS::RTPS::OctetArray16));
+  std::memcpy(&dest[0], &src[0], sizeof(OpenDDS::DCPS::OctetArray16));
 }
 
-inline void assign(OpenDDS::RTPS::OctetArray16& dest,
+inline void assign(OpenDDS::DCPS::OctetArray16& dest,
                    const ACE_CDR::ULong& ipv4addr_be)
 {
   std::memset(&dest[0], 0, 12);
@@ -93,7 +94,7 @@ inline void assign(DCPS::EntityKey_t& lhs, unsigned int rhs)
 
 
 inline void
-address_to_bytes(OpenDDS::RTPS::OctetArray16& dest, const ACE_INET_Addr& addr)
+address_to_bytes(OpenDDS::DCPS::OctetArray16& dest, const ACE_INET_Addr& addr)
 {
   const void* raw = addr.get_addr();
 #ifdef ACE_HAS_IPV6
@@ -122,7 +123,7 @@ address_to_kind(const ACE_INET_Addr& addr)
 }
 
 inline int
-locator_to_address(ACE_INET_Addr& dest, const Locator_t& locator)
+locator_to_address(ACE_INET_Addr& dest, const OpenDDS::DCPS::Locator_t& locator)
 {
   switch (locator.kind) {
 #ifdef ACE_HAS_IPV6
@@ -155,7 +156,7 @@ locator_to_address(ACE_INET_Addr& dest, const Locator_t& locator)
 inline DDS::ReturnCode_t
 blob_to_locators(
     const OpenDDS::DCPS::TransportBLOB& blob,
-    LocatorSeq& locators,
+    OpenDDS::DCPS::LocatorSeq& locators,
     bool& requires_inline_qos)
 {
   ACE_Data_Block db(blob.length(), ACE_Message_Block::MB_DATA,
@@ -190,7 +191,7 @@ void
 }
 
 inline void
-locators_to_blob(const LocatorSeq& locators, DCPS::TransportBLOB& blob)
+locators_to_blob(const OpenDDS::DCPS::LocatorSeq& locators, DCPS::TransportBLOB& blob)
 {
   using OpenDDS::DCPS::Serializer;
   size_t size_locator = 0, padding_locator = 0;

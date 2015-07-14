@@ -16,7 +16,6 @@ module OpenDDS {
 
     typedef octet OctetArray2[2];
     typedef octet OctetArray4[4];
-    typedef octet OctetArray16[16];
 
     typedef DDS::OctetSeq OctetSeq;
 
@@ -33,18 +32,6 @@ module OpenDDS {
     struct ContentFilterInfo_t {
       FilterResult_t filterResult;
       FilterSignatureSeq filterSignatures;
-    };
-
-    typedef DDS::StringSeq StringSeq;
-    typedef string<256> String256;
-
-    /* information to enable content filtering */
-    struct ContentFilterProperty_t {
-      String256 contentFilteredTopicName;
-      String256 relatedTopicName;
-      String256 filterClassName;
-      string filterExpression;
-      StringSeq expressionParameters;
     };
 
     struct Property_t {
@@ -86,16 +73,8 @@ module OpenDDS {
       LongSeq8 bitmap;
     };
 
-    /* Type used to represent the addressing information needed to send a
-       message to an RTPS Endpoint */
-    struct Locator_t {
-      long kind;
-      unsigned long _port;
-      OctetArray16 address;
-    };
-
     /* LocatorList is used to specify a list of locators. */
-    typedef sequence<Locator_t, 8> LocatorList;
+    typedef sequence<OpenDDS::DCPS::Locator_t, 8> LocatorList;
 
 
     // OMG Specification formal/2010-11-01 DDS-RTPS v2.1
@@ -154,7 +133,7 @@ module OpenDDS {
     const short RELIABLE = 3;
 
     struct KeyHash_t {
-      OctetArray16 value;
+      OpenDDS::DCPS::OctetArray16 value;
     };
 
     struct StatusInfo_t {
@@ -301,7 +280,7 @@ module OpenDDS {
     union Parameter switch (ParameterId_t) {
       case PID_TOPIC_NAME:
       case PID_TYPE_NAME:
-        String256 string_data;
+        OpenDDS::DCPS::String256 string_data;
 
       // DDS Quality-of-Service (QoS) structs
       case PID_USER_DATA:
@@ -356,7 +335,7 @@ module OpenDDS {
       case PID_DEFAULT_MULTICAST_LOCATOR:
       case PID_METATRAFFIC_UNICAST_LOCATOR:
       case PID_METATRAFFIC_MULTICAST_LOCATOR:
-        Locator_t locator;
+        OpenDDS::DCPS::Locator_t locator;
 
       case PID_MULTICAST_IPADDRESS:
       case PID_DEFAULT_UNICAST_IPADDRESS:
@@ -388,7 +367,7 @@ module OpenDDS {
         Duration_t duration;
 
       case PID_CONTENT_FILTER_PROPERTY:
-        ContentFilterProperty_t content_filter_property;
+        OpenDDS::DCPS::ContentFilterProperty_t content_filter_property;
 
       case PID_PARTICIPANT_GUID:
       case PID_ENDPOINT_GUID:
@@ -507,18 +486,16 @@ module OpenDDS {
     typedef DCPS::GuidPrefix_t GuidPrefix_t;
     // see GUIDPREFIX_UNKNOWN constant in BaseMessageTypes.h
 
-    typedef sequence<Locator_t> LocatorSeq;
-
     struct ParticipantProxy_t {
       ProtocolVersion_t protocolVersion;
       GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
       VendorId_t vendorId;
       boolean expectsInlineQos;
       BuiltinEndpointSet_t availableBuiltinEndpoints;
-      LocatorSeq metatrafficUnicastLocatorList;
-      LocatorSeq metatrafficMulticastLocatorList;
-      LocatorSeq defaultMulticastLocatorList;
-      LocatorSeq defaultUnicastLocatorList;
+      OpenDDS::DCPS::LocatorSeq metatrafficUnicastLocatorList;
+      OpenDDS::DCPS::LocatorSeq metatrafficMulticastLocatorList;
+      OpenDDS::DCPS::LocatorSeq defaultMulticastLocatorList;
+      OpenDDS::DCPS::LocatorSeq defaultUnicastLocatorList;
       Count_t manualLivelinessCount;
     };
 
@@ -527,35 +504,6 @@ module OpenDDS {
       DDS::ParticipantBuiltinTopicData ddsParticipantData;
       ParticipantProxy_t participantProxy;
       Duration_t leaseDuration;
-    };
-
-    struct WriterProxy_t {
-      GUID_t remoteWriterGuid;  // optional in DiscoveredWriterData
-      LocatorSeq unicastLocatorList;
-      LocatorSeq multicastLocatorList;
-      OpenDDS::DCPS::TransportLocatorSeq allLocators;
-    };
-
-    // top-level data type for SEDPbuiltinPublications
-    struct DiscoveredWriterData {
-      DDS::PublicationBuiltinTopicData ddsPublicationData;
-      WriterProxy_t writerProxy;
-    };
-
-    struct ReaderProxy_t {
-      GUID_t remoteReaderGuid;  // optional in DiscoveredReaderData
-      boolean expectsInlineQos;
-      LocatorSeq unicastLocatorList;
-      LocatorSeq multicastLocatorList;
-      OpenDDS::DCPS::TransportLocatorSeq allLocators;
-      GUIDSeq associatedWriters;
-    };
-
-    // top-level data type for SEDPbuiltinSubscriptions
-    struct DiscoveredReaderData {
-      DDS::SubscriptionBuiltinTopicData ddsSubscriptionData;
-      ReaderProxy_t readerProxy;
-      ContentFilterProperty_t contentFilterProperty;
     };
 
     /* Type used to hold data exchanged between Participants.

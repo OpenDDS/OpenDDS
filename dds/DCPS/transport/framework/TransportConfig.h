@@ -32,7 +32,8 @@ public:
 
   OPENDDS_STRING name() const { return name_; }
 
-  OPENDDS_VECTOR(TransportInst_rch) instances_;
+  typedef OPENDDS_VECTOR(TransportInst_rch) InstancesType;
+  InstancesType instances_;
 
   bool swap_bytes_;
 
@@ -45,6 +46,8 @@ public:
   /// Use when the names of the TransportInst objects are specifically assigned
   /// to have the sorted order make sense.
   void sorted_insert(const TransportInst_rch& inst);
+
+  void populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
 private:
   friend class TransportRegistry;

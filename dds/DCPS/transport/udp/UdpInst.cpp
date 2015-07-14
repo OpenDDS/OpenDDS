@@ -10,6 +10,7 @@
 #include "UdpLoader.h"
 
 #include "dds/DCPS/transport/framework/TransportDefs.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #include "ace/Configuration.h"
 
@@ -63,6 +64,21 @@ UdpInst::dump(std::ostream& os)
                                            << ":" << this->local_address_.get_port_number() << std::endl;
   os << formatNameForDump("send_buffer_size") << this->send_buffer_size_ << std::endl;
   os << formatNameForDump("rcv_buffer_size") << this->rcv_buffer_size_ << std::endl;
+}
+
+void
+UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+{
+  NetworkAddress network_address(this->local_address_,
+                                 this->local_address_.is_any());
+  ACE_OutputCDR cdr;
+  cdr << network_address;
+
+  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+  char* buffer = const_cast<char*>(cdr.buffer()); // safe
+
+  info.transport_type = "udp";
+  info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
 }
 
 } // namespace DCPS

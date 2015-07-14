@@ -53,6 +53,7 @@ public:
   /// Key value for the default repository IOR.
   static const char DEFAULT_REPO[];
   static const char DEFAULT_RTPS[];
+  static const char DEFAULT_STATIC[];
 
   // TODO: NEED TO REMOVE THIS once Service_Participant::repository_lost has been refactored
   virtual bool active() { return true; }

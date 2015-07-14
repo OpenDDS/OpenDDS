@@ -402,6 +402,12 @@ public:
 
   void remove_all_associations();
 
+  virtual void register_for_reader(const RepoId& participant,
+                                   const RepoId& writerid,
+                                   const RepoId& readerid,
+                                   const TransportLocatorSeq& locators,
+                                   DiscoveryListener* listener);
+
   void notify_publication_disconnected(const ReaderIdSeq& subids);
   void notify_publication_reconnected(const ReaderIdSeq& subids);
   void notify_publication_lost(const ReaderIdSeq& subids);
