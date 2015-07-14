@@ -1048,13 +1048,14 @@ sub configure_build {
 sub write_cross_compile_makefile {
   my $MF = backup_and_open('GNUmakefile');
   my $safety_profile_step = $opts{'safety-profile'} ?
-    "\tcd $targetEnv{'ACE_ROOT'}/ace && \$(MAKE) \$@\n" : '';
+    "\tcd $targetEnv{'ACE_ROOT'}/ace && " .
+    '$(MAKE) $(if $(filter all,$@),ACE,$@)' . "\n" : '';
   print $MF <<"EOT";
 # OpenDDS configure script: $0 @ARGS
-all clean realclean install depend:
+all clean realclean depend:
 \tcd build/host && \$(MAKE) \$@
 $safety_profile_step\tcd build/target && \$(MAKE) \$@
-.PHONY: all clean realclean install depend
+.PHONY: all clean realclean depend
 EOT
   $MF->close;
   print "Wrote top-level GNUmakefile for cross-compile\n" if $opts{'verbose'};
