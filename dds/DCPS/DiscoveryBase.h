@@ -122,6 +122,8 @@ namespace OpenDDS {
         , topic_counter_(0)
       { }
 
+      virtual ~EndpointManager() { }
+
       RepoId bit_key_to_repo_id(const char* bit_topic_name,
                                 const DDS::BuiltinTopicKey_t& key)
       {
@@ -884,6 +886,8 @@ namespace OpenDDS {
       LocalParticipant (const DDS::DomainParticipantQos& qos)
         : qos_(qos)
       { }
+
+      virtual ~LocalParticipant() { }
 
       DCPS::RepoId bit_key_to_repo_id(const char* bit_topic_name,
                                       const DDS::BuiltinTopicKey_t& key)
