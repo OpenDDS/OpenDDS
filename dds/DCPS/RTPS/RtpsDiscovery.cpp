@@ -40,7 +40,7 @@ namespace OpenDDS {
 namespace RTPS {
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
-  : DCPS::DiscoveryBase<Spdp>(key)
+  : DCPS::PeerDiscovery<Spdp>(key)
   , resend_period_(30 /*seconds*/) // see RTPS v2.1 9.6.1.4.2
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   , dg_(250)

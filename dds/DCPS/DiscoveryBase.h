@@ -1088,11 +1088,11 @@ namespace OpenDDS {
     };
 
     template<typename Participant>
-    class OpenDDS_Dcps_Export DiscoveryBase : public Discovery {
+    class OpenDDS_Dcps_Export PeerDiscovery : public Discovery {
     public:
       typedef typename Participant::TopicDetails TopicDetails;
 
-      explicit DiscoveryBase(const RepoKey& key) : Discovery(key) { }
+      explicit PeerDiscovery(const RepoKey& key) : Discovery(key) { }
 
       virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) {
         using namespace DCPS;

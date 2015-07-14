@@ -38,7 +38,7 @@ namespace RTPS {
  * discovery.
  *
  */
-class OpenDDS_Rtps_Export RtpsDiscovery : public OpenDDS::DCPS::DiscoveryBase<Spdp> {
+class OpenDDS_Rtps_Export RtpsDiscovery : public OpenDDS::DCPS::PeerDiscovery<Spdp> {
 public:
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();

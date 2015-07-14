@@ -310,7 +310,7 @@ namespace OpenDDS {
     }
 
     StaticDiscovery::StaticDiscovery(const RepoKey& key)
-      : DiscoveryBase<StaticParticipant>(key)
+      : PeerDiscovery<StaticParticipant>(key)
     { }
 
     namespace {

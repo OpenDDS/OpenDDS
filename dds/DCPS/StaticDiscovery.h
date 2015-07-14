@@ -191,7 +191,7 @@ namespace OpenDDS {
     };
 
     class OpenDDS_Dcps_Export StaticDiscovery
-      : public OpenDDS::DCPS::DiscoveryBase<StaticParticipant> {
+      : public OpenDDS::DCPS::PeerDiscovery<StaticParticipant> {
     public:
       StaticDiscovery(const RepoKey& key);
 
