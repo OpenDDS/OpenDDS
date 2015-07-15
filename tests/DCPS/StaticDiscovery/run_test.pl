@@ -126,10 +126,13 @@ sub runTest {
     generateConfig($fh, $beta_count, \@beta_participant_array, $beta_readers, \@beta_reader_array, $beta_writers, \@beta_writer_array);
     close $fh;
 
+    my $readers = $alpha_readers * $alpha_count + $beta_readers * $beta_count;
+    my $writers = $alpha_writers * $alpha_count + $beta_writers * $beta_count;
+
     print "Spawning $alpha_count alphas\n";
 
     for (my $i = 0; $i != $alpha_count; ++$i) {
-        $test->process("alpha$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @alpha_reader_array @alpha_writer_array");
+        $test->process("alpha$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @alpha_reader_array @alpha_writer_array -total_readers $readers -total_writers $writers");
         $test->start_process("alpha$i");
     }
 
@@ -138,7 +141,7 @@ sub runTest {
     print "Spawning $beta_count betas\n";
 
     for (my $i = 0; $i != $beta_count; ++$i) {
-        $test->process("beta$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @beta_reader_array @beta_writer_array");
+        $test->process("beta$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @beta_reader_array @beta_writer_array -total_readers $readers -total_writers $writers");
         $test->start_process("beta$i");
     }
 
@@ -152,14 +155,14 @@ sub runTest {
 # 1 process with 1 reader and 1 writer
 runTest(1, 1, 1, 0, 0, 0, 0);
 # 1 process with 1 reader, 1 process with 1 writer
-#runTest(1, 1, 0, 1, 0, 1, 0);
+runTest(1, 1, 0, 1, 0, 1, 0);
 # 1 process with 1 reader, 5 second delay, 1 process with 1 writer
-#runTest(1, 1, 0, 1, 0, 1, 5);
+runTest(1, 1, 0, 1, 0, 1, 5);
 # 1 process with 5 readers and 1 writer
-#runTest(1, 5, 1, 0, 0, 0, 0);
+runTest(1, 5, 1, 0, 0, 0, 0);
 # 1 process with 1 reader and 5 writers
-#runTest(1, 1, 5, 0, 0, 0, 0);
+#runTest(1, 1, 5, 0, 0, 0, 0); - doesn't work
 # 5 processes with 5 readers and 5 writers
-#runTest(5, 5, 5, 0, 0, 0, 0);
+#runTest(5, 5, 5, 0, 0, 0, 0); - doesn't work
 
 exit $result;

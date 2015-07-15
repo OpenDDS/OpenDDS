@@ -53,11 +53,13 @@ public:
   WriterTask (std::vector<std::string>& writers,
               DDS::DomainParticipant_var participant,
               DDS::Topic_var topic,
-              const bool& reliable)
+              const bool& reliable,
+              int total_readers)
     : writers_(writers)
     , participant_(participant)
     , topic_(topic)
     , reliable_(reliable)
+    , total_readers_(total_readers)
   { }
 
   int svc()
@@ -134,7 +136,7 @@ public:
                          -1);
       }
 
-      if (matches.current_count >= 1) {
+      if (matches.current_count >= total_readers_) {
         break;
       }
 
@@ -331,6 +333,7 @@ private:
   DDS::DomainParticipant_var participant_;
   DDS::Topic_var topic_;
   const bool& reliable_;
+  int total_readers_;
 };
 
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> WriterTask::thread_counter_;
@@ -347,6 +350,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::vector<std::string> readers;
     std::vector<std::string> writers;
     bool reliable = false;
+    int total_readers = 0, total_writers = 0;
 
     {
       // New scope.
@@ -368,6 +372,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         x = shifter.get_the_parameter (ACE_TEXT("-reliable"));
         if (x != NULL) {
           reliable = atoi(x);
+        }
+        x = shifter.get_the_parameter (ACE_TEXT("-total_readers"));
+        if (x != NULL) {
+          total_readers = atoi(x);
+        }
+        x = shifter.get_the_parameter (ACE_TEXT("-total_writers"));
+        if (x != NULL) {
+          total_writers = atoi(x);
         }
 
         shifter.consume_arg ();
@@ -439,13 +451,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" create_subscriber failed!\n")), -1);
     }
 
+    const int n_msgs = reliable ? 10 /* samples */ * total_writers : 0;
+
     // Create DataReaders
     for (std::vector<std::string>::iterator pos = readers.begin(), limit = readers.end();
          pos != limit;
          ++pos) {
       pos->resize(6);
 
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(n_msgs));
 
       DDS::DataReaderQos qos;
       subscriber->get_default_datareader_qos(qos);
@@ -478,7 +492,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
-    WriterTask task(writers, participant, topic, reliable);
+    WriterTask task(writers, participant, topic, reliable, total_readers);
     task.activate(DEFAULT_FLAGS, writers.size());
     task.wait();
 

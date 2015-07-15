@@ -18,6 +18,13 @@
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
+  explicit DataReaderListenerImpl(int expected_samples)
+    : expected_samples_(expected_samples)
+    , received_samples_(0)
+  {}
+
+  ~DataReaderListenerImpl();
+
   virtual void on_requested_deadline_missed(
     DDS::DataReader_ptr reader,
     const DDS::RequestedDeadlineMissedStatus& status);
@@ -44,6 +51,10 @@ public:
   virtual void on_sample_lost(
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
+
+private:
+  const int expected_samples_;
+  int received_samples_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL_H */

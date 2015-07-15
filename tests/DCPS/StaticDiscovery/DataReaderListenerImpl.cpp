@@ -15,6 +15,16 @@
 
 #include <iostream>
 
+DataReaderListenerImpl::~DataReaderListenerImpl()
+{
+  if (expected_samples_ && received_samples_ != expected_samples_) {
+    ACE_ERROR((LM_ERROR, "ERROR: expected %d but received %d\n",
+               expected_samples_, received_samples_));
+  } else if (expected_samples_) {
+    ACE_DEBUG((LM_DEBUG, "Expected number of samples received\n"));
+  }
+}
+
 void
 DataReaderListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr /*reader*/,
@@ -62,11 +72,9 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   DDS::ReturnCode_t error = reader_i->take_next_sample(message, info);
 
   if (error == DDS::RETCODE_OK) {
-    std::cout << "SampleInfo.sample_rank = " << info.sample_rank << std::endl;
-    std::cout << "SampleInfo.instance_state = " << info.instance_state << std::endl;
-
     if (info.valid_data) {
       std::cout << "Message: value      = " << message.value << std::endl;
+      ++received_samples_;
     }
 
   } else {
