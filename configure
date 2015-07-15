@@ -57,12 +57,15 @@ my %platforminfo =
                'aceplatform' => 'linux_$NONSTDCOMP', # $NONSTDCOMP = clang
               },
    'lynxos-178' => {
-                    'compilers' => ['g++'],
                     'libpath' => 'LD_LIBRARY_PATH',
                     'no_host' => 1,
                     'aceplatform' => 'lynxos',
                     'compiler_root_env' => 'ENV_PREFIX',
                    },
+   'vxworks' => {
+                 'libpath' => 'LD_LIBRARY_PATH',
+                 'no_host' => 1,
+                },
   );
 
 ## arg processing and usage
@@ -416,6 +419,9 @@ elsif (-r '../ACE_wrappers/ace/ACE.h') {
 elsif (-r 'ACE_wrappers/ace/ACE.h') {
   $ace_src = 'ACE_wrappers';
 }
+elsif (-r 'ATCD/ACE/ace/ACE.h') {
+  $ace_src = 'ATCD/ACE';
+}
 
 $ace_src = normalizePath($ace_src);
 
@@ -665,6 +671,10 @@ sub write_platform_macros {
           print $PMG "$macro = $opts{$key}\n";
         }
       }
+      if ($cross_compile) {
+        print $PMG 'TAO_IDL = $(HOST_ACE)/bin/tao_idl', "\n";
+        print $PMG 'TAO_IDL_DEP = $(TAO_IDL)', "\n";
+      }
     }
     if ($buildEnv{'build'} eq 'host') {
       print $PMG "static_libs_only = 1\n";
@@ -672,7 +682,7 @@ sub write_platform_macros {
     if ($opts{'prefix'}) {
       print $PMG "INSTALL_PREFIX=" . $opts{'prefix'} . "\n";
     }
-    my $plat = $opts{'host'};
+    my $plat = $opts{$buildEnv{'build'}};
     if ($pi->{'aceplatform'}) {
       $plat = $pi->{'aceplatform'};
       $plat =~ s/\$COMP/($opts{'compiler'} =~ m!CC!) ? 'sunc++' : 'g++'/e;
@@ -873,8 +883,6 @@ sub generate_workspace {
       }
       if ($cross_compile) {
         print $UM <<'EOT';
-TAO_IDL = $(HOST_ACE)/bin/tao_idl
-TAO_IDL_DEP = $(TAO_IDL)
 OPENDDS_IDL = $(HOST_DDS)/bin/opendds_idl
 OPENDDS_IDL_DEP = $(OPENDDS_IDL)
 CROSS-COMPILE = 1
