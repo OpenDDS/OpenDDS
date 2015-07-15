@@ -97,7 +97,6 @@ sub runTest {
     print $fh "\n";
     print $fh "[transport/Rtps]\n";
     print $fh "transport_type=rtps_udp\n";
-    print $fh "local_address=localhost\n";
     print $fh "\n";
     print $fh "[datawriterqos/ReliableWriter]\n";
     print $fh "reliability.kind=RELIABLE\n";

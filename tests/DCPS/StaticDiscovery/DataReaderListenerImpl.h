@@ -15,12 +15,15 @@
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/Definitions.h>
 
+typedef void (*callback_t)();
+
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  explicit DataReaderListenerImpl(int expected_samples)
+  DataReaderListenerImpl(int expected_samples, callback_t done_callback)
     : expected_samples_(expected_samples)
     , received_samples_(0)
+    , done_callback_(done_callback)
   {}
 
   ~DataReaderListenerImpl();
@@ -55,6 +58,7 @@ public:
 private:
   const int expected_samples_;
   int received_samples_;
+  callback_t done_callback_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL_H */

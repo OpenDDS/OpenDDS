@@ -15,7 +15,6 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
-#include "model/Sync.h"
 #include "ace/Arg_Shifter.h"
 
 /*
@@ -23,7 +22,7 @@
   This behavior is not an error.
 */
 
-const int DOMAIN = 100;
+const int DOMAIN = 100, MSGS_PER_WRITER = 10;
 
 unsigned char hextobyte(unsigned char c)
 {
@@ -155,7 +154,7 @@ public:
     // Write samples
     TestMsg message;
     message.value = 0;
-    for (int i = 0; i < 10; ++i) {
+    for (int i = 0; i < MSGS_PER_WRITER; ++i) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
       ++message.value;
 
@@ -166,14 +165,10 @@ public:
       }
     }
 
-    // Wait for samples to be acknowledged
     DDS::Duration_t timeout = { 30, 0 };
-    if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" wait_for_acknowledgments failed!\n")),
-                       -1);
-    }
+    message_writer->wait_for_acknowledgments(timeout);
+    // With static discovery, it's not an error for wait_for_acks to fail
+    // since the peer process may have terminated before sending acks.
 
 //     try
 //       {
@@ -338,6 +333,17 @@ private:
 
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> WriterTask::thread_counter_;
 
+ACE_Thread_Mutex readers_done_lock;
+ACE_Condition_Thread_Mutex readers_done_cond(readers_done_lock);
+int readers_done = 0;
+
+void reader_done_callback()
+{
+  ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
+  ++readers_done;
+  readers_done_cond.signal();
+}
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -451,7 +457,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" create_subscriber failed!\n")), -1);
     }
 
-    const int n_msgs = reliable ? 10 /* samples */ * total_writers : 0;
+    const int n_msgs = reliable ? MSGS_PER_WRITER * total_writers : 0;
 
     // Create DataReaders
     for (std::vector<std::string>::iterator pos = readers.begin(), limit = readers.end();
@@ -459,7 +465,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          ++pos) {
       pos->resize(6);
 
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(n_msgs));
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(n_msgs, reader_done_callback));
 
       DDS::DataReaderQos qos;
       subscriber->get_default_datareader_qos(qos);
@@ -496,7 +502,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     task.activate(DEFAULT_FLAGS, writers.size());
     task.wait();
 
-    ACE_OS::sleep(10);
+    if (!reliable)
+      ACE_OS::sleep(10);
+    else {
+      ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
+      while (readers_done != static_cast<int>(readers.size()))
+        readers_done_cond.wait();
+    }
 
     // Clean-up!
     participant->delete_contained_entities();
