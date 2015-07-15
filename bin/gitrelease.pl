@@ -5,9 +5,10 @@ use Date::Format;
 $ENV{TZ} = "UTC";
 
 sub usage {
-  return "gitrelease.pl <version> [<remote>] [opts]\n" .
+  return "gitrelease.pl <version> [<remote>] [<stepnum>] [opts]\n" .
          "  version: release version in a.b or a.b.c notation\n" .
          "   remote: valid git remote for OpenDDS\n" .
+         "  stepnum: # of individual step to run\n" .
          "   opts: --list   to not make changes, perform dry run\n" .
          "         --remedy to remediate problems where possible\n" .
          "         --force  to progress where possible\n"
@@ -291,24 +292,32 @@ sub any_arg_is {
   return 0;
 }
 
+sub numeric_arg {
+  my @args = @ARGV[1..$#ARGV];
+  foreach (@args) {
+    if ($_ =~ /[0-9]+/) {
+      return $_;
+    }
+  }
+  return 0;
+}
+
 my %settings = (
   list      => any_arg_is("--list"),
   remedy    => any_arg_is("--remedy"),
   force     => any_arg_is("--force"),
+  step      => numeric_arg(),
   version   => $ARGV[0],
   remote    => $ARGV[1] || "origin",
   timestamp => strftime("%a %b %e %T %Z %Y", @t),
   expected  => 'git@github.com:objectcomputing/OpenDDS.git'
 );
 
-my $step_count = 0;
-
-for my $step (@release_steps) {
-  ++$step_count; 
+sub run_step {
+  my ($step_count, $step) = @_;
   print "$step_count: $step->{title}\n";
   # Run the verification
   if (!$step->{verify}(\%settings)) {
-    
     # Failed
     my $message = $step->{message}(\%settings);
     if ($settings{list}) {
@@ -326,3 +335,14 @@ for my $step (@release_steps) {
   }
 }
 
+if (my $step_num = $settings{step}) {
+  # Run one step
+  run_step($step_num, $release_steps[$step_num - 1]);
+} else {
+  my $step_count = 0;
+
+  for my $step (@release_steps) {
+    ++$step_count; 
+    run_step($step_count, $step);
+  }
+}
