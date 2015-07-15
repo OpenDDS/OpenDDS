@@ -8,7 +8,6 @@ sub usage {
   return "gitrelease.pl <version> [<remote>] [<stepnum>] [opts]\n" .
          "  version: release version in a.b or a.b.c notation\n" .
          "   remote: valid git remote for OpenDDS\n" .
-         "  stepnum: # of individual step to run\n" .
          "   opts: --list   to not make changes, perform dry run\n" .
          "         --remedy to remediate problems where possible\n" .
          "         --force  to progress where possible\n"
@@ -121,29 +120,33 @@ sub remedy_update_version_file {
   return $corrected;
 }
 ############################################################################
-sub verify_news_file_section {
+sub verify_update_news_file {
   my $settings = shift();
   my $version = $settings->{version};
   my $status = open(NEWS, 'NEWS');
   my $metaversion = quotemeta($version);
   my $has_version = 0;
+  my $corrected_features = 1;
+  my $corrected_fixes = 1;
   while (<NEWS>) {
     if ($_ =~ /Version $metaversion of OpenDDS\./) {
       $has_version = 1;
+    } elsif ($_ =~ /Add your features here/) {
+      $corrected_features = 0;
+    } elsif ($_ =~ /Add your fixes here/) {
+      $corrected_fixes = 0;
     }
   }
   close(NEWS);
 
-  return ($has_version);
+  return ($has_version && $corrected_features && $corrected_fixes);
 }
 
-sub message_news_file_section {
-  my $settings = shift();
-  my $version = $settings->{version};
-  return "NEWS file release $version section needs updating";
+sub message_update_news_file {
+  return "NEWS file needs updating with current version release notes"
 }
 
-sub remedy_news_file_section {
+sub remedy_update_news_file {
   my $settings = shift();
   my $version = $settings->{version};
   print "Updating NEWS file for $version\n";
@@ -168,32 +171,7 @@ ENDOUT
   close(NEWS)                           or die "Closing: $!";
   return $corrected;
 }
-############################################################################
-sub verify_update_news_file {
-  my $settings = shift();
-  my $version = $settings->{version};
-  my $status = open(NEWS, 'NEWS');
-  my $metaversion = quotemeta($version);
-  my $has_version = 0;
-  my $corrected_features = 1;
-  my $corrected_fixes = 1;
-  while (<NEWS>) {
-    if ($_ =~ /Version $metaversion of OpenDDS\./) {
-      $has_version = 1;
-    } elsif ($_ =~ /Add your features here/) {
-      $corrected_features = 0;
-    } elsif ($_ =~ /Add your fixes here/) {
-      $corrected_fixes = 0;
-    }
-  }
-  close(NEWS);
 
-  return ($has_version && $corrected_features && $corrected_fixes);
-}
-
-sub message_update_news_file {
-  return "NEWS file needs updating with current version release notes";
-}
 ############################################################################
 sub verify_update_version_h_file {
   my $settings = shift();
@@ -270,21 +248,22 @@ my @release_steps = (
     message => sub{message_git_remote(@_)},
   },
   {
+    title   => 'Verify git status is clean',
+    verify  => sub{verify_git_status_clean(@_)},
+    message => sub{message_git_status_clean(@_)},
+    # remedy  => sub{remedy_git_status_clean(@_)}
+  },
+  {
     title   => 'Update VERSION',
     verify  => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
     remedy  => sub{remedy_update_version_file(@_)}
   },
   {
-    title   => 'Add NEWS Section',
-    verify  => sub{verify_news_file_section(@_)},
-    message => sub{message_news_file_section(@_)},
-    remedy  => sub{remedy_news_file_section(@_)}
-  },
-  {
-    title   => 'Update NEWS Section',
+    title   => 'Update NEWS',
     verify  => sub{verify_update_news_file(@_)},
-    message => sub{message_update_news_file(@_)}
+    message => sub{message_update_news_file(@_)},
+    remedy  => sub{remedy_update_news_file(@_)}
   },
   {
     title => 'Update Version.h',
@@ -297,13 +276,6 @@ my @release_steps = (
     verify  => sub{verify_update_prf_file(@_)},
     message => sub{message_update_prf_file(@_)},
     remedy  => sub{remedy_update_prf_file(@_)}
-  },
-  # Commit to git
-  {
-    title   => 'Verify git status is clean',
-    verify  => sub{verify_git_status_clean(@_)},
-    message => sub{message_git_status_clean(@_)},
-    # remedy  => sub{remedy_git_status_clean(@_)}
   }
 );
 
@@ -320,10 +292,9 @@ sub any_arg_is {
 }
 
 sub numeric_arg {
-  my @args = @ARGV[1..$#ARGV];
-  foreach (@args) {
-    if ($_ =~ /[0-9]+/) {
-      return $_;
+  foreach my $arg (@ARGV[1..$#ARGV]) {
+    if ($arg =~ /[0-9]+/
+      return atoi $arg;
     }
   }
   return 0;
@@ -333,19 +304,21 @@ my %settings = (
   list      => any_arg_is("--list"),
   remedy    => any_arg_is("--remedy"),
   force     => any_arg_is("--force"),
-  step      => numeric_arg(),
+  only_step => numeric_arg(),
   version   => $ARGV[0],
   remote    => $ARGV[1] || "origin",
   timestamp => strftime("%a %b %e %T %Z %Y", @t),
   expected  => 'git@github.com:objectcomputing/OpenDDS.git'
 );
 
+my $step_count = 0;
+
 sub run_step {
-  my ($step_count, $step) = @_;
   print "$step_count: $step->{title}\n";
-  return if ($settings{list});
+  my ($step_count, $step) = @_;
   # Run the verification
   if (!$step->{verify}(\%settings)) {
+    
     # Failed
     my $message = $step->{message}(\%settings);
     if ($settings{list}) {
@@ -361,16 +334,11 @@ sub run_step {
       die " !!!! $message";
     }
   }
+
 }
 
-if (my $step_num = $settings{step}) {
-  # Run one step
-  run_step($step_num, $release_steps[$step_num - 1]);
-} else {
-  my $step_count = 0;
-
-  for my $step (@release_steps) {
-    ++$step_count; 
-    run_step($step_count, $step);
-  }
+for my $step (@release_steps) {
+  ++$step_count; 
+  run_step($step_count, $step);
 }
+
