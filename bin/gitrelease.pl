@@ -64,9 +64,27 @@ sub remedy_git_status_clean {
 
 ############################################################################
 sub verify_update_version_file {
+  my $settings = shift();
+  my $version = $settings->{version};
+  my $correct = 0;
+  my $status = open(VERSION, 'VERSION');
+  my $metaversion = quotemeta($version);
+  while (<VERSION>) {
+    if (/This is OpenDDS version $metaversion, released/ =~ $_) {
+    }
+  
+    $correct = 1;
+    last;
+  }
+  close(VERSION);
+
+  return $correct;
 }
+
 sub message_update_version_file {
+  return "VERSION file needs updating with current version"
 }
+
 sub remedy_update_version_file {
 }
 
