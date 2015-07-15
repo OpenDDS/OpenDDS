@@ -9,9 +9,9 @@ sub usage {
          "  version: release version in a.b or a.b.c notation\n" .
          "   remote: valid git remote for OpenDDS\n" .
          "  stepnum: # of individual step to run\n" .
-         "   opts: --list   to not make changes, perform dry run\n" .
-         "         --remedy to remediate problems where possible\n" .
-         "         --force  to progress where possible\n"
+         "   opts: --list      just show steps (default to perform check)\n" .
+         "         --remedy    remediate problems where possible\n" .
+         "         --force     don't exit at first error\n"
 }
 
 ###########################################################################
@@ -23,6 +23,8 @@ sub verify_version {
     $settings->{minor_version} = $2;
     if ($3) {
       $settings->{micro_version} = $3;
+    } else {
+      $settings->{micro_version} = 0;
     }
     return 1;
   } else {
@@ -102,7 +104,7 @@ sub message_update_version_file {
 sub remedy_update_version_file {
   my $settings = shift();
   my $version = $settings->{version};
-  print "Updating VERSION file for $version\n";
+  print "  Updating VERSION file for $version\n";
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   my $corrected = 0;
@@ -110,9 +112,10 @@ sub remedy_update_version_file {
   my $out = "";
   
   while (<VERSION>) {
-    s/This is OpenDDS version [^,]+, released (.*)/$outline/;
-      $out .= $_;
+    if (s/This is OpenDDS version [^,]+, released (.*)/$outline/) {
       $corrected = 1;
+    }
+    $out .= $_;
   }
   seek(VERSION,0,0)                        or die "Seeking: $!";
   print VERSION $out                       or die "Printing: $!";
@@ -146,7 +149,7 @@ sub message_news_file_section {
 sub remedy_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
-  print "Updating NEWS file for $version\n";
+  print "  Adding $version section to NEWS\n";
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   my $corrected = 0;
@@ -200,7 +203,7 @@ sub verify_update_version_h_file {
   my $version = $settings->{version};
   my $matched_major  = 0;
   my $matched_minor  = 0;
-  my $matched_micro  = $settings->{matched_micro} ? 0 : 1;
+  my $matched_micro  = 0;
   my $matched_version = 0;
   my $status = open(VERSION_H, 'dds/Version.h');
   my $metaversion = quotemeta($version);
@@ -210,8 +213,7 @@ sub verify_update_version_h_file {
       ++$matched_major;
     } elsif ($_ =~ /^#define DDS_MINOR_VERSION $settings->{minor_version}$/) {
       ++$matched_minor;
-    } elsif ($settings->{micro_version} && 
-            ($_ =~ /^#define DDS_MICRO_VERSION $settings->{micro_version}$/)) {
+    } elsif ($_ =~ /^#define DDS_MICRO_VERSION $settings->{micro_version}$/) {
       ++$matched_micro;
     } elsif ($_ =~ /^#define DDS_VERSION "$metaversion"$/) {
       ++$matched_version;
@@ -228,6 +230,41 @@ sub message_update_version_h_file {
 }
 
 sub remedy_update_version_h_file {
+  my $settings = shift();
+  my $version = $settings->{version};
+  print "  Updating dds/Version.h file for $version\n";
+  my $corrected_major  = 0;
+  my $corrected_minor  = 0;
+  my $corrected_micro  = 0;
+  my $corrected_version = 0;
+  my $major_line = "#define DDS_MAJOR_VERSION $settings->{major_version}";
+  my $minor_line = "#define DDS_MINOR_VERSION $settings->{minor_version}";
+  my $micro_line = "#define DDS_MICRO_VERSION $settings->{micro_version}";
+  my $version_line = "#define DDS_MICRO_VERSION $settings->{version}";
+
+  open(VERSION_H, "+< dds/Version.h")                 or die "Opening: $!";
+
+  my $out = "";
+
+  while (<VERSION_H>) {
+    if (s/^#define DDS_MAJOR_VERSION +[0-9]+ *$/major_line/) {
+      ++$corrected_major;
+    } elsif (s/^#define DDS_MINOR_VERSION +[0-9]+ *$/$minor_line/) {
+      ++$corrected_minor;
+    } elsif (s/^#define DDS_MICRO_VERSION +[0-9]+ *$/$micro_line/) {
+      ++$corrected_micro;
+    } elsif (s/^#define DDS_VERSION ".*" *$/$version_line/) {
+      ++$corrected_version;
+    }
+    $out .= $_;
+  }
+  seek(VERSION_H,0,0)                        or die "Seeking: $!";
+  print VERSION_H $out                       or die "Printing: $!";
+  truncate(VERSION_H,tell(VERSION_H))          or die "Truncating: $!";
+  close(VERSION_H)                           or die "Closing: $!";
+
+  return (($corrected_major == 1) && ($corrected_minor   == 1) &&
+          ($corrected_micro == 1) && ($corrected_version == 1));
 }
 ############################################################################
 sub verify_update_prf_file {
@@ -271,29 +308,34 @@ my @release_steps = (
   },
   {
     title   => 'Update VERSION',
+    skip    => 1,
     verify  => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
     remedy  => sub{remedy_update_version_file(@_)}
   },
   {
     title   => 'Add NEWS Section',
+    skip    => 1,
     verify  => sub{verify_news_file_section(@_)},
     message => sub{message_news_file_section(@_)},
     remedy  => sub{remedy_news_file_section(@_)}
   },
   {
     title   => 'Update NEWS Section',
+    skip    => 1,
     verify  => sub{verify_update_news_file(@_)},
     message => sub{message_update_news_file(@_)}
   },
   {
-    title => 'Update Version.h',
+    title   => 'Update Version.h',
+    skip    => 1,
     verify  => sub{verify_update_version_h_file(@_)},
     message => sub{message_update_version_h_file(@_)},
     remedy  => sub{remedy_update_version_h_file(@_)}
   },
   {
-    title => 'Update PROBLEM-REPORT-FORM',
+    title   => 'Update PROBLEM-REPORT-FORM',
+    skip    => 1,
     verify  => sub{verify_update_prf_file(@_)},
     message => sub{message_update_prf_file(@_)},
     remedy  => sub{remedy_update_prf_file(@_)}
@@ -301,6 +343,7 @@ my @release_steps = (
   # Commit to git
   {
     title   => 'Verify git status is clean',
+    skip    => 1,
     verify  => sub{verify_git_status_clean(@_)},
     message => sub{message_git_status_clean(@_)},
     # remedy  => sub{remedy_git_status_clean(@_)}
@@ -342,23 +385,32 @@ my %settings = (
 
 sub run_step {
   my ($step_count, $step) = @_;
+  # Output the title
   print "$step_count: $step->{title}\n";
+  # Exit if we are just listing
   return if ($settings{list});
   # Run the verification
   if (!$step->{verify}(\%settings)) {
     # Failed
-    my $message = $step->{message}(\%settings);
-    if ($settings{list}) {
-      print " !!!! $message\n";
-    } elsif ($settings{remedy} && $step->{remedy}) {
-      $step->{remedy}(\%settings);
+    print $step->{message}(\%settings) . "\n";
+
+    # If we can remediate and --remedy set
+    if ($settings{remedy} && $step->{remedy}) {
+      if (!$step->{remedy}(\%settings)) {
+        die " !!!! Remediation did not complete\n";
+      }
       # Reverify
       if (!$step->{verify}(\%settings)) {
-        die " !!!! Remediation did not complete step\n";
+        die " !!!! Remediation did not pass verification\n";
       }
-    } elsif ($settings{force}) {
-    } else {
-      die " !!!! $message";
+    } elsif ($settings{force} && $step->{skip}) {
+      # Skip this step
+    } elsif ($settings{force} && !$step->{skip}) {
+      die " Step can't be skipped";
+    } elsif (!$settings{force} && $step->{skip}) {
+      die " Use --force to continue";
+    } elsif (!$settings{force} && !$step->{skip}) {
+      die;
     }
   }
 }
