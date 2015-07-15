@@ -1,11 +1,16 @@
 use strict;
 use warnings;
+use Date::Format;
+
+$ENV{TZ} = "UTC";
 
 sub usage {
   return "gitrelease.pl <version> [<remote>] [opts]\n" .
          "  version: release version in a.b or a.b.c notation\n" .
          "   remote: valid git remote for OpenDDS\n" .
-         "   opts: --force to force and remediate problems\n"
+         "   opts: --list   to not make changes, perform dry run\n" .
+         "         --remedy to remediate problems where possible\n" .
+         "         --force  to progress where possible\n"
 }
 
 ###########################################################################
@@ -94,6 +99,25 @@ sub message_update_version_file {
 }
 
 sub remedy_update_version_file {
+  my $settings = shift();
+  my $version = $settings->{version};
+  print "Updating VERSION file for $version\n";
+  my $timestamp = $settings->{timestamp};
+  my $outline = "This is OpenDDS version $version, released $timestamp";
+  my $corrected = 0;
+  open(VERSION, "+< VERSION")                 or die "Opening: $!";
+  my $out = "";
+  
+  while (<VERSION>) {
+    s/This is OpenDDS version [^,]+, released (.*)/$outline/;
+      $out .= $_;
+      $corrected = 1;
+  }
+  seek(VERSION,0,0)                        or die "Seeking: $!";
+  print VERSION $out                       or die "Printing: $!";
+  truncate(VERSION,tell(VERSION))          or die "Truncating: $!";
+  close(VERSION)                           or die "Closing: $!";
+  return $corrected;
 }
 ############################################################################
 sub verify_update_news_file {
@@ -123,6 +147,37 @@ sub verify_update_news_file {
 sub message_update_news_file {
   return "NEWS file needs updating with current version release notes"
 }
+
+sub remedy_update_news_file {
+  my $settings = shift();
+  my $version = $settings->{version};
+  print "Updating NEWS file for $version\n";
+  my $timestamp = $settings->{timestamp};
+  my $outline = "This is OpenDDS version $version, released $timestamp";
+  my $corrected = 0;
+  open(VERSION, "+< NEWS")                 or die "Opening: $!";
+  my $out = "Version $version of OpenDDS.\n" . <<"ENDOUT";
+
+Additions:
+  Add your features here 
+
+Fixes:
+  Add your fixes here
+
+ENDOUT
+
+  while (<VERSION>) {
+    s/This is OpenDDS version [^,]+, released (.*)/$outline/;
+      $out .= $_;
+      $corrected = 1;
+  }
+  seek(NEWS,0,0)                        or die "Seeking: $!";
+  print NEWS $out                       or die "Printing: $!";
+  truncate(NEWS,tell(VERSION))          or die "Truncating: $!";
+  close(NEWS)                           or die "Closing: $!";
+  return $corrected;
+}
+
 ############################################################################
 sub verify_update_version_h_file {
   my $settings = shift();
@@ -205,13 +260,13 @@ my @release_steps = (
     force   => sub{force_git_status_clean(@_)}
   },
   {
-    title  => 'Update VERSION',
+    title   => 'Update VERSION',
     verify  => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
-    force   => sub{force_update_version_file(@_)}
+    remedy  => sub{remedy_update_version_file(@_)}
   },
   {
-    title => 'Update NEWS',
+    title   => 'Update NEWS',
     verify  => sub{verify_update_news_file(@_)},
     message => sub{message_update_news_file(@_)}
   },
@@ -229,24 +284,44 @@ my @release_steps = (
   }
 );
 
+my @t = gmtime;
+
+sub any_arg_is {
+  my $match = shift;
+  foreach my $arg (@ARGV) {
+    if ($arg eq $match) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
 my %settings = (
-  version => $ARGV[0],
-  remote  => $ARGV[1] || "origin",
-  expected => 'git@github.com:objectcomputing/OpenDDS.git'
+  list      => any_arg_is("--list"),
+  remedy    => any_arg_is("--remedy"),
+  version   => $ARGV[0],
+  remote    => $ARGV[1] || "origin",
+  timestamp => strftime("%a %b %e %T %Z %Y", @t),
+  expected  => 'git@github.com:objectcomputing/OpenDDS.git'
 );
 
-my $count = 0;
+my $step_count = 0;
 
 for my $step (@release_steps) {
-  ++$count; 
-  print "$count: $step->{title}\n";
+  ++$step_count; 
+  print "$step_count: $step->{title}\n";
   # Run the verification
   if (!$step->{verify}(\%settings)) {
     
     # Failed
     my $message = $step->{message}(\%settings);
-    print " !!!! $message\n";
-    # die; unless --dry run
+    if ($settings{list}) {
+      print " !!!! $message\n";
+    } elsif ($settings{remedy} && $step->{remedy}) {
+      $step->{remedy}(\%settings);
+    } else {
+      die " !!!! $message";
+    }
   }
 }
 
