@@ -123,25 +123,23 @@ sub remedy_update_version_file {
 sub verify_update_news_file {
   my $settings = shift();
   my $version = $settings->{version};
-  my $lines = 0;
   my $status = open(NEWS, 'NEWS');
   my $metaversion = quotemeta($version);
+  my $has_version = 0;
+  my $corrected_features = 1;
+  my $corrected_fixes = 1;
   while (<NEWS>) {
     if ($_ =~ /Version $metaversion of OpenDDS\./) {
-      $lines = 1;
-    } elsif ($_ =~ /Version .* of OpenDDS\./) {
-      if ($lines) {
-        # Done counting
-        last;
-      }
-    } elsif ($lines) {
-      # Count lines
-      ++$lines;
+      $has_version = 1;
+    } elsif ($_ =~ /Add your features here/) {
+      $corrected_features = 0;
+    } elsif ($_ =~ /Add your fixes here/) {
+      $corrected_fixes = 0;
     }
   }
   close(NEWS);
 
-  return ($lines > 10);
+  return ($has_version && $corrected_features && $corrected_fixes);
 }
 
 sub message_update_news_file {
@@ -155,7 +153,7 @@ sub remedy_update_news_file {
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   my $corrected = 0;
-  open(VERSION, "+< NEWS")                 or die "Opening: $!";
+  open(NEWS, "+< NEWS")                 or die "Opening: $!";
   my $out = "Version $version of OpenDDS.\n" . <<"ENDOUT";
 
 Additions:
@@ -166,14 +164,10 @@ Fixes:
 
 ENDOUT
 
-  while (<VERSION>) {
-    s/This is OpenDDS version [^,]+, released (.*)/$outline/;
-      $out .= $_;
-      $corrected = 1;
-  }
+  $out .= join("", <NEWS>);
   seek(NEWS,0,0)                        or die "Seeking: $!";
   print NEWS $out                       or die "Printing: $!";
-  truncate(NEWS,tell(VERSION))          or die "Truncating: $!";
+  truncate(NEWS,tell(NEWS))          or die "Truncating: $!";
   close(NEWS)                           or die "Closing: $!";
   return $corrected;
 }
@@ -257,7 +251,7 @@ my @release_steps = (
     title   => 'Verify git status is clean',
     verify  => sub{verify_git_status_clean(@_)},
     message => sub{message_git_status_clean(@_)},
-    force   => sub{force_git_status_clean(@_)}
+    # remedy  => sub{remedy_git_status_clean(@_)}
   },
   {
     title   => 'Update VERSION',
@@ -268,19 +262,20 @@ my @release_steps = (
   {
     title   => 'Update NEWS',
     verify  => sub{verify_update_news_file(@_)},
-    message => sub{message_update_news_file(@_)}
+    message => sub{message_update_news_file(@_)},
+    remedy  => sub{remedy_update_news_file(@_)}
   },
   {
     title => 'Update Version.h',
     verify  => sub{verify_update_version_h_file(@_)},
     message => sub{message_update_version_h_file(@_)},
-    force   => sub{force_update_version_h_file(@_)}
+    remedy  => sub{remedy_update_version_h_file(@_)}
   },
   {
     title => 'Update PROBLEM-REPORT-FORM',
     verify  => sub{verify_update_prf_file(@_)},
     message => sub{message_update_prf_file(@_)},
-    force   => sub{force_update_prf_file(@_)}
+    remedy  => sub{remedy_update_prf_file(@_)}
   }
 );
 
@@ -299,6 +294,7 @@ sub any_arg_is {
 my %settings = (
   list      => any_arg_is("--list"),
   remedy    => any_arg_is("--remedy"),
+  force     => any_arg_is("--force"),
   version   => $ARGV[0],
   remote    => $ARGV[1] || "origin",
   timestamp => strftime("%a %b %e %T %Z %Y", @t),
@@ -319,6 +315,11 @@ for my $step (@release_steps) {
       print " !!!! $message\n";
     } elsif ($settings{remedy} && $step->{remedy}) {
       $step->{remedy}(\%settings);
+      # Reverify
+      if (!$step->{verify}(\%settings)) {
+        die " !!!! Remediation did not complete step\n";
+      }
+    } elsif ($settings{force}) {
     } else {
       die " !!!! $message";
     }
