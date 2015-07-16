@@ -15,7 +15,6 @@ sub usage {
          "  --step=#        # of individual step to run (default: all)\n" 
 }
 
-###########################################################################
 ############################################################################
 sub verify_git_remote {
   my $settings = shift();
@@ -122,6 +121,82 @@ sub remedy_update_version_file {
 }
 ############################################################################
 sub verify_changelog {
+  my $settings = shift();
+  my $version = $settings->{version};
+  my $status = open(CHANGELOG, "ChangeLog-$version");
+  if ($status) {
+    close(CHANGELOG);
+  }
+  return $status;
+}
+
+sub message_changelog {
+  my $settings = shift();
+  my $version = $settings->{version};
+  return "File ChangeLog-$version missing";
+}
+
+sub remedy_changelog {
+  my $settings = shift();
+  my $version = $settings->{version};
+  my $remote = $settings->{remote};
+  # TODO determine
+  my $prev_tag = "DDS-3.6";
+  my $author = 0;
+  my $date = 0;
+  my $comment = "";
+  my $file_list = "";
+  my $changed = 0;
+
+  print "  >> Creating ChangeLog-$version from git history\n";
+
+  open(CHANGELOG, ">ChangeLog-$version") or die "Opening $!";
+
+  open(GITLOG, "git log $prev_tag..$remote/master --name-only |") or die "Opening $!";
+  while (<GITLOG>) {
+    chomp;
+print "$_\n";
+    if (/^commit .*/) {
+      # print out previous 
+      if ($author) {
+        print CHANGELOG $date . "  " .  $author . "\n";
+        if ($file_list) {
+          print CHANGELOG "\n" . $file_list;
+        }
+        print CHANGELOG "\n" . $comment . "\n";
+        $comment = "";
+        $file_list = "";
+        $changed = 1;
+      }
+    } elsif (/^Merge: *(.*)/) {
+      # Ignore
+    } elsif (/^Author: *(.*)/) {
+      $author = $1;
+    } elsif (/^Date: *(.*)/) {
+      $date = $1;
+    } elsif (/^ +(.*) */) {
+      $comment .= "$_\n";
+print "COMMENT\n";
+    } elsif (/^([^ ]+.*) *$/) {
+print "FILE $1\n";
+      $file_list .= " * $_\n";
+    }
+  }
+  # print out final
+  if ($author) {
+    print CHANGELOG $date . "  " .  $author . "\n";
+    if ($file_list) {
+      print CHANGELOG "\n" . $file_list;
+    }
+    print CHANGELOG "\n" . $comment . "\n";
+    $comment = "";
+    $file_list = "";
+    $changed = 1;
+  }
+  close(GITLOG);
+  close(CHANGELOG);
+
+  return $changed;
 }
 
 ############################################################################
@@ -390,7 +465,12 @@ my @release_steps = (
     verify  => sub{compare_git_remote_out_of_date(@_)},
     message => sub{message_git_remote_out_of_date(@_)}
   },
-# changelog
+  {
+    title   => 'Verify ChangeLog',
+    verify  => sub{verify_changelog(@_)},
+    message => sub{message_changelog(@_)},
+    remedy  => sub{remedy_changelog(@_)}
+  },
   {
     title   => 'Add NEWS Section',
     skip    => 1,
@@ -503,7 +583,7 @@ sub validate_version_arg {
   }
 }
 
-if (validate_version_arg) {
+if (validate_version_arg()) {
   if (my $step_num = $settings{step}) {
     # Run one step
     run_step($step_num, $release_steps[$step_num - 1]);
