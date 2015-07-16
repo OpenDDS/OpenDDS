@@ -41,6 +41,7 @@ sub message_git_remote {
 
 ############################################################################
 sub verify_git_status_clean {
+  my $settings = shift;
   my $clean = 1;
   my $status = open(GITSTATUS, 'git status -s|');
   my %modified = ("NEWS" => 1,
@@ -50,10 +51,11 @@ sub verify_git_status_clean {
   # TODO remove
   $modified{"bin/gitrelease.pl"} = 1;
 
+  my $unclean = "";
   while (<GITSTATUS>) {
     if (/^...(.*)/) {
       if (!$modified{$1}) {
-        print $_;
+        $unclean .= $_;
         $clean = 0;
         last;
       }
@@ -61,11 +63,14 @@ sub verify_git_status_clean {
   }
   close(GITSTATUS);
 
+  $settings->{unclean} = $unclean;
   return $clean;
 }
 
 sub message_git_status_clean {
-  return "The working directory is not clean.  Run git clean before continuing."
+  my $settings = shift;
+  return "The working directory is not clean:\n" . $settings->{unclean} .
+         "  Run git clean before continuing."
 }
 
 sub remedy_git_status_clean {
