@@ -5,13 +5,14 @@ use Date::Format;
 $ENV{TZ} = "UTC";
 
 sub usage {
-  return "gitrelease.pl <version> [<remote>] [<stepnum>] [opts]\n" .
+  return "gitrelease.pl <version> [options]\n" .
          "    version:  release version in a.b or a.b.c notation\n" .
-         "     remote:  valid git remote for OpenDDS (default: origin)\n" .
-         "    stepnum:  # of individual step to run (default: all)\n" .
-         "   opts: --list      just show steps (default check)\n" .
-         "         --remedy    remediate problems where possible\n" .
-         "         --force     don't exit at first error\n"
+         "options:\n" .
+         "  --list          just show step names (default perform check)\n" .
+         "  --remedy        remediate problems where possible\n" .
+         "  --force         keep going where possible\n" .
+         "  --remote=name   valid git remote for OpenDDS (default: origin)\n" .
+         "  --step=#        # of individual step to run (default: all)\n" 
 }
 
 ###########################################################################
@@ -114,6 +115,10 @@ sub remedy_update_version_file {
   close(VERSION)                           or die "Closing: $!";
   return $corrected;
 }
+############################################################################
+sub verify_changelog {
+}
+
 ############################################################################
 sub verify_news_file_section {
   my $settings = shift();
@@ -375,23 +380,31 @@ sub any_arg_is {
   return 0;
 }
 
-sub numeric_arg {
+sub numeric_arg_value {
+  my $name = shift;
   my @args = @ARGV[1..$#ARGV];
-  foreach (@args) {
-    if ($_ =~ /[0-9]+/) {
-      return $_;
-    }
+  my $arg_str = join(" ", @args);
+  if ($arg_str =~ /$name ?=? ?([0-9]+)/) {
+    return $1;
   }
-  return 0;
+}
+
+sub string_arg_value {
+  my $name = shift;
+  my @args = @ARGV[1..$#ARGV];
+  my $arg_str = join(" ", @args);
+  if ($arg_str =~ /$name ?=? ?([^ ]+)/) {
+    return $1;
+  }
 }
 
 my %settings = (
   list      => any_arg_is("--list"),
   remedy    => any_arg_is("--remedy"),
   force     => any_arg_is("--force"),
-  step      => numeric_arg(),
+  step      => numeric_arg_value("--step"),
+  remote    => string_arg_value("--remote") || "origin",
   version   => $ARGV[0],
-  remote    => $ARGV[1] || "origin",
   timestamp => strftime("%a %b %e %T %Z %Y", @t),
   expected  => 'git@github.com:objectcomputing/OpenDDS.git'
 );
