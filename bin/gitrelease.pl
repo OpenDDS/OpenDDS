@@ -42,9 +42,21 @@ sub message_git_remote {
 sub verify_git_status_clean {
   my $clean = 1;
   my $status = open(GITSTATUS, 'git status -s|');
+  my %modified = ("NEWS" => 1,
+                 "PROBLEM-REPORT-FORM" => 1,
+                 "VERSION" => 1,
+                 "dds/Version.h" => 1);
+  # TODO remove
+  $modified{"bin/gitrelease.pl"} = 1;
+
   while (<GITSTATUS>) {
-    $clean = 0;
-    last;
+    if (/^...(.*)/) {
+      if (!$modified{$1}) {
+        print $_;
+        $clean = 0;
+        last;
+      }
+    }
   }
   close(GITSTATUS);
 
