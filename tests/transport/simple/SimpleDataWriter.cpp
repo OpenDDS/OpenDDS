@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "SimpleDataWriter.h"
 #include "dds/DCPS/DataSampleHeader.h"

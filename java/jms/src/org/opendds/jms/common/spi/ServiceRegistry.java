@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import java.util.List;
 
 /**
  * @author Steven Stallion
- * @version $Revision$
  */
 public abstract class ServiceRegistry<T> {
     protected List<T> providers =

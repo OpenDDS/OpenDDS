@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "common.h"
 #include "tests/DCPS/common/TestSupport.h"

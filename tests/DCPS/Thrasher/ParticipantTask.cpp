@@ -1,5 +1,4 @@
 /*
- * $Id$
  */
 
 #include <ace/Atomic_Op_T.h>
@@ -45,12 +44,10 @@ ParticipantTask::svc()
     FooDataWriter_var writer_i;
     DDS::StatusCondition_var cond;
     DDS::WaitSet_var ws = new DDS::WaitSet;
-    int thread_index = -1;
 
     { // Scope for guard to serialize creating Entities.
       GuardType guard(lock_);
 
-      thread_index = thread_index_++;
       // Create Participant
       participant =
         dpf->create_participant(42,
@@ -61,8 +58,9 @@ ParticipantTask::svc()
 #ifdef OPENDDS_SAFETY_PROFILE
       // RTPS cannot be shared
       char config_name[64], inst_name[64];
-      ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index);
-      ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index);
+      ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index_);
+      ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index_);
+      ++thread_index_;
 
       ACE_DEBUG((LM_INFO,
         "(%P|%t)    -> PARTICIPANT creating transport config %C\n",

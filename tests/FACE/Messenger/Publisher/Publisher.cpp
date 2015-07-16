@@ -8,49 +8,7 @@
 #include "ace/OS_NS_unistd.h"
 #include "ace/Log_Msg.h"
 
-static bool no_global_new = false;
-
-#if defined(OPENDDS_SAFETY_PROFILE) && (defined(__GLIBC__) || defined(ACE_HAS_EXECINFO_H))
-
-#include <execinfo.h>
-
-void* operator new(size_t sz)
-#ifdef ACE_HAS_NEW_THROW_SPEC
-  throw (std::bad_alloc)
-#endif
- {
-  if (no_global_new) {
-    printf ("ERROR: call to global operator new\n");
-  }
-  return ::malloc(sz);
-}
-
-void operator delete(void* ptr) {
-  ::free(ptr);
-}
-
-void* operator new[](size_t sz, const std::nothrow_t&)
-#ifdef ACE_HAS_NEW_THROW_SPEC
-  throw (std::bad_alloc)
-#endif
-{
-  if (no_global_new) {
-    printf ("ERROR: Publisher call to global operator new[]\n");
-    void* addresses[32];
-    int count = backtrace(addresses, 32);
-    char** text = backtrace_symbols(addresses, count);
-    for (int i = 0; i != count; ++i) {
-      printf ("Publisher %s\n", text[i]);
-    }
-    ::free(text);
-  }
-  return ::malloc(sz);
-}
-
-void operator delete[](void* ptr) {
-  ::free(ptr);
-}
-#endif
+#include "tests/Utils/Safety.h"
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
@@ -58,7 +16,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::TS::Initialize("face_config.ini", status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  no_global_new = true;
+  DisableGlobalNew dgn;
 
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
@@ -125,7 +83,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   FACE::TS::Get_Connection_Parameters(name, connId, connectionStatus, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
-  if (connectionStatus.MESSAGE != 1
+  if (connectionStatus.MESSAGE != 0
       || connectionStatus.LAST_MSG_VALIDITY != FACE::VALID
       || connectionStatus.WAITING_PROCESSES_OR_MESSAGES != 0
       || connectionStatus.CONNECTION_DIRECTION != FACE::SOURCE

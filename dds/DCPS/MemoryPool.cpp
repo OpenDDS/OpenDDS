@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -606,12 +605,12 @@ MemoryPool::validate_pool(MemoryPool& pool, bool log) {
         found = free_map.find(free_header->smaller_free(pool.pool_ptr_));
         if (found != free_map.end()) {
           smlr_index = found->second;
-          sprintf(smlr_buff, "[%2d]", smlr_index); // preprocessed out
+          snprintf(smlr_buff, 32, "[%2d]", smlr_index); // preprocessed out
         }
         found = free_map.find(free_header->larger_free(pool.pool_ptr_));
         if (found != free_map.end()) {
           lrgr_index = found->second;
-          sprintf(lrgr_buff, "[%2d]", lrgr_index); //preprocessed out
+          snprintf(lrgr_buff, 32, "[%2d]", lrgr_index); // preprocessed out
         }
       }
       ACE_OS::printf(

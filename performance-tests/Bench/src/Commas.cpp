@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "Commas.h"
 

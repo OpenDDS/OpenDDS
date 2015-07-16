@@ -1,4 +1,3 @@
-// $Id$
 #include "TopicQos_Handler.h"
 #include "QOS_Topic_T.h"
 

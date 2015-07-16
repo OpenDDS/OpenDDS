@@ -1,5 +1,4 @@
 //
-// $Id$
 //
 
 project(*publisher): dcpsexe, dcps_transports_for_test {

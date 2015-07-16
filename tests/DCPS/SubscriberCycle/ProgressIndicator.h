@@ -1,5 +1,4 @@
 /*
- * $Id$
  */
 
 #ifndef DCPS_THRASHER_PROGRESSINDICATOR_H

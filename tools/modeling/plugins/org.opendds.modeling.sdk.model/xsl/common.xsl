@@ -4,7 +4,6 @@
      xmlns:xmi='http://www.omg.org/XMI'
      xmlns:opendds='http://www.opendds.org/modeling/schemas/OpenDDS/1.0'>
   <!--
-    ** $Id$
     **
     ** Common stylesheet templates and variables
     **

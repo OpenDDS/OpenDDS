@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "Writer.h"
 #include "MessengerTypeSupportC.h"
 #include <ace/OS_NS_unistd.h>

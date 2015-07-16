@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -13,7 +12,6 @@ import javax.jms.Session;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MessageDispatcher implements Runnable {
     private final AbstractMessageImpl message;

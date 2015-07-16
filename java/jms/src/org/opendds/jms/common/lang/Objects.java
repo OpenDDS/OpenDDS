@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -11,7 +10,6 @@ package org.opendds.jms.common.lang;
 /**
  * @author  Weiqi Gao
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class Objects {
 

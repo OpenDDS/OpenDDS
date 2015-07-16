@@ -1,4 +1,3 @@
-// $Id$
 project: dcpslib, dcps_tcp, dcps_test_java {
 
     sharedname      = complex_idl_test

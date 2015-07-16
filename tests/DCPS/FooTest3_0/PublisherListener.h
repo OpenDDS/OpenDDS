@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef PUBLISHER_LISTENER_IMPL
 #define PUBLISHER_LISTENER_IMPL
 

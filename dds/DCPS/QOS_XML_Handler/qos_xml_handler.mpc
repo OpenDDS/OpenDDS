@@ -1,4 +1,3 @@
-//$Id$
 
 project (OpenDDS_XML_QOS_XSC_Generation) : install, xscdefaults {
   requires += xsc

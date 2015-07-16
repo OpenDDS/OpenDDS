@@ -5,7 +5,6 @@
 /**
  *  @file  common.h
  *
- *  $Id$
  *
  *
  */

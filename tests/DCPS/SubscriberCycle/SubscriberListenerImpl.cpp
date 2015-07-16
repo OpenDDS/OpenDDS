@@ -1,5 +1,4 @@
 /*
- * $Id$
  */
 
 #include "SubscriberListenerImpl.h"

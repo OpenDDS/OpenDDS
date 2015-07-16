@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #ifndef ENTITYPROFILES_H
 #define ENTITYPROFILES_H
 

@@ -1,5 +1,4 @@
 // -*- C++ -*-
-// $Id$
 
 #include "Subscription.h"
 

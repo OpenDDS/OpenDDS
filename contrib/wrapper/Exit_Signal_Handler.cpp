@@ -4,7 +4,6 @@
 /**
  *  @file    Exit_Signal_Handler.cpp
  *
- *  $Id$
  *
  * @author   Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */

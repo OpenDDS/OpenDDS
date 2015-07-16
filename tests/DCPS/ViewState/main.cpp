@@ -3,7 +3,6 @@
 /**
  *  @file   main.cpp
  *
- *  $Id$
  *
  *  Test of view state.
  */

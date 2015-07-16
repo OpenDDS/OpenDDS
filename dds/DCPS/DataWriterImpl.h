@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -696,6 +695,10 @@ private:
   DDS::ReturnCode_t send_end_historic_samples(const RepoId& readerId);
 
   bool liveliness_asserted_;
+
+  // Lock used to synchronize remove_associations calls from discovery
+  // and unregister_instances during deletion of datawriter from application
+  ACE_Thread_Mutex sync_unreg_rem_assocs_lock_;
 };
 
 } // namespace DCPS

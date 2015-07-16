@@ -25,12 +25,9 @@
 #include <iostream>
 #include <cstdio>
 
-using namespace std;
 using namespace DDS;
 using namespace CORBA;
 using namespace DDSPerfTest;
-
-
 
 /* void set_rt() */
 /*      Attempt to set the real time priority and lock memory */
@@ -88,7 +85,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
             total_samples = ACE_OS::atoi(get_opts.opt_arg ());
 
             if(total_samples < 0) {
-              fprintf(stderr, "splice_pub: ERROR - bad sample number\n");
+              std::cerr << "sample_pub: ERROR - bad sample number\n";
               exit(1);
             }
 
@@ -119,7 +116,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                        DDS::DomainParticipantListener::_nil (),
                                        ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
        if (CORBA::is_nil (dp.in ()) ) {
-         cout << argv[0] << "SAMPLE_PUB: ERROR - Create participant failed." << endl;
+         std::cout << argv[0] << " SAMPLE_PUB: ERROR - Create participant failed." << endl;
          exit (1);
        }
 
@@ -194,8 +191,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                            DDS::TopicListener::_nil (),
                                                            ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-
-
        /* Create the listener for datareader */
        DDS::DataReaderListener_var listener (new AckDataReaderListenerImpl (size));
        AckDataReaderListenerImpl* listener_servant =
@@ -226,10 +221,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        pubmessage_writer->write (pubmessage_data,
                                  handle);
 
-       while (listener_servant->done () == 0)
-       {
+       while (listener_servant->done() == 0) {
          ACE_OS::sleep (1);
-       };
+       }
 
        /* Shut down domain entities */
 
@@ -252,6 +246,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     return 1;
   }
 
-       return(0);
+  return 0;
 
 }

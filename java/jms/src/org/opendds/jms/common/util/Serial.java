@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -10,7 +9,6 @@ package org.opendds.jms.common.util;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class Serial {
     private boolean overflow;

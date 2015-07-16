@@ -4,7 +4,6 @@
 /**
  *  @file    OpenDDS_create_domain_manager.cpp
  *
- *  $Id$
  *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */

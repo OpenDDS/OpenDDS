@@ -11,7 +11,6 @@ reduce-shared-data.pl - reduce test results into plottable data
 
 N.B. - this contains only a naive data reduction at this time.
 
-$Id$
 
 =head1 SYNOPSIS
 

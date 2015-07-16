@@ -22,3 +22,4 @@ lib*.so*
 /user_macros.GNU
 /build
 /ipch
+/ACE_wrappers

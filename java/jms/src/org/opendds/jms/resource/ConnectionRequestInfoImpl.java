@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -21,7 +20,6 @@ import org.opendds.jms.transport.TransportFactory;
 
 /**
  * @author Steven Stallion
- * @version $Revision$
  */
 public class ConnectionRequestInfoImpl implements ConnectionRequestInfo, Serializable {
     private String clientID;

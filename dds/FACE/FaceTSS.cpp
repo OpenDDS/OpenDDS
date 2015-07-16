@@ -22,7 +22,7 @@ namespace TS {
 bool MessageHeader::operator==(const MessageHeader& rhs) const
 {
   return message_instance_guid == rhs.message_instance_guid
-    && message_definition_guid == rhs.message_definition_guid
+    && platform_view_guid == rhs.platform_view_guid
     && message_source_guid == rhs.message_source_guid
     && message_timestamp == rhs.message_timestamp
     && message_validity == rhs.message_validity;
@@ -136,16 +136,18 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
     OpenDDS::FaceTSS::convertDuration(qos.datawriter_qos().lifespan.duration) : 0;
 
   const TRANSPORT_CONNECTION_STATUS_TYPE status = {
-    topic.message_definition_guid_, // MESSAGE
-    ACE_INT32_MAX, // MAX_MESSAGE
+    0, // MESSAGE currently set to 0 due to type mismatch in MESSAGE_RANGE_TYPE and MESSAGE_TYPE_GUID
+    max_message_size, // MAX_MESSAGE with no transformations, set to config value
     max_message_size,
     connection_direction,
     0, // WAITING_PROCESSES_OR_MESSAGES
     refresh_period,
     INVALID,
   };
-  Entities::instance()->connections_[connection_id] =
-    std::pair<OPENDDS_STRING, TRANSPORT_CONNECTION_STATUS_TYPE>(connection_name, status);
+  Entities::ConnectionInfo& conn_info = Entities::instance()->connections_[connection_id];
+  conn_info.connection_name = connection_name;
+  conn_info.connection_status = status;
+  conn_info.platform_view_guid = topic.platform_view_guid_;
 }
 
 void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
@@ -164,7 +166,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
     // if validated or populated, set return_code so status will be populated
     if (connection_name[0]) {
       // Validate provided connection_name
-      OPENDDS_STRING conn_name = entities.connections_[connection_id].first;
+      OPENDDS_STRING conn_name = entities.connections_[connection_id].connection_name;
       if (std::strcmp(connection_name, conn_name.c_str()) == 0) {
         return_code = RC_NO_ERROR;
       } else {
@@ -174,7 +176,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
       // connection_name not provided
       // so populate from connection_id lookup
       // and set return code so status will be populated
-      entities.connections_[connection_id].first.copy(connection_name,
+      entities.connections_[connection_id].connection_name.copy(connection_name,
                                                       sizeof(CONNECTION_NAME_TYPE));
       connection_name[sizeof(CONNECTION_NAME_TYPE) - 1] = 0;
       return_code = RC_NO_ERROR;
@@ -197,7 +199,7 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
     return_code = INVALID_PARAM;
   }
   if (return_code == RC_NO_ERROR) {
-    TRANSPORT_CONNECTION_STATUS_TYPE& cur_status = entities.connections_[connection_id].second;
+    TRANSPORT_CONNECTION_STATUS_TYPE& cur_status = entities.connections_[connection_id].connection_status;
     if (cur_status.CONNECTION_DIRECTION == FACE::DESTINATION) {
       Entities::FaceReceiver& receiver = *entities.receivers_[connection_id];
       if (receiver.status_valid != FACE::VALID) {
@@ -304,11 +306,22 @@ void receive_header(/*in*/    FACE::CONNECTION_ID_TYPE connection_id,
   // of last_msg_tid to 0 before a msg has been received so
   // only valid transaction_ids are > 0.
   if (!readers.count(connection_id) || transaction_id == 0) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) receive_header - INVALID_PARAM - "
+          "could not find reader for connection_id: %d OR transaction id[%d] == 0 \n",
+          connection_id,
+          transaction_id));
+    }
     return_code = FACE::INVALID_PARAM;
     return;
   }
 
   if (message_size < 0 || (unsigned)message_size < sizeof(FACE::TS::MessageHeader)) {
+    if (OpenDDS::DCPS::DCPS_debug_level) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) receive_header - INVALID_PARAM - message_size: %d is < %d \n",
+          message_size,
+          sizeof(FACE::TS::MessageHeader)));
+    }
     return_code = FACE::INVALID_PARAM;
     return;
   }
@@ -338,40 +351,19 @@ namespace {
                          const DDS::DomainParticipantFactory_var& dpf,
                          DDS::DomainParticipant_var& dp) {
     DDS::DomainParticipant_var temp_dp;
-    Entities::ConnIdToReceiverMap& readers = Entities::instance()->receivers_;
-    Entities::ConnIdToReceiverMap::iterator rdrIter = readers.begin();
-    while (rdrIter != readers.end()) {
-      temp_dp = rdrIter->second->dr->get_subscriber()->get_participant();
-      if (domainId == temp_dp->get_domain_id()) {
-        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d in receivers\n", domainId));
-        }
-        dp = temp_dp;
-        return;
-      } else {
-        ++rdrIter;
-      }
-    }
 
-    Entities::ConnIdToSenderMap& writers = Entities::instance()->senders_;
-    Entities::ConnIdToSenderMap::iterator wtrIter = writers.begin();
-
-    while (wtrIter != writers.end()) {
-      temp_dp = wtrIter->second.dw->get_publisher()->get_participant();
-      if (domainId == temp_dp->get_domain_id()) {
-        if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d in senders\n", domainId));
-        }
-        dp = temp_dp;
-        return;
-      } else {
-        ++wtrIter;
+    temp_dp = dpf->lookup_participant(domainId);
+    if (!temp_dp) {
+      if (OpenDDS::DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - created new participant for domainId: %d\n", domainId));
       }
+      dp = dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
+      return;
     }
     if (OpenDDS::DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - created new participant for domainId: %d\n", domainId));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - found exiting participant for domainId: %d \n", domainId));
     }
-    dp = dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
+    dp = temp_dp;
   }
 
   void find_or_create_pub(const DDS::PublisherQos& qos,
@@ -658,7 +650,7 @@ FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
   DDS::ReturnCode_t retcode)
 {
   FACE::TRANSPORT_CONNECTION_STATUS_TYPE& status =
-    Entities::instance()->connections_[connection_id].second;
+    Entities::instance()->connections_[connection_id].connection_status;
   FACE::RETURN_CODE_TYPE rc = FACE::INVALID_PARAM;
 
   switch (retcode) {
@@ -745,7 +737,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   FACE::TS::MessageHeader& header = readers[connection_id]->last_msg_header;
 
   //TODO: Populate other header fields appropriately
-  header.message_definition_guid = Entities::instance()->connections_[connection_id].second.MESSAGE;
+  header.platform_view_guid = Entities::instance()->connections_[connection_id].platform_view_guid;
   //  header.message_instance_guid = sinfo.instance_handle;
   header.message_timestamp = convertTime(sinfo.source_timestamp);
   ACE_Time_Value now(ACE_OS::gettimeofday());

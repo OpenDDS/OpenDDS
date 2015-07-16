@@ -2,14 +2,12 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     & eval 'exec perl -S $0 $argv:q'
     if 0;
 
-# $Id$
 # -*- perl -*-
 
 =head1 NAME
 
 run_test.pl - run one side of a latency cross host test
 
-$Id$
 
 =head1 SYNOPSIS
 

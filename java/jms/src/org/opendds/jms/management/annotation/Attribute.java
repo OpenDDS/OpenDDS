@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -21,7 +20,6 @@ import java.lang.annotation.Target;
  * be registered as writable.
  *
  * @author  Steven Stallion
- * @version $Revision$
  *
  * @see     javax.management.MBeanAttributeInfo
  */

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -53,7 +52,6 @@ import OpenDDS.JMS.MessagePayloadTypeSupportImpl;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class AbstractMessageImplTest {
     private static final float FLOAT_EPSILON = 1e-6f;

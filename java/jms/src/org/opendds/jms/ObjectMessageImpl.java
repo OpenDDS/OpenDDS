@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -25,7 +24,6 @@ import org.opendds.jms.common.ExceptionHelper;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class ObjectMessageImpl extends AbstractMessageImpl implements ObjectMessage {
     public ObjectMessageImpl(SessionImpl sessionImpl) {

@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "Reader.h"
 #include "../common/SampleInfo.h"

@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "SimpleDataReader.h"
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/GuidBuilder.h"

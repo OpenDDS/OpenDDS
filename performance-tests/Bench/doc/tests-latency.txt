@@ -1,5 +1,4 @@
 
-$Id$
 
 This file explains the execution of the latency tests located in the
 tests/latency subdirectory.  The file 'test-commands' in that directory

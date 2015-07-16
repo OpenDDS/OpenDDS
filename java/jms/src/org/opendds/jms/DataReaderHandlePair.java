@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -15,7 +14,6 @@ import OpenDDS.JMS.MessagePayloadDataReader;
  * the acknowledgement phase of the Message consumption
  *
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class DataReaderHandlePair {
     private MessagePayloadDataReader dataReader;

@@ -1,4 +1,3 @@
-# $Id$
 
 This test verifies the TRANSPORT_PRIORITY QoS policy support in OpenDDS.
 See the Perl POD description embedded in the run_test.pl script in this

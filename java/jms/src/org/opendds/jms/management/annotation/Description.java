@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -21,7 +20,6 @@ import java.lang.annotation.Target;
  * This type may also be applied to the MBean class itself.
  *
  * @author  Steven Stallion
- * @version $Revision$
  *
  * @see     Attribute
  * @see     Constructor

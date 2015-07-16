@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -597,14 +596,14 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       ACE_Message_Block* const end_historic_samples =
         create_control_message(END_HISTORIC_SAMPLES, header, data, timestamp);
 
+      this->controlTracker.message_sent();
       guard.release();
       SendControlStatus ret = send_w_control(list, header, end_historic_samples, remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                              ACE_TEXT("DataWriterImpl::association_complete_i: ")
                              ACE_TEXT("send_w_control failed.\n")));
-      } else {
-        this->controlTracker.message_sent();
+        this->controlTracker.message_dropped();
       }
     }
   }
@@ -639,6 +638,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   CORBA::ULong rds_len = 0;
   DDS::InstanceHandleSeq handles;
 
+  ACE_GUARD(ACE_Thread_Mutex, wait_guard, sync_unreg_rem_assocs_lock_);
   {
     // Ensure the same acquisition order as in wait_for_acknowledgments().
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
@@ -1655,14 +1655,18 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
 void
 DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 {
-  PublicationInstanceMapType::iterator it =
-    this->data_container_->instances_.begin();
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, sync_unreg_rem_assocs_lock_);
 
-  while (it != this->data_container_->instances_.end()) {
-    DDS::InstanceHandle_t handle = it->first;
-    ++it; // avoid mangling the iterator
+    PublicationInstanceMapType::iterator it =
+      this->data_container_->instances_.begin();
 
-    this->unregister_instance_i(handle, source_timestamp);
+    while (it != this->data_container_->instances_.end()) {
+      DDS::InstanceHandle_t handle = it->first;
+      ++it; // avoid mangling the iterator
+
+      this->unregister_instance_i(handle, source_timestamp);
+    }
   }
 }
 
@@ -2611,10 +2615,12 @@ SendControlStatus
 DataWriterImpl::send_control(const DataSampleHeader& header,
                              ACE_Message_Block* msg)
 {
+  controlTracker.message_sent();
+
   SendControlStatus status = TransportClient::send_control(header, msg);
 
-  if (status == SEND_CONTROL_OK) {
-    controlTracker.message_sent();
+  if (status != SEND_CONTROL_OK) {
+    controlTracker.message_dropped();
   }
 
   return status;

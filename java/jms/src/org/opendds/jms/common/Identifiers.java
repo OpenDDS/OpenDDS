@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -15,7 +14,6 @@ import org.opendds.jms.common.lang.Strings;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class Identifiers {
     protected static List<String> forbidenNames = Arrays.asList("NULL", "TRUE", "FALSE",

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -17,7 +16,6 @@ import OpenDDS.DCPS.transport.TransportInst;
 
 /**
  * @author  Steven Stallion
- * @version $Revision$
  */
 public class Transports {
     private static TransportRegistry registry = new TransportRegistry();

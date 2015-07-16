@@ -1,5 +1,4 @@
 #
-# $Id$
 #
 
 org.opendds.jms.transport.spi.TcpTransport

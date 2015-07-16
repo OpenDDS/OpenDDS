@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "DataReaderListener.h"
 
 // Implementation skeleton constructor

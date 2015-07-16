@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -18,7 +17,6 @@ import OpenDDS.JMS.MessagePayload;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class MapMessageImpl extends AbstractMessageImpl implements MapMessage {
     protected MapBodyFacade mapBody;

@@ -1,4 +1,3 @@
-# $Id$
 
 The PERSISTENT kind of the DURABILITY QoS policy configures the
 publisher within a given domain to retain unsent data beyond the

@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 
 #include "DCPSDataWriterI.h"
 #include <dds/DCPS/RepoIdConverter.h>

@@ -1,6 +1,5 @@
 // -*- C++ -*-
 //
-// $Id$
 #include "DataWriterListener.h"
 
 extern int offered_incompatible_qos_called_on_dw;

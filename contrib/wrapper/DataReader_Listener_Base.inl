@@ -4,7 +4,6 @@
 /**
  *  @file    DataReader_Listener_Base.inl
  *
- *  $Id$
  *
  *  @author  Friedhelm Wolf (fwolf@dre.vanderbilt.edu)
  */

@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  *
  * Distributed under the OpenDDS License.
@@ -16,7 +15,6 @@ import OpenDDS.JMS.MessagePayload;
 
 /**
  * @author  Weiqi Gao
- * @version $Revision$
  */
 public class BytesMessageImpl extends AbstractMessageImpl implements BytesMessage {
     protected BytesBodyFacade bytesBody;

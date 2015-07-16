@@ -1,5 +1,4 @@
 /*
- * $Id$
  *
  * Derived from sample code included in Microsoft Knowledge Base Article 327215.
  * Additional material distributed under the OpenDDS License.

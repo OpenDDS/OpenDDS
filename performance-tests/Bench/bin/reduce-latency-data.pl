@@ -9,7 +9,6 @@ use strict;
 
 reduce-latency-data.pl - reduce test results into plottable data
 
-$Id$
 
 =head1 SYNOPSIS
 
