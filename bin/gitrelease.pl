@@ -104,7 +104,7 @@ sub message_update_version_file {
 sub remedy_update_version_file {
   my $settings = shift();
   my $version = $settings->{version};
-  print "  Updating VERSION file for $version\n";
+  print "  >> Updating VERSION file for $version\n";
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
   my $corrected = 0;
@@ -149,10 +149,10 @@ sub message_news_file_section {
 sub remedy_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
-  print "  Adding $version section to NEWS\n";
+  print "  >> Adding $version section to NEWS\n";
+  print "  !! Manual update to NEWS needed\n";
   my $timestamp = $settings->{timestamp};
   my $outline = "This is OpenDDS version $version, released $timestamp";
-  my $corrected = 0;
   open(NEWS, "+< NEWS")                 or die "Opening: $!";
   my $out = "Version $version of OpenDDS.\n" . <<"ENDOUT";
 
@@ -169,7 +169,7 @@ ENDOUT
   print NEWS $out                       or die "Printing: $!";
   truncate(NEWS,tell(NEWS))          or die "Truncating: $!";
   close(NEWS)                           or die "Closing: $!";
-  return $corrected;
+  return 1;
 }
 ############################################################################
 sub verify_update_news_file {
@@ -232,7 +232,7 @@ sub message_update_version_h_file {
 sub remedy_update_version_h_file {
   my $settings = shift();
   my $version = $settings->{version};
-  print "  Updating dds/Version.h file for $version\n";
+  print "  >> Updating dds/Version.h file for $version\n";
   my $corrected_major  = 0;
   my $corrected_minor  = 0;
   my $corrected_micro  = 0;
@@ -240,14 +240,14 @@ sub remedy_update_version_h_file {
   my $major_line = "#define DDS_MAJOR_VERSION $settings->{major_version}";
   my $minor_line = "#define DDS_MINOR_VERSION $settings->{minor_version}";
   my $micro_line = "#define DDS_MICRO_VERSION $settings->{micro_version}";
-  my $version_line = "#define DDS_MICRO_VERSION $settings->{version}";
+  my $version_line = "#define DDS_VERSION \"$settings->{version}\"";
 
   open(VERSION_H, "+< dds/Version.h")                 or die "Opening: $!";
 
   my $out = "";
 
   while (<VERSION_H>) {
-    if (s/^#define DDS_MAJOR_VERSION +[0-9]+ *$/major_line/) {
+    if (s/^#define DDS_MAJOR_VERSION +[0-9]+ *$/$major_line/) {
       ++$corrected_major;
     } elsif (s/^#define DDS_MINOR_VERSION +[0-9]+ *$/$minor_line/) {
       ++$corrected_minor;
@@ -260,7 +260,7 @@ sub remedy_update_version_h_file {
   }
   seek(VERSION_H,0,0)                        or die "Seeking: $!";
   print VERSION_H $out                       or die "Printing: $!";
-  truncate(VERSION_H,tell(VERSION_H))          or die "Truncating: $!";
+  truncate(VERSION_H,tell(VERSION_H))        or die "Truncating: $!";
   close(VERSION_H)                           or die "Closing: $!";
 
   return (($corrected_major == 1) && ($corrected_minor   == 1) &&
@@ -272,17 +272,17 @@ sub verify_update_prf_file {
   my $version = $settings->{version};
   my $matched_header  = 0;
   my $matched_version = 0;
-  my $status = open(PROBLEM_REPORT_FORM, 'PROBLEM-REPORT-FORM');
+  my $status = open(PRF, 'PROBLEM-REPORT-FORM');
   my $metaversion = quotemeta($version);
 
-  while (<PROBLEM_REPORT_FORM>) {
+  while (<PRF>) {
     if ($_ =~ /^This is OpenDDS version $metaversion, released/) {
       ++$matched_header;
     } elsif ($_ =~ /OpenDDS VERSION: $metaversion$/) {
       ++$matched_version;
     }
   }
-  close(PROBLEM_REPORT_FORM);
+  close(PRF);
 
   return (($matched_header == 1) && ($matched_version == 1));
 }
@@ -292,6 +292,33 @@ sub message_update_prf_file {
 }
 
 sub remedy_update_prf_file {
+  my $settings = shift();
+  my $version = $settings->{version};
+  print "  >> Updating PROBLEM-REPORT-FORM file for $version\n";
+  my $corrected_header  = 0;
+  my $corrected_version = 0;
+  open(PRF, '+< PROBLEM-REPORT-FORM') or die "Opening $!";
+  my $timestamp = $settings->{timestamp};
+  my $header_line = "This is OpenDDS version $version, released $timestamp";
+  my $version_line = "OpenDDS VERSION: $version";
+
+  my $out = "";
+
+  while (<PRF>) {
+    if (s/^This is OpenDDS version .*, released.*$/$header_line/) {
+      ++$corrected_header;
+    } elsif (s/OpenDDS VERSION: .*$/$version_line/) {
+      ++$corrected_version;
+    }
+    $out .= $_;
+  }
+
+  seek(PRF,0,0)                        or die "Seeking: $!";
+  print PRF $out                       or die "Printing: $!";
+  truncate(PRF,tell(PRF))              or die "Truncating: $!";
+  close(PRF)                           or die "Closing: $!";
+
+  return (($corrected_header == 1) && ($corrected_version == 1));
 }
 ############################################################################
 
@@ -383,6 +410,9 @@ my %settings = (
   expected  => 'git@github.com:objectcomputing/OpenDDS.git'
 );
 
+my $half_divider = "-----------------------------------------";
+my $divider = "$half_divider$half_divider";
+
 sub run_step {
   my ($step_count, $step) = @_;
   # Output the title
@@ -392,7 +422,8 @@ sub run_step {
   # Run the verification
   if (!$step->{verify}(\%settings)) {
     # Failed
-    print $step->{message}(\%settings) . "\n";
+    print "$divider\n";
+    print "  " . $step->{message}(\%settings) . "\n";
 
     # If we can remediate and --remedy set
     if ($settings{remedy} && $step->{remedy}) {
@@ -414,6 +445,7 @@ sub run_step {
     } elsif (!$settings{force} && !$step->{skip}) {
       die;
     }
+    print "$divider\n";
   }
 }
 
