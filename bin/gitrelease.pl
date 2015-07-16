@@ -125,6 +125,33 @@ sub verify_changelog {
 }
 
 ############################################################################
+sub compare_git_remote_out_of_date {
+  my $settings = shift();
+  my $remote = $settings->{remote};
+  # Update refs
+  open(GITREMOTE, "git remote update $remote|");
+  while (<GITREMOTE>) {
+  }
+  close(GITREMOTE);
+  # Check for differences
+  my $diffs = open(GITDIFF, 
+                   "git diff HEAD $remote/master --shortstat --exit-code|");
+  if ($diffs) {
+    $settings->{git_diff} = <GITDIFF>;
+  }
+  close(GITDIFF);
+  return !$diffs;
+}
+
+sub message_git_remote_out_of_date {
+  my $settings = shift();
+  my $remote = $settings->{remote};
+  return "Tracking branch $remote/master is out of date with $remote:\n" .
+         $settings->{git_diff} . 
+         "  Perform a merge to continue";
+}
+
+############################################################################
 sub verify_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
@@ -339,13 +366,6 @@ my @release_steps = (
     remedy  => sub{remedy_update_version_file(@_)}
   },
   {
-    title   => 'Add NEWS Section',
-    skip    => 1,
-    verify  => sub{verify_news_file_section(@_)},
-    message => sub{message_news_file_section(@_)},
-    remedy  => sub{remedy_news_file_section(@_)}
-  },
-  {
     title   => 'Update Version.h',
     skip    => 1,
     verify  => sub{verify_update_version_h_file(@_)},
@@ -360,15 +380,28 @@ my @release_steps = (
     remedy  => sub{remedy_update_prf_file(@_)}
   },
   {
+    title   => 'Verify remote arg',
+    verify  => sub{verify_git_remote(@_)},
+    message => sub{message_git_remote(@_)},
+  },
+  {
+    title   => 'Compare remote',
+    verify  => sub{compare_git_remote_out_of_date(@_)},
+    message => sub{message_git_remote_out_of_date(@_)}
+  },
+# changelog
+  {
+    title   => 'Add NEWS Section',
+    skip    => 1,
+    verify  => sub{verify_news_file_section(@_)},
+    message => sub{message_news_file_section(@_)},
+    remedy  => sub{remedy_news_file_section(@_)}
+  },
+  {
     title   => 'Update NEWS Section',
     skip    => 1,
     verify  => sub{verify_update_news_file(@_)},
     message => sub{message_update_news_file(@_)}
-  },
-  {
-    title   => 'Verify remote arg',
-    verify  => sub{verify_git_remote(@_)},
-    message => sub{message_git_remote(@_)},
   },
   # Commit to git
 );
