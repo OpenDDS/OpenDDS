@@ -157,10 +157,10 @@ sub remedy_news_file_section {
   my $out = "Version $version of OpenDDS.\n" . <<"ENDOUT";
 
 Additions:
-  Add your features here 
+  TODO: Add your features here 
 
 Fixes:
-  Add your fixes here
+  TODO: Add your fixes here
 
 ENDOUT
 
@@ -183,9 +183,9 @@ sub verify_update_news_file {
   while (<NEWS>) {
     if ($_ =~ /Version $metaversion of OpenDDS\./) {
       $has_version = 1;
-    } elsif ($_ =~ /Add your features here/) {
+    } elsif ($_ =~ /TODO: Add your features here/) {
       $corrected_features = 0;
-    } elsif ($_ =~ /Add your fixes here/) {
+    } elsif ($_ =~ /TODO: Add your fixes here/) {
       $corrected_fixes = 0;
     }
   }
@@ -397,18 +397,20 @@ sub run_step {
     # If we can remediate and --remedy set
     if ($settings{remedy} && $step->{remedy}) {
       if (!$step->{remedy}(\%settings)) {
-        die " !!!! Remediation did not complete\n";
+        die "  !!!! Remediation did not complete\n";
       }
       # Reverify
       if (!$step->{verify}(\%settings)) {
-        die " !!!! Remediation did not pass verification\n";
+        die "  !!!! Remediation did not pass verification\n";
       }
     } elsif ($settings{force} && $step->{skip}) {
       # Skip this step
     } elsif ($settings{force} && !$step->{skip}) {
-      die " Step can't be skipped";
+      print "  Use --remedy to attempt a fix\n" if $step->{remedy};
+      die "  Step can't be skipped";
     } elsif (!$settings{force} && $step->{skip}) {
-      die " Use --force to continue";
+      print "  Use --remedy to attempt a fix\n" if $step->{remedy};
+      die "  Use --force to continue";
     } elsif (!$settings{force} && !$step->{skip}) {
       die;
     }
