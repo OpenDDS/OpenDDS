@@ -6,36 +6,15 @@ $ENV{TZ} = "UTC";
 
 sub usage {
   return "gitrelease.pl <version> [<remote>] [<stepnum>] [opts]\n" .
-         "  version: release version in a.b or a.b.c notation\n" .
-         "   remote: valid git remote for OpenDDS\n" .
-         "  stepnum: # of individual step to run\n" .
-         "   opts: --list      just show steps (default to perform check)\n" .
+         "    version:  release version in a.b or a.b.c notation\n" .
+         "     remote:  valid git remote for OpenDDS (default: origin)\n" .
+         "    stepnum:  # of individual step to run (default: all)\n" .
+         "   opts: --list      just show steps (default check)\n" .
          "         --remedy    remediate problems where possible\n" .
          "         --force     don't exit at first error\n"
 }
 
 ###########################################################################
-sub verify_version {
-  my $settings = shift();
-  my $version = $settings->{version} || "";
-  if ("$version" =~ /([0-9])+\.([0-9])+([0-9]+)?/) {
-    $settings->{major_version} = $1;
-    $settings->{minor_version} = $2;
-    if ($3) {
-      $settings->{micro_version} = $3;
-    } else {
-      $settings->{micro_version} = 0;
-    }
-    return 1;
-  } else {
-    return 0;
-  }
-}
- 
-sub message_version {
-  usage();
-}
-
 ############################################################################
 sub verify_git_remote {
   my $settings = shift();
@@ -110,7 +89,7 @@ sub remedy_update_version_file {
   my $corrected = 0;
   open(VERSION, "+< VERSION")                 or die "Opening: $!";
   my $out = "";
-  
+
   while (<VERSION>) {
     if (s/This is OpenDDS version [^,]+, released (.*)/$outline/) {
       $corrected = 1;
@@ -157,7 +136,7 @@ sub remedy_news_file_section {
   my $out = "Version $version of OpenDDS.\n" . <<"ENDOUT";
 
 Additions:
-  TODO: Add your features here 
+  TODO: Add your features here
 
 Fixes:
   TODO: Add your fixes here
@@ -324,14 +303,11 @@ sub remedy_update_prf_file {
 
 my @release_steps = (
   {
-    title   => 'Verify version arg',
-    verify  => sub{verify_version(@_)},
-    message => sub{message_version(@_)},
-  },
-  {
-    title   => 'Verify remote arg',
-    verify  => sub{verify_git_remote(@_)},
-    message => sub{message_git_remote(@_)},
+    title   => 'Verify git status is clean',
+    skip    => 1,
+    verify  => sub{verify_git_status_clean(@_)},
+    message => sub{message_git_status_clean(@_)},
+    # remedy  => sub{remedy_git_status_clean(@_)}
   },
   {
     title   => 'Update VERSION',
@@ -348,12 +324,6 @@ my @release_steps = (
     remedy  => sub{remedy_news_file_section(@_)}
   },
   {
-    title   => 'Update NEWS Section',
-    skip    => 1,
-    verify  => sub{verify_update_news_file(@_)},
-    message => sub{message_update_news_file(@_)}
-  },
-  {
     title   => 'Update Version.h',
     skip    => 1,
     verify  => sub{verify_update_version_h_file(@_)},
@@ -367,14 +337,18 @@ my @release_steps = (
     message => sub{message_update_prf_file(@_)},
     remedy  => sub{remedy_update_prf_file(@_)}
   },
-  # Commit to git
   {
-    title   => 'Verify git status is clean',
+    title   => 'Update NEWS Section',
     skip    => 1,
-    verify  => sub{verify_git_status_clean(@_)},
-    message => sub{message_git_status_clean(@_)},
-    # remedy  => sub{remedy_git_status_clean(@_)}
-  }
+    verify  => sub{verify_update_news_file(@_)},
+    message => sub{message_update_news_file(@_)}
+  },
+  {
+    title   => 'Verify remote arg',
+    verify  => sub{verify_git_remote(@_)},
+    message => sub{message_git_remote(@_)},
+  },
+  # Commit to git
 );
 
 my @t = gmtime;
@@ -449,14 +423,34 @@ sub run_step {
   }
 }
 
-if (my $step_num = $settings{step}) {
-  # Run one step
-  run_step($step_num, $release_steps[$step_num - 1]);
-} else {
-  my $step_count = 0;
-
-  for my $step (@release_steps) {
-    ++$step_count; 
-    run_step($step_count, $step);
+sub validate_version_arg {
+  my $version = $settings{version} || "";
+  if ($version =~ /([0-9])+\.([0-9])+([0-9]+)?/) {
+    $settings{major_version} = $1;
+    $settings{minor_version} = $2;
+    if ($3) {
+      $settings{micro_version} = $3;
+    } else {
+      $settings{micro_version} = 0;
+    }
+    return 1;
+  } else {
+    return 0;
   }
+}
+
+if (validate_version_arg) {
+  if (my $step_num = $settings{step}) {
+    # Run one step
+    run_step($step_num, $release_steps[$step_num - 1]);
+  } else {
+    my $step_count = 0;
+
+    for my $step (@release_steps) {
+      ++$step_count;
+      run_step($step_count, $step);
+    }
+  }
+} else {
+  print usage();
 }
