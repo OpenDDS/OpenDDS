@@ -752,7 +752,7 @@ public:
             indent << "  return false;\n" <<
             indent << "}\n";
         } else {
-          be_global->impl_ << 
+          be_global->impl_ <<
             "  if (" << field_name << " != rhs." << field_name << ") {\n"
             "    return false;\n"
             "  }\n";
