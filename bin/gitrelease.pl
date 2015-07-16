@@ -134,10 +134,11 @@ sub compare_git_remote_out_of_date {
   }
   close(GITREMOTE);
   # Check for differences
-  my $diffs = open(GITDIFF, 
-                   "git diff HEAD $remote/master --shortstat --exit-code|");
-  if ($diffs) {
-    $settings->{git_diff} = <GITDIFF>;
+  my $diffs = 0;
+  open(GITDIFF, "git diff HEAD $remote/master --shortstat |");
+  while (<GITDIFF>) {
+    $settings->{git_diff} = $_;
+    $diffs = 1;
   }
   close(GITDIFF);
   return !$diffs;
