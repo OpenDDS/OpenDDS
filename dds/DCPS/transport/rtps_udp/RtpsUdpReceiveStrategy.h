@@ -109,8 +109,8 @@ private:
     OpenDDS::RTPS::VendorId_t source_vendor_;
     OpenDDS::RTPS::GuidPrefix_t source_guid_prefix_;
     OpenDDS::RTPS::GuidPrefix_t dest_guid_prefix_;
-    OpenDDS::DCPS::LocatorSeq unicast_reply_locator_list_;
-    OpenDDS::DCPS::LocatorSeq multicast_reply_locator_list_;
+    OpenDDS::RTPS::LocatorSeq unicast_reply_locator_list_;
+    OpenDDS::RTPS::LocatorSeq multicast_reply_locator_list_;
     bool have_timestamp_;
     OpenDDS::RTPS::Time_t timestamp_;
   };

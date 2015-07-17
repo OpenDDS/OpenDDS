@@ -43,18 +43,6 @@ private:
 
   virtual void shutdown_i();
 
-  virtual void register_for_reader(const RepoId& participant,
-                                   const RepoId& writerid,
-                                   const RepoId& readerid,
-                                   const TransportLocatorSeq& locators,
-                                   OpenDDS::DCPS::DiscoveryListener* listener);
-
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
-                                   const TransportLocatorSeq& /*locators*/,
-                                   DiscoveryListener* /*listener*/);
-
   virtual bool connection_info_i(TransportLocator& info) const;
   ACE_INET_Addr get_connection_addr(const TransportBLOB& data,
                                     bool& requires_inline_qos) const;

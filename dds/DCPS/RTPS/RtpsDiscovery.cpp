@@ -40,7 +40,7 @@ namespace OpenDDS {
 namespace RTPS {
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
-  : DCPS::PeerDiscovery<Spdp>(key)
+  : DCPS::Discovery(key)
   , resend_period_(30 /*seconds*/) // see RTPS v2.1 9.6.1.4.2
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
   , dg_(250)
@@ -58,6 +58,99 @@ RtpsDiscovery::~RtpsDiscovery()
 {
   reactor_runner_.end();
 
+}
+
+OpenDDS::DCPS::RepoId
+RtpsDiscovery::bit_key_to_repo_id(DCPS::DomainParticipantImpl* participant,
+                                  const char* bit_topic_name,
+                                  const DDS::BuiltinTopicKey_t& key) const
+{
+  return get_part(participant->get_domain_id(), participant->get_id())
+    ->bit_key_to_repo_id(bit_topic_name, key);
+}
+
+
+namespace {
+  void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
+                     DCPS::SubscriberImpl* sub,
+                     const DDS::DataReaderQos& qos)
+  {
+    using namespace DCPS;
+    TopicDescriptionImpl* bit_topic_i =
+      dynamic_cast<TopicDescriptionImpl*>(topic);
+
+    DDS::DomainParticipant_var participant = sub->get_participant();
+    DomainParticipantImpl* participant_i =
+      dynamic_cast<DomainParticipantImpl*>(participant.in());
+
+    TypeSupport_var type_support =
+      Registered_Data_Types->lookup(participant, type);
+
+    DDS::DataReader_var dr = type_support->create_datareader();
+    OpenDDS::DCPS::DataReaderImpl* dri = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(dr.in());
+
+    dri->init(bit_topic_i, qos, 0 /*listener*/, 0 /*mask*/,
+              participant_i, sub, dr);
+    dri->disable_transport();
+    dri->enable();
+  }
+}
+
+DDS::Subscriber_ptr
+RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
+{
+  using namespace DCPS;
+  if (create_bit_topics(participant) != DDS::RETCODE_OK) {
+    return 0;
+  }
+
+  DDS::Subscriber_var bit_subscriber =
+    participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+                                   DDS::SubscriberListener::_nil(),
+                                   DEFAULT_STATUS_MASK);
+  SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber.in());
+
+  DDS::DataReaderQos dr_qos;
+  sub->get_default_datareader_qos(dr_qos);
+  dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
+
+  DDS::TopicDescription_var bit_part_topic =
+    participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
+  create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,
+                sub, dr_qos);
+
+  DDS::TopicDescription_var bit_topic_topic =
+    participant->lookup_topicdescription(BUILT_IN_TOPIC_TOPIC);
+  create_bit_dr(bit_topic_topic, BUILT_IN_TOPIC_TOPIC_TYPE,
+                sub, dr_qos);
+
+  DDS::TopicDescription_var bit_pub_topic =
+    participant->lookup_topicdescription(BUILT_IN_PUBLICATION_TOPIC);
+  create_bit_dr(bit_pub_topic, BUILT_IN_PUBLICATION_TOPIC_TYPE,
+                sub, dr_qos);
+
+  DDS::TopicDescription_var bit_sub_topic =
+    participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
+  create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
+                sub, dr_qos);
+
+  set_part_bit_subscriber(participant->get_domain_id(), participant->get_id(), bit_subscriber);
+
+  return bit_subscriber._retn();
+}
+
+void
+RtpsDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant)
+{
+  get_part(participant->get_domain_id(), participant->get_id())->fini_bit();
+}
+
+void
+RtpsDiscovery::set_part_bit_subscriber(const DDS::DomainId_t domain_id,
+                                       const DCPS::RepoId& part_id,
+                                       const DDS::Subscriber_var& bit_subscriber)
+{
+  get_part(domain_id, part_id)->init_bit(bit_subscriber);
 }
 
 namespace {
@@ -291,6 +384,13 @@ RtpsDiscovery::ReactorRunner::~ReactorRunner()
 
 // Participant operations:
 
+bool
+RtpsDiscovery::attach_participant(DDS::DomainId_t /*domainId*/,
+                                  const OpenDDS::DCPS::RepoId& /*participantId*/)
+{
+  return false; // This is just for DCPSInfoRepo?
+}
+
 DCPS::AddDomainStatus
 RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
                                       const DDS::DomainParticipantQos& qos)
@@ -312,12 +412,304 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
   return ads;
 }
 
+bool
+RtpsDiscovery::remove_domain_participant(DDS::DomainId_t domain_id,
+                                         const OpenDDS::DCPS::RepoId& participantId)
+{
+  // Use reference counting to ensure participant
+  // does not get deleted until lock as been released.
+  DCPS::RcHandle<Spdp> participant;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  DomainParticipantMap::iterator domain = participants_.find(domain_id);
+  if (domain == participants_.end()) {
+    return false;
+  }
+  ParticipantMap::iterator part = domain->second.find(participantId);
+  if (part == domain->second.end()) {
+    return false;
+  }
+  participant = part->second;
+  domain->second.erase(part);
+  if (domain->second.empty()) {
+    participants_.erase(domain);
+  }
+
+  return true;
+}
+
+bool
+RtpsDiscovery::ignore_domain_participant(DDS::DomainId_t domain,
+                                         const OpenDDS::DCPS::RepoId& myParticipantId,
+                                         const OpenDDS::DCPS::RepoId& ignoreId)
+{
+  get_part(domain, myParticipantId)->ignore_domain_participant(ignoreId);
+  return true;
+}
+
+bool
+RtpsDiscovery::update_domain_participant_qos(DDS::DomainId_t domain,
+                                             const OpenDDS::DCPS::RepoId& participant,
+                                             const DDS::DomainParticipantQos& qos)
+{
+  return get_part(domain, participant)->update_domain_participant_qos(qos);
+}
+
+// Topic operations:
+
+DCPS::TopicStatus
+RtpsDiscovery::assert_topic(OpenDDS::DCPS::RepoId_out topicId,
+                            DDS::DomainId_t domainId,
+                            const OpenDDS::DCPS::RepoId& participantId,
+                            const char* topicName,
+                            const char* dataTypeName,
+                            const DDS::TopicQos& qos,
+                            bool hasDcpsKey)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
+  OPENDDS_MAP(DDS::DomainId_t,
+           OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails) )::iterator topic_it =
+    topics_.find(domainId);
+  if (topic_it != topics_.end()) {
+    const OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails)::iterator it =
+      topic_it->second.find(topicName);
+    if (it != topic_it->second.end()
+        && it->second.data_type_ != dataTypeName) {
+      topicId = GUID_UNKNOWN;
+      return DCPS::CONFLICTING_TYPENAME;
+    }
+  }
+
+  // Verified its safe to hold lock during call to assert_topic
+  const DCPS::TopicStatus stat =
+    participants_[domainId][participantId]->assert_topic(topicId, topicName,
+                                                         dataTypeName, qos,
+                                                         hasDcpsKey);
+  if (stat == DCPS::CREATED || stat == DCPS::FOUND) { // qos change (FOUND)
+    Sedp::TopicDetails& td = topics_[domainId][topicName];
+    td.data_type_ = dataTypeName;
+    td.qos_ = qos;
+    td.repo_id_ = topicId;
+    ++topic_use_[domainId][topicName];
+  }
+  return stat;
+}
+
+DCPS::TopicStatus
+RtpsDiscovery::find_topic(DDS::DomainId_t domainId, const char* topicName,
+                          CORBA::String_out dataTypeName, DDS::TopicQos_out qos,
+                          OpenDDS::DCPS::RepoId_out topicId)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
+  OPENDDS_MAP(DDS::DomainId_t,
+           OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails) )::iterator topic_it =
+    topics_.find(domainId);
+  if (topic_it == topics_.end()) {
+    return DCPS::NOT_FOUND;
+  }
+  OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails)::iterator iter =
+    topic_it->second.find(topicName);
+  if (iter == topic_it->second.end()) {
+    return DCPS::NOT_FOUND;
+  }
+  Sedp::TopicDetails& td = iter->second;
+  dataTypeName = td.data_type_.c_str();
+  qos = new DDS::TopicQos(td.qos_);
+  topicId = td.repo_id_;
+  ++topic_use_[domainId][topicName];
+  return DCPS::FOUND;
+}
+
+DCPS::TopicStatus
+RtpsDiscovery::remove_topic(DDS::DomainId_t domainId,
+                            const OpenDDS::DCPS::RepoId& participantId,
+                            const OpenDDS::DCPS::RepoId& topicId)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
+  OPENDDS_MAP(DDS::DomainId_t,
+           OPENDDS_MAP(OPENDDS_STRING, Sedp::TopicDetails) )::iterator topic_it =
+    topics_.find(domainId);
+  if (topic_it == topics_.end()) {
+    return DCPS::NOT_FOUND;
+  }
+
+  OPENDDS_STRING name;
+  // Safe to hold lock while calling remove topic
+  const DCPS::TopicStatus stat =
+    participants_[domainId][participantId]->remove_topic(topicId, name);
+
+  if (stat == DCPS::REMOVED) {
+    if (0 == --topic_use_[domainId][name]) {
+      topic_use_[domainId].erase(name);
+      if (topic_it->second.empty()) {
+        topic_use_.erase(domainId);
+      }
+      topic_it->second.erase(name);
+      if (topic_it->second.empty()) {
+        topics_.erase(topic_it);
+      }
+    }
+  }
+  return stat;
+}
+
+bool
+RtpsDiscovery::ignore_topic(DDS::DomainId_t domainId, const OpenDDS::DCPS::RepoId& myParticipantId,
+                            const OpenDDS::DCPS::RepoId& ignoreId)
+{
+  get_part(domainId, myParticipantId)->ignore_topic(ignoreId);
+  return true;
+}
+
+bool
+RtpsDiscovery::update_topic_qos(const OpenDDS::DCPS::RepoId& topicId, DDS::DomainId_t domainId,
+                                const OpenDDS::DCPS::RepoId& participantId, const DDS::TopicQos& qos)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  OPENDDS_STRING name;
+  // Safe to hold lock while calling update_topic_qos
+  if (participants_[domainId][participantId]->update_topic_qos(topicId,
+                                                               qos, name)) {
+    topics_[domainId][name].qos_ = qos;
+    return true;
+  }
+  return false;
+}
+
+
+// Publication operations:
+
+OpenDDS::DCPS::RepoId
+RtpsDiscovery::add_publication(DDS::DomainId_t domainId,
+                               const OpenDDS::DCPS::RepoId& participantId,
+                               const OpenDDS::DCPS::RepoId& topicId,
+                               DCPS::DataWriterCallbacks* publication,
+                               const DDS::DataWriterQos& qos,
+                               const DCPS::TransportLocatorSeq& transInfo,
+                               const DDS::PublisherQos& publisherQos)
+{
+  return get_part(domainId, participantId)->add_publication(
+    topicId, publication, qos, transInfo, publisherQos);
+}
+
+bool
+RtpsDiscovery::remove_publication(DDS::DomainId_t domainId,
+                                  const OpenDDS::DCPS::RepoId& participantId,
+                                  const OpenDDS::DCPS::RepoId& publicationId)
+{
+  get_part(domainId, participantId)->remove_publication(publicationId);
+  return true;
+}
+
+bool
+RtpsDiscovery::ignore_publication(DDS::DomainId_t domainId,
+                                  const OpenDDS::DCPS::RepoId& participantId,
+                                  const OpenDDS::DCPS::RepoId& ignoreId)
+{
+  get_part(domainId, participantId)->ignore_publication(ignoreId);
+  return true;
+}
+
+bool
+RtpsDiscovery::update_publication_qos(DDS::DomainId_t domainId,
+                                      const OpenDDS::DCPS::RepoId& partId,
+                                      const OpenDDS::DCPS::RepoId& dwId,
+                                      const DDS::DataWriterQos& qos,
+                                      const DDS::PublisherQos& publisherQos)
+{
+  return get_part(domainId, partId)->update_publication_qos(dwId, qos,
+                                                            publisherQos);
+}
+
+
+// Subscription operations:
+
+OpenDDS::DCPS::RepoId
+RtpsDiscovery::add_subscription(DDS::DomainId_t domainId,
+                                const OpenDDS::DCPS::RepoId& participantId,
+                                const OpenDDS::DCPS::RepoId& topicId,
+                                DCPS::DataReaderCallbacks* subscription,
+                                const DDS::DataReaderQos& qos,
+                                const DCPS::TransportLocatorSeq& transInfo,
+                                const DDS::SubscriberQos& subscriberQos,
+                                const char* filterClassName,
+                                const char* filterExpr,
+                                const DDS::StringSeq& params)
+{
+  return get_part(domainId, participantId)->add_subscription(topicId, subscription, qos, transInfo, subscriberQos, filterClassName, filterExpr, params);
+}
+
+bool
+RtpsDiscovery::remove_subscription(DDS::DomainId_t domainId,
+                                   const OpenDDS::DCPS::RepoId& participantId,
+                                   const OpenDDS::DCPS::RepoId& subscriptionId)
+{
+  get_part(domainId, participantId)->remove_subscription(subscriptionId);
+  return true;
+}
+
+bool
+RtpsDiscovery::ignore_subscription(DDS::DomainId_t domainId,
+                                   const OpenDDS::DCPS::RepoId& participantId,
+                                   const OpenDDS::DCPS::RepoId& ignoreId)
+{
+  get_part(domainId, participantId)->ignore_subscription(ignoreId);
+  return true;
+}
+
+bool
+RtpsDiscovery::update_subscription_qos(DDS::DomainId_t domainId,
+                                       const OpenDDS::DCPS::RepoId& partId,
+                                       const OpenDDS::DCPS::RepoId& drId,
+                                       const DDS::DataReaderQos& qos,
+                                       const DDS::SubscriberQos& subQos)
+{
+  return get_part(domainId, partId)->update_subscription_qos(drId, qos, subQos);
+}
+
+bool
+RtpsDiscovery::update_subscription_params(DDS::DomainId_t domainId,
+                                          const OpenDDS::DCPS::RepoId& partId,
+                                          const OpenDDS::DCPS::RepoId& subId,
+                                          const DDS::StringSeq& params)
+
+{
+  return get_part(domainId, partId)->update_subscription_params(subId, params);
+}
+
+
+// Managing reader/writer associations:
+
+void
+RtpsDiscovery::association_complete(DDS::DomainId_t domainId,
+                                    const OpenDDS::DCPS::RepoId& participantId,
+                                    const OpenDDS::DCPS::RepoId& localId,
+                                    const OpenDDS::DCPS::RepoId& remoteId)
+{
+  get_part(domainId, participantId)->association_complete(localId, remoteId);
+}
+
 void
 RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
                                  const OpenDDS::DCPS::RepoId& part_id,
                                  DDS::LivelinessQosPolicyKind kind)
 {
   get_part(domain_id, part_id)->signal_liveliness(kind);
+}
+
+DCPS::RcHandle<Spdp>
+RtpsDiscovery::get_part(const DDS::DomainId_t domain_id,
+                        const OpenDDS::DCPS::RepoId& part_id) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::RcHandle<Spdp>());
+  DomainParticipantMap::const_iterator domain = participants_.find(domain_id);
+  if (domain == participants_.end()) {
+    return DCPS::RcHandle<Spdp>();
+  }
+  ParticipantMap::const_iterator part = domain->second.find(part_id);
+  if (part == domain->second.end()) {
+    return DCPS::RcHandle<Spdp>();
+  }
+  return part->second;
 }
 
 RtpsDiscovery::StaticInitializer::StaticInitializer()

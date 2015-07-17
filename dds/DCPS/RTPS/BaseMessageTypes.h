@@ -44,9 +44,9 @@ namespace OpenDDS {
 
     const SequenceNumber_t SEQUENCENUMBER_UNKNOWN = { -1, 0 };
 
-    const OpenDDS::DCPS::Locator_t LOCATOR_INVALID =
+    const Locator_t LOCATOR_INVALID =
       { LOCATOR_KIND_INVALID, LOCATOR_PORT_INVALID, { 0 } };
-    const OpenDDS::DCPS::OctetArray16 LOCATOR_ADDRESS_INVALID = { 0 };
+    const OctetArray16 LOCATOR_ADDRESS_INVALID = { 0 };
 
     const LocatorUDPv4_t LOCATORUDPv4_INVALID = { 0, 0 };
 

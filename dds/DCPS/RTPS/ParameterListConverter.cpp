@@ -25,7 +25,7 @@ namespace {
   }
 
   void add_param_locator_seq(ParameterList& param_list,
-                             const OpenDDS::DCPS::LocatorSeq& locator_seq,
+                             const LocatorSeq& locator_seq,
                              const ParameterId_t pid) {
     CORBA::ULong length = locator_seq.length();
     for (CORBA::ULong i = 0; i < length; ++i) {
@@ -39,14 +39,14 @@ namespace {
   void add_param_rtps_locator(ParameterList& param_list,
                          const DCPS::TransportLocator& dcps_locator) {
     // Convert the tls blob to an RTPS locator seq
-    OpenDDS::DCPS::LocatorSeq locators;
+    LocatorSeq locators;
     bool ignore_requires_inline_qos;
     DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators,
                                                 ignore_requires_inline_qos);
     if (result == DDS::RETCODE_OK) {
       CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
-        OpenDDS::DCPS::Locator_t& rtps_locator = locators[i];
+        Locator_t& rtps_locator = locators[i];
         ACE_INET_Addr address;
         if (locator_to_address(address, rtps_locator) == 0) {
           Parameter param;
@@ -74,7 +74,7 @@ namespace {
     add_param(param_list, param);
   }
 
-  void append_locator(OpenDDS::DCPS::LocatorSeq& list, const OpenDDS::DCPS::Locator_t& locator) {
+  void append_locator(LocatorSeq& list, const Locator_t& locator) {
     CORBA::ULong length = list.length();
     list.length(length + 1);
     list[length] = locator;
@@ -90,7 +90,7 @@ namespace {
 
   void append_locators_if_present(
       OpenDDS::DCPS::TransportLocatorSeq& list,
-      const OpenDDS::DCPS::LocatorSeq& rtps_udp_locators) {
+      const LocatorSeq& rtps_udp_locators) {
     if (rtps_udp_locators.length()) {
       CORBA::ULong length = list.length();
       list.length(length + 1);
@@ -105,7 +105,7 @@ namespace {
     locator_port_only
   };
 
-  void append_associated_writer(OpenDDS::DCPS::DiscoveredReaderData& reader_data,
+  void append_associated_writer(DiscoveredReaderData& reader_data,
                                 const Parameter& param)
   {
     CORBA::ULong len = reader_data.readerProxy.associatedWriters.length();
@@ -113,21 +113,21 @@ namespace {
     reader_data.readerProxy.associatedWriters[len] = param.guid();
   }
 
-  void set_ipaddress(OpenDDS::DCPS::LocatorSeq& locators,
+  void set_ipaddress(LocatorSeq& locators,
                      LocatorState& last_state,
                      const unsigned long addr) {
     CORBA::ULong length = locators.length();
     // Update last locator if the last state is port only
     if (last_state == locator_port_only && length > 0) {
       // Update last locator
-      OpenDDS::DCPS::Locator_t& partial = locators[length - 1];
+      Locator_t& partial = locators[length - 1];
       OpenDDS::RTPS::assign(partial.address, addr);
       // there is no longer a partially complete locator, set state
       last_state = locator_complete;
     // Else there is no partially complete locator available
     } else {
       // initialize and append new locator
-      OpenDDS::DCPS::Locator_t locator;
+      Locator_t locator;
       locator.kind = LOCATOR_KIND_UDPv4;
       locator.port = 0;
       OpenDDS::RTPS::assign(locator.address, addr);
@@ -138,21 +138,21 @@ namespace {
     }
   }
 
-  void set_port(OpenDDS::DCPS::LocatorSeq& locators,
+  void set_port(LocatorSeq& locators,
                 LocatorState& last_state,
                 const unsigned long port) {
     CORBA::ULong length = locators.length();
     // Update last locator if the last state is address only
     if (last_state == locator_address_only && length > 0) {
       // Update last locator
-      OpenDDS::DCPS::Locator_t& partial = locators[length - 1];
+      Locator_t& partial = locators[length - 1];
       partial.port = port;
       // there is no longer a partially complete locator, set state
       last_state = locator_complete;
     // Else there is no partially complete locator available
     } else {
       // initialize and append new locator
-      OpenDDS::DCPS::Locator_t locator;
+      Locator_t locator;
       locator.kind = LOCATOR_KIND_UDPv4;
       locator.port = port;
       OpenDDS::RTPS::assign(locator.address, 0);
@@ -246,7 +246,7 @@ namespace {
     return qos != def_qos;
   }
 
-  bool not_default(const OpenDDS::DCPS::ContentFilterProperty_t& cfprop)
+  bool not_default(const ContentFilterProperty_t& cfprop)
   {
     return std::strlen(cfprop.filterExpression);
   }
@@ -356,7 +356,7 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
   return 0;
 }
 
-int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
+int to_param_list(const DiscoveredWriterData& writer_data,
                   ParameterList& param_list)
 {
   // Ignore builtin topic key
@@ -520,7 +520,7 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
   return 0;
 }
 
-int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
+int to_param_list(const DiscoveredReaderData& reader_data,
                   ParameterList& param_list)
 {
   // Ignore builtin topic key
@@ -646,7 +646,7 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
   if (not_default(reader_data.contentFilterProperty))
   {
     Parameter param;
-    OpenDDS::DCPS::ContentFilterProperty_t cfprop_copy = reader_data.contentFilterProperty;
+    ContentFilterProperty_t cfprop_copy = reader_data.contentFilterProperty;
     if (!std::strlen(cfprop_copy.filterClassName)) {
       cfprop_copy.filterClassName = "DDSSQL";
     }
@@ -813,11 +813,11 @@ int from_param_list(const ParameterList& param_list,
 }
 
 int from_param_list(const ParameterList& param_list,
-                    OpenDDS::DCPS::DiscoveredWriterData& writer_data)
+                    DiscoveredWriterData& writer_data)
 {
   LocatorState last_state = locator_undefined;  // Track state of locator
   // Collect the rtps_udp locators before appending them to allLocators
-  OpenDDS::DCPS::LocatorSeq rtps_udp_locators;
+  LocatorSeq rtps_udp_locators;
 
   // Start by setting defaults
   writer_data.ddsPublicationData.topic_name = "";
@@ -971,12 +971,12 @@ int from_param_list(const ParameterList& param_list,
 }
 
 int from_param_list(const ParameterList& param_list,
-                    OpenDDS::DCPS::DiscoveredReaderData& reader_data)
+                    DiscoveredReaderData& reader_data)
 {
   LocatorState last_state = locator_undefined;  // Track state of locator
   // Collect the rtps_udp locators before appending them to allLocators
 
-  OpenDDS::DCPS::LocatorSeq rtps_udp_locators;
+  LocatorSeq rtps_udp_locators;
   // Start by setting defaults
   reader_data.ddsSubscriptionData.topic_name = "";
   reader_data.ddsSubscriptionData.type_name  = "";

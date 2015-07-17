@@ -1,7 +1,0 @@
-project: dcpsexe, dcps_transports_for_test {
-  requires += built_in_topics
-  idlflags += -SS
-  TypeSupport_Files {
-    TestMsg.idl
-  }
-}

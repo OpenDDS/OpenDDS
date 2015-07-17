@@ -807,16 +807,6 @@ void ReplayerImpl::remove_all_associations()
 }
 
 void
-ReplayerImpl::register_for_reader(const RepoId& participant,
-                                  const RepoId& writerid,
-                                  const RepoId& readerid,
-                                  const TransportLocatorSeq& locators,
-                                  DiscoveryListener* listener)
-{
-  TransportClient::register_for_reader(participant, writerid, readerid, locators, listener);
-}
-
-void
 ReplayerImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
 

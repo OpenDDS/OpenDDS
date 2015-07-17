@@ -32,16 +32,10 @@ void callback(FACE::TRANSACTION_ID_TYPE,
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  if (argc < 2) {
-    ACE_ERROR((LM_ERROR, "No config file\n"));
-    return EXIT_FAILURE;
-  }
-  const char* config = argv[1];
-  const bool useCallback = argc > 2 && 0 == std::strcmp(argv[2], "callback");
-  const char* subname = useCallback ? "suba" : "subb";
+  const bool useCallback = argc > 1 && 0 == std::strcmp(argv[1], "callback");
 
   FACE::RETURN_CODE_TYPE status;
-  FACE::TS::Initialize(config, status);
+  FACE::TS::Initialize("face_config.ini", status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   DisableGlobalNew dgn;
@@ -49,7 +43,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   FACE::CONNECTION_ID_TYPE connId;
   FACE::CONNECTION_DIRECTION_TYPE dir;
   FACE::MESSAGE_SIZE_TYPE max_msg_size;
-  FACE::TS::Create_Connection(subname, FACE::PUB_SUB, connId, dir, max_msg_size,
+  FACE::TS::Create_Connection("sub", FACE::PUB_SUB, connId, dir, max_msg_size,
                               FACE::INF_TIME_VALUE, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 

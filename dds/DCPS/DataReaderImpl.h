@@ -537,12 +537,6 @@ public:
 
   void disable_transport();
 
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
-                                   const TransportLocatorSeq& /*locators*/,
-                                   DiscoveryListener* /*listener*/);
-
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_or_reschedule(const PublicationId& pub_id);
