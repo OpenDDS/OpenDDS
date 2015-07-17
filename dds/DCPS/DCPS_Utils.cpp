@@ -355,7 +355,9 @@ bool should_check_association_upon_change(const DDS::PublisherQos & qos1,
 
 #else // !OPENDDS_GCC33
 
+#ifndef OPENDDS_SAFETY_PROFILE
 using OpenDDS::DCPS::operator==;
+#endif
 bool should_check_association_upon_change(const DDS::DataReaderQos & qos1,
                                           const DDS::DataReaderQos & qos2)
 {
