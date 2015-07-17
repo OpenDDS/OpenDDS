@@ -19,12 +19,6 @@ void Common_Export PrintSampleInfo(const ::DDS::SampleInfo& si) ;
  * NOTE: comparison operators don't compare instance_handle or
  * source_timestamp
  */
-bool Common_Export operator==(const ::DDS::SampleInfo& si1, const ::DDS::SampleInfo& si2) ;
-
-inline bool operator!=(const ::DDS::SampleInfo& si1,
-                       const ::DDS::SampleInfo& si2)
-{
-    return !operator==(si1, si2) ;
-}
+bool Common_Export SampleInfoMatches(const ::DDS::SampleInfo& si1, const ::DDS::SampleInfo& si2);
 
 #endif

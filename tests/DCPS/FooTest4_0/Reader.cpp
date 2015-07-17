@@ -163,7 +163,7 @@ Reader::read (const SampleInfoMap& si_map,
           }
           else
           {
-            if (si[i] != it->second)
+            if (!SampleInfoMatches(si[i], it->second))
             {
               ACE_OS::printf ("read - Error: %c SampleInfo != expected\n",
                               foo[i].c) ;

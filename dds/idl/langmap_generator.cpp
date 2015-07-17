@@ -990,7 +990,7 @@ public:
             "  }\n";
         }
       }
-      be_global->impl_ << "  return false;\n}\n\n";
+      be_global->impl_ << "  return true;\n}\n\n";
 
       if (size == AST_Type::VARIABLE) {
         be_global->impl_ <<
