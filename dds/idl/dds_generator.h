@@ -329,17 +329,32 @@ namespace AstTypeClassification {
 
 struct NestedForLoops {
   NestedForLoops(const char* type, const char* prefix, AST_Array* arr,
-                 std::string& indent)
+                 std::string& indent, bool followTypedefs = false)
     : n_(arr->n_dims()), indent_(indent)
   {
     std::ostringstream index_oss;
-    for (size_t i = 0; i < n_; ++i) {
-      be_global->impl_ <<
-        indent << "for (" << type << ' ' << prefix << i << " = 0; " <<
-        prefix << i << " < " << arr->dims()[i]->ev()->u.ulval << "; ++" <<
-        prefix << i << ") {\n";
-      indent += "  ";
-      index_oss << "[" << prefix << i << "]";
+    size_t i = 0, j = 0;
+    while (true) {
+      for (; i < n_; ++i) {
+        be_global->impl_ <<
+          indent << "for (" << type << ' ' << prefix << i << " = 0; " <<
+          prefix << i << " < " << arr->dims()[i - j]->ev()->u.ulval << "; ++" <<
+          prefix << i << ") {\n";
+        indent += "  ";
+        index_oss << "[" << prefix << i << "]";
+      }
+      if (!followTypedefs) {
+        break;
+      }
+      AST_Type* const base =
+        AstTypeClassification::resolveActualType(arr->base_type());
+      if (base->node_type() == AST_Decl::NT_array) {
+        arr = AST_Array::narrow_from_decl(base);
+        n_ += arr->n_dims();
+        j = i;
+      } else {
+        break;
+      }
     }
     index_ = index_oss.str();
   }

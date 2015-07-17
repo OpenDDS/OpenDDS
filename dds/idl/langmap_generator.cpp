@@ -487,6 +487,7 @@ public:
 
     be_global->lang_header_ <<
       "  bool operator==(const " << nm << "& rhs) const;\n"
+      "  bool operator!=(const " << nm << "& rhs) const { return !(*this == rhs); }\n"
       "  OPENDDS_POOL_ALLOCATION_HOOKS\n";
 
     be_global->lang_header_ <<
@@ -715,6 +716,7 @@ public:
 
     be_global->lang_header_ << "\n"
       "  bool operator==(const " << nm << "& rhs) const;\n"
+      "  bool operator!=(const " << nm << "& rhs) const { return !(*this == rhs); }\n"
       "  OPENDDS_POOL_ALLOCATION_HOOKS\n"
       "};\n\n";
 
@@ -735,31 +737,28 @@ public:
       const ScopedNamespaceGuard guard(name, be_global->impl_);
       be_global->impl_ <<
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
-        "{\n"
-        "  return ";
-
+        "{\n";
       for (size_t i = 0; i < fields.size(); ++i) {
         const std::string field_name = fields[i]->local_name()->get_string();
         AST_Type* field_type = resolveActualType(fields[i]->field_type());
         const Classification cls = classify(field_type);
         if (cls & CL_ARRAY) {
-          ACE_CDR::ULong elems = 1;
-          const std::string flat_fn = field_name + array_dims(field_type, elems);
-          for (ACE_CDR::ULong j = 0; j < elems; ++j) {
-            be_global->impl_ << flat_fn << '[' << j << "] == rhs." << flat_fn
-                             << '[' << j << ']';
-            if (j < elems - 1) {
-              be_global->impl_ << "\n    && ";
-            }
-          }
+          std::string indent("  ");
+          NestedForLoops nfl("int", "i",
+            AST_Array::narrow_from_decl(field_type), indent, true);
+          be_global->impl_ <<
+            indent << "if (" << field_name << nfl.index_ << " != rhs."
+            << field_name << nfl.index_ << ") {\n" <<
+            indent << "  return false;\n" <<
+            indent << "}\n";
         } else {
-          be_global->impl_ << field_name << " == rhs." << field_name;
-        }
-        if (i < fields.size() - 1) {
-          be_global->impl_ << "\n    && ";
+          be_global->impl_ <<
+            "  if (" << field_name << " != rhs." << field_name << ") {\n"
+            "    return false;\n"
+            "  }\n";
         }
       }
-      be_global->impl_ << ";\n}\n\n";
+      be_global->impl_ << "  return true;\n}\n\n";
 
       if (size == AST_Type::VARIABLE) {
         be_global->impl_ <<
@@ -949,6 +948,7 @@ public:
 
     be_global->lang_header_ << "\n"
       "  bool operator==(const " << nm << "& rhs) const;\n"
+      "  bool operator!=(const " << nm << "& rhs) const { return !(*this == rhs); }\n"
       "  OPENDDS_POOL_ALLOCATION_HOOKS\n"
       "};\n\n";
 
@@ -969,31 +969,28 @@ public:
       const ScopedNamespaceGuard guard(name, be_global->impl_);
       be_global->impl_ <<
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
-        "{\n"
-        "  return ";
-
+        "{\n";
       for (size_t i = 0; i < fields.size(); ++i) {
         const std::string field_name = fields[i]->local_name()->get_string();
         AST_Type* field_type = resolveActualType(fields[i]->field_type());
         const Classification cls = classify(field_type);
         if (cls & CL_ARRAY) {
-          ACE_CDR::ULong elems = 1;
-          const std::string flat_fn = field_name + array_dims(field_type, elems);
-          for (ACE_CDR::ULong j = 0; j < elems; ++j) {
-            be_global->impl_ << flat_fn << '[' << j << "] == rhs." << flat_fn
-                             << '[' << j << ']';
-            if (j < elems - 1) {
-              be_global->impl_ << "\n    && ";
-            }
-          }
+          std::string indent("  ");
+          NestedForLoops nfl("int", "i",
+            AST_Array::narrow_from_decl(field_type), indent, true);
+          be_global->impl_ <<
+            indent << "if (" << field_name << nfl.index_ << " != rhs."
+            << field_name << nfl.index_ << ") {\n" <<
+            indent << "  return false;\n" <<
+            indent << "}\n";
         } else {
-          be_global->impl_ << field_name << " == rhs." << field_name;
-        }
-        if (i < fields.size() - 1) {
-          be_global->impl_ << "\n    && ";
+          be_global->impl_ <<
+            "  if (" << field_name << " != rhs." << field_name << ") {\n"
+            "    return false;\n"
+            "  }\n";
         }
       }
-      be_global->impl_ << ";\n}\n\n";
+      be_global->impl_ << "  return false;\n}\n\n";
 
       if (size == AST_Type::VARIABLE) {
         be_global->impl_ <<
