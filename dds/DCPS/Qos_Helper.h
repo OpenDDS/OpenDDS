@@ -31,7 +31,7 @@ ACE_Time_Value duration_to_time_value(const DDS::Duration_t& t);
 
 ACE_INLINE OpenDDS_Dcps_Export
 ACE_Time_Value duration_to_absolute_time_value(const DDS::Duration_t& t,
-                                               const ACE_Time_Value now = ACE_OS::gettimeofday());
+                                               const ACE_Time_Value& now = ACE_OS::gettimeofday());
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv);
@@ -53,7 +53,7 @@ bool valid_duration(DDS::Duration_t const & t);
 /// Check if given duration is either infinite or greater than or
 /// equal to zero.
 ACE_INLINE OpenDDS_Dcps_Export
-bool non_negative_duration(DDS::Duration_t const & t);
+bool non_negative_duration(const DDS::Duration_t& t);
 
 /**
  * @class Qos_Helper
@@ -95,12 +95,12 @@ class OpenDDS_Dcps_Export Qos_Helper {
 public:
 
   static bool consistent(
-    DDS::ResourceLimitsQosPolicy const & resource_limits,
-    DDS::HistoryQosPolicy const & history);
+    const DDS::ResourceLimitsQosPolicy& resource_limits,
+    const DDS::HistoryQosPolicy& history);
 
   static bool consistent(
-    DDS::DeadlineQosPolicy const & deadline,
-    DDS::TimeBasedFilterQosPolicy const & time_based_filter);
+    const DDS::DeadlineQosPolicy& deadline,
+    const DDS::TimeBasedFilterQosPolicy& time_based_filter);
 
   static bool consistent(const DDS::DomainParticipantQos& qos);
 
@@ -278,29 +278,23 @@ public:
 
 #ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
-bool operator== (const DDS::Duration_t& t1,
-                 const DDS::Duration_t& t2);
+bool operator==(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 #endif
 
 ACE_INLINE OpenDDS_Dcps_Export
-bool operator!= (const DDS::Duration_t& t1,
-                 const DDS::Duration_t& t2);
+bool operator<(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
-bool operator<(const DDS::Duration_t& t1,
-                const DDS::Duration_t& t2);
+bool operator<=(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
-bool operator<= (const DDS::Duration_t& t1,
-                 const DDS::Duration_t& t2);
+bool operator>(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
-bool operator> (const DDS::Duration_t& t1,
-                const DDS::Duration_t& t2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator>= (const DDS::Duration_t& t1,
-                 const DDS::Duration_t& t2);
+bool operator>=(const DDS::Duration_t& t1, const DDS::Duration_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!(const DDS::Time_t& t);
@@ -308,10 +302,10 @@ bool operator!(const DDS::Time_t& t);
 #ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator==(const DDS::Time_t& t1, const DDS::Time_t& t2);
-#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator!=(const DDS::Time_t& t1, const DDS::Time_t& t2);
+#endif
 
 ACE_INLINE OpenDDS_Dcps_Export
 bool operator<(const DDS::Time_t& t1, const DDS::Time_t& t2);
@@ -330,289 +324,237 @@ DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 #ifndef OPENDDS_SAFETY_PROFILE
 ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::UserDataQosPolicy& qos1,
-                  const DDS::UserDataQosPolicy& qos2);
+bool operator==(const DDS::UserDataQosPolicy& qos1,
+                const DDS::UserDataQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::TopicDataQosPolicy & qos1,
+                const DDS::TopicDataQosPolicy & qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::GroupDataQosPolicy& qos1,
+                const DDS::GroupDataQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::TransportPriorityQosPolicy& qos1,
+                const DDS::TransportPriorityQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::LifespanQosPolicy& qos1,
+                const DDS::LifespanQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DurabilityQosPolicy& qos1,
+                const DDS::DurabilityQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DurabilityServiceQosPolicy& qos1,
+                const DDS::DurabilityServiceQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::PresentationQosPolicy& qos1,
+                const DDS::PresentationQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DeadlineQosPolicy& qos1,
+                const DDS::DeadlineQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::LatencyBudgetQosPolicy& qos1,
+                const DDS::LatencyBudgetQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::OwnershipQosPolicy& qos1,
+                const DDS::OwnershipQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::OwnershipStrengthQosPolicy& qos1,
+                const DDS::OwnershipStrengthQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::LivelinessQosPolicy& qos1,
+                const DDS::LivelinessQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::TimeBasedFilterQosPolicy& qos1,
+                const DDS::TimeBasedFilterQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::PartitionQosPolicy& qos1,
+                const DDS::PartitionQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::ReliabilityQosPolicy& qos1,
+                const DDS::ReliabilityQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DestinationOrderQosPolicy& qos1,
+                const DDS::DestinationOrderQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::HistoryQosPolicy& qos1,
+                const DDS::HistoryQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::ResourceLimitsQosPolicy& qos1,
+                const DDS::ResourceLimitsQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::EntityFactoryQosPolicy& qos1,
+                const DDS::EntityFactoryQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::WriterDataLifecycleQosPolicy& qos1,
+                const DDS::WriterDataLifecycleQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::ReaderDataLifecycleQosPolicy& qos1,
+                const DDS::ReaderDataLifecycleQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DomainParticipantQos& qos1,
+                const DDS::DomainParticipantQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::TopicQos& qos1,
+                const DDS::TopicQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DataWriterQos& qos1,
+                const DDS::DataWriterQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::PublisherQos& qos1,
+                const DDS::PublisherQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DataReaderQos& qos1,
+                const DDS::DataReaderQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::SubscriberQos& qos1,
+                const DDS::SubscriberQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const DDS::DomainParticipantFactoryQos& qos1,
+                const DDS::DomainParticipantFactoryQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::UserDataQosPolicy& qos1,
+                const DDS::UserDataQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::TopicDataQosPolicy & qos1,
+                const DDS::TopicDataQosPolicy & qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::GroupDataQosPolicy& qos1,
+                const DDS::GroupDataQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::TransportPriorityQosPolicy& qos1,
+                const DDS::TransportPriorityQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::LifespanQosPolicy& qos1,
+                const DDS::LifespanQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DurabilityQosPolicy& qos1,
+                const DDS::DurabilityQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DurabilityServiceQosPolicy& qos1,
+                const DDS::DurabilityServiceQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::PresentationQosPolicy& qos1,
+                const DDS::PresentationQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DeadlineQosPolicy& qos1,
+                const DDS::DeadlineQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::LatencyBudgetQosPolicy& qos1,
+                const DDS::LatencyBudgetQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::OwnershipQosPolicy& qos1,
+                const DDS::OwnershipQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::OwnershipStrengthQosPolicy& qos1,
+                const DDS::OwnershipStrengthQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::LivelinessQosPolicy& qos1,
+                const DDS::LivelinessQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::TimeBasedFilterQosPolicy& qos1,
+                const DDS::TimeBasedFilterQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::PartitionQosPolicy& qos1,
+                const DDS::PartitionQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::ReliabilityQosPolicy& qos1,
+                const DDS::ReliabilityQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DestinationOrderQosPolicy& qos1,
+                const DDS::DestinationOrderQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::HistoryQosPolicy& qos1,
+                const DDS::HistoryQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::ResourceLimitsQosPolicy& qos1,
+                const DDS::ResourceLimitsQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::EntityFactoryQosPolicy& qos1,
+                const DDS::EntityFactoryQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::WriterDataLifecycleQosPolicy& qos1,
+                const DDS::WriterDataLifecycleQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::ReaderDataLifecycleQosPolicy& qos1,
+                const DDS::ReaderDataLifecycleQosPolicy& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DomainParticipantQos& qos1,
+                const DDS::DomainParticipantQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::TopicQos& qos1,
+                const DDS::TopicQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DataWriterQos& qos1,
+                const DDS::DataWriterQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::PublisherQos& qos1,
+                const DDS::PublisherQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DataReaderQos& qos1,
+                const DDS::DataReaderQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::SubscriberQos& qos1,
+                const DDS::SubscriberQos& qos2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+bool operator!=(const DDS::DomainParticipantFactoryQos& qos1,
+                const DDS::DomainParticipantFactoryQos& qos2);
 #endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::TopicDataQosPolicy & qos1,
-                  const DDS::TopicDataQosPolicy & qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::GroupDataQosPolicy& qos1,
-                  const DDS::GroupDataQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::TransportPriorityQosPolicy& qos1,
-                  const DDS::TransportPriorityQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::LifespanQosPolicy& qos1,
-                  const DDS::LifespanQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::DurabilityQosPolicy& qos1,
-                  const DDS::DurabilityQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::DurabilityServiceQosPolicy& qos1,
-                  const DDS::DurabilityServiceQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::PresentationQosPolicy& qos1,
-                  const DDS::PresentationQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::DeadlineQosPolicy& qos1,
-                  const DDS::DeadlineQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::LatencyBudgetQosPolicy& qos1,
-                  const DDS::LatencyBudgetQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::OwnershipQosPolicy& qos1,
-                  const DDS::OwnershipQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::OwnershipStrengthQosPolicy& qos1,
-                  const DDS::OwnershipStrengthQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::LivelinessQosPolicy& qos1,
-                  const DDS::LivelinessQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::TimeBasedFilterQosPolicy& qos1,
-                  const DDS::TimeBasedFilterQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::PartitionQosPolicy& qos1,
-                  const DDS::PartitionQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::ReliabilityQosPolicy& qos1,
-                  const DDS::ReliabilityQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::DestinationOrderQosPolicy& qos1,
-                  const DDS::DestinationOrderQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::HistoryQosPolicy& qos1,
-                  const DDS::HistoryQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::ResourceLimitsQosPolicy& qos1,
-                  const DDS::ResourceLimitsQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::EntityFactoryQosPolicy& qos1,
-                  const DDS::EntityFactoryQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::WriterDataLifecycleQosPolicy& qos1,
-                  const DDS::WriterDataLifecycleQosPolicy& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::ReaderDataLifecycleQosPolicy& qos1,
-                  const DDS::ReaderDataLifecycleQosPolicy& qos2);
-#endif
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::DomainParticipantQos& qos1,
-                  const DDS::DomainParticipantQos& qos2);
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::TopicQos& qos1,
-                  const DDS::TopicQos& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::DataWriterQos& qos1,
-                  const DDS::DataWriterQos& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::PublisherQos& qos1,
-                  const DDS::PublisherQos& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::DataReaderQos& qos1,
-                  const DDS::DataReaderQos& qos2);
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::SubscriberQos& qos1,
-                  const DDS::SubscriberQos& qos2);
-#endif
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator == (const DDS::DomainParticipantFactoryQos& qos1,
-                  const DDS::DomainParticipantFactoryQos& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::UserDataQosPolicy& qos1,
-                  const DDS::UserDataQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::TopicDataQosPolicy & qos1,
-                  const DDS::TopicDataQosPolicy & qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::GroupDataQosPolicy& qos1,
-                  const DDS::GroupDataQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::TransportPriorityQosPolicy& qos1,
-                  const DDS::TransportPriorityQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::LifespanQosPolicy& qos1,
-                  const DDS::LifespanQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::DurabilityQosPolicy& qos1,
-                  const DDS::DurabilityQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::DurabilityServiceQosPolicy& qos1,
-                  const DDS::DurabilityServiceQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::PresentationQosPolicy& qos1,
-                  const DDS::PresentationQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::DeadlineQosPolicy& qos1,
-                  const DDS::DeadlineQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::LatencyBudgetQosPolicy& qos1,
-                  const DDS::LatencyBudgetQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::OwnershipQosPolicy& qos1,
-                  const DDS::OwnershipQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::OwnershipStrengthQosPolicy& qos1,
-                  const DDS::OwnershipStrengthQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::LivelinessQosPolicy& qos1,
-                  const DDS::LivelinessQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::TimeBasedFilterQosPolicy& qos1,
-                  const DDS::TimeBasedFilterQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::PartitionQosPolicy& qos1,
-                  const DDS::PartitionQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::ReliabilityQosPolicy& qos1,
-                  const DDS::ReliabilityQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::DestinationOrderQosPolicy& qos1,
-                  const DDS::DestinationOrderQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::HistoryQosPolicy& qos1,
-                  const DDS::HistoryQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::ResourceLimitsQosPolicy& qos1,
-                  const DDS::ResourceLimitsQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::EntityFactoryQosPolicy& qos1,
-                  const DDS::EntityFactoryQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::WriterDataLifecycleQosPolicy& qos1,
-                  const DDS::WriterDataLifecycleQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::ReaderDataLifecycleQosPolicy& qos1,
-                  const DDS::ReaderDataLifecycleQosPolicy& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::DomainParticipantQos& qos1,
-                  const DDS::DomainParticipantQos& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::TopicQos& qos1,
-                  const DDS::TopicQos& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::DataWriterQos& qos1,
-                  const DDS::DataWriterQos& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::PublisherQos& qos1,
-                  const DDS::PublisherQos& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::DataReaderQos& qos1,
-                  const DDS::DataReaderQos& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::SubscriberQos& qos1,
-                  const DDS::SubscriberQos& qos2);
-
-ACE_INLINE OpenDDS_Dcps_Export
-bool operator != (const DDS::DomainParticipantFactoryQos& qos1,
-                  const DDS::DomainParticipantFactoryQos& qos2);
 
 } // namespace DCPS
 } // namespace OpenDDS
