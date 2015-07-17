@@ -14,6 +14,108 @@
 namespace OpenDDS {
   namespace DCPS {
 
+    StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
+                                                 ACE_Thread_Mutex& lock,
+                                                 const EndpointRegistry& registry,
+                                                 StaticParticipant& participant)
+      : EndpointManager<StaticDiscoveredParticipantData>(participant_id, lock)
+      , registry_(registry)
+      , participant_(participant)
+    {
+    }
+
+    void
+    StaticEndpointManager::init_bit()
+    {
+      // Discover all remote publications and subscriptions.
+
+      for (EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.begin(),
+             limit = registry_.writer_map.end();
+           pos != limit;
+           ++pos) {
+        const RepoId& remoteid = pos->first;
+        const EndpointRegistry::Writer& writer = pos->second;
+
+        if (!GuidPrefixEqual()(participant_id_.guidPrefix, remoteid.guidPrefix)) {
+          increment_key(pub_bit_key_);
+          pub_key_to_id_[pub_bit_key_] = remoteid;
+
+          // pos represents a remote.
+          // Populate data.
+          DDS::PublicationBuiltinTopicData data;
+
+          data.key = pub_bit_key_;
+          OPENDDS_STRING topic_name = writer.topic_name;
+          data.topic_name = topic_name.c_str();
+          const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
+          data.type_name = topic.type_name.c_str();
+          data.durability = writer.qos.durability;
+          data.durability_service = writer.qos.durability_service;
+          data.deadline = writer.qos.deadline;
+          data.latency_budget = writer.qos.latency_budget;
+          data.liveliness = writer.qos.liveliness;
+          data.reliability = writer.qos.reliability;
+          data.lifespan = writer.qos.lifespan;
+          data.user_data = writer.qos.user_data;
+          data.ownership = writer.qos.ownership;
+          data.ownership_strength = writer.qos.ownership_strength;
+          data.destination_order = writer.qos.destination_order;
+          data.presentation = writer.publisher_qos.presentation;
+          data.partition = writer.publisher_qos.partition;
+          // If the TopicQos becomes available, this can be populated.
+          //data.topic_data = topic_details.qos_.topic_data;
+          data.group_data = writer.publisher_qos.group_data;
+
+          DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
+          if (bit) { // bit may be null if the DomainParticipant is shutting down
+            bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
+          }
+        }
+      }
+
+      for (EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.begin(),
+             limit = registry_.reader_map.end();
+           pos != limit;
+           ++pos) {
+        const RepoId& remoteid = pos->first;
+        const EndpointRegistry::Reader& reader = pos->second;
+
+        if (!GuidPrefixEqual()(participant_id_.guidPrefix, remoteid.guidPrefix)) {
+          increment_key(sub_bit_key_);
+          sub_key_to_id_[sub_bit_key_] = remoteid;
+
+          // pos represents a remote.
+          // Populate data.
+          DDS::SubscriptionBuiltinTopicData data;
+
+          data.key = sub_bit_key_;
+          OPENDDS_STRING topic_name = reader.topic_name;
+          data.topic_name = topic_name.c_str();
+          const EndpointRegistry::Topic& topic = registry_.topic_map.find(topic_name)->second;
+          data.type_name = topic.type_name.c_str();
+          data.durability = reader.qos.durability;
+          data.deadline = reader.qos.deadline;
+          data.latency_budget = reader.qos.latency_budget;
+          data.liveliness = reader.qos.liveliness;
+          data.reliability = reader.qos.reliability;
+          data.ownership = reader.qos.ownership;
+          data.destination_order = reader.qos.destination_order;
+          data.user_data = reader.qos.user_data;
+          data.time_based_filter = reader.qos.time_based_filter;
+          data.presentation = reader.subscriber_qos.presentation;
+          data.partition = reader.subscriber_qos.partition;
+          // // If the TopicQos becomes available, this can be populated.
+          //data.topic_data = topic_details.qos_.topic_data;
+          data.group_data = reader.subscriber_qos.group_data;
+
+          DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
+          if (bit) { // bit may be null if the DomainParticipant is shutting down
+            bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
+          }
+        }
+      }
+    }
+
     void
     StaticEndpointManager::assign_publication_key(DCPS::RepoId& rid,
                                                   const RepoId& /*topicId*/,
@@ -159,16 +261,21 @@ namespace OpenDDS {
           // Different participants, same topic.
           DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
           DCPS::IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
+          const DCPS::TransportLocatorSeq& writer_trans_info = pub.trans_info_;
+          const DCPS::TransportLocatorSeq& reader_trans_info = pos->second.trans_info;
+          const DDS::DataWriterQos& writer_qos = pub.qos_;
+          const DDS::DataReaderQos& reader_qos = pos->second.qos;
+          const DDS::PublisherQos& publisher_qos = pub.publisher_qos_;
+          const DDS::SubscriberQos& subscriber_qos = pos->second.subscriber_qos;
 
-          if (DCPS::compatibleQOS(&writerStatus, &readerStatus, pub.trans_info_, pos->second.trans_info, &pub.qos_, &pos->second.qos, &pub.publisher_qos_, &pos->second.subscriber_qos)) {
+          if (DCPS::compatibleQOS(&writerStatus, &readerStatus, writer_trans_info, reader_trans_info, &writer_qos, &reader_qos, &publisher_qos, &subscriber_qos)) {
             switch (pos->second.qos.reliability.kind) {
             case DDS::BEST_EFFORT_RELIABILITY_QOS:
               {
                 const DCPS::ReaderAssociation ra =
-                  {pos->second.trans_info, readerid, pos->second.subscriber_qos, pos->second.qos,
-                   "", "",
-                   0};
-                pub.publication_->add_association(readerid, ra, true);
+                  {reader_trans_info, readerid, subscriber_qos, reader_qos, "", "", 0};
+                ACE_DEBUG((LM_DEBUG, "Associating writer %s with reader %s\n", LogGuid(writerid).c_str(), LogGuid(readerid).c_str()));
+                pub.publication_->add_association(writerid, ra, true);
                 pub.publication_->association_complete(readerid);
               }
               break;
@@ -176,7 +283,6 @@ namespace OpenDDS {
               pub.publication_->register_for_reader(participant_id_, writerid, readerid, pos->second.trans_info, this);
               break;
             }
-
           }
         }
       }
@@ -219,15 +325,22 @@ namespace OpenDDS {
           // Different participants, same topic.
           DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
           DCPS::IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
+          const DCPS::TransportLocatorSeq& writer_trans_info = pos->second.trans_info;
+          const DCPS::TransportLocatorSeq& reader_trans_info = sub.trans_info_;
+          const DDS::DataWriterQos& writer_qos = pos->second.qos;
+          const DDS::DataReaderQos& reader_qos = sub.qos_;
+          const DDS::PublisherQos& publisher_qos = pos->second.publisher_qos;
+          const DDS::SubscriberQos& subscriber_qos = sub.subscriber_qos_;
 
-          if (DCPS::compatibleQOS(&writerStatus, &readerStatus, pos->second.trans_info, sub.trans_info_, &pos->second.qos, &sub.qos_, &pos->second.publisher_qos, &sub.subscriber_qos_)) {
+          if (DCPS::compatibleQOS(&writerStatus, &readerStatus, writer_trans_info, reader_trans_info, &writer_qos, &reader_qos, &publisher_qos, &subscriber_qos)) {
+
             switch (sub.qos_.reliability.kind) {
             case DDS::BEST_EFFORT_RELIABILITY_QOS:
               {
                 const DCPS::WriterAssociation wa =
-                  {pos->second.trans_info, writerid, pos->second.publisher_qos, pos->second.qos};
-
-                sub.subscription_->add_association(writerid, wa, false);
+                  {writer_trans_info, writerid, publisher_qos, writer_qos};
+                ACE_DEBUG((LM_DEBUG, "Associating reader %s with writer %s\n", LogGuid(readerid).c_str(), LogGuid(writerid).c_str()));
+                sub.subscription_->add_association(readerid, wa, false);
               }
               break;
             case DDS::RELIABLE_RELIABILITY_QOS:
@@ -305,7 +418,7 @@ namespace OpenDDS {
            "", "",
            0};
 
-        dwr->add_association(readerid, ra, true);
+        dwr->add_association(writerid, ra, true);
         dwr->association_complete(readerid);
       }
     }
@@ -322,8 +435,32 @@ namespace OpenDDS {
         const DCPS::WriterAssociation wa =
           {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
 
-        drr->add_association(writerid, wa, false);
+        drr->add_association(readerid, wa, false);
       }
+    }
+
+    DDS::PublicationBuiltinTopicDataDataReaderImpl*
+    StaticEndpointManager::pub_bit()
+    {
+      DDS::Subscriber_var sub = participant_.bit_subscriber();
+      if (!sub.in())
+        return 0;
+
+      DDS::DataReader_var d =
+        sub->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
+      return dynamic_cast<DDS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
+    }
+
+    DDS::SubscriptionBuiltinTopicDataDataReaderImpl*
+    StaticEndpointManager::sub_bit()
+    {
+      DDS::Subscriber_var sub = participant_.bit_subscriber();
+      if (!sub.in())
+        return 0;
+
+      DDS::DataReader_var d =
+        sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
+      return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
     }
 
     StaticDiscovery::StaticDiscovery(const RepoKey& key)
@@ -351,43 +488,43 @@ namespace OpenDDS {
       {
         return (hextobyte(x[idx * 2]) << 4) | (hextobyte(x[idx * 2 + 1]));
       }
+    }
 
-      EntityId_t
-      build_id(const unsigned char* entity_key,
-               const unsigned char entity_kind)
-      {
-        EntityId_t retval;
-        retval.entityKey[0] = entity_key[0];
-        retval.entityKey[1] = entity_key[1];
-        retval.entityKey[2] = entity_key[2];
-        retval.entityKind = entity_kind;
-        return retval;
-      }
+    EntityId_t
+    EndpointRegistry::build_id(const unsigned char* entity_key,
+                               const unsigned char entity_kind)
+    {
+      EntityId_t retval;
+      retval.entityKey[0] = entity_key[0];
+      retval.entityKey[1] = entity_key[1];
+      retval.entityKey[2] = entity_key[2];
+      retval.entityKind = entity_kind;
+      return retval;
+    }
 
-      RepoId
-      build_id(DDS::DomainId_t domain,
-               const unsigned char* participant_id,
-               const EntityId_t& entity_id)
-      {
-        RepoId id;
-        id.guidPrefix[0] = DCPS::VENDORID_OCI[0];
-        id.guidPrefix[1] = DCPS::VENDORID_OCI[1];
-        // id.guidPrefix[2] = domain[0]
-        // id.guidPrefix[3] = domain[1]
-        // id.guidPrefix[4] = domain[2]
-        // id.guidPrefix[5] = domain[3]
-        DDS::DomainId_t netdom = ACE_HTONL(domain);
-        ACE_OS::memcpy(&id.guidPrefix[2], &netdom, sizeof (DDS::DomainId_t));
-        // id.guidPrefix[6] = participant[0]
-        // id.guidPrefix[7] = participant[1]
-        // id.guidPrefix[8] = participant[2]
-        // id.guidPrefix[9] = participant[3]
-        // id.guidPrefix[10] = participant[4]
-        // id.guidPrefix[11] = participant[5]
-        ACE_OS::memcpy(&id.guidPrefix[6], participant_id, 6);
-        id.entityId = entity_id;
-        return id;
-      }
+    RepoId
+    EndpointRegistry::build_id(DDS::DomainId_t domain,
+                               const unsigned char* participant_id,
+                               const EntityId_t& entity_id)
+    {
+      RepoId id;
+      id.guidPrefix[0] = DCPS::VENDORID_OCI[0];
+      id.guidPrefix[1] = DCPS::VENDORID_OCI[1];
+      // id.guidPrefix[2] = domain[0]
+      // id.guidPrefix[3] = domain[1]
+      // id.guidPrefix[4] = domain[2]
+      // id.guidPrefix[5] = domain[3]
+      DDS::DomainId_t netdom = ACE_HTONL(domain);
+      ACE_OS::memcpy(&id.guidPrefix[2], &netdom, sizeof (DDS::DomainId_t));
+      // id.guidPrefix[6] = participant[0]
+      // id.guidPrefix[7] = participant[1]
+      // id.guidPrefix[8] = participant[2]
+      // id.guidPrefix[9] = participant[3]
+      // id.guidPrefix[10] = participant[4]
+      // id.guidPrefix[11] = participant[5]
+      ACE_OS::memcpy(&id.guidPrefix[6], participant_id, 6);
+      id.entityId = entity_id;
+      return id;
     }
 
     AddDomainStatus
@@ -398,22 +535,22 @@ namespace OpenDDS {
 
       if (qos.user_data.value.length() != 6) {
         ACE_DEBUG((LM_ERROR,
-                   ACE_TEXT("(%P|%t) StaticDiscovery::add_domain_participant ")
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::add_domain_participant ")
                    ACE_TEXT("No userdata to identify participant\n")));
         return ads;
       }
 
-      RepoId id = build_id(domain,
-                                          qos.user_data.value.get_buffer(),
-                                          ENTITYID_PARTICIPANT);
+      RepoId id = EndpointRegistry::build_id(domain,
+                                             qos.user_data.value.get_buffer(),
+                                             ENTITYID_PARTICIPANT);
       if (!get_part(domain, id).is_nil()) {
         ACE_DEBUG((LM_ERROR,
-                   ACE_TEXT("(%P|%t) StaticDiscovery::add_domain_participant ")
+                   ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::add_domain_participant ")
                    ACE_TEXT("Duplicate participant\n")));
         return ads;
       }
 
-      const DCPS::RcHandle<StaticParticipant> participant = new StaticParticipant(id, qos, registry_);
+      const DCPS::RcHandle<StaticParticipant> participant = new StaticParticipant(id, qos, this->registry);
 
       {
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
@@ -552,8 +689,7 @@ namespace OpenDDS {
 
         EndpointRegistry::Topic topic;
         bool name_Specified = false,
-          type_name_Specified = false,
-          max_message_size_Specified = false;
+          type_name_Specified = false;
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
           std::string name = (*it).first;
@@ -572,31 +708,13 @@ namespace OpenDDS {
             }
             topic.type_name = value;
             type_name_Specified = true;
-          } else if (name == "max_message_size") {
-            if (convertToInteger(value, topic.max_message_size)) {
-              max_message_size_Specified = true;
-            } else {
-              ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
-                                ACE_TEXT("Illegal integer value for max_message_size (%C) in [topic/%C] section.\n"),
-                                value.c_str(), topic_name.c_str()),
-                               -1);
-            }
           } else {
-            ACE_ERROR_RETURN((LM_ERROR,
-                              ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
-                              ACE_TEXT("Unexpected entry (%C) in [topic/%C] section.\n"),
-                              name.c_str(), topic_name.c_str()),
-                             -1);
+            // Typos are ignored to avoid parsing FACE-specific keys.
           }
         }
 
         if (!name_Specified) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
-                            ACE_TEXT("No type_name specified for [topic/%C] section.\n"),
-                            topic_name.c_str()),
-                           -1);
+          topic.name = topic_name;
         }
 
         if (!type_name_Specified) {
@@ -607,15 +725,7 @@ namespace OpenDDS {
                            -1);
         }
 
-        if (!max_message_size_Specified) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
-                            ACE_TEXT("No max_message_size specified for [topic/%C] section.\n"),
-                            topic_name.c_str()),
-                           -1);
-        }
-
-        registry_.topic_map.insert(std::make_pair(topic_name, topic));
+        this->registry.topic_map.insert(std::make_pair(topic_name, topic));
       }
 
       return 0;
@@ -798,7 +908,7 @@ namespace OpenDDS {
           }
         }
 
-        registry_.datawriterqos_map.insert(std::make_pair(datawriterqos_name, datawriterqos));
+        this->registry.datawriterqos_map.insert(std::make_pair(datawriterqos_name, datawriterqos));
       }
 
       return 0;
@@ -973,7 +1083,7 @@ namespace OpenDDS {
           }
         }
 
-        registry_.datareaderqos_map.insert(std::make_pair(datareaderqos_name, datareaderqos));
+        this->registry.datareaderqos_map.insert(std::make_pair(datareaderqos_name, datareaderqos));
       }
 
       return 0;
@@ -1078,7 +1188,7 @@ namespace OpenDDS {
           }
         }
 
-        registry_.publisherqos_map.insert(std::make_pair(publisherqos_name, publisherqos));
+        this->registry.publisherqos_map.insert(std::make_pair(publisherqos_name, publisherqos));
       }
 
       return 0;
@@ -1183,7 +1293,7 @@ namespace OpenDDS {
           }
         }
 
-        registry_.subscriberqos_map.insert(std::make_pair(subscriberqos_name, subscriberqos));
+        this->registry.subscriberqos_map.insert(std::make_pair(subscriberqos_name, subscriberqos));
       }
 
       return 0;
@@ -1252,6 +1362,7 @@ namespace OpenDDS {
         DDS::PublisherQos publisherqos(TheServiceParticipant->initial_PublisherQos());
         DDS::SubscriberQos subscriberqos(TheServiceParticipant->initial_SubscriberQos());
         DCPS::TransportLocatorSeq trans_info;
+        OPENDDS_STRING config_name;
 
         bool domainSpecified = false,
           participantSpecified = false,
@@ -1317,8 +1428,8 @@ namespace OpenDDS {
                                -1);
             }
           } else if (name == "topic") {
-            EndpointRegistry::TopicMapType::const_iterator pos = registry_.topic_map.find(value);
-            if (pos != registry_.topic_map.end()) {
+            EndpointRegistry::TopicMapType::const_iterator pos = this->registry.topic_map.find(value);
+            if (pos != this->registry.topic_map.end()) {
               topic_name = pos->second.name;
               topic_name_Specified = true;
             } else {
@@ -1329,8 +1440,8 @@ namespace OpenDDS {
                                -1);
             }
           } else if (name == "datawriterqos") {
-            EndpointRegistry::DataWriterQosMapType::const_iterator pos = registry_.datawriterqos_map.find(value);
-            if (pos != registry_.datawriterqos_map.end()) {
+            EndpointRegistry::DataWriterQosMapType::const_iterator pos = this->registry.datawriterqos_map.find(value);
+            if (pos != this->registry.datawriterqos_map.end()) {
               datawriterqos = pos->second;
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
@@ -1340,8 +1451,8 @@ namespace OpenDDS {
                                -1);
             }
           } else if (name == "publisherqos") {
-            EndpointRegistry::PublisherQosMapType::const_iterator pos = registry_.publisherqos_map.find(value);
-            if (pos != registry_.publisherqos_map.end()) {
+            EndpointRegistry::PublisherQosMapType::const_iterator pos = this->registry.publisherqos_map.find(value);
+            if (pos != this->registry.publisherqos_map.end()) {
               publisherqos = pos->second;
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
@@ -1351,8 +1462,8 @@ namespace OpenDDS {
                                -1);
             }
           } else if (name == "datareaderqos") {
-            EndpointRegistry::DataReaderQosMapType::const_iterator pos = registry_.datareaderqos_map.find(value);
-            if (pos != registry_.datareaderqos_map.end()) {
+            EndpointRegistry::DataReaderQosMapType::const_iterator pos = this->registry.datareaderqos_map.find(value);
+            if (pos != this->registry.datareaderqos_map.end()) {
               datareaderqos = pos->second;
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
@@ -1362,8 +1473,8 @@ namespace OpenDDS {
                                -1);
             }
           } else if (name == "subscriberqos") {
-            EndpointRegistry::SubscriberQosMapType::const_iterator pos = registry_.subscriberqos_map.find(value);
-            if (pos != registry_.subscriberqos_map.end()) {
+            EndpointRegistry::SubscriberQosMapType::const_iterator pos = this->registry.subscriberqos_map.find(value);
+            if (pos != this->registry.subscriberqos_map.end()) {
               subscriberqos = pos->second;
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
@@ -1373,17 +1484,8 @@ namespace OpenDDS {
                                -1);
             }
           } else if (name == "config") {
-            TransportConfig_rch config = TheTransportRegistry->get_config(value);
-            if (!config.is_nil()) {
-              config->populate_locators(trans_info);
-              config_name_Specified = true;
-            } else {
-              ACE_ERROR_RETURN((LM_ERROR,
-                                ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                                ACE_TEXT("Illegal config reference (%C) in [endpoint/%C] section.\n"),
-                                value.c_str(), endpoint_name.c_str()),
-                               -1);
-            }
+            config_name = value;
+            config_name_Specified = true;
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -1433,26 +1535,48 @@ namespace OpenDDS {
                            -1);
         }
 
-        if (!config_name_Specified) {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
-                            ACE_TEXT("No config specified for [endpoint/%C] section.\n"),
-                            endpoint_name.c_str()),
-                           -1);
+        TransportConfig_rch config;
+
+        if (config_name_Specified) {
+          config = TheTransportRegistry->get_config(config_name);
+          if (config.is_nil()) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                              ACE_TEXT("Illegal config reference (%C) in [endpoint/%C] section.\n"),
+                              config_name.c_str(), endpoint_name.c_str()),
+                             -1);
+          }
+        }
+
+        if (config.is_nil() && domainSpecified) {
+          config = TheTransportRegistry->domain_default_config(domain);
+        }
+
+        if (config.is_nil()) {
+          config = TheTransportRegistry->global_config();
+        }
+
+        config->populate_locators(trans_info);
+        if (trans_info.length() == 0) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
+                              ACE_TEXT("No locators for [endpoint/%C] section.\n"),
+                              endpoint_name.c_str()),
+                             -1);
         }
 
         EntityId_t entity_id;
 
         switch (type) {
         case Reader:
-          entity_id = build_id(entity, DCPS::ENTITYKIND_USER_READER_WITH_KEY);
+          entity_id = EndpointRegistry::build_id(entity, DCPS::ENTITYKIND_USER_READER_WITH_KEY);
           break;
         case Writer:
-          entity_id = build_id(entity, DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
+          entity_id = EndpointRegistry::build_id(entity, DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
           break;
         }
 
-        RepoId id = build_id(domain, participant, entity_id);
+        RepoId id = EndpointRegistry::build_id(domain, participant, entity_id);
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: StaticDiscovery::parse_endpoints adding entity with id %s\n"), LogGuid(id).c_str()));
@@ -1460,7 +1584,13 @@ namespace OpenDDS {
 
         switch (type) {
         case Reader:
-          if (!registry_.reader_map.insert(std::make_pair(id, EndpointRegistry::Reader(topic_name, datareaderqos, subscriberqos, trans_info))).second) {
+          // Populate the userdata.
+          datareaderqos.user_data.value.length(3);
+          datareaderqos.user_data.value[0] = entity_id.entityKey[0];
+          datareaderqos.user_data.value[1] = entity_id.entityKey[1];
+          datareaderqos.user_data.value[2] = entity_id.entityKey[2];
+
+          if (!this->registry.reader_map.insert(std::make_pair(id, EndpointRegistry::Reader(topic_name, datareaderqos, subscriberqos, trans_info))).second) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                               ACE_TEXT("Section [endpoint/%C] ignored - duplicate reader.\n"),
@@ -1469,7 +1599,13 @@ namespace OpenDDS {
           }
           break;
         case Writer:
-          if (!registry_.writer_map.insert(std::make_pair(id, EndpointRegistry::Writer(topic_name, datawriterqos, publisherqos, trans_info))).second) {
+          // Populate the userdata.
+          datawriterqos.user_data.value.length(3);
+          datawriterqos.user_data.value[0] = entity_id.entityKey[0];
+          datawriterqos.user_data.value[1] = entity_id.entityKey[1];
+          datawriterqos.user_data.value[2] = entity_id.entityKey[2];
+
+          if (!this->registry.writer_map.insert(std::make_pair(id, EndpointRegistry::Writer(topic_name, datawriterqos, publisherqos, trans_info))).second) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                               ACE_TEXT("Section [endpoint/%C] ignored - duplicate writer.\n"),
@@ -1482,6 +1618,8 @@ namespace OpenDDS {
 
       return 0;
     }
+
+    StaticDiscovery_rch StaticDiscovery::instance_ (new StaticDiscovery(OpenDDS::DCPS::Discovery::DEFAULT_STATIC));
   }
 }
 

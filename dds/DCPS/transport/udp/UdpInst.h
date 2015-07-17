@@ -35,7 +35,7 @@ public:
 
   bool is_reliable() const { return false; }
 
-  virtual void populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
 
 private:
   friend class UdpType;

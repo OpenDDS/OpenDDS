@@ -27,17 +27,12 @@ namespace OpenDDS {
 
     typedef OpenDDS::DCPS::RcHandle<StaticDiscovery> StaticDiscovery_rch;
 
-    class EndpointRegistry {
+    class OpenDDS_Dcps_Export EndpointRegistry {
     public:
       struct Topic {
         OPENDDS_STRING name;
         OPENDDS_STRING type_name;
-        size_t max_message_size;
         Topic() { }
-        Topic(const OPENDDS_STRING& tn, size_t mms)
-          : type_name(tn)
-          , max_message_size(mms)
-        { }
       };
       typedef OPENDDS_MAP(OPENDDS_STRING, Topic) TopicMapType;
       TopicMapType topic_map;
@@ -89,9 +84,19 @@ namespace OpenDDS {
       };
       typedef OPENDDS_MAP_CMP(RepoId, Writer, DCPS::GUID_tKeyLessThan) WriterMapType;
       WriterMapType writer_map;
+
+      static EntityId_t
+      build_id(const unsigned char* entity_key /* length of 3 */,
+               const unsigned char entity_kind);
+
+      static RepoId
+      build_id(DDS::DomainId_t domain,
+               const unsigned char* participant_id /* length of 6 */,
+               const EntityId_t& entity_id);
     };
 
     struct StaticDiscoveredParticipantData { };
+    class StaticParticipant;
 
     class StaticEndpointManager
       : public EndpointManager<StaticDiscoveredParticipantData>
@@ -99,10 +104,10 @@ namespace OpenDDS {
     public:
       StaticEndpointManager(const RepoId& participant_id,
                             ACE_Thread_Mutex& lock,
-                            const EndpointRegistry& registry)
-        : EndpointManager<StaticDiscoveredParticipantData>(participant_id, lock)
-        , registry_(registry)
-      { }
+                            const EndpointRegistry& registry,
+                            StaticParticipant& participant);
+
+      void init_bit();
 
       virtual void assign_publication_key(DCPS::RepoId& rid,
                                           const RepoId& topicId,
@@ -162,8 +167,12 @@ namespace OpenDDS {
       virtual void reader_exists(const RepoId& readerid, const RepoId& writerid);
       virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);
 
+      DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
+      DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+
     private:
       const EndpointRegistry& registry_;
+      StaticParticipant& participant_;
     };
 
     class StaticParticipant : public LocalParticipant<StaticEndpointManager> {
@@ -172,12 +181,13 @@ namespace OpenDDS {
                         const DDS::DomainParticipantQos& qos,
                         const EndpointRegistry& registry)
         : LocalParticipant<StaticEndpointManager>(qos)
-        , endpoint_manager_(guid, lock_, registry)
+        , endpoint_manager_(guid, lock_, registry, *this)
       { }
 
       void init_bit(const DDS::Subscriber_var& bit_subscriber)
       {
         bit_subscriber_ = bit_subscriber;
+        endpoint_manager_.init_bit();
       }
 
       void fini_bit() {
@@ -201,6 +211,10 @@ namespace OpenDDS {
                                                                     DDS::DomainId_t domain,
                                                                     const DDS::DomainParticipantQos& qos);
 
+      EndpointRegistry registry;
+
+      static StaticDiscovery_rch instance() { return instance_; }
+
     private:
       int parse_topics(ACE_Configuration_Heap& cf);
       int parse_datawriterqos(ACE_Configuration_Heap& cf);
@@ -209,7 +223,7 @@ namespace OpenDDS {
       int parse_subscriberqos(ACE_Configuration_Heap& cf);
       int parse_endpoints(ACE_Configuration_Heap& cf);
 
-      EndpointRegistry registry_;
+      static StaticDiscovery_rch instance_;
     };
   }
 }

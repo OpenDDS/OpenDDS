@@ -183,20 +183,25 @@ MulticastInst::dump(std::ostream& os)
 #endif
 }
 
-void
+size_t
 MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 {
-  NetworkAddress network_address(this->group_address_);
+  if (this->group_address_ != ACE_INET_Addr()) {
+    NetworkAddress network_address(this->group_address_);
 
-  ACE_OutputCDR cdr;
-  cdr << network_address;
-  cdr << ACE_OutputCDR::from_boolean (ACE_CDR::Boolean (this->is_reliable ()));
+    ACE_OutputCDR cdr;
+    cdr << network_address;
+    cdr << ACE_OutputCDR::from_boolean (ACE_CDR::Boolean (this->is_reliable ()));
 
-  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
-  char* buffer = const_cast<char*>(cdr.buffer()); // safe
+    const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+    char* buffer = const_cast<char*>(cdr.buffer()); // safe
 
-  info.transport_type = "multicast";
-  info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
+    info.transport_type = "multicast";
+    info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 } // namespace DCPS

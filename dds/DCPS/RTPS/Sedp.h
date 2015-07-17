@@ -317,9 +317,6 @@ private:
 
   void assign_bit_key(DiscoveredPublication& pub);
   void assign_bit_key(DiscoveredSubscription& sub);
-  void increment_key(DDS::BuiltinTopicKey_t& key);
-
-  DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
 
   template<typename Map>
   void remove_entities_belonging_to(Map& m, DCPS::RepoId participant);

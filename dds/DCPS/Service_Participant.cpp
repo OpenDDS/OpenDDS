@@ -15,7 +15,6 @@
 #include "ConfigUtils.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/StaticDiscovery.h"
 
 #include "tao/ORB_Core.h"
 
@@ -32,6 +31,7 @@
 
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "StaticDiscovery.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
@@ -87,7 +87,7 @@ void set_log_verbose(unsigned long verbose_logging)
 
 }
 
-  static OpenDDS::DCPS::StaticDiscovery_rch static_discovery(new OpenDDS::DCPS::StaticDiscovery(OpenDDS::DCPS::Discovery::DEFAULT_STATIC));
+
 }
 
 namespace OpenDDS {
@@ -1300,7 +1300,7 @@ Service_Participant::load_configuration(
   }
 
   // Register static discovery.
-  this->add_discovery(static_rchandle_cast<Discovery>(static_discovery));
+  this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
 
   status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
 
@@ -1360,7 +1360,7 @@ Service_Participant::load_configuration(
   }
 
   // Needs to be loaded after transport configs and instances and domains.
-  status = static_discovery->load_configuration(config);
+  status = StaticDiscovery::instance()->load_configuration(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,

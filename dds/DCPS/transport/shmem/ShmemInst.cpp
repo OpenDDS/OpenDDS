@@ -57,7 +57,7 @@ ShmemInst::dump(std::ostream& os)
      << std::endl;
 }
 
-void
+size_t
 ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 {
   info.transport_type = "shmem";
@@ -71,6 +71,8 @@ ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 
   *(buff++) = 0;
   std::memcpy(buff, poolname_.c_str(), poolname_.size());
+
+  return 1;
 }
 
 } // namespace DCPS

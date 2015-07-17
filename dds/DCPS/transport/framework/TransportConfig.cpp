@@ -44,7 +44,10 @@ TransportConfig::populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_inf
        ++pos) {
     size_t idx = trans_info.length();
     trans_info.length(idx + 1);
-    (*pos)->populate_locator(trans_info[idx]);
+    size_t count = (*pos)->populate_locator(trans_info[idx]);
+    if (count == 0) {
+      trans_info.length(idx);
+    }
   }
 }
 

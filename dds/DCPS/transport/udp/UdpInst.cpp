@@ -65,19 +65,24 @@ UdpInst::dump(std::ostream& os)
   os << formatNameForDump("rcv_buffer_size") << this->rcv_buffer_size_ << std::endl;
 }
 
-void
+size_t
 UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 {
-  NetworkAddress network_address(this->local_address_,
-                                 this->local_address_.is_any());
-  ACE_OutputCDR cdr;
-  cdr << network_address;
+  if (this->local_address_ != ACE_INET_Addr()) {
+    NetworkAddress network_address(this->local_address_,
+                                   this->local_address_.is_any());
+    ACE_OutputCDR cdr;
+    cdr << network_address;
 
-  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
-  char* buffer = const_cast<char*>(cdr.buffer()); // safe
+    const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+    char* buffer = const_cast<char*>(cdr.buffer()); // safe
 
-  info.transport_type = "udp";
-  info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
+    info.transport_type = "udp";
+    info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 } // namespace DCPS

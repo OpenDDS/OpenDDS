@@ -863,6 +863,23 @@ namespace OpenDDS {
         return td->second.has_dcps_key_;
       }
 
+      void
+      increment_key(DDS::BuiltinTopicKey_t& key)
+      {
+        for (int idx = 0; idx < 3; ++idx) {
+          CORBA::ULong ukey = static_cast<CORBA::ULong>(key.value[idx]);
+          if (ukey == 0xFFFFFFFF) {
+            key.value[idx] = 0;
+          } else {
+            ++ukey;
+            key.value[idx] = ukey;
+            return;
+          }
+        }
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) EndpointManager::increment_key - ")
+                   ACE_TEXT("ran out of builtin topic keys\n")));
+      }
+
       ACE_Thread_Mutex& lock_;
       DCPS::RepoId participant_id_;
       BitKeyMap pub_key_to_id_, sub_key_to_id_;
@@ -875,6 +892,7 @@ namespace OpenDDS {
       OPENDDS_MAP(OPENDDS_STRING, TopicDetails) topics_;
       TopicNameMap topic_names_;
       OPENDDS_SET(OPENDDS_STRING) ignored_topics_;
+      DDS::BuiltinTopicKey_t pub_bit_key_, sub_bit_key_;
     };
 
     template <typename EndpointManagerType>
@@ -1037,6 +1055,8 @@ namespace OpenDDS {
       {
         endpoint_manager().association_complete(localId, remoteId);
       }
+
+      DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
 
     protected:
 

@@ -151,7 +151,7 @@ RtpsUdpInst::dump_to_str()
   return ret;
 }
 
-void
+size_t
 RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 {
   using namespace OpenDDS::RTPS;
@@ -160,25 +160,28 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
   CORBA::ULong idx = 0;
 
   // multicast first so it's preferred by remote peers
-  if (this->use_multicast_) {
-    locators.length(2);
-    locators[0].kind = address_to_kind(this->multicast_group_address_);
-    locators[0].port = this->multicast_group_address_.get_port_number();
-    RTPS::address_to_bytes(locators[0].address,
+  if (this->use_multicast_ && this->multicast_group_address_ != ACE_INET_Addr()) {
+    idx = locators.length();
+    locators.length(idx + 1);
+    locators[idx].kind = address_to_kind(this->multicast_group_address_);
+    locators[idx].port = this->multicast_group_address_.get_port_number();
+    RTPS::address_to_bytes(locators[idx].address,
                            this->multicast_group_address_);
-    idx = 1;
-
-  } else {
-    locators.length(1);
   }
 
-  locators[idx].kind = address_to_kind(this->local_address_);
-  locators[idx].port = this->local_address_.get_port_number();
-  RTPS::address_to_bytes(locators[idx].address,
-                         this->local_address_);
+  if (this->local_address_ != ACE_INET_Addr()) {
+    idx = locators.length();
+    locators.length(idx + 1);
+    locators[idx].kind = address_to_kind(this->local_address_);
+    locators[idx].port = this->local_address_.get_port_number();
+    RTPS::address_to_bytes(locators[idx].address,
+                           this->local_address_);
+  }
 
   info.transport_type = "rtps_udp";
   RTPS::locators_to_blob(locators, info.data);
+
+  return locators.length();
 }
 
 const TransportBLOB*

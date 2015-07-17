@@ -368,23 +368,6 @@ Sedp::assign_bit_key(DiscoveredSubscription& sub)
 }
 
 void
-Sedp::increment_key(DDS::BuiltinTopicKey_t& key)
-{
-  for (int idx = 0; idx < 3; ++idx) {
-    CORBA::ULong ukey = static_cast<CORBA::ULong>(key.value[idx]);
-    if (ukey == 0xFFFFFFFF) {
-      key.value[idx] = 0;
-    } else {
-      ++ukey;
-      key.value[idx] = ukey;
-      return;
-    }
-  }
-  ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Sedp::increment_key - ")
-                         ACE_TEXT("ran out of builtin topic keys\n")));
-}
-
-void
 create_association_data_proto(DCPS::AssociationData& proto,
                               const SPDPdiscoveredParticipantData& pdata) {
   proto.publication_transport_priority_ = 0;

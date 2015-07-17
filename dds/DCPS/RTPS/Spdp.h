@@ -49,7 +49,7 @@ public:
   // Participant
   void init_bit(const DDS::Subscriber_var& bit_subscriber);
   void fini_bit();
-  DDS::Subscriber_var bit_subscriber() const { return bit_subscriber_; }
+
   bool get_default_locators(const DCPS::RepoId& part_id,
                             OpenDDS::DCPS::LocatorSeq& target,
                             bool& inlineQos);
