@@ -1051,6 +1051,16 @@ RecorderImpl::get_instance_handle()
   return this->participant_servant_->get_handle(subscription_id_);
 }
 
+void
+RecorderImpl::register_for_writer(const RepoId& participant,
+                                  const RepoId& readerid,
+                                  const RepoId& writerid,
+                                  const TransportLocatorSeq& locators,
+                                  DiscoveryListener* listener)
+{
+  TransportClient::register_for_writer(participant, readerid, writerid, locators, listener);
+}
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
 DDS::ReturnCode_t
 RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,

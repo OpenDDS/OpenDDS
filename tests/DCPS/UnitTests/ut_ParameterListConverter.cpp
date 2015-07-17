@@ -19,6 +19,7 @@
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::RTPS::ParameterListConverter;
 using namespace DDS;
+using namespace OpenDDS::DCPS;
 
 namespace {
   GuidGenerator guid_generator;

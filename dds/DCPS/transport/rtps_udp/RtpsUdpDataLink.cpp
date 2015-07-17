@@ -21,6 +21,7 @@
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 #include "ace/Message_Block.h"
+#include "ace/Reverse_Lock_T.h"
 #include "ace/Reactor.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
@@ -346,6 +347,30 @@ RtpsUdpDataLink::check_handshake_complete(const RepoId& local_id,
     return true; // no handshaking for local reader
   }
   return false;
+}
+
+void
+RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
+                                     const RepoId& readerid,
+                                     const ACE_INET_Addr& address,
+                                     OpenDDS::DCPS::DiscoveryListener* listener)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  bool enableheartbeat = interesting_readers_.empty();
+  interesting_readers_.insert(std::make_pair(readerid, InterestingReader(writerid, address, listener)));
+  if (enableheartbeat) {
+    heartbeat_.enable();
+  }
+}
+
+void
+RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
+                                     const RepoId& writerid,
+                                     const ACE_INET_Addr& address,
+                                     OpenDDS::DCPS::DiscoveryListener* listener)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  interesting_writers_.insert(std::make_pair(writerid, InterestingWriter(readerid, address, listener)));
 }
 
 void
@@ -999,6 +1024,57 @@ void
 RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
                           const GuidPrefix_t& src_prefix)
 {
+  RepoId src;
+  std::memcpy(src.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
+  src.entityId = heartbeat.writerId;
+
+  bool schedule_acknack = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+    // We received a heartbeat from a writer.
+    // We should ACKNACK if the writer is interesting and there is no association.
+
+    for (InterestingWriterMapType::iterator pos = interesting_writers_.lower_bound(src),
+           limit = interesting_writers_.upper_bound(src);
+         pos != limit;
+         ++pos) {
+      const RepoId& writerid = src;
+      const RepoId& readerid = pos->second.readerid;
+
+      RtpsReaderMap::const_iterator riter = readers_.find(readerid);
+      if (riter == readers_.end()) {
+        // Reader has no associations.
+        interesting_ack_nacks_.insert (InterestingAckNack(writerid, readerid, pos->second.address));
+      } else if (riter->second.remote_writers_.find(writerid) == riter->second.remote_writers_.end()) {
+        // Reader is not associated with this writer.
+        interesting_ack_nacks_.insert (InterestingAckNack(writerid, readerid, pos->second.address));
+      }
+    }
+
+    schedule_acknack = !interesting_ack_nacks_.empty();
+
+    {
+      // Release the lock.
+      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+
+      for (InterestingWriterMapType::iterator pos = interesting_writers_.lower_bound(src),
+             limit = interesting_writers_.upper_bound(src);
+           pos != limit;
+           ++pos) {
+        if (!pos->second.called) {
+          pos->second.listener->writer_exists(src, pos->second.readerid);
+          pos->second.called = true;
+        }
+      }
+    }
+  }
+
+  if (schedule_acknack) {
+    heartbeat_reply_.schedule();
+  }
+
   datareader_dispatch(heartbeat, src_prefix,
                       &RtpsUdpDataLink::process_heartbeat_i);
 }
@@ -1086,6 +1162,53 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 {
   using namespace OpenDDS::RTPS;
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  for (InterestingAckNackSetType::const_iterator pos = interesting_ack_nacks_.begin(),
+         limit = interesting_ack_nacks_.end();
+       pos != limit;
+       ++pos) {
+
+    SequenceNumber ack;
+    LongSeq8 bitmap;
+    bitmap.length(0);
+
+    AckNackSubmessage acknack = {
+      {ACKNACK,
+       CORBA::Octet(1 /*FLAG_E*/ | 2 /*FLAG_F*/),
+       0 /*length*/},
+      pos->readerid.entityId,
+      pos->writerid.entityId,
+      { // SequenceNumberSet: acking bitmapBase - 1
+        {ack.getHigh(), ack.getLow()},
+        0 /* num_bits */, bitmap
+      },
+      {1 /* acknack count */}
+    };
+
+    size_t size = 0, padding = 0;
+    gen_find_size(acknack, size, padding);
+    acknack.smHeader.submessageLength =
+      static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
+    InfoDestinationSubmessage info_dst = {
+      {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+    gen_find_size(info_dst, size, padding);
+
+    ACE_Message_Block mb_acknack(size + padding); //FUTURE: allocators?
+    // byte swapping is handled in the operator<<() implementation
+    Serializer ser(&mb_acknack, false, Serializer::ALIGN_CDR);
+    std::memcpy(info_dst.guidPrefix, pos->writerid.guidPrefix,
+                sizeof(GuidPrefix_t));
+    ser << info_dst;
+    // Interoperability note: we used to insert "info_reply_" here, but
+    // testing indicated that other DDS implementations didn't accept it.
+    ser << acknack;
+
+    send_strategy_->send_rtps_control(mb_acknack, pos->writer_address);
+  }
+  interesting_ack_nacks_.clear();
+
   for (RtpsReaderMap::iterator rr = readers_.begin(); rr != readers_.end();
        ++rr) {
     WriterInfoMap& writers = rr->second.remote_writers_;
@@ -1413,7 +1536,28 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   std::memcpy(local.guidPrefix, local_prefix_, sizeof(GuidPrefix_t));
   local.entityId = acknack.writerId; // can't be ENTITYID_UNKNOWN
 
+  RepoId remote;
+  std::memcpy(remote.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
+  remote.entityId = acknack.readerId;
+
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  {
+    // Release the lock.
+    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+
+    for (InterestingReaderMapType::iterator pos = interesting_readers_.lower_bound(remote),
+           limit = interesting_readers_.upper_bound(remote);
+         pos != limit;
+         ++pos) {
+      if (!pos->second.called) {
+        pos->second.listener->reader_exists(remote, pos->second.writerid);
+        pos->second.called = true;
+      }
+    }
+  }
+
   const RtpsWriterMap::iterator rw = writers_.find(local);
   if (rw == writers_.end()) {
     if (Transport_debug_level > 5) {
@@ -1423,10 +1567,6 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
     }
     return;
   }
-
-  RepoId remote;
-  std::memcpy(remote.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
-  remote.entityId = acknack.readerId;
 
   if (Transport_debug_level > 5) {
     GuidConverter local_conv(local), remote_conv(remote);
@@ -1991,7 +2131,7 @@ RtpsUdpDataLink::send_heartbeats()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (writers_.empty()) {
+  if (writers_.empty() && interesting_readers_.empty()) {
     heartbeat_.disable();
   }
 
@@ -2001,9 +2141,28 @@ RtpsUdpDataLink::send_heartbeats()
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
   const ACE_Time_Value now = ACE_OS::gettimeofday();
 
+  for (InterestingReaderMapType::iterator pos = interesting_readers_.begin(),
+         limit = interesting_readers_.end();
+       pos != limit;
+       ++pos) {
+    recipients.insert(pos->second.address);
+
+    const SequenceNumber SN = 1;
+    const HeartBeatSubmessage hb = {
+      {HEARTBEAT,
+       CORBA::Octet(1 /*FLAG_E*/),
+       HEARTBEAT_SZ},
+      ENTITYID_UNKNOWN, // any matched reader may be interested in this
+      pos->second.writerid.entityId,
+      {SN.getHigh(), SN.getLow()},
+      {SN.getHigh(), SN.getLow()},
+      {++pos->second.heartbeat_count}
+    };
+    subm.push_back(hb);
+  }
+
   typedef RtpsWriterMap::iterator rw_iter;
   for (rw_iter rw = writers_.begin(); rw != writers_.end(); ++rw) {
-
     const bool has_data = !rw->second.send_buff_.is_nil()
                           && !rw->second.send_buff_->empty();
     bool final = true, has_durable_data = false;
