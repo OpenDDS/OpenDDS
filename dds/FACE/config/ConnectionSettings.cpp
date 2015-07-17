@@ -9,8 +9,7 @@ namespace OpenDDS { namespace FaceTSS { namespace config {
 ConnectionSettings::ConnectionSettings()
 : connection_id_(0),
   direction_(FACE::SOURCE),
-  domain_id_(0),
-  participant_id_(0)
+  domain_id_(0)
 {
   std::strcpy(topic_name_, "");
   std::strcpy(datawriter_qos_name_, "");
@@ -26,8 +25,6 @@ ConnectionSettings::set(const char* name, const char* value)
   int status = 0;
   if (!std::strcmp(name, "id")) {
     connection_id_ = atoi(value);
-  } else if (!std::strcmp(name, "participantid")) {
-    participant_id_ = atoi(value);
   } else if (!std::strcmp(name, "domain")) {
     domain_id_ = atoi(value);
   } else if (!std::strcmp(name, "topic")) {

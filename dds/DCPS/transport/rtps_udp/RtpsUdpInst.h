@@ -47,9 +47,6 @@ public:
   bool is_reliable() const { return true; }
   bool requires_cdr() const { return true; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
-  const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
-
 private:
   friend class RtpsUdpType;
   explicit RtpsUdpInst(const OPENDDS_STRING& name);

@@ -800,16 +800,6 @@ void DataWriterImpl::remove_all_associations()
 }
 
 void
-DataWriterImpl::register_for_reader(const RepoId& participant,
-                                    const RepoId& writerid,
-                                    const RepoId& readerid,
-                                    const TransportLocatorSeq& locators,
-                                    DiscoveryListener* listener)
-{
-  TransportClient::register_for_reader(participant, writerid, readerid, locators, listener);
-}
-
-void
 DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataWriterListener_var listener =

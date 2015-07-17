@@ -145,12 +145,6 @@ public:
 
   void remove_all_associations();
 
-  virtual void register_for_reader(const RepoId& participant,
-                                   const RepoId& writerid,
-                                   const RepoId& readerid,
-                                   const TransportLocatorSeq& locators,
-                                   DiscoveryListener* listener);
-
   DDS::ReturnCode_t enable();
 
   DomainParticipantImpl*          participant() {

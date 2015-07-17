@@ -202,8 +202,8 @@ bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
   return changed;
 }
 
-bool paramsChanged(OpenDDS::DCPS::ContentFilterProperty_t& dest,
-                   const OpenDDS::DCPS::ContentFilterProperty_t& src)
+bool paramsChanged(OpenDDS::RTPS::ContentFilterProperty_t& dest,
+                   const OpenDDS::RTPS::ContentFilterProperty_t& src)
 {
   if (dest.expressionParameters.length() != src.expressionParameters.length()) {
     dest.expressionParameters = src.expressionParameters;
@@ -228,8 +228,9 @@ using DCPS::RepoId;
 const bool Sedp::host_is_bigendian_(!ACE_CDR_BYTE_ORDER);
 
 Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
-  : OpenDDS::DCPS::EndpointManager<SPDPdiscoveredParticipantData>(participant_id, lock)
+  : participant_id_(participant_id)
   , spdp_(owner)
+  , lock_(lock)
   , publications_writer_(make_id(participant_id,
                                  ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER),
                          *this)
@@ -249,6 +250,7 @@ Sedp::Sedp(const RepoId& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
                                                    ENTITYID_P2P_BUILTIN_PARTICIPANT_MESSAGE_READER),
                                            *this))
   , task_(this)
+  , publication_counter_(0), subscription_counter_(0), topic_counter_(0)
   , automatic_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , manual_liveliness_seq_ (DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
 {
@@ -352,6 +354,81 @@ Sedp::multicast_group() const
 }
 
 void
+Sedp::ignore(const RepoId& to_ignore)
+{
+  // Locked prior to call from Spdp.
+  ignored_guids_.insert(to_ignore);
+  {
+    const DiscoveredPublicationIter iter =
+      discovered_publications_.find(to_ignore);
+    if (iter != discovered_publications_.end()) {
+      // clean up tracking info
+      topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
+      remove_from_bit(iter->second);
+      OPENDDS_STRING topic_name = get_topic_name(iter->second);
+      discovered_publications_.erase(iter);
+      // break associations
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
+          topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        match_endpoints(to_ignore, top_it->second, true /*remove*/);
+      }
+      return;
+    }
+  }
+  {
+    const DiscoveredSubscriptionIter iter =
+      discovered_subscriptions_.find(to_ignore);
+    if (iter != discovered_subscriptions_.end()) {
+      // clean up tracking info
+      topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
+      remove_from_bit(iter->second);
+      OPENDDS_STRING topic_name = get_topic_name(iter->second);
+      discovered_subscriptions_.erase(iter);
+      // break associations
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
+          topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        match_endpoints(to_ignore, top_it->second, true /*remove*/);
+      }
+      return;
+    }
+  }
+  {
+    const OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan)::iterator
+      iter = topic_names_.find(to_ignore);
+    if (iter != topic_names_.end()) {
+      ignored_topics_.insert(iter->second);
+      // Remove all publications and subscriptions on this topic
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
+          topics_.find(iter->second);
+      if (top_it != topics_.end()) {
+        TopicDetailsEx& td = top_it->second;
+        RepoIdSet::iterator ep;
+        for (ep = td.endpoints_.begin(); ep!= td.endpoints_.end(); ++ep) {
+          match_endpoints(*ep, td, true /*remove*/);
+          if (spdp_.shutting_down()) { return; }
+        }
+      }
+    }
+  }
+}
+
+RepoId
+Sedp::bit_key_to_repo_id(const char* bit_topic_name,
+                         const DDS::BuiltinTopicKey_t& key)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+  if (0 == std::strcmp(bit_topic_name, DCPS::BUILT_IN_PUBLICATION_TOPIC)) {
+    return pub_key_to_id_[key];
+  }
+  if (0 == std::strcmp(bit_topic_name, DCPS::BUILT_IN_SUBSCRIPTION_TOPIC)) {
+    return sub_key_to_id_[key];
+  }
+  return RepoId();
+}
+
+void
 Sedp::assign_bit_key(DiscoveredPublication& pub)
 {
   increment_key(pub_bit_key_);
@@ -368,6 +445,23 @@ Sedp::assign_bit_key(DiscoveredSubscription& sub)
 }
 
 void
+Sedp::increment_key(DDS::BuiltinTopicKey_t& key)
+{
+  for (int idx = 0; idx < 3; ++idx) {
+    CORBA::ULong ukey = static_cast<CORBA::ULong>(key.value[idx]);
+    if (ukey == 0xFFFFFFFF) {
+      key.value[idx] = 0;
+    } else {
+      ++ukey;
+      key.value[idx] = ukey;
+      return;
+    }
+  }
+  ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Sedp::increment_key - ")
+                         ACE_TEXT("ran out of builtin topic keys\n")));
+}
+
+void
 create_association_data_proto(DCPS::AssociationData& proto,
                               const SPDPdiscoveredParticipantData& pdata) {
   proto.publication_transport_priority_ = 0;
@@ -376,13 +470,13 @@ create_association_data_proto(DCPS::AssociationData& proto,
   std::memcpy(proto.remote_id_.guidPrefix, pdata.participantProxy.guidPrefix,
               sizeof(GuidPrefix_t));
 
-  const OpenDDS::DCPS::LocatorSeq& mll =
+  const LocatorSeq& mll =
     pdata.participantProxy.metatrafficMulticastLocatorList;
-  const OpenDDS::DCPS::LocatorSeq& ull =
+  const LocatorSeq& ull =
     pdata.participantProxy.metatrafficUnicastLocatorList;
   const CORBA::ULong locator_count = mll.length() + ull.length();
 
-  ACE_Message_Block mb_locator(4 + locator_count * sizeof(OpenDDS::DCPS::Locator_t) + 1);
+  ACE_Message_Block mb_locator(4 + locator_count * sizeof(Locator_t) + 1);
   using DCPS::Serializer;
   Serializer ser_loc(&mb_locator, ACE_CDR_BYTE_ORDER, Serializer::ALIGN_CDR);
   ser_loc << locator_count;
@@ -525,7 +619,7 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
           topic.c_str()));
       }
       if (!topic.empty()) {
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator ti =
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator ti =
           sedp_->topics_.find(topic);
         if (ti != sedp_->topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
@@ -615,7 +709,7 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
                                         participant.guidPrefix,
                                         sizeof(GuidPrefix_t));) {
     OPENDDS_STRING topic_name = get_topic_name(i->second);
-    OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+    OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
       topics_.find(topic_name);
     if (top_it != topics_.end()) {
       top_it->second.endpoints_.erase(i->first);
@@ -633,14 +727,16 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
 }
 
 void
-Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
+Sedp::remove_from_bit(const DiscoveredPublication& pub)
 {
+  pub_key_to_id_.erase(pub.writer_data_.ddsPublicationData.key);
   task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT, pub.bit_ih_);
 }
 
 void
-Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
+Sedp::remove_from_bit(const DiscoveredSubscription& sub)
 {
+  sub_key_to_id_.erase(sub.reader_data_.ddsSubscriptionData.key);
   task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT, sub.bit_ih_);
 }
 
@@ -707,6 +803,51 @@ Sedp::sub_bit()
   return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
 
+DCPS::TopicStatus
+Sedp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
+                   const char* dataTypeName, const DDS::TopicQos& qos,
+                   bool hasDcpsKey)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
+  OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator iter =
+    topics_.find(topicName);
+  if (iter != topics_.end()) { // types must match, RtpsDiscovery checked for us
+    iter->second.qos_ = qos;
+    iter->second.has_dcps_key_ = hasDcpsKey;
+    topicId = iter->second.repo_id_;
+    topic_names_[iter->second.repo_id_] = topicName;
+    return DCPS::FOUND;
+  }
+
+  TopicDetailsEx& td = topics_[topicName];
+  td.data_type_ = dataTypeName;
+  td.qos_ = qos;
+  td.has_dcps_key_ = hasDcpsKey;
+  td.repo_id_ = make_topic_guid();
+  topicId = td.repo_id_;
+  topic_names_[td.repo_id_] = topicName;
+
+  return DCPS::CREATED;
+}
+
+DCPS::TopicStatus
+Sedp::remove_topic(const RepoId& topicId, OPENDDS_STRING& name)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
+  name = topic_names_[topicId];
+  OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
+      topics_.find(name);
+  if (top_it != topics_.end()) {
+    TopicDetailsEx& td = top_it->second;
+    if (td.endpoints_.empty()) {
+      topics_.erase(name);
+    }
+  }
+
+  topic_names_.erase(topicId);
+  return DCPS::REMOVED;
+}
+
 bool
 Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
                        OPENDDS_STRING& name)
@@ -718,7 +859,7 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
     return false;
   }
   name = iter->second;
-  TopicDetails& topic = topics_[name];
+  TopicDetailsEx& topic = topics_[name];
   using namespace DCPS;
   // If the TOPIC_DATA QoS changed our local endpoints must be resent
   // with new QoS
@@ -776,10 +917,79 @@ Sedp::inconsistent_topic(const RepoIdSet& eps) const
   }
 }
 
-DDS::ReturnCode_t
-Sedp::remove_publication_i(const RepoId& publicationId)
+bool
+Sedp::has_dcps_key(const RepoId& topicId) const
 {
-  return publications_writer_.write_unregister_dispose(publicationId);
+  typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_STRING, DCPS::GUID_tKeyLessThan) TNMap;
+  TNMap::const_iterator tn = topic_names_.find(topicId);
+  if (tn == topic_names_.end()) return false;
+
+  typedef OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx) TDMap;
+  TDMap::const_iterator td = topics_.find(tn->second);
+  if (td == topics_.end()) return false;
+
+  return td->second.has_dcps_key_;
+}
+
+RepoId
+Sedp::add_publication(const RepoId& topicId,
+                      DCPS::DataWriterCallbacks* publication,
+                      const DDS::DataWriterQos& qos,
+                      const DCPS::TransportLocatorSeq& transInfo,
+                      const DDS::PublisherQos& publisherQos)
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+  RepoId rid = participant_id_;
+  rid.entityId.entityKind =
+    has_dcps_key(topicId)
+    ? DCPS::ENTITYKIND_USER_WRITER_WITH_KEY
+    : DCPS::ENTITYKIND_USER_WRITER_NO_KEY;
+  assign(rid.entityId.entityKey, publication_counter_++);
+  LocalPublication& pb = local_publications_[rid];
+  pb.topic_id_ = topicId;
+  pb.publication_ = publication;
+  pb.qos_ = qos;
+  pb.trans_info_ = transInfo;
+  pb.publisher_qos_ = publisherQos;
+  TopicDetailsEx& td = topics_[topic_names_[topicId]];
+  td.endpoints_.insert(rid);
+
+  if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
+    return RepoId();
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::add_publication - ")
+                         ACE_TEXT("calling match_endpoints\n")));
+  }
+  match_endpoints(rid, td);
+
+  return rid;
+}
+
+void
+Sedp::remove_publication(const RepoId& publicationId)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  LocalPublicationIter iter = local_publications_.find(publicationId);
+  if (iter != local_publications_.end()) {
+    if (DDS::RETCODE_OK ==
+          publications_writer_.write_unregister_dispose(publicationId))
+    {
+      OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
+      local_publications_.erase(publicationId);
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
+            topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        match_endpoints(publicationId, top_it->second, true /*remove*/);
+        top_it->second.endpoints_.erase(publicationId);
+      }
+    } else {
+      ACE_DEBUG((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::remove_publication - ")
+                 ACE_TEXT("Failed to publish dispose msg\n")));
+    }
+  }
 }
 
 bool
@@ -799,7 +1009,7 @@ Sedp::update_publication_qos(const RepoId& publicationId,
     }
     // Match/unmatch with subscriptions
     OPENDDS_STRING topic_name = topic_names_[pb.topic_id_];
-    OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+    OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
           topics_.find(topic_name);
     if (top_it != topics_.end()) {
       match_endpoints(publicationId, top_it->second);
@@ -809,10 +1019,71 @@ Sedp::update_publication_qos(const RepoId& publicationId,
   return false;
 }
 
-DDS::ReturnCode_t
-Sedp::remove_subscription_i(const RepoId& subscriptionId)
+RepoId
+Sedp::add_subscription(const RepoId& topicId,
+                       DCPS::DataReaderCallbacks* subscription,
+                       const DDS::DataReaderQos& qos,
+                       const DCPS::TransportLocatorSeq& transInfo,
+                       const DDS::SubscriberQos& subscriberQos,
+                       const char* filterClassName,
+                       const char* filterExpr,
+                       const DDS::StringSeq& params)
 {
-  return subscriptions_writer_.write_unregister_dispose(subscriptionId);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, RepoId());
+  RepoId rid = participant_id_;
+  rid.entityId.entityKind =
+    has_dcps_key(topicId)
+    ? DCPS::ENTITYKIND_USER_READER_WITH_KEY
+    : DCPS::ENTITYKIND_USER_READER_NO_KEY;
+  assign(rid.entityId.entityKey, subscription_counter_++);
+  LocalSubscription& sb = local_subscriptions_[rid];
+  sb.topic_id_ = topicId;
+  sb.subscription_ = subscription;
+  sb.qos_ = qos;
+  sb.trans_info_ = transInfo;
+  sb.subscriber_qos_ = subscriberQos;
+  sb.filterProperties.filterClassName = filterClassName;
+  sb.filterProperties.filterExpression = filterExpr;
+  sb.filterProperties.expressionParameters = params;
+
+  TopicDetailsEx& td = topics_[topic_names_[topicId]];
+  td.endpoints_.insert(rid);
+
+  if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
+    return RepoId();
+  }
+
+  if (DCPS::DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::add_subscription - ")
+                         ACE_TEXT("calling match_endpoints\n")));
+  }
+  match_endpoints(rid, td);
+
+  return rid;
+}
+
+void
+Sedp::remove_subscription(const RepoId& subscriptionId)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
+  if (iter != local_subscriptions_.end()) {
+    if (DDS::RETCODE_OK ==
+          subscriptions_writer_.write_unregister_dispose(subscriptionId)) {
+      OPENDDS_STRING topic_name = topic_names_[iter->second.topic_id_];
+      local_subscriptions_.erase(subscriptionId);
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
+            topics_.find(topic_name);
+      if (top_it != topics_.end()) {
+        match_endpoints(subscriptionId, top_it->second, true /*remove*/);
+        top_it->second.endpoints_.erase(subscriptionId);
+      }
+    } else {
+      ACE_DEBUG((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: Sedp::remove_subscription - ")
+                 ACE_TEXT("Failed to publish dispose msg\n")));
+    }
+  }
 }
 
 bool
@@ -832,7 +1103,7 @@ Sedp::update_subscription_qos(const RepoId& subscriptionId,
     }
     // Match/unmatch with subscriptions
     OPENDDS_STRING topic_name = topic_names_[sb.topic_id_];
-    OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+    OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
           topics_.find(topic_name);
     if (top_it != topics_.end()) {
       match_endpoints(subscriptionId, top_it->second);
@@ -870,6 +1141,24 @@ Sedp::update_subscription_params(const RepoId& subId,
   return false;
 }
 
+RepoId
+Sedp::make_topic_guid()
+{
+  RepoId guid;
+  guid = participant_id_;
+  guid.entityId.entityKind = DCPS::ENTITYKIND_OPENDDS_TOPIC;
+  assign(guid.entityId.entityKey, topic_counter_++);
+
+  if (topic_counter_ == 0x1000000) {
+    ACE_DEBUG((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Sedp::make_topic_guid: ")
+               ACE_TEXT("Exceeded Maximum number of topic entity keys!")
+               ACE_TEXT("Next key will be a duplicate!\n")));
+    topic_counter_ = 0;
+  }
+  return guid;
+}
+
 void
 Sedp::shutdown()
 {
@@ -898,15 +1187,15 @@ Sedp::Task::shutdown()
 
 void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
-                  const OpenDDS::DCPS::DiscoveredWriterData* pwdata)
+                  const DiscoveredWriterData* pwdata)
 {
-  ACE_Auto_Basic_Ptr<const OpenDDS::DCPS::DiscoveredWriterData> delete_the_data(pwdata);
+  ACE_Auto_Basic_Ptr<const DiscoveredWriterData> delete_the_data(pwdata);
   sedp_->data_received(message_id, *pwdata);
 }
 
 void
 Sedp::data_received(DCPS::MessageId message_id,
-                    const OpenDDS::DCPS::DiscoveredWriterData& wdata)
+                    const DiscoveredWriterData& wdata)
 {
   if (spdp_.shutting_down()) { return; }
 
@@ -931,7 +1220,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   DiscoveredPublicationIter iter = discovered_publications_.find(guid);
 
   if (message_id == DCPS::SAMPLE_DATA) {
-    OpenDDS::DCPS::DiscoveredWriterData wdata_copy;
+    DiscoveredWriterData wdata_copy;
 
     if (iter == discovered_publications_.end()) { // add new
       // Must unlock when calling into pub_bit() as it may call back into us
@@ -942,11 +1231,11 @@ Sedp::data_received(DCPS::MessageId message_id,
             discovered_publications_[guid] = DiscoveredPublication(wdata);
 
         topic_name = get_topic_name(pub);
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
           topics_.find(topic_name);
         if (top_it == topics_.end()) {
           top_it =
-            topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
+            topics_.insert(std::make_pair(topic_name, TopicDetailsEx())).first;
           top_it->second.data_type_ = wdata.ddsPublicationData.type_name;
           top_it->second.qos_.topic_data = wdata.ddsPublicationData.topic_data;
           top_it->second.repo_id_ = make_topic_guid();
@@ -967,7 +1256,7 @@ Sedp::data_received(DCPS::MessageId message_id,
           return;
         }
 
-        TopicDetails& td = top_it->second;
+        TopicDetailsEx& td = top_it->second;
         topic_names_[td.repo_id_] = topic_name;
         td.endpoints_.insert(guid);
 
@@ -997,7 +1286,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       iter = discovered_publications_.find(guid);
       if (iter != discovered_publications_.end()) {
         iter->second.bit_ih_ = instance_handle;
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
@@ -1018,7 +1307,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
       // Match/unmatch local subscription(s)
       topic_name = get_topic_name(iter->second);
-      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         if (DCPS::DCPS_debug_level > 3) {
@@ -1035,7 +1324,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     if (iter != discovered_publications_.end()) {
       // Unmatch local subscription(s)
       topic_name = get_topic_name(iter->second);
-      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
@@ -1054,15 +1343,15 @@ Sedp::data_received(DCPS::MessageId message_id,
 
 void
 Sedp::Task::svc_i(DCPS::MessageId message_id,
-                  const OpenDDS::DCPS::DiscoveredReaderData* prdata)
+                  const DiscoveredReaderData* prdata)
 {
-  ACE_Auto_Basic_Ptr<const OpenDDS::DCPS::DiscoveredReaderData> delete_the_data(prdata);
+  ACE_Auto_Basic_Ptr<const DiscoveredReaderData> delete_the_data(prdata);
   sedp_->data_received(message_id, *prdata);
 }
 
 void
 Sedp::data_received(DCPS::MessageId message_id,
-                    const OpenDDS::DCPS::DiscoveredReaderData& rdata)
+                    const DiscoveredReaderData& rdata)
 {
   if (spdp_.shutting_down()) { return; }
 
@@ -1091,7 +1380,7 @@ Sedp::data_received(DCPS::MessageId message_id,
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
 
   if (message_id == DCPS::SAMPLE_DATA) {
-    OpenDDS::DCPS::DiscoveredReaderData rdata_copy;
+    DiscoveredReaderData rdata_copy;
 
     if (iter == discovered_subscriptions_.end()) { // add new
       { // Reduce scope of sub and td
@@ -1099,11 +1388,11 @@ Sedp::data_received(DCPS::MessageId message_id,
           discovered_subscriptions_[guid] = DiscoveredSubscription(rdata);
 
         topic_name = get_topic_name(sub);
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
           topics_.find(topic_name);
         if (top_it == topics_.end()) {
           top_it =
-            topics_.insert(std::make_pair(topic_name, TopicDetails())).first;
+            topics_.insert(std::make_pair(topic_name, TopicDetailsEx())).first;
           top_it->second.data_type_ = rdata.ddsSubscriptionData.type_name;
           top_it->second.qos_.topic_data = rdata.ddsSubscriptionData.topic_data;
           top_it->second.repo_id_ = make_topic_guid();
@@ -1124,7 +1413,7 @@ Sedp::data_received(DCPS::MessageId message_id,
           return;
         }
 
-        TopicDetails& td = top_it->second;
+        TopicDetailsEx& td = top_it->second;
         topic_names_[td.repo_id_] = topic_name;
         td.endpoints_.insert(guid);
 
@@ -1154,7 +1443,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       iter = discovered_subscriptions_.find(guid);
       if (iter != discovered_subscriptions_.end()) {
         iter->second.bit_ih_ = instance_handle;
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
@@ -1177,7 +1466,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
         // Match/unmatch local publication(s)
         topic_name = get_topic_name(iter->second);
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
             topics_.find(topic_name);
         if (top_it != topics_.end()) {
           if (DCPS::DCPS_debug_level > 3) {
@@ -1192,7 +1481,7 @@ Sedp::data_received(DCPS::MessageId message_id,
                         rdata.contentFilterProperty)) {
         // Let any associated local publications know about the change
         topic_name = get_topic_name(iter->second);
-        OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+        OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
             topics_.find(topic_name);
         const RepoIdSet& assoc =
           (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints_;
@@ -1229,7 +1518,7 @@ Sedp::data_received(DCPS::MessageId message_id,
     if (iter != discovered_subscriptions_.end()) {
       // Unmatch local publication(s)
       topic_name = get_topic_name(iter->second);
-      OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
+      OPENDDS_MAP(OPENDDS_STRING, TopicDetailsEx)::iterator top_it =
           topics_.find(topic_name);
       if (top_it != topics_.end()) {
         top_it->second.endpoints_.erase(guid);
@@ -1297,6 +1586,475 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
 }
 
 // helper for match(), below
+struct DcpsUpcalls : ACE_Task_Base {
+  DcpsUpcalls(DCPS::DataReaderCallbacks* drr,
+              const RepoId& reader,
+              const DCPS::WriterAssociation& wa,
+              bool active,
+              DCPS::DataWriterCallbacks* dwr);
+  int svc();
+  void writer_done();
+  DCPS::DataReaderCallbacks* const drr_;
+  const RepoId& reader_;
+  const DCPS::WriterAssociation& wa_;
+  bool active_;
+  DCPS::DataWriterCallbacks* const dwr_;
+  bool reader_done_, writer_done_;
+  ACE_Thread_Mutex mtx_;
+  ACE_Condition_Thread_Mutex cnd_;
+};
+
+void
+Sedp::match_endpoints(RepoId repoId, const TopicDetailsEx& td,
+                      bool remove)
+{
+  const bool reader = repoId.entityId.entityKind & 4;
+  // Copy the endpoint set - lock can be released in match()
+  RepoIdSet endpoints_copy = td.endpoints_;
+
+  for (RepoIdSet::const_iterator iter = endpoints_copy.begin();
+       iter != endpoints_copy.end(); ++iter) {
+    // check to make sure it's a Reader/Writer or Writer/Reader match
+    if (bool(iter->entityId.entityKind & 4) != reader) {
+      if (remove) {
+        remove_assoc(*iter, repoId);
+      } else {
+        match(reader ? *iter : repoId, reader ? repoId : *iter);
+      }
+    }
+  }
+}
+
+void
+Sedp::match(const RepoId& writer, const RepoId& reader)
+{
+  // 0. For discovered endpoints, we'll have the QoS info in the form of the
+  // publication or subscription BIT data which doesn't use the same structures
+  // for QoS.  In those cases we can copy the individual QoS policies to temp
+  // QoS structs:
+  DDS::DataWriterQos tempDwQos;
+  DDS::PublisherQos tempPubQos;
+  DDS::DataReaderQos tempDrQos;
+  DDS::SubscriberQos tempSubQos;
+  ContentFilterProperty_t tempCfp;
+
+  // 1. collect details about the writer, which may be local or discovered
+  const DDS::DataWriterQos* dwQos = 0;
+  const DDS::PublisherQos* pubQos = 0;
+  DCPS::TransportLocatorSeq* wTls = 0;
+
+  const LocalPublicationIter lpi = local_publications_.find(writer);
+  DiscoveredPublicationIter dpi;
+  bool writer_local = false, already_matched = false;
+  if (lpi != local_publications_.end()) {
+    writer_local = true;
+    dwQos = &lpi->second.qos_;
+    pubQos = &lpi->second.publisher_qos_;
+    wTls = &lpi->second.trans_info_;
+    already_matched = lpi->second.matched_endpoints_.count(reader);
+  } else if ((dpi = discovered_publications_.find(writer))
+             != discovered_publications_.end()) {
+    wTls = &dpi->second.writer_data_.writerProxy.allLocators;
+  } else {
+    return; // Possible and ok, since lock is released
+  }
+
+  // 2. collect details about the reader, which may be local or discovered
+  const DDS::DataReaderQos* drQos = 0;
+  const DDS::SubscriberQos* subQos = 0;
+  DCPS::TransportLocatorSeq* rTls = 0;
+  const ContentFilterProperty_t* cfProp = 0;
+
+  const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
+  DiscoveredSubscriptionIter dsi;
+  bool reader_local = false;
+  if (lsi != local_subscriptions_.end()) {
+    reader_local = true;
+    drQos = &lsi->second.qos_;
+    subQos = &lsi->second.subscriber_qos_;
+    rTls = &lsi->second.trans_info_;
+    if (lsi->second.filterProperties.filterExpression[0] != 0) {
+      tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
+      tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
+    }
+    cfProp = &tempCfp;
+    if (!already_matched) {
+      already_matched = lsi->second.matched_endpoints_.count(writer);
+    }
+  } else if ((dsi = discovered_subscriptions_.find(reader))
+             != discovered_subscriptions_.end()) {
+    if (!writer_local) {
+      // this is a discovered/discovered match, nothing for us to do
+      return;
+    }
+    rTls = &dsi->second.reader_data_.readerProxy.allLocators;
+
+    LocatorSeq locs;
+    bool participantExpectsInlineQos = false;
+    RepoId remote_participant = reader;
+    remote_participant.entityId = ENTITYID_PARTICIPANT;
+    const bool participant_found =
+      spdp_.get_default_locators(remote_participant, locs,
+                                 participantExpectsInlineQos);
+    if (!rTls->length()) {     // if no locators provided, add the default
+      if (!participant_found) {
+        defer_match_endpoints_.insert(reader);
+        return;
+      } else if (locs.length()) {
+        size_t size = 0, padding = 0;
+        DCPS::gen_find_size(locs, size, padding);
+
+        ACE_Message_Block mb_locator(size + 1);   // Add space for boolean
+        using DCPS::Serializer;
+        Serializer ser_loc(&mb_locator,
+                           ACE_CDR_BYTE_ORDER,
+                           Serializer::ALIGN_CDR);
+        ser_loc << locs;
+        const bool readerExpectsInlineQos =
+          dsi->second.reader_data_.readerProxy.expectsInlineQos;
+        ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos
+                                               || readerExpectsInlineQos);
+
+        DCPS::TransportLocator tl;
+        tl.transport_type = "rtps_udp";
+        message_block_to_sequence (mb_locator, tl.data);
+        rTls->length(1);
+        (*rTls)[0] = tl;
+      } else {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Sedp::match - ")
+                   ACE_TEXT("remote reader found with no locators ")
+                   ACE_TEXT("and no default locators\n")));
+      }
+    }
+
+    const DDS::SubscriptionBuiltinTopicData& bit =
+      dsi->second.reader_data_.ddsSubscriptionData;
+    tempDrQos.durability = bit.durability;
+    tempDrQos.deadline = bit.deadline;
+    tempDrQos.latency_budget = bit.latency_budget;
+    tempDrQos.liveliness = bit.liveliness;
+    tempDrQos.reliability = bit.reliability;
+    tempDrQos.destination_order = bit.destination_order;
+    tempDrQos.history = TheServiceParticipant->initial_HistoryQosPolicy();
+    tempDrQos.resource_limits =
+      TheServiceParticipant->initial_ResourceLimitsQosPolicy();
+    tempDrQos.user_data = bit.user_data;
+    tempDrQos.ownership = bit.ownership;
+    tempDrQos.time_based_filter = bit.time_based_filter;
+    tempDrQos.reader_data_lifecycle =
+      TheServiceParticipant->initial_ReaderDataLifecycleQosPolicy();
+    drQos = &tempDrQos;
+    tempSubQos.presentation = bit.presentation;
+    tempSubQos.partition = bit.partition;
+    tempSubQos.group_data = bit.group_data;
+    tempSubQos.entity_factory =
+      TheServiceParticipant->initial_EntityFactoryQosPolicy();
+    subQos = &tempSubQos;
+    cfProp = &dsi->second.reader_data_.contentFilterProperty;
+  } else {
+    return; // Possible and ok, since lock is released
+  }
+
+  // This is really part of step 1, but we're doing it here just in case we
+  // are in the discovered/discovered match and we don't need the QoS data.
+  if (!writer_local) {
+    const DDS::PublicationBuiltinTopicData& bit =
+      dpi->second.writer_data_.ddsPublicationData;
+    tempDwQos.durability = bit.durability;
+    tempDwQos.durability_service = bit.durability_service;
+    tempDwQos.deadline = bit.deadline;
+    tempDwQos.latency_budget = bit.latency_budget;
+    tempDwQos.liveliness = bit.liveliness;
+    tempDwQos.reliability = bit.reliability;
+    tempDwQos.destination_order = bit.destination_order;
+    tempDwQos.history = TheServiceParticipant->initial_HistoryQosPolicy();
+    tempDwQos.resource_limits =
+      TheServiceParticipant->initial_ResourceLimitsQosPolicy();
+    tempDwQos.transport_priority =
+      TheServiceParticipant->initial_TransportPriorityQosPolicy();
+    tempDwQos.lifespan = bit.lifespan;
+    tempDwQos.user_data = bit.user_data;
+    tempDwQos.ownership = bit.ownership;
+    tempDwQos.ownership_strength = bit.ownership_strength;
+    tempDwQos.writer_data_lifecycle =
+      TheServiceParticipant->initial_WriterDataLifecycleQosPolicy();
+    dwQos = &tempDwQos;
+    tempPubQos.presentation = bit.presentation;
+    tempPubQos.partition = bit.partition;
+    tempPubQos.group_data = bit.group_data;
+    tempPubQos.entity_factory =
+      TheServiceParticipant->initial_EntityFactoryQosPolicy();
+    pubQos = &tempPubQos;
+
+    LocatorSeq locs;
+    bool participantExpectsInlineQos = false;
+    RepoId remote_participant = writer;
+    remote_participant.entityId = ENTITYID_PARTICIPANT;
+    const bool participant_found =
+      spdp_.get_default_locators(remote_participant, locs,
+                                 participantExpectsInlineQos);
+    if (!wTls->length()) {     // if no locators provided, add the default
+      if (!participant_found) {
+        defer_match_endpoints_.insert(writer);
+        return;
+      } else if (locs.length()) {
+        size_t size = 0, padding = 0;
+        DCPS::gen_find_size(locs, size, padding);
+
+        ACE_Message_Block mb_locator(size + 1);   // Add space for boolean
+        using DCPS::Serializer;
+        Serializer ser_loc(&mb_locator,
+                           ACE_CDR_BYTE_ORDER,
+                           Serializer::ALIGN_CDR);
+        ser_loc << locs;
+        ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos);
+
+        DCPS::TransportLocator tl;
+        tl.transport_type = "rtps_udp";
+        message_block_to_sequence (mb_locator, tl.data);
+        wTls->length(1);
+        (*wTls)[0] = tl;
+      } else {
+        ACE_DEBUG((LM_WARNING,
+                   ACE_TEXT("(%P|%t) Sedp::match - ")
+                   ACE_TEXT("remote writer found with no locators ")
+                   ACE_TEXT("and no default locators\n")));
+      }
+    }
+  }
+
+  // Need to release lock, below, for callbacks into DCPS which could
+  // call into Spdp/Sedp.  Note that this doesn't unlock, it just constructs
+  // an ACE object which will be used below for unlocking.
+  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+
+  // 3. check transport and QoS compatibility
+
+  // Copy entries from local publication and local subscription maps
+  // prior to releasing lock
+  DCPS::DataWriterCallbacks* dwr = 0;
+  DCPS::DataReaderCallbacks* drr = 0;
+  if (writer_local) {
+    dwr = lpi->second.publication_;
+  }
+  if (reader_local) {
+    drr = lsi->second.subscription_;
+  }
+
+  DCPS::IncompatibleQosStatus
+    writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()},
+    readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
+
+  if (DCPS::compatibleQOS(&writerStatus, &readerStatus, *wTls, *rTls,
+                          dwQos, drQos, pubQos, subQos)) {
+    if (!writer_local) {
+      RepoId writer_participant = writer;
+      writer_participant.entityId = ENTITYID_PARTICIPANT;
+      if (!associated_participants_.count(writer_participant)) {
+        if (DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                               ACE_TEXT("remote writer deferred\n")));
+        }
+        defer_match_endpoints_.insert(writer);
+        return;
+      }
+    }
+    if (!reader_local) {
+      RepoId reader_participant = reader;
+      reader_participant.entityId = ENTITYID_PARTICIPANT;
+      if (!associated_participants_.count(reader_participant)) {
+        if (DCPS::DCPS_debug_level > 3) {
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                               ACE_TEXT("remote reader deferred\n")));
+        }
+        defer_match_endpoints_.insert(reader);
+        return;
+      }
+    }
+
+    bool call_writer = false, call_reader = false;
+    if (writer_local) {
+      call_writer = lpi->second.matched_endpoints_.insert(reader).second;
+    }
+    if (reader_local) {
+      call_reader = lsi->second.matched_endpoints_.insert(writer).second;
+    }
+    if (!call_writer && !call_reader) {
+      return; // nothing more to do
+    }
+    // Copy reader and writer association data prior to releasing lock
+#ifdef __SUNPRO_CC
+    DCPS::ReaderAssociation ra;
+    ra.readerTransInfo = *rTls;
+    ra.readerId = reader;
+    ra.subQos = *subQos;
+    ra.readerQos = *drQos;
+    ra.filterExpression = cfProp->filterExpression;
+    ra.exprParams = cfProp->expressionParameters;
+    DCPS::WriterAssociation wa;
+    wa.writerTransInfo = *wTls;
+    wa.writerId = writer;
+    wa.pubQos = *pubQos;
+    wa.writerQos = *dwQos;
+#else
+    const DCPS::ReaderAssociation ra =
+        {*rTls, reader, *subQos, *drQos,
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+         cfProp->filterClassName, cfProp->filterExpression,
+#else
+         "", "",
+#endif
+         cfProp->expressionParameters};
+
+    const DCPS::WriterAssociation wa = {*wTls, writer, *pubQos, *dwQos};
+#endif
+
+    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+    static const bool writer_active = true;
+
+    if (call_writer) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                             ACE_TEXT("adding writer association\n")));
+      }
+      DcpsUpcalls thr(drr, reader, wa, !writer_active, dwr);
+      if (call_reader) {
+        thr.activate();
+      }
+      dwr->add_association(writer, ra, writer_active);
+      if (call_reader) {
+        thr.writer_done();
+      }
+
+    } else if (call_reader) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                             ACE_TEXT("adding reader association\n")));
+      }
+      drr->add_association(reader, wa, !writer_active);
+    }
+
+    // change this if 'writer_active' (above) changes
+    if (call_writer && !call_reader && !is_opendds(reader)) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) Sedp::match - ")
+                   ACE_TEXT("calling writer association_complete\n")));
+      }
+      dwr->association_complete(reader);
+    }
+
+  } else if (already_matched) { // break an existing associtaion
+    if (writer_local) {
+      lpi->second.matched_endpoints_.erase(reader);
+      lpi->second.remote_opendds_associations_.erase(reader);
+    }
+    if (reader_local) {
+      lsi->second.matched_endpoints_.erase(writer);
+      lsi->second.remote_opendds_associations_.erase(writer);
+    }
+    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
+    if (writer_local) {
+      DCPS::ReaderIdSeq reader_seq(1);
+      reader_seq.length(1);
+      reader_seq[0] = reader;
+      dwr->remove_associations(reader_seq, false /*notify_lost*/);
+    }
+    if (reader_local) {
+      DCPS::WriterIdSeq writer_seq(1);
+      writer_seq.length(1);
+      writer_seq[0] = writer;
+      drr->remove_associations(writer_seq, false /*notify_lost*/);
+    }
+
+  } else { // something was incompatible
+    ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
+    if (writer_local && writerStatus.count_since_last_send) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                             ACE_TEXT("writer incompatible\n")));
+      }
+      dwr->update_incompatible_qos(writerStatus);
+    }
+    if (reader_local && readerStatus.count_since_last_send) {
+      if (DCPS::DCPS_debug_level > 3) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
+                             ACE_TEXT("reader incompatible\n")));
+      }
+      drr->update_incompatible_qos(readerStatus);
+    }
+  }
+}
+
+DcpsUpcalls::DcpsUpcalls(DCPS::DataReaderCallbacks* drr,
+                         const RepoId& reader,
+                         const DCPS::WriterAssociation& wa,
+                         bool active,
+                         DCPS::DataWriterCallbacks* dwr)
+  : drr_(drr), reader_(reader), wa_(wa), active_(active), dwr_(dwr)
+  , reader_done_(false), writer_done_(false), cnd_(mtx_)
+{}
+
+int
+DcpsUpcalls::svc()
+{
+  drr_->add_association(reader_, wa_, active_);
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mtx_, -1);
+    reader_done_ = true;
+    cnd_.signal();
+    while (!writer_done_) {
+      cnd_.wait();
+    }
+  }
+  dwr_->association_complete(reader_);
+  return 0;
+}
+
+void
+DcpsUpcalls::writer_done()
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
+    writer_done_ = true;
+    cnd_.signal();
+  }
+  wait();
+}
+
+void
+Sedp::remove_assoc(const RepoId& remove_from,
+                   const RepoId& removing)
+{
+  const bool reader = remove_from.entityId.entityKind & 4;
+  if (reader) {
+    const LocalSubscriptionIter lsi = local_subscriptions_.find(remove_from);
+    if (lsi != local_subscriptions_.end()) {
+      lsi->second.matched_endpoints_.erase(removing);
+      DCPS::WriterIdSeq writer_seq(1);
+      writer_seq.length(1);
+      writer_seq[0] = removing;
+      lsi->second.remote_opendds_associations_.erase(removing);
+      lsi->second.subscription_->remove_associations(writer_seq,
+                                                     false /*notify_lost*/);
+      // Update writer
+      write_subscription_data(remove_from, lsi->second);
+    }
+
+  } else {
+    const LocalPublicationIter lpi = local_publications_.find(remove_from);
+    if (lpi != local_publications_.end()) {
+      lpi->second.matched_endpoints_.erase(removing);
+      DCPS::ReaderIdSeq reader_seq(1);
+      reader_seq.length(1);
+      reader_seq[0] = removing;
+      lpi->second.remote_opendds_associations_.erase(removing);
+      lpi->second.publication_->remove_associations(reader_seq,
+                                                    false /*notify_lost*/);
+    }
+  }
+}
 
 void
 Sedp::association_complete(const RepoId& localId,
@@ -1684,7 +2442,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      ACE_Auto_Ptr<OpenDDS::DCPS::DiscoveredWriterData> wdata(new OpenDDS::DCPS::DiscoveredWriterData);
+      ACE_Auto_Ptr<DiscoveredWriterData> wdata(new DiscoveredWriterData);
       if (ParameterListConverter::from_param_list(data, *wdata) < 0) {
         ACE_DEBUG((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
@@ -1702,7 +2460,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
         return;
       }
 
-      ACE_Auto_Ptr<OpenDDS::DCPS::DiscoveredReaderData> rdata(new OpenDDS::DCPS::DiscoveredReaderData);
+      ACE_Auto_Ptr<DiscoveredReaderData> rdata(new DiscoveredReaderData);
       if (ParameterListConverter::from_param_list(data, *rdata) < 0) {
         ACE_DEBUG((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR Sedp::Reader::data_received - ")
@@ -1736,7 +2494,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
 void
 Sedp::populate_discovered_writer_msg(
-    OpenDDS::DCPS::DiscoveredWriterData& dwd,
+    DiscoveredWriterData& dwd,
     const RepoId& publication_id,
     const LocalPublication& pub)
 {
@@ -1769,7 +2527,7 @@ Sedp::populate_discovered_writer_msg(
 
 void
 Sedp::populate_discovered_reader_msg(
-    OpenDDS::DCPS::DiscoveredReaderData& drd,
+    DiscoveredReaderData& drd,
     const RepoId& subscription_id,
     const LocalSubscription& sub)
 {
@@ -1852,7 +2610,7 @@ Sedp::write_publication_data(
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
-    OpenDDS::DCPS::DiscoveredWriterData dwd;
+    DiscoveredWriterData dwd;
     ParameterList plist;
     populate_discovered_writer_msg(dwd, rid, lp);
     // Convert to parameter list
@@ -1882,7 +2640,7 @@ Sedp::write_subscription_data(
   DDS::ReturnCode_t result = DDS::RETCODE_OK;
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
-    OpenDDS::DCPS::DiscoveredReaderData drd;
+    DiscoveredReaderData drd;
     ParameterList plist;
     populate_discovered_reader_msg(drd, rid, ls);
     // Convert to parameter list
@@ -1935,6 +2693,13 @@ Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
   }
 }
 
+bool
+Sedp::is_opendds(const GUID_t& endpoint)
+{
+  return !std::memcmp(endpoint.guidPrefix, DCPS::VENDORID_OCI,
+                      sizeof(DCPS::VENDORID_OCI));
+}
+
 void
 Sedp::acknowledge()
 {
@@ -1949,14 +2714,14 @@ Sedp::Task::enqueue(const SPDPdiscoveredParticipantData* pdata)
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata)
+Sedp::Task::enqueue(DCPS::MessageId id, const DiscoveredWriterData* wdata)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_WRITER, id, wdata));
 }
 
 void
-Sedp::Task::enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata)
+Sedp::Task::enqueue(DCPS::MessageId id, const DiscoveredReaderData* rdata)
 {
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(Msg::MSG_READER, id, rdata));
@@ -2029,129 +2794,6 @@ Sedp::Task::svc()
 Sedp::Task::~Task()
 {
   shutdown();
-}
-
-bool
-Sedp::shutting_down() const
-{
-  return spdp_.shutting_down();
-}
-
-void
-Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& rTls,
-                                          DiscoveredSubscriptionIter& dsi,
-                                          const DCPS::RepoId& reader)
-{
-  OpenDDS::DCPS::LocatorSeq locs;
-  bool participantExpectsInlineQos = false;
-  RepoId remote_participant = reader;
-  remote_participant.entityId = ENTITYID_PARTICIPANT;
-  const bool participant_found =
-    spdp_.get_default_locators(remote_participant, locs,
-                               participantExpectsInlineQos);
-  if (!rTls->length()) {     // if no locators provided, add the default
-    if (!participant_found) {
-      defer_match_endpoints_.insert(reader);
-      return;
-    } else if (locs.length()) {
-      size_t size = 0, padding = 0;
-      DCPS::gen_find_size(locs, size, padding);
-
-      ACE_Message_Block mb_locator(size + 1);   // Add space for boolean
-      using DCPS::Serializer;
-      Serializer ser_loc(&mb_locator,
-                         ACE_CDR_BYTE_ORDER,
-                         Serializer::ALIGN_CDR);
-      ser_loc << locs;
-      const bool readerExpectsInlineQos =
-        dsi->second.reader_data_.readerProxy.expectsInlineQos;
-      ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos
-                                             || readerExpectsInlineQos);
-
-      DCPS::TransportLocator tl;
-      tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
-      rTls->length(1);
-      (*rTls)[0] = tl;
-    } else {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) Sedp::match - ")
-                 ACE_TEXT("remote reader found with no locators ")
-                 ACE_TEXT("and no default locators\n")));
-    }
-  }
-}
-
-void
-Sedp::populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& wTls,
-                                          DiscoveredPublicationIter& /*dpi*/,
-                                          const DCPS::RepoId& writer)
-{
-  OpenDDS::DCPS::LocatorSeq locs;
-  bool participantExpectsInlineQos = false;
-  RepoId remote_participant = writer;
-  remote_participant.entityId = ENTITYID_PARTICIPANT;
-  const bool participant_found =
-    spdp_.get_default_locators(remote_participant, locs,
-                               participantExpectsInlineQos);
-  if (!wTls->length()) {     // if no locators provided, add the default
-    if (!participant_found) {
-      defer_match_endpoints_.insert(writer);
-      return;
-    } else if (locs.length()) {
-      size_t size = 0, padding = 0;
-      DCPS::gen_find_size(locs, size, padding);
-
-      ACE_Message_Block mb_locator(size + 1);   // Add space for boolean
-      using DCPS::Serializer;
-      Serializer ser_loc(&mb_locator,
-                         ACE_CDR_BYTE_ORDER,
-                         Serializer::ALIGN_CDR);
-      ser_loc << locs;
-      ser_loc << ACE_OutputCDR::from_boolean(participantExpectsInlineQos);
-
-      DCPS::TransportLocator tl;
-      tl.transport_type = "rtps_udp";
-      message_block_to_sequence (mb_locator, tl.data);
-      wTls->length(1);
-      (*wTls)[0] = tl;
-    } else {
-      ACE_DEBUG((LM_WARNING,
-                 ACE_TEXT("(%P|%t) Sedp::match - ")
-                 ACE_TEXT("remote writer found with no locators ")
-                 ACE_TEXT("and no default locators\n")));
-    }
-  }
-}
-
-bool
-Sedp::defer_writer(const RepoId& writer,
-                   const RepoId& writer_participant)
-{
-  if (!associated_participants_.count(writer_participant)) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
-                 ACE_TEXT("remote writer deferred\n")));
-    }
-    defer_match_endpoints_.insert(writer);
-    return true;
-  }
-  return false;
-}
-
-bool
-Sedp::defer_reader(const RepoId& reader,
-                   const RepoId& reader_participant)
-{
-  if (!associated_participants_.count(reader_participant)) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::match - ")
-                 ACE_TEXT("remote reader deferred\n")));
-    }
-    defer_match_endpoints_.insert(reader);
-    return true;
-  }
-  return false;
 }
 
 WaitForAcks::WaitForAcks()

@@ -210,7 +210,7 @@ bool test_messages()
     iqos[0]._d(PID_TOPIC_NAME);
     iqos[1].string_data("my_type_name"); // 13 with null
     iqos[1]._d(PID_TYPE_NAME);
-    OpenDDS::DCPS::ContentFilterProperty_t cfprop; // 4 empty strings + 1 empty StringSeq
+    ContentFilterProperty_t cfprop; // 4 empty strings + 1 empty StringSeq
     iqos[2].content_filter_property(cfprop);
     ds.inlineQos = iqos;
     ds.smHeader.submessageLength = 112;
@@ -352,7 +352,7 @@ bool test_messages()
     ok &= test(id, expected, "InfoDestinationSubmessage");
   }
   {
-    OpenDDS::DCPS::Locator_t loc[] = {
+    Locator_t loc[] = {
       {LOCATOR_KIND_UDPv4, 49152, {0, 0, 0, 0, 0, 0, 0, 0,
                                    0, 0, 0, 0, 10, 1, 0, 1} },
       {LOCATOR_KIND_UDPv6, 49153, {0, 0, 0, 0, 0, 0, 0, 0,
@@ -372,7 +372,7 @@ bool test_messages()
       2, 0, 0, 0, 2, 192, 0, 0,   // uniLL[2].kind, uniLL[2].port
       1, 32, 184, 13, 163, 133, 0, 0, 0, 0, 46, 138, 112, 3, 52, 115};
     ok &= test(ir, expected, "InfoReplySubmessage");
-    OpenDDS::DCPS::Locator_t multi[] = {
+    Locator_t multi[] = {
       {LOCATOR_KIND_UDPv4, 49155, {0, 0, 0, 0, 0, 0, 0, 0,
                                    0, 0, 0, 0, 224, 0, 0, 1} },
       {LOCATOR_KIND_UDPv6, 49156, {2, 255, 0, 0, 0, 0, 0, 0,

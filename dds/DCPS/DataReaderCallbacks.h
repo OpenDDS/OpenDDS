@@ -9,7 +9,6 @@
 #define OPENDDS_DCPS_DATAREADERCALLBACKS_H
 
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/DiscoveryListener.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -45,12 +44,6 @@ public:
   virtual void inconsistent_topic() = 0;
 
   virtual void signal_liveliness(const RepoId& remote_participant) = 0;
-
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
-                                   const TransportLocatorSeq& /*locators*/,
-                                   DiscoveryListener* /*listener*/) { }
 };
 
 } // namespace DCPS

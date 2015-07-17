@@ -192,7 +192,17 @@ UdpTransport::shutdown_i()
 bool
 UdpTransport::connection_info_i(TransportLocator& info) const
 {
-  this->config_i_->populate_locator(info);
+  NetworkAddress network_address(config_i_->local_address_,
+                                 config_i_->local_address_.is_any());
+  ACE_OutputCDR cdr;
+  cdr << network_address;
+
+  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
+  char* buffer = const_cast<char*>(cdr.buffer()); // safe
+
+  info.transport_type = "udp";
+  info.data = TransportBLOB(len, len, reinterpret_cast<CORBA::Octet*>(buffer));
+
   return true;
 }
 

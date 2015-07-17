@@ -87,13 +87,11 @@ MessageTracker::wait_messages_pending(OPENDDS_STRING& caller_message)
       break;
 
     if (done_condition_.wait(pTimeout) == -1 && pending_messages()) {
-      if (DCPS_debug_level) {
-        ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) %T MessageTracker::")
-                   ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p (caller: %s)\n"),
-                   ACE_TEXT("Timed out waiting for messages to be transported"),
-                   caller_message.c_str()));
-      }
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) %T ERROR: MessageTracker::")
+                 ACE_TEXT("wait_messages_pending (Redmine Issue# 1446) %p (caller: %s)\n"),
+                 ACE_TEXT("Timed out at waiting for messages to be transported"),
+                 caller_message.c_str()));
       break;
     }
   }

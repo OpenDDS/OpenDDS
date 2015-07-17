@@ -23,7 +23,6 @@
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
 #include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/DiscoveryListener.h"
 
 namespace OpenDDS {
 namespace DCPS {
@@ -73,19 +72,6 @@ public:
   /// is the one that knows how to populate the supplied
   /// TransportLocator object.
   virtual bool connection_info_i(TransportLocator& local_info) const = 0;
-
-  virtual void register_for_reader(const RepoId& /*participant*/,
-                                   const RepoId& /*writerid*/,
-                                   const RepoId& /*readerid*/,
-                                   const TransportLocatorSeq& /*locators*/,
-                                   OpenDDS::DCPS::DiscoveryListener* /*listener*/) { }
-
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
-                                   const TransportLocatorSeq& /*locators*/,
-                                   DiscoveryListener* /*listener*/) { }
-
 
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;

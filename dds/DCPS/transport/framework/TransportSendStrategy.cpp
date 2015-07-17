@@ -924,7 +924,7 @@ TransportSendStrategy::stop()
 void
 TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 {
-  if (Transport_debug_level > 9) {
+  if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportSendStrategy::send() [%d] - ")
                ACE_TEXT("sending data at 0x%x.\n"),
@@ -1718,7 +1718,7 @@ TransportSendStrategy::set_graceful_disconnecting(bool flag)
 ssize_t
 TransportSendStrategy::do_send_packet(const ACE_Message_Block* packet, int& bp)
 {
-  if (Transport_debug_level > 9) {
+  if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportSendStrategy::do_send_packet() [%d] - ")
                ACE_TEXT("sending data at 0x%x.\n"),
@@ -1871,7 +1871,7 @@ TransportSendStrategy::non_blocking_send(const iovec iov[], int n, int& bp)
 void
 TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
 {
-  if (Transport_debug_level) {
+  if (DCPS_debug_level) {
     size_t size = this->delayed_delivered_notification_queue_.size();
     if ((size > 0) && (size % this->max_samples_ == 0)) {
       ACE_DEBUG((LM_DEBUG,

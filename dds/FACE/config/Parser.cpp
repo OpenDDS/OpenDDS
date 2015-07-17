@@ -1,7 +1,5 @@
 #include "Parser.h"
 #include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/StaticDiscovery.h"
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
 
 #include "ace/Configuration_Import_Export.h"
 #include "ace/OS_NS_stdio.h"
@@ -17,46 +15,6 @@ namespace {
   const char* DATAREADER_QOS_SECTION = "datareaderqos";
   const char* PUBLISHER_QOS_SECTION  = "publisherqos";
   const char* SUBSCRIBER_QOS_SECTION = "subscriberqos";
-
-  OpenDDS::DCPS::RepoId build_id(const ConnectionSettings& conn)
-  {
-    unsigned char participant_key[6];
-    participant_key[0] = (conn.participant_id_ >> 0) & 0xFF;
-    participant_key[1] = (conn.participant_id_ >> 8) & 0xFF;
-    participant_key[2] = (conn.participant_id_ >> 16) & 0xFF;
-    participant_key[3] = (conn.participant_id_ >> 24) & 0xFF;
-    participant_key[4] = 0; //(conn.domain_id_ >> 32) & 0xFF;
-    participant_key[5] = 0; //(conn.domain_id_ >> 40) & 0xFF;
-
-    unsigned char entity_key[3];
-    entity_key[0] = (conn.connection_id_ >> 0) & 0xFF;
-    entity_key[1] = (conn.connection_id_ >> 8) & 0xFF;
-    entity_key[2] = (conn.connection_id_ >> 16) & 0xFF;
-
-    unsigned char entity_kind = 0;
-    switch (conn.direction_) {
-    case FACE::SOURCE:
-      entity_kind = DCPS::ENTITYKIND_USER_WRITER_WITH_KEY;
-      break;
-    case FACE::DESTINATION:
-      entity_kind = DCPS::ENTITYKIND_USER_READER_WITH_KEY;
-      break;
-    case FACE::BI_DIRECTIONAL:
-    case FACE::ONE_WAY_REQUEST_SOURCE:
-    case FACE::ONE_WAY_REQUEST_DESTINATION:
-    case FACE::TWO_WAY_REQUEST_SYNCHRONOUS_SOURCE:
-    case FACE::TWO_WAY_REQUEST_SYNCHRONOUS_DESTINATION:
-    case FACE::TWO_WAY_REQUEST_REPLY_ASYNCHRONOUS_SOURCE:
-    case FACE::TWO_WAY_REQUEST_REPLY_ASYNCHRONOUS_DESTINATION:
-    case FACE::NOT_DEFINED_CONNECTION_DIRECTION_TYPE:
-      break;
-    }
-    return OpenDDS::DCPS::EndpointRegistry::build_id(conn.domain_id_,
-                                                     participant_key,
-                                                     OpenDDS::DCPS::EndpointRegistry::build_id(entity_key,
-                                                                                               entity_kind));
-  }
-
 } // anon namespace
 
 
@@ -71,183 +29,23 @@ Parser::parse(const char* filename)
   config.open();
   ACE_Ini_ImpExp import(config);
   int status = import.import_config(filename);
-  if (status) {
+  if (status != 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Initialize() ")
                ACE_TEXT("import_config () returned %d\n"),
                status));
     return status;
+  } else {
+    status = parse_sections(config, DATAWRITER_QOS_SECTION, false) ||
+             parse_sections(config, DATAREADER_QOS_SECTION, false) ||
+             parse_sections(config, PUBLISHER_QOS_SECTION, false) ||
+             parse_sections(config, SUBSCRIBER_QOS_SECTION, false) ||
+             parse_sections(config, TOPIC_SECTION, true) ||
+             parse_sections(config, CONNECTION_SECTION, true);
+
+    status = status || TheServiceParticipant->load_configuration(config,
+                                                                 filename);
   }
-
-  status = parse_sections(config, DATAWRITER_QOS_SECTION, false) ||
-    parse_sections(config, DATAREADER_QOS_SECTION, false) ||
-    parse_sections(config, PUBLISHER_QOS_SECTION, false) ||
-    parse_sections(config, SUBSCRIBER_QOS_SECTION, false) ||
-    parse_sections(config, TOPIC_SECTION, true) ||
-    parse_sections(config, CONNECTION_SECTION, true);
-
-  if (status)
-    return status;
-
-  status = TheServiceParticipant->load_configuration(config,
-                                                     filename);
-
-  if (status)
-    return status;
-
-  for (ConnectionMap::const_iterator pos = connection_map_.begin(), limit = connection_map_.end();
-       pos != limit;
-       ++pos) {
-    const ConnectionSettings& conn = pos->second;
-    OpenDDS::DCPS::RepoId id = build_id(conn);
-
-    switch (conn.direction_) {
-    case FACE::SOURCE:
-      {
-        OPENDDS_STRING topic_name = conn.topic_name_;
-
-        DDS::DataWriterQos qos(TheServiceParticipant->initial_DataWriterQos());
-        if (conn.datawriter_qos_set()) {
-          QosMap::const_iterator p = qos_map_.find(conn.datawriter_qos_name());
-          if (p != qos_map_.end()) {
-            p->second.apply_to(qos);
-          } else {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Could not find datawriterqos/%s\n"),
-                       conn.datawriter_qos_name()));
-            return -1;
-          }
-        }
-
-        DDS::PublisherQos publisher_qos(TheServiceParticipant->initial_PublisherQos());
-        if (conn.publisher_qos_set()) {
-          QosMap::const_iterator p = qos_map_.find(conn.publisher_qos_name());
-          if (p != qos_map_.end()) {
-            p->second.apply_to(publisher_qos);
-          } else {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Could not find publisherqos/%s\n"),
-                       conn.publisher_qos_name()));
-            return -1;
-          }
-        }
-
-        DCPS::TransportLocatorSeq trans_info;
-
-        OpenDDS::DCPS::TransportConfig_rch config;
-
-        if (conn.transport_set()) {
-          config = TheTransportRegistry->get_config(conn.transport_name());
-          if (config.is_nil()) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Could not find transport/%s\n"),
-                       conn.transport_name()));
-            return -1;
-          }
-        }
-
-        if (config.is_nil()) {
-          config = TheTransportRegistry->domain_default_config(conn.domain_id_);
-        }
-
-        if (config.is_nil()) {
-          config = TheTransportRegistry->global_config();
-        }
-
-        config->populate_locators(trans_info);
-
-        // Typically, we would ensure that trans_info is not empty.
-        // However, when using RTPS, trans_info will be empty so don't check.
-
-        // Populate the userdata.
-        qos.user_data.value.length(3);
-        qos.user_data.value[0] = (conn.connection_id_ >> 0) & 0xFF;
-        qos.user_data.value[1] = (conn.connection_id_ >> 8) & 0xFF;
-        qos.user_data.value[2] = (conn.connection_id_ >> 16) & 0xFF;
-
-        OpenDDS::DCPS::EndpointRegistry::Writer w(topic_name, qos, publisher_qos, trans_info);
-        OpenDDS::DCPS::StaticDiscovery::instance()->registry.writer_map.insert(std::make_pair(id, w));
-      }
-      break;
-    case FACE::DESTINATION:
-      {
-        OPENDDS_STRING topic_name = conn.topic_name_;
-
-        DDS::DataReaderQos qos(TheServiceParticipant->initial_DataReaderQos());
-        if (conn.datareader_qos_set()) {
-          QosMap::const_iterator p = qos_map_.find(conn.datareader_qos_name());
-          if (p != qos_map_.end()) {
-            p->second.apply_to(qos);
-          } else {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Could not find datareaderqos/%s\n"),
-                       conn.datawriter_qos_name()));
-            return -1;
-          }
-        }
-
-        DDS::SubscriberQos subscriber_qos(TheServiceParticipant->initial_SubscriberQos());
-        if (conn.subscriber_qos_set()) {
-          QosMap::const_iterator p = qos_map_.find(conn.subscriber_qos_name());
-          if (p != qos_map_.end()) {
-            p->second.apply_to(subscriber_qos);
-          } else {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Could not find subscriberqos/%s\n"),
-                       conn.subscriber_qos_name()));
-            return -1;
-          }
-        }
-
-        DCPS::TransportLocatorSeq trans_info;
-
-        OpenDDS::DCPS::TransportConfig_rch config;
-
-        if (conn.transport_set()) {
-          config = TheTransportRegistry->get_config(conn.transport_name());
-          if (config.is_nil()) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Could not find transport/%s\n"),
-                       conn.transport_name()));
-            return -1;
-          }
-        }
-
-        if (config.is_nil()) {
-          config = TheTransportRegistry->domain_default_config(conn.domain_id_);
-        }
-
-        if (config.is_nil()) {
-          config = TheTransportRegistry->global_config();
-        }
-
-        config->populate_locators(trans_info);
-
-        // Typically, we would ensure that trans_info is not empty.
-        // However, when using RTPS, trans_info will be empty so don't check.
-
-        // Populate the userdata.
-        qos.user_data.value.length(3);
-        qos.user_data.value[0] = (conn.connection_id_ >> 0) & 0xFF;
-        qos.user_data.value[1] = (conn.connection_id_ >> 8) & 0xFF;
-        qos.user_data.value[2] = (conn.connection_id_ >> 16) & 0xFF;
-
-        OpenDDS::DCPS::EndpointRegistry::Reader r(topic_name, qos, subscriber_qos, trans_info);
-        OpenDDS::DCPS::StaticDiscovery::instance()->registry.reader_map.insert(std::make_pair(id, r));
-      }
-      break;
-    case FACE::BI_DIRECTIONAL:
-    case FACE::ONE_WAY_REQUEST_SOURCE:
-    case FACE::ONE_WAY_REQUEST_DESTINATION:
-    case FACE::TWO_WAY_REQUEST_SYNCHRONOUS_SOURCE:
-    case FACE::TWO_WAY_REQUEST_SYNCHRONOUS_DESTINATION:
-    case FACE::TWO_WAY_REQUEST_REPLY_ASYNCHRONOUS_SOURCE:
-    case FACE::TWO_WAY_REQUEST_REPLY_ASYNCHRONOUS_DESTINATION:
-    case FACE::NOT_DEFINED_CONNECTION_DIRECTION_TYPE:
-      break;
-    }
-  }
-
   return status;
 }
 

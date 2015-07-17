@@ -35,18 +35,11 @@ public:
 
   bool is_reliable() const { return true; }
 
-  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
-
-  const std::string& hostname() const { return hostname_; }
-  const std::string& poolname() const { return poolname_; }
-
 private:
   friend class ShmemType;
   explicit ShmemInst(const std::string& name);
 
   ShmemTransport* new_impl(const TransportInst_rch& inst);
-  std::string hostname_;
-  std::string poolname_;
 };
 
 } // namespace DCPS
