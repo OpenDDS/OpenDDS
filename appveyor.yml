@@ -1,10 +1,11 @@
 install:
   - mkdir ext && cd ext
   - git clone --depth 1 git://github.com/DOCGroup/MPC.git
-  - git clone -b Latest_Beta --depth 1 git://github.com/DOCGroup/ATCD.git
+  - git clone -q -b Latest_Beta --depth 1 git://github.com/DOCGroup/ATCD.git
   - cd ..
   - set MPC_ROOT=%CD%\ext\MPC
-  - configure --no-tests --ace=ext\ATCD\ACE
+  - call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
+  - call configure --no-tests --ace=ext\ATCD\ACE
 
 platform:
   - x64
