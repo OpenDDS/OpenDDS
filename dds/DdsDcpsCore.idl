@@ -246,6 +246,15 @@ module DDS {
                 EntityFactoryQosPolicy entity_factory;
                 };
 
+    struct DomainParticipantFactoryQos {
+                EntityFactoryQosPolicy entity_factory;
+                };
+
+    struct DomainParticipantQos {
+                UserDataQosPolicy user_data;
+                EntityFactoryQosPolicy entity_factory;
+                };
+
     struct BuiltinTopicKey_t {
                 BuiltinTopicKeyValue value;
                 };

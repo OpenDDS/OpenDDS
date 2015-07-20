@@ -25,7 +25,6 @@ namespace DCPS {
 ShmemTransport::ShmemTransport(const TransportInst_rch& inst)
   : alloc_(0)
   , read_task_(0)
-  , hostname_(get_fully_qualified_hostname())
 {
   if (!inst.is_nil()) {
     if (!configure(inst.in())) {
@@ -78,7 +77,7 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
                                  TransportClient*)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
-  if (key.first != hostname_) {
+  if (key.first != this->config_i_->hostname()) {
     return AcceptConnectResult();
   }
   GuardType guard(links_lock_);
@@ -137,10 +136,6 @@ ShmemTransport::configure_i(TransportInst* config)
   }
   config_i_->_add_ref();
 
-  std::ostringstream pool;
-  pool << "OpenDDS-" << ACE_OS::getpid() << '-' << config->name();
-  poolname_ = pool.str();
-
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 #ifdef ACE_WIN32
   alloc_opts.max_size_ = config_i_->pool_size_;
@@ -152,7 +147,7 @@ ShmemTransport::configure_i(TransportInst* config)
 #endif
 
   alloc_ =
-    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(poolname_.c_str()),
+    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(this->config_i_->poolname().c_str()),
                        0 /*lock_name is optional*/, &alloc_opts);
 
   void* mem = alloc_->malloc(sizeof(ShmemSharedSemaphore));
@@ -193,7 +188,7 @@ ShmemTransport::configure_i(TransportInst* config)
   read_task_ = new ReadTask(this, ace_sema);
 
   VDBG_LVL((LM_INFO, "(%P|%t) ShmemTransport %@ configured with address %C\n",
-            this, poolname_.c_str()), 1);
+            this, this->config_i_->poolname().c_str()), 1);
 
   return true;
 #endif
@@ -235,17 +230,7 @@ ShmemTransport::shutdown_i()
 bool
 ShmemTransport::connection_info_i(TransportLocator& info) const
 {
-  info.transport_type = "shmem";
-
-  const size_t len = hostname_.size() + 1 /* null */ + poolname_.size();
-  info.data.length(static_cast<CORBA::ULong>(len));
-
-  CORBA::Octet* buff = info.data.get_buffer();
-  std::memcpy(buff, hostname_.c_str(), hostname_.size());
-  buff += hostname_.size();
-
-  *(buff++) = 0;
-  std::memcpy(buff, poolname_.c_str(), poolname_.size());
+  this->config_i_->populate_locator(info);
   return true;
 }
 
@@ -328,6 +313,12 @@ void
 ShmemTransport::signal_semaphore()
 {
   ACE_OS::sema_post(&read_task_->semaphore_);
+}
+
+std::string
+ShmemTransport::address()
+{
+  return this->config_i_->poolname();
 }
 
 } // namespace DCPS

@@ -33,6 +33,7 @@ public:
   FACE::CONNECTION_ID_TYPE connection_id_;
   FACE::CONNECTION_DIRECTION_TYPE direction_;
   int domain_id_;
+  int participant_id_;
   char transport_name_[64];
 };
 

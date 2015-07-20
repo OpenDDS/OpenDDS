@@ -10,10 +10,15 @@
 
 #include "tests/Utils/Safety.h"
 
-int ACE_TMAIN(int, ACE_TCHAR*[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  if (argc < 2) {
+    ACE_ERROR((LM_ERROR, "No config file\n"));
+    return EXIT_FAILURE;
+  }
+  const char* config = argv[1];
   FACE::RETURN_CODE_TYPE status;
-  FACE::TS::Initialize("face_config.ini", status);
+  FACE::TS::Initialize(config, status);
   if (status != FACE::RC_NO_ERROR) return static_cast<int>(status);
 
   DisableGlobalNew dgn;

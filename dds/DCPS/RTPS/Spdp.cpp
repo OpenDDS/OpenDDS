@@ -52,7 +52,8 @@ namespace {
 
 Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
            const DDS::DomainParticipantQos& qos, RtpsDiscovery* disco)
-  : disco_(disco), domain_(domain), guid_(guid), qos_(qos)
+  : OpenDDS::DCPS::LocalParticipant<Sedp>(qos)
+  , disco_(disco), domain_(domain), guid_(guid)
   , tport_(new SpdpTransport(this)), eh_(tport_), eh_shutdown_(false)
   , shutdown_cond_(lock_), shutdown_flag_(0), sedp_(guid_, *this, lock_)
 {
@@ -63,7 +64,7 @@ Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
 
   { // Append metatraffic unicast locator
     const ACE_INET_Addr& local_addr = sedp_.local_address();
-    Locator_t uc_locator;
+    OpenDDS::DCPS::Locator_t uc_locator;
     uc_locator.kind = address_to_kind(local_addr);
     uc_locator.port = local_addr.get_port_number();
     address_to_bytes(uc_locator.address, local_addr);
@@ -73,7 +74,7 @@ Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
 
   if (disco->sedp_multicast()) { // Append metatraffic multicast locator
     const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
-    Locator_t mc_locator;
+    OpenDDS::DCPS::Locator_t mc_locator;
     mc_locator.kind = address_to_kind(mc_addr);
     mc_locator.port = mc_addr.get_port_number();
     address_to_bytes(mc_locator.address, mc_addr);
@@ -94,7 +95,7 @@ Spdp::~Spdp()
     }
     // Iterate through a copy of the repo Ids, rather than the map
     //   as it gets unlocked in remove_discovered_participant()
-    RepoIdSet participant_ids;
+    Sedp::RepoIdSet participant_ids;
     get_discovered_participant_ids(participant_ids);
     for (RepoIdSet::iterator participant_id = participant_ids.begin();
          participant_id != participant_ids.end();
@@ -120,26 +121,6 @@ Spdp::~Spdp()
       shutdown_cond_.wait();
     }
   }
-}
-
-void
-Spdp::ignore_domain_participant(const RepoId& ignoreId)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  sedp_.ignore(ignoreId);
-
-  const DiscoveredParticipantIter iter = participants_.find(ignoreId);
-  if (iter != participants_.end()) {
-    remove_discovered_participant(iter);
-  }
-}
-
-bool
-Spdp::update_domain_participant_qos(const DDS::DomainParticipantQos& qos)
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  qos_ = qos;
-  return true;
 }
 
 void
@@ -248,26 +229,6 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 }
 
 void
-Spdp::remove_discovered_participant(DiscoveredParticipantIter iter)
-{
-  bool removed = sedp_.disassociate(iter->second.pdata_);
-  if (removed) {
-    DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-    // bit may be null if the DomainParticipant is shutting down
-    if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
-      bit->set_instance_state(iter->second.bit_ih_,
-                              DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-    }
-    if (DCPS::DCPS_debug_level > 3) {
-      DCPS::GuidConverter conv(iter->first);
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Spdp::remove_discovered_participant")
-                 ACE_TEXT(" - erasing %C\n"), OPENDDS_STRING(conv).c_str()));
-    }
-    participants_.erase(iter);
-  }
-}
-
-void
 Spdp::remove_expired_participants()
 {
   // Find and remove any expired discovered participant
@@ -295,21 +256,6 @@ Spdp::remove_expired_participants()
         remove_discovered_participant(part);
       }
     }
-  }
-}
-
-RepoId
-Spdp::bit_key_to_repo_id(const char* bit_topic_name,
-                         const DDS::BuiltinTopicKey_t& key)
-{
-  if (0 == std::strcmp(bit_topic_name, DCPS::BUILT_IN_PARTICIPANT_TOPIC)) {
-    RepoId guid;
-    std::memcpy(guid.guidPrefix, key.value, sizeof(DDS::BuiltinTopicKeyValue));
-    guid.entityId = ENTITYID_PARTICIPANT;
-    return guid;
-
-  } else {
-    return sedp_.bit_key_to_repo_id(bit_topic_name, key);
   }
 }
 
@@ -564,7 +510,7 @@ Spdp::SpdpTransport::write_i()
 
   // This locator list should not be empty, but we won't actually be using it.
   // The OpenDDS publication/subscription data will have locators included.
-  LocatorSeq nonEmptyList(1);
+  OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
   nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
   nonEmptyList[0].port = 12345;
@@ -777,128 +723,6 @@ Spdp::SpdpTransport::acknowledge()
   reactor->notify(this);
 }
 
-DCPS::TopicStatus
-Spdp::assert_topic(DCPS::RepoId_out topicId, const char* topicName,
-                   const char* dataTypeName, const DDS::TopicQos& qos,
-                   bool hasDcpsKey)
-{
-  if (std::strlen(topicName) > 256 || std::strlen(dataTypeName) > 256) {
-    if (DCPS::DCPS_debug_level) {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR Spdp::assert_topic() - ")
-                 ACE_TEXT("topic or type name length limit (256) exceeded\n")));
-    }
-    return DCPS::PRECONDITION_NOT_MET;
-  }
-
-  return sedp_.assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey);
-}
-
-
-// start of methods that just forward to sedp_
-
-DCPS::TopicStatus
-Spdp::remove_topic(const RepoId& topicId, OPENDDS_STRING& name)
-{
-  return sedp_.remove_topic(topicId, name);
-}
-
-void
-Spdp::ignore_topic(const RepoId& ignoreId)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  sedp_.ignore(ignoreId);
-}
-
-bool
-Spdp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
-                       OPENDDS_STRING& name)
-{
-  return sedp_.update_topic_qos(topicId, qos, name);
-}
-
-RepoId
-Spdp::add_publication(const RepoId& topicId,
-                      DCPS::DataWriterCallbacks* publication,
-                      const DDS::DataWriterQos& qos,
-                      const DCPS::TransportLocatorSeq& transInfo,
-                      const DDS::PublisherQos& publisherQos)
-{
-  return sedp_.add_publication(topicId, publication, qos,
-                               transInfo, publisherQos);
-}
-
-void
-Spdp::remove_publication(const RepoId& publicationId)
-{
-  sedp_.remove_publication(publicationId);
-}
-
-void
-Spdp::ignore_publication(const RepoId& ignoreId)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  return sedp_.ignore(ignoreId);
-}
-
-bool
-Spdp::update_publication_qos(const RepoId& publicationId,
-                             const DDS::DataWriterQos& qos,
-                             const DDS::PublisherQos& publisherQos)
-{
-  return sedp_.update_publication_qos(publicationId, qos, publisherQos);
-}
-
-RepoId
-Spdp::add_subscription(const RepoId& topicId,
-                       DCPS::DataReaderCallbacks* subscription,
-                       const DDS::DataReaderQos& qos,
-                       const DCPS::TransportLocatorSeq& transInfo,
-                       const DDS::SubscriberQos& subscriberQos,
-                       const char* filterClassName,
-                       const char* filterExpr,
-                       const DDS::StringSeq& params)
-{
-  return sedp_.add_subscription(topicId, subscription, qos, transInfo,
-                                subscriberQos, filterClassName, filterExpr, params);
-}
-
-void
-Spdp::remove_subscription(const RepoId& subscriptionId)
-{
-  sedp_.remove_subscription(subscriptionId);
-}
-
-void
-Spdp::ignore_subscription(const RepoId& ignoreId)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  return sedp_.ignore(ignoreId);
-}
-
-bool
-Spdp::update_subscription_qos(const RepoId& subscriptionId,
-                              const DDS::DataReaderQos& qos,
-                              const DDS::SubscriberQos& subscriberQos)
-{
-  return sedp_.update_subscription_qos(subscriptionId, qos, subscriberQos);
-}
-
-bool
-Spdp::update_subscription_params(const RepoId& subId,
-                                 const DDS::StringSeq& params)
-{
-  return sedp_.update_subscription_params(subId, params);
-}
-
-
-// Managing reader/writer associations
-
-void
-Spdp::association_complete(const RepoId& localId, const RepoId& remoteId)
-{
-  sedp_.association_complete(localId, remoteId);
-}
-
 void
 Spdp::signal_liveliness(DDS::LivelinessQosPolicyKind kind)
 {
@@ -960,7 +784,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 }
 
 bool
-Spdp::get_default_locators(const RepoId& part_id, LocatorSeq& target,
+Spdp::get_default_locators(const RepoId& part_id, OpenDDS::DCPS::LocatorSeq& target,
                            bool& inlineQos)
 {
   DiscoveredParticipantIter part_iter = participants_.find(part_id);
@@ -968,9 +792,9 @@ Spdp::get_default_locators(const RepoId& part_id, LocatorSeq& target,
     return false;
   } else {
     inlineQos = part_iter->second.pdata_.participantProxy.expectsInlineQos;
-    LocatorSeq& mc_source =
+    OpenDDS::DCPS::LocatorSeq& mc_source =
           part_iter->second.pdata_.participantProxy.defaultMulticastLocatorList;
-    LocatorSeq& uc_source =
+    OpenDDS::DCPS::LocatorSeq& uc_source =
           part_iter->second.pdata_.participantProxy.defaultUnicastLocatorList;
     CORBA::ULong mc_source_len = mc_source.length();
     CORBA::ULong uc_source_len = uc_source.length();

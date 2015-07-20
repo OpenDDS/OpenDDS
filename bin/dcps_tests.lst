@@ -274,6 +274,7 @@ tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
+tests/DCPS/StaticDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST !NO_BUILT_IN_TOPICS
 tests/DCPS/SubscriberCycle/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_FILTERED_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION
 
 tests/transport/rtps/run_test.pl: !DCPS_MIN RTPS
@@ -317,6 +318,7 @@ tests/FACE/Unit/FreeIndexTest: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
 tests/FACE/Unit/SafetyProfilePoolTest: !DCPS_MIN !WCHAR OPENDDS_SAFETY_PROFILE  !NO_BUILT_IN_TOPICS
 tests/FACE/Unit/SequencesTest: !DCPS_MIN !WCHAR  !NO_BUILT_IN_TOPICS
 tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
+tests/FACE/Messenger/run_test.pl static: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
 tests/FACE/MultiDomainMessenger/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
 tests/FACE/CallbackAndReceive/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
 tests/FACE/Header/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS

@@ -18,6 +18,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/PoolAllocationBase.h"
+#include "dds/DCPS/DiscoveryListener.h"
 
 #include "ace/Time_Value.h"
 #include "ace/Event_Handler.h"
@@ -74,6 +75,19 @@ protected:
   void disassociate(const RepoId& peerId);
   void stop_associating();
   void stop_associating(const GUID_t* repos, CORBA::ULong length);
+
+  // Discovery:
+  void register_for_reader(const RepoId& participant,
+                           const RepoId& writerid,
+                           const RepoId& readerid,
+                           const TransportLocatorSeq& locators,
+                           OpenDDS::DCPS::DiscoveryListener* listener);
+
+  void register_for_writer(const RepoId& participant,
+                           const RepoId& readerid,
+                           const RepoId& writerid,
+                           const TransportLocatorSeq& locators,
+                           DiscoveryListener* listener);
 
   // Data transfer:
 
@@ -139,11 +153,11 @@ private:
   friend class ::DDS_TEST;
 
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
-
+  typedef OPENDDS_VECTOR(TransportImpl_rch) ImplsType;
 
   struct PendingAssoc : ACE_Event_Handler, public PoolAllocationBase {
     bool active_, removed_;
-    OPENDDS_VECTOR(TransportImpl_rch) impls_;
+    ImplsType impls_;
     CORBA::ULong blob_index_;
     AssociationData data_;
     TransportImpl::ConnectionAttribs attribs_;
@@ -247,7 +261,7 @@ private:
 
   // Associated Impls and DataLinks:
 
-  OPENDDS_VECTOR(TransportImpl_rch) impls_;
+  ImplsType impls_;
   PendingMap pending_;
   DataLinkSet links_;
   DataLinkIndex links_waiting_for_on_deleted_callback_;

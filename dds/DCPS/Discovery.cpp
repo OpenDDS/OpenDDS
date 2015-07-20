@@ -22,6 +22,7 @@ namespace DCPS {
 
 const char Discovery::DEFAULT_REPO[] = "DEFAULT_REPO";
 const char Discovery::DEFAULT_RTPS[] = "DEFAULT_RTPS";
+const char Discovery::DEFAULT_STATIC[] = "DEFAULT_STATIC";
 
 #ifndef DDS_HAS_MINIMUM_BIT
 DDS::ReturnCode_t

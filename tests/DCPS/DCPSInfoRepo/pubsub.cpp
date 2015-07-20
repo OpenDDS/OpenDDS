@@ -41,7 +41,7 @@ public:
       std::cerr << "ERROR: Could not cast to RtpsDiscovery\n";
       return;
     }
-    rtpsDisc->set_part_bit_subscriber(domain, partId, bit_subscriber);
+    rtpsDisc->get_part(domain, partId)->init_bit(bit_subscriber);
   }
 };
 #endif
