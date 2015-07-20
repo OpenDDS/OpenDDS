@@ -1,16 +1,10 @@
-environment:
-  ACE_ROOT: %APPVEYOR_BUILD_FOLDER%\ext\ATCD\ACE
-  TAO_ROOT: %APPVEYOR_BUILD_FOLDER%\ext\ATCD\TAO
-  DDS_ROOT: %APPVEYOR_BUILD_FOLDER%
-  MPC_ROOT: %APPVEYOR_BUILD_FOLDER%\ext\MPC
-  PATH: %ACE_ROOT%\lib;%DDS_ROOT%\lib;%PATH%
-
 install:
   - mkdir ext && cd ext
   - git clone --depth 1 git://github.com/DOCGroup/MPC.git
   - git clone -b Latest_Beta --depth 1 git://github.com/DOCGroup/ATCD.git
   - cd ..
-  - configure --no-tests
+  - set MPC_ROOT=%CD%\ext\MPC
+  - configure --no-tests --ace=ext\ATCD\ACE
 
 platform:
   - x64
@@ -22,4 +16,4 @@ build:
   project: DDS_TAOv2.sln
 
 after_build:
-  - cd tests\DCPS\Messenger && run_test.pl all
+  - cd DevGuideExamples\DCPS\Messenger && run_test.pl
