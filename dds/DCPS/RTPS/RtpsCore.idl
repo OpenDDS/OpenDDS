@@ -16,8 +16,6 @@ module OpenDDS {
     typedef octet OctetArray2[2];
     typedef octet OctetArray4[4];
 
-    typedef DDS::OctetSeq OctetSeq;
-
     /* A list of filters that were applied to the sample.
        See section 9.6.3.1 for the signature-generation algorithm. */
     typedef long FilterSignature_t[4];
@@ -43,9 +41,6 @@ module OpenDDS {
     struct EntityName_t {
       string name;
     };
-
-    typedef DCPS::EntityId_t EntityId_t;
-    // see ENTITYID_* constants in BaseMessageTypes.h
 
     /* Type used to encapsulate a count that is incremented monotonically, used
        to identify message duplicates. */
@@ -132,17 +127,12 @@ module OpenDDS {
     const short RELIABLE = 3;
 
     struct KeyHash_t {
-      OpenDDS::DCPS::OctetArray16 value;
+      DCPS::OctetArray16 value;
     };
 
     struct StatusInfo_t {
       OctetArray4 value;
     };
-
-    typedef DCPS::GUID_t GUID_t;
-    // see GUID_UNKNOWN constant in BaseMessageTypes.h
-
-    typedef DCPS::GUIDSeq GUIDSeq;
 
     /* Identifies the version of the RTPS protocol. */
     struct ProtocolVersion_t {
@@ -191,7 +181,7 @@ module OpenDDS {
     typedef sequence<Parameter> ParameterList;
 
     struct OriginalWriterInfo_t {
-      GUID_t originalWriterGUID;
+      DCPS::GUID_t originalWriterGUID;
       SequenceNumber_t originalWriterSN;
       ParameterList originalWriterQos;
     };
@@ -334,7 +324,7 @@ module OpenDDS {
       case PID_DEFAULT_MULTICAST_LOCATOR:
       case PID_METATRAFFIC_UNICAST_LOCATOR:
       case PID_METATRAFFIC_MULTICAST_LOCATOR:
-        OpenDDS::DCPS::Locator_t locator;
+        DCPS::Locator_t locator;
 
       case PID_MULTICAST_IPADDRESS:
       case PID_DEFAULT_UNICAST_IPADDRESS:
@@ -366,17 +356,17 @@ module OpenDDS {
         Duration_t duration;
 
       case PID_CONTENT_FILTER_PROPERTY:
-        OpenDDS::DCPS::ContentFilterProperty_t content_filter_property;
+        DCPS::ContentFilterProperty_t content_filter_property;
 
       case PID_PARTICIPANT_GUID:
       case PID_ENDPOINT_GUID:
       case PID_GROUP_GUID:
       case PID_OPENDDS_ASSOCIATED_WRITER:
-        GUID_t guid;
+        DCPS::GUID_t guid;
 
       case PID_PARTICIPANT_ENTITYID:
       case PID_GROUP_ENTITYID:
-        EntityId_t entity_id;
+        DCPS::EntityId_t entity_id;
 
       case PID_BUILTIN_ENDPOINT_SET:
         BuiltinEndpointSet_t builtin_endpoints;
@@ -403,7 +393,7 @@ module OpenDDS {
         SequenceNumber_t coherent_set;
 
       case PID_DIRECTED_WRITE:
-        GUIDSeq directed_write;
+        DCPS::GUIDSeq directed_write;
 
       case PID_ORIGINAL_WRITER_INFO:
         OriginalWriterInfo_t original_writer_info;
@@ -412,7 +402,7 @@ module OpenDDS {
         DCPS::TransportLocator opendds_locator;
 
       default:
-        OctetSeq unknown_data;
+        DDS::OctetSeq unknown_data;
     };
 
     /* all Submessages are composed of a leading SubmessageHeader */
@@ -445,8 +435,8 @@ module OpenDDS {
     struct AckNackSubmessage {
       SubmessageHeader smHeader;
         // F = smHeader.flags & 2 (FinalFlag)
-      EntityId_t readerId;
-      EntityId_t writerId;
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
       SequenceNumberSet readerSNState;
       Count_t count;
     };
@@ -455,8 +445,8 @@ module OpenDDS {
        Reader that a range of sequence numbers is no longer relevant. */
     struct GapSubmessage {
       SubmessageHeader smHeader;
-      EntityId_t readerId;
-      EntityId_t writerId;
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
       SequenceNumber_t gapStart;
       SequenceNumberSet gapList;
     };
@@ -475,26 +465,23 @@ module OpenDDS {
        Writer. */
     struct NackFragSubmessage {
       SubmessageHeader smHeader;
-      EntityId_t readerId;
-      EntityId_t writerId;
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
       SequenceNumber_t writerSN;
       FragmentNumberSet fragmentNumberState;
       Count_t count;
     };
 
-    typedef DCPS::GuidPrefix_t GuidPrefix_t;
-    // see GUIDPREFIX_UNKNOWN constant in BaseMessageTypes.h
-
     struct ParticipantProxy_t {
       ProtocolVersion_t protocolVersion;
-      GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
+      DCPS::GuidPrefix_t guidPrefix;  // optional in SPDPdiscoveredParticipantData
       VendorId_t vendorId;
       boolean expectsInlineQos;
       BuiltinEndpointSet_t availableBuiltinEndpoints;
-      OpenDDS::DCPS::LocatorSeq metatrafficUnicastLocatorList;
-      OpenDDS::DCPS::LocatorSeq metatrafficMulticastLocatorList;
-      OpenDDS::DCPS::LocatorSeq defaultMulticastLocatorList;
-      OpenDDS::DCPS::LocatorSeq defaultUnicastLocatorList;
+      DCPS::LocatorSeq metatrafficUnicastLocatorList;
+      DCPS::LocatorSeq metatrafficMulticastLocatorList;
+      DCPS::LocatorSeq defaultMulticastLocatorList;
+      DCPS::LocatorSeq defaultUnicastLocatorList;
       Count_t manualLivelinessCount;
     };
 
@@ -509,8 +496,8 @@ module OpenDDS {
        This is used for the BuiltinParticipantMessage{Writer,Reader}
        to implement the Writer Liveliness Protocol (8.4.13). */
     struct ParticipantMessageData {
-      GUID_t participantGuid;
-      OctetSeq data;
+      DCPS::GUID_t participantGuid;
+      DDS::OctetSeq data;
     };
     // See PARTICIPANT_MESSAGE_DATA_KIND_* constants for the 'kind'
     // field of ParticipantMessageData, in MessageTypes.h.
@@ -531,7 +518,7 @@ module OpenDDS {
       OctetArray4 prefix;
       ProtocolVersion_t version;
       VendorId_t vendorId;
-      GuidPrefix_t guidPrefix;
+      DCPS::GuidPrefix_t guidPrefix;
     };
 
 
@@ -546,8 +533,8 @@ module OpenDDS {
         // K = smHeader.flags & 8 (KeyFlag)
       unsigned short extraFlags;
       unsigned short octetsToInlineQos; // used by serializer
-      EntityId_t readerId;
-      EntityId_t writerId;
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
       SequenceNumber_t writerSN;
       ParameterList inlineQos; // if Q
       // SerializedPayload payload; // if D||K
@@ -564,8 +551,8 @@ module OpenDDS {
         // K = smHeader.flags & 4 (KeyFlag)
       unsigned short extraFlags;
       unsigned short octetsToInlineQos; // used by serializer
-      EntityId_t readerId;
-      EntityId_t writerId;
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
       SequenceNumber_t writerSN;
       FragmentNumber_t fragmentStartingNum;
       unsigned short fragmentsInSubmessage;
@@ -583,8 +570,8 @@ module OpenDDS {
       SubmessageHeader smHeader;
         // F = smHeader.flags & 2 (FinalFlag)
         // L = smHeader.flags & 4 (LivelinessFlag)
-      EntityId_t readerId;
-      EntityId_t writerId;
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
       SequenceNumber_t firstSN;
       SequenceNumber_t lastSN;
       Count_t count;
@@ -594,8 +581,8 @@ module OpenDDS {
        the Writer has available. */
     struct HeartBeatFragSubmessage {
       SubmessageHeader smHeader;
-      EntityId_t readerId;
-      EntityId_t writerId;
+      DCPS::EntityId_t readerId;
+      DCPS::EntityId_t writerId;
       SequenceNumber_t writerSN;
       FragmentNumber_t lastFragmentNum;
       Count_t count;
@@ -605,7 +592,7 @@ module OpenDDS {
        to interpret the Reader entityIds appearing in the Submessages that follow it. */
     struct InfoDestinationSubmessage {
       SubmessageHeader smHeader;
-      GuidPrefix_t guidPrefix;
+      DCPS::GuidPrefix_t guidPrefix;
     };
 
     /* This message modifies the logical source of the Submessages that follow. */
@@ -614,7 +601,7 @@ module OpenDDS {
       long unused;
       ProtocolVersion_t version;
       VendorId_t vendorId;
-      GuidPrefix_t guidPrefix;
+      DCPS::GuidPrefix_t guidPrefix;
     };
 
     /* This Submessage is used to send a timestamp which applies to the Submessages

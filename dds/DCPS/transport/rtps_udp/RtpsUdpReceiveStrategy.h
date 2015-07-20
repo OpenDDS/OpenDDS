@@ -90,29 +90,28 @@ private:
 
   struct MessageReceiver {
 
-    explicit MessageReceiver(const OpenDDS::RTPS::GuidPrefix_t& local);
+    explicit MessageReceiver(const GuidPrefix_t& local);
 
-    void reset(const ACE_INET_Addr& remote_address,
-               const OpenDDS::RTPS::Header& hdr);
+    void reset(const ACE_INET_Addr& remote_address, const RTPS::Header& hdr);
 
-    void submsg(const OpenDDS::RTPS::Submessage& s);
-    void submsg(const OpenDDS::RTPS::InfoDestinationSubmessage& id);
-    void submsg(const OpenDDS::RTPS::InfoReplySubmessage& ir);
-    void submsg(const OpenDDS::RTPS::InfoReplyIp4Submessage& iri4);
-    void submsg(const OpenDDS::RTPS::InfoTimestampSubmessage& it);
-    void submsg(const OpenDDS::RTPS::InfoSourceSubmessage& is);
+    void submsg(const RTPS::Submessage& s);
+    void submsg(const RTPS::InfoDestinationSubmessage& id);
+    void submsg(const RTPS::InfoReplySubmessage& ir);
+    void submsg(const RTPS::InfoReplyIp4Submessage& iri4);
+    void submsg(const RTPS::InfoTimestampSubmessage& it);
+    void submsg(const RTPS::InfoSourceSubmessage& is);
 
     void fill_header(DataSampleHeader& header) const;
 
-    OpenDDS::RTPS::GuidPrefix_t local_;
-    OpenDDS::RTPS::ProtocolVersion_t source_version_;
-    OpenDDS::RTPS::VendorId_t source_vendor_;
-    OpenDDS::RTPS::GuidPrefix_t source_guid_prefix_;
-    OpenDDS::RTPS::GuidPrefix_t dest_guid_prefix_;
-    OpenDDS::DCPS::LocatorSeq unicast_reply_locator_list_;
-    OpenDDS::DCPS::LocatorSeq multicast_reply_locator_list_;
+    GuidPrefix_t local_;
+    RTPS::ProtocolVersion_t source_version_;
+    RTPS::VendorId_t source_vendor_;
+    GuidPrefix_t source_guid_prefix_;
+    GuidPrefix_t dest_guid_prefix_;
+    DCPS::LocatorSeq unicast_reply_locator_list_;
+    DCPS::LocatorSeq multicast_reply_locator_list_;
     bool have_timestamp_;
-    OpenDDS::RTPS::Time_t timestamp_;
+    RTPS::Time_t timestamp_;
   };
 
   MessageReceiver receiver_;
