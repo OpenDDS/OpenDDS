@@ -89,7 +89,6 @@ module OpenDDS
     typedef sequence<Locator_t> LocatorSeq;
 
     typedef string<256> String256;
-    typedef DDS::StringSeq StringSeq;
 
     /* information to enable content filtering */
     struct ContentFilterProperty_t {
@@ -97,7 +96,7 @@ module OpenDDS
       String256 relatedTopicName;
       String256 filterClassName;
       string filterExpression;
-      StringSeq expressionParameters;
+      DDS::StringSeq expressionParameters;
     };
 
     struct ReaderProxy_t {
@@ -105,7 +104,7 @@ module OpenDDS
       boolean expectsInlineQos;
       LocatorSeq unicastLocatorList;
       LocatorSeq multicastLocatorList;
-      OpenDDS::DCPS::TransportLocatorSeq allLocators;
+      TransportLocatorSeq allLocators;
       GUIDSeq associatedWriters;
     };
 
@@ -120,7 +119,7 @@ module OpenDDS
       GUID_t remoteWriterGuid;  // optional in DiscoveredWriterData
       LocatorSeq unicastLocatorList;
       LocatorSeq multicastLocatorList;
-      OpenDDS::DCPS::TransportLocatorSeq allLocators;
+      TransportLocatorSeq allLocators;
     };
 
     // top-level data type for SEDPbuiltinPublications
