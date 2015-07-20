@@ -200,7 +200,6 @@ sub remedy_changelog {
   open(GITLOG, "git log $prev_tag..$remote/master --name-only |") or die "Opening $!";
   while (<GITLOG>) {
     chomp;
-print "$_\n";
     if (/^commit .*/) {
       # print out previous 
       if ($author) {
@@ -221,9 +220,7 @@ print "$_\n";
       $date = $1;
     } elsif (/^ +(.*) */) {
       $comment .= "$_\n";
-print "COMMENT\n";
     } elsif (/^([^ ]+.*) *$/) {
-print "FILE $1\n";
       $file_list .= " * $_\n";
     }
   }
@@ -475,15 +472,6 @@ sub message_commit_git_changes {
   return "The working directory is not clean:\n" . $settings->{unclean} .
          "Changed files must be committed to git.";
 }
-
-sub remedy_commit_git_changes {
-  my $settings = shift();
-  if ($settings->{force}) {
-    print "  !! Cannot commit to git when --force specified\n";
-  } else {
-    # TODO git add, git commit
-  }
-}
 ############################################################################
 sub verify_git_tag {
 }
@@ -556,8 +544,7 @@ my @release_steps = (
     title   => 'Commit changes to GIT',
     skip    => 1,
     verify  => sub{verify_git_status_clean(@_, 1)},
-    message => sub{message_commit_git_changes(@_)},
-    remedy  => sub{remedy_commit_git_changes(@_)}
+    message => sub{message_commit_git_changes(@_)}
   },
   {
     title   => 'Create git tag',
