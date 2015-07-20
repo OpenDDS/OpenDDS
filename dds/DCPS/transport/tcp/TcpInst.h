@@ -92,6 +92,8 @@ public:
     return (pub_address_str_ == "") ? local_address_str_ : pub_address_str_;
   }
 
+  virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
+
 private:
   friend class TcpType;
   explicit TcpInst(const OPENDDS_STRING& name);
