@@ -16,6 +16,33 @@ sub usage {
 }
 
 ############################################################################
+sub parse_version {
+  my $version = shift;
+  my %result = ();
+  if ($version =~ /([0-9])+\.([0-9])+\.?([0-9]+)?/) {
+    $result{major} = $1;
+    $result{minor} = $2;
+    if ($3) {
+      $result{micro} = $3;
+    } else {
+      $result{micro} = 0;
+    }
+  }
+  return %result;
+}
+
+# Given a version string, return a numeric value for sorting purposes
+sub version_to_value {
+  my $tag_value = 0;
+  my %result = parse_version(shift());
+  if (%result) {
+    $tag_value = (100.0 * ($result{major} || 0)) + 
+                          ($result{minor} || 0) + 
+                 ($result{micro} / 100.0);
+  }
+  return $tag_value;
+}
+############################################################################
 sub verify_git_remote {
   my $settings = shift();
   my $remote = $settings->{remote};
@@ -40,23 +67,22 @@ sub message_git_remote {
 
 ############################################################################
 sub verify_git_status_clean {
-  my $settings = shift;
+  my ($settings, $strict) = @_;
+  my $version = $settings->{version};
   my $clean = 1;
   my $status = open(GITSTATUS, 'git status -s|');
-  my %modified = ("NEWS" => 1,
-                 "PROBLEM-REPORT-FORM" => 1,
-                 "VERSION" => 1,
-                 "dds/Version.h" => 1);
+  my $modified = $settings->{modified};
+
   # TODO remove
-  $modified{"bin/gitrelease.pl"} = 1;
+  $modified->{"bin/gitrelease.pl"} = 1;
 
   my $unclean = "";
   while (<GITSTATUS>) {
     if (/^...(.*)/) {
-      if (!$modified{$1}) {
+      # If this is not a known modified file, or if we are in strict mode
+      if ($strict || !$modified->{$1}) {
         $unclean .= $_;
         $clean = 0;
-        last;
       }
     }
   }
@@ -69,10 +95,7 @@ sub verify_git_status_clean {
 sub message_git_status_clean {
   my $settings = shift;
   return "The working directory is not clean:\n" . $settings->{unclean} .
-         "  Run git clean before continuing."
-}
-
-sub remedy_git_status_clean {
+         "  Commit to source control, or run git clean before continuing."
 }
 
 ############################################################################
@@ -120,10 +143,33 @@ sub remedy_update_version_file {
   return $corrected;
 }
 ############################################################################
+sub find_previous_tag {
+  my $settings = shift();
+  my $remote = $settings->{remote};
+  my $version = $settings->{version};
+  my $prev_version_tag = "";
+  my $prev_version_value = 0;
+  my $release_version_value = version_to_value($version);
+
+  open(GITTAG, "git tag --list 'DDS-*' |") or die "Opening $!";
+  while (<GITTAG>) {
+    chomp;
+    my $tag_value = version_to_value($_);
+    # If this is less than the release version, but the largest seen yet
+    if (($tag_value < $release_version_value) && 
+        ($tag_value > $prev_version_value)) {
+      $prev_version_tag = $_;
+      $prev_version_value = $tag_value;
+    }
+  }
+  close(GITTAG);
+  return $prev_version_tag;
+}
+
 sub verify_changelog {
   my $settings = shift();
   my $version = $settings->{version};
-  my $status = open(CHANGELOG, "ChangeLog-$version");
+  my $status = open(CHANGELOG, "docs/history/ChangeLog-$version");
   if ($status) {
     close(CHANGELOG);
   }
@@ -133,24 +179,23 @@ sub verify_changelog {
 sub message_changelog {
   my $settings = shift();
   my $version = $settings->{version};
-  return "File ChangeLog-$version missing";
+  return "File docs/history/ChangeLog-$version missing";
 }
 
 sub remedy_changelog {
   my $settings = shift();
   my $version = $settings->{version};
   my $remote = $settings->{remote};
-  # TODO determine
-  my $prev_tag = "DDS-3.6";
+  my $prev_tag = find_previous_tag($settings);
   my $author = 0;
   my $date = 0;
   my $comment = "";
   my $file_list = "";
   my $changed = 0;
 
-  print "  >> Creating ChangeLog-$version from git history\n";
+  print "  >> Creating docs/history/ChangeLog-$version from git history\n";
 
-  open(CHANGELOG, ">ChangeLog-$version") or die "Opening $!";
+  open(CHANGELOG, ">docs/history/ChangeLog-$version") or die "Opening $!";
 
   open(GITLOG, "git log $prev_tag..$remote/master --name-only |") or die "Opening $!";
   while (<GITLOG>) {
@@ -425,14 +470,37 @@ sub remedy_update_prf_file {
   return (($corrected_header == 1) && ($corrected_version == 1));
 }
 ############################################################################
+sub message_commit_git_changes {
+  my $settings = shift();
+  return "The working directory is not clean:\n" . $settings->{unclean} .
+         "Changed files must be committed to git.";
+}
+
+sub remedy_commit_git_changes {
+  my $settings = shift();
+  if ($settings->{force}) {
+    print "  !! Cannot commit to git when --force specified\n";
+  } else {
+    # TODO git add, git commit
+  }
+}
+############################################################################
+sub verify_git_tag {
+}
+
+sub message_git_tag {
+}
+
+sub remedy_git_tag {
+}
+############################################################################
 
 my @release_steps = (
   {
     title   => 'Verify git status is clean',
     skip    => 1,
     verify  => sub{verify_git_status_clean(@_)},
-    message => sub{message_git_status_clean(@_)},
-    # remedy  => sub{remedy_git_status_clean(@_)}
+    message => sub{message_git_status_clean(@_)}
   },
   {
     title   => 'Update VERSION',
@@ -461,7 +529,7 @@ my @release_steps = (
     message => sub{message_git_remote(@_)},
   },
   {
-    title   => 'Compare remote',
+    title   => 'Compare Remote',
     verify  => sub{compare_git_remote_out_of_date(@_)},
     message => sub{message_git_remote_out_of_date(@_)}
   },
@@ -484,7 +552,28 @@ my @release_steps = (
     verify  => sub{verify_update_news_file(@_)},
     message => sub{message_update_news_file(@_)}
   },
-  # Commit to git
+  {
+    title   => 'Commit changes to GIT',
+    skip    => 1,
+    verify  => sub{verify_git_status_clean(@_, 1)},
+    message => sub{message_commit_git_changes(@_)},
+    remedy  => sub{remedy_commit_git_changes(@_)}
+  },
+  {
+    title   => 'Create git tag',
+    skip    => 1,
+    verify  => sub{verify_git_tag(@_)},
+    message => sub{message_git_tag(@_)},
+    remedy  => sub{remedy_git_tag(@_)}
+  },
+  { title   => 'Push git tags', },
+  { title   => 'Clone git tag', },
+  { title   => 'Create release archives', },
+  { title   => 'Generate doxygen', },
+  { title   => 'Upload to FTP Site', },
+  { title   => 'Upload to GitHub', },
+  { title   => 'Update opendds.org front page', },
+  { title   => 'Update opendds.org news page', },
 );
 
 my @t = gmtime;
@@ -525,7 +614,12 @@ my %settings = (
   remote    => string_arg_value("--remote") || "origin",
   version   => $ARGV[0],
   timestamp => strftime("%a %b %e %T %Z %Y", @t),
-  expected  => 'git@github.com:objectcomputing/OpenDDS.git'
+  expected  => 'git@github.com:objectcomputing/OpenDDS.git',
+  modified  => {"NEWS" => 1,
+                "PROBLEM-REPORT-FORM" => 1,
+                "VERSION" => 1,
+                "dds/Version.h" => 1,
+                "docs/history/ChangeLog-$ARGV[0]" => 1}
 );
 
 my $half_divider = "-----------------------------------------";
@@ -569,21 +663,20 @@ sub run_step {
 
 sub validate_version_arg {
   my $version = $settings{version} || "";
-  if ($version =~ /([0-9])+\.([0-9])+([0-9]+)?/) {
-    $settings{major_version} = $1;
-    $settings{minor_version} = $2;
-    if ($3) {
-      $settings{micro_version} = $3;
-    } else {
-      $settings{micro_version} = 0;
-    }
+  my %result = parse_version($version);
+  if (%result) {
+    $settings{major_version} = $result{major};
+    $settings{minor_version} = $result{minor};
+    $settings{micro_version} = $result{micro};
+    return 1;
+  } elsif ($settings{list}) {
     return 1;
   } else {
     return 0;
   }
 }
 
-if (validate_version_arg()) {
+if ($settings{list} || validate_version_arg()) {
   if (my $step_num = $settings{step}) {
     # Run one step
     run_step($step_num, $release_steps[$step_num - 1]);
