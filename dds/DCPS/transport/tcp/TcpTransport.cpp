@@ -510,17 +510,8 @@ TcpTransport::connection_info_i(TransportLocator& local_info) const
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport public address str %C\n",
             this->tcp_config_->get_public_address().c_str()), 2);
 
-  // Get the public address string from the inst (usually the local address)
-  NetworkAddress network_order_address(this->tcp_config_->get_public_address());
+  this->tcp_config_->populate_locator(local_info);
 
-  ACE_OutputCDR cdr;
-  cdr << network_order_address;
-  const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
-  char* buffer = const_cast<char*>(cdr.buffer()); // safe
-
-  local_info.transport_type = "tcp";
-  local_info.data = TransportBLOB(len, len,
-                                  reinterpret_cast<CORBA::Octet*>(buffer));
   return true;
 }
 
