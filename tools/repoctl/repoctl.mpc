@@ -2,6 +2,8 @@ project: dcpsexe, dcps_tcp  {
   requires += no_opendds_safety_profile
   exename   = repoctl
   exeout    = $(DDS_ROOT)/bin
+
+  libs     += TAO_IORTable TAO_Svc_Utils TAO_ImR_Client TAO_IORManip
   libs     += OpenDDS_InfoRepoLib OpenDDS_Federator
   after    += DCPSInfoRepo_Federator
 

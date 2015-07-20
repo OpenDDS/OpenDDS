@@ -29,7 +29,7 @@ public:
 
   // used by our DataLink:
   ShmemAllocator* alloc() { return alloc_; }
-  std::string address() { return poolname_; }
+  std::string address();
   void signal_semaphore();
 
 protected:
@@ -90,8 +90,6 @@ private:
     bool stopped_;
 
   }* read_task_;
-
-  std::string hostname_, poolname_;
 };
 
 } // namespace DCPS

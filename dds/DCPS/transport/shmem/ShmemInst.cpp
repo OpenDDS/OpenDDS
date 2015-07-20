@@ -10,7 +10,10 @@
 
 #include "ace/Configuration.h"
 
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
+
 #include <iostream>
+#include <sstream>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -19,7 +22,12 @@ ShmemInst::ShmemInst(const std::string& name)
   : TransportInst("shmem", name)
   , pool_size_(16 * 1024 * 1024)
   , datalink_control_size_(4 * 1024)
+  , hostname_(get_fully_qualified_hostname())
 {
+  std::ostringstream pool;
+  pool << "OpenDDS-" << ACE_OS::getpid() << '-' << this->name();
+  poolname_ = pool.str();
+
 }
 
 ShmemTransport*
@@ -47,6 +55,24 @@ ShmemInst::dump(std::ostream& os)
   os << formatNameForDump("pool_size") << pool_size_ << "\n"
      << formatNameForDump("datalink_control_size") << datalink_control_size_
      << std::endl;
+}
+
+size_t
+ShmemInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
+{
+  info.transport_type = "shmem";
+
+  const size_t len = hostname_.size() + 1 /* null */ + poolname_.size();
+  info.data.length(static_cast<CORBA::ULong>(len));
+
+  CORBA::Octet* buff = info.data.get_buffer();
+  std::memcpy(buff, hostname_.c_str(), hostname_.size());
+  buff += hostname_.size();
+
+  *(buff++) = 0;
+  std::memcpy(buff, poolname_.c_str(), poolname_.size());
+
+  return 1;
 }
 
 } // namespace DCPS

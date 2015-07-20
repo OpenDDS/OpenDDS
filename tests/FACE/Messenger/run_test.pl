@@ -17,15 +17,21 @@ PerlDDS::add_lib_path("Idl");
 
 my $test = new PerlDDS::TestFramework();
 
+my $config = 'face_config.ini';
+
+if($test->flag('static')) {
+    $config = 'face_config_static.ini';
+}
+
 $test->enable_console_logging();
 
-$test->process('Subscriber', 'Subscriber/subscriber');
+$test->process('Subscriber', 'Subscriber/subscriber', "$config");
 $test->start_process('Subscriber');
 
-$test->process('Callback Subscriber', 'Subscriber/subscriber', 'callback');
+$test->process('Callback Subscriber', 'Subscriber/subscriber', "$config callback");
 $test->start_process('Callback Subscriber');
 sleep 5;
 
-$test->process('Publisher', 'Publisher/publisher');
+$test->process('Publisher', 'Publisher/publisher', "$config");
 $test->start_process('Publisher');
 exit $test->finish(30);

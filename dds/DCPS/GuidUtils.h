@@ -117,13 +117,13 @@ operator==(const GUID_t& lhs, const GUID_t& rhs)
   GUID_tKeyLessThan lessThan;
   return !lessThan(lhs, rhs) && !lessThan(rhs, lhs);
 }
-#endif
 
 inline bool
 operator!=(const GUID_t& lhs, const GUID_t& rhs)
 {
   return !(lhs == rhs);
 }
+#endif
 
 struct GuidPrefixEqual {
 
@@ -141,13 +141,13 @@ operator==(const EntityId_t& lhs, const EntityId_t& rhs)
   return !GUID_tKeyLessThan::entity_less(lhs, rhs)
     && !GUID_tKeyLessThan::entity_less(rhs, lhs);
 }
-#endif
 
 inline bool
 operator!=(const EntityId_t& lhs, const EntityId_t& rhs)
 {
   return !(lhs == rhs);
 }
+#endif
 
 struct EntityIdConverter {
   EntityIdConverter (const unsigned char o[4])

@@ -29,6 +29,7 @@
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/DiscoveryListener.h"
 
 class DDS_TEST;
 
@@ -99,6 +100,16 @@ public:
                   bool local_durable, bool remote_durable);
 
   bool check_handshake_complete(const RepoId& local, const RepoId& remote);
+
+  void register_for_reader(const RepoId& writerid,
+                           const RepoId& readerid,
+                           const ACE_INET_Addr& address,
+                           OpenDDS::DCPS::DiscoveryListener* listener);
+
+  void register_for_writer(const RepoId& readerid,
+                           const RepoId& writerid,
+                           const ACE_INET_Addr& address,
+                           OpenDDS::DCPS::DiscoveryListener* listener);
 
   virtual void pre_stop_i();
 
@@ -378,6 +389,65 @@ private:
   } heartbeat_;
 
   RTPS::InfoReplySubmessage info_reply_;
+
+  struct InterestingReader {
+    RepoId writerid;
+    ACE_INET_Addr address;
+    DiscoveryListener* listener;
+    CORBA::Long heartbeat_count;
+    bool called;
+
+    InterestingReader() { }
+    InterestingReader(const RepoId& w, const ACE_INET_Addr& a, DiscoveryListener* l)
+      : writerid(w)
+      , address(a)
+      , listener(l)
+      , heartbeat_count(0)
+      , called(false)
+    { }
+  };
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingReader, DCPS::GUID_tKeyLessThan) InterestingReaderMapType;
+  InterestingReaderMapType interesting_readers_;
+
+  struct InterestingWriter {
+    RepoId readerid;
+    ACE_INET_Addr address;
+    DiscoveryListener* listener;
+    bool called;
+
+    InterestingWriter() { }
+    InterestingWriter(const RepoId& r, const ACE_INET_Addr& a, DiscoveryListener* l)
+      : readerid(r)
+      , address(a)
+      , listener(l)
+      , called(false)
+    { }
+  };
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingWriter, DCPS::GUID_tKeyLessThan) InterestingWriterMapType;
+  InterestingWriterMapType interesting_writers_;
+
+  struct InterestingAckNack {
+    RepoId writerid;
+    RepoId readerid;
+    ACE_INET_Addr writer_address;
+
+    InterestingAckNack() { }
+    InterestingAckNack(const RepoId& w, const RepoId& r, const ACE_INET_Addr& wa)
+      : writerid(w)
+      , readerid(r)
+      , writer_address(wa)
+    { }
+
+    bool operator<(const InterestingAckNack& other) const {
+      if (writerid != other.writerid) {
+        return DCPS::GUID_tKeyLessThan() (writerid, other.writerid);
+      }
+      return DCPS::GUID_tKeyLessThan() (readerid, other.readerid);
+    }
+  };
+
+  typedef OPENDDS_SET(InterestingAckNack) InterestingAckNackSetType;
+  InterestingAckNackSetType interesting_ack_nacks_;
 };
 
 } // namespace DCPS
