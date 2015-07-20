@@ -187,6 +187,11 @@ sub remedy_changelog {
   my $version = $settings->{version};
   my $remote = $settings->{remote};
   my $prev_tag = find_previous_tag($settings);
+  # Update so git log is correct
+  open(GITREMOTE, "git remote update $remote|");
+  while (<GITREMOTE>) {
+  }
+  close(GITREMOTE);
   my $author = 0;
   my $date = 0;
   my $comment = "";
@@ -240,35 +245,6 @@ sub remedy_changelog {
 
   return $changed;
 }
-
-############################################################################
-sub compare_git_remote_out_of_date {
-  my $settings = shift();
-  my $remote = $settings->{remote};
-  # Update refs
-  open(GITREMOTE, "git remote update $remote|");
-  while (<GITREMOTE>) {
-  }
-  close(GITREMOTE);
-  # Check for differences
-  my $diffs = 0;
-  open(GITDIFF, "git diff HEAD $remote/master --shortstat |");
-  while (<GITDIFF>) {
-    $settings->{git_diff} = $_;
-    $diffs = 1;
-  }
-  close(GITDIFF);
-  return !$diffs;
-}
-
-sub message_git_remote_out_of_date {
-  my $settings = shift();
-  my $remote = $settings->{remote};
-  return "Tracking branch $remote/master is out of date with $remote:\n" .
-         $settings->{git_diff} . 
-         "  Perform a merge to continue";
-}
-
 ############################################################################
 sub verify_news_file_section {
   my $settings = shift();
@@ -515,11 +491,6 @@ my @release_steps = (
     title   => 'Verify remote arg',
     verify  => sub{verify_git_remote(@_)},
     message => sub{message_git_remote(@_)},
-  },
-  {
-    title   => 'Compare Remote',
-    verify  => sub{compare_git_remote_out_of_date(@_)},
-    message => sub{message_git_remote_out_of_date(@_)}
   },
   {
     title   => 'Verify ChangeLog',
