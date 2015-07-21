@@ -20,11 +20,14 @@ typedef void (*callback_t)();
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(int expected_samples, callback_t done_callback)
-    : expected_samples_(expected_samples)
+  DataReaderListenerImpl(const std::string& id, int expected_samples, callback_t done_callback)
+    : id_(id)
+    , expected_samples_(expected_samples)
     , received_samples_(0)
     , done_callback_(done_callback)
-  {}
+  {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %s\n", id.c_str()));
+  }
 
   ~DataReaderListenerImpl();
 
@@ -56,6 +59,7 @@ public:
     const DDS::SampleLostStatus& status);
 
 private:
+  std::string id_;
   const int expected_samples_;
   int received_samples_;
   callback_t done_callback_;

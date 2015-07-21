@@ -147,7 +147,7 @@ namespace OpenDDS {
       DDS::DataWriterQos qos3(pos->second.qos);
 
       if (qos2 != qos3) {
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_publication_key: dynamic and static QoS differ\n")));
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: dynamic and static QoS differ\n")));
       }
     }
 
@@ -168,7 +168,7 @@ namespace OpenDDS {
 
       EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(rid);
       if (pos == registry_.reader_map.end()) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_subscription_key: unknown reader: %s\n"), LogGuid(rid).c_str()));
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: unknown reader: %s\n"), LogGuid(rid).c_str()));
         return;
       }
 
@@ -177,7 +177,7 @@ namespace OpenDDS {
       qos2.user_data = pos->second.qos.user_data;
 
       if (qos2 != pos->second.qos) {
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_subscription_key: dynamic and static QoS differ\n")));
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: dynamic and static QoS differ\n")));
       }
     }
 
@@ -186,7 +186,7 @@ namespace OpenDDS {
                                             const DDS::TopicQos& /*qos*/,
                                             OPENDDS_STRING& /*name*/)
     {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) StaticEndpointManager::update_topic_qos - ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_topic_qos - ")
                  ACE_TEXT("Not allowed\n")));
       return false;
     }
@@ -196,7 +196,7 @@ namespace OpenDDS {
                                                   const DDS::DataWriterQos& /*qos*/,
                                                   const DDS::PublisherQos& /*publisherQos*/)
     {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) StaticEndpointManager::update_publication_qos - ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_publication_qos - ")
                  ACE_TEXT("Not allowed\n")));
       return false;
     }
@@ -206,7 +206,7 @@ namespace OpenDDS {
                                                    const DDS::DataReaderQos& /*qos*/,
                                                    const DDS::SubscriberQos& /*subscriberQos*/)
     {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) StaticEndpointManager::update_subscription_qos - ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
                  ACE_TEXT("Not allowed\n")));
       return false;
     }
@@ -215,7 +215,7 @@ namespace OpenDDS {
     StaticEndpointManager::update_subscription_params(const DCPS::RepoId& /*subId*/,
                                                       const DDS::StringSeq& /*params*/)
     {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) StaticEndpointManager::update_subscription_qos - ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
                  ACE_TEXT("Not allowed\n")));
       return false;
     }
@@ -236,9 +236,8 @@ namespace OpenDDS {
     }
 
     DDS::ReturnCode_t
-    StaticEndpointManager::write_publication_data(const DCPS::RepoId& writerid,
-                                                  LocalPublication& pub,
-                                                  const DCPS::RepoId& /*reader*/)
+    StaticEndpointManager::add_publication_i(const DCPS::RepoId& writerid,
+                                             LocalPublication& pub)
     {
       /*
         Find all matching remote readers.
@@ -277,7 +276,6 @@ namespace OpenDDS {
               {
                 const DCPS::ReaderAssociation ra =
                   {reader_trans_info, readerid, subscriber_qos, reader_qos, "", "", 0};
-                ACE_DEBUG((LM_DEBUG, "Associating writer %s with reader %s\n", LogGuid(writerid).c_str(), LogGuid(readerid).c_str()));
                 pub.publication_->add_association(writerid, ra, true);
                 pub.publication_->association_complete(readerid);
               }
@@ -300,9 +298,8 @@ namespace OpenDDS {
     }
 
     DDS::ReturnCode_t
-    StaticEndpointManager::write_subscription_data(const DCPS::RepoId& readerid,
-                                                   LocalSubscription& sub,
-                                                   const DCPS::RepoId& /*reader*/)
+    StaticEndpointManager::add_subscription_i(const DCPS::RepoId& readerid,
+                                              LocalSubscription& sub)
     {
       /*
         Find all matching remote writers.
@@ -342,7 +339,6 @@ namespace OpenDDS {
               {
                 const DCPS::WriterAssociation wa =
                   {writer_trans_info, writerid, publisher_qos, writer_qos};
-                ACE_DEBUG((LM_DEBUG, "Associating reader %s with writer %s\n", LogGuid(readerid).c_str(), LogGuid(writerid).c_str()));
                 sub.subscription_->add_association(readerid, wa, false);
               }
               break;
@@ -477,10 +473,10 @@ namespace OpenDDS {
           return c - '0';
         }
         if (c >= 'a' && c <= 'f') {
-          return c - 'a';
+          return 10 + c - 'a';
         }
         if (c >= 'A' && c <= 'F') {
-          return c - 'A';
+          return 10 + c - 'A';
         }
         return c;
       }
@@ -681,7 +677,7 @@ namespace OpenDDS {
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_topics ")
                      ACE_TEXT("processing [topic/%C] section.\n"),
                      topic_name.c_str()));
         }
@@ -775,7 +771,7 @@ namespace OpenDDS {
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_datawriterqos ")
                      ACE_TEXT("processing [datawriterqos/%C] section.\n"),
                      datawriterqos_name.c_str()));
         }
@@ -958,7 +954,7 @@ namespace OpenDDS {
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_datareaderqos ")
                      ACE_TEXT("processing [datareaderqos/%C] section.\n"),
                      datareaderqos_name.c_str()));
         }
@@ -1133,7 +1129,7 @@ namespace OpenDDS {
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_publisherqos ")
                      ACE_TEXT("processing [publisherqos/%C] section.\n"),
                      publisherqos_name.c_str()));
         }
@@ -1238,7 +1234,7 @@ namespace OpenDDS {
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_subscriberqos ")
                      ACE_TEXT("processing [subscriberqos/%C] section.\n"),
                      subscriberqos_name.c_str()));
         }

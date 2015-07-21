@@ -408,6 +408,8 @@ private:
   };
   typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingReader, DCPS::GUID_tKeyLessThan) InterestingReaderMapType;
   InterestingReaderMapType interesting_readers_;
+  typedef OPENDDS_MAP_CMP(RepoId, size_t, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
+  HeartBeatCountMapType heartbeat_counts_;
 
   struct InterestingWriter {
     RepoId readerid;
