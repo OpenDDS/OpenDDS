@@ -274,8 +274,19 @@ namespace OpenDDS {
             switch (pos->second.qos.reliability.kind) {
             case DDS::BEST_EFFORT_RELIABILITY_QOS:
               {
+#ifdef __SUNPRO_CC
+                DCPS::ReaderAssociation ra;
+                ra.readerTransInfo = reader_trans_info;
+                ra.readerId = readerid;
+                ra.subQos = subscriber_qos;
+                ra.readerQos = reader_qos;
+                ra.filterClassName = "";
+                ra.filterExpression = "";
+                ra.exprParams = 0;
+#else
                 const DCPS::ReaderAssociation ra =
                   {reader_trans_info, readerid, subscriber_qos, reader_qos, "", "", 0};
+#endif
                 pub.publication_->add_association(writerid, ra, true);
                 pub.publication_->association_complete(readerid);
               }
@@ -337,8 +348,16 @@ namespace OpenDDS {
             switch (sub.qos_.reliability.kind) {
             case DDS::BEST_EFFORT_RELIABILITY_QOS:
               {
+#ifdef __SUNPRO_CC
+                DCPS::WriterAssociation wa;
+                wa.writerTransInfo = writer_trans_info;
+                wa.writerId = writerid;
+                wa.pubQos = publisher_qos;
+                wa.writerQos = writer_qos;
+#else
                 const DCPS::WriterAssociation wa =
                   {writer_trans_info, writerid, publisher_qos, writer_qos};
+#endif
                 sub.subscription_->add_association(readerid, wa, false);
               }
               break;
@@ -412,11 +431,20 @@ namespace OpenDDS {
       if (lp_pos != local_publications_.end() &&
           reader_pos != registry_.reader_map.end()) {
         DCPS::DataWriterCallbacks* dwr = lp_pos->second.publication_;
+#ifdef __SUNPRO_CC
+        DCPS::ReaderAssociation ra;
+        ra.readerTransInfo = reader_pos->second.trans_info;
+        ra.readerId = readerid;
+        ra.subQos = reader_pos->second.subscriber_qos;
+        ra.readerQos = reader_pos->second.qos;
+        ra.filterClassName = "";
+        ra.filterExpression = "";
+        ra.exprParams = 0;
+#else
         const DCPS::ReaderAssociation ra =
-          {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
-           "", "",
-           0};
+          {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0};
 
+#endif
         dwr->add_association(writerid, ra, true);
         dwr->association_complete(readerid);
       }
@@ -431,8 +459,17 @@ namespace OpenDDS {
       if (ls_pos != local_subscriptions_.end() &&
           writer_pos != registry_.writer_map.end()) {
         DCPS::DataReaderCallbacks* drr = ls_pos->second.subscription_;
+#ifdef __SUNPRO_CC
+        DCPS::WriterAssociation wa;
+        wa.writerTransInfo = writer_pos->second.trans_info;
+        wa.writerId = writerid;
+        wa.pubQos = writer_pos->second.publisher_qos;
+        wa.writerQos = writer_pos->second.qos;
+#else
         const DCPS::WriterAssociation wa =
           {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
+#endif
+
 
         drr->add_association(readerid, wa, false);
       }
