@@ -16,7 +16,6 @@ configuration:
 build:
   parallel: true
   project: DDS_TAOv2.sln
-  verbosity: minimal
 
 after_build:
   - cd DevGuideExamples\DCPS\Messenger && run_test.pl
