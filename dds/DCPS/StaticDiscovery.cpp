@@ -12,6 +12,8 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
+#include <ctype.h>
+
 namespace OpenDDS {
   namespace DCPS {
 
@@ -484,8 +486,7 @@ namespace OpenDDS {
       }
 
       unsigned char
-      fromhex(const std::string& x,
-              size_t idx)
+      fromhex(const OPENDDS_STRING& x, size_t idx)
       {
         return (hextobyte(x[idx * 2]) << 4) | (hextobyte(x[idx * 2 + 1]));
       }
@@ -571,7 +572,7 @@ namespace OpenDDS {
       const ACE_TCHAR SUBSCRIBERQOS_SECTION_NAME[] = ACE_TEXT("subscriberqos");
       const ACE_TCHAR ENDPOINT_SECTION_NAME[] = ACE_TEXT("endpoint");
 
-      void parse_second(CORBA::Long& x, const std::string& value)
+      void parse_second(CORBA::Long& x, const OPENDDS_STRING& value)
       {
         if (value == "DURATION_INFINITE_SEC") {
           x = DDS::DURATION_INFINITE_SEC;
@@ -580,7 +581,7 @@ namespace OpenDDS {
         }
       }
 
-      void parse_nanosecond(CORBA::ULong& x, const std::string& value)
+      void parse_nanosecond(CORBA::ULong& x, const OPENDDS_STRING& value)
       {
         if (value == "DURATION_INFINITE_NANOSEC") {
           x = DDS::DURATION_INFINITE_NSEC;
@@ -589,7 +590,7 @@ namespace OpenDDS {
         }
       }
 
-      bool parse_bool(CORBA::Boolean& x, const std::string& value)
+      bool parse_bool(CORBA::Boolean& x, const OPENDDS_STRING& value)
       {
         if (value == "true") {
           x = true;
@@ -601,7 +602,7 @@ namespace OpenDDS {
         return false;
       }
 
-      void parse_list(DDS::PartitionQosPolicy& x, const std::string& value)
+      void parse_list(DDS::PartitionQosPolicy& x, const OPENDDS_STRING& value)
       {
         // Value can be a comma-separated list
         const char* start = value.c_str();
@@ -676,7 +677,7 @@ namespace OpenDDS {
 
       // Loop through the [topic/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string topic_name = (*it).first;
+        OPENDDS_STRING topic_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
@@ -693,8 +694,8 @@ namespace OpenDDS {
           type_name_Specified = false;
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "name") {
             topic.name = value;
@@ -770,7 +771,7 @@ namespace OpenDDS {
 
       // Loop through the [datawriterqos/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string datawriterqos_name = (*it).first;
+        OPENDDS_STRING datawriterqos_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
@@ -785,8 +786,8 @@ namespace OpenDDS {
         DDS::DataWriterQos datawriterqos(TheServiceParticipant->initial_DataWriterQos());
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "durability.kind") {
             if (value == "VOLATILE") {
@@ -953,7 +954,7 @@ namespace OpenDDS {
 
       // Loop through the [datareaderqos/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string datareaderqos_name = (*it).first;
+        OPENDDS_STRING datareaderqos_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
@@ -968,8 +969,8 @@ namespace OpenDDS {
         DDS::DataReaderQos datareaderqos(TheServiceParticipant->initial_DataReaderQos());
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "durability.kind") {
             if (value == "VOLATILE") {
@@ -1128,7 +1129,7 @@ namespace OpenDDS {
 
       // Loop through the [publisherqos/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string publisherqos_name = (*it).first;
+        OPENDDS_STRING publisherqos_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
@@ -1143,8 +1144,8 @@ namespace OpenDDS {
         DDS::PublisherQos publisherqos(TheServiceParticipant->initial_PublisherQos());
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "presentation.access_scope") {
             if (value == "INSTANCE") {
@@ -1233,7 +1234,7 @@ namespace OpenDDS {
 
       // Loop through the [subscriberqos/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string subscriberqos_name = (*it).first;
+        OPENDDS_STRING subscriberqos_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
@@ -1248,8 +1249,8 @@ namespace OpenDDS {
         DDS::SubscriberQos subscriberqos(TheServiceParticipant->initial_SubscriberQos());
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "presentation.access_scope") {
             if (value == "INSTANCE") {
@@ -1338,7 +1339,7 @@ namespace OpenDDS {
 
       // Loop through the [endpoint/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string endpoint_name = (*it).first;
+        OPENDDS_STRING endpoint_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
@@ -1373,8 +1374,8 @@ namespace OpenDDS {
           config_name_Specified = false;
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "domain") {
             if (convertToInteger(value, domain)) {

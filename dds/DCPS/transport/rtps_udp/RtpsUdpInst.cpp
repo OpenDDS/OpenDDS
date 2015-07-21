@@ -14,6 +14,8 @@
 #include "ace/Configuration.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 
+#include <cstring>
+
 namespace OpenDDS {
 namespace DCPS {
 
@@ -188,7 +190,7 @@ const TransportBLOB*
 RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const
 {
   for (size_t idx = 0, limit = trans_info.length(); idx != limit; ++idx) {
-    if (strcmp(trans_info[idx].transport_type, "rtps_udp") == 0) {
+    if (std::strcmp(trans_info[idx].transport_type, "rtps_udp") == 0) {
       return &trans_info[idx].data;
     }
   }
