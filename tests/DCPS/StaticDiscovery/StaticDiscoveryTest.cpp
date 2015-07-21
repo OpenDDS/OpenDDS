@@ -16,6 +16,7 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include "ace/Arg_Shifter.h"
+#include "ace/OS_NS_stdlib.h"
 
 /*
   NOTE:  The messages may not be processed by the reader in this test.
@@ -365,27 +366,27 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         const ACE_TCHAR* x;
         x = shifter.get_the_parameter (ACE_TEXT("-participant"));
         if (x != NULL) {
-          participant_id = x;
+          participant_id = ACE_TEXT_ALWAYS_CHAR(x);
         }
         x = shifter.get_the_parameter (ACE_TEXT("-reader"));
         if (x != NULL) {
-          readers.push_back(x);
+          readers.push_back(ACE_TEXT_ALWAYS_CHAR(x));
         }
         x = shifter.get_the_parameter (ACE_TEXT("-writer"));
         if (x != NULL) {
-          writers.push_back(x);
+          writers.push_back(ACE_TEXT_ALWAYS_CHAR(x));
         }
         x = shifter.get_the_parameter (ACE_TEXT("-reliable"));
         if (x != NULL) {
-          reliable = atoi(x);
+          reliable = ACE_OS::atoi(x);
         }
         x = shifter.get_the_parameter (ACE_TEXT("-total_readers"));
         if (x != NULL) {
-          total_readers = atoi(x);
+          total_readers = ACE_OS::atoi(x);
         }
         x = shifter.get_the_parameter (ACE_TEXT("-total_writers"));
         if (x != NULL) {
-          total_writers = atoi(x);
+          total_writers = ACE_OS::atoi(x);
         }
 
         shifter.consume_arg ();

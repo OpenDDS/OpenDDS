@@ -1299,8 +1299,10 @@ Service_Participant::load_configuration(
                      -1);
   }
 
+#ifndef DDS_HAS_MINIMUM_BIT
   // Register static discovery.
   this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
+#endif
 
   status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
 
@@ -1359,6 +1361,7 @@ Service_Participant::load_configuration(
                      -1);
   }
 
+#ifndef DDS_HAS_MINIMUM_BIT
   // Needs to be loaded after transport configs and instances and domains.
   status = StaticDiscovery::instance()->load_configuration(config);
 
@@ -1369,6 +1372,7 @@ Service_Participant::load_configuration(
                       status),
                      -1);
   }
+#endif
 
   return 0;
 }

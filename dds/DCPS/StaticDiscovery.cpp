@@ -12,6 +12,8 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
+#include <ctype.h>
+
 namespace OpenDDS {
   namespace DCPS {
 
