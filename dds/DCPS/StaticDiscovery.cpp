@@ -1421,8 +1421,14 @@ namespace OpenDDS {
                                -1);
             }
           } else if (name == "participant") {
+#ifdef __SUNPRO_CC
+            int count = 0;
+            std::count_if(value.begin(), value.end(), isxdigit, count);
+            if (value.size() != 12 || count != 12) {
+#else
             if (value.size() != 12 ||
                 std::count_if(value.begin(), value.end(), isxdigit) != 12) {
+#endif
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                                 ACE_TEXT("participant (%C) must be 12 hexadecimal digits in [endpoint/%C] section.\n"),
@@ -1435,8 +1441,14 @@ namespace OpenDDS {
             }
             participantSpecified = true;
           } else if (name == "entity") {
+#ifdef __SUNPRO_CC
+            int count = 0;
+            std::count_if(value.begin(), value.end(), isxdigit, count);
+            if (value.size() != 6 || count != 6) {
+#else
             if (value.size() != 6 ||
                 std::count_if(value.begin(), value.end(), isxdigit) != 6) {
+#endif
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                                 ACE_TEXT("entity (%C) must be 6 hexadecimal digits in [endpoint/%C] section.\n"),
