@@ -3,7 +3,7 @@
 // so that the static link includes the initializers for these libraries.
 #ifdef ACE_AS_STATIC_LIBS
 # ifdef OPENDDS_SAFETY_PROFILE
-#  include "dds/DCPS/StaticDiscovery/StaticDiscovery.h"
+#  include "dds/DCPS/StaticDiscovery.h"
 #  include "dds/DCPS/RTPS/RtpsDiscovery.h"
 #  include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 # else
