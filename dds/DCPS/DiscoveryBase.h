@@ -1112,7 +1112,7 @@ namespace OpenDDS {
     };
 
     template<typename Participant>
-    class OpenDDS_Dcps_Export PeerDiscovery : public Discovery {
+    class PeerDiscovery : public Discovery {
     public:
       typedef typename Participant::TopicDetails TopicDetails;
 

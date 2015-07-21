@@ -1,7 +1,6 @@
-#ifndef DDS_HAS_MINIMUM_BIT
-
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#ifndef DDS_HAS_MINIMUM_BIT
 #include "StaticDiscovery.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/ConfigUtils.h"

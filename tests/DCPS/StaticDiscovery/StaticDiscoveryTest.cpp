@@ -22,7 +22,7 @@
   This behavior is not an error.
 */
 
-const int DOMAIN = 100, MSGS_PER_WRITER = 10;
+const int DOMAIN_ID = 100, MSGS_PER_WRITER = 10;
 
 unsigned char hextobyte(unsigned char c)
 {
@@ -406,7 +406,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dp_qos.user_data.value[5] = fromhex(participant_id, 5);
 
     DDS::DomainParticipant_var participant =
-      dpf->create_participant(DOMAIN,
+      dpf->create_participant(DOMAIN_ID,
                               dp_qos,
                               0,
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);

@@ -20,6 +20,9 @@
 
 namespace OpenDDS {
 namespace RTPS {
+  using DCPS::GuidPrefix_t;
+  using DCPS::GUID_t;
+  using DCPS::EntityId_t;
 
 template <typename T>
 void marshal_key_hash(const T& msg, KeyHash_t& hash) {
@@ -62,8 +65,7 @@ void marshal_key_hash(const T& msg, KeyHash_t& hash) {
   }
 }
 
-inline void assign(OpenDDS::RTPS::GuidPrefix_t& dest,
-                   const OpenDDS::RTPS::GuidPrefix_t& src)
+inline void assign(GuidPrefix_t& dest, const GuidPrefix_t& src)
 {
   std::memcpy(&dest[0], &src[0], sizeof(GuidPrefix_t));
 }
