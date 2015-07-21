@@ -114,8 +114,6 @@ public:
   const AddrVec& spdp_send_addrs() const { return spdp_send_addrs_; }
   AddrVec& spdp_send_addrs() { return spdp_send_addrs_; }
 
-  ACE_Reactor* reactor();
-
 private:
   ACE_Time_Value resend_period_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_, ttl_;
@@ -123,16 +121,6 @@ private:
   OPENDDS_STRING multicast_interface_;
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.
   AddrVec spdp_send_addrs_;
-
-  struct ReactorRunner : ACE_Task_Base {
-    ReactorRunner() : reactor_(0) {}
-    ~ReactorRunner();
-    int svc();
-    void end();
-
-    ACE_Reactor* reactor_;
-    ACE_Thread_Mutex mtx_;
-  } reactor_runner_;
 
   /// Guids will be unique within this RTPS configuration
   GuidGenerator guid_gen_;

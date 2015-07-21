@@ -15,6 +15,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include "ace/Select_Reactor.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -1132,6 +1133,10 @@ namespace OpenDDS {
 
       explicit PeerDiscovery(const RepoKey& key) : Discovery(key) { }
 
+      ~PeerDiscovery() {
+        reactor_runner_.end();
+      }
+
       virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) {
         using namespace DCPS;
         if (create_bit_topics(participant) != DDS::RETCODE_OK) {
@@ -1438,6 +1443,17 @@ namespace OpenDDS {
         get_part(domainId, participantId)->association_complete(localId, remoteId);
       }
 
+      ACE_Reactor*
+      reactor()
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, reactor_runner_.mtx_, 0);
+        if (!reactor_runner_.reactor_) {
+          reactor_runner_.reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+          reactor_runner_.activate();
+        }
+        return reactor_runner_.reactor_;
+      }
+
     protected:
 
       typedef DCPS::RcHandle<Participant> ParticipantHandle;
@@ -1485,6 +1501,35 @@ namespace OpenDDS {
       }
 
       mutable ACE_Thread_Mutex lock_;
+
+      // Before participants_ so destroyed after.
+      struct ReactorRunner : ACE_Task_Base {
+      ReactorRunner() : reactor_(0) {}
+        ~ReactorRunner()
+        {
+          delete reactor_;
+        }
+
+        int svc()
+        {
+          reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
+          reactor_->run_reactor_event_loop();
+          return 0;
+        }
+
+        void end()
+        {
+          ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
+          if (reactor_) {
+            reactor_->end_reactor_event_loop();
+            wait();
+          }
+        }
+
+        ACE_Reactor* reactor_;
+        ACE_Thread_Mutex mtx_;
+      } reactor_runner_;
+
       DomainParticipantMap participants_;
       OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, TopicDetails) ) topics_;
       OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, unsigned int) ) topic_use_;
