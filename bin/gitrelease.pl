@@ -1,6 +1,7 @@
 use strict;
 use warnings;
 use Date::Format;
+use Cwd;
 
 $ENV{TZ} = "UTC";
 
@@ -55,13 +56,13 @@ sub verify_git_remote {
     }
   }
   close(GITREMOTE);
-  return ($url eq $settings->{expected});
+  return ($url eq $settings->{git_url});
 }
 
 sub message_git_remote {
   my $settings = shift;
   my $remote = $settings->{remote};
-  return "Remote $remote does not match expected URL $settings->{expected},\n" .
+  return "Remote $remote does not match expected URL $settings->{git_url},\n" .
          "rerun and specifiy --remote";
 }
 
@@ -465,12 +466,8 @@ sub verify_git_tag {
 
 sub message_git_tag {
   my $settings = shift();
-  return "Could not find a tag of $settings->{git_tag}.";
-}
-
-sub hint_git_tag {
-  my $settings = shift();
-  return "Create tag using\n" .
+  return "Could not find a tag of $settings->{git_tag}.\n" .
+         "Create annotated tag using\n" .
          "  >> git tag -a -m 'OpenDDS Release $settings->{version}'" .
          $settings->{git_tag};
 }
@@ -481,7 +478,35 @@ sub remedy_git_tag {
   my $command = "git tag -a -m 'OpenDDS Release $settings->{version}' " .
                  $settings->{git_tag};
   my $result = system($command);
+  if (!$result) {
+    print "Pushing tag to $settings->{remote}\n";
+    $result = system("git push $settings->{remote} $settings->{git_tag}");
+  }
   return !$result;
+}
+############################################################################
+sub verify_clone_tag {
+  my $settings = shift();
+  return (-d $settings->{clone_dir});
+}
+
+sub message_clone_tag {
+  my $settings = shift();
+  return "Could not see directory $settings->{clone_dir}\n";
+}
+
+sub remedy_clone_tag {
+  my $settings = shift();
+  print "Cloning OpenDDS into $settings->{clone_dir}\n";
+  my $result = system("git clone $settings->{git_url} $settings->{clone_dir}");
+  if (!$result) {
+    my $curdir = getcwd;
+    chdir($settings->{clone_dir});
+    print "Checking out tag $settings->{git_tag}\n";
+    $result = system("git checkout tags/$settings->{git_tag}");
+    chdir($curdir);
+  }
+  return $result;
 }
 ############################################################################
 
@@ -548,12 +573,20 @@ my @release_steps = (
     skip    => 1,
     verify  => sub{verify_git_tag(@_)},
     message => sub{message_git_tag(@_)},
-    hint    => sub{hint_git_tag(@_)},
     remedy  => sub{remedy_git_tag(@_)}
   },
-  { title   => 'Push git tags', },
-  { title   => 'Clone git tag', },
-  { title   => 'Create release archives', },
+  {
+    title   => 'Clone tag',
+    verify  => sub{verify_clone_tag(@_)},
+    message => sub{message_clone_tag(@_)},
+    remedy  => sub{remedy_clone_tag(@_)}
+  },
+  {
+    title   => 'Create unix release archive', 
+#    verify  => sub{verify_tgz_archive(@_)},
+#    message => sub{message_tgz_archive(@_)},
+#    remedy  => sub{remedy_tgz_archive(@_)}
+  },
   { title   => 'Generate doxygen', },
   { title   => 'Upload to FTP Site', },
   { title   => 'Upload to GitHub', },
@@ -599,8 +632,9 @@ my %settings = (
   remote    => string_arg_value("--remote") || "origin",
   version   => $ARGV[0],
   git_tag   => "DDS-$ARGV[0]",
+  clone_dir => "../OpenDDS-Release-$ARGV[0]/DDS",
   timestamp => strftime("%a %b %e %T %Z %Y", @t),
-  expected  => 'git@github.com:objectcomputing/OpenDDS.git',
+  git_url   => 'git@github.com:objectcomputing/OpenDDS.git',
   modified  => {"NEWS" => 1,
                 "PROBLEM-REPORT-FORM" => 1,
                 "VERSION" => 1,
@@ -623,26 +657,30 @@ sub run_step {
     print "$divider\n";
     print "  " . $step->{message}(\%settings) . "\n";
 
-    # If we can remediate and --remedy set
-    if ($settings{remedy} && $step->{remedy}) {
-      if (!$step->{remedy}(\%settings)) {
-        die "  !!!! Remediation did not complete\n";
+    my $remedied = 0;
+    # If a remedy is available
+    if ($step->{remedy}) {
+      # If --remedy is set
+      if ($settings{remedy}) {
+        # Try remediation
+        if (!$step->{remedy}(\%settings)) {
+          print "  !!!! Remediation did not complete\n";
+        # Reverify
+        } elsif (!$step->{verify}(\%settings)) {
+          print "  !!!! Remediation did not pass verification\n";
+        } else {
+          $remedied = 1;
+        }
+      # Else --remedy is  NOT set
+      } else {
+        print "  Use --remedy to attempt a fix\n" if $step->{remedy};
       }
-      # Reverify
-      if (!$step->{verify}(\%settings)) {
-        die "  !!!! Remediation did not pass verification\n";
-      }
-    } elsif ($settings{force} && $step->{skip}) {
-      # Skip this step
-    } elsif ($settings{force} && !$step->{skip}) {
-      print "  Use --remedy to attempt a fix\n" if $step->{remedy};
-      die "  Step can't be skipped";
-    } elsif (!$settings{force} && $step->{skip}) {
-      print "  Use --remedy to attempt a fix\n" if $step->{remedy};
-      die "  Use --force to continue";
-    } elsif (!$settings{force} && !$step->{skip}) {
-      die;
+
+    # Else there is no remedy
+    } else {
+      print "  Use --force to continue" if $step->{skip};
     }
+    die unless $remedied;
     print "$divider\n";
   }
 }
