@@ -723,6 +723,7 @@ namespace OpenDDS {
           ra.readerId = reader;
           ra.subQos = *subQos;
           ra.readerQos = *drQos;
+          ra.filterClassName = cfProp->filterClassName;
           ra.filterExpression = cfProp->filterExpression;
           ra.exprParams = cfProp->expressionParameters;
           DCPS::WriterAssociation wa;
