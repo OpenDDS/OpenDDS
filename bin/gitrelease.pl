@@ -62,7 +62,7 @@ sub message_git_remote {
   my $settings = shift;
   my $remote = $settings->{remote};
   return "Remote $remote does not match expected URL $settings->{expected},\n" .
-         "rerun and specifiy remote";
+         "rerun and specifiy --remote";
 }
 
 ############################################################################
@@ -450,12 +450,38 @@ sub message_commit_git_changes {
 }
 ############################################################################
 sub verify_git_tag {
+  my $settings = shift();
+  my $found = 0;
+  open(GITTAG, "git tag --list 'DDS-*' |") or die "Opening $!";
+  while (<GITTAG>) {
+    chomp;
+    if (/$settings->{git_tag}/) {
+      $found = 1;
+    }
+  }
+  close(GITTAG);
+  return $found;
 }
 
 sub message_git_tag {
+  my $settings = shift();
+  return "Could not find a tag of $settings->{git_tag}.";
+}
+
+sub hint_git_tag {
+  my $settings = shift();
+  return "Create tag using\n" .
+         "  >> git tag -a -m 'OpenDDS Release $settings->{version}'" .
+         $settings->{git_tag};
 }
 
 sub remedy_git_tag {
+  my $settings = shift();
+  print "Creating tag $settings->{git_tag}\n";
+  my $command = "git tag -a -m 'OpenDDS Release $settings->{version}' " .
+                 $settings->{git_tag};
+  my $result = system($command);
+  return !$result;
 }
 ############################################################################
 
@@ -522,6 +548,7 @@ my @release_steps = (
     skip    => 1,
     verify  => sub{verify_git_tag(@_)},
     message => sub{message_git_tag(@_)},
+    hint    => sub{hint_git_tag(@_)},
     remedy  => sub{remedy_git_tag(@_)}
   },
   { title   => 'Push git tags', },
@@ -571,6 +598,7 @@ my %settings = (
   step      => numeric_arg_value("--step"),
   remote    => string_arg_value("--remote") || "origin",
   version   => $ARGV[0],
+  git_tag   => "DDS-$ARGV[0]",
   timestamp => strftime("%a %b %e %T %Z %Y", @t),
   expected  => 'git@github.com:objectcomputing/OpenDDS.git',
   modified  => {"NEWS" => 1,
