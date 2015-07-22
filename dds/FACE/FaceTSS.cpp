@@ -800,7 +800,7 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
       sinfo.source_timestamp.nanosec + lifespan.nanosec
     };
 
-    // We assume that the publisher host's clock and subcriber host's
+    // We assume that the publisher host's clock and subscriber host's
     // clock are synchronized (allowed by the spec).
     ACE_Time_Value const expiration_time(
         OpenDDS::DCPS::time_to_time_value(tmp));
