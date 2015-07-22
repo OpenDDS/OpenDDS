@@ -30,6 +30,7 @@
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DiscoveryListener.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 
 class DDS_TEST;
 
@@ -55,6 +56,7 @@ public:
   RtpsUdpInst* config();
 
   ACE_Reactor* get_reactor();
+  bool reactor_is_shut_down();
 
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();
@@ -369,10 +371,18 @@ private:
   } nack_reply_, heartbeat_reply_;
 
 
-  struct HeartBeat : ACE_Event_Handler {
+  struct HeartBeat : ReactorInterceptor {
 
-    explicit HeartBeat(RtpsUdpDataLink* outer)
-      : outer_(outer), enabled_(false) {}
+    explicit HeartBeat(ACE_Reactor* reactor, ACE_thread_t owner, RtpsUdpDataLink* outer)
+      : ReactorInterceptor(reactor, owner)
+      , outer_(outer)
+      , enabled_(false) {}
+
+    void schedule_enable()
+    {
+      ScheduleEnableCommand c(this);
+      execute_or_enqueue(c);
+    }
 
     int handle_timeout(const ACE_Time_Value&, const void*)
     {
@@ -380,11 +390,29 @@ private:
       return 0;
     }
 
+    bool reactor_is_shut_down() const
+    {
+      return outer_->reactor_is_shut_down();
+    }
+
     void enable();
     void disable();
 
     RtpsUdpDataLink* outer_;
     bool enabled_;
+
+    struct ScheduleEnableCommand : public Command {
+      ScheduleEnableCommand(HeartBeat* hb)
+        : heartbeat_(hb)
+      { }
+
+      virtual void execute()
+      {
+        heartbeat_->enable();
+      }
+
+      HeartBeat* heartbeat_;
+    };
 
   } heartbeat_;
 

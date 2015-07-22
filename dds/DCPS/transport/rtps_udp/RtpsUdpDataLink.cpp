@@ -65,7 +65,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config->heartbeat_response_delay_),
-    heartbeat_(this)
+    heartbeat_(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this)
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
@@ -322,7 +322,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 
   g.release();
   if (enable_heartbeat) {
-    heartbeat_.enable();
+    heartbeat_.schedule_enable();
   }
 }
 
@@ -360,7 +360,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   interesting_readers_.insert(std::make_pair(readerid, InterestingReader(writerid, address, listener)));
   heartbeat_counts_[writerid] = 1;
   if (enableheartbeat) {
-    heartbeat_.enable();
+    heartbeat_.schedule_enable();
   }
 }
 
