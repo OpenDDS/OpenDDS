@@ -129,7 +129,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
                                         topic.type_name_,
                                         connection_direction,
                                         qos,
-                                        connection.transport_name_);
+                                        connection.config_name_);
   if (return_code != RC_NO_ERROR) {
     return;
   }
