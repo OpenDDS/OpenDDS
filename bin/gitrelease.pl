@@ -547,7 +547,34 @@ sub remedy_tgz_archive {
   return !$result;
 }
 ############################################################################
+sub verify_zip_archive {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{zip_src});
+  return (-f $file);
+}
 
+sub message_zip_archive {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{zip_src});
+  return "Could not find file $file";
+}
+
+sub remedy_zip_archive {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{zip_src});
+  my $curdir = getcwd;
+  chdir($settings->{parent_dir});
+  # zip -x .git .gitignore does not exclude as advertised
+  print "Removing git-specific directories\n";
+  my $result = system("find . -name '.git*' | xargs rm -rf");
+  if (!$result) {
+    print "Creating file $settings->{zip_src}\n";
+    $result = system("zip -qq -r $settings->{zip_src} DDS -x '.git*'");
+  }
+  chdir($curdir);
+  return !$result;
+}
+############################################################################
 my @release_steps = (
   {
     title   => 'Verify git status is clean',
@@ -625,7 +652,13 @@ my @release_steps = (
     message => sub{message_tgz_archive(@_)},
     remedy  => sub{remedy_tgz_archive(@_)}
   },
-  { title   => 'Generate doxygen', },
+  {
+    title   => 'Create windows release archive',
+    verify  => sub{verify_zip_archive(@_)},
+    message => sub{message_zip_archive(@_)},
+    remedy  => sub{remedy_zip_archive(@_)}
+  },
+  { title   => 'Generate doxygen', }, # Should run $ACE_ROOT/bin/generate_doxygen.pl
   { title   => 'Upload to FTP Site', },
   { title   => 'Upload to GitHub', },
   { title   => 'Update opendds.org front page', },
@@ -674,6 +707,7 @@ my %settings = (
   parent_dir => "../OpenDDS-Release-$ARGV[0]",
   tar_src    => "OpenDDS-$ARGV[0].tar",
   tgz_src    => "OpenDDS-$ARGV[0].tar.gz",
+  zip_src    => "OpenDDS-$ARGV[0].zip",
   timestamp  => strftime("%a %b %e %T %Z %Y", @t),
   git_url    => 'git@github.com:objectcomputing/OpenDDS.git',
   changelog  => "docs/history/ChangeLog-$ARGV[0]",
