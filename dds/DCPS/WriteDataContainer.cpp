@@ -246,12 +246,14 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
+      GuidConverter reader(reader_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
-                 ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend.\n"),
+                 ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend to %C.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 OPENDDS_STRING(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str(),
+                 OPENDDS_STRING(reader).c_str()));
     }
   }
 
