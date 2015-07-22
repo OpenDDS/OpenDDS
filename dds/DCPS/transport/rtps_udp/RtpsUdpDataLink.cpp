@@ -357,7 +357,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   bool enableheartbeat = interesting_readers_.empty();
-  interesting_readers_.insert(std::make_pair(readerid, InterestingReader(writerid, address, listener)));
+  interesting_readers_.insert(InterestingReaderMapType::value_type(readerid, InterestingReader(writerid, address, listener)));
   heartbeat_counts_[writerid] = 1;
   if (enableheartbeat) {
     heartbeat_.schedule_enable();
@@ -371,7 +371,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
                                      OpenDDS::DCPS::DiscoveryListener* listener)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-  interesting_writers_.insert(std::make_pair(writerid, InterestingWriter(readerid, address, listener)));
+  interesting_writers_.insert(InterestingWriterMapType::value_type(writerid, InterestingWriter(readerid, address, listener)));
 }
 
 void
@@ -2171,7 +2171,7 @@ RtpsUdpDataLink::send_heartbeats()
       pos->entityId,
       {SN.getHigh(), SN.getLow()},
       {SN.getHigh(), SN.getLow()},
-      {++heartbeat_counts_[*pos]}
+      {static_cast<CORBA::Long>(++heartbeat_counts_[*pos])}
     };
     subm.push_back(hb);
   }
