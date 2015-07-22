@@ -170,7 +170,7 @@ sub find_previous_tag {
 sub verify_changelog {
   my $settings = shift();
   my $version = $settings->{version};
-  my $status = open(CHANGELOG, "docs/history/ChangeLog-$version");
+  my $status = open(CHANGELOG, $settings->{changelog});
   if ($status) {
     close(CHANGELOG);
   }
@@ -180,7 +180,7 @@ sub verify_changelog {
 sub message_changelog {
   my $settings = shift();
   my $version = $settings->{version};
-  return "File docs/history/ChangeLog-$version missing";
+  return "File $settings->{changelog} missing";
 }
 
 sub remedy_changelog {
@@ -199,9 +199,9 @@ sub remedy_changelog {
   my $file_list = "";
   my $changed = 0;
 
-  print "  >> Creating docs/history/ChangeLog-$version from git history\n";
+  print "  >> Creating $settings->{changelog} from git history\n";
 
-  open(CHANGELOG, ">docs/history/ChangeLog-$version") or die "Opening $!";
+  open(CHANGELOG, ">$settings->{changelog}") or die "Opening $!";
 
   open(GITLOG, "git log $prev_tag..$remote/master --name-only |") or die "Opening $!";
   while (<GITLOG>) {
@@ -509,6 +509,44 @@ sub remedy_clone_tag {
   return $result;
 }
 ############################################################################
+sub verify_tgz_archive {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
+  my $good = 0;
+  if (-f $file) {
+    open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
+    my $target = join("/", 'DDS', $settings->{changelog});
+    while (<TGZ>) {
+      if (/$target/) {
+        $good = 1;
+        last;
+      }
+    }
+  }
+  return $good;
+}
+
+sub message_tgz_archive {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
+  return "Could not find file $file";
+}
+
+sub remedy_tgz_archive {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
+  my $curdir = getcwd;
+  chdir($settings->{parent_dir});
+  print "Creating file $settings->{tar_src}\n";
+  my $result = system("tar -cf $settings->{tar_src} DDS --exclude-vcs");
+  if (!$result) {
+    print "Gzipping file $settings->{tar_src}\n";
+    $result = system("gzip $settings->{tar_src}");
+  }
+  chdir($curdir);
+  return !$result;
+}
+############################################################################
 
 my @release_steps = (
   {
@@ -583,9 +621,9 @@ my @release_steps = (
   },
   {
     title   => 'Create unix release archive', 
-#    verify  => sub{verify_tgz_archive(@_)},
-#    message => sub{message_tgz_archive(@_)},
-#    remedy  => sub{remedy_tgz_archive(@_)}
+    verify  => sub{verify_tgz_archive(@_)},
+    message => sub{message_tgz_archive(@_)},
+    remedy  => sub{remedy_tgz_archive(@_)}
   },
   { title   => 'Generate doxygen', },
   { title   => 'Upload to FTP Site', },
@@ -625,17 +663,21 @@ sub string_arg_value {
 }
 
 my %settings = (
-  list      => any_arg_is("--list"),
-  remedy    => any_arg_is("--remedy"),
-  force     => any_arg_is("--force"),
-  step      => numeric_arg_value("--step"),
-  remote    => string_arg_value("--remote") || "origin",
-  version   => $ARGV[0],
-  git_tag   => "DDS-$ARGV[0]",
-  clone_dir => "../OpenDDS-Release-$ARGV[0]/DDS",
-  timestamp => strftime("%a %b %e %T %Z %Y", @t),
-  git_url   => 'git@github.com:objectcomputing/OpenDDS.git',
-  modified  => {"NEWS" => 1,
+  list       => any_arg_is("--list"),
+  remedy     => any_arg_is("--remedy"),
+  force      => any_arg_is("--force"),
+  step       => numeric_arg_value("--step"),
+  remote     => string_arg_value("--remote") || "origin",
+  version    => $ARGV[0],
+  git_tag    => "DDS-$ARGV[0]",
+  clone_dir  => "../OpenDDS-Release-$ARGV[0]/DDS",
+  parent_dir => "../OpenDDS-Release-$ARGV[0]",
+  tar_src    => "OpenDDS-$ARGV[0].tar",
+  tgz_src    => "OpenDDS-$ARGV[0].tar.gz",
+  timestamp  => strftime("%a %b %e %T %Z %Y", @t),
+  git_url    => 'git@github.com:objectcomputing/OpenDDS.git',
+  changelog  => "docs/history/ChangeLog-$ARGV[0]",
+  modified   => {"NEWS" => 1,
                 "PROBLEM-REPORT-FORM" => 1,
                 "VERSION" => 1,
                 "dds/Version.h" => 1,
