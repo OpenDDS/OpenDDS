@@ -65,7 +65,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport* transport,
                 config->nak_response_delay_),
     heartbeat_reply_(this, &RtpsUdpDataLink::send_heartbeat_replies,
                      config->heartbeat_response_delay_),
-    heartbeat_(this)
+    heartbeat_(reactor_task->get_reactor(), reactor_task->get_reactor_owner(), this)
 {
   std::memcpy(local_prefix_, local_prefix, sizeof(GuidPrefix_t));
 }
@@ -322,7 +322,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 
   g.release();
   if (enable_heartbeat) {
-    heartbeat_.enable();
+    heartbeat_.schedule_enable();
   }
 }
 
@@ -358,8 +358,9 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   bool enableheartbeat = interesting_readers_.empty();
   interesting_readers_.insert(std::make_pair(readerid, InterestingReader(writerid, address, listener)));
+  heartbeat_counts_[writerid] = 1;
   if (enableheartbeat) {
-    heartbeat_.enable();
+    heartbeat_.schedule_enable();
   }
 }
 
@@ -1182,7 +1183,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         {ack.getHigh(), ack.getLow()},
         0 /* num_bits */, bitmap
       },
-      {1 /* acknack count */}
+      {0 /* acknack count */}
     };
 
     size_t size = 0, padding = 0;
@@ -1551,9 +1552,12 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
            limit = interesting_readers_.upper_bound(remote);
          pos != limit;
          ++pos) {
-      if (!pos->second.called) {
-        pos->second.listener->reader_exists(remote, pos->second.writerid);
-        pos->second.called = true;
+      // Ensure the acknack was for the writer.
+      if (local == pos->second.writerid) {
+        if (!pos->second.called) {
+          pos->second.listener->reader_exists(remote, local);
+          pos->second.called = true;
+        }
       }
     }
   }
@@ -2141,22 +2145,33 @@ RtpsUdpDataLink::send_heartbeats()
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
   const ACE_Time_Value now = ACE_OS::gettimeofday();
 
+  typedef OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan) WriterSetType;
+  WriterSetType writers_to_advertise;
+
   for (InterestingReaderMapType::iterator pos = interesting_readers_.begin(),
          limit = interesting_readers_.end();
        pos != limit;
        ++pos) {
-    recipients.insert(pos->second.address);
+    if (!pos->second.called) {
+      recipients.insert(pos->second.address);
+      writers_to_advertise.insert(pos->second.writerid);
+    }
+  }
 
+  for (WriterSetType::const_iterator pos = writers_to_advertise.begin(),
+         limit = writers_to_advertise.end();
+       pos != limit;
+       ++pos) {
     const SequenceNumber SN = 1;
     const HeartBeatSubmessage hb = {
       {HEARTBEAT,
        CORBA::Octet(1 /*FLAG_E*/),
        HEARTBEAT_SZ},
       ENTITYID_UNKNOWN, // any matched reader may be interested in this
-      pos->second.writerid.entityId,
+      pos->entityId,
       {SN.getHigh(), SN.getLow()},
       {SN.getHigh(), SN.getLow()},
-      {++pos->second.heartbeat_count}
+      {++heartbeat_counts_[*pos]}
     };
     subm.push_back(hb);
   }

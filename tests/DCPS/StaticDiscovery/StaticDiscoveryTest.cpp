@@ -16,6 +16,7 @@
 #include "dds/DCPS/StaticIncludes.h"
 
 #include "ace/Arg_Shifter.h"
+#include "ace/OS_NS_stdlib.h"
 
 /*
   NOTE:  The messages may not be processed by the reader in this test.
@@ -30,10 +31,10 @@ unsigned char hextobyte(unsigned char c)
     return c - '0';
   }
   if (c >= 'a' && c <= 'f') {
-    return c - 'a';
+    return 10 + c - 'a';
   }
   if (c >= 'A' && c <= 'F') {
-    return c - 'A';
+    return 10 + c - 'A';
   }
   return c;
 }
@@ -80,12 +81,15 @@ public:
 
     writers_[thread_id].resize(6);
 
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %s\n", writers_[thread_id].c_str()));
+
     DDS::DataWriterQos qos;
     publisher->get_default_datawriter_qos(qos);
     qos.user_data.value.length(3);
     qos.user_data.value[0] = fromhex(writers_[thread_id], 0);
     qos.user_data.value[1] = fromhex(writers_[thread_id], 1);
     qos.user_data.value[2] = fromhex(writers_[thread_id], 2);
+
     if (reliable_) {
       qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       qos.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
@@ -135,6 +139,7 @@ public:
                          -1);
       }
 
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %s has %d of %d readers\n", writers_[thread_id].c_str(), matches.current_count, total_readers_));
       if (matches.current_count >= total_readers_) {
         break;
       }
@@ -165,159 +170,12 @@ public:
       }
     }
 
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %s is waiting for acknowledgements\n", writers_[thread_id].c_str()));
     DDS::Duration_t timeout = { 30, 0 };
     message_writer->wait_for_acknowledgments(timeout);
     // With static discovery, it's not an error for wait_for_acks to fail
     // since the peer process may have terminated before sending acks.
-
-//     try
-//       {
-//         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    -> PARTICIPANT STARTED\n")));
-
-//         DDS::DomainParticipantFactory_var dpf = TheParticipantFactory;
-//         DDS::DomainParticipant_var participant;
-//         DDS::Publisher_var publisher;
-//         DDS::DataWriter_var writer;
-//         TestMsgDataWriter_var writer_i;
-//         DDS::StatusCondition_var cond;
-//         DDS::WaitSet_var ws = new DDS::WaitSet;
-
-//         // Create Participant
-//         participant =
-//           dpf->create_participant(42,
-//                                   PARTICIPANT_QOS_DEFAULT,
-//                                   DDS::DomainParticipantListener::_nil(),
-//                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-// #ifdef OPENDDS_SAFETY_PROFILE
-//         // RTPS cannot be shared
-//         char config_name[64], inst_name[64];
-//         ACE_OS::snprintf(config_name, 64, "cfg_%d", thread_index);
-//         ACE_OS::snprintf(inst_name, 64, "rtps_%d", thread_index);
-
-//         ACE_DEBUG((LM_INFO,
-//                    "(%P|%t)    -> PARTICIPANT creating transport config %C\n",
-//                    config_name));
-//         OpenDDS::DCPS::TransportConfig_rch config =
-//           TheTransportRegistry->create_config(config_name);
-//         OpenDDS::DCPS::TransportInst_rch inst =
-//           TheTransportRegistry->create_inst(inst_name, "rtps_udp");
-//         config->instances_.push_back(inst);
-//         TheTransportRegistry->bind_config(config_name, participant);
-// #endif
-
-
-//         if (CORBA::is_nil(participant.in()))
-//           ACE_ERROR_RETURN((LM_ERROR,
-//                             ACE_TEXT("%N:%l: svc()")
-//                             ACE_TEXT(" create_participant failed!\n")), 1);
-
-//         {
-//           // Create Publisher
-//           publisher =
-//             participant->create_publisher(PUBLISHER_QOS_DEFAULT,
-//                                           DDS::PublisherListener::_nil(),
-//                                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-//           if (CORBA::is_nil(publisher.in()))
-//             ACE_ERROR_RETURN((LM_ERROR,
-//                               ACE_TEXT("%N:%l: svc()")
-//                               ACE_TEXT(" create_publisher failed!\n")), 1);
-
-
-//           // Register Type (FooType)
-//           TestMsgTypeSupport_var ts = new TestMsgTypeSupportImpl;
-//           if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK)
-//             ACE_ERROR_RETURN((LM_ERROR,
-//                               ACE_TEXT("%N:%l: svc()")
-//                               ACE_TEXT(" register_type failed!\n")), 1);
-
-//           // Create Topic (TestMsgTopic)
-//           DDS::Topic_var topic =
-//             participant->create_topic("TestMsgTopic",
-//                                       ts->get_type_name(),
-//                                       TOPIC_QOS_DEFAULT,
-//                                       DDS::TopicListener::_nil(),
-//                                       ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-//           if (CORBA::is_nil(topic.in()))
-//             ACE_ERROR_RETURN((LM_ERROR,
-//                               ACE_TEXT("%N:%l: svc()")
-//                               ACE_TEXT(" create_topic failed!\n")), 1);
-
-//           // Create DataWriter
-//           DDS::DataWriterQos writer_qos;
-//           publisher->get_default_datawriter_qos(writer_qos);
-
-//           writer =
-//             publisher->create_datawriter(topic.in(),
-//                                          writer_qos,
-//                                          DDS::DataWriterListener::_nil(),
-//                                          ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-//           if (CORBA::is_nil(writer.in()))
-//             ACE_ERROR_RETURN((LM_ERROR,
-//                               ACE_TEXT("%N:%l: svc()")
-//                               ACE_TEXT(" create_datawriter failed!\n")), 1);
-
-//           writer_i = TestMsgDataWriter::_narrow(writer);
-//           if (CORBA::is_nil(writer_i))
-//             ACE_ERROR_RETURN((LM_ERROR,
-//                               ACE_TEXT("%N:%l: svc()")
-//                               ACE_TEXT(" _narrow failed!\n")), 1);
-
-//           // Block until Subscriber is available
-//           cond = writer->get_statuscondition();
-//           cond->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-
-//           ws->attach_condition(cond);
-
-//           DDS::Duration_t timeout =
-//             { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-//           DDS::ConditionSeq conditions;
-//           DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-//           do
-//             {
-//               if (ws->wait(conditions, timeout) != DDS::RETCODE_OK)
-//                 ACE_ERROR_RETURN((LM_ERROR,
-//                                   ACE_TEXT("%N:%l: svc()")
-//                                   ACE_TEXT(" wait failed!\n")), 1);
-
-//               if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK)
-//                 {
-//                   ACE_ERROR ((LM_ERROR,
-//                               "(%P|%t) ERROR: failed to get publication matched status\n"));
-//                   ACE_OS::exit (1);
-//                 }
-//             }
-//           while (matches.current_count < 1);
-
-//           ws->detach_condition(cond);
-
-//           DDS::Duration_t interval = { 30, 0};
-//           if( DDS::RETCODE_OK != writer->wait_for_acknowledgments( interval)) {
-//             ACE_ERROR_RETURN((LM_ERROR,
-//                               ACE_TEXT("(%P:%t) ERROR: svc() - ")
-//                               ACE_TEXT("timed out waiting for acks!\n")
-//                               ), 1);
-//           }
-//         }
-
-//         // Clean-up!
-//         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER PARTICIPANT DEL CONT ENTITIES\n")));
-//         participant->delete_contained_entities();
-//         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER DELETE PARTICIPANT\n")));
-//         dpf->delete_participant(participant.in());
-//         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)       <- PUBLISHER PARTICIPANT VARS GOING OUT OF SCOPE\n")));
-//       }
-//     catch (const CORBA::Exception& e)
-//       {
-//         e._tao_print_exception("caught in svc()");
-//         return 1;
-//       }
-
-//     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)    <- PARTICIPANT FINISHED\n")));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %s is done\n", writers_[thread_id].c_str()));
 
     return 0;
   }
@@ -365,27 +223,27 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         const ACE_TCHAR* x;
         x = shifter.get_the_parameter (ACE_TEXT("-participant"));
         if (x != NULL) {
-          participant_id = x;
+          participant_id = ACE_TEXT_ALWAYS_CHAR(x);
         }
         x = shifter.get_the_parameter (ACE_TEXT("-reader"));
         if (x != NULL) {
-          readers.push_back(x);
+          readers.push_back(ACE_TEXT_ALWAYS_CHAR(x));
         }
         x = shifter.get_the_parameter (ACE_TEXT("-writer"));
         if (x != NULL) {
-          writers.push_back(x);
+          writers.push_back(ACE_TEXT_ALWAYS_CHAR(x));
         }
         x = shifter.get_the_parameter (ACE_TEXT("-reliable"));
         if (x != NULL) {
-          reliable = atoi(x);
+          reliable = ACE_OS::atoi(x);
         }
         x = shifter.get_the_parameter (ACE_TEXT("-total_readers"));
         if (x != NULL) {
-          total_readers = atoi(x);
+          total_readers = ACE_OS::atoi(x);
         }
         x = shifter.get_the_parameter (ACE_TEXT("-total_writers"));
         if (x != NULL) {
-          total_writers = atoi(x);
+          total_writers = ACE_OS::atoi(x);
         }
 
         shifter.consume_arg ();
@@ -464,8 +322,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(n_msgs, reader_done_callback));
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, n_msgs, reader_done_callback));
 
       DDS::DataReaderQos qos;
       subscriber->get_default_datareader_qos(qos);
@@ -508,6 +365,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
       while (readers_done != static_cast<int>(readers.size()))
         readers_done_cond.wait();
+      // Sleep allows an ACKNACK to be generated.
+      ACE_OS::sleep(3);
     }
 
     // Clean-up!

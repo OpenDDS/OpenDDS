@@ -15,6 +15,7 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include "ace/Select_Reactor.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -268,6 +269,10 @@ namespace OpenDDS {
         TopicDetails& td = topics_[topic_names_[topicId]];
         td.endpoints_.insert(rid);
 
+        if (DDS::RETCODE_OK != add_publication_i(rid, pb)) {
+          return RepoId();
+        }
+
         if (DDS::RETCODE_OK != write_publication_data(rid, pb)) {
           return RepoId();
         }
@@ -332,6 +337,10 @@ namespace OpenDDS {
 
         TopicDetails& td = topics_[topic_names_[topicId]];
         td.endpoints_.insert(rid);
+
+        if (DDS::RETCODE_OK != add_subscription_i(rid, sb)) {
+          return RepoId();
+        }
 
         if (DDS::RETCODE_OK != write_subscription_data(rid, sb)) {
           return RepoId();
@@ -465,13 +474,18 @@ namespace OpenDDS {
         }
       }
 
-      virtual DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& rid,
-                                                       LocalPublication& pub,
-                                                       const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN) = 0;
+      virtual DDS::ReturnCode_t add_publication_i(const DCPS::RepoId& /*rid*/,
+                                                  LocalPublication& /*pub*/) { return DDS::RETCODE_OK; }
+      virtual DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& /*rid*/,
+                                                       LocalPublication& /*pub*/,
+                                                       const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN) { ACE_UNUSED_ARG(reader); return DDS::RETCODE_OK; }
       virtual DDS::ReturnCode_t remove_publication_i(const RepoId& publicationId) = 0;
-      virtual DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
-                                                        LocalSubscription& pub,
-                                                        const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN) = 0;
+
+      virtual DDS::ReturnCode_t add_subscription_i(const DCPS::RepoId& /*rid*/,
+                                                   LocalSubscription& /*pub*/) { return DDS::RETCODE_OK; };
+      virtual DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& /*rid*/,
+                                                        LocalSubscription& /*pub*/,
+                                                        const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN) { ACE_UNUSED_ARG(reader); return DDS::RETCODE_OK; }
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& subscriptionId) = 0;
 
       void match_endpoints(DCPS::RepoId repoId, const TopicDetails& td,
@@ -710,6 +724,7 @@ namespace OpenDDS {
           ra.readerId = reader;
           ra.subQos = *subQos;
           ra.readerQos = *drQos;
+          ra.filterClassName = cfProp->filterClassName;
           ra.filterExpression = cfProp->filterExpression;
           ra.exprParams = cfProp->expressionParameters;
           DCPS::WriterAssociation wa;
@@ -1118,6 +1133,10 @@ namespace OpenDDS {
 
       explicit PeerDiscovery(const RepoKey& key) : Discovery(key) { }
 
+      ~PeerDiscovery() {
+        reactor_runner_.end();
+      }
+
       virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) {
         using namespace DCPS;
         if (create_bit_topics(participant) != DDS::RETCODE_OK) {
@@ -1424,6 +1443,17 @@ namespace OpenDDS {
         get_part(domainId, participantId)->association_complete(localId, remoteId);
       }
 
+      ACE_Reactor*
+      reactor()
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, g, reactor_runner_.mtx_, 0);
+        if (!reactor_runner_.reactor_) {
+          reactor_runner_.reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
+          reactor_runner_.activate();
+        }
+        return reactor_runner_.reactor_;
+      }
+
     protected:
 
       typedef DCPS::RcHandle<Participant> ParticipantHandle;
@@ -1471,6 +1501,35 @@ namespace OpenDDS {
       }
 
       mutable ACE_Thread_Mutex lock_;
+
+      // Before participants_ so destroyed after.
+      struct ReactorRunner : ACE_Task_Base {
+      ReactorRunner() : reactor_(0) {}
+        ~ReactorRunner()
+        {
+          delete reactor_;
+        }
+
+        int svc()
+        {
+          reactor_->owner(ACE_Thread_Manager::instance()->thr_self());
+          reactor_->run_reactor_event_loop();
+          return 0;
+        }
+
+        void end()
+        {
+          ACE_GUARD(ACE_Thread_Mutex, g, mtx_);
+          if (reactor_) {
+            reactor_->end_reactor_event_loop();
+            wait();
+          }
+        }
+
+        ACE_Reactor* reactor_;
+        ACE_Thread_Mutex mtx_;
+      } reactor_runner_;
+
       DomainParticipantMap participants_;
       OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, TopicDetails) ) topics_;
       OPENDDS_MAP(DDS::DomainId_t, OPENDDS_MAP(OPENDDS_STRING, unsigned int) ) topic_use_;

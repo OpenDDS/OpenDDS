@@ -33,6 +33,13 @@ RtpsUdpDataLink::get_reactor()
   return reactor_task_->get_reactor();
 }
 
+ACE_INLINE bool
+RtpsUdpDataLink::reactor_is_shut_down()
+{
+  if (reactor_task_ == 0) return true;
+  return reactor_task_->is_shut_down();
+}
+
 ACE_INLINE ACE_SOCK_Dgram&
 RtpsUdpDataLink::unicast_socket()
 {
