@@ -8,6 +8,7 @@ use lib "$ENV{ACE_ROOT}/bin";
 use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
+use warnings;
 
 my $result = 0;
 my $participant = 0;
@@ -25,7 +26,7 @@ sub generateConfig {
 
     for (my $j = 0; $j != $count; ++$j) {
         my $p = sprintf("%012x", $participant++);
-        push($participant_array, "-participant $p");
+        push(@$participant_array, "-participant $p");
         my @ra;
         my @wa;
         for (my $i = 0; $i != $readers; ++$i) {

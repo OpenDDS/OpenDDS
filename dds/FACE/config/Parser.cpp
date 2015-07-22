@@ -136,12 +136,12 @@ Parser::parse(const char* filename)
 
         OpenDDS::DCPS::TransportConfig_rch config;
 
-        if (conn.transport_set()) {
-          config = TheTransportRegistry->get_config(conn.transport_name());
+        if (conn.config_set()) {
+          config = TheTransportRegistry->get_config(conn.config_name());
           if (config.is_nil()) {
             ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: Could not find transport/%s\n"),
-                       conn.transport_name()));
+                       ACE_TEXT("(%P|%t) ERROR: Could not find config/%s\n"),
+                       conn.config_name()));
             return -1;
           }
         }
@@ -203,12 +203,12 @@ Parser::parse(const char* filename)
 
         OpenDDS::DCPS::TransportConfig_rch config;
 
-        if (conn.transport_set()) {
-          config = TheTransportRegistry->get_config(conn.transport_name());
+        if (conn.config_set()) {
+          config = TheTransportRegistry->get_config(conn.config_name());
           if (config.is_nil()) {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("(%P|%t) ERROR: Could not find transport/%s\n"),
-                       conn.transport_name()));
+                       conn.config_name()));
             return -1;
           }
         }

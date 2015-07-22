@@ -17,13 +17,13 @@ public:
   const char* datareader_qos_name() const;
   const char* publisher_qos_name() const;
   const char* subscriber_qos_name() const;
-  const char* transport_name() const;
+  const char* config_name() const;
 
   bool datawriter_qos_set() const;
   bool datareader_qos_set() const;
   bool publisher_qos_set() const;
   bool subscriber_qos_set() const;
-  bool transport_set() const;
+  bool config_set() const;
 
   char topic_name_[64];
   char datawriter_qos_name_[64]; // QOS name of datawriter
@@ -34,7 +34,7 @@ public:
   FACE::CONNECTION_DIRECTION_TYPE direction_;
   int domain_id_;
   int participant_id_;
-  char transport_name_[64];
+  char config_name_[64];
 };
 
 typedef OPENDDS_MAP(OPENDDS_STRING, ConnectionSettings) ConnectionMap;

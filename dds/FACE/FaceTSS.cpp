@@ -129,7 +129,7 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
                                         topic.type_name_,
                                         connection_direction,
                                         qos,
-                                        connection.transport_name_);
+                                        connection.config_name_);
   if (return_code != RC_NO_ERROR) {
     return;
   }
@@ -367,8 +367,8 @@ namespace {
       qos.user_data.value[1] = (participantId >> 8) & 0xFF;
       qos.user_data.value[2] = (participantId >> 16) & 0xFF;
       qos.user_data.value[3] = (participantId >> 24) & 0xFF;
-      // qos.user_data.value[4] = (participantId >> 32) & 0xFF;
-      // qos.user_data.value[5] = (participantId >> 40) & 0xFF;
+      qos.user_data.value[4] = 0; // (participantId >> 32) & 0xFF;
+      qos.user_data.value[5] = 0; // (participantId >> 40) & 0xFF;
       dp = dpf->create_participant(domainId, qos, 0, 0);
       return;
     }
