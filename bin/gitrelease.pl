@@ -13,7 +13,7 @@ sub usage {
          "  --remedy        remediate problems where possible\n" .
          "  --force         keep going where possible\n" .
          "  --remote=name   valid git remote for OpenDDS (default: origin)\n" .
-         "  --step=#        # of individual step to run (default: all)\n" 
+         "  --step=#        # of individual step to run (default: all)\n"
 }
 
 ############################################################################
@@ -37,8 +37,8 @@ sub version_to_value {
   my $tag_value = 0;
   my %result = parse_version(shift());
   if (%result) {
-    $tag_value = (100.0 * ($result{major} || 0)) + 
-                          ($result{minor} || 0) + 
+    $tag_value = (100.0 * ($result{major} || 0)) +
+                          ($result{minor} || 0) +
                  ($result{micro} / 100.0);
   }
   return $tag_value;
@@ -157,7 +157,7 @@ sub find_previous_tag {
     chomp;
     my $tag_value = version_to_value($_);
     # If this is less than the release version, but the largest seen yet
-    if (($tag_value < $release_version_value) && 
+    if (($tag_value < $release_version_value) &&
         ($tag_value > $prev_version_value)) {
       $prev_version_tag = $_;
       $prev_version_value = $tag_value;
@@ -207,7 +207,7 @@ sub remedy_changelog {
   while (<GITLOG>) {
     chomp;
     if (/^commit .*/) {
-      # print out previous 
+      # print out previous
       if ($author) {
         print CHANGELOG $date . "  " .  $author . "\n";
         if ($file_list) {
@@ -620,7 +620,7 @@ my @release_steps = (
     remedy  => sub{remedy_clone_tag(@_)}
   },
   {
-    title   => 'Create unix release archive', 
+    title   => 'Create unix release archive',
     verify  => sub{verify_tgz_archive(@_)},
     message => sub{message_tgz_archive(@_)},
     remedy  => sub{remedy_tgz_archive(@_)}
