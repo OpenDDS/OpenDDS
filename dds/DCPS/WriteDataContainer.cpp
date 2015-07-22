@@ -1415,10 +1415,12 @@ WriteDataContainer::wait_pending()
       break;
 
     if (empty_condition_.wait(pTimeout) == -1 && pending_data()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
-                 ACE_TEXT("Timed out waiting for messages to be transported")));
-      if (DCPS_debug_level) this->log_send_state_lists("Wait pending failed: ");
+      if (DCPS_debug_level) {
+        ACE_DEBUG((LM_INFO,
+                   ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
+                   ACE_TEXT("Timed out waiting for messages to be transported")));
+        this->log_send_state_lists("WriteDataContainer::wait_pending - wait failed: ");
+      }
       break;
     }
   }
