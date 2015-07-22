@@ -15,6 +15,8 @@
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/Definitions.h>
 
+#include <string>
+
 typedef void (*callback_t)();
 
 class DataReaderListenerImpl
