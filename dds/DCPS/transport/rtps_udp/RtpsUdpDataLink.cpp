@@ -1183,7 +1183,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         {ack.getHigh(), ack.getLow()},
         0 /* num_bits */, bitmap
       },
-      {1 /* acknack count */}
+      {0 /* acknack count */}
     };
 
     size_t size = 0, padding = 0;
