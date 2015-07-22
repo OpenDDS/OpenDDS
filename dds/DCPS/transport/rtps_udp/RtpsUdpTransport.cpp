@@ -172,8 +172,6 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
     if (locator_to_address(addr, locators[i]) == 0) {
       // if this is a unicast address, or if we are allowing multicast
       if (!addr.is_multicast() || config_i_->use_multicast_) {
-        char buffer[256];
-        addr.addr_to_string(buffer, 256);
         return addr;
       }
     }

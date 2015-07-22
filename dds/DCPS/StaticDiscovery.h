@@ -136,15 +136,13 @@ namespace OpenDDS {
 
       virtual bool disassociate(const StaticDiscoveredParticipantData& /*pdata*/);
 
-      virtual DDS::ReturnCode_t write_publication_data(const DCPS::RepoId& /*rid*/,
-                                                       LocalPublication& /*pub*/,
-                                                       const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+      virtual DDS::ReturnCode_t add_publication_i(const DCPS::RepoId& /*rid*/,
+                                                  LocalPublication& /*pub*/);
 
       virtual DDS::ReturnCode_t remove_publication_i(const RepoId& /*publicationId*/);
 
-      virtual DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& /*rid*/,
-                                                        LocalSubscription& /*pub*/,
-                                                        const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
+      virtual DDS::ReturnCode_t add_subscription_i(const DCPS::RepoId& /*rid*/,
+                                                   LocalSubscription& /*pub*/);
 
       virtual DDS::ReturnCode_t remove_subscription_i(const RepoId& /*subscriptionId*/);
 

@@ -42,8 +42,8 @@ void callback(FACE::TRANSACTION_ID_TYPE txn,
             << "\n\tinstance guid: " << hdr.message_instance_guid
             << "\n\tsource guid: " << hdr.message_source_guid
             << "\n\tvalidity " << hdr.message_validity << std::endl;
-  if (hdr.message_source_guid != 1234567890) {
-    std::cout << "ERROR: Receive_Message for header failed.  Header source guid " << hdr.message_source_guid << " does not equal 1234567890" << std::endl;
+  if (hdr.message_source_guid != 9645061) {
+    std::cout << "ERROR: Receive_Message for header failed.  Header source guid " << hdr.message_source_guid << " does not equal 9645061" << std::endl;
     return_code = FACE::INVALID_PARAM;
     return;
   }
@@ -109,9 +109,9 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
                   << "\n\tinstance guid: " << hdr.message_instance_guid
                   << "\n\tsource guid: " << hdr.message_source_guid
                   << "\n\tvalidity " << hdr.message_validity << std::endl;
-        if (hdr.message_source_guid != 1234567890) {
+        if (hdr.message_source_guid != 9645061) {
           std::cout << "ERROR: Receive_Message for header failed.  Header source guid " << hdr.message_source_guid
-                    << " != 1234567890" << std::endl;
+                    << " != 9645061" << std::endl;
           status = FACE::INVALID_PARAM;
           return status;
         }

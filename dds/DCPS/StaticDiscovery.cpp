@@ -12,6 +12,8 @@
 #include "dds/DCPS/Qos_Helper.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 
+#include <ctype.h>
+
 namespace OpenDDS {
   namespace DCPS {
 
@@ -145,7 +147,7 @@ namespace OpenDDS {
       DDS::DataWriterQos qos3(pos->second.qos);
 
       if (qos2 != qos3) {
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_publication_key: dynamic and static QoS differ\n")));
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: dynamic and static QoS differ\n")));
       }
     }
 
@@ -166,7 +168,7 @@ namespace OpenDDS {
 
       EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(rid);
       if (pos == registry_.reader_map.end()) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_subscription_key: unknown reader: %s\n"), LogGuid(rid).c_str()));
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: unknown reader: %s\n"), LogGuid(rid).c_str()));
         return;
       }
 
@@ -175,7 +177,7 @@ namespace OpenDDS {
       qos2.user_data = pos->second.qos.user_data;
 
       if (qos2 != pos->second.qos) {
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::assign_subscription_key: dynamic and static QoS differ\n")));
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_subscription_key: dynamic and static QoS differ\n")));
       }
     }
 
@@ -184,7 +186,7 @@ namespace OpenDDS {
                                             const DDS::TopicQos& /*qos*/,
                                             OPENDDS_STRING& /*name*/)
     {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) StaticEndpointManager::update_topic_qos - ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_topic_qos - ")
                  ACE_TEXT("Not allowed\n")));
       return false;
     }
@@ -194,7 +196,7 @@ namespace OpenDDS {
                                                   const DDS::DataWriterQos& /*qos*/,
                                                   const DDS::PublisherQos& /*publisherQos*/)
     {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) StaticEndpointManager::update_publication_qos - ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_publication_qos - ")
                  ACE_TEXT("Not allowed\n")));
       return false;
     }
@@ -204,7 +206,7 @@ namespace OpenDDS {
                                                    const DDS::DataReaderQos& /*qos*/,
                                                    const DDS::SubscriberQos& /*subscriberQos*/)
     {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) StaticEndpointManager::update_subscription_qos - ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
                  ACE_TEXT("Not allowed\n")));
       return false;
     }
@@ -213,7 +215,7 @@ namespace OpenDDS {
     StaticEndpointManager::update_subscription_params(const DCPS::RepoId& /*subId*/,
                                                       const DDS::StringSeq& /*params*/)
     {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) StaticEndpointManager::update_subscription_qos - ")
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: StaticEndpointManager::update_subscription_qos - ")
                  ACE_TEXT("Not allowed\n")));
       return false;
     }
@@ -234,9 +236,8 @@ namespace OpenDDS {
     }
 
     DDS::ReturnCode_t
-    StaticEndpointManager::write_publication_data(const DCPS::RepoId& writerid,
-                                                  LocalPublication& pub,
-                                                  const DCPS::RepoId& /*reader*/)
+    StaticEndpointManager::add_publication_i(const DCPS::RepoId& writerid,
+                                             LocalPublication& pub)
     {
       /*
         Find all matching remote readers.
@@ -273,9 +274,19 @@ namespace OpenDDS {
             switch (pos->second.qos.reliability.kind) {
             case DDS::BEST_EFFORT_RELIABILITY_QOS:
               {
+#ifdef __SUNPRO_CC
+                DCPS::ReaderAssociation ra;
+                ra.readerTransInfo = reader_trans_info;
+                ra.readerId = readerid;
+                ra.subQos = subscriber_qos;
+                ra.readerQos = reader_qos;
+                ra.filterClassName = "";
+                ra.filterExpression = "";
+                ra.exprParams = 0;
+#else
                 const DCPS::ReaderAssociation ra =
                   {reader_trans_info, readerid, subscriber_qos, reader_qos, "", "", 0};
-                ACE_DEBUG((LM_DEBUG, "Associating writer %s with reader %s\n", LogGuid(writerid).c_str(), LogGuid(readerid).c_str()));
+#endif
                 pub.publication_->add_association(writerid, ra, true);
                 pub.publication_->association_complete(readerid);
               }
@@ -298,9 +309,8 @@ namespace OpenDDS {
     }
 
     DDS::ReturnCode_t
-    StaticEndpointManager::write_subscription_data(const DCPS::RepoId& readerid,
-                                                   LocalSubscription& sub,
-                                                   const DCPS::RepoId& /*reader*/)
+    StaticEndpointManager::add_subscription_i(const DCPS::RepoId& readerid,
+                                              LocalSubscription& sub)
     {
       /*
         Find all matching remote writers.
@@ -338,9 +348,16 @@ namespace OpenDDS {
             switch (sub.qos_.reliability.kind) {
             case DDS::BEST_EFFORT_RELIABILITY_QOS:
               {
+#ifdef __SUNPRO_CC
+                DCPS::WriterAssociation wa;
+                wa.writerTransInfo = writer_trans_info;
+                wa.writerId = writerid;
+                wa.pubQos = publisher_qos;
+                wa.writerQos = writer_qos;
+#else
                 const DCPS::WriterAssociation wa =
                   {writer_trans_info, writerid, publisher_qos, writer_qos};
-                ACE_DEBUG((LM_DEBUG, "Associating reader %s with writer %s\n", LogGuid(readerid).c_str(), LogGuid(writerid).c_str()));
+#endif
                 sub.subscription_->add_association(readerid, wa, false);
               }
               break;
@@ -414,11 +431,20 @@ namespace OpenDDS {
       if (lp_pos != local_publications_.end() &&
           reader_pos != registry_.reader_map.end()) {
         DCPS::DataWriterCallbacks* dwr = lp_pos->second.publication_;
+#ifdef __SUNPRO_CC
+        DCPS::ReaderAssociation ra;
+        ra.readerTransInfo = reader_pos->second.trans_info;
+        ra.readerId = readerid;
+        ra.subQos = reader_pos->second.subscriber_qos;
+        ra.readerQos = reader_pos->second.qos;
+        ra.filterClassName = "";
+        ra.filterExpression = "";
+        ra.exprParams = 0;
+#else
         const DCPS::ReaderAssociation ra =
-          {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
-           "", "",
-           0};
+          {reader_pos->second.trans_info, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos, "", "", 0};
 
+#endif
         dwr->add_association(writerid, ra, true);
         dwr->association_complete(readerid);
       }
@@ -433,8 +459,17 @@ namespace OpenDDS {
       if (ls_pos != local_subscriptions_.end() &&
           writer_pos != registry_.writer_map.end()) {
         DCPS::DataReaderCallbacks* drr = ls_pos->second.subscription_;
+#ifdef __SUNPRO_CC
+        DCPS::WriterAssociation wa;
+        wa.writerTransInfo = writer_pos->second.trans_info;
+        wa.writerId = writerid;
+        wa.pubQos = writer_pos->second.publisher_qos;
+        wa.writerQos = writer_pos->second.qos;
+#else
         const DCPS::WriterAssociation wa =
           {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
+#endif
+
 
         drr->add_association(readerid, wa, false);
       }
@@ -475,17 +510,16 @@ namespace OpenDDS {
           return c - '0';
         }
         if (c >= 'a' && c <= 'f') {
-          return c - 'a';
+          return 10 + c - 'a';
         }
         if (c >= 'A' && c <= 'F') {
-          return c - 'A';
+          return 10 + c - 'A';
         }
         return c;
       }
 
       unsigned char
-      fromhex(const std::string& x,
-              size_t idx)
+      fromhex(const OPENDDS_STRING& x, size_t idx)
       {
         return (hextobyte(x[idx * 2]) << 4) | (hextobyte(x[idx * 2 + 1]));
       }
@@ -571,7 +605,7 @@ namespace OpenDDS {
       const ACE_TCHAR SUBSCRIBERQOS_SECTION_NAME[] = ACE_TEXT("subscriberqos");
       const ACE_TCHAR ENDPOINT_SECTION_NAME[] = ACE_TEXT("endpoint");
 
-      void parse_second(CORBA::Long& x, const std::string& value)
+      void parse_second(CORBA::Long& x, const OPENDDS_STRING& value)
       {
         if (value == "DURATION_INFINITE_SEC") {
           x = DDS::DURATION_INFINITE_SEC;
@@ -580,7 +614,7 @@ namespace OpenDDS {
         }
       }
 
-      void parse_nanosecond(CORBA::ULong& x, const std::string& value)
+      void parse_nanosecond(CORBA::ULong& x, const OPENDDS_STRING& value)
       {
         if (value == "DURATION_INFINITE_NANOSEC") {
           x = DDS::DURATION_INFINITE_NSEC;
@@ -589,7 +623,7 @@ namespace OpenDDS {
         }
       }
 
-      bool parse_bool(CORBA::Boolean& x, const std::string& value)
+      bool parse_bool(CORBA::Boolean& x, const OPENDDS_STRING& value)
       {
         if (value == "true") {
           x = true;
@@ -601,7 +635,7 @@ namespace OpenDDS {
         return false;
       }
 
-      void parse_list(DDS::PartitionQosPolicy& x, const std::string& value)
+      void parse_list(DDS::PartitionQosPolicy& x, const OPENDDS_STRING& value)
       {
         // Value can be a comma-separated list
         const char* start = value.c_str();
@@ -676,11 +710,11 @@ namespace OpenDDS {
 
       // Loop through the [topic/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string topic_name = (*it).first;
+        OPENDDS_STRING topic_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_topics ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_topics ")
                      ACE_TEXT("processing [topic/%C] section.\n"),
                      topic_name.c_str()));
         }
@@ -693,8 +727,8 @@ namespace OpenDDS {
           type_name_Specified = false;
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "name") {
             topic.name = value;
@@ -770,11 +804,11 @@ namespace OpenDDS {
 
       // Loop through the [datawriterqos/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string datawriterqos_name = (*it).first;
+        OPENDDS_STRING datawriterqos_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_datawriterqos ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_datawriterqos ")
                      ACE_TEXT("processing [datawriterqos/%C] section.\n"),
                      datawriterqos_name.c_str()));
         }
@@ -785,8 +819,8 @@ namespace OpenDDS {
         DDS::DataWriterQos datawriterqos(TheServiceParticipant->initial_DataWriterQos());
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "durability.kind") {
             if (value == "VOLATILE") {
@@ -953,11 +987,11 @@ namespace OpenDDS {
 
       // Loop through the [datareaderqos/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string datareaderqos_name = (*it).first;
+        OPENDDS_STRING datareaderqos_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_datareaderqos ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_datareaderqos ")
                      ACE_TEXT("processing [datareaderqos/%C] section.\n"),
                      datareaderqos_name.c_str()));
         }
@@ -968,8 +1002,8 @@ namespace OpenDDS {
         DDS::DataReaderQos datareaderqos(TheServiceParticipant->initial_DataReaderQos());
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "durability.kind") {
             if (value == "VOLATILE") {
@@ -1128,11 +1162,11 @@ namespace OpenDDS {
 
       // Loop through the [publisherqos/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string publisherqos_name = (*it).first;
+        OPENDDS_STRING publisherqos_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_publisherqos ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_publisherqos ")
                      ACE_TEXT("processing [publisherqos/%C] section.\n"),
                      publisherqos_name.c_str()));
         }
@@ -1143,8 +1177,8 @@ namespace OpenDDS {
         DDS::PublisherQos publisherqos(TheServiceParticipant->initial_PublisherQos());
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "presentation.access_scope") {
             if (value == "INSTANCE") {
@@ -1233,11 +1267,11 @@ namespace OpenDDS {
 
       // Loop through the [subscriberqos/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string subscriberqos_name = (*it).first;
+        OPENDDS_STRING subscriberqos_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
-                     ACE_TEXT("(%P|%t) StaticDiscovery::parse_subscriberqos ")
+                     ACE_TEXT("(%P|%t) NOTICE: StaticDiscovery::parse_subscriberqos ")
                      ACE_TEXT("processing [subscriberqos/%C] section.\n"),
                      subscriberqos_name.c_str()));
         }
@@ -1248,8 +1282,8 @@ namespace OpenDDS {
         DDS::SubscriberQos subscriberqos(TheServiceParticipant->initial_SubscriberQos());
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "presentation.access_scope") {
             if (value == "INSTANCE") {
@@ -1338,7 +1372,7 @@ namespace OpenDDS {
 
       // Loop through the [endpoint/*] sections
       for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-        std::string endpoint_name = (*it).first;
+        OPENDDS_STRING endpoint_name = (*it).first;
 
         if (DCPS_debug_level > 0) {
           ACE_DEBUG((LM_NOTICE,
@@ -1373,8 +1407,8 @@ namespace OpenDDS {
           config_name_Specified = false;
 
         for (ValueMap::const_iterator it=values.begin(); it != values.end(); ++it) {
-          std::string name = (*it).first;
-          std::string value = (*it).second;
+          OPENDDS_STRING name = (*it).first;
+          OPENDDS_STRING value = (*it).second;
 
           if (name == "domain") {
             if (convertToInteger(value, domain)) {
@@ -1387,8 +1421,14 @@ namespace OpenDDS {
                                -1);
             }
           } else if (name == "participant") {
+#ifdef __SUNPRO_CC
+            int count = 0;
+            std::count_if(value.begin(), value.end(), isxdigit, count);
+            if (value.size() != 12 || count != 12) {
+#else
             if (value.size() != 12 ||
                 std::count_if(value.begin(), value.end(), isxdigit) != 12) {
+#endif
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                                 ACE_TEXT("participant (%C) must be 12 hexadecimal digits in [endpoint/%C] section.\n"),
@@ -1401,8 +1441,14 @@ namespace OpenDDS {
             }
             participantSpecified = true;
           } else if (name == "entity") {
+#ifdef __SUNPRO_CC
+            int count = 0;
+            std::count_if(value.begin(), value.end(), isxdigit, count);
+            if (value.size() != 6 || count != 6) {
+#else
             if (value.size() != 6 ||
                 std::count_if(value.begin(), value.end(), isxdigit) != 6) {
+#endif
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
                                 ACE_TEXT("entity (%C) must be 6 hexadecimal digits in [endpoint/%C] section.\n"),

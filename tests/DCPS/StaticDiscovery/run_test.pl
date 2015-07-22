@@ -26,12 +26,14 @@ sub generateConfig {
     for (my $j = 0; $j != $count; ++$j) {
         my $p = sprintf("%012x", $participant++);
         push($participant_array, "-participant $p");
+        my @ra;
+        my @wa;
         for (my $i = 0; $i != $readers; ++$i) {
-            print $fh "[endpoint/Reader$i]\n";
+            print $fh "[endpoint/Reader$entity]\n";
             print $fh "domain=100\n";
             print $fh "participant=$p\n";
             my $e = sprintf("%06x", $entity++);
-            push($reader_array, "-reader $e");
+            push(@ra, "-reader $e");
             print $fh "entity=$e\n";
             print $fh "type=reader\n";
             print $fh "config=Config\n";
@@ -44,11 +46,11 @@ sub generateConfig {
             print $fh "\n";
         }
         for (my $i = 0; $i != $writers; ++$i) {
-            print $fh "[endpoint/Writer$i]\n";
+            print $fh "[endpoint/Writer$entity]\n";
             print $fh "domain=100\n";
             print $fh "participant=$p\n";
             my $e = sprintf("%06x", $entity++);
-            push($writer_array, "-writer $e");
+            push(@wa, "-writer $e");
             print $fh "entity=$e\n";
             print $fh "type=writer\n";
             print $fh "config=Config\n";
@@ -60,6 +62,8 @@ sub generateConfig {
             }
             print $fh "\n";
         }
+        push(@$reader_array, \@ra);
+        push(@$writer_array, \@wa);
     }
 }
 
@@ -131,7 +135,7 @@ sub runTest {
     print "Spawning $alpha_count alphas\n";
 
     for (my $i = 0; $i != $alpha_count; ++$i) {
-        $test->process("alpha$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @alpha_reader_array @alpha_writer_array -total_readers $readers -total_writers $writers");
+        $test->process("alpha$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @{$alpha_reader_array[$i]} @{$alpha_writer_array[$i]} -total_readers $readers -total_writers $writers");
         $test->start_process("alpha$i");
     }
 
@@ -140,7 +144,7 @@ sub runTest {
     print "Spawning $beta_count betas\n";
 
     for (my $i = 0; $i != $beta_count; ++$i) {
-        $test->process("beta$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @beta_reader_array @beta_writer_array -total_readers $readers -total_writers $writers");
+        $test->process("beta$i", 'StaticDiscoveryTest', "-DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @{$beta_reader_array[$i]} @{$beta_writer_array[$i]} -total_readers $readers -total_writers $writers");
         $test->start_process("beta$i");
     }
 
@@ -160,8 +164,8 @@ runTest(1, 1, 0, 1, 0, 1, 5);
 # 1 process with 5 readers and 1 writer
 runTest(1, 5, 1, 0, 0, 0, 0);
 # 1 process with 1 reader and 5 writers
-#runTest(1, 1, 5, 0, 0, 0, 0); - doesn't work
+runTest(1, 1, 5, 0, 0, 0, 0);
 # 5 processes with 5 readers and 5 writers
-#runTest(5, 5, 5, 0, 0, 0, 0); - doesn't work
+runTest(5, 5, 5, 0, 0, 0, 0);
 
 exit $result;
