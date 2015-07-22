@@ -26,6 +26,8 @@ class MultiTopicDataReader_T
 public:
   typedef TAO::DCPS::ZeroCopyDataSeq<Sample> SampleSeq;
 
+  MultiTopicDataReader_T() {}
+
   void init_typed(DataReaderEx* dr);
   const MetaStruct& getResultingMeta();
   void incoming_sample(void* sample, const DDS::SampleInfo& info,
