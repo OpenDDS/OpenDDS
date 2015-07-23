@@ -46,6 +46,10 @@
 #define OPENDDS_GCC33_TEMPLATE_DEPENDENT template
 #endif
 
+#define OPENDDS_DELETED_COPY_CTOR_ASSIGN(CLASS)         \
+  ACE_UNIMPLEMENTED_FUNC(CLASS(const CLASS&))           \
+  ACE_UNIMPLEMENTED_FUNC(CLASS& operator=(const CLASS&))
+
 // If features content_filtered_topic, multi_topic, and query_condition
 // are all disabled, define a macro to indicate common code these
 // three features depend on should not be built.
