@@ -197,13 +197,6 @@ public:
   /// with the provided sub.
   bool is_target(const RepoId& sub_id);
 
-  /// Check if the remote_id/local_id is associated with this link
-  /// and if they are the last association using this link.
-  bool exist(const RepoId& remote_id,
-             const RepoId& local_id,
-             const bool&   pub_side,
-             bool& last);
-
   /// This is called by DataLinkCleanupTask thread to remove the associations
   /// based on the snapshot in release_resources().
   void clear_associations();
@@ -247,9 +240,6 @@ public:
   /// (the "in" sequence), return the subset of the input set "in" which are
   /// targets of this DataLink (see is_target()).
   GUIDSeq* target_intersection(const RepoId& pub_id, const GUIDSeq& in, size_t& n_subs);
-
-  CORBA::ULong num_targets() const;
-  RepoIdSet_rch get_targets() const;
 
   TransportImpl_rch impl() const;
 

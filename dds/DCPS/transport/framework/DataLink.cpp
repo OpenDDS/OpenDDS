@@ -1289,47 +1289,6 @@ DataLink::target_intersection(const RepoId& pub_id, const GUIDSeq& in,
   return res._retn();
 }
 
-CORBA::ULong
-DataLink::num_targets() const
-{
-  GuardType guard(this->pub_sub_maps_lock_);
-  return static_cast<CORBA::ULong>(this->sub_map_.size());
-}
-
-RepoIdSet_rch
-DataLink::get_targets() const
-{
-  GuardType guard(this->pub_sub_maps_lock_);
-  RepoIdSet_rch ret(new RepoIdSet);
-  this->sub_map_.get_keys(*ret.in());
-  return ret;
-}
-
-bool
-DataLink::exist(const RepoId& remote_id, const RepoId& local_id,
-                const bool& pub_side, bool& last)
-{
-  GuardType guard(this->pub_sub_maps_lock_);
-  if (pub_side) {
-    RepoIdSet_rch pubs;
-
-    pubs = this->sub_map_.find(remote_id);
-
-    if (!pubs.is_nil())
-      return pubs->exist(local_id, last);
-
-  } else {
-    ReceiveListenerSet_rch subs;
-
-    subs = this->pub_map_.find(remote_id);
-
-    if (!subs.is_nil())
-      return subs->exist(local_id, last);
-  }
-
-  return false;
-}
-
 void DataLink::prepare_release()
 {
   GuardType guard(this->pub_sub_maps_lock_);
