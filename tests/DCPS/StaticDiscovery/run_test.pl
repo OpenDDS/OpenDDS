@@ -106,8 +106,8 @@ sub runTest {
     print $fh "[datawriterqos/ReliableWriter]\n";
     print $fh "reliability.kind=RELIABLE\n";
     print $fh "reliability.max_blocking_time.sec=DURATION_INFINITE_SEC\n";
-    print $fh "resource_limits.max_instances=10\n";
-    print $fh "history.depth=10\n";
+    #print $fh "resource_limits.max_instances=10\n";
+    #print $fh "history.depth=10\n";
     print $fh "\n";
     print $fh "[datareaderqos/ReliableReader]\n";
     print $fh "reliability.kind=RELIABLE\n";

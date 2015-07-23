@@ -93,8 +93,8 @@ public:
     if (reliable_) {
       qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       qos.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
-      qos.resource_limits.max_instances = 10;
-      qos.history.depth = 10;
+      // qos.resource_limits.max_instances = 10;
+      // qos.history.depth = 10;
     } else {
       qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
     }
