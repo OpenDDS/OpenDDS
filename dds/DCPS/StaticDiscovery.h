@@ -49,11 +49,14 @@ namespace OpenDDS {
       typedef OPENDDS_MAP(OPENDDS_STRING, DDS::PublisherQos) PublisherQosMapType;
       PublisherQosMapType publisherqos_map;
 
+      typedef OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan) RepoIdSetType;
       struct Reader {
         OPENDDS_STRING topic_name;
         DDS::DataReaderQos qos;
         DDS::SubscriberQos subscriber_qos;
         DCPS::TransportLocatorSeq trans_info;
+        RepoIdSetType best_effort_writers;
+        RepoIdSetType reliable_writers;
         Reader(const OPENDDS_STRING& tn,
                const DDS::DataReaderQos& q,
                const DDS::SubscriberQos& sq,
@@ -72,6 +75,8 @@ namespace OpenDDS {
         DDS::DataWriterQos qos;
         DDS::PublisherQos publisher_qos;
         DCPS::TransportLocatorSeq trans_info;
+        RepoIdSetType best_effort_readers;
+        RepoIdSetType reliable_readers;
         Writer(const OPENDDS_STRING& tn,
                const DDS::DataWriterQos& q,
                const DDS::PublisherQos& pq,
@@ -84,6 +89,8 @@ namespace OpenDDS {
       };
       typedef OPENDDS_MAP_CMP(RepoId, Writer, DCPS::GUID_tKeyLessThan) WriterMapType;
       WriterMapType writer_map;
+
+      void match();
 
       static EntityId_t
       build_id(const unsigned char* entity_key /* length of 3 */,
