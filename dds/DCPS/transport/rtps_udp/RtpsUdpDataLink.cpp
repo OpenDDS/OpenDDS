@@ -641,9 +641,15 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   const RtpsWriterMap::iterator rw = writers_.find(pub_id);
 
   bool gap_ok = true;
+  DestToEntityMap gap_receivers;
   if (rw != writers_.end() && !rw->second.remote_readers_.empty()) {
     for (ReaderInfoMap::iterator ri = rw->second.remote_readers_.begin();
          ri != rw->second.remote_readers_.end(); ++ri) {
+      RepoId tmp;
+      std::memcpy(tmp.guidPrefix, ri->first.guidPrefix, sizeof(GuidPrefix_t));
+
+      gap_receivers[tmp].push_back(ri->first);
+
       if (ri->second.expecting_durable_data()) {
         // Can't add an in-line GAP if some Data Reader is expecting durable
         // data, the GAP could cause that Data Reader to ignore the durable
@@ -656,7 +662,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   }
 
   if (gap_ok) {
-    add_gap_submsg(subm, *element);
+    add_gap_submsg(subm, *element, gap_receivers);
   }
 
   const SequenceNumber seq = element->sequence();
@@ -821,7 +827,8 @@ bool RtpsUdpDataLink::force_inline_qos_ = false;
 
 void
 RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
-                                const TransportQueueElement& tqe)
+                                const TransportQueueElement& tqe,
+                                const DestToEntityMap& dtem)
 {
   // These are the GAP submessages that we'll send directly in-line with the
   // DATA when we notice that the DataWriter has deliberately skipped seq #s.
@@ -872,9 +879,34 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
     gap.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
 
-    const CORBA::ULong i = msg.length();
-    msg.length(i + 1);
-    msg[i].gap_sm(gap);
+    if (!rw.durable_) {
+      const CORBA::ULong i = msg.length();
+      msg.length(i + 1);
+      msg[i].gap_sm(gap);
+    } else {
+      InfoDestinationSubmessage idst = {
+        {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+      };
+      CORBA::ULong ml = msg.length();
+
+      //Change the non-directed Gap into multiple directed gaps to prevent
+      //delivering to currently undiscovered durable readers
+      DestToEntityMap::const_iterator iter = dtem.begin();
+      while (iter != dtem.end()) {
+        std::memcpy(idst.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
+        msg.length(ml + 1);
+        msg[ml++].info_dst_sm(idst);
+
+        const OPENDDS_VECTOR(RepoId)& readers = iter->second;
+        for (size_t i = 0; i < readers.size(); ++i) {
+          gap.readerId = readers.at(i).entityId;
+          msg.length(ml + 1);
+          msg[ml++].gap_sm(gap);
+        } //END iter over reader entity ids
+        ++iter;
+      } //END iter over reader GuidPrefix_t's
+    }
   }
 }
 
@@ -1000,8 +1032,10 @@ RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
     if (sr.first <= sr.second) {
       if (Transport_debug_level > 5) {
         const GuidConverter conv(src);
+        const GuidConverter rdr(rr.first);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::process_gap_i "
-                  "received GAP with range [%q, %q] from %C\n",
+                  "Reader %C received GAP with range [%q, %q] from %C\n",
+                  OPENDDS_STRING(rdr).c_str(),
                   sr.first.getValue(), sr.second.getValue(),
                   OPENDDS_STRING(conv).c_str()));
       }
@@ -1136,7 +1170,7 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
     liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
 
   if (!final || (!liveliness && (info.should_nack() ||
-      (rr.second.durable_ && recvd.empty()) ||
+      rr.second.nack_durable(info) ||
       recv_strategy_->has_fragments(info.hb_range_, wi->first)))) {
     info.ack_pending_ = true;
     return true; // timer will invoke send_heartbeat_replies()
@@ -1156,6 +1190,13 @@ RtpsUdpDataLink::WriterInfo::should_nack() const
     return recvd_.high() < hb_range_.second;
   }
   return false;
+}
+
+bool
+RtpsUdpDataLink::RtpsReader::nack_durable(const WriterInfo& info)
+{
+  return durable_ && (info.recvd_.empty() ||
+                      info.recvd_.low() > info.hb_range_.first);
 }
 
 void
@@ -1219,12 +1260,11 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
       // if we have some negative acknowledgments, we'll ask for a reply
       DisjointSequence& recvd = wi->second.recvd_;
       const bool nack = wi->second.should_nack() ||
-                        (rr->second.durable_ && recvd.empty());
+                        rr->second.nack_durable(wi->second);
       bool final = !nack;
 
       if (wi->second.ack_pending_ || nack) {
-        const bool prev_empty =
-          rr->second.durable_ && wi->second.ack_pending_ && !nack;
+        const bool prev_ack_pending = wi->second.ack_pending_;
         wi->second.ack_pending_ = false;
 
         SequenceNumber ack;
@@ -1248,7 +1288,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
           DisjointSequence::fill_bitmap_range(0, idx,
                                               bitmap.get_buffer(),
                                               bitmap.length(), num_bits);
-        } else if (prev_empty && recvd.low() > hb_low) {
+        } else if (((prev_ack_pending && !nack) || rr->second.nack_durable(wi->second)) && recvd.low() > hb_low) {
           // Nack the range between the heartbeat low and the recvd low.
           ack = hb_low;
           const SequenceNumber& rec_low = recvd.low();

@@ -246,12 +246,14 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 
     if (DCPS_debug_level > 9) {
       GuidConverter converter(publication_id_);
+      GuidConverter reader(reader_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
-                 ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend.\n"),
+                 ACE_TEXT("domain %d topic %C publication %C copying HISTORY to resend to %C.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 OPENDDS_STRING(converter).c_str()));
+                 OPENDDS_STRING(converter).c_str(),
+                 OPENDDS_STRING(reader).c_str()));
     }
   }
 
@@ -1413,10 +1415,12 @@ WriteDataContainer::wait_pending()
       break;
 
     if (empty_condition_.wait(pTimeout) == -1 && pending_data()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
-                 ACE_TEXT("Timed out waiting for messages to be transported")));
-      if (DCPS_debug_level) this->log_send_state_lists("Wait pending failed: ");
+      if (DCPS_debug_level) {
+        ACE_DEBUG((LM_INFO,
+                   ACE_TEXT("(%P|%t) WriteDataContainer::wait_pending %p\n"),
+                   ACE_TEXT("Timed out waiting for messages to be transported")));
+        this->log_send_state_lists("WriteDataContainer::wait_pending - wait failed: ");
+      }
       break;
     }
   }
