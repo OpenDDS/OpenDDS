@@ -163,7 +163,9 @@ namespace OpenDDS {
                                 const RepoId& /*writer_participant*/);
 
       virtual void reader_exists(const RepoId& readerid, const RepoId& writerid);
+      virtual void reader_does_not_exist(const RepoId& readerid, const RepoId& writerid);
       virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);
+      virtual void writer_does_not_exist(const RepoId& writerid, const RepoId& readerid);
 
       DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
       DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();

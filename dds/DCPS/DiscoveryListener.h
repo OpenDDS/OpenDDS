@@ -27,7 +27,9 @@ public:
   virtual ~DiscoveryListener() {}
 
   virtual void reader_exists(const RepoId& readerid, const RepoId& writerid) = 0;
+  virtual void reader_does_not_exist(const RepoId& readerid, const RepoId& writerid) = 0;
   virtual void writer_exists(const RepoId& writerid, const RepoId& readerid) = 0;
+  virtual void writer_does_not_exist(const RepoId& writerid, const RepoId& readerid) = 0;
 };
 
 } // namespace DCPS

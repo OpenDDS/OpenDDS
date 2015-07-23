@@ -451,6 +451,22 @@ namespace OpenDDS {
     }
 
     void
+    StaticEndpointManager::reader_does_not_exist(const RepoId& readerid, const RepoId& writerid)
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
+      EndpointRegistry::ReaderMapType::const_iterator reader_pos = registry_.reader_map.find(readerid);
+      if (lp_pos != local_publications_.end() &&
+          reader_pos != registry_.reader_map.end()) {
+        DCPS::DataWriterCallbacks* dwr = lp_pos->second.publication_;
+        ReaderIdSeq ids;
+        ids.length(1);
+        ids[0] = readerid;
+        dwr->remove_associations(ids, true);
+      }
+    }
+
+    void
     StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& readerid)
     {
       ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -469,9 +485,23 @@ namespace OpenDDS {
         const DCPS::WriterAssociation wa =
           {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
 #endif
-
-
         drr->add_association(readerid, wa, false);
+      }
+    }
+
+    void
+    StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoId& readerid)
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
+      EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
+      if (ls_pos != local_subscriptions_.end() &&
+          writer_pos != registry_.writer_map.end()) {
+        DCPS::DataReaderCallbacks* drr = ls_pos->second.subscription_;
+        WriterIdSeq ids;
+        ids.length(1);
+        ids[0] = writerid;
+        drr->remove_associations(ids, true);
       }
     }
 
