@@ -238,6 +238,7 @@ private:
   struct RtpsReader {
     WriterInfoMap remote_writers_;
     bool durable_;
+    bool nack_durable(const WriterInfo& info);
   };
 
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader, GUID_tKeyLessThan) RtpsReaderMap;
