@@ -36,6 +36,7 @@ namespace {
   OpenDDS::FaceTSS::config::Parser parser;
 
   void find_or_create_dp(const DDS::DomainId_t& domainId,
+                         int participantId,
                          const DDS::DomainParticipantFactory_var& dpf,
                          DDS::DomainParticipant_var& dp);
   void find_or_create_pub(const DDS::PublisherQos& qos,
@@ -50,6 +51,7 @@ namespace {
   void cleanup_opendds_participant(const DDS::DomainParticipant_var dp);
 
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
+                                           int participantId,
                                            const DDS::DomainId_t domainId,
                                            const char* topic,
                                            const char* type,
@@ -121,12 +123,13 @@ void Create_Connection(const CONNECTION_NAME_TYPE connection_name,
   max_message_size = topic.max_message_size_;
 
   return_code = create_opendds_entities(connection_id,
+                                        connection.participant_id_,
                                         connection.domain_id_,
                                         connection.topic_name_,
                                         topic.type_name_,
                                         connection_direction,
                                         qos,
-                                        connection.transport_name_);
+                                        connection.config_name_);
   if (return_code != RC_NO_ERROR) {
     return;
   }
@@ -348,6 +351,7 @@ void Receive_Message(
 
 namespace {
   void find_or_create_dp(const DDS::DomainId_t& domainId,
+                         int participantId,
                          const DDS::DomainParticipantFactory_var& dpf,
                          DDS::DomainParticipant_var& dp) {
     DDS::DomainParticipant_var temp_dp;
@@ -357,7 +361,15 @@ namespace {
       if (OpenDDS::DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) find_or_create_dp - created new participant for domainId: %d\n", domainId));
       }
-      dp = dpf->create_participant(domainId, PARTICIPANT_QOS_DEFAULT, 0, 0);
+      DDS::DomainParticipantQos qos(PARTICIPANT_QOS_DEFAULT);
+      qos.user_data.value.length(6);
+      qos.user_data.value[0] = (participantId >> 0) & 0xFF;
+      qos.user_data.value[1] = (participantId >> 8) & 0xFF;
+      qos.user_data.value[2] = (participantId >> 16) & 0xFF;
+      qos.user_data.value[3] = (participantId >> 24) & 0xFF;
+      qos.user_data.value[4] = 0; // (participantId >> 32) & 0xFF;
+      qos.user_data.value[5] = 0; // (participantId >> 40) & 0xFF;
+      dp = dpf->create_participant(domainId, qos, 0, 0);
       return;
     }
     if (OpenDDS::DCPS::DCPS_debug_level > 3) {
@@ -535,6 +547,7 @@ namespace {
   }
 
   RETURN_CODE_TYPE create_opendds_entities(CONNECTION_ID_TYPE connectionId,
+                                           int participantId,
                                            const DDS::DomainId_t domainId,
                                            const char* topicName,
                                            const char* type,
@@ -552,7 +565,7 @@ namespace {
     if (!dpf) return INVALID_PARAM;
 
     DDS::DomainParticipant_var dp;
-    find_or_create_dp(domainId, dpf, dp);
+    find_or_create_dp(domainId, participantId, dpf, dp);
     if (!dp) return INVALID_PARAM;
 
     using OpenDDS::DCPS::Data_Types_Register;
@@ -586,11 +599,10 @@ namespace {
       qos_settings.apply_to(datawriter_qos);
 
       // set up user data in DW qos
-      OPENDDS_STRING connId = OpenDDS::DCPS::to_dds_string(connectionId);
-      datawriter_qos.user_data.value.length (connId.size()+1); /* +1 for NULL terminator*/
-      datawriter_qos.user_data.value.replace (connId.size()+1,
-                                              connId.size()+1,
-                                              reinterpret_cast<CORBA::Octet*>(const_cast<char*>(connId.c_str())));
+      datawriter_qos.user_data.value.length (3);
+      datawriter_qos.user_data.value[0] = (connectionId >> 0) & 0xFF;
+      datawriter_qos.user_data.value[1] = (connectionId >> 8) & 0xFF;
+      datawriter_qos.user_data.value[2] = (connectionId >> 16) & 0xFF;
 
       const DDS::DataWriter_var dw =
         pub->create_datawriter(topic, datawriter_qos, 0, 0);
@@ -616,11 +628,10 @@ namespace {
       qos_settings.apply_to(datareader_qos);
 
       // set up user data in DR qos
-      OPENDDS_STRING connId = OpenDDS::DCPS::to_dds_string(connectionId);
-      datareader_qos.user_data.value.length (connId.size()+1); /* +1 for NULL terminator*/
-      datareader_qos.user_data.value.replace (connId.size()+1,
-                                              connId.size()+1,
-                                              reinterpret_cast<CORBA::Octet*>(const_cast<char*>(connId.c_str())));
+      datareader_qos.user_data.value.length (3);
+      datareader_qos.user_data.value[0] = (connectionId >> 0) & 0xFF;
+      datareader_qos.user_data.value[1] = (connectionId >> 8) & 0xFF;
+      datareader_qos.user_data.value[2] = (connectionId >> 16) & 0xFF;
 
       const DDS::DataReader_var dr =
         sub->create_datareader(topic, datareader_qos, 0, 0);
@@ -782,11 +793,13 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
     return;
   }
 
-  CORBA::ULong i = 0;
+  const CORBA::ULong i = 0;
 
-//  ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: DW user data %C \n",
-//                       pubdata[i].user_data.value.get_buffer()));
-  header.message_source_guid = atoi(reinterpret_cast <char*> (pubdata[i].user_data.value.get_buffer()));
+  header.message_source_guid =
+    (pubdata[i].user_data.value[0] << 0) |
+    (pubdata[i].user_data.value[1] << 8) |
+    (pubdata[i].user_data.value[2] << 16);
+
 //  ACE_DEBUG((LM_DEBUG, "(%P|%t) populate_header_received: DW lifespan qos value: sec: %d nanosec: %d\n",
 //                         pubdata[i].lifespan.duration.sec, pubdata[i].lifespan.duration.nanosec));
 

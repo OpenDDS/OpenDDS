@@ -45,6 +45,8 @@ public:
 
   void wait_for_startup() { barrier_.wait(); }
 
+  bool is_shut_down() const { return state_ == STATE_NOT_RUNNING; }
+
   OPENDDS_POOL_ALLOCATION_FWD
 
 private:

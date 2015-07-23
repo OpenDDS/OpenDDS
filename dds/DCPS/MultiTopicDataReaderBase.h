@@ -25,6 +25,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export MultiTopicDataReaderBase
   : public virtual LocalObject<DataReaderEx> {
 public:
+  MultiTopicDataReaderBase() {}
 
   void init(const DDS::DataReaderQos& dr_qos,
     DDS::DataReaderListener_ptr a_listener, DDS::StatusMask mask,
@@ -174,6 +175,8 @@ protected:
 
   // key: topicName for this reader
   OPENDDS_MAP(OPENDDS_STRING, QueryPlan) query_plans_;
+
+  OPENDDS_DELETED_COPY_CTOR_ASSIGN(MultiTopicDataReaderBase);
 };
 
 }

@@ -31,6 +31,7 @@
 
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
+#include "StaticDiscovery.h"
 
 #ifdef OPENDDS_SAFETY_PROFILE
 #include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
@@ -85,6 +86,7 @@ void set_log_verbose(unsigned long verbose_logging)
   (ACE_LOG_MSG->*flagop)(value);
 
 }
+
 
 }
 
@@ -1297,6 +1299,11 @@ Service_Participant::load_configuration(
                      -1);
   }
 
+#ifndef DDS_HAS_MINIMUM_BIT
+  // Register static discovery.
+  this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
+#endif
+
   status = this->load_discovery_configuration(config, RTPS_SECTION_NAME);
 
   if (status != 0) {
@@ -1353,6 +1360,19 @@ Service_Participant::load_configuration(
                       status),
                      -1);
   }
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  // Needs to be loaded after transport configs and instances and domains.
+  status = StaticDiscovery::instance()->load_configuration(config);
+
+  if (status != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
+                      ACE_TEXT("load_discovery_configuration() returned %d\n"),
+                      status),
+                     -1);
+  }
+#endif
 
   return 0;
 }
@@ -1683,6 +1703,7 @@ Service_Participant::load_domain_configuration(ACE_Configuration_Heap& cf,
       if (!repoKey.empty()) {
         if ((repoKey != Discovery::DEFAULT_REPO) &&
             (repoKey != Discovery::DEFAULT_RTPS) &&
+            (repoKey != Discovery::DEFAULT_STATIC) &&
             (this->discoveryMap_.find(repoKey) == this->discoveryMap_.end())) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) Service_Participant::load_domain_configuration(): ")

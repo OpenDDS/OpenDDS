@@ -184,32 +184,42 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
 bool
 RtpsUdpTransport::connection_info_i(TransportLocator& info) const
 {
-  using namespace OpenDDS::RTPS;
-
-  LocatorSeq locators;
-  CORBA::ULong idx = 0;
-
-  // multicast first so it's preferred by remote peers
-  if (config_i_->use_multicast_) {
-    locators.length(2);
-    locators[0].kind = address_to_kind(config_i_->multicast_group_address_);
-    locators[0].port = config_i_->multicast_group_address_.get_port_number();
-    RTPS::address_to_bytes(locators[0].address,
-                           config_i_->multicast_group_address_);
-    idx = 1;
-
-  } else {
-    locators.length(1);
-  }
-
-  locators[idx].kind = address_to_kind(config_i_->local_address_);
-  locators[idx].port = config_i_->local_address_.get_port_number();
-  RTPS::address_to_bytes(locators[idx].address,
-                         config_i_->local_address_);
-
-  info.transport_type = "rtps_udp";
-  RTPS::locators_to_blob(locators, info.data);
+  this->config_i_->populate_locator(info);
   return true;
+}
+
+void
+RtpsUdpTransport::register_for_reader(const RepoId& participant,
+                                      const RepoId& writerid,
+                                      const RepoId& readerid,
+                                      const TransportLocatorSeq& locators,
+                                      OpenDDS::DCPS::DiscoveryListener* listener)
+{
+  const TransportBLOB* blob = this->config_i_->get_blob(locators);
+  if (!blob)
+    return;
+  if (link_ == 0) {
+    make_datalink(participant.guidPrefix);
+  }
+  bool requires_inline_qos;
+  link_->register_for_reader(writerid, readerid, get_connection_addr(*blob, requires_inline_qos), listener);
+}
+
+void
+RtpsUdpTransport::register_for_writer(const RepoId& participant,
+                                      const RepoId& readerid,
+                                      const RepoId& writerid,
+                                      const TransportLocatorSeq& locators,
+                                      DiscoveryListener* listener)
+{
+  const TransportBLOB* blob = this->config_i_->get_blob(locators);
+  if (!blob)
+    return;
+  if (link_ == 0) {
+    make_datalink(participant.guidPrefix);
+  }
+  bool requires_inline_qos;
+  link_->register_for_writer(readerid, writerid, get_connection_addr(*blob, requires_inline_qos), listener);
 }
 
 bool

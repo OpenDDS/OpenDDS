@@ -345,7 +345,8 @@ CORBA::SystemException::_info (void) const
         default:
           {
             // 7 bits of some other errno.
-            ACE_OS::sprintf (unknown_errno,
+            ACE_OS::snprintf (unknown_errno,
+                             255,
                              "low 7 bits of errno: %3u %s",
                              minor_code, ACE_OS::strerror (minor_code));
 
@@ -354,7 +355,8 @@ CORBA::SystemException::_info (void) const
         }
 
       char buffer[BUFSIZ];
-      ACE_OS::sprintf (buffer,
+      ACE_OS::snprintf (buffer,
+                       BUFSIZ,
                        "TAO exception, "
                        "minor code = %x (%s; %s), "
                        "completed = %s\n",
@@ -383,7 +385,8 @@ CORBA::SystemException::_info (void) const
         minor_description = "*unknown description*";
 
       char buffer[BUFSIZ];
-      ACE_OS::sprintf (buffer,
+      ACE_OS::snprintf (buffer,
+                       BUFSIZ,
                        "OMG minor code (%d), "
                        "described as '%s', "
                        "completed = %s\n",
@@ -399,7 +402,8 @@ CORBA::SystemException::_info (void) const
   else
     {
       char buffer[BUFSIZ];
-      ACE_OS::sprintf (buffer,
+      ACE_OS::snprintf (buffer,
+                       BUFSIZ,
                        "Unknown vendor minor code id (%x), "
                        "minor code = %x, completed = %s\n",
                        VMCID,

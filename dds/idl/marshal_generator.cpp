@@ -1417,7 +1417,7 @@ namespace {
       be_global->impl_ <<
         "  default:\n"
         "    {\n"
-        "      uni.unknown_data(OpenDDS::RTPS::OctetSeq(size));\n"
+        "      uni.unknown_data(DDS::OctetSeq(size));\n"
         "      uni.unknown_data().length(size);\n"
         "      std::memcpy(uni.unknown_data().get_buffer(), data, size);\n"
         "      uni._d(disc);\n"

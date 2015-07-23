@@ -288,15 +288,6 @@ module DDS {
     const QosPolicyId_t LIFESPAN_QOS_POLICY_ID            = 21;
     const QosPolicyId_t DURABILITYSERVICE_QOS_POLICY_ID   = 22;
 
-    struct DomainParticipantFactoryQos {
-        EntityFactoryQosPolicy entity_factory;
-    };
-
-    struct DomainParticipantQos {
-                UserDataQosPolicy user_data;
-                EntityFactoryQosPolicy entity_factory;
-                };
-
     // ----------------------------------------------------------------------
     local interface Entity {
     //  ReturnCode_t set_qos(

@@ -29,6 +29,8 @@
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/GuidConverter.h"
 #include "dds/DCPS/PoolAllocator.h"
+#include "dds/DCPS/DiscoveryListener.h"
+#include "dds/DCPS/ReactorInterceptor.h"
 
 class DDS_TEST;
 
@@ -54,6 +56,7 @@ public:
   RtpsUdpInst* config();
 
   ACE_Reactor* get_reactor();
+  bool reactor_is_shut_down();
 
   ACE_SOCK_Dgram& unicast_socket();
   ACE_SOCK_Dgram_Mcast& multicast_socket();
@@ -99,6 +102,16 @@ public:
                   bool local_durable, bool remote_durable);
 
   bool check_handshake_complete(const RepoId& local, const RepoId& remote);
+
+  void register_for_reader(const RepoId& writerid,
+                           const RepoId& readerid,
+                           const ACE_INET_Addr& address,
+                           OpenDDS::DCPS::DiscoveryListener* listener);
+
+  void register_for_writer(const RepoId& readerid,
+                           const RepoId& writerid,
+                           const ACE_INET_Addr& address,
+                           OpenDDS::DCPS::DiscoveryListener* listener);
 
   virtual void pre_stop_i();
 
@@ -361,15 +374,28 @@ private:
   } nack_reply_, heartbeat_reply_;
 
 
-  struct HeartBeat : ACE_Event_Handler {
+  struct HeartBeat : ReactorInterceptor {
 
-    explicit HeartBeat(RtpsUdpDataLink* outer)
-      : outer_(outer), enabled_(false) {}
+    explicit HeartBeat(ACE_Reactor* reactor, ACE_thread_t owner, RtpsUdpDataLink* outer)
+      : ReactorInterceptor(reactor, owner)
+      , outer_(outer)
+      , enabled_(false) {}
+
+    void schedule_enable()
+    {
+      ScheduleEnableCommand c(this);
+      execute_or_enqueue(c);
+    }
 
     int handle_timeout(const ACE_Time_Value&, const void*)
     {
       outer_->send_heartbeats();
       return 0;
+    }
+
+    bool reactor_is_shut_down() const
+    {
+      return outer_->reactor_is_shut_down();
     }
 
     void enable();
@@ -378,9 +404,83 @@ private:
     RtpsUdpDataLink* outer_;
     bool enabled_;
 
+    struct ScheduleEnableCommand : public Command {
+      ScheduleEnableCommand(HeartBeat* hb)
+        : heartbeat_(hb)
+      { }
+
+      virtual void execute()
+      {
+        heartbeat_->enable();
+      }
+
+      HeartBeat* heartbeat_;
+    };
+
   } heartbeat_;
 
   RTPS::InfoReplySubmessage info_reply_;
+
+  struct InterestingReader {
+    RepoId writerid;
+    ACE_INET_Addr address;
+    DiscoveryListener* listener;
+    CORBA::Long heartbeat_count;
+    bool called;
+
+    InterestingReader() { }
+    InterestingReader(const RepoId& w, const ACE_INET_Addr& a, DiscoveryListener* l)
+      : writerid(w)
+      , address(a)
+      , listener(l)
+      , heartbeat_count(0)
+      , called(false)
+    { }
+  };
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingReader, DCPS::GUID_tKeyLessThan) InterestingReaderMapType;
+  InterestingReaderMapType interesting_readers_;
+  typedef OPENDDS_MAP_CMP(RepoId, size_t, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
+  HeartBeatCountMapType heartbeat_counts_;
+
+  struct InterestingWriter {
+    RepoId readerid;
+    ACE_INET_Addr address;
+    DiscoveryListener* listener;
+    bool called;
+
+    InterestingWriter() { }
+    InterestingWriter(const RepoId& r, const ACE_INET_Addr& a, DiscoveryListener* l)
+      : readerid(r)
+      , address(a)
+      , listener(l)
+      , called(false)
+    { }
+  };
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingWriter, DCPS::GUID_tKeyLessThan) InterestingWriterMapType;
+  InterestingWriterMapType interesting_writers_;
+
+  struct InterestingAckNack {
+    RepoId writerid;
+    RepoId readerid;
+    ACE_INET_Addr writer_address;
+
+    InterestingAckNack() { }
+    InterestingAckNack(const RepoId& w, const RepoId& r, const ACE_INET_Addr& wa)
+      : writerid(w)
+      , readerid(r)
+      , writer_address(wa)
+    { }
+
+    bool operator<(const InterestingAckNack& other) const {
+      if (writerid != other.writerid) {
+        return DCPS::GUID_tKeyLessThan() (writerid, other.writerid);
+      }
+      return DCPS::GUID_tKeyLessThan() (readerid, other.readerid);
+    }
+  };
+
+  typedef OPENDDS_SET(InterestingAckNack) InterestingAckNackSetType;
+  InterestingAckNackSetType interesting_ack_nacks_;
 };
 
 } // namespace DCPS
