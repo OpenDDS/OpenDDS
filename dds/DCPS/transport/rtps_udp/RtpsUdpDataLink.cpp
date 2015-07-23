@@ -717,15 +717,6 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
     if (sub != GUID_UNKNOWN) {
       ReaderInfoMap::iterator ri = rw->second.remote_readers_.find(sub);
       if (ri != rw->second.remote_readers_.end()) {
-        if (Transport_debug_level > 5) {
-          GuidConverter reader(ri->first);
-          GuidConverter writer(rw->first);
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::customize_queue_element -")
-                               ACE_TEXT(" durable writer %C storing durable data with seq#: %d for reader %C\n"),
-                               OPENDDS_STRING(writer).c_str(),
-                               rtps->sequence().getValue(),
-                               OPENDDS_STRING(reader).c_str()));
-        }
         ri->second.durable_data_[rtps->sequence()] = rtps;
         ri->second.durable_timestamp_ = ACE_OS::gettimeofday();
         if (Transport_debug_level > 3) {
@@ -940,34 +931,6 @@ RtpsUdpDataLink::process_data_i(const RTPS::DataSubmessage& data,
     seq.setValue(data.writerSN.high, data.writerSN.low);
     info.frags_.erase(seq);
     const RepoId& readerId = rr.first;
-    if (Transport_debug_level > 5) {
-      OpenDDS::DCPS::GuidConverter converter(readerId);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::process_data_i - reader: %C :\n"
-                            "info.recvd_.contains(seq): %d\n"
-                            "[\ninfo.recvd_.disjoint() - %s OR\n"
-                            "(!info.recvd_.empty() && info.recvd_.cumulative_ack() != seq.previous()) - %s OR\n"
-                            "(rr.second.durable_ && !info.recvd_.empty() && info.recvd_.low() > 1) - %s OR\n"
-                            "(rr.second.durable_ && info.recvd_.empty() && seq > 1) - %s\n]\n"
-                            "info.recvd_.disjoint() : %d\n"
-                            "info.recvd_.empty() : %d\n"
-                            "info.recvd_.cumulative_ack() [%d] != seq.previous() [%d]\n"
-                            "rr.second.durable_ : %d\n"
-                            "info.recvd_.low() [%d] > 1\n"
-                            "seq [%d] > 1\n",
-                            OPENDDS_STRING(converter).c_str(),
-                            info.recvd_.contains(seq),
-                            info.recvd_.disjoint() ? "TRUE" : "FALSE",
-                            (!info.recvd_.empty() && info.recvd_.cumulative_ack() != seq.previous()) ? "TRUE" : "FALSE",
-                            (rr.second.durable_ && !info.recvd_.empty() && info.recvd_.low() > 1) ? "TRUE" : "FALSE",
-                            (rr.second.durable_ && info.recvd_.empty() && seq > 1) ? "TRUE" : "FALSE",
-                            info.recvd_.disjoint(),
-                            info.recvd_.empty(),
-                            info.recvd_.cumulative_ack().getValue(),
-                            seq.previous().getValue(),
-                            rr.second.durable_,
-                            info.recvd_.low().getValue(),
-                            seq.getValue()));
-    }
     if (info.recvd_.contains(seq)) {
       if (Transport_debug_level > 5) {
         GuidConverter writer(src);
@@ -1008,17 +971,6 @@ RtpsUdpDataLink::process_data_i(const RTPS::DataSubmessage& data,
       recv_strategy_->do_not_withhold_data_from(readerId);
     }
     info.recvd_.insert(seq);
-    if (Transport_debug_level > 5) {
-      GuidConverter writer(src);
-      GuidConverter reader(readerId);
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink[%@]::process_data_i(DataSubmessage) -")
-                           ACE_TEXT(" calling deliver_held_data after inserting data seq: %q from %C to %C with info.recvd_.low = %q\n"),
-                           this,
-                           seq.getValue(),
-                           OPENDDS_STRING(writer).c_str(),
-                           OPENDDS_STRING(reader).c_str(),
-                           info.recvd_.low().getValue()));
-    }
     deliver_held_data(readerId, info, rr.second.durable_);
   } else {
     if (Transport_debug_level > 5) {
@@ -1041,26 +993,7 @@ void
 RtpsUdpDataLink::deliver_held_data(const RepoId& readerId, WriterInfo& info,
                                    bool durable)
 {
-  if (Transport_debug_level > 5) {
-    GuidConverter reader(readerId);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink[%@]::deliver_held_data -")
-                         ACE_TEXT(" durable : %s, (info.recvd_.empty() [%s] || info.recvd_.low() [%d] > 1) = %s to %C\n"),
-                         this,
-                         durable ? "TRUE" : "FALSE",
-                         info.recvd_.empty() ? "TRUE" : "FALSE",
-                         info.recvd_.low().getValue(),
-                         (info.recvd_.empty() || info.recvd_.low() > 1) ? "TRUE" : "FALSE",
-                         OPENDDS_STRING(reader).c_str()));
-  }
-  if (durable && (info.recvd_.empty() || info.recvd_.low() > 1)) {
-    if (Transport_debug_level > 5) {
-      GuidConverter reader(readerId);
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::deliver_held_data -")
-                           ACE_TEXT(" condition not met to deliver to %C, returning\n"),
-                           OPENDDS_STRING(reader).c_str()));
-    }
-    return;
-  }
+  if (durable && (info.recvd_.empty() || info.recvd_.low() > 1)) return;
   const SequenceNumber ca = info.recvd_.cumulative_ack();
   typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
   const iter end = info.held_.upper_bound(ca);
@@ -1068,10 +1001,9 @@ RtpsUdpDataLink::deliver_held_data(const RepoId& readerId, WriterInfo& info,
     if (Transport_debug_level > 5) {
       GuidConverter reader(readerId);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::deliver_held_data -")
-                           ACE_TEXT(" deliver sequence: %q to %C [recvd cum_ack: %q]\n"),
+                           ACE_TEXT(" deliver sequence: %q to %C\n"),
                            it->second.header_.sequence_.getValue(),
-                           OPENDDS_STRING(reader).c_str(),
-                           ca.getValue()));
+                           OPENDDS_STRING(reader).c_str()));
     }
     data_received(it->second, readerId);
     info.held_.erase(it++);
@@ -1116,16 +1048,6 @@ RtpsUdpDataLink::process_gap_i(const RTPS::GapSubmessage& gap,
     }
     wi->second.recvd_.insert(base, gap.gapList.numBits,
                              gap.gapList.bitmap.get_buffer());
-    if (Transport_debug_level > 5) {
-      GuidConverter writer(src);
-      GuidConverter reader(wi->first);
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_gap_i(GapSubmessage) -")
-                           ACE_TEXT(" calling deliver_held_data after inserting gap with range [%q, %q] into info recvd from %C to %C with info.recvd_.low = %q\n"),
-                           sr.first.getValue(), sr.second.getValue(),
-                           OPENDDS_STRING(writer).c_str(),
-                           OPENDDS_STRING(reader).c_str(),
-                           wi->second.recvd_.low().getValue()));
-    }
     deliver_held_data(rr.first, wi->second, rr.second.durable_);
     //FUTURE: to support wait_for_acks(), notify DCPS layer of the GAP
   }
@@ -1165,20 +1087,6 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
   static const SequenceNumber starting, zero = SequenceNumber::ZERO();
 
   DisjointSequence& recvd = info.recvd_;
-  if (Transport_debug_level > 5) {
-    GuidConverter writer(src);
-    GuidConverter reader(rr.first);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_heartbeat_i(HeartbeatSubmessage) -")
-                         ACE_TEXT(" received heartbeat from %C to %C with first: %q last: %q recvd.empty() : %s recvd.low = %q is reader durable: %s  initial_hb: %s\n"),
-                         OPENDDS_STRING(writer).c_str(),
-                         OPENDDS_STRING(reader).c_str(),
-                         first.getValue(),
-                         last.getValue(),
-                         recvd.empty() ? "TRUE" : "FALSE",
-                         recvd.low().getValue(),
-                         rr.second.durable_ ? "TRUE" : "FALSE",
-                         info.initial_hb_ ? "TRUE" : "FALSE"));
-  }
   if (!rr.second.durable_ && info.initial_hb_) {
     if (last.getValue() < starting.getValue()) {
       // this is an invalid heartbeat -- last must be positive
@@ -1187,58 +1095,18 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
     // For the non-durable reader, the first received HB or DATA establishes
     // a baseline of the lowest sequence number we'd ever need to NACK.
     if (recvd.empty() || recvd.low() >= last) {
-        if (Transport_debug_level > 5) {
-          GuidConverter writer(src);
-          GuidConverter reader(rr.first);
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_heartbeat_i(HeartbeatSubmessage) -")
-                               ACE_TEXT(" 1st site: received heartbeat from %C to %C inserting into recvd: %q to %q [note: last value: %q]\n"),
-                               OPENDDS_STRING(writer).c_str(),
-                               OPENDDS_STRING(reader).c_str(),
-                               zero.getValue(),
-                               (last > starting) ? last.previous().getValue() : zero.getValue(),
-                               last.previous().getValue()));
-        }
       recvd.insert(SequenceRange(zero,
                                  (last > starting) ? last.previous() : zero));
     } else {
-        if (Transport_debug_level > 5) {
-          GuidConverter writer(src);
-          GuidConverter reader(rr.first);
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_heartbeat_i(HeartbeatSubmessage) -")
-                               ACE_TEXT(" 2nd site: received heartbeat from %C to %C inserting into recvd: %q to %q <- is recvd.low\n"),
-                               OPENDDS_STRING(writer).c_str(),
-                               OPENDDS_STRING(reader).c_str(),
-                               zero.getValue(),
-                               recvd.low().getValue()));
-        }
       recvd.insert(SequenceRange(zero, recvd.low()));
     }
   } else if (!recvd.empty()) {
-      if (Transport_debug_level > 5) {
-        GuidConverter writer(src);
-        GuidConverter reader(rr.first);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_heartbeat_i(HeartbeatSubmessage) -")
-                             ACE_TEXT(" 3rd site: received heartbeat from %C to %C inserting into recvd: %q to %q [note: first value: %q]\n"),
-                             OPENDDS_STRING(writer).c_str(),
-                             OPENDDS_STRING(reader).c_str(),
-                             zero.getValue(),
-                             (first > starting) ? first.previous().getValue() : zero.getValue(),
-                             first.previous().getValue()));
-      }
     // All sequence numbers below 'first' should not be NACKed.
     // The value of 'first' may not decrease with subsequent HBs.
     recvd.insert(SequenceRange(zero,
                                (first > starting) ? first.previous() : zero));
   }
-  if (Transport_debug_level > 5) {
-    GuidConverter writer(src);
-    GuidConverter reader(rr.first);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_heartbeat_i(HeartbeatSubmessage) -")
-                         ACE_TEXT(" calling deliver_held_data from %C to %C with info.recvd_.low = %q\n"),
-                         OPENDDS_STRING(writer).c_str(),
-                         OPENDDS_STRING(reader).c_str(),
-                         info.recvd_.low().getValue()));
-  }
+
   deliver_held_data(rr.first, info, rr.second.durable_);
 
   //FUTURE: to support wait_for_acks(), notify DCPS layer of the sequence
@@ -1248,22 +1116,6 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
 
   const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
     liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
-  if (Transport_debug_level > 5) {
-    GuidConverter writer(src);
-    GuidConverter reader(rr.first);
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::process_heartbeat_i(HeartbeatSubmessage) -")
-                         ACE_TEXT(" check for setting ack_pending local: %C remote: %C : final: %s, liveliness: %s, should_nack: %s, nack_durable: %s, has_fragments: %s, Will set ack_pending: %s\n"),
-                         OPENDDS_STRING(writer).c_str(),
-                         OPENDDS_STRING(reader).c_str(),
-                         final ? "TRUE" : "FALSE",
-                         liveliness ? "TRUE" : "FALSE",
-                         info.should_nack() ? "TRUE" : "FALSE",
-                         rr.second.nack_durable(info) ? "TRUE" : "FALSE",
-                         recv_strategy_->has_fragments(info.hb_range_, wi->first) ? "TRUE" : "FALSE",
-                         (!final || (!liveliness && (info.should_nack() ||
-                         rr.second.nack_durable(info) ||
-                         recv_strategy_->has_fragments(info.hb_range_, wi->first)))) ? "TRUE" : "FALSE"));
-  }
   if (!final || (!liveliness && (info.should_nack() ||
       rr.second.nack_durable(info) ||
       recv_strategy_->has_fragments(info.hb_range_, wi->first)))) {
@@ -1326,22 +1178,6 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         const SequenceNumber::Value hb_low_val = hb_low.getValue(),
           hb_high_val = hb_high.getValue();
 
-        if (Transport_debug_level > 5) {
-          GuidConverter writer(wi->first);
-          GuidConverter reader(rr->first);
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::send_heartbeat_replies -")
-                               ACE_TEXT(" send heartbeat reply from %C to %C: recvd.empty: %s, prev_ack_pending: %s (durable_: %s, nack: %s (should_nack: %s, nack_durable: %s), hb_low: %q, recvd.low: %q) \n"),
-                               OPENDDS_STRING(reader).c_str(),
-                               OPENDDS_STRING(writer).c_str(),
-                               recvd.empty() ? "TRUE" : "FALSE",
-                               prev_ack_pending ? "TRUE" : "FALSE",
-                               rr->second.durable_ ? "TRUE" : "FALSE",
-                               nack ? "TRUE" : "FALSE",
-                               wi->second.should_nack() ? "TRUE" : "FALSE",
-                               rr->second.nack_durable(wi->second) ? "TRUE" : "FALSE",
-                               hb_low.getValue(),
-                               recvd.low().getValue()));
-        }
         if (recvd.empty()) {
           // Nack the entire heartbeat range.  Only reached when durable.
           ack = hb_low;
@@ -1353,16 +1189,6 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
                                               bitmap.get_buffer(),
                                               bitmap.length(), num_bits);
         } else if (((prev_ack_pending && !nack) || rr->second.nack_durable(wi->second)) && recvd.low() > hb_low) {
-          if (Transport_debug_level > 5) {
-            GuidConverter writer(wi->first);
-            GuidConverter reader(rr->first);
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::send_heartbeat_replies -")
-                                 ACE_TEXT(" send heartbeat reply from %C to %C with hb_low: %q recvd.low: %q \n"),
-                                 OPENDDS_STRING(reader).c_str(),
-                                 OPENDDS_STRING(writer).c_str(),
-                                 hb_low.getValue(),
-                                 recvd.low().getValue()));
-          }
           // Nack the range between the heartbeat low and the recvd low.
           ack = hb_low;
           const SequenceNumber& rec_low = recvd.low();
@@ -1377,28 +1203,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
 
         } else {
           ack = ++SequenceNumber(recvd.cumulative_ack());
-          if (Transport_debug_level > 5) {
-            GuidConverter writer(wi->first);
-            GuidConverter reader(rr->first);
-            ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::send_heartbeat_replies -")
-                                 ACE_TEXT(" send heartbeat reply from %C to %C  - else condition - recvd.cumulative_ack: %q to ack: %q (recvd.disjoint: %s)\n"),
-                                 OPENDDS_STRING(reader).c_str(),
-                                 OPENDDS_STRING(writer).c_str(),
-                                 recvd.cumulative_ack().getValue(),
-                                 ack.getValue(),
-                                 recvd.disjoint() ? "TRUE" : "FALSE"));
-          }
           if (recvd.low().getValue() > 1) {
-            if (Transport_debug_level > 5) {
-              GuidConverter writer(wi->first);
-              GuidConverter reader(rr->first);
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::send_heartbeat_replies -")
-                                   ACE_TEXT(" send heartbeat reply from %C to %C about to insert SequenceRange from: %q to recvd.low: %q into recvd\n"),
-                                   OPENDDS_STRING(reader).c_str(),
-                                   OPENDDS_STRING(writer).c_str(),
-                                   SequenceNumber::ZERO().getValue(),
-                                   recvd.low().getValue()));
-            }
             // since the "ack" really is cumulative, we need to make
             // sure that a lower discontinuity is not possible later
             recvd.insert(SequenceRange(SequenceNumber::ZERO(), recvd.low()));
@@ -1408,17 +1213,6 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
             bitmap.length(bitmap_num_longs(ack, recvd.last_ack().previous()));
             recvd.to_bitmap(bitmap.get_buffer(), bitmap.length(),
                             num_bits, true);
-            if (Transport_debug_level > 5) {
-              GuidConverter writer(wi->first);
-              GuidConverter reader(rr->first);
-              ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::send_heartbeat_replies -")
-                                   ACE_TEXT(" send heartbeat reply from %C to %C recvd is disjoint so process bitmap, bitmap length: %d, ack: %q, recvd last ack.prev: %q\n"),
-                                   OPENDDS_STRING(reader).c_str(),
-                                   OPENDDS_STRING(writer).c_str(),
-                                   bitmap.length(),
-                                   ack.getValue(),
-                                   recvd.last_ack().previous().getValue()));
-            }
           }
         }
 
