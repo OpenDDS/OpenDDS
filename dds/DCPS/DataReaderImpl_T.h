@@ -67,7 +67,7 @@ namespace OpenDDS {
       data_allocator_ = new DataAllocator(get_n_chunks ());
       if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) %sDataReaderImpl::")
+                   ACE_TEXT("(%P|%t) %CDataReaderImpl::")
                    ACE_TEXT("enable_specific-data")
                    ACE_TEXT(" Cached_Allocator_With_Overflow ")
                    ACE_TEXT("%x with %d chunks\n"),
@@ -1522,7 +1522,7 @@ void store_instance_data(
         if (this->owner_manager_->instance_lock_acquire () != 0) {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%sDataReaderImpl::")
+                      ACE_TEXT("%CDataReaderImpl::")
                       ACE_TEXT("store_instance_data, ")
                       ACE_TEXT("acquire instance_lock failed. \n"), TraitsType::type_name()));
           return;
@@ -1559,7 +1559,7 @@ void store_instance_data(
           {
             ACE_ERROR ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
-                        ACE_TEXT("%sDataReaderImpl::")
+                        ACE_TEXT("%CDataReaderImpl::")
                         ACE_TEXT("store_instance_data, ")
                         ACE_TEXT("insert handle failed. \n"), TraitsType::type_name()));
             return;
@@ -1582,7 +1582,7 @@ void store_instance_data(
             {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
-                          ACE_TEXT("%sDataReaderImpl::")
+                          ACE_TEXT("%CDataReaderImpl::")
                           ACE_TEXT("store_instance_data, ")
                           ACE_TEXT("insert to participant scope %s failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
               return;
@@ -1592,7 +1592,7 @@ void store_instance_data(
         if (this->owner_manager_->instance_lock_release () != 0) {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%sDataReaderImpl::")
+                      ACE_TEXT("%CDataReaderImpl::")
                       ACE_TEXT("store_instance_data, ")
                       ACE_TEXT("release instance_lock failed. \n"), TraitsType::type_name()));
           return;
@@ -1607,7 +1607,7 @@ void store_instance_data(
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%sDataReaderImpl::")
+                      ACE_TEXT("%CDataReaderImpl::")
                       ACE_TEXT("store_instance_data, ")
                       ACE_TEXT("insert %s failed. \n"), TraitsType::type_name(), TraitsType::type_name()));
           return;
@@ -1932,7 +1932,7 @@ void notify_status_condition_no_sample_lock()
   if (received_data.length() != info_seq.length())
     {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %sDataReaderImpl::%C ")
+                 ACE_TEXT("(%P|%t) %CDataReaderImpl::%C ")
                  ACE_TEXT("PRECONDITION_NOT_MET sample and info input ")
                  ACE_TEXT("sequences do not match.\n"),
                  TraitsType::type_name(),
@@ -1944,7 +1944,7 @@ void notify_status_condition_no_sample_lock()
   if ((received_data.maximum() > 0) && (received_data.release() == false))
     {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %sDataReaderImpl::%C ")
+                 ACE_TEXT("(%P|%t) %CDataReaderImpl::%C ")
                  ACE_TEXT("PRECONDITION_NOT_MET mismatch of ")
                  ACE_TEXT("maximum %d and owns %d\n"),
                  TraitsType::type_name(),
@@ -1976,7 +1976,7 @@ void notify_status_condition_no_sample_lock()
         {
           //SPEC ref v1.2 7.1.2.5.3.8 #5c
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) %sDataReaderImpl::%C ")
+                     ACE_TEXT("(%P|%t) %CDataReaderImpl::%C ")
                      ACE_TEXT("PRECONDITION_NOT_MET max_samples %d > maximum %d\n"),
                      TraitsType::type_name(),
                      method_name,

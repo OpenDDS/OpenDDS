@@ -81,7 +81,7 @@ public:
 
     writers_[thread_id].resize(6);
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %s\n", writers_[thread_id].c_str()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writers_[thread_id].c_str()));
 
     DDS::DataWriterQos qos;
     publisher->get_default_datawriter_qos(qos);
@@ -139,7 +139,7 @@ public:
                          -1);
       }
 
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %s has %d of %d readers\n", writers_[thread_id].c_str(), matches.current_count, total_readers_));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C has %d of %d readers\n", writers_[thread_id].c_str(), matches.current_count, total_readers_));
       if (matches.current_count >= total_readers_) {
         break;
       }
@@ -170,12 +170,12 @@ public:
       }
     }
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %s is waiting for acknowledgements\n", writers_[thread_id].c_str()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is waiting for acknowledgements\n", writers_[thread_id].c_str()));
     DDS::Duration_t timeout = { 30, 0 };
     message_writer->wait_for_acknowledgments(timeout);
     // With static discovery, it's not an error for wait_for_acks to fail
     // since the peer process may have terminated before sending acks.
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %s is done\n", writers_[thread_id].c_str()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is done\n", writers_[thread_id].c_str()));
 
     return 0;
   }
