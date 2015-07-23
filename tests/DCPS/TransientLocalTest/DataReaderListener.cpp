@@ -44,7 +44,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
         if (durable) ++num_reads_;
 
-        ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListenerImpl[%@]::on_data_available - %s count = %d\n", this,
+        ACE_DEBUG((LM_INFO, "(%P|%t) DataReaderListenerImpl[%@]::on_data_available - %C count = %d\n", this,
               durable ? "Durable " : "Volatile", message.count));
         if (durable && (message.count != num_reads_)) {
           ACE_DEBUG((LM_INFO, "(%P|%t) ERROR: durable reader received out-of-order data (msg count = %d and num_reads = %d)\n", message.count, num_reads_));
