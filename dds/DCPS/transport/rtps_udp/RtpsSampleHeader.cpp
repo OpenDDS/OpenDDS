@@ -340,6 +340,22 @@ RtpsSampleHeader::populate_data_sample_submessages(
                 sizeof(GuidPrefix_t));
     subm.length(i + 1);
     subm[i++].info_dst_sm(idest);
+  } else {
+    //Not durability resend, but could have inline gaps
+    for (CORBA::ULong x = 0; x < i; ++x) {
+      if (subm[x]._d() == INFO_DST) {
+        //Need to add INFO_DST
+        InfoDestinationSubmessage idest;
+        idest.smHeader.submessageId = INFO_DST;
+        idest.smHeader.flags = flags;
+        idest.smHeader.submessageLength = INFO_DST_SZ;
+        std::memcpy(idest.guidPrefix, GUIDPREFIX_UNKNOWN,
+                    sizeof(GuidPrefix_t));
+        subm.length(i + 1);
+        subm[i++].info_dst_sm(idest);
+        break;
+      }
+    }
   }
 
   DataSubmessage data = {

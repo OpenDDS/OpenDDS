@@ -118,8 +118,10 @@ private:
   static bool force_inline_qos_;
   bool requires_inline_qos(const PublicationId& pub_id);
 
+  typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
   void add_gap_submsg(RTPS::SubmessageSeq& msg,
-                      const TransportQueueElement& tqe);
+                      const TransportQueueElement& tqe,
+                      const DestToEntityMap& dtem);
 
   RtpsUdpInst* config_;
   TransportReactorTask_rch reactor_task_;

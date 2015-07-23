@@ -615,9 +615,23 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   const RtpsWriterMap::iterator rw = writers_.find(pub_id);
 
   bool gap_ok = true;
+  DestToEntityMap gap_receivers;
   if (rw != writers_.end() && !rw->second.remote_readers_.empty()) {
     for (ReaderInfoMap::iterator ri = rw->second.remote_readers_.begin();
          ri != rw->second.remote_readers_.end(); ++ri) {
+      RepoId tmp;
+      std::memcpy(tmp.guidPrefix, ri->first.guidPrefix, sizeof(GuidPrefix_t));
+
+      gap_receivers[tmp].push_back(ri->first);
+
+      if (Transport_debug_level > 5) {
+        GuidConverter wr(pub_id);
+        GuidConverter rd(ri->first);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::customize_queue_element - writer(%C) checking if reader(%C) is expecting durable data (%s)\n",
+                             OPENDDS_STRING(wr).c_str(),
+                             OPENDDS_STRING(rd).c_str(),
+                             ri->second.expecting_durable_data() ? "TRUE" : "FALSE"));
+      }
       if (ri->second.expecting_durable_data()) {
         // Can't add an in-line GAP if some Data Reader is expecting durable
         // data, the GAP could cause that Data Reader to ignore the durable
@@ -630,7 +644,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
   }
 
   if (gap_ok) {
-    add_gap_submsg(subm, *element);
+    add_gap_submsg(subm, *element, gap_receivers);
   }
 
   const SequenceNumber seq = element->sequence();
@@ -795,7 +809,8 @@ bool RtpsUdpDataLink::force_inline_qos_ = false;
 
 void
 RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
-                                const TransportQueueElement& tqe)
+                                const TransportQueueElement& tqe,
+                                const DestToEntityMap& dtem)
 {
   // These are the GAP submessages that we'll send directly in-line with the
   // DATA when we notice that the DataWriter has deliberately skipped seq #s.
@@ -818,6 +833,13 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
   RtpsWriter& rw = wi->second;
 
   if (seq != rw.expected_) {
+    if (Transport_debug_level > 5) {
+      GuidConverter writer(pub);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::add_gap_submsg - writer(%C) seq [%d] != rw.expected [%d]\n",
+                           OPENDDS_STRING(writer).c_str(),
+                           seq.getValue(),
+                           rw.expected_.getValue()));
+    }
     SequenceNumber firstMissing = rw.expected_;
 
     // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
@@ -845,10 +867,45 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
     gen_find_size(gap, size, padding);
     gap.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
+    InfoDestinationSubmessage idst = {
+      {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+    CORBA::ULong ml = msg.length();
 
-    const CORBA::ULong i = msg.length();
-    msg.length(i + 1);
-    msg[i].gap_sm(gap);
+    //Change the non-directed Gap into multiple directed gaps to prevent
+    //delivering to currently undiscovered readers
+    DestToEntityMap::const_iterator iter = dtem.begin();
+    while (iter != dtem.end()) {
+      std::memcpy(idst.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
+      msg.length(ml + 1);
+      msg[ml++].info_dst_sm(idst);
+
+      const OPENDDS_VECTOR(RepoId)& readers = iter->second;
+      for (size_t i = 0; i < readers.size(); ++i) {
+        gap.readerId = readers.at(i).entityId;
+        msg.length(ml + 1);
+        msg[ml++].gap_sm(gap);
+        if (Transport_debug_level > 5) {
+          SequenceRange sr;
+          sr.first.setValue(gap.gapStart.high, gap.gapStart.low);
+          SequenceNumber base;
+          base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
+          sr.second = base.previous();
+          GuidConverter writer(pub);
+          RepoId reader_id;
+          std::memcpy(reader_id.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
+          reader_id.entityId = readers.at(i).entityId;
+          GuidConverter reader(reader_id);
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::add_gap_submsg - writer(%C) to reader(%C) for seqs[%d, %d]\n",
+                               OPENDDS_STRING(writer).c_str(),
+                               OPENDDS_STRING(reader).c_str(),
+                               sr.first.getValue(),
+                               sr.second.getValue()));
+        }
+      } //END iter over reader entity ids
+      ++iter;
+    } //END iter over reader GuidPrefix_t's
   }
 }
 
