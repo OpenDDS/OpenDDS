@@ -852,28 +852,35 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
     gen_find_size(gap, size, padding);
     gap.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
-    InfoDestinationSubmessage idst = {
-      {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
-      {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
-    };
-    CORBA::ULong ml = msg.length();
 
-    //Change the non-directed Gap into multiple directed gaps to prevent
-    //delivering to currently undiscovered readers
-    DestToEntityMap::const_iterator iter = dtem.begin();
-    while (iter != dtem.end()) {
-      std::memcpy(idst.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
-      msg.length(ml + 1);
-      msg[ml++].info_dst_sm(idst);
+    if (!rw.durable_) {
+      const CORBA::ULong i = msg.length();
+      msg.length(i + 1);
+      msg[i].gap_sm(gap);
+    } else {
+      InfoDestinationSubmessage idst = {
+        {INFO_DST, 1 /*FLAG_E*/, INFO_DST_SZ},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+      };
+      CORBA::ULong ml = msg.length();
 
-      const OPENDDS_VECTOR(RepoId)& readers = iter->second;
-      for (size_t i = 0; i < readers.size(); ++i) {
-        gap.readerId = readers.at(i).entityId;
+      //Change the non-directed Gap into multiple directed gaps to prevent
+      //delivering to currently undiscovered durable readers
+      DestToEntityMap::const_iterator iter = dtem.begin();
+      while (iter != dtem.end()) {
+        std::memcpy(idst.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
         msg.length(ml + 1);
-        msg[ml++].gap_sm(gap);
-      } //END iter over reader entity ids
-      ++iter;
-    } //END iter over reader GuidPrefix_t's
+        msg[ml++].info_dst_sm(idst);
+
+        const OPENDDS_VECTOR(RepoId)& readers = iter->second;
+        for (size_t i = 0; i < readers.size(); ++i) {
+          gap.readerId = readers.at(i).entityId;
+          msg.length(ml + 1);
+          msg[ml++].gap_sm(gap);
+        } //END iter over reader entity ids
+        ++iter;
+      } //END iter over reader GuidPrefix_t's
+    }
   }
 }
 
