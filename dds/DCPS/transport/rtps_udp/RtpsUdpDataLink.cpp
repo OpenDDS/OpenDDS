@@ -624,14 +624,6 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
 
       gap_receivers[tmp].push_back(ri->first);
 
-      if (Transport_debug_level > 5) {
-        GuidConverter wr(pub_id);
-        GuidConverter rd(ri->first);
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::customize_queue_element - writer(%C) checking if reader(%C) is expecting durable data (%s)\n",
-                             OPENDDS_STRING(wr).c_str(),
-                             OPENDDS_STRING(rd).c_str(),
-                             ri->second.expecting_durable_data() ? "TRUE" : "FALSE"));
-      }
       if (ri->second.expecting_durable_data()) {
         // Can't add an in-line GAP if some Data Reader is expecting durable
         // data, the GAP could cause that Data Reader to ignore the durable
@@ -833,13 +825,6 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
   RtpsWriter& rw = wi->second;
 
   if (seq != rw.expected_) {
-    if (Transport_debug_level > 5) {
-      GuidConverter writer(pub);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::add_gap_submsg - writer(%C) seq [%d] != rw.expected [%d]\n",
-                           OPENDDS_STRING(writer).c_str(),
-                           seq.getValue(),
-                           rw.expected_.getValue()));
-    }
     SequenceNumber firstMissing = rw.expected_;
 
     // RTPS v2.1 8.3.7.4: the Gap sequence numbers are those in the range
@@ -886,23 +871,6 @@ RtpsUdpDataLink::add_gap_submsg(RTPS::SubmessageSeq& msg,
         gap.readerId = readers.at(i).entityId;
         msg.length(ml + 1);
         msg[ml++].gap_sm(gap);
-        if (Transport_debug_level > 5) {
-          SequenceRange sr;
-          sr.first.setValue(gap.gapStart.high, gap.gapStart.low);
-          SequenceNumber base;
-          base.setValue(gap.gapList.bitmapBase.high, gap.gapList.bitmapBase.low);
-          sr.second = base.previous();
-          GuidConverter writer(pub);
-          RepoId reader_id;
-          std::memcpy(reader_id.guidPrefix, iter->first.guidPrefix, sizeof(GuidPrefix_t));
-          reader_id.entityId = readers.at(i).entityId;
-          GuidConverter reader(reader_id);
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::add_gap_submsg - writer(%C) to reader(%C) for seqs[%d, %d]\n",
-                               OPENDDS_STRING(writer).c_str(),
-                               OPENDDS_STRING(reader).c_str(),
-                               sr.first.getValue(),
-                               sr.second.getValue()));
-        }
       } //END iter over reader entity ids
       ++iter;
     } //END iter over reader GuidPrefix_t's
@@ -1116,6 +1084,7 @@ RtpsUdpDataLink::process_heartbeat_i(const RTPS::HeartBeatSubmessage& heartbeat,
 
   const bool final = heartbeat.smHeader.flags & 2 /* FLAG_F */,
     liveliness = heartbeat.smHeader.flags & 4 /* FLAG_L */;
+
   if (!final || (!liveliness && (info.should_nack() ||
       rr.second.nack_durable(info) ||
       recv_strategy_->has_fragments(info.hb_range_, wi->first)))) {
