@@ -784,6 +784,19 @@ TransportClient::register_for_reader(const RepoId& participant,
 }
 
 void
+TransportClient::unregister_for_reader(const RepoId& participant,
+                                       const RepoId& writerid,
+                                       const RepoId& readerid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    (*pos)->unregister_for_reader(participant, writerid, readerid);
+  }
+}
+
+void
 TransportClient::register_for_writer(const RepoId& participant,
                                      const RepoId& readerid,
                                      const RepoId& writerid,
@@ -795,6 +808,19 @@ TransportClient::register_for_writer(const RepoId& participant,
        pos != limit;
        ++pos) {
     (*pos)->register_for_writer(participant, readerid, writerid, locators, listener);
+  }
+}
+
+void
+TransportClient::unregister_for_writer(const RepoId& participant,
+                                       const RepoId& readerid,
+                                       const RepoId& writerid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
+  for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
+       pos != limit;
+       ++pos) {
+    (*pos)->unregister_for_writer(participant, readerid, writerid);
   }
 }
 

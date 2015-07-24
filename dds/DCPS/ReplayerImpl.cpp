@@ -817,6 +817,14 @@ ReplayerImpl::register_for_reader(const RepoId& participant,
 }
 
 void
+ReplayerImpl::unregister_for_reader(const RepoId& participant,
+                                    const RepoId& writerid,
+                                    const RepoId& readerid)
+{
+  TransportClient::unregister_for_reader(participant, writerid, readerid);
+}
+
+void
 ReplayerImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
 

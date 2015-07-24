@@ -51,6 +51,10 @@ public:
                                    const RepoId& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/) { }
+
+  virtual void unregister_for_writer(const RepoId& /*participant*/,
+                                     const RepoId& /*readerid*/,
+                                     const RepoId& /*writerid*/) { }
 };
 
 } // namespace DCPS
