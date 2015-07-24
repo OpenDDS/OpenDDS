@@ -810,6 +810,14 @@ DataWriterImpl::register_for_reader(const RepoId& participant,
 }
 
 void
+DataWriterImpl::unregister_for_reader(const RepoId& participant,
+                                      const RepoId& writerid,
+                                      const RepoId& readerid)
+{
+  TransportClient::unregister_for_reader(participant, writerid, readerid);
+}
+
+void
 DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataWriterListener_var listener =

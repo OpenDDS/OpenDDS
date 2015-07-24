@@ -328,8 +328,49 @@ namespace OpenDDS {
     }
 
     DDS::ReturnCode_t
-    StaticEndpointManager::remove_publication_i(const RepoId& /*publicationId*/)
+    StaticEndpointManager::remove_publication_i(const RepoId& writerid)
     {
+      LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
+      if (lp_pos == local_publications_.end()) {
+        return DDS::RETCODE_ERROR;
+      }
+
+      const LocalPublication& pub = lp_pos->second;
+
+      EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(writerid);
+      if (pos == registry_.writer_map.end()) {
+        return DDS::RETCODE_ERROR;
+      }
+
+      const EndpointRegistry::Writer& writer = pos->second;
+
+      {
+        ReaderIdSeq ids;
+        ids.length(writer.best_effort_readers.size());
+        size_t idx = 0;
+        for (RepoIdSet::const_iterator pos = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
+             pos != limit;
+             ++pos, ++idx) {
+          const RepoId& readerid = *pos;
+          ids[idx] = readerid;
+        }
+        pub.publication_->remove_associations(ids, false);
+      }
+
+      {
+        ReaderIdSeq ids;
+        ids.length(writer.reliable_readers.size());
+        size_t idx = 0;
+        for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
+             pos != limit;
+             ++pos, ++idx) {
+          const RepoId& readerid = *pos;
+          ids[idx] = readerid;
+          pub.publication_->unregister_for_reader(participant_id_, writerid, readerid);
+        }
+        pub.publication_->remove_associations(ids, false);
+      }
+
       return DDS::RETCODE_OK;
     }
 
@@ -381,25 +422,46 @@ namespace OpenDDS {
     DDS::ReturnCode_t
     StaticEndpointManager::remove_subscription_i(const RepoId& readerid)
     {
-      ACE_DEBUG((LM_DEBUG, "(P|%t) StaticEndpointManager::remove_subscription_i %s\n", LogGuid(readerid).c_str()));
-
       LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
-//       EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
-//       if (ls_pos != local_subscriptions_.end() &&
-//           writer_pos != registry_.writer_map.end()) {
-//         DCPS::DataReaderCallbacks* drr = ls_pos->second.subscription_;
-// #ifdef __SUNPRO_CC
-//         DCPS::WriterAssociation wa;
-//         wa.writerTransInfo = writer_pos->second.trans_info;
-//         wa.writerId = writerid;
-//         wa.pubQos = writer_pos->second.publisher_qos;
-//         wa.writerQos = writer_pos->second.qos;
-// #else
-//         const DCPS::WriterAssociation wa =
-//           {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
-// #endif
-//         drr->add_association(readerid, wa, false);
-//       }
+      if (ls_pos == local_subscriptions_.end()) {
+        return DDS::RETCODE_ERROR;
+      }
+
+      const LocalSubscription& sub = ls_pos->second;
+
+      EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(readerid);
+      if (pos == registry_.reader_map.end()) {
+        return DDS::RETCODE_ERROR;
+      }
+
+      const EndpointRegistry::Reader& reader = pos->second;
+
+      {
+        WriterIdSeq ids;
+        ids.length(reader.best_effort_writers.size());
+        size_t idx = 0;
+        for (RepoIdSet::const_iterator pos = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
+             pos != limit;
+             ++pos, ++idx) {
+          const RepoId& writerid = *pos;
+          ids[idx] = writerid;
+        }
+        sub.subscription_->remove_associations(ids, false);
+      }
+
+      {
+        WriterIdSeq ids;
+        ids.length(reader.reliable_writers.size());
+        size_t idx = 0;
+        for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
+             pos != limit;
+             ++pos, ++idx) {
+          const RepoId& writerid = *pos;
+          ids[idx] = writerid;
+          sub.subscription_->unregister_for_writer(participant_id_, readerid, writerid);
+        }
+        sub.subscription_->remove_associations(ids, false);
+      }
 
       return DDS::RETCODE_OK;
     }
@@ -488,7 +550,6 @@ namespace OpenDDS {
         ReaderIdSeq ids;
         ids.length(1);
         ids[0] = readerid;
-        ACE_DEBUG((LM_DEBUG, "Calling DataWriterCallbacks::remove_associations\n"));
         dwr->remove_associations(ids, true);
       }
     }
@@ -528,7 +589,6 @@ namespace OpenDDS {
         WriterIdSeq ids;
         ids.length(1);
         ids[0] = writerid;
-        ACE_DEBUG((LM_DEBUG, "Calling DataReaderCallbacks::remove_associations\n"));
         drr->remove_associations(ids, true);
       }
     }

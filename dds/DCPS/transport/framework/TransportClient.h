@@ -83,11 +83,19 @@ protected:
                            const TransportLocatorSeq& locators,
                            OpenDDS::DCPS::DiscoveryListener* listener);
 
+  void unregister_for_reader(const RepoId& participant,
+                             const RepoId& writerid,
+                             const RepoId& readerid);
+
   void register_for_writer(const RepoId& participant,
                            const RepoId& readerid,
                            const RepoId& writerid,
                            const TransportLocatorSeq& locators,
                            DiscoveryListener* listener);
+
+  void unregister_for_writer(const RepoId& participant,
+                             const RepoId& readerid,
+                             const RepoId& writerid);
 
   // Data transfer:
 

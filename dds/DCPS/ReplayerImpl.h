@@ -151,6 +151,10 @@ public:
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
+  virtual void unregister_for_reader(const RepoId& participant,
+                                     const RepoId& writerid,
+                                     const RepoId& readerid);
+
   DDS::ReturnCode_t enable();
 
   DomainParticipantImpl*          participant() {

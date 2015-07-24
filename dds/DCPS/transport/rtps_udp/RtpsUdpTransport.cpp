@@ -206,6 +206,16 @@ RtpsUdpTransport::register_for_reader(const RepoId& participant,
 }
 
 void
+RtpsUdpTransport::unregister_for_reader(const RepoId& /*participant*/,
+                                        const RepoId& writerid,
+                                        const RepoId& readerid)
+{
+  if (link_ != 0) {
+    link_->unregister_for_reader(writerid, readerid);
+  }
+}
+
+void
 RtpsUdpTransport::register_for_writer(const RepoId& participant,
                                       const RepoId& readerid,
                                       const RepoId& writerid,
@@ -220,6 +230,16 @@ RtpsUdpTransport::register_for_writer(const RepoId& participant,
   }
   bool requires_inline_qos;
   link_->register_for_writer(readerid, writerid, get_connection_addr(*blob, requires_inline_qos), listener);
+}
+
+void
+RtpsUdpTransport::unregister_for_writer(const RepoId& /*participant*/,
+                                        const RepoId& readerid,
+                                        const RepoId& writerid)
+{
+  if (link_ != 0) {
+    link_->unregister_for_writer(readerid, writerid);
+  }
 }
 
 bool

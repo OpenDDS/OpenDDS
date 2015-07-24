@@ -368,6 +368,23 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
 }
 
 void
+RtpsUdpDataLink::unregister_for_reader(const RepoId& writerid,
+                                       const RepoId& readerid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (InterestingRemoteMapType::iterator pos = interesting_readers_.lower_bound(readerid),
+         limit = interesting_readers_.upper_bound(readerid);
+       pos != limit;
+       ) {
+    if (pos->second.localid == writerid) {
+      interesting_readers_.erase(pos++);
+    } else {
+      ++pos;
+    }
+  }
+}
+
+void
 RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
                                      const RepoId& writerid,
                                      const ACE_INET_Addr& address,
@@ -378,6 +395,23 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
   interesting_writers_.insert(InterestingRemoteMapType::value_type(writerid, InterestingRemote(readerid, address, listener)));
   if (enableheartbeatchecker) {
     heartbeatchecker_.schedule_enable();
+  }
+}
+
+void
+RtpsUdpDataLink::unregister_for_writer(const RepoId& readerid,
+                                       const RepoId& writerid)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  for (InterestingRemoteMapType::iterator pos = interesting_writers_.lower_bound(writerid),
+         limit = interesting_writers_.upper_bound(writerid);
+       pos != limit;
+       ) {
+    if (pos->second.localid == readerid) {
+      interesting_writers_.erase(pos++);
+    } else {
+      ++pos;
+    }
   }
 }
 

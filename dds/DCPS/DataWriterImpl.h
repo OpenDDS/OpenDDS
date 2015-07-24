@@ -407,6 +407,10 @@ public:
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
+  virtual void unregister_for_reader(const RepoId& participant,
+                                     const RepoId& writerid,
+                                     const RepoId& readerid);
+
   void notify_publication_disconnected(const ReaderIdSeq& subids);
   void notify_publication_reconnected(const ReaderIdSeq& subids);
   void notify_publication_lost(const ReaderIdSeq& subids);

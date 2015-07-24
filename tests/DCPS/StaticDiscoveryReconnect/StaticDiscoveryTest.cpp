@@ -34,7 +34,6 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
                       ACE_TEXT(" create_subscriber failed!\n")), -1);
   }
 
-  // Create DataReader
   DDS::DataReaderQos qos;
   subscriber->get_default_datareader_qos(qos);
   qos.user_data.value.length(3);
@@ -43,20 +42,20 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
   qos.user_data.value[2] = 0;
   qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 
-  ACE_DEBUG((LM_DEBUG, "Creating reader\n"));
-  DDS::DataReader_var reader =
-    subscriber->create_datareader(topic,
-                                  qos,
-                                  0,
-                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  if (!reader) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("ERROR: %N:%l: main() -")
-                      ACE_TEXT(" create_datareader failed!\n")), -1);
-  }
-
   if (toggle) {
+    ACE_DEBUG((LM_DEBUG, "Creating reader\n"));
+    DDS::DataReader_var reader =
+      subscriber->create_datareader(topic,
+                                    qos,
+                                    0,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (!reader) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_datareader failed!\n")), -1);
+    }
+
     ACE_OS::sleep(11);
     // Go away.
     ACE_DEBUG((LM_DEBUG, "Deleting reader\n"));
@@ -68,6 +67,68 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
                                            qos,
                                            0,
                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    ACE_OS::sleep(11);
+  } else {
+    struct Listener : public DDS::DataReaderListener {
+      size_t found, lost;
+
+      Listener() : found(0), lost(0) { }
+
+      virtual void
+      on_requested_deadline_missed (::DDS::DataReader_ptr,
+                                    const ::DDS::RequestedDeadlineMissedStatus &) { }
+
+      virtual void
+      on_requested_incompatible_qos (::DDS::DataReader_ptr,
+                                     const ::DDS::RequestedIncompatibleQosStatus &) { }
+
+      virtual void
+      on_sample_rejected (::DDS::DataReader_ptr,
+                          const ::DDS::SampleRejectedStatus &) { }
+
+      virtual void
+      on_liveliness_changed (::DDS::DataReader_ptr,
+                             const ::DDS::LivelinessChangedStatus &) { }
+
+      virtual void
+      on_data_available (::DDS::DataReader_ptr) { }
+
+      virtual void
+      on_subscription_matched (::DDS::DataReader_ptr,
+                               const ::DDS::SubscriptionMatchedStatus & status) {
+        if (status.current_count_change > 0) {
+          ACE_DEBUG((LM_DEBUG, "Reader found writer\n"));
+          ++found;
+        }
+        if (status.current_count_change < 0) {
+          ACE_DEBUG((LM_DEBUG, "Reader lost writer\n"));
+          ++lost;
+        }
+      }
+
+      virtual void
+      on_sample_lost (::DDS::DataReader_ptr,
+                      const ::DDS::SampleLostStatus &) { }
+    } listener;
+
+    // Create DataReader
+    DDS::DataReader_var reader =
+      subscriber->create_datareader(topic,
+                                    qos,
+                                    &listener,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (!reader) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_datareader failed!\n")),
+                       -1);
+    }
+
+    ACE_OS::sleep(30);
+
+    if (listener.found == 2 && listener.lost == 1) { return 0; }
+    return -1;
   }
 
   return 0;
@@ -97,31 +158,83 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
   qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   qos.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
 
-  // Create DataWriter
-  DDS::DataWriter_var writer =
-    publisher->create_datawriter(topic,
-                                 qos,
-                                 0,
-                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  if (toggle) {
+    ACE_DEBUG((LM_DEBUG, "Creating writer\n"));
+    DDS::DataWriter_var writer =
+      publisher->create_datawriter(topic,
+                                   qos,
+                                   0,
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  if (!writer) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("ERROR: %N:%l: main() -")
-                      ACE_TEXT(" create_datawriter failed!\n")),
-                     -1);
-  }
-
-  for (size_t i = 0; i != 30; ++i) {
-    DDS::PublicationMatchedStatus matches;
-    if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
+    if (!writer) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")
-                        ACE_TEXT(" get_publication_matched_status failed!\n")),
+                        ACE_TEXT(" create_datawriter failed!\n")), -1);
+    }
+
+    ACE_OS::sleep(11);
+    // Go away.
+    ACE_DEBUG((LM_DEBUG, "Deleting writer\n"));
+    publisher->delete_datawriter(writer);
+    ACE_OS::sleep(11);
+    // Come back.
+    ACE_DEBUG((LM_DEBUG, "Creating writer\n"));
+    writer = publisher->create_datawriter(topic,
+                                          qos,
+                                          0,
+                                          OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    ACE_OS::sleep(11);
+  } else {
+    struct Listener : public DDS::DataWriterListener {
+      size_t found, lost;
+
+      Listener() : found(0), lost(0) { }
+
+      virtual void
+      on_offered_deadline_missed (::DDS::DataWriter_ptr,
+                                  const ::DDS::OfferedDeadlineMissedStatus &) { }
+
+      virtual void
+      on_offered_incompatible_qos (::DDS::DataWriter_ptr,
+                                   const ::DDS::OfferedIncompatibleQosStatus &) { }
+
+      virtual void
+      on_liveliness_lost (::DDS::DataWriter_ptr,
+                          const ::DDS::LivelinessLostStatus &) { }
+
+      virtual void
+      on_publication_matched (::DDS::DataWriter_ptr,
+                              const ::DDS::PublicationMatchedStatus & status) {
+        if (status.current_count_change > 0) {
+          ACE_DEBUG((LM_DEBUG, "Writer found reader\n"));
+          ++found;
+        }
+        if (status.current_count_change < 0) {
+          ACE_DEBUG((LM_DEBUG, "Writer lost reader\n"));
+          ++lost;
+        }
+      }
+
+    } listener;
+
+    // Create DataWriter
+    DDS::DataWriter_var writer =
+      publisher->create_datawriter(topic,
+                                   qos,
+                                   &listener,
+                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    if (!writer) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" create_datawriter failed!\n")),
                        -1);
     }
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %d readers\n", matches.current_count));
-    ACE_OS::sleep(1);
+    ACE_OS::sleep(30);
+
+    if (listener.found == 2 && listener.lost == 1) { return 0; }
+    return -1;
   }
 
   return 0;

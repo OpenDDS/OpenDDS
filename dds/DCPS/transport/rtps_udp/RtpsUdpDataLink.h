@@ -108,10 +108,16 @@ public:
                            const ACE_INET_Addr& address,
                            OpenDDS::DCPS::DiscoveryListener* listener);
 
+  void unregister_for_reader(const RepoId& writerid,
+                             const RepoId& readerid);
+
   void register_for_writer(const RepoId& readerid,
                            const RepoId& writerid,
                            const ACE_INET_Addr& address,
                            OpenDDS::DCPS::DiscoveryListener* listener);
+
+  void unregister_for_writer(const RepoId& readerid,
+                             const RepoId& writerid);
 
   virtual void pre_stop_i();
 
