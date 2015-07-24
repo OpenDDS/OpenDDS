@@ -118,7 +118,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
       if (Transport_debug_level > 5) {
         OPENDDS_STRING included_ids;
         bool first = true;
-        OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)::iterator iter = readers_selected_.begin();
+        RepoIdSet::iterator iter = readers_selected_.begin();
         while(iter != readers_selected_.end()) {
           included_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter));
           first = false;
@@ -126,7 +126,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
         }
         OPENDDS_STRING excluded_ids;
         first = true;
-        OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)::iterator iter2 = this->readers_withheld_.begin();
+        RepoIdSet::iterator iter2 = this->readers_withheld_.begin();
         while(iter2 != readers_withheld_.end()) {
             excluded_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter2));
           first = false;

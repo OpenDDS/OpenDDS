@@ -19,7 +19,6 @@
 #include "TransportInst_rch.h"
 #include "TransportReactorTask.h"
 #include "TransportReactorTask_rch.h"
-#include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
 #include "dds/DCPS/PoolAllocator.h"

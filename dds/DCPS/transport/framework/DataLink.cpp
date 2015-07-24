@@ -7,7 +7,6 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "DataLink.h"
-#include "RepoIdSet.h"
 
 #include "ReceivedDataSample.h"
 
@@ -94,14 +93,11 @@ DataLink::~DataLink()
 {
   DBG_ENTRY_LVL("DataLink", "~DataLink", 6);
 
-  if ((this->pub_map_.size() > 0) || (this->sub_map_.size() > 0)) {
+  if (!assoc_by_local_.empty()) {
     ACE_DEBUG((LM_WARNING,
                ACE_TEXT("(%P|%t) WARNING: DataLink[%@]::~DataLink() - ")
-               ACE_TEXT("link still in use by %d publications ")
-               ACE_TEXT("and %d subscriptions when deleted!\n"),
-               this,
-               this->pub_map_.size(),
-               this->sub_map_.size()));
+               ACE_TEXT("link still in use by %d entities when deleted!\n"),
+               this, assoc_by_local_.size()));
   }
 
   delete this->db_allocator_;
@@ -263,12 +259,6 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
                            TransportSendListener* send_listener)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
-  int pub_result      = 0;
-  int sub_result      = 0;
-  int pub_undo_result = 0;
-  int sub_undo_result = 0;
-
-  bool first_pub = false;
 
   if (DCPS_debug_level > 9) {
     GuidConverter local(local_publication_id), remote(remote_subscription_id);
@@ -281,87 +271,25 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
   }
 
   {
-    GuardType guard(this->strategy_lock_);
+    GuardType guard(strategy_lock_);
 
-    if (!this->send_strategy_.is_nil()) {
-      this->send_strategy_->link_released(false);
+    if (!send_strategy_.is_nil()) {
+      send_strategy_->link_released(false);
     }
   }
   {
     GuardType guard(this->pub_sub_maps_lock_);
 
-    first_pub = this->pub_map_.size() == 0; // empty
+    assoc_by_local_[local_publication_id].insert(remote_subscription_id);
+    ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_subscription_id];
 
-    // Update our pub_map_.  The last argument is a 0 because remote
-    // subscribers don't have a TransportReceiveListener object.
-    pub_result = this->pub_map_.insert(local_publication_id,
-                                       remote_subscription_id, 0);
+    if (rls.is_nil())
+      rls = new ReceiveListenerSet;
+    rls->insert(local_publication_id, 0);
 
-    // Take advantage of the lock and store the send listener as well.
-    this->send_listeners_.insert(std::make_pair(local_publication_id, send_listener));
-
-    if (pub_result == 0) {
-      sub_result = this->sub_map_.insert(remote_subscription_id,
-                                           local_publication_id);
-
-      if (sub_result == 0) {
-        // If this is our first reservation, we should notify the
-        // subclass that it should start:
-        if (!first_pub || start_i() == 0) {
-          // Success!
-          return 0;
-
-        } else {
-          sub_undo_result = this->sub_map_.remove(remote_subscription_id,
-                                                  local_publication_id);
-        }
-      }
-
-      pub_undo_result = this->pub_map_.remove(local_publication_id,
-                                              remote_subscription_id);
-    }
+    send_listeners_[local_publication_id] = send_listener;
   }
-  // We only get to here when an error occurred somewhere along the way.
-  // None of this needs the lock_ to be acquired.
-
-  if (pub_result == 0) {
-    if (sub_result != 0) {
-      GuidConverter local(local_publication_id), remote(remote_subscription_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("failed to insert remote subscription %C ")
-                 ACE_TEXT("to local publication %C reservation into sub_map_.\n"),
-                 OPENDDS_STRING(remote).c_str(), OPENDDS_STRING(local).c_str()));
-    }
-
-    if (pub_undo_result != 0) {
-      GuidConverter local(local_publication_id), remote(remote_subscription_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("failed to remove (undo) local publication %C ")
-                 ACE_TEXT("to remote subscription %C reservation from pub_map_.\n"),
-                 OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
-    }
-
-    if (sub_undo_result != 0) {
-      GuidConverter local(local_publication_id), remote(remote_subscription_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("failed to remove (undo) remote subscription %C ")
-                 ACE_TEXT("to local publication %C reservation from sub_map_.\n"),
-                 OPENDDS_STRING(remote).c_str(), OPENDDS_STRING(local).c_str()));
-    }
-
-  } else {
-    GuidConverter local(local_publication_id), remote(remote_subscription_id);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-               ACE_TEXT("failed to insert local publication %C to remote ")
-               ACE_TEXT("subscription %C reservation into pub_map_.\n"),
-               OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
-  }
-
-  return -1;
+  return 0;
 }
 
 int
@@ -370,12 +298,6 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
                            TransportReceiveListener* receive_listener)
 {
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
-  int sub_result      = 0;
-  int pub_result      = 0;
-  int sub_undo_result = 0;
-  int pub_undo_result = 0;
-
-  bool first_sub = false;
 
   if (DCPS_debug_level > 9) {
     GuidConverter local(local_subscription_id), remote(remote_publication_id);
@@ -396,129 +318,41 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
   {
     GuardType guard(this->pub_sub_maps_lock_);
 
-    first_sub = this->sub_map_.size() == 0; // empty
+    assoc_by_local_[local_subscription_id].insert(remote_publication_id);
+    ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_publication_id];
 
-    // Update our sub_map_.
-    sub_result = this->sub_map_.insert(local_subscription_id, remote_publication_id);
+    if (rls.is_nil())
+      rls = new ReceiveListenerSet;
+    rls->insert(local_subscription_id, receive_listener);
 
-    this->recv_listeners_.insert(std::make_pair(local_subscription_id, receive_listener));
-
-  if (sub_result == 0) {
-      pub_result = this->pub_map_.insert(remote_publication_id,
-                                         local_subscription_id,
-                                         receive_listener);
-
-      if (pub_result == 0) {
-        // If this is our first reservation, we should notify the
-        // subclass that it should start:
-        if (!first_sub || start_i() == 0) {
-          // Success!
-          return 0;
-
-        } else {
-          pub_undo_result = this->pub_map_.remove(remote_publication_id,
-                                                  local_subscription_id);
-        }
-      }
-
-      // Since we failed to insert into into the pub_map_, and have
-      // already inserted it in the sub_map_, we better attempt to
-      // undo the insert that we did to the sub_map_.  Otherwise,
-      // the sub_map_ and pub_map_ will become inconsistent.
-      sub_undo_result = this->sub_map_.remove(local_subscription_id,
-                                              remote_publication_id);
-    }
+    recv_listeners_[local_subscription_id] = receive_listener;
   }
-  //this->send_strategy_->link_released (false);
+  return 0;
+}
 
-  // We only get to here when an error occurred somewhere along the way.
-  // None of this needs the lock_ to be acquired.
-
-  if (sub_result == 0) {
-    if (pub_result != 0) {
-      GuidConverter local(local_subscription_id), remote(remote_publication_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("Failed to insert remote publication %C to local ")
-                 ACE_TEXT("subcription %C reservation into pub_map_.\n"),
-                 OPENDDS_STRING(remote).c_str(), OPENDDS_STRING(local).c_str()));
-    }
-
-    if (sub_undo_result != 0) {
-      GuidConverter local(local_subscription_id), remote(remote_publication_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("failed to remove (undo) local subcription %C to ")
-                 ACE_TEXT("remote publication %C reservation from sub_map_.\n"),
-                 OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
-    }
-
-    if (pub_undo_result != 0) {
-      GuidConverter local(local_subscription_id), remote(remote_publication_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-                 ACE_TEXT("failed to remove (undo) remote publication %C to ")
-                 ACE_TEXT("local subcription %C reservation from pub_map_.\n"),
-                 OPENDDS_STRING(remote).c_str(), OPENDDS_STRING(local).c_str()));
-    }
-
-  } else {
-    GuidConverter local(local_subscription_id), remote(remote_publication_id);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataLink::make_reservation: ")
-               ACE_TEXT("failed to insert local subcription %C to remote ")
-               ACE_TEXT("publication %C reservation into sub_map_.\n"),
-               OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
+template <typename Seq>
+void set_to_seq(const RepoIdSet& rids, Seq& seq)
+{
+  seq.length(static_cast<CORBA::ULong>(rids.size()));
+  CORBA::ULong i = 0;
+  for (RepoIdSet::const_iterator iter = rids.begin(); iter != rids.end(); ++iter) {
+    seq[i++] = *iter;
   }
-
-  return -1;
 }
 
 GUIDSeq*
 DataLink::peer_ids(const RepoId& local_id) const
 {
   GuardType guard(this->pub_sub_maps_lock_);
-  // Is 'local_id' a local publication?
-  if (this->send_listeners_.count(local_id)) {
-    ReceiveListenerSet_rch rls = this->pub_map_.find(local_id);
 
-    if (rls.is_nil()) {
-      return 0;
-    }
+  const AssocByLocal::const_iterator iter = assoc_by_local_.find(local_id);
 
-    GUIDSeq_var result = new GUIDSeq;
-    result->length(static_cast<CORBA::ULong>(rls->size()));
-    CORBA::ULong i = 0;
+  if (iter == assoc_by_local_.end())
+    return 0;
 
-    for (ReceiveListenerSet::MapType::iterator iter = rls->map().begin();
-         iter != rls->map().end(); ++iter) {
-      result[i++] = iter->first;
-    }
-
-    return result._retn();
-  }
-
-  // Is 'local_id' a local subscription?
-  if (this->recv_listeners_.count(local_id)) {
-    RepoIdSet_rch ris = this->sub_map_.find(local_id);
-
-    if (ris.is_nil()) {
-      return 0;
-    }
-
-    GUIDSeq_var result = new GUIDSeq;
-    result->length(static_cast<CORBA::ULong>(ris->size()));
-    CORBA::ULong i = 0;
-
-    for (RepoIdSet::MapType::iterator iter = ris->map().begin();
-         iter != ris->map().end(); ++iter) {
-      result[i++] = iter->first;
-    }
-
-    return result._retn();
-  }
-
-  return 0;
+  GUIDSeq_var result = new GUIDSeq;
+  set_to_seq(iter->second, static_cast<GUIDSeq&>(result));
+  return result._retn();
 }
 
 /// This gets invoked when a TransportClient::remove_associations()
@@ -553,105 +387,29 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   //pub_sub_maps_lock_
   this->release_reservations_i(remote_id, local_id);
 
-  // See if the remote_id is a publisher_id.
-  ReceiveListenerSet_rch listener_set;
-
   GuardType guard(this->pub_sub_maps_lock_);
-  listener_set = this->pub_map_.find(remote_id);
 
-  if (listener_set.is_nil()) {
-    // The remote_id is not a publisher_id.
-    // See if it is a subscriber_id by looking in our sub_map_.
-    RepoIdSet_rch id_set;
-    bool has_local_listener = false;
-
-    id_set = this->sub_map_.find(remote_id);
-    if (id_set.is_nil()) {
-      has_local_listener = this->recv_listener_for(local_id);
-    }
-
-    if (id_set.is_nil() && !has_local_listener) {
-      has_local_listener = this->send_listener_for(local_id);
-    }
-
-    if (has_local_listener) {
-      // Special case for "loopback" use of one DataLink for both
-      // publication and subscription: if the first release_reservations()
-      // has already completed, the second may not find anything in pub_map_
-      // and sub_map_.
-      VDBG_LVL((LM_DEBUG,
-                ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
-                ACE_TEXT("the link has no reservations.\n")), 5);
-
-      this->release_remote_i(remote_id);
-      DataLinkSet_rch& rel_set = released_locals[local_id];
-
-      if (!rel_set.in())
-        rel_set = new DataLinkSet;
-
-      rel_set->insert_link(this);
-
-      return;
-    }
-
-    if (id_set.is_nil()) {
-      // We don't know about the remote_id.
-      GuidConverter converter(remote_id);
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DataLink::release_reservations: ")
-                 ACE_TEXT("unable to locate remote %C in pub_map_ or sub_map_.\n"),
-                 OPENDDS_STRING(converter).c_str()));
-
-    } else {
-      VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::release_reservations: the remote_id is a sub id.\n"), 5);
-
-      // The remote_id is a subscriber_id.
-
-      this->release_remote_subscriber(remote_id,
-                                      local_id,
-                                      id_set,
-                                      released_locals);
-
-      if (id_set->size() == 0) {
-        // Remove the remote_id(sub) after the remote/local ids is released
-        // and there are no local pubs associated with this sub.
-
-        id_set = this->sub_map_.remove_set(remote_id);
-
-        this->release_remote_i(remote_id);
-      }
-
-    }
-
+  ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_id];
+  if (rls->size() == 1) {
+    assoc_by_remote_.erase(remote_id);
+    release_remote_i(remote_id);
   } else {
-    VDBG_LVL((LM_DEBUG,
-              ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
-              ACE_TEXT("the remote_id is a pub id.\n")), 5);
-
-    // The remote_id is a publisher_id.
-
-    this->release_remote_publisher(remote_id,
-                                   local_id,
-                                   listener_set,
-                                   released_locals);
-
-    if (listener_set->size() == 0) {
-      // Remove the remote_id(pub) after the remote/local ids is released
-      // and there are no local subs associated with this pub.
-      listener_set = this->pub_map_.remove_set(remote_id);
-
-      this->release_remote_i(remote_id);
-    }
-
+    rls->remove(local_id);
   }
 
-  VDBG_LVL((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
-            ACE_TEXT("maps tot size: %d.\n"),
-            this->pub_map_.size() + this->sub_map_.size()),
-           5);
+  RepoIdSet& ris = assoc_by_local_[local_id];
+  if (ris.size() == 1) {
+    assoc_by_local_.erase(local_id);
 
-  if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
+    DataLinkSet_rch& links = released_locals[local_id];
+    if (links.is_nil())
+      links = new DataLinkSet;
+    links->insert_link(this);
+  } else {
+    ris.erase(remote_id);
+  }
+
+  if (assoc_by_local_.empty()) {
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
               ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
@@ -697,14 +455,6 @@ DataLink::cancel_release()
     reactor->get_reactor()->notify(this);
   }
   return true;
-}
-
-int
-DataLink::start_i()
-{
-  DBG_ENTRY_LVL("DataLink", "start_i", 6);
-
-  return 0;
 }
 
 void
@@ -775,13 +525,12 @@ int
 DataLink::data_received(ReceivedDataSample& sample,
                         const RepoId& readerId /* = GUID_UNKNOWN */)
 {
-  data_received_i(sample, readerId, OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)(), ReceiveListenerSet::SET_EXCLUDED);
+  data_received_i(sample, readerId, RepoIdSet(), ReceiveListenerSet::SET_EXCLUDED);
   return 0;
 }
 
 void
-DataLink::data_received_include(ReceivedDataSample& sample,
-                                  const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl)
+DataLink::data_received_include(ReceivedDataSample& sample, const RepoIdSet& incl)
 {
   data_received_i(sample, GUID_UNKNOWN, incl, ReceiveListenerSet::SET_INCLUDED);
 }
@@ -789,7 +538,7 @@ DataLink::data_received_include(ReceivedDataSample& sample,
 void
 DataLink::data_received_i(ReceivedDataSample& sample,
                           const RepoId& readerId,
-                          const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl_excl,
+                          const RepoIdSet& incl_excl,
                           ReceiveListenerSet::ConstrainReceiveSet constrain)
 {
   DBG_ENTRY_LVL("DataLink", "data_received_i", 6);
@@ -799,7 +548,6 @@ DataLink::data_received_i(ReceivedDataSample& sample,
   // Locate the set of TransportReceiveListeners associated with this
   // DataLink that are interested in hearing about any samples received
   // from the remote publisher_id.
-  ReceiveListenerSet_rch listener_set;
   if (DCPS_debug_level > 9) {
     const GuidConverter converter(publication_id);
     const GuidConverter reader(readerId);
@@ -821,9 +569,12 @@ DataLink::data_received_i(ReceivedDataSample& sample,
                to_string(sample.header_).c_str()));
   }
 
+  ReceiveListenerSet_rch listener_set;
   {
     GuardType guard(this->pub_sub_maps_lock_);
-    listener_set = this->pub_map_.find(publication_id);
+    AssocByRemote::iterator iter = assoc_by_remote_.find(publication_id);
+    if (iter != assoc_by_remote_.end())
+      listener_set = iter->second;
 
     if (listener_set.is_nil() && this->default_listener_) {
       this->default_listener_->data_received(sample);
@@ -866,7 +617,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
       // method on each one.
       OPENDDS_STRING included_ids;
       bool first = true;
-      OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)::const_iterator iter = incl_excl.begin();
+      RepoIdSet::const_iterator iter = incl_excl.begin();
       while(iter != incl_excl.end()) {
         included_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter));
         first = false;
@@ -880,108 +631,6 @@ DataLink::data_received_i(ReceivedDataSample& sample,
   }
 
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-}
-
-/// No locking needed because the only caller release_reservations()
-/// obtains pub_sub_maps_lock prior to calling
-void
-DataLink::release_remote_subscriber(RepoId subscriber_id, RepoId publisher_id,
-                                    RepoIdSet_rch& pubid_set,
-                                    DataLinkSetMap& released_publishers)
-{
-  DBG_ENTRY_LVL("DataLink", "release_remote_subscriber", 6);
-
-  RepoIdSet::MapType& pubid_map = pubid_set->map();
-
-  for (RepoIdSet::MapType::iterator itr = pubid_map.begin();
-       itr != pubid_map.end();
-       ++itr) {
-    if (publisher_id == itr->first) {
-      // Remove the publisher_id => subscriber_id association.
-      int ret = 0;
-      {
-
-        ret = this->pub_map_.release_subscriber(publisher_id,
-                                                subscriber_id);
-      }
-
-      if (ret == 1) {
-        // This means that this release() operation has caused the
-        // publisher_id to no longer be associated with *any* subscribers.
-        DataLinkSet_rch& rel_set = released_publishers[publisher_id];
-
-        if (!rel_set.in())
-          rel_set = new DataLinkSet;
-
-        rel_set->insert_link(this);
-        {
-          GuardType guard(this->released_local_lock_);
-          released_local_pubs_.insert_id(publisher_id, subscriber_id);
-        }
-      }
-    }
-  }
-
-  bool last;
-  bool exists = pubid_set->exist(publisher_id, last);
-
-  if (!exists) {
-    GuidConverter converter(publisher_id);
-    ACE_ERROR((LM_INFO,
-               ACE_TEXT("(%P|%t) DataLink::release_remote_subscriber: ")
-               ACE_TEXT(" pub %C not in PubSet when trying to remove.\n"),
-               OPENDDS_STRING(converter).c_str()));
-  }
-
-  // remove the publisher_id from the pubset that associate with the remote sub.
-  // only call remove_id if publisher_id indeed exists in pubid_set
-  if (exists && pubid_set->remove_id(publisher_id) == -1) {
-    GuidConverter converter(publisher_id);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_subscriber: ")
-               ACE_TEXT(" failed to remove pub %C from PubSet.\n"),
-               OPENDDS_STRING(converter).c_str()));
-  }
-}
-
-/// No locking needed because the only caller release_reservations()
-/// obtains pub_sub_maps_lock prior to calling
-void
-DataLink::release_remote_publisher(RepoId publisher_id, RepoId subscriber_id,
-                                   ReceiveListenerSet_rch& listener_set,
-                                   DataLinkSetMap& released_subscribers)
-{
-  DBG_ENTRY_LVL("DataLink", "release_remote_publisher", 6);
-
-  if (listener_set->exist(subscriber_id)) {
-    // Remove the publisher_id => subscriber_id association.
-
-    int result = 0;
-    result = this->sub_map_.release_publisher(subscriber_id,publisher_id);
-
-    if (result == 1) {
-      // This means that this release() operation has caused the
-      // subscriber_id to no longer be associated with *any* publishers.
-      DataLinkSet_rch& rel_set = released_subscribers[subscriber_id];
-
-      if (!rel_set.in())
-        rel_set = new DataLinkSet;
-
-      rel_set->insert_link(this);
-      {
-        GuardType guard(this->released_local_lock_);
-        released_local_subs_.insert_id(subscriber_id, publisher_id);
-      }
-    }
-  }
-
-  if (listener_set->remove(subscriber_id) == -1) {
-    GuidConverter converter(subscriber_id);
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: DataLink::release_remote_publisher: ")
-               ACE_TEXT(" failed to remove sub %C from ListenerSet.\n"),
-               OPENDDS_STRING(converter).c_str()));
-  }
 }
 
 // static
@@ -1039,15 +688,12 @@ DataLink::notify(ConnectionNotice notice)
 
   GuardType guard(this->pub_sub_maps_lock_);
 
-  ReceiveListenerSetMap::MapType & pub_map_ref = this->pub_map_.map();
-
   // Notify the datawriters
   // the lost publications due to a connection problem.
-  for (ReceiveListenerSetMap::MapType::iterator itr = pub_map_ref.begin();
-        itr != pub_map_ref.end();
-        ++itr) {
+  for (IdToSendListenerMap::iterator itr = send_listeners_.begin();
+       itr != send_listeners_.end(); ++itr) {
 
-    TransportSendListener* tsl = send_listener_for(itr->first);
+    TransportSendListener* tsl = itr->second;
 
     if (tsl != 0) {
       if (Transport_debug_level > 0) {
@@ -1059,10 +705,9 @@ DataLink::notify(ConnectionNotice notice)
                    connection_notice_as_str(notice)));
       }
 
-      ReceiveListenerSet_rch subset = itr->second;
-
+      const RepoIdSet& rids = assoc_by_local_[itr->first];
       ReaderIdSeq subids;
-      subset->get_keys(subids);
+      set_to_seq(rids, subids);
 
       switch (notice) {
       case DISCONNECTED:
@@ -1099,13 +744,10 @@ DataLink::notify(ConnectionNotice notice)
 
   // Notify the datareaders registered with TransportImpl
   // the lost subscriptions due to a connection problem.
-  RepoIdSetMap::MapType & sub_map_ref = this->sub_map_.map();
+  for (IdToRecvListenerMap::iterator itr = recv_listeners_.begin();
+       itr != recv_listeners_.end(); ++itr) {
 
-  for (RepoIdSetMap::MapType::iterator itr = sub_map_ref.begin();
-       itr != sub_map_ref.end();
-       ++itr) {
-
-    TransportReceiveListener* trl = recv_listener_for(itr->first);
+    TransportReceiveListener* trl = itr->second;
 
     if (trl != 0) {
       if (Transport_debug_level > 0) {
@@ -1117,18 +759,9 @@ DataLink::notify(ConnectionNotice notice)
                    connection_notice_as_str(notice)));
       }
 
-      RepoIdSet_rch pubset = itr->second;
-      RepoIdSet::MapType & map = pubset->map();
-
+      const RepoIdSet& rids = assoc_by_local_[itr->first];
       WriterIdSeq pubids;
-      pubids.length(static_cast<CORBA::ULong>(pubset->size()));
-      CORBA::ULong i = 0;
-
-      for (RepoIdSet::MapType::iterator iitr = map.begin();
-           iitr != map.end();
-           ++iitr) {
-        pubids[i++] = iitr->first;
-      }
+      set_to_seq(rids, pubids);
 
       switch (notice) {
       case DISCONNECTED:
@@ -1163,77 +796,9 @@ DataLink::notify(ConnectionNotice notice)
   }
 }
 
-void
-DataLink::notify_connection_deleted()
+void DataLink::notify_connection_deleted()
 {
-  GuardType guard(this->released_local_lock_);
-
-  if (Transport_debug_level > 5) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataLink[%@]::notify_connection_deleted: ")
-               ACE_TEXT("pmap %d smap %d\n"),
-               this,
-               released_local_pubs_.map().size(),
-               released_local_subs_.map().size()));
-  }
-
-  RepoIdSet::MapType& pmap = released_local_pubs_.map();
-
-  for (RepoIdSet::MapType::iterator itr = pmap.begin();
-       itr != pmap.end();
-       ++itr) {
-
-    TransportSendListener* tsl = send_listener_for(itr->first);
-
-    if (tsl != 0) {
-      if (Transport_debug_level > 0) {
-        GuidConverter converter(itr->first);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
-                   ACE_TEXT("notify pub %C connection deleted.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-
-      tsl->notify_connection_deleted(itr->second);
-    } else {
-      if (Transport_debug_level > 0) {
-        GuidConverter converter(itr->first);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
-                   ACE_TEXT("could not find tsl for pub %C.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-    }
-  }
-
-  RepoIdSet::MapType& smap = released_local_subs_.map();
-
-  for (RepoIdSet::MapType::iterator itr2 = smap.begin();
-       itr2 != smap.end();
-       ++itr2) {
-
-    TransportReceiveListener* trl = recv_listener_for(itr2->first);
-
-    if (trl != 0) {
-      if (Transport_debug_level > 0) {
-        GuidConverter converter(itr2->first);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink::notify_connection_deleted: ")
-                   ACE_TEXT("notify sub %C connection deleted.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-
-      trl->notify_connection_deleted(itr2->second);
-    } else {
-      if (Transport_debug_level > 0) {
-        GuidConverter converter(itr2->first);
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink:: notify_connection_deleted: ")
-                   ACE_TEXT("could not find tsl for pub %C.\n"),
-                   OPENDDS_STRING(converter).c_str()));
-      }
-    }
-  }
+  //TODO
 }
 
 void
@@ -1255,12 +820,10 @@ DataLink::release_resources()
 }
 
 bool
-DataLink::is_target(const RepoId& sub_id)
+DataLink::is_target(const RepoId& remote_sub_id)
 {
   GuardType guard(this->pub_sub_maps_lock_);
-  RepoIdSet_rch pubs = this->sub_map_.find(sub_id);
-
-  return !pubs.is_nil();
+  return assoc_by_remote_.count(remote_sub_id);
 }
 
 GUIDSeq*
@@ -1269,14 +832,14 @@ DataLink::target_intersection(const RepoId& pub_id, const GUIDSeq& in,
 {
   GUIDSeq_var res;
   GuardType guard(this->pub_sub_maps_lock_);
-  ReceiveListenerSet_rch rlset = this->pub_map_.find(pub_id);
+  AssocByLocal::const_iterator iter = assoc_by_local_.find(pub_id);
 
-  if (!rlset.is_nil()) {
-    n_subs = rlset->map().size();
+  if (iter != assoc_by_local_.end()) {
+    n_subs = iter->second.size();
     const CORBA::ULong len = in.length();
 
     for (CORBA::ULong i(0); i < len; ++i) {
-      if (rlset->exist(in[i])) {
+      if (iter->second.count(in[i])) {
         if (res.ptr() == 0) {
           res = new GUIDSeq;
         }
@@ -1293,103 +856,35 @@ void DataLink::prepare_release()
 {
   GuardType guard(this->pub_sub_maps_lock_);
 
-  if (this->sub_map_releasing_.size() > 0) {
+  if (!assoc_releasing_.empty()) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) DataLink::prepare_release: ")
-               ACE_TEXT("sub_map is already released.\n")));
+               ACE_TEXT("already prepared for release.\n")));
     return;
   }
 
-  this->sub_map_releasing_ = this->sub_map_;
-
-  if (this->pub_map_releasing_.size() > 0) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) DataLink::prepare_release: ")
-               ACE_TEXT("pub_map is already released.\n")));
-    return;
-  }
-
-  this->pub_map_releasing_ = this->pub_map_;
+  assoc_releasing_ = assoc_by_local_;
 }
 
 void DataLink::clear_associations()
 {
-  // The pub_map_ has an entry for each pub_id
-  // Create iterator to traverse Publisher map.
-  ReceiveListenerSetMap::MapType& pub_map = pub_map_releasing_.map();
-
-  for (ReceiveListenerSetMap::MapType::iterator pub_map_iter = pub_map.begin();
-       pub_map_iter != pub_map.end();) {
-    // Extract the pub id
-    RepoId pub_id = pub_map_iter->first;
-
-    // Each pub_id (may)has an associated DataWriter
-    // Dependends upon whether we are an actual pub or sub.
-    TransportSendListener* tsl = send_listener_for(pub_id);
-
-    ReceiveListenerSet_rch sub_id_set = pub_map_iter->second;
-    // The iterator seems to get corrupted if the element currently
-    // being pointed at gets unbound. Hence advance it.
-    ++pub_map_iter;
-
-    // Check is DataWriter exists (could have been deleted before we got here.
-    if (tsl != NULL) {
-      // Each pub-id is mapped to a bunch of sub-id's
-      //ReceiveListenerSet_rch sub_id_set = pub_entry->int_id_;
+  for (AssocByLocal::iterator iter = assoc_releasing_.begin();
+       iter != assoc_releasing_.end(); ++iter) {
+    TransportSendListener* const tsl = send_listener_for(iter->first);
+    if (tsl) {
       ReaderIdSeq sub_ids;
-      sub_id_set->get_keys(sub_ids);
-
-      // after creating remote id sequence, remove from DataWriter
-      // I believe the 'notify_lost' should be set to false, since
-      // it doesn't look like we meet any of the conditions for setting
-      // it true. Check interface documentations.
+      set_to_seq(iter->second, sub_ids);
       tsl->remove_associations(sub_ids, false);
+      continue;
     }
-  }
-
-  // sub -> pub
-  // Create iterator to traverse Subscriber map.
-  RepoIdSetMap::MapType& sub_map = sub_map_releasing_.map();
-
-  for (RepoIdSetMap::MapType::iterator sub_map_iter = sub_map.begin();
-       sub_map_iter != sub_map.end();) {
-    // Extract the sub id
-    RepoId sub_id = sub_map_iter->first;
-    // Each sub_id (may)has an associated DataReader
-    // Dependends upon whether we are an actual pub or sub.
-    TransportReceiveListener* trl = recv_listener_for(sub_id);
-
-    RepoIdSet_rch pub_id_set = sub_map_iter->second;
-    // The iterator seems to get corrupted if the element currently
-    // being pointed at gets unbound. Hence advance it.
-    ++sub_map_iter;
-
-    // Check id DataReader exists (could have been deleted before we got here.)
-    if (trl != NULL) {
-      // Each sub-id is mapped to a bunch of pub-id's
-      CORBA::ULong pub_ids_count =
-        static_cast<CORBA::ULong>(pub_id_set->size());
-      WriterIdSeq pub_ids(pub_ids_count);
-      pub_ids.length(pub_ids_count);
-
-      int count = 0;
-
-      // create a sequence of associated pub-id's
-      for (RepoIdSet::MapType::iterator pub_ids_iter = pub_id_set->map().begin();
-           pub_ids_iter != pub_id_set->map().end(); ++pub_ids_iter) {
-        pub_ids[count++] = pub_ids_iter->first;
-      }
-
-      // after creating remote id sequence, remove from DataReader
-      // I believe the 'notify_lost' should be set to false, since
-      // it doesn't look like we meet any of the conditions for setting
-      // it true. Check interface documentations.
+    TransportReceiveListener* const trl = recv_listener_for(iter->first);
+    if (trl) {
+      WriterIdSeq pub_ids;
+      set_to_seq(iter->second, pub_ids);
       trl->remove_associations(pub_ids, false);
     }
   }
-
-  sub_map_releasing_.clear();
-  pub_map_releasing_.clear();
+  assoc_releasing_.clear();
 }
 
 int
@@ -1399,7 +894,7 @@ DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
     VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
     this->impl_->unbind_link(this);
 
-    if ((this->pub_map_.size() + this->sub_map_.size()) == 0) {
+    if (assoc_by_remote_.empty() && assoc_by_local_.empty()) {
       this->stop();
     }
   }
@@ -1498,7 +993,7 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
 #ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
-{
+{/*
   str << "   There are " << value.pub_map_.map().size()
       << " publications currently associated with this link:"
       << std::endl;
@@ -1515,7 +1010,7 @@ operator<<(std::ostream& str, const DataLink& value)
           << GuidConverter(subLocation->first) << "   " << std::endl;
     }
   }
-
+  */
   return str;
 }
 #endif

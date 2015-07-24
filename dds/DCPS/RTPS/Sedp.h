@@ -329,9 +329,9 @@ private:
 
   // Topic:
 
-  RepoIdSet defer_match_endpoints_, associated_participants_;
+  DCPS::RepoIdSet defer_match_endpoints_, associated_participants_;
 
-  void inconsistent_topic(const RepoIdSet& endpoints) const;
+  void inconsistent_topic(const DCPS::RepoIdSet& endpoints) const;
 
   virtual bool shutting_down() const;
 

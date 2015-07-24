@@ -139,7 +139,7 @@ ReceiveListenerSet::clear()
 
 void
 ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
-                                  const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl_excl,
+                                  const RepoIdSet& incl_excl,
                                   ConstrainReceiveSet constrain)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received", 6);

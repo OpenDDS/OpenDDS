@@ -195,9 +195,7 @@ private:
   DataReaderImpl* reader_;
   DDS::InstanceHandle_t handle_;
 
-  typedef OPENDDS_SET_CMP(PublicationId, GUID_tKeyLessThan) Writers;
-
-  Writers writers_;
+  RepoIdSet writers_;
   PublicationId owner_;
   bool exclusive_;
   /// registered with participant so it can be calledback as
