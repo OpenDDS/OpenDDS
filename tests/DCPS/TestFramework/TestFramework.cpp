@@ -49,7 +49,7 @@ TestBase::run(int& argc, ACE_TCHAR* argv[])
 
   int error(0);
   try {
-    init();
+    init(argc, argv);
     error = test();
     fini();
 
@@ -64,12 +64,12 @@ TestBase::run(int& argc, ACE_TCHAR* argv[])
 }
 
 void
-TestBase::init()
+TestBase::init(int argc, ACE_TCHAR* argv[])
 {
   this->participant_ = create_participant();
   this->topic_ = create_topic();
 
-  init_i();  // delegate to child
+  init_i(argc, argv);  // delegate to child
 }
 
 void

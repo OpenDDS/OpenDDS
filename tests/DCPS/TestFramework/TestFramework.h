@@ -46,6 +46,41 @@ public:
     DDS::TopicListener_ptr& listener,
     DDS::StatusMask& status);
 
+  virtual DDS::ReturnCode_t init_publisher(
+    DDS::PublisherQos& qos,
+    DDS::PublisherListener_ptr& listener,
+    DDS::StatusMask& status)
+  {
+    return DDS::RETCODE_OK;
+  }
+
+  virtual DDS::ReturnCode_t init_datawriter(
+    DDS::DataWriterQos& qos,
+    DDS::DataWriterListener_ptr& listener,
+    DDS::StatusMask& status)
+  {
+    return DDS::RETCODE_OK;
+  }
+
+  virtual DDS::ReturnCode_t init_subscriber(
+    DDS::SubscriberQos& qos,
+    DDS::SubscriberListener_ptr& listener,
+    DDS::StatusMask& status)
+  {
+    return DDS::RETCODE_OK;
+  }
+
+  virtual DDS::ReturnCode_t init_datareader(
+    DDS::DataReaderQos& qos,
+    DDS::DataReaderListener_ptr& listener,
+    DDS::StatusMask& status)
+  {
+    return DDS::RETCODE_OK;
+  }
+
+  DDS::DomainParticipant_var& get_participant() { return participant_; }
+  DDS::Topic_var& get_topic() { return topic_; }
+
   int run(int &argc, ACE_TCHAR* arg[]);
 
   virtual int test() = 0;
@@ -56,11 +91,12 @@ protected:
 
   TestBase();
 
-  void init();
+  void init(int argc, ACE_TCHAR* argv[]);
 
   void fini();
 
-  virtual void init_i() = 0;
+  virtual void init_i(int /*argc*/, ACE_TCHAR*[] /*argv*/) { init_i(); }
+  virtual void init_i() {};
 
   virtual void fini_i() = 0;
 

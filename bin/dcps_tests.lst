@@ -253,6 +253,7 @@ tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps: !DCPS_MIN RTPS
 tests/DCPS/ManualAssertLiveliness/run_test.pl rtpsdisco rtps lost: !DCPS_MIN RTPS
 tests/DCPS/Serializer_wstring/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SharedTransport/run_test.pl rtps: !DCPS_MIN !OPENDDS_SAFETY_PROFILE RTPS
 tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE
 tests/DCPS/SharedTransport/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE

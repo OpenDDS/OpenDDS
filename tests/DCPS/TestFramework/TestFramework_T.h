@@ -11,12 +11,12 @@
 #include "TestFramework.h"
 
 template<typename Writer>
-class TestPublisher : public virtual TestBase {
+class TestPublisher {
 public:
   typedef typename Writer::_ptr_type Writer_ptr;
   typedef typename Writer::_var_type Writer_var;
 
-  TestPublisher();
+  TestPublisher(TestBase& test);
   virtual ~TestPublisher();
 
   virtual DDS::ReturnCode_t init_publisher(
@@ -30,34 +30,47 @@ public:
     DDS::StatusMask& status);
 
   void wait_for_acknowledgments(
-    DDS::Duration_t timeout = DEFAULT_TIMEOUT);
+    DDS::Duration_t timeout = TestBase::DEFAULT_TIMEOUT);
 
   void wait_for_subscribers(
     CORBA::Long count = 1,
-    DDS::Duration_t timeout = DEFAULT_TIMEOUT);
+    DDS::Duration_t timeout = TestBase::DEFAULT_TIMEOUT);
+
+  int write_message(TestMessage& message);
+  int write_w_timestamp(
+    TestMessage& message,
+    DDS::InstanceHandle_t& instance,
+    DDS::Time_t& timestamp);
+
+  DDS::InstanceHandle_t register_instance(TestMessage& message);
+
+  virtual void init_i();
+  virtual void fini_i();
 
 protected:
+  TestBase& test_;
   DDS::Publisher_var publisher_;
 
   DDS::DataWriter_var writer_;
   Writer_ptr writer_i_;
 
-  virtual void init_i();
-
-  virtual void fini_i();
-
   DDS::Publisher_var create_publisher();
-
   DDS::DataWriter_var create_datawriter();
+
+  DDS::DomainParticipant_var&
+  get_participant() { return test_.get_participant(); }
+
+  DDS::Topic_var&
+  get_topic() { return test_.get_topic(); }
 };
 
 template<typename Reader>
-class TestSubscriber : public virtual TestBase {
+class TestSubscriber {
 public:
   typedef typename Reader::_ptr_type Reader_ptr;
   typedef typename Reader::_var_type Reader_var;
 
-  TestSubscriber();
+  TestSubscriber(TestBase& test);
   virtual ~TestSubscriber();
 
   virtual DDS::ReturnCode_t init_subscriber(
@@ -72,21 +85,42 @@ public:
 
   void wait_for_publishers(
     CORBA::Long count = 1,
-    DDS::Duration_t timeout = DEFAULT_TIMEOUT);
+    DDS::Duration_t timeout = TestBase::DEFAULT_TIMEOUT);
+
+  DDS::ReturnCode_t take_next_sample(
+    TestMessage& message,
+    DDS::SampleInfo& si);
+
+  DDS::ReturnCode_t take_instance(
+    TestMessageSeq& messages,
+    DDS::SampleInfoSeq& si,
+    long max_samples,
+    DDS::InstanceHandle_t& handle,
+    DDS::SampleStateMask sample_states,
+    DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
+
+  DDS::InstanceHandle_t lookup_instance(
+    TestMessage& message);
+
+  virtual void init_i();
+  virtual void fini_i();
 
 protected:
+  TestBase& test_;
   DDS::Subscriber_var subscriber_;
 
   DDS::DataReader_var reader_;
   Reader_ptr reader_i_;
 
-  virtual void init_i();
-
-  virtual void fini_i();
-
   DDS::Subscriber_var create_subscriber();
-
   DDS::DataReader_var create_datareader();
+
+  DDS::DomainParticipant_var&
+  get_participant() { return test_.get_participant(); }
+
+  DDS::Topic_var&
+  get_topic() { return test_.get_topic(); }
 };
 
 template<typename Reader, typename Writer>
