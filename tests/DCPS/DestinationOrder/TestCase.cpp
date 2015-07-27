@@ -53,6 +53,20 @@ TestCase::init_datareader(DDS::DataReaderQos& qos,
   return DDS::RETCODE_OK;
 }
 
+void
+TestCase::init_i() {
+  publisher_  = new TestPublisherType(*this);
+  subscriber_ = new TestSubscriberType(*this);
+  publisher_->init_i();
+  subscriber_->init_i();
+}
+
+void
+TestCase::fini_i() {
+  delete publisher_;
+  delete subscriber_;
+}
+
 int
 TestCase::test()
 {
@@ -66,15 +80,15 @@ TestCase::test()
   TestMessage m1 = { 0, "FIRST"  };
   TestMessage m2 = { 0, "SECOND" };
 
-  instance = this->writer_i_->register_instance(m1);
+  instance = publisher_->register_instance(m1);
 
-  if (this->writer_i_->write_w_timestamp(m1, instance, t1) != DDS::RETCODE_OK) {
+  if (publisher_->write_w_timestamp(m1, instance, t1) != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("ERROR: %N:%l: test() -")
                       ACE_TEXT(" unable to write sample!\n")), -1);
   }
 
-  if (this->writer_i_->write_w_timestamp(m2, instance, t2) != DDS::RETCODE_OK) {
+  if (publisher_->write_w_timestamp(m2, instance, t2) != DDS::RETCODE_OK) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("ERROR: %N:%l: test() -")
                       ACE_TEXT(" unable to write sample!\n")), -1);
@@ -85,10 +99,10 @@ TestCase::test()
   TestMessageSeq messages;
   DDS::SampleInfoSeq info;
 
-  instance = this->reader_i_->lookup_instance(m1);
+  instance = subscriber_->lookup_instance(m1);
 
   DDS::ReturnCode_t error =
-    this->reader_i_->take_instance(messages,
+    subscriber_->take_instance(messages,
                                    info,
                                    1,
                                    instance,
@@ -108,6 +122,12 @@ TestCase::test()
   } else {
     return ACE_OS::strcmp(messages[0].message, "SECOND") == 0;
   }
+}
+
+void
+TestCase::wait_for_subscribers()
+{
+  publisher_->wait_for_subscribers();
 }
 
 int
