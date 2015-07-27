@@ -258,13 +258,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_Arg_Shifter shifter (argc, argv);
       while (shifter.is_anything_left ()) {
         const ACE_TCHAR* x = shifter.get_current();
-        if (strcmp(x, "-reader") == 0) {
+        if (ACE_OS::strcmp(x, ACE_TEXT("-reader")) == 0) {
           mode = READER;
         }
-        if (strcmp(x, "-writer") == 0) {
+        if (ACE_OS::strcmp(x, ACE_TEXT("-writer")) == 0) {
           mode = WRITER;
         }
-        if (strcmp(x, "-toggle") == 0) {
+        if (ACE_OS::strcmp(x, ACE_TEXT("-toggle")) == 0) {
           toggle = true;
         }
         shifter.consume_arg ();
