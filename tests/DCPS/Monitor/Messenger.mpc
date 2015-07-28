@@ -47,6 +47,10 @@ project(Monitor*monitor): dcpsexe_with_tcp, dcps_monitor {
   after    += Monitor*idl
   libs     += Monitor*idl
 
+  specific (vc9, vc10, vc11, vc12, vc14) {
+    compile_flags += /bigobj
+  }
+
   Idl_Files {
   }
 

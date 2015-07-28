@@ -5,7 +5,11 @@ project (ExcelRTD): taolib, dcpslib, dcps_inforepodiscovery, dcps_tcp, dcps_moni
 
   macros += _USRDLL RTDServer_EXPORTS
 
-  specific(vc10) {
+  specific (vc9, vc10, vc11, vc12, vc14) {
+    compile_flags += /bigobj
+  }
+
+  specific (vc10, vc11, vc12, vc14) {
     macros += RTD_DLL_NAME=<%quote%>$(TargetFileName)<%quote%>
   } else {
     macros += RTD_DLL_NAME=<%equote%>$(TargetFileName)<%equote%>

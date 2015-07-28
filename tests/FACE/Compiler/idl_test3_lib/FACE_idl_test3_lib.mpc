@@ -1,0 +1,23 @@
+project: opendds_face, face_idl_test_config {
+  idlflags      += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -I../../../DCPS/Compiler/idl_test3_lib
+  dcps_ts_flags += -Wb,export_macro=FooLib_Export -Wb,export_include=foolib_export.h -I../../../DCPS/Compiler/idl_test3_lib
+  dynamicflags  += FOOLIB_BUILD_DLL
+
+  specific (vc9, vc10, vc11, vc12, vc14) {
+    compile_flags += /bigobj
+  }
+
+  TypeSupport_Files {
+    ../../../DCPS/Compiler/idl_test3_lib/FooDef.idl
+    ../../../DCPS/Compiler/idl_test3_lib/FooDef2.idl
+    ../../../DCPS/Compiler/idl_test3_lib/FooDef3.idl
+    ../../../DCPS/Compiler/idl_test3_lib/SharedTypes.idl
+  }
+
+  IDL_Files {
+    FooDefTypeSupport.idl
+    FooDef2TypeSupport.idl
+    FooDef3TypeSupport.idl
+    SharedTypesTypeSupport.idl
+  }
+}

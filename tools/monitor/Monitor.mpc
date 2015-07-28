@@ -4,6 +4,10 @@ project(*App) : dcpsexe_with_tcp, dcps_monitor, qt4_gui {
   exeout  = $(DDS_ROOT)/bin
   requires += built_in_topics
 
+  specific (vc9, vc10, vc11, vc12, vc14) {
+    compile_flags += /bigobj
+  }
+
   MOC_Files {
     MonitorDataModel.h
     RepoSelect.h
