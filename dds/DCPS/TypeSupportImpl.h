@@ -25,6 +25,7 @@ class MetaStruct;
 class OpenDDS_Dcps_Export TypeSupportImpl
   : public virtual LocalObject<TypeSupport> {
 public:
+  TypeSupportImpl() {}
 
   virtual ~TypeSupportImpl();
 
@@ -39,6 +40,8 @@ public:
 
 private:
   CORBA::String_var type_name_;
+
+  OPENDDS_DELETED_COPY_CTOR_ASSIGN(TypeSupportImpl);
 };
 
 }
