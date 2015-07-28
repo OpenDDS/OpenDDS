@@ -413,13 +413,11 @@ ACE_Message_Block*
     if (key_marshaled_size_) {
       effective_size = key_marshaled_size_;
     } else {
-      // if (cdr) {
-      //   effective_size = 4; // CDR encapsulation
-      // }
       OpenDDS::DCPS::gen_find_size(ko_instance_data, effective_size, padding);
+	  effective_size += 4; // CDR encapsulation
     }
     if (cdr) {
-      effective_size += 4 + padding;
+      effective_size += padding;
     }
     ACE_NEW_RETURN(mb, ACE_Message_Block(effective_size,
                                          ACE_Message_Block::MB_DATA,
@@ -446,13 +444,13 @@ ACE_Message_Block*
     if (marshaled_size_) {
       effective_size = marshaled_size_;
     } else {
-      // if (cdr) {
-      //   effective_size = 4; // CDR encapsulation
-      // }
       OpenDDS::DCPS::gen_find_size(instance_data, effective_size, padding);
+	  if (cdr) {
+        effective_size += 4; // CDR encapsulation
+      }
     }
     if (cdr) {
-      effective_size += 4 + padding;
+      effective_size += padding;
     }
     ACE_NEW_MALLOC_RETURN(mb,
                           static_cast<ACE_Message_Block*>(
