@@ -12,6 +12,8 @@ module Messenger {
 #pragma DCPS_DATA_KEY "Messenger::Message subject_id"
 
   struct Message {
+    long align_field_a;
+    double align_field_b;
     string from;
     string subject;
     long subject_id;

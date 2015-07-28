@@ -413,13 +413,13 @@ ACE_Message_Block*
     if (key_marshaled_size_) {
       effective_size = key_marshaled_size_;
     } else {
-      if (cdr) {
-        effective_size = 4; // CDR encapsulation
-      }
+      // if (cdr) {
+      //   effective_size = 4; // CDR encapsulation
+      // }
       OpenDDS::DCPS::gen_find_size(ko_instance_data, effective_size, padding);
     }
     if (cdr) {
-      effective_size += padding;
+      effective_size += 4 + padding;
     }
     ACE_NEW_RETURN(mb, ACE_Message_Block(effective_size,
                                          ACE_Message_Block::MB_DATA,
@@ -435,20 +435,24 @@ ACE_Message_Block*
       serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
       serializer << ACE_CDR::UShort(0);
     }
-    serializer << ko_instance_data;
+
+    OpenDDS::DCPS::Serializer serializer2(mb, swap, cdr
+      ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+      : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+    serializer2 << ko_instance_data;
 
   } else { // OpenDDS::DCPS::FULL_MARSHALING
     size_t effective_size = 0, padding = 0;
     if (marshaled_size_) {
       effective_size = marshaled_size_;
     } else {
-      if (cdr) {
-        effective_size = 4; // CDR encapsulation
-      }
+      // if (cdr) {
+      //   effective_size = 4; // CDR encapsulation
+      // }
       OpenDDS::DCPS::gen_find_size(instance_data, effective_size, padding);
     }
     if (cdr) {
-      effective_size += padding;
+      effective_size += 4 + padding;
     }
     ACE_NEW_MALLOC_RETURN(mb,
                           static_cast<ACE_Message_Block*>(
@@ -475,7 +479,10 @@ ACE_Message_Block*
       serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
       serializer << ACE_CDR::UShort(0);
     }
-    serializer << instance_data;
+    OpenDDS::DCPS::Serializer serializer2(mb, swap, cdr
+      ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+      : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+    serializer2 << instance_data;
   }
 
   return mb;
@@ -1841,10 +1848,15 @@ void
     ser >> header;
   }
 
+  OpenDDS::DCPS::Serializer ser2(
+    sample.sample_,
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+    cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+
   if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
-    ser >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(*data);
+    ser2 >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(*data);
   } else {
-    ser >> *data;
+    ser2 >> *data;
   }
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1885,10 +1897,15 @@ void
     ser >> header;
   }
 
+  ::OpenDDS::DCPS::Serializer ser2(
+    sample.sample_,
+    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+    cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+
   if (sample.header_.key_fields_only_) {
-    ser >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(data);
+    ser2 >> ::OpenDDS::DCPS::KeyOnly< ::<%SCOPED%>>(data);
   } else {
-    ser >> data;
+    ser2 >> data;
   }
 
   ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);

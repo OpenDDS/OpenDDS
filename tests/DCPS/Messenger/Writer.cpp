@@ -106,6 +106,8 @@ Writer::svc()
     message.subject      = "Review";
     message.text         = "Worst. Movie. Ever.";
     message.count        = 0;
+    message.align_field_a = (int)0x98765432;
+    message.align_field_b = 3.1415926535897932384626433832795;
 
     for (int i = 0; i < num_messages; i++) {
       DDS::ReturnCode_t error;
