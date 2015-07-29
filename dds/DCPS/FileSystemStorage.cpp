@@ -351,7 +351,7 @@ DDS_DIRENT* DDS_Dirent::read()
   }
 
   if (dirp_->current_handle_ != INVALID_HANDLE_VALUE) {
-    dirp_->dirent_ = (DDS_DIRENT*) ACE_allocator::instance()->malloc(sizeof(DDS_DIRENT));
+    dirp_->dirent_ = (DDS_DIRENT*) ACE_Allocator::instance()->malloc(sizeof(DDS_DIRENT));
 
     if (dirp_->dirent_ != 0) {
 #ifdef ACE_HAS_TCHAR_DIRENT
