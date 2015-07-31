@@ -360,6 +360,9 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) AssocByLocal;
   AssocByLocal assoc_by_local_;
 
+  mutable LockType released_assoc_by_local_lock_;
+  AssocByLocal released_assoc_by_local_;
+
   /// A (smart) pointer to the TransportImpl that created this DataLink.
   TransportImpl_rch impl_;
 

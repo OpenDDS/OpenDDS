@@ -396,15 +396,17 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   } else {
     rls->remove(local_id);
   }
-
   RepoIdSet& ris = assoc_by_local_[local_id];
   if (ris.size() == 1) {
-    assoc_by_local_.erase(local_id);
-
     DataLinkSet_rch& links = released_locals[local_id];
     if (links.is_nil())
       links = new DataLinkSet;
     links->insert_link(this);
+    {
+      GuardType guard(this->released_assoc_by_local_lock_);
+      released_assoc_by_local_[local_id].insert(remote_id);
+    }
+    assoc_by_local_.erase(local_id);
   } else {
     ris.erase(remote_id);
   }
@@ -706,6 +708,17 @@ DataLink::notify(ConnectionNotice notice)
       }
 
       const RepoIdSet& rids = assoc_by_local_[itr->first];
+      if (assoc_by_local_.empty() || rids.empty()) {
+        if (Transport_debug_level) {
+          GuidConverter converter(itr->first);
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) DataLink::notify: ")
+                     ACE_TEXT("try to notify pub %C %C - no associations to notify.\n"),
+                     OPENDDS_STRING(converter).c_str(),
+                     connection_notice_as_str(notice)));
+        }
+        break;
+      }
       ReaderIdSeq subids;
       set_to_seq(rids, subids);
 
@@ -760,6 +773,17 @@ DataLink::notify(ConnectionNotice notice)
       }
 
       const RepoIdSet& rids = assoc_by_local_[itr->first];
+      if (assoc_by_local_.empty() || rids.empty()) {
+        if (Transport_debug_level) {
+          GuidConverter converter(itr->first);
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) DataLink::notify: ")
+                     ACE_TEXT("try to notify sub %C %C - no associations to notify.\n"),
+                     OPENDDS_STRING(converter).c_str(),
+                     connection_notice_as_str(notice)));
+        }
+        break;
+      }
       WriterIdSeq pubids;
       set_to_seq(rids, pubids);
 
@@ -798,7 +822,27 @@ DataLink::notify(ConnectionNotice notice)
 
 void DataLink::notify_connection_deleted()
 {
-  //TODO
+  GuardType guard(this->released_assoc_by_local_lock_);
+  for (AssocByLocal::iterator iter = released_assoc_by_local_.begin();
+       iter != released_assoc_by_local_.end(); ++iter) {
+      TransportSendListener* const tsl = send_listener_for(iter->first);
+      if (tsl) {
+        for (RepoIdSet::iterator ris_it = iter->second.begin();
+             ris_it != iter->second.end(); ++ris_it) {
+          tsl->notify_connection_deleted(*ris_it);
+        }
+        iter->second.clear();
+//        continue;
+      }
+      TransportReceiveListener* const trl = recv_listener_for(iter->first);
+      if (trl) {
+        for (RepoIdSet::iterator ris_it = iter->second.begin();
+             ris_it != iter->second.end(); ++ris_it) {
+          trl->notify_connection_deleted(*ris_it);
+        }
+        iter->second.clear();
+      }
+  }
 }
 
 void
