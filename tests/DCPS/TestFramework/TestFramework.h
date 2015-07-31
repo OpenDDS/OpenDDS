@@ -47,33 +47,33 @@ public:
     DDS::StatusMask& status);
 
   virtual DDS::ReturnCode_t init_publisher(
-    DDS::PublisherQos& qos,
-    DDS::PublisherListener_ptr& listener,
-    DDS::StatusMask& status)
+    DDS::PublisherQos& /*qos*/,
+    DDS::PublisherListener_ptr& /*listener*/,
+    DDS::StatusMask& /*status*/)
   {
     return DDS::RETCODE_OK;
   }
 
   virtual DDS::ReturnCode_t init_datawriter(
-    DDS::DataWriterQos& qos,
-    DDS::DataWriterListener_ptr& listener,
-    DDS::StatusMask& status)
+    DDS::DataWriterQos& /*qos*/,
+    DDS::DataWriterListener_ptr& /*listener*/,
+    DDS::StatusMask& /*status*/)
   {
     return DDS::RETCODE_OK;
   }
 
   virtual DDS::ReturnCode_t init_subscriber(
-    DDS::SubscriberQos& qos,
-    DDS::SubscriberListener_ptr& listener,
-    DDS::StatusMask& status)
+    DDS::SubscriberQos& /*qos*/,
+    DDS::SubscriberListener_ptr& /*listener*/,
+    DDS::StatusMask& /*status*/)
   {
     return DDS::RETCODE_OK;
   }
 
   virtual DDS::ReturnCode_t init_datareader(
-    DDS::DataReaderQos& qos,
-    DDS::DataReaderListener_ptr& listener,
-    DDS::StatusMask& status)
+    DDS::DataReaderQos& /*qos*/,
+    DDS::DataReaderListener_ptr& /*listener*/,
+    DDS::StatusMask& /*status*/)
   {
     return DDS::RETCODE_OK;
   }

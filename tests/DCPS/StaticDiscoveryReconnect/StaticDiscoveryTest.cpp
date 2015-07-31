@@ -13,6 +13,9 @@
 #include "dds/DCPS/GuidConverter.h"
 
 #include "dds/DCPS/StaticIncludes.h"
+#ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+#endif
 
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_NS_stdlib.h"
@@ -29,7 +32,7 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
 
   if (!subscriber) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("ERROR: %N:%l: main() -")
+                      ACE_TEXT("ERROR: %N:%l: do_reader() -")
                       ACE_TEXT(" create_subscriber failed!\n")), -1);
   }
 
@@ -51,7 +54,7 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
 
     if (!reader) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT("ERROR: %N:%l: do_reader() -")
                         ACE_TEXT(" create_datareader failed!\n")), -1);
     }
 
@@ -119,7 +122,7 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
 
     if (!reader) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT("ERROR: %N:%l: do_reader() -")
                         ACE_TEXT(" create_datareader failed!\n")),
                        -1);
     }
@@ -143,7 +146,7 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
 
   if (!publisher) {
     ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("ERROR: %N:%l: main() -")
+                      ACE_TEXT("ERROR: %N:%l: do_writer() -")
                       ACE_TEXT(" create_publisher failed!\n")),
                      -1);
   }
@@ -167,7 +170,7 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
 
     if (!writer) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT("ERROR: %N:%l: do_writer() -")
                         ACE_TEXT(" create_datawriter failed!\n")), -1);
     }
 
@@ -225,7 +228,7 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
 
     if (!writer) {
       ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT("ERROR: %N:%l: do_writer() -")
                         ACE_TEXT(" create_datawriter failed!\n")),
                        -1);
     }
