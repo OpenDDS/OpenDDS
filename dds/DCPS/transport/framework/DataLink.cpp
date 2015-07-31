@@ -1037,24 +1037,23 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
 #ifndef OPENDDS_SAFETY_PROFILE
 std::ostream&
 operator<<(std::ostream& str, const DataLink& value)
-{/*
-  str << "   There are " << value.pub_map_.map().size()
-      << " publications currently associated with this link:"
+{
+  str << "   There are " << value.assoc_by_local_.size()
+      << " local entities currently using this link comprising following associations:"
       << std::endl;
 
-  for (ReceiveListenerSetMap::MapType::const_iterator
-       pubLocation = value.pub_map_.map().begin();
-       pubLocation != value.pub_map_.map().end();
-       ++pubLocation) {
-    for (ReceiveListenerSet::MapType::const_iterator
-         subLocation = pubLocation->second->map().begin();
-         subLocation != pubLocation->second->map().end();
-         ++subLocation) {
-      str << GuidConverter(pubLocation->first) << " --> "
-          << GuidConverter(subLocation->first) << "   " << std::endl;
+  for (DataLink::AssocByLocal::const_iterator
+       localId = value.assoc_by_local_.begin();
+       localId != value.assoc_by_local_.end();
+       ++localId) {
+    for (RepoIdSet::const_iterator
+         remoteId = localId->second.begin();
+         remoteId != localId->second.end();
+         ++remoteId) {
+      str << GuidConverter(localId->first) << " --> "
+          << GuidConverter(*remoteId) << "   " << std::endl;
     }
   }
-  */
   return str;
 }
 #endif
