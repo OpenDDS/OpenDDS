@@ -134,6 +134,10 @@ public:
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/);
 
+  virtual void unregister_for_writer(const RepoId& /*participant*/,
+                                     const RepoId& /*readerid*/,
+                                     const RepoId& /*writerid*/);
+
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
   void remove_or_reschedule(const PublicationId& pub_id);

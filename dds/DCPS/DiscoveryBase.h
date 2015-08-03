@@ -105,8 +105,6 @@ namespace OpenDDS {
     public:
       typedef DiscoveredParticipantData_ DiscoveredParticipantData;
 
-      typedef OPENDDS_SET_CMP(DCPS::RepoId, DCPS::GUID_tKeyLessThan) RepoIdSet;
-
       struct TopicDetails {
         OPENDDS_STRING data_type_;
         DDS::TopicQos qos_;

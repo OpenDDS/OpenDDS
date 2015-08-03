@@ -116,8 +116,7 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, long> shutdown_flag_; // Spdp shutting down
 
   void remove_expired_participants();
-  typedef Sedp::RepoIdSet RepoIdSet;
-  void get_discovered_participant_ids(RepoIdSet& results) const;
+  void get_discovered_participant_ids(DCPS::RepoIdSet& results) const;
 
   Sedp sedp_;
   // wait for acknowledgments from SpdpTransport and Sedp::Task

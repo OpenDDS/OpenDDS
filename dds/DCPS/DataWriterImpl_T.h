@@ -76,7 +76,7 @@ namespace OpenDDS {
         {
           ACE_ERROR ((LM_ERROR,
                       ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%sDataWriterImpl::")
+                      ACE_TEXT("%CDataWriterImpl::")
                       ACE_TEXT("register_instance_w_timestamp, ")
                       ACE_TEXT("register failed error=%d.\n"),
                       TraitsType::type_name(),
@@ -112,7 +112,7 @@ namespace OpenDDS {
           // already unregistered.
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) ")
-                             ACE_TEXT("%sDataWriterImpl::")
+                             ACE_TEXT("%CDataWriterImpl::")
                              ACE_TEXT("unregister_instance_w_timestamp, ")
                              ACE_TEXT("The instance is not registered.\n"),
                              TraitsType::type_name()),
@@ -122,7 +122,7 @@ namespace OpenDDS {
         {
           ACE_ERROR_RETURN ((LM_ERROR,
                              ACE_TEXT("(%P|%t) ")
-                             ACE_TEXT("%sDataWriterImpl::")
+                             ACE_TEXT("%CDataWriterImpl::")
                              ACE_TEXT("unregister_w_timestamp, ")
                              ACE_TEXT("The given handle=%X is different from ")
                              ACE_TEXT("registered handle=%X.\n"),
@@ -173,7 +173,7 @@ namespace OpenDDS {
         if (ret != ::DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ")
-                            ACE_TEXT("%sDataWriterImpl::write, ")
+                            ACE_TEXT("%CDataWriterImpl::write, ")
                             ACE_TEXT("register failed err=%d.\n"),
                             TraitsType::type_name(),
                             ret),
@@ -234,7 +234,7 @@ namespace OpenDDS {
             {
               ACE_ERROR_RETURN ((LM_ERROR,
                                  ACE_TEXT("(%P|%t) ")
-                                 ACE_TEXT("%sDataWriterImpl::dispose, ")
+                                 ACE_TEXT("%CDataWriterImpl::dispose, ")
                                  ACE_TEXT("The instance sample is not registered.\n"),
                                  TraitsType::type_name()),
                                 ::DDS::RETCODE_ERROR);
@@ -340,7 +340,7 @@ namespace OpenDDS {
           data_allocator_ = new DataAllocator (n_chunks_, marshaled_size_);
           if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
             ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) %sDataWriterImpl::")
+                       ACE_TEXT("(%P|%t) %CDataWriterImpl::")
                        ACE_TEXT("enable_specific-data")
                        ACE_TEXT(" Dynamic_Cached_Allocator_With_Overflow %x ")
                        ACE_TEXT("with %d chunks\n"),
@@ -352,7 +352,7 @@ namespace OpenDDS {
         {
           if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
             ACE_DEBUG((LM_DEBUG,
-                       ACE_TEXT("(%P|%t) %sDataWriterImpl::enable_specific")
+                       ACE_TEXT("(%P|%t) %CDataWriterImpl::enable_specific")
                        ACE_TEXT(" is unbounded data - allocate from heap\n"), TraitsType::type_name()));
         }
 
@@ -364,7 +364,7 @@ namespace OpenDDS {
       if (::OpenDDS::DCPS::DCPS_debug_level >= 2)
         {
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) %sDataWriterImpl::")
+                     ACE_TEXT("(%P|%t) %CDataWriterImpl::")
                      ACE_TEXT("enable_specific-mb ")
                      ACE_TEXT("Cached_Allocator_With_Overflow ")
                      ACE_TEXT("%x with %d chunks\n"),
@@ -372,7 +372,7 @@ namespace OpenDDS {
                      mb_allocator_,
                      n_chunks_ * association_chunk_multiplier_));
           ACE_DEBUG((LM_DEBUG,
-                     ACE_TEXT("(%P|%t) %sDataWriterImpl::")
+                     ACE_TEXT("(%P|%t) %CDataWriterImpl::")
                      ACE_TEXT("enable_specific-db ")
                      ACE_TEXT("Cached_Allocator_With_Overflow ")
                      ACE_TEXT("%x with %d chunks\n"),
@@ -590,7 +590,7 @@ private:
                   handle = ::DDS::HANDLE_NIL;
                   ACE_ERROR_RETURN ((LM_ERROR,
                                      ACE_TEXT("(%P|%t) ")
-                                     ACE_TEXT("%sDataWriterImpl::")
+                                     ACE_TEXT("%CDataWriterImpl::")
                                      ACE_TEXT("get_or_create_instance_handle, ")
                                      ACE_TEXT("insert %s failed. \n"),
                                      TraitsType::type_name(), TraitsType::type_name()),

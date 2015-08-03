@@ -108,10 +108,16 @@ public:
                            const ACE_INET_Addr& address,
                            OpenDDS::DCPS::DiscoveryListener* listener);
 
+  void unregister_for_reader(const RepoId& writerid,
+                             const RepoId& readerid);
+
   void register_for_writer(const RepoId& readerid,
                            const RepoId& writerid,
                            const ACE_INET_Addr& address,
                            OpenDDS::DCPS::DiscoveryListener* listener);
+
+  void unregister_for_writer(const RepoId& readerid,
+                             const RepoId& writerid);
 
   virtual void pre_stop_i();
 
@@ -131,8 +137,10 @@ private:
   static bool force_inline_qos_;
   bool requires_inline_qos(const PublicationId& pub_id);
 
+  typedef OPENDDS_MAP_CMP(RepoId, OPENDDS_VECTOR(RepoId),GUID_tKeyLessThan) DestToEntityMap;
   void add_gap_submsg(RTPS::SubmessageSeq& msg,
-                      const TransportQueueElement& tqe);
+                      const TransportQueueElement& tqe,
+                      const DestToEntityMap& dtem);
 
   RtpsUdpInst* config_;
   TransportReactorTask_rch reactor_task_;
@@ -209,10 +217,9 @@ private:
     SnToTqeMap elems_not_acked_;
     //Only accessed with RtpsUdpDataLink lock held
     SnToTqeMap to_deliver_;
-    CORBA::Long heartbeat_count_;
     bool durable_;
 
-    RtpsWriter() : heartbeat_count_(0), durable_(false) {}
+    RtpsWriter() : durable_(false) {}
     ~RtpsWriter();
     SequenceNumber heartbeat_high(const ReaderInfo&) const;
     void add_elem_awaiting_ack(TransportQueueElement* element);
@@ -249,6 +256,7 @@ private:
   struct RtpsReader {
     WriterInfoMap remote_writers_;
     bool durable_;
+    bool nack_durable(const WriterInfo& info);
   };
 
   typedef OPENDDS_MAP_CMP(RepoId, RtpsReader, GUID_tKeyLessThan) RtpsReaderMap;
@@ -339,14 +347,15 @@ private:
   void send_nack_replies();
   void process_acked_by_all_i(ACE_Guard<ACE_Thread_Mutex>& g, const RepoId& pub_id);
   void send_heartbeats();
+  void check_heartbeats();
   void send_heartbeats_manual(const TransportSendControlElement* tsce);
   void send_heartbeat_replies();
 
   CORBA::Long best_effort_heartbeat_count_;
 
-  struct TimedDelay : ACE_Event_Handler {
+  typedef void (RtpsUdpDataLink::*PMF)();
 
-    typedef void (RtpsUdpDataLink::*PMF)();
+  struct TimedDelay : ACE_Event_Handler {
 
     TimedDelay(RtpsUdpDataLink* outer, PMF function,
                const ACE_Time_Value& timeout)
@@ -370,12 +379,12 @@ private:
 
   } nack_reply_, heartbeat_reply_;
 
-
   struct HeartBeat : ReactorInterceptor {
 
-    explicit HeartBeat(ACE_Reactor* reactor, ACE_thread_t owner, RtpsUdpDataLink* outer)
+    explicit HeartBeat(ACE_Reactor* reactor, ACE_thread_t owner, RtpsUdpDataLink* outer, PMF function)
       : ReactorInterceptor(reactor, owner)
       , outer_(outer)
+      , function_(function)
       , enabled_(false) {}
 
     void schedule_enable()
@@ -386,7 +395,7 @@ private:
 
     int handle_timeout(const ACE_Time_Value&, const void*)
     {
-      outer_->send_heartbeats();
+      (outer_->*function_)();
       return 0;
     }
 
@@ -399,6 +408,7 @@ private:
     void disable();
 
     RtpsUdpDataLink* outer_;
+    PMF function_;
     bool enabled_;
 
     struct ScheduleEnableCommand : public Command {
@@ -414,47 +424,38 @@ private:
       HeartBeat* heartbeat_;
     };
 
-  } heartbeat_;
+  } heartbeat_, heartbeatchecker_;
 
   RTPS::InfoReplySubmessage info_reply_;
 
-  struct InterestingReader {
-    RepoId writerid;
+  /// Data structure representing an "interesting" remote entity for static discovery.
+  struct InterestingRemote {
+    /// id of local entity that is interested in this remote.
+    RepoId localid;
+    /// address of this entity
     ACE_INET_Addr address;
+    /// Callback to invoke.
     DiscoveryListener* listener;
-    CORBA::Long heartbeat_count;
-    bool called;
+    /// Timestamp indicating the last HeartBeat or AckNack received from the remote entity
+    ACE_Time_Value last_activity;
+    /// Current status of the remote entity.
+    enum { DOES_NOT_EXIST, EXISTS } status;
 
-    InterestingReader() { }
-    InterestingReader(const RepoId& w, const ACE_INET_Addr& a, DiscoveryListener* l)
-      : writerid(w)
+    InterestingRemote() { }
+    InterestingRemote(const RepoId& w, const ACE_INET_Addr& a, DiscoveryListener* l)
+      : localid(w)
       , address(a)
       , listener(l)
-      , heartbeat_count(0)
-      , called(false)
+      //, heartbeat_count(0)
+      , status(DOES_NOT_EXIST)
     { }
   };
-  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingReader, DCPS::GUID_tKeyLessThan) InterestingReaderMapType;
-  InterestingReaderMapType interesting_readers_;
-  typedef OPENDDS_MAP_CMP(RepoId, size_t, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
+  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingRemote, DCPS::GUID_tKeyLessThan) InterestingRemoteMapType;
+  InterestingRemoteMapType interesting_readers_;
+  InterestingRemoteMapType interesting_writers_;
+
+  typedef OPENDDS_MAP_CMP(RepoId, CORBA::Long, DCPS::GUID_tKeyLessThan) HeartBeatCountMapType;
   HeartBeatCountMapType heartbeat_counts_;
-
-  struct InterestingWriter {
-    RepoId readerid;
-    ACE_INET_Addr address;
-    DiscoveryListener* listener;
-    bool called;
-
-    InterestingWriter() { }
-    InterestingWriter(const RepoId& r, const ACE_INET_Addr& a, DiscoveryListener* l)
-      : readerid(r)
-      , address(a)
-      , listener(l)
-      , called(false)
-    { }
-  };
-  typedef OPENDDS_MULTIMAP_CMP(RepoId, InterestingWriter, DCPS::GUID_tKeyLessThan) InterestingWriterMapType;
-  InterestingWriterMapType interesting_writers_;
 
   struct InterestingAckNack {
     RepoId writerid;

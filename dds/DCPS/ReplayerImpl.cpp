@@ -776,15 +776,15 @@ void ReplayerImpl::remove_all_associations()
     size = static_cast<CORBA::ULong>(readers_.size()) + num_pending_readers;
     readers.length(size);
 
-    IdSet::iterator itEnd = readers_.end();
+    RepoIdSet::iterator itEnd = readers_.end();
     int i = 0;
 
-    for (IdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
+    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
       readers[i++] = *it;
     }
 
     itEnd = pending_readers_.end();
-    for (IdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
+    for (RepoIdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
       readers[i++] = *it;
     }
 
@@ -814,6 +814,14 @@ ReplayerImpl::register_for_reader(const RepoId& participant,
                                   DiscoveryListener* listener)
 {
   TransportClient::register_for_reader(participant, writerid, readerid, locators, listener);
+}
+
+void
+ReplayerImpl::unregister_for_reader(const RepoId& participant,
+                                    const RepoId& writerid,
+                                    const RepoId& readerid)
+{
+  TransportClient::unregister_for_reader(participant, writerid, readerid);
 }
 
 void

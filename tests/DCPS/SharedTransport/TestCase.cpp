@@ -145,7 +145,7 @@ void
 TestCase::init_i(int argc, ACE_TCHAR* argv[])
 {
   if (argc > 1) {
-    set_writers(atoi(argv[1]));
+    set_writers(ACE_OS::atoi(argv[1]));
   }
 
   // Create publishers

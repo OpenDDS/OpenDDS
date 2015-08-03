@@ -63,7 +63,7 @@ sub run_compatibility_tests {
 
   my $Subscriber = PerlDDS::create_process ("subscriber", $sub_parameters);
 
-  my $pub_parameters = "-c $compatibility -d $pub_durability_kind -k $pub_liveliness_kind -r $pub_reliability_kind -l $pub_lease_time -x $pub_time -ORBDebugLevel $level $DCPScfg";
+  my $pub_parameters = "-c $compatibility -d $pub_durability_kind -k $pub_liveliness_kind -r $pub_reliability_kind -l $pub_lease_time -x $pub_time -DCPSDebugLevel $level $DCPScfg";
 
   my $Publisher = PerlDDS::create_process ("publisher", "$pub_parameters");
 

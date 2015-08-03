@@ -1061,6 +1061,14 @@ RecorderImpl::register_for_writer(const RepoId& participant,
   TransportClient::register_for_writer(participant, readerid, writerid, locators, listener);
 }
 
+void
+RecorderImpl::unregister_for_writer(const RepoId& participant,
+                                    const RepoId& readerid,
+                                    const RepoId& writerid)
+{
+  TransportClient::unregister_for_writer(participant, readerid, writerid);
+}
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
 DDS::ReturnCode_t
 RecorderImpl::repoid_to_bit_key(const DCPS::RepoId&     id,

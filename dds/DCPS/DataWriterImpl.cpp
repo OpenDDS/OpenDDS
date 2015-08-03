@@ -764,16 +764,16 @@ void DataWriterImpl::remove_all_associations()
     size = static_cast<CORBA::ULong>(readers_.size()) + num_pending_readers;
     readers.length(size);
 
-    IdSet::iterator itEnd = readers_.end();
+    RepoIdSet::iterator itEnd = readers_.end();
     int i = 0;
 
-    for (IdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
+    for (RepoIdSet::iterator it = readers_.begin(); it != itEnd; ++it) {
       readers[i ++] = *it;
     }
 
     itEnd = pending_readers_.end();
 
-    for (IdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
+    for (RepoIdSet::iterator it = pending_readers_.begin(); it != itEnd; ++it) {
       readers[i ++] = *it;
     }
 
@@ -807,6 +807,14 @@ DataWriterImpl::register_for_reader(const RepoId& participant,
                                     DiscoveryListener* listener)
 {
   TransportClient::register_for_reader(participant, writerid, readerid, locators, listener);
+}
+
+void
+DataWriterImpl::unregister_for_reader(const RepoId& participant,
+                                      const RepoId& writerid,
+                                      const RepoId& readerid)
+{
+  TransportClient::unregister_for_reader(participant, writerid, readerid);
 }
 
 void
@@ -1781,7 +1789,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   // Track individual expected sequence numbers in ReaderInfo
-  OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) excluded;
+  RepoIdSet excluded;
 
   if (filter_out && !reader_info_.empty()) {
     const GUID_t* buf = filter_out->get_buffer();
@@ -2587,7 +2595,7 @@ DataWriterImpl::get_instance_handles(InstanceHandleVec& instance_handles)
 }
 
 void
-DataWriterImpl::get_readers(IdSet& readers)
+DataWriterImpl::get_readers(RepoIdSet& readers)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
   readers = this->readers_;

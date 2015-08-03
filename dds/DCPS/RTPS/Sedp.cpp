@@ -501,7 +501,7 @@ Sedp::Task::svc_i(const SPDPdiscoveredParticipantData* ppdata)
     sedp_->write_durable_participant_message_data(proto.remote_id_);
   }
 
-  for (RepoIdSet::iterator it = sedp_->defer_match_endpoints_.begin();
+  for (DCPS::RepoIdSet::iterator it = sedp_->defer_match_endpoints_.begin();
        it != sedp_->defer_match_endpoints_.end(); /*incremented in body*/) {
     if (0 == std::memcmp(it->guidPrefix, proto.remote_id_.guidPrefix,
                          sizeof(GuidPrefix_t))) {
@@ -750,8 +750,9 @@ Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
 }
 
 void
-Sedp::inconsistent_topic(const RepoIdSet& eps) const
+Sedp::inconsistent_topic(const DCPS::RepoIdSet& eps) const
 {
+  using DCPS::RepoIdSet;
   for (RepoIdSet::const_iterator iter(eps.begin()); iter != eps.end(); ++iter) {
     if (0 == std::memcmp(participant_id_.guidPrefix, iter->guidPrefix,
                          sizeof(GuidPrefix_t))) {
@@ -857,7 +858,7 @@ Sedp::update_subscription_params(const RepoId& subId,
     }
 
     // Let any associated local publications know about the change
-    for (RepoIdSet::iterator i = iter->second.matched_endpoints_.begin();
+    for (DCPS::RepoIdSet::iterator i = iter->second.matched_endpoints_.begin();
          i != iter->second.matched_endpoints_.end(); ++i) {
       const LocalPublicationIter lpi = local_publications_.find(*i);
       if (lpi != local_publications_.end()) {
@@ -1194,6 +1195,7 @@ Sedp::data_received(DCPS::MessageId message_id,
         topic_name = get_topic_name(iter->second);
         OPENDDS_MAP(OPENDDS_STRING, TopicDetails)::iterator top_it =
             topics_.find(topic_name);
+        using DCPS::RepoIdSet;
         const RepoIdSet& assoc =
           (top_it == topics_.end()) ? RepoIdSet() : top_it->second.endpoints_;
         for (RepoIdSet::const_iterator i = assoc.begin(); i != assoc.end(); ++i) {
@@ -1264,7 +1266,7 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
   RepoId guid_participant = guid;
   guid_participant.entityId = ENTITYID_PARTICIPANT;
   RepoId prefix = data.participantGuid;
-  prefix.entityId = EntityId_t();
+  prefix.entityId = EntityId_t(); // Clear the entityId so lower bound will work.
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -1277,21 +1279,14 @@ Sedp::data_received(DCPS::MessageId /*message_id*/,
     return;
   }
 
-  // Clear the entityId so lower bound will work.
   for (LocalSubscriptionMap::const_iterator sub_pos = local_subscriptions_.begin(),
          sub_limit = local_subscriptions_.end();
-       sub_pos != sub_limit;
-       ++sub_pos) {
-    for (RepoIdSet::const_iterator pos = sub_pos->second.matched_endpoints_.lower_bound(prefix),
-           limit = sub_pos->second.matched_endpoints_.end();
-         pos != limit;
-         ++pos) {
-      if (OpenDDS::DCPS::GuidPrefixEqual() (pos->guidPrefix, prefix.guidPrefix)) {
-        sub_pos->second.subscription_->signal_liveliness(guid_participant);
-        break;
-      } else {
-        break;
-      }
+       sub_pos != sub_limit; ++sub_pos) {
+    const DCPS::RepoIdSet::const_iterator pos =
+      sub_pos->second.matched_endpoints_.lower_bound(prefix);
+    if (pos != sub_pos->second.matched_endpoints_.end() &&
+        OpenDDS::DCPS::GuidPrefixEqual()(pos->guidPrefix, prefix.guidPrefix)) {
+      sub_pos->second.subscription_->signal_liveliness(guid_participant);
     }
   }
 }
@@ -1307,7 +1302,7 @@ Sedp::association_complete(const RepoId& localId,
     LocalSubscriptionIter sub = local_subscriptions_.find(localId);
     // If the local endpoint is a reader
     if (sub != local_subscriptions_.end()) {
-      std::pair<RepoIdSet::iterator, bool> result =
+      std::pair<DCPS::RepoIdSet::iterator, bool> result =
           sub->second.remote_opendds_associations_.insert(remoteId);
       // If this is a new association for the local reader
       if (result.second) {
@@ -1803,7 +1798,8 @@ Sedp::populate_discovered_reader_msg(
   drd.contentFilterProperty.filterClassName = ""; // PLConverter adds default
   drd.contentFilterProperty.filterExpression = sub.filterProperties.filterExpression;
   drd.contentFilterProperty.expressionParameters = sub.filterProperties.expressionParameters;
-  for (RepoIdSet::const_iterator writer = sub.remote_opendds_associations_.begin();
+  for (DCPS::RepoIdSet::const_iterator writer =
+        sub.remote_opendds_associations_.begin();
        writer != sub.remote_opendds_associations_.end();
        ++writer)
   {

@@ -95,9 +95,9 @@ Spdp::~Spdp()
     }
     // Iterate through a copy of the repo Ids, rather than the map
     //   as it gets unlocked in remove_discovered_participant()
-    Sedp::RepoIdSet participant_ids;
+    DCPS::RepoIdSet participant_ids;
     get_discovered_participant_ids(participant_ids);
-    for (RepoIdSet::iterator participant_id = participant_ids.begin();
+    for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
          participant_id != participant_ids.end();
          ++participant_id)
     {
@@ -235,9 +235,9 @@ Spdp::remove_expired_participants()
   ACE_GUARD (ACE_Thread_Mutex, g, lock_);
   // Iterate through a copy of the repo Ids, rather than the map
   //   as it gets unlocked in remove_discovered_participant()
-  RepoIdSet participant_ids;
+  DCPS::RepoIdSet participant_ids;
   get_discovered_participant_ids(participant_ids);
-  for (RepoIdSet::iterator participant_id = participant_ids.begin();
+  for (DCPS::RepoIdSet::iterator participant_id = participant_ids.begin();
        participant_id != participant_ids.end();
        ++participant_id)
   {
@@ -820,7 +820,7 @@ Spdp::has_discovered_participant(const DCPS::RepoId& guid)
 
 
 void
-Spdp::get_discovered_participant_ids(RepoIdSet& results) const
+Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
 {
   DiscoveredParticipantMap::const_iterator idx;
   for (idx = participants_.begin(); idx != participants_.end(); ++idx)
