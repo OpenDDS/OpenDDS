@@ -32,6 +32,10 @@ namespace OpenDDS {
                             typename TraitsType::LessThanType) InstanceMap;
     typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex>  DataAllocator;
 
+    enum {
+      cdr_header_size = 4
+    };
+
     /// Constructor
     DataWriterImpl_T (void)
       : marshaled_size_ (0)
@@ -427,10 +431,13 @@ private:
         if (key_marshaled_size_) {
           effective_size = key_marshaled_size_;
         } else {
-          if (cdr) {
-            effective_size = 4; // CDR encapsulation
+          if (cdr && !Serializer::use_rti_serialization()) {
+            effective_size = cdr_header_size; // CDR encapsulation
           }
           TraitsType::gen_find_size(ko_instance_data, effective_size, padding);
+          if (Serializer::use_rti_serialization()) {
+            effective_size += (8 - cdr_header_size);  // RTI padding
+          }
         }
         if (cdr) {
           effective_size += padding;
@@ -449,17 +456,30 @@ private:
           serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
           serializer << ACE_CDR::UShort(0);
         }
-        serializer << ko_instance_data;
+        // If this is RTI serialization, start counting byte offset AFTER
+        // the header
+        if (Serializer::use_rti_serialization()) {
+          OpenDDS::DCPS::Serializer serializer2(mb, swap, cdr
+            ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+            : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+          serializer2 << ko_instance_data;
+        // Else use same serializer
+        } else {
+          serializer << ko_instance_data;
+        }
 
       } else { // OpenDDS::DCPS::FULL_MARSHALING
         size_t effective_size = 0, padding = 0;
         if (marshaled_size_) {
           effective_size = marshaled_size_;
         } else {
-          if (cdr) {
-            effective_size = 4; // CDR encapsulation
+          if (cdr && !Serializer::use_rti_serialization()) {
+            effective_size = cdr_header_size; // CDR encapsulation
           }
           TraitsType::gen_find_size(instance_data, effective_size, padding);
+          if (cdr && Serializer::use_rti_serialization()) {
+            effective_size += (8 - cdr_header_size);  // RTI padding
+          }
         }
         if (cdr) {
           effective_size += padding;
@@ -489,7 +509,18 @@ private:
           serializer << ACE_OutputCDR::from_octet(swap ? !ACE_CDR_BYTE_ORDER : ACE_CDR_BYTE_ORDER);
           serializer << ACE_CDR::UShort(0);
         }
-        serializer << instance_data;
+        // If this is RTI serialization, start counting byte offset AFTER
+        // the header
+        if (Serializer::use_rti_serialization()) {
+          OpenDDS::DCPS::Serializer serializer2(mb, swap, cdr
+            ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+            : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+          serializer2 << instance_data;
+        // Else use same serializer
+        } else {
+          serializer << instance_data;
+        }
+        
       }
 
       return mb;

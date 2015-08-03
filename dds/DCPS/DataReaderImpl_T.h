@@ -856,20 +856,37 @@ namespace OpenDDS {
     const bool cdr = sample.header_.cdr_encapsulation_;
 
     ::OpenDDS::DCPS::Serializer ser(
-                                    sample.sample_,
-                                    sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-                                    cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+      sample.sample_,
+      sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+      cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+          : OpenDDS::DCPS::Serializer::ALIGN_NONE);
 
     if (cdr) {
       ACE_CDR::ULong header;
       ser >> header;
     }
 
-    if (sample.header_.key_fields_only_) {
-      ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
+    if (Serializer::use_rti_serialization()) {
+      // Start counting byte-offset AFTER header
+      ::OpenDDS::DCPS::Serializer ser2(
+        sample.sample_,
+        sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+        cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR
+            : OpenDDS::DCPS::Serializer::ALIGN_NONE);
+
+      if (sample.header_.key_fields_only_) {
+        ser2 >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
+      } else {
+        ser2 >> data;
+      }
     } else {
-      ser >> data;
+      if (sample.header_.key_fields_only_) {
+        ser2 >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
+      } else {
+        ser2 >> data;
+      }
     }
+
 
     ::DDS::InstanceHandle_t handle(::DDS::HANDLE_NIL);
     typename InstanceMap::const_iterator const it = instance_map_.find(data);
@@ -911,11 +928,26 @@ protected:
       ser >> header;
     }
 
-    if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
-      ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(*data);
+    if (Serializer::use_rti_serialization()) {
+      // Start counting byte-offset AFTER header
+      OpenDDS::DCPS::Serializer ser2(
+        sample.sample_,
+        sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
+        cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR 
+            : OpenDDS::DCPS::Serializer::ALIGN::NONE);
+      if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
+        ser2 >> ::OpenDDS::DCPS::KeyOnly< MessageType>(*data);
+      } else {
+        ser2 >> *data;
+      }
     } else {
-      ser >> *data;
+      if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
+        ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(*data);
+      } else {
+        ser >> *data;
+      }
     }
+
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     if (!sample.header_.content_filter_) { // if this is true, the writer has already filtered

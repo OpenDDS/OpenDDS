@@ -688,12 +688,6 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
         return 0;
       }
       submessageLength = smHeader.submessageLength;
-      if (subm != INFO_TS && DCPS::DCPS_debug_level > 5) {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) Spdp::SpdpTransport::handle_input() - ")
-                   ACE_TEXT("ignored submessage type: %x, DATA is %x\n"),
-                   int(subm), int(DATA)));
-      }
       break;
     }
     if (submessageLength && buff_.length()) {
