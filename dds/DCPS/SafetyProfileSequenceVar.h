@@ -75,6 +75,22 @@ namespace SafetyProfile {
       return ptr_;
     }
 
+    operator _in_type() const
+    {
+      return in();
+    }
+
+    operator _inout_type()
+    {
+      return inout();
+    }
+
+    operator _out_type()
+    {
+      return out();
+    }
+
+
     T_elem operator[](CORBA::ULong index)
     {
       return (*ptr_)[index];
