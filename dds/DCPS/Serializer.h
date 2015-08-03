@@ -299,6 +299,7 @@ private:
 public:
   static const size_t WCHAR_SIZE = 2; // Serialize wchar as UTF-16BE
 
+  static bool use_rti_serialization();
   static void set_use_rti_serialization(bool should_use);
 
 #if defined ACE_LITTLE_ENDIAN

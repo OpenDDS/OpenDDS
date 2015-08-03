@@ -208,5 +208,11 @@ Serializer::set_use_rti_serialization(bool should_use)
   use_rti_serialization_ = should_use;
 }
 
+bool
+Serializer::use_rti_serialization()
+{
+  return use_rti_serialization_;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS

@@ -881,9 +881,9 @@ namespace OpenDDS {
       }
     } else {
       if (sample.header_.key_fields_only_) {
-        ser2 >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
+        ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
       } else {
-        ser2 >> data;
+        ser >> data;
       }
     }
 
@@ -934,7 +934,7 @@ protected:
         sample.sample_,
         sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
         cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR 
-            : OpenDDS::DCPS::Serializer::ALIGN::NONE);
+            : OpenDDS::DCPS::Serializer::ALIGN_NONE);
       if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
         ser2 >> ::OpenDDS::DCPS::KeyOnly< MessageType>(*data);
       } else {
