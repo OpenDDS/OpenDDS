@@ -832,7 +832,7 @@ void DataLink::notify_connection_deleted()
           tsl->notify_connection_deleted(*ris_it);
         }
         iter->second.clear();
-//        continue;
+        continue;
       }
       TransportReceiveListener* const trl = recv_listener_for(iter->first);
       if (trl) {
