@@ -9,6 +9,7 @@
 #define GUIDUTILS_H
 
 #include "dds/DdsDcpsGuidC.h"
+#include "dds/DdsDcpsInfoUtilsC.h"
 #include "dds/DCPS/PoolAllocator.h"
 
 #include "dcps_export.h"
@@ -103,6 +104,8 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
     return entity_less(v1.entityId, v2.entityId);
   }
 };
+
+typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSet;
 
 inline size_t
 gen_max_marshaled_size(const GUID_t&)

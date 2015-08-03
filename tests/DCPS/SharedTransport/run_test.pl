@@ -13,32 +13,32 @@ use strict;
 PerlDDS::add_lib_path('../FooType');
 PerlDDS::add_lib_path('../TestFramework');
 
-my $arg_idx = 0;
 my $transport = "tcp.ini";
 my $is_rtps_disc = 0;
 
-if ($ARGV[$arg_idx] eq 'udp') {
-  $transport = "udp.ini";
-  $arg_idx = $arg_idx + 1;
+my @other_args = ();
+
+foreach my $arg (@ARGV) {
+  if ($arg eq 'tcp') {
+    $transport = "tcp.ini";
+  } elsif ($arg eq 'udp') {
+    $transport = "udp.ini";
+  } elsif ($arg eq 'multicast') {
+    $transport = "multicast.ini";
+  } elsif ($arg eq 'shmem') {
+    $transport = "shmem.ini";
+  } elsif ($arg eq 'rtps_disc_tcp') {
+    $transport = "rtps_disc_tcp.ini";
+    $is_rtps_disc = 1;
+  } elsif ($arg eq 'rtps') {
+    $transport = "rtps.ini";
+    $is_rtps_disc = 1;
+  } else {
+    push(@other_args, $arg);
+  }
 }
 
-if ($ARGV[$arg_idx] eq 'multicast') {
-  $transport = "multicast.ini";
-  $arg_idx = $arg_idx + 1;
-}
-
-if ($ARGV[$arg_idx] eq 'shmem') {
-  $transport = "shmem.ini";
-  $arg_idx = $arg_idx + 1;
-}
-
-if ($ARGV[$arg_idx] eq 'rtps_disc_tcp') {
-  $transport = "rtps_disc_tcp.ini";
-  $arg_idx = $arg_idx + 1;
-  $is_rtps_disc = 1;
-}
-
-my $test_opts = "-DCPSConfigFile $transport @ARGV";
+my $test_opts = "-DCPSConfigFile $transport @other_args";
 
 my $status = 0;
 

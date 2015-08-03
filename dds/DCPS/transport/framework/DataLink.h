@@ -13,7 +13,6 @@
 #include "dds/DCPS/RcObject_T.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "ReceiveListenerSetMap.h"
-#include "RepoIdSetMap.h"
 #include "SendResponseListener.h"
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
@@ -161,8 +160,7 @@ public:
   /// Varation of data_received() that allows for excluding a subset of readers
   /// by specifying which readers specifically should receive.
   /// Any reader ID that does not appear in the include set will be skipped.
-  void data_received_include(ReceivedDataSample& sample,
-                             const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl);
+  void data_received_include(ReceivedDataSample& sample, const RepoIdSet& incl);
 
   /// Obtain a unique identifier for this DataLink object.
   DataLinkIdType id() const;
@@ -195,14 +193,7 @@ public:
 
   /// This is called on publisher side to see if this link communicates
   /// with the provided sub.
-  bool is_target(const RepoId& sub_id);
-
-  /// Check if the remote_id/local_id is associated with this link
-  /// and if they are the last association using this link.
-  bool exist(const RepoId& remote_id,
-             const RepoId& local_id,
-             const bool&   pub_side,
-             bool& last);
+  bool is_target(const RepoId& remote_sub_id);
 
   /// This is called by DataLinkCleanupTask thread to remove the associations
   /// based on the snapshot in release_resources().
@@ -248,9 +239,6 @@ public:
   /// targets of this DataLink (see is_target()).
   GUIDSeq* target_intersection(const RepoId& pub_id, const GUIDSeq& in, size_t& n_subs);
 
-  CORBA::ULong num_targets() const;
-  RepoIdSet_rch get_targets() const;
-
   TransportImpl_rch impl() const;
 
   void default_listener(TransportReceiveListener* trl);
@@ -279,11 +267,6 @@ protected:
   /// it will be stopped before the start() method returns -1.
   int start(const TransportSendStrategy_rch& send_strategy,
             const TransportStrategy_rch& receive_strategy);
-
-  /// This announces the "start" event to our subclass.  The "start"
-  /// event will occur when this DataLink is handling its first
-  /// make_reservation() call.
-  virtual int start_i();
 
   /// This announces the "stop" event to our subclass.  The "stop"
   /// event will occur when this DataLink is handling a
@@ -319,23 +302,6 @@ private:
   /// Helper function to output the enum as a string to help debugging.
   const char* connection_notice_as_str(ConnectionNotice notice);
 
-  /// Used by release_reservations() once it has determined that the
-  /// remote_id/local_id being released is, in fact,
-  /// a remote subscriber id/a local publisher id.
-  void release_remote_subscriber(RepoId          subscriber_id,
-                                 RepoId          publisher_id,
-                                 RepoIdSet_rch&  pubid_set,
-                                 DataLinkSetMap& released_publishers);
-
-  /// Used by release_reservations() once it has determined that the
-  /// remote_id/local_id being released is, in fact,
-  /// a remote publisher id/a local subscriber.
-  void release_remote_publisher
-  (RepoId               publisher_id,
-   RepoId               subscriber_id,
-   ReceiveListenerSet_rch& listener_set,
-   DataLinkSetMap&      released_subscribers);
-
   TransportSendListener* send_listener_for(const RepoId& pub_id) const;
   TransportReceiveListener* recv_listener_for(const RepoId& sub_id) const;
 
@@ -357,7 +323,7 @@ private:
 
   void data_received_i(ReceivedDataSample& sample,
                        const RepoId& readerId,
-                       const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl_excl,
+                       const RepoIdSet& incl_excl,
                        ReceiveListenerSet::ConstrainReceiveSet constrain);
 
   typedef ACE_SYNCH_MUTEX     LockType;
@@ -388,21 +354,14 @@ private:
 
   mutable LockType pub_sub_maps_lock_;
 
-  /// Map associating each publisher_id with a set of
-  /// TransportReceiveListener objects (each with an associated
-  /// subscriber_id).  This map is used for delivery of incoming
-  /// (aka, received) data samples.
-  ReceiveListenerSetMap pub_map_;
+  typedef OPENDDS_MAP_CMP(RepoId, ReceiveListenerSet_rch, GUID_tKeyLessThan) AssocByRemote;
+  AssocByRemote assoc_by_remote_;
 
-  //mutable LockType pub_map_lock_;
+  typedef OPENDDS_MAP_CMP(RepoId, RepoIdSet, GUID_tKeyLessThan) AssocByLocal;
+  AssocByLocal assoc_by_local_;
 
-  /// Map associating each subscriber_id with the set of publisher_ids.
-  /// In essence, the pub_map_ and sub_map_ are the "mirror image" of
-  /// each other, where we have a many (publishers) to many (subscribers)
-  /// association being managed here.
-  RepoIdSetMap sub_map_;
-
-  //mutable LockType sub_map_lock_;
+  mutable LockType released_assoc_by_local_lock_;
+  AssocByLocal released_assoc_by_local_;
 
   /// A (smart) pointer to the TransportImpl that created this DataLink.
   TransportImpl_rch impl_;
@@ -415,14 +374,8 @@ private:
   /// true. It only dedicate to this datalink.
   ThreadPerConnectionSendTask* thr_per_con_send_task_;
 
-  RepoIdSet released_local_pubs_;
-  RepoIdSet released_local_subs_;
-
-  LockType released_local_lock_;
-
-  // snapshot of associations when the release_resource() is called.
-  ReceiveListenerSetMap pub_map_releasing_;
-  RepoIdSetMap sub_map_releasing_;
+  // snapshot of associations when the release_resources() is called.
+  AssocByLocal assoc_releasing_;
 
   /// TRANSPORT_PRIORITY value associated with the link.
   Priority transport_priority_;

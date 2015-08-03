@@ -156,8 +156,7 @@ public:
   typedef OPENDDS_VECTOR(DDS::InstanceHandle_t) InstanceHandleVec;
   void get_instance_handles(InstanceHandleVec& instance_handles);
 
-  typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) IdSet;
-  void get_readers(IdSet& readers);
+  void get_readers(RepoIdSet& readers);
 
   virtual DDS::ReturnCode_t get_matched_subscriptions(
     DDS::InstanceHandleSeq & subscription_handles);
@@ -407,6 +406,10 @@ public:
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
+  virtual void unregister_for_reader(const RepoId& participant,
+                                     const RepoId& writerid,
+                                     const RepoId& readerid);
+
   void notify_publication_disconnected(const ReaderIdSeq& subids);
   void notify_publication_reconnected(const ReaderIdSeq& subids);
   void notify_publication_lost(const ReaderIdSeq& subids);
@@ -620,7 +623,7 @@ private:
 
   RepoIdToHandleMap               id_to_handle_map_;
 
-  IdSet                           readers_;
+  RepoIdSet readers_;
 
   /// Status conditions.
   DDS::LivelinessLostStatus           liveliness_lost_status_ ;
@@ -677,7 +680,7 @@ private:
   /// Flag indicates that the init() is called.
   bool                       initialized_;
 
-  IdSet                      pending_readers_, assoc_complete_readers_;
+  RepoIdSet pending_readers_, assoc_complete_readers_;
 
   /// The cached available data while suspending and associated transaction ids.
   ACE_UINT64 min_suspended_transaction_id_;

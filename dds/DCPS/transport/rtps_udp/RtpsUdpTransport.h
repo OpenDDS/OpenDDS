@@ -49,11 +49,19 @@ private:
                                    const TransportLocatorSeq& locators,
                                    OpenDDS::DCPS::DiscoveryListener* listener);
 
+  virtual void unregister_for_reader(const RepoId& participant,
+                                     const RepoId& writerid,
+                                     const RepoId& readerid);
+
   virtual void register_for_writer(const RepoId& /*participant*/,
                                    const RepoId& /*readerid*/,
                                    const RepoId& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/);
+
+  virtual void unregister_for_writer(const RepoId& /*participant*/,
+                                     const RepoId& /*readerid*/,
+                                     const RepoId& /*writerid*/);
 
   virtual bool connection_info_i(TransportLocator& info) const;
   ACE_INET_Addr get_connection_addr(const TransportBLOB& data,

@@ -3360,6 +3360,14 @@ DataReaderImpl::register_for_writer(const RepoId& participant,
   TransportClient::register_for_writer(participant, readerid, writerid, locators, listener);
 }
 
+void
+DataReaderImpl::unregister_for_writer(const RepoId& participant,
+                                      const RepoId& readerid,
+                                      const RepoId& writerid)
+{
+  TransportClient::unregister_for_writer(participant, readerid, writerid);
+}
+
 EndHistoricSamplesMissedSweeper::EndHistoricSamplesMissedSweeper(ACE_Reactor* reactor,
                                                                  ACE_thread_t owner,
                                                                  DataReaderImpl* reader)

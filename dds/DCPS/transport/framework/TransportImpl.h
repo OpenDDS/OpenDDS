@@ -19,7 +19,6 @@
 #include "TransportInst_rch.h"
 #include "TransportReactorTask.h"
 #include "TransportReactorTask_rch.h"
-#include "RepoIdSetMap.h"
 #include "DataLinkCleanupTask.h"
 #include "ace/Synch.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -80,12 +79,19 @@ public:
                                    const TransportLocatorSeq& /*locators*/,
                                    OpenDDS::DCPS::DiscoveryListener* /*listener*/) { }
 
+  virtual void unregister_for_reader(const RepoId& /*participant*/,
+                                     const RepoId& /*writerid*/,
+                                     const RepoId& /*readerid*/) { }
+
   virtual void register_for_writer(const RepoId& /*participant*/,
                                    const RepoId& /*readerid*/,
                                    const RepoId& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/) { }
 
+  virtual void unregister_for_writer(const RepoId& /*participant*/,
+                                     const RepoId& /*readerid*/,
+                                     const RepoId& /*writerid*/) { }
 
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;

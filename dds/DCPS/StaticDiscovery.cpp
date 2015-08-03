@@ -17,6 +17,49 @@
 namespace OpenDDS {
   namespace DCPS {
 
+    void
+    EndpointRegistry::match()
+    {
+      for (WriterMapType::iterator wp = writer_map.begin(), wp_limit = writer_map.end();
+           wp != wp_limit;
+           ++wp) {
+        const RepoId& writerid = wp->first;
+        Writer& writer = wp->second;
+        for (ReaderMapType::iterator rp = reader_map.begin(), rp_limit = reader_map.end();
+             rp != rp_limit;
+             ++rp) {
+          const RepoId& readerid = rp->first;
+          Reader& reader = rp->second;
+
+          if (!GuidPrefixEqual()(readerid.guidPrefix, writerid.guidPrefix) &&
+              reader.topic_name == writer.topic_name) {
+            // Different participants, same topic.
+            DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
+            DCPS::IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
+            const DCPS::TransportLocatorSeq& writer_trans_info = writer.trans_info;
+            const DCPS::TransportLocatorSeq& reader_trans_info = reader.trans_info;
+            const DDS::DataWriterQos& writer_qos = writer.qos;
+            const DDS::DataReaderQos& reader_qos = reader.qos;
+            const DDS::PublisherQos& publisher_qos = writer.publisher_qos;
+            const DDS::SubscriberQos& subscriber_qos = reader.subscriber_qos;
+
+            if (DCPS::compatibleQOS(&writerStatus, &readerStatus, writer_trans_info, reader_trans_info, &writer_qos, &reader_qos, &publisher_qos, &subscriber_qos)) {
+              switch (reader.qos.reliability.kind) {
+              case DDS::BEST_EFFORT_RELIABILITY_QOS:
+                writer.best_effort_readers.insert (readerid);
+                reader.best_effort_writers.insert (writerid);
+                break;
+              case DDS::RELIABLE_RELIABILITY_QOS:
+                writer.reliable_readers.insert (readerid);
+                reader.reliable_writers.insert (writerid);
+                break;
+              }
+            }
+          }
+        }
+      }
+    }
+
     StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
                                                  ACE_Thread_Mutex& lock,
                                                  const EndpointRegistry& registry,
@@ -244,67 +287,90 @@ namespace OpenDDS {
         If the reader is best effort, then associate immediately.
         If the reader is reliable (we are reliable by implication), register with the transport to receive notification that the remote reader is up.
        */
-
-      TopicNameMap::const_iterator topic_pos = topic_names_.find(pub.topic_id_);
-      if (topic_pos == topic_names_.end()) {
+      EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(writerid);
+      if (pos == registry_.writer_map.end()) {
         return DDS::RETCODE_ERROR;
       }
+      const EndpointRegistry::Writer& writer = pos->second;
 
-      const OPENDDS_STRING topic_name = topic_pos->second;
-
-      for (EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.begin(), limit = registry_.reader_map.end();
+      for (RepoIdSet::const_iterator pos = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
            pos != limit;
            ++pos) {
-        const RepoId& readerid = pos->first;
+        const RepoId& readerid = *pos;
+        const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
 
-        // pos represents a remote reader.  Try to match.
-        if (!GuidPrefixEqual()(readerid.guidPrefix, writerid.guidPrefix) &&
-            pos->second.topic_name == topic_name) {
-          // Different participants, same topic.
-          DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
-          DCPS::IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
-          const DCPS::TransportLocatorSeq& writer_trans_info = pub.trans_info_;
-          const DCPS::TransportLocatorSeq& reader_trans_info = pos->second.trans_info;
-          const DDS::DataWriterQos& writer_qos = pub.qos_;
-          const DDS::DataReaderQos& reader_qos = pos->second.qos;
-          const DDS::PublisherQos& publisher_qos = pub.publisher_qos_;
-          const DDS::SubscriberQos& subscriber_qos = pos->second.subscriber_qos;
-
-          if (DCPS::compatibleQOS(&writerStatus, &readerStatus, writer_trans_info, reader_trans_info, &writer_qos, &reader_qos, &publisher_qos, &subscriber_qos)) {
-            switch (pos->second.qos.reliability.kind) {
-            case DDS::BEST_EFFORT_RELIABILITY_QOS:
-              {
 #ifdef __SUNPRO_CC
-                DCPS::ReaderAssociation ra;
-                ra.readerTransInfo = reader_trans_info;
-                ra.readerId = readerid;
-                ra.subQos = subscriber_qos;
-                ra.readerQos = reader_qos;
-                ra.filterClassName = "";
-                ra.filterExpression = "";
-                ra.exprParams = 0;
+        DCPS::ReaderAssociation ra;
+        ra.readerTransInfo = reader.trans_info;
+        ra.readerId = readerid;
+        ra.subQos = reader.subscriber_qos;
+        ra.readerQos = reader.qos;
+        ra.filterClassName = "";
+        ra.filterExpression = "";
+        ra.exprParams = 0;
 #else
-                const DCPS::ReaderAssociation ra =
-                  {reader_trans_info, readerid, subscriber_qos, reader_qos, "", "", 0};
+        const DCPS::ReaderAssociation ra =
+          {reader.trans_info, readerid, reader.subscriber_qos, reader.qos, "", "", 0};
 #endif
-                pub.publication_->add_association(writerid, ra, true);
-                pub.publication_->association_complete(readerid);
-              }
-              break;
-            case DDS::RELIABLE_RELIABILITY_QOS:
-              pub.publication_->register_for_reader(participant_id_, writerid, readerid, pos->second.trans_info, this);
-              break;
-            }
-          }
-        }
+        pub.publication_->add_association(writerid, ra, true);
+        pub.publication_->association_complete(readerid);
+      }
+
+      for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
+           pos != limit;
+           ++pos) {
+        const RepoId& readerid = *pos;
+        const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
+        pub.publication_->register_for_reader(participant_id_, writerid, readerid, reader.trans_info, this);
       }
 
       return DDS::RETCODE_OK;
     }
 
     DDS::ReturnCode_t
-    StaticEndpointManager::remove_publication_i(const RepoId& /*publicationId*/)
+    StaticEndpointManager::remove_publication_i(const RepoId& writerid)
     {
+      LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
+      if (lp_pos == local_publications_.end()) {
+        return DDS::RETCODE_ERROR;
+      }
+
+      const LocalPublication& pub = lp_pos->second;
+
+      EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(writerid);
+      if (pos == registry_.writer_map.end()) {
+        return DDS::RETCODE_ERROR;
+      }
+
+      const EndpointRegistry::Writer& writer = pos->second;
+
+      {
+        ReaderIdSeq ids;
+        ids.length(writer.best_effort_readers.size());
+        size_t idx = 0;
+        for (RepoIdSet::const_iterator pos = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
+             pos != limit;
+             ++pos, ++idx) {
+          const RepoId& readerid = *pos;
+          ids[idx] = readerid;
+        }
+        pub.publication_->remove_associations(ids, false);
+      }
+
+      {
+        ReaderIdSeq ids;
+        ids.length(writer.reliable_readers.size());
+        size_t idx = 0;
+        for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
+             pos != limit;
+             ++pos, ++idx) {
+          const RepoId& readerid = *pos;
+          ids[idx] = readerid;
+          pub.publication_->unregister_for_reader(participant_id_, writerid, readerid);
+        }
+        pub.publication_->remove_associations(ids, false);
+      }
+
       return DDS::RETCODE_OK;
     }
 
@@ -317,64 +383,86 @@ namespace OpenDDS {
         If we (the reader) is best effort, then associate immediately.
         If we (the reader) are reliable, then register with the transport to receive notification that the remote writer is up.
        */
-
-      TopicNameMap::const_iterator topic_pos = topic_names_.find(sub.topic_id_);
-      if (topic_pos == topic_names_.end()) {
+      EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(readerid);
+      if (pos == registry_.reader_map.end()) {
         return DDS::RETCODE_ERROR;
       }
+      const EndpointRegistry::Reader& reader = pos->second;
 
-      const OPENDDS_STRING topic_name = topic_pos->second;
-
-      for (EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.begin(), limit = registry_.writer_map.end();
+      for (RepoIdSet::const_iterator pos = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
            pos != limit;
            ++pos) {
-        const RepoId& writerid = pos->first;
+        const RepoId& writerid = *pos;
+        const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
 
-        // pos represents a remote writer.  Try to match.
-        if (!GuidPrefixEqual()(writerid.guidPrefix, readerid.guidPrefix) &&
-            pos->second.topic_name == topic_name) {
-          // Different participants, same topic.
-          DCPS::IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
-          DCPS::IncompatibleQosStatus readerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
-          const DCPS::TransportLocatorSeq& writer_trans_info = pos->second.trans_info;
-          const DCPS::TransportLocatorSeq& reader_trans_info = sub.trans_info_;
-          const DDS::DataWriterQos& writer_qos = pos->second.qos;
-          const DDS::DataReaderQos& reader_qos = sub.qos_;
-          const DDS::PublisherQos& publisher_qos = pos->second.publisher_qos;
-          const DDS::SubscriberQos& subscriber_qos = sub.subscriber_qos_;
-
-          if (DCPS::compatibleQOS(&writerStatus, &readerStatus, writer_trans_info, reader_trans_info, &writer_qos, &reader_qos, &publisher_qos, &subscriber_qos)) {
-
-            switch (sub.qos_.reliability.kind) {
-            case DDS::BEST_EFFORT_RELIABILITY_QOS:
-              {
 #ifdef __SUNPRO_CC
-                DCPS::WriterAssociation wa;
-                wa.writerTransInfo = writer_trans_info;
-                wa.writerId = writerid;
-                wa.pubQos = publisher_qos;
-                wa.writerQos = writer_qos;
+        DCPS::WriterAssociation wa;
+        wa.writerTransInfo = writer.trans_info;
+        wa.writerId = writerid;
+        wa.pubQos = writer.publisher_qos;
+        wa.writerQos = writer.qos;
 #else
-                const DCPS::WriterAssociation wa =
-                  {writer_trans_info, writerid, publisher_qos, writer_qos};
+        const DCPS::WriterAssociation wa =
+          {writer.trans_info, writerid, writer.publisher_qos, writer.qos};
 #endif
-                sub.subscription_->add_association(readerid, wa, false);
-              }
-              break;
-            case DDS::RELIABLE_RELIABILITY_QOS:
-              sub.subscription_->register_for_writer(participant_id_, readerid, writerid, pos->second.trans_info, this);
-              break;
-            }
-          }
-        }
+        sub.subscription_->add_association(readerid, wa, false);
+      }
+
+      for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
+           pos != limit;
+           ++pos) {
+        const RepoId& writerid = *pos;
+        const EndpointRegistry::Writer& writer = registry_.writer_map.find(writerid)->second;
+        sub.subscription_->register_for_writer(participant_id_, readerid, writerid, writer.trans_info, this);
       }
 
       return DDS::RETCODE_OK;
     }
 
     DDS::ReturnCode_t
-    StaticEndpointManager::remove_subscription_i(const RepoId& /*subscriptionId*/)
+    StaticEndpointManager::remove_subscription_i(const RepoId& readerid)
     {
+      LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
+      if (ls_pos == local_subscriptions_.end()) {
+        return DDS::RETCODE_ERROR;
+      }
+
+      const LocalSubscription& sub = ls_pos->second;
+
+      EndpointRegistry::ReaderMapType::const_iterator pos = registry_.reader_map.find(readerid);
+      if (pos == registry_.reader_map.end()) {
+        return DDS::RETCODE_ERROR;
+      }
+
+      const EndpointRegistry::Reader& reader = pos->second;
+
+      {
+        WriterIdSeq ids;
+        ids.length(reader.best_effort_writers.size());
+        size_t idx = 0;
+        for (RepoIdSet::const_iterator pos = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
+             pos != limit;
+             ++pos, ++idx) {
+          const RepoId& writerid = *pos;
+          ids[idx] = writerid;
+        }
+        sub.subscription_->remove_associations(ids, false);
+      }
+
+      {
+        WriterIdSeq ids;
+        ids.length(reader.reliable_writers.size());
+        size_t idx = 0;
+        for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
+             pos != limit;
+             ++pos, ++idx) {
+          const RepoId& writerid = *pos;
+          ids[idx] = writerid;
+          sub.subscription_->unregister_for_writer(participant_id_, readerid, writerid);
+        }
+        sub.subscription_->remove_associations(ids, false);
+      }
+
       return DDS::RETCODE_OK;
     }
 
@@ -451,6 +539,22 @@ namespace OpenDDS {
     }
 
     void
+    StaticEndpointManager::reader_does_not_exist(const RepoId& readerid, const RepoId& writerid)
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      LocalPublicationMap::const_iterator lp_pos = local_publications_.find(writerid);
+      EndpointRegistry::ReaderMapType::const_iterator reader_pos = registry_.reader_map.find(readerid);
+      if (lp_pos != local_publications_.end() &&
+          reader_pos != registry_.reader_map.end()) {
+        DCPS::DataWriterCallbacks* dwr = lp_pos->second.publication_;
+        ReaderIdSeq ids;
+        ids.length(1);
+        ids[0] = readerid;
+        dwr->remove_associations(ids, true);
+      }
+    }
+
+    void
     StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& readerid)
     {
       ACE_GUARD(ACE_Thread_Mutex, g, lock_);
@@ -469,9 +573,23 @@ namespace OpenDDS {
         const DCPS::WriterAssociation wa =
           {writer_pos->second.trans_info, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos};
 #endif
-
-
         drr->add_association(readerid, wa, false);
+      }
+    }
+
+    void
+    StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoId& readerid)
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+      LocalSubscriptionMap::const_iterator ls_pos = local_subscriptions_.find(readerid);
+      EndpointRegistry::WriterMapType::const_iterator writer_pos = registry_.writer_map.find(writerid);
+      if (ls_pos != local_subscriptions_.end() &&
+          writer_pos != registry_.writer_map.end()) {
+        DCPS::DataReaderCallbacks* drr = ls_pos->second.subscription_;
+        WriterIdSeq ids;
+        ids.length(1);
+        ids[0] = writerid;
+        drr->remove_associations(ids, true);
       }
     }
 
@@ -669,6 +787,9 @@ namespace OpenDDS {
           parse_endpoints(cf)) {
         return -1;
       }
+
+      this->registry.match();
+
       return 0;
     }
 

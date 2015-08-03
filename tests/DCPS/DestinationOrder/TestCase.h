@@ -10,15 +10,24 @@
 
 #include "TestFramework_T.h"
 
-class TestCase : public virtual TestPair<TestMessageDataReader,
-                                         TestMessageDataWriter> {
+class TestCase : public TestBase {
 public:
   virtual DDS::ReturnCode_t init_datareader(
     DDS::DataReaderQos& qos,
     DDS::DataReaderListener_ptr& listener,
     DDS::StatusMask& status);
 
+  virtual void init_i();
+  virtual void fini_i();
   virtual int test();
+
+  void wait_for_subscribers();
+
+private:
+  typedef TestPublisher<TestMessageDataWriter>  TestPublisherType;
+  typedef TestSubscriber<TestMessageDataReader> TestSubscriberType;
+  TestPublisherType*  publisher_;
+  TestSubscriberType* subscriber_;
 };
 
 #endif  /* DCPS_TEST_DESTINATIONORDER_H */
