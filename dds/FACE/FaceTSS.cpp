@@ -3,6 +3,7 @@
 #include "config/Parser.h"
 
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/DomainParticipantImpl.h"
 #include "dds/DCPS/Registered_Data_Types.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -735,6 +736,48 @@ FACE::SYSTEM_TIME_TYPE convertTime(const DDS::Time_t& timestamp)
       timestamp.sec * static_cast<FACE::SYSTEM_TIME_TYPE>(NSEC_PER_SEC);
 }
 
+FACE::MESSAGE_INSTANCE_GUID
+create_message_instance_guid(const OpenDDS::DCPS::RepoId& pub, const CORBA::LongLong& orig_seq)
+{
+  OpenDDS::DCPS::GuidConverter writer(pub);
+
+  FACE::MESSAGE_INSTANCE_GUID message_instance_guid;
+  FACE::LongLong mig_low;
+  FACE::LongLong masked_seq;
+
+  if (sizeof(FACE::MESSAGE_INSTANCE_GUID) < sizeof(OpenDDS::DCPS::GUID_t)) {
+    //Until MESSAGE_INSTANCE_GUID becomes 128 bit GUID, use checksum to represent Prefix
+    FACE::Long prefix_representation = ACE::crc32(reinterpret_cast<const void*>(&pub), sizeof(pub));
+    masked_seq = (orig_seq & 0xFFFFFFFF00000000) >> 32;
+
+    if (masked_seq) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: create_message_instance_guid - seq does not fit in FACE::Long, truncating high bits to fit\n"));
+    }
+    mig_low = orig_seq & 0xFFFFFFFF;
+    message_instance_guid = (((FACE::LongLong) prefix_representation) << 32 ) | ((FACE::LongLong) mig_low);
+
+  } else {
+    typedef CORBA::Octet MsgInstGuidPrefix_t[13];
+    typedef CORBA::Octet MsgInstGuidSeq_t[3];
+    MsgInstGuidPrefix_t migPrefix;
+    MsgInstGuidSeq_t migSeq;
+    ACE_OS::memcpy(&migPrefix[0], &pub.guidPrefix[2], 10);
+    ACE_OS::memcpy(&migPrefix[10], &pub.entityId.entityKey[0], 3);
+    masked_seq = (orig_seq & 0xFFFFFFFFFF000000) >> 32;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) create_message_instance_guid - before mask seq: %Q, after mask seq: %Q\n",
+               orig_seq,
+               masked_seq));
+    if (masked_seq) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: create_message_instance_guid - seq does not fit in 3 bytes, truncating high bits to fit\n"));
+    }
+    FACE::LongLong masked = orig_seq & 0xFFFFFFFFFF;
+    ACE_OS::memcpy(&migSeq[0], &masked, 3);
+
+  }
+
+  return message_instance_guid;
+}
+
 void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
                               const DDS::DomainParticipant_var part,
                               const DDS::SampleInfo& sinfo,
@@ -747,9 +790,12 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   }
   FACE::TS::MessageHeader& header = readers[connection_id]->last_msg_header;
 
-  //TODO: Populate other header fields appropriately
   header.platform_view_guid = Entities::instance()->connections_[connection_id].platform_view_guid;
-  //  header.message_instance_guid = sinfo.instance_handle;
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(readers[connection_id]->dr->get_subscriber()->get_participant());
+  const OpenDDS::DCPS::RepoId pub = dpi->get_repoid(sinfo.publication_handle);
+  header.message_instance_guid = create_message_instance_guid(pub, sinfo.opendds_reserved_publication_seq);
+
   header.message_timestamp = convertTime(sinfo.source_timestamp);
   ACE_Time_Value now(ACE_OS::gettimeofday());
 

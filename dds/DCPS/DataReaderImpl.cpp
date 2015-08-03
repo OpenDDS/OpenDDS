@@ -1957,6 +1957,8 @@ void DataReaderImpl::sample_info(DDS::SampleInfo & sample_info,
       (static_cast<CORBA::Long>(ptr->disposed_generation_count_) +
           static_cast<CORBA::Long>(ptr->no_writers_generation_count_)) -
           sample_info.absolute_generation_rank;
+
+  sample_info.opendds_reserved_publication_seq = ptr->sequence_.getValue();
 }
 
 CORBA::Long DataReaderImpl::total_samples() const
