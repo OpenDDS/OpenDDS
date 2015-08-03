@@ -278,7 +278,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
     }
   }
   {
-    GuardType guard(this->pub_sub_maps_lock_);
+    GuardType guard(pub_sub_maps_lock_);
 
     assoc_by_local_[local_publication_id].insert(remote_subscription_id);
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_subscription_id];
@@ -309,14 +309,14 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
   }
 
   {
-    GuardType guard(this->strategy_lock_);
+    GuardType guard(strategy_lock_);
 
-    if (!this->send_strategy_.is_nil()) {
-      this->send_strategy_->link_released(false);
+    if (!send_strategy_.is_nil()) {
+      send_strategy_->link_released(false);
     }
   }
   {
-    GuardType guard(this->pub_sub_maps_lock_);
+    GuardType guard(pub_sub_maps_lock_);
 
     assoc_by_local_[local_subscription_id].insert(remote_publication_id);
     ReceiveListenerSet_rch& rls = assoc_by_remote_[remote_publication_id];
@@ -343,7 +343,7 @@ void set_to_seq(const RepoIdSet& rids, Seq& seq)
 GUIDSeq*
 DataLink::peer_ids(const RepoId& local_id) const
 {
-  GuardType guard(this->pub_sub_maps_lock_);
+  GuardType guard(pub_sub_maps_lock_);
 
   const AssocByLocal::const_iterator iter = assoc_by_local_.find(local_id);
 
