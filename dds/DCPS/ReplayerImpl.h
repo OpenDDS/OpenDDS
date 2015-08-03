@@ -249,9 +249,7 @@ private:
 
   RepoIdToHandleMap id_to_handle_map_;
 
-  typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) IdSet;
-
-  IdSet readers_;
+  RepoIdSet readers_;
 
   /// Status conditions.
   // DDS::LivelinessLostStatus liveliness_lost_status_;
@@ -323,7 +321,7 @@ private:
 
   RepoIdToSequenceMap idToSequence_;
 
-  IdSet pending_readers_, assoc_complete_readers_;
+  RepoIdSet pending_readers_, assoc_complete_readers_;
 
   ACE_Condition<ACE_Recursive_Thread_Mutex> empty_condition_;
   int pending_write_count_;

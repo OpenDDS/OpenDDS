@@ -2232,8 +2232,7 @@ RtpsUdpDataLink::send_heartbeats()
   OPENDDS_VECTOR(TransportQueueElement*) pendingCallbacks;
   const ACE_Time_Value now = ACE_OS::gettimeofday();
 
-  typedef OPENDDS_SET_CMP(RepoId, DCPS::GUID_tKeyLessThan) WriterSetType;
-  WriterSetType writers_to_advertise;
+  RepoIdSet writers_to_advertise;
 
   const ACE_Time_Value tv3 = ACE_OS::gettimeofday() - 3 * config_->heartbeat_period_;
   for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
@@ -2324,7 +2323,7 @@ RtpsUdpDataLink::send_heartbeats()
     subm.push_back(hb);
   }
 
-  for (WriterSetType::const_iterator pos = writers_to_advertise.begin(),
+  for (RepoIdSet::const_iterator pos = writers_to_advertise.begin(),
          limit = writers_to_advertise.end();
        pos != limit;
        ++pos) {

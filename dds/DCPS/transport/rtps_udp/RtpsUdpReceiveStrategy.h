@@ -82,8 +82,7 @@ private:
   SequenceNumber last_received_;
 
   const ReceivedDataSample* recvd_sample_;
-  OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) readers_withheld_;
-  OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) readers_selected_;
+  RepoIdSet readers_withheld_, readers_selected_;
 
   SequenceRange frags_;
   TransportReassembly reassembly_;

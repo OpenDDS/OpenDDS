@@ -808,13 +808,13 @@ PubDriver::listener_test ()
     ACE_TEXT("remove_associations.\n")
   ));
 
-  DataWriterImpl::IdSet reader_id_set;
+  RepoIdSet reader_id_set;
   datawriter_servant_->get_readers(reader_id_set);
 
   ::OpenDDS::DCPS::ReaderIdSeq reader_id_seq;
   reader_id_seq.length(reader_id_set.size());
   int index = 0;
-  for (DataWriterImpl::IdSet::iterator iter = reader_id_set.begin();
+  for (RepoIdSet::iterator iter = reader_id_set.begin();
        iter != reader_id_set.end();
        ++iter) {
     reader_id_seq[index] = *iter;

@@ -45,7 +45,7 @@ public:
   ssize_t size() const;
 
   void data_received(const ReceivedDataSample& sample,
-                     const OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan)& incl_excl,
+                     const RepoIdSet& incl_excl,
                      ConstrainReceiveSet constrain);
   void data_received(const ReceivedDataSample& sample, const RepoId& readerId);
 

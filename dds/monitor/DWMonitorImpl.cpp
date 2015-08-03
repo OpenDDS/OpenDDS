@@ -45,11 +45,11 @@ DWMonitorImpl::report() {
          ++iter) {
       report.instances[length++] = *iter;
     }
-    DataWriterImpl::IdSet readers;
+    DCPS::RepoIdSet readers;
     this->dw_->get_readers(readers);
     length = 0;
     report.associations.length(static_cast<CORBA::ULong>(readers.size()));
-    for (DataWriterImpl::IdSet::iterator iter = readers.begin();
+    for (DCPS::RepoIdSet::iterator iter = readers.begin();
          iter != readers.end();
          ++iter) {
       report.associations[length].dr_id = *iter;
