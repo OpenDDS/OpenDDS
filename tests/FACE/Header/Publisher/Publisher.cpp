@@ -1,4 +1,7 @@
-#include "Idl/FaceMessage_TS.hpp"
+#include "../Idl/FaceHeaderTestMsg_TS.hpp"
+#include "../Idl/FaceHeaderTestMsgTypeSupportImpl.h"
+#include "dds/DCPS/TypeSupportImpl.h"
+#include "dds/FACE/FaceTSS.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 # include "dds/DCPS/RTPS/RtpsDiscovery.h"
@@ -26,8 +29,19 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   std::cout << "Publisher: about to send_message() 10x for callbacks" << std::endl;
   FACE::Long i = 0;
+
+  //Use to get this datawriters repo id for creation of the message instance guid
+  OpenDDS::FaceTSS::Entities::ConnIdToSenderMap& writers = OpenDDS::FaceTSS::Entities::instance()->senders_;
+  typedef OpenDDS::DCPS::DDSTraits<HeaderTest::Message>::DataWriterType DataWriter;
+  const DataWriter::_var_type typedWriter =
+    DataWriter::_narrow(writers[connId].dw);
+  OpenDDS::DCPS::DomainParticipantImpl* dpi =
+    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(writers[connId].dw->get_publisher()->get_participant());
+  const OpenDDS::DCPS::RepoId pub = dpi->get_repoid(typedWriter->get_instance_handle());
+
   for (; i < 10; ++i) {
-    Messenger::Message msg = {"Hello, world.", i, 0};
+    //Increment i by 2 for seq number (1 for initial ctl msg and 1 due to txn id start at 1 not 0 like seq numbers)
+    HeaderTest::Message msg = {"Hello, world.", i, OpenDDS::FaceTSS::create_message_instance_guid(pub, i+2)};
     FACE::TRANSACTION_ID_TYPE txn;
     std::cout << "  sending " << i << std::endl;
     int retries = 40;
@@ -49,7 +63,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   std::cout << "Publisher: about to send_message() 10x for receives" << std::endl;
   for (; i < 20; ++i) {
-    Messenger::Message msg = {"Hello, world.", i, 0};
+    //Increment i by 2 for seq number (1 for initial ctl msg and 1 due to txn id start at 1 not 0 like seq numbers)
+    HeaderTest::Message msg = {"Hello, world.", i, OpenDDS::FaceTSS::create_message_instance_guid(pub, i+2)};
     FACE::TRANSACTION_ID_TYPE txn;
     std::cout << "  sending " << i << std::endl;
     int retries = 40;

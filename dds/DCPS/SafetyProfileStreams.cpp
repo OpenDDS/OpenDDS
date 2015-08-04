@@ -71,6 +71,21 @@ to_dds_string(long long to_convert)
 }
 
 OPENDDS_STRING
+to_dds_string(unsigned long long to_convert, bool as_hex)
+{
+  const char* fmt;
+  if (as_hex) {
+    fmt = "%0llx";
+  } else {
+    fmt = "%llu";
+  }
+  const int buff_size = 20 + 1; // note +1 for null terminator
+  char buf[buff_size];
+  ACE_OS::snprintf(&buf[0], buff_size, fmt, to_convert);
+  return OPENDDS_STRING(buf);
+}
+
+OPENDDS_STRING
 to_dds_string(unsigned long to_convert, bool as_hex)
 {
   const char* fmt;

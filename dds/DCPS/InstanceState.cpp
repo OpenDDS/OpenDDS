@@ -79,6 +79,8 @@ void OpenDDS::DCPS::InstanceState::sample_info(DDS::SampleInfo& si,
   si.absolute_generation_rank =
     static_cast<CORBA::Long>(de->disposed_generation_count_ +
                              de->no_writers_generation_count_);
+
+  si.opendds_reserved_publication_seq = de->sequence_.getValue();
 }
 
 // cannot ACE_INLINE because of #include loop
