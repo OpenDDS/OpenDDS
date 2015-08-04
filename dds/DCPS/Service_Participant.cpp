@@ -441,7 +441,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_info = true;
 
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-RTISerialization"))) != 0) {
+    } else if (!arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-RTISerialization"))) {
       Serializer::set_use_rti_serialization(true);
       arg_shifter.consume_arg();
       got_use_rti_serialization = true;

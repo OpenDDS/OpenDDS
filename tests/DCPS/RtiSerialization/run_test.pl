@@ -109,6 +109,9 @@ else {
     $sub_opts .= ' -DCPSConfigFile sub.ini';
 }
 
+$pub_opts .= " -RTISerialization";
+$sub_opts .= " -RTISerialization";
+
 $test->report_unused_flags(!$flag_found);
 
 $pub_opts .= $thread_per_connection;
