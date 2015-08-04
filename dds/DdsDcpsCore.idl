@@ -404,6 +404,7 @@ module DDS {
                 long generation_rank;
                 long absolute_generation_rank;
                 boolean valid_data;
+                long long opendds_reserved_publication_seq;
                 };
 
   typedef sequence<SampleInfo> SampleInfoSeq;

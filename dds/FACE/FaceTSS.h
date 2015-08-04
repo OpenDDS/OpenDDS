@@ -84,6 +84,9 @@ OpenDDS_FACE_Export void populate_header_received(const FACE::CONNECTION_ID_TYPE
                                                   const DDS::SampleInfo& sinfo,
                                                   FACE::RETURN_CODE_TYPE& return_code);
 
+OpenDDS_FACE_Export FACE::MESSAGE_INSTANCE_GUID create_message_instance_guid(const OpenDDS::DCPS::RepoId& pub,
+                                                                             const CORBA::LongLong& seq);
+
 OpenDDS_FACE_Export FACE::RETURN_CODE_TYPE update_status(FACE::CONNECTION_ID_TYPE connection_id,
     DDS::ReturnCode_t retcode);
 
