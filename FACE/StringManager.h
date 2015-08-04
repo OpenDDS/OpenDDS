@@ -186,7 +186,7 @@ public:
   String_var& operator=(CharT* moved)
   {
     String_var tmp(moved);
-    std::swap(str_, moved.str_);
+    std::swap(str_, tmp.str_);
     return *this;
   }
 
