@@ -791,9 +791,10 @@ void populate_header_received(const FACE::CONNECTION_ID_TYPE& connection_id,
   FACE::TS::MessageHeader& header = readers[connection_id]->last_msg_header;
 
   header.platform_view_guid = Entities::instance()->connections_[connection_id].platform_view_guid;
-  OpenDDS::DCPS::DomainParticipantImpl* dpi =
-    dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(readers[connection_id]->dr->get_subscriber()->get_participant());
-  const OpenDDS::DCPS::RepoId pub = dpi->get_repoid(sinfo.publication_handle);
+
+  DDS::Subscriber_var temp_sub = readers[connection_id]->dr->get_subscriber();
+  DDS::DomainParticipant_var temp_dp = temp_sub->get_participant();
+  const OpenDDS::DCPS::RepoId pub = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(temp_dp.in())->get_repoid(sinfo.publication_handle);
   header.message_instance_guid = create_message_instance_guid(pub, sinfo.opendds_reserved_publication_seq);
 
   header.message_timestamp = convertTime(sinfo.source_timestamp);
