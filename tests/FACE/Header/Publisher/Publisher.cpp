@@ -32,8 +32,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
   //Use to get this datawriters repo id for creation of the message instance guid
   OpenDDS::FaceTSS::Entities::ConnIdToSenderMap& writers = OpenDDS::FaceTSS::Entities::instance()->senders_;
-  typedef typename OpenDDS::DCPS::DDSTraits<HeaderTest::Message>::DataWriterType DataWriter;
-  const typename DataWriter::_var_type typedWriter =
+  typedef OpenDDS::DCPS::DDSTraits<HeaderTest::Message>::DataWriterType DataWriter;
+  const DataWriter::_var_type typedWriter =
     DataWriter::_narrow(writers[connId].dw);
   OpenDDS::DCPS::DomainParticipantImpl* dpi =
     dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(writers[connId].dw->get_publisher()->get_participant());
