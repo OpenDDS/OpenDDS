@@ -19,3 +19,5 @@ build:
 
 after_build:
   - cd DevGuideExamples\DCPS\Messenger && run_test.pl
+
+test: off

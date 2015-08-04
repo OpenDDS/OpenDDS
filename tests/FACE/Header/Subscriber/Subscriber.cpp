@@ -1,4 +1,5 @@
-#include "Idl/FaceMessage_TS.hpp"
+#include "../Idl/FaceHeaderTestMsg_TS.hpp"
+#include "dds/DCPS/SafetyProfileStreams.h"
 
 #ifdef ACE_AS_STATIC_LIBS
 # include "dds/DCPS/RTPS/RtpsDiscovery.h"
@@ -17,7 +18,7 @@ const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
 
 
 void callback(FACE::TRANSACTION_ID_TYPE txn,
-              Messenger::Message& msg,
+              HeaderTest::Message& msg,
               FACE::MESSAGE_TYPE_GUID message_type_id,
               FACE::MESSAGE_SIZE_TYPE message_size,
               const FACE::WAITSET_TYPE,
@@ -25,10 +26,10 @@ void callback(FACE::TRANSACTION_ID_TYPE txn,
 {
   ++callback_count;
   expected = msg.count + 1;
-  ACE_DEBUG((LM_INFO, "In callback() (the %d time): %C\t%d\t"
-             "message_type_id: %Ld\tmessage_size: %d\ttransaction_id: %d\n",
-             callback_count, msg.text.in(), msg.count,
-             message_type_id, message_size, txn));
+  std::cout << "In callback() (the " << callback_count << " time): " << msg.text.in()
+            << "\t" << msg.count << "\tmsg_instance_guid: " << std::hex << msg.msg_instance_guid
+            << std::dec << "\tmessage_type_id: " << message_type_id << "\tmessage_size: "
+            << message_size << "\ttransaction_id: " << txn << std::endl;
   callbackHappened = true;
   FACE::TS::MessageHeader hdr;
   FACE::TS::Receive_Message(connId, timeout, txn, hdr, sizeof(FACE::TS::MessageHeader), return_code);
@@ -39,13 +40,19 @@ void callback(FACE::TRANSACTION_ID_TYPE txn,
   std::cout << "In callback() Message Header - tid: " << txn
             << "\n\tplatform view guid: " << hdr.platform_view_guid
             << "\n\tsource timestamp: " << hdr.message_timestamp
-            << "\n\tinstance guid: " << hdr.message_instance_guid
-            << "\n\tsource guid: " << hdr.message_source_guid
+            << "\n\tinstance guid: " << std::hex << hdr.message_instance_guid
+            << "\n\tsource guid: " << std::dec << hdr.message_source_guid
             << "\n\tvalidity " << hdr.message_validity << std::endl;
   if (hdr.message_source_guid != 9645061) {
     std::cout << "ERROR: Receive_Message for header failed.  Header source guid " << hdr.message_source_guid << " does not equal 9645061" << std::endl;
     return_code = FACE::INVALID_PARAM;
     return;
+  }
+  if (hdr.message_instance_guid != msg.msg_instance_guid) {
+      std::cout << "ERROR: Receive_Message for header failed.  message_instance_guid " << std::hex << hdr.message_instance_guid
+                << " != " << msg.msg_instance_guid << std::endl;
+      return_code = FACE::INVALID_PARAM;
+      return;
   }
   if (callback_count == 10) {
     ACE_DEBUG((LM_INFO, "Subscriber: about to Unregister_Callback()\n"));
@@ -80,15 +87,14 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
   if (!status) {
     const FACE::TIMEOUT_TYPE timeout = FACE::INF_TIME_VALUE;
     FACE::TRANSACTION_ID_TYPE txn;
-    Messenger::Message msg;
+    HeaderTest::Message msg;
     std::cout << "Subscriber: about to Receive_Message()" << std::endl;
     while (expected <= 19) {
       FACE::TS::Receive_Message(connId, timeout, txn, msg, max_msg_size, status);
       if (status != FACE::RC_NO_ERROR) break;
-        ACE_DEBUG((LM_INFO, "Receive_Message: (the %d time): %C\t%d\t"
-                   "ttid: %Ld\n",
-                   recv_msg_count, msg.text.in(), msg.count,
-                   txn));
+        std::cout << "Receive_Message: (the " << recv_msg_count << " time): " << msg.text.in()
+                  << "\t" << msg.count << "\tmsg_instance_guid: " << std::hex << msg.msg_instance_guid
+                  << std::dec << "\tttid: " << txn << std::endl;
       ++recv_msg_count;
       receiveMessageHappened = true;
       if ((msg.count != expected) && expected > 0) {
@@ -106,8 +112,8 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
         std::cout << "Message Header - tid: " << txn
                   << "\n\tplatform view guid: " << hdr.platform_view_guid
                   << "\n\tsource timestamp: " << hdr.message_timestamp
-                  << "\n\tinstance guid: " << hdr.message_instance_guid
-                  << "\n\tsource guid: " << hdr.message_source_guid
+                  << "\n\tinstance guid: " << std::hex << hdr.message_instance_guid
+                  << "\n\tsource guid: " << std::dec << hdr.message_source_guid
                   << "\n\tvalidity " << hdr.message_validity << std::endl;
         if (hdr.message_source_guid != 9645061) {
           std::cout << "ERROR: Receive_Message for header failed.  Header source guid " << hdr.message_source_guid
@@ -115,7 +121,12 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
           status = FACE::INVALID_PARAM;
           return status;
         }
-
+        if (hdr.message_instance_guid != msg.msg_instance_guid) {
+            std::cout << "ERROR: Receive_Message for header failed.  message_instance_guid " << std::hex << hdr.message_instance_guid
+                      << " != " << msg.msg_instance_guid << std::endl;
+            status = FACE::INVALID_PARAM;
+            return status;
+        }
         expected = msg.count + 1;
       }
     }

@@ -22,6 +22,7 @@ OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(int to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned int to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long to_convert);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(long long to_convert);
+OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export OPENDDS_STRING to_dds_string(unsigned long to_convert, bool as_hex = false);
 
 template <typename T>
