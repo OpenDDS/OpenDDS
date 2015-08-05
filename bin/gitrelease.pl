@@ -2,6 +2,8 @@ use strict;
 use warnings;
 use Date::Format;
 use Cwd;
+use LWP::Simple;
+
 
 $ENV{TZ} = "UTC";
 
@@ -575,6 +577,74 @@ sub remedy_zip_archive {
   return !$result;
 }
 ############################################################################
+sub verify_gen_doxygen {
+  return (-f 'html/dds/index.html');
+}
+
+sub message_gen_doxygen {
+  return "Doxygen documentation needs generating";
+}
+
+sub remedy_gen_doxygen {
+  my $generated = 0;
+  if ($ENV{ACE_ROOT}) {
+    $ENV{DDS_ROOT} = getcwd;
+    my $result = system("$ENV{ACE_ROOT}/bin/generate_doxygen.pl", "-exclude_ace -include_dds");
+    if (!$result) {
+      $generated = 1;
+    }
+  } else {
+    print "ACE_ROOT is not set\n";
+  }
+  return $generated;
+}
+############################################################################
+sub verify_ftp_upload {
+  my $settings = shift();
+  my $url = "http://download.ociweb.com/OpenDDS/";
+  my $content = get($url);
+  my $base = "OpenDDS-$settings->{version}";
+  # Check for required files
+  my @files = ("$base-doxygen.tar.gz", "$base-doxygen.zip",
+               "$base.tar.gz",         "$base.zip",
+               "$base.pdf",            "OpenDDS-latest.pdf",
+               "$base.md5");
+  foreach my $file (@files) {
+    if ($content =~ /$file/) {
+    } else {
+      print "$file not found at $url\n";
+      return 0;
+    }
+  }
+  return 1;
+}
+
+sub message_ftp_upload {
+  return "Release needs to be uploaded to ftp site";
+}
+############################################################################
+sub verify_github_upload {
+  my $settings = shift();
+  my $tag = $settings->{git_tag};
+  my $url = "https://github.com/objectcomputing/OpenDDS/releases/tag/$tag";
+  my $content = get($url);
+  my $base = "DDS-$settings->{version}";
+  # Check for required files
+  my @files = ("$base.tar.gz",         "$base.zip");
+  foreach my $file (@files) {
+    if ($content =~ /$file/) {
+    } else {
+      print "$file not found at $url\n";
+      return 0;
+    }
+  }
+  return 1;
+}
+
+sub message_github_upload {
+  return "tar.gz and zip of sources need to be uploaded to github";
+}
+############################################################################
 my @release_steps = (
   {
     title   => 'Verify git status is clean',
@@ -658,9 +728,23 @@ my @release_steps = (
     message => sub{message_zip_archive(@_)},
     remedy  => sub{remedy_zip_archive(@_)}
   },
-  { title   => 'Generate doxygen', }, # Should run $ACE_ROOT/bin/generate_doxygen.pl
-  { title   => 'Upload to FTP Site', },
-  { title   => 'Upload to GitHub', },
+  # TODO MD5
+  {
+    title   => 'Generate doxygen',
+    verify  => sub{verify_gen_doxygen(@_)},
+    message => sub{message_gen_doxygen(@_)},
+    remedy  => sub{remedy_gen_doxygen(@_)} # $ACE_ROOT/bin/generate_doxygen.pl
+  },
+  {
+    title   => 'Upload to FTP Site',
+    verify  => sub{verify_ftp_upload(@_)},
+    message => sub{message_ftp_upload(@_)}
+  },
+  {
+    title   => 'Upload to GitHub',
+    verify  => sub{verify_github_upload(@_)},
+    message => sub{message_github_upload(@_)}
+   },
   { title   => 'Update opendds.org front page', },
   { title   => 'Update opendds.org news page', },
 );
