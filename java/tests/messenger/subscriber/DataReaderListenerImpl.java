@@ -41,7 +41,7 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
 
         MessageHolder mh = new MessageHolder(new Message());
         SampleInfoHolder sih = new SampleInfoHolder(new SampleInfo(0, 0, 0,
-            new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false));
+            new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
         int status = mdr.take_next_sample(mh, sih);
 
         if (status == RETCODE_OK.value) {
