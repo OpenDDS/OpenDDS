@@ -1301,6 +1301,9 @@ DataReaderImpl::enable()
             this->last_deadline_missed_total_count_);
   }
 
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  disco->pre_reader(this);
+
   this->set_enabled();
 
   if (topic_servant_ && !transport_disabled_) {
@@ -1337,8 +1340,6 @@ DataReaderImpl::enable()
     DDS::SubscriberQos sub_qos;
     this->subscriber_servant_->get_qos(sub_qos);
 
-    Discovery_rch disco =
-        TheServiceParticipant->get_discovery(this->domain_id_);
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
             this->participant_servant_->get_id(),

@@ -30,8 +30,8 @@ namespace {
   const ACE_TString OLD_TRANSPORT_PREFIX = ACE_TEXT("transport_");
 
   /// Used for sorting
-  bool predicate( const OpenDDS::DCPS::TransportInst_rch& lhs,
-                  const OpenDDS::DCPS::TransportInst_rch& rhs )
+  bool predicate(const OpenDDS::DCPS::TransportInst_rch& lhs,
+                 const OpenDDS::DCPS::TransportInst_rch& rhs)
   {
     return lhs->name() < rhs->name();
   }
@@ -56,7 +56,7 @@ TransportRegistry::instance()
 const char TransportRegistry::DEFAULT_CONFIG_NAME[] = "_OPENDDS_DEFAULT_CONFIG";
 const char TransportRegistry::DEFAULT_INST_PREFIX[] = "_OPENDDS_";
 
-OpenDDS::DCPS::TransportRegistry::TransportRegistry()
+TransportRegistry::TransportRegistry()
   : global_config_(new TransportConfig(DEFAULT_CONFIG_NAME))
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
@@ -77,7 +77,7 @@ int
 TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                                                 ACE_Configuration_Heap& cf)
 {
-  const ACE_Configuration_Section_Key &root = cf.root_section();
+  const ACE_Configuration_Section_Key& root = cf.root_section();
 
   // Create a vector to hold configuration information so we can populate
   // them after the transports instances are created.
@@ -116,24 +116,24 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
         // Process the subsections of this section (the individual transport
         // impls).
         KeyList keys;
-        if (processSections( cf, sect, keys ) != 0) {
+        if (processSections(cf, sect, keys) != 0) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                             ACE_TEXT("too many nesting layers in [%s] section.\n"),
                             sect_name.c_str()),
                            -1);
         }
-        for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-          OPENDDS_STRING transport_id = (*it).first;
-          ACE_Configuration_Section_Key inst_sect = (*it).second;
+        for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
+          OPENDDS_STRING transport_id = it->first;
+          ACE_Configuration_Section_Key inst_sect = it->second;
 
           ValueMap values;
-          if (pullValues( cf, (*it).second, values ) != 0) {
+          if (pullValues(cf, it->second, values) != 0) {
             // Get the factory_id for the transport.
             OPENDDS_STRING transport_type;
             ValueMap::const_iterator vm_it = values.find("transport_type");
             if (vm_it != values.end()) {
-              transport_type = (*vm_it).second;
+              transport_type = vm_it->second;
             } else {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -144,8 +144,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
             // Create the TransportInst object and load the transport
             // configuration in ACE_Configuration_Heap to the TransportInst
             // object.
-            TransportInst_rch inst = this->create_inst(transport_id,
-                                                       transport_type);
+            TransportInst_rch inst = create_inst(transport_id, transport_type);
             if (inst == 0) {
               ACE_ERROR_RETURN((LM_ERROR,
                                 ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -187,7 +186,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
         // Process the subsections of this section (the individual config
         // impls).
         KeyList keys;
-        if (processSections( cf, sect, keys ) != 0) {
+        if (processSections(cf, sect, keys) != 0) {
           // Don't allow multiple layers of nesting ([config/x/y]).
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -195,11 +194,11 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                             sect_name.c_str()),
                            -1);
         }
-        for (KeyList::const_iterator it=keys.begin(); it != keys.end(); ++it) {
-          OPENDDS_STRING config_id = (*it).first;
+        for (KeyList::const_iterator it = keys.begin(); it != keys.end(); ++it) {
+          OPENDDS_STRING config_id = it->first;
 
           // Create a TransportConfig object.
-          TransportConfig_rch config = this->create_config(config_id);
+          TransportConfig_rch config = create_config(config_id);
           if (config == 0) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -209,16 +208,14 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
           }
 
           ValueMap values;
-          pullValues( cf, (*it).second, values );
+          pullValues(cf, it->second, values);
 
           ConfigInfo configInfo;
           configInfo.first = config;
-          for (ValueMap::const_iterator it=values.begin();
-               it != values.end(); ++it) {
-            OPENDDS_STRING name = (*it).first;
+          for (ValueMap::const_iterator it = values.begin(); it != values.end(); ++it) {
+            OPENDDS_STRING name = it->first;
+            OPENDDS_STRING value = it->second;
             if (name == "transports") {
-              OPENDDS_STRING value = (*it).second;
-
               char delim = ',';
               size_t pos = 0;
               OPENDDS_STRING token;
@@ -231,7 +228,6 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
 
               configInfoVec.push_back(configInfo);
             } else if (name == "swap_bytes") {
-              OPENDDS_STRING value = (*it).second;
               if ((value == "1") || (value == "true")) {
                 config->swap_bytes_ = true;
               } else if ((value != "0") && (value != "false")) {
@@ -242,7 +238,6 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                                  -1);
               }
             } else if (name == "passive_connect_duration") {
-              OPENDDS_STRING value = (*it).second;
               if (!convertToInteger(value,
                                     config->passive_connect_duration_)) {
                 ACE_ERROR_RETURN((LM_ERROR,
@@ -259,7 +254,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
                                -1);
             }
           }
-          if (configInfo.second.size() == 0) {
+          if (configInfo.second.empty()) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
                               ACE_TEXT("No transport instances listed in [config/%C] section.\n"),
@@ -283,7 +278,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
     TransportConfig_rch config = configInfoVec[i].first;
     OPENDDS_VECTOR(OPENDDS_STRING)& insts = configInfoVec[i].second;
     for (unsigned int j = 0; j < insts.size(); ++j) {
-      TransportInst_rch inst = this->get_inst(insts[j]);
+      TransportInst_rch inst = get_inst(insts[j]);
       if (inst == 0) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -298,7 +293,7 @@ TransportRegistry::load_transport_configuration(const OPENDDS_STRING& file_name,
   // Create and populate the default configuration for this
   // file with all the instances from this file.
   if (!instances.empty()) {
-    TransportConfig_rch config = this->create_config(file_name);
+    TransportConfig_rch config = create_config(file_name);
     if (config == 0) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) TransportRegistry::load_transport_configuration: ")
@@ -322,9 +317,8 @@ TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type)
   ACE_UNUSED_ARG(transport_type);
 #if !defined(ACE_AS_STATIC_LIBS)
   GuardType guard(lock_);
-  LibDirectiveMap::iterator lib_iter =
-    this->lib_directive_map_.find(transport_type);
-  if (lib_iter != this->lib_directive_map_.end()) {
+  LibDirectiveMap::iterator lib_iter = lib_directive_map_.find(transport_type);
+  if (lib_iter != lib_directive_map_.end()) {
     ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
     // Release the lock, because loading a transport library will
     // recursively call this function to add its default inst.
@@ -338,18 +332,18 @@ TransportInst_rch
 TransportRegistry::create_inst(const OPENDDS_STRING& name,
                                const OPENDDS_STRING& transport_type)
 {
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
   TransportType_rch type;
 
-  if (find(this->type_map_, transport_type, type) != 0) {
+  if (find(type_map_, transport_type, type) != 0) {
 #if !defined(ACE_AS_STATIC_LIBS)
     guard.release();
     // Not present, try to load library
-    this->load_transport_lib(transport_type);
+    load_transport_lib(transport_type);
     guard.acquire();
 
     // Try to find it again
-    if (find(this->type_map_, transport_type, type) != 0) {
+    if (find(type_map_, transport_type, type) != 0) {
 #endif
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
@@ -361,7 +355,7 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
 #endif
   }
 
-  if (this->inst_map_.count(name)) {
+  if (inst_map_.count(name)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
                ACE_TEXT("name=%C is already in use.\n"),
@@ -369,7 +363,7 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
     return TransportInst_rch();
   }
   TransportInst_rch inst = type->new_inst(name);
-  this->inst_map_[name] = inst;
+  inst_map_[name] = inst;
   return inst;
 }
 
@@ -377,9 +371,9 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
 TransportInst_rch
 TransportRegistry::get_inst(const OPENDDS_STRING& name) const
 {
-  GuardType guard(this->lock_);
-  InstMap::const_iterator found = this->inst_map_.find(name);
-  if (found != this->inst_map_.end()) {
+  GuardType guard(lock_);
+  InstMap::const_iterator found = inst_map_.find(name);
+  if (found != inst_map_.end()) {
     return found->second;
   }
   return TransportInst_rch();
@@ -389,9 +383,9 @@ TransportRegistry::get_inst(const OPENDDS_STRING& name) const
 TransportConfig_rch
 TransportRegistry::create_config(const OPENDDS_STRING& name)
 {
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
 
-  if (this->config_map_.count(name)) {
+  if (config_map_.count(name)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) TransportRegistry::create_config: ")
                ACE_TEXT("name=%C is already in use.\n"),
@@ -400,7 +394,7 @@ TransportRegistry::create_config(const OPENDDS_STRING& name)
   }
 
   TransportConfig_rch inst = new TransportConfig(name);
-  this->config_map_[name] = inst;
+  config_map_[name] = inst;
   return inst;
 }
 
@@ -408,9 +402,9 @@ TransportRegistry::create_config(const OPENDDS_STRING& name)
 TransportConfig_rch
 TransportRegistry::get_config(const OPENDDS_STRING& name) const
 {
-  GuardType guard(this->lock_);
-  ConfigMap::const_iterator found = this->config_map_.find(name);
-  if (found != this->config_map_.end()) {
+  GuardType guard(lock_);
+  ConfigMap::const_iterator found = config_map_.find(name);
+  if (found != config_map_.end()) {
     return found->second;
   }
   return TransportConfig_rch();
@@ -445,7 +439,7 @@ TransportRegistry::fix_empty_default()
   TransportConfig_rch global_config = global_config_;
 #if !defined(ACE_AS_STATIC_LIBS)
   guard.release();
-  this->load_transport_lib(FALLBACK_TYPE);
+  load_transport_lib(FALLBACK_TYPE);
 #endif
   return global_config;
 }
@@ -487,11 +481,9 @@ void
 TransportRegistry::release()
 {
   DBG_ENTRY_LVL("TransportRegistry", "release", 6);
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
 
-  for (InstMap::iterator iter = inst_map_.begin();
-       iter != inst_map_.end();
-       ++iter) {
+  for (InstMap::iterator iter = inst_map_.begin(); iter != inst_map_.end(); ++iter) {
     iter->second->shutdown();
   }
 
@@ -500,7 +492,6 @@ TransportRegistry::release()
   config_map_.clear();
   domain_default_config_map_.clear();
   global_config_ = 0;
-
 }
 
 
