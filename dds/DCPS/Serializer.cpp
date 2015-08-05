@@ -38,6 +38,13 @@ Serializer::~Serializer()
 }
 
 void
+Serializer::reset_alignment()
+{
+  align_rshift_ = current_ ? ptrdiff_t(current_->rd_ptr()) % MAX_ALIGN : 0;
+  align_wshift_ = current_ ? ptrdiff_t(current_->wr_ptr()) % MAX_ALIGN : 0;
+}
+
+void
 Serializer::smemcpy(char* to, const char* from, size_t n)
 {
     (void) ACE_OS::memcpy(

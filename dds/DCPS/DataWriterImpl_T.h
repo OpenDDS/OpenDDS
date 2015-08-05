@@ -459,15 +459,10 @@ private:
         // If this is RTI serialization, start counting byte offset AFTER
         // the header
         if (Serializer::use_rti_serialization()) {
-          OpenDDS::DCPS::Serializer serializer2(mb, swap, cdr
-            ? OpenDDS::DCPS::Serializer::ALIGN_CDR
-            : OpenDDS::DCPS::Serializer::ALIGN_NONE);
-          serializer2 << ko_instance_data;
-        // Else use same serializer
-        } else {
-          serializer << ko_instance_data;
+          // Start counting byte-offset AFTER header
+          serializer.reset_alignment();
         }
-
+        serializer << ko_instance_data;
       } else { // OpenDDS::DCPS::FULL_MARSHALING
         size_t effective_size = 0, padding = 0;
         if (marshaled_size_) {
@@ -512,15 +507,10 @@ private:
         // If this is RTI serialization, start counting byte offset AFTER
         // the header
         if (Serializer::use_rti_serialization()) {
-          OpenDDS::DCPS::Serializer serializer2(mb, swap, cdr
-            ? OpenDDS::DCPS::Serializer::ALIGN_CDR
-            : OpenDDS::DCPS::Serializer::ALIGN_NONE);
-          serializer2 << instance_data;
-        // Else use same serializer
-        } else {
-          serializer << instance_data;
+          // Start counting byte-offset AFTER header
+          serializer.reset_alignment();
         }
-        
+        serializer << instance_data;
       }
 
       return mb;

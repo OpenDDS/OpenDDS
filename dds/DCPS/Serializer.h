@@ -77,6 +77,9 @@ public:
   /// Examine alignment behavior.
   Alignment alignment() const;
 
+  /// Reset aligment as if a new instance were created
+  void reset_alignment();
+
   /// Examine the state of the stream abstraction.
   bool good_bit() const;
 

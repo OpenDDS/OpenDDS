@@ -868,23 +868,12 @@ namespace OpenDDS {
 
     if (Serializer::use_rti_serialization()) {
       // Start counting byte-offset AFTER header
-      ::OpenDDS::DCPS::Serializer ser2(
-        sample.sample_,
-        sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-        cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR
-            : OpenDDS::DCPS::Serializer::ALIGN_NONE);
-
-      if (sample.header_.key_fields_only_) {
-        ser2 >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
-      } else {
-        ser2 >> data;
-      }
+      ser.reset_alignment();
+    }
+    if (sample.header_.key_fields_only_) {
+      ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
     } else {
-      if (sample.header_.key_fields_only_) {
-        ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(data);
-      } else {
-        ser >> data;
-      }
+      ser >> data;
     }
 
 
@@ -930,22 +919,12 @@ protected:
 
     if (Serializer::use_rti_serialization()) {
       // Start counting byte-offset AFTER header
-      OpenDDS::DCPS::Serializer ser2(
-        sample.sample_,
-        sample.header_.byte_order_ != ACE_CDR_BYTE_ORDER,
-        cdr ? OpenDDS::DCPS::Serializer::ALIGN_CDR 
-            : OpenDDS::DCPS::Serializer::ALIGN_NONE);
-      if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
-        ser2 >> ::OpenDDS::DCPS::KeyOnly< MessageType>(*data);
-      } else {
-        ser2 >> *data;
-      }
+      ser.reset_alignment();
+    }
+    if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
+      ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(*data);
     } else {
-      if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
-        ser >> ::OpenDDS::DCPS::KeyOnly< MessageType>(*data);
-      } else {
-        ser >> *data;
-      }
+      ser >> *data;
     }
 
 
