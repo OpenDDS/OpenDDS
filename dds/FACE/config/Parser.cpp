@@ -248,6 +248,8 @@ Parser::parse(const char* filename)
     }
   }
 
+  DCPS::StaticDiscovery::instance()->registry.match();
+
   return status;
 }
 
