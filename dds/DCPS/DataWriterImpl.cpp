@@ -1366,8 +1366,7 @@ DataWriterImpl::enable()
 
   if (deadline_period.sec != DDS::DURATION_INFINITE_SEC
       || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC) {
-    this->watchdog_ =
-                       new OfferedDeadlineWatchdog(
+    this->watchdog_ = new OfferedDeadlineWatchdog(
                          this->lock_,
                          this->qos_.deadline,
                          this,
@@ -1375,6 +1374,9 @@ DataWriterImpl::enable()
                          this->offered_deadline_missed_status_,
                          this->last_deadline_missed_total_count_);
   }
+
+  Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
+  disco->pre_writer(this);
 
   this->set_enabled();
 
@@ -1395,7 +1397,6 @@ DataWriterImpl::enable()
   DDS::PublisherQos pub_qos;
   this->publisher_servant_->get_qos(pub_qos);
 
-  Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   this->publication_id_ =
     disco->add_publication(this->domain_id_,
                            this->participant_servant_->get_id(),
