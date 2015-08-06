@@ -2893,18 +2893,18 @@ void DataReaderImpl::notify_liveliness_change()
 
   if (DCPS_debug_level > 9) {
     OPENDDS_STRING output_str;
-    output_str + "subscription ";
+    output_str += "subscription ";
     output_str += OPENDDS_STRING(GuidConverter(subscription_id_));
-    output_str + ", listener at: 0x";
+    output_str += ", listener at: 0x";
     output_str += to_dds_string(this->listener_.in ());
 
     for (WriterMapType::iterator current = this->writers_.begin();
         current != this->writers_.end();
         ++current) {
       RepoId id = current->first;
-      output_str + "\n\tNOTIFY: writer[ ";
+      output_str += "\n\tNOTIFY: writer[ ";
       output_str += OPENDDS_STRING(GuidConverter(id));
-      output_str + "] == ";
+      output_str += "] == ";
       output_str += current->second->get_state_str();
     }
 
