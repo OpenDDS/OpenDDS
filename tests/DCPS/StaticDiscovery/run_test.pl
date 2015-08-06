@@ -48,7 +48,7 @@ sub generateConfig {
             print $fh "[transport/Rtps$entity]\n";
             print $fh "transport_type=rtps_udp\n";
             print $fh "use_multicast=0\n";
-            print $fh "local_address=localhost:", 21074 + $entity, "\n\n";
+            print $fh "local_address=127.0.0.1:", 21074 + $entity, "\n\n";
             print $fh "[config/Config$entity]\n";
             print $fh "transports=Rtps$entity\n\n";
             ++$entity;
@@ -72,7 +72,7 @@ sub generateConfig {
             print $fh "[transport/Rtps$entity]\n";
             print $fh "transport_type=rtps_udp\n";
             print $fh "use_multicast=0\n";
-            print $fh "local_address=localhost:", 21074 + $entity, "\n\n";
+            print $fh "local_address=127.0.0.1:", 21074 + $entity, "\n\n";
             print $fh "[config/Config$entity]\n";
             print $fh "transports=Rtps$entity\n\n";
             ++$entity;
@@ -104,6 +104,7 @@ sub runTest {
     open(my $fh, '>', 'config.ini') or die "Could not open file 'config.ini' $!";
     print $fh "[common]\n";
     print $fh "DCPSDefaultDiscovery=DEFAULT_STATIC\n";
+    print $fh "pool_size=83886080\n";
     print $fh "\n";
     print $fh "[topic/TheTopic]\n";
     print $fh "name=TheTopic\n";
