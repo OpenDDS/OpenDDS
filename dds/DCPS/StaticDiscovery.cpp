@@ -67,7 +67,10 @@ StaticEndpointManager::StaticEndpointManager(const RepoId& participant_id,
   : EndpointManager<StaticDiscoveredParticipantData>(participant_id, lock)
   , registry_(registry)
   , participant_(participant)
-{}
+{
+  pub_bit_key_.value[0] = pub_bit_key_.value[1] = pub_bit_key_.value[2] = 0;
+  sub_bit_key_.value[0] = sub_bit_key_.value[1] = sub_bit_key_.value[2] = 0;
+}
 
 void StaticEndpointManager::init_bit()
 {
