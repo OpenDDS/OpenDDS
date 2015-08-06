@@ -22,7 +22,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
     ACE_ERROR((LM_ERROR, "ERROR: expected %d but received %d\n",
                expected_samples_, received_samples_));
   } else if (expected_samples_) {
-    ACE_DEBUG((LM_DEBUG, "Expected number of samples received\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Expected number of samples received\n"));
   }
 }
 
