@@ -343,31 +343,15 @@ StaticEndpointManager::remove_publication_i(const RepoId& writerid)
 
   const EndpointRegistry::Writer& writer = pos->second;
 
-  {
-    ReaderIdSeq ids;
-    ids.length(writer.best_effort_readers.size());
-    size_t idx = 0;
-    for (RepoIdSet::const_iterator pos = writer.best_effort_readers.begin(), limit = writer.best_effort_readers.end();
-         pos != limit;
-         ++pos, ++idx) {
-      const RepoId& readerid = *pos;
-      ids[idx] = readerid;
-    }
-    pub.publication_->remove_associations(ids, false);
-  }
-
-  {
-    ReaderIdSeq ids;
-    ids.length(writer.reliable_readers.size());
-    size_t idx = 0;
-    for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
-         pos != limit;
-         ++pos, ++idx) {
-      const RepoId& readerid = *pos;
-      ids[idx] = readerid;
-      pub.publication_->unregister_for_reader(participant_id_, writerid, readerid);
-    }
-    pub.publication_->remove_associations(ids, false);
+  ReaderIdSeq ids;
+  ids.length(writer.reliable_readers.size());
+  size_t idx = 0;
+  for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
+        pos != limit;
+        ++pos, ++idx) {
+    const RepoId& readerid = *pos;
+    ids[idx] = readerid;
+    pub.publication_->unregister_for_reader(participant_id_, writerid, readerid);
   }
 
   return DDS::RETCODE_OK;
@@ -435,31 +419,15 @@ StaticEndpointManager::remove_subscription_i(const RepoId& readerid)
 
   const EndpointRegistry::Reader& reader = pos->second;
 
-  {
-    WriterIdSeq ids;
-    ids.length(reader.best_effort_writers.size());
-    size_t idx = 0;
-    for (RepoIdSet::const_iterator pos = reader.best_effort_writers.begin(), limit = reader.best_effort_writers.end();
-         pos != limit;
-         ++pos, ++idx) {
-      const RepoId& writerid = *pos;
-      ids[idx] = writerid;
-    }
-    sub.subscription_->remove_associations(ids, false);
-  }
-
-  {
-    WriterIdSeq ids;
-    ids.length(reader.reliable_writers.size());
-    size_t idx = 0;
-    for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
-         pos != limit;
-         ++pos, ++idx) {
-      const RepoId& writerid = *pos;
-      ids[idx] = writerid;
-      sub.subscription_->unregister_for_writer(participant_id_, readerid, writerid);
-    }
-    sub.subscription_->remove_associations(ids, false);
+  WriterIdSeq ids;
+  ids.length(reader.reliable_writers.size());
+  size_t idx = 0;
+  for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
+        pos != limit;
+        ++pos, ++idx) {
+    const RepoId& writerid = *pos;
+    ids[idx] = writerid;
+    sub.subscription_->unregister_for_writer(participant_id_, readerid, writerid);
   }
 
   return DDS::RETCODE_OK;
