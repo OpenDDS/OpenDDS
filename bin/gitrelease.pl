@@ -67,7 +67,6 @@ sub message_git_remote {
   return "Remote $remote does not match expected URL $settings->{git_url},\n" .
          "rerun and specifiy --remote";
 }
-
 ############################################################################
 sub verify_git_status_clean {
   my ($settings, $strict) = @_;
@@ -100,7 +99,6 @@ sub message_git_status_clean {
   return "The working directory is not clean:\n" . $settings->{unclean} .
          "  Commit to source control, or run git clean before continuing."
 }
-
 ############################################################################
 sub verify_update_version_file {
   my $settings = shift();
@@ -489,18 +487,39 @@ sub remedy_git_tag {
 ############################################################################
 sub verify_clone_tag {
   my $settings = shift();
-  return (-d $settings->{clone_dir});
+  my $correct = 0;
+  if (-d $settings->{clone_dir}) {
+    my $curdir = getcwd;
+    chdir $settings->{clone_dir};
+    open(GIT_BRANCH, "git branch |") or die "git branch $!";
+    my $startwithstar = '$\*';
+    while (<GIT_BRANCH>) {
+      if (/^\* \(detached from $settings->{git_tag}\)/) {
+        $correct = 1;
+      }
+    }
+    close GIT_BRANCH;
+    chdir $curdir;
+  }
+  return $correct;
 }
 
 sub message_clone_tag {
   my $settings = shift();
-  return "Could not see directory $settings->{clone_dir}\n";
+  if (-d $settings->{clone_dir}) {
+    return "Directory $settings->{clone_dir} did not check out tag $settings->{git_tag}\n";
+  } else {
+    return "Could not see directory $settings->{clone_dir}\n";
+  }
 }
 
 sub remedy_clone_tag {
   my $settings = shift();
-  print "Cloning OpenDDS into $settings->{clone_dir}\n";
-  my $result = system("git clone $settings->{git_url} $settings->{clone_dir}");
+  my $result = 0;
+  if (!-d $settings->{clone_dir}) {
+    print "Cloning OpenDDS into $settings->{clone_dir}\n";
+    $result = system("git clone $settings->{git_url} $settings->{clone_dir}");
+  }
   if (!$result) {
     my $curdir = getcwd;
     chdir($settings->{clone_dir});
@@ -508,14 +527,15 @@ sub remedy_clone_tag {
     $result = system("git checkout tags/$settings->{git_tag}");
     chdir($curdir);
   }
-  return $result;
+  return !$result;
 }
 ############################################################################
-sub verify_tgz_archive {
+sub verify_tgz_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
   my $good = 0;
   if (-f $file) {
+    # Check if it is in the right format
     open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
     my $target = join("/", 'DDS', $settings->{changelog});
     while (<TGZ>) {
@@ -528,19 +548,19 @@ sub verify_tgz_archive {
   return $good;
 }
 
-sub message_tgz_archive {
+sub message_tgz_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
   return "Could not find file $file";
 }
 
-sub remedy_tgz_archive {
+sub remedy_tgz_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
   my $curdir = getcwd;
   chdir($settings->{parent_dir});
   print "Creating file $settings->{tar_src}\n";
-  my $result = system("tar -cf $settings->{tar_src} DDS --exclude-vcs");
+  my $result = system("tar -cf $settings->{tar_src} $curdir --exclude-vcs");
   if (!$result) {
     print "Gzipping file $settings->{tar_src}\n";
     $result = system("gzip $settings->{tar_src}");
@@ -549,19 +569,19 @@ sub remedy_tgz_archive {
   return !$result;
 }
 ############################################################################
-sub verify_zip_archive {
+sub verify_zip_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{zip_src});
   return (-f $file);
 }
 
-sub message_zip_archive {
+sub message_zip_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{zip_src});
   return "Could not find file $file";
 }
 
-sub remedy_zip_archive {
+sub remedy_zip_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{zip_src});
   my $curdir = getcwd;
@@ -571,10 +591,28 @@ sub remedy_zip_archive {
   my $result = system("find . -name '.git*' | xargs rm -rf");
   if (!$result) {
     print "Creating file $settings->{zip_src}\n";
-    $result = system("zip -qq -r $settings->{zip_src} DDS -x '.git*'");
+    $result = system("zip -qq -r $settings->{zip_src} $curdir -x '.git*'");
   }
   chdir($curdir);
   return !$result;
+}
+############################################################################
+sub verify_md5_checksum{
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{md5_src});
+  return (-f $file);
+}
+
+sub message_md5_checksum{
+  return "You need to generate the MD5 checksum file";
+}
+
+sub remedy_md5_checksum{
+  my $settings = shift();
+  my $md5_file = join("/", $settings->{parent_dir}, $settings->{md5_src});
+  my $tgz_file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
+  my $zip_file = join("/", $settings->{parent_dir}, $settings->{zip_src});
+  system("md5sum $tgz_file $zip_file > $md5_file");
 }
 ############################################################################
 sub verify_gen_doxygen {
@@ -599,6 +637,67 @@ sub remedy_gen_doxygen {
   return $generated;
 }
 ############################################################################
+sub verify_tgz_doxygen {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{tgz_dox});
+  my $good = 0;
+  if (-f $file) {
+    open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
+    my $target = join("/", 'DDS', $settings->{changelog});
+    while (<TGZ>) {
+      if (/$target/) {
+        $good = 1;
+        last;
+      }
+    }
+  }
+  return $good;
+}
+
+sub message_tgz_doxygen {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{tgz_dox});
+  return "Could not find file $file";
+}
+
+sub remedy_tgz_doxygen {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{tar_dox});
+  my $curdir = getcwd;
+  chdir($settings->{parent_dir});
+  print "Creating file $settings->{tar_dox}\n";
+  my $result = system("tar -cf $settings->{tar_dox} $curdir/html/dds");
+  if (!$result) {
+    print "Gzipping file $settings->{tar_dox}\n";
+    $result = system("gzip $settings->{tar_dox}");
+  }
+  chdir($curdir);
+  return !$result;
+}
+############################################################################
+sub verify_zip_doxygen {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{zip_dox});
+  return (-f $file);
+}
+
+sub message_zip_doxygen {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{zip_dox});
+  return "Could not find file $file";
+}
+
+sub remedy_zip_doxygen {
+  my $settings = shift();
+  my $file = join("/", $settings->{parent_dir}, $settings->{zip_dox});
+  my $curdir = getcwd;
+  chdir($settings->{parent_dir});
+  print "Creating file $settings->{zip_src}\n";
+  my $result = system("zip -qq -r $settings->{zip_src} $curdir/html/dds");
+  chdir($curdir);
+  return !$result;
+}
+############################################################################
 sub verify_ftp_upload {
   my $settings = shift();
   my $url = "http://download.ociweb.com/OpenDDS/";
@@ -621,6 +720,34 @@ sub verify_ftp_upload {
 
 sub message_ftp_upload {
   return "Release needs to be uploaded to ftp site";
+}
+############################################################################
+sub verify_update_opendds_org_front {
+  my $settings = shift();
+  my $url = "http://www.opendds.org";
+  my $content = get($url);
+  my $version = "[Vv]ersion $settings->{version}";
+  if (!$content =~ /$version/) {
+    return 0;
+  }
+}
+
+sub message_update_opendds_org_front {
+  return "OpenDDS.org front page needs updating";
+}
+############################################################################
+sub verify_update_opendds_org_news {
+  my $settings = shift();
+  my $url = "http://www.opendds.org/news";
+  my $content = get($url);
+  my $version = "[Vv]ersion $settings->{version}";
+  if (!$content =~ /$version/) {
+    return 0;
+  }
+}
+
+sub message_update_opendds_org_news {
+  return "OpenDDS.org news page needs updating";
 }
 ############################################################################
 sub verify_github_upload {
@@ -718,22 +845,39 @@ my @release_steps = (
   },
   {
     title   => 'Create unix release archive',
-    verify  => sub{verify_tgz_archive(@_)},
-    message => sub{message_tgz_archive(@_)},
-    remedy  => sub{remedy_tgz_archive(@_)}
+    verify  => sub{verify_tgz_source(@_)},
+    message => sub{message_tgz_source(@_)},
+    remedy  => sub{remedy_tgz_source(@_)}
   },
   {
     title   => 'Create windows release archive',
-    verify  => sub{verify_zip_archive(@_)},
-    message => sub{message_zip_archive(@_)},
-    remedy  => sub{remedy_zip_archive(@_)}
+    verify  => sub{verify_zip_source(@_)},
+    message => sub{message_zip_source(@_)},
+    remedy  => sub{remedy_zip_source(@_)}
   },
-  # TODO MD5
   {
     title   => 'Generate doxygen',
     verify  => sub{verify_gen_doxygen(@_)},
     message => sub{message_gen_doxygen(@_)},
     remedy  => sub{remedy_gen_doxygen(@_)} # $ACE_ROOT/bin/generate_doxygen.pl
+  },
+  {
+    title   => 'Create unix doxygen archive',
+    verify  => sub{verify_tgz_doxygen(@_)},
+    message => sub{message_tgz_doxygen(@_)},
+    remedy  => sub{remedy_tgz_doxygen(@_)}
+  },
+  {
+    title   => 'Create windows doxygen archive',
+    verify  => sub{verify_zip_doxygen(@_)},
+    message => sub{message_zip_doxygen(@_)},
+    remedy  => sub{remedy_zip_doxygen(@_)}
+  },
+  {
+    title   => 'Create md5 checksum',
+    verify  => sub{verify_md5_checksum(@_)},
+    message => sub{message_md5_checksum(@_)},
+    remedy  => sub{remedy_md5_checksum(@_)}
   },
   {
     title   => 'Upload to FTP Site',
@@ -745,8 +889,15 @@ my @release_steps = (
     verify  => sub{verify_github_upload(@_)},
     message => sub{message_github_upload(@_)}
    },
-  { title   => 'Update opendds.org front page', },
-  { title   => 'Update opendds.org news page', },
+  {
+    title   => 'Update opendds.org front page',
+    verify  => sub{verify_update_opendds_org_front(@_)},
+    message => sub{message_update_opendds_org_front(@_)}
+  },
+  { title   => 'Update opendds.org news page',
+    verify  => sub{verify_update_opendds_org_news(@_)},
+    message => sub{message_update_opendds_org_news(@_)}
+  },
 );
 
 my @t = gmtime;
@@ -792,6 +943,10 @@ my %settings = (
   tar_src    => "OpenDDS-$ARGV[0].tar",
   tgz_src    => "OpenDDS-$ARGV[0].tar.gz",
   zip_src    => "OpenDDS-$ARGV[0].zip",
+  md5_src    => "OpenDDS-$ARGV[0].md5",
+  tar_dox    => "OpenDDS-$ARGV[0]-doxygen.tar",
+  tgz_dox    => "OpenDDS-$ARGV[0]-doxygen.tar.gz",
+  zip_dox    => "OpenDDS-$ARGV[0]-doxygen.zip",
   timestamp  => strftime("%a %b %e %T %Z %Y", @t),
   git_url    => 'git@github.com:objectcomputing/OpenDDS.git',
   changelog  => "docs/history/ChangeLog-$ARGV[0]",
