@@ -690,7 +690,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
          ri != rw->second.remote_readers_.end(); ++ri) {
       RepoId tmp;
       std::memcpy(tmp.guidPrefix, ri->first.guidPrefix, sizeof(GuidPrefix_t));
-
+      tmp.entityId = ENTITYID_UNKNOWN;
       gap_receivers[tmp].push_back(ri->first);
 
       if (ri->second.expecting_durable_data()) {
