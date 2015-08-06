@@ -74,7 +74,6 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   if (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
-      std::cout << "Message: value      = " << message.value << std::endl;
       if (++received_samples_ == expected_samples_)
         done_callback_();
     }
