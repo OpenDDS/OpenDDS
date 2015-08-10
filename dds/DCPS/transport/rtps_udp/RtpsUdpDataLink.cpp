@@ -2246,7 +2246,8 @@ RtpsUdpDataLink::send_heartbeats()
       writers_to_advertise.insert(pos->second.localid);
     }
     if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
-      interestingCallbacks.push_back(*pos);
+      CallbackType callback(pos->first, pos->second);
+      interestingCallbacks.push_back(callback);
       pos->second.status = InterestingRemote::DOES_NOT_EXIST;
     }
   }
@@ -2388,7 +2389,8 @@ RtpsUdpDataLink::check_heartbeats()
        pos != limit;
        ++pos) {
     if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
-      interestingCallbacks.push_back(*pos);
+      CallbackType callback(pos->first, pos->second);
+      interestingCallbacks.push_back(callback);
       pos->second.status = InterestingRemote::DOES_NOT_EXIST;
     }
   }
