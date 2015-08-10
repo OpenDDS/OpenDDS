@@ -15,7 +15,7 @@
 
 #ifndef DDS_HAS_MINIMUM_BIT
 #include "DdsDcpsCoreTypeSupportImpl.h"
-#endif
+#endif /* DDS_HAS_MINIMUM_BIT */
 
 namespace OpenDDS {
 namespace DCPS {
@@ -177,7 +177,7 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
 
   return DDS::RETCODE_OK;
 }
-#endif
+#endif /* DDS_HAS_MINIMUM_BIT */
 
 Discovery::Config::~Config()
 {

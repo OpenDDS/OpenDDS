@@ -276,8 +276,8 @@ tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
-tests/DCPS/StaticDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST !NO_BUILT_IN_TOPICS
-tests/DCPS/StaticDiscoveryReconnect/run_test.pl: !DCPS_MIN !NO_MCAST !NO_BUILT_IN_TOPICS
+tests/DCPS/StaticDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST
+tests/DCPS/StaticDiscoveryReconnect/run_test.pl: !DCPS_MIN !NO_MCAST
 tests/DCPS/SubscriberCycle/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_FILTERED_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION
 
 tests/transport/rtps/run_test.pl: !DCPS_MIN RTPS

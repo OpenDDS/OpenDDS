@@ -231,7 +231,7 @@ public:
 protected:
 #ifndef DDS_HAS_MINIMUM_BIT
   DDS::ReturnCode_t create_bit_topics(DomainParticipantImpl* participant);
-#endif
+#endif /* DDS_HAS_MINIMUM_BIT */
 
 private:
   RepoKey        key_;
