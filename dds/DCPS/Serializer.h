@@ -77,6 +77,9 @@ public:
   /// Examine alignment behavior.
   Alignment alignment() const;
 
+  /// Reset aligment as if a new instance were created
+  void reset_alignment();
+
   /// Examine the state of the stream abstraction.
   bool good_bit() const;
 
@@ -294,9 +297,13 @@ private:
 
   static const size_t MAX_ALIGN = 8;
   static const char ALIGN_PAD[MAX_ALIGN];
+  static bool use_rti_serialization_;
 
 public:
   static const size_t WCHAR_SIZE = 2; // Serialize wchar as UTF-16BE
+
+  static bool use_rti_serialization();
+  static void set_use_rti_serialization(bool should_use);
 
 #if defined ACE_LITTLE_ENDIAN
   static const bool SWAP_BE = true;

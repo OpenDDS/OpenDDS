@@ -120,6 +120,7 @@ static const ACE_TCHAR REPO_SECTION_NAME[]   = ACE_TEXT("repository");
 static const ACE_TCHAR RTPS_SECTION_NAME[]   = ACE_TEXT("rtps_discovery");
 
 static bool got_debug_level = false;
+static bool got_use_rti_serialization = false;
 static bool got_info = false;
 static bool got_chunks = false;
 static bool got_chunk_association_multiplier = false;
@@ -440,11 +441,10 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_info = true;
 
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSInfo"))) != 0) {
-      // Deprecated, use -DCPSInfoRepo
-      this->set_repo_ior(currentArg, Discovery::DEFAULT_REPO);
+    } else if (!arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-DCPSRTISerialization"))) {
+      Serializer::set_use_rti_serialization(true);
       arg_shifter.consume_arg();
-      got_info = true;
+      got_use_rti_serialization = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSChunks"))) != 0) {
       n_chunks_ = ACE_OS::atoi(currentArg);
@@ -1409,6 +1409,15 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       if (!value.empty()) {
         this->set_repo_ior(value.c_str(), Discovery::DEFAULT_REPO);
       }
+    }
+
+    if (got_use_rti_serialization) {
+      ACE_DEBUG((LM_NOTICE,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSRTISerialization value from command option (overrides value if it's in config file).\n")));
+    } else {
+      bool should_use = false;
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSRTISerialization"), should_use, bool)
+      Serializer::set_use_rti_serialization(should_use);
     }
 
     if (got_chunks) {
