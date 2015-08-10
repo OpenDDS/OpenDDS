@@ -160,7 +160,7 @@ DataTypeBase* types[] = {
 #endif
 };
 
-bool testType(DataTypeBase* type)
+bool testType(DataTypeBase* type, bool reset = false)
 {
   ACE_Message_Block mb(1024);
   bool ok = true;
@@ -178,21 +178,49 @@ bool testType(DataTypeBase* type)
       mb.wr_ptr(offset);
       type->write(s);
 
-      const size_t len = mb.length() - memory;
-      const size_t align = type->alignment();
-      const size_t padding = (align > 1 && offset % align)
-                             ? align - (offset % align) : 0;
-      const size_t expected = offset + padding + type->space();
-      if (len != expected) {
+      const size_t len1 = mb.length() - memory;
+      const size_t align1 = type->alignment();
+      const size_t padding1 = (align1 > 1 && offset % align1)
+                             ? align1 - (offset % align1) : 0;
+      const size_t expected1 = offset + padding1 + type->space();
+      if (len1 != expected1) {
         ok = false;
-        std::cerr << "ERROR: expected length " << expected << " != actual "
-                  << len << " with offset " << offset << " and type "
-                  << type->name() << " (padding " << padding << ")\n";
+        std::cerr << "ERROR: expected length " << expected1 << " != actual "
+                  << len1 << " with offset " << offset << " and type "
+                  << type->name() << " (padding " << padding1 << ")\n";
+        continue;
+      }
+
+      if (reset) {
+        s.reset_alignment();
+      }
+
+      type->write(s);
+      {
+        const size_t len = mb.length() - memory;
+        const size_t align = type->alignment();
+        const size_t extraPadding = reset ? 0 : (len1 % align);
+
+        const size_t padding = (align > 1 && offset % align)
+                               ? align - (offset % align) : 0;
+        const size_t expected = offset + extraPadding +
+                                padding + type->space() * 2;
+        if (len != expected) {
+          ok = false;
+          std::cerr << "ERROR: expected length2 " << expected << " != actual "
+                    << len << " with offset " << offset << " and type "
+                    << type->name() << " (padding " << padding << ")\n";
+        }
       }
 
       mb.rd_ptr(memory);
+
       Serializer s2(&mb, false /* swap */, Serializer::ALIGN_CDR);
       mb.rd_ptr(offset);
+      type->read(s2);
+      if (reset) {
+        s2.reset_alignment();
+      }
       type->read(s2);
 
       const size_t leftover = mb.length();
@@ -212,6 +240,16 @@ bool runAlignmentTest()
   bool ok = true;
   for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
     ok &= testType(types[i]);
+  }
+  return ok;
+}
+
+bool runAlignmentResetTest()
+{
+  std::cerr << "\nRunning alignment reset tests...\n";
+  bool ok = true;
+  for (size_t i = 0; i < sizeof(types) / sizeof(types[0]); ++i) {
+    ok &= testType(types[i], true);
   }
   return ok;
 }

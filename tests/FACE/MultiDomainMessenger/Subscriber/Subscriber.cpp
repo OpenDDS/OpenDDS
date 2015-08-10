@@ -68,8 +68,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     ACE_OS::sleep(15);
     if (!callbackHappened || callback_count != 4) {
-      ACE_ERROR((LM_ERROR,
-                 "ERROR: number callbacks seen incorrect (seen: %d expected: 4)\n"));
+      ACE_ERROR((
+        LM_ERROR,
+        "ERROR: number callbacks seen incorrect (seen: %d expected: 4)\n",
+        callback_count));
       testPassed = false;
     }
     FACE::TS::Unregister_Callback(connId1, status);
