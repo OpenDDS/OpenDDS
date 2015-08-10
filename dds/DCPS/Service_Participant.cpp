@@ -441,7 +441,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_info = true;
 
-    } else if (!arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-RTISerialization"))) {
+    } else if (!arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-DCPSRTISerialization"))) {
       Serializer::set_use_rti_serialization(true);
       arg_shifter.consume_arg();
       got_use_rti_serialization = true;
@@ -1417,10 +1417,10 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
 
     if (got_use_rti_serialization) {
       ACE_DEBUG((LM_NOTICE,
-                 ACE_TEXT("(%P|%t) NOTICE: using RTISerialization value from command option (overrides value if it's in config file).\n")));
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSRTISerialization value from command option (overrides value if it's in config file).\n")));
     } else {
       bool should_use = false;
-      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("RTISerialization"), should_use, bool)
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSRTISerialization"), should_use, bool)
       Serializer::set_use_rti_serialization(should_use);
     }
 

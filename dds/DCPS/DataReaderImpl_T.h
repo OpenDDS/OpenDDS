@@ -866,7 +866,7 @@ namespace OpenDDS {
       ser >> header;
     }
 
-    if (Serializer::use_rti_serialization()) {
+    if (cdr && Serializer::use_rti_serialization()) {
       // Start counting byte-offset AFTER header
       ser.reset_alignment();
     }
@@ -917,7 +917,7 @@ protected:
       ser >> header;
     }
 
-    if (Serializer::use_rti_serialization()) {
+    if (cdr && Serializer::use_rti_serialization()) {
       // Start counting byte-offset AFTER header
       ser.reset_alignment();
     }

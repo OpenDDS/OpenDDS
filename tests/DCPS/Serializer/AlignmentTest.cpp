@@ -200,7 +200,7 @@ bool testType(DataTypeBase* type, bool reset = false)
         const size_t len = mb.length() - memory;
         const size_t align = type->alignment();
         const size_t extraPadding = reset ? 0 : (len1 % align);
-         
+
         const size_t padding = (align > 1 && offset % align)
                                ? align - (offset % align) : 0;
         const size_t expected = offset + extraPadding +
