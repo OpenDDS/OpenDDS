@@ -128,7 +128,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::SampleInfo si ={::DDS::NOT_READ_SAMPLE_STATE, ::DDS::NOT_NEW_VIEW_STATE
                              , ::DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE
                              , {0, 0}, ::DDS::HANDLE_NIL
-                             , 0, 0, 0, 0, 0, ::DDS::HANDLE_NIL, false};
+                             , 0, 0, 0, 0, 0, ::DDS::HANDLE_NIL, false, 0};
 
       reader = new Reader(dp.in (), history_depth, max_samples_per_instance) ;
 

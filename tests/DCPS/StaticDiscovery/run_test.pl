@@ -33,11 +33,11 @@ sub generateConfig {
             print $fh "[endpoint/Reader$entity]\n";
             print $fh "domain=100\n";
             print $fh "participant=$p\n";
-            my $e = sprintf("%06x", $entity++);
+            my $e = sprintf("%06x", $entity);
             push(@ra, "-reader $e");
             print $fh "entity=$e\n";
             print $fh "type=reader\n";
-            print $fh "config=Config\n";
+            print $fh "config=Config$entity\n";
             print $fh "topic=TheTopic\n";
             if ($reliable) {
                 print $fh "datareaderqos=ReliableReader\n";
@@ -45,16 +45,23 @@ sub generateConfig {
                 print $fh "datareaderqos=BestEffortReader\n";
             }
             print $fh "\n";
+            print $fh "[transport/Rtps$entity]\n";
+            print $fh "transport_type=rtps_udp\n";
+            print $fh "use_multicast=0\n";
+            print $fh "local_address=127.0.0.1:", 21074 + $entity, "\n\n";
+            print $fh "[config/Config$entity]\n";
+            print $fh "transports=Rtps$entity\n\n";
+            ++$entity;
         }
         for (my $i = 0; $i != $writers; ++$i) {
             print $fh "[endpoint/Writer$entity]\n";
             print $fh "domain=100\n";
             print $fh "participant=$p\n";
-            my $e = sprintf("%06x", $entity++);
+            my $e = sprintf("%06x", $entity);
             push(@wa, "-writer $e");
             print $fh "entity=$e\n";
             print $fh "type=writer\n";
-            print $fh "config=Config\n";
+            print $fh "config=Config$entity\n";
             print $fh "topic=TheTopic\n";
             if ($reliable) {
                 print $fh "datawriterqos=ReliableWriter\n";
@@ -62,6 +69,13 @@ sub generateConfig {
                 print $fh "datawriterqos=BestEffortWriter\n";
             }
             print $fh "\n";
+            print $fh "[transport/Rtps$entity]\n";
+            print $fh "transport_type=rtps_udp\n";
+            print $fh "use_multicast=0\n";
+            print $fh "local_address=127.0.0.1:", 21074 + $entity, "\n\n";
+            print $fh "[config/Config$entity]\n";
+            print $fh "transports=Rtps$entity\n\n";
+            ++$entity;
         }
         push(@$reader_array, \@ra);
         push(@$writer_array, \@wa);
@@ -90,18 +104,12 @@ sub runTest {
     open(my $fh, '>', 'config.ini') or die "Could not open file 'config.ini' $!";
     print $fh "[common]\n";
     print $fh "DCPSDefaultDiscovery=DEFAULT_STATIC\n";
-    print $fh "DCPSGlobalTransportConfig=Config\n";
+    print $fh "pool_size=83886080\n";
     print $fh "\n";
     print $fh "[topic/TheTopic]\n";
     print $fh "name=TheTopic\n";
     print $fh "type_name=IDL:TestMsg/TestMsgTypeSupport:1.0\n";
     print $fh "max_message_size=300\n";
-    print $fh "\n";
-    print $fh "[config/Config]\n";
-    print $fh "transports=Rtps\n";
-    print $fh "\n";
-    print $fh "[transport/Rtps]\n";
-    print $fh "transport_type=rtps_udp\n";
     print $fh "\n";
     print $fh "[datawriterqos/ReliableWriter]\n";
     print $fh "reliability.kind=RELIABLE\n";

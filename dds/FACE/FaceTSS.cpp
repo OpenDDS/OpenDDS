@@ -745,36 +745,38 @@ create_message_instance_guid(const OpenDDS::DCPS::RepoId& pub, const CORBA::Long
   FACE::LongLong mig_low;
   FACE::LongLong masked_seq;
 
-  if (sizeof(FACE::MESSAGE_INSTANCE_GUID) < sizeof(OpenDDS::DCPS::GUID_t)) {
-    //Until MESSAGE_INSTANCE_GUID becomes 128 bit GUID, use checksum to represent Prefix
-    FACE::Long prefix_representation = ACE::crc32(reinterpret_cast<const void*>(&pub), sizeof(pub));
-    masked_seq = (orig_seq & 0xFFFFFFFF00000000) >> 32;
+  //Until MESSAGE_INSTANCE_GUID becomes 128 bit GUID, use checksum to represent Prefix
+  FACE::Long prefix_representation = ACE::crc32(reinterpret_cast<const void*>(&pub), sizeof(pub));
+  masked_seq = orig_seq >> 32;
 
-    if (masked_seq) {
-      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: create_message_instance_guid - seq does not fit in FACE::Long, truncating high bits to fit\n"));
-    }
-    mig_low = orig_seq & 0xFFFFFFFF;
-    message_instance_guid = (((FACE::LongLong) prefix_representation) << 32 ) | ((FACE::LongLong) mig_low);
-
-  } else {
-    typedef CORBA::Octet MsgInstGuidPrefix_t[13];
-    typedef CORBA::Octet MsgInstGuidSeq_t[3];
-    MsgInstGuidPrefix_t migPrefix;
-    MsgInstGuidSeq_t migSeq;
-    ACE_OS::memcpy(&migPrefix[0], &pub.guidPrefix[2], 10);
-    ACE_OS::memcpy(&migPrefix[10], &pub.entityId.entityKey[0], 3);
-    masked_seq = (orig_seq & 0xFFFFFFFFFF000000) >> 32;
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) create_message_instance_guid - before mask seq: %Q, after mask seq: %Q\n",
-               orig_seq,
-               masked_seq));
-    if (masked_seq) {
-      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: create_message_instance_guid - seq does not fit in 3 bytes, truncating high bits to fit\n"));
-    }
-    FACE::LongLong masked = orig_seq & 0xFFFFFFFFFF;
-    ACE_OS::memcpy(&migSeq[0], &masked, 3);
-
+  if (masked_seq) {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: create_message_instance_guid - seq does not fit in FACE::Long, truncating high bits to fit\n"));
   }
+  mig_low = orig_seq & 0xFFFFFFFF;
+  message_instance_guid = (((FACE::LongLong) prefix_representation) << 32 ) | ((FACE::LongLong) mig_low);
+/*
+  //TODO: This is initial work toward defining how a 128 bit guid could be created
+  //in the future for a Message Instance Guid when supported.
+  // 13 byte prefix contains identifying pieces of guid
+  // 3 byte seq - truncated sequence from the sample
+  typedef CORBA::Octet MsgInstGuidPrefix_t[13];
+  typedef CORBA::Octet MsgInstGuidSeq_t[3];
+  MsgInstGuidPrefix_t migPrefix;
+  MsgInstGuidSeq_t migSeq;
+  ACE_OS::memcpy(&migPrefix[0], &pub.guidPrefix[2], 10);
+  ACE_OS::memcpy(&migPrefix[10], &pub.entityId.entityKey[0], 3);
+  masked_seq = orig_seq >> 24;
 
+  if (masked_seq) {
+    ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: create_message_instance_guid - seq does not fit in 3 bytes, truncating high bits to fit\n"));
+  }
+  FACE::LongLong masked = orig_seq & 0xFFFFFF;
+
+#ifdef ACE_BIG_ENDIAN
+  masked <<= 8 * (sizeof(FACE::LongLong)-3);
+#endif
+  ACE_OS::memcpy(&migSeq[0], &masked, 3);
+*/
   return message_instance_guid;
 }
 
