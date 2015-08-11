@@ -8,7 +8,6 @@
 #ifndef OPENDDS_RTPS_RTPSDISCOVERY_H
 #define OPENDDS_RTPS_RTPSDISCOVERY_H
 
-#ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dds/DCPS/DiscoveryBase.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
@@ -147,5 +146,4 @@ typedef OpenDDS::DCPS::RcHandle<RtpsDiscovery> RtpsDiscovery_rch;
 } // namespace RTPS
 } // namespace OpenDDS
 
-#endif /* DDS_HAS_MINIMUM_BIT */
 #endif /* OPENDDS_RTPS_RTPSDISCOVERY_H  */

@@ -847,6 +847,7 @@ namespace OpenDDS {
       virtual bool defer_reader(const RepoId& writer,
                                 const RepoId& writer_participant) = 0;
 
+#ifndef DDS_HAS_MINIMUM_BIT
       void remove_from_bit(const DiscoveredPublication& pub)
       {
         pub_key_to_id_.erase(get_key(pub));
@@ -858,6 +859,7 @@ namespace OpenDDS {
         sub_key_to_id_.erase(get_key(sub));
         remove_from_bit_i(sub);
       }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
       RepoId make_topic_guid()
       {

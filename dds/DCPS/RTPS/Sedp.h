@@ -7,7 +7,6 @@
 
 #ifndef OPENDDS_RTPS_SEDP_H
 #define OPENDDS_RTPS_SEDP_H
-#ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -253,7 +252,9 @@ private:
     void enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
     void enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
     void enqueue(DCPS::MessageId id, const ParticipantMessageData* data);
+#ifndef DDS_HAS_MINIMUM_BIT
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
+#endif /* DDS_HAS_MINIMUM_BIT */
 
     void acknowledge();
     void shutdown();
@@ -266,7 +267,9 @@ private:
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
     void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
+#ifndef DDS_HAS_MINIMUM_BIT
     void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
+#endif /* DDS_HAS_MINIMUM_BIT */
 
     Spdp* spdp_;
     Sedp* sedp_;
@@ -276,9 +279,11 @@ private:
   // Transport
   DCPS::TransportInst_rch transport_inst_;
 
+#ifndef DDS_HAS_MINIMUM_BIT
   DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+#endif /* DDS_HAS_MINIMUM_BIT */
 
   void populate_discovered_writer_msg(
       OpenDDS::DCPS::DiscoveredWriterData& dwd,
@@ -321,8 +326,10 @@ private:
   template<typename Map>
   void remove_entities_belonging_to(Map& m, DCPS::RepoId participant);
 
+#ifndef DDS_HAS_MINIMUM_BIT
   void remove_from_bit_i(const DiscoveredPublication& pub);
   void remove_from_bit_i(const DiscoveredSubscription& sub);
+#endif /* DDS_HAS_MINIMUM_BIT */
 
   virtual DDS::ReturnCode_t remove_publication_i(const DCPS::RepoId& publicationId);
   virtual DDS::ReturnCode_t remove_subscription_i(const DCPS::RepoId& subscriptionId);
@@ -388,5 +395,4 @@ private:
 }
 }
 
-#endif // DDS_HAS_MINIMUM_BIT
 #endif // OPENDDS_RTPS_SEDP_H
