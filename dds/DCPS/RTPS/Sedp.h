@@ -326,10 +326,8 @@ private:
   template<typename Map>
   void remove_entities_belonging_to(Map& m, DCPS::RepoId participant);
 
-#ifndef DDS_HAS_MINIMUM_BIT
   void remove_from_bit_i(const DiscoveredPublication& pub);
   void remove_from_bit_i(const DiscoveredSubscription& sub);
-#endif /* DDS_HAS_MINIMUM_BIT */
 
   virtual DDS::ReturnCode_t remove_publication_i(const DCPS::RepoId& publicationId);
   virtual DDS::ReturnCode_t remove_subscription_i(const DCPS::RepoId& subscriptionId);

@@ -146,9 +146,7 @@ namespace OpenDDS {
           if (iter != discovered_publications_.end()) {
             // clean up tracking info
             topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
-#ifndef DDS_HAS_MINIMUM_BIT
             remove_from_bit(iter->second);
-#endif /* DDS_HAS_MINIMUM_BIT */
             OPENDDS_STRING topic_name = get_topic_name(iter->second);
             discovered_publications_.erase(iter);
             // break associations
@@ -166,9 +164,7 @@ namespace OpenDDS {
           if (iter != discovered_subscriptions_.end()) {
             // clean up tracking info
             topics_[get_topic_name(iter->second)].endpoints_.erase(iter->first);
-#ifndef DDS_HAS_MINIMUM_BIT
             remove_from_bit(iter->second);
-#endif /* DDS_HAS_MINIMUM_BIT */
             OPENDDS_STRING topic_name = get_topic_name(iter->second);
             discovered_subscriptions_.erase(iter);
             // break associations
@@ -442,10 +438,8 @@ namespace OpenDDS {
       static DDS::BuiltinTopicKey_t get_key(const DiscoveredSubscription& sub) {
         return sub.reader_data_.ddsSubscriptionData.key;
       }
-#ifndef DDS_HAS_MINIMUM_BIT
       virtual void remove_from_bit_i(const DiscoveredPublication& /*pub*/) { }
       virtual void remove_from_bit_i(const DiscoveredSubscription& /*sub*/) { }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
       virtual void assign_publication_key(RepoId& rid,
                                           const RepoId& topicId,
@@ -847,7 +841,6 @@ namespace OpenDDS {
       virtual bool defer_reader(const RepoId& writer,
                                 const RepoId& writer_participant) = 0;
 
-#ifndef DDS_HAS_MINIMUM_BIT
       void remove_from_bit(const DiscoveredPublication& pub)
       {
         pub_key_to_id_.erase(get_key(pub));
@@ -859,7 +852,6 @@ namespace OpenDDS {
         sub_key_to_id_.erase(get_key(sub));
         remove_from_bit_i(sub);
       }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
       RepoId make_topic_guid()
       {
@@ -1148,23 +1140,21 @@ namespace OpenDDS {
 
       virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) {
         using namespace DCPS;
-#ifndef DDS_HAS_MINIMUM_BIT
         if (create_bit_topics(participant) != DDS::RETCODE_OK) {
           return 0;
         }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
         DDS::Subscriber_var bit_subscriber =
           participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
                                          DDS::SubscriberListener::_nil(),
                                          DEFAULT_STATUS_MASK);
-#ifndef DDS_HAS_MINIMUM_BIT
         SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber.in());
 
         DDS::DataReaderQos dr_qos;
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
+#ifndef DDS_HAS_MINIMUM_BIT
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
         create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,

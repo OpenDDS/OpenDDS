@@ -24,10 +24,11 @@ const char Discovery::DEFAULT_REPO[] = "DEFAULT_REPO";
 const char Discovery::DEFAULT_RTPS[] = "DEFAULT_RTPS";
 const char Discovery::DEFAULT_STATIC[] = "DEFAULT_STATIC";
 
-#ifndef DDS_HAS_MINIMUM_BIT
 DDS::ReturnCode_t
 Discovery::create_bit_topics(DomainParticipantImpl* participant)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
+
   TypeSupport_var type_support =
     Registered_Data_Types->lookup(participant, BUILT_IN_PARTICIPANT_TOPIC_TYPE);
 
@@ -174,10 +175,10 @@ Discovery::create_bit_topics(DomainParticipantImpl* participant)
                       BUILT_IN_PUBLICATION_TOPIC),
                      DDS::RETCODE_ERROR);
   }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
   return DDS::RETCODE_OK;
 }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
 Discovery::Config::~Config()
 {

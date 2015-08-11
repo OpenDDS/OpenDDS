@@ -633,19 +633,23 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
   }
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
 void
 Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
   task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT, pub.bit_ih_);
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
   task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT, sub.bit_ih_);
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 void
 Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
