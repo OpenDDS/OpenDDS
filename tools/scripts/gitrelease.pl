@@ -614,13 +614,13 @@ sub remedy_zip_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{zip_src});
   my $curdir = getcwd;
-  chdir($settings->{parent_dir});
+  chdir($settings->{clone_dir});
   # zip -x .git .gitignore does not exclude as advertised
   print "Removing git-specific directories\n";
   my $result = system("find . -name '.git*' | xargs rm -rf");
   if (!$result) {
     print "Creating file $settings->{zip_src}\n";
-    $result = system("zip -qq -r $settings->{zip_src} $curdir -x '.git*'");
+    $result = system("zip ../$settings->{zip_src} -qq -r . -x '.git*'");
   }
   chdir($curdir);
   return !$result;
