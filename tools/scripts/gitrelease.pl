@@ -23,11 +23,11 @@ sub email_announce_contents {
   my $settings = shift();
   my $devguide = "";
   if (!$settings->{nodevguide}) {
-    $devguide = 
-      "An updated version of the OpenDDS Developer's Guide is available\n" . 
+    $devguide =
+      "An updated version of the OpenDDS Developer's Guide is available\n" .
       "from the same site in PDF format.\n";
   }
-  
+
   my $result =
     "OpenDDS version $settings->{version} is now available for download.\n" .
     "Please see http://download.ociweb.com/OpenDDS for the download.\n\n" .
