@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DDS_HAS_MINIMUM_BIT
 #include "Spdp.h"
 #include "BaseMessageTypes.h"
 #include "MessageTypes.h"
@@ -172,6 +171,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
     // add a new participant
     participants_[guid] = DiscoveredParticipant(pdata, time);
     DDS::InstanceHandle_t bit_instance_handle = DDS::HANDLE_NIL;
+#ifndef DDS_HAS_MINIMUM_BIT
     DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
     if (bit) {
       ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
@@ -179,6 +179,7 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
         bit->store_synthetic_data(pdata.ddsParticipantData,
                                   DDS::NEW_VIEW_STATE);
     }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
     // notify Sedp of association
     // Sedp may call has_discovered_participant.
@@ -211,12 +212,14 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
 #endif
       iter->second.pdata_.ddsParticipantData.user_data =
         pdata.ddsParticipantData.user_data;
+#ifndef DDS_HAS_MINIMUM_BIT
       DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
       if (bit) {
         ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
         bit->store_synthetic_data(pdata.ddsParticipantData,
                                   DDS::NOT_NEW_VIEW_STATE);
       }
+#endif /* DDS_HAS_MINIMUM_BIT */
       // Perform search again, so iterator becomes valid
       iter = participants_.find(guid);
     }
@@ -279,6 +282,7 @@ Spdp::fini_bit()
   wait_for_acks_.wait_for_acks(2);
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 DDS::ParticipantBuiltinTopicDataDataReaderImpl*
 Spdp::part_bit()
 {
@@ -289,6 +293,7 @@ Spdp::part_bit()
     bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
   return dynamic_cast<DDS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
 }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
 ACE_Reactor*
 Spdp::reactor() const
@@ -373,6 +378,11 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
                mc_addr.c_str (),
                mc_port));
   }
+
+#ifdef ACE_HAS_MAC_OSX
+  multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
+                         ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
+#endif
 
   if (0 != multicast_socket_.join(default_multicast, 1,
                                   net_if.empty() ? 0 :
@@ -831,4 +841,3 @@ Spdp::get_discovered_participant_ids(DCPS::RepoIdSet& results) const
 
 }
 }
-#endif // DDS_HAS_MINIMUM_BIT

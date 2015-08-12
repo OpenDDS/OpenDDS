@@ -29,9 +29,7 @@
 
 #include "DiscReceivedCalls.h"
 
-#ifndef DDS_HAS_MINIMUM_BIT
 #include "dds/DCPS/Discovery.h"
-#endif
 
 #include <vector>
 
@@ -81,9 +79,7 @@ public:
     {
       return received_;
     }
-#ifndef DDS_HAS_MINIMUM_BIT
   OpenDDS::DCPS::Discovery* disco_;
-#endif
   DDS::DomainId_t domainId_;
   ::OpenDDS::DCPS::RepoId participantId_;
 private:

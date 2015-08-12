@@ -1093,12 +1093,14 @@ namespace OpenDDS {
       {
         bool removed = endpoint_manager().disassociate(iter->second.pdata_);
         if (removed) {
+#ifndef DDS_HAS_MINIMUM_BIT
           DDS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
           // bit may be null if the DomainParticipant is shutting down
           if (bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) {
             bit->set_instance_state(iter->second.bit_ih_,
                                     DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
           }
+#endif /* DDS_HAS_MINIMUM_BIT */
           if (DCPS::DCPS_debug_level > 3) {
             DCPS::GuidConverter conv(iter->first);
             ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
@@ -1108,6 +1110,7 @@ namespace OpenDDS {
         }
       }
 
+#ifndef DDS_HAS_MINIMUM_BIT
       DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
       {
         if (!bit_subscriber_.in())
@@ -1117,6 +1120,7 @@ namespace OpenDDS {
           bit_subscriber_->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
         return dynamic_cast<DDS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
       }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
       ACE_Thread_Mutex lock_;
       DDS::Subscriber_var bit_subscriber_;
@@ -1151,6 +1155,7 @@ namespace OpenDDS {
         sub->get_default_datareader_qos(dr_qos);
         dr_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
+#ifndef DDS_HAS_MINIMUM_BIT
         DDS::TopicDescription_var bit_part_topic =
           participant->lookup_topicdescription(BUILT_IN_PARTICIPANT_TOPIC);
         create_bit_dr(bit_part_topic, BUILT_IN_PARTICIPANT_TOPIC_TYPE,
@@ -1170,6 +1175,7 @@ namespace OpenDDS {
           participant->lookup_topicdescription(BUILT_IN_SUBSCRIPTION_TOPIC);
         create_bit_dr(bit_sub_topic, BUILT_IN_SUBSCRIPTION_TOPIC_TYPE,
                       sub, dr_qos);
+#endif /* DDS_HAS_MINIMUM_BIT */
 
         get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
 

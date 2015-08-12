@@ -46,7 +46,18 @@ MulticastSendStrategy::sync_send(const iovec iov[], int n)
 {
   ACE_SOCK_Dgram_Mcast& socket = this->link_->socket();
 
-  return socket.send(iov, n);
+  const ssize_t result = socket.send(iov, n);
+
+  if (result == -1 && errno == ENOBUFS) {
+    // Make the framework think this was a successful send to avoid
+    // putting the send strategy in suspended mode.  If reliability
+    // is enabled, the data may be resent later in response to a NAK.
+    ssize_t b = 0;
+    for (int i = 0; i < n; ++i) b += iov[i].iov_len;
+    return b;
+  }
+
+  return result;
 }
 
 ssize_t

@@ -6,11 +6,14 @@
 #ifndef OPENDDS_STATICDISCOVERY_STATICDISCOVERY_H
 #define OPENDDS_STATICDISCOVERY_STATICDISCOVERY_H
 
-#ifndef DDS_HAS_MINIMUM_BIT
-
 #include "dds/DCPS/DiscoveryBase.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dcps_export.h"
+
+#ifdef DDS_HAS_MINIMUM_BIT
+#include "dds/DCPS/DataReaderImpl_T.h"
+#include "dds/DCPS/DataWriterImpl_T.h"
+#endif /* DDS_HAS_MINIMUM_BIT */
 
 #include "ace/Configuration.h"
 
@@ -176,9 +179,11 @@ public:
   virtual void reader_does_not_exist(const RepoId& readerid, const RepoId& writerid);
   virtual void writer_exists(const RepoId& writerid, const RepoId& readerid);
   virtual void writer_does_not_exist(const RepoId& writerid, const RepoId& readerid);
-
+#ifndef DDS_HAS_MINIMUM_BIT
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+#endif /* DDS_HAS_MINIMUM_BIT */
+
 
 private:
   const EndpointRegistry& registry_;
@@ -241,7 +246,5 @@ private:
 
 }
 }
-
-#endif /* DDS_HAS_MINIMUM_BIT */
 
 #endif /* OPENDDS_STATICDISCOVERY_STATICDISCOVERY_H */
