@@ -121,6 +121,10 @@ InfoRepoMulticastResponder::common_init(
   }
 
   // Use ACE_SOCK_Dgram_Mcast factory to subscribe to multicast group.
+#ifdef ACE_HAS_MAC_OSX
+  mcast_dgram_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
+                    ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
+#endif
   if (this->mcast_nic_.length() != 0) {
     if (this->mcast_dgram_.join(this->mcast_addr_,
                                 1,

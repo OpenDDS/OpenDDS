@@ -374,6 +374,11 @@ Spdp::SpdpTransport::SpdpTransport(Spdp* outer)
                mc_port));
   }
 
+#ifdef ACE_HAS_MAC_OSX
+  multicast_socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
+                         ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
+#endif
+
   if (0 != multicast_socket_.join(default_multicast, 1,
                                   net_if.empty() ? 0 :
                                   ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str()))) {
