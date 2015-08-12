@@ -184,12 +184,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::SubscriberQos default_sub_qos;
       dp->get_default_subscriber_qos (default_sub_qos);
 
-#ifdef OPENDDS_GCC33
-      if (!OpenDDS::DCPS::operator==(sub_qos_got, default_sub_qos))
-#else
       using OpenDDS::DCPS::operator==;
       if (! (sub_qos_got == default_sub_qos))
-#endif
       {
         ACE_ERROR ((LM_ERROR,
                    ACE_TEXT("(%P|%t) Subscriber get_default_qos failed.\n")));
@@ -268,11 +264,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1 ;
       }
 
-#ifdef OPENDDS_GCC33
-      if (!OpenDDS::DCPS::operator==(dr_qos_use_topic_qos, copied_from_topic))
-#else
       if (!(dr_qos_use_topic_qos == copied_from_topic))
-#endif
       {
         ACE_ERROR ((LM_ERROR,
                   ACE_TEXT("(%P|%t) Subscriber copy_from_topic_qos failed.\n")));

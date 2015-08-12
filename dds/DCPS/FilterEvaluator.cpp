@@ -577,18 +577,6 @@ template<> double& Value::get() { return f_; }
 template<> ACE_CDR::LongDouble& Value::get() { return ld_; }
 template<> const char*& Value::get() { return s_; }
 
-#ifdef OPENDDS_GCC33
-template<> const bool& Value::get<bool>() const { return b_; }
-template<> const int& Value::get<int>() const { return i_; }
-template<> const unsigned int& Value::get<unsigned int>() const { return u_; }
-template<> const ACE_INT64& Value::get<ACE_INT64>() const { return l_; }
-template<> const ACE_UINT64& Value::get<ACE_UINT64>() const { return m_; }
-template<> const char& Value::get<char>() const { return c_; }
-template<> const double& Value::get<double>() const { return f_; }
-template<> const ACE_CDR::LongDouble& Value::get<ACE_CDR::LongDouble>() const
-  { return ld_; }
-template<> const char* const& Value::get<const char*>() const { return s_; }
-#else
 template<> const bool& Value::get() const { return b_; }
 template<> const int& Value::get() const { return i_; }
 template<> const unsigned int& Value::get() const { return u_; }
@@ -598,7 +586,6 @@ template<> const char& Value::get() const { return c_; }
 template<> const double& Value::get() const { return f_; }
 template<> const ACE_CDR::LongDouble& Value::get() const { return ld_; }
 template<> const char* const& Value::get() const { return s_; }
-#endif
 
 Value::~Value()
 {
@@ -649,7 +636,7 @@ namespace {
 
     template<typename T> void operator()(const T& s)
     {
-      tgt_. OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT get<T>() = s;
+      tgt_.get<T>() = s;
     }
 
     Value& tgt_;
@@ -708,7 +695,7 @@ namespace {
 
     template<typename T> bool operator()(const T& rhs) const
     {
-      return lhs_. OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT get<T>() == rhs;
+      return lhs_.get<T>() == rhs;
     }
 
     const Value& lhs_;
@@ -724,7 +711,7 @@ namespace {
 
     template<typename T> bool operator()(const T& rhs) const
     {
-      return lhs_. OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT get<T>() < rhs;
+      return lhs_.get<T>() < rhs;
     }
 
     const Value& lhs_;
@@ -746,7 +733,7 @@ namespace {
     template<typename T>
     Value operator()(const T& rhs) const
     {
-      return lhs_. OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT get<T>() % rhs;
+      return lhs_.get<T>() % rhs;
     }
 
     Value operator()(const double&) const

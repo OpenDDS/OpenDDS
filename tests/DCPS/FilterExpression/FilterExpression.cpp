@@ -83,7 +83,7 @@ namespace yard_test {
   {
     const char* out = in + std::strlen(in);
     yard::SimpleTextParser parser(in, out);
-    const bool pass = parser. OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT Parse<yard::Seq<Rule_T, yard::EndOfInput> >();
+    const bool pass = parser.Parse<yard::Seq<Rule_T, yard::EndOfInput> >();
     std::printf("%s test for rule %s, on input %s\n",
       pass ? "passed" : "FAILED", typeid(Rule_T).name(), in);
     if (pass && callback) callback(parser);
