@@ -3,6 +3,7 @@ use warnings;
 use Date::Format;
 use Cwd;
 use LWP::Simple;
+use File::Basename;
 
 
 $ENV{TZ} = "UTC";
@@ -558,8 +559,9 @@ sub verify_tgz_source {
   my $good = 0;
   if (-f $file) {
     # Check if it is in the right format
+    my $basename = basename($settings->{clone_dir});
     open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
-    my $target = join("/", 'DDS', $settings->{changelog});
+    my $target = join("/", $basename, 'VERSION');
     while (<TGZ>) {
       if (/$target/) {
         $good = 1;
@@ -573,7 +575,11 @@ sub verify_tgz_source {
 sub message_tgz_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
-  return "Could not find file $file";
+  if (!-f $file) {
+    return "Could not find file $file";
+  } else {
+    return "File $file is not in the right format";
+  }
 }
 
 sub remedy_tgz_source {
@@ -582,7 +588,8 @@ sub remedy_tgz_source {
   my $curdir = getcwd;
   chdir($settings->{parent_dir});
   print "Creating file $settings->{tar_src}\n";
-  my $result = system("tar -cf $settings->{tar_src} $curdir --exclude-vcs");
+  my $basename = basename($settings->{clone_dir});
+  my $result = system("tar -cf $settings->{tar_src} $basename --exclude-vcs");
   if (!$result) {
     print "Gzipping file $settings->{tar_src}\n";
     $result = system("gzip $settings->{tar_src}");
@@ -988,7 +995,7 @@ my %settings = (
   remote     => string_arg_value("--remote") || "origin",
   version    => $version,
   git_tag    => "DDS-$version",
-  clone_dir  => "../OpenDDS-Release-$version/DDS",
+  clone_dir  => "../OpenDDS-Release-$version/OpenDDS-$version",
   parent_dir => "../OpenDDS-Release-$version",
   tar_src    => "OpenDDS-$version.tar",
   tgz_src    => "OpenDDS-$version.tar.gz",
