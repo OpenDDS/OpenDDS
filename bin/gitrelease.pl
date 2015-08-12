@@ -15,9 +15,31 @@ sub usage {
          "  --remedy        remediate problems where possible\n" .
          "  --force         keep going where possible\n" .
          "  --remote=name   valid git remote for OpenDDS (default: origin)\n" .
-         "  --step=#        # of individual step to run (default: all)\n"
+         "  --step=#        # of individual step to run (default: all)\n" .
+         "  --no-devguide   no devguide issued for this release"
 }
 
+sub email_announce_contents {
+  my $settings = shift();
+  my $devguide = "";
+  if (!$settings->{nodevguide}) {
+    $devguide = 
+      "An updated version of the OpenDDS Developer's Guide is available\n" . 
+      "from the same site in PDF format.\n";
+  }
+  
+  my $result =
+    "OpenDDS version $settings->{version} is now available for download.\n" .
+    "Please see http://download.ociweb.com/OpenDDS for the download.\n\n" .
+    $devguide . "\n" .
+    "Updates in this OpenDDS version:\n\n";
+
+  return $result;
+}
+
+sub news_contents_excerpt {
+  return "";
+}
 ############################################################################
 sub parse_version {
   my $version = shift;
@@ -706,8 +728,10 @@ sub verify_ftp_upload {
   # Check for required files
   my @files = ("$base-doxygen.tar.gz", "$base-doxygen.zip",
                "$base.tar.gz",         "$base.zip",
-               "$base.pdf",            "OpenDDS-latest.pdf",
-               "$base.md5");
+               "$base.md5",            "OpenDDS-latest.pdf");
+  if (!$settings->{nodevguide}) {
+    push(@files , "$base.pdf");
+  }
   foreach my $file (@files) {
     if ($content =~ /$file/) {
     } else {
@@ -720,6 +744,28 @@ sub verify_ftp_upload {
 
 sub message_ftp_upload {
   return "Release needs to be uploaded to ftp site";
+}
+############################################################################
+sub verify_github_upload {
+  my $settings = shift();
+  my $tag = $settings->{git_tag};
+  my $url = "https://github.com/objectcomputing/OpenDDS/releases/tag/$tag";
+  my $content = get($url);
+  my $base = "DDS-$settings->{version}";
+  # Check for required files
+  my @files = ("$base.tar.gz",         "$base.zip");
+  foreach my $file (@files) {
+    if ($content =~ /$file/) {
+    } else {
+      print "$file not found at $url\n";
+      return 0;
+    }
+  }
+  return 1;
+}
+
+sub message_github_upload {
+  return "tar.gz and zip of sources need to be uploaded to github";
 }
 ############################################################################
 sub verify_update_opendds_org_front {
@@ -750,27 +796,23 @@ sub message_update_opendds_org_news {
   return "OpenDDS.org news page needs updating";
 }
 ############################################################################
-sub verify_github_upload {
-  my $settings = shift();
-  my $tag = $settings->{git_tag};
-  my $url = "https://github.com/objectcomputing/OpenDDS/releases/tag/$tag";
-  my $content = get($url);
-  my $base = "DDS-$settings->{version}";
-  # Check for required files
-  my @files = ("$base.tar.gz",         "$base.zip");
-  foreach my $file (@files) {
-    if ($content =~ /$file/) {
-    } else {
-      print "$file not found at $url\n";
-      return 0;
-    }
-  }
-  return 1;
+sub verify_email_list {
+  # Can't verify
 }
 
-sub message_github_upload {
-  return "tar.gz and zip of sources need to be uploaded to github";
+sub message_email_dds_release_announce {
+  return 'Email needs to be sent to dds-release-announce@ociweb.com';
 }
+
+sub remedy_email_dds_release_announce {
+  my $settings = shift;
+  return 'Email this text to dds-release-announce@ociweb.com' . "\n\n" .
+
+  "Approved: postthisrelease\n\n" .
+  email_announce_contents($settings) .
+  news_contents_excerpt($settings);
+}
+
 ############################################################################
 my @release_steps = (
   {
@@ -898,6 +940,12 @@ my @release_steps = (
     verify  => sub{verify_update_opendds_org_news(@_)},
     message => sub{message_update_opendds_org_news(@_)}
   },
+  {
+    title   => 'Email DDS-Release-Announce list',
+    verify  => sub{verify_email_list(@_)},
+    message => sub{message_email_dds_release_announce(@_)},
+    message => sub{remedy_email_dds_release_announce(@_)}
+  }
 );
 
 my @t = gmtime;
@@ -930,31 +978,33 @@ sub string_arg_value {
   }
 }
 
+my $version = $ARGV[0] || "";
 my %settings = (
   list       => any_arg_is("--list"),
   remedy     => any_arg_is("--remedy"),
   force      => any_arg_is("--force"),
+  nodevguide => any_arg_is("--no-devguide"),
   step       => numeric_arg_value("--step"),
   remote     => string_arg_value("--remote") || "origin",
-  version    => $ARGV[0],
-  git_tag    => "DDS-$ARGV[0]",
-  clone_dir  => "../OpenDDS-Release-$ARGV[0]/DDS",
-  parent_dir => "../OpenDDS-Release-$ARGV[0]",
-  tar_src    => "OpenDDS-$ARGV[0].tar",
-  tgz_src    => "OpenDDS-$ARGV[0].tar.gz",
-  zip_src    => "OpenDDS-$ARGV[0].zip",
-  md5_src    => "OpenDDS-$ARGV[0].md5",
-  tar_dox    => "OpenDDS-$ARGV[0]-doxygen.tar",
-  tgz_dox    => "OpenDDS-$ARGV[0]-doxygen.tar.gz",
-  zip_dox    => "OpenDDS-$ARGV[0]-doxygen.zip",
+  version    => $version,
+  git_tag    => "DDS-$version",
+  clone_dir  => "../OpenDDS-Release-$version/DDS",
+  parent_dir => "../OpenDDS-Release-$version",
+  tar_src    => "OpenDDS-$version.tar",
+  tgz_src    => "OpenDDS-$version.tar.gz",
+  zip_src    => "OpenDDS-$version.zip",
+  md5_src    => "OpenDDS-$version.md5",
+  tar_dox    => "OpenDDS-$version-doxygen.tar",
+  tgz_dox    => "OpenDDS-$version-doxygen.tar.gz",
+  zip_dox    => "OpenDDS-$version-doxygen.zip",
   timestamp  => strftime("%a %b %e %T %Z %Y", @t),
   git_url    => 'git@github.com:objectcomputing/OpenDDS.git',
-  changelog  => "docs/history/ChangeLog-$ARGV[0]",
+  changelog  => "docs/history/ChangeLog-$version",
   modified   => {"NEWS" => 1,
                 "PROBLEM-REPORT-FORM" => 1,
                 "VERSION" => 1,
                 "dds/Version.h" => 1,
-                "docs/history/ChangeLog-$ARGV[0]" => 1}
+                "docs/history/ChangeLog-$version" => 1}
 );
 
 my $half_divider = "-----------------------------------------";
