@@ -438,6 +438,7 @@ namespace OpenDDS {
       static DDS::BuiltinTopicKey_t get_key(const DiscoveredSubscription& sub) {
         return sub.reader_data_.ddsSubscriptionData.key;
       }
+
       virtual void remove_from_bit_i(const DiscoveredPublication& /*pub*/) { }
       virtual void remove_from_bit_i(const DiscoveredSubscription& /*sub*/) { }
 

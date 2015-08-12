@@ -636,6 +636,8 @@ Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
   task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT, pub.bit_ih_);
+#else
+  ACE_UNUSED_ARG(pub);
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
@@ -644,6 +646,8 @@ Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
   task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT, sub.bit_ih_);
+#else
+  ACE_UNUSED_ARG(sub);
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
@@ -673,6 +677,9 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
   default:
     break;
   }
+#else
+  ACE_UNUSED_ARG(which_bit);
+  ACE_UNUSED_ARG(bit_ih);
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
@@ -1986,6 +1993,9 @@ Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 #ifndef DDS_HAS_MINIMUM_BIT
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
+#else
+  ACE_UNUSED_ARG(which_bit);
+  ACE_UNUSED_ARG(bit_ih);
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
