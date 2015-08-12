@@ -967,7 +967,7 @@ EOT
     print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
                                        'project files'), ".\n";
     my $mwcargs = "-type $needmpc $buildEnv->{'DDS_ROOT'}$slash$ws $static";
-    $mwcargs .= ' ' . $opts{'mpcargs'} if defined $opts{'mpcargs'};
+    $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
     print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
 
     if (!$opts{'dry-run'}) {
@@ -980,7 +980,7 @@ EOT
     if (defined $opts{'no-opendds-safety-profile'}) {
       # Generate ACE workspace separately, to exclude TAO
       my $mwcargs = "-type $needmpc $static " . $buildEnv->{'ACE_ROOT'}. "/ace";
-      $mwcargs .= ' ' . $opts{'mpcargs'} if defined $opts{'mpcargs'};
+      $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
       print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
 
       if (!$opts{'dry-run'}) {

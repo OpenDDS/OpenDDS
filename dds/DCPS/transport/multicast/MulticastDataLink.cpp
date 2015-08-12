@@ -88,6 +88,10 @@ bool
 MulticastDataLink::join(const ACE_INET_Addr& group_address)
 {
   const std::string& net_if = this->config_->local_address_;
+#ifdef ACE_HAS_MAC_OSX
+  socket_.opts(ACE_SOCK_Dgram_Mcast::OPT_BINDADDR_NO |
+               ACE_SOCK_Dgram_Mcast::DEFOPT_NULLIFACE);
+#endif
   if (this->socket_.join(group_address, 1,
       net_if.empty() ? 0 :
           ACE_TEXT_CHAR_TO_TCHAR(net_if.c_str())) != 0) {
