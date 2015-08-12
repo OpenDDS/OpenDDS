@@ -7,7 +7,6 @@
 
 #ifndef OPENDDS_RTPS_SPDP_H
 #define OPENDDS_RTPS_SPDP_H
-#ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -80,7 +79,9 @@ private:
 
   void data_received(const DataSubmessage& data, const ParameterList& plist);
 
+#ifndef DDS_HAS_MINIMUM_BIT
   DDS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit();
+#endif /* DDS_HAS_MINIMUM_BIT */
 
   struct SpdpTransport : ACE_Event_Handler, public OpenDDS::DCPS::PoolAllocationBase {
     explicit SpdpTransport(Spdp* outer);
@@ -127,5 +128,4 @@ private:
 }
 }
 
-#endif // DDS_HAS_MINIMUM_BIT
 #endif // OPENDDS_RTPS_SPDP_H

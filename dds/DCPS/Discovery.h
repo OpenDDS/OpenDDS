@@ -229,9 +229,7 @@ public:
                                  DDS::LivelinessQosPolicyKind /*kind*/) { }
 
 protected:
-#ifndef DDS_HAS_MINIMUM_BIT
   DDS::ReturnCode_t create_bit_topics(DomainParticipantImpl* participant);
-#endif
 
 private:
   RepoKey        key_;

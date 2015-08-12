@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef DDS_HAS_MINIMUM_BIT
 #include "Sedp.h"
 #include "Spdp.h"
 #include "MessageTypes.h"
@@ -635,18 +634,27 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
 void
 Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
   task_.enqueue(Msg::MSG_REMOVE_FROM_PUB_BIT, pub.bit_ih_);
+#else
+  ACE_UNUSED_ARG(pub);
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
   task_.enqueue(Msg::MSG_REMOVE_FROM_SUB_BIT, sub.bit_ih_);
+#else
+  ACE_UNUSED_ARG(sub);
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 void
 Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
   switch (which_bit) {
   case Msg::MSG_REMOVE_FROM_PUB_BIT: {
     DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
@@ -669,8 +677,13 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
   default:
     break;
   }
+#else
+  ACE_UNUSED_ARG(which_bit);
+  ACE_UNUSED_ARG(bit_ih);
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 DDS::TopicBuiltinTopicDataDataReaderImpl*
 Sedp::topic_bit()
 {
@@ -706,6 +719,7 @@ Sedp::sub_bit()
     sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
 bool
 Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos,
@@ -982,6 +996,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       iter = discovered_publications_.end();
 
       DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
+#ifndef DDS_HAS_MINIMUM_BIT
       {
         // Release lock for call into pub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
@@ -992,6 +1007,7 @@ Sedp::data_received(DCPS::MessageId message_id,
                                       DDS::NEW_VIEW_STATE);
         }
       }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
       if (spdp_.shutting_down()) { return; }
       // Publication may have been removed while lock released
@@ -1011,11 +1027,13 @@ Sedp::data_received(DCPS::MessageId message_id,
 
     } else if (qosChanged(iter->second.writer_data_.ddsPublicationData,
                           wdata.ddsPublicationData)) { // update existing
+#ifndef DDS_HAS_MINIMUM_BIT
       DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(iter->second.writer_data_.ddsPublicationData,
                                   DDS::NOT_NEW_VIEW_STATE);
       }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
       // Match/unmatch local subscription(s)
       topic_name = get_topic_name(iter->second);
@@ -1139,6 +1157,7 @@ Sedp::data_received(DCPS::MessageId message_id,
       iter = discovered_subscriptions_.end();
 
       DDS::InstanceHandle_t instance_handle = DDS::HANDLE_NIL;
+#ifndef DDS_HAS_MINIMUM_BIT
       {
         // Release lock for call into sub_bit
         ACE_GUARD(ACE_Reverse_Lock< ACE_Thread_Mutex>, rg, rev_lock);
@@ -1149,6 +1168,7 @@ Sedp::data_received(DCPS::MessageId message_id,
                                       DDS::NEW_VIEW_STATE);
         }
       }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
       if (spdp_.shutting_down()) { return; }
       // Subscription may have been removed while lock released
@@ -1169,12 +1189,14 @@ Sedp::data_received(DCPS::MessageId message_id,
     } else { // update existing
       if (qosChanged(iter->second.reader_data_.ddsSubscriptionData,
                      rdata.ddsSubscriptionData)) {
+#ifndef DDS_HAS_MINIMUM_BIT
         DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
         if (bit) { // bit may be null if the DomainParticipant is shutting down
           bit->store_synthetic_data(
                 iter->second.reader_data_.ddsSubscriptionData,
                 DDS::NOT_NEW_VIEW_STATE);
         }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local publication(s)
         topic_name = get_topic_name(iter->second);
@@ -1968,8 +1990,13 @@ Sedp::Task::enqueue(DCPS::MessageId id, const ParticipantMessageData* data)
 void
 Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
+#else
+  ACE_UNUSED_ARG(which_bit);
+  ACE_UNUSED_ARG(bit_ih);
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 int
@@ -2186,4 +2213,3 @@ WaitForAcks::reset()
 
 }
 }
-#endif // DDS_HAS_MINIMUM_BIT
