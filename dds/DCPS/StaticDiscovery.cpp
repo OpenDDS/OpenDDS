@@ -1,6 +1,5 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#ifndef DDS_HAS_MINIMUM_BIT
 #include "StaticDiscovery.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/ConfigUtils.h"
@@ -112,11 +111,12 @@ void StaticEndpointManager::init_bit()
       // If the TopicQos becomes available, this can be populated.
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = writer.publisher_qos.group_data;
-
+#ifndef DDS_HAS_MINIMUM_BIT
       DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
+#endif /* DDS_HAS_MINIMUM_BIT */
     }
   }
 
@@ -155,10 +155,12 @@ void StaticEndpointManager::init_bit()
       //data.topic_data = topic_details.qos_.topic_data;
       data.group_data = reader.subscriber_qos.group_data;
 
+#ifndef DDS_HAS_MINIMUM_BIT
       DDS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
       if (bit) { // bit may be null if the DomainParticipant is shutting down
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE);
       }
+#endif /* DDS_HAS_MINIMUM_BIT */
     }
   }
 }
@@ -560,6 +562,7 @@ StaticEndpointManager::writer_does_not_exist(const RepoId& writerid, const RepoI
   }
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 DDS::PublicationBuiltinTopicDataDataReaderImpl*
 StaticEndpointManager::pub_bit()
 {
@@ -581,6 +584,7 @@ StaticEndpointManager::sub_bit()
   DDS::DataReader_var d = sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
   return dynamic_cast<DDS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
 }
+#endif /* DDS_HAS_MINIMUM_BIT */
 
 StaticDiscovery::StaticDiscovery(const RepoKey& key)
   : PeerDiscovery<StaticParticipant>(key)
@@ -1810,4 +1814,3 @@ StaticDiscovery_rch StaticDiscovery::instance_(new StaticDiscovery(Discovery::DE
 }
 }
 
-#endif /* DDS_HAS_MINIMUM_BIT */

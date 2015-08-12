@@ -8,9 +8,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/MonitorFactory.h"
 
-#ifndef DDS_HAS_MINIMUM_BIT
 #include "dds/DCPS/RTPS/RtpsDiscovery.h"
-#endif
 
 #include "tao/PortableServer/PortableServer.h"
 
@@ -29,7 +27,6 @@ bool qos_tests = false;
 bool use_rtps = false;
 bool failed = false;
 
-#ifndef DDS_HAS_MINIMUM_BIT
 class DDS_TEST
 {
 public:
@@ -44,7 +41,6 @@ public:
     rtpsDisc->get_part(domain, partId)->init_bit(bit_subscriber);
   }
 };
-#endif
 
 int parse_args(int argc, ACE_TCHAR *argv[])
 {
@@ -106,14 +102,12 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_domain_participant failed!\n") ));
     }
 
-#ifndef DDS_HAS_MINIMUM_BIT
   DDS::Subscriber_var sub;
   DDS::Subscriber_var sub2;
   if (use_rtps) {
     sub = new TAO_DDS_DCPSSubscriber_i;
     DDS_TEST::set_part_bit_subscriber(disc, domain, pubPartId, sub);
   }
-#endif
 
   ::DDS::TopicQos_var topicQos = new ::DDS::TopicQos;
   *topicQos = TheServiceParticipant->initial_TopicQos();
@@ -221,10 +215,8 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
   OpenDDS::DCPS::RepoId subTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RepoId subId = OpenDDS::DCPS::GUID_UNKNOWN;
   TAO_DDS_DCPSDataReader_i drImpl;
-#ifndef DDS_HAS_MINIMUM_BIT
   if (use_rtps)
     drImpl.disco_ = disc.in();
-#endif
 
   value = disc->add_domain_participant(domain, partQos.in());
   subPartId = value.id;
@@ -239,12 +231,10 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: add_domain_participant returned existing participant!\n") ));
     }
 
-#ifndef DDS_HAS_MINIMUM_BIT
   if (use_rtps) {
     sub2 = new TAO_DDS_DCPSSubscriber_i;
     DDS_TEST::set_part_bit_subscriber(disc, domain, subPartId, sub2);
   }
-#endif
 
   topicQos = new ::DDS::TopicQos;
   *topicQos = TheServiceParticipant->initial_TopicQos();
@@ -395,7 +385,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       mgr->activate();
 
       OpenDDS::DCPS::Discovery_rch disc;
-#ifndef DDS_HAS_MINIMUM_BIT
 
       if (use_rtps) {
         OpenDDS::RTPS::RtpsDiscovery* rtpsDisc = new OpenDDS::RTPS::RtpsDiscovery("TestRtpsDiscovery");
@@ -403,7 +392,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         rtpsDisc->resend_period(ACE_Time_Value(1));
         rtpsDisc->sedp_multicast(false);
       } else {
-#endif
         CORBA::Object_var tmp =
           orb->string_to_object (ACE_TEXT_ALWAYS_CHAR(ior));
         OpenDDS::DCPS::DCPSInfo_var info =
@@ -412,9 +400,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           new OpenDDS::DCPS::InfoRepoDiscovery("TestInfoRepoDiscovery", info);
         disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::DCPS::Discovery>(ird);
         ird->set_ORB(orb);
-#ifndef DDS_HAS_MINIMUM_BIT
       }
-#endif
 
       if (disc.is_nil())
         {
@@ -436,9 +422,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           return 1;
         }
 
-#ifndef DDS_HAS_MINIMUM_BIT
       disc = 0;
-#endif
       obj = 0;
       poa = 0;
       mgr = 0;

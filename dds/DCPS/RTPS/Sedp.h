@@ -7,7 +7,6 @@
 
 #ifndef OPENDDS_RTPS_SEDP_H
 #define OPENDDS_RTPS_SEDP_H
-#ifndef DDS_HAS_MINIMUM_BIT
 
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -276,9 +275,11 @@ private:
   // Transport
   DCPS::TransportInst_rch transport_inst_;
 
+#ifndef DDS_HAS_MINIMUM_BIT
   DDS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
   DDS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
   DDS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
+#endif /* DDS_HAS_MINIMUM_BIT */
 
   void populate_discovered_writer_msg(
       OpenDDS::DCPS::DiscoveredWriterData& dwd,
@@ -388,5 +389,4 @@ private:
 }
 }
 
-#endif // DDS_HAS_MINIMUM_BIT
 #endif // OPENDDS_RTPS_SEDP_H
