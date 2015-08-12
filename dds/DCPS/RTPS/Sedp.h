@@ -252,9 +252,7 @@ private:
     void enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
     void enqueue(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
     void enqueue(DCPS::MessageId id, const ParticipantMessageData* data);
-#ifndef DDS_HAS_MINIMUM_BIT
     void enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
-#endif /* DDS_HAS_MINIMUM_BIT */
 
     void acknowledge();
     void shutdown();
@@ -267,9 +265,7 @@ private:
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredWriterData* wdata);
     void svc_i(DCPS::MessageId id, const OpenDDS::DCPS::DiscoveredReaderData* rdata);
     void svc_i(DCPS::MessageId id, const ParticipantMessageData* data);
-#ifndef DDS_HAS_MINIMUM_BIT
     void svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih);
-#endif /* DDS_HAS_MINIMUM_BIT */
 
     Spdp* spdp_;
     Sedp* sedp_;

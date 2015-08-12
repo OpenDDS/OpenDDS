@@ -626,9 +626,7 @@ Sedp::remove_entities_belonging_to(Map& m, RepoId participant)
       match_endpoints(i->first, top_it->second, true /*remove*/);
       if (spdp_.shutting_down()) { return; }
     }
-#ifndef DDS_HAS_MINIMUM_BIT
     remove_from_bit(i->second);
-#endif /* DDS_HAS_MINIMUM_BIT */
     m.erase(i++);
   }
 }
@@ -649,10 +647,10 @@ Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 #endif /* DDS_HAS_MINIMUM_BIT */
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
 void
 Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
   switch (which_bit) {
   case Msg::MSG_REMOVE_FROM_PUB_BIT: {
     DDS::PublicationBuiltinTopicDataDataReaderImpl* bit = sedp_->pub_bit();
@@ -675,8 +673,10 @@ Sedp::Task::svc_i(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
   default:
     break;
   }
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
+#ifndef DDS_HAS_MINIMUM_BIT
 DDS::TopicBuiltinTopicDataDataReaderImpl*
 Sedp::topic_bit()
 {
@@ -1054,10 +1054,7 @@ Sedp::data_received(DCPS::MessageId message_id,
         match_endpoints(guid, top_it->second, true /*remove*/);
         if (spdp_.shutting_down()) { return; }
       }
-#ifndef DDS_HAS_MINIMUM_BIT
       remove_from_bit(iter->second);
-#endif /* DDS_HAS_MINIMUM_BIT */
-
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::data_received(dwd) - ")
                              ACE_TEXT("calling match_endpoints disp/unreg\n")));
@@ -1260,9 +1257,7 @@ Sedp::data_received(DCPS::MessageId message_id,
         match_endpoints(guid, top_it->second, true /*remove*/);
         if (spdp_.shutting_down()) { return; }
       }
-#ifndef DDS_HAS_MINIMUM_BIT
       remove_from_bit(iter->second);
-#endif /* DDS_HAS_MINIMUM_BIT */
       discovered_subscriptions_.erase(iter);
     }
   }
@@ -1985,14 +1980,14 @@ Sedp::Task::enqueue(DCPS::MessageId id, const ParticipantMessageData* data)
   putq(new Msg(Msg::MSG_PARTICIPANT_DATA, id, data));
 }
 
-#ifndef DDS_HAS_MINIMUM_BIT
 void
 Sedp::Task::enqueue(Msg::MsgType which_bit, const DDS::InstanceHandle_t bit_ih)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
   if (spdp_->shutting_down()) { return; }
   putq(new Msg(which_bit, DCPS::DISPOSE_INSTANCE, bit_ih));
-}
 #endif /* DDS_HAS_MINIMUM_BIT */
+}
 
 int
 Sedp::Task::svc()
@@ -2018,9 +2013,7 @@ Sedp::Task::svc()
       break;
     case Msg::MSG_REMOVE_FROM_PUB_BIT:
     case Msg::MSG_REMOVE_FROM_SUB_BIT:
-#ifndef DDS_HAS_MINIMUM_BIT
       svc_i(msg->type_, msg->ih_);
-#endif /* DDS_HAS_MINIMUM_BIT */
       break;
     case Msg::MSG_FINI_BIT:
       // acknowledge that fini_bit has been called (this just ensures that
