@@ -1301,6 +1301,9 @@ DataReaderImpl::enable()
             this->last_deadline_missed_total_count_);
   }
 
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+  disco->pre_reader(this);
+
   this->set_enabled();
 
   if (topic_servant_ && !transport_disabled_) {
@@ -1337,8 +1340,6 @@ DataReaderImpl::enable()
     DDS::SubscriberQos sub_qos;
     this->subscriber_servant_->get_qos(sub_qos);
 
-    Discovery_rch disco =
-        TheServiceParticipant->get_discovery(this->domain_id_);
     this->subscription_id_ =
         disco->add_subscription(this->domain_id_,
             this->participant_servant_->get_id(),
@@ -2892,18 +2893,18 @@ void DataReaderImpl::notify_liveliness_change()
 
   if (DCPS_debug_level > 9) {
     OPENDDS_STRING output_str;
-    output_str + "subscription ";
+    output_str += "subscription ";
     output_str += OPENDDS_STRING(GuidConverter(subscription_id_));
-    output_str + ", listener at: 0x";
+    output_str += ", listener at: 0x";
     output_str += to_dds_string(this->listener_.in ());
 
     for (WriterMapType::iterator current = this->writers_.begin();
         current != this->writers_.end();
         ++current) {
       RepoId id = current->first;
-      output_str + "\n\tNOTIFY: writer[ ";
+      output_str += "\n\tNOTIFY: writer[ ";
       output_str += OPENDDS_STRING(GuidConverter(id));
-      output_str + "] == ";
+      output_str += "] == ";
       output_str += current->second->get_state_str();
     }
 

@@ -706,9 +706,8 @@ DataLink::notify(ConnectionNotice notice)
                    OPENDDS_STRING(converter).c_str(),
                    connection_notice_as_str(notice)));
       }
-
-      const RepoIdSet& rids = assoc_by_local_[itr->first];
-      if (assoc_by_local_.empty() || rids.empty()) {
+      AssocByLocal::iterator local_it = assoc_by_local_.find(itr->first);
+      if (local_it == assoc_by_local_.end()) {
         if (Transport_debug_level) {
           GuidConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
@@ -719,6 +718,8 @@ DataLink::notify(ConnectionNotice notice)
         }
         break;
       }
+      const RepoIdSet& rids = local_it->second;
+
       ReaderIdSeq subids;
       set_to_seq(rids, subids);
 
@@ -771,9 +772,8 @@ DataLink::notify(ConnectionNotice notice)
                    OPENDDS_STRING(converter).c_str(),
                    connection_notice_as_str(notice)));
       }
-
-      const RepoIdSet& rids = assoc_by_local_[itr->first];
-      if (assoc_by_local_.empty() || rids.empty()) {
+      AssocByLocal::iterator local_it = assoc_by_local_.find(itr->first);
+      if (local_it == assoc_by_local_.end()) {
         if (Transport_debug_level) {
           GuidConverter converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
@@ -784,6 +784,8 @@ DataLink::notify(ConnectionNotice notice)
         }
         break;
       }
+      const RepoIdSet& rids = local_it->second;
+
       WriterIdSeq pubids;
       set_to_seq(rids, pubids);
 

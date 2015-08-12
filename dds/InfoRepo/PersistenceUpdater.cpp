@@ -279,7 +279,11 @@ PersistenceUpdater::init(int argc, ACE_TCHAR *argv[])
 
   this->parse(argc, argv);
 
+#if defined ACE_HAS_MAC_OSX && defined __x86_64__ && __x86_64__
+  ACE_MMAP_Memory_Pool::OPTIONS options((void*)0x200000000);
+#else
   ACE_MMAP_Memory_Pool::OPTIONS options(ACE_DEFAULT_BASE_ADDR);
+#endif
 
   // Create the allocator with the appropriate options.  The name used
   // for  the lock is the same as one used for the file.

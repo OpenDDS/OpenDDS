@@ -362,6 +362,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   bool enableheartbeat = interesting_readers_.empty();
   interesting_readers_.insert(InterestingRemoteMapType::value_type(readerid, InterestingRemote(writerid, address, listener)));
   heartbeat_counts_[writerid] = 0;
+  g.release();
   if (enableheartbeat) {
     heartbeat_.schedule_enable();
   }
@@ -393,6 +394,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   bool enableheartbeatchecker = interesting_writers_.empty();
   interesting_writers_.insert(InterestingRemoteMapType::value_type(writerid, InterestingRemote(readerid, address, listener)));
+  g.release();
   if (enableheartbeatchecker) {
     heartbeatchecker_.schedule_enable();
   }
@@ -690,7 +692,7 @@ RtpsUdpDataLink::customize_queue_element(TransportQueueElement* element)
          ri != rw->second.remote_readers_.end(); ++ri) {
       RepoId tmp;
       std::memcpy(tmp.guidPrefix, ri->first.guidPrefix, sizeof(GuidPrefix_t));
-
+      tmp.entityId = ENTITYID_UNKNOWN;
       gap_receivers[tmp].push_back(ri->first);
 
       if (ri->second.expecting_durable_data()) {
@@ -1107,6 +1109,9 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
   src.entityId = heartbeat.writerId;
 
   bool schedule_acknack = false;
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  OPENDDS_VECTOR(InterestingRemote) callbacks;
+
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
@@ -1128,27 +1133,18 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
         // Reader is not associated with this writer.
         interesting_ack_nacks_.insert (InterestingAckNack(writerid, readerid, pos->second.address));
       }
+      pos->second.last_activity = now;
+      if (pos->second.status == InterestingRemote::DOES_NOT_EXIST) {
+        callbacks.push_back(pos->second);
+        pos->second.status = InterestingRemote::EXISTS;
+      }
     }
 
     schedule_acknack = !interesting_ack_nacks_.empty();
+  }
 
-    {
-      // Release the lock.
-      ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-      const ACE_Time_Value now = ACE_OS::gettimeofday();
-
-      for (InterestingRemoteMapType::iterator pos = interesting_writers_.lower_bound(src),
-             limit = interesting_writers_.upper_bound(src);
-           pos != limit;
-           ++pos) {
-        pos->second.last_activity = now;
-        if (pos->second.status == InterestingRemote::DOES_NOT_EXIST) {
-          pos->second.listener->writer_exists(src, pos->second.localid);
-          pos->second.status = InterestingRemote::EXISTS;
-        }
-      }
-    }
+  for (size_t i = 0; i < callbacks.size(); ++i) {
+    callbacks[i].listener->writer_exists(src, callbacks[i].localid);
   }
 
   if (schedule_acknack) {
@@ -1626,14 +1622,11 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
   std::memcpy(remote.guidPrefix, src_prefix, sizeof(GuidPrefix_t));
   remote.entityId = acknack.readerId;
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  const ACE_Time_Value now = ACE_OS::gettimeofday();
+  OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
   {
-    // Release the lock.
-    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rg, rev_lock);
-    const ACE_Time_Value now = ACE_OS::gettimeofday();
-
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     for (InterestingRemoteMapType::iterator pos = interesting_readers_.lower_bound(remote),
            limit = interesting_readers_.upper_bound(remote);
          pos != limit;
@@ -1642,13 +1635,18 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
       // Ensure the acknack was for the writer.
       if (local == pos->second.localid) {
         if (pos->second.status == InterestingRemote::DOES_NOT_EXIST) {
-          pos->second.listener->reader_exists(remote, local);
+          callbacks.push_back(pos->second.listener);
           pos->second.status = InterestingRemote::EXISTS;
         }
       }
     }
   }
 
+  for (size_t i = 0; i < callbacks.size(); ++i) {
+    callbacks[i]->reader_exists(remote, local);
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const RtpsWriterMap::iterator rw = writers_.find(local);
   if (rw == writers_.end()) {
     if (Transport_debug_level > 5) {
@@ -2234,7 +2232,10 @@ RtpsUdpDataLink::send_heartbeats()
 
   RepoIdSet writers_to_advertise;
 
+  const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config_->heartbeat_period_;
   const ACE_Time_Value tv3 = ACE_OS::gettimeofday() - 3 * config_->heartbeat_period_;
+  typedef std::pair<RepoId, InterestingRemote> CallbackType;
+  OPENDDS_VECTOR(CallbackType) interestingCallbacks;
   for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
          limit = interesting_readers_.end();
        pos != limit;
@@ -2243,6 +2244,11 @@ RtpsUdpDataLink::send_heartbeats()
         (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv3)) {
       recipients.insert(pos->second.address);
       writers_to_advertise.insert(pos->second.localid);
+    }
+    if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
+      CallbackType callback(pos->first, pos->second);
+      interestingCallbacks.push_back(callback);
+      pos->second.status = InterestingRemote::DOES_NOT_EXIST;
     }
   }
 
@@ -2360,15 +2366,10 @@ RtpsUdpDataLink::send_heartbeats()
   }
   g.release();
 
-  // Have any interesting readers timed out?
-  const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config_->heartbeat_period_;
-  for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(), limit = interesting_readers_.end();
-       pos != limit;
-       ++pos) {
-    if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
-      pos->second.listener->reader_does_not_exist(pos->first, pos->second.localid);
-      pos->second.status = InterestingRemote::DOES_NOT_EXIST;
-    }
+  for (size_t i = 0; i < interestingCallbacks.size(); ++i) {
+    const RepoId& rid = interestingCallbacks[i].first;
+    const InterestingRemote& remote = interestingCallbacks[i].second;
+    remote.listener->reader_does_not_exist(rid, remote.localid);
   }
 
   for (size_t i = 0; i < pendingCallbacks.size(); ++i) {
@@ -2381,13 +2382,23 @@ RtpsUdpDataLink::check_heartbeats()
 {
   // Have any interesting writers timed out?
   const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config_->heartbeat_period_;
+  typedef std::pair<RepoId, InterestingRemote> CallbackType;
+  OPENDDS_VECTOR(CallbackType) interestingCallbacks;
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   for (InterestingRemoteMapType::iterator pos = interesting_writers_.begin(), limit = interesting_writers_.end();
        pos != limit;
        ++pos) {
     if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
-      pos->second.listener->writer_does_not_exist(pos->first, pos->second.localid);
+      CallbackType callback(pos->first, pos->second);
+      interestingCallbacks.push_back(callback);
       pos->second.status = InterestingRemote::DOES_NOT_EXIST;
     }
+  }
+  g.release();
+  for (size_t i = 0; i < interestingCallbacks.size(); ++i) {
+    const RepoId& rid = interestingCallbacks[i].first;
+    const InterestingRemote& remote = interestingCallbacks[i].second;
+    remote.listener->writer_does_not_exist(rid, remote.localid);
   }
 }
 

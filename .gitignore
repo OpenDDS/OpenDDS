@@ -6,6 +6,7 @@ GNUmakefile*
 .shobj/
 lib*.a
 lib*.so*
+lib*.dylib
 *~
 *.opensdf
 *.sdf

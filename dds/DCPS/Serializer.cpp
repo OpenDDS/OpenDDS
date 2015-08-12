@@ -20,6 +20,8 @@ namespace DCPS {
 
 const char Serializer::ALIGN_PAD[] = {0};
 
+bool Serializer::use_rti_serialization_(false);
+
 Serializer::Serializer(ACE_Message_Block* chain,
                        bool swap_bytes, Alignment align)
   : current_(chain)
@@ -33,6 +35,13 @@ Serializer::Serializer(ACE_Message_Block* chain,
 
 Serializer::~Serializer()
 {
+}
+
+void
+Serializer::reset_alignment()
+{
+  align_rshift_ = current_ ? ptrdiff_t(current_->rd_ptr()) % MAX_ALIGN : 0;
+  align_wshift_ = current_ ? ptrdiff_t(current_->wr_ptr()) % MAX_ALIGN : 0;
 }
 
 void
@@ -198,6 +207,18 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
       dest = 0;
     }
   }
+}
+
+void
+Serializer::set_use_rti_serialization(bool should_use)
+{
+  use_rti_serialization_ = should_use;
+}
+
+bool
+Serializer::use_rti_serialization()
+{
+  return use_rti_serialization_;
 }
 
 } // namespace DCPS
