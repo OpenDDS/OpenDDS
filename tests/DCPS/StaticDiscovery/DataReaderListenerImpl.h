@@ -17,16 +17,18 @@
 
 #include <string>
 
-typedef void (*callback_t)();
+typedef void (*callback_t)(bool);
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const std::string& id, int expected_samples, callback_t done_callback)
+  DataReaderListenerImpl(const std::string& id, int expected_samples, callback_t done_callback, bool check_bits)
     : id_(id)
     , expected_samples_(expected_samples)
     , received_samples_(0)
     , done_callback_(done_callback)
+    , check_bits_(check_bits)
+    , builtin_read_error_(false)
   {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %s\n", id.c_str()));
   }
@@ -60,11 +62,25 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
+#ifndef DDS_HAS_MINIMUM_BIT
+  void set_builtin_datareader (DDS::DataReader_ptr builtin);
+
+  bool builtin_read_errors () const {
+    return builtin_read_error_;
+  }
+#endif /* DDS_HAS_MINIMUM_BIT */
+
 private:
   std::string id_;
   const int expected_samples_;
   int received_samples_;
   callback_t done_callback_;
+  bool check_bits_;
+  bool builtin_read_error_;
+
+#ifndef DDS_HAS_MINIMUM_BIT
+  DDS::DataReader_var     builtin_;
+#endif /* DDS_HAS_MINIMUM_BIT */
 };
 
 #endif /* DATAREADER_LISTENER_IMPL_H */
