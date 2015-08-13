@@ -209,16 +209,11 @@ SubscriberListenerImpl::verify (const Messenger::Message& msg,
     this->verify_result_ = false;
   }
 
+  using OpenDDS::DCPS::operator<;
   if (qos.presentation.access_scope == ::DDS::GROUP_PRESENTATION_QOS) {
     static DDS::Time_t last_timestamp = { 0, 0 };
 
-  #ifdef OPENDDS_GCC33
-    if (OpenDDS::DCPS::operator<(si.source_timestamp, last_timestamp))
-  #else
-    using OpenDDS::DCPS::operator<;
-    if (si.source_timestamp < last_timestamp)
-  #endif
-    {
+    if (si.source_timestamp < last_timestamp) {
       ACE_ERROR((LM_ERROR,
                 ACE_TEXT("%N:%l SubscriberListenerImpl::verify()")
                 ACE_TEXT(" ERROR: Samples taken out of order!\n")));
@@ -236,13 +231,7 @@ SubscriberListenerImpl::verify (const Messenger::Message& msg,
       return;
     }
 
-  #ifdef OPENDDS_GCC33
-    if (OpenDDS::DCPS::operator<(si.source_timestamp, timestamps[msg.subject_id]))
-  #else
-    using OpenDDS::DCPS::operator<;
-    if (si.source_timestamp < timestamps[msg.subject_id])
-  #endif
-    {
+    if (si.source_timestamp < timestamps[msg.subject_id]) {
       ACE_ERROR((LM_ERROR,
                 ACE_TEXT("%N:%l SubscriberListenerImpl::verify()")
                 ACE_TEXT(" ERROR: Samples taken out of order!\n")));

@@ -197,10 +197,12 @@ ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> WriterTask::thread_counter_;
 ACE_Thread_Mutex readers_done_lock;
 ACE_Condition_Thread_Mutex readers_done_cond(readers_done_lock);
 int readers_done = 0;
+bool built_in_read_errors = false;
 
-void reader_done_callback()
+void reader_done_callback(bool bit_read_errors)
 {
   ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
+  if (bit_read_errors) built_in_read_errors = true;
   ++readers_done;
   readers_done_cond.signal();
 }
@@ -218,6 +220,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     std::vector<std::string> writers;
     bool reliable = false;
     int total_readers = 0, total_writers = 0;
+    bool check_bits = false;
 
     {
       // New scope.
@@ -252,7 +255,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         shifter.consume_arg ();
       }
     }
-
+    if ((size_t) total_writers > writers.size()) {
+      check_bits = true;
+    }
     participant_id.resize(12);
 
     // Create DomainParticipant
@@ -325,7 +330,16 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, n_msgs, reader_done_callback));
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, n_msgs, reader_done_callback, check_bits));
+
+#ifndef DDS_HAS_MINIMUM_BIT
+      DataReaderListenerImpl* listener_servant =
+        dynamic_cast<DataReaderListenerImpl*>(listener.in());
+      DDS::Subscriber_var builtin = participant->get_builtin_subscriber();
+      DDS::DataReader_var bitdr =
+        builtin->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
+      listener_servant->set_builtin_datareader(bitdr.in());
+#endif /* DDS_HAS_MINIMUM_BIT */
 
       DDS::DataReaderQos qos;
       subscriber->get_default_datareader_qos(qos);
@@ -372,6 +386,12 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(3);
     }
 
+    if (built_in_read_errors) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" BIT read failed!\n")),
+                       -1);
+    }
     // Clean-up!
     participant->delete_contained_entities();
     dpf->delete_participant(participant);

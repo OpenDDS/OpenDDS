@@ -75,7 +75,7 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
   if (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
       if (++received_samples_ == expected_samples_)
-        done_callback_();
+        done_callback_(builtin_read_error_);
     }
 
   } else {
@@ -90,6 +90,37 @@ DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr /*reader*/,
   const DDS::SubscriptionMatchedStatus& /*status*/)
 {
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (check_bits_) {
+    DDS::PublicationBuiltinTopicDataDataReader_var rdr =
+      DDS::PublicationBuiltinTopicDataDataReader::_narrow(builtin_);
+    DDS::PublicationBuiltinTopicDataSeq data;
+    DDS::SampleInfoSeq infos;
+
+    DDS::ReturnCode_t ret =
+      rdr->read(data, infos, DDS::LENGTH_UNLIMITED,
+                DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ALIVE_INSTANCE_STATE);
+    if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_NO_DATA) {
+      ACE_DEBUG((LM_ERROR, "ERROR: %P could not read publication BIT: %d\n", ret));
+      builtin_read_error_ = true;
+      return;
+    }
+
+    for (CORBA::ULong i = 0; i < data.length(); ++i) {
+      if (infos[i].valid_data) {
+
+        ACE_DEBUG((LM_DEBUG,
+                   "%P Read Publication BIT with key: %x %x %x and handle %d\n"
+                   "\tTopic: %C\tType: %C\n",
+                   data[i].key.value[0], data[i].key.value[1],
+                   data[i].key.value[2], infos[i].instance_handle,
+                   data[i].topic_name.in(),
+                   data[i].type_name.in()));
+
+      }
+    }
+  }
+#endif /* DDS_HAS_MINIMUM_BIT */
 }
 
 void
@@ -98,3 +129,11 @@ DataReaderListenerImpl::on_sample_lost(
   const DDS::SampleLostStatus& /*status*/)
 {
 }
+
+#ifndef DDS_HAS_MINIMUM_BIT
+void DataReaderListenerImpl::set_builtin_datareader (
+  DDS::DataReader_ptr builtin)
+{
+  builtin_ = DDS::DataReader::_duplicate(builtin);
+}
+#endif /* DDS_HAS_MINIMUM_BIT */

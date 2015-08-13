@@ -91,7 +91,7 @@ namespace yard
         // AST functions
         Node* GetAstRoot() { return mTree.GetRoot(); }
         template<typename Rule_T>
-        void CreateNode() { mTree.OPENDDS_GCC33_TEMPLATE_DEPENDENT CreateNode<Rule_T>(*this); }
+        void CreateNode() { mTree.template CreateNode<Rule_T>(*this); }
         void CompleteNode() { mTree.CompleteNode(*this); }
         void AbandonNode() { mTree.AbandonNode(*this); }
 

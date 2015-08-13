@@ -22,28 +22,12 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-// Newer versions of ACE+TAO do not define ACE_THROW_SPEC
-#ifndef ACE_THROW_SPEC
-#define ACE_THROW_SPEC(X)
-#endif
-
 // More strict check than ACE does: if we have GNU lib C++ without support for
 // wchar_t (std::wstring, std::wostream, etc.) then we don't have DDS_HAS_WCHAR
 #if defined (ACE_HAS_WCHAR) && \
     (!defined (_GLIBCPP_VERSION) || defined(_GLIBCPP_USE_WCHAR_T)) && \
     !defined (__ANDROID__)
 #define DDS_HAS_WCHAR
-#endif
-
-#if defined __GNUC__ && (__GNUC__ < 3 || (__GNUC__ == 3 && __GNUC_MINOR__ < 4))
-// GCC 3.3.x doesn't have using-declarations and has some strange bugs
-// regarding when the "template" keyword should be used to disambiguate.
-#define OPENDDS_GCC33
-#define OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT template
-#define OPENDDS_GCC33_TEMPLATE_DEPENDENT
-#else
-#define OPENDDS_GCC33_TEMPLATE_NON_DEPENDENT
-#define OPENDDS_GCC33_TEMPLATE_DEPENDENT template
 #endif
 
 #define OPENDDS_DELETED_COPY_CTOR_ASSIGN(CLASS)         \
