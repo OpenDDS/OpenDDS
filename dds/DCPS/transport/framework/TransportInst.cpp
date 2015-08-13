@@ -78,7 +78,7 @@ OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
   formatted_name += name;
   OPENDDS_STRING delim(": ");
   formatted_name += delim;
-  for (unsigned int i = 0; i < (NAME_WIDTH - std::strlen(name) - delim.length()); ++i) {
+  for (unsigned int i = 0; i < (NAME_WIDTH + NAME_INDENT - std::strlen(name) - delim.length()); ++i) {
     formatted_name += " ";
   }
   return formatted_name;
