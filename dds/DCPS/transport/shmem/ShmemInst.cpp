@@ -48,13 +48,15 @@ ShmemInst::load(ACE_Configuration_Heap& cf,
   return 0;
 }
 
-void
-ShmemInst::dump(std::ostream& os)
+OPENDDS_STRING
+ShmemInst::dump_to_str()
 {
-  TransportInst::dump(os);
+  std::ostringstream os;
+  os << TransportInst::dump_to_str() << std::endl;
   os << formatNameForDump("pool_size") << pool_size_ << "\n"
      << formatNameForDump("datalink_control_size") << datalink_control_size_
      << std::endl;
+  return OPENDDS_STRING(os.str());
 }
 
 size_t

@@ -235,18 +235,9 @@ TransportImpl::report()
 void
 TransportImpl::dump()
 {
-#ifndef OPENDDS_SAFETY_PROFILE
-  std::stringstream os;
-  dump(os);
-
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) TransportImpl::dump() -\n%C"),
-             os.str().c_str()));
-#else
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("(%P|%t) TransportImpl::dump() -\n%C"),
              dump_to_str().c_str()));
-#endif
 }
 
 OPENDDS_STRING
@@ -258,18 +249,6 @@ TransportImpl::dump_to_str()
     return this->config_->dump_to_str();
   }
 }
-
-#ifndef OPENDDS_SAFETY_PROFILE
-void
-TransportImpl::dump(ostream& os)
-{
-  if (this->config_.is_nil()) {
-    os << " (not configured)" << std::endl;
-  } else {
-    this->config_->dump(os);
-  }
-}
-#endif
 
 }
 }

@@ -85,37 +85,6 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   return 0;
 }
 
-#ifndef OPENDDS_SAFETY_PROFILE
-void
-RtpsUdpInst::dump(std::ostream& os)
-{
-  // ACE_INET_Addr uses a static buffer for get_host_addr() so we can't
-  // directly call it on both local_address_ and multicast_group_address_,
-  // since the second call could overwrite the result of the first before the
-  // ostream gets a chance to see it.
-  const OPENDDS_STRING local = local_address_.get_host_addr(),
-    multi = multicast_group_address_.get_host_addr();
-  TransportInst::dump(os);
-  const std::ios::fmtflags flags = os.setf(ios::boolalpha);
-  os << formatNameForDump("local_address") << local
-     << ':' << local_address_.get_port_number() << '\n'
-     << formatNameForDump("use_multicast") << use_multicast_ << '\n'
-     << formatNameForDump("multicast_group_address") << multi
-     << ':' << multicast_group_address_.get_port_number() << '\n'
-     << formatNameForDump("multicast_interface") << multicast_interface_ << '\n'
-     << formatNameForDump("nak_depth") << nak_depth_ << '\n'
-     << formatNameForDump("nak_response_delay") << nak_response_delay_.msec()
-     << '\n'
-     << formatNameForDump("heartbeat_period") << heartbeat_period_.msec()
-     << '\n'
-     << formatNameForDump("heartbeat_response_delay")
-     << heartbeat_response_delay_.msec() << '\n'
-     << formatNameForDump("handshake_timeout") << handshake_timeout_.msec()
-     << std::endl;
-  os.flags(flags);
-}
-#endif
-
 OPENDDS_STRING
 RtpsUdpInst::dump_to_str()
 {
