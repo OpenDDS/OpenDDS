@@ -30,7 +30,7 @@ public:
     , check_bits_(check_bits)
     , builtin_read_error_(false)
   {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %s\n", id.c_str()));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %C\n", id.c_str()));
   }
 
   ~DataReaderListenerImpl();

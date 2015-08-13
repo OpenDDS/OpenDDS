@@ -43,7 +43,7 @@ bool
     }
 
   ACE_DEBUG((LM_INFO,
-             ACE_TEXT("(%P|%t) Check if '%C' is among supported [%s]?\n"),
+             ACE_TEXT("(%P|%t) Check if '%C' is among supported [%C]?\n"),
              name.c_str(),
              supported.c_str()));
 
@@ -107,7 +107,7 @@ bool
     }
 
   ACE_DEBUG((LM_INFO,
-             ACE_TEXT("(%P|%t) Check if '%C' is among negotiated [%s]?\n"),
+             ACE_TEXT("(%P|%t) Check if '%C' is among negotiated [%C]?\n"),
              name.c_str(),
              negotiated.c_str()));
 

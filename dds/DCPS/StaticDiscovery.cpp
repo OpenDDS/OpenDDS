@@ -1707,7 +1707,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
     RepoId id = EndpointRegistry::build_id(domain, participant, entity_id);
 
     if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: StaticDiscovery::parse_endpoints adding entity with id %s\n"), LogGuid(id).c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: StaticDiscovery::parse_endpoints adding entity with id %C\n"), LogGuid(id).c_str()));
     }
 
     switch (type) {
