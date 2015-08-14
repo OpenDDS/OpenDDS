@@ -19,7 +19,7 @@
 #include <ace/OS_NS_stdlib.h>
 #include <iostream>
 
-const int num_messages = 40;
+const int num_messages = 10;
 extern bool reliable;
 extern bool wait_for_acks;
 
