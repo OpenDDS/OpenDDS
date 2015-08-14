@@ -24,6 +24,8 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
 
+#include <ace/Argv_Type_Converter.h>
+
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;
 
@@ -60,51 +62,51 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 
     RtpsDiscovery_rch disc = new RtpsDiscovery("RtpsDiscovery");
     for (; curr < argc; ++curr) {
-      if (ACE_OS::strcmp("-u", argv[curr]) == 0) {
+      if (ACE_OS::strcmp(ACE_TEXT("-u"), argv[curr]) == 0) {
         multicast = false;
         std::cout << "SEDP unicast only" << std::endl;
       }
-      else if ((ACE_OS::strcmp("-r", argv[curr]) == 0) && (curr + 1 < argc)) {
+      else if ((ACE_OS::strcmp(ACE_TEXT("-r"), argv[curr]) == 0) && (curr + 1 < argc)) {
         resend = ACE_OS::atoi(argv[++curr]);
         std::cout << "Resend: " << resend << " sec" << std::endl;
       }
-      else if ((ACE_OS::strcmp("-pb", argv[curr]) == 0) && (curr + 1 < argc)) {
+      else if ((ACE_OS::strcmp(ACE_TEXT("-pb"), argv[curr]) == 0) && (curr + 1 < argc)) {
         const u_short temp = ACE_OS::atoi(argv[++curr]);
         std::cout << "pb: " << temp << std::endl;
         disc->pb(temp);
       }
-      else if ((ACE_OS::strcmp("-dg", argv[curr]) == 0) && (curr + 1 < argc)) {
+      else if ((ACE_OS::strcmp(ACE_TEXT("-dg"), argv[curr]) == 0) && (curr + 1 < argc)) {
         const u_short temp = ACE_OS::atoi(argv[++curr]);
         std::cout << "dg: " << temp << std::endl;
         disc->dg(temp);
       }
-      else if ((ACE_OS::strcmp("-pg", argv[curr]) == 0) && (curr + 1 < argc)) {
+      else if ((ACE_OS::strcmp(ACE_TEXT("-pg"), argv[curr]) == 0) && (curr + 1 < argc)) {
         const u_short temp = ACE_OS::atoi(argv[++curr]);
         std::cout << "pg: " << temp << std::endl;
         disc->pg(temp);
       }
-      else if ((ACE_OS::strcmp("-d0", argv[curr]) == 0) && (curr + 1 < argc)) {
+      else if ((ACE_OS::strcmp(ACE_TEXT("-d0"), argv[curr]) == 0) && (curr + 1 < argc)) {
         const u_short temp = ACE_OS::atoi(argv[++curr]);
         std::cout << "d0: " << temp << std::endl;
         disc->d0(temp);
       }
-      else if ((ACE_OS::strcmp("-d1", argv[curr]) == 0) && (curr + 1 < argc)) {
+      else if ((ACE_OS::strcmp(ACE_TEXT("-d1"), argv[curr]) == 0) && (curr + 1 < argc)) {
         const u_short temp = ACE_OS::atoi(argv[++curr]);
         std::cout << "d1: " << temp << std::endl;
         disc->d1(temp);
       }
-      else if ((ACE_OS::strcmp("-dx", argv[curr]) == 0) && (curr + 1 < argc)) {
+      else if ((ACE_OS::strcmp(ACE_TEXT("-dx"), argv[curr]) == 0) && (curr + 1 < argc)) {
         const u_short temp = ACE_OS::atoi(argv[++curr]);
         std::cout << "dx: " << temp << std::endl;
         disc->dx(temp);
       }
-      else if ((ACE_OS::strcmp("-partition", argv[curr]) == 0) &&
+      else if ((ACE_OS::strcmp(ACE_TEXT("-partition"), argv[curr]) == 0) &&
                (curr + 1 < argc)) {
-        partition = argv[++curr];
+        partition = ACE_TEXT_ALWAYS_CHAR(argv[++curr]);
         std::cout << "Partition[0]: " << partition << std::endl;
       }
       else {
-        std::cout << "Ignoring unknown param: " << argv[curr] << std::endl;
+        std::cout << "Ignoring unknown param: " << ACE_TEXT_ALWAYS_CHAR(argv[curr]) << std::endl;
       }
     }
 
@@ -125,7 +127,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
     }
 
     srand(clock());
-    QApplication app(argc, argv);
+    ACE_Argv_Type_Converter atc(argc, argv);
+    QApplication app(argc, atc.get_ASCII_argv());
     Q_INIT_RESOURCE(ishape);
     // create and show your widgets here
     ShapesDialog shapes(participant, partition);
