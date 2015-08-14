@@ -621,7 +621,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   }
 
   // Handle some RTI protocol multicast to the same address
-  if ((buff_.size() >= 4) && (!memcmp(buff_.rd_ptr(), "RTPX", 4))) {
+  if ((buff_.size() >= 4) && (!ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4))) {
     return 0; // Ignore
   }
 
