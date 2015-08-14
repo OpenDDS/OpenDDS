@@ -57,18 +57,9 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
 void
 OpenDDS::DCPS::TransportInst::dump()
 {
-#ifndef OPENDDS_SAFETY_PROFILE
-  std::stringstream os;
-  dump(os);
-
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
-             os.str().c_str()));
-#else
   ACE_DEBUG((LM_DEBUG,
              ACE_TEXT("\n(%P|%t) TransportInst::dump() -\n%C"),
              dump_to_str().c_str()));
-#endif
 }
 
 namespace {
@@ -79,25 +70,15 @@ namespace {
 OPENDDS_STRING
 OpenDDS::DCPS::TransportInst::formatNameForDump(const char* name)
 {
-#ifndef OPENDDS_SAFETY_PROFILE
-  std::ostringstream oss;
-  oss << std::setw(NAME_INDENT) << "" << std::setw(NAME_WIDTH) << std::left
-      << name << ": ";
-  return oss.str();
-#else
   OPENDDS_STRING formatted_name;
   formatted_name.reserve(NAME_INDENT + NAME_WIDTH);
-  for (int i = 0; i < NAME_INDENT; ++i) {
-    formatted_name += " ";
-  }
+  formatted_name += OPENDDS_STRING(NAME_INDENT, ' ');
   formatted_name += name;
-  OPENDDS_STRING delim(": ");
-  formatted_name += delim;
-  for (unsigned int i = 0; i < (NAME_WIDTH - std::strlen(name) - delim.length()); ++i) {
-    formatted_name += " ";
+  formatted_name += ":";
+  if ((NAME_WIDTH + NAME_INDENT) > formatted_name.length()) {
+    formatted_name += OPENDDS_STRING((NAME_WIDTH + NAME_INDENT- formatted_name.length()), ' ');
   }
   return formatted_name;
-#endif
 }
 
 OPENDDS_STRING
@@ -116,23 +97,6 @@ OpenDDS::DCPS::TransportInst::dump_to_str()
   ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(this->datalink_control_chunks_)) + '\n';
   return ret;
 }
-
-#ifndef OPENDDS_SAFETY_PROFILE
-void
-OpenDDS::DCPS::TransportInst::dump(std::ostream& os)
-{
-  os << formatNameForDump("transport_type")          << this->transport_type_ << std::endl;
-  os << formatNameForDump("name")                    << this->name_ << std::endl;
-  os << formatNameForDump("queue_messages_per_pool") << this->queue_messages_per_pool_ << std::endl;
-  os << formatNameForDump("queue_initial_pools")     << this->queue_initial_pools_ << std::endl;
-  os << formatNameForDump("max_packet_size")         << this->max_packet_size_ << std::endl;
-  os << formatNameForDump("max_samples_per_packet")  << this->max_samples_per_packet_ << std::endl;
-  os << formatNameForDump("optimum_packet_size")     << this->optimum_packet_size_ << std::endl;
-  os << formatNameForDump("thread_per_connection")   << (this->thread_per_connection_ ? "true" : "false") << std::endl;
-  os << formatNameForDump("datalink_release_delay")  << this->datalink_release_delay_ << std::endl;
-  os << formatNameForDump("datalink_control_chunks") << this->datalink_control_chunks_ << std::endl;
-}
-#endif
 
 void
 OpenDDS::DCPS::TransportInst::shutdown()

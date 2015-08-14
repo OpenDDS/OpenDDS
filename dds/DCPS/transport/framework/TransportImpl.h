@@ -107,9 +107,6 @@ public:
   /// Diagnostic aid.
   void dump();
   OPENDDS_STRING dump_to_str();
-#ifndef OPENDDS_SAFETY_PROFILE
-  void dump(ostream& os);
-#endif
 
   void report();
 

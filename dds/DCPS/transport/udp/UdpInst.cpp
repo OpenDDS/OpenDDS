@@ -14,6 +14,7 @@
 #include "ace/Configuration.h"
 
 #include <iostream>
+#include <sstream>
 
 namespace OpenDDS {
 namespace DCPS {
@@ -54,15 +55,17 @@ UdpInst::load(ACE_Configuration_Heap& cf,
   return 0;
 }
 
-void
-UdpInst::dump(std::ostream& os)
+OPENDDS_STRING
+UdpInst::dump_to_str()
 {
-  TransportInst::dump(os);
+  std::ostringstream os;
+  os << TransportInst::dump_to_str() << std::endl;
 
   os << formatNameForDump("local_address") << this->local_address_.get_host_addr()
                                            << ":" << this->local_address_.get_port_number() << std::endl;
   os << formatNameForDump("send_buffer_size") << this->send_buffer_size_ << std::endl;
   os << formatNameForDump("rcv_buffer_size") << this->rcv_buffer_size_ << std::endl;
+  return OPENDDS_STRING(os.str());
 }
 
 size_t

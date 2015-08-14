@@ -15,6 +15,7 @@
 #include "ace/Configuration.h"
 
 #include <iostream>
+#include <sstream>
 
 namespace {
 
@@ -146,10 +147,11 @@ MulticastInst::new_impl(const TransportInst_rch& inst)
   return new MulticastTransport(inst);
 }
 
-void
-MulticastInst::dump(std::ostream& os)
+OPENDDS_STRING
+MulticastInst::dump_to_str()
 {
-  TransportInst::dump(os);
+  std::ostringstream os;
+  os << TransportInst::dump_to_str() << std::endl;
 
   os << formatNameForDump("group_address")       << this->group_address_.get_host_addr()
                                                            << ":" << this->group_address_.get_port_number() << std::endl;
@@ -181,6 +183,7 @@ MulticastInst::dump(std::ostream& os)
 #else
   os << "Not Supported on this Platform" << std::endl;
 #endif
+  return OPENDDS_STRING(os.str());
 }
 
 size_t

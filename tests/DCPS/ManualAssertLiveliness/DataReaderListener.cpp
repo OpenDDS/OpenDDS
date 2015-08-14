@@ -105,7 +105,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
                       "  not_alive_count = %d\n"
                       "  alive_count_change = %d\n"
                       "  not_alive_count_change = %d\n"
-                      "  last_publication_handle = %d (%s)\n",
+                      "  last_publication_handle = %d (%C)\n",
                       num_liveliness_change_callbacks_,
                       status.alive_count,
                       status.not_alive_count,

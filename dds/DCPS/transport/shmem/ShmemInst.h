@@ -22,7 +22,7 @@ public:
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 
-  virtual void dump(std::ostream& os);
+  virtual OPENDDS_STRING dump_to_str();
 
   /// Size (in bytes) of the single shared-memory pool allocated by this
   /// transport instance.  Defaults to 16 megabytes.

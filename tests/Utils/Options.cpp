@@ -172,7 +172,7 @@ Options::parse(int argc, ACE_TCHAR* argv[])
         insert.first->second.first = value;
       }
     } else {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Options::parse skipping value=%s not paired with flag\n"), param.c_str()));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Options::parse skipping value=%C not paired with flag\n"), param.c_str()));
     }
   }
 

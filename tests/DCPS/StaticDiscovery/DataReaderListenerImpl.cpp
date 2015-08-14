@@ -17,7 +17,7 @@
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %s is done\n", id_.c_str()));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C is done\n", id_.c_str()));
   if (expected_samples_ && received_samples_ != expected_samples_) {
     ACE_ERROR((LM_ERROR, "ERROR: expected %d but received %d\n",
                expected_samples_, received_samples_));

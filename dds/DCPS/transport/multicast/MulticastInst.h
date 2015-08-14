@@ -107,7 +107,7 @@ public:
                    ACE_Configuration_Section_Key& sect);
 
   /// Diagnostic aid.
-  virtual void dump(std::ostream& os);
+  virtual OPENDDS_STRING dump_to_str();
 
   bool is_reliable() const { return this->reliable_; }
 

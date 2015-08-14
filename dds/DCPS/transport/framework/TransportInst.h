@@ -60,9 +60,6 @@ public:
   /// Diagnostic aid.
   void dump();
   virtual OPENDDS_STRING dump_to_str();
-#ifndef OPENDDS_SAFETY_PROFILE
-  virtual void dump(std::ostream& os);
-#endif
 
   /// Format name of transport configuration parameter for use in
   /// conjunction with dump(std::ostream& os).

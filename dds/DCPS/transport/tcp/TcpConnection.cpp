@@ -472,12 +472,9 @@ OpenDDS::DCPS::TcpConnection::active_establishment(bool initiate_connect)
 
   if (initiate_connect && connector.connect(this->peer(), remote_address_) != 0) {
 
-    std::ostringstream os;
-    this->tcp_config_->dump(os);
-
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Failed to connect. %p\n%C"),
-                      ACE_TEXT("connect"), os.str().c_str()),
+                      ACE_TEXT("connect"), this->tcp_config_->dump_to_str().c_str()),
                      -1);
 
   } else {

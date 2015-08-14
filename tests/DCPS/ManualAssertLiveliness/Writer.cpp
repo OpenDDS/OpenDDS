@@ -25,7 +25,7 @@ Writer_Base::start ()
 {
   id_ = OPENDDS_STRING (OpenDDS::DCPS::GuidConverter (dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(writer_->get_publisher()->get_participant())->get_repoid(writer_->get_instance_handle())));
 
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer_Base::start %s\n"), get_id()));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer_Base::start %C\n"), get_id()));
   if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) {
     cerr << "Writer_Base::start(): activate failed" << endl;
     exit(1);
@@ -38,7 +38,7 @@ Writer_Base::end ()
   wait ();
 
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer_Base::end %s\n"), get_id()));
+             ACE_TEXT("(%P|%t) Writer_Base::end %C\n"), get_id()));
 }
 
 
@@ -52,7 +52,7 @@ int
 Manual_By_Participant_Writer_1::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_1::svc begins. %s\n"), get_id()));
+             ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_1::svc begins. %C\n"), get_id()));
 
   ::DDS::InstanceHandleSeq handles;
   try {
@@ -91,7 +91,7 @@ Manual_By_Participant_Writer_1::svc ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_1::svc writing msg. %s\n"), get_id()));
+                 ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_1::svc writing msg. %C\n"), get_id()));
       ::DDS::ReturnCode_t ret;
       do {
         ret = message_dw->write(message, handle);
@@ -141,7 +141,7 @@ int
 Manual_By_Participant_Writer_2::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_2::svc begins. %s\n"), get_id()));
+             ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_2::svc begins. %C\n"), get_id()));
 
   ::DDS::InstanceHandleSeq handles;
   try {
@@ -164,7 +164,7 @@ Manual_By_Participant_Writer_2::svc ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_2::svc calling assert_liveliness. %s\n"), get_id()));
+                 ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_2::svc calling assert_liveliness. %C\n"), get_id()));
       ::DDS::ReturnCode_t ret = this->participant_->assert_liveliness ();
       if (ret != ::DDS::RETCODE_OK)
       {
@@ -206,7 +206,7 @@ int
 Manual_By_Topic_Writer_1::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_1::svc begins. %s\n"), get_id()));
+             ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_1::svc begins. %C\n"), get_id()));
 
   ::DDS::InstanceHandleSeq handles;
   try {
@@ -245,7 +245,7 @@ Manual_By_Topic_Writer_1::svc ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_1::svc writing msg. %s\n"), get_id()));
+                 ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_1::svc writing msg. %C\n"), get_id()));
       ::DDS::ReturnCode_t ret;
       do {
         ret = message_dw->write(message, handle);
@@ -292,7 +292,7 @@ int
 Manual_By_Topic_Writer_2::svc ()
 {
   ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_2::svc begins. %s\n"), get_id()));
+             ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_2::svc begins. %C\n"), get_id()));
 
   ::DDS::InstanceHandleSeq handles;
   try {
@@ -314,7 +314,7 @@ Manual_By_Topic_Writer_2::svc ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_2::svc calling assert_liveliness. %s\n"), get_id()));
+                 ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_2::svc calling assert_liveliness. %C\n"), get_id()));
       ::DDS::ReturnCode_t ret = writer_->assert_liveliness ();
 
       if (ret != ::DDS::RETCODE_OK) {
