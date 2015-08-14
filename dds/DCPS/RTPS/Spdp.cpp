@@ -620,6 +620,11 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     return -1;
   }
 
+  // Handle some RTI protocol multicast to the same address
+  if ((buff_.size() >= 4) && (!memcmp(buff_.rd_ptr(), "RTPX", 4))) {
+    return 0; // Ignore
+  }
+
   DCPS::Serializer ser(&buff_, false, DCPS::Serializer::ALIGN_CDR);
   Header header;
   if (!(ser >> header)) {
