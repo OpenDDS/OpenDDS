@@ -1,3 +1,53 @@
+Version 3.7 of OpenDDS.
+
+Additions:
+- Support for FACE Transport Services API v2.1, FACE safety base and
+  FACE safety extended profiles.
+- Support for RTPS 2.2.
+- Support allocations from memory pool in safety base builds.  Introduced
+  standard library containers and strings, as well as TAO sequences that 
+  allocate from this pool.
+- Support IDL fixed type inside of DCPS_DATA_TYPE.
+- Updated opendds_idl for FACE support, moving some of the code-generation
+  from tao_idl to opendds_idl.
+- Type-specific DataWriterImpl and DataReaderImpl are now templates.  Code
+  generation now introduces a typedef of these.
+- Content filtering now supports modulus (MOD) operator.
+- Support for static discovery.
+- Support non-default liveliness QOS in rtps_udp transport.
+- Support wait_for_acknowledgements in rtps_udp transport.
+- Support command line option -DCPSRTISerialization when integrating with RTI
+  DDS using RTPS, to account for a different serialization algorithm.
+- Support IDL fixed type inside of DCPS_DATA_TYPE.
+- Configure script handles cross-platform builds.
+- Support for new Visual Studio builds (vc11, vc12, and vc14).
+??Support for clang builds on OSX.
+- Removed support for old GCC compilers.
+?? ITL
+
+Fixes:
+- Fixed many tests for minimum profile builds.
+PO ??Fixed the behavior of a reliable data writer when history is KEEP_LAST 1.
+- opendds_idl can now be specified in user_macros.GNU instead of always
+  assuming it is in $DDS_ROOT/bin.
+TODO ??Fixed Ipv6 support in windows builds.
+- Fixed disassociate handling of local entities on loopback interface.
+PO ?? Corrected wait_for_acknowedgements for non-reliable writers to return
+  success immediately.
+PO ?? Allow disassociating readers to finish processing messages from active writer
+  before removing.
+PO ?? Remove TcpDataLink from DataLinkSet when connect() fails.
+PO ?? DCPSTransportDebugLevel 1 messages now association-oriented.
+PO ?? Fixed durable resend out-of-order handling for rtps_udp transport.
+PO ?? Fixed handling of acknowledgements during shutdown of rtps_udp data link.
+- RTPS Discovery now ignores 'RTPX' messages seen during RTI integration.
+
+Notes:
+- OCI no longer builds with vc71, vc8, and GCC 4.1.1.  If you require support
+  of these older platforms contact sales@ociweb.com.
+- The project is now hosted at github.com/objectcomputing/OpenDDS
+
+
 Version 3.6 of OpenDDS.
 
 Notes:
