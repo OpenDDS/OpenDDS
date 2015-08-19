@@ -9,6 +9,7 @@
 #include "NetworkAddress.h"
 #include "ace/OS_NS_netdb.h"
 #include "ace/Sock_Connect.h"
+#include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
 #if !defined (__ACE_INLINE__)
 # include "NetworkAddress.inl"
@@ -85,6 +86,23 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
                  ACE_TEXT("ACE::get_ip_interfaces")));
 
     } else {
+#ifdef ACE_HAS_IPV6
+        //front load IPV6 addresses to give preference to IPV6 interfaces
+        ACE_INET_Addr temp;
+        size_t index_last_non_ipv6 = 0;
+        for (size_t i = 0; i < addr_count; i++) {
+          if (addr_array[i].get_type() == AF_INET6) {
+            if (i == index_last_non_ipv6) {
+              ++index_last_non_ipv6;
+            } else {
+              temp = addr_array[i];
+              addr_array[i] = addr_array[index_last_non_ipv6];
+              addr_array[index_last_non_ipv6] = temp;
+              ++index_last_non_ipv6;
+            }
+          }
+        }
+#endif
       for (size_t i = 0; i < addr_count; i++) {
         char hostname[MAXHOSTNAMELEN+1] = "";
 
@@ -167,5 +185,45 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
   return fullname;
 }
 
+bool set_socket_ttl(const ACE_SOCK_Dgram& unicast_socket, const char& ttl)
+{
+  ACE_HANDLE handle = unicast_socket.get_handle();
+#if defined (ACE_HAS_IPV6)
+  ACE_INET_Addr local_addr;
+  if (0 != unicast_socket.get_local_addr(local_addr)) {
+  VDBG((LM_WARNING, "(%P|%t) set_socket_ttl: "
+      "ACE_SOCK_Dgram::get_local_addr %p\n", ACE_TEXT("")));
+  }
+  if (local_addr.get_type () == AF_INET6) {
+    if (0 != ACE_OS::setsockopt(handle,
+                                IPPROTO_IPV6,
+                                IPV6_MULTICAST_HOPS,
+                                &ttl,
+                                sizeof(ttl))) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("set_socket_ttl: ")
+                        ACE_TEXT("failed to set IPV6 TTL: %d %p\n"),
+                        ttl,
+                        ACE_TEXT("ACE_OS::setsockopt(TTL)")),
+                       false);
+    }
+  } else
+#endif  /* ACE_HAS_IPV6 */
+  if (0 != ACE_OS::setsockopt(handle,
+                              IPPROTO_IP,
+                              IP_MULTICAST_TTL,
+                              &ttl,
+                              sizeof(ttl))) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("set_socket_ttl: ")
+                      ACE_TEXT("failed to set TTL: %d %p\n"),
+                      ttl,
+                      ACE_TEXT("ACE_OS::setsockopt(TTL)")),
+                     false);
+  }
+  return true;
+}
 }
 }

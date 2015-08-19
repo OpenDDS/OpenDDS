@@ -12,6 +12,7 @@
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
@@ -133,6 +134,7 @@ bool
 RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 {
   unicast_socket_ = unicast_socket;
+  char ttl = static_cast<char>(config_->ttl_);
 
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr uni_addr;
@@ -145,12 +147,16 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     if (unicast_socket_type_ == AF_INET6) {
       const ACE_UINT32 any_addr = INADDR_ANY;
       ACE_INET_Addr alt_addr(any_port, any_addr);
+      ipv6_alternate_socket_type_ = alt_addr.get_type();
+
       if (0 != ipv6_alternate_socket_.open(alt_addr)) {
         VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::open: "
               "ACE_SOCK_Dgram::open %p\n", ACE_TEXT("alternate IPv4")));
       }
     } else {
       ACE_INET_Addr alt_addr(any_port, ACE_IPV6_ANY, AF_INET6);
+      ipv6_alternate_socket_type_ = alt_addr.get_type();
+
       if (0 != ipv6_alternate_socket_.open(alt_addr)) {
         VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::open: "
               "ACE_SOCK_Dgram::open %p\n", ACE_TEXT("alternate IPv6")));
@@ -158,7 +164,15 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  /// FUTURE: Set TTL on the alternate sockets.
+  if (!OpenDDS::DCPS::set_socket_ttl(ipv6_alternate_socket_, ttl)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpDataLink::open: ")
+                      ACE_TEXT("failed to set ipv6_alternate_socket_ TTL: %d %p\n"),
+                      config_->ttl_,
+                      ACE_TEXT("ACE_OS::setsockopt(TTL)")),
+                     false);
+  }
 #endif
 
   if (config_->use_multicast_) {
@@ -178,14 +192,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  ACE_HANDLE handle = unicast_socket_.get_handle();
-  char ttl = static_cast<char>(config_->ttl_);
-
-  if (0 != ACE_OS::setsockopt(handle,
-                              IPPROTO_IP,
-                              IP_MULTICAST_TTL,
-                              &ttl,
-                              sizeof(ttl))) {
+  if (!OpenDDS::DCPS::set_socket_ttl(unicast_socket_, ttl)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")

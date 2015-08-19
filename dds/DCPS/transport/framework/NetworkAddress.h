@@ -16,6 +16,8 @@
 #include "ace/INET_Addr.h"
 #include "ace/CDR_Stream.h"
 #include "ace/SString.h"
+#include "ace/SOCK_Dgram.h"
+
 
 namespace OpenDDS {
 namespace DCPS {
@@ -63,8 +65,14 @@ struct OpenDDS_Dcps_Export NetworkAddress {
 /// address. In the case using short hostname or name resolved from loopback, a
 /// warning is logged. If there is no any name discovered from network interfaces,
 /// an error is logged.
+/// If ACE_HAS_IPV6, will give priority to IPV6 interfaces
 extern OpenDDS_Dcps_Export
 OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
+
+/// Helper function to set the ttl on a socket appropriately
+/// given whether it is IPV4 or IPV6
+extern OpenDDS_Dcps_Export
+bool set_socket_ttl(const ACE_SOCK_Dgram& unicast_socket, const char& ttl);
 
 } // namespace DCPS
 } // namespace OpenDDS

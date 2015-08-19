@@ -163,7 +163,7 @@ private:
   ACE_SOCK_Dgram_Mcast multicast_socket_;
 #ifdef ACE_HAS_IPV6
   ACE_SOCK_Dgram ipv6_alternate_socket_;
-  int unicast_socket_type_;
+  int unicast_socket_type_, ipv6_alternate_socket_type_;
 #endif
 
   RtpsCustomizedElementAllocator rtps_customized_element_allocator_;
