@@ -88,16 +88,13 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
     } else {
 #ifdef ACE_HAS_IPV6
         //front load IPV6 addresses to give preference to IPV6 interfaces
-        ACE_INET_Addr temp;
         size_t index_last_non_ipv6 = 0;
         for (size_t i = 0; i < addr_count; i++) {
           if (addr_array[i].get_type() == AF_INET6) {
             if (i == index_last_non_ipv6) {
               ++index_last_non_ipv6;
             } else {
-              temp = addr_array[i];
-              addr_array[i] = addr_array[index_last_non_ipv6];
-              addr_array[index_last_non_ipv6] = temp;
+              std::swap(addr_array[i], addr_array[index_last_non_ipv6]);
               ++index_last_non_ipv6;
             }
           }
@@ -185,12 +182,12 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
   return fullname;
 }
 
-bool set_socket_ttl(const ACE_SOCK_Dgram& unicast_socket, const char& ttl)
+bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const char& ttl)
 {
-  ACE_HANDLE handle = unicast_socket.get_handle();
+  ACE_HANDLE handle = socket.get_handle();
 #if defined (ACE_HAS_IPV6)
   ACE_INET_Addr local_addr;
-  if (0 != unicast_socket.get_local_addr(local_addr)) {
+  if (0 != socket.get_local_addr(local_addr)) {
   VDBG((LM_WARNING, "(%P|%t) set_socket_ttl: "
       "ACE_SOCK_Dgram::get_local_addr %p\n", ACE_TEXT("")));
   }

@@ -24,7 +24,6 @@
 #include "ace/Message_Block.h"
 #include "ace/Reverse_Lock_T.h"
 #include "ace/Reactor.h"
-#include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
 #include <string.h>
 
@@ -164,13 +163,12 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  if (!OpenDDS::DCPS::set_socket_ttl(ipv6_alternate_socket_, ttl)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(ipv6_alternate_socket_, ttl)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
-                      ACE_TEXT("failed to set ipv6_alternate_socket_ TTL: %d %p\n"),
-                      config_->ttl_,
-                      ACE_TEXT("ACE_OS::setsockopt(TTL)")),
+                      ACE_TEXT("failed to set ipv6_alternate_socket_ TTL: %d\n"),
+                      config_->ttl_),
                      false);
   }
 #endif
@@ -192,13 +190,12 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  if (!OpenDDS::DCPS::set_socket_ttl(unicast_socket_, ttl)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, ttl)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
-                      ACE_TEXT("failed to set TTL: %d %p\n"),
-                      config_->ttl_,
-                      ACE_TEXT("ACE_OS::setsockopt(TTL)")),
+                      ACE_TEXT("failed to set TTL: %d\n"),
+                      config_->ttl_),
                      false);
   }
 

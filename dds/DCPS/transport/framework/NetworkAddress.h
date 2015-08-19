@@ -72,7 +72,7 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
 /// Helper function to set the ttl on a socket appropriately
 /// given whether it is IPV4 or IPV6
 extern OpenDDS_Dcps_Export
-bool set_socket_ttl(const ACE_SOCK_Dgram& unicast_socket, const char& ttl);
+bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const char& ttl);
 
 } // namespace DCPS
 } // namespace OpenDDS

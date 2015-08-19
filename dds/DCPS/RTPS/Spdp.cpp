@@ -768,20 +768,14 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
           uni_port));
   }
 
-  ACE_HANDLE handle = unicast_socket_.get_handle();
   char ttl = static_cast<char>(outer_->disco_->ttl());
 
-  if (0 != ACE_OS::setsockopt(handle,
-                              IPPROTO_IP,
-                              IP_MULTICAST_TTL,
-                              &ttl,
-                              sizeof(ttl))) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, ttl)) {
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
-               ACE_TEXT("for port:%hd %p\n"),
-               outer_->disco_->ttl(), uni_port,
-               ACE_TEXT("ACE_OS::setsockopt(TTL)")));
+               ACE_TEXT("for port:%hd\n"),
+               outer_->disco_->ttl(), uni_port));
     throw std::runtime_error("failed to set TTL");
   }
   return true;

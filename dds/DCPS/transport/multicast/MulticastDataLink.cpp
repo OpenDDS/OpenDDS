@@ -19,6 +19,7 @@
 #include "tao/ORB_Core.h"
 
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
@@ -105,15 +106,11 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
   ACE_HANDLE handle = this->socket_.get_handle();
   char ttl = this->config_->ttl_;
 
-  if (ACE_OS::setsockopt(handle,
-      IPPROTO_IP,
-      IP_MULTICAST_TTL,
-      &ttl,
-      sizeof(ttl)) < 0) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(this->socket_, ttl)) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("MulticastDataLink::join: ")
-        ACE_TEXT("ACE_OS::setsockopt TTL failed.\n")),
+        ACE_TEXT("OpenDDS::DCPS::set_socket_multicast_ttl failed.\n")),
         false);
   }
 
