@@ -38,7 +38,7 @@ const long DEFAULT_NAK_DELAY_INTERVALS(4);
 const long DEFAULT_NAK_MAX(3);
 const long DEFAULT_NAK_TIMEOUT(30000);
 
-const char DEFAULT_TTL(1);
+const unsigned char DEFAULT_TTL(1);
 const bool DEFAULT_ASYNC_SEND(false);
 
 } // namespace
@@ -119,7 +119,7 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
 
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_timeout"), this->nak_timeout_)
 
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), this->ttl_, char)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), this->ttl_, unsigned char)
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"),
                    this->rcv_buffer_size_, size_t)
@@ -167,7 +167,7 @@ MulticastInst::dump_to_str()
   os << formatNameForDump("nak_delay_intervals") << this->nak_delay_intervals_ << std::endl;
   os << formatNameForDump("nak_max")             << this->nak_max_ << std::endl;
   os << formatNameForDump("nak_timeout")         << this->nak_timeout_.msec() << std::endl;
-  os << formatNameForDump("ttl")                 << int(this->ttl_) << std::endl;
+  os << formatNameForDump("ttl")                 << this->ttl_ << std::endl;
   os << formatNameForDump("rcv_buffer_size");
 
   if (this->rcv_buffer_size_ == 0) {

@@ -182,7 +182,7 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr)
   return fullname;
 }
 
-bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const char& ttl)
+bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char& ttl)
 {
   ACE_HANDLE handle = socket.get_handle();
 #if defined (ACE_HAS_IPV6)
@@ -195,12 +195,12 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const char& ttl)
     if (0 != ACE_OS::setsockopt(handle,
                                 IPPROTO_IPV6,
                                 IPV6_MULTICAST_HOPS,
-                                &ttl,
+                                reinterpret_cast<const char*>(&ttl),
                                 sizeof(ttl))) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("set_socket_ttl: ")
-                        ACE_TEXT("failed to set IPV6 TTL: %d %p\n"),
+                        ACE_TEXT("failed to set IPV6 TTL: %C %p\n"),
                         ttl,
                         ACE_TEXT("ACE_OS::setsockopt(TTL)")),
                        false);
@@ -210,12 +210,12 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const char& ttl)
   if (0 != ACE_OS::setsockopt(handle,
                               IPPROTO_IP,
                               IP_MULTICAST_TTL,
-                              &ttl,
+                              reinterpret_cast<const char*>(&ttl),
                               sizeof(ttl))) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("set_socket_ttl: ")
-                      ACE_TEXT("failed to set TTL: %d %p\n"),
+                      ACE_TEXT("failed to set TTL: %C %p\n"),
                       ttl,
                       ACE_TEXT("ACE_OS::setsockopt(TTL)")),
                      false);

@@ -89,7 +89,7 @@ public:
     dx_ = offset_two;
   }
 
-  u_short ttl() const { return ttl_; }
+  unsigned char ttl() const { return ttl_; }
   void ttl(u_short time_to_live) {
     ttl_ = time_to_live;
   }
@@ -115,7 +115,8 @@ public:
 
 private:
   ACE_Time_Value resend_period_;
-  u_short pb_, dg_, pg_, d0_, d1_, dx_, ttl_;
+  u_short pb_, dg_, pg_, d0_, d1_, dx_;
+  unsigned char ttl_;
   bool sedp_multicast_;
   OPENDDS_STRING multicast_interface_;
   OPENDDS_STRING default_multicast_group_;  /// FUTURE: handle > 1 group.

@@ -104,9 +104,8 @@ MulticastDataLink::join(const ACE_INET_Addr& group_address)
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) MulticastDataLink::join OK\n")), 6);
 
   ACE_HANDLE handle = this->socket_.get_handle();
-  char ttl = this->config_->ttl_;
 
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(this->socket_, ttl)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(this->socket_, this->config_->ttl_)) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("MulticastDataLink::join: ")

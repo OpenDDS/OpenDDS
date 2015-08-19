@@ -133,7 +133,6 @@ bool
 RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 {
   unicast_socket_ = unicast_socket;
-  char ttl = static_cast<char>(config_->ttl_);
 
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr uni_addr;
@@ -163,11 +162,11 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(ipv6_alternate_socket_, ttl)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(ipv6_alternate_socket_, config_->ttl_)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
-                      ACE_TEXT("failed to set ipv6_alternate_socket_ TTL: %d\n"),
+                      ACE_TEXT("failed to set ipv6_alternate_socket_ TTL: %C\n"),
                       config_->ttl_),
                      false);
   }
@@ -190,11 +189,11 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, ttl)) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, config_->ttl_)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
-                      ACE_TEXT("failed to set TTL: %d\n"),
+                      ACE_TEXT("failed to set TTL: %C\n"),
                       config_->ttl_),
                      false);
   }
