@@ -376,6 +376,18 @@ void
 RtpsUdpDataLink::unregister_for_reader(const RepoId& writerid,
                                        const RepoId& readerid)
 {
+  OPENDDS_VECTOR(CallbackType) to_notify;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, c, reader_no_longer_exists_lock_);
+    to_notify.swap(readerDoesNotExistCallbacks_);
+  }
+  OPENDDS_VECTOR(CallbackType)::iterator iter = to_notify.begin();
+  while(iter != to_notify.end()) {
+    const RepoId& rid = iter->first;
+    const InterestingRemote& remote = iter->second;
+    remote.listener->reader_does_not_exist(rid, remote.localid);
+    ++iter;
+  }
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   for (InterestingRemoteMapType::iterator pos = interesting_readers_.lower_bound(readerid),
          limit = interesting_readers_.upper_bound(readerid);
@@ -408,6 +420,18 @@ void
 RtpsUdpDataLink::unregister_for_writer(const RepoId& readerid,
                                        const RepoId& writerid)
 {
+  OPENDDS_VECTOR(CallbackType) to_notify;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, c, writer_no_longer_exists_lock_);
+    to_notify.swap(writerDoesNotExistCallbacks_);
+  }
+  OPENDDS_VECTOR(CallbackType)::iterator iter = to_notify.begin();
+  while(iter != to_notify.end()) {
+    const RepoId& rid = iter->first;
+    const InterestingRemote& remote = iter->second;
+    remote.listener->writer_does_not_exist(rid, remote.localid);
+    ++iter;
+  }
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   for (InterestingRemoteMapType::iterator pos = interesting_writers_.lower_bound(writerid),
          limit = interesting_writers_.upper_bound(writerid);
@@ -2223,6 +2247,7 @@ void
 RtpsUdpDataLink::send_heartbeats()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, c, reader_no_longer_exists_lock_);
 
   if (writers_.empty() && interesting_readers_.empty()) {
     heartbeat_.disable();
@@ -2238,8 +2263,6 @@ RtpsUdpDataLink::send_heartbeats()
 
   const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config_->heartbeat_period_;
   const ACE_Time_Value tv3 = ACE_OS::gettimeofday() - 3 * config_->heartbeat_period_;
-  typedef std::pair<RepoId, InterestingRemote> CallbackType;
-  OPENDDS_VECTOR(CallbackType) interestingCallbacks;
   for (InterestingRemoteMapType::iterator pos = interesting_readers_.begin(),
          limit = interesting_readers_.end();
        pos != limit;
@@ -2251,7 +2274,7 @@ RtpsUdpDataLink::send_heartbeats()
     }
     if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
       CallbackType callback(pos->first, pos->second);
-      interestingCallbacks.push_back(callback);
+      readerDoesNotExistCallbacks_.push_back(callback);
       pos->second.status = InterestingRemote::DOES_NOT_EXIST;
     }
   }
@@ -2368,11 +2391,19 @@ RtpsUdpDataLink::send_heartbeats()
       send_strategy_->send_rtps_control(mb, recipients);
     }
   }
+  c.release();
   g.release();
 
-  for (size_t i = 0; i < interestingCallbacks.size(); ++i) {
-    const RepoId& rid = interestingCallbacks[i].first;
-    const InterestingRemote& remote = interestingCallbacks[i].second;
+  while(true) {
+    c.acquire();
+    if (readerDoesNotExistCallbacks_.empty()) {
+      break;
+    }
+    OPENDDS_VECTOR(CallbackType)::iterator iter = readerDoesNotExistCallbacks_.begin();
+    const RepoId& rid = iter->first;
+    const InterestingRemote& remote = iter->second;
+    readerDoesNotExistCallbacks_.erase(iter);
+    c.release();
     remote.listener->reader_does_not_exist(rid, remote.localid);
   }
 
@@ -2386,22 +2417,29 @@ RtpsUdpDataLink::check_heartbeats()
 {
   // Have any interesting writers timed out?
   const ACE_Time_Value tv = ACE_OS::gettimeofday() - 10 * config_->heartbeat_period_;
-  typedef std::pair<RepoId, InterestingRemote> CallbackType;
-  OPENDDS_VECTOR(CallbackType) interestingCallbacks;
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, c, writer_no_longer_exists_lock_);
   for (InterestingRemoteMapType::iterator pos = interesting_writers_.begin(), limit = interesting_writers_.end();
        pos != limit;
        ++pos) {
     if (pos->second.status == InterestingRemote::EXISTS && pos->second.last_activity < tv) {
       CallbackType callback(pos->first, pos->second);
-      interestingCallbacks.push_back(callback);
+      writerDoesNotExistCallbacks_.push_back(callback);
       pos->second.status = InterestingRemote::DOES_NOT_EXIST;
     }
   }
+  c.release();
   g.release();
-  for (size_t i = 0; i < interestingCallbacks.size(); ++i) {
-    const RepoId& rid = interestingCallbacks[i].first;
-    const InterestingRemote& remote = interestingCallbacks[i].second;
+  while(true) {
+    c.acquire();
+    if (writerDoesNotExistCallbacks_.empty()) {
+      break;
+    }
+    OPENDDS_VECTOR(CallbackType)::iterator iter = writerDoesNotExistCallbacks_.begin();
+    const RepoId& rid = iter->first;
+    const InterestingRemote& remote = iter->second;
+    writerDoesNotExistCallbacks_.erase(iter);
+    c.release();
     remote.listener->writer_does_not_exist(rid, remote.localid);
   }
 }

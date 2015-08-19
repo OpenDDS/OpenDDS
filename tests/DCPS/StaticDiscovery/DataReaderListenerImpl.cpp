@@ -106,17 +106,21 @@ DataReaderListenerImpl::on_subscription_matched(
       return;
     }
 
-    for (CORBA::ULong i = 0; i < data.length(); ++i) {
-      if (infos[i].valid_data) {
+    ACE_DEBUG((LM_DEBUG, "%P Successfully read publication BITs\n"));
 
-        ACE_DEBUG((LM_DEBUG,
-                   "%P Read Publication BIT with key: %x %x %x and handle %d\n"
-                   "\tTopic: %C\tType: %C\n",
-                   data[i].key.value[0], data[i].key.value[1],
-                   data[i].key.value[2], infos[i].instance_handle,
-                   data[i].topic_name.in(),
-                   data[i].type_name.in()));
+    if (OpenDDS::DCPS::DCPS_debug_level > 4) {
+      for (CORBA::ULong i = 0; i < data.length(); ++i) {
+        if (infos[i].valid_data) {
 
+          ACE_DEBUG((LM_DEBUG,
+                     "(%P|%t) Read Publication BIT with key: %x %x %x and handle %d\n"
+                     "\tTopic: %C\tType: %C\n",
+                     data[i].key.value[0], data[i].key.value[1],
+                     data[i].key.value[2], infos[i].instance_handle,
+                     data[i].topic_name.in(),
+                     data[i].type_name.in()));
+
+        }
       }
     }
   }
