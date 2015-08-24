@@ -74,6 +74,10 @@ OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
 extern OpenDDS_Dcps_Export
 bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char& ttl);
 
+/// Helper function to create dual stack socket to support IPV4 and IPV6,
+/// for IPV6 builds allows for setting IPV6_V6ONLY socket option to 0 before binding
+extern OpenDDS_Dcps_Export
+bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, bool active, const ACE_INET_Addr& local_address);
 } // namespace DCPS
 } // namespace OpenDDS
 

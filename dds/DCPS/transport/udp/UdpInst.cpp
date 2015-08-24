@@ -47,6 +47,7 @@ UdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s)
   this->local_address_.set(local_address_s.c_str());
+  this->local_address_config_str_ += local_address_s.c_str();
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
 
@@ -72,8 +73,12 @@ size_t
 UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 {
   if (this->local_address_ != ACE_INET_Addr()) {
-    NetworkAddress network_address(this->local_address_,
-                                   this->local_address_.is_any());
+    NetworkAddress network_address;
+    if (!this->local_address_config_str_.empty()) {
+      network_address = NetworkAddress(this->local_address_config_str_);
+    } else {
+      network_address = NetworkAddress(this->local_address_, true);
+    }
     ACE_OutputCDR cdr;
     cdr << network_address;
 

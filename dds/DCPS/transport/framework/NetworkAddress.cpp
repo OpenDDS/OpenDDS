@@ -11,6 +11,7 @@
 #include "ace/Sock_Connect.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
+
 #if !defined (__ACE_INLINE__)
 # include "NetworkAddress.inl"
 #endif /* !__ACE_INLINE__ */
@@ -221,6 +222,89 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
                      false);
   }
   return true;
+}
+
+bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, bool active, const ACE_INET_Addr& local_address)
+{
+#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
+  int protocol_family = ACE_PROTOCOL_FAMILY_INET;
+  int protocol = 0;
+  int reuse_addr = 0;
+  if ((ACE_Addr)local_address != ACE_Addr::sap_any)
+    protocol_family = local_address.get_type();
+  else if (protocol_family == PF_UNSPEC)
+    protocol_family = ACE::ipv6_enabled() ? PF_INET6 : PF_INET;
+
+  int one = 1;
+  socket.set_handle(ACE_OS::socket(protocol_family,
+    SOCK_DGRAM,
+    protocol));
+
+  if (socket.get_handle() == ACE_INVALID_HANDLE) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("open_dual_stack_socket: ")
+      ACE_TEXT("failed to set socket handle\n")),
+      false);
+  }
+  else if (protocol_family != PF_UNIX
+    && reuse_addr
+    && socket.set_option(SOL_SOCKET,
+      SO_REUSEADDR,
+      &one,
+      sizeof one) == -1)
+  {
+    socket.close();
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("open_dual_stack_socket: ")
+      ACE_TEXT("failed to set socket SO_REUSEADDR option\n")),
+      false);
+  }
+  if (!active && local_address.get_type() == AF_INET6) {
+    ACE_HANDLE handle = socket.get_handle();
+    int ipv6_only = 0;
+    if (0 != ACE_OS::setsockopt(handle,
+      IPPROTO_IPV6,
+      IPV6_V6ONLY,
+      (char*)&ipv6_only,
+      sizeof(ipv6_only))) {
+      ACE_ERROR_RETURN((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("open_dual_stack_socket: ")
+        ACE_TEXT("failed to set IPV6_V6ONLY to 0: %p\n"),
+        ACE_TEXT("ACE_OS::setsockopt(IPV6_V6ONLY)")),
+        false);
+    }
+  }
+  bool error = false;
+
+  if ((ACE_Addr)local_address == ACE_Addr::sap_any)
+  {
+    if (protocol_family == PF_INET || protocol_family == PF_INET6)
+    {
+      if (ACE::bind_port(socket.get_handle(),
+        INADDR_ANY,
+        protocol_family) == -1)
+        error = true;
+    }
+  }
+  else if (ACE_OS::bind(socket.get_handle(),
+    reinterpret_cast<sockaddr *> (local_address.get_addr()),
+    local_address.get_size()) == -1)
+    error = true;
+
+  if (error) {
+    socket.close();
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("open_dual_stack_socket: ")
+      ACE_TEXT("failed to bind address to socket\n")),
+      false);
+  }
+  return true;
+#endif
+  return false;
 }
 }
 }

@@ -15,6 +15,7 @@
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 
+
 #ifndef __ACE_INLINE__
 # include "UdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
@@ -43,17 +44,26 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 
   ACE_INET_Addr local_address;
   if (this->active_) {
-    local_address.set_type(remote_address.get_type());
+    local_address.set(0, "", 0, remote_address.get_type());
   } else {
     local_address = this->config_->local_address_;
   }
 
+#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
+  if (!open_dual_stack_socket(this->socket_, this->active_, local_address)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("UdpDataLink::open: open dual stack socket failed\n")),
+      false);
+  }
+#else
   if (this->socket_.open(local_address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("UdpDataLink::open: open failed: %m\n")),
                      false);
   }
+#endif
 
   VDBG((LM_DEBUG, "(%P|%t) UdpDataLink::open: listening on %C:%hu\n",
         local_address.get_host_addr(), local_address.get_port_number()));
