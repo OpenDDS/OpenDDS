@@ -187,7 +187,7 @@ template <typename T>
 void
   message_block_to_sequence(const ACE_Message_Block& mb_locator, T& out)
 {
-  out.length (mb_locator.length());
+  out.length (CORBA::ULong(mb_locator.length()));
   std::memcpy (out.get_buffer(), mb_locator.rd_ptr(), mb_locator.length());
 }
 
