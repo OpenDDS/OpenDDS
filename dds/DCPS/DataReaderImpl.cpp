@@ -2561,7 +2561,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
     return participant_servant_->get_handle(id);
 
   } else {
-    return participant_servant_->get_handle();
+    return participant_servant_->get_handle(GUID_UNKNOWN);
   }
 }
 

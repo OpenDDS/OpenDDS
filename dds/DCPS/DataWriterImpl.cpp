@@ -208,7 +208,7 @@ DataWriterImpl::get_instance_handle()
 DDS::InstanceHandle_t
 DataWriterImpl::get_next_handle()
 {
-  return this->participant_servant_->get_handle();
+  return this->participant_servant_->get_handle(GUID_UNKNOWN);
 }
 
 void
