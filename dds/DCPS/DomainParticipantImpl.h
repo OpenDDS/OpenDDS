@@ -292,7 +292,7 @@ private:
   /**
    * Obtain a local handle representing a GUID.
    */
-  DDS::InstanceHandle_t get_handle(const RepoId& id);
+  DDS::InstanceHandle_t id_to_handle(const RepoId& id);
 
   /**
    * Obtain a GUID representing a local hande.

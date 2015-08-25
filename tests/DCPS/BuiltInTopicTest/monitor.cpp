@@ -241,7 +241,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                      OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC,
                                      data.key);
 
-          if (part_svt->get_handle (id) != handles[i])
+          if (part_svt->id_to_handle (id) != handles[i])
           {
             ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant_data test failed.\n"));
             return 1;
@@ -353,7 +353,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
                                      OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC,
                                      data.key);
 
-          if (part_svt->get_handle (id) != handles[i])
+          if (part_svt->id_to_handle (id) != handles[i])
           {
             ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topic_data test failed.\n"));
             return 1;

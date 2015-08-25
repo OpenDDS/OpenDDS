@@ -288,7 +288,7 @@ void DataReaderImpl::init(
 DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
 {
-  return this->participant_servant_->get_handle(subscription_id_);
+  return this->participant_servant_->id_to_handle(subscription_id_);
 }
 
 void
@@ -444,7 +444,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
   if (!is_bit_) {
 
-    DDS::InstanceHandle_t handle = participant_servant_->get_handle(remote_id);
+    DDS::InstanceHandle_t handle = participant_servant_->id_to_handle(remote_id);
 
     // We acquire the publication_handle_lock_ for the remainder of our
     // processing.
@@ -2558,10 +2558,10 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
     Discovery_rch disc = TheServiceParticipant->get_discovery(domain_id_);
     CORBA::String_var topic = get_topic_name();
     RepoId id = disc->bit_key_to_repo_id(participant_servant_, topic, key);
-    return participant_servant_->get_handle(id);
+    return participant_servant_->id_to_handle(id);
 
   } else {
-    return participant_servant_->get_handle(GUID_UNKNOWN);
+    return participant_servant_->id_to_handle(GUID_UNKNOWN);
   }
 }
 
@@ -2699,7 +2699,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
   hdls.length(num_wrts);
 
   for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-    hdls[i] = this->participant_servant_->get_handle(ids[i]);
+    hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
 
   return true;
