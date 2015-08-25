@@ -224,7 +224,7 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
   return true;
 }
 
-bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, bool active, const ACE_INET_Addr& local_address)
+bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address)
 {
 #if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
   int protocol_family = ACE_PROTOCOL_FAMILY_INET;
@@ -261,21 +261,19 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, bool active, const ACE_INET_
       ACE_TEXT("failed to set socket SO_REUSEADDR option\n")),
       false);
   }
-  if (!active && local_address.get_type() == AF_INET6) {
-    ACE_HANDLE handle = socket.get_handle();
-    int ipv6_only = 0;
-    if (0 != ACE_OS::setsockopt(handle,
-      IPPROTO_IPV6,
-      IPV6_V6ONLY,
-      (char*)&ipv6_only,
-      sizeof(ipv6_only))) {
-      ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("open_dual_stack_socket: ")
-        ACE_TEXT("failed to set IPV6_V6ONLY to 0: %p\n"),
-        ACE_TEXT("ACE_OS::setsockopt(IPV6_V6ONLY)")),
-        false);
-    }
+  ACE_HANDLE handle = socket.get_handle();
+  int ipv6_only = 0;
+  if (0 != ACE_OS::setsockopt(handle,
+    IPPROTO_IPV6,
+    IPV6_V6ONLY,
+    (char*)&ipv6_only,
+    sizeof(ipv6_only))) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("open_dual_stack_socket: ")
+      ACE_TEXT("failed to set IPV6_V6ONLY to 0: %p\n"),
+      ACE_TEXT("ACE_OS::setsockopt(IPV6_V6ONLY)")),
+      false);
   }
   bool error = false;
 
@@ -296,11 +294,9 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, bool active, const ACE_INET_
 
   if (error) {
     socket.close();
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("open_dual_stack_socket: ")
-      ACE_TEXT("failed to bind address to socket\n")),
-      false);
+    VDBG_LVL((LM_WARNING, "(%P|%t) WARNING: open_dual_stack_socket: "
+                          "failed to bind address to socket\n"), 2);
+    return false;
   }
   return true;
 #endif

@@ -50,7 +50,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   }
 
 #if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
-  if (!open_dual_stack_socket(this->socket_, this->active_, local_address)) {
+  if (!open_dual_stack_socket(this->socket_, local_address)) {
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("UdpDataLink::open: open dual stack socket failed\n")),
