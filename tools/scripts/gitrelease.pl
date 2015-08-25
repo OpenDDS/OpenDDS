@@ -550,6 +550,29 @@ sub remedy_clone_tag {
   return !$result;
 }
 ############################################################################
+sub verify_move_changelog {
+  my $settings = shift();
+  my $target = $settings->{clone_dir} . "/ChangeLog";
+  return -f $settings->{clone_dir} . "/ChangeLog";
+}
+
+sub message_move_changelog {
+  my $settings = shift();
+  my $src = $settings->{clone_dir} . "/" . $settings->{changelog};
+  my $target = $settings->{clone_dir} . "/ChangeLog";
+  return "ChangeLog must be moved from $src to $target";
+}
+
+sub remedy_move_changelog {
+  my $settings = shift();
+  my $src = $settings->{clone_dir} . "/" . $settings->{changelog};
+  my $target = $settings->{clone_dir} . "/ChangeLog";
+  rename($src, $target);
+  print "Changelog moved\n";
+  return 1;
+}
+
+############################################################################
 sub verify_tgz_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
@@ -884,6 +907,12 @@ my @release_steps = (
     remedy  => sub{remedy_clone_tag(@_)}
   },
   {
+    title   => 'Move changelog',
+    verify  => sub{verify_move_changelog(@_)},
+    message => sub{message_move_changelog(@_)},
+    remedy  => sub{remedy_move_changelog(@_)}
+  },
+  {
     title   => 'Create unix release archive',
     verify  => sub{verify_tgz_source(@_)},
     message => sub{message_tgz_source(@_)},
@@ -1048,7 +1077,7 @@ sub run_step {
     } elsif ($settings{force} && $step->{skip}) {
       $skipped = 1;
     } else {
-      print "  Use --force to continue" if $step->{skip};
+      print "  Use --force to continue\n" if $step->{skip};
     }
     die unless ($remedied || $skipped);
     print "$divider\n";
