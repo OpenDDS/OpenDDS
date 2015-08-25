@@ -134,44 +134,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 {
   unicast_socket_ = unicast_socket;
 
-#ifdef ACE_HAS_IPV6
-  ACE_INET_Addr uni_addr;
-  if (0 != unicast_socket_.get_local_addr(uni_addr)) {
-    VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::open: "
-          "ACE_SOCK_Dgram::get_local_addr %p\n", ACE_TEXT("")));
-  } else {
-    unicast_socket_type_ = uni_addr.get_type();
-    const unsigned short any_port = 0;
-    if (unicast_socket_type_ == AF_INET6) {
-      const ACE_UINT32 any_addr = INADDR_ANY;
-      ACE_INET_Addr alt_addr(any_port, any_addr);
-      ipv6_alternate_socket_type_ = alt_addr.get_type();
-
-      if (0 != ipv6_alternate_socket_.open(alt_addr)) {
-        VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::open: "
-              "ACE_SOCK_Dgram::open %p\n", ACE_TEXT("alternate IPv4")));
-      }
-    } else {
-      ACE_INET_Addr alt_addr(any_port, ACE_IPV6_ANY, AF_INET6);
-      ipv6_alternate_socket_type_ = alt_addr.get_type();
-
-      if (0 != ipv6_alternate_socket_.open(alt_addr)) {
-        VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::open: "
-              "ACE_SOCK_Dgram::open %p\n", ACE_TEXT("alternate IPv6")));
-      }
-    }
-  }
-
-  if (!OpenDDS::DCPS::set_socket_multicast_ttl(ipv6_alternate_socket_, config_->ttl_)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpDataLink::open: ")
-                      ACE_TEXT("failed to set ipv6_alternate_socket_ TTL: %C\n"),
-                      config_->ttl_),
-                     false);
-  }
-#endif
-
   if (config_->use_multicast_) {
     const OPENDDS_STRING& net_if = config_->multicast_interface_;
 #ifdef ACE_HAS_MAC_OSX
@@ -238,16 +200,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   return true;
 }
-
-#ifdef ACE_HAS_IPV6
-ACE_SOCK_Dgram&
-RtpsUdpDataLink::socket_for(int address_type)
-{
-  return (address_type == unicast_socket_type_)
-    ? unicast_socket_
-    : ipv6_alternate_socket_;
-}
-#endif
 
 void
 RtpsUdpDataLink::add_locator(const RepoId& remote_id,

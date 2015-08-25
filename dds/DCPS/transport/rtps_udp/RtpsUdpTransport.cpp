@@ -261,6 +261,15 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
+#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
+  if (!open_dual_stack_socket(unicast_socket_, config_i_->local_address_)) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("RtpsUdpTransport::configure_i: open_dual_stack_socket:")
+                        ACE_TEXT("%m\n")),
+                       false);
+  }
+#else
   if (unicast_socket_.open(config_i_->local_address_) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -268,6 +277,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
                       ACE_TEXT("%m\n")),
                      false);
   }
+#endif
 
   if (config_i_->local_address_.is_any()) {
 

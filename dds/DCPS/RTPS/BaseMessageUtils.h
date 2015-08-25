@@ -141,7 +141,11 @@ locator_to_address(ACE_INET_Addr& dest, const OpenDDS::DCPS::Locator_t& locator)
   case LOCATOR_KIND_UDPv4:
     dest.set_type(AF_INET);
     if (dest.set_address(reinterpret_cast<const char*>(locator.address)
-                         + 12, 4, 0 /*network order*/) == -1) {
+                         + 12, 4, 0 /*network order*/
+#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
+                         , 1 /*map IPV4 to IPV6 addr*/
+#endif
+                         ) == -1) {
       return -1;
     }
     dest.set_port_number(locator.port);
