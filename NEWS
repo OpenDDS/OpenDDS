@@ -21,26 +21,30 @@ Additions:
 - Support IDL fixed type inside of DCPS_DATA_TYPE.
 - Configure script handles cross-platform builds.
 - Support for new Visual Studio builds (vc11, vc12, and vc14).
-??Support for clang builds on OSX.
+- Support for clang builds on OSX.
 - Removed support for old GCC compilers.
-?? ITL
+- opendds_idl command-line option -Gitl is a replacement for -Gws.  Wireshark
+  dissector now reads ITL files, rather than .ini files.
 
 Fixes:
 - Fixed many tests for minimum profile builds.
-PO ??Fixed the behavior of a reliable data writer when history is KEEP_LAST 1.
+- Enforced correct behavior of a reliable data writer when history is KEEP_LAST 1.
 - opendds_idl can now be specified in user_macros.GNU instead of always
   assuming it is in $DDS_ROOT/bin.
-TODO ??Fixed Ipv6 support in windows builds.
+- Fixed initial ipv6 support in windows builds.
 - Fixed disassociate handling of local entities on loopback interface.
-PO ?? Corrected wait_for_acknowedgements for non-reliable writers to return
+- Corrected wait_for_acknowedgements for non-reliable writers to return
   success immediately.
-PO ?? Allow disassociating readers to finish processing messages from active writer
+- Allow disassociating readegrs to finish processing messages from active writer
   before removing.
-PO ?? Remove TcpDataLink from DataLinkSet when connect() fails.
-PO ?? DCPSTransportDebugLevel 1 messages now association-oriented.
-PO ?? Fixed durable resend out-of-order handling for rtps_udp transport.
-PO ?? Fixed handling of acknowledgements during shutdown of rtps_udp data link.
+- Remove TcpDataLink from DataLinkSet when connect() fails.  Previously, the 
+  datalink would remain and would be seen as a fully-connected datalink by new
+  associations.
+- DCPSTransportDebugLevel 1 messages now association-oriented.
+- Fixed durable resend out-of-order handling for rtps_udp transport.
+- Fixed handling of acknowledgements during shutdown of rtps_udp data link.
 - RTPS Discovery now ignores 'RTPX' messages seen during RTI integration.
+- Dissection of unions in wireshark dissector (requires ITL).
 
 Notes:
 - OCI no longer builds with vc71, vc8, and GCC 4.1.1.  If you require support

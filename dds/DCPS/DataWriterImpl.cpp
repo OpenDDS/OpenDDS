@@ -202,13 +202,13 @@ DataWriterImpl::init(
 DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
-  return this->participant_servant_->get_handle(publication_id_);
+  return this->participant_servant_->id_to_handle(publication_id_);
 }
 
 DDS::InstanceHandle_t
 DataWriterImpl::get_next_handle()
 {
-  return this->participant_servant_->get_handle();
+  return this->participant_servant_->id_to_handle(GUID_UNKNOWN);
 }
 
 void
@@ -484,7 +484,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
   if (!is_bit_) {
 
     DDS::InstanceHandle_t handle =
-      this->participant_servant_->get_handle(remote_id);
+      this->participant_servant_->id_to_handle(remote_id);
 
     {
       // protect publication_match_status_ and status changed flags.
@@ -2548,7 +2548,7 @@ DataWriterImpl::lookup_instance_handles(const ReaderIdSeq& ids,
   hdls.length(num_rds);
 
   for (CORBA::ULong i = 0; i < num_rds; ++i) {
-    hdls[i] = this->participant_servant_->get_handle(ids[i]);
+    hdls[i] = this->participant_servant_->id_to_handle(ids[i]);
   }
 
   return true;

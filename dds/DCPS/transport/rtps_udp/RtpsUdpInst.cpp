@@ -158,7 +158,7 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 const TransportBLOB*
 RtpsUdpInst::get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const
 {
-  for (size_t idx = 0, limit = trans_info.length(); idx != limit; ++idx) {
+  for (CORBA::ULong idx = 0, limit = trans_info.length(); idx != limit; ++idx) {
     if (std::strcmp(trans_info[idx].transport_type, "rtps_udp") == 0) {
       return &trans_info[idx].data;
     }

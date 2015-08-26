@@ -98,9 +98,6 @@ sub verify_git_status_clean {
   my $status = open(GITSTATUS, 'git status -s|');
   my $modified = $settings->{modified};
 
-  # TODO remove
-  $modified->{"bin/gitrelease.pl"} = 1;
-
   my $unclean = "";
   while (<GITSTATUS>) {
     if (/^...(.*)/) {
@@ -553,6 +550,29 @@ sub remedy_clone_tag {
   return !$result;
 }
 ############################################################################
+sub verify_move_changelog {
+  my $settings = shift();
+  my $target = $settings->{clone_dir} . "/ChangeLog";
+  return -f $settings->{clone_dir} . "/ChangeLog";
+}
+
+sub message_move_changelog {
+  my $settings = shift();
+  my $src = $settings->{clone_dir} . "/" . $settings->{changelog};
+  my $target = $settings->{clone_dir} . "/ChangeLog";
+  return "ChangeLog must be moved from $src to $target";
+}
+
+sub remedy_move_changelog {
+  my $settings = shift();
+  my $src = $settings->{clone_dir} . "/" . $settings->{changelog};
+  my $target = $settings->{clone_dir} . "/ChangeLog";
+  rename($src, $target);
+  print "Changelog moved\n";
+  return 1;
+}
+
+############################################################################
 sub verify_tgz_source {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
@@ -825,32 +845,30 @@ my @release_steps = (
   {
     title   => 'Verify git status is clean',
     skip    => 1,
-    verify  => sub{verify_git_status_clean(@_)},
+    verify  => sub{verify_git_status_clean(@_, 0)},
     message => sub{message_git_status_clean(@_)}
   },
   {
     title   => 'Update VERSION',
-    skip    => 1,
     verify  => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
     remedy  => sub{remedy_update_version_file(@_)}
   },
   {
     title   => 'Update Version.h',
-    skip    => 1,
     verify  => sub{verify_update_version_h_file(@_)},
     message => sub{message_update_version_h_file(@_)},
     remedy  => sub{remedy_update_version_h_file(@_)}
   },
   {
     title   => 'Update PROBLEM-REPORT-FORM',
-    skip    => 1,
     verify  => sub{verify_update_prf_file(@_)},
     message => sub{message_update_prf_file(@_)},
     remedy  => sub{remedy_update_prf_file(@_)}
   },
   {
     title   => 'Verify remote arg',
+    skip    => 1,
     verify  => sub{verify_git_remote(@_)},
     message => sub{message_git_remote(@_)},
   },
@@ -862,26 +880,22 @@ my @release_steps = (
   },
   {
     title   => 'Add NEWS Section',
-    skip    => 1,
     verify  => sub{verify_news_file_section(@_)},
     message => sub{message_news_file_section(@_)},
     remedy  => sub{remedy_news_file_section(@_)}
   },
   {
     title   => 'Update NEWS Section',
-    skip    => 1,
     verify  => sub{verify_update_news_file(@_)},
     message => sub{message_update_news_file(@_)}
   },
   {
     title   => 'Commit changes to GIT',
-    skip    => 1,
     verify  => sub{verify_git_status_clean(@_, 1)},
     message => sub{message_commit_git_changes(@_)}
   },
   {
     title   => 'Create git tag',
-    skip    => 1,
     verify  => sub{verify_git_tag(@_)},
     message => sub{message_git_tag(@_)},
     remedy  => sub{remedy_git_tag(@_)}
@@ -891,6 +905,12 @@ my @release_steps = (
     verify  => sub{verify_clone_tag(@_)},
     message => sub{message_clone_tag(@_)},
     remedy  => sub{remedy_clone_tag(@_)}
+  },
+  {
+    title   => 'Move changelog',
+    verify  => sub{verify_move_changelog(@_)},
+    message => sub{message_move_changelog(@_)},
+    remedy  => sub{remedy_move_changelog(@_)}
   },
   {
     title   => 'Create unix release archive',
@@ -943,7 +963,8 @@ my @release_steps = (
     verify  => sub{verify_update_opendds_org_front(@_)},
     message => sub{message_update_opendds_org_front(@_)}
   },
-  { title   => 'Update opendds.org news page',
+  {
+    title   => 'Update opendds.org news page',
     verify  => sub{verify_update_opendds_org_news(@_)},
     message => sub{message_update_opendds_org_news(@_)}
   },
@@ -1011,7 +1032,8 @@ my %settings = (
                 "PROBLEM-REPORT-FORM" => 1,
                 "VERSION" => 1,
                 "dds/Version.h" => 1,
-                "docs/history/ChangeLog-$version" => 1}
+                "docs/history/ChangeLog-$version" => 1,
+                "tools/scripts/gitrelease.pl" => 1}
 );
 
 my $half_divider = "-----------------------------------------";
@@ -1030,6 +1052,7 @@ sub run_step {
     print "  " . $step->{message}(\%settings) . "\n";
 
     my $remedied = 0;
+    my $skipped  = 0;
     # If a remedy is available
     if ($step->{remedy}) {
       # If --remedy is set
@@ -1044,15 +1067,19 @@ sub run_step {
           $remedied = 1;
         }
       # Else --remedy is  NOT set
+      } elsif ($settings{force} && $step->{skip}) {
+        $skipped = 1;
       } else {
         print "  Use --remedy to attempt a fix\n" if $step->{remedy};
       }
 
     # Else there is no remedy
+    } elsif ($settings{force} && $step->{skip}) {
+      $skipped = 1;
     } else {
-      print "  Use --force to continue" if $step->{skip};
+      print "  Use --force to continue\n" if $step->{skip};
     }
-    die unless $remedied;
+    die unless ($remedied || $skipped);
     print "$divider\n";
   }
 }

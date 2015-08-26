@@ -1548,11 +1548,11 @@ DomainParticipantImpl::get_unique_id()
 DDS::InstanceHandle_t
 DomainParticipantImpl::get_instance_handle()
 {
-  return this->get_handle(this->dp_id_);
+  return this->id_to_handle(this->dp_id_);
 }
 
 DDS::InstanceHandle_t
-DomainParticipantImpl::get_handle(const RepoId& id)
+DomainParticipantImpl::id_to_handle(const RepoId& id)
 {
   if (id == GUID_UNKNOWN) {
     return this->participant_handles_.next();
