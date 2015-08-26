@@ -203,6 +203,59 @@ sub message_changelog {
   return "File $settings->{changelog} missing";
 }
 
+sub format_comment_words {
+  my $comment = shift;
+  my $result = "";
+  my @comment_words = split(/\s+/, $comment);
+  # While there are words left to process...
+  while (scalar(@comment_words) > 0) {
+     # Start next line
+     my $first_word = shift @comment_words;
+     my $comment_line = "          $first_word";
+     my $next = shift(@comment_words);
+     while ($next &&
+            (length($comment_line . " $next") <= 75)) {
+       $comment_line .= " $next";
+       $next = shift(@comment_words);
+     }
+     # Now next has been shifted, but doesn't fit on this line
+     unshift(@comment_words, $next) if $next;
+     $result .= "$comment_line\n";
+  }
+  return $result;
+}
+
+sub format_comment {
+  my $comment = shift;
+  my $result = "";
+  my @comment_lines = split(/\n/, $comment);
+  # While there are lines left to process...
+  while (scalar(@comment_lines) > 0) {
+    my $next_line = shift @comment_lines;
+    if (length($next_line) < 65) {
+      $result .= "          $next_line\n";
+    } else {
+      # Break next line into words
+      my @comment_words = split(/\s+/, $next_line);
+      while (scalar(@comment_words) > 0) {
+        my $first_word = shift @comment_words;
+        my $comment_line = "          $first_word";
+        my $next = shift(@comment_words);
+        # Fill up line
+        while ($next &&
+               (length($comment_line . " $next") <= 75)) {
+          $comment_line .= " $next";
+          $next = shift(@comment_words);
+        }
+        # Now next has been shifted, but doesn't fit on this line
+        unshift(@comment_words, $next) if $next;
+        $result .= "$comment_line\n";
+      }
+    }
+  }
+  return $result;
+}
+
 sub remedy_changelog {
   my $settings = shift();
   my $version = $settings->{version};
@@ -233,7 +286,7 @@ sub remedy_changelog {
         if ($file_list) {
           print CHANGELOG "\n" . $file_list;
         }
-        print CHANGELOG "\n" . $comment . "\n";
+        print CHANGELOG "\n" . format_comment($comment) . "\n";
         $comment = "";
         $file_list = "";
         $changed = 1;
@@ -245,9 +298,9 @@ sub remedy_changelog {
     } elsif (/^Date: *(.*)/) {
       $date = $1;
     } elsif (/^ +(.*) */) {
-      $comment .= "$_\n";
+      $comment .= "$1\n";
     } elsif (/^([^ ]+.*) *$/) {
-      $file_list .= " * $_\n";
+      $file_list .= "        * $_\n";
     }
   }
   # print out final
@@ -256,7 +309,7 @@ sub remedy_changelog {
     if ($file_list) {
       print CHANGELOG "\n" . $file_list;
     }
-    print CHANGELOG "\n" . $comment . "\n";
+    print CHANGELOG "\n" . format_comment($comment) . "\n";
     $comment = "";
     $file_list = "";
     $changed = 1;
