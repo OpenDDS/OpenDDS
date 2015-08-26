@@ -122,15 +122,6 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 #define OPENDDS_LIST(T) std::list<T >
 #define OPENDDS_QUEUE(T) std::queue<T >
 
-#ifdef NOT_DEFINED
-#define OPENDDS_NEW_RETURN(pointer, ctor, default) ACE_NEW_RETURN(pointer, ctor, default)
-#define OPENDDS_NEW(pointer, ctor) ACE_NEW(pointer, ctor)
-#define OPENDDS_NEW_NORETURN(pointer, ctor) ACE_NEW_NORETURN(pointer, ctor)
-
-#define OPENDDS_DELETE(pointer) delete pointer
-#define OPENDDS_DELETE_ARR(pointer) delete[] pointer
-#endif
-
 #endif // OPENDDS_SAFETY_PROFILE
 
 

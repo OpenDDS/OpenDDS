@@ -39,7 +39,38 @@ void operator delete(void* ptr) {
   ::free(ptr);
 }
 
+void* operator new(size_t sz, const std::nothrow_t&)
+{
+  if (no_global_new) {
+    printf ("ERROR: call to global operator new\n");
+  }
+  return ::malloc(sz);
+}
+
+void operator delete(void* ptr, const std::nothrow_t&) {
+  ::free(ptr);
+}
+
 void* operator new[](size_t sz, const std::nothrow_t&)
+{
+  if (no_global_new) {
+    printf ("ERROR: call to global operator new[]\n");
+    void* addresses[32];
+    int count = backtrace(addresses, 32);
+    char** text = backtrace_symbols(addresses, count);
+    for (int i = 0; i != count; ++i) {
+      printf ("%s\n", text[i]);
+    }
+    ::free(text);
+  }
+  return ::malloc(sz);
+}
+
+void operator delete[](void* ptr, const std::nothrow_t&) {
+  ::free(ptr);
+}
+
+void* operator new[](size_t sz)
 #ifdef ACE_HAS_NEW_THROW_SPEC
   throw (std::bad_alloc)
 #endif
@@ -60,6 +91,7 @@ void* operator new[](size_t sz, const std::nothrow_t&)
 void operator delete[](void* ptr) {
   ::free(ptr);
 }
+
 #else
 
 class DisableGlobalNew {
