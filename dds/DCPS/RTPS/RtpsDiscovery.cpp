@@ -95,7 +95,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       u_short pb, dg, pg, d0, d1, dx, ttl;
       AddrVec spdp_send_addrs;
       OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
-      OPENDDS_STRING mi;
+      OPENDDS_STRING mi, sla;
       bool has_resend = false, has_pb = false, has_dg = false, has_pg = false,
         has_d0 = false, has_d1 = false, has_dx = false, has_sm = false,
         has_ttl = false, sm = false;
@@ -199,6 +199,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           sm = bool(smInt);
         } else if (name == "MulticastInterface") {
           mi = it->second;
+        } else if (name == "SedpLocalAddress") {
+          sla = it->second;
         } else if (name == "InteropMulticastOverride") {
           /// FUTURE: handle > 1 group.
           default_multicast_group = it->second;
@@ -233,6 +235,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       discovery->multicast_interface(mi);
       discovery->default_multicast_group( default_multicast_group);
       discovery->spdp_send_addrs().swap(spdp_send_addrs);
+      discovery->sedp_local_address(sla);
       TheServiceParticipant->add_discovery(
         DCPS::static_rchandle_cast<Discovery>(discovery));
     }
