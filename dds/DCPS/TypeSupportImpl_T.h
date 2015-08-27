@@ -79,6 +79,11 @@ namespace OpenDDS {
       return TraitsType::gen_has_key(MessageType());
     }
 
+    const char* default_type_name() const
+    {
+      return TraitsType::type_name();
+    }
+
     static typename TraitsType::TypeSupportType::_ptr_type _narrow(CORBA::Object_ptr obj) {
       return TypeSupportType::_narrow(obj);
     }
