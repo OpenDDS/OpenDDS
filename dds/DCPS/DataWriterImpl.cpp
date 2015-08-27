@@ -113,7 +113,7 @@ DataWriterImpl::DataWriterImpl()
   periodic_monitor_ =
     TheServiceParticipant->monitor_factory_->create_data_writer_periodic_monitor(this);
 
-  db_lock_pool_ = new DataBlockLockPool(n_chunks_);
+  db_lock_pool_ = new DataBlockLockPool((unsigned long)n_chunks_);
 }
 
 // This method is called when there are no longer any reference to the
