@@ -41,6 +41,8 @@ public:
   virtual char* get_type_name();
 
 private:
+  virtual const char* default_type_name() const = 0;
+
   CORBA::String_var type_name_;
 
   OPENDDS_DELETED_COPY_CTOR_ASSIGN(TypeSupportImpl);

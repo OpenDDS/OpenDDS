@@ -108,7 +108,7 @@ sub runTest {
     print $fh "\n";
     print $fh "[topic/TheTopic]\n";
     print $fh "name=TheTopic\n";
-    print $fh "type_name=IDL:TestMsg/TestMsgTypeSupport:1.0\n";
+    print $fh "type_name=TestMsg::TestMsg\n";
     print $fh "max_message_size=300\n";
     print $fh "\n";
     print $fh "[datawriterqos/ReliableWriter]\n";

@@ -34,10 +34,10 @@ TypeSupportImpl::register_type(DDS::DomainParticipant_ptr participant,
 char*
 TypeSupportImpl::get_type_name()
 {
-  if (this->type_name_.in() == 0) {
-    return CORBA::string_dup(this->_interface_repository_id());
+  if (type_name_.in() == 0) {
+    return CORBA::string_dup(default_type_name());
   } else {
-    return CORBA::string_dup(this->type_name_.in());
+    return CORBA::string_dup(type_name_.in());
   }
 }
 

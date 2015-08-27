@@ -213,9 +213,9 @@ void Get_Connection_Parameters(CONNECTION_NAME_TYPE& connection_name,
         return_code = NOT_AVAILABLE;
         return;
       }
-      cur_status.LAST_MSG_VALIDITY = receiver.last_msg_header.message_validity;
       if (receiver.total_msgs_recvd != 0) {
         cur_status.REFRESH_PERIOD = receiver.sum_recvd_msgs_latency/receiver.total_msgs_recvd;
+        cur_status.LAST_MSG_VALIDITY = receiver.last_msg_header.message_validity;
       } else {
         cur_status.REFRESH_PERIOD = 0;
       }
