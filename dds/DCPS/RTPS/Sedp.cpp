@@ -236,6 +236,9 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
 
     rtps_inst->ttl_ = disco.ttl();
     rtps_inst->multicast_interface_ = disco.multicast_interface();
+    if (!disco.sedp_local_address().empty()) {
+      rtps_inst->local_address_.set(disco.sedp_local_address().c_str());
+    }
 
   } else {
     rtps_inst->use_multicast_ = false;
