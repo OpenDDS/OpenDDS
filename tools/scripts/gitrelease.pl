@@ -70,6 +70,7 @@ sub version_to_value {
 }
 ############################################################################
 sub verify_git_remote {
+  my $result = 0;
   my $settings = shift();
   my $remote = $settings->{remote};
   my $url = "";
@@ -81,15 +82,32 @@ sub verify_git_remote {
     }
   }
   close(GITREMOTE);
-  return ($url eq $settings->{git_url});
+  if ($url eq $settings->{git_url}) {
+    $result = 1;
+  } else {
+    $settings->{alt_url} = $url;
+  }
+  return $result;
 }
 
 sub message_git_remote {
   my $settings = shift;
   my $remote = $settings->{remote};
-  return "Remote $remote does not match expected URL $settings->{git_url},\n" .
+  my $alt_url = $settings->{alt_url};
+  return "Remote $remote has url $alt_url, \n" .
+         "which does not match expected URL $settings->{git_url},\n" .
          "rerun and specifiy --remote";
 }
+
+sub override_git_remote {
+  my $settings = shift;
+  my $remote = $settings->{remote};
+  $settings->{git_url} = $settings->{alt_url};
+  print "  Overriding remote $remote, url $settings->{alt_url}\n";
+  # Reverify
+  verify_git_remote($settings);
+}
+
 ############################################################################
 sub verify_git_status_clean {
   my ($settings, $strict) = @_;
@@ -893,54 +911,68 @@ sub remedy_email_dds_release_announce {
   news_contents_excerpt($settings);
 }
 
+
+############################################################################
+sub ignore_step {
+  my $step = shift;
+  print "  Ignoring step $step\n";
+  return 1;
+}
+
 ############################################################################
 my @release_steps = (
   {
     title   => 'Verify git status is clean',
-    skip    => 1,
     verify  => sub{verify_git_status_clean(@_, 0)},
-    message => sub{message_git_status_clean(@_)}
+    message => sub{message_git_status_clean(@_)},
+    force   => sub{ignore_step("Verify git status is clean")}
   },
   {
     title   => 'Update VERSION',
     verify  => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
-    remedy  => sub{remedy_update_version_file(@_)}
+    remedy  => sub{remedy_update_version_file(@_)},
+    force   => sub{ignore_step("Update VERSION")}
   },
   {
     title   => 'Update Version.h',
     verify  => sub{verify_update_version_h_file(@_)},
     message => sub{message_update_version_h_file(@_)},
-    remedy  => sub{remedy_update_version_h_file(@_)}
+    remedy  => sub{remedy_update_version_h_file(@_)},
+    force   => sub{ignore_step("Update Version.h")}
   },
   {
     title   => 'Update PROBLEM-REPORT-FORM',
     verify  => sub{verify_update_prf_file(@_)},
     message => sub{message_update_prf_file(@_)},
-    remedy  => sub{remedy_update_prf_file(@_)}
+    remedy  => sub{remedy_update_prf_file(@_)},
+    force   => sub{ignore_step('Update PROBLEM-REPORT-FORM')}
   },
   {
     title   => 'Verify remote arg',
-    skip    => 1,
     verify  => sub{verify_git_remote(@_)},
     message => sub{message_git_remote(@_)},
+    force   => sub{override_git_remote(@_)},
   },
   {
     title   => 'Verify ChangeLog',
     verify  => sub{verify_changelog(@_)},
     message => sub{message_changelog(@_)},
-    remedy  => sub{remedy_changelog(@_)}
+    remedy  => sub{remedy_changelog(@_)},
+    force   => sub{ignore_step('Verify ChangeLog')}
   },
   {
     title   => 'Add NEWS Section',
     verify  => sub{verify_news_file_section(@_)},
     message => sub{message_news_file_section(@_)},
-    remedy  => sub{remedy_news_file_section(@_)}
+    remedy  => sub{remedy_news_file_section(@_)},
+    force   => sub{ignore_step('Add NEWS Section')}
   },
   {
     title   => 'Update NEWS Section',
     verify  => sub{verify_update_news_file(@_)},
-    message => sub{message_update_news_file(@_)}
+    message => sub{message_update_news_file(@_)},
+    force   => sub{ignore_step('Update NEWS Section')}
   },
   {
     title   => 'Commit changes to GIT',
@@ -1105,34 +1137,39 @@ sub run_step {
     print "  " . $step->{message}(\%settings) . "\n";
 
     my $remedied = 0;
-    my $skipped  = 0;
-    # If a remedy is available
-    if ($step->{remedy}) {
-      # If --remedy is set
-      if ($settings{remedy}) {
-        # Try remediation
-        if (!$step->{remedy}(\%settings)) {
-          print "  !!!! Remediation did not complete\n";
-        # Reverify
-        } elsif (!$step->{verify}(\%settings)) {
-          print "  !!!! Remediation did not pass verification\n";
-        } else {
-          $remedied = 1;
-        }
-      # Else --remedy is  NOT set
-      } elsif ($settings{force} && $step->{skip}) {
-        $skipped = 1;
+    my $forced  = 0;
+    # If a remedy is available and --remedy specified
+    if ($step->{remedy} && $settings{remedy}) {
+      # Try remediation
+      if (!$step->{remedy}(\%settings)) {
+        print "  !!!! Remediation did not complete\n";
+      # Reverify
+      } elsif (!$step->{verify}(\%settings)) {
+        print "  !!!! Remediation did not pass verification\n";
       } else {
-        print "  Use --remedy to attempt a fix\n" if $step->{remedy};
+        $remedied = 1;
       }
-
-    # Else there is no remedy
-    } elsif ($settings{force} && $step->{skip}) {
-      $skipped = 1;
-    } else {
-      print "  Use --force to continue\n" if $step->{skip};
     }
-    die unless ($remedied || $skipped);
+
+    # If not remedied, try forcing
+    if (!$remedied && $step->{force} && $settings{force}) {
+      if ($step->{force}(\%settings)) {
+        $forced = 1;
+      } else {
+        print "  !!!! Forcing did not complete\n";
+      }
+    }
+
+    if (!($remedied || $forced)) {
+      if ($step->{remedy} && !$settings{remedy}) {
+        print "  Use --remedy to attempt a fix\n";
+      }
+      if ($step->{force} && !$settings{force}) {
+        print "  Use --force to force past this step\n";
+      }
+    }
+
+    die unless ($remedied || $forced);
     print "$divider\n";
   }
 }
