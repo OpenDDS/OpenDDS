@@ -346,8 +346,8 @@ StaticEndpointManager::remove_publication_i(const RepoId& writerid)
   const EndpointRegistry::Writer& writer = pos->second;
 
   ReaderIdSeq ids;
-  ids.length(writer.reliable_readers.size());
-  size_t idx = 0;
+  ids.length((CORBA::ULong)writer.reliable_readers.size());
+  CORBA::ULong idx = 0;
   for (RepoIdSet::const_iterator pos = writer.reliable_readers.begin(), limit = writer.reliable_readers.end();
         pos != limit;
         ++pos, ++idx) {
@@ -422,8 +422,8 @@ StaticEndpointManager::remove_subscription_i(const RepoId& readerid)
   const EndpointRegistry::Reader& reader = pos->second;
 
   WriterIdSeq ids;
-  ids.length(reader.reliable_writers.size());
-  size_t idx = 0;
+  ids.length((CORBA::ULong)reader.reliable_writers.size());
+  CORBA::ULong idx = 0;
   for (RepoIdSet::const_iterator pos = reader.reliable_writers.begin(), limit = reader.reliable_writers.end();
         pos != limit;
         ++pos, ++idx) {
