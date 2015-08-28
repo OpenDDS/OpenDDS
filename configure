@@ -202,8 +202,6 @@ sub parseArgs {
 }
 
 my $cross_compile = 0;
-my $needmpc = 0;
-
 my %opts = %{parseArgs()};
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
@@ -286,15 +284,8 @@ if (!exists $platforminfo{$opts{'target'}}) {
 addCurLibPathRef(\%hostEnv);
 addCurLibPathRef(\%targetEnv);
 
-if ($opts{'safety-profile'}) {
-  print "configuring safety profile build\n" if $opts{'verbose'};
-  $tao_version = "face-safety-22a";
-  $cross_compile = 1;
-}
-
-if ($opts{'host'} ne $opts{'target'} || $cross_compile) {
+if ($opts{'host'} ne $opts{'target'} || $opts{'safety-profile'}) {
   print "Setting cross-compile build\n" if $opts{'verbose'};
-  $needmpc = 1;
   $cross_compile = 1;
 }
 
@@ -871,9 +862,7 @@ sub generate_workspace {
     }
   }
 
-  $needmpc ||= (scalar @features ? 1 : 0);
-  # Create user macros
-  if ($needmpc && $slash eq '/') {
+  if ($slash eq '/') {
     if ($buildEnv->{'build'} eq 'target') {
       print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
         if $opts{'verbose'};
@@ -893,8 +882,7 @@ EOT
     }
   }
 
-  my $tests = 1;
-  ($needmpc, $tests) = (1, 0) if (exists $opts{'tests'} && !$opts{'tests'});
+  my $tests = !exists $opts{'tests'} || $opts{'tests'};
 
   if ($opts{'safety-profile'} && $buildEnv->{'build'} eq 'target') {
     $buildtao = 0; # TAO will be built seperately
@@ -904,103 +892,88 @@ EOT
     $buildtao = 1 if !-x "$buildEnv->{'ACE_ROOT'}/bin/tao_idl$exeext";
   }
 
-  if ($slash eq '/' && ($needmpc || !-r 'GNUmakefile')) {
-    $needmpc = 'gnuace';
+  my $mpctype = ($slash eq '/') ? 'gnuace' : $opts{'compiler_version'};
+  locate_mpc($ace_src);
+
+  # Append to default.features
+  if (@features && ($buildEnv->{'build'} eq 'target')) {
+    my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
+      "/default.features";
+    my $DF = $wrote_df
+      ? ($opts{'dry-run'} ? File::Temp->new() : new FileHandle(">>$df_file"))
+      : backup_and_open($df_file);
+    for my $f (@features) {
+      print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
+    }
+    $DF->close;
+    if ($opts{'verbose'}) {
+      print '' . ($wrote_df ? 'Appended to' : 'Wrote') .
+        " $buildEnv->{'ACE_ROOT'}/.../default.features\n";
+    }
+    dump_and_unlink($DF) if $opts{'dry-run'};
   }
-  elsif ($slash ne '/' && ($needmpc || !-r 'DDS.sln')) {
-    $needmpc = $opts{'compiler_version'};
+
+  my $ws = 'DDS.mwc';
+  if (-r $buildEnv->{'DDS_ROOT'} . "/host_tools.mwc") {
+    $ws = 'host_tools.mwc';
+  }
+  elsif (!$tests && $buildtao) {
+    $ws = 'DDS_TAO.mwc';
+  }
+  elsif (!$tests && !$buildtao) {
+    $ws = 'DDS_no_tests.mwc';
+  }
+  elsif ($buildtao) {
+    $ws = 'DDS_TAO_all.mwc';
   }
 
-  if ($needmpc) {
-    locate_mpc($ace_src);
+  if ($tao_maj == 2 && $ws =~ /TAO/) {
+    $ws =~ s/TAO/TAOv2/;
+  }
 
-    # Append to default.features
-    if (@features && ($buildEnv->{'build'} eq 'target')) {
-      my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
-       "/default.features";
-      my $DF = $wrote_df
-        ? ($opts{'dry-run'} ? File::Temp->new()
-                            : new FileHandle(">>$df_file"))
-        : backup_and_open($df_file);
-      for my $f (@features) {
-        print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
-      }
-      $DF->close;
-      if ($opts{'verbose'}) {
-        print '' . ($wrote_df ? 'Appended to' : 'Wrote') .
-          " $buildEnv->{'ACE_ROOT'}/.../default.features\n";
-      }
-      dump_and_unlink($DF) if $opts{'dry-run'};
-    }
+  my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
 
-    my $ws = 'DDS.mwc';
-    if (-r $buildEnv->{'DDS_ROOT'} . "/host_tools.mwc") {
-      $ws = 'host_tools.mwc';
-    }
-    elsif (!$tests && $buildtao) {
-      $ws = 'DDS_TAO.mwc';
-    }
-    elsif (!$tests && !$buildtao) {
-      $ws = 'DDS_no_tests.mwc';
-    }
-    elsif ($buildtao) {
-      $ws = 'DDS_TAO_all.mwc';
-    }
+  # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
+  # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
+  # to be on the include path for .mpb files.
+  for my $var ('CIAO_ROOT', 'DANCE_ROOT') {
+    $buildEnv->{$var} = 'unused' unless defined $buildEnv->{$var};
+  }
 
-    if ($tao_maj == 2 && $ws =~ /TAO/) {
-      $ws =~ s/TAO/TAOv2/;
+  my %savedEnv = %ENV;
+  print "ENV: saving current environment\n" if $opts{'verbose'};
+  mergeToEnv($buildEnv);
+
+  my $mwcargs = "-type $mpctype $buildEnv->{'DDS_ROOT'}$slash$ws $static";
+  $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
+  print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
+  print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
+                                     'project files'), ".\n";
+  if (!$opts{'dry-run'}) {
+    if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
+      die "Error from MPC, stopped";
     }
+  }
 
-    my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
-
-    # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
-    # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
-    # to be on the include path for .mpb files.
-    for my $var ('CIAO_ROOT', 'DANCE_ROOT') {
-      $buildEnv->{$var} = 'unused' unless defined $buildEnv->{$var};
-    }
-
-    my %savedEnv = %ENV;
-    print "ENV: saving current environment\n" if $opts{'verbose'};
-    mergeToEnv($buildEnv);
-
-    print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
-                                       'project files'), ".\n";
-    my $mwcargs = "-type $needmpc $buildEnv->{'DDS_ROOT'}$slash$ws $static";
+  # If this is a target safety profile build
+  if (defined $opts{'no-opendds-safety-profile'}) {
+    # Generate ACE workspace separately, to exclude TAO
+    my $mwcargs = "-type $mpctype $static " . $buildEnv->{'ACE_ROOT'}. "/ace";
     $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
-    print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
+    print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
 
     if (!$opts{'dry-run'}) {
       if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
         die "Error from MPC, stopped";
       }
     }
-
-    # If this is a target safety profile build
-    if (defined $opts{'no-opendds-safety-profile'}) {
-      # Generate ACE workspace separately, to exclude TAO
-      my $mwcargs = "-type $needmpc $static " . $buildEnv->{'ACE_ROOT'}. "/ace";
-      $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
-      print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
-
-      if (!$opts{'dry-run'}) {
-        if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
-          die "Error from MPC, stopped";
-        }
-      }
-    }
-
-    %ENV = %savedEnv;
-    print "ENV: restoring previous environment\n" if $opts{'verbose'};
-
-    $ws =~ s/\.mwc$/.sln/;
-    $opts{'solution_file'} = $ws;
   }
-  elsif ($opts{'compiler_version'}) { #win32, using DDS release package projects
-    $opts{'solution_file'} = 'DDS' . ($opts{'static'} ? '_Static' : '') .
-      ($opts{'compiler_version'} ne 'vc71' ? "_$opts{'compiler_version'}" : '').
-        '.sln';
-  }
+
+  %ENV = %savedEnv;
+  print "ENV: restoring previous environment\n" if $opts{'verbose'};
+
+  $ws =~ s/\.mwc$/.sln/;
+  $opts{'solution_file'} = $ws;
 }
 
 sub write_environment {
