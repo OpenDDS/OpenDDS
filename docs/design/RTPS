@@ -16,7 +16,6 @@ RTPS
 Not Currently Implemented
 -------------------------
 (Items in this list are not necessarily needed for compliance or interop)
-- Non-default LIVELINESS QoS (8.7.2.2.3 and 8.4.13)
 - Writer-side content filtering (8.7.3)
   - OpenDDS may still drop samples that aren't needed (due to content filtering)
     by any associated readers -- this is done above the transport layer
@@ -27,7 +26,6 @@ Not Currently Implemented
   transient and persistent durability, which are not supported by the RTPS
   spec (8.7.2.2.1)
 - Key Hashes (8.7.9) are not generated, but they are optional anyway
-- wait_for_acknowledgements()
 - nackSuppressionDuration (Table 8.47) and heartbeatSuppressionDuration
   (Table 8.62) are suggested but not described in the spec.  These may be
   useful areas for future enhancements.
