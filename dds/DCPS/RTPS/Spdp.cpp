@@ -62,13 +62,7 @@ Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
   sedp_.init(guid_, *disco, domain_);
 
   { // Append metatraffic unicast locator
-    const ACE_INET_Addr& local_addr = sedp_.local_address();
-    OpenDDS::DCPS::Locator_t uc_locator;
-    uc_locator.kind = address_to_kind(local_addr);
-    uc_locator.port = local_addr.get_port_number();
-    address_to_bytes(uc_locator.address, local_addr);
-    sedp_unicast_.length(1);
-    sedp_unicast_[0] = uc_locator;
+    sedp_.unicast_locators(sedp_unicast_);
   }
 
   if (disco->sedp_multicast()) { // Append metatraffic multicast locator

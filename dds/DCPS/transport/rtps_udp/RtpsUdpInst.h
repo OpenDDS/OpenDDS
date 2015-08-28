@@ -25,6 +25,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
 public:
 
   ACE_INET_Addr local_address_;
+  OPENDDS_STRING local_address_config_str_;
 
   bool use_multicast_;
   unsigned char ttl_;

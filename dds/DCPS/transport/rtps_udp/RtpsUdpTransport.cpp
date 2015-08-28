@@ -279,12 +279,6 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   }
 #endif
 
-  if (config_i_->local_address_.is_any()) {
-
-    OpenDDS::DCPS::get_fully_qualified_hostname(&config_i_->local_address_);
-
-  }
-
   if (config_i_->local_address_.get_port_number() == 0) {
 
     ACE_INET_Addr address;

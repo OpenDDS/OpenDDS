@@ -69,6 +69,11 @@ struct OpenDDS_Dcps_Export NetworkAddress {
 extern OpenDDS_Dcps_Export
 OPENDDS_STRING get_fully_qualified_hostname(ACE_INET_Addr* addr = 0);
 
+/// Helper function to get the vector of addresses which should
+/// be advertised to peers
+extern OpenDDS_Dcps_Export
+void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs);
+
 /// Helper function to set the ttl on a socket appropriately
 /// given whether it is IPV4 or IPV6
 extern OpenDDS_Dcps_Export

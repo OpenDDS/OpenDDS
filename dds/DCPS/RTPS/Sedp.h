@@ -65,6 +65,7 @@ public:
   void acknowledge();
 
   void shutdown();
+  void unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const;
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
