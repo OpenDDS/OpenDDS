@@ -418,8 +418,6 @@ private:
 
   } heartbeat_, heartbeatchecker_;
 
-  RTPS::InfoReplySubmessage info_reply_;
-
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {
     /// id of local entity that is interested in this remote.

@@ -162,33 +162,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   send_strategy_->send_buffer(&multi_buff_);
 
-  // Set up info_reply_ messages for use with ACKNACKS
-  using namespace OpenDDS::RTPS;
-  info_reply_.smHeader.submessageId = INFO_REPLY;
-  info_reply_.smHeader.flags = 1 /*FLAG_E*/;
-  info_reply_.unicastLocatorList.length(1);
-  info_reply_.unicastLocatorList[0].kind =
-    address_to_kind(config_->local_address_);
-  info_reply_.unicastLocatorList[0].port =
-    config_->local_address_.get_port_number();
-  RTPS::address_to_bytes(info_reply_.unicastLocatorList[0].address,
-                         config_->local_address_);
-  if (config_->use_multicast_) {
-    info_reply_.smHeader.flags |= 2 /*FLAG_M*/;
-    info_reply_.multicastLocatorList.length(1);
-    info_reply_.multicastLocatorList[0].kind =
-      address_to_kind(config_->multicast_group_address_);
-    info_reply_.multicastLocatorList[0].port =
-      config_->multicast_group_address_.get_port_number();
-    RTPS::address_to_bytes(info_reply_.multicastLocatorList[0].address,
-                           config_->multicast_group_address_);
-  }
-
-  size_t size = 0, padding = 0;
-  gen_find_size(info_reply_, size, padding);
-  info_reply_.smHeader.submessageLength =
-    static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
-
   if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),
             static_rchandle_cast<TransportStrategy>(recv_strategy_)) != 0) {
     stop_i();
@@ -1243,7 +1216,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
     std::memcpy(info_dst.guidPrefix, pos->writerid.guidPrefix,
                 sizeof(GuidPrefix_t));
     ser << info_dst;
-    // Interoperability note: we used to insert "info_reply_" here, but
+    // Interoperability note: we used to insert INFO_REPLY submessage here, but
     // testing indicated that other DDS implementations didn't accept it.
     ser << acknack;
 
@@ -1394,7 +1367,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         std::memcpy(info_dst.guidPrefix, wi->first.guidPrefix,
                     sizeof(GuidPrefix_t));
         ser << info_dst;
-        // Interoperability note: we used to insert "info_reply_" here, but
+        // Interoperability note: we used to insert INFO_REPLY submessage here, but
         // testing indicated that other DDS implementations didn't accept it.
         ser << acknack;
         for (size_t i = 0; i < nack_frags.size(); ++i) {
