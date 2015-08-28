@@ -14,9 +14,10 @@ sub usage {
          "options:\n" .
          "  --list          just show step names (default perform check)\n" .
          "  --remedy        remediate problems where possible\n" .
-         "  --force         keep going where possible\n" .
          "  --remote=name   valid git remote for OpenDDS (default: origin)\n" .
+         "  --branch=name   valid git branch for OpenDDS (default: master)\n" .
          "  --step=#        # of individual step to run (default: all)\n" .
+         "  --force         keep going if possible (requires --step)\n" .
          "  --no-devguide   no devguide issued for this release"
 }
 
@@ -278,6 +279,7 @@ sub remedy_changelog {
   my $settings = shift();
   my $version = $settings->{version};
   my $remote = $settings->{remote};
+  my $branch = $settings->{branch};
   my $prev_tag = find_previous_tag($settings);
   # Update so git log is correct
   open(GITREMOTE, "git remote update $remote|");
@@ -294,7 +296,7 @@ sub remedy_changelog {
 
   open(CHANGELOG, ">$settings->{changelog}") or die "Opening $!";
 
-  open(GITLOG, "git log $prev_tag..$remote/master --name-only |") or die "Opening $!";
+  open(GITLOG, "git log $prev_tag..$remote/$branch --name-only |") or die "Opening $!";
   while (<GITLOG>) {
     chomp;
     if (/^commit .*/) {
@@ -920,145 +922,150 @@ sub ignore_step {
 }
 
 ############################################################################
-my @release_steps = (
-  {
-    title   => 'Verify git status is clean',
-    verify  => sub{verify_git_status_clean(@_, 0)},
-    message => sub{message_git_status_clean(@_)},
-    force   => sub{ignore_step("Verify git status is clean")}
-  },
-  {
-    title   => 'Update VERSION',
+my %steps_run = ();
+
+my %release_step_hash  = (
+  'Update VERSION' => {
     verify  => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
     remedy  => sub{remedy_update_version_file(@_)},
     force   => sub{ignore_step("Update VERSION")}
   },
-  {
-    title   => 'Update Version.h',
+  'Update Version.h' => {
     verify  => sub{verify_update_version_h_file(@_)},
     message => sub{message_update_version_h_file(@_)},
     remedy  => sub{remedy_update_version_h_file(@_)},
     force   => sub{ignore_step("Update Version.h")}
   },
-  {
-    title   => 'Update PROBLEM-REPORT-FORM',
+  'Update PROBLEM-REPORT-FORM' => {
     verify  => sub{verify_update_prf_file(@_)},
     message => sub{message_update_prf_file(@_)},
     remedy  => sub{remedy_update_prf_file(@_)},
     force   => sub{ignore_step('Update PROBLEM-REPORT-FORM')}
   },
-  {
-    title   => 'Verify remote arg',
+  'Verify remote arg' => {
     verify  => sub{verify_git_remote(@_)},
     message => sub{message_git_remote(@_)},
     force   => sub{override_git_remote(@_)},
   },
-  {
-    title   => 'Verify ChangeLog',
+  'Verify ChangeLog' => {
     verify  => sub{verify_changelog(@_)},
     message => sub{message_changelog(@_)},
     remedy  => sub{remedy_changelog(@_)},
     force   => sub{ignore_step('Verify ChangeLog')}
   },
-  {
-    title   => 'Add NEWS Section',
+  'Add NEWS Section' => {
     verify  => sub{verify_news_file_section(@_)},
     message => sub{message_news_file_section(@_)},
     remedy  => sub{remedy_news_file_section(@_)},
     force   => sub{ignore_step('Add NEWS Section')}
   },
-  {
-    title   => 'Update NEWS Section',
+  'Update NEWS Section' => {
     verify  => sub{verify_update_news_file(@_)},
     message => sub{message_update_news_file(@_)},
     force   => sub{ignore_step('Update NEWS Section')}
   },
-  {
-    title   => 'Commit changes to GIT',
+  'Commit changes to GIT' => {
     verify  => sub{verify_git_status_clean(@_, 1)},
     message => sub{message_commit_git_changes(@_)}
   },
-  {
-    title   => 'Create git tag',
+  'Verify changes pushed' => {
+    prereqs => ('Verify remote arg'),
+    verify  => sub{verify_git_changes_pushed(@_, 1)},
+    message => sub{message_git_changes_pushed(@_)}
+  },
+  'Create git tag' => {
     verify  => sub{verify_git_tag(@_)},
     message => sub{message_git_tag(@_)},
     remedy  => sub{remedy_git_tag(@_)}
   },
-  {
-    title   => 'Clone tag',
+  'Clone tag' => {
     verify  => sub{verify_clone_tag(@_)},
     message => sub{message_clone_tag(@_)},
     remedy  => sub{remedy_clone_tag(@_)}
   },
-  {
-    title   => 'Move changelog',
+  'Move changelog' => {
     verify  => sub{verify_move_changelog(@_)},
     message => sub{message_move_changelog(@_)},
     remedy  => sub{remedy_move_changelog(@_)}
   },
-  {
-    title   => 'Create unix release archive',
+  'Create unix release archive' => {
     verify  => sub{verify_tgz_source(@_)},
     message => sub{message_tgz_source(@_)},
     remedy  => sub{remedy_tgz_source(@_)}
   },
-  {
-    title   => 'Create windows release archive',
+  'Create windows release archive' => {
     verify  => sub{verify_zip_source(@_)},
     message => sub{message_zip_source(@_)},
     remedy  => sub{remedy_zip_source(@_)}
   },
-  {
-    title   => 'Generate doxygen',
+  'Generate doxygen' => {
     verify  => sub{verify_gen_doxygen(@_)},
     message => sub{message_gen_doxygen(@_)},
     remedy  => sub{remedy_gen_doxygen(@_)} # $ACE_ROOT/bin/generate_doxygen.pl
   },
-  {
-    title   => 'Create unix doxygen archive',
+  'Create unix doxygen archive' => {
     verify  => sub{verify_tgz_doxygen(@_)},
     message => sub{message_tgz_doxygen(@_)},
     remedy  => sub{remedy_tgz_doxygen(@_)}
   },
-  {
-    title   => 'Create windows doxygen archive',
+  'Create windows doxygen archive' => {
     verify  => sub{verify_zip_doxygen(@_)},
     message => sub{message_zip_doxygen(@_)},
     remedy  => sub{remedy_zip_doxygen(@_)}
   },
-  {
-    title   => 'Create md5 checksum',
+  'Create md5 checksum' => {
     verify  => sub{verify_md5_checksum(@_)},
     message => sub{message_md5_checksum(@_)},
     remedy  => sub{remedy_md5_checksum(@_)}
   },
-  {
-    title   => 'Upload to FTP Site',
+  'Upload to FTP Site' => {
     verify  => sub{verify_ftp_upload(@_)},
     message => sub{message_ftp_upload(@_)}
   },
-  {
-    title   => 'Upload to GitHub',
+  'Upload to GitHub' => {
     verify  => sub{verify_github_upload(@_)},
     message => sub{message_github_upload(@_)}
-   },
-  {
-    title   => 'Update opendds.org front page',
+  },
+  'Update opendds.org front page' => {
     verify  => sub{verify_update_opendds_org_front(@_)},
     message => sub{message_update_opendds_org_front(@_)}
   },
-  {
-    title   => 'Update opendds.org news page',
+  'Update opendds.org news page' => {
     verify  => sub{verify_update_opendds_org_news(@_)},
     message => sub{message_update_opendds_org_news(@_)}
   },
-  {
-    title   => 'Email DDS-Release-Announce list',
+  'Email DDS-Release-Announce list' => {
     verify  => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
     message => sub{remedy_email_dds_release_announce(@_)}
   }
+);
+
+my @ordered_steps = (
+  'Update VERSION',
+  'Update Version.h',
+  'Update PROBLEM-REPORT-FORM',
+  'Verify remote arg',
+  'Verify ChangeLog',
+  'Add NEWS Section',
+  'Update NEWS Section',
+  'Commit changes to GIT',
+  'Verify changes pushed',
+  'Create git tag',
+  'Clone tag',
+  'Move changelog',
+  'Create unix release archive',
+  'Create windows release archive',
+  'Generate doxygen',
+  'Create unix doxygen archive',
+  'Create windows doxygen archive',
+  'Create md5 checksum',
+  'Upload to FTP Site',
+  'Upload to GitHub',
+  'Update opendds.org front page',
+  'Update opendds.org news page',
+  'Email DDS-Release-Announce list',
 );
 
 my @t = gmtime;
@@ -1095,10 +1102,11 @@ my $version = $ARGV[0] || "";
 my %settings = (
   list       => any_arg_is("--list"),
   remedy     => any_arg_is("--remedy"),
-  force      => any_arg_is("--force"),
+  force      => any_arg_is("--force") && numeric_arg_value("--step"),
   nodevguide => any_arg_is("--no-devguide"),
   step       => numeric_arg_value("--step"),
   remote     => string_arg_value("--remote") || "origin",
+  branch     => string_arg_value("--branch") || "master",
   version    => $version,
   git_tag    => "DDS-$version",
   clone_dir  => "../OpenDDS-Release-$version/OpenDDS-$version",
@@ -1125,9 +1133,19 @@ my $half_divider = "-----------------------------------------";
 my $divider = "$half_divider$half_divider";
 
 sub run_step {
-  my ($step_count, $step) = @_;
+  my ($settings, $step_count, $title, $release_step_hash, $steps_run) = @_;
+  my $step = $release_step_hash->{$title};
+
+  if (!$settings->{list}) {
+    if ($step->{prereqs}) {
+      for my $prereq ($step->{prereqs}) {
+        run_step($settings, 'PREREQ', $prereq, $release_step_hash, $steps_run);
+      }
+    }
+  }
+
   # Output the title
-  print "$step_count: $step->{title}\n";
+  print "$step_count: $title\n";
   # Exit if we are just listing
   return if ($settings{list});
   # Run the verification
@@ -1165,11 +1183,12 @@ sub run_step {
         print "  Use --remedy to attempt a fix\n";
       }
       if ($step->{force} && !$settings{force}) {
-        print "  Use --force to force past this step\n";
+        print "  Use --force and --step to force past this step\n";
       }
     }
 
     die unless ($remedied || $forced);
+    $steps_run->{$title} = 1;
     print "$divider\n";
   }
 }
@@ -1192,13 +1211,16 @@ sub validate_version_arg {
 if ($settings{list} || validate_version_arg()) {
   if (my $step_num = $settings{step}) {
     # Run one step
-    run_step($step_num, $release_steps[$step_num - 1]);
+    my $step_name = $ordered_steps[$step_num - 1];
+    run_step(\%settings,
+             $step_num, $step_name, \%release_step_hash, \%steps_run);
   } else {
     my $step_count = 0;
 
-    for my $step (@release_steps) {
+    for my $step_name (@ordered_steps) {
       ++$step_count;
-      run_step($step_count, $step);
+      run_step(\%settings,
+               $step_count, $step_name, \%release_step_hash, \%steps_run);
     }
   }
 } else {
