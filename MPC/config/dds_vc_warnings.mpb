@@ -1,0 +1,29 @@
+// -*- MPC -*-
+
+// This file contains a number of optional features that disable VC
+// warnings regarding various items that specific versions of VC turned 
+// into warnings that were not present in earlier versions. These
+// warnings are disabled by default. To enable them, generate your projects
+// with the feature set to 0.
+
+
+feature(vc_avoid_crt_secure_warnings) {
+  specific(vc8, nmake) {
+    macros += _CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE
+  }
+}
+
+feature(vc_avoid_scl_secure_warnings) {
+  specific(vc14, nmake) {
+    macros += _SCL_SECURE_NO_WARNINGS
+  }
+}
+
+feature(vc_avoid_this_in_initializer_warnings) {
+  specific(vc8) {
+    DisableSpecificWarnings += 4355
+  }
+  specific(nmake) {
+    compile_flags += /wd4355
+  }
+}
