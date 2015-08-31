@@ -382,10 +382,11 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
   int protocol_family = ACE_PROTOCOL_FAMILY_INET;
   int protocol = 0;
   int reuse_addr = 0;
-  if ((ACE_Addr)local_address != ACE_Addr::sap_any)
+  if ((ACE_Addr)local_address != ACE_Addr::sap_any) {
     protocol_family = local_address.get_type();
-  else if (protocol_family == PF_UNSPEC)
+  } else if (protocol_family == PF_UNSPEC) {
     protocol_family = ACE::ipv6_enabled() ? PF_INET6 : PF_INET;
+  }
 
   int one = 1;
   socket.set_handle(ACE_OS::socket(protocol_family,
@@ -415,11 +416,12 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
   }
   ACE_HANDLE handle = socket.get_handle();
   int ipv6_only = 0;
-  if (0 != ACE_OS::setsockopt(handle,
-    IPPROTO_IPV6,
-    IPV6_V6ONLY,
-    (char*)&ipv6_only,
-    sizeof(ipv6_only))) {
+  if (protocol_family == PF_INET6 &&
+      0 != ACE_OS::setsockopt(handle,
+                              IPPROTO_IPV6,
+                              IPV6_V6ONLY,
+                              (char*)&ipv6_only,
+                              sizeof(ipv6_only))) {
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("open_dual_stack_socket: ")

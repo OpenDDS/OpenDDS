@@ -44,7 +44,9 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 
   ACE_INET_Addr local_address;
   if (this->active_) {
-    local_address.set(0, "", 0, remote_address.get_type());
+    if (local_address.get_type() != remote_address.get_type()) {
+      local_address.set(0, "", 0, remote_address.get_type());
+    }
   } else {
     local_address = this->config_->local_address_;
   }

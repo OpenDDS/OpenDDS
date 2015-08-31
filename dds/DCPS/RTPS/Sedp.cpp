@@ -1852,8 +1852,12 @@ Sedp::write_publication_data(
     OpenDDS::DCPS::DiscoveredWriterData dwd;
     ParameterList plist;
     populate_discovered_writer_msg(dwd, rid, lp);
+    bool map = false;
+    if (this->local_address().get_type() != AF_INET) {
+      map = true;
+    }
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(dwd, plist)) {
+    if (ParameterListConverter::to_param_list(dwd, plist, map)) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -1882,8 +1886,12 @@ Sedp::write_subscription_data(
     OpenDDS::DCPS::DiscoveredReaderData drd;
     ParameterList plist;
     populate_discovered_reader_msg(drd, rid, ls);
+    bool map = false;
+    if (this->local_address().get_type() != AF_INET) {
+      map = true;
+    }
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(drd, plist)) {
+    if (ParameterListConverter::to_param_list(drd, plist, map)) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")

@@ -549,8 +549,14 @@ Spdp::SpdpTransport::write_i()
     }
   };
 
+  bool map = false;
+  ACE_INET_Addr tmp;
+  this->unicast_socket_.get_local_addr(tmp);
+  if (tmp.get_type() != AF_INET) {
+    map = true;
+  }
   ParameterList plist;
-  if (ParameterListConverter::to_param_list(pdata, plist) < 0) {
+  if (ParameterListConverter::to_param_list(pdata, plist, map) < 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::SpdpTransport::write() - ")
       ACE_TEXT("failed to convert from SPDPdiscoveredParticipantData ")
