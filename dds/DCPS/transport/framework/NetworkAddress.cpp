@@ -455,7 +455,7 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
   return true;
 #else
   ACE_UNUSED_ARG(socket);
-  ACE_USUSED_ARG(local_address);
+  ACE_UNUSED_ARG(local_address);
 #endif
   return false;
 }
