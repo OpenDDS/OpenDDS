@@ -95,6 +95,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
+    'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -105,12 +106,12 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
-    'ant:s', 'Ant for JBoss (use ANT_HOME)',
+    'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s', 'Wireshark (use WIRESHARK_SRC)',
-    'glib:s', 'GLib for wireshark (use GLIB_ROOT)',
-    'qt:s', 'Qt (use QTDIR)',
+    'glib:s', 'GLib for wireshark (use GLIB_ROOT or system pkg)',
+    'qt:s', 'Qt (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
-    'boost:s', 'Boost (use BOOST_ROOT)',
+    'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
    ],
    ['Minimizing OpenDDS:',
@@ -245,8 +246,11 @@ my $would_download; # can dry-run assume directories that don't exist yet?
 
 sub locate_mpc {
   my $ace_src = shift;
-  if (!$ENV{'MPC_ROOT'} && (-r $ace_src . '/MPC/MPC.ico'
-                            || ($opts{'dry-run'} && $would_download))) {
+  if (defined $opts{'mpc'}) {
+    setEnv('MPC_ROOT', $opts{'mpc'});
+  }
+  elsif (!$ENV{'MPC_ROOT'} && (-r $ace_src . '/MPC/MPC.ico'
+                               || ($opts{'dry-run'} && $would_download))) {
     setEnv('MPC_ROOT', $ace_src . $slash . 'MPC');
   }
   elsif (!$ENV{'MPC_ROOT'}) {
@@ -714,6 +718,26 @@ if (exists $opts{'java'}) {
   setEnv('JAVA_PLATFORM', $opts{'host'});
 }
 
+$opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
+$opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
+
+my %use_system_pkg = map {$_, 1} qw/ant glib qt boost/;
+
+for my $key (keys %optdep) {
+  if (exists $opts{$key} && $opts{$key} eq '') {
+    if ($ENV{$optdep{$key}->[0]}) {
+      $opts{$key} = $ENV{$optdep{$key}->[0]};
+    }
+    elsif ($slash eq '/' && exists $use_system_pkg{$key}) {
+      $opts{$key} = '/usr';
+      print "Defaulting $key to /usr\n" if $opts{'verbose'};
+    }
+    else {
+      die "ERROR: --$key requires a value\n";
+    }
+  }
+}
+
 sub env_from_opt {
   my $key = shift;
   my $e = shift;
@@ -759,8 +783,27 @@ if (exists $opts{'wireshark'} && !exists $opts{'glib'}) {
   die "--glib is required for --wireshark\n";
 }
 
+if ($opts{'glib'}) {
+  if (!-r "$opts{'glib'}/lib/glib-2.0/include/glibconfig.h") {
+    my $pc = `pkg-config --cflags-only-I glib-2.0`;
+    chomp $pc;
+    if ($pc =~ m!-I$opts{'glib'}/([-\w/]+)/glib-2.0/include!) {
+      print "pkg-config found GLIB_LIB_DIR=$1\n" if $opts{'verbose'};
+      setEnv('GLIB_LIB_DIR', $1);
+    }
+    else {
+      print "Failed to locate glibconfig.h using pkg-config ($pc).  Set the " .
+        "environment variable GLIB_LIB_DIR and re-run MPC.\n";
+    }
+  }
+}
+
 if ($opts{'qt-include'}) {
   setEnv('QT4_INCDIR', $opts{'qt-include'});
+}
+elsif (exists $opts{'qt'} && !$ENV{'QT4_INCDIR'} && !$targetEnv{'QT4_INCDIR'}) {
+  setEnv('QT4_INCDIR', $targetEnv{'QTDIR'} . "/include/qt4")
+    if -r "$targetEnv{'QTDIR'}/include/qt4/QtCore/qglobal.h";
 }
 
 if (exists $opts{'qt'} && !-r ($targetEnv{'QT4_INCDIR'} ?
