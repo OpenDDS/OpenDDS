@@ -15,7 +15,7 @@ namespace OpenDDS { namespace RTPS {
 namespace ParameterListConverter {
   OpenDDS_Rtps_Export
   int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
-                    ParameterList& param_list, bool map = 0 /*map IPV4 to IPV6 addr*/);
+                    ParameterList& param_list);
   OpenDDS_Rtps_Export
   int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
                     ParameterList& param_list, bool map = 0 /*map IPV4 to IPV6 addr*/);

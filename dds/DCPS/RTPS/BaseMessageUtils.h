@@ -128,12 +128,10 @@ locator_to_address(ACE_INET_Addr& dest,
                    const OpenDDS::DCPS::Locator_t& locator,
                    bool map /*map IPV4 to IPV6 addr*/)
 {
-#if !defined (ACE_HAS_IPV6) && !defined (IPV6_V6ONLY)
-  ACE_UNUSED_ARG(map);
-#endif
   switch (locator.kind) {
 #ifdef ACE_HAS_IPV6
   case LOCATOR_KIND_UDPv6:
+    ACE_UNUSED_ARG(map);
     dest.set_type(AF_INET6);
     if (dest.set_address(reinterpret_cast<const char*>(locator.address),
                          16, 0 /*encode*/) == -1) {
@@ -144,6 +142,9 @@ locator_to_address(ACE_INET_Addr& dest,
     break;
 #endif
   case LOCATOR_KIND_UDPv4:
+#if !defined (ACE_HAS_IPV6) && !defined (IPV6_V6ONLY)
+    ACE_UNUSED_ARG(map);
+#endif
     dest.set_type(AF_INET);
     if (dest.set_address(reinterpret_cast<const char*>(locator.address)
                          + 12, 4, 0 /*network order*/
@@ -157,6 +158,7 @@ locator_to_address(ACE_INET_Addr& dest,
     return 0;
     break;
   default:
+    ACE_UNUSED_ARG(map);
     return -1;  // Unknown kind
   }
 

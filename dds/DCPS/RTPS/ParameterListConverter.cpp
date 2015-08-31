@@ -266,8 +266,7 @@ namespace {
 
 namespace ParameterListConverter {
 int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
-                  ParameterList& param_list,
-                  bool map)
+                  ParameterList& param_list)
 {
   // Parameterize ParticipantBuiltinTopicData
   // Ignore participant builtin topic key
