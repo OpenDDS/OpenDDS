@@ -1,55 +1,57 @@
 Version 3.7 of OpenDDS.
 
 Additions:
-- Support for FACE Transport Services API v2.1, FACE safety base and
-  FACE safety extended profiles.
-- Support for RTPS 2.2.
+- Implements FACE Transport Services API v2.1, FACE safety base and
+  FACE safety extended profiles (Future Airborne Capability Environment).
+- Implements RTPS 2.2.
 - Support allocations from memory pool in safety base builds.  Introduced
   standard library containers and strings, as well as TAO sequences that 
   allocate from this pool.
-- Support IDL fixed type inside of DCPS_DATA_TYPE.
 - Updated opendds_idl for FACE support, moving some of the code-generation
-  from tao_idl to opendds_idl.
+  from tao_idl to opendds_idl when targeting FACE TS.
+- Support IDL fixed type inside of DCPS_DATA_TYPE (used with FACE TS).
 - Type-specific DataWriterImpl and DataReaderImpl are now templates.  Code
   generation now introduces a typedef of these.
-- Content filtering now supports modulus (MOD) operator.
-- Support for static discovery.
+- Content filtering now supports modulus (MOD) operator as an extension.
+- Added a static (configuration-based) discovery mechanism.
 - Support non-default liveliness QOS in rtps_udp transport.
 - Support wait_for_acknowledgements in rtps_udp transport.
 - Support command line option -DCPSRTISerialization when integrating with RTI
   DDS using RTPS, to account for a different serialization algorithm.
-- Support IDL fixed type inside of DCPS_DATA_TYPE.
-- Configure script handles cross-platform builds.
-- Support for new Visual Studio builds (vc11, vc12, and vc14).
-- Support for clang builds on OSX.
-- Removed support for old GCC compilers.
+- Configure script handles some cross-compile builds and safety profile.
+- Support for new Visual Studio compilers (vc11, vc12, and vc14).
+- Support for clang builds on Mac OS X.
+- Removed support for old GCC compilers (<= 3.3).
 - opendds_idl command-line option -Gitl is a replacement for -Gws.  Wireshark
   dissector now reads ITL files, rather than .ini files.
 
 Fixes:
 - Fixed many tests for minimum profile builds.
-- Enforced correct behavior of a reliable data writer when history is KEEP_LAST 1.
+- Enforced correct behavior of a reliable data writer when history QoS
+  is set to KEEP_LAST with depth=1.
 - opendds_idl can now be specified in user_macros.GNU instead of always
-  assuming it is in $DDS_ROOT/bin.
-- Fixed initial ipv6 support in windows builds.
+  assuming it is in $DDS_ROOT/bin (for -type gnuace builds).
+- Fixed initial IPv6 support in windows builds.
 - Fixed disassociate handling of local entities on loopback interface.
 - Corrected wait_for_acknowedgements for non-reliable writers to return
   success immediately.
-- Allow disassociating readegrs to finish processing messages from active writer
+- Allow disassociating readers to finish processing messages from active writer
   before removing.
 - Remove TcpDataLink from DataLinkSet when connect() fails.  Previously, the 
   datalink would remain and would be seen as a fully-connected datalink by new
   associations.
-- DCPSTransportDebugLevel 1 messages now association-oriented.
+- DCPSTransportDebugLevel 1 messages are now association-oriented.
 - Fixed durable resend out-of-order handling for rtps_udp transport.
 - Fixed handling of acknowledgements during shutdown of rtps_udp data link.
 - RTPS Discovery now ignores 'RTPX' messages seen during RTI integration.
 - Dissection of unions in wireshark dissector (requires ITL).
+- Corrected reference counting scheme for Recorder and Replayer objects:
+  the reference-counted handle types changed from _rch to _var.
 
 Notes:
 - OCI no longer builds with vc71, vc8, and GCC 4.1.1.  If you require support
   of these older platforms contact sales@ociweb.com.
-- The project is now hosted at github.com/objectcomputing/OpenDDS
+- The project repository is now at https://github.com/objectcomputing/OpenDDS
 
 
 Version 3.6 of OpenDDS.
