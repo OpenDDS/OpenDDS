@@ -128,6 +128,9 @@ locator_to_address(ACE_INET_Addr& dest,
                    const OpenDDS::DCPS::Locator_t& locator,
                    bool map /*map IPV4 to IPV6 addr*/)
 {
+#if !defined (ACE_HAS_IPV6) && !defined (IPV6_V6ONLY)
+  ACE_UNUSED_ARG(map);
+#endif
   switch (locator.kind) {
 #ifdef ACE_HAS_IPV6
   case LOCATOR_KIND_UDPv6:
