@@ -93,7 +93,7 @@ Writer::svc ()
         break;
       case 3:
         message.e = other1;
-        message.u.u_f (3.14);
+        message.u.u_f (3.14f);
         break;
       }
 

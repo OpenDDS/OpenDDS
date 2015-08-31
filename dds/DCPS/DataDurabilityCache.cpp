@@ -399,7 +399,7 @@ void OpenDDS::DCPS::DataDurabilityCache::init()
 
                 if (is.bad()) break;
 
-                current->wr_ptr(is.gcount());
+                current->wr_ptr((size_t)is.gcount());
 
                 if (current->space() == 0) {
                   ACE_Message_Block * old = current;
