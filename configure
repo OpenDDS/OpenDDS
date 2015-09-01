@@ -722,6 +722,7 @@ $opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
 $opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 
 my %use_system_pkg = map {$_, 1} qw/ant glib qt boost/;
+my %use_win_default = ('boost' => 'c:\\Boost');
 
 for my $key (keys %optdep) {
   if (exists $opts{$key} && $opts{$key} eq '') {
@@ -731,6 +732,10 @@ for my $key (keys %optdep) {
     elsif ($slash eq '/' && exists $use_system_pkg{$key}) {
       $opts{$key} = '/usr';
       print "Defaulting $key to /usr\n" if $opts{'verbose'};
+    }
+    elsif ($slash ne '/' && exists $use_win_default{$key}) {
+      $opts{$key} = $use_win_default{$key};
+      print "Defaulting $key to $use_win_default{$key}\n" if $opts{'verbose'};
     }
     else {
       die "ERROR: --$key requires a value\n";
@@ -744,6 +749,20 @@ sub env_from_opt {
   my $notdir = shift;
   if ($opts{$key}) {
     setEnv($e, $opts{$key}, $notdir);
+  }
+}
+
+if (exists $opts{'boost'} && !exists $opts{'boost-version'}) {
+  if (!-r $opts{'boost'} . '/' . $optdep{'boost'}->[1]
+      && -d $opts{'boost'} . '/include') {
+    opendir DIR, $opts{'boost'} . '/include';
+    my @dirs = sort {$b cmp $a} grep {/boost-/} readdir DIR;
+    closedir DIR;
+    if (scalar @dirs && -r $opts{'boost'} . '/include/' . $dirs[0]
+        . '/boost/version.hpp') {
+      $opts{'boost-version'} = $dirs[0];
+      print "Found boost-version = $dirs[0]\n" if $opts{'verbose'};
+    }
   }
 }
 
@@ -1032,8 +1051,9 @@ sub write_environment {
 
   my $SE = backup_and_open($dir . '/setenv.' . $specific{'ext'});
 
-  print $SE "$specific{'comment'} OpenDDS configure script: $0 @ARGS\n";
-  print $MK "$specific{'comment'} OpenDDS configure script: $0 @ARGS\n" if $MK;
+  my $args_ = join(' ', map {/ / ? ('"' . $_ . '"') : $_} @ARGS);
+  print $SE "$specific{'comment'} OpenDDS configure script: $0 $args_\n";
+  print $MK "$specific{'comment'} OpenDDS configure script: $0 $args_\n" if $MK;
 
   for my $key (keys %buildEnv) {
     if ($key ne 'build') {
