@@ -312,6 +312,7 @@ sub remedy_changelog {
   my $author = 0;
   my $date = 0;
   my $comment = "";
+  my $commit = "";
   my $file_list = "";
   my $changed = 0;
 
@@ -322,10 +323,11 @@ sub remedy_changelog {
   open(GITLOG, "git log $prev_tag..$remote --name-only |") or die "Opening $!";
   while (<GITLOG>) {
     chomp;
-    if (/^commit .*/) {
+    if (/^commit /) {
       # print out previous
       if ($author) {
         print CHANGELOG $date . "  " .  $author . "\n";
+        print CHANGELOG "$commit\n";
         if ($file_list) {
           print CHANGELOG "\n" . $file_list;
         }
@@ -334,6 +336,7 @@ sub remedy_changelog {
         $file_list = "";
         $changed = 1;
       }
+      $commit = $_;
     } elsif (/^Merge: *(.*)/) {
       # Ignore
     } elsif (/^Author: *(.*)/) {
@@ -343,7 +346,7 @@ sub remedy_changelog {
     } elsif (/^ +(.*) */) {
       $comment .= "$1\n";
     } elsif (/^([^ ]+.*) *$/) {
-      $file_list .= "        * $_\n";
+      $file_list .= "        * $_:\n";
     }
   }
   # print out final
