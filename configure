@@ -95,6 +95,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
+    'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -105,12 +106,12 @@ my @specs = # Array of array-refs, each inner array is an option group which
    ['Optional dependencies for OpenDDS:',
     'java:s', 'Java development kit (use JAVA_HOME)',
     'jboss:s', 'JBoss application server (use JBOSS_HOME)',
-    'ant:s', 'Ant for JBoss (use ANT_HOME)',
+    'ant:s', 'Ant for JBoss (use ANT_HOME or system pkg)',
     'wireshark:s', 'Wireshark (use WIRESHARK_SRC)',
-    'glib:s', 'GLib for wireshark (use GLIB_ROOT)',
-    'qt:s', 'Qt (use QTDIR)',
+    'glib:s', 'GLib for wireshark (use GLIB_ROOT or system pkg)',
+    'qt:s', 'Qt (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT4_INCDIR or QTDIR/include)',
-    'boost:s', 'Boost (use BOOST_ROOT)',
+    'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
     'boost-version:s', 'Boost version (only if needed to find headers)',
    ],
    ['Minimizing OpenDDS:',
@@ -158,7 +159,11 @@ Boolean options can take the form "--opt" or "--no-opt", the more commonly
 needed one (the one that changes the default behavior) is shown below.
 Options that require arguments are shown as "--opt=VAL"  Options with optional
 arguments are shown as "--opt[=VAL]".  Options that can be repeated with
-cumulative effect are shown with a trailing "...".
+cumulative effect are shown with a trailing "...".  Some third-party
+optional dependencies can be automatically located if they are installed in the
+expected locations (see entries below marked with "system pkg").  In those
+cases, specify the option as --opt without an = to enable the corresponding
+feature in OpenDDS and use the default installation location.
 EOT
   iterate(sub {
             my ($group, $opt, $descr, $optkey) = @_;
@@ -168,8 +173,7 @@ EOT
             }
             $optkey .= '=VAL' if $opt =~ /=s/;
             $optkey .= '[=VAL]' if $opt =~ /:s/;
-            $optkey = "[no-]$optkey"
-              if ($opt =~ /!$/ && $descr =~ / \(yes\)$/);
+            $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)$/);
             $optkey .= '...' if $opt =~ /s\@$/;
             print "--$optkey" . ' ' x (27 - length $optkey) . " $descr\n";
           }
@@ -202,8 +206,6 @@ sub parseArgs {
 }
 
 my $cross_compile = 0;
-my $needmpc = 0;
-
 my %opts = %{parseArgs()};
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
@@ -247,8 +249,11 @@ my $would_download; # can dry-run assume directories that don't exist yet?
 
 sub locate_mpc {
   my $ace_src = shift;
-  if (!$ENV{'MPC_ROOT'} && (-r $ace_src . '/MPC/MPC.ico'
-                            || ($opts{'dry-run'} && $would_download))) {
+  if (defined $opts{'mpc'}) {
+    setEnv('MPC_ROOT', $opts{'mpc'});
+  }
+  elsif (!$ENV{'MPC_ROOT'} && (-r $ace_src . '/MPC/MPC.ico'
+                               || ($opts{'dry-run'} && $would_download))) {
     setEnv('MPC_ROOT', $ace_src . $slash . 'MPC');
   }
   elsif (!$ENV{'MPC_ROOT'}) {
@@ -286,15 +291,8 @@ if (!exists $platforminfo{$opts{'target'}}) {
 addCurLibPathRef(\%hostEnv);
 addCurLibPathRef(\%targetEnv);
 
-if ($opts{'safety-profile'}) {
-  print "configuring safety profile build\n" if $opts{'verbose'};
-  $tao_version = "face-safety-22a";
-  $cross_compile = 1;
-}
-
-if ($opts{'host'} ne $opts{'target'} || $cross_compile) {
+if ($opts{'host'} ne $opts{'target'} || $opts{'safety-profile'}) {
   print "Setting cross-compile build\n" if $opts{'verbose'};
-  $needmpc = 1;
   $cross_compile = 1;
 }
 
@@ -626,7 +624,7 @@ sub write_config_h {
   $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
   print $CFGH "#include \"ace/config-$cfg.h\"\n";
   if (defined $opts{'no-opendds-safety-profile'}) {
-    print $CFGH "#define ACE_FACE_SAFETY_BASE\n";
+    print $CFGH "#define ACE_FACE_SAFETY_EXTENDED\n";
   }
 
   close $CFGH;
@@ -723,12 +721,51 @@ if (exists $opts{'java'}) {
   setEnv('JAVA_PLATFORM', $opts{'host'});
 }
 
+$opts{'qt'} = '' if exists $opts{'qt-include'} && !exists $opts{'qt'};
+$opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
+
+my %use_system_pkg = map {$_, 1} qw/ant glib qt boost/;
+my %use_win_default = ('boost' => 'c:\\Boost');
+
+for my $key (keys %optdep) {
+  if (exists $opts{$key} && $opts{$key} eq '') {
+    if ($ENV{$optdep{$key}->[0]}) {
+      $opts{$key} = $ENV{$optdep{$key}->[0]};
+    }
+    elsif ($slash eq '/' && exists $use_system_pkg{$key}) {
+      $opts{$key} = '/usr';
+      print "Defaulting $key to /usr\n" if $opts{'verbose'};
+    }
+    elsif ($slash ne '/' && exists $use_win_default{$key}) {
+      $opts{$key} = $use_win_default{$key};
+      print "Defaulting $key to $use_win_default{$key}\n" if $opts{'verbose'};
+    }
+    else {
+      die "ERROR: --$key requires a value\n";
+    }
+  }
+}
+
 sub env_from_opt {
   my $key = shift;
   my $e = shift;
   my $notdir = shift;
   if ($opts{$key}) {
     setEnv($e, $opts{$key}, $notdir);
+  }
+}
+
+if (exists $opts{'boost'} && !exists $opts{'boost-version'}) {
+  if (!-r $opts{'boost'} . '/' . $optdep{'boost'}->[1]
+      && -d $opts{'boost'} . '/include') {
+    opendir DIR, $opts{'boost'} . '/include';
+    my @dirs = sort {$b cmp $a} grep {/boost-/} readdir DIR;
+    closedir DIR;
+    if (scalar @dirs && -r $opts{'boost'} . '/include/' . $dirs[0]
+        . '/boost/version.hpp') {
+      $opts{'boost-version'} = $dirs[0];
+      print "Found boost-version = $dirs[0]\n" if $opts{'verbose'};
+    }
   }
 }
 
@@ -768,8 +805,27 @@ if (exists $opts{'wireshark'} && !exists $opts{'glib'}) {
   die "--glib is required for --wireshark\n";
 }
 
+if ($opts{'glib'}) {
+  if (!-r "$opts{'glib'}/lib/glib-2.0/include/glibconfig.h") {
+    my $pc = `pkg-config --cflags-only-I glib-2.0`;
+    chomp $pc;
+    if ($pc =~ m!-I$opts{'glib'}/([-\w/]+)/glib-2.0/include!) {
+      print "pkg-config found GLIB_LIB_DIR=$1\n" if $opts{'verbose'};
+      setEnv('GLIB_LIB_DIR', $1);
+    }
+    else {
+      print "Failed to locate glibconfig.h using pkg-config ($pc).  Set the " .
+        "environment variable GLIB_LIB_DIR and re-run MPC.\n";
+    }
+  }
+}
+
 if ($opts{'qt-include'}) {
   setEnv('QT4_INCDIR', $opts{'qt-include'});
+}
+elsif (exists $opts{'qt'} && !$ENV{'QT4_INCDIR'} && !$targetEnv{'QT4_INCDIR'}) {
+  setEnv('QT4_INCDIR', $targetEnv{'QTDIR'} . "/include/qt4")
+    if -r "$targetEnv{'QTDIR'}/include/qt4/QtCore/qglobal.h";
 }
 
 if (exists $opts{'qt'} && !-r ($targetEnv{'QT4_INCDIR'} ?
@@ -871,9 +927,7 @@ sub generate_workspace {
     }
   }
 
-  $needmpc ||= (scalar @features ? 1 : 0);
-  # Create user macros
-  if ($needmpc && $slash eq '/') {
+  if ($slash eq '/') {
     if ($buildEnv->{'build'} eq 'target') {
       print "Writing $buildEnv->{'DDS_ROOT'}/user_macros.GNU\n"
         if $opts{'verbose'};
@@ -893,8 +947,7 @@ EOT
     }
   }
 
-  my $tests = 1;
-  ($needmpc, $tests) = (1, 0) if (exists $opts{'tests'} && !$opts{'tests'});
+  my $tests = !exists $opts{'tests'} || $opts{'tests'};
 
   if ($opts{'safety-profile'} && $buildEnv->{'build'} eq 'target') {
     $buildtao = 0; # TAO will be built seperately
@@ -904,103 +957,88 @@ EOT
     $buildtao = 1 if !-x "$buildEnv->{'ACE_ROOT'}/bin/tao_idl$exeext";
   }
 
-  if ($slash eq '/' && ($needmpc || !-r 'GNUmakefile')) {
-    $needmpc = 'gnuace';
+  my $mpctype = ($slash eq '/') ? 'gnuace' : $opts{'compiler_version'};
+  locate_mpc($ace_src);
+
+  # Append to default.features
+  if (@features && ($buildEnv->{'build'} eq 'target')) {
+    my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
+      "/default.features";
+    my $DF = $wrote_df
+      ? ($opts{'dry-run'} ? File::Temp->new() : new FileHandle(">>$df_file"))
+      : backup_and_open($df_file);
+    for my $f (@features) {
+      print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
+    }
+    $DF->close;
+    if ($opts{'verbose'}) {
+      print '' . ($wrote_df ? 'Appended to' : 'Wrote') .
+        " $buildEnv->{'ACE_ROOT'}/.../default.features\n";
+    }
+    dump_and_unlink($DF) if $opts{'dry-run'};
   }
-  elsif ($slash ne '/' && ($needmpc || !-r 'DDS.sln')) {
-    $needmpc = $opts{'compiler_version'};
+
+  my $ws = 'DDS.mwc';
+  if (-r $buildEnv->{'DDS_ROOT'} . "/host_tools.mwc") {
+    $ws = 'host_tools.mwc';
+  }
+  elsif (!$tests && $buildtao) {
+    $ws = 'DDS_TAO.mwc';
+  }
+  elsif (!$tests && !$buildtao) {
+    $ws = 'DDS_no_tests.mwc';
+  }
+  elsif ($buildtao) {
+    $ws = 'DDS_TAO_all.mwc';
   }
 
-  if ($needmpc) {
-    locate_mpc($ace_src);
+  if ($tao_maj == 2 && $ws =~ /TAO/) {
+    $ws =~ s/TAO/TAOv2/;
+  }
 
-    # Append to default.features
-    if (@features && ($buildEnv->{'build'} eq 'target')) {
-      my $df_file = "$buildEnv->{'ACE_ROOT'}/bin/MakeProjectCreator/config" .
-       "/default.features";
-      my $DF = $wrote_df
-        ? ($opts{'dry-run'} ? File::Temp->new()
-                            : new FileHandle(">>$df_file"))
-        : backup_and_open($df_file);
-      for my $f (@features) {
-        print $DF ($f =~ /=/ ? $f : "$f=1"), "\n";
-      }
-      $DF->close;
-      if ($opts{'verbose'}) {
-        print '' . ($wrote_df ? 'Appended to' : 'Wrote') .
-          " $buildEnv->{'ACE_ROOT'}/.../default.features\n";
-      }
-      dump_and_unlink($DF) if $opts{'dry-run'};
-    }
+  my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
 
-    my $ws = 'DDS.mwc';
-    if (-r $buildEnv->{'DDS_ROOT'} . "/host_tools.mwc") {
-      $ws = 'host_tools.mwc';
-    }
-    elsif (!$tests && $buildtao) {
-      $ws = 'DDS_TAO.mwc';
-    }
-    elsif (!$tests && !$buildtao) {
-      $ws = 'DDS_no_tests.mwc';
-    }
-    elsif ($buildtao) {
-      $ws = 'DDS_TAO_all.mwc';
-    }
+  # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
+  # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
+  # to be on the include path for .mpb files.
+  for my $var ('CIAO_ROOT', 'DANCE_ROOT') {
+    $buildEnv->{$var} = 'unused' unless defined $buildEnv->{$var};
+  }
 
-    if ($tao_maj == 2 && $ws =~ /TAO/) {
-      $ws =~ s/TAO/TAOv2/;
+  my %savedEnv = %ENV;
+  print "ENV: saving current environment\n" if $opts{'verbose'};
+  mergeToEnv($buildEnv);
+
+  my $mwcargs = "-type $mpctype $buildEnv->{'DDS_ROOT'}$slash$ws $static";
+  $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
+  print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
+  print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
+                                     'project files'), ".\n";
+  if (!$opts{'dry-run'}) {
+    if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
+      die "Error from MPC, stopped";
     }
+  }
 
-    my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';
-
-    # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
-    # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
-    # to be on the include path for .mpb files.
-    for my $var ('CIAO_ROOT', 'DANCE_ROOT') {
-      $buildEnv->{$var} = 'unused' unless defined $buildEnv->{$var};
-    }
-
-    my %savedEnv = %ENV;
-    print "ENV: saving current environment\n" if $opts{'verbose'};
-    mergeToEnv($buildEnv);
-
-    print 'Running MPC to generate ', ($needmpc eq 'gnuace' ? 'makefiles' :
-                                       'project files'), ".\n";
-    my $mwcargs = "-type $needmpc $buildEnv->{'DDS_ROOT'}$slash$ws $static";
+  # If this is a target safety profile build
+  if (defined $opts{'no-opendds-safety-profile'}) {
+    # Generate ACE workspace separately, to exclude TAO
+    my $mwcargs = "-type $mpctype $static " . $buildEnv->{'ACE_ROOT'}. "/ace";
     $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
-    print "OpenDDS mwc command line: $mwcargs\n" if $opts{'verbose'};
+    print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
 
     if (!$opts{'dry-run'}) {
       if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
         die "Error from MPC, stopped";
       }
     }
-
-    # If this is a target safety profile build
-    if (defined $opts{'no-opendds-safety-profile'}) {
-      # Generate ACE workspace separately, to exclude TAO
-      my $mwcargs = "-type $needmpc $static " . $buildEnv->{'ACE_ROOT'}. "/ace";
-      $mwcargs .= ' ' . $opts{'mpcopts'} if defined $opts{'mpcopts'};
-      print "ACE mwc command line: $mwcargs\n" if $opts{'verbose'};
-
-      if (!$opts{'dry-run'}) {
-        if (system("perl $ENV{'ACE_ROOT'}/bin/mwc.pl $mwcargs") != 0) {
-          die "Error from MPC, stopped";
-        }
-      }
-    }
-
-    %ENV = %savedEnv;
-    print "ENV: restoring previous environment\n" if $opts{'verbose'};
-
-    $ws =~ s/\.mwc$/.sln/;
-    $opts{'solution_file'} = $ws;
   }
-  elsif ($opts{'compiler_version'}) { #win32, using DDS release package projects
-    $opts{'solution_file'} = 'DDS' . ($opts{'static'} ? '_Static' : '') .
-      ($opts{'compiler_version'} ne 'vc71' ? "_$opts{'compiler_version'}" : '').
-        '.sln';
-  }
+
+  %ENV = %savedEnv;
+  print "ENV: restoring previous environment\n" if $opts{'verbose'};
+
+  $ws =~ s/\.mwc$/.sln/;
+  $opts{'solution_file'} = $ws;
 }
 
 sub write_environment {
@@ -1016,8 +1054,9 @@ sub write_environment {
 
   my $SE = backup_and_open($dir . '/setenv.' . $specific{'ext'});
 
-  print $SE "$specific{'comment'} OpenDDS configure script: $0 @ARGS\n";
-  print $MK "$specific{'comment'} OpenDDS configure script: $0 @ARGS\n" if $MK;
+  my $args_ = join(' ', map {/ / ? ('"' . $_ . '"') : $_} @ARGS);
+  print $SE "$specific{'comment'} OpenDDS configure script: $0 $args_\n";
+  print $MK "$specific{'comment'} OpenDDS configure script: $0 $args_\n" if $MK;
 
   for my $key (keys %buildEnv) {
     if ($key ne 'build') {

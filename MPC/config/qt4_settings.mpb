@@ -1,0 +1,6 @@
+project: qt4_gui {
+  specific(prop:microsoft) {
+    Debug::QT_CFG=d4
+    Release::QT_CFG=4
+  }
+}

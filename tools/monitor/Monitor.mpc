@@ -1,5 +1,4 @@
-
-project(*App) : dcpsexe, dcps_tcp, dcps_monitor, qt4_gui {
+project(*App): dcpsexe, dcps_tcp, dcps_monitor, qt4_settings {
   exename = monitor
   exeout  = $(DDS_ROOT)/bin
   requires += built_in_topics
