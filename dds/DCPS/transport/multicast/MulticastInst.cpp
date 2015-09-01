@@ -167,7 +167,7 @@ MulticastInst::dump_to_str()
   os << formatNameForDump("nak_delay_intervals") << this->nak_delay_intervals_ << std::endl;
   os << formatNameForDump("nak_max")             << this->nak_max_ << std::endl;
   os << formatNameForDump("nak_timeout")         << this->nak_timeout_.msec() << std::endl;
-  os << formatNameForDump("ttl")                 << this->ttl_ << std::endl;
+  os << formatNameForDump("ttl")                 << int(this->ttl_) << std::endl;
   os << formatNameForDump("rcv_buffer_size");
 
   if (this->rcv_buffer_size_ == 0) {

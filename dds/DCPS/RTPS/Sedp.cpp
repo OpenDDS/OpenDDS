@@ -292,18 +292,15 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
     typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
     AddrVector addrs;
     OpenDDS::DCPS::get_interface_addrs(addrs);
-    AddrVector::iterator adr_it = addrs.begin();
-    while (adr_it != addrs.end()) {
+    for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
       idx = locators.length();
       locators.length(idx + 1);
       locators[idx].kind = address_to_kind(*adr_it);
       locators[idx].port = rtps_inst->local_address_.get_port_number();
       RTPS::address_to_bytes(locators[idx].address,
         *adr_it);
-      ++adr_it;
     }
-  }
-  else {
+  } else {
     idx = locators.length();
     locators.length(idx + 1);
     locators[idx].kind = address_to_kind(rtps_inst->local_address_);

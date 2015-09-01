@@ -61,9 +61,8 @@ Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
 
-  { // Append metatraffic unicast locator
-    sedp_.unicast_locators(sedp_unicast_);
-  }
+  // Append metatraffic unicast locator
+  sedp_.unicast_locators(sedp_unicast_);
 
   if (disco->sedp_multicast()) { // Append metatraffic multicast locator
     const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
@@ -778,9 +777,9 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, outer_->disco_->ttl())) {
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
-               ACE_TEXT("failed to set TTL value to %C ")
-               ACE_TEXT("for port:%hd\n"),
-               outer_->disco_->ttl(), uni_port));
+               ACE_TEXT("failed to set TTL value to %d ")
+               ACE_TEXT("for port:%hd %p\n"),
+               outer_->disco_->ttl(), uni_port, ACE_TEXT("OpenDDS::DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }
   return true;

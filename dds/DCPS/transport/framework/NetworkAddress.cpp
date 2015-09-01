@@ -204,8 +204,7 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
       ACE_TEXT("(%P|%t) ERROR: Unable to probe network. %p\n"),
       ACE_TEXT("ACE::get_ip_interfaces")));
 
-  }
-  else {
+  } else {
     size_t lo_cnt = 0;  // Loopback interface count
 #if defined (ACE_HAS_IPV6)
     size_t ipv4_cnt = 0;
@@ -222,16 +221,14 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
       // Scan for IPv4 interfaces since these should not be included
       // when IPv6-only is selected.
       if (if_addrs[j].get_type() != AF_INET6 ||
-        if_addrs[j].is_ipv4_mapped_ipv6()) {
+          if_addrs[j].is_ipv4_mapped_ipv6()) {
         ++ipv4_cnt;
         if (if_addrs[j].is_loopback())
           ++ipv4_lo_cnt;  // keep track of IPv4 loopback ifs
-      }
-      else if (!if_addrs[j].is_linklocal() &&
-        !if_addrs[j].is_loopback()) {
+      } else if (!if_addrs[j].is_linklocal() &&
+                 !if_addrs[j].is_loopback()) {
         ipv6_non_ll = true; // we have at least 1 non-local IPv6 if
-      }
-      else if (if_addrs[j].is_linklocal()) {
+      } else if (if_addrs[j].is_linklocal()) {
         ++ipv6_ll;  // count link local addrs to exclude them afterwards
       }
 #endif /* ACE_HAS_IPV6 */
@@ -247,8 +244,7 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
     bool ignore_lo;
     if (ipv4_only) {
       ignore_lo = ipv4_cnt != ipv4_lo_cnt;
-    }
-    else {
+    } else {
       ignore_lo = if_cnt != lo_cnt;
     }
 
@@ -291,15 +287,14 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
 
     for (size_t i = 0; i < if_cnt; ++i) {
       // Ignore any non-IPv4 interfaces when so required.
-      if (ipv4_only &&
-        (if_addrs[i].get_type() != AF_INET))
+      if (ipv4_only && (if_addrs[i].get_type() != AF_INET))
         continue;
 #if defined (ACE_HAS_IPV6)
       // Ignore any loopback interface if there are other
       // non-loopback interfaces.
       if (ignore_lo &&
-        if_addrs[i].is_loopback() &&
-        (ipv4_only ||
+          if_addrs[i].is_loopback() &&
+          (ipv4_only ||
           ipv6_non_ll ||
           if_addrs[i].get_type() != AF_INET6))
         continue;
@@ -310,8 +305,7 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
 #else /* ACE_HAS_IPV6 */
       // Ignore any loopback interface if there are other
       // non-loopback interfaces.
-      if (ignore_lo &&
-        if_addrs[i].is_loopback())
+      if (ignore_lo && if_addrs[i].is_loopback())
         continue;
 #endif /* !ACE_HAS_IPV6 */
 
@@ -341,8 +335,8 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
 #if defined (ACE_HAS_IPV6)
   ACE_INET_Addr local_addr;
   if (0 != socket.get_local_addr(local_addr)) {
-  VDBG((LM_WARNING, "(%P|%t) set_socket_ttl: "
-      "ACE_SOCK_Dgram::get_local_addr %p\n", ACE_TEXT("")));
+    VDBG((LM_WARNING, "(%P|%t) set_socket_ttl: "
+          "ACE_SOCK_Dgram::get_local_addr %p\n", ACE_TEXT("")));
   }
   if (local_addr.get_type () == AF_INET6) {
     if (0 != ACE_OS::setsockopt(handle,
@@ -399,14 +393,12 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
       ACE_TEXT("open_dual_stack_socket: ")
       ACE_TEXT("failed to set socket handle\n")),
       false);
-  }
-  else if (protocol_family != PF_UNIX
-    && reuse_addr
-    && socket.set_option(SOL_SOCKET,
-      SO_REUSEADDR,
-      &one,
-      sizeof one) == -1)
-  {
+  } else if (protocol_family != PF_UNIX &&
+             reuse_addr &&
+             socket.set_option(SOL_SOCKET,
+                               SO_REUSEADDR,
+                               &one,
+                               sizeof one) == -1) {
     socket.close();
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
@@ -440,11 +432,11 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
         protocol_family) == -1)
         error = true;
     }
-  }
-  else if (ACE_OS::bind(socket.get_handle(),
-    reinterpret_cast<sockaddr *> (local_address.get_addr()),
-    local_address.get_size()) == -1)
+  } else if (ACE_OS::bind(socket.get_handle(),
+                          reinterpret_cast<sockaddr *> (local_address.get_addr()),
+                          local_address.get_size()) == -1) {
     error = true;
+  }
 
   if (error) {
     socket.close();
@@ -456,8 +448,8 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
 #else
   ACE_UNUSED_ARG(socket);
   ACE_UNUSED_ARG(local_address);
-#endif
   return false;
+#endif
 }
 }
 }
