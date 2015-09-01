@@ -376,7 +376,7 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
   int protocol_family = ACE_PROTOCOL_FAMILY_INET;
   int protocol = 0;
   int reuse_addr = 0;
-  if ((ACE_Addr)local_address != ACE_Addr::sap_any) {
+  if (static_cast<ACE_Addr>(local_address) != ACE_Addr::sap_any) {
     protocol_family = local_address.get_type();
   } else if (protocol_family == PF_UNSPEC) {
     protocol_family = ACE::ipv6_enabled() ? PF_INET6 : PF_INET;
@@ -423,10 +423,8 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
   }
   bool error = false;
 
-  if ((ACE_Addr)local_address == ACE_Addr::sap_any)
-  {
-    if (protocol_family == PF_INET || protocol_family == PF_INET6)
-    {
+  if (static_cast<ACE_Addr>(local_address) == ACE_Addr::sap_any) {
+    if (protocol_family == PF_INET || protocol_family == PF_INET6) {
       if (ACE::bind_port(socket.get_handle(),
         INADDR_ANY,
         protocol_family) == -1)
