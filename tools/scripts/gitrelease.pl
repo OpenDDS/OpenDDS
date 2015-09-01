@@ -310,7 +310,7 @@ sub remedy_changelog {
   }
   close(GITREMOTE);
   my $author = 0;
-  my $date = 0;
+  my $date = "";
   my $comment = "";
   my $commit = "";
   my $file_mod_list = "";
@@ -320,7 +320,7 @@ sub remedy_changelog {
 
   open(CHANGELOG, ">$settings->{changelog}") or die "Opening $!";
 
-  open(GITLOG, "git log $prev_tag..$remote --name-status |") or die "Opening $!";
+  open(GITLOG, "git log $prev_tag..$remote --name-status --date=raw |") or die "Opening $!";
   while (<GITLOG>) {
     chomp;
     if (/^commit /) {
@@ -341,16 +341,15 @@ sub remedy_changelog {
       # Ignore
     } elsif (/^Author: *(.*)/) {
       $author = $1;
-    } elsif (/^Date: *(.*)/) {
-      $date = $1;
+    } elsif (/^Date: *([0-9]+)/) {
+      my @gmtime = gmtime($1);
+      $date = strftime("%a %b %e %H:%M:%S %Z %Y", @gmtime);
     } elsif (/^ +(.*) */) {
       $comment .= "$1\n";
     } elsif (/^[AMD]\s+(.*) *$/) {
       $file_mod_list .= "        * $1:\n";
     } elsif (/^[CR][0-9]*\s+(.*) *$/) {
       $file_mod_list .= "        * $1:\n";
-    } else {
-      print "Unmatched log line:\n$_\n";
     }
   }
   # print out final
@@ -363,6 +362,13 @@ sub remedy_changelog {
     $comment = "";
     $file_mod_list = "";
     $changed = 1;
+    print CHANGELOG << "EOF";
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
+EOF
   }
   close(GITLOG);
   close(CHANGELOG);
