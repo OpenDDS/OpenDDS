@@ -313,14 +313,14 @@ sub remedy_changelog {
   my $date = 0;
   my $comment = "";
   my $commit = "";
-  my $file_list = "";
+  my $file_mod_list = "";
   my $changed = 0;
 
   print "  >> Creating $settings->{changelog} from git history\n";
 
   open(CHANGELOG, ">$settings->{changelog}") or die "Opening $!";
 
-  open(GITLOG, "git log $prev_tag..$remote --name-only |") or die "Opening $!";
+  open(GITLOG, "git log $prev_tag..$remote --name-status -date=raw |") or die "Opening $!";
   while (<GITLOG>) {
     chomp;
     if (/^commit /) {
@@ -328,12 +328,12 @@ sub remedy_changelog {
       if ($author) {
         print CHANGELOG $date . "  " .  $author . "\n";
         print CHANGELOG "$commit\n";
-        if ($file_list) {
-          print CHANGELOG "\n" . $file_list;
+        if ($file_mod_list) {
+          print CHANGELOG "\n" . $file_mod_list;
         }
         print CHANGELOG "\n" . format_comment($comment) . "\n";
         $comment = "";
-        $file_list = "";
+        $file_mod_list = "";
         $changed = 1;
       }
       $commit = $_;
@@ -345,19 +345,23 @@ sub remedy_changelog {
       $date = $1;
     } elsif (/^ +(.*) */) {
       $comment .= "$1\n";
-    } elsif (/^([^ ]+.*) *$/) {
-      $file_list .= "        * $_:\n";
+    } elsif (/^[AMD]\s+(.*) *$/) {
+      $file_mod_list .= "        * $1:\n";
+    } elsif (/^[CR][0-9]*\s+(.*) *$/) {
+      $file_mod_list .= "        * $1:\n";
+    } else {
+      print "Unmatched log line:\n$_\n";
     }
   }
   # print out final
   if ($author) {
     print CHANGELOG $date . "  " .  $author . "\n";
-    if ($file_list) {
-      print CHANGELOG "\n" . $file_list;
+    if ($file_mod_list) {
+      print CHANGELOG "\n" . $file_mod_list;
     }
     print CHANGELOG "\n" . format_comment($comment) . "\n";
     $comment = "";
-    $file_list = "";
+    $file_mod_list = "";
     $changed = 1;
   }
   close(GITLOG);
