@@ -159,7 +159,11 @@ Boolean options can take the form "--opt" or "--no-opt", the more commonly
 needed one (the one that changes the default behavior) is shown below.
 Options that require arguments are shown as "--opt=VAL"  Options with optional
 arguments are shown as "--opt[=VAL]".  Options that can be repeated with
-cumulative effect are shown with a trailing "...".
+cumulative effect are shown with a trailing "...".  Some third-party
+optional dependencies can be automatically located if they are installed in the
+expected locations (see entries below marked with "system pkg").  In those
+cases, specify the option as --opt without an = to enable the corresponding
+feature in OpenDDS and use the default installation location.
 EOT
   iterate(sub {
             my ($group, $opt, $descr, $optkey) = @_;
@@ -169,8 +173,7 @@ EOT
             }
             $optkey .= '=VAL' if $opt =~ /=s/;
             $optkey .= '[=VAL]' if $opt =~ /:s/;
-            $optkey = "[no-]$optkey"
-              if ($opt =~ /!$/ && $descr =~ / \(yes\)$/);
+            $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)$/);
             $optkey .= '...' if $opt =~ /s\@$/;
             print "--$optkey" . ' ' x (27 - length $optkey) . " $descr\n";
           }
