@@ -1054,7 +1054,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setNakTimeout
 }
 
 // MulticastInst::getTimeToLive
-jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getTimeToLive
+jbyte JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getTimeToLive
 (JNIEnv * jni, jobject jthis)
 {
   OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
@@ -1064,11 +1064,11 @@ jint JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_getTimeToLive
 
 // MulticastInst::setTimeToLive
 void JNICALL Java_OpenDDS_DCPS_transport_MulticastInst_setTimeToLive
-(JNIEnv * jni, jobject jthis, jint val)
+(JNIEnv * jni, jobject jthis, jbyte val)
 {
   OpenDDS::DCPS::MulticastInst_rch inst(recoverCppObj<OpenDDS::DCPS::MulticastInst>(jni, jthis),
                                         false); // Don't take ownership
-  inst->ttl_ = static_cast<char>(val);
+  inst->ttl_ = static_cast<unsigned char>(val);
 }
 
 // MulticastInst::getRcvBufferSize

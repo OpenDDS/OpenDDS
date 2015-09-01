@@ -13,6 +13,7 @@
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/Configuration.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #include <cstring>
 
@@ -52,6 +53,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                            local_address_s);
   if (!local_address_s.is_empty()) {
     local_address_.set(local_address_s.c_str());
+    local_address_config_str_ += local_address_s.c_str();
   }
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
@@ -72,7 +74,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("nak_depth"), nak_depth_, size_t);
 
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, short);
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ttl"), ttl_, unsigned char);
 
   GET_CONFIG_TIME_VALUE(cf, sect, ACE_TEXT("nak_response_delay"),
                         nak_response_delay_);
@@ -140,7 +142,18 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
                            this->multicast_group_address_);
   }
 
-  if (this->local_address_ != ACE_INET_Addr()) {
+  if (this->local_address_config_str_.empty()) {
+    typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
+    AddrVector addrs;
+    get_interface_addrs(addrs);
+    for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
+      idx = locators.length();
+      locators.length(idx + 1);
+      locators[idx].kind = address_to_kind(*adr_it);
+      locators[idx].port = this->local_address_.get_port_number();
+      RTPS::address_to_bytes(locators[idx].address, *adr_it);
+    }
+  } else {
     idx = locators.length();
     locators.length(idx + 1);
     locators[idx].kind = address_to_kind(this->local_address_);

@@ -169,7 +169,7 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     // If conversion was successful
-    if (locator_to_address(addr, locators[i]) == 0) {
+    if (locator_to_address(addr, locators[i], map_ipv4_to_ipv6()) == 0) {
       // if this is a unicast address, or if we are allowing multicast
       if (!addr.is_multicast() || config_i_->use_multicast_) {
         return addr;
@@ -261,6 +261,15 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
+#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
+  if (!open_dual_stack_socket(unicast_socket_, config_i_->local_address_)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("(%P|%t) ERROR: ")
+                      ACE_TEXT("RtpsUdpTransport::configure_i: open_dual_stack_socket:")
+                      ACE_TEXT("%m\n")),
+                      false);
+  }
+#else
   if (unicast_socket_.open(config_i_->local_address_) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -268,12 +277,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
                       ACE_TEXT("%m\n")),
                      false);
   }
-
-  if (config_i_->local_address_.is_any()) {
-
-    OpenDDS::DCPS::get_fully_qualified_hostname(&config_i_->local_address_);
-
-  }
+#endif
 
   if (config_i_->local_address_.get_port_number() == 0) {
 
@@ -324,5 +328,16 @@ RtpsUdpTransport::pre_detach(TransportClient* c)
   }
 }
 
+bool
+RtpsUdpTransport::map_ipv4_to_ipv6() const
+{
+  bool map = false;
+  ACE_INET_Addr tmp;
+  link_->unicast_socket().get_local_addr(tmp);
+  if (tmp.get_type() != AF_INET) {
+    map = true;
+  }
+  return map;
+}
 } // namespace DCPS
 } // namespace OpenDDS

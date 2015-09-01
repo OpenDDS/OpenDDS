@@ -61,15 +61,8 @@ Spdp::Spdp(DDS::DomainId_t domain, RepoId& guid,
   sedp_.ignore(guid);
   sedp_.init(guid_, *disco, domain_);
 
-  { // Append metatraffic unicast locator
-    const ACE_INET_Addr& local_addr = sedp_.local_address();
-    OpenDDS::DCPS::Locator_t uc_locator;
-    uc_locator.kind = address_to_kind(local_addr);
-    uc_locator.port = local_addr.get_port_number();
-    address_to_bytes(uc_locator.address, local_addr);
-    sedp_unicast_.length(1);
-    sedp_unicast_[0] = uc_locator;
-  }
+  // Append metatraffic unicast locator
+  sedp_.unicast_locators(sedp_unicast_);
 
   if (disco->sedp_multicast()) { // Append metatraffic multicast locator
     const ACE_INET_Addr& mc_addr = sedp_.multicast_group();
@@ -750,6 +743,18 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     throw std::runtime_error("failed to set unicast local address");
   }
 
+#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
+  if (!OpenDDS::DCPS::open_dual_stack_socket(unicast_socket_, local_addr)) {
+    if (DCPS::DCPS_debug_level > 3) {
+      ACE_DEBUG((
+            LM_WARNING,
+            ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
+            ACE_TEXT("failed to open_dual_stack_socket unicast socket on port %d %p.  ")
+            ACE_TEXT("Trying next participantId...\n"),
+            uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
+    }
+    return false;
+#else
   if (0 != unicast_socket_.open(local_addr)) {
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((
@@ -760,6 +765,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
             uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
+#endif
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((
           LM_INFO,
@@ -768,20 +774,12 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
           uni_port));
   }
 
-  ACE_HANDLE handle = unicast_socket_.get_handle();
-  char ttl = static_cast<char>(outer_->disco_->ttl());
-
-  if (0 != ACE_OS::setsockopt(handle,
-                              IPPROTO_IP,
-                              IP_MULTICAST_TTL,
-                              &ttl,
-                              sizeof(ttl))) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, outer_->disco_->ttl())) {
     ACE_DEBUG((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::open_unicast_socket() - ")
                ACE_TEXT("failed to set TTL value to %d ")
                ACE_TEXT("for port:%hd %p\n"),
-               outer_->disco_->ttl(), uni_port,
-               ACE_TEXT("ACE_OS::setsockopt(TTL)")));
+               outer_->disco_->ttl(), uni_port, ACE_TEXT("OpenDDS::DCPS::set_socket_multicast_ttl:")));
     throw std::runtime_error("failed to set TTL");
   }
   return true;

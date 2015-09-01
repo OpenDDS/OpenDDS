@@ -89,7 +89,7 @@ public:
 
   /// time-to-live.
   /// The default value is: 1 (in same subnet)
-  char ttl_;
+  unsigned char ttl_;
 
   /// The size of the socket receive buffer.
   /// The default value is: ACE_DEFAULT_MAX_SOCKET_BUFSIZ if it's defined,

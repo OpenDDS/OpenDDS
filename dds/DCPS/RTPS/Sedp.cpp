@@ -31,6 +31,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #include <ace/Reverse_Lock_T.h>
 #include <ace/Auto_Ptr.h>
@@ -272,6 +273,47 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   return DDS::RETCODE_OK;
 }
 
+void
+Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
+{
+  DCPS::RtpsUdpInst_rch rtps_inst =
+    DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
+  using namespace OpenDDS::RTPS;
+
+  CORBA::ULong idx = 0;
+
+  // multicast first so it's preferred by remote peers
+  if (rtps_inst->use_multicast_ && rtps_inst->multicast_group_address_ != ACE_INET_Addr()) {
+    idx = locators.length();
+    locators.length(idx + 1);
+    locators[idx].kind = address_to_kind(rtps_inst->multicast_group_address_);
+    locators[idx].port = rtps_inst->multicast_group_address_.get_port_number();
+    RTPS::address_to_bytes(locators[idx].address,
+      rtps_inst->multicast_group_address_);
+  }
+
+  if (rtps_inst->local_address_config_str_.empty()) {
+    typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
+    AddrVector addrs;
+    OpenDDS::DCPS::get_interface_addrs(addrs);
+    for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
+      idx = locators.length();
+      locators.length(idx + 1);
+      locators[idx].kind = address_to_kind(*adr_it);
+      locators[idx].port = rtps_inst->local_address_.get_port_number();
+      RTPS::address_to_bytes(locators[idx].address,
+        *adr_it);
+    }
+  } else {
+    idx = locators.length();
+    locators.length(idx + 1);
+    locators[idx].kind = address_to_kind(rtps_inst->local_address_);
+    locators[idx].port = rtps_inst->local_address_.get_port_number();
+    RTPS::address_to_bytes(locators[idx].address,
+      rtps_inst->local_address_);
+  }
+}
+
 const ACE_INET_Addr&
 Sedp::local_address() const
 {
@@ -286,6 +328,15 @@ Sedp::multicast_group() const
   DCPS::RtpsUdpInst_rch rtps_inst =
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
   return rtps_inst->multicast_group_address_;
+}
+bool
+Sedp::map_ipv4_to_ipv6() const
+{
+  bool map = false;
+  if (local_address().get_type() != AF_INET) {
+    map = true;
+  }
+  return map;
 }
 
 void
@@ -1811,8 +1862,9 @@ Sedp::write_publication_data(
     OpenDDS::DCPS::DiscoveredWriterData dwd;
     ParameterList plist;
     populate_discovered_writer_msg(dwd, rid, lp);
+
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(dwd, plist)) {
+    if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -1841,8 +1893,9 @@ Sedp::write_subscription_data(
     OpenDDS::DCPS::DiscoveredReaderData drd;
     ParameterList plist;
     populate_discovered_reader_msg(drd, rid, ls);
+
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(drd, plist)) {
+    if (ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")

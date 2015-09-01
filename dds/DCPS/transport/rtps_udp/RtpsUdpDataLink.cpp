@@ -12,6 +12,7 @@
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 #include "dds/DCPS/transport/framework/TransportSendControlElement.h"
+#include "dds/DCPS/transport/framework/NetworkAddress.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
@@ -23,7 +24,6 @@
 #include "ace/Message_Block.h"
 #include "ace/Reverse_Lock_T.h"
 #include "ace/Reactor.h"
-#include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
 #include <string.h>
 
@@ -134,33 +134,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 {
   unicast_socket_ = unicast_socket;
 
-#ifdef ACE_HAS_IPV6
-  ACE_INET_Addr uni_addr;
-  if (0 != unicast_socket_.get_local_addr(uni_addr)) {
-    VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::open: "
-          "ACE_SOCK_Dgram::get_local_addr %p\n", ACE_TEXT("")));
-  } else {
-    unicast_socket_type_ = uni_addr.get_type();
-    const unsigned short any_port = 0;
-    if (unicast_socket_type_ == AF_INET6) {
-      const ACE_UINT32 any_addr = INADDR_ANY;
-      ACE_INET_Addr alt_addr(any_port, any_addr);
-      if (0 != ipv6_alternate_socket_.open(alt_addr)) {
-        VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::open: "
-              "ACE_SOCK_Dgram::open %p\n", ACE_TEXT("alternate IPv4")));
-      }
-    } else {
-      ACE_INET_Addr alt_addr(any_port, ACE_IPV6_ANY, AF_INET6);
-      if (0 != ipv6_alternate_socket_.open(alt_addr)) {
-        VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::open: "
-              "ACE_SOCK_Dgram::open %p\n", ACE_TEXT("alternate IPv6")));
-      }
-    }
-  }
-
-  /// FUTURE: Set TTL on the alternate sockets.
-#endif
-
   if (config_->use_multicast_) {
     const OPENDDS_STRING& net_if = config_->multicast_interface_;
 #ifdef ACE_HAS_MAC_OSX
@@ -178,51 +151,16 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     }
   }
 
-  ACE_HANDLE handle = unicast_socket_.get_handle();
-  char ttl = static_cast<char>(config_->ttl_);
-
-  if (0 != ACE_OS::setsockopt(handle,
-                              IPPROTO_IP,
-                              IP_MULTICAST_TTL,
-                              &ttl,
-                              sizeof(ttl))) {
+  if (!OpenDDS::DCPS::set_socket_multicast_ttl(unicast_socket_, config_->ttl_)) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
-                      ACE_TEXT("failed to set TTL: %d %p\n"),
-                      config_->ttl_,
-                      ACE_TEXT("ACE_OS::setsockopt(TTL)")),
+                      ACE_TEXT("failed to set TTL: %C\n"),
+                      config_->ttl_),
                      false);
   }
 
   send_strategy_->send_buffer(&multi_buff_);
-
-  // Set up info_reply_ messages for use with ACKNACKS
-  using namespace OpenDDS::RTPS;
-  info_reply_.smHeader.submessageId = INFO_REPLY;
-  info_reply_.smHeader.flags = 1 /*FLAG_E*/;
-  info_reply_.unicastLocatorList.length(1);
-  info_reply_.unicastLocatorList[0].kind =
-    address_to_kind(config_->local_address_);
-  info_reply_.unicastLocatorList[0].port =
-    config_->local_address_.get_port_number();
-  RTPS::address_to_bytes(info_reply_.unicastLocatorList[0].address,
-                         config_->local_address_);
-  if (config_->use_multicast_) {
-    info_reply_.smHeader.flags |= 2 /*FLAG_M*/;
-    info_reply_.multicastLocatorList.length(1);
-    info_reply_.multicastLocatorList[0].kind =
-      address_to_kind(config_->multicast_group_address_);
-    info_reply_.multicastLocatorList[0].port =
-      config_->multicast_group_address_.get_port_number();
-    RTPS::address_to_bytes(info_reply_.multicastLocatorList[0].address,
-                           config_->multicast_group_address_);
-  }
-
-  size_t size = 0, padding = 0;
-  gen_find_size(info_reply_, size, padding);
-  info_reply_.smHeader.submessageLength =
-    static_cast<CORBA::UShort>(size + padding) - SMHDR_SZ;
 
   if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),
             static_rchandle_cast<TransportStrategy>(recv_strategy_)) != 0) {
@@ -235,16 +173,6 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
 
   return true;
 }
-
-#ifdef ACE_HAS_IPV6
-ACE_SOCK_Dgram&
-RtpsUdpDataLink::socket_for(int address_type)
-{
-  return (address_type == unicast_socket_type_)
-    ? unicast_socket_
-    : ipv6_alternate_socket_;
-}
-#endif
 
 void
 RtpsUdpDataLink::add_locator(const RepoId& remote_id,
@@ -1312,7 +1240,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
     std::memcpy(info_dst.guidPrefix, pos->writerid.guidPrefix,
                 sizeof(GuidPrefix_t));
     ser << info_dst;
-    // Interoperability note: we used to insert "info_reply_" here, but
+    // Interoperability note: we used to insert INFO_REPLY submessage here, but
     // testing indicated that other DDS implementations didn't accept it.
     ser << acknack;
 
@@ -1463,7 +1391,7 @@ RtpsUdpDataLink::send_heartbeat_replies() // from DR to DW
         std::memcpy(info_dst.guidPrefix, wi->first.guidPrefix,
                     sizeof(GuidPrefix_t));
         ser << info_dst;
-        // Interoperability note: we used to insert "info_reply_" here, but
+        // Interoperability note: we used to insert INFO_REPLY submessage here, but
         // testing indicated that other DDS implementations didn't accept it.
         ser << acknack;
         for (size_t i = 0; i < nack_frags.size(); ++i) {

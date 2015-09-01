@@ -37,7 +37,8 @@ namespace {
   }
 
   void add_param_rtps_locator(ParameterList& param_list,
-                         const DCPS::TransportLocator& dcps_locator) {
+                              const DCPS::TransportLocator& dcps_locator,
+                              bool map /*map IPV4 to IPV6 addr*/) {
     // Convert the tls blob to an RTPS locator seq
     OpenDDS::DCPS::LocatorSeq locators;
     bool ignore_requires_inline_qos;
@@ -48,7 +49,7 @@ namespace {
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
         OpenDDS::DCPS::Locator_t& rtps_locator = locators[i];
         ACE_INET_Addr address;
-        if (locator_to_address(address, rtps_locator) == 0) {
+        if (locator_to_address(address, rtps_locator, map) == 0) {
           Parameter param;
           param.locator(rtps_locator);
           if (address.is_multicast()) {
@@ -357,7 +358,8 @@ int to_param_list(const SPDPdiscoveredParticipantData& participant_data,
 }
 
 int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
-                  ParameterList& param_list)
+                  ParameterList& param_list,
+                  bool map)
 {
   // Ignore builtin topic key
 
@@ -503,7 +505,7 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
     // If this is an rtps udp transport
     if (!std::strcmp(tl.transport_type, "rtps_udp")) {
       // Append the locator's deserialized locator and an RTPS PID
-      add_param_rtps_locator(param_list, tl);
+      add_param_rtps_locator(param_list, tl, map);
     // Otherwise, this is an OpenDDS, custom transport
     } else {
       // Append the blob and a custom PID
@@ -521,7 +523,8 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredWriterData& writer_data,
 }
 
 int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
-                  ParameterList& param_list)
+                  ParameterList& param_list,
+                  bool map)
 {
   // Ignore builtin topic key
   {
@@ -665,7 +668,7 @@ int to_param_list(const OpenDDS::DCPS::DiscoveredReaderData& reader_data,
     // If this is an rtps udp transport
     if (!std::strcmp(tl.transport_type, "rtps_udp")) {
       // Append the locator's deserialized locator and an RTPS PID
-      add_param_rtps_locator(param_list, tl);
+      add_param_rtps_locator(param_list, tl, map);
     // Otherwise, this is an OpenDDS, custom transport
     } else {
       // Append the blob and a custom PID

@@ -121,7 +121,7 @@ Writer::svc ()
     ACE_OS::sleep( interval);
   }
 
-  ::DDS::Duration_t shutdownDelay = { 15, 0 }; // Wait for up to 15 seconds.
+  ::DDS::Duration_t shutdownDelay = { 30, 0 }; // Wait for up to 30 seconds.
   ::DDS::ReturnCode_t result
     = this->writer_->wait_for_acknowledgments( shutdownDelay);
   if( result != ::DDS::RETCODE_OK) {

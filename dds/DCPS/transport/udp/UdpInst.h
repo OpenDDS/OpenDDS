@@ -23,6 +23,7 @@ public:
   /// The address from which to send/receive data.
   /// The default value is: none.
   ACE_INET_Addr local_address_;
+  OPENDDS_STRING local_address_config_str_;
 
   ACE_INT32 send_buffer_size_;
   ACE_INT32 rcv_buffer_size_;
