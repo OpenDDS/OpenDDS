@@ -272,7 +272,9 @@ sub format_comment {
   # While there are lines left to process...
   while (scalar(@comment_lines) > 0) {
     my $next_line = shift @comment_lines;
-    if (length($next_line) < 65) {
+    if (!$next_line) {
+      $result .= "\n";
+    } elsif (length($next_line) < 65) {
       $result .= "          $next_line\n";
     } else {
       # Break next line into words
