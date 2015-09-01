@@ -11,7 +11,6 @@
 #include "ace/Sock_Connect.h"
 #include "ace/OS_NS_sys_socket.h" // For setsockopt()
 
-
 #if !defined (__ACE_INLINE__)
 # include "NetworkAddress.inl"
 #endif /* !__ACE_INLINE__ */
@@ -278,7 +277,6 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
     else
       endpoint_count = if_cnt - lo_cnt;
 #endif /* !ACE_HAS_IPV6 */
-
     if (endpoint_count == 0) {
       VDBG_LVL((LM_DEBUG,
         ACE_TEXT("(%P|%t) get_interface_addrs() - ")
@@ -308,7 +306,6 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
       if (ignore_lo && if_addrs[i].is_loopback())
         continue;
 #endif /* !ACE_HAS_IPV6 */
-
       addrs.push_back(if_addrs[i]);
     }
   }
@@ -426,9 +423,10 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
   if (static_cast<ACE_Addr>(local_address) == ACE_Addr::sap_any) {
     if (protocol_family == PF_INET || protocol_family == PF_INET6) {
       if (ACE::bind_port(socket.get_handle(),
-        INADDR_ANY,
-        protocol_family) == -1)
+                         INADDR_ANY,
+                         protocol_family) == -1) {
         error = true;
+      }
     }
   } else if (ACE_OS::bind(socket.get_handle(),
                           reinterpret_cast<sockaddr *> (local_address.get_addr()),

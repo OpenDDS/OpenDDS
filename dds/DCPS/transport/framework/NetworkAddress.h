@@ -18,7 +18,6 @@
 #include "ace/SString.h"
 #include "ace/SOCK_Dgram.h"
 
-
 namespace OpenDDS {
 namespace DCPS {
 

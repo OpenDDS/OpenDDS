@@ -15,7 +15,6 @@
 #include "ace/Default_Constants.h"
 #include "ace/Log_Msg.h"
 
-
 #ifndef __ACE_INLINE__
 # include "UdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
