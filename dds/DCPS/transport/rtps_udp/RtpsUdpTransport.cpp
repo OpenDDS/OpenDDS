@@ -165,17 +165,11 @@ RtpsUdpTransport::get_connection_addr(const TransportBLOB& remote,
   if (result != DDS::RETCODE_OK) {
     return ACE_INET_Addr();
   }
-  bool map = false;
-  ACE_INET_Addr tmp;
-  link_->unicast_socket().get_local_addr(tmp);
-  if (tmp.get_type() != AF_INET) {
-    map = true;
-  }
 
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     ACE_INET_Addr addr;
     // If conversion was successful
-    if (locator_to_address(addr, locators[i], map) == 0) {
+    if (locator_to_address(addr, locators[i], map_ipv4_to_ipv6()) == 0) {
       // if this is a unicast address, or if we are allowing multicast
       if (!addr.is_multicast() || config_i_->use_multicast_) {
         return addr;
@@ -332,6 +326,18 @@ RtpsUdpTransport::pre_detach(TransportClient* c)
     link_->default_listener(0);
     default_listener_ = 0;
   }
+}
+
+bool
+RtpsUdpTransport::map_ipv4_to_ipv6() const
+{
+  bool map = false;
+  ACE_INET_Addr tmp;
+  link_->unicast_socket().get_local_addr(tmp);
+  if (tmp.get_type() != AF_INET) {
+    map = true;
+  }
+  return map;
 }
 
 } // namespace DCPS

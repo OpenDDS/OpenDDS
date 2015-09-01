@@ -99,6 +99,7 @@ private:
   /// is not possible because the network location returned by
   /// connection_info_i() can't be shared among participants.
   RtpsUdpDataLink_rch link_;
+  bool map_ipv4_to_ipv6() const;
 
   ACE_SOCK_Dgram unicast_socket_;
 

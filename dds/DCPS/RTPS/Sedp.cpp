@@ -328,6 +328,15 @@ Sedp::multicast_group() const
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
   return rtps_inst->multicast_group_address_;
 }
+bool
+Sedp::map_ipv4_to_ipv6() const
+{
+  bool map = false;
+  if (local_address().get_type() != AF_INET) {
+    map = true;
+  }
+  return map;
+}
 
 void
 Sedp::assign_bit_key(DiscoveredPublication& pub)
@@ -1852,12 +1861,9 @@ Sedp::write_publication_data(
     OpenDDS::DCPS::DiscoveredWriterData dwd;
     ParameterList plist;
     populate_discovered_writer_msg(dwd, rid, lp);
-    bool map = false;
-    if (this->local_address().get_type() != AF_INET) {
-      map = true;
-    }
+
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(dwd, plist, map)) {
+    if (ParameterListConverter::to_param_list(dwd, plist, map_ipv4_to_ipv6())) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_publication_data - ")
                  ACE_TEXT("Failed to convert DiscoveredWriterData ")
@@ -1886,12 +1892,9 @@ Sedp::write_subscription_data(
     OpenDDS::DCPS::DiscoveredReaderData drd;
     ParameterList plist;
     populate_discovered_reader_msg(drd, rid, ls);
-    bool map = false;
-    if (this->local_address().get_type() != AF_INET) {
-      map = true;
-    }
+
     // Convert to parameter list
-    if (ParameterListConverter::to_param_list(drd, plist, map)) {
+    if (ParameterListConverter::to_param_list(drd, plist, map_ipv4_to_ipv6())) {
       ACE_DEBUG((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: Sedp::write_subscription_data - ")
                  ACE_TEXT("Failed to convert DiscoveredReaderData ")

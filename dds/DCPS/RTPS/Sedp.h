@@ -71,6 +71,7 @@ public:
   // Valid after init() call
   const ACE_INET_Addr& local_address() const;
   const ACE_INET_Addr& multicast_group() const;
+  bool map_ipv4_to_ipv6() const;
 
   void associate(const SPDPdiscoveredParticipantData& pdata);
   bool disassociate(const SPDPdiscoveredParticipantData& pdata);
