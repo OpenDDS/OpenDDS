@@ -14,10 +14,17 @@ sub usage {
          "options:\n" .
          "  --list          just show step names (default perform check)\n" .
          "  --remedy        remediate problems where possible\n" .
-         "  --force         keep going where possible\n" .
          "  --remote=name   valid git remote for OpenDDS (default: origin)\n" .
+         "  --branch=name   valid git branch for cloning (default: master)\n" .
          "  --step=#        # of individual step to run (default: all)\n" .
+         "  --force         keep going if possible (requires --step)\n" .
          "  --no-devguide   no devguide issued for this release"
+}
+
+sub normalizePath {
+  my $val = shift;
+  return Cwd::abs_path($val) if $val && -d $val && $val =~ /../;
+  return $val;
 }
 
 sub email_announce_contents {
@@ -70,6 +77,7 @@ sub version_to_value {
 }
 ############################################################################
 sub verify_git_remote {
+  my $result = 0;
   my $settings = shift();
   my $remote = $settings->{remote};
   my $url = "";
@@ -81,15 +89,47 @@ sub verify_git_remote {
     }
   }
   close(GITREMOTE);
-  return ($url eq $settings->{git_url});
+  if ($url eq $settings->{git_url}) {
+    $result = 1;
+  } else {
+    $settings->{alt_url} = $url;
+  }
+  return $result;
 }
 
 sub message_git_remote {
   my $settings = shift;
   my $remote = $settings->{remote};
-  return "Remote $remote does not match expected URL $settings->{git_url},\n" .
-         "rerun and specifiy --remote";
+  my $alt_url = $settings->{alt_url};
+  my $start = "Remote $remote has url $alt_url, \n" .
+         "which does not match expected URL $settings->{git_url}";
 }
+
+sub override_git_remote {
+  my $settings = shift;
+  my $remote = $settings->{remote};
+  $settings->{git_url} = $settings->{alt_url};
+  print "  Overriding remote $remote, url $settings->{alt_url}\n";
+  # Reverify
+  verify_git_remote($settings);
+}
+
+############################################################################
+sub verify_git_branch {
+  my $settings = shift;
+  my $current_branch;
+  open(GIT_BRANCH, "git branch |") or die "git branch $!";
+  my $startwithstar = '$\* (.*)';
+  while (<GIT_BRANCH>) {
+    if (/$startwithstar/) {
+      $current_branch = $1;
+      last;
+    }
+  }
+
+  return ($current_branch eq $settings->{branch});
+}
+
 ############################################################################
 sub verify_git_status_clean {
   my ($settings, $strict) = @_;
@@ -232,7 +272,9 @@ sub format_comment {
   # While there are lines left to process...
   while (scalar(@comment_lines) > 0) {
     my $next_line = shift @comment_lines;
-    if (length($next_line) < 65) {
+    if (!$next_line) {
+      $result .= "\n";
+    } elsif (length($next_line) < 65) {
       $result .= "          $next_line\n";
     } else {
       # Break next line into words
@@ -260,6 +302,7 @@ sub remedy_changelog {
   my $settings = shift();
   my $version = $settings->{version};
   my $remote = $settings->{remote};
+  my $branch = $settings->{branch};
   my $prev_tag = find_previous_tag($settings);
   # Update so git log is correct
   open(GITREMOTE, "git remote update $remote|");
@@ -267,52 +310,65 @@ sub remedy_changelog {
   }
   close(GITREMOTE);
   my $author = 0;
-  my $date = 0;
+  my $date = "";
   my $comment = "";
-  my $file_list = "";
+  my $commit = "";
+  my $file_mod_list = "";
   my $changed = 0;
 
   print "  >> Creating $settings->{changelog} from git history\n";
 
   open(CHANGELOG, ">$settings->{changelog}") or die "Opening $!";
 
-  open(GITLOG, "git log $prev_tag..$remote/master --name-only |") or die "Opening $!";
+  open(GITLOG, "git log $prev_tag..$remote --name-status --date=raw |") or die "Opening $!";
   while (<GITLOG>) {
     chomp;
-    if (/^commit .*/) {
+    if (/^commit /) {
       # print out previous
       if ($author) {
         print CHANGELOG $date . "  " .  $author . "\n";
-        if ($file_list) {
-          print CHANGELOG "\n" . $file_list;
+        print CHANGELOG "$commit\n";
+        if ($file_mod_list) {
+          print CHANGELOG "\n" . $file_mod_list;
         }
         print CHANGELOG "\n" . format_comment($comment) . "\n";
         $comment = "";
-        $file_list = "";
+        $file_mod_list = "";
         $changed = 1;
       }
+      $commit = $_;
     } elsif (/^Merge: *(.*)/) {
       # Ignore
     } elsif (/^Author: *(.*)/) {
       $author = $1;
-    } elsif (/^Date: *(.*)/) {
-      $date = $1;
+    } elsif (/^Date: *([0-9]+)/) {
+      my @gmtime = gmtime($1);
+      $date = strftime("%a %b %e %H:%M:%S %Z %Y", @gmtime);
     } elsif (/^ +(.*) */) {
       $comment .= "$1\n";
-    } elsif (/^([^ ]+.*) *$/) {
-      $file_list .= "        * $_\n";
+    } elsif (/^[AMD]\s+(.*) *$/) {
+      $file_mod_list .= "        * $1:\n";
+    } elsif (/^[CR][0-9]*\s+(.*) *$/) {
+      $file_mod_list .= "        * $1:\n";
     }
   }
   # print out final
   if ($author) {
     print CHANGELOG $date . "  " .  $author . "\n";
-    if ($file_list) {
-      print CHANGELOG "\n" . $file_list;
+    if ($file_mod_list) {
+      print CHANGELOG "\n" . $file_mod_list;
     }
     print CHANGELOG "\n" . format_comment($comment) . "\n";
     $comment = "";
-    $file_list = "";
+    $file_mod_list = "";
     $changed = 1;
+    print CHANGELOG << "EOF";
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
+EOF
   }
   close(GITLOG);
   close(CHANGELOG);
@@ -522,6 +578,37 @@ sub message_commit_git_changes {
   return "The working directory is not clean:\n" . $settings->{unclean} .
          "Changed files must be committed to git.";
 }
+
+sub verify_git_changes_pushed {
+  my $settings = shift();
+  my $found = 0;
+  my $target = "refs/tags/$settings->{git_tag}\$";
+  open(GIT, "git ls-remote --tags |") or die "Opening $!";
+  while (<GIT>) {
+    chomp;
+    if (/$target/) {
+      $found = 1;
+    }
+  }
+  close GIT;
+  return $found;
+}
+
+sub message_git_changes_pushed {
+  my $settings = shift();
+  return "Changes and tags need to be pushed to $settings->{remote}\n";
+}
+
+sub remedy_git_changes_pushed {
+  my $settings = shift();
+  my $remote = $settings->{remote};
+  print "pushing code\n";
+  my $result = system("git push $remote $settings->{branch}");
+  print "pushing tags with git push $remote --tags\n";
+  $result = $result || system("git push $remote --tags");
+  return !$result;
+}
+
 ############################################################################
 sub verify_git_tag {
   my $settings = shift();
@@ -565,7 +652,6 @@ sub verify_clone_tag {
     my $curdir = getcwd;
     chdir $settings->{clone_dir};
     open(GIT_BRANCH, "git branch |") or die "git branch $!";
-    my $startwithstar = '$\*';
     while (<GIT_BRANCH>) {
       if (/^\* \(detached from $settings->{git_tag}\)/) {
         $correct = 1;
@@ -580,7 +666,7 @@ sub verify_clone_tag {
 sub message_clone_tag {
   my $settings = shift();
   if (-d $settings->{clone_dir}) {
-    return "Directory $settings->{clone_dir} did not check out tag $settings->{git_tag}\n";
+    return "Directory $settings->{clone_dir} did not clone tag $settings->{git_tag}\n";
   } else {
     return "Could not see directory $settings->{clone_dir}\n";
   }
@@ -590,14 +676,14 @@ sub remedy_clone_tag {
   my $settings = shift();
   my $result = 0;
   if (!-d $settings->{clone_dir}) {
-    print "Cloning OpenDDS into $settings->{clone_dir}\n";
+    print "Cloning url $settings->{git_url}\ninto $settings->{clone_dir}\n";
     $result = system("git clone $settings->{git_url} $settings->{clone_dir}");
   }
   if (!$result) {
     my $curdir = getcwd;
     chdir($settings->{clone_dir});
     print "Checking out tag $settings->{git_tag}\n";
-    $result = system("git checkout tags/$settings->{git_tag}");
+    $result = system("git checkout $settings->{git_tag}");
     chdir($curdir);
   }
   return !$result;
@@ -641,6 +727,7 @@ sub verify_tgz_source {
         last;
       }
     }
+    close TGZ;
   }
   return $good;
 }
@@ -714,22 +801,29 @@ sub remedy_md5_checksum{
   my $md5_file = join("/", $settings->{parent_dir}, $settings->{md5_src});
   my $tgz_file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
   my $zip_file = join("/", $settings->{parent_dir}, $settings->{zip_src});
-  system("md5sum $tgz_file $zip_file > $md5_file");
+  return !system("md5sum $tgz_file $zip_file > $md5_file");
 }
 ############################################################################
 sub verify_gen_doxygen {
-  return (-f 'html/dds/index.html');
+  my $settings = shift();
+  return (-f "$settings->{clone_dir}/html/dds/index.html");
 }
 
 sub message_gen_doxygen {
-  return "Doxygen documentation needs generating";
+  my $settings = shift();
+  return "Doxygen documentation needs generating in dir $settings->{clone_dir}\n";
 }
 
 sub remedy_gen_doxygen {
+  my $settings = shift();
   my $generated = 0;
   if ($ENV{ACE_ROOT}) {
+    $ENV{ACE_ROOT} = normalizePath($ENV{ACE_ROOT});
+    my $curdir = getcwd;
+    chdir($settings->{clone_dir});
     $ENV{DDS_ROOT} = getcwd;
     my $result = system("$ENV{ACE_ROOT}/bin/generate_doxygen.pl", "-exclude_ace -include_dds");
+    chdir($curdir);
     if (!$result) {
       $generated = 1;
     }
@@ -745,13 +839,14 @@ sub verify_tgz_doxygen {
   my $good = 0;
   if (-f $file) {
     open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
-    my $target = join("/", 'DDS', $settings->{changelog});
+    my $target = "html/dds/index.html";
     while (<TGZ>) {
       if (/$target/) {
         $good = 1;
         last;
       }
     }
+    close TGZ;
   }
   return $good;
 }
@@ -766,12 +861,12 @@ sub remedy_tgz_doxygen {
   my $settings = shift();
   my $file = join("/", $settings->{parent_dir}, $settings->{tar_dox});
   my $curdir = getcwd;
-  chdir($settings->{parent_dir});
+  chdir($settings->{clone_dir});
   print "Creating file $settings->{tar_dox}\n";
-  my $result = system("tar -cf $settings->{tar_dox} $curdir/html/dds");
+  my $result = system("tar -cf ../$settings->{tar_dox} html");
   if (!$result) {
     print "Gzipping file $settings->{tar_dox}\n";
-    $result = system("gzip $settings->{tar_dox}");
+    $result = system("gzip ../$settings->{tar_dox}");
   }
   chdir($curdir);
   return !$result;
@@ -791,11 +886,11 @@ sub message_zip_doxygen {
 
 sub remedy_zip_doxygen {
   my $settings = shift();
-  my $file = join("/", $settings->{parent_dir}, $settings->{zip_dox});
   my $curdir = getcwd;
-  chdir($settings->{parent_dir});
-  print "Creating file $settings->{zip_src}\n";
-  my $result = system("zip -qq -r $settings->{zip_src} $curdir/html/dds");
+  chdir("$settings->{clone_dir}/html");
+  my $file = "../../$settings->{zip_dox}";
+  print "Creating file $settings->{zip_dox}\n";
+  my $result = system("zip $file -qq -r dds");
   chdir($curdir);
   return !$result;
 }
@@ -893,140 +988,161 @@ sub remedy_email_dds_release_announce {
   news_contents_excerpt($settings);
 }
 
+
 ############################################################################
-my @release_steps = (
-  {
-    title   => 'Verify git status is clean',
-    skip    => 1,
-    verify  => sub{verify_git_status_clean(@_, 0)},
-    message => sub{message_git_status_clean(@_)}
-  },
-  {
-    title   => 'Update VERSION',
+sub ignore_step {
+  my $step = shift;
+  print "  Ignoring step $step\n";
+  return 1;
+}
+
+############################################################################
+my %steps_run = ();
+
+my %release_step_hash  = (
+  'Update VERSION' => {
     verify  => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
-    remedy  => sub{remedy_update_version_file(@_)}
+    remedy  => sub{remedy_update_version_file(@_)},
+    force   => sub{ignore_step("Update VERSION")}
   },
-  {
-    title   => 'Update Version.h',
+  'Update Version.h' => {
     verify  => sub{verify_update_version_h_file(@_)},
     message => sub{message_update_version_h_file(@_)},
-    remedy  => sub{remedy_update_version_h_file(@_)}
+    remedy  => sub{remedy_update_version_h_file(@_)},
+    force   => sub{ignore_step("Update Version.h")}
   },
-  {
-    title   => 'Update PROBLEM-REPORT-FORM',
+  'Update PROBLEM-REPORT-FORM' => {
     verify  => sub{verify_update_prf_file(@_)},
     message => sub{message_update_prf_file(@_)},
-    remedy  => sub{remedy_update_prf_file(@_)}
+    remedy  => sub{remedy_update_prf_file(@_)},
+    force   => sub{ignore_step('Update PROBLEM-REPORT-FORM')}
   },
-  {
-    title   => 'Verify remote arg',
-    skip    => 1,
+  'Verify remote arg' => {
     verify  => sub{verify_git_remote(@_)},
     message => sub{message_git_remote(@_)},
+    remedy  => sub{override_git_remote(@_)},
   },
-  {
-    title   => 'Verify ChangeLog',
+  'Create ChangeLog' => {
     verify  => sub{verify_changelog(@_)},
     message => sub{message_changelog(@_)},
-    remedy  => sub{remedy_changelog(@_)}
+    remedy  => sub{remedy_changelog(@_)},
+    force   => sub{ignore_step('Create ChangeLog')}
   },
-  {
-    title   => 'Add NEWS Section',
+  'Add NEWS Section' => {
     verify  => sub{verify_news_file_section(@_)},
     message => sub{message_news_file_section(@_)},
-    remedy  => sub{remedy_news_file_section(@_)}
+    remedy  => sub{remedy_news_file_section(@_)},
+    force   => sub{ignore_step('Add NEWS Section')}
   },
-  {
-    title   => 'Update NEWS Section',
+  'Update NEWS Section' => {
     verify  => sub{verify_update_news_file(@_)},
-    message => sub{message_update_news_file(@_)}
+    message => sub{message_update_news_file(@_)},
+    force   => sub{ignore_step('Update NEWS Section')}
   },
-  {
-    title   => 'Commit changes to GIT',
+  'Commit changes to GIT' => {
     verify  => sub{verify_git_status_clean(@_, 1)},
     message => sub{message_commit_git_changes(@_)}
   },
-  {
-    title   => 'Create git tag',
+  'Verify changes pushed' => {
+    prereqs => ('Verify remote arg'),
+    verify  => sub{verify_git_changes_pushed(@_, 1)},
+    message => sub{message_git_changes_pushed(@_)},
+    remedy  => sub{remedy_git_changes_pushed(@_)}
+  },
+  'Create git tag' => {
     verify  => sub{verify_git_tag(@_)},
     message => sub{message_git_tag(@_)},
     remedy  => sub{remedy_git_tag(@_)}
   },
-  {
-    title   => 'Clone tag',
+  'Clone tag' => {
+    prereqs => ('Verify remote arg'),
     verify  => sub{verify_clone_tag(@_)},
     message => sub{message_clone_tag(@_)},
     remedy  => sub{remedy_clone_tag(@_)}
   },
-  {
-    title   => 'Move changelog',
+  'Move changelog' => {
     verify  => sub{verify_move_changelog(@_)},
     message => sub{message_move_changelog(@_)},
     remedy  => sub{remedy_move_changelog(@_)}
   },
-  {
-    title   => 'Create unix release archive',
+  'Create unix release archive' => {
     verify  => sub{verify_tgz_source(@_)},
     message => sub{message_tgz_source(@_)},
     remedy  => sub{remedy_tgz_source(@_)}
   },
-  {
-    title   => 'Create windows release archive',
+  'Create windows release archive' => {
     verify  => sub{verify_zip_source(@_)},
     message => sub{message_zip_source(@_)},
     remedy  => sub{remedy_zip_source(@_)}
   },
-  {
-    title   => 'Generate doxygen',
+  'Generate doxygen' => {
     verify  => sub{verify_gen_doxygen(@_)},
     message => sub{message_gen_doxygen(@_)},
     remedy  => sub{remedy_gen_doxygen(@_)} # $ACE_ROOT/bin/generate_doxygen.pl
   },
-  {
-    title   => 'Create unix doxygen archive',
+  'Create unix doxygen archive' => {
     verify  => sub{verify_tgz_doxygen(@_)},
     message => sub{message_tgz_doxygen(@_)},
     remedy  => sub{remedy_tgz_doxygen(@_)}
   },
-  {
-    title   => 'Create windows doxygen archive',
+  'Create windows doxygen archive' => {
     verify  => sub{verify_zip_doxygen(@_)},
     message => sub{message_zip_doxygen(@_)},
     remedy  => sub{remedy_zip_doxygen(@_)}
   },
-  {
-    title   => 'Create md5 checksum',
+  'Create md5 checksum' => {
     verify  => sub{verify_md5_checksum(@_)},
     message => sub{message_md5_checksum(@_)},
     remedy  => sub{remedy_md5_checksum(@_)}
   },
-  {
-    title   => 'Upload to FTP Site',
+  'Upload to FTP Site' => {
     verify  => sub{verify_ftp_upload(@_)},
     message => sub{message_ftp_upload(@_)}
   },
-  {
-    title   => 'Upload to GitHub',
+  'Upload to GitHub' => {
     verify  => sub{verify_github_upload(@_)},
     message => sub{message_github_upload(@_)}
-   },
-  {
-    title   => 'Update opendds.org front page',
+  },
+  'Update opendds.org front page' => {
     verify  => sub{verify_update_opendds_org_front(@_)},
     message => sub{message_update_opendds_org_front(@_)}
   },
-  {
-    title   => 'Update opendds.org news page',
+  'Update opendds.org news page' => {
     verify  => sub{verify_update_opendds_org_news(@_)},
     message => sub{message_update_opendds_org_news(@_)}
   },
-  {
-    title   => 'Email DDS-Release-Announce list',
+  'Email DDS-Release-Announce list' => {
     verify  => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
     message => sub{remedy_email_dds_release_announce(@_)}
   }
+);
+
+my @ordered_steps = (
+  'Update VERSION',
+  'Update Version.h',
+  'Update PROBLEM-REPORT-FORM',
+  'Verify remote arg',
+  'Create ChangeLog',
+  'Add NEWS Section',
+  'Update NEWS Section',
+  'Commit changes to GIT',
+  'Create git tag',
+  'Verify changes pushed',
+  'Clone tag',
+  'Move changelog',
+  'Create unix release archive',
+  'Create windows release archive',
+  'Generate doxygen',
+  'Create unix doxygen archive',
+  'Create windows doxygen archive',
+  'Create md5 checksum',
+  'Upload to FTP Site',
+  'Upload to GitHub',
+  'Update opendds.org front page',
+  'Update opendds.org news page',
+  'Email DDS-Release-Announce list',
 );
 
 my @t = gmtime;
@@ -1067,10 +1183,12 @@ my %settings = (
   nodevguide => any_arg_is("--no-devguide"),
   step       => numeric_arg_value("--step"),
   remote     => string_arg_value("--remote") || "origin",
+  branch     => string_arg_value("--branch") || "master",
   version    => $version,
   git_tag    => "DDS-$version",
-  clone_dir  => "../OpenDDS-Release-$version/OpenDDS-$version",
-  parent_dir => "../OpenDDS-Release-$version",
+  clone_dir_name => "OpenDDS-$version",
+  clone_dir  => "../OpenDDS-Release/OpenDDS-$version",
+  parent_dir => "../OpenDDS-Release",
   tar_src    => "OpenDDS-$version.tar",
   tgz_src    => "OpenDDS-$version.tar.gz",
   zip_src    => "OpenDDS-$version.zip",
@@ -1093,9 +1211,21 @@ my $half_divider = "-----------------------------------------";
 my $divider = "$half_divider$half_divider";
 
 sub run_step {
-  my ($step_count, $step) = @_;
+  my ($settings, $step_count, $title, $release_step_hash, $steps_run) = @_;
+  my $step = $release_step_hash->{$title};
+
+  if (!$settings->{list}) {
+    if ($step->{prereqs}) {
+      for my $prereq ($step->{prereqs}) {
+        unless ($steps_run->{$prereq}) {
+          run_step($settings, 'PREREQ', $prereq, $release_step_hash, $steps_run);
+        }
+      }
+    }
+  }
+
   # Output the title
-  print "$step_count: $step->{title}\n";
+  print "$step_count: $title\n";
   # Exit if we are just listing
   return if ($settings{list});
   # Run the verification
@@ -1105,34 +1235,40 @@ sub run_step {
     print "  " . $step->{message}(\%settings) . "\n";
 
     my $remedied = 0;
-    my $skipped  = 0;
-    # If a remedy is available
-    if ($step->{remedy}) {
-      # If --remedy is set
-      if ($settings{remedy}) {
-        # Try remediation
-        if (!$step->{remedy}(\%settings)) {
-          print "  !!!! Remediation did not complete\n";
-        # Reverify
-        } elsif (!$step->{verify}(\%settings)) {
-          print "  !!!! Remediation did not pass verification\n";
-        } else {
-          $remedied = 1;
-        }
-      # Else --remedy is  NOT set
-      } elsif ($settings{force} && $step->{skip}) {
-        $skipped = 1;
+    my $forced  = 0;
+    # If a remedy is available and --remedy specified
+    if ($step->{remedy} && $settings{remedy}) {
+      # Try remediation
+      if (!$step->{remedy}(\%settings)) {
+        print "  !!!! Remediation did not complete\n";
+      # Reverify
+      } elsif (!$step->{verify}(\%settings)) {
+        print "  !!!! Remediation did not pass verification\n";
       } else {
-        print "  Use --remedy to attempt a fix\n" if $step->{remedy};
+        $remedied = 1;
       }
-
-    # Else there is no remedy
-    } elsif ($settings{force} && $step->{skip}) {
-      $skipped = 1;
-    } else {
-      print "  Use --force to continue\n" if $step->{skip};
     }
-    die unless ($remedied || $skipped);
+
+    # If not remedied, try forcing
+    if (!$remedied && $step->{force} && $settings{force}) {
+      if ($step->{force}(\%settings)) {
+        $forced = 1;
+      } else {
+        print "  !!!! Forcing did not complete\n";
+      }
+    }
+
+    if (!($remedied || $forced)) {
+      if ($step->{remedy} && !$settings{remedy}) {
+        print "  Use --remedy to attempt a fix\n";
+      }
+      if ($step->{force} && !$settings{force}) {
+        print "  Use --force to force past this step\n";
+      }
+    }
+
+    die unless ($remedied || $forced);
+    $steps_run->{$title} = 1;
     print "$divider\n";
   }
 }
@@ -1155,13 +1291,16 @@ sub validate_version_arg {
 if ($settings{list} || validate_version_arg()) {
   if (my $step_num = $settings{step}) {
     # Run one step
-    run_step($step_num, $release_steps[$step_num - 1]);
+    my $step_name = $ordered_steps[$step_num - 1];
+    run_step(\%settings,
+             $step_num, $step_name, \%release_step_hash, \%steps_run);
   } else {
     my $step_count = 0;
 
-    for my $step (@release_steps) {
+    for my $step_name (@ordered_steps) {
       ++$step_count;
-      run_step($step_count, $step);
+      run_step(\%settings,
+               $step_count, $step_name, \%release_step_hash, \%steps_run);
     }
   }
 } else {

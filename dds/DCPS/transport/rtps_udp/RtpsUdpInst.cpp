@@ -53,7 +53,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
                            local_address_s);
   if (!local_address_s.is_empty()) {
     local_address_.set(local_address_s.c_str());
-    local_address_config_str_ += local_address_s.c_str();
+    local_address_config_str_ += ACE_TEXT_ALWAYS_CHAR(local_address_s.c_str());
   }
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
