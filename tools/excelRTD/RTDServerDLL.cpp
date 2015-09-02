@@ -198,7 +198,7 @@ STDAPI DllRegisterServer(void)
       //Set the value
       if (err == ERROR_SUCCESS){
          err = RegSetValueExA( hkey, pszValueName, 0, REG_SZ,
-            (const BYTE*)pszValue, (strlen(pszValue) + 1));
+            (const BYTE*)pszValue, static_cast<DWORD>(strlen(pszValue) + 1));
          RegCloseKey(hkey);
       }
 

@@ -438,10 +438,9 @@ Config::loadParticipant(
   valueString.clear();
   heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->qos.user_data.value.length( valueString.length());
     profile->qos.user_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -527,10 +526,9 @@ Config::loadTopic(
   // TopicData                           = <string>
   heap.get_string_value( sectionKey, TOPICDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->qos.topic_data.value.length( valueString.length());
     profile->qos.topic_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -1166,10 +1164,9 @@ Config::loadPublisher(
   valueString.clear();
   heap.get_string_value( sectionKey, GROUPDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->qos.group_data.value.length( valueString.length());
     profile->qos.group_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -1758,10 +1755,9 @@ Config::loadWriter(
   heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->mask |= SetUserDataQos;
-    profile->qos.user_data.value.length( valueString.length());
     profile->qos.user_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -1998,10 +1994,9 @@ Config::loadSubscriber(
   valueString.clear();
   heap.get_string_value( sectionKey, GROUPDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->qos.group_data.value.length( valueString.length());
     profile->qos.group_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -2426,10 +2421,9 @@ Config::loadReader(
   heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->mask |= SetUserDataQos;
-    profile->qos.user_data.value.length( valueString.length());
     profile->qos.user_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )

@@ -160,7 +160,7 @@ TcpPublisher::send_bytes(unsigned num_bytes, const char* bytes)
     throw TestException();
   } // if (subscriber_.send_n(bytes, num_bytes) == -1)
 
-  int result;
+  ssize_t result;
 
   if ((result = subscriber_.recv(buffer_.wr_ptr(), 4)) == 0) {
     // The publisher has disconnected - check if this was unexpected.
@@ -175,7 +175,7 @@ TcpPublisher::send_bytes(unsigned num_bytes, const char* bytes)
   else if (result != 4) {
     ACE_ERROR((LM_ERROR,
                "(%P|%t) Failed to read in the required %d bytes. Read %d bytes.\n",
-                       4, result));
+               4, static_cast<int>(result)));
     throw TestException();
   }
 

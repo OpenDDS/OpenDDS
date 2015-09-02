@@ -168,7 +168,7 @@ QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos (DDS_QOS_TYPE& dds_qos, 
         }
       if (xml_qos->history ().depth_p ())
         {
-          dds_qos.history.depth = xml_qos->history ().depth ();
+          dds_qos.history.depth = static_cast<CORBA::Long>(xml_qos->history().depth());
 
           if (OpenDDS::DCPS::DCPS_debug_level > 9)
             {

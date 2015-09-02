@@ -6,7 +6,7 @@ TestStats*     TcpSubscriber::stats_      = 0;
 ACE_Reactor*   TcpSubscriber::r_          = 0;
 TcpSubscriber::TestAllocator*
                TcpSubscriber::allocator_  = 0;
-unsigned       TcpSubscriber::block_size_ = 0;
+uintptr_t      TcpSubscriber::block_size_ = 0;
 
 
 TcpSubscriber::TcpSubscriber()
@@ -112,7 +112,7 @@ TcpSubscriber::handle_input(ACE_HANDLE)
       // the remainder bytes, we need to move the remainder_ content
       // to the beginning of the underlying buffer - adjusting the
       // raw_block accordingly.
-      unsigned bytes_used = remainder_->wr_ptr() - remainder_->base();
+      uintptr_t bytes_used = remainder_->wr_ptr() - remainder_->base();
       if (bytes_used > (TcpSubscriber::block_size_ / 2)) {
         raw_block->rd_ptr(raw_block->base());
         raw_block->wr_ptr(raw_block->base());
@@ -127,10 +127,10 @@ TcpSubscriber::handle_input(ACE_HANDLE)
   remainder_ = 0;
 
   // We need to receive as many bytes as possible into the raw block.
-  unsigned num_bytes_left = TcpSubscriber::block_size_ -
+  uintptr_t num_bytes_left = TcpSubscriber::block_size_ -
                             (raw_block->wr_ptr() - raw_block->base());
 
-  int result;
+  ssize_t result;
 
   if ((result = peer().recv(raw_block->wr_ptr(), num_bytes_left)) == 0) {
     // The publisher has disconnected - check if this was unexpected.
@@ -155,7 +155,7 @@ TcpSubscriber::handle_input(ACE_HANDLE)
   }
 
   // Move the write pointer forward the number of bytes we read.
-  raw_block->wr_ptr(result);
+  raw_block->wr_ptr(static_cast<size_t>(result));
 
   // Create any ACE_Message_Block pairs (header + payload), and insert
   // them into the msg_list.
@@ -166,7 +166,7 @@ TcpSubscriber::handle_input(ACE_HANDLE)
   while (1) {
     // Check if a complete header exists in the the raw_block.
     //   If not, we are done collecting pairs.
-    unsigned raw_size = raw_block->wr_ptr() - raw_block->rd_ptr();
+    uintptr_t raw_size = raw_block->wr_ptr() - raw_block->rd_ptr();
 
     if (header_size > raw_size) {
       // We are done.
@@ -221,7 +221,7 @@ TcpSubscriber::handle_input(ACE_HANDLE)
   // Release the raw_block now.
   raw_block->release();
 
-  packet_count_ += msg_list.size();
+  packet_count_ += static_cast<unsigned int>(msg_list.size());
 
   // Provide the TestStats object with the list.
   //

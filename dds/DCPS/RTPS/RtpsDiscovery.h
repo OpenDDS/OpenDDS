@@ -90,7 +90,7 @@ public:
   }
 
   unsigned char ttl() const { return ttl_; }
-  void ttl(u_short time_to_live) {
+  void ttl(unsigned char time_to_live) {
     ttl_ = time_to_live;
   }
 

@@ -224,7 +224,7 @@ TestDriver::run_i()
 
   unsigned total_packets = num_packets_ + 500;
 
-  int result;
+  ssize_t result;
   for (unsigned pkt_cnt = 0; pkt_cnt < total_packets; ++pkt_cnt)
   {
 
@@ -244,13 +244,13 @@ TestDriver::run_i()
       // Something bad happened
       ACE_ERROR((LM_ERROR,
                  "(%P|%t) read %d bytes but expected %d\n",
-                 result, num_bytes_per_packet_));
+                 static_cast<int>(result), num_bytes_per_packet_));
       throw TestException();
     }
 
     // only send 4 back
     result = 4;
-    peer.send_n(buffer.wr_ptr(), result);
+    peer.send_n(buffer.wr_ptr(), static_cast<size_t>(result));
   }
 
   // Close the acceptor so that no more clients will be taken in.
