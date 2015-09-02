@@ -95,8 +95,7 @@ protected:
 
   void fini();
 
-  virtual void init_i(int /*argc*/, ACE_TCHAR*[] /*argv*/) { init_i(); }
-  virtual void init_i() {};
+  virtual void init_i(int /*argc*/, ACE_TCHAR*[] /*argv*/) {}
 
   virtual void fini_i() = 0;
 

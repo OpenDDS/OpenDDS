@@ -241,12 +241,12 @@ unsigned int
 FreeIndex::node_index(size_t size)
 {
   // Use shifting to perform log base 2 of size
-  //   start by using min + 1 (+1 because  min is a power of 2 whch is already
+  //   start by using min + 1 (+1 because min is a power of 2 whch is already
   //   one bit)
   size_t size_copy = size >> (min_index_pow + 1);
   unsigned int index = 0;
-  unsigned int max_index = max_index_pow - min_index_pow;
-  while (size_copy && (index < max_index)) {
+  unsigned int max_idx = max_index_pow - min_index_pow;
+  while (size_copy && (index < max_idx)) {
     ++index;
     size_copy = size_copy >> 1;
   }

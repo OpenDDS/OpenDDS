@@ -54,7 +54,7 @@ TestCase::init_datareader(DDS::DataReaderQos& qos,
 }
 
 void
-TestCase::init_i() {
+TestCase::init_i(int, ACE_TCHAR*[]) {
   publisher_  = new TestPublisherType(*this);
   subscriber_ = new TestSubscriberType(*this);
   publisher_->init_i();

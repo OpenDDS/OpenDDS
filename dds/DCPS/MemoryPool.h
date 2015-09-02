@@ -143,7 +143,7 @@ private:
   };
   enum {
     min_index = 8,    // 2^^3
-    max_index = 4096, // 2^^12
+    max_index = 4096  // 2^^12
   };
 
   size_t size_;               ///< Number of index nodes
