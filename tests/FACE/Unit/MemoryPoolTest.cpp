@@ -968,7 +968,7 @@ private:
     size_t oh_bytes = 0;
     size_t free_count = 0;
     unsigned char* pool_end = pool.pool_ptr_ + pool.pool_size_;
-    bool prev_was_free;
+    bool prev_was_free = false;
     size_t index = 0;
 
     typedef std::map<FreeHeader*, int> FreeMap;
