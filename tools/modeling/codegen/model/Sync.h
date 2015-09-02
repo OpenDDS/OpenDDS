@@ -5,12 +5,18 @@
 #include "dds/DdsDcpsC.h"
 #include <ace/Condition_T.h>
 
+#if defined _MSC_VER && _MSC_VER >= 1900
+#define OPENDDS_NOEXCEPT_FALSE noexcept(false)
+#else
+#define OPENDDS_NOEXCEPT_FALSE
+#endif
+
 namespace OpenDDS {
   namespace Model {
     class OpenDDS_Model_Export WriterSync {
     public:
       WriterSync(DDS::DataWriter_var writer, unsigned int num_readers = 1);
-      ~WriterSync();
+      ~WriterSync() OPENDDS_NOEXCEPT_FALSE;
       static int wait_match(const DDS::DataWriter_var& writer, unsigned int num_readers = 1);
       static int wait_ack(const DDS::DataWriter_var& writer);
 
@@ -23,7 +29,7 @@ namespace OpenDDS {
     class OpenDDS_Model_Export ReaderSync {
     public:
       ReaderSync(DDS::DataReader_var reader, unsigned int num_writers = 1);
-      ~ReaderSync();
+      ~ReaderSync() OPENDDS_NOEXCEPT_FALSE;
       static int wait_unmatch(const DDS::DataReader_var& reader, unsigned int num_writers = 1);
     private:
       DDS::DataReader_var reader_;
