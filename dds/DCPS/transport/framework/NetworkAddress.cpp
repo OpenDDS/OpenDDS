@@ -315,13 +315,13 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
   if (addrs.empty()) {
     ACE_INET_Addr addr;
     static const char local[] = { 1, 0, 0, 127 };
-    addr->set_address(local, sizeof local);
+    addr.set_address(local, sizeof local);
     addrs.push_back(addr);
   }
 #else
   if (addrs.empty()) {
     ACE_ERROR((LM_ERROR,
-      "(%P|%t) ERROR: failed to find useable interface address\n"));
+      "(%P|%t) ERROR: failed to find usable interface address\n"));
   }
 #endif
 }
