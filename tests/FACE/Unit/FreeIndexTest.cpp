@@ -212,7 +212,7 @@ private:
     next_alloc_ = pool_ptr_;
     largest_free_ = reinterpret_cast<FreeHeader*>(pool_ptr_);
     if (free_size) {
-      largest_free_->init_free_block(free_size + sizeof(AllocHeader));
+      largest_free_->init_free_block(static_cast<unsigned int>(free_size + sizeof(AllocHeader)));
       index.init(largest_free_);
       next_alloc_ += free_size + (sizeof(AllocHeader)*2) + 32;
     }

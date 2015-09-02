@@ -305,7 +305,7 @@ MemoryPool::MemoryPool(unsigned int pool_size, size_t granularity)
 {
   AllocHeader* the_pool = new (pool_ptr_) AllocHeader();
   FreeHeader* first_free = reinterpret_cast<FreeHeader*>(the_pool);
-  first_free->init_free_block(pool_size_);
+  first_free->init_free_block(static_cast<unsigned int>(pool_size_));
   largest_free_ = first_free;
   free_index_.init(first_free);
   lwm_free_bytes_ = largest_free_->size();
@@ -510,7 +510,7 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
     // Adjust current adjacent block (after free block)
     AllocHeader* next_adjacent = free_block->next_adjacent();
     if (includes(next_adjacent)) {
-      next_adjacent->set_prev_size(alloc_size);
+      next_adjacent->set_prev_size(static_cast<int>(alloc_size));
     }
 
     // Always remove, resize, and reinsert to make sure free list and free
@@ -527,7 +527,7 @@ MemoryPool::allocate(FreeHeader* free_block, size_t alloc_size)
     // Allocate adjacent block (at end of existing block)
     alloc_block->set_size(alloc_size);
     alloc_block->set_allocated();
-    alloc_block->set_prev_size(remainder);
+    alloc_block->set_prev_size(static_cast<int>(remainder));
     return alloc_block->ptr();
   // Else we ARE allocating the whole block
   } else {

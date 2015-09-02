@@ -231,7 +231,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::open passive handle=%d.\n",
-            int(get_handle())), 2);
+            static_cast<int>(intptr_t(get_handle()))), 2);
 
   return 0;
 }

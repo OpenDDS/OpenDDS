@@ -273,19 +273,17 @@ Subscriber::run (void)
 
       ACE_Time_Value tv;
       participant_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Topic, topic_count_, tv.msec());
+      sync_client_->publish(SyncExt::Topic, static_cast<int>(topic_count_), tv.msec());
       //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d participants in %d secs.\n"
       //, participant_count_, tv.sec()));
 
       topic_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Participant, participant_count_
-                             , tv.msec());
+      sync_client_->publish(SyncExt::Participant, static_cast<int>(participant_count_), tv.msec());
       //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d topics in %d secs.\n"
       //, topic_count_, tv.sec()));
 
       sub_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Subscriber, reader_count_
-                             , tv.msec());
+      sync_client_->publish(SyncExt::Subscriber, static_cast<int>(reader_count_), tv.msec());
       //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d subscribers in %d secs.\n"
       //, reader_count_, tv.sec()));
 

@@ -42,7 +42,7 @@ class TcpSubscriber : public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH>
     static TestStats*     stats_;
     static ACE_Reactor*   r_;
     static TestAllocator* allocator_;
-    static unsigned       block_size_;
+    static uintptr_t      block_size_;
 };
 
 #endif

@@ -59,7 +59,7 @@ class TestStats
       //   is a header/payload pair of Message Blocks and represents one
       //   packet), and, if these are the last packets that we expect,
       //   capture the stop time.
-      unsigned num_msgs = msg_list.size();
+      unsigned int num_msgs = static_cast<unsigned int>(msg_list.size());
       packet_count_ += num_msgs;
 
       if (all_packets_received()) { stop_time_  = ACE_OS::gettimeofday(); }

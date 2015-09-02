@@ -25,11 +25,11 @@ DWORD WINAPI RealTimeDataThread( LPVOID pMarshalStream)
       hr = pRTDUpdate->put_HeartbeatInterval( 1200 );
 
       //Initiate a timer
-      UINT timerID = SetTimer( NULL, 0, 1000, NULL );
+      UINT_PTR timerID = SetTimer( NULL, 0, 1000, NULL );
 
       //Spin a message loop so the thread stays alive, and can receive commands
       //from the parent thread.
-      dwRetVal = MessageLoop();
+      dwRetVal = static_cast<DWORD>(MessageLoop());
 
       //Kill the timer
       KillTimer( NULL, timerID );

@@ -102,7 +102,7 @@ public:
   /** Get this node's free block */
   FreeHeader* ptr() { return ptr_; }
   /** Get this node's minimum size */
-  unsigned int size() const { return size_; }
+  unsigned int size() const { return static_cast<unsigned int>(size_); }
 
 private:
   size_t size_;       ///< size of buffer

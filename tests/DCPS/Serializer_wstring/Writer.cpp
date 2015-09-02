@@ -121,12 +121,12 @@ void Writer::set_message (Messenger::Message& message, const int& count)
   {
     case 9:
       {
-        size_t len = ACE_OS::strlen (wcharseq);
+        CORBA::ULong len = static_cast<CORBA::ULong>(ACE_OS::strlen(wcharseq));
         message.bounded_wchar_seq = BoundedWCharSeq (len + 1, wcharseq);
       }
     case 8:
       {
-        size_t len = ACE_OS::strlen (charseq);
+        CORBA::ULong len = static_cast<CORBA::ULong>(ACE_OS::strlen(charseq));
         message.bounded_char_seq = BoundedCharSeq (len + 1, charseq);
       }
     case 7:
@@ -141,12 +141,12 @@ void Writer::set_message (Messenger::Message& message, const int& count)
       }
     case 5:
       {
-        size_t len = ACE_OS::strlen (wcharseq);
+        CORBA::ULong len = static_cast<CORBA::ULong>(ACE_OS::strlen(wcharseq));
         message.wchar_seq.replace (len + 1, len + 1, wcharseq);
       }
     case 4:
       {
-        size_t len = ACE_OS::strlen (charseq);
+        CORBA::ULong len = static_cast<CORBA::ULong>(ACE_OS::strlen(charseq));
         message.char_seq.replace (len + 1, len + 1, charseq);
       }
     case 3:

@@ -979,7 +979,7 @@ private:
       FreeHeader* free_header = alloc->is_free() ?
             reinterpret_cast<FreeHeader*>(alloc) : NULL;
       if (free_header) {
-        free_map[free_header] = index;
+        free_map[free_header] = static_cast<int>(index);
       }
       alloc = alloc->next_adjacent();
       ++index;

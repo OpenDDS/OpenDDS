@@ -27,3 +27,9 @@ feature(vc_avoid_this_in_initializer_warnings) {
     compile_flags += /wd4355
   }
 }
+
+feature(vc_avoid_name_len_exceeded_warnings) {
+  specific(vc10, vc11, vc12, vc14) {
+    DisableSpecificWarnings += 4503
+  }
+}

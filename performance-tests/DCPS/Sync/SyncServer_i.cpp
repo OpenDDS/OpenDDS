@@ -94,7 +94,8 @@ SyncServer_i::register_me (::Sync::Role role, ::Sync::Client_ptr callback,
     }
 
   Sync::Client_ptr cl = Sync::Client::_duplicate (callback);
-  ClientInfo cl_info (count_, cl, role, -1);
+  const Sync::Id count = static_cast<Sync::Id>(count_);
+  ClientInfo cl_info(count, cl, role, -1);
 
   switch (role)
     {
@@ -105,10 +106,9 @@ SyncServer_i::register_me (::Sync::Role role, ::Sync::Client_ptr callback,
         return;
       }
 
-      if (subs_.insert (subs_.end()
-                        , ClientInfos::value_type(count_, cl_info))
-          != subs_.end()){
-        id = count_;
+      if (subs_.insert(subs_.end(), ClientInfos::value_type(count, cl_info))
+          != subs_.end()) {
+        id = count;
       }
       break;
     case Sync::Pub:
@@ -118,10 +118,9 @@ SyncServer_i::register_me (::Sync::Role role, ::Sync::Client_ptr callback,
         return;
       }
 
-      if (pubs_.insert (pubs_.end()
-                        , ClientInfos::value_type(count_, cl_info))
-          != pubs_.end()){
-        id = count_;
+      if (pubs_.insert(pubs_.end(), ClientInfos::value_type(count, cl_info))
+          != pubs_.end()) {
+        id = count;
       }
       break;
     }

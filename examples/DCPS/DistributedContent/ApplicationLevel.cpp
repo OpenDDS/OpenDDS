@@ -244,7 +244,7 @@ ApplicationLevel::publish_file (const ACE_TString& filename)
     else
     {
       // intialize the data
-      diff.difference.length(size);
+      diff.difference.length(static_cast<CORBA::ULong>(size));
 
       size_t read_size = fread(diff.difference.get_buffer(false), 1, size, file_handle);
       if (size != read_size)
