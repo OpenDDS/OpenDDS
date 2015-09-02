@@ -12,7 +12,7 @@ extern int num_deleted_connections;
 
 // Implementation skeleton constructor
 DataWriterListenerImpl::DataWriterListenerImpl()
-  : num_reads_(0)
+  : 
 {
 }
 

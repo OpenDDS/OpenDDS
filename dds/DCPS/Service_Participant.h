@@ -544,11 +544,13 @@ private:
   /// Scheduler time slice from configuration file.
   ACE_Time_Value schedulerQuantum_;
 
+#ifdef OPENDDS_SAFETY_PROFILE
   /// Pool size from configuration file.
   size_t pool_size_;
 
   /// Pool granularity from configuration file.
   size_t pool_granularity_;
+#endif
 
   /// Scheduling policy value used for setting thread priorities.
   long scheduler_;

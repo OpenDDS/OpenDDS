@@ -46,7 +46,7 @@ namespace yard
         Iterator End() { return mEnd; }
 
         template<typename T>
-        void OutputLocation(const T& x)
+        void OutputLocation(const T& /*x*/)
         { }
 
     protected:

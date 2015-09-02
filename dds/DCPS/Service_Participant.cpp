@@ -173,8 +173,10 @@ Service_Participant::Service_Participant()
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
     schedulerQuantum_(ACE_Time_Value::zero),
+#ifdef OPENDDS_SAFETY_PROFILE
     pool_size_(1024*1024*40),
     pool_granularity_(8),
+#endif
     scheduler_(-1),
     priority_min_(0),
     priority_max_(0),

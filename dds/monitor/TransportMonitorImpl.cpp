@@ -17,10 +17,9 @@ namespace DCPS {
 TransportMonitorImpl::TransportReportVec TransportMonitorImpl::queue_;
 ACE_Recursive_Thread_Mutex TransportMonitorImpl::queue_lock_;
 
-TransportMonitorImpl::TransportMonitorImpl(TransportImpl* transport,
+TransportMonitorImpl::TransportMonitorImpl(TransportImpl* /*transport*/,
               OpenDDS::DCPS::TransportReportDataWriter_ptr transport_writer)
-  : transport_(transport),
-    transport_writer_(TransportReportDataWriter::_duplicate(transport_writer))
+  : transport_writer_(TransportReportDataWriter::_duplicate(transport_writer))
 {
   char host[256];
   ACE_OS::hostname(host, 256);

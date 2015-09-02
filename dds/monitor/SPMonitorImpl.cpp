@@ -18,8 +18,8 @@ namespace DCPS {
 
 
 SPMonitorImpl::SPMonitorImpl(MonitorFactoryImpl* monitor_factory,
-                             Service_Participant* sp)
-    : sp_(sp),
+                             Service_Participant* /*sp*/)
+    : 
       monitor_factory_(monitor_factory)
 {
   char host[256];

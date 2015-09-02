@@ -35,7 +35,6 @@ static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);
 
 const int NUM_INSTANCE = 2;
-const int MESG_RECEIVE_DURATION = 5;
 
 // Set up a 5 second recurring deadline.
 static DDS::Duration_t const DEADLINE_PERIOD =

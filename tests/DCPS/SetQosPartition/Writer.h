@@ -27,8 +27,6 @@ private:
 
   // The lock used to synchronize the two write threads.
   ACE_Thread_Mutex lock_;
-  // The flag used to synchronize the two write threads.
-  bool start_;
 };
 
 #endif /* WRITER_H */

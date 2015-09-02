@@ -24,7 +24,6 @@ using namespace OpenDDS::DCPS;
 const long  MY_DOMAIN   = 411;
 const char* MY_TOPIC    = "topic_foo";
 const char* MY_TYPE     = "type_foo";
-const size_t DEFAULT_NUM_CHUNKS = 20;
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
