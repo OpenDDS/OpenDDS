@@ -14,7 +14,7 @@ writer_(writer)
   }
 }
 
-OpenDDS::Model::WriterSync::~WriterSync()
+OpenDDS::Model::WriterSync::~WriterSync() OPENDDS_NOEXCEPT_FALSE
 {
   if (wait_ack(writer_)) {
     throw std::runtime_error("wait_ack failure");
@@ -141,7 +141,7 @@ num_writers_(num_writers)
 {
 }
 
-OpenDDS::Model::ReaderSync::~ReaderSync()
+OpenDDS::Model::ReaderSync::~ReaderSync() OPENDDS_NOEXCEPT_FALSE
 {
   if (wait_unmatch(reader_, num_writers_)) {
     throw std::runtime_error("wait_unmatch failure");
