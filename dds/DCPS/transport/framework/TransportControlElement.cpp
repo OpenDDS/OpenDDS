@@ -15,11 +15,10 @@
 
 OpenDDS::DCPS::TransportControlElement::TransportControlElement(
   const ACE_Message_Block* msg_block,
-  const RepoId& pub_id,
+  const RepoId& /*pub_id*/,
   bool owner
 ) : TransportQueueElement(1),
     msg_( ACE_Message_Block::duplicate(msg_block)),
-    pub_id_( pub_id),
     owner_( owner)
 {
   DBG_ENTRY_LVL("TransportControlElement","TransportControlElement",6);

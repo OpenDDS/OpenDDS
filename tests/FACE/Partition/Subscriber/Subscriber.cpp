@@ -13,7 +13,7 @@
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   FACE::RETURN_CODE_TYPE status = FACE::RC_NO_ERROR;
-  FACE::CONNECTION_ID_TYPE connId;
+  FACE::CONNECTION_ID_TYPE connId = 0;
   FACE::MESSAGE_SIZE_TYPE size;
   int part = atoi(argv[1]);
   bool partitions_received[] = { false, false };

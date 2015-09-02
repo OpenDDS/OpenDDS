@@ -95,8 +95,6 @@ namespace DCPS {
 
 int Service_Participant::zero_argc = 0;
 
-const int DEFAULT_BIT_TRANSPORT_PORT = 0; // let the OS pick the port
-
 const size_t DEFAULT_NUM_CHUNKS = 20;
 
 const size_t DEFAULT_CHUNK_MULTIPLIER = 10;

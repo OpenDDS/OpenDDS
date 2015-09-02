@@ -96,7 +96,6 @@ AckDataReaderListenerImpl::AckDataReaderListenerImpl(CORBA::Long size)
    dr_servant_ (0),
    dw_servant_ (0),
    handle_ (),
-   size_ (size),
    sample_num_(1),
    done_ (0),
    use_zero_copy_(false)
