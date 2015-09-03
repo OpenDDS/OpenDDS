@@ -14,7 +14,6 @@ class PubDriver;
 class Writer : public ACE_Task_Base
 {
 public:
-
   Writer (PubDriver*            pubdriver,
           ::DDS::DataWriter_ptr writer,
           int num_thread_to_write = 1,
