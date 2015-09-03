@@ -244,7 +244,7 @@ void run_sample_list_test ()
   ssize_t i;
   for (i = 0; i < 3; i ++)
   {
-    repoId.entityId.entityKey[2] = i;
+    repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     sample[i]
       = new DataSampleElement(repoId, 0, 0, 0, 0);
     list.enqueue_tail(sample[i]);
@@ -332,7 +332,7 @@ void run_next_sample_test (ssize_t size)
 
   for (ssize_t i = 0; i < size; i ++)
   {
-    repoId.entityId.entityKey[2] = i;
+    repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
       = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
@@ -380,7 +380,7 @@ void run_next_sample_test (ssize_t size)
       ACE_TEXT("(list.dequeue_head_next_sample (sample) == true)")
       ACE_TEXT("\n")
     ));
-    repoId.entityId.entityKey[2] = i;
+    repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_sample_test: ")
@@ -424,7 +424,7 @@ void run_next_send_sample_test (ssize_t size)
 
   for (ssize_t i = 0; i < pub_id_middle; i ++)
   {
-    repoId.entityId.entityKey[2] = i;
+    repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
       = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     list.enqueue_tail (sample);
@@ -432,7 +432,7 @@ void run_next_send_sample_test (ssize_t size)
 
   for (ssize_t i = pub_id_middle; i < size; i ++)
   {
-    repoId.entityId.entityKey[2] = i;
+    repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
       = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
@@ -487,7 +487,7 @@ void run_next_send_sample_test (ssize_t size)
       ACE_TEXT("(list.dequeue_head_next_send_sample (sample) == true)")
       ACE_TEXT("\n")
     ));
-    repoId.entityId.entityKey[2] = i;
+    repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_send_sample_test: ")
@@ -529,7 +529,7 @@ void run_next_instance_sample_test (ssize_t size)
 
   for (ssize_t i = 0; i < size; i ++)
   {
-    repoId.entityId.entityKey[2] = i;
+    repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     DataSampleElement* sample
       = new DataSampleElement(repoId, 0, 0, &trans_allocator, 0);
     if (i == pub_id_middle)
@@ -583,7 +583,7 @@ void run_next_instance_sample_test (ssize_t size)
       ACE_TEXT("(list.dequeue_head_next_instance_sample (sample) == true)")
       ACE_TEXT("\n")
     ));
-    repoId.entityId.entityKey[2] = i;
+    repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
     TEST_CHECK (sample->get_pub_id() == repoId);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) run_next_instance_sample_test: ")

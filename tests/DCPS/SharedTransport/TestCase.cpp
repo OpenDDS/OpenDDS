@@ -67,7 +67,7 @@ void TestCase::wait_for_subscribers()
 
   for (TestPublisherVector::iterator pub = publishers_.begin();
        pub != publishers_.end(); ++pub) {
-    (*pub)->wait_for_subscribers(count);
+    (*pub)->wait_for_subscribers(static_cast<CORBA::Long>(count));
   }
 }
 

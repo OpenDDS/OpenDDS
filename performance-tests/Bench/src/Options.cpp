@@ -482,10 +482,9 @@ Options::loadParticipant(
   valueString.clear();
   heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->qos.user_data.value.length( valueString.length());
     profile->qos.user_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -569,10 +568,9 @@ Options::loadTopic(
   // TopicData                           = <string>
   heap.get_string_value( sectionKey, TOPICDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->qos.topic_data.value.length( valueString.length());
     profile->qos.topic_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -1240,10 +1238,9 @@ Options::loadPublication(
   valueString.clear();
   heap.get_string_value( sectionKey, GROUPDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->publisherQos.group_data.value.length( valueString.length());
     profile->publisherQos.group_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -1747,10 +1744,9 @@ Options::loadPublication(
   heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->writerQosMask |= SetUserDataQos;
-    profile->writerQos.user_data.value.length( valueString.length());
     profile->writerQos.user_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -2360,10 +2356,9 @@ Options::loadSubscription(
   valueString.clear();
   heap.get_string_value( sectionKey, GROUPDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
-    profile->subscriberQos.group_data.value.length( valueString.length());
     profile->subscriberQos.group_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
@@ -2712,10 +2707,9 @@ Options::loadSubscription(
   heap.get_string_value( sectionKey, USERDATA_KEYNAME, valueString);
   if (valueString.length() > 0) {
     profile->readerQosMask |= SetUserDataQos;
-    profile->readerQos.user_data.value.length( valueString.length());
     profile->readerQos.user_data.value.replace(
-      valueString.length(),
-      valueString.length(),
+      static_cast<CORBA::ULong>(valueString.length()),
+      static_cast<CORBA::ULong>(valueString.length()),
       const_cast<CORBA::Octet*>(
         reinterpret_cast<const CORBA::Octet*>( valueString.c_str())
       )
