@@ -344,7 +344,7 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("set_socket_ttl: ")
-                        ACE_TEXT("failed to set IPV6 TTL: %C %p\n"),
+                        ACE_TEXT("failed to set IPV6 TTL: %d %p\n"),
                         ttl,
                         ACE_TEXT("ACE_OS::setsockopt(TTL)")),
                        false);
@@ -359,7 +359,7 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("set_socket_ttl: ")
-                      ACE_TEXT("failed to set TTL: %C %p\n"),
+                      ACE_TEXT("failed to set TTL: %d %p\n"),
                       ttl,
                       ACE_TEXT("ACE_OS::setsockopt(TTL)")),
                      false);
