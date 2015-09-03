@@ -48,8 +48,8 @@ sales@ociweb.com.
 ======================================================================
 * Features
 
-This release of OpenDDS is based on the DDS Specification formal/07-01-01
-(version 1.2).  It features the following transport protocols:
+This release of OpenDDS is based on the DDS Specification formal/2015-04-10
+(version 1.4).  It features the following transport protocols:
 
 ** TCP/IP
 ** UDP/IP
@@ -94,6 +94,11 @@ compile OpenDDS:
 *** TAO 2.2a patch 5
 *** TAO 2.3.1 (DOC Group)
 
+OpenDDS 3.7 is planned to be the final version to support the following 
+TAO branches:
+
+*** TAO 1.6a
+
 Note that the 1.6a, 2.0a, and 2.2a releases are from OCI and can be obtained
 from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
 http://download.dre.vanderbilt.edu/.
@@ -120,11 +125,11 @@ This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
 ** Red Hat EL 5, x86_64
-** Red Hat EL 6.2, x86_64
-** Red Hat EL 6.3, x86_64
+** Red Hat EL 6.6, x86_64
+** Red Hat EL 7.1, x86_64
 ** Fedora Core 6, x86
 ** Fedoras 12 x86_64
-** Ubuntu 12.04 LTS, x86_64
+** Ubuntu 14.04 LTS, x86_64
 ** openSUSE 11.4, x86_64
 
 Windows family:
@@ -133,8 +138,13 @@ Windows family:
 ** Windows Server 2008 R2 (64-bit)
 
 Others:
-** Android NDK
 ** SunOS 5.10 (Solaris 10) (SPARC)
+** Mac OSX 10.10 (Yosemite)
+
+OpenDDS 3.7 is planned to be the final version to support the following
+platforms:
+
+** Windows Server 2003
 
 ======================================================================
 * Compilers
