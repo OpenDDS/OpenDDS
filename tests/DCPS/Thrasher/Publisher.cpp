@@ -58,7 +58,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Spawn Participant threads
     ParticipantTask task(samples_per_thread);
 
-    task.activate(DEFAULT_FLAGS, num_threads);
+    task.activate(DEFAULT_FLAGS, static_cast<int>(num_threads));
     task.wait();
 
     // Clean-up!

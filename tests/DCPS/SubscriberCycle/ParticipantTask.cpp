@@ -86,7 +86,7 @@ ParticipantTask::svc()
     DDS::DataWriterQos writer_qos;
     publisher->get_default_datawriter_qos(writer_qos);
 
-    writer_qos.history.depth = samples_per_thread_;
+    writer_qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_);
 
     if (deadline_.sec > 0 || deadline_.nanosec > 0)
       {

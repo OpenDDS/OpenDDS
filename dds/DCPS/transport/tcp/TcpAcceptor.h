@@ -28,7 +28,7 @@ public:
   // Returns a reference that the caller becomes responsible for.
   TcpTransport* transport();
 
-  // This causes the Acceptor to drop its refernce to the
+  // This causes the Acceptor to drop its reference to the
   // TcpTransport object.
   void transport_shutdown();
 

@@ -17,7 +17,7 @@ public:
     DDS::DataReaderListener_ptr& listener,
     DDS::StatusMask& status);
 
-  virtual void init_i();
+  virtual void init_i(int, ACE_TCHAR*[]);
   virtual void fini_i();
   virtual int test();
 

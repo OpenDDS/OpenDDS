@@ -373,7 +373,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     WriterTask task(writers, participant, topic, reliable, total_readers);
-    task.activate(DEFAULT_FLAGS, writers.size());
+    task.activate(DEFAULT_FLAGS, static_cast<int>(writers.size()));
     task.wait();
 
     if (!reliable)

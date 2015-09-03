@@ -37,15 +37,14 @@ TransportConfig::sorted_insert(const TransportInst_rch& inst)
 }
 
 void
-TransportConfig::populate_locators(OpenDDS::DCPS::TransportLocatorSeq& trans_info) const
+TransportConfig::populate_locators(TransportLocatorSeq& trans_info) const
 {
   for (InstancesType::const_iterator pos = instances_.begin(), limit = instances_.end();
        pos != limit;
        ++pos) {
-    size_t idx = trans_info.length();
+    const CORBA::ULong idx = trans_info.length();
     trans_info.length(idx + 1);
-    size_t count = (*pos)->populate_locator(trans_info[idx]);
-    if (count == 0) {
+    if ((*pos)->populate_locator(trans_info[idx]) == 0) {
       trans_info.length(idx);
     }
   }

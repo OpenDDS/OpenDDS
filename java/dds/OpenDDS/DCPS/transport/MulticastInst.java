@@ -51,8 +51,8 @@ public class MulticastInst extends TransportInst {
     public native long getNakTimeout();
     public native void setNakTimeout(long nt);
 
-    public native int getTimeToLive();
-    public native void setTimeToLive(int ttl);
+    public native byte getTimeToLive();
+    public native void setTimeToLive(byte ttl);
 
     public native int getRcvBufferSize();
     public native void setRcvBufferSize(int rbs);

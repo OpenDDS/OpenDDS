@@ -102,7 +102,7 @@ public:
   /** Get this node's free block */
   FreeHeader* ptr() { return ptr_; }
   /** Get this node's minimum size */
-  unsigned int size() const { return size_; }
+  unsigned int size() const { return static_cast<unsigned int>(size_); }
 
 private:
   size_t size_;       ///< size of buffer
@@ -143,7 +143,7 @@ private:
   };
   enum {
     min_index = 8,    // 2^^3
-    max_index = 4096, // 2^^12
+    max_index = 4096  // 2^^12
   };
 
   size_t size_;               ///< Number of index nodes

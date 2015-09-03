@@ -255,19 +255,19 @@ Publisher::run (void)
 
       ACE_Time_Value tv;
       participant_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Topic, topic_count_, tv.msec());
+      sync_client_->publish (SyncExt::Topic, static_cast<int>(topic_count_), tv.msec());
       //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d participants in %d secs.\n"
       //, participant_count_, tv.sec()));
 
       topic_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Participant, participant_count_
-                             , tv.msec());
+      sync_client_->publish (SyncExt::Participant, static_cast<int>(participant_count_),
+                             tv.msec());
       //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d topics in %d secs.\n"
       //, topic_count_, tv.sec()));
 
       pub_timer.elapsed_time (tv);
-      sync_client_->publish (SyncExt::Publisher, writer_count_
-                             , tv.msec());
+      sync_client_->publish (SyncExt::Publisher, static_cast<int>(writer_count_),
+                             tv.msec());
       //ACE_DEBUG ((LM_DEBUG, "(%P|%t) Created %d publishers in %d secs.\n"
       //, writer_count_, tv.sec()));
 

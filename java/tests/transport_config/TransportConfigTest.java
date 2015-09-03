@@ -99,7 +99,7 @@ public class TransportConfigTest {
         mi.setNakDelayInterval(123);
         mi.setNakMax(5);
         mi.setNakTimeout(100);
-        mi.setTimeToLive(21);
+        mi.setTimeToLive((byte) 21);
         mi.setRcvBufferSize(1023);
 
         TransportInst ti2 = TheTransportRegistry.get_inst(ID);

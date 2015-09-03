@@ -532,7 +532,7 @@ STDMETHODIMP RTDServer::RefreshData( long *TopicCount,
   HRESULT hr = S_OK;
 
   //Set the TopicCount
-  *TopicCount = m_pTopicList.size();
+  *TopicCount = static_cast<long>(m_pTopicList.size());
 
 
   SAFEARRAYBOUND bounds[2];

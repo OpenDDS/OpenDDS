@@ -155,7 +155,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpDataLink::open: ")
-                      ACE_TEXT("failed to set TTL: %C\n"),
+                      ACE_TEXT("failed to set TTL: %d\n"),
                       config_->ttl_),
                      false);
   }

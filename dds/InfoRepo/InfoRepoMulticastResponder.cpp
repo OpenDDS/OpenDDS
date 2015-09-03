@@ -303,8 +303,7 @@ InfoRepoMulticastResponder::handle_input(ACE_HANDLE)
   // length as the first element, and ior itself as the second.)
 
   // Length of ior to be sent.
-  CORBA::Short data_len =
-    static_cast<CORBA::Short>(ACE_HTONS(ior.length() + 1));
+  CORBA::Short data_len = ACE_HTONS(static_cast<CORBA::Short>(ior.length()) + 1);
 
   // Vector to be sent.
   const int cnt = 2;

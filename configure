@@ -624,7 +624,7 @@ sub write_config_h {
   $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
   print $CFGH "#include \"ace/config-$cfg.h\"\n";
   if (defined $opts{'no-opendds-safety-profile'}) {
-    print $CFGH "#define ACE_FACE_SAFETY_EXTENDED\n";
+    print $CFGH "#define ACE_FACE_SAFETY_BASE\n";
   }
 
   close $CFGH;

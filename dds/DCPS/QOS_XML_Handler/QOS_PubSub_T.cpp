@@ -95,7 +95,7 @@ QOS_PubSub_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos (DDS_QOS_TYPE& dds_qos, const
     {
       if (xml_qos->partition ().name_p ())
         {
-          dds_qos.partition.name.length (xml_qos->partition ().name ().count_element ());
+          dds_qos.partition.name.length(static_cast<CORBA::ULong>(xml_qos->partition().name().count_element()));
           CORBA::ULong pos = 0;
           for (::dds::stringSeq::element_const_iterator it = xml_qos->partition ().name ().begin_element ();
                it != xml_qos->partition ().name ().end_element ();

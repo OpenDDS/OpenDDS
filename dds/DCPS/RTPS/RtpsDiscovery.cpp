@@ -92,7 +92,8 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       const OPENDDS_STRING& rtps_name = it->first;
 
       int resend;
-      u_short pb, dg, pg, d0, d1, dx, ttl;
+      u_short pb, dg, pg, d0, d1, dx;
+      unsigned char ttl;
       AddrVec spdp_send_addrs;
       OPENDDS_STRING default_multicast_group = "239.255.0.1" /*RTPS v2.1 9.6.1.4.1*/;
       OPENDDS_STRING mi, sla;
@@ -177,8 +178,10 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           }
         } else if (name == "TTL") {
           const OPENDDS_STRING& value = it->second;
-          has_ttl = DCPS::convertToInteger(value, ttl);
-          if (!has_ttl) {
+          unsigned short ttl_us;
+          has_ttl = DCPS::convertToInteger(value, ttl_us);
+          ttl = static_cast<unsigned char>(ttl_us);
+          if (!has_ttl || ttl_us > UCHAR_MAX) {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
                ACE_TEXT("Invalid entry (%C) for TTL in ")

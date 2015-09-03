@@ -45,7 +45,7 @@ private:
 
   CORBA::String_var type_name_;
 
-  OPENDDS_DELETED_COPY_CTOR_ASSIGN(TypeSupportImpl);
+  OPENDDS_DELETED_COPY_CTOR_ASSIGN(TypeSupportImpl)
 };
 
 }

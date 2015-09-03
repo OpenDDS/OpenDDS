@@ -39,7 +39,7 @@ QOS_DataWriter_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos (DDS_QOS_TYPE& dds_qos, c
 //     }
  if (xml_qos->ownership_strength_p ())
    {
-      dds_qos.ownership_strength.value = xml_qos->ownership_strength ().value ();
+      dds_qos.ownership_strength.value = static_cast<CORBA::Long>(xml_qos->ownership_strength().value());
 
       if (OpenDDS::DCPS::DCPS_debug_level > 9)
         {
