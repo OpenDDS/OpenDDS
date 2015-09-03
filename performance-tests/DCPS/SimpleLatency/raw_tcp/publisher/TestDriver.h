@@ -25,7 +25,6 @@ class TestDriver
     ACE_INET_Addr parse_address(const std::string& spec);
 
 
-    char     publisher_id_;
     unsigned num_packets_;
     char     data_size_;
 

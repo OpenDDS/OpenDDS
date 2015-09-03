@@ -15,8 +15,6 @@
 #include "tests/DCPS/LargeSample/MessengerTypeSupportC.h"
 #include "Writer.h"
 
-const int num_messages = 10;
-
 Writer::Writer(const Options& options, Writers& writers)
   : options_(options)
   , writers_(writers)

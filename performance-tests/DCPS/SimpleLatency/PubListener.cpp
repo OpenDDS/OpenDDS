@@ -90,13 +90,12 @@ static stats_type round_trip;
 extern long total_samples;
 
 // Implementation skeleton constructor
-AckDataReaderListenerImpl::AckDataReaderListenerImpl(CORBA::Long size)
+AckDataReaderListenerImpl::AckDataReaderListenerImpl(CORBA::Long /*size*/)
   :writer_ (),
    reader_ (),
    dr_servant_ (0),
    dw_servant_ (0),
    handle_ (),
-   size_ (size),
    sample_num_(1),
    done_ (0),
    use_zero_copy_(false)

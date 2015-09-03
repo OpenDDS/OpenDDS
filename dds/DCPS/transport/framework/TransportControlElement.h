@@ -61,9 +61,6 @@ private:
   /// The control message.
   ACE_Message_Block* msg_;
 
-  /// Publication Id of the originating publication.
-  RepoId pub_id_;
-
   /// Ownership flag.
   bool owner_;
 };

@@ -73,7 +73,6 @@ private:
 
   DDS::DataReader_var  reader_;
   long                 num_reads_;
-  const char*          reader_id_;
 
   bool  verify_result_;
 

@@ -29,7 +29,6 @@
 #include <cassert>
 using namespace std;
 
-static int const num_messages = 10;
 static ACE_Time_Value write_interval(0, 500000);
 
 static ACE_Time_Value SLEEP_DURATION(20);

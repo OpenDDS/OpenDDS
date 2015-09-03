@@ -41,7 +41,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   FACE::RETURN_CODE_TYPE status = FACE::RC_NO_ERROR;
   FACE::TS::Initialize("face_config.ini", status);
-  FACE::MESSAGE_SIZE_TYPE max_msg_size;
+  FACE::MESSAGE_SIZE_TYPE max_msg_size = 0;
 
   if (!status) {
     FACE::CONNECTION_DIRECTION_TYPE dir;

@@ -31,8 +31,6 @@ protected:
   virtual void unregister_worker_i();
 
 private:
-
-  PoolSynchStrategy* strategy_;
 };
 
 } // namespace DCPS

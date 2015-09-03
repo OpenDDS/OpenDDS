@@ -27,7 +27,6 @@ class TcpPublisher
   private:
 
     ACE_INET_Addr      subscriber_addr_;
-    unsigned           message_size_;
     ACE_SOCK_Stream    subscriber_;
     ACE_Message_Block  buffer_;
     int                pkt_count_;

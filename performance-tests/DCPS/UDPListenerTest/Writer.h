@@ -34,7 +34,6 @@ private:
   ::DDS::DataWriter_ptr writer_;
   int num_messages_;
   int data_size_;
-  int num_floats_per_sample_;
   long writer_id_;
   int num_readers_;
   bool finished_sending_;

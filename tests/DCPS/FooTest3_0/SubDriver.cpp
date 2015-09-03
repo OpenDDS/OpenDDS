@@ -21,8 +21,7 @@ const char* MY_TYPE     = "foo";
 using namespace ::OpenDDS::DCPS;
 
 SubDriver::SubDriver()
-  : sub_id_ (OpenDDS::DCPS::GUID_UNKNOWN),
-    num_writes_ (0),
+  : num_writes_ (0),
     shutdown_pub_ (1),
     add_new_subscription_ (0),
     shutdown_delay_secs_ (10),

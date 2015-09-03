@@ -10,8 +10,6 @@
 #include "tests/DCPS/FooType4/FooDefTypeSupportC.h"
 #include "tests/DCPS/FooType4/FooDefTypeSupportImpl.h"
 
-const int default_key = 101010;
-
 
 Reader::Reader(::DDS::DataReader_ptr reader,
                int use_take,

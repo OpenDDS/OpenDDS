@@ -14,7 +14,7 @@
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   FACE::RETURN_CODE_TYPE status;
-  FACE::CONNECTION_ID_TYPE connId;
+  FACE::CONNECTION_ID_TYPE connId = 0;
 
   if (argc < 2) {
     std::cerr << "Publisher: requires number parameter" << argc << std::endl;

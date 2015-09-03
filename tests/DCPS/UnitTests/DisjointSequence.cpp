@@ -16,8 +16,6 @@ using namespace OpenDDS::DCPS;
 namespace {
   const SequenceNumber::Value SN_MAX   = SequenceNumber::MAX_VALUE;
   const SequenceNumber::Value SN_MIN   = SequenceNumber::MIN_VALUE;
-  const SequenceNumber::Value SN_RANGE = SN_MAX-SN_MIN;
-  const SequenceNumber::Value SN_SEAM  = ACE_UINT32_MAX;
 }
 
 int

@@ -52,7 +52,6 @@ private:
   int write_delay_msec_;
   int check_data_dropped_;
   int num_readers_;
-  PubDriver*   pubdriver_;
 
   bool finished_;
 };

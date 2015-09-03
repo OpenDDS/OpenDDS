@@ -14,7 +14,7 @@
 const int default_key = 101010;
 ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
 
-Writer::Writer(PubDriver*            pubdriver,
+Writer::Writer(PubDriver*            /*pubdriver*/,
                ::DDS::DataWriter_ptr writer,
                int num_thread_to_write,
                int num_writes_per_thread,
@@ -34,7 +34,6 @@ Writer::Writer(PubDriver*            pubdriver,
   write_delay_msec_ (write_delay_msec),
   check_data_dropped_ (check_data_dropped),
   num_readers_(num_readers),
-  pubdriver_ (pubdriver),
   finished_(false)
 {
   writer_servant_

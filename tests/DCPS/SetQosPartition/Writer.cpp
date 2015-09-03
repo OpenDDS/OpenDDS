@@ -17,8 +17,7 @@ static int const num_instances_per_writer = 1;
 static int const num_messages = 10;
 
 Writer::Writer(::DDS::DataWriter_ptr writer)
-: writer_ (::DDS::DataWriter::_duplicate (writer)),
-  start_ (true)
+: writer_ (::DDS::DataWriter::_duplicate (writer))
 {
 }
 

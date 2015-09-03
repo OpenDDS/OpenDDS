@@ -42,7 +42,6 @@ private:
 
   LockType      lock_;
   ConditionType condition_;
-  int           shutdown_;
 };
 
 } // namespace DCPS

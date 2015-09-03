@@ -67,7 +67,6 @@ public:
 private:
 
   DDS::DataWriter_var reader_;
-  int                 num_reads_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
