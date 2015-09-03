@@ -45,7 +45,7 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
     {
       samples_recvd = samples.length ();
 
-      for( std::size_t index = 0; index < samples_recvd; ++index) {
+      for (CORBA::ULong index = 0; index < samples_recvd; ++index) {
         if(OpenDDS::DCPS::DCPS_debug_level > 8) {
           ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderListenerImpl::read<>() - ")
@@ -73,17 +73,8 @@ int read (::DDS::DataReader_ptr reader, bool use_zero_copy_reads)
 
   }
 
-  return samples_recvd;
+  return static_cast<int> (samples_recvd);
 }
-
-
-
-
-
-
-
-
-
 
 
 // Implementation skeleton constructor

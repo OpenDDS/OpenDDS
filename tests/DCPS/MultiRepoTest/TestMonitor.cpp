@@ -57,35 +57,35 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     for( TestConfig::StringVector::size_type index = 0; index < this->config_.infoRepoIorSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE:     InforRepoIOR[ %d] == %C\n"),
-        index, this->config_.infoRepoIor( index).c_str()
+        index, this->config_.infoRepoIor(static_cast<int>(index)).c_str()
       ));
     }
     for( TestConfig::StringVector::size_type index = 0; index < this->config_.readerTopicNameSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE:  readerTopicName[ %d] == %C\n"),
-        index, this->config_.readerTopicName( index).c_str()
+        index, this->config_.readerTopicName(static_cast<int>(index)).c_str()
       ));
     }
     for( TestConfig::StringVector::size_type index = 0; index < this->config_.writerTopicNameSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE:  writerTopicName[ %d] == %C\n"),
-        index, this->config_.writerTopicName( index).c_str()
+        index, this->config_.writerTopicName(static_cast<int>(index)).c_str()
       ));
     }
     for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE: subscriberDomain[ %d] == %d\n")
         ACE_TEXT("(%P|%t) %T COMMANDLINE:    using repository key %d\n"),
-        index, this->config_.subscriberDomain( index),
-        this->config_.domainToRepo( this->config_.subscriberDomain( index))
+        index, this->config_.subscriberDomain(static_cast<int>(index)),
+        this->config_.domainToRepo( this->config_.subscriberDomain(static_cast<int>(index)))
       ));
     }
     for( TestConfig::DomainVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T COMMANDLINE:  publisherDomain[ %d] == %d\n")
         ACE_TEXT("(%P|%t) %T COMMANDLINE:    using repository key %d\n"),
-        index, this->config_.publisherDomain( index),
-        this->config_.domainToRepo( this->config_.publisherDomain( index))
+        index, this->config_.publisherDomain(static_cast<int>(index)),
+        this->config_.domainToRepo( this->config_.publisherDomain(static_cast<int>(index)))
       ));
     }
   }
@@ -99,7 +99,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     oss << index;
     OPENDDS_STRING key_string = oss.str().c_str();
     TheServiceParticipant->set_repo_ior(
-      this->config_.infoRepoIor( index).c_str(),
+      this->config_.infoRepoIor(static_cast<int>(index)).c_str(),
       key_string
     );
   }
@@ -111,14 +111,14 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T INFO: binding subscriber domain %d to repository %d.\n"),
-        this->config_.subscriberDomain( index),
-        this->config_.domainToRepo( this->config_.subscriberDomain( index))
+        this->config_.subscriberDomain(static_cast<int>(index)),
+        this->config_.domainToRepo( this->config_.subscriberDomain(static_cast<int>(index)))
       ));
       std::ostringstream oss;
-      oss << this->config_.domainToRepo( this->config_.subscriberDomain( index));
+      oss << this->config_.domainToRepo( this->config_.subscriberDomain(static_cast<int>(index)));
       OPENDDS_STRING key_string = oss.str().c_str();
       TheServiceParticipant->set_repo_domain(
-        this->config_.subscriberDomain( index),
+        this->config_.subscriberDomain(static_cast<int>(index)),
         key_string
       );
     }
@@ -126,14 +126,14 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     for( TestConfig::StringVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
       ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) %T INFO: binding publisher domain %d to repository %d.\n"),
-        this->config_.publisherDomain( index),
-        this->config_.domainToRepo( this->config_.publisherDomain( index))
+        this->config_.publisherDomain(static_cast<int>(index)),
+        this->config_.domainToRepo( this->config_.publisherDomain(static_cast<int>(index)))
       ));
       std::ostringstream oss;
-      oss << this->config_.domainToRepo( this->config_.publisherDomain( index));
+      oss << this->config_.domainToRepo( this->config_.publisherDomain(static_cast<int>(index)));
       OPENDDS_STRING key_string = oss.str().c_str();
       TheServiceParticipant->set_repo_domain(
-        this->config_.publisherDomain( index),
+        this->config_.publisherDomain(static_cast<int>(index)),
         key_string
       );
     }
@@ -145,31 +145,31 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating subscriber participant in domain %d.\n"),
-      this->config_.subscriberDomain( index)
+      this->config_.subscriberDomain(static_cast<int>(index))
     ));
     ParticipantMap::iterator where
-      = this->participants_.find( this->config_.subscriberDomain( index));
+      = this->participants_.find( this->config_.subscriberDomain(static_cast<int>(index)));
     if( where == this->participants_.end()) {
-      this->participants_[ this->config_.subscriberDomain( index)] =
+      this->participants_[ this->config_.subscriberDomain(static_cast<int>(index))] =
         factory->create_participant(
-          this->config_.subscriberDomain( index),
+          this->config_.subscriberDomain(static_cast<int>(index)),
           PARTICIPANT_QOS_DEFAULT,
           ::DDS::DomainParticipantListener::_nil(),
           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
         );
-      if (CORBA::is_nil (this->participants_[ this->config_.subscriberDomain( index)].in ()))
+      if (CORBA::is_nil (this->participants_[ this->config_.subscriberDomain(static_cast<int>(index))].in ()))
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT("(%P|%t) %T ERROR: create_participant failed for ")
             ACE_TEXT("subscriber[ %d] in domain %d.\n"),
-            index, this->config_.subscriberDomain( index)
+            index, this->config_.subscriberDomain(static_cast<int>(index))
           ));
           throw BadParticipantException ();
         }
     }
     this->subscriberParticipant_[ index]
       = ::DDS::DomainParticipant::_duplicate
-      (this->participants_[ this->config_.subscriberDomain( index)].in());
+      (this->participants_[ this->config_.subscriberDomain(static_cast<int>(index))].in());
   }
 
   //
@@ -178,31 +178,31 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   for( TestConfig::StringVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating publisher participant in domain %d.\n"),
-      this->config_.publisherDomain( index)
+      this->config_.publisherDomain(static_cast<int>(index))
     ));
     ParticipantMap::iterator where
-      = this->participants_.find( this->config_.publisherDomain( index));
+      = this->participants_.find( this->config_.publisherDomain(static_cast<int>(index)));
     if( where == this->participants_.end()) {
-      this->participants_[ this->config_.publisherDomain( index)] =
+      this->participants_[ this->config_.publisherDomain(static_cast<int>(index))] =
         factory->create_participant(
-          this->config_.publisherDomain( index),
+          this->config_.publisherDomain(static_cast<int>(index)),
           PARTICIPANT_QOS_DEFAULT,
           ::DDS::DomainParticipantListener::_nil(),
           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK
         );
-      if (CORBA::is_nil (this->participants_[ this->config_.publisherDomain( index)].in ()))
+      if (CORBA::is_nil (this->participants_[ this->config_.publisherDomain(static_cast<int>(index))].in ()))
         {
           ACE_ERROR ((LM_ERROR,
             ACE_TEXT("(%P|%t) %T ERROR: create_participant failed for ")
             ACE_TEXT("publisher[ %d] in domain %d.\n"),
-            index, this->config_.publisherDomain( index)
+            index, this->config_.publisherDomain(static_cast<int>(index))
           ));
           throw BadParticipantException ();
         }
     }
     this->publisherParticipant_[ index]
       = ::DDS::DomainParticipant::_duplicate
-      (this->participants_[ this->config_.publisherDomain( index)].in());
+      (this->participants_[ this->config_.publisherDomain(static_cast<int>(index))].in());
   }
 
   //
@@ -225,10 +225,10 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   //
   std::set< OpenDDS::DCPS::Discovery::RepoKey> keylist;
   for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
-    keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.subscriberDomain( index)));
+    keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.subscriberDomain(static_cast<int>(index))));
   }
   for( TestConfig::StringVector::size_type index = 0; index < this->config_.publisherDomainSize(); ++index) {
-    keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.publisherDomain( index)));
+    keylist.insert( TheServiceParticipant->domain_to_repo( this->config_.publisherDomain(static_cast<int>(index))));
   }
 
 
@@ -239,12 +239,12 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
   for( TestConfig::StringVector::size_type index = 0; index < this->config_.subscriberDomainSize(); ++index) {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating data reader listener for domain %d.\n"),
-      this->config_.subscriberDomain( index)
+      this->config_.subscriberDomain(static_cast<int>(index))
     ));
     this->listener_[ index] =
         new ForwardingListenerImpl(
               TheServiceParticipant->domain_to_repo(
-                this->config_.subscriberDomain( index)
+                this->config_.subscriberDomain(static_cast<int>(index))
             ));
     this->forwarder_[ index] =
       dynamic_cast<ForwardingListenerImpl*>(this->listener_[ index].in());
@@ -253,7 +253,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT ("(%P|%t) %T ERROR: failed to obtain listener for domain %d.\n"),
-          this->config_.subscriberDomain( index)
+          this->config_.subscriberDomain(static_cast<int>(index))
         ));
         throw BadReaderListenerException ();
       }
@@ -296,11 +296,11 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating subscription[ %d] topic: %C.\n"),
       index,
-      this->config_.readerTopicName( index).c_str()
+      this->config_.readerTopicName(static_cast<int>(index)).c_str()
     ));
     this->readerTopic_[ index]
-      = this->participants_[ this->config_.subscriberDomain( index)]->create_topic(
-          this->config_.readerTopicName( index).c_str(),
+      = this->participants_[ this->config_.subscriberDomain(static_cast<int>(index))]->create_topic(
+          this->config_.readerTopicName(static_cast<int>(index)).c_str(),
           this->config_.typeName().c_str(),
           TOPIC_QOS_DEFAULT,
           ::DDS::TopicListener::_nil(),
@@ -310,7 +310,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       {
         ACE_ERROR ((LM_ERROR,
           ACE_TEXT ("(%P|%t) %T ERROR: Failed to create topic %C for subscriber[ %d].\n"),
-          this->config_.readerTopicName( index).c_str(),
+          this->config_.readerTopicName(static_cast<int>(index)).c_str(),
           index
         ));
         throw BadTopicException ();
@@ -325,11 +325,11 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) %T INFO: creating publication[ %d] topic: %C.\n"),
       index,
-      this->config_.writerTopicName( index).c_str()
+      this->config_.writerTopicName(static_cast<int>(index)).c_str()
     ));
     this->writerTopic_[ index]
-      = this->participants_[ this->config_.publisherDomain( index)]->create_topic(
-          this->config_.writerTopicName( index).c_str(),
+      = this->participants_[ this->config_.publisherDomain(static_cast<int>(index))]->create_topic(
+          this->config_.writerTopicName(static_cast<int>(index)).c_str(),
           this->config_.typeName().c_str(),
           TOPIC_QOS_DEFAULT,
           ::DDS::TopicListener::_nil(),
@@ -339,7 +339,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       {
         ACE_ERROR ((LM_ERROR,
           ACE_TEXT ("(%P|%t) %T ERROR: Failed to create topic %C for publisher[ %d].\n"),
-          this->config_.writerTopicName( index).c_str(),
+          this->config_.writerTopicName(static_cast<int>(index)).c_str(),
           index
         ));
         throw BadTopicException ();
@@ -356,7 +356,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       index
     ));
     this->subscriber_[ index]
-      = this->participants_[ this->config_.subscriberDomain( index)]->create_subscriber(
+      = this->participants_[ this->config_.subscriberDomain(static_cast<int>(index))]->create_subscriber(
           SUBSCRIBER_QOS_DEFAULT, ::DDS::SubscriberListener::_nil(),
           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (this->subscriber_[ index].in ()))
@@ -380,7 +380,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       index
     ));
     this->publisher_[ index]
-      = this->participants_[ this->config_.publisherDomain( index)]->create_publisher(
+      = this->participants_[ this->config_.publisherDomain(static_cast<int>(index))]->create_publisher(
           PUBLISHER_QOS_DEFAULT, ::DDS::PublisherListener::_nil(),
           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (CORBA::is_nil (this->publisher_[ index].in ()))
@@ -406,7 +406,7 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
     ::DDS::DataWriterListener_var listener (
         new DataWriterListenerImpl(
               TheServiceParticipant->domain_to_repo(
-                this->config_.publisherDomain( index)
+                this->config_.publisherDomain(static_cast<int>(index))
             )));
 
     //
@@ -463,8 +463,8 @@ TestMonitor::TestMonitor( int argc, ACE_TCHAR** argv, char** envp)
       index
     ));
     ::DDS::TopicDescription_var description
-      = this->participants_[ this->config_.subscriberDomain( index)]->lookup_topicdescription(
-          this->config_.readerTopicName( index).c_str()
+      = this->participants_[ this->config_.subscriberDomain(static_cast<int>(index))]->lookup_topicdescription(
+          this->config_.readerTopicName(static_cast<int>(index)).c_str()
         );
 
     this->dataReader_[ index]

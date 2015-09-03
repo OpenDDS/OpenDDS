@@ -119,7 +119,7 @@ ParticipantTask::svc()
       DDS::DataWriterQos writer_qos;
       publisher->get_default_datawriter_qos(writer_qos);
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
-      writer_qos.history.depth = samples_per_thread_;
+      writer_qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_);
 #endif
 
       writer =

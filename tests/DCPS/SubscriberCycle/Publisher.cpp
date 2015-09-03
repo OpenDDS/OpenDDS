@@ -81,7 +81,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // Spawn Participant threads
     ParticipantTask task(samples_per_thread, delay_between_pubs_msec, deadline_period);
 
-    task.activate(DEFAULT_FLAGS, num_threads);
+    task.activate(DEFAULT_FLAGS, static_cast<int>(num_threads));
     task.wait();
 
     TheServiceParticipant->shutdown();

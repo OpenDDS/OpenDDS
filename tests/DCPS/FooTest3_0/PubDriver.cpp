@@ -475,7 +475,7 @@ PubDriver::register_test ()
   TEST_CHECK(key_holder.sample_sequence == foo1.sample_sequence);
   TEST_CHECK(key_holder.writer_id == foo1.writer_id);
 
-  for (size_t i = 1; i <= 2; i ++)
+  for (CORBA::Long i = 1; i <= 2; i ++)
   {
     foo2.a_long_value = 101010;
     foo2.handle_value = handle1;
@@ -812,7 +812,7 @@ PubDriver::listener_test ()
   datawriter_servant_->get_readers(reader_id_set);
 
   ::OpenDDS::DCPS::ReaderIdSeq reader_id_seq;
-  reader_id_seq.length(reader_id_set.size());
+  reader_id_seq.length(static_cast<CORBA::ULong>(reader_id_set.size()));
   int index = 0;
   for (RepoIdSet::iterator iter = reader_id_set.begin();
        iter != reader_id_set.end();
@@ -878,7 +878,7 @@ PubDriver::allocator_test ()
   // Allocate serialized foo data from pre-allocated pool
   for (size_t i = 1; i <= n_chunks; i ++)
   {
-    foo2.sample_sequence = i;
+    foo2.sample_sequence = static_cast<CORBA::Long>(i);
 
     ret = foo_datawriter_->write(foo2,
                                  handle);
@@ -889,7 +889,7 @@ PubDriver::allocator_test ()
     {
       TEST_CHECK (foo_datawriter_servant_->data_allocator() != 0);
       TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == 0);
-      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == i);
+      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(i));
     }
     else
     {
@@ -901,7 +901,7 @@ PubDriver::allocator_test ()
   // The pre-allocated pool is full, now the foo data is allocated from heap
   for (size_t i = 1; i <= 2; i ++)
   {
-    foo2.sample_sequence = i + n_chunks;
+    foo2.sample_sequence = static_cast<CORBA::Long>(i + n_chunks);
 
     ret = foo_datawriter_->write(foo2,
                                  handle);
@@ -911,8 +911,8 @@ PubDriver::allocator_test ()
     if (gen_is_bounded_size (foo1))
     {
       TEST_CHECK (foo_datawriter_servant_->data_allocator() != 0);
-      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == i);
-      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == n_chunks);
+      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_heap_ == static_cast<unsigned long>(i));
+      TEST_CHECK (foo_datawriter_servant_->data_allocator()->allocs_from_pool_ == static_cast<unsigned long>(n_chunks));
     }
     else
     {
@@ -943,7 +943,7 @@ PubDriver::liveliness_test ()
 
   for (size_t i = 1; i < num_writes; i ++)
   {
-    foo.sample_sequence = i;
+    foo.sample_sequence = static_cast<CORBA::Long>(i);
 
     ret = foo_datawriter_->write(foo,
                                  handle);
@@ -959,7 +959,7 @@ PubDriver::liveliness_test ()
   // Writing this here makes this test deterministic.
   // The subscriber will wait for this message and both the
   // publish & subscriber close down simultaneously.
-  foo.sample_sequence = num_writes;
+  foo.sample_sequence = static_cast<CORBA::Long>(num_writes);
   ret = foo_datawriter_->write(foo,
                                handle);
 }

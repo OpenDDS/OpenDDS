@@ -47,13 +47,13 @@ TestConfig::TestConfig( int argc, ACE_TCHAR** argv, char** envp)
     } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-WriterDomain")))) {
       long domain = ACE_OS::atoi( currentArg);
       this->publisherDomain_.push_back( domain);
-      this->domainRepoMap_[ domain] = this->infoRepoIor_.size() - 1;
+      this->domainRepoMap_[ domain] = static_cast<long>(this->infoRepoIor_.size() - 1);
       parser.consume_arg();
 
     } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-ReaderDomain")))) {
       long domain = ACE_OS::atoi( currentArg);
       this->subscriberDomain_.push_back( domain);
-      this->domainRepoMap_[ domain] = this->infoRepoIor_.size() - 1;
+      this->domainRepoMap_[ domain] = static_cast<long>(this->infoRepoIor_.size() - 1);
       parser.consume_arg();
 
     } else if( 0 != (currentArg = parser.get_the_parameter(ACE_TEXT("-WriterTopic")))) {

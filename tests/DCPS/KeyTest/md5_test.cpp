@@ -32,7 +32,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                    0xa0, 0x68, 0xff, 0xad,
                                    0xdf, 0x22, 0xcb, 0xd0 };
     MD5_Init(&ctx);
-    MD5_Update(&ctx, msg, strlen(msg));
+    MD5_Update(&ctx, msg, static_cast<unsigned long>(strlen(msg)));
     MD5_Final(d, &ctx);
     print_hex(d);
     print_hex(expected);
@@ -46,7 +46,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                    0xe9, 0x80, 0x09, 0x98,
                                    0xec, 0xf8, 0x42, 0x7e };
     MD5_Init(&ctx);
-    MD5_Update(&ctx, msg, strlen(msg));
+    MD5_Update(&ctx, msg, static_cast<unsigned long>(strlen(msg)));
     MD5_Final(d, &ctx);
     print_hex(d);
     print_hex(expected);
@@ -60,7 +60,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
                                    0x6b, 0xd8, 0x1d, 0x35,
                                    0x42, 0xa4, 0x19, 0xd6 };
     MD5_Init(&ctx);
-    MD5_Update(&ctx, msg, strlen(msg));
+    MD5_Update(&ctx, msg, static_cast<unsigned long>(strlen(msg)));
     MD5_Final(d, &ctx);
     print_hex(d);
     print_hex(expected);
