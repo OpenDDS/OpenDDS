@@ -89,12 +89,12 @@ the "configure" script will download it for you.
 At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
-*** TAO 1.6a patch 14
+*** TAO 1.6a patch 15
 *** TAO 2.0a patch 7
-*** TAO 2.2a patch 5
-*** TAO 2.3.1 (DOC Group)
+*** TAO 2.2a patch 7
+*** TAO 2.3.2 (DOC Group)
 
-OpenDDS 3.7 is planned to be the final version to support the following 
+OpenDDS 3.7 is planned to be the final version to support the following
 TAO branches:
 
 *** TAO 1.6a
