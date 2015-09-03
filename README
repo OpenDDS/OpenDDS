@@ -143,9 +143,9 @@ This release of OpenDDS has been tested using the following compilers:
 
 ** Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 ** Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
-** Microsoft Visual C++ 11 with SP1 (Visual Studio 2012)
-** Microsoft Visual C++ 12 with SP1 (Visual Studio 2013)
-** Microsoft Visual C++ 14 with SP1 (Visual Studio 2015)
+** Microsoft Visual C++ 11 (Visual Studio 2012)
+** Microsoft Visual C++ 12 (Visual Studio 2013)
+** Microsoft Visual C++ 14 (Visual Studio 2015)
 ** gcc 4.4.3
 ** gcc 4.6.1
 ** gcc 4.8.2
