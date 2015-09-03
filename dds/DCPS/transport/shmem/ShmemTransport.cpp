@@ -137,14 +137,14 @@ ShmemTransport::configure_i(TransportInst* config)
   config_i_->_add_ref();
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
-#ifdef ACE_WIN32
+# ifdef ACE_WIN32
   alloc_opts.max_size_ = config_i_->pool_size_;
-#elif !defined ACE_LACKS_SYSV_SHMEM
+# elif !defined ACE_LACKS_SYSV_SHMEM
   alloc_opts.base_addr_ = 0;
   alloc_opts.segment_size_ = config_i_->pool_size_;
   alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
   alloc_opts.max_segments_ = 1;
-#endif
+# endif
 
   alloc_ =
     new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(this->config_i_->poolname().c_str()),
@@ -169,13 +169,16 @@ ShmemTransport::configure_i(TransportInst* config)
                              0 /*no name*/);
   ACE_sema_t ace_sema = *pSem;
   ok = (*pSem != 0);
-# else
+# elif !defined ACE_LACKS_UNNAMED_SEMAPHORE
   ok = (0 == ::sem_init(pSem, 1 /*process shared*/, 0 /*initial count*/));
   ACE_sema_t ace_sema = {pSem, 0 /*no name*/
 #  if !defined (ACE_HAS_POSIX_SEM_TIMEOUT) && !defined (ACE_DISABLE_POSIX_SEM_TIMEOUT_EMULATION)
                          , PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER
 #  endif
   };
+# else
+  ok = false;
+  ACE_sema_t ace_sema;
 # endif
   if (!ok) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -214,7 +217,7 @@ ShmemTransport::shutdown_i()
   ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);
 #ifdef ACE_WIN32
   ::CloseHandle(*pSem);
-#elif defined ACE_HAS_POSIX_SEM
+#elif defined ACE_HAS_POSIX_SEM && !defined ACE_LACKS_UNNAMED_SEMAPHORE
   ::sem_destroy(pSem);
 #else
   ACE_UNUSED_ARG(pSem);

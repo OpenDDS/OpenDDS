@@ -13,17 +13,11 @@
 
 using namespace OpenDDS::DCPS;
 
-namespace {
-  const SequenceNumber::Value SN_MAX   = SequenceNumber::MAX_VALUE;
-  const SequenceNumber::Value SN_MIN   = SequenceNumber::MIN_VALUE;
-}
-
-int
-ACE_TMAIN(int, ACE_TCHAR*[])
+int ACE_TMAIN(int, ACE_TCHAR*[])
 {
   // Construction (default)
   {
-    TEST_CHECK(SequenceNumber(SN_MIN) == SequenceNumber());
+    TEST_CHECK(SequenceNumber(SequenceNumber::MIN_VALUE) == SequenceNumber());
 
     DisjointSequence sequence;
 
@@ -223,7 +217,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     // ASSERT multiple contiguities return  multiple ranges
     //        of values with a difference of one:
     sequence.reset();
-    sequence.insert(SN_MIN);
+    sequence.insert(SequenceNumber::MIN_VALUE);
     sequence.insert(3);  // discontiguity
     sequence.insert(6);  // discontiguity
     sequence.insert(8);  // discontiguity
@@ -233,7 +227,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     it = missingSet.begin();
 
     range = *it;
-    TEST_CHECK(range.first == SequenceNumber(SN_MIN + 1));
+    TEST_CHECK(range.first == SequenceNumber(SequenceNumber::MIN_VALUE + 1));
     TEST_CHECK(range.second == SequenceNumber(2));
     TEST_CHECK(++it != missingSet.end());
 
