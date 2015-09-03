@@ -4,9 +4,11 @@ Additions:
 - Implements FACE Transport Services API v2.1, FACE safety base and
   FACE safety extended profiles (Future Airborne Capability Environment).
 - Implements RTPS 2.2.
-- Support allocations from memory pool in safety base builds.  Introduced
+- Support allocations from memory pool in safety profile builds.  Introduced
   standard library containers and strings, as well as TAO sequences that 
   allocate from this pool.
+- To support FACE TS, the IDL struct DDS::SampleInfo has a new field
+  "opendds_reserved_publication_seq" as an extension to the DDS specification.
 - Updated opendds_idl for FACE support, moving some of the code-generation
   from tao_idl to opendds_idl when targeting FACE TS.
 - Support IDL fixed type inside of DCPS_DATA_TYPE (used with FACE TS).
@@ -14,6 +16,10 @@ Additions:
   generation now introduces a typedef of these.
 - Content filtering now supports modulus (MOD) operator as an extension.
 - Added a static (configuration-based) discovery mechanism.
+- RTPS Discovery is now supported when OpenDDS is built without built-in topics.
+- RTPS Discovery has a new configuration parameter SedpLocalAddress which
+  configures the rtps_udp transport used internally by discovery in the same way
+  that local_address configures a user-created rtps_udp transport instance.
 - Support non-default liveliness QOS in rtps_udp transport.
 - Support wait_for_acknowledgements in rtps_udp transport.
 - Support command line option -DCPSRTISerialization when integrating with RTI
