@@ -3,7 +3,7 @@ Version 3.7 of OpenDDS.
 Additions:
 - Implements FACE Transport Services API v2.1, FACE safety base and
   FACE safety extended profiles (Future Airborne Capability Environment).
-- Implements RTPS 2.2.
+- Implements DDS 1.4 and RTPS 2.2.
 - Support allocations from memory pool in safety profile builds.  Introduced
   standard library containers and strings, as well as TAO sequences that 
   allocate from this pool.
@@ -76,8 +76,8 @@ Notes:
   data writers may block for max_blocking_time and potentially return
   DDS::RETCODE_TIMEOUT in situations where they would have simply
   written the data in older version of OpenDDS.  The new behavior
-  is required by the DDS specification, see section 7.1.2.4.2.11
-  of the version 1.2 specification for details.  This change affects
+  is required by the DDS specification, see section 2.2.2.4.2.11
+  of the version 1.4 specification for details.  This change affects
   various operations of the data writer interface including the
   write and register operations.
 
