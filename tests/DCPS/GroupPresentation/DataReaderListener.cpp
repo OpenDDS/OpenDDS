@@ -19,8 +19,8 @@
 
 extern int acess_scope;
 
-DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id)
-  : num_reads_(0), reader_id_ (reader_id), verify_result_ (true)
+DataReaderListenerImpl::DataReaderListenerImpl(const char* /*reader_id*/)
+  : num_reads_(0), verify_result_ (true)
 {
 }
 

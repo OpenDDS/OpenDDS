@@ -29,7 +29,6 @@ public:
   virtual void report();
 
 private:
-  TransportImpl* transport_;
   OpenDDS::DCPS::TransportReportDataWriter_var transport_writer_;
   std::string hostname_;
   pid_t pid_;

@@ -73,7 +73,6 @@ private:
   DDSPerfTest::AckMessageDataReaderImpl* dr_servant_;
   DDSPerfTest::PubMessageDataWriterImpl* dw_servant_;
   DDS::InstanceHandle_t handle_;
-  CORBA::Long size_;
   CORBA::Long sample_num_;
   int   done_;
   ACE_High_Res_Timer timer_;

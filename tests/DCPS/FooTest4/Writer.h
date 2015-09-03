@@ -20,7 +20,6 @@ private:
 
   int num_writes_per_thread_;
   int multiple_instances_;
-  int instance_id_ ;
   ::DDS::DataReader_ptr reader_ ;
 };
 

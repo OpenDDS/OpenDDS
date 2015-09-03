@@ -33,8 +33,7 @@ void set_rt()
 
 
 TestDriver::TestDriver()
-  : publisher_id_(0),
-    num_packets_(0),
+  : num_packets_(0),
     data_size_(0),
     packet_(0)
 {

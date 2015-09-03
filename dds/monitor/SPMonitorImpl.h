@@ -29,7 +29,6 @@ public:
   virtual void report();
 
 private:
-  Service_Participant* sp_;
   MonitorFactoryImpl* monitor_factory_;
   OpenDDS::DCPS::ServiceParticipantReportDataWriter_var sp_writer_;
   std::string hostname_;

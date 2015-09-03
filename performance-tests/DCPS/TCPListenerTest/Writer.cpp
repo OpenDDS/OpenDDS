@@ -60,7 +60,6 @@ Writer::Writer(::DDS::DataWriter_ptr writer,
                : writer_ (::DDS::DataWriter::_duplicate (writer)),
   num_messages_ (num_messages),
   data_size_ (data_size),
-  num_floats_per_sample_ (data_size),
   num_readers_(num_readers),
   writer_id_ (writer_id),
   finished_sending_ (false)

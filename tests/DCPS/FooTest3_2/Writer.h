@@ -14,7 +14,6 @@ class PubDriver;
 class Writer : public ACE_Task_Base
 {
 public:
-
   Writer (PubDriver*            pubdriver,
           ::DDS::DataWriter_ptr writer,
           int num_thread_to_write = 1,
@@ -50,7 +49,6 @@ private:
   int has_key_;
   int write_delay_msec_;
   int check_data_dropped_;
-  PubDriver*   pubdriver_;
   ::Xyz::UnboundedData unbound_data_;
 
   bool finished_;

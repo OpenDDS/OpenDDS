@@ -23,7 +23,9 @@
 
 ParticipantTask::ParticipantTask(const std::size_t& samples_per_thread)
   : samples_per_thread_(samples_per_thread)
+#ifdef OPENDDS_SAFETY_PROFILE
   , thread_index_(0)
+#endif
 {
 }
 

@@ -77,9 +77,8 @@ static stats_type round_trip;
 
 
 TcpPublisher::TcpPublisher(const ACE_INET_Addr& sub_addr,
-                           unsigned message_size)
+                           unsigned /*message_size*/)
   : subscriber_addr_(sub_addr)
-  , message_size_(message_size)
   , buffer_(100000)
   , pkt_count_(0)
 {
