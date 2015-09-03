@@ -19,8 +19,7 @@ namespace DCPS {
 
 SPMonitorImpl::SPMonitorImpl(MonitorFactoryImpl* monitor_factory,
                              Service_Participant* /*sp*/)
-    : 
-      monitor_factory_(monitor_factory)
+    : monitor_factory_(monitor_factory)
 {
   char host[256];
   ACE_OS::hostname(host, 256);

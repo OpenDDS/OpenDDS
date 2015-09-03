@@ -12,7 +12,6 @@ extern int num_deleted_connections;
 
 // Implementation skeleton constructor
 DataWriterListenerImpl::DataWriterListenerImpl()
-  : 
 {
 }
 
