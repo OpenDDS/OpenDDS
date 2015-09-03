@@ -329,6 +329,14 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
 bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char& ttl)
 {
   ACE_HANDLE handle = socket.get_handle();
+  const void* ttlp = &ttl;
+#ifdef ACE_LINUX
+  int ttl_2 = ttl;
+  ttlp = &ttl_2;
+#define TTL ttl_2
+#else
+#define TTL ttl
+#endif
 #if defined (ACE_HAS_IPV6)
   ACE_INET_Addr local_addr;
   if (0 != socket.get_local_addr(local_addr)) {
@@ -339,8 +347,8 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
     if (0 != ACE_OS::setsockopt(handle,
                                 IPPROTO_IPV6,
                                 IPV6_MULTICAST_HOPS,
-                                reinterpret_cast<const char*>(&ttl),
-                                sizeof(ttl))) {
+                                static_cast<const char*>(ttlp),
+                                sizeof(TTL))) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ")
                         ACE_TEXT("set_socket_ttl: ")
@@ -354,8 +362,8 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
   if (0 != ACE_OS::setsockopt(handle,
                               IPPROTO_IP,
                               IP_MULTICAST_TTL,
-                              reinterpret_cast<const char*>(&ttl),
-                              sizeof(ttl))) {
+                              static_cast<const char*>(ttlp),
+                              sizeof(TTL))) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("set_socket_ttl: ")
