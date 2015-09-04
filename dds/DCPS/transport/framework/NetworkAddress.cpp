@@ -375,7 +375,7 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
   return true;
 }
 
-bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address)
+bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_address)
 {
 #if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
   int protocol_family = ACE_PROTOCOL_FAMILY_INET;
@@ -395,7 +395,7 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
   if (socket.get_handle() == ACE_INVALID_HANDLE) {
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("open_dual_stack_socket: ")
+      ACE_TEXT("open_appropriate_socket_type: ")
       ACE_TEXT("failed to set socket handle\n")),
       false);
   } else if (protocol_family != PF_UNIX &&
@@ -407,7 +407,7 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
     socket.close();
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("open_dual_stack_socket: ")
+      ACE_TEXT("open_appropriate_socket_type: ")
       ACE_TEXT("failed to set socket SO_REUSEADDR option\n")),
       false);
   }
@@ -421,7 +421,7 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
                               sizeof(ipv6_only))) {
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("open_dual_stack_socket: ")
+      ACE_TEXT("open_appropriate_socket_type: ")
       ACE_TEXT("failed to set IPV6_V6ONLY to 0: %p\n"),
       ACE_TEXT("ACE_OS::setsockopt(IPV6_V6ONLY)")),
       false);
@@ -444,15 +444,20 @@ bool open_dual_stack_socket(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& local_a
 
   if (error) {
     socket.close();
-    VDBG_LVL((LM_WARNING, "(%P|%t) WARNING: open_dual_stack_socket: "
+    VDBG_LVL((LM_WARNING, "(%P|%t) WARNING: open_appropriate_socket_type: "
                           "failed to bind address to socket\n"), 2);
     return false;
   }
   return true;
 #else
-  ACE_UNUSED_ARG(socket);
-  ACE_UNUSED_ARG(local_address);
-  return false;
+  if (sock.open(local_addr) != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("open_appropriate_socket_type: non dual stack socket open:")
+      ACE_TEXT("%m\n")),
+      false);
+  }
+  return true;
 #endif
 }
 }
