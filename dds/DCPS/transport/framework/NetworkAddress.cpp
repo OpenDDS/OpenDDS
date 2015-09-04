@@ -330,7 +330,7 @@ bool set_socket_multicast_ttl(const ACE_SOCK_Dgram& socket, const unsigned char&
 {
   ACE_HANDLE handle = socket.get_handle();
   const void* ttlp = &ttl;
-#ifdef ACE_LINUX
+#if defined(ACE_LINUX) || defined(__linux__)
   int ttl_2 = ttl;
   ttlp = &ttl_2;
 #define TTL ttl_2
