@@ -14,7 +14,9 @@ sub orbsvcs {
   my $o = "$ENV{'TAO_ROOT'}/orbsvcs";
   my $n = -r "$o/Naming_Service/tao_cosnaming" || # using new names?
           -r "$o/Naming_Service/tao_cosnaming.exe" ||
-          -r "$o/Naming_Service/Release/tao_cosnaming.exe";
+          -r "$o/Naming_Service/Release/tao_cosnaming.exe" ||
+          -r "$o/Naming_Service/Static_Debug/tao_cosnaming.exe" ||
+          -r "$o/Naming_Service/Static_Release/tao_cosnaming.exe";
   return (
     'Naming_Service' => "$o/Naming_Service/" . ($n ? 'tao_cosnaming'
                                                    : 'Naming_Service'),
