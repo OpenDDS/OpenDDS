@@ -92,9 +92,12 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
   UdpDataLink_rch link = make_datalink(remote_address,
                                        attribs.priority_,
                                        active);
-  client_links_.insert(UdpDataLinkMap::value_type(key, link));
 
-  VDBG((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink connected\n"));
+  if (!link.is_nil()) {
+    client_links_.insert(UdpDataLinkMap::value_type(key, link));
+    VDBG((LM_DEBUG, "(%P|%t) UdpTransport::connect_datalink connected\n"));
+  }
+
   return AcceptConnectResult(link._retn());
 }
 
@@ -245,7 +248,7 @@ UdpTransport::blob_to_key(const TransportBLOB& remote,
 
   ACE_INET_Addr remote_address;
   network_order_address.to_addr(remote_address);
-  const bool is_loopback = remote_address == config_i_->local_address_;
+  const bool is_loopback = remote_address == config_i_->local_address();
 
   return PriorityKey(priority, remote_address, is_loopback, active);
 }

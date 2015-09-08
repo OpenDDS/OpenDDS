@@ -20,11 +20,6 @@ namespace DCPS {
 
 class OpenDDS_Udp_Export UdpInst : public TransportInst {
 public:
-  /// The address from which to send/receive data.
-  /// The default value is: none.
-  ACE_INET_Addr local_address_;
-  OPENDDS_STRING local_address_config_str_;
-
   ACE_INT32 send_buffer_size_;
   ACE_INT32 rcv_buffer_size_;
 
@@ -38,11 +33,25 @@ public:
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
 
+  OPENDDS_STRING local_address_string() const { return local_address_config_str_; }
+  ACE_INET_Addr local_address() const { return local_address_; }
+  void local_address(const char* str)
+  {
+    local_address_config_str_ = str;
+    local_address_.set(str);
+  }
+
 private:
   friend class UdpType;
+  friend class UdpDataLink;
   explicit UdpInst(const std::string& name);
 
   UdpTransport* new_impl(const TransportInst_rch& inst);
+
+  /// The address from which to send/receive data.
+  /// The default value is: none.
+  ACE_INET_Addr local_address_;
+  OPENDDS_STRING local_address_config_str_;
 };
 
 } // namespace DCPS
