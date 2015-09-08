@@ -25,7 +25,7 @@
       <thread_per_connection value="false"/>
       <datalink_release_delay value="10000"/>
       <datalink_control_chunks value="32"/>
-      <local_address_str value="&quot;localhost:52000&quot;"/>
+      <local_address_str value="localhost:52000"/>
     </transport>
     <transport xsi:type="generator:UdpTransport" xmi:id="_04113ca0-a42e-012e-9625-0017a4e90546" name="trans8">
       <queue_messages_per_pool value="10"/>
