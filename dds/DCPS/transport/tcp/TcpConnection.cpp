@@ -67,7 +67,7 @@ OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
   : connected_(false)
   , is_connector_(true)
   , remote_address_(remote_address)
-  , local_address_(config->local_address_)
+  , local_address_(config->local_address())
   , tcp_config_(config)
   , passive_reconnect_timer_id_(-1)
   , reconnect_task_(this)
@@ -210,7 +210,7 @@ OpenDDS::DCPS::TcpConnection::open(void* arg)
   // for ourselves.
   tcp_config->_add_ref();
   tcp_config_ = tcp_config;
-  local_address_ = tcp_config_->local_address_;
+  local_address_ = tcp_config_->local_address();
 
   set_sock_options(tcp_config_.in());
 

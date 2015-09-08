@@ -10,7 +10,6 @@
 #include "RtpsUdpTransport.h"
 
 #include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/Configuration.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
@@ -52,8 +51,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s);
   if (!local_address_s.is_empty()) {
-    local_address_.set(local_address_s.c_str());
-    local_address_config_str_ += ACE_TEXT_ALWAYS_CHAR(local_address_s.c_str());
+    local_address(local_address_s.c_str());
   }
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
@@ -97,7 +95,7 @@ RtpsUdpInst::dump_to_str()
   // OPENDDS_STRING gets a chance to see it.
   OPENDDS_STRING local;
   OPENDDS_STRING multi;
-  const char* loc = local_address_.get_host_addr();
+  const char* loc = local_address().get_host_addr();
   if (loc) {
     local = loc;
   } else {
@@ -111,7 +109,7 @@ RtpsUdpInst::dump_to_str()
   }
   ret += TransportInst::dump_to_str();
   ret += formatNameForDump("local_address") + local;
-  ret += ':' + to_dds_string(local_address_.get_port_number()) + '\n';
+  ret += ':' + to_dds_string(local_address().get_port_number()) + '\n';
   ret += formatNameForDump("use_multicast") + (use_multicast_ ? "true" : "false") + '\n';
   ret += formatNameForDump("multicast_group_address") + multi
       + ':' + to_dds_string(multicast_group_address_.get_port_number()) + '\n';
@@ -142,7 +140,7 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
                            this->multicast_group_address_);
   }
 
-  if (this->local_address_config_str_.empty()) {
+  if (this->local_address_string().empty()) {
     typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
     AddrVector addrs;
     get_interface_addrs(addrs);
@@ -150,16 +148,16 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
       idx = locators.length();
       locators.length(idx + 1);
       locators[idx].kind = address_to_kind(*adr_it);
-      locators[idx].port = this->local_address_.get_port_number();
+      locators[idx].port = this->local_address().get_port_number();
       RTPS::address_to_bytes(locators[idx].address, *adr_it);
     }
   } else {
     idx = locators.length();
     locators.length(idx + 1);
-    locators[idx].kind = address_to_kind(this->local_address_);
-    locators[idx].port = this->local_address_.get_port_number();
+    locators[idx].kind = address_to_kind(this->local_address());
+    locators[idx].port = this->local_address().get_port_number();
     RTPS::address_to_bytes(locators[idx].address,
-                           this->local_address_);
+                           this->local_address());
   }
 
   info.transport_type = "rtps_udp";

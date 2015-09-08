@@ -40,8 +40,7 @@ OpenDDS::DCPS::TcpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_STRING_VALUE(cf, trans_sect, ACE_TEXT("local_address"), local_address);
 
   if (local_address != "") {
-    this->local_address_str_ = local_address;
-    this->local_address_.set(local_address_str_.c_str());
+    this->local_address(local_address.c_str());
   }
 
   GET_CONFIG_STRING_VALUE(cf, trans_sect, ACE_TEXT("pub_address"), pub_address_str_);
@@ -87,7 +86,7 @@ OpenDDS::DCPS::TcpInst::dump_to_str()
 size_t
 OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info) const
 {
-  if (this->local_address_ != ACE_INET_Addr() || !pub_address_str_.empty()) {
+  if (this->local_address() != ACE_INET_Addr() || !pub_address_str_.empty()) {
     // Get the public address string from the inst (usually the local address)
     NetworkAddress network_order_address(this->get_public_address());
 

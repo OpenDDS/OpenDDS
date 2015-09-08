@@ -1098,7 +1098,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getLocalAddress
   OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
                                       false); // Don't take ownership
   ACE_TCHAR buffer[1024];
-  inst->local_address_.addr_to_string(buffer, 1024, 1);
+  inst->local_address().addr_to_string(buffer, 1024, 1);
   std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
   return jni->NewStringUTF(addr_str.c_str());
 }

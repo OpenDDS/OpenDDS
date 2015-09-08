@@ -243,7 +243,7 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
   }
 
   if (!disco.sedp_local_address().empty()) {
-    rtps_inst->local_address_.set(disco.sedp_local_address().c_str());
+    rtps_inst->local_address(disco.sedp_local_address().c_str());
   }
 
   // Crete a config
@@ -292,7 +292,7 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
       rtps_inst->multicast_group_address_);
   }
 
-  if (rtps_inst->local_address_config_str_.empty()) {
+  if (rtps_inst->local_address_string().empty()) {
     typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
     AddrVector addrs;
     OpenDDS::DCPS::get_interface_addrs(addrs);
@@ -300,26 +300,26 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
       idx = locators.length();
       locators.length(idx + 1);
       locators[idx].kind = address_to_kind(*adr_it);
-      locators[idx].port = rtps_inst->local_address_.get_port_number();
+      locators[idx].port = rtps_inst->local_address().get_port_number();
       RTPS::address_to_bytes(locators[idx].address,
         *adr_it);
     }
   } else {
     idx = locators.length();
     locators.length(idx + 1);
-    locators[idx].kind = address_to_kind(rtps_inst->local_address_);
-    locators[idx].port = rtps_inst->local_address_.get_port_number();
+    locators[idx].kind = address_to_kind(rtps_inst->local_address());
+    locators[idx].port = rtps_inst->local_address().get_port_number();
     RTPS::address_to_bytes(locators[idx].address,
-      rtps_inst->local_address_);
+      rtps_inst->local_address());
   }
 }
 
-const ACE_INET_Addr&
+const ACE_INET_Addr
 Sedp::local_address() const
 {
   DCPS::RtpsUdpInst_rch rtps_inst =
       DCPS::static_rchandle_cast<DCPS::RtpsUdpInst>(transport_inst_);
-  return rtps_inst->local_address_;
+  return rtps_inst->local_address();
 }
 
 const ACE_INET_Addr&

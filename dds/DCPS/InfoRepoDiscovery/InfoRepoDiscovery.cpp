@@ -237,16 +237,8 @@ InfoRepoDiscovery::bit_config()
     TcpInst_rch tcp_inst = static_rchandle_cast<TcpInst>(inst);
 
     tcp_inst->datalink_release_delay_ = 0;
-    if (bit_transport_ip_ == "") {
-      tcp_inst->local_address_.set_port_number(bit_transport_port_);
-    } else {
-      tcp_inst->local_address_ = ACE_INET_Addr(bit_transport_port_,
-                                               bit_transport_ip_.c_str());
-    }
-
-    std::stringstream out;
-    out << bit_transport_ip_ << ':' << bit_transport_port_;
-    tcp_inst->local_address_str_ = out.str();
+    tcp_inst->local_address(bit_transport_port_,
+                            bit_transport_ip_.c_str());
   }
   return bit_config_;
 #else

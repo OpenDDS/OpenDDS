@@ -12,10 +12,14 @@
 #include "TcpTransport.h"
 
 #include "dds/DCPS/transport/framework/TransportInst.h"
+#include "dds/DCPS/SafetyProfileStreams.h"
 #include "ace/INET_Addr.h"
 #include "ace/SString.h"
 
 #include <string>
+
+// Forward definition of a test-friendly class in the global name space
+class DDS_TEST;
 
 namespace OpenDDS {
 namespace DCPS {
@@ -28,16 +32,6 @@ public:
 
   /// Diagnostic aid.
   virtual OPENDDS_STRING dump_to_str();
-
-  /// Describes the local endpoint to be used to accept
-  /// passive connections.
-  ACE_INET_Addr local_address_;
-
-  /// The address string used to configure the acceptor.
-  /// This string is either from configuration file or default
-  /// to hostname:port. The hostname is fully qualified hostname
-  /// and the port is randomly picked by os.
-  std::string local_address_str_;
 
   /// The address string provided to DCPSInfoRepo for connectors.
   /// This string is either from configuration file or defaults
@@ -93,12 +87,38 @@ public:
 
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info) const;
 
+  OPENDDS_STRING local_address_string() const { return local_address_str_; }
+  ACE_INET_Addr local_address() const { return local_address_; }
+  void local_address(const char* str)
+  {
+    local_address_str_ = ACE_TEXT_ALWAYS_CHAR(str);
+    local_address_.set(str);
+  }
+  void local_address(u_short port_number, const char* host_name)
+  {
+    local_address_str_ = ACE_TEXT_ALWAYS_CHAR(host_name);
+    local_address_str_ += ":" + to_dds_string(port_number);
+    local_address_.set(port_number, host_name);
+  }
+
 private:
   friend class TcpType;
+  friend class TcpTransport;
+  friend class ::DDS_TEST;
   explicit TcpInst(const OPENDDS_STRING& name);
   virtual ~TcpInst();
 
   TcpTransport* new_impl(const TransportInst_rch& inst);
+
+  /// Describes the local endpoint to be used to accept
+  /// passive connections.
+  ACE_INET_Addr local_address_;
+
+  /// The address string used to configure the acceptor.
+  /// This string is either from configuration file or default
+  /// to hostname:port. The hostname is fully qualified hostname
+  /// and the port is randomly picked by os.
+  std::string local_address_str_;
 };
 
 } // namespace DCPS
