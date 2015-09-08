@@ -50,12 +50,12 @@ public:
   ACE_INET_Addr local_address() const { return local_address_; }
   void local_address(const char* str)
   {
-    local_address_config_str_ = ACE_TEXT_ALWAYS_CHAR(str);
+    local_address_config_str_ = str;
     local_address_.set(str);
   }
   void local_address(u_short port_number, const char* host_name)
   {
-    local_address_config_str_ = ACE_TEXT_ALWAYS_CHAR(host_name);
+    local_address_config_str_ = host_name;
     local_address_config_str_ += ":" + to_dds_string(port_number);
     local_address_.set(port_number, host_name);
   }
