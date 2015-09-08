@@ -203,7 +203,12 @@ int DDS_TEST::test(ACE_TString host, u_short port)
     host = "127.0.0.1";
   }
 #endif
-  ACE_INET_Addr remote_addr(port, host.c_str());
+  ACE_INET_Addr remote_addr;
+  if (host == "localhost") {
+    remote_addr = ACE_INET_Addr(port, host.c_str());
+  } else {
+    remote_addr = ACE_INET_Addr(port, host.c_str(), AF_INET);
+  }
 
   TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
                                                              "rtps_udp");
@@ -237,12 +242,8 @@ int DDS_TEST::test(ACE_TString host, u_short port)
 
   LocatorSeq locators;
   locators.length(1);
-  locators[0].kind =
-#ifdef ACE_HAS_IPV6
-    (remote_addr.get_type() == AF_INET6) ? LOCATOR_KIND_UDPv6 :
-#endif
-      LOCATOR_KIND_UDPv4;
-  locators[0].port = port;
+  locators[0].kind = address_to_kind(remote_addr);
+  locators[0].port = remote_addr.get_port_number();
   address_to_bytes(locators[0].address, remote_addr);
 
   size_t size_locator = 0, padding_locator = 0;
@@ -310,8 +311,18 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   }
 
   ACE_INET_Addr local_addr;
-  ACE_SOCK_Dgram sock(local_addr);
-  ssize_t res = sock.send(msg.rd_ptr(), msg.length(), remote_addr);
+  ACE_SOCK_Dgram sock;
+  if (!open_appropriate_socket_type(sock, local_addr)) {
+    ACE_ERROR_RETURN((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("publisher: open_appropriate_socket_type:")
+      ACE_TEXT("%m\n")),
+      false);
+  }
+
+  ACE_INET_Addr dest;
+  locator_to_address(dest, locators[0], local_addr.get_type() != AF_INET);
+  ssize_t res = sock.send(msg.rd_ptr(), msg.length(), dest);
   if (res < 0) {
     std::cerr << "ERROR: error in send()\n";
     return 1;
