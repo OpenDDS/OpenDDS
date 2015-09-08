@@ -743,29 +743,17 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
     throw std::runtime_error("failed to set unicast local address");
   }
 
-#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
-  if (!OpenDDS::DCPS::open_dual_stack_socket(unicast_socket_, local_addr)) {
+  if (!OpenDDS::DCPS::open_appropriate_socket_type(unicast_socket_, local_addr)) {
     if (DCPS::DCPS_debug_level > 3) {
       ACE_DEBUG((
             LM_WARNING,
             ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-            ACE_TEXT("failed to open_dual_stack_socket unicast socket on port %d %p.  ")
+            ACE_TEXT("failed to open_appropriate_socket_type unicast socket on port %d %p.  ")
             ACE_TEXT("Trying next participantId...\n"),
             uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
-#else
-  if (0 != unicast_socket_.open(local_addr)) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((
-            LM_WARNING,
-            ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
-            ACE_TEXT("failed to open unicast socket on port %d %p.  ")
-            ACE_TEXT("Trying next participantId...\n"),
-            uni_port, ACE_TEXT("ACE_SOCK_Dgram::open")));
-    }
-    return false;
-#endif
+
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((
           LM_INFO,

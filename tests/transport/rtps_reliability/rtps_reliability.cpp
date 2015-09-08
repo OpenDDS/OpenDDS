@@ -769,7 +769,7 @@ bool run_test()
 
   ACE_SOCK_Dgram part1_sock;
   ACE_INET_Addr part1_addr;
-  if (part1_sock.open(part1_addr) != 0) {
+  if (!open_appropriate_socket_type(part1_sock, part1_addr)) {
     std::cerr << "ERROR: run_test() unable to open part1_sock" << std::endl;
     exit(1);
   }
@@ -814,7 +814,19 @@ bool run_test()
   if (!blob_to_addr(part2_loc[0].data, part2_addr)) {
     return false;
   }
-
+#if defined (ACE_HAS_IPV6)
+  ACE_INET_Addr tmp;
+  part1_sock.get_local_addr(tmp);
+  if (tmp.get_type() == AF_INET6 && part2_addr.get_type() == AF_INET) {
+    //need to map address to IPV6
+    LocatorSeq locators;
+    locators.length(1);
+    locators[0].kind = address_to_kind(part2_addr);
+    locators[0].port = part2_addr.get_port_number();
+    address_to_bytes(locators[0].address, part2_addr);
+    locator_to_address(part2_addr, locators[0], tmp.get_type() != AF_INET);
+  }
+#endif
 
   // Associations are done, now test the real DR (SimpleDataReader) using our
   // TestParticipant class to interact with it over the socket directly.

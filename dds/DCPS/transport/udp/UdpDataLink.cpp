@@ -50,21 +50,12 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     local_address = this->config_->local_address();
   }
 
-#if defined (ACE_HAS_IPV6) && defined (IPV6_V6ONLY)
-  if (!open_dual_stack_socket(this->socket_, local_address)) {
+  if (!open_appropriate_socket_type(this->socket_, local_address)) {
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("UdpDataLink::open: open dual stack socket failed\n")),
+      ACE_TEXT("UdpDataLink::open: open_appropriate_socket_type failed\n")),
       false);
   }
-#else
-  if (this->socket_.open(local_address) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpDataLink::open: open failed: %m\n")),
-                     false);
-  }
-#endif
 
   VDBG((LM_DEBUG, "(%P|%t) UdpDataLink::open: listening on %C:%hu\n",
         local_address.get_host_addr(), local_address.get_port_number()));
