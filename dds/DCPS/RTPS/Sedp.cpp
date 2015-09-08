@@ -314,7 +314,7 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
   }
 }
 
-const ACE_INET_Addr
+ACE_INET_Addr
 Sedp::local_address() const
 {
   DCPS::RtpsUdpInst_rch rtps_inst =
