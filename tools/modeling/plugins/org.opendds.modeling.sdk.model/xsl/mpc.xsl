@@ -34,7 +34,7 @@
     </xsl:call-template>
   </xsl:variable>
   <xsl:text>project(</xsl:text>
-  <xsl:value-of select="concat($modelname, ') : dcps, ', $modelname, '_paths')"/>
+  <xsl:value-of select="concat($modelname, ') : dcps, all_dcps_transports, ', $modelname, '_paths')"/>
   
   <xsl:if test="string-length($model-refs) &gt; 0">
     <xsl:value-of select="concat(', ', $model-refs)"/>
