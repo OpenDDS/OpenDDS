@@ -450,7 +450,7 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
   }
   return true;
 #else
-  if (sock.open(local_addr) != 0) {
+  if (sock.open(local_address) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
       ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("open_appropriate_socket_type: non dual stack socket open:")
