@@ -241,7 +241,7 @@
     <xsl:call-template name="str-value"/>
   </xsl:variable>
   <xsl:value-of select="concat('    child_inst->local_address(',
-                               'ACE_INET_Addr(&quot;', $value, '&quot;)',
+                               '&quot;', $value, '&quot;',
                                ');', $newline)"/>
 </xsl:template>
 
