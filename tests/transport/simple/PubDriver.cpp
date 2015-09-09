@@ -213,9 +213,7 @@ PubDriver::init()
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
                "Set the inst->local_address_ to our (local) pub_addr_.\n"));
 
-    tcp_inst->local_address_ = this->pub_addr_;
-    tcp_inst->local_address_str_ =
-      ACE_TEXT_ALWAYS_CHAR(this->pub_addr_str_.c_str());
+    tcp_inst->local_address(this->pub_addr_str_.c_str());
   }
 
   OpenDDS::DCPS::TransportConfig_rch cfg =

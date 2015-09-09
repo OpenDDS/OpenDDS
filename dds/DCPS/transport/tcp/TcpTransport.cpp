@@ -59,7 +59,7 @@ TcpTransport::blob_to_key(const TransportBLOB& remote,
 {
   const ACE_INET_Addr remote_address =
     AssociationData::get_remote_address(remote);
-  const bool is_loopback = remote_address == tcp_config_->local_address_;
+  const bool is_loopback = remote_address == tcp_config_->local_address();
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
 
@@ -368,7 +368,7 @@ TcpTransport::configure_i(TransportInst* config)
   // Open our acceptor object so that we can accept passive connections
   // on our this->tcp_config_->local_address_.
 
-  if (this->acceptor_->open(this->tcp_config_->local_address_,
+  if (this->acceptor_->open(this->tcp_config_->local_address(),
                             this->reactor_task_->get_reactor()) != 0) {
     // Remember to drop our reference to the tcp_config_ object since
     // we are about to return -1 here, which means we are supposed to
@@ -377,8 +377,8 @@ TcpTransport::configure_i(TransportInst* config)
 
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Acceptor failed to open %C:%d: %p\n"),
-                      cfg->local_address_.get_host_addr(),
-                      cfg->local_address_.get_port_number(),
+                      cfg->local_address().get_host_addr(),
+                      cfg->local_address().get_port_number(),
                       ACE_TEXT("open")),
                      false);
   }
@@ -398,36 +398,19 @@ TcpTransport::configure_i(TransportInst* config)
             address.get_host_name(), address.get_port_number()), 2);
 
   unsigned short port = address.get_port_number();
-  std::stringstream out;
-  out << port;
 
   // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
-  if (tcp_config_->local_address_.is_any()) {
+  if (tcp_config_->local_address().is_any()) {
     std::string hostname = get_fully_qualified_hostname();
 
-    this->tcp_config_->local_address_.set(port, hostname.c_str());
-    this->tcp_config_->local_address_str_ = hostname;
-    this->tcp_config_->local_address_str_ += ':' + out.str();
+    this->tcp_config_->local_address(port, hostname.c_str());
   }
 
-  // Now we got the actual listening port. Update the port nnmber in the configuration
+  // Now we got the actual listening port. Update the port number in the configuration
   // if it's 0 originally.
-  else if (tcp_config_->local_address_.get_port_number() == 0) {
-    this->tcp_config_->local_address_.set_port_number(port);
-
-    if (this->tcp_config_->local_address_str_.length() > 0) {
-      size_t pos = this->tcp_config_->local_address_str_.find_last_of(
-                     ":]", std::string::npos, 2);
-      std::string str = this->tcp_config_->local_address_str_.substr(0, pos + 1);
-
-      if (this->tcp_config_->local_address_str_[pos] == ']') {
-        str += ":";
-      }
-
-      str += out.str();
-      this->tcp_config_->local_address_str_ = str;
-    }
+  else if (tcp_config_->local_address().get_port_number() == 0) {
+    tcp_config_->local_address_set_port(port);
   }
 
   // Ahhh...  The sweet smell of success!
@@ -646,7 +629,7 @@ TcpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
   const PriorityKey key(connection->transport_priority(),
                         remote_address,
-                        remote_address == tcp_config_->local_address_,
+                        remote_address == tcp_config_->local_address(),
                         connection->is_connector());
 
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::passive_connection() - ")
@@ -750,7 +733,7 @@ TcpTransport::fresh_link(TcpConnection_rch connection)
 
   PriorityKey key(connection->transport_priority(),
                   connection->get_remote_address(),
-                  connection->get_remote_address() == this->tcp_config_->local_address_,
+                  connection->get_remote_address() == this->tcp_config_->local_address(),
                   connection->is_connector());
 
   if (this->links_.find(key, link) == 0) {

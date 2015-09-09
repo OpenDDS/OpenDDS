@@ -8,6 +8,17 @@
 
 #include <ace/SOCK_Acceptor.h>
 
+class DDS_TEST
+{
+public:
+  DDS_TEST()
+  {
+  }
+  ACE_INET_Addr& local_address(OpenDDS::DCPS::TcpInst* tcp_inst) {
+    return tcp_inst->local_address_;
+  }
+};
+
 bool testConnectionErrorHandling()
 {
   // Open an acceptor to force an existing port number to be used.
@@ -27,7 +38,8 @@ bool testConnectionErrorHandling()
   OpenDDS::DCPS::TcpInst_rch tcp_inst =
     OpenDDS::DCPS::dynamic_rchandle_cast<OpenDDS::DCPS::TcpInst>(inst);
 
-  acceptor.get_local_addr(tcp_inst->local_address_);
+  DDS_TEST test;
+  acceptor.get_local_addr(test.local_address(tcp_inst.in()));
 
   OpenDDS::DCPS::TransportConfig_rch cfg =
     TheTransportRegistry->create_config("cfg");

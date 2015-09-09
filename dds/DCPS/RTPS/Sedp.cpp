@@ -246,7 +246,7 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
     rtps_inst->local_address_.set(disco.sedp_local_address().c_str());
   }
 
-  // Crete a config
+  // Create a config
   OPENDDS_STRING config_name = DCPS::TransportRegistry::DEFAULT_INST_PREFIX +
                             OPENDDS_STRING("_SEDP_TransportCfg_") + key +
                             domainStr;

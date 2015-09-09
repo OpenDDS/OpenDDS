@@ -261,7 +261,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  if (!open_appropriate_socket_type(unicast_socket_, config_i_->local_address_)) {
+  if (!open_appropriate_socket_type(unicast_socket_, config_i_->local_address())) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("RtpsUdpTransport::configure_i: open_appropriate_socket_type:")
@@ -269,7 +269,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
                       false);
   }
 
-  if (config_i_->local_address_.get_port_number() == 0) {
+  if (config_i_->local_address().get_port_number() == 0) {
 
     ACE_INET_Addr address;
     if (unicast_socket_.get_local_addr(address) != 0) {
@@ -277,7 +277,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
         ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p\n"),
         ACE_TEXT("cannot get local addr")), false);
     }
-    config_i_->local_address_.set_port_number(address.get_port_number());
+    config_i_->local_address_set_port(address.get_port_number());
   }
 
   create_reactor_task();

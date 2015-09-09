@@ -682,7 +682,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_TcpInst_getLocalAddress
 {
   OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
                                   false); // Don't take ownership
-  jstring retStr = jni->NewStringUTF(inst->local_address_str_.c_str());
+  jstring retStr = jni->NewStringUTF(inst->local_address_string().c_str());
   return retStr;
 }
 
@@ -693,8 +693,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_TcpInst_setLocalAddress
   OpenDDS::DCPS::TcpInst_rch inst(recoverCppObj<OpenDDS::DCPS::TcpInst>(jni, jthis),
                                   false); // Don't take ownership
   JStringMgr jsm_val(jni, val);
-  inst->local_address_str_ = jsm_val.c_str();
-  inst->local_address_.set(inst->local_address_str_.c_str());
+  inst->local_address(jsm_val.c_str());
 }
 
 // TcpInst::isEnableNagleAlgorithm
@@ -813,10 +812,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_UdpInst_getLocalAddress
 {
   OpenDDS::DCPS::UdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::UdpInst>(jni, jthis),
                                   false); // Don't take ownership
-  ACE_TCHAR buffer[1024];
-  inst->local_address_.addr_to_string(buffer, 1024, 1);
-  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  jstring retStr = jni->NewStringUTF(addr_str.c_str());
+  jstring retStr = jni->NewStringUTF(inst->local_address_string().c_str());
   return retStr;
 }
 
@@ -827,7 +823,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_UdpInst_setLocalAddress
   OpenDDS::DCPS::UdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::UdpInst>(jni, jthis),
                                   false); // Don't take ownership
   JStringMgr jsm_val(jni, val);
-  inst->local_address_.set(jsm_val.c_str());
+  inst->local_address(jsm_val.c_str());
 }
 
 // MulticastInst
@@ -1097,10 +1093,7 @@ jstring JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getLocalAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
                                       false); // Don't take ownership
-  ACE_TCHAR buffer[1024];
-  inst->local_address_.addr_to_string(buffer, 1024, 1);
-  std::string addr_str = ACE_TEXT_ALWAYS_CHAR(buffer);
-  return jni->NewStringUTF(addr_str.c_str());
+  return jni->NewStringUTF(inst->local_address_string().c_str());
 }
 
 // RtpsUdpInst::setLocalAddress
@@ -1110,7 +1103,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setLocalAddress
   OpenDDS::DCPS::RtpsUdpInst_rch inst(recoverCppObj<OpenDDS::DCPS::RtpsUdpInst>(jni, jthis),
                                       false); // Don't take ownership
   JStringMgr jsm_val(jni, val);
-  inst->local_address_.set(jsm_val.c_str());
+  inst->local_address(jsm_val.c_str());
 }
 
 // RtpsUdpInst::isUseMulticast

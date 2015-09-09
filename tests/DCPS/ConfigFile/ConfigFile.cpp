@@ -71,7 +71,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TEST_CHECK(tcp_inst->thread_per_connection_ == true);
   TEST_CHECK(tcp_inst->datalink_release_delay_ == 5000);
   TEST_CHECK(tcp_inst->datalink_control_chunks_ == 16);
-  TEST_CHECK(tcp_inst->local_address_str_ == "localhost:");
+  TEST_CHECK(tcp_inst->local_address_string() == "localhost:");
   TEST_CHECK(tcp_inst->enable_nagle_algorithm_ == true);
   TEST_CHECK(tcp_inst->conn_retry_initial_delay_ == 1000);
   TEST_CHECK(tcp_inst->conn_retry_backoff_multiplier_ == 4);

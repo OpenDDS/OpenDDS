@@ -2183,8 +2183,7 @@ int TAO_DDS_DCPSInfo_i::init_transport(int listen_address_given,
     tcp_inst->conn_retry_attempts_ = 0;
 
     if (listen_address_given) {
-      tcp_inst->local_address_ = ACE_INET_Addr(listen_str);
-      tcp_inst->local_address_str_ = listen_str;
+      tcp_inst->local_address(listen_str);
     }
 
   } catch (...) {

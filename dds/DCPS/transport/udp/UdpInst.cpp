@@ -45,9 +45,8 @@ UdpInst::load(ACE_Configuration_Heap& cf,
 
   ACE_TString local_address_s;
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
-                           local_address_s)
-  this->local_address_.set(local_address_s.c_str());
-  this->local_address_config_str_ += ACE_TEXT_ALWAYS_CHAR(local_address_s.c_str());
+                           local_address_s);
+  this->local_address(local_address_s.c_str());
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
 
@@ -62,8 +61,8 @@ UdpInst::dump_to_str()
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;
 
-  os << formatNameForDump("local_address") << this->local_address_.get_host_addr()
-                                           << ":" << this->local_address_.get_port_number() << std::endl;
+  os << formatNameForDump("local_address") << this->local_address().get_host_addr()
+                                           << ":" << this->local_address().get_port_number() << std::endl;
   os << formatNameForDump("send_buffer_size") << this->send_buffer_size_ << std::endl;
   os << formatNameForDump("rcv_buffer_size") << this->rcv_buffer_size_ << std::endl;
   return OPENDDS_STRING(os.str());
@@ -72,12 +71,12 @@ UdpInst::dump_to_str()
 size_t
 UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
 {
-  if (this->local_address_ != ACE_INET_Addr()) {
+  if (this->local_address() != ACE_INET_Addr()) {
     NetworkAddress network_address;
-    if (!this->local_address_config_str_.empty()) {
-      network_address = NetworkAddress(this->local_address_config_str_);
+    if (!this->local_address_string().empty()) {
+      network_address = NetworkAddress(this->local_address_string());
     } else {
-      network_address = NetworkAddress(this->local_address_, true);
+      network_address = NetworkAddress(this->local_address(), true);
     }
     ACE_OutputCDR cdr;
     cdr << network_address;

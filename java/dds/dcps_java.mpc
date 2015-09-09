@@ -1,5 +1,5 @@
 // dcpslib needs to come after idl2jni to set libout correctly
-project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional {
+project: idl2jni, dcpslib, optional_jni_check, dcps_java_optional, dcps_tcp, dcps_udp, dcps_rtps_udp {
 
   sharedname    = OpenDDS_DCPS_Java
   after        += tao_java
