@@ -11,6 +11,8 @@
 #include "FederatorConfig.h"
 #include "FederatorManagerImpl.h"
 #include "ShutdownInterface.h"
+#include "PersistenceUpdater.h"
+#include "UpdateManager.h"
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
@@ -18,8 +20,6 @@
 //If we need BIT support, pull in TCP so that static builds will have it.
 #if !defined(DDS_HAS_MINIMUM_BIT)
 #include "dds/DCPS/transport/tcp/Tcp.h"
-#include "PersistenceUpdater.h"
-#include "UpdateManager.h"
 #endif
 
 #include "tao/ORB_Core.h"
