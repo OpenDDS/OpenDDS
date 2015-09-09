@@ -277,7 +277,7 @@ RtpsUdpTransport::configure_i(TransportInst* config)
         ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::configure_i - %p\n"),
         ACE_TEXT("cannot get local addr")), false);
     }
-    config_i_->local_address_.set_port_number(address.get_port_number());
+    config_i_->local_address_set_port(address.get_port_number());
   }
 
   create_reactor_task();

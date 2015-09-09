@@ -75,7 +75,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) UdpDataLink::open listening on host %C:%hu\n"),
               hostname.c_str(), port), 2);
-    this->config_->local_address_.set(port, hostname.c_str());
+    this->config_->local_address(port, hostname.c_str());
 
   // Similar case to the "if" case above, but with a bound host/IP but no port
   } else if (!this->active_ &&
@@ -90,7 +90,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) UdpDataLink::open listening on port %hu\n"),
               port), 2);
-    this->config_->local_address_.set_port_number(port);
+    this->config_->local_address_set_port(port);
   }
 
   if (this->config_->send_buffer_size_ > 0) {

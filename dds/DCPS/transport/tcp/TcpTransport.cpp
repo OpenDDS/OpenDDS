@@ -398,8 +398,6 @@ TcpTransport::configure_i(TransportInst* config)
             address.get_host_name(), address.get_port_number()), 2);
 
   unsigned short port = address.get_port_number();
-  std::stringstream out;
-  out << port;
 
   // As default, the acceptor will be listening on INADDR_ANY but advertise with the fully
   // qualified hostname and actual listening port number.
@@ -412,20 +410,7 @@ TcpTransport::configure_i(TransportInst* config)
   // Now we got the actual listening port. Update the port number in the configuration
   // if it's 0 originally.
   else if (tcp_config_->local_address().get_port_number() == 0) {
-    this->tcp_config_->local_address_.set_port_number(port);
-
-    if (this->tcp_config_->local_address_string().length() > 0) {
-      size_t pos = this->tcp_config_->local_address_str_.find_last_of(
-                     ":]", std::string::npos, 2);
-      std::string str = this->tcp_config_->local_address_str_.substr(0, pos + 1);
-
-      if (this->tcp_config_->local_address_str_[pos] == ']') {
-        str += ":";
-      }
-
-      str += out.str();
-      this->tcp_config_->local_address_str_ = str;
-    }
+    tcp_config_->local_address_set_port(port);
   }
 
   // Ahhh...  The sweet smell of success!

@@ -72,7 +72,7 @@ OpenDDS::DCPS::TcpInst::dump_to_str()
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;
 
-  os << formatNameForDump("local_address")                 << this->local_address_str_ << std::endl;
+  os << formatNameForDump("local_address")                 << this->local_address_string() << std::endl;
   os << formatNameForDump("pub_address")                   << this->pub_address_str_ << std::endl;
   os << formatNameForDump("enable_nagle_algorithm")        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;
   os << formatNameForDump("conn_retry_initial_delay")      << this->conn_retry_initial_delay_ << std::endl;
