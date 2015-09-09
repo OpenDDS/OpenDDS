@@ -309,6 +309,21 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
       addrs.push_back(if_addrs[i]);
     }
   }
+#ifdef ACE_HAS_IPV6
+  //front load IPV6 addresses to give preference to IPV6 interfaces
+  size_t index_last_non_ipv6 = 0;
+  for (size_t i = 0; i < addrs.size(); i++) {
+    if (addrs.at(i).get_type() == AF_INET6) {
+      if (i == index_last_non_ipv6) {
+        ++index_last_non_ipv6;
+      }
+      else {
+        std::swap(addrs.at(i), addrs.at(index_last_non_ipv6));
+        ++index_last_non_ipv6;
+      }
+    }
+  }
+#endif
 #ifdef OPENDDS_SAFETY_PROFILE
   // address resolution may not be available due to safety profile,
   // return an address that should work for running tests
