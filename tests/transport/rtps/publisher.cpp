@@ -204,7 +204,7 @@ int DDS_TEST::test(ACE_TString host, u_short port)
   }
 #endif
   ACE_INET_Addr remote_addr;
-  if (host == "localhost") {
+  if (host == ACE_TEXT("localhost")) {
     remote_addr = ACE_INET_Addr(port, host.c_str());
   } else {
     remote_addr = ACE_INET_Addr(port, host.c_str(), AF_INET);

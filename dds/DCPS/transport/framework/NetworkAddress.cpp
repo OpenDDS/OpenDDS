@@ -393,8 +393,8 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
     protocol));
 
   if (socket.get_handle() == ACE_INVALID_HANDLE) {
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_ERROR_RETURN((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING:")
       ACE_TEXT("open_appropriate_socket_type: ")
       ACE_TEXT("failed to set socket handle\n")),
       false);
@@ -405,8 +405,8 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
                                &one,
                                sizeof one) == -1) {
     socket.close();
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_ERROR_RETURN((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: ")
       ACE_TEXT("open_appropriate_socket_type: ")
       ACE_TEXT("failed to set socket SO_REUSEADDR option\n")),
       false);
@@ -419,8 +419,8 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
                               IPV6_V6ONLY,
                               (char*)&ipv6_only,
                               sizeof(ipv6_only))) {
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
+    ACE_ERROR_RETURN((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING: ")
       ACE_TEXT("open_appropriate_socket_type: ")
       ACE_TEXT("failed to set IPV6_V6ONLY to 0: %p\n"),
       ACE_TEXT("ACE_OS::setsockopt(IPV6_V6ONLY)")),
@@ -451,9 +451,9 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
   return true;
 #else
   if (socket.open(local_address) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("open_appropriate_socket_type: non dual stack socket open:")
+    ACE_ERROR_RETURN((LM_WARNING,
+      ACE_TEXT("(%P|%t) WARNING:")
+      ACE_TEXT("open_appropriate_socket_type: socket open not successful:")
       ACE_TEXT("%m\n")),
       false);
   }
