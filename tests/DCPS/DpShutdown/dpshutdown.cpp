@@ -18,6 +18,10 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include "MessengerTypeSupportImpl.h"
 
+#ifndef DDS_HAS_MINIMUM_BIT
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#endif
+
 #ifdef ACE_AS_STATIC_LIBS
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
