@@ -140,7 +140,10 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
                            this->multicast_group_address_);
   }
 
-  if (this->local_address_string().empty()) {
+  //if local_address_string is empty, or only the port has been set
+  //need to get interface addresses to populate into the locator
+  if (this->local_address_string().empty() ||
+      this->local_address_string().rfind(':') == 0) {
     typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
     AddrVector addrs;
     get_interface_addrs(addrs);
