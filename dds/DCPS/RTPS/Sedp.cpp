@@ -292,7 +292,10 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
       rtps_inst->multicast_group_address_);
   }
 
-  if (rtps_inst->local_address_config_str_.empty()) {
+  //if local_address_string is empty, or only the port has been set
+  //need to get interface addresses to populate into the locator
+  if (rtps_inst->local_address_config_str_.empty() ||
+      rtps_inst->local_address_config_str_.rfind(':') == 0) {
     typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
     AddrVector addrs;
     OpenDDS::DCPS::get_interface_addrs(addrs);
