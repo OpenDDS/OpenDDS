@@ -376,6 +376,66 @@ EOF
   return $changed;
 }
 ############################################################################
+sub verify_authors {
+  my $status = 1;
+  my $name = "";
+  my $email = "";
+  my $settings = shift();
+  my %author_names;
+  my %author_emails;
+  my %author_email_aliases = (
+    "jeffrey.j.schmitz\@gmail.com"               => "schmitzj\@ociweb.com",
+    "jrw972\@users.noreply.github.com"           => "wilsonj\@ociweb.com",
+    "brianjohnson5972\@users.noreply.github.com" => "johnsonb\@ociweb.com"
+  );
+  my %author_name_aliases = (
+    "iamtheschmitzer" => "Jeff Schmitz",
+    "johnsonb"        => "Brian Johnson",
+  );
+  open(AUTHORS, "AUTHORS") or die "Opening $!";
+  while (<AUTHORS>) {
+    chomp;
+    ($name, $email) = split(/[<>]/);
+    $name =~ s/^\s+|\s+$//g;
+    $email =~ s/^\s+|\s+$//g;
+    $author_names{$name} = 1;
+    $author_emails{$email} = 1;
+  }
+  close (AUTHORS);
+
+  open(CHANGELOG, $settings->{changelog}) or die "Opening $!";
+  while (<CHANGELOG>) {
+    if (/[0-9:]{8} GMT [0-9]{4} (.*) <(.*)>/) {
+      $name = $1;
+      $email = $2;
+      $name =~ s/^\s+|\s+$//g;
+      $email =~ s/^\s+|\s+$//g;
+      $name = $author_name_aliases{$name} || $name;
+      unless ($author_names{$name}) {
+        print "Could not find name '$name' in AUTHORS file\n";
+        $status = 0;
+        # Add to hash so message goes away
+        $author_names{$name} = 2;
+      }
+      $email = $author_email_aliases{$email} || $email;
+      unless ($author_emails{$email}) {
+        print "Could not find email '$email' in AUTHORS file\n";
+        $status = 0;
+        # Add to hash so message goes away
+        $author_emails{$email} = 2;
+      }
+      next unless $status;
+    }
+  }
+  return $status;
+}
+
+sub message_authors {
+  my $settings = shift();
+  return "AUTHORS file needs updating\n";
+}
+
+############################################################################
 sub verify_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
@@ -1029,6 +1089,12 @@ my %release_step_hash  = (
     remedy  => sub{remedy_changelog(@_)},
     force   => sub{ignore_step('Create ChangeLog')}
   },
+  'Update Authors' => {
+    verify  => sub{verify_authors(@_)},
+    message => sub{message_authors(@_)},
+    remedy  => sub{remedy_authors(@_)},
+    force   => sub{ignore_step('Update Authors')}
+  },
   'Add NEWS Section' => {
     verify  => sub{verify_news_file_section(@_)},
     message => sub{message_news_file_section(@_)},
@@ -1125,6 +1191,7 @@ my @ordered_steps = (
   'Update PROBLEM-REPORT-FORM',
   'Verify remote arg',
   'Create ChangeLog',
+  'Update Authors',
   'Add NEWS Section',
   'Update NEWS Section',
   'Commit changes to GIT',
