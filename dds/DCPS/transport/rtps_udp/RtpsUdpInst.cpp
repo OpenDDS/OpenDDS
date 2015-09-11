@@ -51,7 +51,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s);
   if (!local_address_s.is_empty()) {
-    local_address(local_address_s.c_str());
+    local_address(ACE_TEXT_ALWAYS_CHAR(local_address_s.c_str()));
   }
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
@@ -140,7 +140,10 @@ RtpsUdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info) const
                            this->multicast_group_address_);
   }
 
-  if (this->local_address_string().empty()) {
+  //if local_address_string is empty, or only the port has been set
+  //need to get interface addresses to populate into the locator
+  if (this->local_address_string().empty() ||
+      this->local_address_string().rfind(':') == 0) {
     typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
     AddrVector addrs;
     get_interface_addrs(addrs);
