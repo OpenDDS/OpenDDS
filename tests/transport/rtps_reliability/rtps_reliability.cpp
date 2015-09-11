@@ -740,7 +740,7 @@ bool blob_to_addr(const TransportBLOB& blob, ACE_INET_Addr& addr)
 #ifdef ACE_HAS_IPV6
     addr.set_type(AF_INET6);
 #endif
-    addr.set_address(reinterpret_cast<const char*>(locators[0].address), 16);
+    addr.set_address(reinterpret_cast<const char*>(locators[0].address), 16, 0 /*encode*/);
   } else if (locators[0].kind == LOCATOR_KIND_UDPv4) {
     addr.set_type(AF_INET);
     addr.set_address(reinterpret_cast<const char*>(locators[0].address) + 12,
