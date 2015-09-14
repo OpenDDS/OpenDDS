@@ -18,11 +18,15 @@ static bool no_global_new = false;
 class DisableGlobalNew {
 public:
   DisableGlobalNew() {
+#ifdef ACE_FACE_SAFETY_BASE
     no_global_new = true;
+#else
+    no_global_new = false; // Safety extended allows new
+#endif 
   }
 };
 
-#include <execinfo.h>
+#elinclude <execinfo.h>
 
 void* operator new(size_t sz)
 #ifdef ACE_HAS_NEW_THROW_SPEC
