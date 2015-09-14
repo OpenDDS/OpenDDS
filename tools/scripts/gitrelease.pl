@@ -304,7 +304,7 @@ sub remedy_changelog {
 
   open(CHANGELOG, ">$settings->{changelog}") or die "Opening $!";
 
-  open(GITLOG, "git log $prev_tag..$remote --name-status --date=raw |") or die "Opening $!";
+  open(GITLOG, "git log $prev_tag..$branch --name-status --date=raw |") or die "Opening $!";
   while (<GITLOG>) {
     chomp;
     if (/^commit /) {
