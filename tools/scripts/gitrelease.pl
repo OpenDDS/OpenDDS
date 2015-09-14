@@ -18,7 +18,7 @@ sub usage {
          "  --branch=name   valid git branch for cloning (default: master)\n" .
          "  --step=#        # of individual step to run (default: all)\n" .
          "  --force         keep going if possible (requires --step)\n" .
-         "  --no-devguide   no devguide issued for this release"
+         "  --no-devguide   no devguide issued for this release\n"
 }
 
 sub normalizePath {
@@ -112,22 +112,6 @@ sub override_git_remote {
   print "  Overriding remote $remote, url $settings->{alt_url}\n";
   # Reverify
   verify_git_remote($settings);
-}
-
-############################################################################
-sub verify_git_branch {
-  my $settings = shift;
-  my $current_branch;
-  open(GIT_BRANCH, "git branch |") or die "git branch $!";
-  my $startwithstar = '$\* (.*)';
-  while (<GIT_BRANCH>) {
-    if (/$startwithstar/) {
-      $current_branch = $1;
-      last;
-    }
-  }
-
-  return ($current_branch eq $settings->{branch});
 }
 
 ############################################################################
@@ -375,6 +359,66 @@ EOF
 
   return $changed;
 }
+############################################################################
+sub verify_authors {
+  my $status = 1;
+  my $name = "";
+  my $email = "";
+  my $settings = shift();
+  my %author_names;
+  my %author_emails;
+  my %author_email_aliases = (
+    "jeffrey.j.schmitz\@gmail.com"               => "schmitzj\@ociweb.com",
+    "jrw972\@users.noreply.github.com"           => "wilsonj\@ociweb.com",
+    "brianjohnson5972\@users.noreply.github.com" => "johnsonb\@ociweb.com"
+  );
+  my %author_name_aliases = (
+    "iamtheschmitzer" => "Jeff Schmitz",
+    "johnsonb"        => "Brian Johnson",
+  );
+  open(AUTHORS, "AUTHORS") or die "Opening $!";
+  while (<AUTHORS>) {
+    chomp;
+    ($name, $email) = split(/[<>]/);
+    $name =~ s/^\s+|\s+$//g;
+    $email =~ s/^\s+|\s+$//g;
+    $author_names{$name} = 1;
+    $author_emails{$email} = 1;
+  }
+  close (AUTHORS);
+
+  open(CHANGELOG, $settings->{changelog}) or die "Opening $!";
+  while (<CHANGELOG>) {
+    if (/[0-9:]{8} GMT [0-9]{4} (.*) <(.*)>/) {
+      $name = $1;
+      $email = $2;
+      $name =~ s/^\s+|\s+$//g;
+      $email =~ s/^\s+|\s+$//g;
+      $name = $author_name_aliases{$name} || $name;
+      unless ($author_names{$name}) {
+        print "Could not find name '$name' in AUTHORS file\n";
+        $status = 0;
+        # Add to hash so message goes away
+        $author_names{$name} = 2;
+      }
+      $email = $author_email_aliases{$email} || $email;
+      unless ($author_emails{$email}) {
+        print "Could not find email '$email' in AUTHORS file\n";
+        $status = 0;
+        # Add to hash so message goes away
+        $author_emails{$email} = 2;
+      }
+      next unless $status;
+    }
+  }
+  return $status;
+}
+
+sub message_authors {
+  my $settings = shift();
+  return "AUTHORS file needs updating\n";
+}
+
 ############################################################################
 sub verify_news_file_section {
   my $settings = shift();
@@ -651,13 +695,15 @@ sub verify_clone_tag {
   if (-d $settings->{clone_dir}) {
     my $curdir = getcwd;
     chdir $settings->{clone_dir};
-    open(GIT_BRANCH, "git branch |") or die "git branch $!";
-    while (<GIT_BRANCH>) {
-      if (/^\* \(detached from $settings->{git_tag}\)/) {
+    # Using git describe for compatibility with older versions of git
+    open(GIT_DESCRIBE, "git describe --tags |") or die "git describe --tags $!";
+    while (<GIT_DESCRIBE>) {
+      if (/^$settings->{git_tag}/) {
         $correct = 1;
+        next;
       }
     }
-    close GIT_BRANCH;
+    close GIT_DESCRIBE;
     chdir $curdir;
   }
   return $correct;
@@ -749,7 +795,10 @@ sub remedy_tgz_source {
   chdir($settings->{parent_dir});
   print "Creating file $settings->{tar_src}\n";
   my $basename = basename($settings->{clone_dir});
-  my $result = system("tar -cf $settings->{tar_src} $basename --exclude-vcs");
+  # --exclude-vcs nor available in some tar versions
+  print "Removing git-specific directories\n";
+  my $result = system("find . -name '.git*' | xargs rm -rf");
+  $result = $result || system("tar -cf $settings->{tar_src} $basename");
   if (!$result) {
     print "Gzipping file $settings->{tar_src}\n";
     $result = system("gzip $settings->{tar_src}");
@@ -798,6 +847,7 @@ sub message_md5_checksum{
 
 sub remedy_md5_checksum{
   my $settings = shift();
+  print "Creating file $settings-{md5_src}\n";
   my $md5_file = join("/", $settings->{parent_dir}, $settings->{md5_src});
   my $tgz_file = join("/", $settings->{parent_dir}, $settings->{tgz_src});
   my $zip_file = join("/", $settings->{parent_dir}, $settings->{zip_src});
@@ -822,7 +872,7 @@ sub remedy_gen_doxygen {
     my $curdir = getcwd;
     chdir($settings->{clone_dir});
     $ENV{DDS_ROOT} = getcwd;
-    my $result = system("$ENV{ACE_ROOT}/bin/generate_doxygen.pl", "-exclude_ace -include_dds");
+    my $result = system("$ENV{ACE_ROOT}/bin/generate_doxygen.pl -exclude_ace -include_dds -is_release");
     chdir($curdir);
     if (!$result) {
       $generated = 1;
@@ -895,6 +945,35 @@ sub remedy_zip_doxygen {
   return !$result;
 }
 ############################################################################
+sub verify_devguide {
+  my $settings = shift();
+  if (!$settings->{nodevguide}) {
+    return (-f "$settings->{parent_dir}/$settings->{devguide}" &&
+            -f "$settings->{parent_dir}/OpenDDS-latest.pdf");
+  } else {
+    return 1;
+  }
+}
+
+sub message_devguide {
+  my $settings = shift();
+  return "Devguide missing";
+}
+
+sub remedy_devguide {
+  my $settings = shift();
+  if (!$settings->{nodevguide}) {
+    my $devguide_url = "svn+ssh://svn.ociweb.com/devguide/opendds/trunk/$settings->{devguide}";
+    print "Downloading devguide\n$devguide_url\n";
+    my $result = system("svn cat $devguide_url > $settings->{parent_dir}/$settings->{devguide}");
+    $result = $result || system("svn cat $devguide_url > $settings->{parent_dir}/OpenDDS-latest.pdf");
+    return !$result;
+  } else {
+    return 1;
+  }
+}
+
+############################################################################
 sub verify_ftp_upload {
   my $settings = shift();
   my $url = "http://download.ociweb.com/OpenDDS/";
@@ -921,54 +1000,30 @@ sub message_ftp_upload {
   return "Release needs to be uploaded to ftp site";
 }
 ############################################################################
-sub verify_github_upload {
+sub verify_update_opendds_org_latest_release {
   my $settings = shift();
-  my $tag = $settings->{git_tag};
-  my $url = "https://github.com/objectcomputing/OpenDDS/releases/tag/$tag";
+  my $url = "http://www.opendds.org/latestReleaseVersion.html";
   my $content = get($url);
-  my $base = "DDS-$settings->{version}";
-  # Check for required files
-  my @files = ("$base.tar.gz",         "$base.zip");
-  foreach my $file (@files) {
-    if ($content =~ /$file/) {
-    } else {
-      print "$file not found at $url\n";
-      return 0;
-    }
+  if ($content =~ /Latest [Rr]elease $settings->{version}/) {
+    return 1;
   }
-  return 1;
 }
 
-sub message_github_upload {
-  return "tar.gz and zip of sources need to be uploaded to github";
+sub message_update_opendds_org_latest_release {
+  return "OpenDDS.org latest release version page needs updating";
 }
 ############################################################################
-sub verify_update_opendds_org_front {
+sub verify_update_opendds_org_latest_news {
   my $settings = shift();
-  my $url = "http://www.opendds.org";
+  my $url = "http://www.opendds.org/latestNewsArticle.html";
   my $content = get($url);
-  my $version = "[Vv]ersion $settings->{version}";
-  if (!$content =~ /$version/) {
-    return 0;
+  if ($content =~ /Version $settings->{version} [Rr]eleased/) {
+    return 1;
   }
 }
 
-sub message_update_opendds_org_front {
-  return "OpenDDS.org front page needs updating";
-}
-############################################################################
-sub verify_update_opendds_org_news {
-  my $settings = shift();
-  my $url = "http://www.opendds.org/news";
-  my $content = get($url);
-  my $version = "[Vv]ersion $settings->{version}";
-  if (!$content =~ /$version/) {
-    return 0;
-  }
-}
-
-sub message_update_opendds_org_news {
-  return "OpenDDS.org news page needs updating";
+sub message_update_opendds_org_latest_news {
+  return "OpenDDS.org latest news page needs updating";
 }
 ############################################################################
 sub verify_email_list {
@@ -1028,6 +1083,12 @@ my %release_step_hash  = (
     message => sub{message_changelog(@_)},
     remedy  => sub{remedy_changelog(@_)},
     force   => sub{ignore_step('Create ChangeLog')}
+  },
+  'Update Authors' => {
+    verify  => sub{verify_authors(@_)},
+    message => sub{message_authors(@_)},
+    remedy  => sub{remedy_authors(@_)},
+    force   => sub{ignore_step('Update Authors')}
   },
   'Add NEWS Section' => {
     verify  => sub{verify_news_file_section(@_)},
@@ -1096,21 +1157,22 @@ my %release_step_hash  = (
     message => sub{message_md5_checksum(@_)},
     remedy  => sub{remedy_md5_checksum(@_)}
   },
+  'Download Devguide' => {
+    verify  => sub{verify_devguide(@_)},
+    message => sub{message_devguide(@_)},
+    remedy  => sub{remedy_devguide(@_)},
+  },
   'Upload to FTP Site' => {
     verify  => sub{verify_ftp_upload(@_)},
     message => sub{message_ftp_upload(@_)}
   },
-  'Upload to GitHub' => {
-    verify  => sub{verify_github_upload(@_)},
-    message => sub{message_github_upload(@_)}
+  'Update opendds.org latest release page' => {
+    verify  => sub{verify_update_opendds_org_latest_release(@_)},
+    message => sub{message_update_opendds_org_latest_release(@_)}
   },
-  'Update opendds.org front page' => {
-    verify  => sub{verify_update_opendds_org_front(@_)},
-    message => sub{message_update_opendds_org_front(@_)}
-  },
-  'Update opendds.org news page' => {
-    verify  => sub{verify_update_opendds_org_news(@_)},
-    message => sub{message_update_opendds_org_news(@_)}
+  'Update opendds.org latest news page' => {
+    verify  => sub{verify_update_opendds_org_latest_news(@_)},
+    message => sub{message_update_opendds_org_latest_news(@_)}
   },
   'Email DDS-Release-Announce list' => {
     verify  => sub{verify_email_list(@_)},
@@ -1125,6 +1187,7 @@ my @ordered_steps = (
   'Update PROBLEM-REPORT-FORM',
   'Verify remote arg',
   'Create ChangeLog',
+  'Update Authors',
   'Add NEWS Section',
   'Update NEWS Section',
   'Commit changes to GIT',
@@ -1138,10 +1201,11 @@ my @ordered_steps = (
   'Create unix doxygen archive',
   'Create windows doxygen archive',
   'Create md5 checksum',
+  'Download Devguide',
   'Upload to FTP Site',
   'Upload to GitHub',
-  'Update opendds.org front page',
-  'Update opendds.org news page',
+  'Update opendds.org latest release page',
+  'Update opendds.org latest news page',
   'Email DDS-Release-Announce list',
 );
 
@@ -1196,6 +1260,7 @@ my %settings = (
   tar_dox    => "OpenDDS-$version-doxygen.tar",
   tgz_dox    => "OpenDDS-$version-doxygen.tar.gz",
   zip_dox    => "OpenDDS-$version-doxygen.zip",
+  devguide   => "OpenDDS-$version.pdf",
   timestamp  => strftime("%a %b %e %T %Z %Y", @t),
   git_url    => 'git@github.com:objectcomputing/OpenDDS.git',
   changelog  => "docs/history/ChangeLog-$version",
