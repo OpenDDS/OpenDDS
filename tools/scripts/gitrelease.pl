@@ -682,10 +682,6 @@ sub remedy_git_tag {
   my $command = "git tag -a -m 'OpenDDS Release $settings->{version}' " .
                  $settings->{git_tag};
   my $result = system($command);
-  if (!$result) {
-    print "Pushing tag to $settings->{remote}\n";
-    $result = system("git push $settings->{remote} $settings->{git_tag}");
-  }
   return !$result;
 }
 ############################################################################
