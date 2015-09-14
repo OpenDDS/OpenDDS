@@ -22,7 +22,7 @@ public:
     no_global_new = true;
 #else
     no_global_new = false; // Safety extended allows new
-#endif 
+#endif
   }
 };
 
