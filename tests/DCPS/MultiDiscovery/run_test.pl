@@ -26,7 +26,7 @@ sub runTest {
 
     print "*********************************\n";
     print "MultiDiscoveryTest creates 3 processes, each with a DW and DR.\nDW's in each process use different forms of discovery to find/associate with the DR in their respective domain.\n";
-    print "One DW is specified as the 'origin' and sends 10 messages to its associated DR.\nUpon receipt, DR's pass the message to their process's DW which add's its id to the message's from field\nand relays the messgae on until the loop is completed at the 'origin' DR\n"; 
+    print "One DW is specified as the 'origin' and sends 10 messages to its associated DR.\nUpon receipt, DR's pass the message to their process's DW which add's its id to the message's from field\nand relays the messgae on until the loop is completed at the 'origin' DR\n";
     print "*********************************\n";
     print "Spawning alpha - Writer (12) in domain 12 using default discovery and Reader (13) in domain 31 using rtps discovery\n";
     my $dw_static = 1;
