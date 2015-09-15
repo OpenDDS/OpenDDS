@@ -98,6 +98,23 @@ public:
   typedef OPENDDS_MAP_CMP(RepoId, Writer, GUID_tKeyLessThan) WriterMapType;
   WriterMapType writer_map;
 
+  struct StaticDiscGuidDomainEqual {
+
+    bool
+    operator() (const GuidPrefix_t& lhs, const GuidPrefix_t& rhs) const
+    {
+      return std::memcmp(&lhs[2], &rhs[2], sizeof(DDS::DomainId_t)) == 0;
+    }
+  };
+  struct StaticDiscGuidPartEqual {
+
+    bool
+    operator() (const GuidPrefix_t& lhs, const GuidPrefix_t& rhs) const
+    {
+      return std::memcmp(&lhs[6], &rhs[6], 6) == 0;
+    }
+  };
+
   void match();
 
   static EntityId_t build_id(const unsigned char* entity_key /* length of 3 */,
