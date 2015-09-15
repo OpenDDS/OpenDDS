@@ -29,7 +29,8 @@ void EndpointRegistry::match()
       const RepoId& readerid = rp->first;
       Reader& reader = rp->second;
 
-      if (!GuidPrefixEqual()(readerid.guidPrefix, writerid.guidPrefix) &&
+      if (StaticDiscGuidDomainEqual()(readerid.guidPrefix, writerid.guidPrefix) &&
+          !StaticDiscGuidPartEqual()(readerid.guidPrefix, writerid.guidPrefix) &&
           reader.topic_name == writer.topic_name) {
         // Different participants, same topic.
         IncompatibleQosStatus writerStatus = {0, 0, 0, DDS::QosPolicyCountSeq()};
