@@ -26,7 +26,7 @@ public:
   }
 };
 
-#elinclude <execinfo.h>
+#include <execinfo.h>
 
 void* operator new(size_t sz)
 #ifdef ACE_HAS_NEW_THROW_SPEC
