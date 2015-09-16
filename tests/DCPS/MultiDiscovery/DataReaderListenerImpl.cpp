@@ -9,6 +9,8 @@
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 
+#include "dds/DCPS/WaitSet.h"
+
 #include "DataReaderListenerImpl.h"
 #include "TestMsgTypeSupportC.h"
 #include "TestMsgTypeSupportImpl.h"
@@ -76,7 +78,7 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     if (info.valid_data) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C has received message: %d from: %C\n", id_.c_str(), message.value, std::string(message.from).c_str()));
 
-      if (writer_) {
+      if (!origin_) {
         TestMsgDataWriter_var message_writer =
           TestMsgDataWriter::_narrow(writer_);
 
@@ -131,7 +133,7 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       }
       if (++received_samples_ == expected_samples_) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C has received expected number of samples\n", id_.c_str()));
-        if (writer_) {
+        if (!origin_) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriter %C is waiting for acknowledgments\n", writer_id_.c_str()));
           DDS::Duration_t timeout = { 30, 0 };
           writer_->wait_for_acknowledgments(timeout);

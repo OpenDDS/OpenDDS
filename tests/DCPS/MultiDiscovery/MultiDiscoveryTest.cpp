@@ -14,6 +14,7 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
+#include "dds/DCPS/RTPS/RtpsDiscovery.h"
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
@@ -404,7 +405,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     // Create DataReaders
     reader_id.resize(6);
-    DDS::DataReaderListener_var listener(new DataReaderListenerImpl(reader_id, n_msgs, reader_done_callback, origin ? 0 : writer, writer_id, TOTAL_READERS));
+    DDS::DataReaderListener_var listener(new DataReaderListenerImpl(reader_id, n_msgs, reader_done_callback, origin, writer, writer_id, TOTAL_READERS));
 
     DDS::DataReaderQos dr_qos;
     subscriber->get_default_datareader_qos(dr_qos);
