@@ -12,6 +12,7 @@
 #include <ace/Global_Macros.h>
 
 #include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DdsDcpsPublicationC.h>
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/Definitions.h>
