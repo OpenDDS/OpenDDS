@@ -4,6 +4,8 @@ use Date::Format;
 use Cwd;
 use LWP::Simple;
 use File::Basename;
+use lib dirname (__FILE__) . "/modules";
+use ConvertFiles;
 
 
 $ENV{TZ} = "UTC";
@@ -823,6 +825,11 @@ sub remedy_zip_source {
   # zip -x .git .gitignore does not exclude as advertised
   print "Removing git-specific directories\n";
   my $result = system("find . -name '.git*' | xargs rm -rf");
+  # convert line endings
+  print "Converting source files to Windows line endings\n";
+  my $converter = new ConvertFiles();
+  $converter->convert($settings->{clone_dir});
+
   if (!$result) {
     print "Creating file $settings->{zip_src}\n";
     $result = system("zip ../$settings->{zip_src} -qq -r . -x '.git*'");
@@ -933,6 +940,9 @@ sub message_zip_doxygen {
 sub remedy_zip_doxygen {
   my $settings = shift();
   my $curdir = getcwd;
+  print "Converting doxygen files to Windows line endings\n";
+  my $converter = new ConvertFiles();
+  $converter->convert($settings->{clone_dir} . "/html");
   chdir("$settings->{clone_dir}/html");
   my $file = "../../$settings->{zip_dox}";
   print "Creating file $settings->{zip_dox}\n";
