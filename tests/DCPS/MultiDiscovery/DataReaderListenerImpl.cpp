@@ -9,6 +9,8 @@
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 
+#include "dds/DCPS/WaitSet.h"
+
 #include "DataReaderListenerImpl.h"
 #include "TestMsgTypeSupportC.h"
 #include "TestMsgTypeSupportImpl.h"
