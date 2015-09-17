@@ -1179,6 +1179,11 @@ if ($cross_compile) {
     $opts{'no-opendds-safety-profile'} = 0; # only set for target
   }
 
+  unless ($opts{'static'}) {
+    push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
+    push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
+  }
+
   configure_build(\%targetEnv);
 
   write_environment(\%targetEnv, $targetEnv{'ACE_ROOT'} . '/ace')
