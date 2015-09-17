@@ -586,6 +586,7 @@ sub backup_and_open {
     copy($file, $backup);
     print "WARNING: overwriting existing $file (saved a backup copy as " .
       "$backup)\n";
+    unlink $file;
   }
   if ($opts{'dry-run'}) {
     return File::Temp->new();
