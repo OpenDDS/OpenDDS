@@ -44,8 +44,14 @@ if ($arg eq 'low') {
   $sub_opts .= "-t 1 -n 1024";
 }
 
-$pub_opts = "-DCPSConfigFile thrasher.ini";
-$sub_opts = "-DCPSConfigFile thrasher.ini";
+my $ini_file = "thrasher.ini";
+
+if ("rtps" == shift) {
+  $ini_file = "thrasher_rtps.ini";
+}
+
+$pub_opts .= " -DCPSConfigFile $ini_file";
+$sub_opts .= " -DCPSConfigFile $ini_file";
 
 my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
