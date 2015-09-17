@@ -12,6 +12,7 @@ use warnings;
 
 my $result = 0;
 my $reliable = 1;
+my $dcps_debug_lvl = 0;
 
 sub runTest {
     my $delay = shift;
@@ -33,18 +34,18 @@ sub runTest {
     my $dr_static = 1;
     my $origin = 1;
 
-    $test->process("alpha", 'MultiDiscoveryTest', "-DCPSConfigFile config.ini -origin $origin -reliable $reliable -dw_static_disc 0 -dr_static_disc 0 -wdomain 12 -rdomain 31 -writer 000012 -reader 000013");
+    $test->process("alpha", 'MultiDiscoveryTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -origin $origin -reliable $reliable -dw_static_disc 0 -dr_static_disc 0 -wdomain 12 -rdomain 31 -writer 000012 -reader 000013");
     $test->start_process("alpha");
     sleep $delay;
 
     print "Spawning beta - Writer (23) in domain 23 using static discovery and Reader (21) in domain 12 using default discovery\n";
     $origin = 0;
-    $test->process("beta", 'MultiDiscoveryTest', "-DCPSConfigFile config.ini -origin $origin -reliable $reliable -dw_static_disc $dw_static -dr_static_disc 0 -wdomain 23 -rdomain 12 -dw_participant 000000000023 -writer 000023 -reader 000021");
+    $test->process("beta", 'MultiDiscoveryTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -origin $origin -reliable $reliable -dw_static_disc $dw_static -dr_static_disc 0 -wdomain 23 -rdomain 12 -dw_participant 000000000023 -writer 000023 -reader 000021");
     $test->start_process("beta");
     sleep $delay;
 
     print "Spawning gamma - Writer (31) in domain 31 using rtps discovery and Reader (32) in domain 23 using static discovery\n";
-    $test->process("gamma", 'MultiDiscoveryTest', "-DCPSConfigFile config.ini -origin $origin -reliable $reliable -dw_static_disc 0 -dr_static_disc $dr_static -wdomain 31 -rdomain 23 -dr_participant 000000000032 -writer 000031 -reader 000032");
+    $test->process("gamma", 'MultiDiscoveryTest', "-DCPSConfigFile config.ini -DCPSDebugLevel $dcps_debug_lvl -origin $origin -reliable $reliable -dw_static_disc 0 -dr_static_disc $dr_static -wdomain 31 -rdomain 23 -dr_participant 000000000032 -writer 000031 -reader 000032");
     $test->start_process("gamma");
 
     my $res = $test->finish(150);
