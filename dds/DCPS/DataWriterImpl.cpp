@@ -2108,9 +2108,10 @@ DataWriterImpl::data_delivered(const DataSampleElement* sample)
                OPENDDS_STRING(writer_converter).c_str()));
     return;
   }
-  this->data_container_->data_delivered(sample);
-
+  //provided for statistics tracking in tests
   ++data_delivered_count_;
+
+  this->data_container_->data_delivered(sample);
 }
 
 void
@@ -2248,9 +2249,10 @@ DataWriterImpl::data_dropped(const DataSampleElement* element,
 {
   DBG_ENTRY_LVL("DataWriterImpl","data_dropped",6);
 
-  this->data_container_->data_dropped(element, dropped_by_transport);
-
+  //provided for statistics tracking in tests
   ++data_dropped_count_;
+
+  this->data_container_->data_dropped(element, dropped_by_transport);
 }
 
 void
