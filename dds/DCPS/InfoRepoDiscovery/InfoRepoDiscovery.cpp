@@ -557,6 +557,10 @@ InfoRepoDiscovery::remove_publication(DDS::DomainId_t domainId,
                                       const RepoId& participantId,
                                       const RepoId& publicationId)
 {
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
+    removeDataWriterRemote(publicationId);
+  }
   bool removed = false;
   try {
     get_dcps_info()->remove_publication(domainId, participantId, publicationId);
@@ -565,8 +569,6 @@ InfoRepoDiscovery::remove_publication(DDS::DomainId_t domainId,
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::remove_publication: ");
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
-  removeDataWriterRemote(publicationId);
 
   return removed;
 }
