@@ -252,7 +252,7 @@ DCPS_IR_Topic* DCPS_IR_Topic_Description::get_first_topic()
 
 void DCPS_IR_Topic_Description::try_associate_publication(DCPS_IR_Publication* publication)
 {
-  // for each subscription check for compatiblity
+  // for each subscription check for compatibility
   DCPS_IR_Subscription* subscription = 0;
   OpenDDS::DCPS::IncompatibleQosStatus* qosStatus = 0;
 

@@ -569,7 +569,6 @@ InfoRepoDiscovery::remove_publication(DDS::DomainId_t domainId,
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::remove_publication: ");
   }
 
-
   return removed;
 }
 
@@ -653,6 +652,10 @@ InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
                                        const RepoId& participantId,
                                        const RepoId& subscriptionId)
 {
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
+    removeDataReaderRemote(subscriptionId);
+  }
   bool removed = false;
   try {
     get_dcps_info()->remove_subscription(domainId, participantId, subscriptionId);
@@ -660,8 +663,7 @@ InfoRepoDiscovery::remove_subscription(DDS::DomainId_t domainId,
   } catch (const CORBA::Exception& ex) {
     ex._tao_print_exception("ERROR: InfoRepoDiscovery::remove_subscription: ");
   }
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, this->lock_, false);
-  removeDataReaderRemote(subscriptionId);
+
   return removed;
 }
 
