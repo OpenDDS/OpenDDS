@@ -125,7 +125,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
         'Exclusive Ownership (Ownership Profile) (yes)',
     'object-model-profile!', 'Object Model Profile (yes)',
     'persistence-profile!', 'Persistence Profile (yes)',
-    'safety-profile!', 'Safety Profile (no)',
+    'safety-profile:s', 'Safety Profile: base or extended (none)',
     'tests!', 'Build tests, examples, and performance tests (yes)',
    ],
   );
@@ -447,9 +447,17 @@ elsif (defined $ace_src && -r $ace_src . '/../TAO/tao/ORB.h') {
 
 $tao_src = normalizePath($tao_src);
 
+if ($opts{'safety-profile'}) {
+  # convert to upper case
+  $opts{'safety-profile'} = uc($opts{'safety-profile'});
+}
+
 ## Download ACE+TAO
 my $tao_maj = 1;
 if (!$ace_src || !$tao_src) {
+  if ($opts{'safety-profile'} eq "EXTENDED") {
+    $tao_version = 'face-safety-22a';
+  } 
   my $urlbase = 'http://download.ociweb.com/TAO-' . $tao_version . '/';
   my $file = 'ACE+TAO-' . $tao_version . '_with_latest_patches_NO_makefiles.'
     . ($slash eq '/' ? 'tar.gz' : 'zip');
@@ -586,6 +594,7 @@ sub backup_and_open {
     copy($file, $backup);
     print "WARNING: overwriting existing $file (saved a backup copy as " .
       "$backup)\n";
+    unlink $file;
   }
   if ($opts{'dry-run'}) {
     return File::Temp->new();
@@ -624,7 +633,7 @@ sub write_config_h {
   $cfg .= '-' . $opts{'host_version'} if $opts{'host_version'};
   print $CFGH "#include \"ace/config-$cfg.h\"\n";
   if (defined $opts{'no-opendds-safety-profile'}) {
-    print $CFGH "#define ACE_FACE_SAFETY_BASE\n";
+    print $CFGH "#define ACE_FACE_SAFETY_$opts{'safety-profile'}\n";
   }
 
   close $CFGH;
@@ -1176,6 +1185,11 @@ if ($cross_compile) {
 
   if ($opts{'safety-profile'}) {
     $opts{'no-opendds-safety-profile'} = 0; # only set for target
+  }
+
+  unless ($opts{'static'}) {
+    push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
+    push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
   }
 
   configure_build(\%targetEnv);
