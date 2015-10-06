@@ -586,6 +586,7 @@ sub backup_and_open {
     copy($file, $backup);
     print "WARNING: overwriting existing $file (saved a backup copy as " .
       "$backup)\n";
+    unlink $file;
   }
   if ($opts{'dry-run'}) {
     return File::Temp->new();
@@ -1176,6 +1177,11 @@ if ($cross_compile) {
 
   if ($opts{'safety-profile'}) {
     $opts{'no-opendds-safety-profile'} = 0; # only set for target
+  }
+
+  unless ($opts{'static'}) {
+    push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
+    push_libpath(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'lib');
   }
 
   configure_build(\%targetEnv);
