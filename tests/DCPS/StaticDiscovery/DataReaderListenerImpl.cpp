@@ -106,7 +106,7 @@ DataReaderListenerImpl::on_subscription_matched(
       return;
     }
 
-    ACE_DEBUG((LM_DEBUG, "%P Successfully read publication BITs\n"));
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Successfully read publication BITs\n"));
 
     if (OpenDDS::DCPS::DCPS_debug_level > 4) {
       for (CORBA::ULong i = 0; i < data.length(); ++i) {
