@@ -21,6 +21,8 @@
 #include "ace/OS_NS_stdlib.h"
 
 const int DOMAIN_ID = 100;
+const int SLEEP_SHORT = 11;
+const int SLEEP_LONG = 30;
 
 int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool toggle)
 {
@@ -58,18 +60,20 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
                         ACE_TEXT(" create_datareader failed!\n")), -1);
     }
 
-    ACE_OS::sleep(11);
+    ACE_OS::sleep(SLEEP_SHORT);
     // Go away.
     ACE_DEBUG((LM_DEBUG, "Deleting reader\n"));
     subscriber->delete_datareader(reader);
-    ACE_OS::sleep(11);
+    ACE_OS::sleep(SLEEP_SHORT);
     // Come back.
     ACE_DEBUG((LM_DEBUG, "Creating reader\n"));
     reader = subscriber->create_datareader(topic,
                                            qos,
                                            0,
                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    ACE_OS::sleep(11);
+    ACE_OS::sleep(SLEEP_SHORT);
+    subscriber->delete_contained_entities();
+    return 0;
   } else {
     struct Listener : public DDS::DataReaderListener {
       size_t found, lost;
@@ -127,13 +131,14 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
                        -1);
     }
 
-    ACE_OS::sleep(30);
+    ACE_OS::sleep(SLEEP_LONG);
 
-    if (listener.found == 2 && listener.lost == 1) { return 0; }
+    if (listener.found == 2 && listener.lost == 1) {
+      subscriber->delete_contained_entities();
+      return 0;
+    }
     return -1;
   }
-
-  return 0;
 }
 
 int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool toggle)
@@ -174,18 +179,20 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
                         ACE_TEXT(" create_datawriter failed!\n")), -1);
     }
 
-    ACE_OS::sleep(11);
+    ACE_OS::sleep(SLEEP_SHORT);
     // Go away.
     ACE_DEBUG((LM_DEBUG, "Deleting writer\n"));
     publisher->delete_datawriter(writer);
-    ACE_OS::sleep(11);
+    ACE_OS::sleep(SLEEP_SHORT);
     // Come back.
     ACE_DEBUG((LM_DEBUG, "Creating writer\n"));
     writer = publisher->create_datawriter(topic,
                                           qos,
                                           0,
                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    ACE_OS::sleep(11);
+    ACE_OS::sleep(SLEEP_SHORT);
+    publisher->delete_contained_entities();
+    return 0;
   } else {
     struct Listener : public DDS::DataWriterListener {
       size_t found, lost;
@@ -233,13 +240,14 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
                        -1);
     }
 
-    ACE_OS::sleep(30);
+    ACE_OS::sleep(SLEEP_LONG);
 
-    if (listener.found == 2 && listener.lost == 1) { return 0; }
+    if (listener.found == 2 && listener.lost == 1) {
+      publisher->delete_contained_entities();
+      return 0;
+    }
     return -1;
   }
-
-  return 0;
 }
 
 int
@@ -325,12 +333,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                        -1);
     }
 
+    int return_code;
     switch (mode) {
     case READER:
-      return do_reader(participant, topic, toggle);
+      return_code = do_reader(participant, topic, toggle);
       break;
     case WRITER:
-      return do_writer(participant, topic, toggle);
+      return_code = do_writer(participant, topic, toggle);
       break;
     }
 
@@ -339,6 +348,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dpf->delete_participant(participant);
 
     TheServiceParticipant->shutdown();
+    return return_code;
 
   } catch (const CORBA::Exception& e) {
     e._tao_print_exception("Exception caught in main():");
