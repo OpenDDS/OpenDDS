@@ -46,7 +46,7 @@ if ($arg eq 'low') {
 
 my $ini_file = "thrasher.ini";
 
-if ("rtps" eq shift) {
+if ("rtps" eq (shift || "")) {
   $ini_file = "thrasher_rtps.ini";
 }
 
