@@ -242,8 +242,10 @@ Sedp::init(const RepoId& guid, const RtpsDiscovery& disco,
     rtps_inst->use_multicast_ = false;
   }
 
-  if (!disco.sedp_local_address().empty()) {
-    rtps_inst->local_address_.set(disco.sedp_local_address().c_str());
+  const OPENDDS_STRING sedp_addr = disco.sedp_local_address();
+  if (!sedp_addr.empty()) {
+    rtps_inst->local_address_config_str_ = sedp_addr;
+    rtps_inst->local_address_.set(sedp_addr.c_str());
   }
 
   // Create a config
