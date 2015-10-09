@@ -72,7 +72,6 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
                                            0,
                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     ACE_OS::sleep(SLEEP_SHORT);
-    subscriber->delete_contained_entities();
     return 0;
   } else {
     struct Listener : public DDS::DataReaderListener {
@@ -134,7 +133,7 @@ int do_reader(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
     ACE_OS::sleep(SLEEP_LONG);
 
     if (listener.found == 2 && listener.lost == 1) {
-      subscriber->delete_contained_entities();
+      reader->set_listener(0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       return 0;
     }
     return -1;
@@ -191,7 +190,6 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
                                           0,
                                           OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     ACE_OS::sleep(SLEEP_SHORT);
-    publisher->delete_contained_entities();
     return 0;
   } else {
     struct Listener : public DDS::DataWriterListener {
@@ -243,7 +241,7 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
     ACE_OS::sleep(SLEEP_LONG);
 
     if (listener.found == 2 && listener.lost == 1) {
-      publisher->delete_contained_entities();
+      writer->set_listener(0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       return 0;
     }
     return -1;
