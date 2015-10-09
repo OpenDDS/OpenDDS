@@ -291,6 +291,12 @@ if (!exists $platforminfo{$opts{'target'}}) {
 addCurLibPathRef(\%hostEnv);
 addCurLibPathRef(\%targetEnv);
 
+
+if (defined $opts{'safety-profile'} && $opts{'safety-profile'} eq '') {
+  print "Defaulting safety profile to extended\n";
+  $opts{'safety-profile'} = 'extended';
+}
+
 if ($opts{'host'} ne $opts{'target'} || $opts{'safety-profile'}) {
   print "Setting cross-compile build\n" if $opts{'verbose'};
   $cross_compile = 1;
