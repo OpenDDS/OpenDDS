@@ -188,8 +188,7 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
   size_t if_cnt = 0;
   size_t endpoint_count = 0;
 
-  
-  int result = 
+  int result =
 #ifdef OPENDDS_SAFETY_PROFILE
     -1;
 #else
