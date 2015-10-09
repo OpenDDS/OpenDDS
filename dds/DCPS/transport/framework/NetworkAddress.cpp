@@ -188,7 +188,13 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
   size_t if_cnt = 0;
   size_t endpoint_count = 0;
 
-  int result = ACE::get_ip_interfaces(if_cnt, if_addrs);
+  
+  int result = 
+#ifdef OPENDDS_SAFETY_PROFILE
+    -1;
+#else
+    ACE::get_ip_interfaces(if_cnt, if_addrs);
+#endif
 
   struct Array_Guard {
     Array_Guard(ACE_INET_Addr *ptr) : ptr_(ptr) {}
@@ -198,12 +204,7 @@ void get_interface_addrs(OPENDDS_VECTOR(ACE_INET_Addr)& addrs)
     ACE_INET_Addr* const ptr_;
   } guardObject(if_addrs);
 
-  if (result != 0 || if_cnt < 1) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("(%P|%t) ERROR: Unable to probe network. %p\n"),
-      ACE_TEXT("ACE::get_ip_interfaces")));
-
-  } else {
+  if (!result) {
     size_t lo_cnt = 0;  // Loopback interface count
 #if defined (ACE_HAS_IPV6)
     size_t ipv4_cnt = 0;
