@@ -222,7 +222,7 @@ sub create_test_target()
 
     my $target = undef;
     SWITCH: {
-      if ($config_os =~ m/local|remote/i) {
+      if ((!defined $config_os) || ($config_os =~ m/local|remote/i)) {
         $target = new PerlACE::TestTarget ($config_name);
         last SWITCH;
       }
