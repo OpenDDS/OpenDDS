@@ -5,6 +5,8 @@
 #include "Factory.h"
 #include "../common/TestSupport.h"
 #include "../FooType4/FooDefTypeSupportImpl.h"
+#include "dds/DCPS/WaitSet.h"
+
 
 
 Pusher::Pusher(const Factory& f,
