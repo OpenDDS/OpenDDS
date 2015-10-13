@@ -136,7 +136,15 @@ DCPS_IR_Publication::association_complete(const OpenDDS::DCPS::RepoId& remote)
 void
 DCPS_IR_Publication::call_association_complete(const OpenDDS::DCPS::RepoId& remote)
 {
-  writer_->association_complete(remote);
+  try {
+    writer_->association_complete(remote);
+  } catch (const CORBA::Exception& ex) {
+    if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+      ex._tao_print_exception(
+        "(%P|%t) ERROR: Exception caught in DCPS_IR_Publication::call_association_complete:");
+    }
+    participant_->mark_dead();
+  }
 }
 
 int DCPS_IR_Publication::remove_associated_subscription(DCPS_IR_Subscription* sub,
@@ -451,9 +459,18 @@ void DCPS_IR_Publication::disassociate_subscription(OpenDDS::DCPS::RepoId id,
 
 void DCPS_IR_Publication::update_incompatible_qos()
 {
-  if (this->participant_->isOwner()) {
-    writer_->update_incompatible_qos(incompatibleQosStatus_);
-    incompatibleQosStatus_.count_since_last_send = 0;
+  if (participant_->is_alive() && this->participant_->isOwner()) {
+    try {
+      writer_->update_incompatible_qos(incompatibleQosStatus_);
+      incompatibleQosStatus_.count_since_last_send = 0;
+    } catch (const CORBA::Exception& ex) {
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ex._tao_print_exception(
+          "(%P|%t) ERROR: Exception caught in DCPS_IR_Publication::update_incompatible_qos:");
+      }
+
+      participant_->mark_dead();
+    }
   }
 }
 

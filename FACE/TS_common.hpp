@@ -65,9 +65,15 @@ enum QUEUING_DISCIPLINE_TYPE {
   NOT_DEFINED_QUEUING_DISCIPLINE_TYPE
 };
 
+// INET is used as an enumerator by FACE spec but collides
+// with a macro defined by system headers on VxWorks.
+#ifndef ACE_VXWORKS
+#define DOMAIN_INET INET
+#endif
+
 enum CONNECTION_DOMAIN_TYPE {
   UNIX,
-  INET,
+  DOMAIN_INET,
   NOT_DEFINED_CONNECTION_DOMAIN_TYPE
 };
 

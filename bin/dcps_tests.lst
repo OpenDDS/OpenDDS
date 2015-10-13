@@ -242,6 +242,7 @@ tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN
 tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN
+tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
 tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -279,6 +280,7 @@ tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPI
 tests/DCPS/RtiSerialization/run_test.pl: tcp !DCPS_MIN
 tests/DCPS/RtiSerialization/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/RtiSerialization/run_test.pl rtps_disc: !DCPS_MIN RTPS 
+tests/DCPS/MultiDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscoveryReconnect/run_test.pl: !DCPS_MIN !NO_MCAST
 tests/DCPS/SubscriberCycle/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_FILTERED_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION

@@ -828,7 +828,11 @@ sub remedy_zip_source {
   # convert line endings
   print "Converting source files to Windows line endings\n";
   my $converter = new ConvertFiles();
-  $converter->convert($settings->{clone_dir});
+  my ($stat, $error) = $converter->convert(".");
+  if (!$stat) {
+    print $error;
+    return 0;
+  }
 
   if (!$result) {
     print "Creating file $settings->{zip_src}\n";
@@ -942,7 +946,12 @@ sub remedy_zip_doxygen {
   my $curdir = getcwd;
   print "Converting doxygen files to Windows line endings\n";
   my $converter = new ConvertFiles();
-  $converter->convert($settings->{clone_dir} . "/html");
+  my ($stat, $error) = $converter->convert($settings->{clone_dir} . "/html");
+  if (!$stat) {
+    print $error;
+    return 0;
+  }
+
   chdir("$settings->{clone_dir}/html");
   my $file = "../../$settings->{zip_dox}";
   print "Creating file $settings->{zip_dox}\n";
