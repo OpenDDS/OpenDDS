@@ -6,6 +6,7 @@ use strict;
 use English;
 use POSIX qw(:time_h);
 use Cwd;
+use PerlACE::TestTarget;
 
 sub create_process {
     my $executable = shift;
