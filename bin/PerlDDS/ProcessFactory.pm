@@ -28,23 +28,28 @@ sub create_process {
         }
     }
 
-    if ((PerlACE::is_vxworks_test()) &&
-        (!defined($PerlDDS::vxworks_test_target)) &&
-        (defined($os)) &&
-        ($os =~ /VxWorks/i)) {
-        $PerlDDS::vxworks_test_target =
-            create_test_target($config_name, $os);
-        my @paths = split(':', $PerlDDS::added_lib_path);
-        foreach my $lib_path (@paths) {
-            if ($lib_path ne "") {
-                # make sure the test target has the complete lib path
-                $PerlDDS::vxworks_test_target->AddLibPath(
-                    $lib_path);
-            }
-        }
-        return $PerlDDS::vxworks_test_target->
-            CreateProcess($executable);
+    my $target = PerlDDS::create_test_target($config_name, $os);
+    if (defined $target) {
+      return $target->CreateProcess($executable);
     }
+
+#   if ((PerlACE::is_vxworks_test()) &&
+#       (!defined($PerlDDS::vxworks_test_target)) &&
+#       (defined($os)) &&
+#       ($os =~ /VxWorks/i)) {
+#       $PerlDDS::vxworks_test_target =
+#           create_test_target($config_name, $os);
+#       my @paths = split(':', $PerlDDS::added_lib_path);
+#       foreach my $lib_path (@paths) {
+#           if ($lib_path ne "") {
+#               # make sure the test target has the complete lib path
+#               $PerlDDS::vxworks_test_target->AddLibPath(
+#                   $lib_path);
+#           }
+#       }
+#       return $PerlDDS::vxworks_test_target->
+#           CreateProcess($executable);
+#   }
 
     if ((!PerlDDS::is_coverage_test()) ||
         (non_dds_test($executable))) {
