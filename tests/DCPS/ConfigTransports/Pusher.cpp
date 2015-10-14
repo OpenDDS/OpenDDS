@@ -5,6 +5,8 @@
 #include "Factory.h"
 #include "../common/TestSupport.h"
 #include "../FooType4/FooDefTypeSupportImpl.h"
+#include "dds/DCPS/WaitSet.h"
+
 
 
 Pusher::Pusher(const Factory& f,
@@ -68,6 +70,38 @@ Pusher::push (const ACE_Time_Value& duration)
       ::Xyz::FooDataWriter_var foo_dw
         = ::Xyz::FooDataWriter::_narrow(writer_.in ());
       TEST_ASSERT (! CORBA::is_nil (foo_dw.in ()));
+
+      // Block until Subscriber is available
+      DDS::StatusCondition_var condition = foo_dw->get_statuscondition();
+      condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+
+      DDS::WaitSet_var ws = new DDS::WaitSet;
+      ws->attach_condition(condition);
+
+      while (true) {
+        DDS::PublicationMatchedStatus matches;
+        if (foo_dw->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("ERROR: (%P|%t) %T Writer::run_test -")
+                            ACE_TEXT(" get_publication_matched_status failed!\n")),
+                           -1);
+        }
+
+        if (matches.current_count) {
+          break;
+        }
+
+        DDS::ConditionSeq conditions;
+        DDS::Duration_t timeout = { 60, 0 };
+        if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            ACE_TEXT("ERROR: (%P|%t) %T Writer::run_test() -")
+                            ACE_TEXT(" wait failed!\n")),
+                           -1);
+        }
+      }
+
+      ws->detach_condition(condition);
 
       ACE_DEBUG((LM_DEBUG,
                 ACE_TEXT("(%P|%t) %T Writer::run_test starting to write pass %d\n"),
