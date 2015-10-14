@@ -222,7 +222,7 @@ sub create_test_target()
 
     my $target = undef;
     SWITCH: {
-      if ($config_os =~ m/local|remote/i) {
+      if ((!defined $config_os) || ($config_os =~ m/local|remote/i)) {
         $target = new PerlACE::TestTarget ($config_name);
         last SWITCH;
       }
@@ -787,6 +787,11 @@ sub _track_log_files {
   $self->_info("TestFramework::_track_log_files looking in \"$data\"\n");
   if ($data =~ /-ORBLogFile ([^ ]+)/) {
     my $file = $1;
+    $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
+    push(@{$self->{log_files}}, $file);
+    unlink $file;
+  } elsif ($PerlDDS::SafetyProfile) {
+    my $file = "safetyprofile.log";
     $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
     push(@{$self->{log_files}}, $file);
     unlink $file;
