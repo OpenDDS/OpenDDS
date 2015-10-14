@@ -31,7 +31,7 @@ sub create_process {
 
     my $target = PerlDDS::create_test_target($config_name, $os);
     if (defined $target) {
-      return $target->CreateProcess($executable);
+      return $target->CreateProcess($executable, $arguments);
     }
 
 #   if ((PerlACE::is_vxworks_test()) &&

@@ -790,6 +790,11 @@ sub _track_log_files {
     $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
     push(@{$self->{log_files}}, $file);
     unlink $file;
+  } elsif ($PerlDDS::SafetyProfile) {
+    my $file = "safetyprofile.log";
+    $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
+    push(@{$self->{log_files}}, $file);
+    unlink $file;
   }
 }
 
