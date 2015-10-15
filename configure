@@ -350,7 +350,9 @@ if ($opts{'compiler'} =~ /cl(\.exe)?$/i) {
   }
   open(CL, "\"$opts{'compiler'}\" /v 2>&1 |");
   while (<CL>) {
-    if (/Compiler Version (\d+)\./) {
+    # Must also match international version, like
+    # Microsoft (R) 32-Bit C/C++-Optimierungscompiler Version 16.00.40219.01 für 80x86
+    if (/[Cc]ompiler Version (\d+)\./) {
       if (!exists $platforminfo{'win32'}->{'cl_versions'}->{$1}) {
         die "Unknown or unsupported Visual C++ compiler version: $1\nStopped";
       }
@@ -463,7 +465,7 @@ my $tao_maj = 1;
 if (!$ace_src || !$tao_src) {
   if ($opts{'safety-profile'} eq "EXTENDED") {
     $tao_version = 'face-safety-22a';
-  } 
+  }
   my $urlbase = 'http://download.ociweb.com/TAO-' . $tao_version . '/';
   my $file = 'ACE+TAO-' . $tao_version . '_with_latest_patches_NO_makefiles.'
     . ($slash eq '/' ? 'tar.gz' : 'zip');
