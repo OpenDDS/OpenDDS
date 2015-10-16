@@ -295,17 +295,24 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
     //still exit the loop without checking the size of invalid memory
     //size_t num_callbacks = pend->second.size();
 
-    PendConnMap::iterator updated_pend = pend;
-    do {
-       TransportClient* pend_client = updated_pend->second.front().first;
-       RepoId remote_repo = updated_pend->second.front().second;
-    //for (size_t i = 0; i < pend->second.size(); ++i) {
-    //for(size_t i=0; i < num_callbacks; ++i) {
-       guard.release();
-       pend_client->use_datalink(remote_repo, link);
-       guard.acquire();
-      //pend->second[i].first->use_datalink(pend->second[i].second, link);
-    } while ((updated_pend = pending_connections_.find(key)) != pending_connections_.end());
+    //Create a copy of the vector of callbacks to process, making sure that each is
+    //still present in the actual pending_connections_ before calling use_datalink
+    Callbacks tmp(pend->second);
+    for (size_t i = 0; i < tmp.size(); ++i) {
+      const PendConnMap::iterator pend = pending_connections_.find(key);
+      if (pend != pending_connections_.end()) {
+        const Callbacks::iterator tmp_iter = find(pend->second.begin(),
+                                                  pend->second.end(),
+                                                  tmp.at(i));
+        if (tmp_iter != pend->second.end()) {
+          TransportClient* pend_client = tmp.at(i).first;
+          RepoId remote_repo = tmp.at(i).second;
+          guard.release();
+          pend_client->use_datalink(remote_repo, link);
+          guard.acquire();
+        }
+      }
+    }
 
     // don't need to erase pending_connection here because stop_accepting_or_connecting
     // will take care of the clean up when appropriate (called from use_datalink above)
