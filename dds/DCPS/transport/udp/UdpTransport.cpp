@@ -6,6 +6,7 @@
  */
 
 #include "UdpTransport.h"
+#include "UdpInst_rch.h"
 #include "UdpInst.h"
 #include "UdpSendStrategy.h"
 #include "UdpReceiveStrategy.h"
@@ -77,10 +78,18 @@ UdpTransport::connect_datalink(const RemoteTransport& remote,
                                const ConnectionAttribs& attribs,
                                TransportClient* )
 {
+  UdpInst_rch tmp_config(this->config_i_.in(), false);
+  if (this->is_shut_down() || this->config_i_.is_nil()) {
+    return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+  }
   const ACE_INET_Addr remote_address = get_connection_addr(remote.blob_);
   const bool active = true;
-  const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, active);
+  const PriorityKey key = blob_to_key(remote.blob_, attribs.priority_, tmp_config->local_address(), active);
+  tmp_config = 0; //no longer need to hold on to local config
   GuardType guard(client_links_lock_);
+  if (this->is_shut_down() || this->config_i_.is_nil()) {
+    return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+  }
 
   const UdpDataLinkMap::iterator it(client_links_.find(key));
   if (it != client_links_.end()) {
@@ -109,7 +118,7 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
   //GuardType guard(connections_lock_);
   const PriorityKey key = blob_to_key(remote.blob_,
-                                      attribs.priority_, false /* !active */);
+                                      attribs.priority_, config_i_->local_address(), false /* !active */);
   if (server_link_keys_.count(key)) {
     VDBG((LM_DEBUG, "(%P|%t) UdpTransport::accept_datalink found\n"));
     return AcceptConnectResult(UdpDataLink_rch(server_link_)._retn());
@@ -156,7 +165,8 @@ UdpTransport::stop_accepting_or_connecting(TransportClient* client,
 bool
 UdpTransport::configure_i(TransportInst* config)
 {
-  config_i_ = dynamic_cast<UdpInst*>(config);
+  config_i_ = UdpInst_rch(dynamic_cast<UdpInst*>(config), false);
+
   if (config_i_ == 0) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
@@ -164,7 +174,6 @@ UdpTransport::configure_i(TransportInst* config)
                       ACE_TEXT("invalid configuration!\n")),
                      false);
   }
-  config_i_->_add_ref();
 
   create_reactor_task();
 
@@ -235,6 +244,7 @@ UdpTransport::release_datalink(DataLink* link)
 PriorityKey
 UdpTransport::blob_to_key(const TransportBLOB& remote,
                           Priority priority,
+                          ACE_INET_Addr local_addr,
                           bool active)
 {
   NetworkAddress network_order_address;
@@ -248,7 +258,7 @@ UdpTransport::blob_to_key(const TransportBLOB& remote,
 
   ACE_INET_Addr remote_address;
   network_order_address.to_addr(remote_address);
-  const bool is_loopback = remote_address == config_i_->local_address();
+  const bool is_loopback = remote_address == local_addr;
 
   return PriorityKey(priority, remote_address, is_loopback, active);
 }
@@ -274,7 +284,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
   const char ack_data = 23;
   server_link_->socket().send(&ack_data, 1, remote_address);
 
-  const PriorityKey key = blob_to_key(blob, priority, false /* passive */);
+  const PriorityKey key = blob_to_key(blob, priority, config_i_->local_address(), false /* passive */);
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
 

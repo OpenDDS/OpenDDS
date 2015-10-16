@@ -57,7 +57,7 @@ private:
                              Priority priority, bool active);
 
   PriorityKey blob_to_key(const TransportBLOB& remote,
-                          Priority priority, bool active);
+                          Priority priority, ACE_INET_Addr local_addr, bool active);
 
   RcHandle<UdpInst> config_i_;
 
