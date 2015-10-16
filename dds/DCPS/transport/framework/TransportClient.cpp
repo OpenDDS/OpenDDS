@@ -411,7 +411,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
 
   {
     //can't call connect while holding lock due to possible reactor deadlock
-    ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+    guard.release();
     GuidConverter local(repo_id_);
     GuidConverter remote_conv(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
@@ -419,6 +419,18 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
                         OPENDDS_STRING(local).c_str(),
                         OPENDDS_STRING(remote_conv).c_str()), 0);
     result = impl->connect_datalink(remote, attribs_, this);
+    if (!result.success_) {
+      if (DCPS_debug_level) {
+        GuidConverter writer_converter(repo_id_);
+        GuidConverter reader_converter(remote.repo_id_);
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
+                   ACE_TEXT("connect_datalink between local %C remote %C not successful\n"),
+                   OPENDDS_STRING(writer_converter).c_str(),
+                   OPENDDS_STRING(reader_converter).c_str()));
+      }
+      return false;
+    }
+    guard.acquire();
   }
 
   //Check to make sure the pending assoc still exists in the map and hasn't been slated for removal
