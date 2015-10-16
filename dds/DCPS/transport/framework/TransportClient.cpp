@@ -247,6 +247,34 @@ TransportClient::associate(const AssociationData& data, bool active)
   repo_id_ = get_repo_id();
 
   if (impls_.empty()) {
+    if (DCPS_debug_level) {
+      GuidConverter writer_converter(this->repo_id_);
+      GuidConverter reader_converter(data.remote_id_);
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
+                 ACE_TEXT("local %C remote %C no available impls\n"),
+                 OPENDDS_STRING(writer_converter).c_str(),
+                 OPENDDS_STRING(reader_converter).c_str()));
+    }
+    return false;
+  }
+
+  bool all_impls_shut_down = true;
+  for (size_t i = 0; i < impls_.size(); ++i) {
+    if (!impls_.at(i)->is_shut_down()) {
+      all_impls_shut_down = false;
+      break;
+    }
+  }
+
+  if (all_impls_shut_down) {
+    if (DCPS_debug_level) {
+      GuidConverter writer_converter(this->repo_id_);
+      GuidConverter reader_converter(data.remote_id_);
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
+                 ACE_TEXT("local %C remote %C all available impls previously shutdown\n"),
+                 OPENDDS_STRING(writer_converter).c_str(),
+                 OPENDDS_STRING(reader_converter).c_str()));
+    }
     return false;
   }
 
