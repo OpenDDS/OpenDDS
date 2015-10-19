@@ -40,9 +40,9 @@ project(DDS*IsBounded) : dcpsexe, dcps_transports_for_test, dcps_rtps {
 }
 
 
-project(DDS*KeyMarshaling) : dcpsexe, dcps_transports_for_test, dcps_rtps {
+project(DDS*KeyMarshalling) : dcpsexe, dcps_transports_for_test, dcps_rtps {
 
-  exename   = KeyMarshaling
+  exename   = KeyMarshalling
   after    += DDS*idl
   libs     += DDS*idl
 
@@ -50,7 +50,7 @@ project(DDS*KeyMarshaling) : dcpsexe, dcps_transports_for_test, dcps_rtps {
   }
 
   Source_Files {
-    KeyMarshaling.cpp
+    KeyMarshalling.cpp
   }
 }
 

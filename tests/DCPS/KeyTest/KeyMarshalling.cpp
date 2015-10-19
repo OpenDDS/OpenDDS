@@ -40,7 +40,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.text = "text";
     message.count = 4321;
 
-    // Use Key-Only marshaling (no keys means it should be empty)
+    // Use Key-Only marshalling (no keys means it should be empty)
     KeyOnly<const Messenger1::Message> ko_message(message);
     size_t size = 0, padding = 0;
     gen_find_size(ko_message, size, padding);
@@ -90,7 +90,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     }
 
     {
-      // Use Key-Only marshaling (only the key fields should be equal)
+      // Use Key-Only marshalling (only the key fields should be equal)
       const Messenger2::Message& mess_const_ref = message;
       KeyOnly<const Messenger2::Message> ko_message(mess_const_ref);
       size_t size = 0, padding = 0;
@@ -133,7 +133,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     const CORBA::WChar wstring_value[4] = { 'X', 'Y', 'Z', 0 };
     message.wstring_field = wstring_value;
 
-    // Use Key-Only marshaling (only the key fields should be equal)
+    // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger4::Message> ko_message(message);
     size_t size = 0, padding = 0;
     gen_find_size(ko_message, size, padding);
@@ -195,7 +195,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     const CORBA::WChar wstring_value[4] = { 'X', 'Y', 'Z', 0 };
     message.mess.wstring_field = wstring_value;
 
-    // Use Key-Only marshaling (only the key fields should be equal)
+    // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger4::NestedMessage> ko_message(message);
     size_t size = 0, padding = 0;
     gen_find_size(ko_message, size, padding);
@@ -248,7 +248,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.responses[1] = 2;
     message.responses[2] = 3;
 
-    // Use Key-Only marshaling (only the key fields should be equal)
+    // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger7::Message> ko_message(message);
     size_t size = 0, padding = 0;
     gen_find_size(ko_message, size, padding);
@@ -284,7 +284,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     message.text = "text";
     message.count = 4321;
 
-    // Use Key-Only marshaling (only the key fields should be equal)
+    // Use Key-Only marshalling (only the key fields should be equal)
     KeyOnly<const Messenger9::Message> ko_message(message);
     size_t size = 0, padding = 0;
     gen_find_size(ko_message, size, padding);
