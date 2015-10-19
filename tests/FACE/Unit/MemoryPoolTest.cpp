@@ -1167,11 +1167,6 @@ int ACE_TMAIN(int, ACE_TCHAR* [] )
 
   printf("%d assertions failed, %d passed\n", failed, assertions - failed);
 
-  if (failed) {
-    printf("test FAILED\n");
-  } else {
-    printf("test PASSED\n");
-  }
   return failed;
 }
 
