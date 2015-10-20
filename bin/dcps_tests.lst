@@ -193,7 +193,10 @@ examples/DCPS/Messenger_Imr/run_test.pl: !DCPS_MIN !MIN_CORBA !CORBA_E_COMPACT !
 
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN
 tests/DCPS/UnitTests/run_test.pl: !DCPS_MIN
-tests/DCPS/KeyTest/run_test.pl: !DCPS_MIN
+tests/DCPS/KeyTest/run_test.pl keymarshalling: !DCPS_MIN
+tests/DCPS/KeyTest/run_test.pl isbounded: !DCPS_MIN
+tests/DCPS/KeyTest/run_test.pl md5: !DCPS_MIN
+tests/DCPS/KeyTest/run_test.pl compiler: !DCPS_MIN !TARGET
 tests/DCPS/CompatibilityTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/CompatibilityTest/run_test.pl rtps_disc: !DCPS_MIN RTPS
 tests/DCPS/CompatibilityTest/run_test.pl rtps_disc_tcp: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
@@ -321,6 +324,7 @@ tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter keyed: !D
 tests/DCPS/Instances/run_test.pl multiple_instance multiple_datawriter nokey: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/FACE/Unit/run_test.pl qossettings: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
 tests/FACE/Unit/run_test.pl memorypool: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
+tests/FACE/Unit/run_test.pl safetyprofilepool: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
 tests/FACE/Unit/run_test.pl freeindex: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
 tests/FACE/Unit/run_test.pl sequences: !DCPS_MIN !WCHAR OPENDDS_SAFETY_PROFILE  !NO_BUILT_IN_TOPICS
 tests/FACE/Messenger/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
