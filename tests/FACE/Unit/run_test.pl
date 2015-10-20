@@ -18,6 +18,8 @@ if ($test->flag('freeindex')) {
   $test->process('Test', 'FreeIndexTest');
 } elsif ($test->flag('memorypool')) {
   $test->process('Test', 'MemoryPoolTest');
+} elsif ($test->flag('safetyprofilepool')) {
+  $test->process('Test', 'SafetyProfilePoolTest');
 } elsif ($test->flag('qossettings')) {
   $test->process('Test', 'QosSettingsTest');
 } elsif ($test->flag('sequences')) {
