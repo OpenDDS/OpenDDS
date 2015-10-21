@@ -24,39 +24,21 @@ int read (::DDS::DataReader_ptr reader)
     DR_impl* dr_servant =
       dynamic_cast<DR_impl*> (foo_dr.in ());
 
-    char action[5] ;
-    if (use_take)
-    {
-      ACE_OS::strcpy(action, "take") ;
-    }
-    else
-    {
-      ACE_OS::strcpy(action, "read") ;
-    }
-
     DT foo;
     ::DDS::SampleInfo si ;
 
-    DDS::ReturnCode_t status  ;
-    if (use_take)
-    {
-      status = dr_servant->take_next_sample(foo, si) ;
-    }
-    else
-    {
-      status = dr_servant->read_next_sample(foo, si) ;
-    }
+    DDS::ReturnCode_t status = dr_servant->take_next_sample(foo, si) ;
 
     if (status == ::DDS::RETCODE_OK)
     {
       if (si.valid_data == 1)
       {
+        num_reads++;
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) reader %X %C foo.x = %f foo.y = %f, foo.data_source = %d \n"),
-          reader, action, foo.x, foo.y, foo.data_source));
+          ACE_TEXT("(%P|%t) reader %X take foo.x = %f foo.y = %f, foo.data_source = %d \n"),
+          reader, foo.x, foo.y, foo.data_source));
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) %C SampleInfo.sample_rank = %d \n"),
-          action, si.sample_rank));
+          ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d \n"), si.sample_rank));
 
         if (results.add (foo) == -1)
         {
@@ -88,28 +70,6 @@ int read (::DDS::DataReader_ptr reader)
       ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: read  foo: Error: %d\n"), status),
         -1);
-    }
-
-    if (use_take)
-    {
-      //  Verify the samples were actually taken
-      //
-      DT_seq foo(1) ;
-      ::DDS::SampleInfoSeq si(1) ;
-
-      DDS::ReturnCode_t status ;
-      status = dr_servant->read(foo, si,
-                  1,
-                  ::DDS::READ_SAMPLE_STATE | ::DDS::NOT_READ_SAMPLE_STATE,
-                  ::DDS::ANY_VIEW_STATE,
-                  ::DDS::ANY_INSTANCE_STATE) ;
-
-      if (status != ::DDS::RETCODE_NO_DATA)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-                   ACE_TEXT("(%P|%t) Data found when all of it should have been taken.\n")),
-                   -1);
-      }
     }
   }
   catch (const CORBA::Exception& ex)
@@ -202,8 +162,6 @@ void DataReaderListenerImpl::on_subscription_matched (
   {
     //ACE_DEBUG((LM_DEBUG,
     //  ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available %d\n"), num_reads.value ()));
-
-    num_reads ++;
 
     int ret = 0;
 

@@ -53,7 +53,6 @@ int parse_args (int argc, ACE_TCHAR *argv[])
   while (arg_shifter.is_anything_left ())
   {
     // options:
-    //  -t use_take?1:0             defaults to 0
     //  -r num_datareaders          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
@@ -74,12 +73,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
 
     const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-t"))) != 0)
-    {
-      use_take = ACE_OS::atoi (currentArg);
-      arg_shifter.consume_arg ();
-    }
-    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
     {
       num_datareaders = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
