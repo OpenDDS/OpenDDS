@@ -336,4 +336,4 @@ tests/FACE/Reliability/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
 tests/FACE/Partition/run_test.pl: !DCPS_MIN !WCHAR RTPS !NO_BUILT_IN_TOPICS
 tests/FACE/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
 tests/FACE/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
-tests/FACE/Compiler/idl_test_fixed/TestFixed: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
+tests/FACE/Compiler/idl_test_fixed/run_test.pl: !DCPS_MIN !WCHAR !NO_BUILT_IN_TOPICS
