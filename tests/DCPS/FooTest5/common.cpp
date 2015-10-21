@@ -19,7 +19,6 @@ const char* MY_TYPE_FOR_MULTICAST = "FooMulticast";
 
 const ACE_Time_Value max_blocking_time(::DDS::DURATION_INFINITE_SEC);
 
-int use_take = 0;
 int num_samples_per_instance = 1;
 int num_instances_per_writer = 1;
 int num_datareaders = 1;

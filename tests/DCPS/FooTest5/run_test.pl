@@ -18,7 +18,6 @@ PerlDDS::add_lib_path('../FooType5');
 my $num_writers = 1;
 my $num_instances_per_writer = 1;
 my $num_samples_per_instance = 100;
-my $use_take = 0;
 my $use_udp = 0;
 my $use_multicast = 0;
 my $use_rtps_transport = 0;
@@ -125,7 +124,7 @@ $test->{dcps_debug_level} = 1;
 my $cfg = $PerlDDS::SafetyProfile ? 'rtps.ini' : 'all.ini';
 
 my $sub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast"
-    . " -p $use_rtps_transport -s $use_shmem -r $num_readers -t $use_take"
+    . " -p $use_rtps_transport -s $use_shmem -r $num_readers "
     . " -m $num_instances_per_writer -i $num_samples_per_instance"
     . " -w $num_writers -z $sequence_length"
     . " -k $no_key -y $read_interval_ms -f $mixed_trans";

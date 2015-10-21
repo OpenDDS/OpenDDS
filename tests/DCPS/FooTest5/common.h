@@ -18,7 +18,6 @@ extern const char* MY_TYPE_FOR_UDP;
 extern const char* MY_TYPE_FOR_MULTICAST;
 extern const ACE_Time_Value max_blocking_time;
 
-extern int use_take;
 extern int num_samples_per_instance;
 extern int num_instances_per_writer;
 extern int num_datareaders;
