@@ -118,6 +118,8 @@ ParticipantTask::svc()
       // Create DataWriter
       DDS::DataWriterQos writer_qos;
       publisher->get_default_datawriter_qos(writer_qos);
+      writer_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      writer_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       writer_qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_);
 #endif
