@@ -258,9 +258,11 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       DDS::SampleInfo info;
 
       DDS::ReturnCode_t error = reader_i->take_next_sample(foo, info);
-      if (error == DDS::RETCODE_OK && info.valid_data)
+      if (error == DDS::RETCODE_OK)
       {
-        seen++;
+        if (info.valid_data) {
+          seen++;
+        }
       }
       else if (error == DDS::RETCODE_NO_DATA)
       {
@@ -268,12 +270,13 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       }
       else
       {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: Unable to take sample!\n")), -1);
+        ACE_ERROR_RETURN((
+          LM_ERROR,
+          ACE_TEXT("%N:%l main()")
+          ACE_TEXT(" ERROR: Unable to take sample, error %d!\n"), error), -1);
       }
     }
-
+ 
     if (seen != EXPECTED_SAMPLES)
     {
       ACE_ERROR_RETURN((LM_ERROR,
