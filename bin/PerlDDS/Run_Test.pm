@@ -690,10 +690,9 @@ sub stop_process {
 
 sub stop_processes {
   my $self = shift;
-  my $first_timed_wait = shift;
+  my $timed_wait = shift;
   # if passed, this will be the first processed WaitKilled
   my $name = shift;
-  my $timed_wait = $first_timed_wait;
 
   if (!defined($timed_wait)) {
     print STDERR "ERROR: TestFramework::stop_processes need to provide time "
@@ -714,9 +713,7 @@ sub stop_processes {
     $self->stop_process($timed_wait, $name);
     # make next loop
     $name = undef;
-    if ($timed_wait == $first_timed_wait) {
-      $timed_wait += $self->{wait_after_first_proc};
-    }
+    $timed_wait = $self->{wait_after_first_proc};
   }
 
   $self->stop_discovery($timed_wait);
