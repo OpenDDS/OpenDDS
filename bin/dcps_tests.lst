@@ -250,8 +250,9 @@ tests/DCPS/Thrasher/run_test.pl single rtps: !DCPS_MIN !LYNXOS
 tests/DCPS/Thrasher/run_test.pl default rtps: !DCPS_MIN !LYNXOS
 tests/DCPS/Thrasher/run_test.pl low rtps: !DCPS_MIN !LYNXOS
 tests/DCPS/Thrasher/run_test.pl medium rtps: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl high rtps: !DCPS_MIN !LYNXOS
-tests/DCPS/Thrasher/run_test.pl aggressive rtps: !DCPS_MIN !LYNXOS
+# Need investigation
+# tests/DCPS/Thrasher/run_test.pl high rtps: !DCPS_MIN !LYNXOS
+# tests/DCPS/Thrasher/run_test.pl aggressive rtps: !DCPS_MIN !LYNXOS
 tests/DCPS/DPFactoryQos/run_test.pl: !DCPS_MIN
 tests/DCPS/ManualAssertLiveliness/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ManualAssertLiveliness/run_test.pl lost: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
