@@ -276,7 +276,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
           ACE_TEXT(" ERROR: Unable to take sample, error %d!\n"), error), -1);
       }
     }
- 
+
     if (seen != EXPECTED_SAMPLES)
     {
       ACE_ERROR_RETURN((LM_ERROR,
