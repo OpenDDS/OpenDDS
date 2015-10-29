@@ -167,7 +167,14 @@ ReliableSession::send_naks()
 {
   // Could get data samples before syn control message.
   // No use nak'ing until syn control message is received and session is acked.
-  if (!this->acked()) return;
+  if (!this->acked()) {
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
+                           ACE_TEXT("remote %d session NOT acked yet, don't send naks\n"),
+        this->link_->local_peer(), this->remote_peer_));
+    }
+    return;
+  }
 
   if (DCPS_debug_level > 5) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
@@ -175,19 +182,30 @@ ReliableSession::send_naks()
       this->link_->local_peer(), this->remote_peer_, this->nak_requests_.size()));
   }
 
-  if (!this->nak_sequence_.disjoint()) return;  // nothing to send
+  if (!(this->nak_sequence_.low() > 1) && !this->nak_sequence_.disjoint()) {
+    if (DCPS_debug_level > 5) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
+                           ACE_TEXT("remote %d nak sequence not disjoint, don't send naks \n"),
+        this->link_->local_peer(), this->remote_peer_));
+    }
+    return;  // nothing to send
+  }
 
   ACE_Time_Value now(ACE_OS::gettimeofday());
 
-  // Record high-water mark for this interval; this value will
+  // Record low-water mark for this interval; this value will
   // be used to reset the low-water mark in the event the remote
   // peer becomes unresponsive:
-  this->nak_requests_[now] = this->nak_sequence_.high();
+  if (this->nak_sequence_.low() > 1) {
+    this->nak_requests_[now] = SequenceNumber();
+  } else {
+    this->nak_requests_[now] = this->nak_sequence_.cumulative_ack();
+  }
 
   typedef std::vector<SequenceRange> RangeVector;
   RangeVector ignored;
 
-  /// The range first - second will be skiped (no naks sent for it).
+  /// The range first - second will be skipped (no naks sent for it).
   SequenceNumber first;
   SequenceNumber second;
 
@@ -261,7 +279,7 @@ ReliableSession::send_naks()
         low = received.cumulative_ack();
       }
 
-      if (DCPS_debug_level > 0) {
+      if (DCPS_debug_level > 5) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
           ACE_TEXT("remote %d ignore missing [%q - %q]\n"),
           this->link_->local_peer(), this->remote_peer_, low.getValue(), high.getValue()));
@@ -278,9 +296,49 @@ ReliableSession::send_naks()
     // ranges already requested by other peers for this interval:
     received.insert(*it);
   }
+  bool sending_naks = false;
+  if (received.low() > 1){
+    //Special case: nak from beginning to make sure no missing sequence
+    //number below the first received
+    sending_naks = true;
+    std::vector<SequenceRange> ranges;
+    ranges.push_back(SequenceRange(SequenceNumber(), received.low()));
 
+    CORBA::ULong size = ACE_Utils::truncate_cast<CORBA::ULong>(ranges.size());
+
+    size_t len = sizeof(this->remote_peer_)
+               + sizeof(size)
+               + size * 2 * sizeof(SequenceNumber);
+
+    ACE_Message_Block* data;
+    ACE_NEW(data, ACE_Message_Block(len));
+
+    Serializer serializer(data);
+
+    serializer << this->remote_peer_;
+    serializer << size;
+    for (std::vector<SequenceRange>::const_iterator iter = ranges.begin();
+         iter != ranges.end(); ++iter) {
+      serializer << iter->first;
+      serializer << iter->second;
+      if (DCPS_debug_level > 0) {
+        ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks ")
+                              ACE_TEXT (" local %d remote %d [%q - %q]\n"),
+                              this->link_->local_peer(), remote_peer_,
+                              iter->first.getValue(), iter->second.getValue()));
+      }
+    }
+    // Send control sample to remote peer:
+    send_control(MULTICAST_NAK, data);
+  }
   if (received.disjoint()) {
+    sending_naks = true;
     send_naks(received);
+  }
+  if (!sending_naks && DCPS_debug_level > 5){
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
+                         ACE_TEXT("remote %d received sequence not disjoint, don't send naks \n"),
+      this->link_->local_peer(), this->remote_peer_));
   }
 
   // Clear peer repair requests:
@@ -367,7 +425,7 @@ ReliableSession::send_naks(DisjointSequence& received)
     serializer << iter->first;
     serializer << iter->second;
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks")
+      ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks (Disjoint) ")
                             ACE_TEXT (" local %d remote %d [%q - %q]\n"),
                             this->link_->local_peer(), remote_peer_,
                             iter->first.getValue(), iter->second.getValue()));
@@ -382,7 +440,6 @@ void
 ReliableSession::nakack_received(ACE_Message_Block* control)
 {
   if (this->active_) return; // pub send syn, then doesn't receive them.
-
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
@@ -398,8 +455,22 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   // repaired by a remote peer; if any values were needed below
   // this value, then the sequence needs to be shifted:
   std::vector<SequenceRange> dropped;
-  if (this->nak_sequence_.insert(SequenceRange(this->nak_sequence_.low(),
-                                               low.previous()), dropped)) {
+  SequenceNumber range_low = low.previous() < this->nak_sequence_.low() ? SequenceNumber() : low.previous();
+  SequenceNumber range_high = low.previous() < this->nak_sequence_.low() ? low.previous() : this->nak_sequence_.low();
+
+  if (range_low == SequenceNumber() && range_high == SequenceNumber()) {
+    //clearout the nak_sequence_ so initial range can be inserted,
+    //then re-insert ranges present before
+    DisjointSequence tmp(this->nak_sequence_);
+    this->nak_sequence_.reset();
+    this->nak_sequence_.insert(SequenceRange(range_low, range_high));
+    const std::vector<SequenceRange> ranges(tmp.present_sequence_ranges());
+
+    for (std::vector<SequenceRange>::const_iterator iter = ranges.begin();
+         iter != ranges.end(); ++iter) {
+      this->nak_sequence_.insert(SequenceRange(iter->first, iter->second));
+    }
+  } else if (this->nak_sequence_.insert(SequenceRange(range_low, range_high), dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
       this->reassembly_.data_unavailable(dropped[i]);
@@ -427,7 +498,6 @@ ReliableSession::send_nakack(SequenceNumber low)
   Serializer serializer(data);
 
   serializer << low;
-
   // Broadcast control sample to all peers:
   send_control(MULTICAST_NAKACK, data);
 }
@@ -438,7 +508,7 @@ ReliableSession::start(bool active, bool acked)
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->start_lock_, false);
 
   if (this->started_) {
-     return true;  // already started
+    return true;  // already started
   }
 
   this->active_  = active;
@@ -452,7 +522,7 @@ ReliableSession::start(bool active, bool acked)
     // Only subscriber send naks so just schedule for sub role.
     if (!active) {
       if (acked) {
-        this->acked_ = true;
+        this->set_acked();
       }
       if (!this->nak_watchdog_->schedule()) {
         ACE_ERROR_RETURN((LM_ERROR,
