@@ -496,7 +496,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           data_.remote_reliable_, data_.remote_durable_};
 
         TransportImpl::AcceptConnectResult res;
-
+        GuidConverter tmp_local(tc->repo_id_);
+        GuidConverter tmp_remote(this->data_.remote_id_);
         if (!tc->initiate_connect_i(res, impl, remote, attribs_, guard)) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
@@ -509,12 +510,11 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                                 OPENDDS_STRING(remote).c_str()), 0);
             return true;
           }
-          GuidConverter local(tc->repo_id_);
-          GuidConverter remote(this->data_.remote_id_);
+
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                               "between %C and remote %C unsuccessful\n",
-                              OPENDDS_STRING(local).c_str(),
-                              OPENDDS_STRING(remote).c_str()), 0);
+                              OPENDDS_STRING(tmp_local).c_str(),
+                              OPENDDS_STRING(tmp_remote).c_str()), 0);
           return false;
         }
 
@@ -570,7 +570,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   //try to make a local copy of remote_id to use in calls
   //because the reference could be invalidated if the caller
   //reference location is deleted (i.e. in stop_accepting_or_connecting
-  //if user_datalink_i was called from passive_connection)
+  //if use_datalink_i was called from passive_connection)
   //Does changing this from a reference to a local affect anything going forward?
   RepoId remote_id(remote_id_ref);
 
