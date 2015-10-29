@@ -78,6 +78,9 @@ private:
   typedef std::map<std::string, WriterCounts> ProcessWriters;
   ProcessWriters process_writers_;
   bool valid_;
+  typedef std::string PROCESS_ID_STR;
+  typedef CORBA::Long WRITER_ID, HIGHEST_SAMPLE_RECVD;
+  std::map<PROCESS_ID_STR, std::map<WRITER_ID, HIGHEST_SAMPLE_RECVD> > processToWriterSamples_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */
