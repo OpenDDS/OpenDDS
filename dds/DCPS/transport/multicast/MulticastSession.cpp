@@ -104,6 +104,11 @@ MulticastSession::acked()
   return this->acked_;
 }
 
+void
+MulticastSession::set_acked() {
+  ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
+  this->acked_ = true;
+}
 
 bool
 MulticastSession::start_syn()
@@ -230,7 +235,7 @@ MulticastSession::send_syn()
 void
 MulticastSession::synack_received(ACE_Message_Block* control)
 {
-  if (!this->active_) return; // sub send syn, then doesn't receive them.
+  if (!this->active_) return; // sub send synack, then doesn't receive them.
 
   // Already received ack.
   if (this->acked()) return;

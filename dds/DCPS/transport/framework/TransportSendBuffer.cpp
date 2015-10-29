@@ -295,6 +295,10 @@ SingleSendBuffer::resend(const SequenceRange& range, DisjointSequence* gaps)
 bool
 SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
 {
+  //Special case, nak to make sure it has all history
+  SequenceNumber lowForAllResent;
+  range.first == SequenceNumber() ? lowForAllResent = low() : lowForAllResent = range.first;
+
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
     // Re-send requested sample if still buffered; missing samples
@@ -326,9 +330,8 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
       }
     }
   }
-
   // Have we resent all requested data?
-  return range.first >= low() && range.second <= high();
+  return lowForAllResent >= low() && range.second <= high();
 }
 
 void
