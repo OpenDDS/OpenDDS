@@ -296,8 +296,7 @@ bool
 SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps)
 {
   //Special case, nak to make sure it has all history
-  SequenceNumber lowForAllResent;
-  range.first == SequenceNumber() ? lowForAllResent = low() : lowForAllResent = range.first;
+  const SequenceNumber lowForAllResent = range.first == SequenceNumber() ? low() : range.first;
 
   for (SequenceNumber sequence(range.first);
        sequence <= range.second; ++sequence) {
