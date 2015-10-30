@@ -20,6 +20,7 @@
 
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/GuidConverter.h"
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
