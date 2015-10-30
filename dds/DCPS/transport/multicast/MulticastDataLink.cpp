@@ -297,10 +297,10 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
 
       for (MulticastSessionMap::iterator it(temp_sessions.begin());
           it != temp_sessions.end(); ++it) {
-        bool ctrl_rcvd = it->second->control_received(sample.header_.submessage_id_,
+        it->second->control_received(sample.header_.submessage_id_,
                                                       sample.sample_);
         // reset read pointer
-        if (ctrl_rcvd && ptr) {
+        if (ptr) {
           sample.sample_->rd_ptr(ptr);
         }
       }
