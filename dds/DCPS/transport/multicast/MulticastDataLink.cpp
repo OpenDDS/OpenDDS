@@ -351,7 +351,7 @@ MulticastDataLink::ready_to_deliver(const ReceivedDataSample& data, ACE_INT32 so
       return true;
     }
     MulticastSession_rch session(session_it->second);
-    DisjointSequence recvd = this->data_samples_seen_[data.header_.publication_id_];
+    DisjointSequence& recvd = this->data_samples_seen_[data.header_.publication_id_];
     if (recvd.disjoint() ||
         (!recvd.empty() && recvd.cumulative_ack() != seq /*seq already inserted in duplicate check*/)
         || (!recvd.empty() && recvd.low() > 1)
@@ -392,7 +392,7 @@ MulticastDataLink::ready_to_deliver(const ReceivedDataSample& data, ACE_INT32 so
 void
 MulticastDataLink::deliver_held_data(PublicationId pubId)
 {
-  DisjointSequence recvd = this->data_samples_seen_[pubId];
+  DisjointSequence& recvd = this->data_samples_seen_[pubId];
 
   if (recvd.empty() || recvd.low() > 1) return;
   const SequenceNumber ca = recvd.cumulative_ack();
