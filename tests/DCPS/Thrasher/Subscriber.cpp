@@ -119,6 +119,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
       DDS::DataReaderQos reader_qos;
       subscriber->get_default_datareader_qos(reader_qos);
 
+      reader_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       reader_qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 #endif
