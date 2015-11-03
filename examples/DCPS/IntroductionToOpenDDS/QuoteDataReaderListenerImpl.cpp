@@ -40,7 +40,7 @@ void QuoteDataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       DDS::SampleInfo si ;
       DDS::ReturnCode_t status = quote_dr->take_next_sample(quote, si) ;
 
-      if (status == DDS::RETCODE_OK) {
+      if (status == DDS::RETCODE_OK && si.valid_data) {
         ++count;
         cout << "Quote: ticker    = " << quote.ticker.in()    << endl
              << "       exchange  = " << quote.exchange.in()  << endl
