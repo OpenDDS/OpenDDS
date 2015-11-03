@@ -26,6 +26,7 @@ public:
   virtual bool check_header(const TransportHeader& header);
 
   virtual bool start(bool active, bool acked);
+  virtual bool is_reliable() { return false;}
 
 private:
   SequenceNumber expected_;

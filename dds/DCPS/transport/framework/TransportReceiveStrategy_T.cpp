@@ -489,7 +489,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
               "We have enough bytes to demarshall the transport "
               "packet header.\n"));
 
-        // only do the hexdump if it will be printed - to not impact perfomance.
+        // only do the hexdump if it will be printed - to not impact performance.
         if (Transport_debug_level > 5) {
           ACE_TCHAR xbuffer[4096];
           const ACE_Message_Block& mb =
@@ -609,7 +609,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
                 "We have received enough bytes for the sample "
                 "header.  Demarshall the sample header now.\n"));
 
-          // only do the hexdump if it will be printed - to not impact perfomance.
+          // only do the hexdump if it will be printed - to not impact performance.
           if (Transport_debug_level > 5) {
             ACE_TCHAR ebuffer[4096];
             ACE::format_hexdump

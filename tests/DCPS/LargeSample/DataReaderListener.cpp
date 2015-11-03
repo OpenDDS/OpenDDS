@@ -80,6 +80,15 @@ throw(CORBA::SystemException)
                      message.writer_id,
                      message.sample_id));
 
+          if (message.sample_id < processToWriterSamples_[message.process_id.in()][message.writer_id]) {
+            std::cout << "ERROR: Out of order message from process_id " << message.process_id.in() << " writer_id "
+                      << message.writer_id << " sample_id " << message.sample_id << " already received sample with id: "
+                      << processToWriterSamples_[std::string(message.process_id)][message.writer_id]
+                      << " (" << message.from.in() << ")\n";
+            valid_ = false;
+          } else {
+              processToWriterSamples_[std::string(message.process_id)][message.writer_id] = message.sample_id;
+          }
           if ((message.writer_id == 1 && std::string(message.from) != "Comic Book Guy 1") ||
               (message.writer_id == 2 && std::string(message.from) != "Comic Book Guy 2")) {
             std::cout << "ERROR: Bad from for process_id " << message.process_id.in() << " writer_id "

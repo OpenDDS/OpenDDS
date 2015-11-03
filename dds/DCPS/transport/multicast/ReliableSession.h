@@ -67,6 +67,7 @@ public:
 
   virtual bool start(bool active, bool acked);
   virtual void stop();
+  virtual bool is_reliable() { return true;}
 
   virtual void syn_hook(const SequenceNumber& seq);
 

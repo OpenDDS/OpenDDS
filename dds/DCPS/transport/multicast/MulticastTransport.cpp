@@ -173,7 +173,6 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
 
     link = this->make_datalink(attribs.local_id_, attribs.priority_, true /*active*/);
     this->client_links_[local_peer] = link;
-
   } else {
     link = link_iter->second;
   }
@@ -184,9 +183,12 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     this->start_session(link, remote_peer, true /*active*/);
 
   if (session.is_nil()) {
+    Links::iterator to_remove = this->client_links_.find(local_peer);
+    if (to_remove != this->client_links_.end()) {
+      this->client_links_.erase(to_remove);
+    }
     return AcceptConnectResult();
   }
-
   return AcceptConnectResult(link._retn());
 }
 
@@ -211,7 +213,6 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
     link = this->make_datalink(attribs.local_id_, attribs.priority_, false /*passive*/);
     this->server_links_[local_peer] = link;
-
   } else {
     link = link_iter->second;
   }
@@ -233,7 +234,6 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
     if (session.is_nil()) {
       link = 0;
     }
-
     return AcceptConnectResult(link._retn());
 
   } else {
@@ -261,14 +261,16 @@ MulticastTransport::stop_accepting_or_connecting(TransportClient* client,
 
   for (PendConnMap::iterator it = this->pending_connections_.begin();
        it != this->pending_connections_.end(); ++it) {
+    bool erased_from_it = false;
     for (size_t i = 0; i < it->second.size(); ++i) {
       if (it->second[i].first == client && it->second[i].second == remote_id) {
+        erased_from_it = true;
         it->second.erase(it->second.begin() + i);
         break;
       }
     }
 
-    if (it->second.empty()) {
+    if (erased_from_it && it->second.empty()) {
       this->pending_connections_.erase(it);
       return;
     }
@@ -286,34 +288,37 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
 
   const Peers peers(remote_peer, local_peer);
   const PendConnMap::iterator pend = this->pending_connections_.find(peers);
-
-  if (pend != pending_connections_.end()) {
-
-    Links::const_iterator server_link = this->server_links_.find(local_peer);
-    DataLink_rch link;
-
-    if (server_link != this->server_links_.end()) {
-      link = static_rchandle_cast<DataLink>(server_link->second);
-    }
-
-    VDBG((LM_DEBUG, "(%P|%t) MulticastTransport::passive_connection completing\n"));
-    PendConnMap::iterator updated_pend = pend;
-
-    do {
-      TransportClient* pend_client = updated_pend->second.front().first;
-      RepoId remote_repo = updated_pend->second.front().second;
-
-      guard.release();
-      pend_client->use_datalink(remote_repo, link);
-
-      guard.acquire();
-
-    } while ((updated_pend = pending_connections_.find(peers)) != pending_connections_.end());
-  }
-
   //if connection was pending, calls to use_datalink finalized the connection
   //if it was not previously pending, accept_datalink() will finalize connection
   this->connections_.insert(peers);
+
+  Links::const_iterator server_link = this->server_links_.find(local_peer);
+  DataLink_rch link;
+
+  if (server_link != this->server_links_.end()) {
+    link = static_rchandle_cast<DataLink>(server_link->second);
+    MulticastSession_rch session = server_link->second->find_or_create_session(remote_peer);
+    session->set_acked();
+  }
+
+  if (pend != pending_connections_.end()) {
+    Callbacks tmp(pend->second);
+    for (size_t i = 0; i < tmp.size(); ++i) {
+      const PendConnMap::iterator pend = pending_connections_.find(peers);
+      if (pend != pending_connections_.end()) {
+        const Callbacks::iterator tmp_iter = find(pend->second.begin(),
+                                                  pend->second.end(),
+                                                  tmp.at(i));
+        if (tmp_iter != pend->second.end()) {
+          TransportClient* pend_client = tmp.at(i).first;
+          RepoId remote_repo = tmp.at(i).second;
+          guard.release();
+          pend_client->use_datalink(remote_repo, link);
+          guard.acquire();
+        }
+      }
+    }
+  }
 }
 
 bool
@@ -355,13 +360,17 @@ MulticastTransport::shutdown_i()
   for (link = this->client_links_.begin();
        link != this->client_links_.end();
        ++link) {
-    link->second->transport_shutdown();
+    if (!::CORBA::is_nil(link->second)) {
+      link->second->transport_shutdown();
+    }
   }
 
   for (link = this->server_links_.begin();
        link != this->server_links_.end();
        ++link) {
-    link->second->transport_shutdown();
+    if (!::CORBA::is_nil(link->second)) {
+      link->second->transport_shutdown();
+    }
   }
 
   this->config_i_ = 0;

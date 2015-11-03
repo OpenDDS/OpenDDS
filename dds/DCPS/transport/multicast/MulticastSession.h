@@ -62,6 +62,8 @@ public:
   MulticastPeer remote_peer() const;
 
   bool acked();
+  void set_acked();
+  virtual bool is_reliable() { return false;}
 
   void syn_received(ACE_Message_Block* control);
   void send_syn();
