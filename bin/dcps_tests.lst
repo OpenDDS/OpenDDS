@@ -292,6 +292,11 @@ tests/DCPS/RtiSerialization/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/RtiSerialization/run_test.pl rtps_disc: !DCPS_MIN RTPS
 tests/DCPS/MultiDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST
+tests/DCPS/StaticDiscovery/run_test.pl mp: !DCPS_MIN !NO_MCAST
+tests/DCPS/StaticDiscovery/run_test.pl mp delay: !DCPS_MIN !NO_MCAST
+tests/DCPS/StaticDiscovery/run_test.pl mr: !DCPS_MIN !NO_MCAST
+tests/DCPS/StaticDiscovery/run_test.pl mw: !DCPS_MIN !NO_MCAST
+tests/DCPS/StaticDiscovery/run_test.pl mpmrmw: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscoveryReconnect/run_test.pl: !DCPS_MIN !NO_MCAST
 tests/DCPS/SubscriberCycle/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_FILTERED_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION
 

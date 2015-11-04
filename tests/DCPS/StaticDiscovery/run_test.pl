@@ -14,6 +14,7 @@ my $result = 0;
 my $participant = 0;
 my $entity = 0;
 my $reliable = 1;
+my $test = new PerlDDS::TestFramework();
 
 sub generateConfig {
     my $fh = shift;
@@ -93,7 +94,6 @@ sub runTest {
 
     my $delay = shift;
 
-    my $test = new PerlDDS::TestFramework();
     $test->enable_console_logging();
 
     if ($test->flag('best_effort')) {
@@ -160,21 +160,36 @@ sub runTest {
     my $res = $test->finish(150);
     if ($res != 0) {
         print STDERR "ERROR: test returned $res\n";
-        $result += $res;
+        $result = $res;
     }
 }
 
-# 1 process with 1 reader and 1 writer
-runTest(1, 1, 1, 0, 0, 0, 0);
-# 1 process with 1 reader, 1 process with 1 writer
-runTest(1, 1, 0, 1, 0, 1, 0);
-# 1 process with 1 reader, 5 second delay, 1 process with 1 writer
-runTest(1, 1, 0, 1, 0, 1, 5);
-# 1 process with 5 readers and 1 writer
-runTest(1, 5, 1, 0, 0, 0, 0);
-# 1 process with 1 reader and 5 writers
-runTest(1, 1, 5, 0, 0, 0, 0);
-# 5 processes with 5 readers and 5 writers
-runTest(5, 5, 5, 0, 0, 0, 0);
+if ($test->flag('mp')) {
+  if ($test->flag('delay')) {
+    # mp delay
+    # 1 process with 1 reader, 5 second delay, 1 process with 1 writer
+    runTest(1, 1, 0, 1, 0, 1, 5);
+  } else {
+    # mp
+    # 1 process with 1 reader, 1 process with 1 writer
+    runTest(1, 1, 0, 1, 0, 1, 0);
+  }
+} elsif ($test->flag('mr')) {
+  # mr
+  # 1 process with 5 readers and 1 writer
+  runTest(1, 5, 1, 0, 0, 0, 0);
+} elsif ($test->flag('mw')) {
+  # mw
+  # 1 process with 1 reader and 5 writers
+  runTest(1, 1, 5, 0, 0, 0, 0);
+} elsif ($test->flag('mpmrmw')) {
+  # mpmrmw
+  # 5 processes with 5 readers and 5 writers
+  runTest(5, 5, 5, 0, 0, 0, 0);
+} else {
+  # default
+  # 1 process with 1 reader and 1 writer
+  runTest(1, 1, 1, 0, 0, 0, 0);
+}
 
 exit $result;
