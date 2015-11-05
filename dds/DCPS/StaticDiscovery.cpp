@@ -1473,14 +1473,14 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
 
     ValueMap values;
     pullValues(cf, it->second, values);
-    int domain;
+    int domain = 0;
     unsigned char participant[6];
     unsigned char entity[3];
     enum Type {
       Reader,
       Writer
     };
-    Type type;
+    Type type = Reader; // avoid warning
     OPENDDS_STRING topic_name;
     DDS::DataWriterQos datawriterqos(TheServiceParticipant->initial_DataWriterQos());
     DDS::DataReaderQos datareaderqos(TheServiceParticipant->initial_DataReaderQos());
@@ -1512,8 +1512,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         }
       } else if (name == "participant") {
 #ifdef __SUNPRO_CC
-        int count = 0;
-        std::count_if(value.begin(), value.end(), isxdigit, count);
+        int count = std::count_if(value.begin(), value.end(), isxdigit, count);
         if (value.size() != 12 || count != 12) {
 #else
         if (value.size() != 12 ||
@@ -1532,8 +1531,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         participantSpecified = true;
       } else if (name == "entity") {
 #ifdef __SUNPRO_CC
-        int count = 0;
-        std::count_if(value.begin(), value.end(), isxdigit, count);
+        int count = std::count_if(value.begin(), value.end(), isxdigit, count);
         if (value.size() != 6 || count != 6) {
 #else
         if (value.size() != 6 ||
