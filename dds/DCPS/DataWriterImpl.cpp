@@ -2013,7 +2013,14 @@ DataWriterImpl::create_control_message(MessageId message_id,
       reader->second.expected_sequence_ = sequence_number_;
     }
   }
-
+  if (DCPS_debug_level >= 4) {
+    const GuidConverter converter(publication_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterImpl::create_control_message: ")
+               ACE_TEXT("from publication %C sending control sample: %C .\n"),
+               OPENDDS_STRING(converter).c_str(),
+               to_string(header_data).c_str()));
+  }
   return message;
 }
 
@@ -2089,6 +2096,14 @@ DataWriterImpl::create_sample_data_message(DataSample* data,
                         DDS::RETCODE_ERROR);
 
   *message << header_data;
+  if (DCPS_debug_level >= 4) {
+    const GuidConverter converter(publication_id_);
+    ACE_DEBUG((LM_DEBUG,
+               ACE_TEXT("(%P|%t) DataWriterImpl::create_sample_data_message: ")
+               ACE_TEXT("from publication %C sending data sample: %C .\n"),
+               OPENDDS_STRING(converter).c_str(),
+               to_string(header_data).c_str()));
+  }
   return DDS::RETCODE_OK;
 }
 

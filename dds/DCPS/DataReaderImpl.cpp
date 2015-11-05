@@ -3402,7 +3402,7 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
   if (DCPS_debug_level >= 1) {
     GuidConverter sub_repo(reader_->get_repo_id());
     GuidConverter pub_repo(pub_id);
-    ACE_DEBUG((LM_INFO, "((%P|%t)) EndHistoricSamplesMissedSweeper::handle_timeout reader: %C waiting on writer: %C\n",
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::handle_timeout reader: %C waiting on writer: %C\n",
                OPENDDS_STRING(sub_repo).c_str(),
                OPENDDS_STRING(pub_repo).c_str()));
   }
