@@ -180,6 +180,11 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
   rid.entityId.entityKey[2] = qos.user_data.value[2];
   rid.entityId.entityKind = ENTITYKIND_USER_WRITER_WITH_KEY;
 
+  if (DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) looking up writer ID %s\n",
+               LogGuid(rid).c_str()));
+  }
+
   EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(rid);
   if (pos == registry_.writer_map.end()) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: unknown writer: %s\n"), LogGuid(rid).c_str()));
