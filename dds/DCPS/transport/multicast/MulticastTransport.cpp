@@ -360,7 +360,7 @@ MulticastTransport::shutdown_i()
   for (link = this->client_links_.begin();
        link != this->client_links_.end();
        ++link) {
-    if (!::CORBA::is_nil(link->second)) {
+    if (link->second.in()) {
       link->second->transport_shutdown();
     }
   }
@@ -368,7 +368,7 @@ MulticastTransport::shutdown_i()
   for (link = this->server_links_.begin();
        link != this->server_links_.end();
        ++link) {
-    if (!::CORBA::is_nil(link->second)) {
+    if (link->second.in()) {
       link->second->transport_shutdown();
     }
   }
