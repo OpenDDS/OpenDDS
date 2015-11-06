@@ -180,6 +180,11 @@ void StaticEndpointManager::assign_publication_key(RepoId& rid,
   rid.entityId.entityKey[2] = qos.user_data.value[2];
   rid.entityId.entityKind = ENTITYKIND_USER_WRITER_WITH_KEY;
 
+  if (DCPS_debug_level > 8) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) looking up writer ID %s\n",
+               LogGuid(rid).c_str()));
+  }
+
   EndpointRegistry::WriterMapType::const_iterator pos = registry_.writer_map.find(rid);
   if (pos == registry_.writer_map.end()) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: StaticEndpointManager::assign_publication_key: unknown writer: %s\n"), LogGuid(rid).c_str()));
@@ -1733,6 +1738,10 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       datawriterqos.user_data.value[1] = entity_id.entityKey[1];
       datawriterqos.user_data.value[2] = entity_id.entityKey[2];
 
+      if (DCPS_debug_level > 8) {
+        ACE_DEBUG((LM_INFO, "(%P|%t) inserting writer ID %s\n",
+                   LogGuid(rid).c_str()));
+      }
       if (!registry.writer_map.insert(std::make_pair(id,
             EndpointRegistry::Writer(topic_name, datawriterqos, publisherqos, config_name, trans_info))).second) {
         ACE_ERROR_RETURN((LM_ERROR,
