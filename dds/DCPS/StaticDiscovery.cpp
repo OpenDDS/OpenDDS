@@ -1738,10 +1738,6 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       datawriterqos.user_data.value[1] = entity_id.entityKey[1];
       datawriterqos.user_data.value[2] = entity_id.entityKey[2];
 
-      if (DCPS_debug_level > 8) {
-        ACE_DEBUG((LM_INFO, "(%P|%t) inserting writer ID %s\n",
-                   LogGuid(rid).c_str()));
-      }
       if (!registry.writer_map.insert(std::make_pair(id,
             EndpointRegistry::Writer(topic_name, datawriterqos, publisherqos, config_name, trans_info))).second) {
         ACE_ERROR_RETURN((LM_ERROR,
