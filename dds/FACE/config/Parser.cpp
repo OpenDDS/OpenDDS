@@ -355,7 +355,7 @@ Parser::parse_topic(ACE_Configuration_Heap& config,
         status = status || topic.set(value_name.c_str(), value.c_str());
       }
     } else {
-      ACE_OS::printf("unexpected value type %d\n", value_type);
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("unexpected value type %d\n"), value_type));
       status = -1;
       break;
     }
@@ -388,7 +388,7 @@ Parser::parse_connection(ACE_Configuration_Heap& config,
         status = status || connection.set(value_name.c_str(), value.c_str());
       }
     } else {
-      ACE_OS::printf("unexpected value type %d\n", value_type);
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("unexpected value type %d\n"), value_type));
       status = -1;
       break;
     }
@@ -424,7 +424,7 @@ Parser::parse_qos(ACE_Configuration_Heap& config,
                  qos.set_qos(level, value_name.c_str(), value.c_str());
       }
     } else {
-      ACE_OS::printf("unexpected value type %d\n", value_type);
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("unexpected value type %d\n"), value_type));
       status = -1;
       break;
     }
@@ -445,8 +445,7 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
                           0, // don't create if missing
                           key) != 0) {
     if (required) {
-      ACE_OS::printf("Could not open %s section in config file, status %d\n",
-                     section_type, status);
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("Could not open %C section in config file, status %d\n"), section_type, status));
       status = -1;
     }
   // Else, we can open this section
@@ -464,7 +463,7 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
                               section_name.c_str(),
                               0, // don't create if missing
                               subkey) != 0) {
-        ACE_OS::printf("Could not open subsections of %s\n", section_name.c_str());
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("Could not open subsections of %C\n"), section_name.c_str()));
         break;
       }
 
@@ -485,7 +484,7 @@ Parser::parse_sections(ACE_Configuration_Heap& config,
         status = parse_qos(
             config, subkey, section_name.c_str(), QosSettings::subscriber);
       } else {
-        ACE_OS::printf("unknown section %s\n", section_type);
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("unknown section %C\n"), section_type));
       }
     }
   }

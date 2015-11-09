@@ -53,17 +53,17 @@ ConnectionSettings::set(const char* name, const char* value)
       direction_ = FACE::DESTINATION;
     } else if (!std::strcmp(value, "bi_directional") ||
                !std::strcmp(value, "not_defined_connection_direction_type")) {
-      ACE_OS::printf("Direction not supported: %s\n", value);
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("Direction not supported: %C\n"), value));
       status = 1;
     } else {
-      ACE_OS::printf("Don't know of direction %s\n", value);
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("Don't know of direction %C\n"), value));
       status = 1;
     }
   } else if (!std::strcmp(name, "config")) {
     std::strncpy(config_name_, value, sizeof(config_name_));
   } else {
     // no match
-    ACE_OS::printf("Don't know of setting %s\n", name);
+    ACE_DEBUG((LM_ERROR, ACE_TEXT("Don't know of setting %C\n"), name));
     status = 1;
   }
 

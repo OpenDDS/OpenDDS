@@ -18,7 +18,7 @@ TopicSettings::set(const char* name, const char* value)
     std::strncpy(type_name_, value, sizeof(type_name_));
   } else {
     // no match
-    ACE_OS::printf("Don't know of setting %s\n", name);
+    ACE_DEBUG((LM_ERROR, ACE_TEXT("Don't know of setting %C\n"), name));
     status = 1;
   }
 
