@@ -70,6 +70,8 @@ public:
 
   bool empty();
 
+  void send_final_acks(const RepoId& readerid);
+
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
 

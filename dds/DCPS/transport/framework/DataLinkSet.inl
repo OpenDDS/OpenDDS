@@ -249,3 +249,16 @@ OpenDDS::DCPS::DataLinkSet::copy_map_to(MapType& target)
     target.insert(*itr);
   }
 }
+
+ACE_INLINE void
+OpenDDS::DCPS::DataLinkSet::send_final_acks(const RepoId& readerid)
+{
+  GuardType guard(this->lock_);
+  for (MapType::iterator itr = map_.begin();
+       itr != map_.end();
+       ++itr) {
+    itr->second->send_final_acks(readerid);
+  }
+
+  map_.clear();
+}

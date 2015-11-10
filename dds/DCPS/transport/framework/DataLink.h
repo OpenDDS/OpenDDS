@@ -251,6 +251,8 @@ public:
 
   void set_scheduling_release(bool scheduling_release);
 
+  virtual void send_final_acks (const RepoId& readerid);
+
 protected:
 
   /// This is how the subclass "announces" to this DataLink base class
