@@ -96,8 +96,10 @@ public:
     if (reliable_) {
       qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       qos.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
-      // qos.resource_limits.max_instances = 10;
-      // qos.history.depth = 10;
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+      qos.resource_limits.max_instances = 10;
+      qos.history.depth = 10;
+#endif
     } else {
       qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
     }
@@ -382,8 +384,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
       while (readers_done != static_cast<int>(readers.size()))
         readers_done_cond.wait();
-      // Sleep allows an ACKNACK to be generated.
-      ACE_OS::sleep(3);
     }
 
     if (built_in_read_errors) {

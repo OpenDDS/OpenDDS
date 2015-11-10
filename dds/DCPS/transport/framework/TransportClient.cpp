@@ -728,6 +728,12 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
 }
 
 void
+TransportClient::send_final_acks()
+{
+  links_.send_final_acks (get_repo_id());
+}
+
+void
 TransportClient::disassociate(const RepoId& peerId)
 {
   GuidConverter peerId_conv(peerId);

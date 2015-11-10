@@ -117,6 +117,8 @@ public:
 
   virtual void pre_stop_i();
 
+  virtual void send_final_acks (const RepoId& readerid);
+
 private:
   virtual void stop_i();
   virtual void send_i(TransportQueueElement* element, bool relink = true);
@@ -477,6 +479,8 @@ private:
 
   typedef OPENDDS_SET(InterestingAckNack) InterestingAckNackSetType;
   InterestingAckNackSetType interesting_ack_nacks_;
+
+  void send_ack_nacks(RtpsReaderMap::iterator rr, bool finalFlag = false);
 };
 
 } // namespace DCPS
