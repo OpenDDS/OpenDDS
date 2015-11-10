@@ -74,10 +74,12 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   if (error == DDS::RETCODE_OK) {
     if (info.valid_data) {
-      if (++received_samples_ == expected_samples_)
+      if (++received_samples_ == expected_samples_) {
         done_callback_(builtin_read_error_);
+      } else {
+        ACE_DEBUG((LM_INFO, "(%P|%t) Got message %d\n", received_samples_));
+      }
     }
-
   } else {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("ERROR: %N:%l: on_data_available() -")

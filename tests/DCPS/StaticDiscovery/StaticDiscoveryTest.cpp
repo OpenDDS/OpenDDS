@@ -204,6 +204,7 @@ void reader_done_callback(bool bit_read_errors)
   ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
   if (bit_read_errors) built_in_read_errors = true;
   ++readers_done;
+  ACE_DEBUG((LM_INFO, "(%P|%t) Reader %d done\n", readers_done));
   readers_done_cond.signal();
 }
 
