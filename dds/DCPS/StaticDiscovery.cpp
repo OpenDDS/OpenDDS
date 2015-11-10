@@ -1517,7 +1517,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         }
       } else if (name == "participant") {
 #ifdef __SUNPRO_CC
-        int count;
+        int count = 0;
         std::count_if(value.begin(), value.end(), isxdigit, count);
         if (value.size() != 12 || count != 12) {
 #else
@@ -1537,7 +1537,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         participantSpecified = true;
       } else if (name == "entity") {
 #ifdef __SUNPRO_CC
-        int count;
+        int count = 0;
         std::count_if(value.begin(), value.end(), isxdigit, count);
         if (value.size() != 6 || count != 6) {
 #else
