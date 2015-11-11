@@ -411,6 +411,9 @@ sub finish {
         . " To prevent this set <TestFramework>->{report_errors_in_log_file}"
         . "=0\n");
       foreach my $file (@{$self->{log_files}}) {
+        if (defined($ENV{TEST_ROOT}) && defined($self->{TEST_ROOT})) {
+            $file = PerlACE::rebase_path ($file, $self->{TEST_ROOT}, $self->{TARGET}->{TEST_ROOT});
+        }
         if (PerlDDS::report_errors_in_file($file, $self->{errors_to_ignore})) {
           $self->{status} = -1;
         }
@@ -789,11 +792,17 @@ sub _track_log_files {
     my $file = $1;
     $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
     push(@{$self->{log_files}}, $file);
+    if (defined($ENV{TEST_ROOT}) && defined($self->{TEST_ROOT})) {
+        $file = PerlACE::rebase_path ($file, $self->{TEST_ROOT}, $self->{TARGET}->{TEST_ROOT});
+    }
     unlink $file;
   } elsif ($PerlDDS::SafetyProfile) {
     my $file = "safetyprofile.log";
     $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
     push(@{$self->{log_files}}, $file);
+    if (defined($ENV{TEST_ROOT}) && defined($self->{TEST_ROOT})) {
+        $file = PerlACE::rebase_path ($file, $self->{TEST_ROOT}, $self->{TARGET}->{TEST_ROOT});
+    }
     unlink $file;
   }
 }
