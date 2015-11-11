@@ -9,6 +9,7 @@
 #include "ace/Log_Msg.h"
 #include <cstring>
 
+ACE_Thread_Mutex mutex;
 bool callbackHappened = false;
 int callback_count = 0;
 
@@ -19,6 +20,7 @@ void callback(FACE::TRANSACTION_ID_TYPE,
               const FACE::WAITSET_TYPE,
               FACE::RETURN_CODE_TYPE& return_code)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex);
   ++callback_count;
   ACE_DEBUG((LM_INFO, "In callback() (the %d time): %C\t%d\t"
              "message_type_id: %Ld\tmessage_size: %d\n",
