@@ -463,7 +463,7 @@ if ($opts{'safety-profile'}) {
 ## Download ACE+TAO
 my $tao_maj = 1;
 if (!$ace_src || !$tao_src) {
-  if ($opts{'safety-profile'} eq "EXTENDED") {
+  if (defined $opts{'safety-profile'} && $opts{'safety-profile'} eq "EXTENDED") {
     $tao_version = 'face-safety-22a';
   }
   my $urlbase = 'http://download.ociweb.com/TAO-' . $tao_version . '/';

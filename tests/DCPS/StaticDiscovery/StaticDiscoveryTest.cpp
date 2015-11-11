@@ -95,11 +95,8 @@ public:
 
     if (reliable_) {
       qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-      qos.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
-      qos.resource_limits.max_instances = 10;
-      qos.history.depth = 10;
-#endif
+      qos.reliability.max_blocking_time.sec = 5;
+      qos.reliability.max_blocking_time.nanosec = 0;
     } else {
       qos.reliability.kind = DDS::BEST_EFFORT_RELIABILITY_QOS;
     }
