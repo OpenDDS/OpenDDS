@@ -1109,6 +1109,8 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
               }
               ret = DDS::RETCODE_TIMEOUT;
             } else {
+              ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) ERROR: WriteDataContainer::obtain_buffer condition_.wait()")
+                                    ACE_TEXT("%p\n")));
               ret = DDS::RETCODE_ERROR;
             }
           }
