@@ -32,6 +32,12 @@ my $subscriber_running_sec = 30;
 my $repo_bit_conf = '-NOBITS';
 my $app_bit_conf = '-DCPSBit 0';
 
+my $config_file = "";
+
+if ((new PerlACE::ConfigList)->check_config('OPENDDS_SAFETY_PROFILE')) {
+  $config_file = "-DCPSConfigFile rtps.ini";
+}
+
 my $test = new PerlDDS::TestFramework();
 
 if ($test->flag('keyed')) {
@@ -76,6 +82,7 @@ $test->process('pub', 'publisher', $app_bit_conf
                . " -num_writes_per_thread $num_writes_per_thread "
                . " -max_samples_per_instance $max_samples_per_instance"
                . " -write_delay_msec $write_delay_msec"
+               . " $config_file"
     );
 
 $test->process('sub', 'subscriber', $app_bit_conf
@@ -83,6 +90,7 @@ $test->process('sub', 'subscriber', $app_bit_conf
                . " -keyed_data $keyed_data"
                . " -num_writes $num_writes"
                . " -receive_delay_msec $receive_delay_msec"
+               . " $config_file"
     );
 
 $test->start_process('pub');
