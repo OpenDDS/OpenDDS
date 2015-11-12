@@ -162,7 +162,6 @@ int do_writer(DDS::DomainParticipant_var participant, DDS::Topic_var topic, bool
   qos.user_data.value[1] = 0;
   qos.user_data.value[2] = 1;
   qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  qos.reliability.max_blocking_time.sec = DDS::DURATION_INFINITE_SEC;
 
   if (toggle) {
     ACE_DEBUG((LM_DEBUG, "Creating writer\n"));

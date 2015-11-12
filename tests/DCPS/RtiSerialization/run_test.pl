@@ -26,7 +26,6 @@ my $pub_opts = "$dbg_lvl";
 my $sub_opts = "$dbg_lvl";
 my $repo_bit_opt = "";
 my $stack_based = 0;
-my $is_rtps_disc = 0;
 my $DCPSREPO;
 
 my $thread_per_connection = "";
@@ -39,15 +38,9 @@ if ($test->flag('rtps')) {
     $pub_opts .= " -DCPSConfigFile rtps.ini";
     $sub_opts .= " -DCPSConfigFile rtps.ini";
 }
-elsif ($test->flag('rtps_disc')) {
-    $pub_opts .= " -DCPSConfigFile rtps_disc.ini";
-    $sub_opts .= " -DCPSConfigFile rtps_disc.ini";
-    $is_rtps_disc = 1;
-}
 elsif ($test->flag('rtps_disc_tcp')) {
     $pub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
     $sub_opts .= " -DCPSConfigFile rtps_disc_tcp.ini";
-    $is_rtps_disc = 1;
 }
 elsif ($test->flag('rtps_unicast')) {
     $test->{nobits} = 1;
@@ -79,5 +72,5 @@ $test->start_process("publisher");
 
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
-# start killing processes in 300 seconds
-exit $test->finish(30);
+# start killing processes in 120 seconds
+exit $test->finish(120);
