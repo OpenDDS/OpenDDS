@@ -411,9 +411,6 @@ sub finish {
         . " To prevent this set <TestFramework>->{report_errors_in_log_file}"
         . "=0\n");
       foreach my $file (@{$self->{log_files}}) {
-        if (defined($ENV{TEST_ROOT}) && defined($self->{TEST_ROOT})) {
-            $file = PerlACE::rebase_path ($file, $self->{TEST_ROOT}, $self->{TARGET}->{TEST_ROOT});
-        }
         if (PerlDDS::report_errors_in_file($file, $self->{errors_to_ignore})) {
           $self->{status} = -1;
         }
@@ -786,23 +783,24 @@ sub _prefix {
 sub _track_log_files {
   my $self = shift;
   my $data = shift;
+  my $process = shift;
 
   $self->_info("TestFramework::_track_log_files looking in \"$data\"\n");
   if ($data =~ /-ORBLogFile ([^ ]+)/) {
     my $file = $1;
     $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
-    push(@{$self->{log_files}}, $file);
-    if (defined($ENV{TEST_ROOT}) && defined($self->{TEST_ROOT})) {
-        $file = PerlACE::rebase_path ($file, $self->{TEST_ROOT}, $self->{TARGET}->{TEST_ROOT});
+    if (defined($ENV{TEST_ROOT}) && defined($process->{TARGET}->{TEST_ROOT})) {
+        $file = PerlACE::rebase_path ($file, $ENV{TEST_ROOT}, $process->{TARGET}->{TEST_ROOT});
     }
+    push(@{$self->{log_files}}, $file);
     unlink $file;
   } elsif ($PerlDDS::SafetyProfile) {
     my $file = "safetyprofile.log";
     $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
-    push(@{$self->{log_files}}, $file);
-    if (defined($ENV{TEST_ROOT}) && defined($self->{TEST_ROOT})) {
-        $file = PerlACE::rebase_path ($file, $self->{TEST_ROOT}, $self->{TARGET}->{TEST_ROOT});
+    if (defined($ENV{TEST_ROOT}) && defined($process->{TARGET}->{TEST_ROOT})) {
+        $file = PerlACE::rebase_path ($file, $ENV{TEST_ROOT}, $process->{TARGET}->{TEST_ROOT});
     }
+    push(@{$self->{log_files}}, $file);
     unlink $file;
   }
 }
@@ -824,9 +822,9 @@ sub _create_process {
       . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
     $params .= $flag if $self->{add_pending_timeout};
   }
-  $self->_track_log_files($params);
-  return
-    PerlDDS::create_process($executable, $params);
+  my $proc = PerlDDS::create_process($executable, $params);
+  $self->_track_log_files($params, $proc);
+  return $proc;
 }
 
 sub _alternate_transport {
