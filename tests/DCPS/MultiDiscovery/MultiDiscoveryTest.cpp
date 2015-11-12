@@ -379,6 +379,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
     if (reliable) {
       dw_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      dw_qos.reliability.max_blocking_time.sec     = 1;
+      dw_qos.reliability.max_blocking_time.nanosec = 0;
       // dw_qos.resource_limits.max_instances = 10;
       // dw_qos.history.depth = 10;
     } else {
