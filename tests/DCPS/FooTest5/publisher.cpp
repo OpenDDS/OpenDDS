@@ -393,8 +393,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       dw_qos.reliability.kind = ::DDS::RELIABLE_RELIABILITY_QOS;
       dw_qos.resource_limits.max_samples_per_instance =
           max_samples_per_instance ;
-      dw_qos.reliability.max_blocking_time.sec = blocking_ms/1000;
-      dw_qos.reliability.max_blocking_time.nanosec = blocking_ms%1000 * 1000000;
+      if (blocking_ms > 0) {
+        dw_qos.reliability.max_blocking_time.sec = blocking_ms/1000;
+        dw_qos.reliability.max_blocking_time.nanosec = blocking_ms%1000 * 1000000;
+      }
       // The history depth is only used for KEEP_LAST.
       //dw_qos.history.depth = history_depth  ;
 
