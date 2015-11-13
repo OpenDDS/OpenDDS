@@ -342,13 +342,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
                      ACE_TEXT("(%P|%t) NOTICE: not using file configuration - no configuration ")
                      ACE_TEXT("file specified.\n")));
         }
-#if defined OPENDDS_SAFETY_PROFILE && !defined ACE_FACE_DEV
-        if (!got_log_fname) {
-          // Neither log file nor config file specified
-          set_log_file_name("safetyprofile.log");
-        }
-#endif
-
 
       } else {
         // Load configuration only if the configuration
@@ -1548,11 +1541,6 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("ORBLogFile"), log_fname);
       if (!log_fname.empty()) {
         set_log_file_name(log_fname.c_str());
-#if defined OPENDDS_SAFETY_PROFILE && !defined ACE_FACE_DEV
-      } else {
-        // No log file specified
-        set_log_file_name("safetyprofile.log");
-#endif
       }
     }
 

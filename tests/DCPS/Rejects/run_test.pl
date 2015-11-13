@@ -20,63 +20,24 @@ if ($ARGV[0] eq 'rtps_disc') {
 
 my $puboutputfilename = "pub.log";
 my $suboutputfilename = "sub.log";
-my $dcpsrepo_ior = "repo.ior";
 
 my $pub_opts = "-ORBLogFile $puboutputfilename -DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");
 my $sub_opts = "-ORBLogFile $suboutputfilename -DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "sub.ini");
 
-unlink $dcpsrepo_ior;
 unlink $puboutputfilename;
 unlink $suboutputfilename;
 
-my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "-o $dcpsrepo_ior");
-my $Subscriber = PerlDDS::create_process("subscriber", $sub_opts);
-my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
+my $test = new PerlDDS::TestFramework();
+$test->setup_discovery() unless $is_rtps_disc;
+$test->process("subscriber", "subscriber", $sub_opts);
+$test->process("publisher", "publisher", $pub_opts);
+$test->start_process("publisher");
+$test->start_process("subscriber");
 
-
-if (!$is_rtps_disc) {
-  print $DCPSREPO->CommandLine() . "\n";
-  $DCPSREPO->Spawn();
-  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill();
-    exit 1;
-  }
-}
-
-print $Publisher->CommandLine() . "\n";
-print $Subscriber->CommandLine() . "\n";
-$Publisher->Spawn();
-
-$Subscriber->Spawn();
-
-my $PublisherResult = $Publisher->WaitKill(300);
-if ($PublisherResult != 0) {
-  print STDERR "ERROR: publisher returned $PublisherResult \n";
+my $result = $test->finish(300);
+if ($result != 0) {
+  print STDERR "ERROR: test returned $result\n";
   $status = 1;
-}
-
-my $SubscriberResult = $Subscriber->WaitKill(30);
-if ($SubscriberResult != 0) {
-  print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-  $status = 1;
-}
-
-if (!$is_rtps_disc) {
-  my $ir = $DCPSREPO->TerminateWaitKill(5);
-  if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-  }
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
 }
 
 exit $status;

@@ -15,39 +15,25 @@ sub do_test {
   my $subready = 'subready.txt';
   unlink $subready;
 
-  print "***About to create subscriber process\n";
+  my $test = new PerlDDS::TestFramework();
 
-  my $SUB = PerlDDS::create_process('subscriber', "-h localhost -p $port");
-  my $result = $SUB->Spawn();
-  print $SUB->CommandLine() . "\n";
-  if ($result != 0) {
-    print STDERR "ERROR: spawning subscriber returned $result\n";
-    return 1;
-  }
+  $test->process('subscriber', 'subscriber', "-h localhost -p $port");
+  $test->start_process('subscriber');
   if (PerlACE::waitforfile_timed($subready, 10) == -1) {
     print STDERR "ERROR: waiting for subscriber file\n";
-    $SUB->Kill();
+    $test->finish(1);
     return 1;
   }
 
-  print "***About to create publisher process\n";
+  $test->process('publisher', 'publisher',
+                 $mcast ? "-h 239.255.0.2 -p 7401" : "-h localhost -p $port");
+  $test->start_process('publisher');
 
-  my $PUB = PerlDDS::create_process('publisher',
-              $mcast ? "-h 239.255.0.2 -p 7401" : "-h localhost -p $port");
-  $result = $PUB->SpawnWaitKill(60);
-  print $PUB->CommandLine() . "\n";
+  my $result = $test->finish(60);
   if ($result != 0) {
-    print STDERR "ERROR: publisher returned $result\n";
+      print STDERR "ERROR: test returned $result\n";
   }
-
-  $result = $SUB->WaitKill(60);
-  if ($result != 0) {
-    print STDERR "ERROR: subscriber returned $result\n";
-  }
-
-  print "***About to finish first test\n";
-
-  return 0;
+  return $result;
 }
 
 my $result = do_test(0);

@@ -25,14 +25,13 @@ PerlDDS::add_lib_path('../FooType');
 
 $options = "-DCPSConfigFile rtps_disc.ini -ORBLogFile $logfile";
 
-$Topic = PerlDDS::create_process ("register_instance_test", "$options");
+my $test = new PerlDDS::TestFramework();
+$test->process("register_instance_test", "register_instance_test", "$options");
+$test->start_process("register_instance_test");
+$result = $test->finish(60);
 
-print $Topic->CommandLine() . "\n";
-
-$TopicResult = $Topic->SpawnWaitKill (60);
-
-if ($TopicResult != 0) {
-    print STDERR "ERROR: topic_test returned $TopicResult\n";
+if ($result != 0) {
+    print STDERR "ERROR: test returned $result\n";
     $status = 1;
 }
 

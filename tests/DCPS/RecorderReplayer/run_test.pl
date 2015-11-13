@@ -125,76 +125,19 @@ else {
 
 $pub_opts .= $thread_per_connection;
 
-my $dcpsrepo_ior = "repo.ior";
+my $test = new PerlDDS::TestFramework();
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log $repo_bit_opt ") unless $is_rtps_disc;
+$test->process("subscriber", ($stack_based ? 'stack_' : '') . "subscriber", $sub_opts);
+$test->process("publisher",  "publisher", $pub_opts);
+$test->process("relay",      "relay", $relay_opts);
+$test->start_process("publisher");
+$test->start_process("subscriber");
+$test->start_process("relay");
 
-unlink $dcpsrepo_ior;
-
-unless ($is_rtps_disc) {
-  $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                     "-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                     "$repo_bit_opt -o $dcpsrepo_ior");
-}
-
-my $Subscriber = PerlDDS::create_process(($stack_based ? 'stack_' : '') .
-                                         "subscriber", $sub_opts);
-
-my $Publisher = PerlDDS::create_process("publisher", $pub_opts);
-
-my $Relay = PerlDDS::create_process("relay", $relay_opts);
-
-unless ($is_rtps_disc) {
-  print $DCPSREPO->CommandLine() . "\n";
-  $DCPSREPO->Spawn();
-
-  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-      print STDERR "ERROR: waiting for Info Repo IOR file\n";
-      $DCPSREPO->Kill();
-      exit 1;
-  }
-}
-
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn();
-
-print $Relay->CommandLine() . "\n";
-$Relay->Spawn();
-
-
-my $PublisherResult = $Publisher->WaitKill(300);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult \n";
+my $result = $test->finish(300);
+if ($result != 0) {
+    print STDERR "ERROR: test returned $result \n";
     $status = 1;
-}
-
-my $SubscriberResult = $Subscriber->WaitKill(30);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult \n";
-    $status = 1;
-}
-
-my $RelayResult = $Relay->WaitKill(30);
-if ($RelayResult != 0) {
-    print STDERR "ERROR: relay returned $RelayResult \n";
-    $status = 1;
-}
-
-
-unless ($is_rtps_disc) {
-  my $ir = $DCPSREPO->TerminateWaitKill(5);
-  if ($ir != 0) {
-      print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-      $status = 1;
-  }
-  unlink $dcpsrepo_ior;
-}
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
 }
 
 exit $status;

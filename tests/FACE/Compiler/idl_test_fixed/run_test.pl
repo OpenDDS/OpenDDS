@@ -12,9 +12,11 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$TESTDVR = PerlDDS::create_process ("TestFixed");
+my $test = new PerlDDS::TestFramework();
+$test->process ("TestFixed", "TestFixed", "");
+$test->start_process ("TestFixed");
 
-$status = $TESTDVR->SpawnWaitKill (300);
+$status = $test->finish(300);
 
 if ($status != 0) {
     print STDERR "ERROR: TestFixed returned $status\n";
