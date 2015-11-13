@@ -74,6 +74,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
+  int status = 0;
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -259,6 +260,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         cerr << "ERROR: did not receive expected liveliness lost callbacks. "
           << actual << "/" <<
           num_liveliness_lost_callbacks << endl;
+        status = 1;
       }
 
       ACE_OS::sleep(1);
@@ -276,5 +278,5 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       exit(1);
     }
 
-  return 0;
+  return status;
 }
