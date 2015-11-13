@@ -35,13 +35,15 @@ int read (::DDS::DataReader_ptr reader)
       {
         num_reads++;
         ACE_DEBUG((LM_DEBUG,
-          ACE_TEXT("(%P|%t) reader %X take foo.x = %f foo.y = %f, foo.data_source = %d \n"),
-          reader, foo.x, foo.y, foo.data_source));
+          ACE_TEXT("(%P|%t) reader %X take foo.x = %f foo.y = %f, foo.data_source = %d, count = %d \n"),
+          reader, foo.x, foo.y, foo.data_source, num_reads.value()));
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d \n"), si.sample_rank));
 
         if (results.add (foo) == -1)
         {
+          ACE_DEBUG((LM_ERROR,
+            ACE_TEXT("(%P|%t) ERROR add of sample resulted in -1\n")));
           return -1;
         }
       }

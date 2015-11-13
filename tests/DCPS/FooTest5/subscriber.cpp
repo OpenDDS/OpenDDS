@@ -470,6 +470,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
 
       // Indicate that the subscriber is ready
+      ACE_DEBUG((LM_INFO, "(%P|%t) subscriber signaling ready\n"));
       FILE* readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("w"));
       if (readers_ready == 0)
         {
@@ -483,6 +484,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
+          ACE_DEBUG((LM_INFO, "(%P|%t) subscriber checking for pub ready\n"));
           writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == writers_ready);
 
@@ -502,6 +504,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           // the blocking timeout test will never exit from this loop.
           if (writers_completed == 0)
             {
+              ACE_DEBUG((LM_INFO, "(%P|%t) subscriber checking for pub finished\n"));
               writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
               if (writers_completed != 0)
                 {
@@ -510,21 +513,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                     //if fscanf return 0 or EOF(-1), failed to read a matching line format to populate in timeout_writes
                     ACE_ERROR ((LM_ERROR,
                                 ACE_TEXT("(%P|%t) ERROR: subscriber could not read timeout_writes\n")));
+                  } else if (timeout_writes) {
+                    expected -= timeout_writes;
+                    ACE_DEBUG((LM_DEBUG,
+                             ACE_TEXT ("(%P|%t) %d timed out writes, adjusted we expected to %d\n"),
+                             timeout_writes, expected));
                   }
                   // After we got the number of timed out writes, we should speed the
                   // receiving.
                   op_interval_ms = 0;
-                  expected -= timeout_writes;
-                  ACE_DEBUG((LM_DEBUG,
-                             ACE_TEXT ("(%P|%t) timed out writes %d, we expect %d, we have received %d\n"),
-                             timeout_writes, expected, num_reads.value()));
                 }
+
+                ACE_DEBUG((LM_DEBUG,
+                           ACE_TEXT ("(%P|%t) received %d of expected %d\n"),
+                           num_reads.value(), expected));
 
             }
           ACE_OS::sleep (1);
         }
 
       // Indicate that the subscriber is done
+      ACE_DEBUG((LM_INFO, "(%P|%t) subscriber signaling finished\n"));
       FILE* readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_TEXT("w"));
       if (readers_completed == 0)
         {
@@ -537,6 +546,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
+          ACE_DEBUG((LM_INFO, "(%P|%t) subscriber checking for pub finished\n"));
           writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
         }
 
