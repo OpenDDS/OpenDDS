@@ -432,6 +432,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
       // Indicate that the publisher is ready
+      ACE_DEBUG((LM_INFO, "(%P|%t) publisher signaling ready\n"));
       FILE* writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_TEXT("w"));
       if (writers_ready == 0)
         {
@@ -445,6 +446,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
+          ACE_DEBUG((LM_INFO, "(%P|%t) publisher checking for sub ready\n"));
           readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_ready);
 
@@ -477,6 +479,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           timeout_writes += writers[i]->get_timeout_writes();
         }
       // Indicate that the publisher is done
+      ACE_DEBUG((LM_INFO, "(%P|%t) publisher signaling finished\n"));
       FILE* writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("w"));
       if (writers_completed == 0)
         {
@@ -485,6 +488,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       else
         {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) notifying subscriber of %d timeout writes\n"),
+                      timeout_writes));
           ACE_OS::fprintf (writers_completed, "%d\n", timeout_writes);
           ACE_OS::fclose(writers_completed);
         }
@@ -495,6 +501,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
+          ACE_DEBUG((LM_INFO, "(%P|%t) publisher checking for sub finished\n"));
           readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_completed);
 
