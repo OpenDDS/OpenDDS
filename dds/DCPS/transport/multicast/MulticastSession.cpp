@@ -272,12 +272,12 @@ MulticastSession::synack_received(ACE_Message_Block* control)
 void
 MulticastSession::send_synack()
 {
-  // Send nakack before sending synack to
-  // reduce naks from remote.
+  // Send naks before sending synack to
+  // reduce wait time for resends from remote.
   SingleSendBuffer* send_buffer = this->link_->send_buffer();
   if (send_buffer && !send_buffer->empty()
       && send_buffer->low() > ++SequenceNumber()) {
-    send_nakack(send_buffer->low());
+    send_naks();
   }
 
   size_t len = sizeof(this->remote_peer_);
