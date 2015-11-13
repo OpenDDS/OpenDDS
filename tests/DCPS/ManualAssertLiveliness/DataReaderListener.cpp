@@ -100,7 +100,7 @@ void DataReaderListenerImpl::on_liveliness_changed (
   const OpenDDS::DCPS::RepoId id = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(reader->get_subscriber()->get_participant())->get_repoid(status.last_publication_handle);
   OpenDDS::DCPS::GuidConverter converter(id);
 
-  ACE_DEBUG((LM_INFO, "%T DataReaderListenerImpl::on_liveliness_changed #%d\n"
+  ACE_DEBUG((LM_INFO, "DataReaderListenerImpl::on_liveliness_changed #%d\n"
                       "  alive_count = %d\n"
                       "  not_alive_count = %d\n"
                       "  alive_count_change = %d\n"

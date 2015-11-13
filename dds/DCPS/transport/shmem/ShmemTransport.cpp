@@ -171,11 +171,13 @@ ShmemTransport::configure_i(TransportInst* config)
   ok = (*pSem != 0);
 # elif !defined ACE_LACKS_UNNAMED_SEMAPHORE
   ok = (0 == ::sem_init(pSem, 1 /*process shared*/, 0 /*initial count*/));
-  ACE_sema_t ace_sema = {pSem, 0 /*no name*/
+  ACE_sema_t ace_sema;
+  std::memset(&ace_sema, 0, sizeof ace_sema);
+  ace_sema.sema_ = pSem;
 #  if !defined (ACE_HAS_POSIX_SEM_TIMEOUT) && !defined (ACE_DISABLE_POSIX_SEM_TIMEOUT_EMULATION)
-                         , PTHREAD_MUTEX_INITIALIZER, PTHREAD_COND_INITIALIZER
+  ace_sema.lock_ = PTHREAD_MUTEX_INITIALIZER;
+  ace_sema.count_nonzero_ = PTHREAD_COND_INITIALIZER;
 #  endif
-  };
 # else
   ok = false;
   ACE_sema_t ace_sema;
