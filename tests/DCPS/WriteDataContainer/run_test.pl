@@ -12,37 +12,18 @@ use PerlDDS::Run_Test;
 
 $status = 0;
 
-$dcpsrepo_ior = "repo.ior";
-
-unlink $dcpsrepo_ior;
-
-
 $parameters = "-DcpsBit 0 -ORBVerboseLogging 1 -DCPSDebugLevel 10";
 
 if ($ARGV[0] eq 'by_instance') {
   $parameters .= " -i";
 }
 
-
-$ZCTest = PerlDDS::create_process ("WriteDataContainerTest", $parameters);
-
-print $ZCTest->CommandLine(), "\n";
-if ($ZCTest->Spawn () != 0) {
-    print STDERR "ERROR: Couldn't spawn main\ntest FAILED.\n";
-    return 1;
-}
-
-$result = $ZCTest->WaitKill (60);
-
+my $test = new PerlDDS::TestFramework();
+$test->process("WriteDataContainerTest", "WriteDataContainerTest", $parameters);
+$test->start_process("WriteDataContainerTest");
+$result = $test->finish(60);
 if ($result != 0) {
     print STDERR "ERROR: main returned $result \n";
     $status = 1;
-}
-
-if ($status == 0) {
-  print "test PASSED.\n";
-}
-else {
-  print STDERR "test FAILED.\n";
 }
 exit $status;

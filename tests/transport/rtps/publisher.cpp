@@ -540,6 +540,8 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
+    TheParticipantFactoryWithArgs(argc, argv);
+
     ACE_TString host;
     u_short port = 0;
 
@@ -556,8 +558,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         break;
       }
     }
-
-    TheServiceParticipant->get_domain_participant_factory();
 
     return DDS_TEST::test(host, port);
 

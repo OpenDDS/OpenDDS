@@ -12,10 +12,9 @@ use PerlDDS::Run_Test;
 
 my $args = "--test" ;
 
-$test = PerlDDS::create_process( "./SerializerTest", $args) ;
-
-my $status = $test->SpawnWaitKill( 60);
+my $test = new PerlDDS::TestFramework();
+$test->process("SerializerTest", "SerializerTest", $args);
+$test->start_process("SerializerTest");
+my $status = $test->finish(60);
 print STDERR "ERROR: client returned $status\n" if $status ;
-
 exit ($status ne 0)? 1 : 0 ;
-

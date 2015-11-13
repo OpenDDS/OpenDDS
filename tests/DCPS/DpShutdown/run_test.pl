@@ -20,21 +20,14 @@ $debugOpts .= "-DCPSDebugLevel $debug " if $debug;
 
 unlink $debugFile;
 
-$CL = PerlDDS::create_process ("dpshutdown",
-                              "$debugOpts $pub_opts");
-print $CL->CommandLine() . "\n";
-
-$client = $CL->SpawnWaitKill (30);
+my $test = new PerlDDS::TestFramework();
+$test->process("dpshutdown", "dpshutdown", "$debugOpts $pub_opts");
+$test->start_process("dpshutdown");
+$client = $test->finish(30);
 
 if ($client != 0) {
     print STDERR "ERROR: client returned $client\n";
     $status = 1;
-}
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
 }
 
 exit $status;

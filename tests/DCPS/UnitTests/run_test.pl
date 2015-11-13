@@ -25,11 +25,14 @@ if(defined $ARGV[0])
 my $something_ran = 0;
 
 sub run_unit_tests {
+  my $test = new PerlDDS::TestFramework();
+
   if($single_test ne '') {
-    $TST = PerlDDS::create_process("$single_test", "");
+    $test->process("$single_test", "$single_test", "");
     $something_ran = 1;
     print STDERR "Running only $single_test\n";
-    my $retcode = $TST->SpawnWaitKill(60);
+    $test->start_process("$single_test");
+    my $retcode = $test->finish(60);
     if ($retcode != 0) {
       $status = 1;
     }
@@ -46,9 +49,9 @@ sub run_unit_tests {
           # each process runs to completion before the next starts
           my $LONE_PROCESS = 1;
           if ($executable eq "UnitTests_BIT_DataReader") {
-            $TST = PerlDDS::create_process("$executable", "-DCPSConfigFile rtps.ini", $LONE_PROCESS);
+            $test->process ("$executable", "$executable", "-DCPSConfigFile rtps.ini", $LONE_PROCESS);
           } else {
-            $TST = PerlDDS::create_process("$executable", "", $LONE_PROCESS);
+            $test->process ("$executable", "$executable", "", $LONE_PROCESS);
           }
         }
         else {
@@ -56,7 +59,7 @@ sub run_unit_tests {
         }
         $something_ran = 1;
         print STDOUT "Running $file\n";
-        my $retcode = $TST->SpawnWaitKill(60);
+        my $retcode = $test->finish(60);
         if ($retcode != 0) {
           ++$status;
         }
