@@ -11,33 +11,14 @@ use lib "$ACE_ROOT/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $status = 0;
-my $is_rtps_disc = 0;
-
-if ($ARGV[0] eq 'rtps_disc') {
-  $is_rtps_disc = 1;
-}
-
-my $puboutputfilename = "pub.log";
-my $suboutputfilename = "sub.log";
-
-my $pub_opts = "-ORBLogFile $puboutputfilename -DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "pub.ini");
-my $sub_opts = "-ORBLogFile $suboutputfilename -DCPSConfigFile " . ($is_rtps_disc ? "rtps_disc.ini" : "sub.ini");
-
-unlink $puboutputfilename;
-unlink $suboutputfilename;
-
 my $test = new PerlDDS::TestFramework();
-$test->setup_discovery() unless $is_rtps_disc;
-$test->process("subscriber", "subscriber", $sub_opts);
-$test->process("publisher", "publisher", $pub_opts);
-$test->start_process("publisher");
-$test->start_process("subscriber");
+$test->{'dcps_debug_level'} = $test->{'dcps_transport_debug_level'} = 0;
+$test->ignore_error('DataWriterImpl::register_instance_i: register instance ' .
+                    'with container failed');
+$test->setup_discovery();
+$test->process("sub", "subscriber");
+$test->process("pub", "publisher");
+$test->start_process("pub");
+$test->start_process("sub");
 
-my $result = $test->finish(300);
-if ($result != 0) {
-  print STDERR "ERROR: test returned $result\n";
-  $status = 1;
-}
-
-exit $status;
+exit $test->finish(300);
