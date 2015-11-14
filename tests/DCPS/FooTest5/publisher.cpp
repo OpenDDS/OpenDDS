@@ -79,6 +79,11 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       num_datawriters = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
+    {
+      num_datareaders = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg ();
+    }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
     {
       max_samples_per_instance = ACE_OS::atoi (currentArg);
@@ -455,7 +460,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       for (int i = 0; i < num_datawriters; i ++)
         {
-          OpenDDS::Model::WriterSync::wait_match(dw[i]);
+          OpenDDS::Model::WriterSync::wait_match(dw[i], num_datareaders);
           writers[i]->start ();
         }
 

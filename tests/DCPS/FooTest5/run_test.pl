@@ -130,7 +130,7 @@ my $sub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast"
     . " -k $no_key -y $read_interval_ms -f $mixed_trans";
 
 my $pub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast "
-    . " -p $use_rtps_transport -s $use_shmem -w $num_writers "
+    . " -p $use_rtps_transport -s $use_shmem -r $num_readers -w $num_writers "
     . " -m $num_instances_per_writer -i $num_samples_per_instance "
     . " -n $max_samples_per_instance -z $sequence_length"
     . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"
