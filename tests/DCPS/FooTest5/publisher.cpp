@@ -46,6 +46,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     // options:
     //  -i num_samples_per_instance    defaults to 1
     //  -w num_datawriters          defaults to 1
+    //  -r num_datareaders          defaults to 1
     //  -m num_instances_per_writer defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
@@ -458,9 +459,12 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ACE_OS::fclose(writers_ready);
       ACE_OS::fclose(readers_ready);
 
+      // If mixed transports, each writer will associate with only one reader
+      int associations_per_writer = mixed_trans ? 1 : num_datareaders;
+
       for (int i = 0; i < num_datawriters; i ++)
         {
-          OpenDDS::Model::WriterSync::wait_match(dw[i], num_datareaders);
+          OpenDDS::Model::WriterSync::wait_match(dw[i], associations_per_writer);
           writers[i]->start ();
         }
 
