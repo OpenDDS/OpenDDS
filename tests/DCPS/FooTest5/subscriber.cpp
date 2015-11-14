@@ -491,8 +491,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::fclose(readers_ready);
       ACE_OS::fclose(writers_ready);
 
-      int expected
-        = num_datawriters * num_instances_per_writer * num_samples_per_instance;
+      int num_associations = mixed_trans ? num_datawriters :
+                                           num_datareaders * num_datawriters;
+      int expected = num_associations *
+                     num_instances_per_writer * num_samples_per_instance;
 
       FILE* writers_completed = 0;
       int timeout_writes = 0;
