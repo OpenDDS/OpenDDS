@@ -491,7 +491,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::fclose(readers_ready);
       ACE_OS::fclose(writers_ready);
 
-      int expected = num_datareaders * num_datawriters * 
+      int expected = num_datareaders * num_datawriters *
                      num_instances_per_writer * num_samples_per_instance;
 
       FILE* writers_completed = 0;
