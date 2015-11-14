@@ -326,6 +326,7 @@ sub new {
   $self->{add_orb_log_file} = 1;
   $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;
+  $self->{console_logging} = 0;
 
   my $index = 0;
   foreach my $arg (@ARGV) {
@@ -417,13 +418,24 @@ sub finish {
       }
     }
   }
-  if ($self->{status} == 0) {
-    print STDERR _prefix() . "test PASSED.\n";
-  } else {
+  if ($PerlDDS::SafetyProfile && $self->{console_logging} == 1) {
     foreach my $file (@{$self->{log_files}}) {
       PerlDDS::print_file($file);
     }
-    print STDERR _prefix() . "test FAILED.\n";
+    if ($self->{status} == 0) {
+      print STDERR _prefix() . "test PASSED.\n";
+    } else {
+      print STDERR _prefix() . "test FAILED.\n";
+    }
+  } else {
+    if ($self->{status} == 0) {
+      print STDERR _prefix() . "test PASSED.\n";
+    } else {
+      foreach my $file (@{$self->{log_files}}) {
+        PerlDDS::print_file($file);
+      }
+      print STDERR _prefix() . "test FAILED.\n";
+    }
   }
 
   return $self->{status};
@@ -767,7 +779,11 @@ sub enable_console_logging {
   my $self = shift;
   $self->{dcps_debug_level} = 0;
   $self->{dcps_transport_debug_level} = 0;
-  $self->{add_orb_log_file} = 0;
+  $self->{console_logging} = 1;
+  if (!$PerlDDS::SafetyProfile) {
+      # Emulate by using a log file and printing it later.
+      $self->{add_orb_log_file} = 0;
+  }
 }
 
 sub _prefix {
@@ -783,16 +799,15 @@ sub _prefix {
 sub _track_log_files {
   my $self = shift;
   my $data = shift;
+  my $process = shift;
 
   $self->_info("TestFramework::_track_log_files looking in \"$data\"\n");
   if ($data =~ /-ORBLogFile ([^ ]+)/) {
     my $file = $1;
     $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
-    push(@{$self->{log_files}}, $file);
-    unlink $file;
-  } elsif ($PerlDDS::SafetyProfile) {
-    my $file = "safetyprofile.log";
-    $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
+    if (defined($ENV{TEST_ROOT}) && defined($process->{TARGET}->{TEST_ROOT})) {
+        $file = PerlACE::rebase_path ($file, $ENV{TEST_ROOT}, $process->{TARGET}->{TEST_ROOT});
+    }
     push(@{$self->{log_files}}, $file);
     unlink $file;
   }
@@ -815,9 +830,9 @@ sub _create_process {
       . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
     $params .= $flag if $self->{add_pending_timeout};
   }
-  $self->_track_log_files($params);
-  return
-    PerlDDS::create_process($executable, $params);
+  my $proc = PerlDDS::create_process($executable, $params);
+  $self->_track_log_files($params, $proc);
+  return $proc;
 }
 
 sub _alternate_transport {

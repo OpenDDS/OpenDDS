@@ -43,7 +43,7 @@ void DataWriterListenerImpl::on_liveliness_lost (
   if (matched_) {
     ++ num_liveliness_lost_callbacks_;
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %X %d\n"),
+               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %@ %d\n"),
                writer, num_liveliness_lost_callbacks_));
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d \n"),

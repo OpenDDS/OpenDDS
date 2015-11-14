@@ -300,6 +300,11 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
 
     const DataLink_rch link = static_rchandle_cast<DataLink>(server_link_);
 
+    //Insert key now to make sure when releasing guard to call use_datalink
+    //if an accept_datalink obtains lock first it will see that it can proceed
+    //with using the link and do its own use_datalink call.
+    server_link_keys_.insert(key);
+
     //create a copy of the size of callback vector so that if use_datalink_i -> stop_accepting_or_connecting
     //finds that callbacks vector is empty and deletes pending connection & its callback vector for loop can
     //still exit the loop without checking the size of invalid memory
@@ -323,20 +328,6 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
         }
       }
     }
-
-    // don't need to erase pending_connection here because stop_accepting_or_connecting
-    // will take care of the clean up when appropriate (called from use_datalink above)
-    // this allows no duplicate erase of pend, allowing connections_lock_ to be recursive
-
-    //need to protect server_link_keys_ access below
-    //ACE_Guard<ACE_Recursive_Thread_Mutex> guard(connections_lock_);
-
-    //Delegate deletion of pending connection to stop_accepting_or_connecting
-    //called from use_datalink_i after link known to be valid
-    //pending_connections_.erase(pend);
-    server_link_keys_.insert(key);
-
-
   } else {
     // still hold guard(connections_lock_) at this point so
     // pending_server_link_keys_ is protected for insert

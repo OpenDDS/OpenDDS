@@ -195,6 +195,8 @@ int
 ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   try {
+    TheParticipantFactoryWithArgs(argc, argv);
+
     std::cerr << "STARTING MAIN IN SUBSCRIBER\n";
     ACE_TString host;
     u_short port = 0;
@@ -217,8 +219,6 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cerr << "ERROR: -h <host> and -p <port> options are required\n";
       return 1;
     }
-
-    TheServiceParticipant->get_domain_participant_factory();
 
     TransportInst_rch inst = TheTransportRegistry->create_inst("my_rtps",
                                                                "rtps_udp");

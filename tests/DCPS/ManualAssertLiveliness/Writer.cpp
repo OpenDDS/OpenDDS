@@ -91,7 +91,7 @@ Manual_By_Participant_Writer_1::svc ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_1::svc writing msg. %C\n"), get_id()));
+                 ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_1::svc writing msg. %C\n"), get_id()));
       ::DDS::ReturnCode_t ret;
       do {
         ret = message_dw->write(message, handle);
@@ -164,7 +164,7 @@ Manual_By_Participant_Writer_2::svc ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_2::svc calling assert_liveliness. %C\n"), get_id()));
+                 ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_2::svc calling assert_liveliness. %C\n"), get_id()));
       ::DDS::ReturnCode_t ret = this->participant_->assert_liveliness ();
       if (ret != ::DDS::RETCODE_OK)
       {
@@ -245,7 +245,7 @@ Manual_By_Topic_Writer_1::svc ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_1::svc writing msg. %C\n"), get_id()));
+                 ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_1::svc writing msg. %C\n"), get_id()));
       ::DDS::ReturnCode_t ret;
       do {
         ret = message_dw->write(message, handle);
@@ -314,7 +314,7 @@ Manual_By_Topic_Writer_2::svc ()
       }
 
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_2::svc calling assert_liveliness. %C\n"), get_id()));
+                 ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_2::svc calling assert_liveliness. %C\n"), get_id()));
       ::DDS::ReturnCode_t ret = writer_->assert_liveliness ();
 
       if (ret != ::DDS::RETCODE_OK) {
