@@ -25,9 +25,8 @@ if(defined $ARGV[0])
 my $something_ran = 0;
 
 sub run_unit_tests {
-  my $test = new PerlDDS::TestFramework();
-
   if($single_test ne '') {
+    my $test = new PerlDDS::TestFramework();
     $test->process("$single_test", "$single_test", "");
     $something_ran = 1;
     print STDERR "Running only $single_test\n";
@@ -43,7 +42,7 @@ sub run_unit_tests {
     my $testExe = "^(UnitTests_[^\.]*?)(:?\.exe)?\$";
     if (opendir($fh, $dir)) {
       foreach my $file (readdir($fh)) {
-        my $TST;
+        my $test = new PerlDDS::TestFramework();
         if ($file =~ /$testExe/o) {
           my $executable = $1;
           # each process runs to completion before the next starts
@@ -71,13 +70,8 @@ sub run_unit_tests {
 
 run_unit_tests();
 
-
-if (($status == 0) &&
-    ($something_ran == 1)) {
-  print "test PASSED.\n";
-}
-else {
-  print STDERR "test FAILED.\n";
+unless ($something_ran == 1) {
+  print STDERR "ERROR: no test was run\n";
 }
 
 exit $status;
