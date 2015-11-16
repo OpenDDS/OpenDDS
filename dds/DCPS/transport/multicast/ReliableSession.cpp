@@ -439,7 +439,7 @@ ReliableSession::send_naks(DisjointSequence& received)
 void
 ReliableSession::nakack_received(ACE_Message_Block* control)
 {
-  if (this->active_) return; // pub send syn, then doesn't receive them.
+  if (this->active_) return; // pub send nakack, then doesn't receive them.
   const TransportHeader& header =
     this->link_->receive_strategy()->received_header();
 
@@ -455,16 +455,16 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
   // repaired by a remote peer; if any values were needed below
   // this value, then the sequence needs to be shifted:
   std::vector<SequenceRange> dropped;
-  SequenceNumber range_low = low.previous() < this->nak_sequence_.low() ? SequenceNumber() : low.previous();
-  SequenceNumber range_high = low.previous() < this->nak_sequence_.low() ? low.previous() : this->nak_sequence_.low();
+  SequenceNumber range_low = (low == SequenceNumber() || low.previous() < this->nak_sequence_.low()) ? SequenceNumber() : low.previous();
+  SequenceNumber range_high = low == SequenceNumber() ? SequenceNumber() : low.previous() < this->nak_sequence_.low() ? low.previous() : this->nak_sequence_.low();
 
   if (range_low == SequenceNumber() && range_high == SequenceNumber()) {
     //clearout the nak_sequence_ so initial range can be inserted,
     //then re-insert ranges present before
-    DisjointSequence tmp(this->nak_sequence_);
+    const std::vector<SequenceRange> ranges(this->nak_sequence_.present_sequence_ranges());
     this->nak_sequence_.reset();
     this->nak_sequence_.insert(SequenceRange(range_low, range_high));
-    const std::vector<SequenceRange> ranges(tmp.present_sequence_ranges());
+
 
     for (std::vector<SequenceRange>::const_iterator iter = ranges.begin();
          iter != ranges.end(); ++iter) {

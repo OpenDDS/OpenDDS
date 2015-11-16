@@ -71,6 +71,7 @@ public:
   void synack_received(ACE_Message_Block* control);
   void send_synack();
   virtual void send_nakack(SequenceNumber /*low*/) {}
+  virtual void send_naks() {}
 
   virtual bool check_header(const TransportHeader& header) = 0;
 
