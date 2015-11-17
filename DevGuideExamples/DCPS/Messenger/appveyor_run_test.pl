@@ -12,26 +12,22 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $status = 0;
-my $common_opts = "-ORBDebugLevel 1 -DCPSDebugLevel 1";
+my $common_opts = "-ORBDebugLevel 1 -ORBVerboseLogging 1 -DCPSDebugLevel 2 ".
+    "-DCPSTransportDebugLevel 3";
 
-my $pub_opts = "$common_opts " .
-#               "-ORBLogFile publisher.log" .
-               "";
-my $sub_opts = "$common_opts -DCPSTransportDebugLevel 1 " .
-#               "-ORBLogFile subscriber.log" .
-               "";
-
+my $pub_opts = $common_opts;
+my $sub_opts = $common_opts;
 my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;
 
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                        "-ORBDebugLevel 1 " .
+                                        "$common_opts " .
 #                                        "-ORBLogFile DCPSInfoRepo.log " .
                                         "-o $dcpsrepo_ior");
 
-my $Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts");
-my $Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+my $Subscriber = PerlDDS::create_process ("subscriber", $sub_opts);
+my $Publisher = PerlDDS::create_process ("publisher", $pub_opts);
 
 print $DCPSREPO->CommandLine() . "\n";
 $DCPSREPO->Spawn ();
