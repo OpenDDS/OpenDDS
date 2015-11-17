@@ -66,12 +66,12 @@ namespace Test
 
     PartitionConfig const PartitionConfigs[] =
       {
-        PartitionConfig (One,   2),
-        PartitionConfig (Two,   0),
-        PartitionConfig (Three, 2),
+        PartitionConfig (One,   3),
+        PartitionConfig (Two,   1),
+        PartitionConfig (Three, 3),
         PartitionConfig (Four,  1),
         PartitionConfig (Five,  0),
-        PartitionConfig (Six,   2)
+        PartitionConfig (Six,   3)
       };
   }
 
