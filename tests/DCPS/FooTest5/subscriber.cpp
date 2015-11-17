@@ -513,8 +513,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                   //writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
                   if (std::fscanf (writers_completed, "%d\n", &timeout_writes) != 1) {
                     //if fscanf return 0 or EOF(-1), failed to read a matching line format to populate in timeout_writes
-                    ACE_ERROR ((LM_ERROR,
-                                ACE_TEXT("(%P|%t) ERROR: subscriber could not read timeout_writes\n")));
+                    ACE_DEBUG ((LM_DEBUG,
+                                ACE_TEXT("(%P|%t) Warning: subscriber could not read timeout_writes\n")));
                   } else if (timeout_writes) {
                     expected -= timeout_writes;
                     ACE_DEBUG((LM_DEBUG,

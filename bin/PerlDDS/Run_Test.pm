@@ -324,7 +324,7 @@ sub new {
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
   $self->{add_orb_log_file} = 1;
-  $self->{wait_after_first_proc} = 25;
+  $self->{wait_after_first_proc} = 60;
   $self->{finished} = 0;
   $self->{console_logging} = 0;
 

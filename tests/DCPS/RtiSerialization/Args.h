@@ -21,7 +21,6 @@
 
 const int num_messages = 10;
 extern bool reliable;
-extern bool wait_for_acks;
 
 inline int
 parse_args(int argc, ACE_TCHAR *argv[])
@@ -51,9 +50,6 @@ parse_args(int argc, ACE_TCHAR *argv[])
       break;
     case 'r':
       reliable = true;
-      break;
-    case 'w':
-      wait_for_acks = true;
       break;
     case '?':
     default:
