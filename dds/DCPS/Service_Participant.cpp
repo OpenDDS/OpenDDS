@@ -144,6 +144,7 @@ static bool got_default_discovery = false;
 #endif
 static bool got_log_fname = false;
 static bool got_log_verbose = false;
+static bool got_default_address = false;
 
 Service_Participant::Service_Participant()
   :
@@ -546,6 +547,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       set_log_verbose(ACE_OS::atoi(currentArg));
       arg_shifter.consume_arg();
       got_log_verbose = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDefaultAddress"))) != 0) {
+      this->default_address_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
+      arg_shifter.consume_arg();
+      got_default_address = true;
 
     } else {
       arg_shifter.ignore_arg();
@@ -1554,6 +1560,13 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       unsigned long verbose_logging = 0;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ORBVerboseLogging"), verbose_logging, unsigned long);
       set_log_verbose(verbose_logging);
+    }
+
+    if (got_default_address) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSDefaultAddress value from command option (overrides value if it's in config file).\n")));
+    } else {
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), this->default_address_)
     }
 
     // These are not handled on the command line.
