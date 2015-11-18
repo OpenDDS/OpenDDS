@@ -45,6 +45,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
     //  -z                          verbose transport debug
+    //  -T                          prefix for temporary files
 
     const ACE_TCHAR *currentArg = 0;
 
@@ -76,6 +77,11 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-z")) == 0)
     {
       TURN_ON_VERBOSE_DEBUG;
+      arg_shifter.consume_arg();
+    }
+    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-T")) == 0)
+    {
+      temp_file_prefix = currentArg;
       arg_shifter.consume_arg();
     }
     else
@@ -192,7 +198,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                   ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
       // Indicate that the subscriber is ready
-      FILE* readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("w"));
+      FILE* readers_ready = ACE_OS::fopen ((temp_file_prefix + sub_ready_filename).c_str (), ACE_TEXT("w"));
       if (readers_ready == 0)
         {
           ACE_ERROR ((LM_ERROR,
@@ -207,7 +213,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
-          writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_TEXT("r"));
+          writers_ready = ACE_OS::fopen ((temp_file_prefix + pub_ready_filename).c_str (), ACE_TEXT("r"));
         } while (0 == writers_ready);
 
       ACE_OS::fclose(readers_ready);
@@ -217,7 +223,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       // Indicate that the subscriber is done
       // (((it is done when ever the publisher is done)))
-      FILE* readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_TEXT("w"));
+      FILE* readers_completed = ACE_OS::fopen ((temp_file_prefix + sub_finished_filename).c_str (), ACE_TEXT("w"));
       if (readers_completed == 0)
         {
           ACE_ERROR ((LM_ERROR,
@@ -231,7 +237,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
-          writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("r"));
+          writers_completed = ACE_OS::fopen ((temp_file_prefix + pub_finished_filename).c_str (), ACE_TEXT("r"));
         } while (0 == writers_completed);
 
       ACE_OS::fclose(readers_completed);

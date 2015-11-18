@@ -33,20 +33,23 @@ char UPDATED_DR_USER_DATA[] = "Updated DataReader UserData";
 char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
 char UPDATED_GROUP_DATA[] = "Updated GroupData";
 
-
+ACE_TString synch_dir;
 char synch_fname[] = "monitor1_done";
 
 int num_messages = 10;
 
 int parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, "n:");
+  ACE_Get_Opt get_opts (argc, argv, "T:n:");
   int c;
 
   while ((c = get_opts ()) != -1)
   {
     switch (c)
     {
+    case 'T':
+      synch_dir = get_opts.opt_arg ();
+      break;
     case 'n':
       num_messages = ACE_OS::atoi (get_opts.opt_arg ());
       break;
@@ -181,7 +184,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
 
       // Wait for Monitor 1 done.
-      FILE* fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
+      FILE* fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));
       int i = 0;
       while (fp == 0 &&  i < 15)
       {
@@ -189,7 +192,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
         ACE_OS::sleep (1);
         ++i;
-        fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
+        fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));
       }
       if (fp != 0)
         ACE_OS::fclose (fp);

@@ -51,6 +51,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
   while (arg_shifter.is_anything_left())
   {
     // options:
+    //  -o synchronization directory
     //  -i num_ops_per_thread       defaults to 10
     //  -w num_datawriters          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
@@ -58,7 +59,12 @@ int parse_args(int argc, ACE_TCHAR *argv[])
 
     const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0)
+    {
+      synch_dir = currentArg;
+      arg_shifter.consume_arg();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0)
     {
       num_ops_per_thread = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
@@ -383,7 +389,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_TString t1_filename = ACE_TEXT(MY_TOPIC1) +
                                     pub_finished_filename;
           FILE* writers_completed =
-                ACE_OS::fopen(t1_filename.c_str(), ACE_TEXT("w"));
+            ACE_OS::fopen((synch_dir + t1_filename).c_str(), ACE_TEXT("w"));
           if (writers_completed == 0)
             {
               ACE_ERROR((LM_ERROR,
@@ -398,7 +404,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_TString t2_filename = ACE_TEXT(MY_TOPIC2) +
                                     pub_finished_filename;
           FILE* writers_completed =
-                ACE_OS::fopen(t2_filename.c_str(), ACE_TEXT("w"));
+            ACE_OS::fopen((synch_dir + t2_filename).c_str(), ACE_TEXT("w"));
           if (writers_completed == 0)
             {
               ACE_ERROR((LM_ERROR,
@@ -413,7 +419,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_TString t3_filename = ACE_TEXT(MY_TOPIC3) +
                                     pub_finished_filename;
           FILE* writers_completed =
-                ACE_OS::fopen(t3_filename.c_str(), ACE_TEXT("w"));
+            ACE_OS::fopen((synch_dir + t3_filename).c_str(), ACE_TEXT("w"));
           if (writers_completed == 0)
             {
               ACE_ERROR((LM_ERROR,
@@ -433,7 +439,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               ACE_Time_Value small_time(0,250000);
               ACE_OS::sleep(small_time);
               readers_completed =
-                  ACE_OS::fopen(t1_filename.c_str(), ACE_TEXT("r"));
+                ACE_OS::fopen((synch_dir + t1_filename).c_str(), ACE_TEXT("r"));
             } while (0 == readers_completed);
 
           ACE_OS::fclose(readers_completed);
@@ -449,7 +455,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               ACE_Time_Value small_time(0,250000);
               ACE_OS::sleep(small_time);
               readers_completed =
-                  ACE_OS::fopen(t2_filename.c_str(), ACE_TEXT("r"));
+                ACE_OS::fopen((synch_dir + t2_filename).c_str(), ACE_TEXT("r"));
             } while (0 == readers_completed);
 
           ACE_OS::fclose(readers_completed);
@@ -465,7 +471,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               ACE_Time_Value small_time(0,250000);
               ACE_OS::sleep(small_time);
               readers_completed =
-                  ACE_OS::fopen(t3_filename.c_str(), ACE_TEXT("r"));
+                ACE_OS::fopen((synch_dir + t3_filename).c_str(), ACE_TEXT("r"));
             } while (0 == readers_completed);
 
           ACE_OS::fclose(readers_completed);

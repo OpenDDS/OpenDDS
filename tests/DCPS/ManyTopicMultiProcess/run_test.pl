@@ -15,28 +15,21 @@ my $status = 0;
 
 PerlDDS::add_lib_path('../common');
 
-my @txtfiles;
-for my $n (1..7) {
-  for my $proc ('subscriber', 'publisher') {
-    push(@txtfiles, "T${n}_${proc}_finished.txt");
-  }
-}
-
-unlink @txtfiles;
-
 my $test = new PerlDDS::TestFramework();
 
 $test->process('proc1', 'publisher', '-p1 -p2 -s6');
 $test->process('proc2', 'publisher', '-p3 -p4 -p5 -s7');
 $test->process('proc3', 'subscriber', '-s1 -s2 -s3 -s4 -s5 -p6 -p7');
 
+for my $n (1..7) {
+  $test->add_temporary_file('proc1', "T${n}_publisher_finished.txt");
+  $test->add_temporary_file('proc3', "T${n}_subscriber_finished.txt");
+}
+
 $test->setup_discovery();
 
-$test->start_process('proc1');
-$test->start_process('proc2');
-$test->start_process('proc3');
+$test->start_process('proc1', '-T');
+$test->start_process('proc2', '-T');
+$test->start_process('proc3', '-T');
 
-my $status = $test->finish(300);
-unlink @txtfiles;
-exit $status;
-
+exit $test->finish(300);

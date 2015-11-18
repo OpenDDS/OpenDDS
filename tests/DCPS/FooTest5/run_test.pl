@@ -101,11 +101,6 @@ my $subscriber_ready = 'subscriber_ready.txt';
 my $publisher_completed = 'publisher_finished.txt';
 my $publisher_ready = 'publisher_ready.txt';
 
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
-
 $test->enable_console_logging();
 
 $test->report_unused_flags(1);
@@ -139,15 +134,15 @@ my $pub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast "
 $test->process("subscriber", "subscriber", $sub_parameters);
 $test->process("publisher", "publisher", $pub_parameters);
 
-$test->start_process("publisher");
-$test->start_process("subscriber");
+$test->add_temporary_file("subscriber", $subscriber_completed);
+$test->add_temporary_file("subscriber", $subscriber_ready);
+$test->add_temporary_file("publisher", $publisher_completed);
+$test->add_temporary_file("publisher", $publisher_ready);
+
+$test->start_process("publisher", "-o");
+$test->start_process("subscriber", "-o");
 
 my $status = $test->finish(300, "publisher");
-
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
 
 cleanup();
 exit $status;

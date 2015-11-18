@@ -13,10 +13,6 @@ use strict;
 
 PerlDDS::add_lib_path('../FooType5');
 
-my @txtfiles = qw/publisher_finished.txt publisher_ready.txt
-                  subscriber_finished.txt subscriber_ready.txt/;
-unlink @txtfiles;
-
 # single reader with single instances test
 
 my $num_instances_per_writer = 1;
@@ -28,11 +24,14 @@ $test->enable_console_logging();
 $test->process('sub', 'subscriber', $args);
 $test->process('pub', 'publisher', $args);
 
+$test->add_temporary_file('sub', 'subscriber_finished.txt');
+$test->add_temporary_file('sub', 'subscriber_ready.txt');
+$test->add_temporary_file('pub', 'publisher_finished.txt');
+$test->add_temporary_file('pub', 'publisher_ready.txt');
+
 $test->setup_discovery();
 
-$test->start_process('pub');
-$test->start_process('sub');
+$test->start_process('pub', '-o');
+$test->start_process('sub', '-o');
 
-my $result = $test->finish(300);
-unlink @txtfiles;
-exit $result;
+exit $test->finish(300);
