@@ -339,5 +339,12 @@ Service_Participant::is_shut_down() const
   return this->shut_down_;
 }
 
+ACE_INLINE
+ACE_TString
+Service_Participant::default_address() const
+{
+  return this->default_address_;
+}
+
 } // namespace DDS
 } // namespace OpenDDS

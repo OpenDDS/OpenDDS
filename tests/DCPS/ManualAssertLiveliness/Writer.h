@@ -6,70 +6,59 @@
 #include <dds/DdsDcpsPublicationC.h>
 #include <ace/Task.h>
 #include "dds/DCPS/PoolAllocator.h"
+#include "MessengerTypeSupportC.h"
 
 class Writer_Base : public ACE_Task_Base
 {
 public:
-  Writer_Base (::DDS::DataWriter_ptr writer);
-  void start ();
-  void end ();
+  Writer_Base(DDS::DataWriter_ptr writer, const char* name);
+  void start();
+  void end();
+
 protected:
+  const char* get_id() const { return id_.c_str(); }
+  virtual void pre_loop() {}
+  virtual void in_loop(int i) = 0;
+
   ::DDS::DataWriter_var writer_;
   OPENDDS_STRING id_;
-  const char* get_id() const { return id_.c_str(); }
-};
-
-
-// via write()
-class Manual_By_Participant_Writer_1 : public Writer_Base
-{
-public:
-
-  Manual_By_Participant_Writer_1 (::DDS::DataWriter_ptr writer);
-
-  /** Lanch a thread to write. **/
-  virtual int svc ();
-};
-
-
-// via participant->assert_liveliness()
-class Manual_By_Participant_Writer_2 : public Writer_Base
-{
-public:
-
-  Manual_By_Participant_Writer_2 (::DDS::DataWriter_ptr writer);
-
-  /** Lanch a thread to write. **/
-  virtual int svc ();
+  const char* name_;
 
 private:
+  int svc();
+};
 
-  ::DDS::DomainParticipant_var participant_;
+class Write_Samples : public Writer_Base
+{
+public:
+  Write_Samples(DDS::DataWriter_ptr writer, const char* name);
+
+private:
+  void pre_loop();
+  void in_loop(int i);
+
+  Messenger::MessageDataWriter_var message_dw_;
+  Messenger::Message message_;
+  DDS::InstanceHandle_t handle_;
 };
 
 
-
-// via write()
-class Manual_By_Topic_Writer_1 : public Writer_Base
+class Assert_Participant_Liveliness : public Writer_Base
 {
 public:
-
-  Manual_By_Topic_Writer_1 (::DDS::DataWriter_ptr writer);
-
-  /** Lanch a thread to write. **/
-  virtual int svc ();
+  Assert_Participant_Liveliness(DDS::DataWriter_ptr writer, const char* name);
+private:
+  void in_loop(int i);
+  DDS::DomainParticipant_var participant_;
 };
 
 
-// via assert_liveliness ()
-class Manual_By_Topic_Writer_2 : public Writer_Base
+class Assert_Writer_Liveliness : public Writer_Base
 {
 public:
-
-  Manual_By_Topic_Writer_2 (::DDS::DataWriter_ptr writer);
-
-  /** Lanch a thread to write. **/
-  virtual int svc ();
+  Assert_Writer_Liveliness(DDS::DataWriter_ptr writer, const char* name);
+private:
+  void in_loop(int i);
 };
 
 
