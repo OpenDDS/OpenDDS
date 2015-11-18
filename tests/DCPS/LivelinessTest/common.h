@@ -39,3 +39,5 @@ extern int num_unlively_periods;
 extern int max_samples_per_instance;
 extern int history_depth;
 extern int use_take;
+
+extern ACE_TString temp_file_prefix;

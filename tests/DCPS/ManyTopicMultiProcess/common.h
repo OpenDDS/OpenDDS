@@ -38,6 +38,7 @@ static const ACE_Time_Value small_time(2, 250000);
 
 static const int LEASE_DURATION_SEC = 5; // seconds
 
+static ACE_TString synch_dir;
 // These files need to be unlinked in the run test script before and
 // after running.
 static ACE_TString pub_finished_filename = ACE_TEXT("_publisher_finished.txt");
@@ -63,7 +64,7 @@ inline bool check_listener(const DataReaderListenerImpl* drl, int expected,
                  drl->num_samples());
 
   const ACE_TString t1_fn = topic + sub_finished_filename;
-  FILE* const readers_completed = ACE_OS::fopen(t1_fn.c_str(), ACE_TEXT("w"));
+  FILE* const readers_completed = ACE_OS::fopen((synch_dir + t1_fn).c_str(), ACE_TEXT("w"));
 
   if (readers_completed == 0) {
     ACE_ERROR((LM_ERROR,
@@ -83,7 +84,7 @@ inline void wait_for_file(const ACE_TCHAR* topic, const ACE_TString& suffix)
 
   while (!file) {
     ACE_OS::sleep(small_time);
-    file = ACE_OS::fopen(filename.c_str(), ACE_TEXT("r"));
+    file = ACE_OS::fopen((synch_dir + filename).c_str(), ACE_TEXT("r"));
   }
 
   ACE_OS::fclose(file);

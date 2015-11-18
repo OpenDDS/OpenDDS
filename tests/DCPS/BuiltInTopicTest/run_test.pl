@@ -30,21 +30,18 @@ $test->process("subscriber", "subscriber", $rtps_cfg);
 $test->process("publisher", "publisher", $rtps_cfg);
 $test->process("monitor1", "monitor", "-l 7 $rtps_mon $rtps_cfg");
 $test->process("monitor2", "monitor", "-u $rtps_mon $rtps_cfg");
-my $synch_file = "monitor1_done";
 
-unlink $synch_file;
+$test->add_temporary_file("monitor1", "monitor1_done");
 
-$test->start_process("monitor1");
+$test->start_process("monitor1", "-T");
 
-$test->start_process("publisher");
-$test->start_process("subscriber");
+$test->start_process("publisher", "-T");
+$test->start_process("subscriber", "-T");
 
 sleep (15);
 
-$test->start_process("monitor2");
+$test->start_process("monitor2", "-T");
 
 my $status = $test->finish(300, "monitor1");
-
-unlink $synch_file;
 
 exit $status;

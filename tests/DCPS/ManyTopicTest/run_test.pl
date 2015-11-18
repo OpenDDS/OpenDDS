@@ -24,14 +24,6 @@ my $publisher1_completed = "T1_publisher_finished.txt";
 my $publisher2_completed = "T2_publisher_finished.txt";
 my $publisher3_completed = "T3_publisher_finished.txt";
 
-unlink $subscriber1_completed;
-unlink $subscriber2_completed;
-unlink $subscriber3_completed;
-
-unlink $publisher1_completed;
-unlink $publisher2_completed;
-unlink $publisher3_completed;
-
 # single reader with single instances test
 my $multiple_instance = 0;
 my $num_samples_per_reader = 10;
@@ -101,22 +93,16 @@ $test->process("subscriber1", "subscriber", $sub_parameters);
 $test->process("subscriber2", "subscriber", $sub_parameters);
 $test->process("publisher", "publisher", $pub_parameters);
 
-$test->start_process("publisher");
-$test->start_process("subscriber1");
-$test->start_process("subscriber2");
+$test->add_temporary_file("subscriber1", $subscriber1_completed);
+$test->add_temporary_file("subscriber1", $subscriber2_completed);
+$test->add_temporary_file("subscriber1", $subscriber3_completed);
 
-my $result = $test->finish(300);
-if ($result != 0) {
-  print STDERR "ERROR: publisher returned $result\n";
-  $status = 1;
-}
+$test->add_temporary_file("publisher", $publisher1_completed);
+$test->add_temporary_file("publisher", $publisher2_completed);
+$test->add_temporary_file("publisher", $publisher3_completed);
 
-unlink $subscriber1_completed;
-unlink $subscriber2_completed;
-unlink $subscriber3_completed;
+$test->start_process("publisher", "-o");
+$test->start_process("subscriber1", "-o");
+$test->start_process("subscriber2", "-o");
 
-unlink $publisher1_completed;
-unlink $publisher2_completed;
-unlink $publisher3_completed;
-
-exit $status;
+exit $test->finish(300);

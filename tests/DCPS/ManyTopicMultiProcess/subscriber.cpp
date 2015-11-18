@@ -49,6 +49,7 @@ int parse_args(int argc, ACE_TCHAR *argv[]) {
 
   while (arg_shifter.is_anything_left()) {
     // options:
+    //  -T synch directory
     //  -i num_ops_per_thread       defaults to 10
     //  -r num_datareaders          defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
@@ -56,7 +57,11 @@ int parse_args(int argc, ACE_TCHAR *argv[]) {
 
     const ACE_TCHAR *currentArg = 0;
 
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0) {
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-T"))) != 0) {
+      synch_dir = currentArg;
+      arg_shifter.consume_arg();
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-i"))) != 0) {
       num_ops_per_thread = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
 
@@ -462,7 +467,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (publish_topics & TOPIC_T6) {
       ACE_TString t6_filename = ACE_TEXT(MY_TOPIC6) + pub_finished_filename;
       FILE* writers_completed =
-        ACE_OS::fopen(t6_filename.c_str(), ACE_TEXT("w"));
+        ACE_OS::fopen((synch_dir + t6_filename).c_str(), ACE_TEXT("w"));
       if (writers_completed == 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ")
@@ -476,7 +481,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (publish_topics & TOPIC_T7) {
       ACE_TString t7_filename = ACE_TEXT(MY_TOPIC7) + pub_finished_filename;
       FILE* writers_completed =
-        ACE_OS::fopen(t7_filename.c_str(), ACE_TEXT("w"));
+        ACE_OS::fopen((synch_dir + t7_filename).c_str(), ACE_TEXT("w"));
       if (writers_completed == 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ")

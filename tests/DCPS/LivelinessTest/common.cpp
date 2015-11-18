@@ -19,3 +19,4 @@ int max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 int history_depth = 1000 ;
 int use_take = 0;
 
+ACE_TString temp_file_prefix;
