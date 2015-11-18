@@ -25,13 +25,17 @@ if($test->flag('static')) {
     $config = 'face_config_static.ini';
 }
 
+my $callback = '';
+
+if($test->flag('callback')) {
+    $callback = 'callback';
+}
+
 $test->enable_console_logging();
 
-$test->process('Subscriber', 'Subscriber/subscriber', "$config");
+$test->process('Subscriber', 'Subscriber/subscriber', "$config $callback");
 $test->start_process('Subscriber');
 
-$test->process('Callback Subscriber', 'Subscriber/subscriber', "$config callback");
-$test->start_process('Callback Subscriber');
 sleep 5;
 
 $test->process('Publisher', 'Publisher/publisher', "$config");
