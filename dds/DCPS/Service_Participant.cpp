@@ -549,7 +549,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_log_verbose = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDefaultAddress"))) != 0) {
-      this->default_address_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
+      this->default_address_ = currentArg;
       arg_shifter.consume_arg();
       got_default_address = true;
 
@@ -1566,7 +1566,7 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) NOTICE: using DCPSDefaultAddress value from command option (overrides value if it's in config file).\n")));
     } else {
-      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), this->default_address_)
+      GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), this->default_address_)
     }
 
     // These are not handled on the command line.
