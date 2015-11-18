@@ -324,7 +324,7 @@ sub new {
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
   $self->{add_orb_log_file} = 1;
-  $self->{wait_after_first_proc} = 60;
+  $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;
   $self->{console_logging} = 0;
 
@@ -715,17 +715,17 @@ sub stop_processes {
 
   $self->_info("TestFramework::stop_processes\n");
 
+  my $subsequent_wait = $timed_wait + $self->{wait_after_first_proc};
+
   while (scalar(@{$self->{processes}->{order}}) > 0) {
     if (!defined($name)) {
       my @rorder = reverse(@{$self->{processes}->{order}});
       $name = $rorder[0];
     }
-    $self->_info("TestFramework::stop_processes stopping $name in $timed_wait "
-      . "seconds\n");
     $self->stop_process($timed_wait, $name);
     # make next loop
     $name = undef;
-    $timed_wait = $self->{wait_after_first_proc};
+    $timed_wait = $subsequent_wait;
   }
 
   $self->stop_discovery($timed_wait);
