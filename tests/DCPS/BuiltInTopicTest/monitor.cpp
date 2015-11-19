@@ -54,7 +54,7 @@ char* CUR_GROUP_DATA = GROUP_DATA;
 
 unsigned int dps_with_user_data = 2;
 ACE_TString synch_dir;
-char synch_fname[] = "monitor1_done";
+ACE_TCHAR synch_fname[] = ACE_TEXT("monitor1_done");
 
 int
 parse_args (int argc, ACE_TCHAR *argv[])

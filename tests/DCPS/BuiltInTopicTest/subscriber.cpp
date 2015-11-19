@@ -34,7 +34,7 @@ char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
 char UPDATED_GROUP_DATA[] = "Updated GroupData";
 
 ACE_TString synch_dir;
-char synch_fname[] = "monitor1_done";
+ACE_TCHAR synch_fname[] = ACE_TEXT("monitor1_done");
 
 int num_messages = 10;
 
