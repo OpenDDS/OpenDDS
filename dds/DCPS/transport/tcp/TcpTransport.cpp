@@ -22,6 +22,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <sstream>
 
@@ -363,6 +364,12 @@ TcpTransport::configure_i(TransportInst* config)
                       ACE_TEXT("(%P|%t) ERROR: connection checker failed to open : %p\n"),
                       ACE_TEXT("open")),
                      false);
+  }
+
+  // Override with DCPSDefaultAddress.
+  if (this->tcp_config_->local_address() == ACE_INET_Addr () &&
+      !TheServiceParticipant->default_address ().empty ()) {
+    this->tcp_config_->local_address(0, TheServiceParticipant->default_address ().c_str ());
   }
 
   // Open our acceptor object so that we can accept passive connections

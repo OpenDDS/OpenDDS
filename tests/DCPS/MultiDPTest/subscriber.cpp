@@ -78,6 +78,16 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0)
+    {
+      synch_file_dir = currentArg;
+      pub_ready_filename = synch_file_dir + pub_ready_filename;
+      pub_finished_filename = synch_file_dir + pub_finished_filename;
+      sub_ready_filename = synch_file_dir + sub_ready_filename;
+      sub_finished_filename = synch_file_dir + sub_finished_filename;
+
+      arg_shifter.consume_arg ();
+    }
     else
     {
       arg_shifter.ignore_arg ();
