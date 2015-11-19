@@ -340,7 +340,7 @@ Service_Participant::is_shut_down() const
 }
 
 ACE_INLINE
-ACE_TString
+ACE_CString
 Service_Participant::default_address() const
 {
   return this->default_address_;
