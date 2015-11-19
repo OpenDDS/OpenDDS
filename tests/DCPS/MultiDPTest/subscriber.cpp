@@ -220,15 +220,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
 
-#ifdef OPENDDS_SAFETY_PROFILE
-  TheServiceParticipant->configure_pool ();
-#endif
-
   try
     {
-      ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
       dpf = TheParticipantFactoryWithArgs(argc, argv);
+      ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.

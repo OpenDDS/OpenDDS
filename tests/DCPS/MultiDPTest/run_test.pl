@@ -18,6 +18,11 @@ PerlDDS::add_lib_path('../FooType5');
 my $num_instances_per_writer = 1;
 my $num_samples_per_instance = 10;
 my $args = "-m $num_instances_per_writer -i $num_samples_per_instance";
+$args .= " -DCPSDebugLevel 3";
+
+if ((new PerlACE::ConfigList)->check_config('OPENDDS_SAFETY_PROFILE')) {
+  $args .= " -DCPSConfigFile memory_pool.ini"
+}
 
 my $test = new PerlDDS::TestFramework();
 $test->enable_console_logging();
