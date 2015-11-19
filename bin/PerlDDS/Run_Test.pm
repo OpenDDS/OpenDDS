@@ -834,7 +834,7 @@ sub _temporary_file_path {
   }
 
   # Local processes use TEST_ROOT.
-  for (values $self->{processes}->{process}) {
+  for (values %{$self->{processes}->{process}}) {
     my $proc = $_->{process};
     if (defined($ENV{TEST_ROOT}) &&
       defined($proc->{TARGET}->{TEST_ROOT})) {
