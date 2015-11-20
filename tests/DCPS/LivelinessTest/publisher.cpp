@@ -124,7 +124,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
-    else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-T")) == 0)
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-T"))) == 0)
     {
       temp_file_prefix = currentArg;
       arg_shifter.consume_arg();
