@@ -15,7 +15,9 @@
 
 #include <cstring>
 
+#ifndef OPENDDS_SAFETY_PROFILE
 using OpenDDS::DCPS::operator==;
+#endif
 
 namespace FACE {
 namespace TS {

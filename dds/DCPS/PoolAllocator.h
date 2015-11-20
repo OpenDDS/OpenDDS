@@ -122,7 +122,7 @@ bool operator!=(const PoolAllocator<T>&, const PoolAllocator<U>&)
 #define OPENDDS_LIST(T) std::list<T >
 #define OPENDDS_QUEUE(T) std::queue<T >
 
-#endif // OPENDDS_SAFETY_PROFILE
+#endif // OPENDDS_SAFETY_PROFILE && ACE_HAS_ALLOC_HOOKS
 
 
 #endif // OPENDDS_DCPS_POOL_ALLOCATOR_H
