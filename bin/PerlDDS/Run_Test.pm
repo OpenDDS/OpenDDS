@@ -675,7 +675,10 @@ sub start_process {
 
   if (defined($tmp_dir_flag)) {
     my $args = $process->Arguments();
-    my $path = $self->_temporary_file_path($name, 1);
+    my $path = $self->_temporary_file_path($name, 1, '');
+    if ($path !~ /[\/\\]$/) {
+      $path .= ($^O eq 'MSWin32') ? '\\' : '/';
+    }
     $process->Arguments($args . " $tmp_dir_flag $path");
   }
 
@@ -804,7 +807,7 @@ sub add_temporary_file {
   my $self = shift;
   my $process = shift;
   my $file = shift;
-  my $path = $self->_temporary_file_path($process, 0) . $file;
+  my $path = $self->_temporary_file_path($process, 0, $file);
   push(@{$self->{temp_files}}, $path);
   unlink $path;
 }
@@ -813,6 +816,7 @@ sub _temporary_file_path {
   my $self = shift;
   my $name = shift;
   my $flag = shift;
+  my $file = shift;
 
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
@@ -830,7 +834,7 @@ sub _temporary_file_path {
     if ($flag) {
       $p = PerlACE::rebase_path ($p, $process->{TARGET}->{TEST_ROOT}, $process->{TARGET}->{TEST_FSROOT});
     }
-    return File::Spec->catfile($p, '');
+    return File::Spec->catfile($p, $file);
   }
 
   # Local processes use TEST_ROOT.
@@ -840,12 +844,12 @@ sub _temporary_file_path {
       defined($proc->{TARGET}->{TEST_ROOT})) {
       my $p = Cwd::getcwd();
       $p = PerlACE::rebase_path ($p, $ENV{TEST_ROOT}, $proc->{TARGET}->{TEST_ROOT});
-      return File::Spec->catfile($p, '');
+      return File::Spec->catfile($p, $file);
     }
   }
 
   # No locals or remotes.
-  return File::Spec->catfile(Cwd::getcwd(), '');
+  return File::Spec->catfile(Cwd::getcwd(), $file);
 }
 
 sub _prefix {
