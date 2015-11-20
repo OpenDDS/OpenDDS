@@ -9,7 +9,7 @@
 #include <queue>
 #include <set>
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
 #include "dcps_export.h"
 #include "SafetyProfilePool.h"
 
