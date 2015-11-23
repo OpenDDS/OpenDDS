@@ -252,7 +252,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         dwl4_servant->num_liveliness_lost_callbacks();
 
       if (liveliness_lost_test
-          && actual != num_liveliness_lost_callbacks)
+          && static_cast<int>(actual) != num_liveliness_lost_callbacks)
       {
         cerr << "ERROR: did not receive expected liveliness lost callbacks. "
           << actual << "/" <<
