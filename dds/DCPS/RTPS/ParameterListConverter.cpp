@@ -15,7 +15,9 @@
 
 namespace OpenDDS { namespace RTPS {
 
+#ifndef OPENDDS_SAFETY_PROFILE
 using DCPS::operator!=;
+#endif
 
 namespace {
   void add_param(ParameterList& param_list, const Parameter& param) {

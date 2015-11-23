@@ -42,7 +42,9 @@ namespace {
 bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
                 const DDS::PublicationBuiltinTopicData& src)
 {
+#ifndef OPENDDS_SAFETY_PROFILE
   using OpenDDS::DCPS::operator!=;
+#endif
   bool changed = false;
 
   // check each Changeable QoS policy value in Publication BIT Data
@@ -93,7 +95,9 @@ bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
 bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
                 const DDS::SubscriptionBuiltinTopicData& src)
 {
+#ifndef OPENDDS_SAFETY_PROFILE
   using OpenDDS::DCPS::operator!=;
+#endif
   bool changed = false;
 
   // check each Changeable QoS policy value in Subcription BIT Data
