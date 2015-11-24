@@ -8,6 +8,7 @@
 #ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 #define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
+#include "ace/config-macros.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"

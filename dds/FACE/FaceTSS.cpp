@@ -1,3 +1,4 @@
+#include "ace/config-macros.h"
 #include "FACE/TS.hpp"
 #include "FaceTSS.h"
 #include "config/Parser.h"

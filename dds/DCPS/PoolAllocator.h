@@ -1,6 +1,7 @@
 #ifndef OPENDDS_DCPS_POOL_ALLOCATOR_H
 #define OPENDDS_DCPS_POOL_ALLOCATOR_H
 
+#include "ace/config-macros.h"
 #include <limits>
 #include <string>
 #include <map>
