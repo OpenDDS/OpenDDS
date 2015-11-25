@@ -142,8 +142,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       std::cout << "Writer wait for ACKS" << std::endl;
 
-      DDS::Duration_t timeout =
-        { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+      DDS::Duration_t timeout = { 60, 0 };
       dw->wait_for_acknowledgments(timeout);
 
       std::cerr << "deleting DW" << std::endl;
