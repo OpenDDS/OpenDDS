@@ -164,7 +164,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       const bool ownEntitiesAreInBIT = ignoredEntitiesAreInBIT;
 
       // give time for BIT datareader/datawriter fully association.
-      ACE_OS::sleep (2);
+      ACE_OS::sleep (5);
 
       if (delay_before_read_sec > 0) {
         ACE_DEBUG((LM_DEBUG,"(%P|%t) monitor: SLEEPING BEFORE READING!\n"));

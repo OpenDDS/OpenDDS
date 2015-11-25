@@ -15,8 +15,7 @@ my $test = new PerlDDS::TestFramework();
 
 # Run at high debug level for additional function coverage.
 $test->{dcps_debug_level} = 8;
-# give each process 300 seconds to complete
-$test->{wait_after_first_proc} = 300;
+
 $test->{add_pending_timeout} = 0;
 $test->{add_transport_config} = 0;
 
