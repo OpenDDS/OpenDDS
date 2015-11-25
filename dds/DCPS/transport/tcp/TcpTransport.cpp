@@ -400,9 +400,10 @@ TcpTransport::configure_i(TransportInst* config)
                ACE_TEXT("cannot get local addr\n")));
   }
 
+  OPENDDS_STRING listening_addr(address.get_host_addr());
   VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) TcpTransport::configure_i listening on %C:%hu\n"),
-            address.get_host_name(), address.get_port_number()), 2);
+            listening_addr.c_str(), address.get_port_number()), 2);
 
   unsigned short port = address.get_port_number();
 
