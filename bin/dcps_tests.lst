@@ -295,7 +295,7 @@ tests/DCPS/StaticDiscovery/run_test.pl mp: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscovery/run_test.pl mp delay: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscovery/run_test.pl mr: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscovery/run_test.pl mw: !DCPS_MIN !NO_MCAST
-tests/DCPS/StaticDiscovery/run_test.pl mpmrmw: !DCPS_MIN !NO_MCAST
+tests/DCPS/StaticDiscovery/run_test.pl mpmrmw: !DCPS_MIN !NO_MCAST !TARGET
 tests/DCPS/StaticDiscoveryReconnect/run_test.pl: !DCPS_MIN !NO_MCAST
 tests/DCPS/SubscriberCycle/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_FILTERED_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION
 
