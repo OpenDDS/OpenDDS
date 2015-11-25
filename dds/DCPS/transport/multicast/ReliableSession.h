@@ -52,6 +52,12 @@ public:
   ~ReliableSession();
 
   virtual bool check_header(const TransportHeader& header);
+  virtual void record_header_received(const TransportHeader& header);
+
+  virtual bool ready_to_deliver(const TransportHeader& header,
+                                const ReceivedDataSample& data);
+  void deliver_held_data();
+  virtual void release_remote(const RepoId& remote);
 
   virtual bool control_received(char submessage_id,
                                 ACE_Message_Block* control);
@@ -78,6 +84,10 @@ private:
 
   typedef OPENDDS_MAP(ACE_Time_Value, SequenceNumber) NakRequestMap;
   NakRequestMap nak_requests_;
+
+  ACE_Thread_Mutex held_lock_;
+  typedef SequenceNumber TransportHeaderSN;
+  OPENDDS_MULTIMAP(TransportHeaderSN, ReceivedDataSample) held_;
 
   typedef OPENDDS_SET(SequenceRange) NakPeerSet;
   NakPeerSet nak_peers_;

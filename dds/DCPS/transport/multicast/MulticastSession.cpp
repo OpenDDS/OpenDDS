@@ -147,15 +147,6 @@ bool
 MulticastSession::control_received(char submessage_id,
                                    ACE_Message_Block* control)
 {
-  // Record that we've gotten this message so we don't nak for it later.
-  if (!this->acked()) {
-    const TransportHeader& header =
-      this->link_->receive_strategy()->received_header();
-    if (this->remote_peer_ == header.source_) {
-      check_header(header);
-    }
-  }
-
   switch (submessage_id) {
   case MULTICAST_SYN:
     syn_received(control);
@@ -283,14 +274,6 @@ MulticastSession::synack_received(ACE_Message_Block* control)
 void
 MulticastSession::send_synack()
 {
-  // Send naks before sending synack to
-  // reduce wait time for resends from remote.
-  SingleSendBuffer* send_buffer = this->link_->send_buffer();
-  if (send_buffer && !send_buffer->empty()
-      && send_buffer->low() > ++SequenceNumber()) {
-    send_naks();
-  }
-
   size_t len = sizeof(this->remote_peer_);
 
   ACE_Message_Block* data;
@@ -311,6 +294,10 @@ MulticastSession::send_synack()
 
   // Send control sample to remote peer:
   send_control(MULTICAST_SYNACK, data);
+
+  // Send naks before sending synack to
+  // reduce wait time for resends from remote.
+  send_naks();
 }
 
 void

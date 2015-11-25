@@ -289,6 +289,13 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
         guard.release();
         syn_received_no_session(theader.source_, sample.sample_,
                                 theader.swap_bytes());
+
+        guard.acquire();
+        MulticastSessionMap::iterator s_itr = sessions_.find(theader.source_);
+        if (s_itr != sessions_.end()) {
+          s_itr->second->record_header_received(theader);
+        }
+
         if (ptr) {
           sample.sample_->rd_ptr(ptr);
         }
@@ -302,6 +309,8 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
           it != temp_sessions.end(); ++it) {
         it->second->control_received(sample.header_.submessage_id_,
                                      sample.sample_);
+        it->second->record_header_received(theader);
+
         // reset read pointer
         if (ptr) {
           sample.sample_->rd_ptr(ptr);
@@ -311,24 +320,8 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
   } break;
 
   default:
-    ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
-        guard,
-        this->session_lock_);
 
-    const TransportHeader& theader = receive_strategy()->received_header();
-
-    MulticastSessionMap::iterator s_itr = sessions_.find(theader.source_);
-    if (!is_active() && (s_itr == sessions_.end() || !s_itr->second->acked())) {
-      // We have received a SYN but there is no acked session (yet) for this source.
-      // Depending on the data, we may need to send SYNACK.
-
-      guard.release();
-      sample_rcvd_no_acked_session(theader.source_, sample.sample_,
-                                   theader.swap_bytes());
-    }
-    guard.release();
-    if (!duplicate_data_sample(sample.header_) &&
-        ready_to_deliver(sample, theader.source_)) {
+    if (ready_to_deliver(sample)) {
       data_received(sample);
     }
     break;
@@ -336,100 +329,34 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
 }
 
 bool
-MulticastDataLink::ready_to_deliver(const ReceivedDataSample& data, ACE_INT32 source)
+MulticastDataLink::ready_to_deliver(const ReceivedDataSample& data)
 {
-  if (data.header_.sequence_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ||
-      data.header_.publication_id_ == GUID_UNKNOWN) {
-    return true;
-  }
-
   ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX,
       guard,
       this->session_lock_, false);
-  SequenceNumber seq = data.header_.sequence_;
-  MulticastSessionMap::iterator session_it = sessions_.find(source);
+
+  const TransportHeader& theader = receive_strategy()->received_header();
+
+  MulticastSessionMap::iterator session_it = sessions_.find(theader.source_);
   if (session_it != sessions_.end()) {
-    bool reliable = session_it->second->is_reliable();
-    if (!reliable) {
-      return true;
-    }
-    MulticastSession_rch session(session_it->second);
-    DisjointSequence& recvd = this->data_samples_seen_[data.header_.publication_id_];
-    if (recvd.disjoint() ||
-        (!recvd.empty() && recvd.cumulative_ack() != seq /*seq already inserted in duplicate check*/)
-        || (!recvd.empty() && recvd.low() > 1)
-        || (recvd.empty() && seq > 1)) {
-      if (Transport_debug_level > 5) {
-        GuidConverter writer(data.header_.publication_id_);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) MulticastDataLink::ready_to_deliver(DataSubmessage) -")
-                             ACE_TEXT(" data seq: %q from %C being WITHHELD because can't receive yet\n"),
-                             seq.getValue(),
-                             OPENDDS_STRING(writer).c_str()));
-      }
-      held_[data.header_.publication_id_].insert(std::make_pair(seq, data));
-      deliver_held_data(data.header_.publication_id_);
-      return false;
-    } else {
-      if (Transport_debug_level > 5) {
-        GuidConverter writer(data.header_.publication_id_);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) MulticastDataLink::ready_to_deliver(DataSubmessage) -")
-                             ACE_TEXT(" data seq: %q from %C OK to deliver\n"),
-                             seq.getValue(),
-                             OPENDDS_STRING(writer).c_str()));
-      }
-      return true;
-    }
-
-  } else {
-    if (Transport_debug_level > 5) {
-      GuidConverter writer(data.header_.publication_id_);
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) MulticastDataLink::ready_to_deliver(DataSubmessage) -")
-                           ACE_TEXT(" data seq: %q from %C OK to deliver (publication currently has no session)\n"),
-                           seq.getValue(),
-                           OPENDDS_STRING(writer).c_str()));
-    }
-    return true;
+    MulticastSession_rch sess_rch(session_it->second);
+    guard.release();
+    return sess_rch->ready_to_deliver(theader, data);
   }
-}
 
-void
-MulticastDataLink::deliver_held_data(PublicationId pubId)
-{
-  DisjointSequence& recvd = this->data_samples_seen_[pubId];
-
-  if (recvd.empty() || recvd.low() > 1) return;
-  const SequenceNumber ca = recvd.cumulative_ack();
-  typedef OPENDDS_MAP(SequenceNumber, ReceivedDataSample)::iterator iter;
-  const iter end = this->held_[pubId].upper_bound(ca);
-  for (iter it = this->held_[pubId].begin(); it != end; /*increment in loop body*/) {
-    if (Transport_debug_level > 5) {
-      GuidConverter writer(pubId);
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) MulticastDataLink::deliver_held_data -")
-                           ACE_TEXT(" deliver sequence: %q from %C\n"),
-                           it->second.header_.sequence_.getValue(),
-                           OPENDDS_STRING(writer).c_str()));
-    }
-    data_received(it->second);
-    this->held_[pubId].erase(it++);
-  }
-}
-
-bool
-MulticastDataLink::duplicate_data_sample(const DataSampleHeader& header)
-{
-  if (header.sequence_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()
-      || header.publication_id_ == GUID_UNKNOWN) {
-    return false;
-  }
-  ACE_GUARD_RETURN(ACE_SYNCH_RECURSIVE_MUTEX, guard, session_lock_, false);
-  return !data_samples_seen_[header.publication_id_].insert(header.sequence_);
+  return true;
 }
 
 void
 MulticastDataLink::release_remote_i(const RepoId& remote)
 {
   ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX, guard, session_lock_);
-  data_samples_seen_.erase(remote);
+  MulticastPeer remote_source = (ACE_INT64)RepoIdConverter(remote).federationId() << 32
+                              | RepoIdConverter(remote).participantId();
+  MulticastSessionMap::iterator session_it = sessions_.find(remote_source);
+  if (session_it != sessions_.end() && session_it->second->is_reliable()) {
+    session_it->second->release_remote(remote);
+  }
 }
 
 void
@@ -468,42 +395,6 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     ACE_ERROR((LM_ERROR, "(%P|%t) MulticastDataLink::syn_received_no_session: "
         "ERROR: send_control failed: %d!\n", error));
     return;
-  }
-
-  transport_->passive_connection(local_peer, source);
-}
-
-void
-MulticastDataLink::sample_rcvd_no_acked_session(MulticastPeer source,
-    ACE_Message_Block* data,
-    bool swap_bytes)
-{
-  Serializer serializer_read(data, swap_bytes);
-
-  MulticastPeer local_peer;
-  serializer_read >> local_peer;
-
-  if (local_peer != local_peer_) {
-    return;
-  }
-
-  VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastDataLink[%C]::sample_rcvd_no_acked_session "
-      "send_synack local 0x%x remote 0x%x\n",
-      config_->name().c_str(), local_peer, source), 2);
-
-  ACE_Message_Block* synack_data = new ACE_Message_Block(sizeof(MulticastPeer));
-
-  Serializer serializer_write(synack_data);
-  serializer_write << source;
-
-  DataSampleHeader header;
-  ACE_Message_Block* control =
-      create_control(MULTICAST_SYNACK, header, synack_data);
-
-  const int error = send_control(header, control);
-  if (error != SEND_CONTROL_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) MulticastDataLink::sample_rcvd_no_acked_session: "
-        "ERROR: send_control failed: %d!\n", error));
   }
 
   transport_->passive_connection(local_peer, source);
