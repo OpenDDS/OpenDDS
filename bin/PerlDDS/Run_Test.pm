@@ -621,6 +621,12 @@ sub setup_discovery {
       . " this.\n");
     $params .= $no_bits;
   }
+  if (defined($ENV{OPENDDS_RTPS_DEFAULT_D0}) &&
+      ($self->{transport} eq "mcast" ||
+       $self->{transport} eq "multicast" ||
+       $self->{transport} eq "multicast_async")) {
+    $params .= " -FederationId $ENV{OPENDDS_RTPS_DEFAULT_D0}";
+  }
 
   $self->{info_repo}->{process} =
     $self->_create_process($executable, $params);
