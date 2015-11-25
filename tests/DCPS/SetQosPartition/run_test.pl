@@ -12,10 +12,10 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
-$test->{'dcps_debug_level'} = $test->{'dcps_transport_debug_level'} = 10;
+$test->{'dcps_debug_level'} = 4; # $test->{'dcps_transport_debug_level'} = 10;
 $test->setup_discovery();
 $test->process("sub", "subscriber", "-DCPSPendingTimeout 0");
 $test->process("pub", "publisher", "-DCPSPendingTimeout 0");
 $test->start_process("pub");
 $test->start_process("sub");
-exit $test->finish(300);
+exit $test->finish(120);

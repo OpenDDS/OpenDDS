@@ -93,6 +93,7 @@ sub runTest {
     my $beta_writers = shift;
 
     my $delay = shift;
+    my $pool_size = shift;
 
     $test->enable_console_logging();
 
@@ -104,7 +105,7 @@ sub runTest {
     open(my $fh, '>', 'config.ini') or die "Could not open file 'config.ini' $!";
     print $fh "[common]\n";
     print $fh "DCPSDefaultDiscovery=DEFAULT_STATIC\n";
-    print $fh "pool_size=83886080\n";
+    print $fh "pool_size=$pool_size\n";
     print $fh "\n";
     print $fh "[topic/TheTopic]\n";
     print $fh "name=TheTopic\n";
@@ -168,28 +169,28 @@ if ($test->flag('mp')) {
   if ($test->flag('delay')) {
     # mp delay
     # 1 process with 1 reader, 5 second delay, 1 process with 1 writer
-    runTest(1, 1, 0, 1, 0, 1, 5);
+    runTest(1, 1, 0, 1, 0, 1, 5, 30000000);
   } else {
     # mp
     # 1 process with 1 reader, 1 process with 1 writer
-    runTest(1, 1, 0, 1, 0, 1, 0);
+    runTest(1, 1, 0, 1, 0, 1, 0, 30000000);
   }
 } elsif ($test->flag('mr')) {
   # mr
   # 1 process with 5 readers and 1 writer
-  runTest(1, 5, 1, 0, 0, 0, 0);
+  runTest(1, 5, 1, 0, 0, 0, 0, 45000000);
 } elsif ($test->flag('mw')) {
   # mw
   # 1 process with 1 reader and 5 writers
-  runTest(1, 1, 5, 0, 0, 0, 0);
+  runTest(1, 1, 5, 0, 0, 0, 0, 45000000);
 } elsif ($test->flag('mpmrmw')) {
   # mpmrmw
   # 5 processes with 5 readers and 5 writers
-  runTest(5, 5, 5, 0, 0, 0, 0);
+  runTest(5, 5, 5, 0, 0, 0, 0, 85000000);
 } else {
   # default
   # 1 process with 1 reader and 1 writer
-  runTest(1, 1, 1, 0, 0, 0, 0);
+  runTest(1, 1, 1, 0, 0, 0, 0, 30000000);
 }
 
 exit $result;
