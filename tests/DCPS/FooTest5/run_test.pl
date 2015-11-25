@@ -101,11 +101,6 @@ my $subscriber_ready = 'subscriber_ready.txt';
 my $publisher_completed = 'publisher_finished.txt';
 my $publisher_ready = 'publisher_ready.txt';
 
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
-
 $test->enable_console_logging();
 
 $test->report_unused_flags(1);
@@ -130,7 +125,7 @@ my $sub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast"
     . " -k $no_key -y $read_interval_ms -f $mixed_trans";
 
 my $pub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast "
-    . " -p $use_rtps_transport -s $use_shmem -w $num_writers "
+    . " -p $use_rtps_transport -s $use_shmem -r $num_readers -w $num_writers "
     . " -m $num_instances_per_writer -i $num_samples_per_instance "
     . " -n $max_samples_per_instance -z $sequence_length"
     . " -k $no_key -y $write_interval_ms -b $writer_blocking_ms"
@@ -139,15 +134,15 @@ my $pub_parameters = "-DCPSConfigFile $cfg -u $use_udp -c $use_multicast "
 $test->process("subscriber", "subscriber", $sub_parameters);
 $test->process("publisher", "publisher", $pub_parameters);
 
-$test->start_process("publisher");
-$test->start_process("subscriber");
+$test->add_temporary_file("subscriber", $subscriber_completed);
+$test->add_temporary_file("subscriber", $subscriber_ready);
+$test->add_temporary_file("publisher", $publisher_completed);
+$test->add_temporary_file("publisher", $publisher_ready);
+
+$test->start_process("publisher", "-o");
+$test->start_process("subscriber", "-o");
 
 my $status = $test->finish(300, "publisher");
-
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
 
 cleanup();
 exit $status;

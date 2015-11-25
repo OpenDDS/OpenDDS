@@ -1344,6 +1344,8 @@ DataWriterImpl::enable()
       liveliness_check_interval_ = ACE_Time_Value (0, 1);
     }
 
+    last_liveliness_check_time_ = ACE_OS::gettimeofday();
+
     if (reactor_->schedule_timer(this,
                                  0,
                                  liveliness_check_interval_,

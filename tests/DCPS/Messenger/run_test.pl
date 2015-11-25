@@ -126,4 +126,4 @@ $test->start_process("publisher");
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
 # start killing processes in 300 seconds
-exit $test->finish(30);
+exit $test->finish(120);

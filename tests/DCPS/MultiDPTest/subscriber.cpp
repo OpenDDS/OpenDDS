@@ -78,6 +78,16 @@ int parse_args (int argc, ACE_TCHAR *argv[])
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
     }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0)
+    {
+      synch_file_dir = currentArg;
+      pub_ready_filename = synch_file_dir + pub_ready_filename;
+      pub_finished_filename = synch_file_dir + pub_finished_filename;
+      sub_ready_filename = synch_file_dir + sub_ready_filename;
+      sub_finished_filename = synch_file_dir + sub_finished_filename;
+
+      arg_shifter.consume_arg ();
+    }
     else
     {
       arg_shifter.ignore_arg ();
@@ -210,15 +220,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
 
-#ifdef OPENDDS_SAFETY_PROFILE
-  TheServiceParticipant->configure_pool ();
-#endif
-
   try
     {
-      ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
       dpf = TheParticipantFactoryWithArgs(argc, argv);
+      ACE_DEBUG((LM_INFO,"(%P|%t) %T subscriber main\n"));
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.

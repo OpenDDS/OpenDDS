@@ -17,6 +17,8 @@ my $transport = "tcp";
 my $pub_extra = "";
 my $sub_extra = "";
 
+my $test = new PerlDDS::TestFramework();
+
 while ($a = shift) {
     if ($a eq 'lost') {
         $pub_extra = "-l -n 4 -t 10 -c 8";
@@ -27,6 +29,7 @@ while ($a = shift) {
     }
     elsif ($a eq 'rtpsdisco') {
         $discovery = "rtps";
+        $test->{'discovery'} = 'rtps';
     }
     else {
         print STDERR "ERROR: unknown option: $a\n";
@@ -37,15 +40,14 @@ while ($a = shift) {
 my $pub_conf = "pub_" . $discovery . "_" . $transport . ".ini";
 my $sub_conf = "sub_" . $discovery . "_" . $transport . ".ini";
 
-my $pub_opts = "-DCPSConfigFile $pub_conf $pub_extra";
-my $sub_opts = "-DCPSConfigFile $sub_conf $sub_extra";
+my $pub_opts = "-DCPSConfigFile $pub_conf $pub_extra -ORBVerboseLogging 1";
+my $sub_opts = "-DCPSConfigFile $sub_conf $sub_extra -ORBVerboseLogging 1";
 
-my $test = new PerlDDS::TestFramework();
 $test->enable_console_logging();
 $test->process('sub', 'subscriber', $sub_opts);
 $test->process('pub', 'publisher', $pub_opts);
 
-$test->setup_discovery() if $discovery eq 'inforepo';
+$test->setup_discovery();
 
 $test->start_process('pub');
 $test->start_process('sub');

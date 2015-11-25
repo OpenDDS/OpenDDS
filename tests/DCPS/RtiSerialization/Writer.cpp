@@ -18,7 +18,6 @@
 
 const int num_instances_per_writer = 1;
 bool reliable = false;
-bool wait_for_acks = false;
 
 Writer::Writer(DDS::DataWriter_ptr writer)
   : writer_(DDS::DataWriter::_duplicate(writer)),

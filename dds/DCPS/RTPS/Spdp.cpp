@@ -195,7 +195,9 @@ Spdp::data_received(const DataSubmessage& data, const ParameterList& plist)
   } else {
     // update an existing participant
     pdata.ddsParticipantData.key = iter->second.pdata_.ddsParticipantData.key;
+#ifndef OPENDDS_SAFETY_PROFILE
     using OpenDDS::DCPS::operator!=;
+#endif
     if (iter->second.pdata_.ddsParticipantData.user_data !=
         pdata.ddsParticipantData.user_data) {
       iter->second.pdata_.ddsParticipantData.user_data =

@@ -15,7 +15,9 @@ PerlDDS::add_lib_path('../FooType');
 
 my $test = new PerlDDS::TestFramework();
 
-$test->process('test', 'infrastructure_test');
+my $params = '-DCPSConfigFile infrastructure.ini';
+
+$test->process('test', 'infrastructure_test', $params);
 $test->setup_discovery();
 $test->start_process('test');
 $test->ignore_error('DomainParticipantFactoryImpl::delete_participant, Nil participant');

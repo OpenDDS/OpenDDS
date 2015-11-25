@@ -1,3 +1,4 @@
+#include "ace/config-macros.h"
 #include "FACE/TS.hpp"
 #include "FaceTSS.h"
 #include "config/Parser.h"
@@ -15,7 +16,9 @@
 
 #include <cstring>
 
+#ifndef OPENDDS_SAFETY_PROFILE
 using OpenDDS::DCPS::operator==;
+#endif
 
 namespace FACE {
 namespace TS {
@@ -75,7 +78,7 @@ void Initialize(const CONFIGURATION_RESOURCE configuration_file,
     return_code = INVALID_PARAM;
   } else {
     return_code = RC_NO_ERROR;
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
     TheServiceParticipant->configure_pool();
 #endif
   }

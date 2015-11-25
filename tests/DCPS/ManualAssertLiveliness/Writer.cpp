@@ -2,6 +2,7 @@
 //
 #include "Writer.h"
 #include "MessengerTypeSupportC.h"
+#include "DataWriterListenerImpl.h"
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
 #include "tests/Utils/ExceptionStreams.h"
@@ -16,331 +17,167 @@ extern int assert_liveliness_period;
 extern bool liveliness_lost_test;
 
 
-Writer_Base::Writer_Base(::DDS::DataWriter_ptr writer)
-: writer_ (::DDS::DataWriter::_duplicate (writer))
+Writer_Base::Writer_Base(DDS::DataWriter_ptr writer, const char* name)
+  : writer_(DDS::DataWriter::_duplicate(writer))
+  , name_(name)
 {}
 
 void
-Writer_Base::start ()
+Writer_Base::start()
 {
-  id_ = OPENDDS_STRING (OpenDDS::DCPS::GuidConverter (dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(writer_->get_publisher()->get_participant())->get_repoid(writer_->get_instance_handle())));
+  DDS::DomainParticipant_var part = DDS::Publisher_var(writer_->get_publisher())->get_participant();
+  id_ = OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(part.in())->get_repoid(writer_->get_instance_handle())));
 
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer_Base::start %C\n"), get_id()));
-  if (activate (THR_NEW_LWP | THR_JOINABLE, 1) == -1) {
+  if (activate(THR_NEW_LWP | THR_JOINABLE, 1) == -1) {
     cerr << "Writer_Base::start(): activate failed" << endl;
     exit(1);
   }
 }
 
 void
-Writer_Base::end ()
+Writer_Base::end()
 {
-  wait ();
+  wait();
 
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Writer_Base::end %C\n"), get_id()));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer_Base::end %C\n"), get_id()));
 }
-
-
-Manual_By_Participant_Writer_1::Manual_By_Participant_Writer_1(::DDS::DataWriter_ptr writer)
-: Writer_Base (writer)
-{
-}
-
 
 int
-Manual_By_Participant_Writer_1::svc ()
+Writer_Base::svc()
 {
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_1::svc begins. %C\n"), get_id()));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %C svc() begins. %C\n"), name_, get_id()));
 
-  ::DDS::InstanceHandleSeq handles;
   try {
-
-    while (1)
-    {
+    DDS::InstanceHandleSeq handles;
+    while (true) {
       writer_->get_matched_subscriptions(handles);
       if (handles.length() > 0)
         break;
       else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
+        ACE_OS::sleep(ACE_Time_Value(0, 200000));
     }
 
-    ::Messenger::MessageDataWriter_var message_dw
-      = ::Messenger::MessageDataWriter::_narrow(writer_.in());
-    if (CORBA::is_nil (message_dw.in ())) {
-      cerr << "Data Manual_By_Participant_Writer_1 could not be narrowed"<< endl;
-      exit(1);
-    }
+    pre_loop();
 
-    Messenger::Message message;
-    message.subject_id = 99;
-    ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
-
-    message.from       = CORBA::string_dup("Manual_By_Participant_Writer_1");
-    message.subject    = CORBA::string_dup("Review");
-    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
-    message.count      = 0;
-
-    for (int i = 0; i< num_messages; i ++)
-    {
-      if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
-      {
-        ACE_OS::sleep (assert_liveliness_period);
-        continue;
+    for (int i = 0; i < num_messages; ++i) {
+      if (!liveliness_lost_test || i == 0 || i == num_messages - 1) {
+        in_loop(i);
+        if (i == 0) {
+          // Since an arbitrary amount of time was spent in the get_matched_subscriptions
+          // loop above, any number of liveliness lost callbacks may have already occurred.
+          // These are not the callbacks that the test is counting (liveliness_lost_test).
+          DDS::DataWriterListener_var dwl = writer_->get_listener();
+          DataWriterListenerImpl* listener = dynamic_cast<DataWriterListenerImpl*>(dwl.in());
+          listener->reset_liveliness_lost_callbacks();
+        }
       }
 
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_1::svc writing msg. %C\n"), get_id()));
-      ::DDS::ReturnCode_t ret;
-      do {
-        ret = message_dw->write(message, handle);
-      } while (ret == ::DDS::RETCODE_TIMEOUT);
-
-      if (ret != ::DDS::RETCODE_OK) {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: Manual_By_Participant_Writer_1::svc, ")
-                    ACE_TEXT ("%dth write() returned %d.\n"),
-                    i, ret));
-      }
-
-      message.count++;
-
-      ACE_OS::sleep (assert_liveliness_period);
+      ACE_OS::sleep(assert_liveliness_period);
     }
 
-  } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in svc:" << endl
-         << e << endl;
-  }
-
-  while (1)
-    {
+    while (true) {
       writer_->get_matched_subscriptions(handles);
       if (handles.length() == 0)
         break;
       else
         ACE_OS::sleep(1);
     }
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_1::svc finished.\n")));
 
-  return 0;
-}
-
-
-Manual_By_Participant_Writer_2::Manual_By_Participant_Writer_2(
-    ::DDS::DataWriter_ptr writer)
-    : Writer_Base(writer),
-      participant_ (::DDS::DomainParticipant::_duplicate (
-        writer->get_publisher()->get_participant()))
-{
-}
-
-
-int
-Manual_By_Participant_Writer_2::svc ()
-{
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_2::svc begins. %C\n"), get_id()));
-
-  ::DDS::InstanceHandleSeq handles;
-  try {
-
-    while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() > 0)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-    }
-
-    for (int i = 0; i< num_messages; i ++)
-    {
-      if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
-      {
-        ACE_OS::sleep (assert_liveliness_period);
-        continue;
-      }
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Participant_Writer_2::svc calling assert_liveliness. %C\n"), get_id()));
-      ::DDS::ReturnCode_t ret = this->participant_->assert_liveliness ();
-      if (ret != ::DDS::RETCODE_OK)
-      {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: Manual_By_Participant_Writer_2::svc, ")
-                    ACE_TEXT ("%dth assert_liveliness() returned %d.\n"),
-                    i, ret));
-      }
-      ACE_OS::sleep (assert_liveliness_period);
-    }
-
-  } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in svc:" << endl
-         << e << endl;
+  } catch (const CORBA::Exception& e) {
+    cerr << "Exception caught in svc:" << endl << e << endl;
   }
 
-  while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() == 0)
-        break;
-      else
-        ACE_OS::sleep(1);
-    }
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Manual_By_Participant_Writer_2::svc finished.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Writer_Base::svc finished %C.\n"), name_));
 
   return 0;
 }
 
-
-
-Manual_By_Topic_Writer_1::Manual_By_Topic_Writer_1(::DDS::DataWriter_ptr writer)
-: Writer_Base (writer)
+Write_Samples::Write_Samples(DDS::DataWriter_ptr writer, const char* name)
+  : Writer_Base(writer, name)
 {
 }
 
-
-int
-Manual_By_Topic_Writer_1::svc ()
+void
+Write_Samples::pre_loop()
 {
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_1::svc begins. %C\n"), get_id()));
-
-  ::DDS::InstanceHandleSeq handles;
-  try {
-
-    while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() > 0)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-    }
-
-    ::Messenger::MessageDataWriter_var message_dw
-      = ::Messenger::MessageDataWriter::_narrow(writer_.in());
-    if (CORBA::is_nil (message_dw.in ())) {
-      cerr << "Data Manual_By_Topic_Writer_1 could not be narrowed"<< endl;
-      exit(1);
-    }
-
-    Messenger::Message message;
-    message.subject_id = 99;
-    ::DDS::InstanceHandle_t handle = message_dw->register_instance(message);
-
-    message.from       = CORBA::string_dup("Manual_By_Topic_Writer_1");
-    message.subject    = CORBA::string_dup("Review");
-    message.text       = CORBA::string_dup("Worst. Movie. Ever.");
-    message.count      = 0;
-
-    for (int i = 0; i< num_messages; i ++)
-    {
-      if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
-      {
-        ACE_OS::sleep (assert_liveliness_period);
-        continue;
-      }
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_1::svc writing msg. %C\n"), get_id()));
-      ::DDS::ReturnCode_t ret;
-      do {
-        ret = message_dw->write(message, handle);
-      } while (ret == ::DDS::RETCODE_TIMEOUT);
-
-      if (ret != ::DDS::RETCODE_OK) {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: Manual_By_Topic_Writer_1::svc, ")
-                    ACE_TEXT ("%dth write() returned %d.\n"),
-                    i, ret));
-      }
-
-      message.count++;
-
-      ACE_OS::sleep (assert_liveliness_period);
-    }
-
-  } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in svc:" << endl
-         << e << endl;
+  message_dw_ = MessageDataWriter::_narrow(writer_);
+  if (CORBA::is_nil(message_dw_)) {
+    cerr << "MessageDataWriter could not be narrowed (" << name_ << ")" << endl;
+    exit(1);
   }
 
-  while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() == 0)
-        break;
-      else
-        ACE_OS::sleep(1);
-    }
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_1::svc finished.\n")));
+  message_.subject_id = 99;
+  handle_ = message_dw_->register_instance(message_);
 
-  return 0;
+  message_.from = name_;
+  message_.subject = "Review";
+  message_.text = "Worst. Movie. Ever.";
+  message_.count = 0;
 }
 
-
-Manual_By_Topic_Writer_2::Manual_By_Topic_Writer_2(::DDS::DataWriter_ptr writer)
-: Writer_Base (writer)
+void
+Write_Samples::in_loop(int i)
 {
-}
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %C writing msg. %C\n"), name_, get_id()));
 
+  DDS::ReturnCode_t ret;
+  do {
+    ret = message_dw_->write(message_, handle_);
+  } while (ret == ::DDS::RETCODE_TIMEOUT);
 
-int
-Manual_By_Topic_Writer_2::svc ()
-{
-  ACE_DEBUG((LM_DEBUG,
-             ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_2::svc begins. %C\n"), get_id()));
-
-  ::DDS::InstanceHandleSeq handles;
-  try {
-
-    while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() > 0)
-        break;
-      else
-        ACE_OS::sleep(ACE_Time_Value(0,200000));
-    }
-
-    for (int i = 0; i< num_messages; i ++) {
-      if (liveliness_lost_test &&  i > 0 && i < num_messages - 1)
-      {
-        ACE_OS::sleep (assert_liveliness_period);
-        continue;
-      }
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) %T Manual_By_Topic_Writer_2::svc calling assert_liveliness. %C\n"), get_id()));
-      ::DDS::ReturnCode_t ret = writer_->assert_liveliness ();
-
-      if (ret != ::DDS::RETCODE_OK) {
-        ACE_ERROR ((LM_ERROR,
-                    ACE_TEXT("(%P|%t) ERROR: Manual_By_Topic_Writer_2::svc, ")
-                    ACE_TEXT ("%dth assert_liveliness() returned %d.\n"),
-                    i, ret));
-      }
-
-      ACE_OS::sleep (assert_liveliness_period);
-    }
-
-  } catch (CORBA::Exception& e) {
-    cerr << "Exception caught in svc:" << endl
-         << e << endl;
+  if (ret != ::DDS::RETCODE_OK) {
+    ACE_ERROR ((LM_ERROR,
+                ACE_TEXT("(%P|%t) ERROR: Write_Samples: ")
+                ACE_TEXT("%dth write() returned %d %C\n"),
+                i, ret, name_));
   }
 
-  while (1)
-    {
-      writer_->get_matched_subscriptions(handles);
-      if (handles.length() == 0)
-        break;
-      else
-        ACE_OS::sleep(1);
-    }
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Manual_By_Topic_Writer_2::svc finished.\n")));
+  ++message_.count;
+}
 
-  return 0;
+
+Assert_Participant_Liveliness::Assert_Participant_Liveliness(
+  DDS::DataWriter_ptr writer, const char* name)
+  : Writer_Base(writer, name)
+  , participant_(DDS::Publisher_var(writer->get_publisher())->get_participant())
+{
+}
+
+
+void
+Assert_Participant_Liveliness::in_loop(int i)
+{
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Assert_Participant_Liveliness calling assert_liveliness. %C\n"), get_id()));
+  const DDS::ReturnCode_t ret = participant_->assert_liveliness();
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Assert_Participant_Liveliness: ")
+               ACE_TEXT("%dth assert_liveliness() returned %d.\n"),
+               i, ret));
+  }
+}
+
+
+Assert_Writer_Liveliness::Assert_Writer_Liveliness(DDS::DataWriter_ptr writer, const char* name)
+  : Writer_Base(writer, name)
+{
+}
+
+
+void
+Assert_Writer_Liveliness::in_loop(int i)
+{
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) Assert_Writer_Liveliness calling assert_liveliness. %C\n"), get_id()));
+  const DDS::ReturnCode_t ret = writer_->assert_liveliness();
+
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: Assert_Writer_Liveliness: ")
+               ACE_TEXT ("%dth assert_liveliness() returned %d.\n"),
+               i, ret));
+  }
 }

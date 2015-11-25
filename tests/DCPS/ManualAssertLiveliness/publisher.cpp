@@ -74,6 +74,7 @@ parse_args (int argc, ACE_TCHAR *argv[])
 }
 
 int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
+  int status = 0;
   try
     {
       DDS::DomainParticipantFactory_var dpf =
@@ -228,37 +229,35 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
         exit(1);
       }
 
-      Manual_By_Participant_Writer_1* writer1 = new Manual_By_Participant_Writer_1(dw1.in());
-      Manual_By_Participant_Writer_2* writer2 = new Manual_By_Participant_Writer_2(dw2.in());
-      Manual_By_Topic_Writer_1* writer3 = new Manual_By_Topic_Writer_1(dw3.in());
-      Manual_By_Topic_Writer_2* writer4 = new Manual_By_Topic_Writer_2(dw4.in());
+      {
+        Write_Samples writer1(dw1, "Manual_By_Participant_Writer_1");
+        Assert_Participant_Liveliness writer2(dw2, "Manual_By_Participant_Writer_2");
+        Write_Samples writer3(dw3, "Manual_By_Topic_Writer_1");
+        Assert_Writer_Liveliness writer4(dw4, "Manual_By_Topic_Writer_2");
 
-      writer1->start ();
-      writer2->start ();
-      writer3->start ();
-      writer4->start ();
+        writer1.start();
+        writer2.start();
+        writer3.start();
+        writer4.start();
 
-      writer1->end ();
-      writer2->end ();
-      writer3->end ();
-      writer4->end ();
+        writer1.end();
+        writer2.end();
+        writer3.end();
+        writer4.end();
+      }
 
-      delete writer1;
-      delete writer2;
-      delete writer3;
-      delete writer4;
-
-      int actual = dwl1_servant->num_liveliness_lost_callbacks () +
-        dwl2_servant->num_liveliness_lost_callbacks () +
-        dwl3_servant->num_liveliness_lost_callbacks () +
-        dwl4_servant->num_liveliness_lost_callbacks ();
+      const unsigned long actual = dwl1_servant->num_liveliness_lost_callbacks() +
+        dwl2_servant->num_liveliness_lost_callbacks() +
+        dwl3_servant->num_liveliness_lost_callbacks() +
+        dwl4_servant->num_liveliness_lost_callbacks();
 
       if (liveliness_lost_test
-          && actual != num_liveliness_lost_callbacks)
+          && static_cast<int>(actual) != num_liveliness_lost_callbacks)
       {
         cerr << "ERROR: did not receive expected liveliness lost callbacks. "
           << actual << "/" <<
           num_liveliness_lost_callbacks << endl;
+        status = 1;
       }
 
       ACE_OS::sleep(1);
@@ -276,5 +275,5 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       exit(1);
     }
 
-  return 0;
+  return status;
 }

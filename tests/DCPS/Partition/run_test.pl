@@ -16,7 +16,6 @@ unlink $data_file;
 
 my $test = new PerlDDS::TestFramework();
 $test->enable_console_logging();
-$test->{report_errors_in_log_file} = 0;
 
 $test->process('sub', 'subscriber');
 $test->process('pub', 'publisher', "-ORBLogFile $data_file");

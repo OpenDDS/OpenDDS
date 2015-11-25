@@ -8,6 +8,7 @@
 #ifndef OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 #define OPENDDS_DDS_DCPS_SERVICE_PARTICIPANT_H
 
+#include "ace/config-macros.h"
 #include "DomainParticipantFactoryImpl.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsDomainC.h"
@@ -291,6 +292,8 @@ public:
     bit_enabled_ = b;
   }
 
+  ACE_CString default_address() const;
+
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
   /// DurabilityQosPolicy and sample list depth.
@@ -508,6 +511,9 @@ private:
   /// @c DataReader.
   int bit_lookup_duration_msec_;
 
+  /// The default network address to use.
+  ACE_CString default_address_;
+
   /// The configuration object that imports the configuration
   /// file.
   ACE_Configuration_Heap cf_;
@@ -544,7 +550,7 @@ private:
   /// Scheduler time slice from configuration file.
   ACE_Time_Value schedulerQuantum_;
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
   /// Pool size from configuration file.
   size_t pool_size_;
 

@@ -53,18 +53,22 @@ char* CUR_TOPIC_DATA = TOPIC_DATA;
 char* CUR_GROUP_DATA = GROUP_DATA;
 
 unsigned int dps_with_user_data = 2;
-char synch_fname[] = "monitor1_done";
+ACE_TString synch_dir;
+ACE_TCHAR synch_fname[] = ACE_TEXT("monitor1_done");
 
 int
 parse_args (int argc, ACE_TCHAR *argv[])
 {
-  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("l:d:t:s:p:u"));
+  ACE_Get_Opt get_opts (argc, argv, ACE_TEXT("T:l:d:t:s:p:u"));
   int c;
 
   while ((c = get_opts ()) != -1)
   {
     switch (c)
     {
+    case 'T':
+      synch_dir = get_opts.opt_arg ();
+      break;
     case 'l':
       delay_before_read_sec = ACE_OS::atoi (get_opts.opt_arg ());
       break;
@@ -125,7 +129,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CUR_PART_USER_DATA == UPDATED_PART_USER_DATA)
       {
         // wait for Monitor 1 done
-        FILE* fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
+        FILE* fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));
         int i = 0;
         while (fp == 0 &&  i < 15)
         {
@@ -133,7 +137,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
           ACE_OS::sleep (1);
           ++ i;
-          fp = ACE_OS::fopen (synch_fname, ACE_TEXT("r"));
+          fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));
         }
 
         if (fp != 0)
@@ -160,7 +164,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       const bool ownEntitiesAreInBIT = ignoredEntitiesAreInBIT;
 
       // give time for BIT datareader/datawriter fully association.
-      ACE_OS::sleep (2);
+      ACE_OS::sleep (5);
 
       if (delay_before_read_sec > 0) {
         ACE_DEBUG((LM_DEBUG,"(%P|%t) monitor: SLEEPING BEFORE READING!\n"));
@@ -632,7 +636,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       if (CUR_PART_USER_DATA == PART_USER_DATA)
       {
         // Create synch file.
-        FILE* fp = ACE_OS::fopen (synch_fname, ACE_TEXT("w"));
+        FILE* fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("w"));
         if (fp != 0)
         {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) monitor1 is done\n")));

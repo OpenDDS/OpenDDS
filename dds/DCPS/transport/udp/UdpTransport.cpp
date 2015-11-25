@@ -177,10 +177,16 @@ UdpTransport::configure_i(TransportInst* config)
 
   create_reactor_task();
 
+  // Override with DCPSDefaultAddress.
+  if (this->config_i_->local_address() == ACE_INET_Addr () &&
+      !TheServiceParticipant->default_address ().empty ()) {
+    this->config_i_->local_address(0, TheServiceParticipant->default_address ().c_str ());
+  }
+
   // Our "server side" data link is created here, similar to the acceptor_
   // in the TcpTransport implementation.  This establishes a socket as an
   // endpoint that we can advertise to peers via connection_info_i().
-  server_link_ = make_datalink(ACE_INET_Addr(), 0 /* priority */, false);
+  server_link_ = make_datalink(this->config_i_->local_address(), 0 /* priority */, false);
   return true;
 }
 

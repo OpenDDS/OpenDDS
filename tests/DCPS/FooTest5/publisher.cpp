@@ -46,6 +46,7 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     // options:
     //  -i num_samples_per_instance    defaults to 1
     //  -w num_datawriters          defaults to 1
+    //  -r num_datareaders          defaults to 1
     //  -m num_instances_per_writer defaults to 1
     //  -n max_samples_per_instance defaults to INFINITE
     //  -d history.depth            defaults to 1
@@ -77,6 +78,11 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-w"))) != 0)
     {
       num_datawriters = ACE_OS::atoi (currentArg);
+      arg_shifter.consume_arg ();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-r"))) != 0)
+    {
+      num_datareaders = ACE_OS::atoi (currentArg);
       arg_shifter.consume_arg ();
     }
     else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-n"))) != 0)
@@ -432,6 +438,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
 
       // Indicate that the publisher is ready
+      ACE_DEBUG((LM_INFO, "(%P|%t) publisher signaling ready\n"));
       FILE* writers_ready = ACE_OS::fopen (pub_ready_filename.c_str (), ACE_TEXT("w"));
       if (writers_ready == 0)
         {
@@ -445,15 +452,19 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
+          ACE_DEBUG((LM_INFO, "(%P|%t) publisher checking for sub ready\n"));
           readers_ready = ACE_OS::fopen (sub_ready_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_ready);
 
       ACE_OS::fclose(writers_ready);
       ACE_OS::fclose(readers_ready);
 
+      // If mixed transports, each writer will associate with only one reader
+      int associations_per_writer = mixed_trans ? 1 : num_datareaders;
+
       for (int i = 0; i < num_datawriters; i ++)
         {
-          OpenDDS::Model::WriterSync::wait_match(dw[i]);
+          OpenDDS::Model::WriterSync::wait_match(dw[i], associations_per_writer);
           writers[i]->start ();
         }
 
@@ -477,6 +488,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           timeout_writes += writers[i]->get_timeout_writes();
         }
       // Indicate that the publisher is done
+      ACE_DEBUG((LM_INFO, "(%P|%t) publisher signaling finished\n"));
       FILE* writers_completed = ACE_OS::fopen (pub_finished_filename.c_str (), ACE_TEXT("w"));
       if (writers_completed == 0)
         {
@@ -485,6 +497,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         }
       else
         {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) notifying subscriber of %d timeout writes\n"),
+                      timeout_writes));
           ACE_OS::fprintf (writers_completed, "%d\n", timeout_writes);
           ACE_OS::fclose(writers_completed);
         }
@@ -495,6 +510,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         {
           ACE_Time_Value small_time(0,250000);
           ACE_OS::sleep (small_time);
+          ACE_DEBUG((LM_INFO, "(%P|%t) publisher checking for sub finished\n"));
           readers_completed = ACE_OS::fopen (sub_finished_filename.c_str (), ACE_TEXT("r"));
         } while (0 == readers_completed);
 

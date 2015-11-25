@@ -19,11 +19,6 @@ my $subscriber_ready = "subscriber_ready.txt";
 my $publisher_completed = "publisher_finished.txt";
 my $publisher_ready = "publisher_ready.txt";
 
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
-
 # single reader with single instances test
 my $multiple_instance = 0;
 my $num_samples_per_reader = 2;
@@ -50,14 +45,14 @@ my $common_parameters = $app_bit_conf
 $test->process('sub', 'subscriber', $common_parameters . " -t $use_take");
 $test->process('pub', 'publisher', $common_parameters);
 
-$test->start_process('sub');
-$test->start_process('pub');
+$test->add_temporary_file('sub', $subscriber_completed);
+$test->add_temporary_file('sub', $subscriber_ready);
+$test->add_temporary_file('pub', $publisher_completed);
+$test->add_temporary_file('pub', $publisher_ready);
+
+$test->start_process('sub', '-T');
+$test->start_process('pub', '-T');
 
 my $result = $test->finish(60);
-
-unlink $subscriber_completed;
-unlink $subscriber_ready;
-unlink $publisher_completed;
-unlink $publisher_ready;
 
 exit $result;

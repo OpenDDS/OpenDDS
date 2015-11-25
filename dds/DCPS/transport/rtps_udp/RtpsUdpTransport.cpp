@@ -255,6 +255,12 @@ RtpsUdpTransport::configure_i(TransportInst* config)
                      false);
   }
 
+  // Override with DCPSDefaultAddress.
+  if (this->config_i_->local_address() == ACE_INET_Addr () &&
+      !TheServiceParticipant->default_address ().empty ()) {
+    this->config_i_->local_address(0, TheServiceParticipant->default_address ().c_str ());
+  }
+
   // Open the socket here so that any addresses/ports left
   // unspecified in the RtpsUdpInst are known by the time we get to
   // connection_info_i().  Opening the sockets here also allows us to

@@ -16,6 +16,8 @@
 #include "dcps_export.h"
 #include "MemoryPool.h"
 
+#include <cstring>
+
 class SafetyProfilePoolTest;
 
 namespace OpenDDS {
@@ -52,18 +54,18 @@ public:
     main_pool_->pool_free(ptr);
   }
 
-  void* calloc(std::size_t, char = '\0')
+  void* calloc(std::size_t bytes, char init = '\0')
   {
-    ACE_DEBUG((LM_ERROR,
-               "SafetyProfilePool::calloc not supported\n"));
-    return 0;
+    void* const mem = malloc(bytes);
+    std::memset(mem, init, bytes);
+    return mem;
   }
-  void* calloc(std::size_t, std::size_t, char = '\0')
+
+  void* calloc(std::size_t elems, std::size_t size, char init = '\0')
   {
-    ACE_DEBUG((LM_ERROR,
-               "SafetyProfilePool::calloc not supported\n"));
-    return 0;
+    return calloc(elems * size, init);
   }
+
   int remove() { return -1; }
   int bind(const char*, void*, int = 0) { return -1; }
   int trybind(const char*, void*&) { return -1; }

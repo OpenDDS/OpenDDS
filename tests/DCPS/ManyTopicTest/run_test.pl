@@ -24,14 +24,6 @@ my $publisher1_completed = "T1_publisher_finished.txt";
 my $publisher2_completed = "T2_publisher_finished.txt";
 my $publisher3_completed = "T3_publisher_finished.txt";
 
-unlink $subscriber1_completed;
-unlink $subscriber2_completed;
-unlink $subscriber3_completed;
-
-unlink $publisher1_completed;
-unlink $publisher2_completed;
-unlink $publisher3_completed;
-
 # single reader with single instances test
 my $multiple_instance = 0;
 my $num_samples_per_reader = 10;
@@ -85,78 +77,32 @@ else {
   exit 1;
 }
 
-my $dcpsrepo_ior = "repo.ior";
-
-unlink $dcpsrepo_ior;
-
 my $sub_parameters = "-t all";
 my $pub_parameters = "-t all";
 
-my $DCPSREPO = PerlDDS::create_process("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                       "-o $dcpsrepo_ior");
-
+my $test = new PerlDDS::TestFramework();
 if ($rtps_disc) {
   $sub_parameters .= ' -DCPSConfigFile rtps_disc.ini';
   $pub_parameters .= ' -DCPSConfigFile rtps_disc.ini';
 }
 else {
-  $DCPSREPO->Spawn();
-
-  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill();
-    exit 1;
-  }
+  $test->setup_discovery();
 }
 
-my $Subscriber = PerlDDS::create_process("subscriber", $sub_parameters);
-my $Sub2 = PerlDDS::create_process("subscriber", $sub_parameters);
-my $Publisher = PerlDDS::create_process("publisher", $pub_parameters);
+$test->process("subscriber1", "subscriber", $sub_parameters);
+$test->process("subscriber2", "subscriber", $sub_parameters);
+$test->process("publisher", "publisher", $pub_parameters);
 
-$Publisher->Spawn();
-$Subscriber->Spawn();
-$Sub2->Spawn();
+$test->add_temporary_file("subscriber1", $subscriber1_completed);
+$test->add_temporary_file("subscriber1", $subscriber2_completed);
+$test->add_temporary_file("subscriber1", $subscriber3_completed);
 
-my $PublisherResult = $Publisher->WaitKill(300);
-if ($PublisherResult != 0) {
-  print STDERR "ERROR: publisher returned $PublisherResult\n";
-  $status = 1;
-}
+$test->add_temporary_file("publisher", $publisher1_completed);
+$test->add_temporary_file("publisher", $publisher2_completed);
+$test->add_temporary_file("publisher", $publisher3_completed);
 
-my $SubscriberResult = $Subscriber->WaitKill(30);
-if ($SubscriberResult != 0) {
-  print STDERR "ERROR: subscriber returned $SubscriberResult\n";
-  $status = 1;
-}
+$test->start_process("publisher", "-o");
+$test->start_process("subscriber1", "-o");
+$test->start_process("subscriber2", "-o");
 
-my $Sub2Result = $Sub2->WaitKill(5);
-if ($Sub2Result != 0) {
-  print STDERR "ERROR: subscriber2 returned $Sub2Result\n";
-  $status = 1;
-}
-
-if (!$rtps_disc) {
-  my $ir = $DCPSREPO->TerminateWaitKill(5);
-
-  if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-  }
-}
-
-unlink $subscriber1_completed;
-unlink $subscriber2_completed;
-unlink $subscriber3_completed;
-
-unlink $publisher1_completed;
-unlink $publisher2_completed;
-unlink $publisher3_completed;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-}
-else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish(300);

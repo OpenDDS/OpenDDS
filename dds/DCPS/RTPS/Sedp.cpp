@@ -42,7 +42,9 @@ namespace {
 bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
                 const DDS::PublicationBuiltinTopicData& src)
 {
+#ifndef OPENDDS_SAFETY_PROFILE
   using OpenDDS::DCPS::operator!=;
+#endif
   bool changed = false;
 
   // check each Changeable QoS policy value in Publication BIT Data
@@ -93,7 +95,9 @@ bool qosChanged(DDS::PublicationBuiltinTopicData& dest,
 bool qosChanged(DDS::SubscriptionBuiltinTopicData& dest,
                 const DDS::SubscriptionBuiltinTopicData& src)
 {
+#ifndef OPENDDS_SAFETY_PROFILE
   using OpenDDS::DCPS::operator!=;
+#endif
   bool changed = false;
 
   // check each Changeable QoS policy value in Subcription BIT Data
@@ -300,7 +304,11 @@ Sedp::unicast_locators(OpenDDS::DCPS::LocatorSeq& locators) const
       rtps_inst->local_address_config_str_.rfind(':') == 0) {
     typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
     AddrVector addrs;
-    OpenDDS::DCPS::get_interface_addrs(addrs);
+    if (TheServiceParticipant->default_address ().empty ()) {
+      OpenDDS::DCPS::get_interface_addrs(addrs);
+    } else {
+      addrs.push_back (ACE_INET_Addr (static_cast<u_short> (0), TheServiceParticipant->default_address ().c_str ()));
+    }
     for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
       idx = locators.length();
       locators.length(idx + 1);

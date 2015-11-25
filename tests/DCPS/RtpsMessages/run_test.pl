@@ -9,8 +9,10 @@ use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
 
-my $TEST = PerlDDS::create_process('RtpsMessagesTest');
-my $result = $TEST->SpawnWaitKill(60);
+my $test = new PerlDDS::TestFramework();
+$test->process('RtpsMessagesTest', 'RtpsMessagesTest', "");
+$test->start_process('RtpsMessagesTest');
+my $result = $test->finish(60);
 if ($result != 0) {
   print STDERR "ERROR: test returned $result\n";
   exit 1;

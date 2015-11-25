@@ -7,6 +7,7 @@ use PerlDDS::Process;
 use PerlDDS::ProcessFactory;
 use Cwd;
 use POSIX qw(strftime);
+use File::Spec;
 
 package PerlDDS;
 
@@ -307,6 +308,7 @@ sub new {
   $self->{flags} = {};
   $self->{status} = 0;
   $self->{log_files} = [];
+  $self->{temp_files} = [];
   $self->{errors_to_ignore} = [];
   $self->{info_repo} = {};
   $self->{info_repo}->{executable} = "$ENV{DDS_ROOT}/bin/DCPSInfoRepo";
@@ -326,6 +328,7 @@ sub new {
   $self->{add_orb_log_file} = 1;
   $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;
+  $self->{console_logging} = 0;
 
   my $index = 0;
   foreach my $arg (@ARGV) {
@@ -417,13 +420,28 @@ sub finish {
       }
     }
   }
-  if ($self->{status} == 0) {
-    print STDERR _prefix() . "test PASSED.\n";
-  } else {
+  if ($PerlDDS::SafetyProfile && $self->{console_logging} == 1) {
     foreach my $file (@{$self->{log_files}}) {
       PerlDDS::print_file($file);
     }
-    print STDERR _prefix() . "test FAILED.\n";
+    if ($self->{status} == 0) {
+      print STDERR _prefix() . "test PASSED.\n";
+    } else {
+      print STDERR _prefix() . "test FAILED.\n";
+    }
+  } else {
+    if ($self->{status} == 0) {
+      print STDERR _prefix() . "test PASSED.\n";
+    } else {
+      foreach my $file (@{$self->{log_files}}) {
+        PerlDDS::print_file($file);
+      }
+      print STDERR _prefix() . "test FAILED.\n";
+    }
+  }
+
+  foreach my $file (@{$self->{temp_files}}) {
+    unlink $file;
   }
 
   return $self->{status};
@@ -646,6 +664,7 @@ sub setup_discovery {
 sub start_process {
   my $self = shift;
   my $name = shift;
+  my $tmp_dir_flag = shift;
 
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
@@ -655,6 +674,16 @@ sub start_process {
 
   push(@{$self->{processes}->{order}}, $name);
   my $process = $self->{processes}->{process}->{$name}->{process};
+
+  if (defined($tmp_dir_flag)) {
+    my $args = $process->Arguments();
+    my $path = $self->_temporary_file_path($name, 1, '');
+    if ($path !~ /[\/\\]$/) {
+      $path .= ($^O eq 'MSWin32') ? '\\' : '/';
+    }
+    $process->Arguments($args . " $tmp_dir_flag $path");
+  }
+
   print $process->CommandLine() . "\n";
   $process->Spawn();
   print "$name PID: " . _getpid($process) . "\n";
@@ -705,17 +734,17 @@ sub stop_processes {
 
   $self->_info("TestFramework::stop_processes\n");
 
+  my $subsequent_wait = $timed_wait + $self->{wait_after_first_proc};
+
   while (scalar(@{$self->{processes}->{order}}) > 0) {
     if (!defined($name)) {
       my @rorder = reverse(@{$self->{processes}->{order}});
       $name = $rorder[0];
     }
-    $self->_info("TestFramework::stop_processes stopping $name in $timed_wait "
-      . "seconds\n");
     $self->stop_process($timed_wait, $name);
     # make next loop
     $name = undef;
-    $timed_wait = $self->{wait_after_first_proc};
+    $timed_wait = $subsequent_wait;
   }
 
   $self->stop_discovery($timed_wait);
@@ -769,7 +798,60 @@ sub enable_console_logging {
   my $self = shift;
   $self->{dcps_debug_level} = 0;
   $self->{dcps_transport_debug_level} = 0;
-  $self->{add_orb_log_file} = 0;
+  $self->{console_logging} = 1;
+  if (!$PerlDDS::SafetyProfile) {
+      # Emulate by using a log file and printing it later.
+      $self->{add_orb_log_file} = 0;
+  }
+}
+
+sub add_temporary_file {
+  my $self = shift;
+  my $process = shift;
+  my $file = shift;
+  my $path = $self->_temporary_file_path($process, 0, $file);
+  push(@{$self->{temp_files}}, $path);
+  unlink $path;
+}
+
+sub _temporary_file_path {
+  my $self = shift;
+  my $name = shift;
+  my $flag = shift;
+  my $file = shift;
+
+  if (!defined($self->{processes}->{process}->{$name})) {
+    print STDERR "ERROR: no process with name=$name\n";
+    $self->{status} = -1;
+    return;
+  }
+  my $process = $self->{processes}->{process}->{$name}->{process};
+
+  # Remote processes use TEST_ROOT or FS_ROOT.
+  if (defined($ENV{TEST_ROOT}) &&
+      defined($process->{TARGET}->{TEST_ROOT}) &&
+      defined($process->{TARGET}->{TEST_FSROOT})) {
+    my $p = Cwd::getcwd();
+    $p = PerlACE::rebase_path ($p, $ENV{TEST_ROOT}, $process->{TARGET}->{TEST_ROOT});
+    if ($flag) {
+      $p = PerlACE::rebase_path ($p, $process->{TARGET}->{TEST_ROOT}, $process->{TARGET}->{TEST_FSROOT});
+    }
+    return File::Spec->catfile($p, $file);
+  }
+
+  # Local processes use TEST_ROOT.
+  for (values %{$self->{processes}->{process}}) {
+    my $proc = $_->{process};
+    if (defined($ENV{TEST_ROOT}) &&
+      defined($proc->{TARGET}->{TEST_ROOT})) {
+      my $p = Cwd::getcwd();
+      $p = PerlACE::rebase_path ($p, $ENV{TEST_ROOT}, $proc->{TARGET}->{TEST_ROOT});
+      return File::Spec->catfile($p, $file);
+    }
+  }
+
+  # No locals or remotes.
+  return File::Spec->catfile(Cwd::getcwd(), $file);
 }
 
 sub _prefix {
@@ -790,14 +872,6 @@ sub _track_log_files {
   $self->_info("TestFramework::_track_log_files looking in \"$data\"\n");
   if ($data =~ /-ORBLogFile ([^ ]+)/) {
     my $file = $1;
-    $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
-    if (defined($ENV{TEST_ROOT}) && defined($process->{TARGET}->{TEST_ROOT})) {
-        $file = PerlACE::rebase_path ($file, $ENV{TEST_ROOT}, $process->{TARGET}->{TEST_ROOT});
-    }
-    push(@{$self->{log_files}}, $file);
-    unlink $file;
-  } elsif ($PerlDDS::SafetyProfile) {
-    my $file = "safetyprofile.log";
     $self->_info("TestFramework::_track_log_files found file=\"$file\"\n");
     if (defined($ENV{TEST_ROOT}) && defined($process->{TARGET}->{TEST_ROOT})) {
         $file = PerlACE::rebase_path ($file, $ENV{TEST_ROOT}, $process->{TARGET}->{TEST_ROOT});

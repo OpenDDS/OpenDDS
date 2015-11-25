@@ -144,6 +144,7 @@ static bool got_default_discovery = false;
 #endif
 static bool got_log_fname = false;
 static bool got_log_verbose = false;
+static bool got_default_address = false;
 
 Service_Participant::Service_Participant()
   :
@@ -173,8 +174,8 @@ Service_Participant::Service_Participant()
     federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
     federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
     schedulerQuantum_(ACE_Time_Value::zero),
-#ifdef OPENDDS_SAFETY_PROFILE
-    pool_size_(1024*1024*40),
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
+    pool_size_(1024*1024*16),
     pool_granularity_(8),
 #endif
     scheduler_(-1),
@@ -342,13 +343,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
                      ACE_TEXT("(%P|%t) NOTICE: not using file configuration - no configuration ")
                      ACE_TEXT("file specified.\n")));
         }
-#if defined OPENDDS_SAFETY_PROFILE && !defined ACE_FACE_DEV
-        if (!got_log_fname) {
-          // Neither log file nor config file specified
-          set_log_file_name("safetyprofile.log");
-        }
-#endif
-
 
       } else {
         // Load configuration only if the configuration
@@ -374,7 +368,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
         }
       }
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
@@ -553,6 +547,11 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       set_log_verbose(ACE_OS::atoi(currentArg));
       arg_shifter.consume_arg();
       got_log_verbose = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDefaultAddress"))) != 0) {
+      this->default_address_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
+      arg_shifter.consume_arg();
+      got_default_address = true;
 
     } else {
       arg_shifter.ignore_arg();
@@ -1548,11 +1547,6 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("ORBLogFile"), log_fname);
       if (!log_fname.empty()) {
         set_log_file_name(log_fname.c_str());
-#if defined OPENDDS_SAFETY_PROFILE && !defined ACE_FACE_DEV
-      } else {
-        // No log file specified
-        set_log_file_name("safetyprofile.log");
-#endif
       }
     }
 
@@ -1568,13 +1562,20 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       set_log_verbose(verbose_logging);
     }
 
+    if (got_default_address) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) NOTICE: using DCPSDefaultAddress value from command option (overrides value if it's in config file).\n")));
+    } else {
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), this->default_address_)
+    }
+
     // These are not handled on the command line.
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationRecoveryDuration"), this->federation_recovery_duration_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationInitialBackoffSeconds"), this->federation_initial_backoff_seconds_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationBackoffMultiplier"), this->federation_backoff_multiplier_, int)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("FederationLivelinessDuration"), this->federation_liveliness_, int)
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
     GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_granularity"), pool_granularity_, size_t)
 #endif
@@ -1770,7 +1771,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
   return 0;
 }
 
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined OPENDDS_SAFETY_PROFILE && defined ACE_HAS_ALLOC_HOOKS
 void
 Service_Participant::configure_pool()
 {

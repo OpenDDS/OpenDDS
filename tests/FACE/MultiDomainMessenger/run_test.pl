@@ -15,11 +15,15 @@ my $test = new PerlDDS::TestFramework();
 
 $test->enable_console_logging();
 
-$test->process('Subscriber', 'Subscriber/subscriber');
+my $callback = '';
+
+if($test->flag('callback')) {
+    $callback = 'callback';
+}
+
+$test->process('Subscriber', 'Subscriber/subscriber', $callback);
 $test->start_process('Subscriber');
 
-$test->process('Callback Subscriber', 'Subscriber/subscriber', 'callback');
-$test->start_process('Callback Subscriber');
 sleep 5;
 
 $test->process('Publisher', 'Publisher/publisher');

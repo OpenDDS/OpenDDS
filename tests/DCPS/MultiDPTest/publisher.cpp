@@ -43,6 +43,8 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     //  -w num_datawriters          defaults to 1
     //  -m num_instances_per_writer defaults to 1
     //  -z length of float sequence in data type   defaults to 10
+    //  -o directory of synch files used to coordinate publisher and subscriber
+    //                              defaults to current directory.
     //  -v                          verbose transport debug
 
     const ACE_TCHAR *currentArg = 0;
@@ -61,6 +63,16 @@ int parse_args (int argc, ACE_TCHAR *argv[])
     {
       TURN_ON_VERBOSE_DEBUG;
       arg_shifter.consume_arg();
+    }
+    else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0)
+    {
+      synch_file_dir = currentArg;
+      pub_ready_filename = synch_file_dir + pub_ready_filename;
+      pub_finished_filename = synch_file_dir + pub_finished_filename;
+      sub_ready_filename = synch_file_dir + sub_ready_filename;
+      sub_finished_filename = synch_file_dir + sub_finished_filename;
+
+      arg_shifter.consume_arg ();
     }
     else
     {
@@ -185,15 +197,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   int status = 0;
 
-#ifdef OPENDDS_SAFETY_PROFILE
-  TheServiceParticipant->configure_pool ();
-#endif
-
   try
     {
-      ACE_DEBUG((LM_INFO,"(%P|%t) %T publisher main\n"));
-
       dpf = TheParticipantFactoryWithArgs(argc, argv);
+      ACE_DEBUG((LM_INFO,"(%P|%t) %T publisher main\n"));
 
       // let the Service_Participant (in above line) strip out -DCPSxxx parameters
       // and then get application specific parameters.

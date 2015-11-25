@@ -22,6 +22,7 @@
 #include "dds/DCPS/AssociationData.h"
 #include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/Service_Participant.h"
 
 #include <sstream>
 
@@ -365,6 +366,12 @@ TcpTransport::configure_i(TransportInst* config)
                      false);
   }
 
+  // Override with DCPSDefaultAddress.
+  if (this->tcp_config_->local_address() == ACE_INET_Addr () &&
+      !TheServiceParticipant->default_address ().empty ()) {
+    this->tcp_config_->local_address(0, TheServiceParticipant->default_address ().c_str ());
+  }
+
   // Open our acceptor object so that we can accept passive connections
   // on our this->tcp_config_->local_address_.
 
@@ -393,9 +400,10 @@ TcpTransport::configure_i(TransportInst* config)
                ACE_TEXT("cannot get local addr\n")));
   }
 
+  OPENDDS_STRING listening_addr(address.get_host_addr());
   VDBG_LVL((LM_DEBUG,
             ACE_TEXT("(%P|%t) TcpTransport::configure_i listening on %C:%hu\n"),
-            address.get_host_name(), address.get_port_number()), 2);
+            listening_addr.c_str(), address.get_port_number()), 2);
 
   unsigned short port = address.get_port_number();
 

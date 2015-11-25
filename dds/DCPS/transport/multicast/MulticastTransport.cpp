@@ -349,6 +349,12 @@ MulticastTransport::configure_i(TransportInst* config)
 
   this->config_i_->_add_ref();
 
+  // Override with DCPSDefaultAddress.
+  if (this->config_i_->local_address_.empty () &&
+      !TheServiceParticipant->default_address ().empty ()) {
+    this->config_i_->local_address_ = TheServiceParticipant->default_address ().c_str ();
+  }
+
   if (!this->config_i_->group_address_.is_multicast()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")

@@ -4,7 +4,6 @@
 
 DataWriterListenerImpl::DataWriterListenerImpl ()
 : num_liveliness_lost_callbacks_(0)
-, matched_(false)
 {
 }
 
@@ -18,8 +17,8 @@ void DataWriterListenerImpl::on_offered_deadline_missed (
       const ::DDS::OfferedDeadlineMissedStatus & status
     )
 {
-  ACE_UNUSED_ARG(writer) ;
-  ACE_UNUSED_ARG(status) ;
+  ACE_UNUSED_ARG(writer);
+  ACE_UNUSED_ARG(status);
 }
 
 void DataWriterListenerImpl::on_offered_incompatible_qos (
@@ -27,8 +26,8 @@ void DataWriterListenerImpl::on_offered_incompatible_qos (
       const ::DDS::OfferedIncompatibleQosStatus & status
     )
 {
-  ACE_UNUSED_ARG(writer) ;
-  ACE_UNUSED_ARG(status) ;
+  ACE_UNUSED_ARG(writer);
+  ACE_UNUSED_ARG(status);
 
   ACE_ERROR ((LM_DEBUG,
          ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_offered_incompatible_qos ")
@@ -40,18 +39,13 @@ void DataWriterListenerImpl::on_liveliness_lost (
       const ::DDS::LivelinessLostStatus & status
     )
 {
-  if (matched_) {
-    ++ num_liveliness_lost_callbacks_;
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %X %d\n"),
-               writer, num_liveliness_lost_callbacks_));
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d \n"),
-               status.total_count, status.total_count_change));
-  } else {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost before matched\n")));
-  }
+  ++num_liveliness_lost_callbacks_;
+  ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %@ %d\n"),
+              writer, (int) num_liveliness_lost_callbacks_.value()));
+  ACE_DEBUG((LM_DEBUG,
+              ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d \n"),
+              status.total_count, status.total_count_change));
 }
 
 void DataWriterListenerImpl::on_publication_matched (
@@ -59,9 +53,8 @@ void DataWriterListenerImpl::on_publication_matched (
       const ::DDS::PublicationMatchedStatus & status
     )
 {
-  matched_ = true;
-  ACE_UNUSED_ARG(writer) ;
-  ACE_UNUSED_ARG(status) ;
+  ACE_UNUSED_ARG(writer);
+  ACE_UNUSED_ARG(status);
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_publication_matched \n")));
@@ -72,8 +65,8 @@ void DataWriterListenerImpl::on_publication_disconnected (
       const ::OpenDDS::DCPS::PublicationDisconnectedStatus & status
     )
 {
-  ACE_UNUSED_ARG(writer) ;
-  ACE_UNUSED_ARG(status) ;
+  ACE_UNUSED_ARG(writer);
+  ACE_UNUSED_ARG(status);
 }
 
 void DataWriterListenerImpl::on_publication_reconnected (
@@ -81,8 +74,8 @@ void DataWriterListenerImpl::on_publication_reconnected (
       const ::OpenDDS::DCPS::PublicationReconnectedStatus & status
     )
 {
-  ACE_UNUSED_ARG(writer) ;
-  ACE_UNUSED_ARG(status) ;
+  ACE_UNUSED_ARG(writer);
+  ACE_UNUSED_ARG(status);
 }
 
 void DataWriterListenerImpl::on_publication_lost (
@@ -90,13 +83,13 @@ void DataWriterListenerImpl::on_publication_lost (
       const ::OpenDDS::DCPS::PublicationLostStatus & status
     )
 {
-  ACE_UNUSED_ARG(writer) ;
-  ACE_UNUSED_ARG(status) ;
+  ACE_UNUSED_ARG(writer);
+  ACE_UNUSED_ARG(status);
 }
 
 void DataWriterListenerImpl::on_connection_deleted (
       ::DDS::DataWriter_ptr writer
     )
 {
-  ACE_UNUSED_ARG(writer) ;
+  ACE_UNUSED_ARG(writer);
 }

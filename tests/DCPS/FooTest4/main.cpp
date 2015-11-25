@@ -184,7 +184,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       ::DDS::SubscriberQos default_sub_qos;
       dp->get_default_subscriber_qos (default_sub_qos);
 
+#ifndef OPENDDS_SAFETY_PROFILE
       using OpenDDS::DCPS::operator==;
+#endif
       if (! (sub_qos_got == default_sub_qos))
       {
         ACE_ERROR ((LM_ERROR,

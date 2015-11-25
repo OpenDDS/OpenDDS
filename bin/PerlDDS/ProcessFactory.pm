@@ -30,6 +30,11 @@ sub create_process {
     }
 
     my $target = PerlDDS::create_test_target($config_name, $os);
+
+    if (defined($target) && defined($target->{IP_ADDRESS}) && $arguments !~ /-DCPSDefaultAddress /) {
+        $arguments .= " -DCPSDefaultAddress $target->{IP_ADDRESS}";
+    }
+
     if (defined $target) {
       return $target->CreateProcess($executable, $arguments);
     }

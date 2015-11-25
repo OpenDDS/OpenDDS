@@ -5,12 +5,13 @@
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/LocalObject.h"
 
+#include "ace/Atomic_Op.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 
-//Class DataWriterListenerImpl
 class DataWriterListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<OpenDDS::DCPS::DataWriterListener>
 {
@@ -61,15 +62,18 @@ public:
       ::DDS::DataWriter_ptr writer
     );
 
-  int num_liveliness_lost_callbacks() const
+  unsigned long num_liveliness_lost_callbacks() const
   {
-    return num_liveliness_lost_callbacks_;
+    return num_liveliness_lost_callbacks_.value();
   }
 
-protected:
+  void reset_liveliness_lost_callbacks()
+  {
+    num_liveliness_lost_callbacks_ = 0;
+  }
+
 private:
-  int num_liveliness_lost_callbacks_;
-  bool matched_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> num_liveliness_lost_callbacks_;
 };
 
 #endif /* DATAWRITER_LISTENER_IMPL  */
