@@ -54,11 +54,12 @@ MulticastTransport::make_datalink(const RepoId& local_id,
     ACE_NEW_RETURN(session_factory, BestEffortSessionFactory, 0);
   }
 
-  MulticastPeer local_peer = RepoIdConverter(local_id).participantId();
+  MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(local_id).federationId() << 32
+                           | RepoIdConverter(local_id).participantId();
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::make_datalink "
-            "peers: local 0x%x priority %d active %d\n",
-            this->config_i_->name().c_str(), local_peer,
+            "peers: local %#08x%08x priority %d active %d\n",
+            this->config_i_->name().c_str(), (unsigned int)(local_peer >> 32), (unsigned int)local_peer,
             priority, active), 2);
 
   MulticastDataLink_rch link;
@@ -119,8 +120,10 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport[%C]::start_session: ")
-                      ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
-                      this->config_i_->name().c_str(), remote_peer),
+                      ACE_TEXT("failed to create session for remote peer: %#08x%08x!\n"),
+                      this->config_i_->name().c_str(),
+                      (unsigned int)(remote_peer >> 32),
+                      (unsigned int) remote_peer),
                      0);
   }
 
@@ -130,8 +133,10 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport[%C]::start_session: ")
-                      ACE_TEXT("failed to start session for remote peer: 0x%x!\n"),
-                      this->config_i_->name().c_str(), remote_peer),
+                      ACE_TEXT("failed to start session for remote peer: %#08x%08x!\n"),
+                      this->config_i_->name().c_str(),
+                      (unsigned int)(remote_peer >> 32),
+                      (unsigned int) remote_peer),
                      0);
   }
 
@@ -165,7 +170,8 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
   }
 
   GuardThreadType guard_links(this->links_lock_);
-  const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
+  const MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(attribs.local_id_).federationId() << 32
+                                 | RepoIdConverter(attribs.local_id_).participantId();
   Links::const_iterator link_iter = this->client_links_.find(local_peer);
   MulticastDataLink_rch link;
 
@@ -177,7 +183,8 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     link = link_iter->second;
   }
 
-  MulticastPeer remote_peer = RepoIdConverter(remote.repo_id_).participantId();
+  MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote.repo_id_).federationId() << 32
+                            | RepoIdConverter(remote.repo_id_).participantId();
 
   MulticastSession_rch session =
     this->start_session(link, remote_peer, true /*active*/);
@@ -202,7 +209,8 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
     return AcceptConnectResult();
   }
 
-  const MulticastPeer local_peer = RepoIdConverter(attribs.local_id_).participantId();
+  const MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(attribs.local_id_).federationId() << 32
+                                 | RepoIdConverter(attribs.local_id_).participantId();
 
   GuardThreadType guard_links(this->links_lock_);
 
@@ -219,7 +227,8 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
   guard_links.release();
 
-  MulticastPeer remote_peer = RepoIdConverter(remote.repo_id_).participantId();
+  MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote.repo_id_).federationId() << 32
+                            | RepoIdConverter(remote.repo_id_).participantId();
   GuardThreadType guard(this->connections_lock_);
 
   if (connections_.count(std::make_pair(remote_peer, local_peer))) {
@@ -283,8 +292,12 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
   GuardThreadType guard(this->connections_lock_);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::passive_connection "
-            "from remote peer 0x%x to local peer 0x%x\n",
-            this->config_i_->name().c_str(), remote_peer, local_peer), 2);
+            "from remote peer %#08x%08x to local peer %#08x%08x\n",
+            this->config_i_->name().c_str(),
+            (unsigned int) (remote_peer >> 32),
+            (unsigned int) remote_peer,
+            (unsigned int) (local_peer >> 32),
+            (unsigned int) local_peer), 2);
 
   const Peers peers(remote_peer, local_peer);
   const PendConnMap::iterator pend = this->pending_connections_.find(peers);

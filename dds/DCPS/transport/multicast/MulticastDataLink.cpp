@@ -21,6 +21,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/RepoIdConverter.h"
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
@@ -194,8 +195,9 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("MulticastDataLink::find_or_create_session: ")
-        ACE_TEXT("failed to create session for remote peer: 0x%x!\n"),
-        remote_peer),
+        ACE_TEXT("failed to create session for remote peer: %#08x%08x!\n"),
+        (unsigned int) (remote_peer >> 32),
+        (unsigned int) remote_peer),
         0);
   }
 
@@ -205,8 +207,9 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("MulticastDataLink::find_or_create_session: ")
-        ACE_TEXT("failed to insert session for remote peer: 0x%x!\n"),
-        remote_peer),
+        ACE_TEXT("failed to insert session for remote peer: %#08x%08x!\n"),
+        (unsigned int) (remote_peer >> 32),
+        (unsigned int) remote_peer),
         0);
   }
   return session._retn();
@@ -444,8 +447,12 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
   }
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastDataLink[%C]::syn_received_no_session "
-      "send_synack local 0x%x remote 0x%x\n",
-      config_->name().c_str(), local_peer, source), 2);
+      "send_synack local %#08x%08x remote %#08x%08x\n",
+      config_->name().c_str(),
+      (unsigned int) (local_peer >> 32),
+      (unsigned int) local_peer,
+      (unsigned int) (source >> 32),
+      (unsigned int) source), 2);
 
   ACE_Message_Block* synack_data = new ACE_Message_Block(sizeof(MulticastPeer));
 

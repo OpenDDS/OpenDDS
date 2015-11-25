@@ -203,8 +203,8 @@ namespace OpenDDS
       if (header.last_fragment_) os << ", Last Fragment";
       os << ", Sequence: 0x" << std::hex << std::setw(8) << std::setfill('0')
          << header.sequence_.getValue();
-      os << ", Source: 0x" << std::hex << std::setw(8) << std::setfill('0')
-         << ACE_UINT32(header.source_);
+      os << ", Source: 0x" << std::hex << std::setw(16) << std::setfill('0')
+         << ACE_UINT64(header.source_);
 
       return os.str();
     }
