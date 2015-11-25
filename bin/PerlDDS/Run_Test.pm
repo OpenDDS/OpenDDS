@@ -531,14 +531,12 @@ sub process {
     if ($params !~ /-ORBVerboseLogging /) {
       $debug .= " -ORBVerboseLogging 1";
     }
-    $self->_info_appending($executable, $debug, "dcps_debug_level");
     $params .= $debug;
   }
 
   if ($params !~ /-DCPSTransportDebugLevel / &&
       $self->{dcps_transport_debug_level}) {
     my $debug = " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
-    $self->_info_appending($executable, $debug, "dcps_transport_debug_level");
     $params .= $debug;
   }
 
@@ -550,7 +548,6 @@ sub process {
     $file_name =~ s/#//g;
 
     my $debug = " -ORBLogFile $file_name.log";
-    $self->_info_appending($executable, $debug, "add_orb_log_file");
     $params .= $debug;
   }
 
@@ -566,7 +563,6 @@ sub process {
 
   if ($self->{nobits}) {
     my $no_bits = " -DCPSBit 0 ";
-    $self->_info_appending($executable, $no_bits, "nobits");
     $params .= $no_bits;
   }
 
@@ -902,16 +898,6 @@ sub _info {
   if ($self->{test_verbose}) {
     print STDERR "$msg";
   }
-}
-
-sub _info_appending {
-  my $self = shift;
-  my $executable = shift;
-  my $str = shift;
-  my $param = shift;
-  $self->_info("TestFramework::process appending \"$str\" to "
-    . "$executable's parameters. Set <TestFramework>->{$param} = 0 to prevent"
-    . " this.\n");
 }
 
 sub _write_tcp_ini {
