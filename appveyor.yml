@@ -22,7 +22,7 @@ build:
   project: DDS_TAOv2.sln
 
 after_build:
-#  - cd DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
+  - cd DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
   - cd ..\..\..\tests\DCPS\Messenger && run_test.pl
 
 test: off
