@@ -16,6 +16,8 @@
 #include "ace/Truncate.h"
 
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/GuidConverter.h"
+
 #include <cstdlib>
 
 namespace OpenDDS {
