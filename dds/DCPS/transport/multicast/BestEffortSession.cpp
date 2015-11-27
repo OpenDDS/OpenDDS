@@ -42,6 +42,25 @@ BestEffortSession::check_header(const TransportHeader& header)
   return true;
 }
 
+void
+BestEffortSession::record_header_received(const TransportHeader& header)
+{
+  if (this->remote_peer_ != header.source_) return;
+
+  check_header(header);
+}
+
+bool
+BestEffortSession::ready_to_deliver(const TransportHeader& header,
+                                    const ReceivedDataSample& /*data*/)
+{
+  if (expected_ != SequenceNumber::SEQUENCENUMBER_UNKNOWN()
+      && header.sequence_ == expected_.previous()) {
+    return true;
+  }
+  return false;
+}
+
 bool
 BestEffortSession::start(bool active, bool /*acked*/)
 {

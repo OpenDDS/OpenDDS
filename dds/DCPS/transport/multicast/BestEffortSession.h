@@ -24,6 +24,10 @@ public:
                     MulticastPeer remote_peer);
 
   virtual bool check_header(const TransportHeader& header);
+  virtual void record_header_received(const TransportHeader& header);
+
+  virtual bool ready_to_deliver(const TransportHeader& header,
+                                const ReceivedDataSample& data);
 
   virtual bool start(bool active, bool acked);
   virtual bool is_reliable() { return false;}

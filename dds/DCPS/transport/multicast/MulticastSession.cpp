@@ -69,10 +69,12 @@ SynWatchdog::on_timeout(const void* /*arg*/)
   ACE_ERROR((LM_WARNING,
              ACE_TEXT("(%P|%t) WARNING: ")
              ACE_TEXT("SynWatchdog[transport=%C]::on_timeout: ")
-             ACE_TEXT("timed out waiting on remote peer: 0x%x local: 0x%x\n"),
+             ACE_TEXT("timed out waiting on remote peer: %#08x%08x local: %#08x%08x\n"),
              this->session_->link()->config()->name().c_str(),
-             this->session_->remote_peer(),
-             this->session_->link()->local_peer()));
+             (unsigned int)(this->session_->remote_peer() >> 32),
+             (unsigned int) this->session_->remote_peer(),
+             (unsigned int)(this->session_->link()->local_peer() >> 32),
+             (unsigned int) this->session_->link()->local_peer()));
 }
 
 
@@ -145,15 +147,6 @@ bool
 MulticastSession::control_received(char submessage_id,
                                    ACE_Message_Block* control)
 {
-  // Record that we've gotten this message so we don't nak for it later.
-  if (!this->acked()) {
-    const TransportHeader& header =
-      this->link_->receive_strategy()->received_header();
-    if (this->remote_peer_ == header.source_) {
-      check_header(header);
-    }
-  }
-
   switch (submessage_id) {
   case MULTICAST_SYN:
     syn_received(control);
@@ -190,9 +183,12 @@ MulticastSession::syn_received(ACE_Message_Block* control)
   if (local_peer != this->link_->local_peer()) return;
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::syn_received "
-                    "local 0x%x remote 0x%x\n",
+                    "local %#08x%08x remote %#08x%08x\n",
                     this->link()->config()->name().c_str(),
-                    this->link()->local_peer(), this->remote_peer_), 2);
+                    (unsigned int)(this->link()->local_peer() >> 32),
+                    (unsigned int) this->link()->local_peer(),
+                    (unsigned int)(this->remote_peer_ >> 32),
+                    (unsigned int) this->remote_peer_), 2);
 
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
@@ -224,9 +220,12 @@ MulticastSession::send_syn()
   serializer << this->remote_peer_;
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_syn "
-                      "local 0x%x remote 0x%x\n",
+                      "local %#08x%08x remote %#08x%08x\n",
                       this->link()->config()->name().c_str(),
-                      this->link()->local_peer(), this->remote_peer_), 2);
+                      (unsigned int)(this->link()->local_peer() >> 32),
+                      (unsigned int) this->link()->local_peer(),
+                      (unsigned int)(this->remote_peer_ >> 32),
+                      (unsigned int) this->remote_peer_), 2);
 
   // Send control sample to remote peer:
   send_control(MULTICAST_SYN, data);
@@ -255,9 +254,12 @@ MulticastSession::synack_received(ACE_Message_Block* control)
   if (local_peer != this->link_->local_peer()) return;
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::synack_received "
-                      "local 0x%x remote 0x%x\n",
+                      "local %#08x%08x remote %#08x%08x\n",
                       this->link()->config()->name().c_str(),
-                      this->link()->local_peer(), this->remote_peer_), 2);
+                      (unsigned int)(this->link()->local_peer() >> 32),
+                      (unsigned int) this->link()->local_peer(),
+                      (unsigned int)(this->remote_peer_ >> 32),
+                      (unsigned int) this->remote_peer_), 2);
 
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
@@ -272,14 +274,6 @@ MulticastSession::synack_received(ACE_Message_Block* control)
 void
 MulticastSession::send_synack()
 {
-  // Send naks before sending synack to
-  // reduce wait time for resends from remote.
-  SingleSendBuffer* send_buffer = this->link_->send_buffer();
-  if (send_buffer && !send_buffer->empty()
-      && send_buffer->low() > ++SequenceNumber()) {
-    send_naks();
-  }
-
   size_t len = sizeof(this->remote_peer_);
 
   ACE_Message_Block* data;
@@ -290,13 +284,20 @@ MulticastSession::send_synack()
   serializer << this->remote_peer_;
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_synack "
-                      "local 0x%x remote 0x%x active %d\n",
+                      "local %#08x%08x remote %#08x%08x active %d\n",
                       this->link()->config()->name().c_str(),
-                      this->link()->local_peer(), this->remote_peer_,
+                      (unsigned int)(this->link()->local_peer() >> 32),
+                      (unsigned int) this->link()->local_peer(),
+                      (unsigned int)(this->remote_peer_ >> 32),
+                      (unsigned int) this->remote_peer_,
                       this->active_ ? 1 : 0), 2);
 
   // Send control sample to remote peer:
   send_control(MULTICAST_SYNACK, data);
+
+  // Send naks before sending synack to
+  // reduce wait time for resends from remote.
+  send_naks();
 }
 
 void
