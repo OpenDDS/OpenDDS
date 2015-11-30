@@ -16,6 +16,10 @@
 namespace OpenDDS {
 namespace DCPS {
 
+// If TransportHeader changes size, must recalculate
+// serialized size and update static variable here
+static const ACE_UINT32 TRANSPORT_HDR_SERIALIZED_SZ(28);
+
 /**
  * @struct TransportHeader
  *

@@ -129,7 +129,7 @@ ReliableSession::ready_to_deliver(const TransportHeader& header,
     {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, held_lock_, false);
 
-      held_.insert(std::make_pair(header.sequence_, data));
+      held_.insert(std::pair<SequenceNumber, ReceivedDataSample>(header.sequence_, data));
 
       if (Transport_debug_level > 5) {
         OPENDDS_MULTIMAP(SequenceNumber, ReceivedDataSample)::iterator it = held_.begin();
@@ -287,8 +287,11 @@ ReliableSession::expire_naks()
     ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ")
                 ACE_TEXT("ReliableSession::expire_naks: ")
-                ACE_TEXT("timed out waiting on remote peer %d to send missing samples: %q - %q!\n"),
-                this->remote_peer_, this->nak_sequence_.low().getValue(), lastSeq.getValue()));
+                ACE_TEXT("timed out waiting on remote peer %#08x%08x to send missing samples: %q - %q!\n"),
+                (unsigned int)(this->remote_peer_ >> 32),
+                (unsigned int) this->remote_peer_,
+                this->nak_sequence_.low().getValue(),
+                lastSeq.getValue()));
   }
 
   // Clear expired repair requests:
@@ -303,33 +306,45 @@ ReliableSession::send_naks()
   // No use nak'ing until syn control message is received and session is acked.
   if (!this->acked()) {
     if (DCPS_debug_level > 5) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
-                           ACE_TEXT("remote %d session NOT acked yet, don't send naks\n"),
-        this->link_->local_peer(), this->remote_peer_));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
+                           ACE_TEXT("remote %#08x%08x session NOT acked yet, don't send naks\n"),
+                           (unsigned int)(this->link()->local_peer() >> 32),
+                           (unsigned int) this->link()->local_peer(),
+                           (unsigned int)(this->remote_peer_ >> 32),
+                           (unsigned int) this->remote_peer_));
     }
     return;
   }
 
   if (DCPS_debug_level > 5) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
-                         ACE_TEXT("remote %d nak request size %d \n"),
-      this->link_->local_peer(), this->remote_peer_, this->nak_requests_.size()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
+                         ACE_TEXT("remote %#08x%08x nak request size %d \n"),
+                         (unsigned int)(this->link()->local_peer() >> 32),
+                         (unsigned int) this->link()->local_peer(),
+                         (unsigned int)(this->remote_peer_ >> 32),
+                         (unsigned int) this->remote_peer_,
+                         this->nak_requests_.size()));
   }
 
   if (!(this->nak_sequence_.low() > 1) && !this->nak_sequence_.disjoint()) {
     if (DCPS_debug_level > 5) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
-                           ACE_TEXT("remote %d nak sequence not disjoint, don't send naks \n"),
-        this->link_->local_peer(), this->remote_peer_));
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
+                           ACE_TEXT("remote %#08x%08x nak sequence not disjoint, don't send naks \n"),
+                           (unsigned int)(this->link()->local_peer() >> 32),
+                           (unsigned int) this->link()->local_peer(),
+                           (unsigned int)(this->remote_peer_ >> 32),
+                           (unsigned int) this->remote_peer_));
     }
 
     if (DCPS_debug_level > 9) {
       const std::vector<SequenceRange> ranges(this->nak_sequence_.present_sequence_ranges());
       for (std::vector<SequenceRange>::const_iterator iter = ranges.begin();
            iter != ranges.end(); ++iter) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) ReliableSession::send_naks - local %d remote %d nak_sequence includes: [%q - %q]\n",
-                     this->link_->local_peer(),
-                     this->remote_peer_,
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) ReliableSession::send_naks - local %#08x%08x remote %#08x%08x nak_sequence includes: [%q - %q]\n",
+                     (unsigned int)(this->link()->local_peer() >> 32),
+                     (unsigned int) this->link()->local_peer(),
+                     (unsigned int)(this->remote_peer_ >> 32),
+                     (unsigned int) this->remote_peer_,
                      iter->first.getValue(),
                      iter->second.getValue()));
       }
@@ -426,9 +441,13 @@ ReliableSession::send_naks()
       }
 
       if (DCPS_debug_level > 5) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
-          ACE_TEXT("remote %d ignore missing [%q - %q]\n"),
-          this->link_->local_peer(), this->remote_peer_, low.getValue(), high.getValue()));
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
+          ACE_TEXT("remote %#08x%08x ignore missing [%q - %q]\n"),
+          (unsigned int)(this->link()->local_peer() >> 32),
+          (unsigned int) this->link()->local_peer(),
+          (unsigned int)(this->remote_peer_ >> 32),
+          (unsigned int) this->remote_peer_,
+          low.getValue(), high.getValue()));
       }
 
       // Make contiguous between ignored sequences.
@@ -469,8 +488,11 @@ ReliableSession::send_naks()
       serializer << iter->second;
       if (DCPS_debug_level > 0) {
         ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks ")
-                              ACE_TEXT (" local %d remote %d [%q - %q]\n"),
-                              this->link_->local_peer(), remote_peer_,
+                              ACE_TEXT (" local %#08x%08x remote %#08x%08x [%q - %q]\n"),
+                              (unsigned int)(this->link()->local_peer() >> 32),
+                              (unsigned int) this->link()->local_peer(),
+                              (unsigned int)(this->remote_peer_ >> 32),
+                              (unsigned int) this->remote_peer_,
                               iter->first.getValue(), iter->second.getValue()));
       }
     }
@@ -483,9 +505,12 @@ ReliableSession::send_naks()
   }
 
   if (!sending_naks && DCPS_debug_level > 5){
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %d ")
-                         ACE_TEXT("remote %d received sequence not disjoint, don't send naks \n"),
-      this->link_->local_peer(), this->remote_peer_));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::send_naks local %#08x%08x ")
+                         ACE_TEXT("remote %#08x%08x received sequence not disjoint, don't send naks \n"),
+                         (unsigned int)(this->link()->local_peer() >> 32),
+                         (unsigned int) this->link()->local_peer(),
+                         (unsigned int)(this->remote_peer_ >> 32),
+                         (unsigned int) this->remote_peer_));
   }
 
   // Clear peer repair requests:
@@ -541,8 +566,11 @@ ReliableSession::nak_received(ACE_Message_Block* control)
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG ((LM_DEBUG,
                   ACE_TEXT ("(%P|%t) ReliableSession::nak_received")
-                  ACE_TEXT (" local %d remote %d [%q - %q] resend result %C\n"),
-                  this->link_->local_peer(), this->remote_peer_,
+                  ACE_TEXT (" local %#08x%08x remote %#08x%08x [%q - %q] resend result %C\n"),
+                  (unsigned int)(this->link()->local_peer() >> 32),
+                  (unsigned int) this->link()->local_peer(),
+                  (unsigned int)(this->remote_peer_ >> 32),
+                  (unsigned int) this->remote_peer_,
                   ranges[i].first.getValue(), ranges[i].second.getValue(),
                   ret ? "SUCCESS" : "FAILED"));
     }
@@ -573,8 +601,11 @@ ReliableSession::send_naks(DisjointSequence& received)
     serializer << iter->second;
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
       ACE_DEBUG ((LM_DEBUG, ACE_TEXT ("(%P|%t) ReliableSession::send_naks (Disjoint) ")
-                            ACE_TEXT (" local %d remote %d [%q - %q]\n"),
-                            this->link_->local_peer(), remote_peer_,
+                            ACE_TEXT (" local %#08x%08x remote %#08x%08x [%q - %q]\n"),
+                            (unsigned int)(this->link()->local_peer() >> 32),
+                            (unsigned int) this->link()->local_peer(),
+                            (unsigned int)(this->remote_peer_ >> 32),
+                            (unsigned int) this->remote_peer_,
                             iter->first.getValue(), iter->second.getValue()));
     }
   }
@@ -619,9 +650,12 @@ ReliableSession::nakack_received(ACE_Message_Block* control)
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_WARNING,
                 ACE_TEXT("(%P|%t) WARNING: ReliableSession::nakack_received ")
-                ACE_TEXT("local %d remote %d with low [%q] ")
+                ACE_TEXT("local %#08x%08x remote %#08x%08x with low [%q] ")
                 ACE_TEXT("- some ranges dropped.\n"),
-                this->link_->local_peer(), this->remote_peer_,
+                (unsigned int)(this->link()->local_peer() >> 32),
+                (unsigned int) this->link()->local_peer(),
+                (unsigned int)(this->remote_peer_ >> 32),
+                (unsigned int) this->remote_peer_,
                 low.getValue()));
     }
   }
