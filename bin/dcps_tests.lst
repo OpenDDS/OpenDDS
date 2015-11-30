@@ -289,7 +289,7 @@ tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/RtiSerialization/run_test.pl: tcp !DCPS_MIN
 tests/DCPS/RtiSerialization/run_test.pl rtps: !DCPS_MIN RTPS
-tests/DCPS/MultiDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST
+tests/DCPS/MultiDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST !TARGET
 tests/DCPS/StaticDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscovery/run_test.pl mp: !DCPS_MIN !NO_MCAST
 tests/DCPS/StaticDiscovery/run_test.pl mp delay: !DCPS_MIN !NO_MCAST
