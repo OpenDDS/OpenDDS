@@ -583,6 +583,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = 1;
     }
 
+    ACE_DEBUG((LM_INFO, "(%P|%t) subscriber starting shutdown\n"));
   try
     {
       if (! CORBA::is_nil (participant.in ()))
@@ -600,6 +601,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       status = 1;
     }
 
+  ACE_DEBUG((LM_INFO, "(%P|%t) subscriber shutdown of ServiceParticipant\n"));
   TheServiceParticipant->shutdown ();
+  ACE_DEBUG((LM_INFO, "(%P|%t) subscriber exiting with status %d\n", status));
   return status;
 }
