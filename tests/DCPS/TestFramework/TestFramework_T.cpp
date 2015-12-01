@@ -361,6 +361,17 @@ TestSubscriber<Reader>::create_datareader()
 }
 
 template<typename Reader>
+DDS::ReadCondition_ptr
+TestSubscriber<Reader>::create_readcondition(
+  DDS::SampleStateMask sample_states,
+  DDS::ViewStateMask view_states,
+  DDS::InstanceStateMask instance_states)
+{
+  return reader_->create_readcondition(sample_states,
+        view_states, instance_states);
+}
+
+template<typename Reader>
 void
 TestSubscriber<Reader>::wait_for_publishers(CORBA::Long count,
                                             DDS::Duration_t timeout)
@@ -402,11 +413,37 @@ TestSubscriber<Reader>::wait_for_publishers(CORBA::Long count,
 
 template<typename Reader>
 DDS::ReturnCode_t
+TestSubscriber<Reader>::take_w_condition (
+  TestMessageSeq & data_values,
+  DDS::SampleInfoSeq & sample_infos,
+  CORBA::Long max_samples,
+  DDS::ReadCondition_ptr a_condition)
+{
+  return reader_i_->take_w_condition(
+      data_values, sample_infos,
+      max_samples, a_condition);
+}
+
+template<typename Reader>
+DDS::ReturnCode_t
 TestSubscriber<Reader>::take_next_sample(
   TestMessage& message,
   DDS::SampleInfo& si)
 {
   return reader_i_->take_next_sample(message, si);
+}
+
+template<typename Reader>
+DDS::ReturnCode_t
+TestSubscriber<Reader>::read_w_condition(
+    TestMessageSeq& data_values,
+    DDS::SampleInfoSeq& sample_infos,
+    CORBA::Long max_samples,
+    DDS::ReadCondition_ptr a_condition)
+{
+  return reader_i_->read_w_condition(
+      data_values, sample_infos,
+      max_samples, a_condition);
 }
 
 template<typename Reader>
