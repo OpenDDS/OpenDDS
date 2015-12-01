@@ -89,8 +89,11 @@ ReliableSession::check_header(const TransportHeader& header)
   if (this->active_) return true;
 
   // Update last seen sequence for remote peer; return false if we
-  // have already seen this datagram to prevent duplicate delivery:
-  return this->nak_sequence_.insert(header.sequence_);
+  // have already seen this datagram to prevent duplicate delivery
+  // Note: SN 2 is first SN recorded - fill in up to 2 when rcvd
+  return this->nak_sequence_.insert(SequenceRange(
+      header.sequence_ == 2 ? SequenceNumber() : header.sequence_,
+      header.sequence_));
 }
 
 void
@@ -241,19 +244,13 @@ ReliableSession::control_received(char submessage_id,
 void
 ReliableSession::syn_hook(const SequenceNumber& seq)
 {
-  //First syn packet at publisher could send would have seq number 2
-  if (seq.getValue() == 2) {
-    // Establish a baseline for detecting reception gaps:
-    this->nak_sequence_.insert(SequenceRange(SequenceNumber(), seq));
-  } else {
-    const std::vector<SequenceRange> ranges(this->nak_sequence_.present_sequence_ranges());
-    this->nak_sequence_.reset();
-    this->nak_sequence_.insert(seq);
+  const std::vector<SequenceRange> ranges(this->nak_sequence_.present_sequence_ranges());
+  this->nak_sequence_.reset();
+  this->nak_sequence_.insert(seq);
 
-    for (std::vector<SequenceRange>::const_iterator iter = ranges.begin();
-         iter != ranges.end(); ++iter) {
-      this->nak_sequence_.insert(SequenceRange(iter->first, iter->second));
-    }
+  for (std::vector<SequenceRange>::const_iterator iter = ranges.begin();
+       iter != ranges.end(); ++iter) {
+    this->nak_sequence_.insert(SequenceRange(iter->first, iter->second));
   }
 }
 
@@ -558,6 +555,16 @@ ReliableSession::nak_received(ACE_Message_Block* control)
   // repair requests for unrecoverable samples by providing a
   // new low-water mark for affected peers:
   if (!send_buffer->empty() && send_buffer->low() > ranges.begin()->first) {
+      if (OpenDDS::DCPS::DCPS_debug_level > 0) {
+        ACE_DEBUG ((LM_DEBUG,
+                    ACE_TEXT ("(%P|%t) ReliableSession::nak_received")
+                    ACE_TEXT (" local %#08x%08x remote %#08x%08x sending nakack for lowest available: %q\n"),
+                    (unsigned int)(this->link()->local_peer() >> 32),
+                    (unsigned int) this->link()->local_peer(),
+                    (unsigned int)(this->remote_peer_ >> 32),
+                    (unsigned int) this->remote_peer_,
+                    send_buffer->low().getValue()));
+      }
     send_nakack(send_buffer->low());
   }
 
