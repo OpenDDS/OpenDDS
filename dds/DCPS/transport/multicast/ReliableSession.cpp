@@ -129,7 +129,7 @@ ReliableSession::ready_to_deliver(const TransportHeader& header,
     {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, held_lock_, false);
 
-      held_.insert(std::pair<SequenceNumber, ReceivedDataSample>(header.sequence_, data));
+      held_.insert(std::pair<const SequenceNumber, ReceivedDataSample>(header.sequence_, data));
 
       if (Transport_debug_level > 5) {
         OPENDDS_MULTIMAP(SequenceNumber, ReceivedDataSample)::iterator it = held_.begin();
