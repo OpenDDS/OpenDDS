@@ -469,7 +469,7 @@ bool open_appropriate_socket_type(ACE_SOCK_Dgram& socket, const ACE_INET_Addr& l
     ACE_ERROR_RETURN((LM_WARNING,
       ACE_TEXT("(%P|%t) WARNING:")
       ACE_TEXT("open_appropriate_socket_type: socket open not successful:")
-      ACE_TEXT("%m\n")),
+      ACE_TEXT("errno: %d\n"), errno),
       false);
   }
   return true;
