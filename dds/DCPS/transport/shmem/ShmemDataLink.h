@@ -54,7 +54,7 @@ typedef ACE_Malloc_T<ShmemPool, ACE_Process_Mutex, ACE_PI_Control_Block>
 
 struct ShmemData {
   int status_;
-  char transport_header_[24]; // <-- this must change if TransportHeader changes
+  char transport_header_[TRANSPORT_HDR_SERIALIZED_SZ];
   ACE_Based_Pointer_Basic<char> payload_;
 };
 

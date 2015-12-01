@@ -70,10 +70,13 @@ public:
 
   void synack_received(ACE_Message_Block* control);
   void send_synack();
-  virtual void send_nakack(SequenceNumber /*low*/) {}
   virtual void send_naks() {}
 
   virtual bool check_header(const TransportHeader& header) = 0;
+  virtual void record_header_received(const TransportHeader& header) = 0;
+  virtual bool ready_to_deliver(const TransportHeader& header,
+                                const ReceivedDataSample& data) = 0;
+  virtual void release_remote(const RepoId& /*remote*/) {};
 
   virtual bool control_received(char submessage_id,
                                 ACE_Message_Block* control);

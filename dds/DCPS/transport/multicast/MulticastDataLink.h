@@ -102,21 +102,14 @@ private:
   typedef OPENDDS_MAP(MulticastPeer, MulticastSession_rch) MulticastSessionMap;
   MulticastSessionMap sessions_;
 
-  OPENDDS_MAP_CMP(RepoId, DisjointSequence, OpenDDS::DCPS::GUID_tKeyLessThan) data_samples_seen_;
-  OPENDDS_MAP_CMP(RepoId, OPENDDS_MAP(SequenceNumber, ReceivedDataSample), OpenDDS::DCPS::GUID_tKeyLessThan) held_;
-
   virtual void stop_i();
 
   void syn_received_no_session(MulticastPeer source, ACE_Message_Block* data,
                                bool swap_bytes);
-  void sample_rcvd_no_acked_session(MulticastPeer source, ACE_Message_Block* data,
-                                    bool swap_bytes);
 
   void release_remote_i(const RepoId& remote);
   RepoIdSet readers_selected_, readers_withheld_;
-  bool ready_to_deliver(const ReceivedDataSample& data, ACE_INT32 source);
-  void deliver_held_data(PublicationId pubId);
-  bool duplicate_data_sample(const DataSampleHeader& header);
+  bool ready_to_deliver(const ReceivedDataSample& data);
 };
 
 } // namespace DCPS

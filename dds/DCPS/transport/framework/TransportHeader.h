@@ -16,6 +16,10 @@
 namespace OpenDDS {
 namespace DCPS {
 
+// If TransportHeader changes size, must recalculate
+// serialized size and update static variable here
+static const ACE_UINT32 TRANSPORT_HDR_SERIALIZED_SZ(28);
+
 /**
  * @struct TransportHeader
  *
@@ -72,7 +76,7 @@ struct OpenDDS_Dcps_Export TransportHeader {
 
   /// A transport-specific identification number which uniquely
   /// identifies the source of the packet.
-  ACE_INT32 source_;
+  ACE_INT64 source_;
 
   /// Similar to IDL compiler generated methods.
   static size_t max_marshaled_size();

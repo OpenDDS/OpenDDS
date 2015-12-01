@@ -13,7 +13,7 @@
 namespace OpenDDS {
 namespace DCPS {
 
-typedef ACE_INT32 MulticastPeer;
+typedef ACE_INT64 MulticastPeer;
 
 } // namespace DCPS
 } // namespace OpenDDS
