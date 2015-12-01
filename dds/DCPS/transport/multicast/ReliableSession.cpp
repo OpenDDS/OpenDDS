@@ -538,14 +538,6 @@ ReliableSession::nak_received(ACE_Message_Block* control)
     ranges.push_back(range);
   }
 
-  // Track peer repair requests for later suppression:
-  if (local_peer == this->remote_peer_) {
-    for (CORBA::ULong i = 0; i < size; ++i) {
-      this->nak_peers_.insert(ranges[i]);
-    }
-    return;
-  }
-
   // Ignore sample if not destined for us:
   if ((local_peer != this->link_->local_peer())        // Not to us.
     || (this->remote_peer_ != header.source_)) return; // Not from the remote peer for this session.
