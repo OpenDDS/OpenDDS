@@ -79,7 +79,7 @@ TestCase::test()
 
   // As there are no fully association establishment between pub and sub for UDP
   // transport, a delay is required for the test to receive all messages.
-  ACE_OS::sleep (2);
+  ACE_OS::sleep (3);
 
   // Write test data to exercise the data paths:
   for (int i = 0; i < num_messages; ++i) {
@@ -105,21 +105,24 @@ TestCase::test()
                                      DDS::ALIVE_INSTANCE_STATE);
     ws->attach_condition(rc);
     DDS::Duration_t finite = {30, 0};
-    while (read != num_messages) {
-      DDS::ConditionSeq active;
-      DDS::ReturnCode_t ret = ws->wait(active, finite);
-      if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                    ACE_TEXT("%N:%l: wait()")
-                    ACE_TEXT(" ERROR: wait for samples failed: %d\n"),
-                    ret), -1);
-      }
+    do {
       TestMessageSeq data_values;
       DDS::SampleInfoSeq sample_infos;
       CORBA::Long max_samples = num_messages;
       (*sub)->read_w_condition(data_values, sample_infos, max_samples, rc);
       read += data_values.length();
-    }
+      if (read != num_messages) {
+        DDS::ConditionSeq active;
+        DDS::ReturnCode_t ret = ws->wait(active, finite);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: wait()")
+                      ACE_TEXT(" ERROR: wait for samples failed: %d\n"),
+                      ret), -1);
+        }
+      }
+    } while (read != num_messages);
+
     ws->detach_condition(rc);
   }
 
