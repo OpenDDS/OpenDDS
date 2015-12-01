@@ -112,7 +112,7 @@ tests/DCPS/BuiltInTopic/run_test.pl ignore_part: !DCPS_MIN !NO_BUILT_IN_TOPICS !
 tests/DCPS/BuiltInTopic/run_test.pl ignore_topic: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_pub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/BuiltInTopic/run_test.pl ignore_sub: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE
-tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/BuiltInTopicTest/run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !DDS_NO_OWNERSHIP_PROFILE !TARGET
 tests/DCPS/BuiltInTopicTest/prst_repo_run_test.pl: !DCPS_MIN !NO_BUILT_IN_TOPICS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 
 tests/DCPS/CorbaSeq/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
