@@ -13,7 +13,7 @@ use strict;
 
 my $status = 0;
 my $common_opts = "-ORBDebugLevel 1 -ORBVerboseLogging 1 -DCPSDebugLevel 10 ".
-    "-DCPSTransportDebugLevel 6";
+    "-DCPSTransportDebugLevel 10";
 
 my $pub_opts = $common_opts;
 my $sub_opts = $common_opts;
@@ -23,6 +23,7 @@ unlink $dcpsrepo_ior;
 
 my $DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
                                         "$common_opts " .
+                                        "-NOBITS " .
 #                                        "-ORBLogFile DCPSInfoRepo.log " .
                                         "-o $dcpsrepo_ior");
 
