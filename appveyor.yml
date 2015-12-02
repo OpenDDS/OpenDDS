@@ -18,12 +18,13 @@ platform:
 configuration:
   - Debug
 
-build:
-  parallel: true
-  project: DDS_TAOv2.sln
+#build:
+#  parallel: true
+#  project: DDS_TAOv2.sln
 
 build_script:
-  - msbuild tests\DCPS\Messenger\Messenger.sln
+  - msbuild DDS_TAOv2.sln /m /p:Configuration=Debug;Platform=x64
+  - msbuild tests\DCPS\Messenger\Messenger.sln /m /p:Configuration=Debug;Platform=x64
 
 after_build:
   - cd DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
