@@ -10,6 +10,7 @@ install:
   - set MPC_ROOT=%CD%\ext\MPC
   - call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
   - call configure --no-tests --ace=ext\ATCD\ACE
+  - %ACE_ROOT%\bin\mwc.pl -type vc12 tests\DCPS\Messenger
 
 platform:
   - x64
@@ -21,7 +22,12 @@ build:
   parallel: true
   project: DDS_TAOv2.sln
 
+build:
+  parallel: true
+  project: tests\DCPS\Messenger\Messenger.sln
+
 after_build:
   - cd DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
+  - cd ..\..\..\tests\DCPS\Messenger && run_test.pl rtps
 
 test: off
