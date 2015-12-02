@@ -105,13 +105,14 @@ TestCase::test()
                                      DDS::ALIVE_INSTANCE_STATE);
     ws->attach_condition(rc);
     DDS::Duration_t finite = {30, 0};
+    CORBA::Long num_expected = num_messages * publishers_.size();
+
     do {
       TestMessageSeq data_values;
       DDS::SampleInfoSeq sample_infos;
-      CORBA::Long max_samples = num_messages;
-      (*sub)->read_w_condition(data_values, sample_infos, max_samples, rc);
+      (*sub)->read_w_condition(data_values, sample_infos, num_expected, rc);
       read += data_values.length();
-      if (read != num_messages) {
+      if (read != num_expected) {
         DDS::ConditionSeq active;
         DDS::ReturnCode_t ret = ws->wait(active, finite);
         if (ret != DDS::RETCODE_OK) {
@@ -121,7 +122,7 @@ TestCase::test()
                       ret), -1);
         }
       }
-    } while (read != num_messages);
+    } while (read != num_expected);
 
     ws->detach_condition(rc);
   }
