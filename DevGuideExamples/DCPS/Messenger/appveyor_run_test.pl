@@ -12,8 +12,8 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $status = 0;
-my $common_opts = "-ORBDebugLevel 1 -ORBVerboseLogging 1 -DCPSDebugLevel 2 ".
-    "-DCPSTransportDebugLevel 3";
+my $common_opts = "-ORBDebugLevel 1 -ORBVerboseLogging 1 -DCPSDebugLevel 10 ".
+    "-DCPSTransportDebugLevel 6";
 
 my $pub_opts = $common_opts;
 my $sub_opts = $common_opts;
