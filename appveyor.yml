@@ -20,9 +20,8 @@ configuration:
 
 build:
   parallel: true
-  projects:
-    - DDS_TAOv2.sln
-    - tests\DCPS\Messenger\Messenger.sln
+  project: DDS_TAOv2.sln
+  project: tests\DCPS\Messenger\Messenger.sln
 
 after_build:
   - cd DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
