@@ -38,7 +38,7 @@ foreach my $arg (@ARGV) {
   }
 }
 
-my $test_opts = "-DCPSConfigFile $transport @other_args";
+my $test_opts = "-DCPSPendingTimeout 3 -DCPSConfigFile $transport @other_args";
 
 my $status = 0;
 

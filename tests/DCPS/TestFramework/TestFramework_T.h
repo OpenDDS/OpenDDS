@@ -83,9 +83,26 @@ public:
     DDS::DataReaderListener_ptr& listener,
     DDS::StatusMask& status);
 
+  DDS::ReadCondition_ptr create_readcondition(
+    DDS::SampleStateMask sample_states,
+    DDS::ViewStateMask view_states,
+    DDS::InstanceStateMask instance_states);
+
   void wait_for_publishers(
     CORBA::Long count = 1,
     DDS::Duration_t timeout = TestBase::DEFAULT_TIMEOUT);
+
+  DDS::ReturnCode_t read_w_condition(
+    TestMessageSeq& data_values,
+    DDS::SampleInfoSeq& sample_infos,
+    CORBA::Long max_samples,
+    DDS::ReadCondition_ptr a_condition);
+
+  DDS::ReturnCode_t take_w_condition (
+    TestMessageSeq & data_values,
+    DDS::SampleInfoSeq & sample_infos,
+    CORBA::Long max_samples,
+    DDS::ReadCondition_ptr a_condition);
 
   DDS::ReturnCode_t take_next_sample(
     TestMessage& message,

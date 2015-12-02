@@ -20,6 +20,7 @@
 
 #include "TestCase.h"
 #include "tests/Utils/ExceptionStreams.h"
+#include <dds/DCPS/WaitSet.h>
 
 
 namespace {
@@ -78,7 +79,7 @@ TestCase::test()
 
   // As there are no fully association establishment between pub and sub for UDP
   // transport, a delay is required for the test to receive all messages.
-  ACE_OS::sleep (2);
+  ACE_OS::sleep (3);
 
   // Write test data to exercise the data paths:
   for (int i = 0; i < num_messages; ++i) {
@@ -93,24 +94,60 @@ TestCase::test()
     }
   }
 
-  ACE_OS::sleep(5); // wait for delivery
+  // wait for delivery
+  for (TestSubscriberVector::iterator sub = subscribers_.begin();
+       sub != subscribers_.end(); ++sub) {
+    int read = 0;
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    DDS::ReadCondition_var rc =
+        (*sub)->create_readcondition(DDS::NOT_READ_SAMPLE_STATE,
+                                     DDS::NEW_VIEW_STATE,
+                                     DDS::ALIVE_INSTANCE_STATE);
+    ws->attach_condition(rc);
+    DDS::Duration_t finite = {30, 0};
+    do {
+      TestMessageSeq data_values;
+      DDS::SampleInfoSeq sample_infos;
+      CORBA::Long max_samples = num_messages;
+      (*sub)->read_w_condition(data_values, sample_infos, max_samples, rc);
+      read += data_values.length();
+      if (read != num_messages) {
+        DDS::ConditionSeq active;
+        DDS::ReturnCode_t ret = ws->wait(active, finite);
+        if (ret != DDS::RETCODE_OK) {
+          ACE_ERROR_RETURN((LM_ERROR,
+                      ACE_TEXT("%N:%l: wait()")
+                      ACE_TEXT(" ERROR: wait for samples failed: %d\n"),
+                      ret), -1);
+        }
+      }
+    } while (read != num_messages);
+
+    ws->detach_condition(rc);
+  }
 
   // This test verifies associations formed between subscribers and
   // publishers attached to the same TransportImpl. There is nothing
   // which needs to be verified other than the association is formed
   // without crashing the DCPS subsystem.
   for (int i = 0; i < num_messages; ++i) {
-    TestMessage message;
-    DDS::SampleInfo si;
+    TestMessageSeq message_seq;
+    DDS::SampleInfoSeq si_seq;
+    ::CORBA::Long max_take = 1;
 
     // For each subscriber
     for (TestSubscriberVector::iterator sub = subscribers_.begin();
          sub != subscribers_.end(); ++sub) {
+      DDS::ReadCondition_var tc = (*sub)->create_readcondition(DDS::READ_SAMPLE_STATE,
+                                                               DDS::ANY_VIEW_STATE,
+                                                               DDS::ALIVE_INSTANCE_STATE);
       // For each publisher
       size_t num_pubs = publishers_.size();
       for (unsigned int i = 0; i < num_pubs; ++i) {
-        DDS::ReturnCode_t status = (*sub)->take_next_sample(message, si);
+        DDS::ReturnCode_t status = (*sub)->take_w_condition(message_seq, si_seq, max_take, tc);
         if (status == DDS::RETCODE_OK) {
+          DDS::SampleInfo si = si_seq[0];
+          TestMessage message = message_seq[0];
           std::cout << "SampleInfo.sample_rank = " << si.sample_rank << std::endl;
           std::cout << "SampleInfo.instance_state = " << si.instance_state << std::endl;
 
