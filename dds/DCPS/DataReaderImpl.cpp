@@ -343,7 +343,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
       // Schedule timer if necessary
       //   - only need to check reader qos - we know the writer must be >= reader
       if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-        end_historic_sweeper_->schedule_timer(info);
+        info->waiting_for_end_historic_samples_ = true;
       }
 
       this->statistics_.insert(
@@ -3343,6 +3343,17 @@ void DataReaderImpl::deliver_historic(OPENDDS_MAP(SequenceNumber, ReceivedDataSa
 void
 DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
 {
+  if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
+
+    ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
+
+    WriterMapType::iterator it = writers_.find(peer);
+    if (it != writers_.end()) {
+      // Schedule timer if necessary
+      //   - only need to check reader qos - we know the writer must be >= reader
+      end_historic_sweeper_->schedule_timer(it->second);
+    }
+  }
   TransportClient::add_link(link, peer);
   TransportImpl_rch impl = link->impl();
   OPENDDS_STRING type = impl->transport_type();
