@@ -27,7 +27,7 @@ build_script:
   - msbuild tests\DCPS\Messenger\Messenger.sln /m /p:Configuration=Debug;Platform=x64
 
 after_build:
-  - cd DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
   - cd ..\..\..\tests\DCPS\Messenger && run_test.pl rtps
+  - cd DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
 
 test: off
