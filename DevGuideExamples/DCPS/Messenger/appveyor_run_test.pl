@@ -13,7 +13,7 @@ use strict;
 
 my $status = 0;
 my $common_opts = "-ORBDebugLevel 1 -ORBVerboseLogging 1 -DCPSDebugLevel 2 ".
-    "-DCPSTransportDebugLevel 3";
+    "-DCPSTransportDebugLevel 3 -DCPSDefaultAddress 127.0.0.1";
 
 my $pub_opts = $common_opts;
 my $sub_opts = $common_opts;
