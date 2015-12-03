@@ -364,6 +364,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
           if (res.success_ && !res.link_.is_nil()) {
 
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::associate - calling use_datalink_i with link[%@]\n", res.link_.in()));
             use_datalink_i(data.remote_id_, res.link_, guard);
 
             return true;
@@ -386,6 +387,7 @@ TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
 {
   TransportClient* tc = static_cast<TransportClient*>(const_cast<void*>(arg));
 
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::PendingAssoc::handle_timeout - calling use_datalink\n"));
   tc->use_datalink(data_.remote_id_, 0);
 
   return 0;
@@ -524,6 +526,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
           if (!res.link_.is_nil()) {
 
+            ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::PendingAssoc::initiate_connect - calling use_datalink_i with link[%@]\n", res.link_.in()));
             tc->use_datalink_i(data_.remote_id_, res.link_, guard);
           } else {
             GuidConverter local(tc->repo_id_);
@@ -559,6 +562,7 @@ TransportClient::use_datalink(const RepoId& remote_id,
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TransportClient::use_datalink - calling use_datalink_i with link[%@]\n", link.in()));
   use_datalink_i(remote_id, link, guard);
 }
 

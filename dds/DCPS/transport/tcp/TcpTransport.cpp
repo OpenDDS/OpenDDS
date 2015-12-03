@@ -112,6 +112,9 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
   ACE_TCHAR str[64];
   key.address().addr_to_string(str,sizeof(str)/sizeof(str[0]));
 
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink - trying to connect to %C:%hu\n",
+      OPENDDS_STRING(key.address().get_host_addr()).c_str(),
+      key.address().get_port_number()));
   // Can't make this call while holding onto TransportClient::lock_
   const int ret =
     connector_.connect(pConn, key.address(), ACE_Synch_Options::asynch);
@@ -370,6 +373,8 @@ TcpTransport::configure_i(TransportInst* config)
   if (this->tcp_config_->local_address() == ACE_INET_Addr () &&
       !TheServiceParticipant->default_address ().empty ()) {
     this->tcp_config_->local_address(0, TheServiceParticipant->default_address ().c_str ());
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpTransport::configure_i - Overriding with DCPSDefaultAddress %C\n",
+               this->tcp_config_->local_address_string().c_str()));
   }
 
   // Open our acceptor object so that we can accept passive connections

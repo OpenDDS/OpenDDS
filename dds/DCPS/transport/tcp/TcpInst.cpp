@@ -73,7 +73,9 @@ OpenDDS::DCPS::TcpInst::dump_to_str()
   os << TransportInst::dump_to_str() << std::endl;
 
   os << formatNameForDump("local_address")                 << this->local_address_string() << std::endl;
-  os << formatNameForDump("pub_address")                   << this->pub_address_str_ << std::endl;
+  os << formatNameForDump("local_address (dot deci)")      << this->local_address().get_host_addr()
+                                                           << ":" << this->local_address().get_port_number() << std::endl;
+  os << formatNameForDump("pub_address")                   << this->get_public_address() << std::endl;
   os << formatNameForDump("enable_nagle_algorithm")        << (this->enable_nagle_algorithm_ ? "true" : "false") << std::endl;
   os << formatNameForDump("conn_retry_initial_delay")      << this->conn_retry_initial_delay_ << std::endl;
   os << formatNameForDump("conn_retry_backoff_multiplier") << this->conn_retry_backoff_multiplier_ << std::endl;
@@ -88,6 +90,7 @@ OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_
 {
   if (this->local_address() != ACE_INET_Addr() || !pub_address_str_.empty()) {
     // Get the public address string from the inst (usually the local address)
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpInst::populate_locator - public_address: %C\n", this->get_public_address().c_str()));
     NetworkAddress network_order_address(this->get_public_address());
 
     ACE_OutputCDR cdr;
