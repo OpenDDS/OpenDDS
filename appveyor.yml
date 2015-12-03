@@ -11,8 +11,7 @@ install:
   - call "C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\vcvarsall.bat" amd64
   - call configure --no-tests --ace=ext\ATCD\ACE
   - ext\ATCD\ACE\bin\mwc.pl -type vc12 tests\DCPS\Messenger
-  - ipconfig /all
-  - ping appveyor-vm.c.appveyor-ci.internal.
+  - ping appveyor-vm.c.appveyor-ci.internal. & ipconfig /all
 
 platform:
   - x64
