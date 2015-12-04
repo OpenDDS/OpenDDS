@@ -12,14 +12,14 @@ BUILDING OpenDDS
 
 * Compiling:
 
-  Starting with version 2.2, OpenDDS has a "configure" script to automate the
-  steps described below (Option B).  This script requires Perl 5.10 or newer to
-  be installed and available on the system PATH.  Perl 5.8 may be sufficient on
+  OpenDDS has a "configure" script to automate all steps required before
+  actually compiling source code.  This script requires Perl 5.10 or newer to be
+  installed and available on the system PATH.  Perl 5.8 may be sufficient on
   Unix systems but ActiveState Perl 5.10 or newer should be used on Windows.
   To start the script simply change to the directory containing this INSTALL
   file, and run
 
-  ./configure         (*nix)
+  ./configure         (Linux, MacOSX, Solaris)
   configure           (Windows: use a Visual Studio Command Prompt)
 
   Optionally add "--help" to the command line to see the advanced options
@@ -30,11 +30,16 @@ BUILDING OpenDDS
   If configure runs successfully it will end with a message about the next
   steps for compiling OpenDDS.
 
-  The configure script creates an environment setup file called setenv to
-  restore all the environment variables the build and test steps rely on.
-  The main makefile for *nix builds temporarily sets the environment as well.
+  The configure script creates an environment setup file called setenv (actually
+  named setenv.sh or setenv.cmd depending on platform) that restores all the
+  environment variables the build and test steps rely on.
+  The main makefile for non-Windows builds temporarily sets the environment as
+  well, so setenv.sh is not needed when running "make" from the top level.
+  On Windows, the configure script modifies the environment of the command
+  prompt that ran it.
 
-* Test 
+
+* Test:
 
   Optionally, you can run the entire OpenDDS regression test suite with one
   Perl command.
@@ -42,11 +47,30 @@ BUILDING OpenDDS
   NOTE: Make sure your environment is set by checking the variable DDS_ROOT.
         Run setenv if it is not set.
 
-  $DDS_ROOT/bin/auto_run_tests.pl
+  bin/auto_run_tests.pl        (On Windows: bin\auto_run_test.pl)
       If you built static libraries, add "-Config STATIC" to this command.
+      To test RTPS features (uses multicast) add "-Config RTPS" to this command.
       On Windows if you build Release mode add "-ExeSubDir Release".
       On Windows if you build static libraries add "-ExeSubDir Static_Debug"
       or "-ExeSubDir Static_Release".
+
+
+* Installation:
+
+  When OpenDDS is built using make, if the configure script was run with an
+  argument of "--prefix=<dir>" the "make install" target is available.
+
+  After running "make" (and before "make install") you have one completely ready
+  and useable OpenDDS.  Its DDS_ROOT is the top of the source tree -- the same
+  directory from which you ran configure and make.  That DDS_ROOT should work
+  for building application code, and some users may prefer using it this way.
+
+  After "make install" there is a second completely ready and useable OpenDDS
+  that's under the installation prefix directory.  It comes with a one-line
+  shell script in <prefix>/share/dds/dds-devel.sh that sets a DDS_ROOT which
+  is used for building an application using this installed OpenDDS.  The
+  analogous files for ACE and TAO are in <prefix>/share/ace/ace-devel.sh and 
+  <prefix>/share/tao/tao-devel.sh.
 
 
 * Cross Compiling:
@@ -56,6 +80,7 @@ BUILDING OpenDDS
 
   ./configure --target=lynxos-178
 
+  Supported targets include lynxos-178 and vxworks.
   In this setup, configure will clone the DDS and TAO source trees for host and 
   target builds.  It will do a static build of the host tools (such as
   opendds_idl and tao_idl) in the host environment, and a full build in the
@@ -63,6 +88,7 @@ BUILDING OpenDDS
   target parameters.
 
   Any testing has to be done manually.
+
 
 * Getting Started building your own applications:
 
@@ -74,7 +100,7 @@ BUILDING OpenDDS
   ----                                            -------
   cd $DDS_ROOT/DevGuideExamples/DCPS/Messenger    cd %DDS_ROOT%\DevGuideExam...
   ./run_test.pl                                   perl run_test.pl
-  [ see the notes in step 5 "Test", above, for options to run_test.pl ]
+  [ see the notes in section "Test", above, for options to run_test.pl ]
 
   The Perl script will start 3 processes, the DCPSInfoRepo, one publisher, and
   one subscriber.  Note that the command lines used to spawn these processes
@@ -84,14 +110,6 @@ BUILDING OpenDDS
 
 
 * Platform specific notes:
-
- QNX:
-  QNX requires the MPC feature "link_codecfactory=1" be present during makefile
-  generation for both TAO and OpenDDS.  Technically, this is part of Step #1
-  above because it's required in order to have a functioning TAO build.  Use
-  the instructions under "Note:" above to re-generate the makefiles after
-  adding the line "link_codecfactory=1" to the end of
-  $ACE_ROOT/bin/MakeProjectCreator/config/default.features.
 
  Android:
   Currently there is only support for building with Standalone compiler

@@ -111,24 +111,19 @@ on Unix and Linux systems.
 ** Perl
 
 Perl is used for running the automated tests and examples included in this
-source tree, or if you will be generating Makefiles or Visual Studio project
-files.  In most cases you will *not* need to generate Makefiles/project files
-for OpenDDS itself (but see the INSTALL file for details), but doing so for
-your own application code that uses OpenDDS is recommended.  On Windows we
-recommend the use of ActiveState Perl.  The "configure" script also uses Perl.
-
-* Build Targets
+source tree and generating Makefiles or Visual Studio project files.  On Windows
+we recommend the use of ActiveState Perl.  The configure script also uses Perl.
 
 * Operating Systems
 
 This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
-** Red Hat EL 5, x86_64
-** Red Hat EL 6.6, x86_64
+** Red Hat EL 5 and 5.3, x86_64
+** Red Hat EL and CentOS 6.6, x86_64
 ** Red Hat EL 7.1, x86_64
 ** Fedora Core 6, x86
-** Fedoras 12 x86_64
+** Fedora 12 x86_64
 ** Ubuntu 14.04 LTS, x86_64
 ** openSUSE 11.4, x86_64
 
@@ -156,10 +151,12 @@ This release of OpenDDS has been tested using the following compilers:
 ** Microsoft Visual C++ 11 (Visual Studio 2012)
 ** Microsoft Visual C++ 12 (Visual Studio 2013)
 ** Microsoft Visual C++ 14 (Visual Studio 2015)
-** gcc 4.4.3
-** gcc 4.6.1
-** gcc 4.8.2
-** Clang 3.4
+** gcc 4.1.x
+** gcc 4.4.x
+** gcc 4.5.x
+** gcc 4.8.x
+** gcc 5.3
+** Clang 3.7 (llvm.org) and 6.10 (Apple)
 ** Sun C++ 5.9 SunOS_sparc Patch 124863-01 2007/07/25
 
 * Building and Installing
