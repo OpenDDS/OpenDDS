@@ -28,6 +28,6 @@ build_script:
 
 after_build:
   - cd tests\DCPS\Messenger && run_test.pl rtps
-  - cd DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
+  - cd ..\..\..\DevGuideExamples\DCPS\Messenger && appveyor_run_test.pl
 
 test: off
