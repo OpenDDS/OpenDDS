@@ -29,6 +29,7 @@
 #include <dds/DCPS/transport/multicast/Multicast.h>
 #include <dds/DCPS/transport/shmem/Shmem.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #endif
 
 #include "DataReaderListener.h"
