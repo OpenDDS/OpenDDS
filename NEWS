@@ -1,3 +1,18 @@
+Version 3.8 of OpenDDS.
+
+- Improved support for Safety Profile
+
+- OpenDDS multicast transport (reliable mode) now guarantees in-order delivery
+
+- Added a "default address" configuration parameter that sets an overall default
+  for binding to a specific network interface
+
+- Fixed bugs in transport framework, udp transport, InfoRepo discovery, static
+  discovery, and the Liveliness and Durability QoS policies
+
+
+========================================================================
+
 Version 3.7 of OpenDDS.
 
 Additions:
@@ -59,6 +74,8 @@ Notes:
   of these older platforms contact sales@ociweb.com.
 - The project repository is now at https://github.com/objectcomputing/OpenDDS
 
+
+========================================================================
 
 Version 3.6 of OpenDDS.
 
@@ -124,6 +141,7 @@ Tests:
   publications with large numbers of subscribers.
 
 - Added a packet reassembly unit test.
+
 
 ========================================================================
 
@@ -215,6 +233,7 @@ Tests:
 
 - Rewrite LargeSample test to make it verify message contents are as expected.
 
+
 ========================================================================
 
 Version 3.5 of OpenDDS.
@@ -235,6 +254,7 @@ Version 3.5 of OpenDDS.
   types are used as fields of structs.
 
 - Corrected a number of other bugs related to discovery and scaling.
+
 
 ========================================================================
 

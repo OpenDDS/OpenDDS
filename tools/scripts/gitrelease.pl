@@ -1,14 +1,16 @@
 use strict;
 use warnings;
-use Date::Format;
+use Time::Piece;
+use POSIX;
 use Cwd;
 use LWP::Simple;
 use File::Basename;
 use lib dirname (__FILE__) . "/modules";
 use ConvertFiles;
 
-
 $ENV{TZ} = "UTC";
+Time::Piece::_tzset;
+my $timefmt = "%a %b %d %H:%M:%S %Z %Y";
 
 sub usage {
   return "gitrelease.pl <version> [options]\n" .
@@ -198,9 +200,10 @@ sub find_previous_tag {
   my $prev_version_value = 0;
   my $release_version_value = version_to_value($version);
 
-  open(GITTAG, "git tag --list 'DDS-*' |") or die "Opening $!";
+  open(GITTAG, "git tag --list |") or die "Opening $!";
   while (<GITTAG>) {
     chomp;
+    next unless /^DDS-([\d\.]*)/;
     my $tag_value = version_to_value($_);
     # If this is less than the release version, but the largest seen yet
     if (($tag_value < $release_version_value) &&
@@ -313,7 +316,7 @@ sub remedy_changelog {
       # print out previous
       if ($author) {
         print CHANGELOG $date . "  " .  $author . "\n";
-        print CHANGELOG "$commit\n";
+        print CHANGELOG "        $commit\n";
         if ($file_mod_list) {
           print CHANGELOG "\n" . $file_mod_list;
         }
@@ -327,9 +330,9 @@ sub remedy_changelog {
       # Ignore
     } elsif (/^Author: *(.*)/) {
       $author = $1;
+      $author =~ s/</ </;
     } elsif (/^Date: *([0-9]+)/) {
-      my @gmtime = gmtime($1);
-      $date = strftime("%a %b %e %H:%M:%S %Z %Y", @gmtime);
+      $date = POSIX::strftime($timefmt, gmtime($1));
     } elsif (/^ +(.*) */) {
       $comment .= "$1\n";
     } elsif (/^[AMD]\s+(.*) *$/) {
@@ -1224,8 +1227,6 @@ my @ordered_steps = (
   'Email DDS-Release-Announce list',
 );
 
-my @t = gmtime;
-
 sub any_arg_is {
   my $match = shift;
   foreach my $arg (@ARGV) {
@@ -1276,7 +1277,7 @@ my %settings = (
   tgz_dox    => "OpenDDS-$version-doxygen.tar.gz",
   zip_dox    => "OpenDDS-$version-doxygen.zip",
   devguide   => "OpenDDS-$version.pdf",
-  timestamp  => strftime("%a %b %e %T %Z %Y", @t),
+  timestamp  => POSIX::strftime($timefmt, gmtime),
   git_url    => 'git@github.com:objectcomputing/OpenDDS.git',
   changelog  => "docs/history/ChangeLog-$version",
   modified   => {"NEWS" => 1,
@@ -1287,8 +1288,8 @@ my %settings = (
                 "tools/scripts/gitrelease.pl" => 1}
 );
 
-my $half_divider = "-----------------------------------------";
-my $divider = "$half_divider$half_divider";
+my $half_divider = '-' x 40;
+my $divider = $half_divider x 2;
 
 sub run_step {
   my ($settings, $step_count, $title, $release_step_hash, $steps_run) = @_;

@@ -463,9 +463,6 @@ if ($opts{'safety-profile'}) {
 ## Download ACE+TAO
 my $tao_maj = 1;
 if (!$ace_src || !$tao_src) {
-  if (defined $opts{'safety-profile'} && $opts{'safety-profile'} eq "extended") {
-    $tao_version = 'face-safety-22a';
-  }
   my $urlbase = 'http://download.ociweb.com/TAO-' . $tao_version . '/';
   my $file = 'ACE+TAO-' . $tao_version . '_with_latest_patches_NO_makefiles.'
     . ($slash eq '/' ? 'tar.gz' : 'zip');
@@ -1006,17 +1003,13 @@ EOT
     $ws = 'host_tools.mwc';
   }
   elsif (!$tests && $buildtao) {
-    $ws = 'DDS_TAO.mwc';
+    $ws = 'DDS_TAOv2.mwc';
   }
   elsif (!$tests && !$buildtao) {
     $ws = 'DDS_no_tests.mwc';
   }
   elsif ($buildtao) {
-    $ws = 'DDS_TAO_all.mwc';
-  }
-
-  if ($tao_maj == 2 && $ws =~ /TAO/) {
-    $ws =~ s/TAO/TAOv2/;
+    $ws = 'DDS_TAOv2_all.mwc';
   }
 
   my $static = ($opts{'static'} && $slash ne '/') ? '-static' : '';

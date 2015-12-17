@@ -64,22 +64,6 @@ endif
 
 GNUACE_PROJECT_VERSION ?= $(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
 
-# Version number of the libraries
-#
-ifeq ($(versioned_so),1)
-  # Only set SOVERSION for DDS if versioning is turned on and SOVERION is
-  # blank, which gives users to ability to override it.
-  ifeq ($(SOVERSION),)
-    SOVERSION = .$(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
-  endif # SOVERSION
-
-  # Name that will be written into the dynamic library
-  #
-  ifneq ($(SONAME),)
-    SONAME = $(SHLIB).$(DDS_MAJOR_VERSION).$(DDS_MINOR_VERSION).$(DDS_MICRO_VERSION)
-  endif # SONAME
-endif # versioned_so
-
 -include $(DDS_ROOT)/user_macros.GNU
 
 # user_macros.GNU may not exist, but GNU make will try to "make" it using the

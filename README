@@ -89,19 +89,16 @@ the "configure" script will download it for you.
 At a minimum, you must be at one of the following versions in order to properly
 compile OpenDDS:
 
-*** TAO 1.6a patch 15
 *** TAO 2.0a patch 7
-*** TAO 2.2a patch 7
-*** TAO 2.3.2 (DOC Group)
+*** TAO 2.2a patch 8
+*** TAO 2.3.3 (DOC Group)
 
-OpenDDS 3.7 is planned to be the final version to support the following
-TAO branches:
-
-*** TAO 1.6a
-
-Note that the 1.6a, 2.0a, and 2.2a releases are from OCI and can be obtained
+Note that the 2.0a and 2.2a releases are from OCI and can be obtained
 from http://www.theaceorb.com/.  The DOC Group releases can be obtained from
 http://download.dre.vanderbilt.edu/.
+
+OpenDDS Safety Profile requires OCI TAO 2.2a patch 8 or
+DOC Group TAO from GitHub master (after 2.3.3 release).
 
 ** GNU Make
 
@@ -135,11 +132,13 @@ Windows family:
 Others:
 ** SunOS 5.10 (Solaris 10) (SPARC)
 ** Mac OSX 10.10 (Yosemite)
+** LynxOS-178 (OpenDDS Safety Profile)
 
-OpenDDS 3.7 is planned to be the final version to support the following
-platforms:
+We have also built OpenDDS for VxWorks 6.9 and 7 and have run basic
+system and performance tests (but not the entire regression test suite).
+Please contact sales@ociweb.com or opendds-main@lists.sourceforge.net for
+more information on support for ACE, TAO, and OpenDDS on VxWorks.
 
-** Windows Server 2003
 
 ======================================================================
 * Compilers
