@@ -24,3 +24,4 @@ lib*.dylib
 /build
 /ipch
 /ACE_wrappers
+/*.VC.opendb
