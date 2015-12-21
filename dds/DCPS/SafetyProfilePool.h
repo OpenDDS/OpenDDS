@@ -28,10 +28,6 @@ namespace DCPS {
 /// Saftey Profile disallows std::free() and the delete operators
 /// See PoolAllocator.h for a class that allows STL containers to use an
 /// instance of SafetyProfilePool managed by our Service_Participant singleton.
-///
-/// This class currently allocates from a single array and doesn't attempt to
-/// reuse a free()'d block.  That's expected to change as Safety Profile
-/// work is completed and becomes ready for production use.
 class OpenDDS_Dcps_Export SafetyProfilePool : public ACE_Allocator
 {
   friend class SafetyProfilePoolTest;

@@ -21,7 +21,7 @@ OpenDDS_Dcps_Export void* pool_alloc_memory(size_t size);
 
 OpenDDS_Dcps_Export void pool_free_memory(void* ptr);
 
-/// Adapt the Service Participant's memory pool for use with STL containers.
+/// Adapt the MemoryPool for use with STL containers.
 ///
 /// See Definitions.h for macros that assist with instantiating STL containers
 /// with switchable support for the allocator (when Safety Profile is enabled).
